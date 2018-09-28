@@ -154,34 +154,6 @@ export class AdvancedSettings extends Component {
     const PageFooter = getSettingsComponent(PAGE_FOOTER_COMPONENT);
 
     return (
-<<<<<<< HEAD
-      <div className="advancedSettings">
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem>
-            <PageTitle />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <Search
-              query={query}
-              categories={this.categories}
-              onQueryChange={this.onQueryChange}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <PageSubtitle />
-        <EuiSpacer size="m" />
-        <CallOuts />
-        <EuiSpacer size="m" />
-        <Form
-          settings={filteredSettings}
-          categories={this.categories}
-          categoryCounts={this.categoryCounts}
-          clearQuery={this.clearQuery}
-          save={this.saveConfig}
-          clear={this.clearConfig}
-          showNoResultsMessage={!footerQueryMatched}
-        />
-=======
       <EuiPage restrictWidth>
         <div className="mgtAdvancedSettings">
           <EuiFlexGroup gutterSize="none">
@@ -196,8 +168,9 @@ export class AdvancedSettings extends Component {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          <PageSubtitle />
           <EuiSpacer size="m" />
-          <CallOuts/>
+          <CallOuts />
           <EuiSpacer size="m" />
           <Form
             settings={filteredSettings}
@@ -208,9 +181,8 @@ export class AdvancedSettings extends Component {
             clear={this.clearConfig}
             showNoResultsMessage={!footerQueryMatched}
           />
+          <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} />
         </div>
->>>>>>> OSS amanagement less to sass
-        <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} />
       </EuiPage>
     );
   }

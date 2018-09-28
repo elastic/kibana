@@ -574,7 +574,7 @@ export class Field extends PureComponent {
               aria-label={`Save ${ariaName}`}
               onClick={this.saveEdit}
               disabled={isDisabled || isInvalid}
-              data-test-subj={`mgtAdvancedSetting__saveEditField--${name}`}
+              data-test-subj={`advancedSetting-saveEditField-${name}`}
             >
               Save
             </EuiButton>
@@ -584,7 +584,7 @@ export class Field extends PureComponent {
               aria-label={`Cancel editing ${ariaName}`}
               onClick={() => changeImage ? this.cancelChangeImage() : this.cancelEdit()}
               disabled={isDisabled}
-              data-test-subj={`mgtAdvancedSetting__cancelEditField--${name}`}
+              data-test-subj={`advancedSetting-cancelEditField-${name}`}
             >
               Cancel
             </EuiButtonEmpty>
