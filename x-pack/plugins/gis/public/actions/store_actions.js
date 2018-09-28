@@ -289,8 +289,9 @@ export async function loadMapResources(dispatch) {
       {
         dataDirty: false,
         id: "0hmz5",
+        label: 'light theme tiles',
         sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
-        visible: true,
+        visible: false,
         temporary: false,
         style: {},
         type: "TILE",
@@ -300,8 +301,12 @@ export async function loadMapResources(dispatch) {
       },
       {
         id: "0pmk0",
-        sourceDescriptor: { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
-        visible: false,
+        label: 'dark theme tiles',
+        sourceDescriptor: {
+          "type": "EMS_XYZ",
+          "urlTemplate": "https://api.mapbox.com/styles/v1/npeihl/cjgib11ei001w2rrva9nomul9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibnBlaWhsIiwiYSI6InVmU21qeVUifQ.jwa9V6XsmccKsEHKh5QfmQ"
+        },
+        visible: true,
         temporary: false,
         style: {},
         type: "TILE",
