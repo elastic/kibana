@@ -36,6 +36,7 @@ import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
+const CONTENT_WRAPPER_CLASS = 'ml-explorer-chart-content-wrapper';
 
 export class ExplorerChart extends React.Component {
   static propTypes = {
@@ -92,13 +93,14 @@ export class ExplorerChart extends React.Component {
 
       // Clear any existing elements from the visualization,
       // then build the svg elements for the chart.
-      const chartElement = d3.select(element).select('.content-wrapper');
+      const chartElement = d3.select(element).select(`.${CONTENT_WRAPPER_CLASS}`);
       chartElement.select('svg').remove();
 
       const svgWidth = $el.width();
       const svgHeight = chartHeight + margin.top + margin.bottom;
 
       const svg = chartElement.append('svg')
+        .classed('ml-explorer-chart-svg', true)
         .attr('width', svgWidth)
         .attr('height', svgHeight);
 
@@ -382,7 +384,7 @@ export class ExplorerChart extends React.Component {
           <LoadingIndicator height={CONTENT_WRAPPER_HEIGHT} />
         )}
         {!isLoading && (
-          <div className="content-wrapper" />
+          <div className={CONTENT_WRAPPER_CLASS} />
         )}
       </div>
     );

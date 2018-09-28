@@ -374,10 +374,6 @@ ammo@2.x.x:
     boom "5.x.x"
     hoek "4.x.x"
 
-angular-paging@2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/angular-paging/-/angular-paging-2.2.1.tgz#8090864f71bc4c9b89307b02ab02afb205983c43"
-
 angular-resource@1.4.9:
   version "1.4.9"
   resolved "https://registry.yarnpkg.com/angular-resource/-/angular-resource-1.4.9.tgz#67f09382b623fd7e61540b0d127dba99fda99d45"
@@ -2370,9 +2366,9 @@ dotenv@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-2.0.0.tgz#bd759c357aaa70365e01c96b7b0bec08a6e0d949"
 
-dragselect@1.7.17:
-  version "1.7.17"
-  resolved "https://registry.yarnpkg.com/dragselect/-/dragselect-1.7.17.tgz#ab98661d8599286c0ada66ce5f5923b06b4f09fd"
+dragselect@1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/dragselect/-/dragselect-1.8.1.tgz#63f71a6f980f710c87e28b328e175b7afc9e162b"
 
 duplexer2@0.0.2, duplexer2@~0.0.2:
   version "0.0.2"
