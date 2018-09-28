@@ -4,16 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { openSans } from '../../../common/lib/fonts';
 import header from './header.png';
 
-export const revealImage = () => ({
-  name: 'revealImage',
-  displayName: 'Image reveal',
-  help: 'Reveals a percentage of an image',
+export const progressWheel = () => ({
+  name: 'progressWheel',
+  displayName: 'Progress Wheel',
+  help: 'Displays progress as a portion of a wheel',
+  width: 200,
+  height: 200,
   image: header,
   expression: `filters
 | demodata
 | math "mean(percent_uptime)"
-| revealImage origin=bottom image=null
+| progress shape="wheel" label={formatnumber 0%} font={font size=24 family="${
+    openSans.value
+  }" color="#000000" align=center}
 | render`,
 });
