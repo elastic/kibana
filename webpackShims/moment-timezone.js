@@ -18,6 +18,4 @@
  */
 
 var moment = module.exports = require('../node_modules/moment-timezone/moment-timezone');
-var momentDurationFormatSetup = require('../node_modules/moment-duration-format/lib/moment-duration-format');
 moment.tz.load(require('../node_modules/moment-timezone/data/packed/latest.json'));
-momentDurationFormatSetup(moment);

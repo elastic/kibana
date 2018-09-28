@@ -17,6 +17,8 @@
  * under the License.
  */
 
-var moment = module.exports = require('../node_modules/moment/min/moment.min.js');
-var momentDurationFormatSetup = require('../node_modules/moment-duration-format/lib/moment-duration-format');
+var moment = require('../node_modules/moment/min/moment.min.js');
+var momentDurationFormatSetup = require('moment-duration-format');
 momentDurationFormatSetup(moment);
+
+module.exports = moment;
