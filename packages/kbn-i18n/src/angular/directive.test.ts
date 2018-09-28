@@ -19,12 +19,13 @@
 
 import angular from 'angular';
 import 'angular-mocks';
+import 'angular-sanitize';
 
 import { i18nDirective } from './directive';
 import { I18nProvider } from './provider';
 
 angular
-  .module('app', [])
+  .module('app', ['ngSanitize'])
   .provider('i18n', I18nProvider)
   .directive('i18nId', i18nDirective);
 
@@ -43,38 +44,46 @@ describe('i18nDirective', () => {
   );
 
   test('inserts correct translation html content', () => {
-    const id = 'id';
-    const defaultMessage = 'default-message';
-
     const element = angular.element(
       `<div
-        i18n-id="${id}"
-        i18n-default-message="${defaultMessage}"
+        i18n-id="id"
+        i18n-default-message="Default message"
       />`
     );
 
     compile(element)(scope);
     scope.$digest();
 
-    expect(element.html()).toEqual(defaultMessage);
+    expect(element[0]).toMatchSnapshot();
+  });
+
+  test('sanitizes defaultMessage', () => {
+    const element = angular.element(
+      `<div
+        i18n-id="id"
+        i18n-default-message="Dangerous default message, {value}"
+        i18n-values="{ value: '<div i18n-id=&quot;id2&quot; i18n-default-message=&quot;<script></script>inner message&quot; />' }"
+      />`
+    );
+
+    compile(element)(scope);
+    scope.$digest();
+
+    expect(element[0]).toMatchSnapshot();
   });
 
   test('inserts correct translation html content with values', () => {
-    const id = 'id';
-    const defaultMessage = 'default-message {word}';
-    const compiledContent = 'default-message word';
-
     const element = angular.element(
       `<div
-        i18n-id="${id}"
-        i18n-default-message="${defaultMessage}"
-        i18n-values="{ word: 'word' }"
+        i18n-id="id"
+        i18n-default-message="Default message, {value}"
+        i18n-values="{ value: '<div i18n-id=&quot;id2&quot; i18n-default-message=&quot;<span>inner message</span>&quot; />' }"
       />`
     );
 
     compile(element)(scope);
     scope.$digest();
 
-    expect(element.html()).toEqual(compiledContent);
+    expect(element[0]).toMatchSnapshot();
   });
 });
