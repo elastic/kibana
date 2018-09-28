@@ -5,6 +5,7 @@
  */
 import path from 'path';
 import { EvaluateOptions, KbnServer, Size } from '../../../../../types';
+import { LayoutTypes } from '../../../common/constants';
 import { Layout } from './layout';
 import { CaptureConfig } from './types';
 
@@ -25,8 +26,8 @@ export class PrintLayout extends Layout {
 
   private captureConfig: CaptureConfig;
 
-  constructor(server: KbnServer, id: string) {
-    super(id);
+  constructor(server: KbnServer) {
+    super(LayoutTypes.PRINT);
     this.captureConfig = server.config().get('xpack.reporting.capture');
   }
 
