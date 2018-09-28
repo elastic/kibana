@@ -104,6 +104,7 @@ export class Control {
   }
 
   disable(reason) {
+    this.clear();
     this.enable = false;
     this.disabledReason = reason;
   }
