@@ -159,6 +159,13 @@ export type TaskStatus = 'idle' | 'running';
  */
 export interface TaskInstance {
   /**
+   * Optional ID that can be passed by the caller. When ID is undefined, ES
+   * will auto-generate a unique id. Otherwise, ID will be used to either
+   * create a new document, or update existing document
+   */
+  id?: string;
+
+  /**
    * The task definition type whose run function will execute this instance.
    */
   taskType: string;
