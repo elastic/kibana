@@ -29,7 +29,7 @@ function getDiscoverQuery(id: string) {
 }
 
 interface Props {
-  onClose: () => {};
+  onClose: () => void;
   transaction?: Transaction;
 }
 

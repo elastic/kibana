@@ -7,7 +7,11 @@
 import { zipObject } from 'lodash';
 import { colors } from '../../../../../style/variables';
 
-export function getServiceColors(services) {
+interface IServiceColors {
+  [key: string]: string;
+}
+
+export function getServiceColors(services: string[]): IServiceColors {
   const assignedColors = [
     colors.apmBlue,
     colors.apmGreen,

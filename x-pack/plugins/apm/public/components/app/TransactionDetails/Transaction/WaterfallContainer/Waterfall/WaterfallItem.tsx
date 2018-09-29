@@ -6,16 +6,16 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
 
 import {
-  unit,
-  units,
   colors,
-  px,
   fontFamilyCode,
-  fontSizes
+  fontSizes,
+  px,
+  unit,
+  units
 } from '../../../../../../style/variables';
+import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
 const ItemBar = styled.div`
   position: relative;
@@ -45,14 +45,28 @@ const Container = styled.div`
   }
 `;
 
-function WaterfallItem({
+interface Props {
+  timelineMargins: {
+    right: number;
+    left: number;
+    top: number;
+    bottom: number;
+  };
+  totalDuration: number;
+  item: IWaterfallItem;
+  color: string;
+  isSelected: boolean;
+  onClick: () => any;
+}
+
+export function WaterfallItem({
   timelineMargins,
   totalDuration,
   item,
   color,
   isSelected,
   onClick
-}) {
+}: Props) {
   const width = (item.duration / totalDuration) * 100;
   const left = (item.offset / totalDuration) * 100;
 
@@ -83,10 +97,3 @@ function WaterfallItem({
     </Container>
   );
 }
-
-WaterfallItem.propTypes = {
-  location: PropTypes.object.isRequired,
-  totalDuration: PropTypes.number.isRequired
-};
-
-export default WaterfallItem;
