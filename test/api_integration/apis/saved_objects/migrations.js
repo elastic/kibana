@@ -226,7 +226,7 @@ async function createIndex({ callCluster, index }) {
 async function createDocs({ callCluster, index, docs }) {
   await callCluster('bulk', {
     body: docs.reduce((acc, doc) => {
-      acc.push({ index: { _id: doc.id, _index: index, _type: 'doc' } });
+      acc.push({ index: { _id: doc.id, _index: index, _type: '_doc' } });
       acc.push(_.omit(doc, 'id'));
       return acc;
     }, []),
