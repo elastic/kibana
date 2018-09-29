@@ -623,7 +623,7 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'delete', {
-        type: 'doc',
+        type: '_doc',
         id: 'foo-namespace:index-pattern:logstash-*',
         refresh: 'wait_for',
         index: '.kibana-test',
@@ -641,7 +641,7 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'delete', {
-        type: 'doc',
+        type: '_doc',
         id: 'index-pattern:logstash-*',
         refresh: 'wait_for',
         index: '.kibana-test',
@@ -661,7 +661,7 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'delete', {
-        type: 'doc',
+        type: '_doc',
         id: 'globaltype:logstash-*',
         refresh: 'wait_for',
         index: '.kibana-test',
@@ -874,7 +874,7 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
         id: 'foo-namespace:index-pattern:logstash-*',
-        type: 'doc'
+        type: '_doc'
       }));
     });
 
@@ -886,7 +886,7 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
         id: 'index-pattern:logstash-*',
-        type: 'doc'
+        type: '_doc'
       }));
     });
 
@@ -900,7 +900,7 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
         id: 'globaltype:logstash-*',
-        type: 'doc'
+        type: '_doc'
       }));
     });
   });
@@ -1053,7 +1053,7 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
-        type: 'doc',
+        type: '_doc',
         id: 'foo-namespace:index-pattern:logstash-*',
         version: undefined,
         body: {
@@ -1072,7 +1072,7 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
-        type: 'doc',
+        type: '_doc',
         id: 'index-pattern:logstash-*',
         version: undefined,
         body: {
@@ -1095,7 +1095,7 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
-        type: 'doc',
+        type: '_doc',
         id: 'globaltype:foo',
         version: undefined,
         body: {

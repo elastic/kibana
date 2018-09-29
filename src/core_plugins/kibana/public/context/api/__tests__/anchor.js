@@ -129,7 +129,7 @@ describe('context app', function () {
               constant_score: {
                 filter: {
                   ids: {
-                    type: 'doc',
+                    type: '_doc',
                     values: ['id'],
                   },
                 }

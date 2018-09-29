@@ -259,7 +259,7 @@ async function migrateIndex({ callCluster, index, migrations, mappingProperties,
 async function fetchDocs({ callCluster, index }) {
   const {
     hits: { hits },
-  } = await callCluster('search', { index, type: 'doc' });
+  } = await callCluster('search', { index, type: '_doc' });
   return hits.map(h => ({
     ...h._source,
     id: h._id,

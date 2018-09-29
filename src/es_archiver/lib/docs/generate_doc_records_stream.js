@@ -51,7 +51,7 @@ export function createGenerateDocRecordsStream(client, stats) {
             remainingHits -= 1;
             stats.archivedDoc(hit._index);
             this.push({
-              type: 'doc',
+              type: '_doc',
               value: {
                 index: hit._index,
                 type: hit._type,
