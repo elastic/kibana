@@ -144,7 +144,7 @@ describe('FieldEditor', () => {
     const testField = {
       ...field,
       name: 'test',
-      script: 'doc.test.value',
+      script: '_doc.test.value',
     };
     indexPattern.fields.push(testField);
     indexPattern.fields.byName[testField.name] = testField;
@@ -166,7 +166,7 @@ describe('FieldEditor', () => {
     const testField = {
       ...field,
       name: 'test',
-      script: 'doc.test.value',
+      script: '_doc.test.value',
       lang: 'testlang'
     };
     indexPattern.fields.push(testField);

@@ -102,7 +102,7 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
         .slice(0, allResults.total - allResults.hits.length);
 
       hits = hits.map(hit => {
-        if (hit._type === 'doc') {
+        if (hit._type === '_doc') {
           return {
             _id: hit._id.replace(`${this.type}:`, ''),
             _type: this.type,

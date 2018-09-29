@@ -85,7 +85,7 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
             await handleIndex(this, record);
             break;
 
-          case 'doc':
+          case '_doc':
             await handleDoc(this, record);
             break;
 

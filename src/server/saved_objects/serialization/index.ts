@@ -28,7 +28,7 @@ import { SavedObjectsSchema } from '../schema';
 /**
  * The root document type. In 7.0, this needs to change to '_doc'.
  */
-export const ROOT_TYPE = 'doc';
+export const ROOT_TYPE = '_doc';
 
 /**
  * A raw document as represented directly in the saved object index.
