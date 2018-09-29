@@ -8,6 +8,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
+// This should import the colors directly from EUI's palette service rather than be hard coded
 const COLORS = [
   '#00B3A4', // euiColorVis0
   '#3185FC', // euiColorVis1

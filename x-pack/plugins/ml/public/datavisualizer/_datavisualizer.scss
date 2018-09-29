@@ -101,8 +101,8 @@
     padding-bottom: $euiSizeXS;
 
     .synopsisTitle {
-      font-size: $euiFontSize;
-      font-weight: normal;
+      font-size: $euiFontSizeM;
+      font-weight: $euiFontWeightRegular;
       color: $euiColorPrimary;
     }
 
@@ -115,7 +115,7 @@
     }
 
     .synopsisIcon {
-      padding-top: $euiSize;
+      padding-top: $euiSizeS;
     }
 
     .recognized-job-content {

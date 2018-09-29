@@ -5,8 +5,7 @@
 
   // SASSTODO: Proper selector
   h3 {
-    overflow: hidden;
-    text-overflow: ellipsis;
+    @include euiTextTruncate;
   }
 
   // SASSTODO: Proper calc

@@ -43,7 +43,7 @@
 
       // SASSTODO: Overwrite of bootstrap
     .col-xs-12 {
-      width: calc(100% - $euiSizeXL);
+      width: calc(100% - #{$euiSizeXL});
       padding-left: $euiSize;
     }
 
@@ -51,7 +51,7 @@
       float: left;
       padding-top: $euiSizeXS;
       padding-left: $euiSize;
-      color: #7b8a8b;
+      color: $euiColorDarkShade;
       font-size: $euiFontSizeS;
     }
 
@@ -146,7 +146,7 @@
       & > .title {
         background-color: $euiColorMediumShade;
         color: $euiColorEmptyShade;
-        font-weight: bold;
+        font-weight: $euiFontWeightBold;
         margin-top: 0px;
         border-radius: $euiSizeXS/ 2;
         margin-bottom: $euiSizeXS;

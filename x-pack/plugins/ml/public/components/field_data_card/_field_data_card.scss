@@ -96,7 +96,7 @@
 
   svg {
     font-size: 11px;
-    font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
+    font-family: $euiFontFamily;
 
     text {
       fill: $euiColorDarkShade;
@@ -149,12 +149,11 @@
     font-size: 13px;
 
     .field-label {
+      @include euiTextTruncate;
+
       display: inline-block;
       width: 100px;
       text-align: right;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
     .count-label {

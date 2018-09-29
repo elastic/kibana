@@ -12,7 +12,7 @@ ml-paginated-table {
 
   // SASSTODO: Needs proper selector
   table th {
-    font-weight: bold;
+    font-weight: $euiFontWeightBold;
     text-align: left;
   }
 

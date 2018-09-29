@@ -14,11 +14,11 @@
 
   .form-controls, .charts-container {
     margin: 0px;
-    margin-right: $euiSizeS;
+    margin-right: -$euiSizeS;
 
     // SASSTODO: Proper selector
     & > div {
-      border: $euiColorLightestShade;
+      border: $euiBorderThin;
       border-top: 0px;
     }
 

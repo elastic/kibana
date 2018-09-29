@@ -6,10 +6,9 @@
     text-align: left;
 
     .field-value {
+      @include euiTextTruncate;
+
       max-width: calc(100% - 34px); // SASSTODO: Calc proper value
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
       display: inline-block;
       vertical-align: bottom;
     }

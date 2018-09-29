@@ -14,20 +14,17 @@ ml-controls-select {
 
   .dropdown-menu {
     min-width: 120px;
-    font-size: 13px;
-  }
+    font-size: $euiFontSizeXS;
 
-  .dropdown-menu > li > a {
-    color: $euiColorDarkestShade;;
-    text-decoration: none;
-  }
+    > li > a {
+      color: $euiColorDarkestShade;;
+      text-decoration: none;
 
-  // SASSTODO: Needs more specific selectors
-  .dropdown-menu > li > a:hover,
-  .dropdown-menu > li > a:active,
-  .dropdown-menu > li > a:focus {
-    color: $euiColorEmptyShade;
-    box-shadow: none;
+      &:hover, &:active, &:focus {
+        color: $euiColorEmptyShade;
+        box-shadow: none;
+      }
+    }
   }
 
   button.dropdown-toggle {
