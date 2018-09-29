@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDoc, ContextService, Stackframe } from './APMDoc';
+import { APMDocV1, APMDocV2, ContextService, Stackframe } from './APMDoc';
 
 export interface DbContext {
   instance?: string;
@@ -13,31 +13,56 @@ export interface DbContext {
   user?: string;
 }
 
-export interface Span extends APMDoc {
-  processor: {
-    name: 'transaction';
-    event: 'span';
-  };
-  context: {
-    db?: DbContext;
-    service: ContextService;
-    [key: string]: any;
-  };
+interface Processor {
+  name: 'transaction';
+  event: 'span';
+}
+
+interface Context {
+  db?: DbContext;
+  service: ContextService;
+  [key: string]: any;
+}
+
+export interface SpanV1 extends APMDocV1 {
+  version: 'v1';
+  processor: Processor;
+  context: Context;
   span: {
     duration: {
       us: number;
     };
     start: {
-      us: number;
+      us: number; // only v1
     };
     name: string;
     type: string;
     id: number; // id will be derived from hex encoded 64 bit hex_id string in v2
-    hex_id?: string; // hex_id not available in v1
-    parent?: string; // parent deprecated in v2
+    parent?: string; // only v1
     stacktrace?: Stackframe[];
   };
   transaction: {
     id: string;
   };
 }
+
+export interface SpanV2 extends APMDocV2 {
+  version: 'v2';
+  processor: Processor;
+  context: Context;
+  span: {
+    duration: {
+      us: number;
+    };
+    name: string;
+    type: string;
+    id: number; // id will be derived from hex encoded 64 bit hex_id string in v2
+    hex_id: string; // only v2
+    stacktrace?: Stackframe[];
+  };
+  transaction: {
+    id: string;
+  };
+}
+
+export type Span = SpanV1 | SpanV2;

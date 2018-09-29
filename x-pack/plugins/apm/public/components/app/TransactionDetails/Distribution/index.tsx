@@ -4,44 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import d3 from 'd3';
-import Histogram from '../../../shared/charts/Histogram';
-import { toQuery, fromQuery, history } from '../../../../utils/url';
-import { HeaderSmall } from '../../../shared/UIComponents';
-import EmptyMessage from '../../../shared/EmptyMessage';
+import React, { Component } from 'react';
+import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { IBucket } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_buckets';
+import { IDistributionResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_distribution';
+// @ts-ignore
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
+// @ts-ignore
+import { fromQuery, history, toQuery } from '../../../../utils/url';
+// @ts-ignore
+import Histogram from '../../../shared/charts/Histogram';
+import EmptyMessage from '../../../shared/EmptyMessage';
+// @ts-ignore
+import { HeaderSmall } from '../../../shared/UIComponents';
+// @ts-ignore
 import SamplingTooltip from './SamplingTooltip';
 
-export function getFormattedBuckets(buckets, bucketSize) {
+interface IChartPoint {
+  sample?: IBucket['sample'];
+  x0: string;
+  x: string;
+  y: number;
+  style: {
+    cursor: string;
+  };
+}
+
+export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
   if (!buckets) {
-    return null;
+    return [];
   }
 
-  return buckets.map(({ sampled, count, key, transactionId }) => {
+  return buckets.map(({ sample, count, key }) => {
     return {
-      sampled,
-      transactionId,
+      sample,
       x0: key,
       x: key + bucketSize,
       y: count,
-      style: count > 0 && sampled ? { cursor: 'pointer' } : {}
+      style: { cursor: count > 0 && sample ? 'pointer' : 'default' }
     };
   });
 }
 
-class Distribution extends Component {
-  formatYShort = t => {
+interface Props {
+  location: any;
+  distribution: IDistributionResponse;
+  urlParams: IUrlParams;
+}
+
+export class Distribution extends Component<Props> {
+  public formatYShort = (t: number) => {
     return `${t} ${unitShort(this.props.urlParams.transactionType)}`;
   };
 
-  formatYLong = t => {
+  public formatYLong = (t: number) => {
     return `${t} ${unitLong(this.props.urlParams.transactionType, t)}`;
   };
 
-  render() {
-    const { location, distribution } = this.props;
+  public render() {
+    const { location, distribution, urlParams } = this.props;
 
     const buckets = getFormattedBuckets(
       distribution.buckets,
@@ -58,7 +80,10 @@ class Distribution extends Component {
     }
 
     const bucketIndex = buckets.findIndex(
-      bucket => bucket.transactionId === this.props.urlParams.transactionId
+      bucket =>
+        bucket.sample != null &&
+        bucket.sample.transactionId === urlParams.transactionId &&
+        bucket.sample.traceId === urlParams.traceId
     );
 
     return (
@@ -76,13 +101,14 @@ class Distribution extends Component {
           buckets={buckets}
           bucketSize={distribution.bucketSize}
           bucketIndex={bucketIndex}
-          onClick={bucket => {
-            if (bucket.sampled && bucket.y > 0) {
+          onClick={(bucket: IChartPoint) => {
+            if (bucket.sample && bucket.y > 0) {
               history.replace({
                 ...location,
                 search: fromQuery({
                   ...toQuery(location.search),
-                  transactionId: bucket.transactionId
+                  transactionId: bucket.sample.transactionId,
+                  traceId: bucket.sample.traceId
                 })
               });
             }
@@ -90,16 +116,20 @@ class Distribution extends Component {
           formatX={timeFormatter}
           formatYShort={this.formatYShort}
           formatYLong={this.formatYLong}
-          verticalLineHover={bucket => bucket.y > 0 && !bucket.sampled}
-          backgroundHover={bucket => bucket.y > 0 && bucket.sampled}
-          tooltipHeader={bucket =>
+          verticalLineHover={(bucket: IChartPoint) =>
+            bucket.y > 0 && !bucket.sample
+          }
+          backgroundHover={(bucket: IChartPoint) =>
+            bucket.y > 0 && bucket.sample
+          }
+          tooltipHeader={(bucket: IChartPoint) =>
             `${timeFormatter(bucket.x0, false)} - ${timeFormatter(
               bucket.x,
               false
             )} ${unit}`
           }
-          tooltipFooter={bucket =>
-            !bucket.sampled && 'No sample available for this bucket'
+          tooltipFooter={(bucket: IChartPoint) =>
+            !bucket.sample && 'No sample available for this bucket'
           }
         />
       </div>
@@ -107,20 +137,12 @@ class Distribution extends Component {
   }
 }
 
-function unitShort(type) {
+function unitShort(type: string | undefined) {
   return type === 'request' ? 'req.' : 'trans.';
 }
 
-function unitLong(type, count) {
+function unitLong(type: string | undefined, count: number) {
   const suffix = count > 1 ? 's' : '';
 
   return type === 'request' ? `request${suffix}` : `transaction${suffix}`;
 }
-
-Distribution.propTypes = {
-  urlParams: PropTypes.object.isRequired,
-  location: PropTypes.object.isRequired,
-  distribution: PropTypes.object
-};
-
-export default Distribution;

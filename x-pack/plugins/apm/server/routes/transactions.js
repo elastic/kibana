@@ -8,6 +8,7 @@ import Joi from 'joi';
 import Boom from 'boom';
 
 import { getTimeseriesData } from '../lib/transactions/charts/get_timeseries_data';
+import { getSpans } from '../lib/transactions/spans/get_spans';
 import { getDistribution } from '../lib/transactions/distribution/get_distribution';
 import { getTopTransactions } from '../lib/transactions/get_top_transactions';
 import getTransaction from '../lib/transactions/get_transaction';
@@ -55,13 +56,34 @@ export function initTransactionsApi(server) {
     config: {
       pre,
       validate: {
+        query: withDefaultValidators({
+          traceId: Joi.string().allow('')
+        })
+      }
+    },
+    handler: (req, reply) => {
+      const { transactionId } = req.params;
+      const { traceId } = req.query;
+      const { setup } = req.pre;
+      return getTransaction({ transactionId, traceId, setup })
+        .then(reply)
+        .catch(defaultErrorHandler(reply));
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/{transactionId}/spans`,
+    config: {
+      pre,
+      validate: {
         query: withDefaultValidators()
       }
     },
     handler: (req, reply) => {
       const { transactionId } = req.params;
       const { setup } = req.pre;
-      return getTransaction({ transactionId, setup })
+      return getSpans({ transactionId, setup })
         .then(reply)
         .catch(defaultErrorHandler(reply));
     }
@@ -112,11 +134,7 @@ export function initTransactionsApi(server) {
       const { setup } = req.pre;
       const { serviceName } = req.params;
       const { transaction_name: transactionName } = req.query;
-      return getDistribution({
-        serviceName,
-        transactionName,
-        setup
-      })
+      return getDistribution(serviceName, transactionName, setup)
         .then(reply)
         .catch(defaultErrorHandler(reply));
     }

@@ -5,11 +5,12 @@
  */
 
 import { connect } from 'react-redux';
+import { IReduxState } from '../../../store/rootReducer';
 // @ts-ignore
 import { getUrlParams } from '../../../store/urlParams';
 import { TraceOverview as View } from './view';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state = {} as IReduxState) {
   return {
     urlParams: getUrlParams(state)
   };

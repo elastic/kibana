@@ -111,6 +111,16 @@ export async function loadTransactionDistribution({
   });
 }
 
+export async function loadSpans({ serviceName, start, end, transactionId }) {
+  return callApi({
+    pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}/spans`,
+    query: {
+      start,
+      end
+    }
+  });
+}
+
 export async function loadTrace({ traceId, start, end }) {
   return callApi(
     {
@@ -131,12 +141,14 @@ export async function loadTransaction({
   start,
   end,
   transactionId,
+  traceId,
   kuery
 }) {
   const res = await callApi(
     {
       pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
       query: {
+        traceId,
         start,
         end,
         esFilterQuery: await getEncodedEsQuery(kuery)

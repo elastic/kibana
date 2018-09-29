@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface APMDoc {
+export interface APMDocV1 {
   '@timestamp': string;
   beat: {
     hostname: string;
@@ -14,11 +14,17 @@ export interface APMDoc {
   host: {
     name: string;
   };
-  parent?: {
-    id: string; // parent ID is not available in v1
+}
+
+export interface APMDocV2 extends APMDocV1 {
+  timestamp: {
+    us: number;
   };
-  trace?: {
-    id: string; // trace ID is not available in v1
+  parent?: {
+    id: string; // parent ID is not available on the root transaction
+  };
+  trace: {
+    id: string;
   };
 }
 

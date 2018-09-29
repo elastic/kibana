@@ -5,11 +5,16 @@
  */
 
 import _ from 'lodash';
+import { AnyAction } from 'redux';
 import { createSelector } from 'reselect';
+// @ts-ignore
+import { legacyDecodeURIComponent, toQuery } from '../utils/url';
+// @ts-ignore
 import { LOCATION_UPDATE } from './location';
-import { toQuery, legacyDecodeURIComponent } from '../utils/url';
-import { getDefaultTransactionId } from './reactReduxRequest/transactionDistribution';
+// @ts-ignore
 import { getDefaultTransactionType } from './reactReduxRequest/serviceDetails';
+import { getDefaultDistributionSample } from './reactReduxRequest/transactionDistribution';
+import { IReduxState } from './rootReducer';
 
 // ACTION TYPES
 export const TIMEPICKER_UPDATE = 'TIMEPICKER_UPDATE';
@@ -22,7 +27,7 @@ export const TIMEPICKER_UPDATE = 'TIMEPICKER_UPDATE';
 // serviceName: opbeans-backend (path param)
 // transactionType: Brewing%20Bot (path param)
 // transactionId: 1321 (query param)
-function urlParams(state = {}, action) {
+export function urlParamsReducer(state = {}, action: AnyAction) {
   switch (action.type) {
     case LOCATION_UPDATE: {
       const {
@@ -34,6 +39,7 @@ function urlParams(state = {}, action) {
       } = getPathParams(action.location.pathname);
 
       const {
+        traceId,
         transactionId,
         detailTab,
         spanId,
@@ -43,7 +49,7 @@ function urlParams(state = {}, action) {
         kuery
       } = toQuery(action.location.search);
 
-      return {
+      return removeUndefinedProps({
         ...state,
 
         // query params
@@ -51,6 +57,7 @@ function urlParams(state = {}, action) {
         sortField,
         page: toNumber(page) || 0,
         transactionId: toString(transactionId),
+        traceId: toString(traceId),
         detailTab,
         spanId: toNumber(spanId),
         kuery: legacyDecodeURIComponent(kuery),
@@ -61,7 +68,7 @@ function urlParams(state = {}, action) {
         transactionType: legacyDecodeURIComponent(transactionType),
         transactionName: legacyDecodeURIComponent(transactionName),
         errorGroupId
-      };
+      });
     }
 
     case TIMEPICKER_UPDATE:
@@ -72,24 +79,28 @@ function urlParams(state = {}, action) {
   }
 }
 
-function toNumber(value) {
+function toNumber(value: string) {
   if (value != null) {
     return parseInt(value, 10);
   }
 }
 
-function toString(string) {
-  if (string === '' || string === 'null' || string === 'undefined') {
+function toString(str: string) {
+  if (str === '' || str === 'null' || str === 'undefined') {
     return;
   }
-  return string;
+  return str;
 }
 
-function getPathAsArray(pathname) {
+function getPathAsArray(pathname: string) {
   return _.compact(pathname.split('/'));
 }
 
-function getPathParams(pathname) {
+function removeUndefinedProps<T>(obj: T): Partial<T> {
+  return _.pick(obj, value => value !== undefined);
+}
+
+function getPathParams(pathname: string) {
   const paths = getPathAsArray(pathname);
   const pageName = paths[1];
 
@@ -113,21 +124,37 @@ function getPathParams(pathname) {
 }
 
 // ACTION CREATORS
-export function updateTimePicker(time) {
+export function updateTimePicker(time: string) {
   return { type: TIMEPICKER_UPDATE, time };
 }
 
 // Selectors
 export const getUrlParams = createSelector(
-  state => state.urlParams,
+  (state: IReduxState) => state.urlParams,
   getDefaultTransactionType,
-  getDefaultTransactionId,
-  (urlParams, transactionType, transactionId) => {
-    return _.defaults({}, urlParams, {
+  getDefaultDistributionSample,
+  (
+    urlParams,
+    transactionType: string,
+    { traceId, transactionId }
+  ): IUrlParams => {
+    return {
       transactionType,
-      transactionId
-    });
+      transactionId,
+      traceId,
+      ...urlParams
+    };
   }
 );
 
-export default urlParams;
+export interface IUrlParams {
+  end?: string;
+  errorGroupId?: string;
+  kuery?: string;
+  serviceName?: string;
+  start?: string;
+  traceId?: string;
+  transactionId?: string;
+  transactionName?: string;
+  transactionType?: string;
+}
