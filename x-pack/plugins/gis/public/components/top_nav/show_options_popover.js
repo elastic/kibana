@@ -7,7 +7,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { OptionsMenu } from './options';
+import { OptionsMenu } from './options_menu';
+
+import { getStore } from '../../store/store';
+import { getIsDarkTheme, updateIsDarkTheme } from '../../store/ui';
 
 import {
   EuiWrappingPopover,
@@ -22,10 +25,8 @@ const onClose = () => {
   isOpen = false;
 };
 
-export function showOptionsPopover({
+export async function showOptionsPopover({
   anchorElement,
-  darkTheme,
-  onDarkThemeChange,
 }) {
   if (isOpen) {
     onClose();
@@ -33,6 +34,9 @@ export function showOptionsPopover({
   }
 
   isOpen = true;
+
+  // TODO figure out how to use connect to avoid having to manually wire state and dispatch functions
+  const store = await getStore();
 
   document.body.appendChild(container);
   const element = (
@@ -44,8 +48,10 @@ export function showOptionsPopover({
       closePopover={onClose}
     >
       <OptionsMenu
-        darkTheme={darkTheme}
-        onDarkThemeChange={onDarkThemeChange}
+        darkTheme={getIsDarkTheme(store.getState())}
+        onDarkThemeChange={(isDarkTheme) => {
+          store.dispatch(updateIsDarkTheme(isDarkTheme));
+        }}
       />
     </EuiWrappingPopover>
   );

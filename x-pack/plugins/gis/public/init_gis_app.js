@@ -16,6 +16,7 @@ import {
 } from 'ui/timefilter';
 import { getStore } from './store/store';
 import { setTimeFilters } from './actions/store_actions';
+import { getIsDarkTheme } from './store/ui';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters } from './kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
@@ -47,8 +48,24 @@ export function initGisApp(resolve) {
   uiModules
     .get('app/gis', [])
     .controller('TimePickerController', ($scope) => {
-      // TODO move state to store
-      let isDarkTheme = true;
+
+      let isDarkTheme;
+      let unsubscribe;
+      getStore().then(store => {
+        handleStoreChanges(store);
+        unsubscribe = store.subscribe(() => {
+          handleStoreChanges(store);
+        });
+      });
+
+      timefilter.on('timeUpdate', dispatchTimeUpdate);
+
+      $scope.$on('$destroy', () => {
+        if (unsubscribe) {
+          unsubscribe();
+        }
+        timefilter.off('timeUpdate', dispatchTimeUpdate);
+      });
 
       $scope.topNavMenu = [{
         key: 'inspect',
@@ -66,13 +83,6 @@ export function initGisApp(resolve) {
         run: async (menuItem, navController, anchorElement) => {
           showOptionsPopover({
             anchorElement,
-            darkTheme: isDarkTheme,
-            onDarkThemeChange: (isChecked) => {
-              isDarkTheme = isChecked;
-              $scope.$evalAsync(() => {
-                updateTheme();
-              });
-            },
           });
         }
       }, {
@@ -100,8 +110,23 @@ export function initGisApp(resolve) {
       timefilter.enableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
 
+      async function dispatchTimeUpdate() {
+        const timeFilters = timefilter.getTime();
+        const store = await getStore();
+        store.dispatch(setTimeFilters(timeFilters));
+      }
+
+      function handleStoreChanges(store) {
+        if (isDarkTheme !== getIsDarkTheme(store.getState())) {
+          isDarkTheme = getIsDarkTheme(store.getState());
+          updateTheme();
+        }
+      }
+
       function updateTheme() {
-        isDarkTheme ? setDarkTheme() : setLightTheme();
+        $scope.$evalAsync(() => {
+          isDarkTheme ? setDarkTheme() : setLightTheme();
+        });
       }
 
       function setDarkTheme() {
@@ -116,15 +141,6 @@ export function initGisApp(resolve) {
         applyTheme('light');
       }
 
-      updateTheme();
-
       Promise.all([waitForAngularReady]).then(resolve());
     });
 }
-
-getStore().then(store => {
-  timefilter.on('timeUpdate', () => {
-    const timeFilters = timefilter.getTime();
-    store.dispatch(setTimeFilters(timeFilters));
-  });
-});
