@@ -38,34 +38,34 @@ export class DomPreview extends React.Component {
   }
 
   update = original => () => {
-    const thumb = original.cloneNode(true);
+    if (this.content && this.container) {
+      const thumb = original.cloneNode(true);
 
-    const originalStyle = window.getComputedStyle(original, null);
-    const originalWidth = parseInt(originalStyle.getPropertyValue('width'), 10);
-    const originalHeight = parseInt(originalStyle.getPropertyValue('height'), 10);
+      const originalStyle = window.getComputedStyle(original, null);
+      const originalWidth = parseInt(originalStyle.getPropertyValue('width'), 10);
+      const originalHeight = parseInt(originalStyle.getPropertyValue('height'), 10);
 
-    const thumbHeight = this.props.height;
-    const scale = thumbHeight / originalHeight;
-    const thumbWidth = originalWidth * scale;
+      const thumbHeight = this.props.height;
+      const scale = thumbHeight / originalHeight;
+      const thumbWidth = originalWidth * scale;
 
-    if (this.content) {
       if (this.content.hasChildNodes()) this.content.removeChild(this.content.firstChild);
       this.content.appendChild(thumb);
+
+      this.content.style.cssText = `transform: scale(${scale}); transform-origin: top left;`;
+      this.container.style.cssText = `width: ${thumbWidth}px; height: ${thumbHeight}px;`;
+
+      // Copy canvas data
+      const originalCanvas = original.querySelectorAll('canvas');
+      const thumbCanvas = thumb.querySelectorAll('canvas');
+
+      // Cloned canvas elements are blank and need to be explicitly redrawn
+      if (originalCanvas.length > 0) {
+        Array.from(originalCanvas).map((img, i) =>
+          thumbCanvas[i].getContext('2d').drawImage(img, 0, 0)
+        );
+      }
     }
-
-    // Copy canvas data
-    const originalCanvas = original.querySelectorAll('canvas');
-    const thumbCanvas = thumb.querySelectorAll('canvas');
-
-    // Cloned canvas elements are blank and need to be explicitly redrawn
-    if (originalCanvas.length > 0) {
-      Array.from(originalCanvas).map((img, i) =>
-        thumbCanvas[i].getContext('2d').drawImage(img, 0, 0)
-      );
-    }
-
-    this.container.style.cssText = `width: ${thumbWidth}px; height: ${thumbHeight}px;`;
-    this.content.style.cssText = `transform: scale(${scale}); transform-origin: top left;`;
   };
 
   render() {
