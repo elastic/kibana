@@ -1,11 +1,11 @@
 <div class="form-group">
   <div>
-    <label ng-if="$index < 1 || groupName !== 'buckets'" class="agg-select-label">Aggregation</label>
-    <label ng-if="$index >= 1 && groupName === 'buckets'" class="agg-select-label">Sub Aggregation</label>
+    <label ng-if="$index < 1 || groupName !== 'buckets'" class="eui-displayInline">Aggregation</label>
+    <label ng-if="$index >= 1 && groupName === 'buckets'" class="eui-displayInline">Sub Aggregation</label>
     <a
       ng-if="aggHelpLink"
       href="{{aggHelpLink}}"
-      class="agg-select-help"
+      class="pull-right"
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -16,7 +16,7 @@
   <ui-select
     required
     name="agg"
-    class="vis-editor-field-ui-select agg-select"
+    class="visEditorAggSelect__select agg-select"
     data-test-subj="visEditorAggSelect"
     ng-model="agg.type"
   >

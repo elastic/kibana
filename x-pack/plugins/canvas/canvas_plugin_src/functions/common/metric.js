@@ -16,7 +16,7 @@ export const metric = () => ({
   args: {
     label: {
       types: ['string'],
-      alias: ['_', 'text', 'description'],
+      aliases: ['_', 'text', 'description'],
       help: 'Text describing the metric',
       default: '""',
     },

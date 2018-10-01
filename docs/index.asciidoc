@@ -52,6 +52,8 @@ include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
 
+include::spaces/index.asciidoc[]
+
 include::security/index.asciidoc[]
 
 include::management/watcher-ui/index.asciidoc[]

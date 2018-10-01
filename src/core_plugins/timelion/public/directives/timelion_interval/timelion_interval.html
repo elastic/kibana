@@ -1,15 +1,15 @@
 <input
   input-focus
   aria-label="Custom interval"
-  class="kuiTextInput timelion-interval-custom"
+  class="kuiTextInput timInterval__input"
   ng-show="interval === 'other'"
-  ng-class="{ 'timelion-interval-custom-compact': interval === 'other' }"
+  ng-class="{ 'timInterval__input--compact': interval === 'other' }"
   ng-model="otherInterval"
 ><select
   id="timelionInterval"
   aria-label="Select interval"
-  class="kuiSelect timelion-interval-presets"
-  ng-class="{ 'timelion-interval-presets-compact': interval === 'other'}"
+  class="kuiSelect timInterval__presets"
+  ng-class="{ 'timInterval__presets--compact': interval === 'other'}"
   ng-model="interval"
 >
   <option

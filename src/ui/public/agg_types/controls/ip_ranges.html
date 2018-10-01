@@ -8,7 +8,7 @@
   <div class="euiSpacer euiSpacer--s"></div>
 
   <div ng-show="agg.params.ipRangeType != 'mask'">
-    <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.fromTo.length">
+    <table class="visEditorAgg__rangesTable form-group" ng-show="agg.params.ranges.fromTo.length">
       <tr>
         <th scope="col">
           <label id="visEditorIpRangeFromLabel{{agg.id}}">From</label>
@@ -66,7 +66,7 @@
   </div>
 
   <div ng-show="agg.params.ipRangeType == 'mask'">
-    <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.mask.length">
+    <table class="visEditorAgg__rangesTable form-group" ng-show="agg.params.ranges.mask.length">
       <tr>
         <th scope="col">
           <label id="visEditorIpRangeCidrLabel{{agg.id}}">CIDR Mask</label>

@@ -31,3 +31,6 @@ import './logstash/pipeline';
 import './beats/overview';
 import './beats/listing';
 import './beats/beat';
+import './apm/overview';
+import './apm/instances';
+import './apm/instance';
