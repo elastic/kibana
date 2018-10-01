@@ -19,15 +19,23 @@
 
 import { vislibColorMaps } from './colormaps';
 
-export const truncatedColorMaps = {};
+let truncatedMaps;
 
-const colormaps = vislibColorMaps;
-for (const key in colormaps) {
-  if (colormaps.hasOwnProperty(key)) {
-    //slice off lightest colors
-    truncatedColorMaps[key] = {
-      ...colormaps[key],
-      value: colormaps[key].value.slice(Math.floor(colormaps[key].value.length / 4))
-    };
+export const truncatedColorMaps = () => {
+  if (!truncatedMaps) {
+    truncatedMaps = {};
+
+    const colormaps = vislibColorMaps();
+    for (const key in colormaps) {
+      if (colormaps.hasOwnProperty(key)) {
+        //slice off lightest colors
+        truncatedMaps[key] = {
+          ...colormaps[key],
+          value: colormaps[key].value.slice(Math.floor(colormaps[key].value.length / 4))
+        };
+      }
+    }
   }
-}
+
+  return truncatedMaps;
+};

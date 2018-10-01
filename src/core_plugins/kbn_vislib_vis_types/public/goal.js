@@ -79,7 +79,7 @@ export default function GoalVisType(Private) {
         gaugeTypes: ['Arc', 'Circle'],
         gaugeColorMode: ['None', 'Labels', 'Background'],
         scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
+        colorSchemas: Object.values(vislibColorMaps()).map(value => ({ id: value.id, label: value.label })),
       },
       optionsTemplate: gaugeTemplate,
       schemas: new Schemas([

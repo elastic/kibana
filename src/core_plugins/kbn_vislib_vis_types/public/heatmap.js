@@ -79,7 +79,7 @@ export default function HeatmapVisType(Private) {
           text: 'bottom',
         }],
         scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
+        colorSchemas: Object.values(vislibColorMaps()).map(value => ({ id: value.id, label: value.label })),
       },
       optionsTemplate: heatmapTemplate,
       schemas: new Schemas([

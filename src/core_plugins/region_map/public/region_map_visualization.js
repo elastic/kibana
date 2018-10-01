@@ -101,7 +101,7 @@ export function RegionMapsVisualizationProvider(Private, config) {
         this._vis.params.showAllShapes
       );
       this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
-      this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
+      this._choroplethLayer.setColorRamp(truncatedColorMaps()[visParams.colorSchema].value);
       this._choroplethLayer.setLineWeight(visParams.outlineWeight);
       this._setTooltipFormatter();
 
