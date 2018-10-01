@@ -17,16 +17,7 @@
  * under the License.
  */
 
-import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
-import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
-import { commonFunctions } from '../common/functions/index';
-import { clientFunctions } from './functions/index';
-import { typeSpecs } from '../common/types/index';
+import { serverFunctions } from './index';
 
-const loadBrowserPlugins = () => {
-  clientFunctions.forEach(fn => functionsRegistry.register(fn));
-  commonFunctions.forEach(fn => functionsRegistry.register(fn));
-  typeSpecs.forEach(fn => typesRegistry.register(fn));
-};
-
-loadBrowserPlugins();
+// eslint-disable-next-line no-undef
+serverFunctions.forEach(canvas.register);
