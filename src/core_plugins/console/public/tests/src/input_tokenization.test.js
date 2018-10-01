@@ -31,18 +31,18 @@ describe('Input Tokenization', () => {
     // Set up our document body
     document.body.innerHTML =
       `<div>
-        <div id="editor" />
-        <div id="editor_actions" />
-        <div id="copy_as_curl" />
+        <div id="ConAppEditor" />
+        <div id="ConAppEditorActions" />
+        <div id="ConCopyAsCurl" />
       </div>`;
 
     input = initializeInput(
-      $('#editor'),
-      $('#editor_actions'),
-      $('#copy_as_curl'),
+      $('#ConAppEditor'),
+      $('#ConAppEditorActions'),
+      $('#ConCopyAsCurl'),
       null
     );
-    input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), null);
+    input = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'), $('#ConCopyAsCurl'), null);
     input.$el.show();
     input.autocomplete._test.removeChangeListener();
   });

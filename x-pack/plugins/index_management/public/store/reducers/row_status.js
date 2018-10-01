@@ -121,6 +121,7 @@ export const rowStatus = handleActions({
     }, {});
 
     const newState = { ...state };
+    // eslint-disable-next-line guard-for-in
     for (const indexName in state) {
       if (state[indexName] === INDEX_CLOSING && indicesByName[indexName].status === INDEX_CLOSED) {
         delete newState[indexName];
