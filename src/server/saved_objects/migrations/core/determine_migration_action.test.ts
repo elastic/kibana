@@ -22,7 +22,7 @@ import { determineMigrationAction, MigrationAction } from './determine_migration
 describe('determineMigrationAction', () => {
   test('requires no action if mappings are identical', () => {
     const actual = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           hello: {
@@ -34,7 +34,7 @@ describe('determineMigrationAction', () => {
       },
     };
     const expected = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           hello: {
@@ -51,7 +51,7 @@ describe('determineMigrationAction', () => {
 
   test('requires no action if mappings differ only by dynamic properties', () => {
     const actual = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           hello: { dynamic: true, foo: 'bar' },
@@ -60,7 +60,7 @@ describe('determineMigrationAction', () => {
       },
     };
     const expected = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           hello: { dynamic: 'true', goober: 'pea' },
@@ -74,7 +74,7 @@ describe('determineMigrationAction', () => {
 
   test('requires no action if mappings differ only by equivalent coerced properties', () => {
     const actual = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           hello: { dynamic: 'false', baz: '2', foo: 'bar' },
@@ -83,7 +83,7 @@ describe('determineMigrationAction', () => {
       },
     };
     const expected = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           hello: { dynamic: false, baz: 2, foo: 'bar' },
@@ -97,7 +97,7 @@ describe('determineMigrationAction', () => {
 
   test('requires no action if a root property has been disabled', () => {
     const actual = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           hello: { dynamic: true, foo: 'bar' },
@@ -106,7 +106,7 @@ describe('determineMigrationAction', () => {
       },
     };
     const expected = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           world: { baz: 'bing' },
@@ -119,7 +119,7 @@ describe('determineMigrationAction', () => {
 
   test('requires migration if a sub-property differs', () => {
     const actual = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           world: { type: 'text' },
@@ -127,7 +127,7 @@ describe('determineMigrationAction', () => {
       },
     };
     const expected = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           world: { type: 'keword' },
@@ -140,7 +140,7 @@ describe('determineMigrationAction', () => {
 
   test('requires migration if a type changes', () => {
     const actual = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           meaning: { type: 'text' },
@@ -148,7 +148,7 @@ describe('determineMigrationAction', () => {
       },
     };
     const expected = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           meaning: 42,
@@ -161,7 +161,7 @@ describe('determineMigrationAction', () => {
 
   test('requires migration if doc dynamic value differs', () => {
     const actual = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           world: { type: 'text' },
@@ -169,7 +169,7 @@ describe('determineMigrationAction', () => {
       },
     };
     const expected = {
-      doc: {
+      _doc: {
         dynamic: 'true',
         properties: {
           world: { type: 'text' },
@@ -182,13 +182,13 @@ describe('determineMigrationAction', () => {
 
   test('requires patching if we added a root property', () => {
     const actual = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {},
       },
     };
     const expected = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           world: { type: 'keword' },
@@ -201,7 +201,7 @@ describe('determineMigrationAction', () => {
 
   test('requires patching if we added a sub-property', () => {
     const actual = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           world: {
@@ -213,7 +213,7 @@ describe('determineMigrationAction', () => {
       },
     };
     const expected = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           world: {
@@ -231,7 +231,7 @@ describe('determineMigrationAction', () => {
 
   test('requires migration if a sub property has been removed', () => {
     const actual = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           world: {
@@ -244,7 +244,7 @@ describe('determineMigrationAction', () => {
       },
     };
     const expected = {
-      doc: {
+      _doc: {
         dynamic: 'strict',
         properties: {
           world: {

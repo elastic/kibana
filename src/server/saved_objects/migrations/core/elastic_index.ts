@@ -50,7 +50,7 @@ export async function fetchInfo(callCluster: CallCluster, index: string): Promis
       aliases: {},
       exists: false,
       indexName: index,
-      mappings: { doc: { dynamic: 'strict', properties: {} } },
+      mappings: { _doc: { dynamic: 'strict', properties: {} } },
     };
   }
 
@@ -193,7 +193,7 @@ export async function migrationsUpToDate(
  * @param {IndexMapping} mappings
  */
 export function putMappings(callCluster: CallCluster, index: string, mappings: IndexMapping) {
-  return callCluster('indices.putMapping', { body: mappings.doc, index, type: ROOT_TYPE });
+  return callCluster('indices.putMapping', { body: mappings._doc, index, type: ROOT_TYPE });
 }
 
 export async function createIndex(

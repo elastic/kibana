@@ -163,7 +163,7 @@ describe('SavedObjectsRepository', () => {
   };
 
   const mappings = {
-    doc: {
+    _doc: {
       properties: {
         'index-pattern': {
           properties: {

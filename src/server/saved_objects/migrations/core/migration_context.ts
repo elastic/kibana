@@ -104,11 +104,11 @@ function createDestContext(
     exists: false,
     indexName: nextIndexName(source.indexName, alias),
     mappings: {
-      doc: {
-        ...activeMappings.doc,
+      _doc: {
+        ...activeMappings._doc,
         properties: {
-          ...source.mappings.doc.properties,
-          ...activeMappings.doc.properties,
+          ...source.mappings._doc.properties,
+          ...activeMappings._doc.properties,
         },
       },
     },
