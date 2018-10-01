@@ -9,16 +9,19 @@ import {
   uiModules
 } from 'ui/modules';
 import chrome from 'ui/chrome';
+import { applyTheme } from 'ui/theme';
 import 'ui/autoload/all';
 import {
   timefilter
 } from 'ui/timefilter';
 import { getStore } from './store/store';
 import { setTimeFilters } from './actions/store_actions';
+import { getIsDarkTheme } from './store/ui';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters } from './kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { showOptionsPopover } from './components/top_nav/show_options_popover';
 
 // hack to wait for angular template to be ready
 const waitForAngularReady = new Promise(resolve => {
@@ -45,6 +48,25 @@ export function initGisApp(resolve) {
   uiModules
     .get('app/gis', [])
     .controller('TimePickerController', ($scope) => {
+
+      let isDarkTheme;
+      let unsubscribe;
+      getStore().then(store => {
+        handleStoreChanges(store);
+        unsubscribe = store.subscribe(() => {
+          handleStoreChanges(store);
+        });
+      });
+
+      timefilter.on('timeUpdate', dispatchTimeUpdate);
+
+      $scope.$on('$destroy', () => {
+        if (unsubscribe) {
+          unsubscribe();
+        }
+        timefilter.off('timeUpdate', dispatchTimeUpdate);
+      });
+
       $scope.topNavMenu = [{
         key: 'inspect',
         description: 'Open Inspector',
@@ -55,9 +77,16 @@ export function initGisApp(resolve) {
           });
         }
       }, {
+        key: 'options',
+        description: 'Options',
+        testId: 'optionsButton',
+        run: async (menuItem, navController, anchorElement) => {
+          showOptionsPopover(anchorElement);
+        }
+      }, {
         key: 'save',
-        description: 'Save Visualization',
-        testId: 'visualizeSaveButton',
+        description: 'Save',
+        testId: 'saveButton',
         run: async () => {
           const onSave = () => {
             return new Promise(resolve => {
@@ -79,13 +108,37 @@ export function initGisApp(resolve) {
       timefilter.enableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
 
+      async function dispatchTimeUpdate() {
+        const timeFilters = timefilter.getTime();
+        const store = await getStore();
+        store.dispatch(setTimeFilters(timeFilters));
+      }
+
+      function handleStoreChanges(store) {
+        if (isDarkTheme !== getIsDarkTheme(store.getState())) {
+          isDarkTheme = getIsDarkTheme(store.getState());
+          updateTheme();
+        }
+      }
+
+      function updateTheme() {
+        $scope.$evalAsync(() => {
+          isDarkTheme ? setDarkTheme() : setLightTheme();
+        });
+      }
+
+      function setDarkTheme() {
+        chrome.removeApplicationClass(['theme-light']);
+        chrome.addApplicationClass('theme-dark');
+        applyTheme('dark');
+      }
+
+      function setLightTheme() {
+        chrome.removeApplicationClass(['theme-dark']);
+        chrome.addApplicationClass('theme-light');
+        applyTheme('light');
+      }
+
       Promise.all([waitForAngularReady]).then(resolve());
     });
 }
-
-getStore().then(store => {
-  timefilter.on('timeUpdate', () => {
-    const timeFilters = timefilter.getTime();
-    store.dispatch(setTimeFilters(timeFilters));
-  });
-});

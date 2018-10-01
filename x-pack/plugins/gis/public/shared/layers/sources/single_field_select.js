@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 
 // Creates grouped options by grouping fields by field type
-const getGroupedFieldOptions = (fields, filterField) => {
+export const getGroupedFieldOptions = (fields, filterField) => {
   const fieldsByTypeMap = new Map();
   const groupedFieldOptions = [];
 

@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from './single_field_select';
+import { MultiFieldSelect } from './multi_field_select';
 import {
   indexPatternService,
   inspectorAdapters,
@@ -45,7 +46,9 @@ export class ESSearchSource extends VectorSource {
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
       limit: descriptor.limit,
-      filterByMapBounds: descriptor.filterByMapBounds
+      filterByMapBounds: descriptor.filterByMapBounds,
+      showTooltip: _.get(descriptor, 'showTooltip', false),
+      tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     });
     window._ess = this;
   }
@@ -133,6 +136,36 @@ export class ESSearchSource extends VectorSource {
     }
   }
 
+  areFeatureTooltipsEnabled() {
+    return this._descriptor.showTooltip && this._descriptor.tooltipProperties.length > 0;
+  }
+
+  async filterAndFormatProperties(properties) {
+    const filteredProperties = {};
+    this._descriptor.tooltipProperties.forEach(propertyName => {
+      filteredProperties[propertyName] = _.get(properties, propertyName, '-');
+    });
+
+    let indexPattern;
+    try {
+      indexPattern = await this._getIndexPatternService();
+    } catch(error) {
+      console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
+      return filteredProperties;
+    }
+
+    this._descriptor.tooltipProperties.forEach(propertyName => {
+      const field = indexPattern.fields.byName[propertyName];
+      if (!field) {
+        return;
+      }
+
+      filteredProperties[propertyName] = field.format.convert(filteredProperties[propertyName]);
+    });
+
+    return filteredProperties;
+  }
+
   getDisplayName() {
     return this._descriptor.indexPatternId;
   }
@@ -160,6 +193,8 @@ class Editor extends React.Component {
       selectedFields: [],
       limit: DEFAULT_LIMIT,
       filterByMapBounds: true,
+      showTooltip: true,
+      tooltipProperties: [],
     };
   }
 
@@ -183,6 +218,7 @@ class Editor extends React.Component {
       isLoadingIndexPattern: true,
       indexPattern: undefined,
       geoField: undefined,
+      tooltipProperties: [],
     }, this.debouncedLoad.bind(null, indexPatternId));
   }
 
@@ -234,12 +270,26 @@ class Editor extends React.Component {
     }, this.previewLayer);
   };
 
+  onShowTooltipChange = e => {
+    this.setState({
+      showTooltip: e.target.checked,
+    }, this.previewLayer);
+  };
+
+  onTooltipPropertiesSelect = (propertyNames) => {
+    this.setState({
+      tooltipProperties: propertyNames
+    }, this.previewLayer);
+  };
+
   previewLayer = () => {
     const {
       indexPatternId,
       geoField,
       limit,
       filterByMapBounds,
+      showTooltip,
+      tooltipProperties,
     } = this.state;
     if (indexPatternId && geoField) {
       this.props.onSelect({
@@ -247,6 +297,8 @@ class Editor extends React.Component {
         geoField,
         limit: limit ? limit : DEFAULT_LIMIT,
         filterByMapBounds,
+        showTooltip,
+        tooltipProperties,
       });
     }
   }
@@ -256,7 +308,7 @@ class Editor extends React.Component {
   }
 
   _renderGeoSelect() {
-    if (!this.state.indexPatternId) {
+    if (!this.state.indexPattern) {
       return;
     }
 
@@ -273,6 +325,43 @@ class Editor extends React.Component {
           fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
         />
       </EuiFormRow>
+    );
+  }
+
+  _renderTooltipConfig() {
+    if (!this.state.indexPattern) {
+      return;
+    }
+
+    let fieldSelectFormRow;
+    if (this.state.showTooltip) {
+      fieldSelectFormRow = (
+        <EuiFormRow
+          label="Fields displayed in tooltip"
+          compressed
+        >
+          <MultiFieldSelect
+            placeholder="Select field(s)"
+            value={this.state.tooltipProperties}
+            onChange={this.onTooltipPropertiesSelect}
+            fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
+          />
+        </EuiFormRow>
+      );
+    }
+
+    return (
+      <Fragment>
+        <EuiFormRow compressed>
+          <EuiSwitch
+            label="Show tooltip on feature mouseover"
+            checked={this.state.showTooltip}
+            onChange={this.onShowTooltipChange}
+          />
+        </EuiFormRow>
+
+        {fieldSelectFormRow}
+      </Fragment>
     );
   }
 
@@ -313,6 +402,8 @@ class Editor extends React.Component {
         </EuiFormRow>
 
         {this._renderGeoSelect()}
+
+        {this._renderTooltipConfig()}
 
       </Fragment>
     );

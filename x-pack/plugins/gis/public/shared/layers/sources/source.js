@@ -111,6 +111,15 @@ export class VectorSource extends ASource {
     throw new Error('Should implement VectorSource#getGeoJson');
   }
 
+  areFeatureTooltipsEnabled() {
+    return false;
+  }
+
+  // Allow source to filter and format feature properties before displaying to user
+  async filterAndFormatProperties(properties) {
+    return properties;
+  }
+
   async isTimeAware() {
     throw new Error('Should implement');
   }

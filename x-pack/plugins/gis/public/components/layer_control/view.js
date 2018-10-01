@@ -20,27 +20,29 @@ export function LayerControl(props) {
       Add layer
     </EuiButtonEmpty>);
   return (
-    <div>
-      <EuiPanel className="LayerControl" hasShadow paddingSize="none">
-        <EuiFlexGroup
-          className="LayerControl--header"
-          justifyContent="spaceBetween"
-          responsive={false}
-          gutterSize="none"
-        >
-          <EuiFlexItem>
-            <EuiTitle><h2>Layers</h2></EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {addLayer}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <LayerTOC />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </div>
+    <EuiPanel className="LayerControl" hasShadow paddingSize="none">
+      <EuiFlexGroup
+        className="LayerControl--header"
+        justifyContent="spaceBetween"
+        responsive={false}
+        gutterSize="none"
+      >
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h1>Layers</h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {addLayer}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <LayerTOC />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+    </EuiPanel>
   );
 }

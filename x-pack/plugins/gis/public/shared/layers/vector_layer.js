@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import mapboxgl from 'mapbox-gl';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
 import { ALayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
 
+import { FeatureTooltip } from 'plugins/gis/components/map/feature_tooltip';
 
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
 let defaultColorIndex = 0;
@@ -15,6 +20,14 @@ let defaultColorIndex = 0;
 export class VectorLayer extends ALayer {
 
   static type = 'VECTOR';
+
+  static popup = new mapboxgl.Popup({
+    closeButton: false,
+    closeOnClick: false,
+    className: 'euiPanel euiPanel--shadow',
+  });
+
+  static tooltipContainer = document.createElement('div');
 
   static createDescriptor(options) {
     const layerDescriptor = super.createDescriptor(options);
@@ -81,6 +94,7 @@ export class VectorLayer extends ALayer {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
+
     let timeAware;
     try {
       timeAware = await this._source.isTimeAware();
@@ -155,6 +169,7 @@ export class VectorLayer extends ALayer {
       if (!this._descriptor.showAtAllZoomLevels) {
         mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
       }
+      this.addToolipListeners(mbMap, pointLayerId);
       return;
     }
 
@@ -167,6 +182,7 @@ export class VectorLayer extends ALayer {
       mbMap.setLayerZoomRange(strokeLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
       mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     }
+    this.addToolipListeners(mbMap, fillLayerId);
   }
 
   renderStyleEditor(style, options) {
@@ -176,4 +192,52 @@ export class VectorLayer extends ALayer {
     });
   }
 
+  addToolipListeners(mbMap, mbLayerId) {
+    this.removeAllListenersForMbLayer(mbMap, mbLayerId);
+
+    if (!this._source.areFeatureTooltipsEnabled()) {
+      return;
+    }
+
+    this.addEventListenerForMbLayer(mbMap, mbLayerId, 'mouseenter', async (e) => {
+      mbMap.getCanvas().style.cursor = 'pointer';
+
+      const feature = e.features[0];
+
+      let popupAnchorLocation = e.lngLat; // default popup location to mouse location
+      if (feature.geometry.type === 'Point') {
+        const coordinates = e.features[0].geometry.coordinates.slice();
+
+        // Ensure that if the map is zoomed out such that multiple
+        // copies of the feature are visible, the popup appears
+        // over the copy being pointed to.
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
+
+        popupAnchorLocation = coordinates;
+      }
+
+      const properties = await this._source.filterAndFormatProperties(e.features[0].properties);
+
+      ReactDOM.render(
+        React.createElement(
+          FeatureTooltip, {
+            properties: properties,
+          }
+        ),
+        VectorLayer.tooltipContainer
+      );
+
+      VectorLayer.popup.setLngLat(popupAnchorLocation)
+        .setDOMContent(VectorLayer.tooltipContainer)
+        .addTo(mbMap);
+    });
+
+    this.addEventListenerForMbLayer(mbMap, mbLayerId, 'mouseleave', () => {
+      mbMap.getCanvas().style.cursor = '';
+      VectorLayer.popup.remove();
+      ReactDOM.unmountComponentAtNode(VectorLayer.tooltipContainer);
+    });
+  }
 }

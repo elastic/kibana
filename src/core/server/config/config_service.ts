@@ -146,7 +146,10 @@ export class ConfigService {
   private getDistinctConfig(path: ConfigPath) {
     this.markAsHandled(path);
 
-    return this.config$.pipe(map(config => config.get(path)), distinctUntilChanged(isEqual));
+    return this.config$.pipe(
+      map(config => config.get(path)),
+      distinctUntilChanged(isEqual)
+    );
   }
 
   private markAsHandled(path: ConfigPath) {
