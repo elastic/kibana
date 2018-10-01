@@ -22,7 +22,7 @@ import metricVisParamsTemplate from './metric_vis_params.html';
 import _ from 'lodash';
 const module = uiModules.get('kibana');
 
-module.directive('metricVisParams', function () {
+module.directive('metricVisParams', function (i18n) {
   return {
     restrict: 'E',
     template: metricVisParamsTemplate,
@@ -80,6 +80,7 @@ module.directive('metricVisParams', function () {
         $scope.customColors = true;
       });
 
+      $scope.editorState.requiredDescription = i18n('metricVis.params.ranges.warning.requiredDescription', { defaultMessage: 'Required:' });
     }
   };
 });

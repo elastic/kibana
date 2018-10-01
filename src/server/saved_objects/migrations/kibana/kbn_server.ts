@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { SavedObjectsSchemaDefinition } from '../../schema';
 import { CallCluster, LogFn } from '../core';
 
 export interface KbnServer {
@@ -26,6 +27,7 @@ export interface KbnServer {
     savedObjectMappings: any[];
     savedObjectMigrations: any;
     savedObjectValidations: any;
+    savedObjectSchemas: SavedObjectsSchemaDefinition;
   };
 }
 

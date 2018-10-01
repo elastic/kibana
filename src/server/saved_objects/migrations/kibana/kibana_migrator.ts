@@ -22,8 +22,10 @@
  * (the shape of the mappings and documents in the index).
  */
 
-import { SavedObjectDoc } from '../../serialization';
+import { SavedObjectsSchema } from '../../schema';
+import { SavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator } from '../../validation';
+
 import {
   buildActiveMappings,
   CallCluster,
@@ -47,6 +49,7 @@ export class KibanaMigrator {
   private documentMigrator: VersionedTransformer;
   private mappingProperties: MappingProperties;
   private log: LogFn;
+  private serializer: SavedObjectsSerializer;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -57,6 +60,9 @@ export class KibanaMigrator {
    */
   constructor({ kbnServer }: { kbnServer: KbnServer }) {
     this.kbnServer = kbnServer;
+    this.serializer = new SavedObjectsSerializer(
+      new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas)
+    );
     this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings || []);
     this.log = (meta: string[], message: string) => kbnServer.server.log(meta, message);
     this.documentMigrator = new DocumentMigrator({
@@ -112,6 +118,7 @@ export class KibanaMigrator {
       index: config.get('kibana.index'),
       pollInterval: config.get('migrations.pollInterval'),
       scrollDuration: config.get('migrations.scrollDuration'),
+      serializer: this.serializer,
     });
   }
 }

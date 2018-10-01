@@ -24,6 +24,7 @@
  * serves as a central blueprint for what migrations will end up doing.
  */
 
+import { SavedObjectsSerializer } from '../../serialization';
 import { buildActiveMappings } from './build_active_mappings';
 import { CallCluster, MappingProperties } from './call_cluster';
 import { VersionedTransformer } from './document_migrator';
@@ -49,6 +50,7 @@ export interface MigrationOpts {
   log: LogFn;
   mappingProperties: MappingProperties;
   documentMigrator: VersionedTransformer;
+  serializer: SavedObjectsSerializer;
 }
 
 export interface Context {
@@ -63,6 +65,7 @@ export interface Context {
   pollInterval: number;
   scrollDuration: string;
   action: MigrationAction;
+  serializer: SavedObjectsSerializer;
 }
 
 /**
@@ -89,6 +92,7 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
     batchSize: opts.batchSize,
     pollInterval: opts.pollInterval,
     scrollDuration: opts.scrollDuration,
+    serializer: opts.serializer,
   };
 }
 

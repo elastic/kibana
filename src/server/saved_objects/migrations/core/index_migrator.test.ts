@@ -19,7 +19,8 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { ROOT_TYPE } from '../../serialization';
+import { SavedObjectsSchema } from '../../schema';
+import { ROOT_TYPE, SavedObjectsSerializer } from '../../serialization';
 import { createIndexMigrator } from './index_migrator';
 
 describe('index_migrator', () => {
@@ -361,6 +362,7 @@ async function createTestMigrator(testOpts: any = {}) {
     mappingProperties: testOpts.mappingProperties || {},
     pollInterval: 1,
     scrollDuration: '1m',
+    serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),
     documentMigrator: {
       migrationVersion: testOpts.migrationVersion || {},
       migrate: testOpts.migrate || _.identity,

@@ -109,6 +109,7 @@ function mockKbnServer({ configValues }: { configValues?: any } = {}) {
       savedObjectValidations: {},
       savedObjectMigrations: {},
       savedObjectMappings: [],
+      savedObjectSchemas: {},
     },
     server: {
       config: () => ({
