@@ -32,7 +32,7 @@ export const podNetworkTraffic: InfraMetricModelCreator = (timeField, indexPatte
         {
           id: 'posonly-deriv-max-net-tx',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-net-tx' }],
+          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-network-tx' }],
           script: 'params.rate > 0.0 ? params.rate : 0.0',
         },
       ],
@@ -55,7 +55,7 @@ export const podNetworkTraffic: InfraMetricModelCreator = (timeField, indexPatte
         {
           id: 'posonly-deriv-max-net-tx',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-net-tx' }],
+          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-network-tx' }],
           script: 'params.rate > 0.0 ? params.rate : 0.0',
         },
         {
