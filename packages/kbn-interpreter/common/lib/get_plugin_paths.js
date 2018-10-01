@@ -17,18 +17,24 @@
  * under the License.
  */
 
-import { getPluginStream } from '../lib/get_plugin_stream';
+import fs from 'fs';
+import { resolve } from 'path';
+import { promisify } from 'util';
+import { flatten } from 'lodash';
+import { pathsRegistry } from './paths_registry';
 
-export function plugins(server) {
-  server.route({
-    method: 'GET',
-    path: '/api/canvas/plugins',
-    handler: function (request, reply) {
-      const { type } = request.query;
-      reply(getPluginStream(type));
-    },
-    config: {
-      auth: false,
-    },
-  });
-}
+const readdir = promisify(fs.readdir);
+
+export const getPluginPaths = type => {
+  const typePaths = pathsRegistry.get(type);
+  if (!typePaths) throw new Error(`Unknown type: ${type}`);
+
+  return Promise.all(typePaths.map(path => {
+
+    // Get the full path of all files in the directory
+    return readdir(path).then(files => files.map(file => {
+      if (!file.endsWith('.js')) return;
+      return resolve(path, file);
+    }).filter(path => path)).catch();
+  })).then(flatten);
+};
