@@ -43,21 +43,13 @@ export const loadBrowserPlugins = (additionalTypes) => {
       const type = remainingTypes.pop();
       window.canvas = window.canvas || {};
       window.canvas.register = d => types[type].register(d);
-      window.canvas.load = [];
       // Load plugins one at a time because each needs a different loader function
       // $script will only load each of these once, we so can call this as many times as we need?
       // not really as we'll mess up the window.canvas object ...
       const pluginPath = chrome.addBasePath(`/api/canvas/plugins?type=${type}`);
-      const loadNext = () => {
+      $script(pluginPath, () => {
         if (remainingTypes.length) loadType();
         else resolve(true);
-      };
-      $script(pluginPath, () => {
-        if (window.canvas.load.length) {
-          $script(window.canvas.load, () => loadNext);
-        } else {
-          loadNext();
-        }
       });
     }
 

@@ -17,21 +17,24 @@
  * under the License.
  */
 
-import fs from 'fs';
-import ss from 'stream-stream';
-import { getPluginPaths } from '@kbn/interpreter/common/lib/get_plugin_paths';
+const webpack = require('webpack');
+const webpackConfig = require('./webpack.plugins');
 
-export const getPluginStream = type => {
-  const stream = ss({
-    separator: '\n',
-  });
+const devtool = 'inline-cheap-module-source-map';
 
-  getPluginPaths(type).then(files => {
-    files.forEach(file => {
-      stream.write(fs.createReadStream(file));
-    });
-    stream.end();
-  });
-
-  return stream;
+const onComplete = function (done) {
+  return function (err, stats) {
+    if (err) {
+      done && done(err);
+    } else {
+      const seconds = ((stats.endTime - stats.startTime) / 1000).toFixed(2);
+      console.log(`Plugins built in ${seconds} seconds`);
+      done && done();
+    }
+  };
 };
+
+webpack({ ...webpackConfig, devtool }, onComplete(function () {
+  console.log('all done');
+}));
+
