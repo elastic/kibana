@@ -17,7 +17,7 @@ export default function (kibana) {
       <%_ if (generateHack) { -%>
       hacks: [
         'plugins/<%= snakeCase(name) %>/hack'
-      ]
+      ],
       <%_ } -%>
       <%_ if (generateScss) { -%>
       styleSheetPaths: require('path').resolve(__dirname, 'public/app.scss'),

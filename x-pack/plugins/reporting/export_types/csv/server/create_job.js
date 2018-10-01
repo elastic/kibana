@@ -21,6 +21,7 @@ function createJobFn(server) {
     return {
       headers: serializedEncryptedHeaders,
       indexPatternSavedObject: indexPatternSavedObject,
+      basePath: request.getBasePath(),
       ...jobParams
     };
   };
