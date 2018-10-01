@@ -24,11 +24,14 @@ import Boom from 'boom';
 import Hapi from 'hapi';
 import { setupVersionCheck } from './version_check';
 import { registerHapiPlugins } from './register_hapi_plugins';
+import { setupBasePathProvider } from './setup_base_path_provider';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
   kbnServer.server = new Hapi.Server(kbnServer.core.serverOptions);
   server = kbnServer.server;
+
+  setupBasePathProvider(server, config);
 
   await registerHapiPlugins(server);
 
@@ -84,7 +87,7 @@ export default async function (kbnServer, server, config) {
     path: '/',
     method: 'GET',
     handler(req, h) {
-      const basePath = config.get('server.basePath');
+      const basePath = req.getBasePath();
       const defaultRoute = config.get('server.defaultRoute');
       return h.redirect(`${basePath}${defaultRoute}`);
     }
@@ -98,7 +101,8 @@ export default async function (kbnServer, server, config) {
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         throw Boom.notFound();
       }
-      const pathPrefix = config.get('server.basePath') ? `${config.get('server.basePath')}/` : '';
+
+      const pathPrefix = req.getBasePath() ? `${req.getBasePath()}/` : '';
       return h
         .redirect(format({
           search: req.url.search,

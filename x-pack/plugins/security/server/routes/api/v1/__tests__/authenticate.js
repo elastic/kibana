@@ -15,7 +15,6 @@ import { AuthenticationResult } from '../../../../../server/lib/authentication/a
 import { BasicCredentials } from '../../../../../server/lib/authentication/providers/basic';
 import { initAuthenticateApi } from '../authenticate';
 import { DeauthenticationResult } from '../../../../lib/authentication/deauthentication_result';
-import { CHECK_PRIVILEGES_RESULT } from '../../../../lib/authorization';
 
 describe('Authentication routes', () => {
   let serverStub;
@@ -37,7 +36,7 @@ describe('Authentication routes', () => {
     let loginRoute;
     let request;
     let authenticateStub;
-    let checkPrivilegesWithRequestStub;
+    let authorizationModeStub;
 
     beforeEach(() => {
       loginRoute = serverStub.route
@@ -53,7 +52,7 @@ describe('Authentication routes', () => {
       authenticateStub = serverStub.plugins.security.authenticate.withArgs(
         sinon.match(BasicCredentials.decorateRequest({ headers: {} }, 'user', 'password'))
       );
-      checkPrivilegesWithRequestStub = serverStub.plugins.security.authorization.checkPrivilegesWithRequest;
+      authorizationModeStub = serverStub.plugins.security.authorization.mode;
     });
 
     it('correctly defines route.', async () => {
@@ -121,51 +120,31 @@ describe('Authentication routes', () => {
       const getDeprecationMessage = username =>
         `${username} relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0`;
 
-      it(`returns user data and doesn't log deprecation warning if checkPrivileges result is authorized.`, async () => {
+      it(`returns user data and doesn't log deprecation warning if authorization.mode.useRbacForRequest returns true.`, async () => {
         const user = { username: 'user' };
         authenticateStub.returns(
           Promise.resolve(AuthenticationResult.succeeded(user))
         );
-        const checkPrivilegesStub = sinon.stub().returns({ result: CHECK_PRIVILEGES_RESULT.AUTHORIZED });
-        checkPrivilegesWithRequestStub.returns(checkPrivilegesStub);
+        authorizationModeStub.useRbacForRequest.returns(true);
 
         await loginRoute.handler(request, hStub);
 
-        sinon.assert.calledWithExactly(checkPrivilegesWithRequestStub, request);
-        sinon.assert.calledWithExactly(checkPrivilegesStub, [serverStub.plugins.security.authorization.actions.login]);
+        sinon.assert.calledWithExactly(authorizationModeStub.useRbacForRequest, request);
         sinon.assert.neverCalledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
         sinon.assert.calledOnce(hStub.response);
       });
 
-      it(`returns user data and logs deprecation warning if checkPrivileges result is legacy.`, async () => {
+      it(`returns user data and logs deprecation warning if authorization.mode.useRbacForRequest returns false.`, async () => {
         const user = { username: 'user' };
         authenticateStub.returns(
           Promise.resolve(AuthenticationResult.succeeded(user))
         );
-        const checkPrivilegesStub = sinon.stub().returns({ result: CHECK_PRIVILEGES_RESULT.LEGACY });
-        checkPrivilegesWithRequestStub.returns(checkPrivilegesStub);
+        authorizationModeStub.useRbacForRequest.returns(false);
 
         await loginRoute.handler(request, hStub);
 
-        sinon.assert.calledWithExactly(checkPrivilegesWithRequestStub, request);
-        sinon.assert.calledWithExactly(checkPrivilegesStub, [serverStub.plugins.security.authorization.actions.login]);
+        sinon.assert.calledWithExactly(authorizationModeStub.useRbacForRequest, request);
         sinon.assert.calledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
-        sinon.assert.calledOnce(hStub.response);
-      });
-
-      it(`returns user data and doesn't log deprecation warning if checkPrivileges result is unauthorized.`, async () => {
-        const user = { username: 'user' };
-        authenticateStub.returns(
-          Promise.resolve(AuthenticationResult.succeeded(user))
-        );
-        const checkPrivilegesStub = sinon.stub().returns({ result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED });
-        checkPrivilegesWithRequestStub.returns(checkPrivilegesStub);
-
-        await loginRoute.handler(request, hStub);
-
-        sinon.assert.calledWithExactly(checkPrivilegesWithRequestStub, request);
-        sinon.assert.calledWithExactly(checkPrivilegesStub, [serverStub.plugins.security.authorization.actions.login]);
-        sinon.assert.neverCalledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
         sinon.assert.calledOnce(hStub.response);
       });
     });

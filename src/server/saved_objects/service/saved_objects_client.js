@@ -102,6 +102,7 @@ export class SavedObjectsClient {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
@@ -114,6 +115,7 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}) {
@@ -125,10 +127,12 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type, id) {
-    return this._repository.delete(type, id);
+  async delete(type, id, options = {}) {
+    return this._repository.delete(type, id, options);
   }
 
   /**
@@ -142,6 +146,7 @@ export class SavedObjectsClient {
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -152,6 +157,8 @@ export class SavedObjectsClient {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -160,8 +167,8 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = []) {
-    return this._repository.bulkGet(objects);
+  async bulkGet(objects = [], options = {}) {
+    return this._repository.bulkGet(objects, options);
   }
 
   /**
@@ -169,10 +176,12 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id) {
-    return this._repository.get(type, id);
+  async get(type, id, options = {}) {
+    return this._repository.get(type, id, options);
   }
 
   /**
@@ -182,6 +191,7 @@ export class SavedObjectsClient {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {

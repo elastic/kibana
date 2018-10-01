@@ -120,7 +120,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       branch: config.get('pkg.branch'),
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
-      basePath: config.get('server.basePath'),
+      basePath: request.getBasePath(),
       serverName: config.get('server.name'),
       devMode: config.get('env.dev'),
       uiSettings: await props({
@@ -133,7 +133,7 @@ export function uiRenderMixin(kbnServer, server, config) {
   async function renderApp({ app, h, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
     const request = h.request;
     const translations = await server.getUiTranslations();
-    const basePath = config.get('server.basePath');
+    const basePath = request.getBasePath();
 
     return h.view('ui_app', {
       uiPublicUrl: `${basePath}/ui`,
@@ -152,14 +152,15 @@ export function uiRenderMixin(kbnServer, server, config) {
             defaultInjectedVars,
           ),
         ),
-        legacyMetadata: await getLegacyKibanaPayload({
-          app,
-          translations,
-          request,
-          includeUserProvidedConfig,
-          injectedVarsOverrides
-        }),
       },
+
+      legacyMetadata: await getLegacyKibanaPayload({
+        app,
+        translations,
+        request,
+        includeUserProvidedConfig,
+        injectedVarsOverrides
+      }),
     });
   }
 
