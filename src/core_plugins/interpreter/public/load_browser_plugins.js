@@ -17,20 +17,6 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import init from './init';
+import { loadBrowserPlugins } from '@kbn/interpreter/public/load_browser_plugins';
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    id: 'interpreter',
-    require: ['kibana', 'elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      hacks: [
-        'plugins/interpreter/load_browser_plugins.js',
-      ],
-    },
-    init,
-  });
-}
-
+loadBrowserPlugins();

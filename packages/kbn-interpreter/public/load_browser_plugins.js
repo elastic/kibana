@@ -22,6 +22,7 @@ import $script from 'scriptjs';
 import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
 import { functionsRegistry as browserFunctions } from '@kbn/interpreter/common/lib/functions_registry';
 
+let loading;
 export const loadBrowserPlugins = (additionalTypes) => {
 
   const types = {
@@ -30,7 +31,15 @@ export const loadBrowserPlugins = (additionalTypes) => {
     types: typesRegistry,
   };
 
-  return new Promise(resolve => {
+  // if we are already loading, we need to wait till its done before starting again
+  if (loading) {
+    return loading.then(() => {
+      loading = null;
+      return loadBrowserPlugins(additionalTypes);
+    });
+  }
+
+  loading = new Promise(resolve => {
     if (additionalTypes) {
       Object.keys(additionalTypes).forEach(key => {
         types[key] = additionalTypes[key];
@@ -45,7 +54,6 @@ export const loadBrowserPlugins = (additionalTypes) => {
       window.canvas.register = d => types[type].register(d);
       // Load plugins one at a time because each needs a different loader function
       // $script will only load each of these once, we so can call this as many times as we need?
-      // not really as we'll mess up the window.canvas object ...
       const pluginPath = chrome.addBasePath(`/api/canvas/plugins?type=${type}`);
       $script(pluginPath, () => {
         if (remainingTypes.length) loadType();
@@ -55,4 +63,6 @@ export const loadBrowserPlugins = (additionalTypes) => {
 
     loadType();
   });
+
+  return loading;
 };
