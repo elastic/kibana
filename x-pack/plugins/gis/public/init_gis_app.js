@@ -81,9 +81,7 @@ export function initGisApp(resolve) {
         description: 'Options',
         testId: 'optionsButton',
         run: async (menuItem, navController, anchorElement) => {
-          showOptionsPopover({
-            anchorElement,
-          });
+          showOptionsPopover(anchorElement);
         }
       }, {
         key: 'save',

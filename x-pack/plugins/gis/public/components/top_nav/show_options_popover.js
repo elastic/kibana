@@ -6,11 +6,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 
-import { OptionsMenu } from './options_menu';
+import { OptionsMenu } from './options_menu_container';
 
 import { getStore } from '../../store/store';
-import { getIsDarkTheme, updateIsDarkTheme } from '../../store/ui';
 
 import {
   EuiWrappingPopover,
@@ -25,9 +25,7 @@ const onClose = () => {
   isOpen = false;
 };
 
-export async function showOptionsPopover({
-  anchorElement,
-}) {
+export async function showOptionsPopover(anchorElement) {
   if (isOpen) {
     onClose();
     return;
@@ -35,25 +33,21 @@ export async function showOptionsPopover({
 
   isOpen = true;
 
-  // TODO figure out how to use connect to avoid having to manually wire state and dispatch functions
   const store = await getStore();
 
   document.body.appendChild(container);
   const element = (
-    <EuiWrappingPopover
-      className="navbar__popover"
-      id="popover"
-      button={anchorElement}
-      isOpen={true}
-      closePopover={onClose}
-    >
-      <OptionsMenu
-        darkTheme={getIsDarkTheme(store.getState())}
-        onDarkThemeChange={(isDarkTheme) => {
-          store.dispatch(updateIsDarkTheme(isDarkTheme));
-        }}
-      />
-    </EuiWrappingPopover>
+    <Provider store={store}>
+      <EuiWrappingPopover
+        className="navbar__popover"
+        id="popover"
+        button={anchorElement}
+        isOpen={true}
+        closePopover={onClose}
+      >
+        <OptionsMenu/>
+      </EuiWrappingPopover>
+    </Provider>
   );
   ReactDOM.render(element, container);
 }

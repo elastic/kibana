@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -13,41 +13,28 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-export class OptionsMenu extends Component {
+export function OptionsMenu({ isDarkTheme, onDarkThemeChange }) {
 
-  state = {
-    darkTheme: this.props.darkTheme,
-    useMargins: this.props.useMargins,
-    hidePanelTitles: this.props.hidePanelTitles,
-  }
+  const handleDarkThemeChange = (evt) => {
+    onDarkThemeChange(evt.target.checked);
+  };
 
-  handleDarkThemeChange = (evt) => {
-    const isChecked = evt.target.checked;
-    this.props.onDarkThemeChange(isChecked);
-    this.setState({ darkTheme: isChecked });
-  }
-
-  render() {
-    return (
-      <EuiForm
-        data-test-subj="dashboardOptionsMenu"
-      >
-
-        <EuiFormRow>
-          <EuiSwitch
-            label="Use dark theme"
-            checked={this.state.darkTheme}
-            onChange={this.handleDarkThemeChange}
-            data-test-subj="dashboardDarkThemeCheckbox"
-          />
-        </EuiFormRow>
-
-      </EuiForm>
-    );
-  }
+  return (
+    <EuiForm
+      data-test-subj="gisOptionsMenu"
+    >
+      <EuiFormRow>
+        <EuiSwitch
+          label="Use dark theme"
+          checked={isDarkTheme}
+          onChange={handleDarkThemeChange}
+        />
+      </EuiFormRow>
+    </EuiForm>
+  );
 }
 
 OptionsMenu.propTypes = {
-  darkTheme: PropTypes.bool.isRequired,
+  isDarkTheme: PropTypes.bool.isRequired,
   onDarkThemeChange: PropTypes.func.isRequired,
 };
