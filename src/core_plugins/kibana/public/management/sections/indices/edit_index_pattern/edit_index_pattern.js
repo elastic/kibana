@@ -201,7 +201,7 @@ uiModules.get('apps/management')
     });
 
     $scope.$watch('indexPattern.fields', function () {
-      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
+      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, indexPatternListProvider);
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
       updateIndexedFieldsTable($scope, $state);

@@ -21,7 +21,7 @@ import { IndexPatternListConfigRegistry } from './index_pattern_list_config_regi
 
 class IndexPatternList {
   constructor(registry) {
-    this._plugins = registry.inOrder.map(Plugin => new Plugin({}));
+    this._plugins = registry.inOrder.map(Plugin => new Plugin());
   }
 
   getIndexPatternTags = (indexPattern) => {

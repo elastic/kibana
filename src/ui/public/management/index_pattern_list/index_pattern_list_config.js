@@ -20,12 +20,6 @@
 export class IndexPatternListConfig {
   static key = 'default';
 
-  constructor({
-    enableScriptedFields = true
-  }) {
-    this.enableScriptedFields = enableScriptedFields;
-  }
-
   getIndexPatternTags = () => {
     return [];
   }
@@ -35,6 +29,6 @@ export class IndexPatternListConfig {
   }
 
   areScriptedFieldsEnabled = () => {
-    return this.enableScriptedFields;
+    return true;
   }
 }

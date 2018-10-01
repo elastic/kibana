@@ -12,13 +12,6 @@ function isRollup(indexPattern) {
 export class RollupIndexPatternListConfig extends IndexPatternListConfig {
   static key = 'rollup';
 
-  constructor(options) {
-    super({
-      enableScriptedFields: false,
-      ...options,
-    });
-  }
-
   getIndexPatternTags = (indexPattern) => {
     return isRollup(indexPattern) ? [{
       key: 'rollup',
@@ -50,5 +43,9 @@ export class RollupIndexPatternListConfig extends IndexPatternListConfig {
           return aggName;
       }
     }));
+  }
+
+  areScriptedFieldsEnabled = (indexPattern) => {
+    return !isRollup(indexPattern);
   }
 }
