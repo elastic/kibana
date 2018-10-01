@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
 
@@ -29,10 +30,15 @@ export default new Chainable('title', {
     {
       name: 'title',
       types: ['string', 'null'],
-      help: 'Title for the plot.'
+      help: i18n.translate('timelion.help.functions.title.titleArg', {
+        defaultMessage: 'Title for the plot.',
+      }),
     }
   ],
-  help: 'Adds a title to the top of the plot. If called on more than 1 seriesList the last call will be used.',
+  help: i18n.translate('timelion.help.functions.title.description', {
+    defaultMessage:
+      'Adds a title to the top of the plot. If called on more than 1 seriesList the last call will be used.',
+  }),
   fn: function hideFn(args) {
     return alter(args, function (eachSeries, title) {
       eachSeries._title = title;

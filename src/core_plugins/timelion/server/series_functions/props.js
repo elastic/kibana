@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
 import _ from 'lodash';
@@ -49,7 +50,9 @@ export default new Chainable('props', {
     {
       name: 'global',
       types: ['boolean', 'null'],
-      help: 'Set props on the seriesList vs on each series'
+      help: i18n.translate('timelion.help.functions.props.globalArg', {
+        defaultMessage: 'Set props on the seriesList vs on each series',
+      }),
     }
   ],
   extended: {
@@ -60,7 +63,13 @@ export default new Chainable('props', {
   },
   // extended means you can pass arguments that aren't listed. They just won't be in the ordered array
   // They will be passed as args._extended:{}
-  help: 'Use at your own risk, sets arbitrary properties on the series. For example .props(label=bears!)',
+  help: i18n.translate('timelion.help.functions.props.description', {
+    defaultMessage:
+      'Use at your own risk, sets arbitrary properties on the series. For example {example}',
+    values: {
+      example: '.props(label=bears!)',
+    },
+  }),
   fn: function firstFn(args) {
     const properties = unflatten(_.omit(args.byName, 'inputSeries', 'global'));
 

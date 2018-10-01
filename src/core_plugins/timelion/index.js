@@ -103,7 +103,8 @@ export default function (kibana) {
           description: `<em>[experimental]</em> Your API key from www.quandl.com`,
           category: ['timelion'],
         }
-      }
+      },
+      translations: [],
     },
     init: require('./init.js'),
   });

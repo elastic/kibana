@@ -16,14 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register((i18n) => {
   return {
     id: 'timelion',
     title: 'Timelion',
-    description: 'Use an expression language to analyze time series data and visualize the results.',
+    description: i18n('timelion.registerFeature.description', {
+      defaultMessage:
+        'Use an expression language to analyze time series data and visualize the results.',
+    }),
     icon: 'timelionApp',
     path: '/app/timelion',
     showOnHomePage: true,

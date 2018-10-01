@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
@@ -30,11 +31,15 @@ export default new Chainable('log', {
     {
       name: 'base',
       types: ['number'],
-      help: 'Set logarithmic base, 10 by default'
-
+      help: i18n.translate('timelion.help.functions.log.baseArg', {
+        defaultMessage: 'Set logarithmic base, 10 by default',
+      }),
     }
   ],
-  help: 'Return the logarithm value of each value in the series list (default base: 10)',
+  help: i18n.translate('timelion.help.functions.log.description', {
+    defaultMessage:
+      'Return the logarithm value of each value in the series list (default base: 10)',
+  }),
   fn: function logFn(args) {
     const config = args.byName;
     return alter(args, function (eachSeries) {

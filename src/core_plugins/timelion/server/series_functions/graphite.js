@@ -17,21 +17,30 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import fetch from 'node-fetch';
 import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
-
 
 export default new Datasource ('graphite', {
   args: [
     {
       name: 'metric', // _test-data.users.*.data
       types: ['string'],
-      help: 'Graphite metric to pull, e.g., _test-data.users.*.data'
+      help: i18n.translate('timelion.help.functions.graphite.metricArg', {
+        defaultMessage: 'Graphite metric to pull, e.g., {metricExample}',
+        values: {
+          metricExample: '_test-data.users.*.data',
+        },
+      }),
     }
   ],
-  help: `[experimental] Pull data from graphite. Configure your graphite server in Kibana's Advanced Settings`,
+  help: i18n.translate('timelion.help.functions.graphite.description', {
+    defaultMessage:
+      '[experimental] Pull data from graphite. Configure your graphite server in \
+Kibana\'s Advanced Settings',
+  }),
   fn: function graphite(args, tlConfig) {
 
     const config = args.byName;

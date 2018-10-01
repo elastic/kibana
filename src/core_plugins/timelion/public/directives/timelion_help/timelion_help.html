@@ -1,22 +1,33 @@
 <div class="euiText timHelp">
   <div ng-show="page === 1">
     <div>
-      <h1>Welcome to <strong>Timelion</strong>!</h1>
-      <p>
-        Timelion is the clawing, gnashing, zebra killing, pluggable time
-        series interface for <em>everything</em>. If your datastore can
-        produce a time series, then you have all of the awesome power of
-        Timelion at your disposal. Timelion lets you compare, combine, and
-        combobulate datasets across multiple datasources with one
-        easy-to-master expression syntax. This tutorial focuses on
-        Elasticsearch, but you'll quickly discover that what you learn here
-        applies to any datasource Timelion supports.
-      </p>
-      <p>
-        Ready to get started? Click <strong>Next</strong>. Want to skip the
-        tutorial and view the docs? <a ng-click="setPage(0)">
-        Jump to the function reference</a>.
-      </p>
+      <h1
+        i18n-id="timelion.help.welcome.title"
+        i18n-default-message="Welcome to {strongTimelionLabel}!"
+        i18n-values="{ strongTimelionLabel: '<strong>Timelion</strong>' }"
+      ></h1>
+      <p
+        i18n-id="timelion.help.welcome.content.part1"
+        i18n-default-message="Timelion is the clawing, gnashing, zebra killing, pluggable time
+                              series interface for {openEmTag}everything{closeEmTag}. If your datastore can
+                              produce a time series, then you have all of the awesome power of
+                              Timelion at your disposal. Timelion lets you compare, combine, and
+                              combobulate datasets across multiple datasources with one
+                              easy-to-master expression syntax. This tutorial focuses on
+                              Elasticsearch, but you'll quickly discover that what you learn here
+                              applies to any datasource Timelion supports."
+        i18n-values="{ openEmTag: '<em>', closeEmTag: '</em>' }"
+      ></p>
+      <p
+        i18n-id="timelion.help.welcome.content.part2"
+        i18n-default-message="Ready to get started? Click {openStrongTag}Next{closeStrongTag}.
+                              Want to skip the tutorial and view the docs? {functionReferenceLink}."
+        i18n-values="{
+          openStrongTag: '<strong>',
+          closeStrongTag: '</strong>',
+          functionReferenceLink: translations.welcomeFunctionReferenceLink,
+        }"
+      ></p>
     </div>
     <div class="timHelp__buttons">
 
@@ -24,7 +35,7 @@
         ng-click="opts.dontShowHelp()"
         class="kuiButton kuiButton--hollow"
       >
-        Don't show this again
+        {{translations.dontShowHelpButtonText}}
       </button>
 
 
@@ -32,7 +43,7 @@
         ng-click="setPage(page+1)"
         class="kuiButton kuiButton--primary"
       >
-        Next
+        {{translations.nextButtonText}}
       </button>
 
     </div>
@@ -40,20 +51,30 @@
   <div ng-show="page === 2">
     <div ng-show="!es.valid">
       <div>
-        <h2>First time configuration</h2>
-        <p>
-          If you're using Logstash, you don't need to configure anything to
-          start exploring your log data with Timelion. To search other
-          indices, go to <strong>Management / Kibana / Advanced Settings
-          </strong> and configure the <code>timelion:es.default_index</code>
-          and <code>timelion:es.timefield</code> settings to match your
-          indices.
-        </p>
-        <p>
-          You'll also see some other Timelion settings. For now, you don't need
-          to worry about them. Later, you'll see that you can set most of
-          them on the fly if you need to.
-        </p>
+        <h2
+          i18n-id="timelion.help.configuration.notValid.title"
+          i18n-default-message="First time configuration"
+        ></h2>
+        <p
+          i18n-id="timelion.help.configuration.notValid.part1"
+          i18n-default-message="If you're using Logstash, you don't need to configure anything to
+                                start exploring your log data with Timelion. To search other
+                                indices, go to {openStrongTag}Management / Kibana / Advanced Settings
+                                {closeStrongTag} and configure the {esDefaultIndex}
+                                and {esTimefield} settings to match your indices."
+          i18n-values="{
+            openStrongTag: '<strong>',
+            closeStrongTag: '</strong>',
+            esDefaultIndex: '<code>timelion:es.default_index</code>',
+            esTimefield: '<code>timelion:es.timefield</code>',
+          }"
+        ></p>
+        <p
+          i18n-id="timelion.help.configuration.notValid.part2"
+          i18n-default-message="You'll also see some other Timelion settings. For now, you don't need
+                                to worry about them. Later, you'll see that you can set most of
+                                them on the fly if you need to."
+        ></p>
       </div>
       <div class="timHelp__buttons">
 
@@ -61,74 +82,97 @@
           ng-click="setPage(page-1)"
           class="kuiButton kuiButton--primary"
         >
-          Previous
+          {{translations.previousButtonText}}
         </button>
 
-        <span ng-show="es.invalidCount > 0 && !es.valid">
-          Could not validate Elasticsearch settings:
-          <strong>{{es.invalidReason}}</strong>. Check your Advanced Settings
-          and try again. ({{es.invalidCount}})
-        </span>
+        <span
+          ng-show="es.invalidCount > 0 && !es.valid"
+          i18n-id="timelion.help.configuration.notValid.error"
+          i18n-default-message="Could not validate Elasticsearch settings: {reason}.
+                                Check your Advanced Settings and try again. ({count})"
+          i18n-values="{
+            reason: '<strong>' + es.invalidReason + '</strong>',
+            count: es.invalidCount,
+          }"
+        ></span>
 
         <button
           ng-click="recheckElasticsearch()"
           class="kuiButton kuiButton--primary"
-        >
-          Validate Config
-        </button>
+          i18n-id="timelion.help.configuration.notValid.validateButton"
+          i18n-default-message="Validate Config"
+        ></button>
 
       </div>
     </div>
     <div ng-show="es.valid">
       <div>
-        <h2>Good news, Elasticsearch is configured correctly!</h2>
-        <p>
-          We validated your default index and your timefield and everything
-          looks ok. We found data from <strong>{{es.stats.min}}</strong> to
-          <strong>{{es.stats.max}}</strong>. You're probably all set. If this
-          doesn't look right, see <a ng-click="es.valid = false">First time
-          configuration</a> for information about configuring the Elasticsearch
-          datasource.
-        </p>
-        <p>
-          You should already see one chart, but you might need to make a
-          couple adjustments before you see any interesting data:
-        </p>
+        <h2
+          i18n-id="timelion.help.configuration.valid.title"
+          i18n-default-message="Good news, Elasticsearch is configured correctly!"
+        ></h2>
+        <p
+          i18n-id="timelion.help.configuration.valid.part1"
+          i18n-default-message="We validated your default index and your timefield and everything
+                                looks ok. We found data from {statsMin} to {statsMax}.
+                                You're probably all set. If this doesn't look right,
+                                see {firstTimeConfigurationLink} for information about configuring
+                                the Elasticsearch datasource."
+          i18n-values="{
+            statsMin: '<strong>' + es.stats.min + '</strong>',
+            statsMax: '<strong>' + es.stats.max + '</strong>',
+            firstTimeConfigurationLink: translations.firstTimeConfigurationLink,
+          }"
+        ></p>
+        <p
+          i18n-id="timelion.help.configuration.valid.part2"
+          i18n-default-message="You should already see one chart, but you might need to make a
+                                couple adjustments before you see any interesting data:"
+        ></p>
         <ul>
           <li>
-            <strong>Intervals</strong>
-            <p>
-              The interval selector at the right of the input bar lets you
-              control the sampling frequency. It's currently set to
-              <code>{{state.interval}}</code>.
-              <span ng-show="state.interval == 'auto'">
-                <strong>You're all set!</strong>
-              </span>
-              <span ng-show="state.interval != 'auto'">
-                Set it to <code>auto </code> to let Timelion choose an
-                appropriate interval.
-              </span>
-              If Timelion thinks your combination of time range and interval
-              will produce too many data points, it throws an error. You can
-              adjust that limit by configuring <code>timelion:max_buckets</code>
-              in <strong>Management/Kibana/Advanced Settings</strong>.
-            </p>
+            <strong
+              i18n-id="timelion.help.configuration.valid.intervals.title"
+              i18n-default-message="Intervals"
+            ></strong>
+            <p
+              i18n-id="timelion.help.configuration.valid.intervals.content"
+              i18n-default-message="The interval selector at the right of the input bar lets you
+                                    control the sampling frequency. It's currently set to {interval}.
+                                    {intervalIsAutoMessage} {intervalIsNotAutoMessage}
+                                    If Timelion thinks your combination of time range and interval
+                                    will produce too many data points, it throws an error.
+                                    You can adjust that limit by configuring {maxBuckets} in
+                                    {openStrongTag}Management/Kibana/Advanced Settings{closeStrongTag}."
+              i18n-values="{
+                interval: '<code>' + state.interval + '</code>',
+                maxBuckets: '<code>timelion:max_buckets</code>',
+                openStrongTag: '<strong>',
+                closeStrongTag: '</strong>',
+                intervalIsAutoMessage: translations.intervalIsAutoMessage,
+                intervalIsNotAutoMessage: translations.intervalIsNotAutoMessage,
+              }"
+            ></p>
           </li>
           <li>
-            <strong>Time range</strong>
-            <p>
-              Use the timepicker in the
-              Kibana toolbar to select the time period that contains the
-              data you want to visualize. Make sure you select a time
-              period that includes all or part of the time range shown
-              above.
-            </p>
+            <strong
+              i18n-id="timelion.help.configuration.valid.timeRange.title"
+              i18n-default-message="Time range"
+            ></strong>
+            <p
+              i18n-id="timelion.help.configuration.valid.timeRange.content"
+              i18n-default-message="Use the timepicker in the Kibana toolbar to select
+                                    the time period that contains the data you want to visualize.
+                                    Make sure you select a time period that includes all or part of
+                                    the time range shown above."
+            ></p>
           </li>
         </ul>
-        <p>
-          Now, you should see a line chart that displays a count of your
-          data points over time.
-        </p>
+        <p
+          i18n-id="timelion.help.configuration.valid.part3"
+          i18n-default-message="Now, you should see a line chart that displays a count of your
+                                data points over time."
+        ></p>
       </div>
       <div class="timHelp__buttons">
 
@@ -136,7 +180,7 @@
           ng-click="setPage(page-1)"
           class="kuiButton kuiButton--primary"
         >
-          Previous
+          {{translations.previousButtonText}}
         </button>
 
 
@@ -144,7 +188,7 @@
           ng-click="setPage(page+1)"
           class="kuiButton kuiButton--primary"
         >
-          Next
+          {{translations.nextButtonText}}
         </button>
 
       </div>
@@ -152,61 +196,89 @@
   </div>
   <div ng-show="page === 3">
     <div>
-      <h2>Querying the Elasticsearch datasource</h2>
-      <p>
-        Now that we've validated that you have a working Elasticsearch
-        datasource, you can start submitting queries. For starters,
-        enter <code>.es(*)</code> in the input bar and hit enter.
-      </p>
-      <p>
-        This says <em>hey Elasticsearch, find everything in my default
-        index</em>. If you want to find a subset, you could enter something
-        like <code>.es(html)</code> to count events that match <em>html</em>,
-        or <code>.es('user:bob AND bytes:>100')</code> to find events
-        that contain <em>bob</em> in the <code>user</code> field and have a
-        <code>bytes</code> field that is greater than 100. Note that this query
-        is enclosed in single quotes&mdash;that's because it contains
-        spaces. You can enter any
-        <a
-           href="https://www.elastic.co/guide/en/elasticsearch/reference/5.1/query-dsl-query-string-query.html#query-string-syntax"
-           target="_blank"
-           rel="noopener noreferrer"
-        >
-          Lucene query string
-        </a>
-        as the first argument to the <code>.es()</code> function.
-      </p>
-      <h4>Passing arguments</h4>
-      <p>
-        Timelion has a number of shortcuts that make it easy to do common
-        things. One is that for simple arguments that don't contain spaces or
-        special characters, you don't need to use quotes. Many functions also
-        have defaults. For example, <code>.es()</code> and <code>.es(*)</code>
-        do the same thing. Arguments also have names, so you don't have to
-        specify them in a specific order. For example, you can enter
-        <code>.es(index='logstash-*', q='*')</code> to tell the
-        Elasticsearch datasource <em>use * as the q (query) for the
-        logstash-* index</em>.
-      </p>
-      <h4>Beyond count</h4>
-      <p>
-        Counting events is all well and good, but the Elasticsearch datasource
-        also supports any
-        <a
-           href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics.html"
-           target="_blank"
-           rel="noopener noreferrer"
-        >
-          Elasticsearch metric aggregation
-        </a>
-        that returns a single value. Some of the most useful are
-        <code>min</code>, <code>max</code>, <code>avg</code>, <code>sum</code>,
-        and <code>cardinality</code>. Let's say you want a unique count of the
-        <code>src_ip</code> field. Simply use the <code>cardinality</code>
-        metric: <code>.es(*, metric='cardinality:src_ip')</code>. To get the
-        average of the <code>bytes</code> field, you can use the
-        <code>avg</code> metric: <code>.es(metric='avg:bytes')</code>.
-      </p>
+      <h2
+        i18n-id="timelion.help.querying.title"
+        i18n-default-message="Querying the Elasticsearch datasource"
+      ></h2>
+      <p
+        i18n-id="timelion.help.querying.part1"
+        i18n-default-message="Now that we've validated that you have a working Elasticsearch
+                              datasource, you can start submitting queries. For starters,
+                              enter {esPattern} in the input bar and hit enter."
+        i18n-values="{
+          esPattern: '<code>.es(*)</code>',
+        }"
+      ></p>
+      <p
+        i18n-id="timelion.help.querying.part2"
+        i18n-default-message="This says {openEmTag}hey Elasticsearch, find everything in my default
+                              index{closeEmTag}. If you want to find a subset, you could enter something
+                              like {htmlQuery} to count events that match {html},
+                              or {bobQuery} to find events that contain {bob} in the {user} field and have a
+                              {bytes} field that is greater than 100. Note that this query
+                              is enclosed in single quotes&mdash;that's because it contains
+                              spaces. You can enter any
+                              {luceneQueryLinkMessage}
+                              as the first argument to the {esQuery} function."
+        i18n-values="{
+          openEmTag: '<em>',
+          closeEmTag: '</em>',
+          html: '<em>html</em>',
+          htmlQuery: '<code>.es(html)</code>',
+          bobQuery: '<code>.es(\'user:bob AND bytes:>100\')</code>',
+          bob: '<em>bob</em>',
+          user: '<code>user</code>',
+          bytes: '<code>bytes</code>',
+          esQuery: '<code>.es()</code>',
+          luceneQueryLinkMessage: translations.luceneQueryLinkMessage,
+        }"
+      ></p>
+      <h4
+        i18n-id="timelion.help.querying.passingArguments.title"
+        i18n-default-message="Passing arguments"
+      ></h4>
+      <p
+        i18n-id="timelion.help.querying.passingArguments.content"
+        i18n-default-message="Timelion has a number of shortcuts that make it easy to do common things.
+                              One is that for simple arguments that don't contain spaces or special
+                              characters, you don't need to use quotes. Many functions also have defaults.
+                              For example, {esEmptyQuery} and {esStarQuery} do the same thing.
+                              Arguments also have names, so you don't have to specify them in a specific order.
+                              For example, you can enter {esLogstashQuery} to tell the Elasticsearch datasource
+                              {openEmTag}use * as the q (query) for the logstash-* index{closeEmTag}."
+        i18n-values="{
+          esEmptyQuery: '<code>.es()</code>',
+          esStarQuery: '<code>.es(*)</code>',
+          esLogstashQuery: '<code>.es(index=\'logstash-*\', q=\'*\')</code>',
+          openEmTag: '<em>',
+          closeEmTag: '</em>',
+        }"
+      ></p>
+      <h4
+        i18n-id="timelion.help.querying.count.title"
+        i18n-default-message="Beyond count"
+      ></h4>
+      <p
+        i18n-id="timelion.help.querying.count.content"
+        i18n-default-message="Counting events is all well and good, but the Elasticsearch datasource
+                              also supports any {metricAggregationLinkMessage} that returns a single value.
+                              Some of the most useful are {min}, {max}, {avg}, {sum}, and {cardinality}.
+                              Let's say you want a unique count of the {srcIp} field.
+                              Simply use the {cardinality} metric: {esCardinalityQuery}. To get the
+                              average of the {bytes} field, you can use the {avg} metric: {esAvgQuery}."
+        i18n-values="{
+          metricAggregationLinkMessage: translations.metricAggregationLinkMessage,
+          min: '<code>min</code>',
+          max: '<code>max</code>',
+          avg: '<code>avg</code>',
+          sum: '<code>sum</code>',
+          cardinality: '<code>cardinality</code>',
+          bytes: '<code>bytes</code>',
+          srcIp: '<code>src_ip</code>',
+          esCardinalityQuery: '<code>.es(*, metric=\'cardinality:src_ip\')</code>',
+          esAvgQuery: '<code>.es(metric=\'avg:bytes\')</code>',
+        }"
+      ></p>
     </div>
     <div class="timHelp__buttons">
 
@@ -214,7 +286,7 @@
         ng-click="setPage(page-1)"
         class="kuiButton kuiButton--primary"
       >
-        Previous
+        {{translations.previousButtonText}}
       </button>
 
 
@@ -222,7 +294,7 @@
         ng-click="setPage(page+1)"
         class="kuiButton kuiButton--primary"
       >
-        Next
+        {{translations.nextButtonText}}
       </button>
 
     </div>
@@ -230,61 +302,94 @@
 
   <div ng-show="page === 4">
     <div>
-      <h2>Expressing yourself with expressions</h2>
-      <p>
-        Every  expression starts with a datasource function. From there, you
-        can append new functions to the datasource to transform and augment
-        it.
-      </p>
-      <p>
-        By the way, from here on out you probably know more about your data
-        than we do. Feel free to replace the sample queries with something
-        more meaningful!
-      </p>
-      <p>
-        We're going to experiment, so click <strong>Add</strong> in the Kibana
-        toolbar to add another chart or three. Then, select a chart, copy
-        one of the following expressions, paste it into the input bar,
-        and hit enter. Rinse, repeat to try out the other expressions.
-      </p>
+      <h2
+        i18n-id="timelion.help.expressions.title"
+        i18n-default-message="Expressing yourself with expressions"
+      ></h2>
+      <p
+        i18n-id="timelion.help.expressions.part1"
+        i18n-default-message="Every  expression starts with a datasource function. From there, you
+                              can append new functions to the datasource to transform and augment it."
+      ></p>
+      <p
+        i18n-id="timelion.help.expressions.part2"
+        i18n-default-message="By the way, from here on out you probably know more about your data
+                              than we do. Feel free to replace the sample queries with something
+                              more meaningful!"
+      ></p>
+      <p
+        i18n-id="timelion.help.expressions.part3"
+        i18n-default-message="We're going to experiment, so click {openStrongTag}Add{closeStrongTag}
+                              in the Kibana toolbar to add another chart or three. Then, select a chart,
+                              copy one of the following expressions, paste it into the input bar,
+                              and hit enter. Rinse, repeat to try out the other expressions."
+        i18n-values="{
+          openStrongTag: '<strong>',
+          closeStrongTag: '</strong>',
+        }"
+      ></p>
       <table class="table table-condensed table-striped">
         <tr>
           <td><code>.es(*), .es(US)</code></td>
-          <td><strong>Double the fun.</strong> Two expressions on the same
-            chart.</td>
+          <td
+            i18n-id="timelion.help.expressions.examples.twoExpressions"
+            i18n-default-message="{openStrongTag}Double the fun.{closeStrongTag}
+                                  Two expressions on the same chart."
+            i18n-values="{
+              openStrongTag: '<strong>',
+              closeStrongTag: '</strong>',
+            }"
+          ></td>
         </tr>
         <tr>
           <td><code>.es(*).color(#f66), .es(US).bars(1)</code></td>
-          <td>
-            <strong>Custom styling.</strong> Colorizes the first series red
-            and uses 1 pixel wide bars for the second series.
-          </td>
+          <td
+            i18n-id="timelion.help.expressions.examples.customStyling"
+            i18n-default-message="{openStrongTag}Custom styling.{closeStrongTag} Colorizes the first
+                                  series red and uses 1 pixel wide bars for the second series."
+            i18n-values="{
+              openStrongTag: '<strong>',
+              closeStrongTag: '</strong>',
+            }"
+          ></td>
         </tr>
         <tr>
           <td>
             <code>.es(*).color(#f66).lines(fill=3),
             .es(US).bars(1).points(radius=3, weight=1)</code>
           </td>
-          <td>
-            <strong>Named arguments.</strong> Forget trying to remember what
-            order you need to specify arguments in, use named arguments to make
-            the expressions easier to read and write.
-          </td>
+          <td
+            i18n-id="timelion.help.expressions.examples.namedArguments"
+            i18n-default-message="{openStrongTag}Named arguments.{closeStrongTag} Forget trying to
+                                  remember what order you need to specify arguments in, use named
+                                  arguments to make the expressions easier to read and write."
+            i18n-values="{
+              openStrongTag: '<strong>',
+              closeStrongTag: '</strong>',
+            }"
+          ></td>
         </tr>
         <tr>
           <td><code>(.es(*), .es(GB)).points()</code></td>
-          <td>
-            <strong>Grouped expressions.</strong> You can also chain groups
-            of expressions to functions. Here, both series are shown as
-            points instead of lines.
-          </td>
+          <td
+            i18n-id="timelion.help.expressions.examples.groupedExpressions"
+            i18n-default-message="{openStrongTag}Grouped expressions.{closeStrongTag} You can also
+                                  chain groups of expressions to functions. Here, both series are
+                                  shown as points instead of lines."
+            i18n-values="{
+              openStrongTag: '<strong>',
+              closeStrongTag: '</strong>',
+            }"
+          ></td>
         </tr>
       </table>
-      <p>
-        Timelion provides additional view transformation functions you can use
-        to customize the appearance of your charts. For the complete list, see
-        the <a ng-click="setPage(0)">Function reference</a>.
-      </p>
+      <p
+        i18n-id="timelion.help.expressions.part4"
+        i18n-default-message="Timelion provides additional view transformation functions you can use
+                              to customize the appearance of your charts. For the complete list, see
+                              the {functionReferenceLink}."
+        i18n-values="{ functionReferenceLink: translations.functionReferenceLink }"
+      ></p>
     </div>
     <div class="timHelp__buttons">
 
@@ -292,7 +397,7 @@
         ng-click="setPage(page-1)"
         class="kuiButton kuiButton--primary"
       >
-        Previous
+        {{translations.previousButtonText}}
       </button>
 
 
@@ -300,51 +405,75 @@
         ng-click="setPage(page+1)"
         class="kuiButton kuiButton--primary"
       >
-        Next
+        {{translations.nextButtonText}}
       </button>
 
     </div>
   </div>
   <div ng-show="page === 5">
     <div>
-      <h2>Transforming your data: the real fun begins!</h2>
-      <p>
-        Now that you've mastered the basics, it's time to unleash the power of
-        Timelion. Let's figure out what percentage some subset of our data
-        represents of the whole, over time. For example, what percentage of
-        our web traffic comes from the US?
-      </p>
-      <p>
-        First, we need to find all events that contain US:
-        <code>.es('US')</code>.
-      </p>
-      <p>
-        Next, we want to calculate the ratio of US events to the whole. To
-        divide <code>'US'</code> by everything, we can use the
-        <code>divide</code> function: <code>.es('US').divide(.es())</code>.
-      </p>
-      <p>
-        Not bad, but this gives us a number between 0 and 1. To convert it
-        to a percentage, simply multiply by 100:
-        <code>.es('US').divide(.es()).multiply(100)</code>.
-      </p>
-      <p>
-        Now we know what percentage of our traffic comes from the US, and
-        can see how it has changed over time!
-        Timelion has a number of built-in arithmetic functions, such as
-        <code>sum</code>, <code>subtract</code>, <code>multiply</code>, and
-        <code>divide</code>. Many of these can take a series or a number.
-        There are also other useful data transformation functions, such as
-        <code>movingaverage</code>, <code>abs</code>, and
-        <code>derivative</code>.
-      </p>
-      <p>Now that you're familiar with the syntax, refer to the
-        <a ng-click="setPage(0)">Function reference</a> to see
-        how to use all of the available Timelion functions. You can view
-        the reference at any time by clicking <strong>Docs</strong>
-        in the Kibana toolbar. To get back to this tutorial, click the
-        <strong>Tutorial</strong> link at the top of the reference.
-      </p>
+      <h2
+        i18n-id="timelion.help.dataTransforming.title"
+        i18n-default-message="Transforming your data: the real fun begins!"
+      ></h2>
+      <p
+        i18n-id="timelion.help.dataTransforming.part1"
+        i18n-default-message="Now that you've mastered the basics, it's time to unleash the power of
+                              Timelion. Let's figure out what percentage some subset of our data
+                              represents of the whole, over time. For example, what percentage of
+                              our web traffic comes from the US?"
+      ></p>
+      <p
+        i18n-id="timelion.help.dataTransforming.part2"
+        i18n-default-message="First, we need to find all events that contain US: {esUsQuery}."
+        i18n-values="{ esUsQuery: '<code>.es(\'US\')</code>' }"
+      ></p>
+      <p
+        i18n-id="timelion.help.dataTransforming.part3"
+        i18n-default-message="Next, we want to calculate the ratio of US events to the whole.
+                              To divide {us} by everything, we can use the {divide} function:
+                              {divideDataQuery}."
+        i18n-values="{
+          us: '<code>\'US\'</code>',
+          divide: '<code>divide</code>',
+          divideDataQuery: '<code>.es(\'US\').divide(.es())</code>',
+        }"
+      ></p>
+      <p
+        i18n-id="timelion.help.dataTransforming.part4"
+        i18n-default-message="Not bad, but this gives us a number between 0 and 1. To convert it
+                              to a percentage, simply multiply by 100: {multiplyDataQuery}."
+        i18n-values="{
+          multiplyDataQuery: '<code>.es(\'US\').divide(.es()).multiply(100)</code>',
+        }"
+      ></p>
+      <p
+        i18n-id="timelion.help.dataTransforming.part5"
+        i18n-default-message="Now we know what percentage of our traffic comes from the US, and
+                              can see how it has changed over time! Timelion has a number of
+                              built-in arithmetic functions, such as {sum}, {subtract}, {multiply},
+                              and {divide}. Many of these can take a series or a number. There are
+                              also other useful data transformation functions, such as
+                              {movingaverage}, {abs}, and {derivative}."
+        i18n-values="{
+          sum: '<code>sum</code>',
+          subtract: '<code>subtract</code>',
+          multiply: '<code>multiply</code>',
+          divide: '<code>divide</code>',
+          movingaverage: '<code>movingaverage</code>',
+          abs: '<code>abs</code>',
+          derivative: '<code>derivative</code>',
+        }"
+      ></p>
+      <p
+        i18n-id="timelion.help.dataTransforming.part6"
+        i18n-default-message="Now that you're familiar with the syntax, refer to the
+                              {functionReferenceLink} to see how to use all of the available
+                              Timelion functions. You can view the reference at any time by clicking
+                              \{Docs\} in the Kibana toolbar. To get back to this tutorial, click the
+                              \{Tutorial\} link at the top of the reference."
+        i18n-values="{ functionReferenceLink: translations.functionReferenceLink }"
+      ></p>
     </div>
     <div class="timHelp__buttons">
 
@@ -352,7 +481,7 @@
         ng-click="setPage(page-1)"
         class="kuiButton kuiButton--primary"
       >
-        Previous
+        {{translations.previousButtonText}}
       </button>
 
 
@@ -361,30 +490,29 @@
         ng-click="opts.dontShowHelp()"
         class="kuiButton kuiButton--hollow"
       >
-        Don't show this again
+        {{translations.dontShowHelpButtonText}}
       </button>
 
     </div>
   </div>
 </div>
 <div ng-show="page === 0">
-  <h2 class="kuiLocalDropdownTitle">
-    Help
-  </h2>
+  <h2
+    class="kuiLocalDropdownTitle"
+    i18n-id="timelion.help.mainPage.title"
+    i18n-default-message="Help"
+  ></h2>
 
   <tabset>
-    <tab heading="Function reference">
+    <tab heading="{{ ::'timelion.help.mainPage.functionReference.title' | i18n: { defaultMessage: 'Function reference' } }}">
       <div class="list-group-item list-group-item--noBorder">
-        <div class="kuiLocalDropdownHelpText">
-          Click any function for more information. Just getting started?
-          <a
-            class="kuiLink"
-            ng-click="setPage(1)"
-            kbn-accessible-click
-          >
-            Check out the tutorial
-          </a>.
-        </div>
+        <div
+          class="kuiLocalDropdownHelpText"
+          i18n-id="timelion.help.mainPage.functionReference.gettingStartedMessage"
+          i18n-default-message="Click any function for more information.
+                                Just getting started? {welcomePageLink}."
+          i18n-values="{ welcomePageLink: translations.welcomePageLink }"
+        ></div>
 
         <div class="timHelp__functions">
           <table class="table table-condensed table-bordered">
@@ -409,9 +537,21 @@
                     ng-show="function.args.length > (function.chainable ? 1: 0)"
                   >
                     <thead>
-                      <th scope="col">Argument Name</th>
-                      <th scope="col">Accepted Types</th>
-                      <th scope="col">Information</th>
+                      <th
+                        scope="col"
+                        i18n-id="timelion.help.mainPage.functionReference.detailsTable.argumentNameColumn"
+                        i18n-default-message="Argument Name"
+                      ></th>
+                      <th
+                        scope="col"
+                        i18n-id="timelion.help.mainPage.functionReference.detailsTable.acceptedTypesColumn"
+                        i18n-default-message="Accepted Types"
+                      ></th>
+                      <th
+                        scope="col"
+                        i18n-id="timelion.help.mainPage.functionReference.detailsTable.informationColumn"
+                        i18n-default-message="Information"
+                      ></th>
                     </thead>
                     <tr
                       ng-repeat="arg in function.args"
@@ -423,10 +563,11 @@
                     </tr>
                   </table>
                   <div ng-hide="function.args.length > (function.chainable ? 1: 0)">
-                    <em>
-                      This function does not accept any arguments.
-                      Well that's simple, isn't it?
-                    </em>
+                    <em
+                      i18n-id="timelion.help.mainPage.functionReference.noArgumentsFunctionMessage"
+                      i18n-default-message="This function does not accept any arguments.
+                      Well that's simple, isn't it?"
+                    ></em>
                   </div>
                 </div>
               </td>
@@ -436,26 +577,50 @@
       </div>
     </tab>
 
-    <tab heading="Keyboard tips">
+    <tab heading="{{ ::'timelion.help.mainPage.keyboardTips.title' | i18n: { defaultMessage: 'Keyboard tips' } }}">
       <div class="list-group-item list-group-item--noBorder">
         <!-- General editing tips -->
         <dl class="dl-horizontal">
-          <dd><strong>General editing</strong></dd>
+          <dd>
+            <strong
+              i18n-id="timelion.help.mainPage.keyboardTips.generalEditing.title"
+              i18n-default-message="General editing"
+            ></strong></dd>
           <dt></dt>
           <dt>Ctrl/Cmd + Enter</dt>
-          <dd>Submit request</dd>
+          <dd
+            i18n-id="timelion.help.mainPage.keyboardTips.generalEditing.submitRequest"
+            i18n-default-message="Submit request"
+          ></dd>
         </dl>
 
         <!-- Auto complete tips -->
         <dl class="dl-horizontal">
           <dt></dt>
-          <dd><strong>When auto-complete is visible</strong></dd>
-          <dt>Down arrow</dt>
-          <dd>Switch focus to auto-complete menu. Use arrows to further select a term</dd>
+          <dd>
+            <strong
+              i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.title"
+              i18n-default-message="When auto-complete is visible"
+            ></strong>
+          </dd>
+          <dt
+            i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.downArrow.key"
+            i18n-default-message="Down arrow"
+          ></dt>
+          <dd
+            i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.downArrow.description"
+            i18n-default-message="Switch focus to auto-complete menu. Use arrows to further select a term"
+          ></dd>
           <dt>Enter/Tab</dt>
-          <dd>Select the currently selected or the top most term in auto-complete menu</dd>
+          <dd
+            i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.enterTab"
+            i18n-default-message="Select the currently selected or the top most term in auto-complete menu"
+          ></dd>
           <dt>Esc</dt>
-          <dd>Close auto-complete menu</dd>
+          <dd
+            i18n-id="timelion.help.mainPage.keyboardTips.autoComplete.esc"
+            i18n-default-message="Close auto-complete menu"
+          ></dd>
         </dl>
       </div>
     </tab>

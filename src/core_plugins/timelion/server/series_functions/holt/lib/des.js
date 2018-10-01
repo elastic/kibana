@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
 export default function des(points, alpha, beta) {
@@ -27,7 +28,11 @@ export default function des(points, alpha, beta) {
   let unknownCount = 0;
 
   if (points.length < 2) {
-    throw new Error ('You need at least 2 points to use double exponential smoothing');
+    throw new Error(
+      i18n.translate('timelion.serverSideErrors.holtFunction.notEnoughPoints', {
+        defaultMessage: 'You need at least 2 points to use double exponential smoothing',
+      }),
+    );
   }
 
   const smoothedPoints = _.map(points, (point, i) => {

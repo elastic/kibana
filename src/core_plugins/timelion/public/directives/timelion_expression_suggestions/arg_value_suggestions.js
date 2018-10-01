@@ -79,13 +79,27 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
       metric: async function (partial, functionArgs) {
         if (!partial || !partial.includes(':')) {
           return [
-            { name: 'avg:' },
-            { name: 'cardinality:' },
-            { name: 'count' },
-            { name: 'max:' },
-            { name: 'min:' },
-            { name: 'percentiles:' },
-            { name: 'sum:' }
+            {
+              name: 'avg:',
+            },
+            {
+              name: 'cardinality:',
+            },
+            {
+              name: 'count',
+            },
+            {
+              name: 'max:',
+            },
+            {
+              name: 'min:',
+            },
+            {
+              name: 'percentiles:',
+            },
+            {
+              name: 'sum:',
+            },
           ];
         }
 

@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 // Only applies to already resolved arguments
 export default function indexArguments(functionDef, orderedArgs) {
@@ -26,7 +27,16 @@ export default function indexArguments(functionDef, orderedArgs) {
 
   // This almost certainly is not required
   const allowedLength = functionDef.extended ? functionDef.args.length + 2 : functionDef.args.length;
-  if (orderedArgs.length > allowedLength) throw new Error ('Too many arguments passed to: ' + functionDef.name);
+  if (orderedArgs.length > allowedLength) {
+    throw new Error (
+      i18n.translate('timelion.serverSideErrors.argumentsOverflow', {
+        defaultMessage: 'Too many arguments passed to: {functionName}',
+        values: {
+          functionName: functionDef.name,
+        },
+      })
+    );
+  }
 
   const indexedArgs = {};
   // Check and index each known argument

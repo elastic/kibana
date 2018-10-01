@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
@@ -30,15 +31,21 @@ export default new Chainable('range', {
     {
       name: 'min',
       types: ['number'],
-      help: 'New minimum value'
+      help: i18n.translate('timelion.help.functions.range.minArg', {
+        defaultMessage: 'New minimum value',
+      }),
     },
     {
       name: 'max',
       types: ['number'],
-      help: 'New maximum value'
+      help: i18n.translate('timelion.help.functions.range.maxArg', {
+        defaultMessage: 'New maximum value',
+      }),
     }
   ],
-  help: 'Changes the max and min of a series while keeping the same shape',
+  help: i18n.translate('timelion.help.functions.range.description', {
+    defaultMessage: 'Changes the max and min of a series while keeping the same shape',
+  }),
   fn: function range(args) {
     return alter(args, function (eachSeries) {
       const values = _.map(eachSeries.data, 1);

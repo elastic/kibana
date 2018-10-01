@@ -42,7 +42,7 @@ app.directive('timelionInterval', function ($compile, $timeout) {
         '1w': '1 week',
         '1M': '1 month',
         '1y': '1 year',
-        'other': 'other'
+        'other': 'other',
       };
 
       $scope.$watch('model', function (newVal, oldVal) {

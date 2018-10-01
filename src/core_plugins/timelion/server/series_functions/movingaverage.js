@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
@@ -34,14 +35,23 @@ export default new Chainable('movingaverage', {
     {
       name: 'window',
       types: ['number', 'string'],
-      help: 'Number of points, or a date math expression (eg 1d, 1M) to average over. ' +
-      'If a date math expression is specified, the function will get as close as possible given the currently select interval' +
-      'If the date math expression is not evenly divisible by the interval the results may appear abnormal.'
+      help: i18n.translate('timelion.help.functions.movingaverage.windowArg', {
+        defaultMessage:
+          'Number of points, or a date math expression (eg 1d, 1M) to average over. If a date math expression \
+is specified, the function will get as close as possible given the currently select interval. \
+If the date math expression is not evenly divisible by the interval the results may appear abnormal.',
+      }),
     },
     {
       name: 'position',
       types: ['string', 'null'],
-      help: `Position of the averaged points relative to the result time. One of: ${validPositions.join(', ')}`,
+      help: i18n.translate('timelion.help.functions.movingaverage.positionArg', {
+        defaultMessage:
+          'Position of the averaged points relative to the result time. One of: {validPositions}',
+        values: {
+          validPositions: validPositions.join(', '),
+        },
+      }),
       suggestions: validPositions.map(position => {
         const suggestion = { name: position };
         if (position === defaultPosition) {
@@ -52,7 +62,10 @@ export default new Chainable('movingaverage', {
     }
   ],
   aliases: ['mvavg'],
-  help: 'Calculate the moving average over a given window. Nice for smoothing noisy series',
+  help: i18n.translate('timelion.help.functions.movingaverage.description', {
+    defaultMessage:
+      'Calculate the moving average over a given window. Nice for smoothing noisy series',
+  }),
   fn: function movingaverageFn(args, tlConfig) {
     return alter(args, function (eachSeries, _window, _position) {
 
@@ -69,7 +82,16 @@ export default new Chainable('movingaverage', {
       }
 
       _position = _position || defaultPosition;
-      if (!_.contains(validPositions, _position)) throw new Error('Valid positions are: ' + validPositions.join(', '));
+      if (!_.contains(validPositions, _position)) {
+        throw new Error(
+          i18n.translate('timelion.serverSideErrors.movingaverageFunction.notValidPosition', {
+            defaultMessage: 'Valid positions are: {validPositions}',
+            values: {
+              validPositions: validPositions.join(', '),
+            },
+          })
+        );
+      }
 
       const pairs = eachSeries.data;
       const pairsLen = pairs.length;

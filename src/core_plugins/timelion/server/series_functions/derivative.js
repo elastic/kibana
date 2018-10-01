@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
@@ -28,7 +29,9 @@ export default new Chainable('derivative', {
       types: ['seriesList']
     }
   ],
-  help: 'Plot the change in values over time.',
+  help: i18n.translate('timelion.help.functions.derivative.description', {
+    defaultMessage: 'Plot the change in values over time.',
+  }),
   fn: function derivativeFn(args) {
     return alter(args, function (eachSeries) {
       const pairs = eachSeries.data;

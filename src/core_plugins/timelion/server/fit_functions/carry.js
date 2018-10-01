@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 // Upsampling of non-cumulative sets
 // Good: average, min, max
@@ -27,7 +28,11 @@ import _ from 'lodash';
 export default function carry(dataTuples, targetTuples) {
 
   if (dataTuples.length > targetTuples.length) {
-    throw new Error (`Don't use the 'carry' fit method to down sample, use 'scale' or 'average'`);
+    throw new Error (
+      i18n.translate('timelion.fitFunctions.carry.downSampleError', {
+        defaultMessage: 'Don\'t use the \'carry\' fit method to down sample, use \'scale\' or \'average\'',
+      })
+    );
   }
 
   let currentCarry = dataTuples[0][1];

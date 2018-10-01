@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
 import tinygradient from 'tinygradient';
@@ -30,11 +31,16 @@ export default new Chainable('color', {
     {
       name: 'color',
       types: ['string'],
-      help: 'Color of series, as hex, e.g., #c6c6c6 is a lovely light grey. If you specify multiple colors, and have ' +
-       'multiple series, you will get a gradient, e.g., "#00B1CC:#00FF94:#FF3A39:#CC1A6F"'
+      help: i18n.translate('timelion.help.functions.color.colorArg', {
+        defaultMessage:
+          'Color of series, as hex, e.g., #c6c6c6 is a lovely light grey. If you specify multiple \
+colors, and have multiple series, you will get a gradient, e.g., "#00B1CC:#00FF94:#FF3A39:#CC1A6F"',
+      }),
     }
   ],
-  help: 'Change the color of the series',
+  help: i18n.translate('timelion.help.functions.color.description', {
+    defaultMessage: 'Change the color of the series',
+  }),
   fn: function colorFn(args) {
     const colors = args.byName.color.split(':');
     const gradientStops = args.byName.inputSeries.list.length;

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
 
@@ -27,7 +28,10 @@ export default new Chainable('first', {
       types: ['seriesList']
     }
   ],
-  help: 'This is an internal function that simply returns the input seriesList. Don\'t use this',
+  help: i18n.translate('timelion.help.functions.first.description', {
+    defaultMessage:
+      'This is an internal function that simply returns the input seriesList. Don\'t use this',
+  }),
   fn: function firstFn(args) {
     return alter(args, function (eachSeries) {
       return eachSeries;

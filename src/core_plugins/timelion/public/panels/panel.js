@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function Panel(name, config) {
+export default function Panel(name, config, i18n) {
 
   this.name = name;
 
@@ -25,7 +25,12 @@ export default function Panel(name, config) {
 
   this.render = config.render;
 
-  if (!config.render) throw new Error ('Panel must have a rendering function');
-
+  if (!config.render) {
+    throw new Error (
+      i18n('timelion.panels.noRenderFunctionError', {
+        defaultMessage: 'Panel must have a rendering function'
+      })
+    );
+  }
 
 }

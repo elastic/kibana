@@ -26,14 +26,27 @@
         <h4>
           <strong>.{{suggestion.name}}()</strong>
           <small id="timelionSuggestionDescription{{$index}}">
-            {{suggestion.help}}
-            {{suggestion.chainable ? '(Chainable)' : '(Data Source)'}}
+            <span
+              ng-if="suggestion.chainable"
+              i18n-id="timelion.expressionSuggestions.func.description.chainable"
+              i18n-default-message="{help} (Chainable)"
+              i18n-values="{ help: suggestion.help }"
+            ></span>
+            <span
+              ng-if="!suggestion.chainable"
+              i18n-id="timelion.expressionSuggestions.func.description.dataSource"
+              i18n-default-message="{help} (Data Source)"
+              i18n-values="{ help: suggestion.help }"
+            ></span>
           </small>
         </h4>
 
         <div ng-show="suggestion.args.length > (suggestion.chainable ? 1: 0)">
           <div ng-show="suggestions.length > 1">
-            <strong>Arguments:</strong>
+            <strong
+              i18n-id="timelion.expressionSuggestions.arg.list"
+              i18n-default-message="Arguments:"
+            ></strong>
             <span ng-repeat="arg in suggestion.args" ng-hide="$index < 1 && suggestion.chainable">
               <strong>{{arg.name}}</strong>=(<em>{{arg.types.join(' | ')}}</em>)
               <em ng-show="!$last">,</em>
@@ -43,9 +56,21 @@
           <div class="timSuggestions__details" ng-show="suggestions.length === 1">
             <table class="table table-striped table-condensed table-bordered">
             <thead>
-              <th scope="col">Argument Name</th>
-              <th scope="col">Accepted Types</th>
-              <th scope="col">Information</th>
+              <th
+                scope="col"
+                i18n-id="timelion.expressionSuggestions.arg.name"
+                i18n-default-message="Argument Name"
+              ></th>
+              <th
+                scope="col"
+                i18n-id="timelion.expressionSuggestions.arg.types"
+                i18n-default-message="Accepted Types"
+              ></th>
+              <th
+                scope="col"
+                i18n-id="timelion.expressionSuggestions.arg.info"
+                i18n-default-message="Information"
+              ></th>
             </thead>
             <tr ng-repeat="arg in suggestion.args" ng-hide="$index < 1 && suggestion.chainable">
               <td>{{arg.name}}</td>

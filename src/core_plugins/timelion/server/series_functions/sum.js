@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import reduce from '../lib/reduce.js';
 import Chainable from '../lib/classes/chainable';
 
@@ -29,11 +30,16 @@ export default new Chainable('sum', {
     {
       name: 'term',
       types: ['seriesList', 'number'],
-      help: 'Number or series to sum with the input series. SeriesList with multiple series will be applied label-wise.'
-
+      help: i18n.translate('timelion.help.functions.sum.termArg', {
+        defaultMessage:
+          'Number or series to sum with the input series. SeriesList with multiple series will be applied label-wise.',
+      }),
     }
   ],
-  help: 'Adds the values of one or more series in a seriesList to each position, in each series, of the input seriesList',
+  help: i18n.translate('timelion.help.functions.sum.description', {
+    defaultMessage:
+      'Adds the values of one or more series in a seriesList to each position, in each series, of the input seriesList',
+  }),
   aliases: ['add', 'plus'],
   fn: function sumFn(args) {
     return reduce(args, function (a, b) {

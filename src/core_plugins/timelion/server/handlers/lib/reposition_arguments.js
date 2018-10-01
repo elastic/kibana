@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 // Applies to unresolved arguments in the AST
 export default function repositionArguments(functionDef, unorderedArgs) {
@@ -58,7 +59,17 @@ export default function repositionArguments(functionDef, unorderedArgs) {
       value = unorderedArg;
     }
 
-    if (!argDef) throw new Error('Unknown argument to ' + functionDef.name + ': ' + (unorderedArg.name || ('#' + i)));
+    if (!argDef) {
+      throw new Error(
+        i18n.translate('timelion.serverSideErrors.unknownArgument', {
+          defaultMessage: 'Unknown argument to {functionName}: {argumentName}',
+          values: {
+            functionName: functionDef.name,
+            argumentName: (unorderedArg.name || ('#' + i)),
+          },
+        })
+      );
+    }
 
     if (storeAsArray) {
       args[targetIndex] = args[targetIndex] || [];

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import fs from 'fs';
 import path from 'path';
 import _ from 'lodash';
@@ -30,7 +31,15 @@ export default function parseSheet(sheet) {
       return Parser.parse(plot).tree;
     } catch (e) {
       if (e.expected) {
-        throw new Error('Expected: ' + e.expected[0].description + ' @ character ' + e.column);
+        throw new Error(
+          i18n.translate('timelion.serverSideErrors.sheetParseError', {
+            defaultMessage: 'Expected: {expectedDescription} @ character {column}',
+            values: {
+              expectedDescription: e.expected[0].description,
+              column: e.column,
+            },
+          })
+        );
       } else {
         throw e;
       }

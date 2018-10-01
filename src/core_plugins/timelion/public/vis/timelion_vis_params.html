@@ -1,6 +1,10 @@
 <div class="kuiSideBarSection">
   <div class="form-group">
-    <label for="timelionInterval">Interval</label>
+    <label
+      for="timelionInterval"
+      i18n-id="timelion.vis.interval.label"
+      i18n-default-message="Interval"
+    ></label>
     <div class="form-group">
       <timelion-interval model="editorState.params.interval"></timelion-interval>
     </div>
@@ -8,7 +12,10 @@
 
   <div class="form-group">
     <div>
-      <label>Timelion Expression</label>
+      <label
+        i18n-id="timelion.vis.expression.label"
+        i18n-default-message="Timelion Expression"
+      ></label>
     </div>
 
     <timelion-expression-input

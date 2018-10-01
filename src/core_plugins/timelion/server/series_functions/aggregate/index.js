@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../../lib/alter.js';
 import Chainable from '../../lib/classes/chainable';
 import _ from 'lodash';
@@ -40,11 +41,21 @@ export default new Chainable('aggregate', {
     {
       name: 'function',
       types: ['string'],
-      help: 'One of ' + _.keys(functions).join(', ')
+      help: i18n.translate('timelion.help.functions.aggregate.functionArg', {
+        defaultMessage: 'One of {functions}',
+        values: {
+          functions: _.keys(functions).join(', '),
+        },
+      }),
     }
   ],
-  help: 'Creates a static line based on result of processing all points in the series.' +
-  ' Available functions: ' + _.keys(functions).join(', '),
+  help: i18n.translate('timelion.help.functions.aggregate.description', {
+    defaultMessage:
+      'Creates a static line based on result of processing all points in the series. Available functions: {functions}',
+    values: {
+      functions: _.keys(functions).join(', '),
+    },
+  }),
   fn: function aggregateFn(args) {
     const fn = functions[args.byName.function];
     if (!fn) throw new Error('.aggregate() function must be one of: ' + _.keys(functions).join(', '));

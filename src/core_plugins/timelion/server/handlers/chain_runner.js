@@ -20,6 +20,8 @@
 
 import _ from 'lodash';
 import Promise from 'bluebird';
+import { i18n } from '@kbn/i18n';
+
 import parseSheet from './lib/parse_sheet.js';
 import parseDateMath from '../lib/date_math.js';
 import repositionArguments from './lib/reposition_arguments.js';
@@ -79,7 +81,14 @@ export default function chainRunner(tlConfig) {
           case 'seriesList':
             return item;
         }
-        throw new Error ('Argument type not supported: ' + JSON.stringify(item));
+        throw new Error(
+          i18n.translate('timelion.serverSideErrors.unknownArgumentType', {
+            defaultMessage: 'Argument type not supported: {argument}',
+            values: {
+              argument: item,
+            },
+          })
+        );
       } else {
         return item;
       }

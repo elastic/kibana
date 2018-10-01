@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import processFunctionDefinition from './server/lib/process_function_definition';
 
@@ -33,7 +34,15 @@ export default function (server) {
   }
 
   function getFunction(name) {
-    if (!functions[name]) throw new Error ('No such function: ' + name);
+    if (!functions[name]) {
+      throw new Error(
+        i18n.translate('timelion.noFunctionError', {
+          defaultMessage: 'No such function: {name}',
+          values: { name },
+        })
+      );
+    }
+
     return functions[name];
   }
 

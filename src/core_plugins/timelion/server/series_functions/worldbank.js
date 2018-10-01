@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import fetch from 'node-fetch';
 import moment from 'moment';
@@ -27,17 +28,28 @@ export default new Datasource ('worldbank', {
     {
       name: 'code', // countries/all/indicators/SP.POP.TOTL
       types: ['string', 'null'],
-      help: 'Worldbank API path.' +
-        ' This is usually everything after the domain, before the querystring. E.g.: ' +
-        '/en/countries/ind;chn/indicators/DPANUSSPF.'
+      help: i18n.translate('timelion.help.functions.worldbank.description', {
+        defaultMessage:
+          'Worldbank API path. This is usually everything after the domain, before the querystring. E.g.: {apiPathExample}.',
+        values: {
+          apiPathExample: '/en/countries/ind;chn/indicators/DPANUSSPF',
+        },
+      }),
     }
   ],
   aliases: ['wb'],
-  help: `
-    [experimental]
-    Pull data from http://data.worldbank.org/ using path to series.
-    The worldbank provides mostly yearly data, and often has no data for the current year.
-    Try offset=-1y if you get no data for recent time ranges.`,
+  help: i18n.translate('timelion.help.functions.worldbank.description', {
+    defaultMessage:
+      '\n\
+    [experimental]\n\
+    Pull data from {worldbankUrl} using path to series.\n\
+    The worldbank provides mostly yearly data, and often has no data for the current year.\n\
+    Try {offsetQuery} if you get no data for recent time ranges.',
+    values: {
+      worldbankUrl: 'http://data.worldbank.org/',
+      offsetQuery: 'offset=-1y',
+    },
+  }),
   fn: function worldbank(args, tlConfig) {
     // http://api.worldbank.org/en/countries/ind;chn/indicators/DPANUSSPF?date=2000:2006&MRV=5
 
@@ -74,7 +86,16 @@ export default new Datasource ('worldbank', {
         return [moment(date, 'YYYY').valueOf(), Number(val)];
       }));
 
-      if (!hasData) throw new Error('Worldbank request succeeded, but there was no data for ' + config.code);
+      if (!hasData) {
+        throw new Error(
+          i18n.translate('timelion.serverSideErrors.worldbankFunction.noData', {
+            defaultMessage: 'Worldbank request succeeded, but there was no data for {code}',
+            values: {
+              code: config.code,
+            },
+          })
+        );
+      }
 
       return {
         type: 'seriesList',

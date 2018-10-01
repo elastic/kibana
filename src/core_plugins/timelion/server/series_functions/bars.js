@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
 
@@ -29,15 +30,21 @@ export default new Chainable('bars', {
     {
       name: 'width',
       types: ['number', 'null'],
-      help: 'Width of bars in pixels'
+      help: i18n.translate('timelion.help.functions.bars.widthArg', {
+        defaultMessage: 'Width of bars in pixels',
+      }),
     },
     {
       name: 'stack',
       types: ['boolean', 'null'],
-      help: 'Should bars be stacked, true by default'
+      help: i18n.translate('timelion.help.functions.bars.stackArg', {
+        defaultMessage: 'Should bars be stacked, true by default',
+      }),
     }
   ],
-  help: 'Show the seriesList as bars',
+  help: i18n.translate('timelion.help.functions.bars.description', {
+    defaultMessage: 'Show the seriesList as bars',
+  }),
   fn: function barsFn(args) {
     return alter(args, function (eachSeries, width, stack) {
       eachSeries.bars = eachSeries.bars || {};

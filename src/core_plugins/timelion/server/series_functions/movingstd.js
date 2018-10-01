@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
@@ -33,23 +34,44 @@ export default new Chainable('movingstd', {
     {
       name: 'window',
       types: ['number'],
-      help: 'Number of points to compute the standard deviation over.'
+      help: i18n.translate('timelion.help.functions.movingstd.windowArg', {
+        defaultMessage: 'Number of points to compute the standard deviation over.',
+      }),
     },
     {
       name: 'position',
       types: ['string', 'null'],
-      help: `Position of the window slice relative to the result time. Options are ${positions.join(', ')}. Default: ${defaultPosition}`
+      help: i18n.translate('timelion.help.functions.movingstd.positionArg', {
+        defaultMessage:
+          'Position of the window slice relative to the result time. Options are {positions}. Default: {defaultPosition}',
+        values: {
+          positions: positions.join(', '),
+          defaultPosition,
+        },
+      }),
     }
   ],
   aliases: ['mvstd'],
-  help: 'Calculate the moving standard deviation over a given window. Uses naive two-pass algorithm. Rounding errors ' +
-    'may become more noticeable with very long series, or series with very large numbers.',
+  help: i18n.translate('timelion.help.functions.movingstd.description', {
+    defaultMessage:
+      'Calculate the moving standard deviation over a given window. Uses naive two-pass algorithm. \
+Rounding errors may become more noticeable with very long series, or series with very large numbers.',
+  }),
   fn: function movingstdFn(args) {
     return alter(args, function (eachSeries, _window, _position) {
 
       _position = _position || defaultPosition;
 
-      if (!_.contains(positions, _position)) throw new Error('Valid positions are: ' + positions.join(', '));
+      if (!_.contains(positions, _position)) {
+        throw new Error(
+          i18n.translate('timelion.serverSideErrors.movingstdFunction.notValidPosition', {
+            defaultMessage: 'Valid positions are: {validPositions}',
+            values: {
+              validPositions: positions.join(', '),
+            },
+          }),
+        );
+      }
 
       const pairs = eachSeries.data;
       const pairsLen = pairs.length;

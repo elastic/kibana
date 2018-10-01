@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
@@ -32,13 +33,21 @@ export default new Chainable('fit', {
     {
       name: 'mode',
       types: ['string'],
-      help: `The algorithm to use for fitting the series to the target. One of: ${_.keys(fitFunctions).join(', ')}`,
+      help: i18n.translate('timelion.help.functions.fit.modeArg', {
+        defaultMessage:
+          'The algorithm to use for fitting the series to the target. One of: {fitFunctions}',
+        values: {
+          fitFunctions: _.keys(fitFunctions).join(', '),
+        },
+      }),
       suggestions: _.keys(fitFunctions).map(key => {
         return { name: key };
       })
     }
   ],
-  help: 'Fills null values using a defined fit function',
+  help: i18n.translate('timelion.help.functions.fit.description', {
+    defaultMessage: 'Fills null values using a defined fit function',
+  }),
   fn: function absFn(args) {
     return alter(args, function (eachSeries, mode) {
 

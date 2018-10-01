@@ -19,6 +19,7 @@
 
 import argType from './arg_type';
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 export default function validateArgFn(functionDef) {
   return function validateArg(value, name, argDef) {
@@ -36,7 +37,17 @@ export default function validateArgFn(functionDef) {
     else return false;
 
     if (!isCorrectType) {
-      throw new Error (functionDef.name + '(' + name + ') must be one of ' + JSON.stringify(required) + '. Got: ' + type);
+      throw new Error(
+        i18n.translate('timelion.serverSideErrors.wrongFunctionArgumentType', {
+          defaultMessage: '{functionName}({argumentName}) must be one of {requiredTypes}. Got: {actualType}',
+          values: {
+            functionName: functionDef.name,
+            argumentName: name,
+            requiredTypes: JSON.stringify(required),
+            actualType: type,
+          },
+        })
+      );
     }
   };
 }

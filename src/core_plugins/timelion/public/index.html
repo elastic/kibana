@@ -10,8 +10,13 @@
           <span class="fa fa-bolt" ng-click="showStats = !showStats"></span>
           &nbsp;
           <span class="timApp__stats" ng-show="showStats">
-            Query Time {{stats.queryTime - stats.invokeTime}}ms /
-            Processing Time {{stats.sheetTime - stats.queryTime}}ms
+            <span
+              i18n-id="timelion.topNavMenu.stats"
+              i18n-default-message="Query Time {queryTime}ms Processing Time {processingTime}ms"
+              i18n-values="{
+                queryTime: stats.queryTime - stats.invokeTime,
+                processingTime: stats.sheetTime - stats.queryTime,
+              }"></span>
           </span>
         </span>
       </div>
@@ -43,7 +48,7 @@
 
           <button
             type="submit"
-            aria-label="Search"
+            aria-label="{{ ::'timelion.search.submitAriaLabel' | i18n: { defaultMessage: 'Search' } }}"
             class="kuiButton kuiButton--primary fullWidth kuiVerticalRhythmSmall"
           >
             <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-play"></span>

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
@@ -30,15 +31,22 @@ export default new Chainable('trim', {
     {
       name: 'start',
       types: ['number', 'null'],
-      help: 'Buckets to trim from the beginning of the series. Default: 1'
+      help: i18n.translate('timelion.help.functions.trim.startArg', {
+        defaultMessage: 'Buckets to trim from the beginning of the series. Default: 1',
+      }),
     },
     {
       name: 'end',
       types: ['number', 'null'],
-      help: 'Buckets to trim from the end of the series. Default: 1'
+      help: i18n.translate('timelion.help.functions.trim.endArg', {
+        defaultMessage: 'Buckets to trim from the end of the series. Default: 1',
+      }),
     }
   ],
-  help: 'Set N buckets at the start or end of a series to null to fit the "partial bucket issue"',
+  help: i18n.translate('timelion.help.functions.trim.description', {
+    defaultMessage:
+      'Set N buckets at the start or end of a series to null to fit the "partial bucket issue"',
+  }),
   fn: function conditionFn(args) {
     const config = args.byName;
     if (config.start == null) config.start = 1;

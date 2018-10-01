@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
 
@@ -29,30 +30,42 @@ export default new Chainable('lines', {
     {
       name: 'width',
       types: ['number', 'null'],
-      help: 'Line thickness'
+      help: i18n.translate('timelion.help.functions.lines.widthArg', {
+        defaultMessage: 'Line thickness',
+      }),
     },
     {
       name: 'fill',
       types: ['number', 'null'],
-      help: 'Number between 0 and 10. Use for making area charts'
+      help: i18n.translate('timelion.help.functions.lines.fillArg', {
+        defaultMessage: 'Number between 0 and 10. Use for making area charts',
+      }),
     },
     {
       name: 'stack',
       types: ['boolean', 'null'],
-      help: 'Stack lines, often misleading. At least use some fill if you use this.'
+      help: i18n.translate('timelion.help.functions.lines.stackArg', {
+        defaultMessage: 'Stack lines, often misleading. At least use some fill if you use this.',
+      }),
     },
     {
       name: 'show',
       types: ['number', 'boolean', 'null'],
-      help: 'Show or hide lines'
+      help: i18n.translate('timelion.help.functions.lines.showArg', {
+        defaultMessage: 'Show or hide lines',
+      }),
     },
     {
       name: 'steps',
       types: ['number', 'boolean', 'null'],
-      help: 'Show line as step, e.g., do not interpolate between points'
+      help: i18n.translate('timelion.help.functions.lines.stepsArg', {
+        defaultMessage: 'Show line as step, e.g., do not interpolate between points',
+      }),
     }
   ],
-  help: 'Show the seriesList as lines',
+  help: i18n.translate('timelion.help.functions.lines.description', {
+    defaultMessage: 'Show the seriesList as lines',
+  }),
   fn: function linesFn(args) {
     return alter(args, function (eachSeries, width, fill, stack, show, steps) {
       eachSeries.lines = eachSeries.lines || {};

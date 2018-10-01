@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
@@ -28,7 +29,9 @@ export default new Chainable('abs', {
       types: ['seriesList']
     }
   ],
-  help: 'Return the absolute value of each value in the series list',
+  help: i18n.translate('timelion.help.functions.abs.description', {
+    defaultMessage: 'Return the absolute value of each value in the series list',
+  }),
   fn: function absFn(args) {
     return alter(args, function (eachSeries) {
       const data = _.map(eachSeries.data, function (point) {

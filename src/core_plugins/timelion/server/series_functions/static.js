@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import Datasource from '../lib/classes/datasource';
 import Promise from 'bluebird';
-
 
 export default new Datasource ('static', {
   aliases: ['value'],
@@ -28,16 +28,24 @@ export default new Datasource ('static', {
     {
       name: 'value', // _test-data.users.*.data
       types: ['number', 'string'],
-      help: 'The single value to to display, you can also pass several values and I will interpolate them evenly ' +
-        'across your time range.'
+      help: i18n.translate('timelion.help.functions.static.valueArg', {
+        defaultMessage:
+          'The single value to to display, you can also pass several values and I will interpolate \
+them evenly across your time range.',
+      }),
     },
     {
       name: 'label',
       types: ['string', 'null'],
-      help: 'A quick way to set the label for the series. You could also use the .label() function'
+      help: i18n.translate('timelion.help.functions.static.labelArg', {
+        defaultMessage:
+          'A quick way to set the label for the series. You could also use the .label() function',
+      }),
     }
   ],
-  help: 'Draws a single value across the chart',
+  help: i18n.translate('timelion.help.functions.static.description', {
+    defaultMessage: 'Draws a single value across the chart',
+  }),
   fn: function staticFn(args, tlConfig) {
 
     let data;

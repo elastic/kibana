@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
@@ -30,10 +31,14 @@ export default new Chainable('cusum', {
     {
       name: 'base',
       types: ['number'],
-      help: 'Number to start at. Basically just adds this to the beginning of the series'
+      help: i18n.translate('timelion.help.functions.cusum.baseArg', {
+        defaultMessage: 'Number to start at. Basically just adds this to the beginning of the series',
+      }),
     }
   ],
-  help: 'Return the cumulative sum of a series, starting at a base.',
+  help: i18n.translate('timelion.help.functions.cusum.description', {
+    defaultMessage: 'Return the cumulative sum of a series, starting at a base.',
+  }),
   fn: function cusumFn(args) {
     return alter(args, function (eachSeries, base) {
       const pairs = eachSeries.data;

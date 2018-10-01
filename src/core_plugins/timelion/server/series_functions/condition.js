@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
@@ -31,53 +32,83 @@ export default new Chainable('condition', {
     {
       name: 'operator', // <, <=, >, >=, ==, !=
       types: ['string'],
-      help: 'comparison operator to use for comparison, valid operators are eq (equal), ne (not equal), lt (less than), lte ' +
-        '(less than equal), gt (greater than), gte (greater than equal)',
+      help: i18n.translate('timelion.help.functions.condition.operatorArg.description', {
+        defaultMessage:
+          'comparison operator to use for comparison, valid operators are eq (equal), \
+ne (not equal), lt (less than), lte (less than equal), gt (greater than), gte (greater than equal)',
+      }),
       suggestions: [
         {
           name: 'eq',
-          help: 'equal',
+          help: i18n.translate('timelion.help.functions.condition.operatorArg.eqSuggestion', {
+            defaultMessage: 'equal',
+          }),
         },
         {
           name: 'ne',
-          help: 'not equal'
+          help: i18n.translate('timelion.help.functions.condition.operatorArg.neSuggestion', {
+            defaultMessage: 'not equal',
+          }),
         },
         {
           name: 'lt',
-          help: 'less than'
+          help: i18n.translate('timelion.help.functions.condition.operatorArg.ltSuggestion', {
+            defaultMessage: 'less than',
+          }),
         },
         {
           name: 'lte',
-          help: 'less than equal'
+          help: i18n.translate('timelion.help.functions.condition.operatorArg.lteSuggestion', {
+            defaultMessage: 'less than equal',
+          }),
         },
         {
           name: 'gt',
-          help: 'greater than'
+          help: i18n.translate('timelion.help.functions.condition.operatorArg.gtSuggestion', {
+            defaultMessage: 'greater than',
+          }),
         },
         {
           name: 'gte',
-          help: 'greater than equal'
-        }
-      ]
+          help: i18n.translate('timelion.help.functions.condition.operatorArg.gteSuggestion', {
+            defaultMessage: 'greater than equal',
+          }),
+        },
+      ],
     },
     {
       name: 'if',
       types: ['number', 'seriesList', 'null'],
-      help: 'The value to which the point will be compared. If you pass a seriesList here the first series will be used'
+      help: i18n.translate('timelion.help.functions.condition.ifArg', {
+        defaultMessage:
+          'The value to which the point will be compared. \
+If you pass a seriesList here the first series will be used',
+      }),
     },
     {
       name: 'then',
       types: ['number', 'seriesList', 'null'],
-      help: 'The value the point will be set to if the comparison is true. If you pass a seriesList here the first series will be used'
+      help: i18n.translate('timelion.help.functions.condition.thenArg', {
+        defaultMessage:
+          'The value the point will be set to if the comparison is true. \
+If you pass a seriesList here the first series will be used',
+      }),
     },
     {
       name: 'else',
       types: ['number', 'seriesList', 'null'],
-      help: 'The value the point will be set to if the comparison is false. If you pass a seriesList here the first series will be used'
+      help: i18n.translate('timelion.help.functions.condition.elseArg', {
+        defaultMessage:
+          'The value the point will be set to if the comparison is false. \
+If you pass a seriesList here the first series will be used',
+      }),
     }
   ],
-  help: 'Compares each point to a number, or the same point in another series using an operator, then sets its value' +
-    'to the result if the condition proves true, with an optional else.',
+  help: i18n.translate('timelion.help.functions.condition.description', {
+    defaultMessage:
+      'Compares each point to a number, or the same point in another series using an operator, \
+then sets its value to the result if the condition proves true, with an optional else.',
+  }),
   aliases: ['if'],
   fn: function conditionFn(args) {
     const config = args.byName;
@@ -87,7 +118,11 @@ export default new Chainable('condition', {
           if (argType(source) === 'number') return source;
           if (argType(source) === 'null') return null;
           if (argType(source) === 'seriesList') return source.list[0].data[i][1];
-          throw new Error ('must be a number or a seriesList');
+          throw new Error(
+            i18n.translate('timelion.serverSideErrors.conditionFunction.wrongArgType', {
+              defaultMessage: 'must be a number or a seriesList',
+            })
+          );
         }
 
         const ifVal = getNumber(config.if);
@@ -109,7 +144,11 @@ export default new Chainable('condition', {
             case 'ne':
               return point[1] !== ifVal ? thenVal : elseVal;
             default:
-              throw new Error ('Unknown operator');
+              throw new Error(
+                i18n.translate('timelion.serverSideErrors.conditionFunction.unknownOperator', {
+                  defaultMessage: 'Unknown operator',
+                })
+              );
           }
         }());
 

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
 
@@ -29,10 +30,14 @@ export default new Chainable('hide', {
     {
       name: 'hide',
       types: ['boolean', 'null'],
-      help: 'Hide or unhide the series'
+      help: i18n.translate('timelion.help.functions.hide.hideArg', {
+        defaultMessage: 'Hide or unhide the series',
+      }),
     }
   ],
-  help: 'Hide the series by default',
+  help: i18n.translate('timelion.help.functions.hide.description', {
+    defaultMessage: 'Hide the series by default',
+  }),
   fn: function hideFn(args) {
     return alter(args, function (eachSeries, hide) {
       eachSeries._hide = hide == null ? true : hide;

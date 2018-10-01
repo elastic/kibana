@@ -16,12 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import panelRegistryProvider from '../../lib/panel_registry';
 
 require('ui/modules')
   .get('apps/timelion', [])
-  .directive('chart', function (Private) {
+  .directive('chart', function (Private, i18n) {
     return {
       restrict: 'A',
       scope: {
@@ -46,7 +45,12 @@ require('ui/modules')
           const panelSchema = panelRegistry.byName[seriesList.render.type];
 
           if (!panelSchema) {
-            $elem.text('No such panel type: ' + seriesList.render.type);
+            $elem.text(
+              i18n('timelion.chart.seriesList.noSchemaWarning', {
+                defaultMessage: 'No such panel type: {renderType}',
+                values: { renderType: seriesList.render.type },
+              })
+            );
             return;
           }
 

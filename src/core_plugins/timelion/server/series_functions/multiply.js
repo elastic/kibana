@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import reduce from '../lib/reduce.js';
 import Chainable from '../lib/classes/chainable';
 
@@ -29,10 +30,16 @@ export default new Chainable('multiply', {
     {
       name: 'multiplier',
       types: ['seriesList', 'number'],
-      help: 'Number or series by which to multiply. SeriesList with multiple series will be applied label-wise.'
+      help: i18n.translate('timelion.help.functions.multiply.multiplierArg', {
+        defaultMessage:
+          'Number or series by which to multiply. SeriesList with multiple series will be applied label-wise.',
+      }),
     }
   ],
-  help: 'Multiply the values of one or more series in a seriesList to each position, in each series, of the input seriesList',
+  help: i18n.translate('timelion.help.functions.multiply.description', {
+    defaultMessage:
+      'Multiply the values of one or more series in a seriesList to each position, in each series, of the input seriesList',
+  }),
   fn: function multiplyFn(args) {
     return reduce(args, function (a, b) {
       return a * b;

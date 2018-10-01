@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import Chainable from '../../lib/classes/chainable';
 import { linear, log } from './lib/regress';
@@ -35,7 +36,13 @@ export default new Chainable('trend', {
     {
       name: 'mode',
       types: ['string'],
-      help: `The algorithm to use for generating the trend line. One of: ${_.keys(validRegressions).join(', ')}`,
+      help: i18n.translate('timelion.help.function.trend.modeArg', {
+        defaultMessage:
+          'The algorithm to use for generating the trend line. One of: {validRegressions}',
+        values: {
+          validRegressions: _.keys(validRegressions).join(', '),
+        },
+      }),
       suggestions: _.keys(validRegressions).map(key => {
         return { name: key, help: validRegressions[key] };
       })
@@ -43,17 +50,25 @@ export default new Chainable('trend', {
     {
       name: 'start',
       types: ['number', 'null'],
-      help: 'Where to start calculating from the beginning or end. For example -10 would start calculating 10 points from' +
-      ' the end, +15 would start 15 points from the beginning. Default: 0',
+      help: i18n.translate('timelion.help.function.trend.startArg', {
+        defaultMessage:
+          'Where to start calculating from the beginning or end. For example -10 would start \
+calculating 10 points from the end, +15 would start 15 points from the beginning. Default: 0',
+      }),
     },
     {
       name: 'end',
       types: ['number', 'null'],
-      help: 'Where to stop calculating from the beginning or end. For example -10 would stop calculating 10 points from' +
-      ' the end, +15 would stop 15 points from the beginning. Default: 0',
+      help: i18n.translate('timelion.help.function.trend.endArg', {
+        defaultMessage:
+          'Where to stop calculating from the beginning or end. For example -10 would stop \
+calculating 10 points from the end, +15 would stop 15 points from the beginning. Default: 0',
+      }),
     },
   ],
-  help: 'Draws a trend line using a specified regression algorithm',
+  help: i18n.translate('timelion.help.function.trend.description', {
+    defaultMessage: 'Draws a trend line using a specified regression algorithm',
+  }),
   fn: function absFn(args) {
     const newSeries = _.cloneDeep(args.byName.inputSeries);
 

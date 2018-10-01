@@ -1,11 +1,21 @@
 <form role="form">
-  <h2 class="kuiLocalDropdownTitle">
-    Sheet options
-  </h2>
+  <h2
+    class="kuiLocalDropdownTitle"
+    i18n-id="timelion.topNavMenu.options.title"
+    i18n-default-message="Sheet options"
+  ></h2>
 
   <div>
     <div class="form-group col-md-6">
-      <label for="timelionColCount">Columns <small>Column count must divide evenly into 12</small></label>
+      <label
+        for="timelionColCount"
+        i18n-id="timelion.topNavMenu.options.columnsCount"
+        i18n-default-message="Columns {openSmallTag}Column count must divide evenly into 12{closeSmallTag}"
+        i18n-values="{
+          openSmallTag: '<small>',
+          closeSmallTag: '</small>',
+        }"
+      ></label>
       <select class="form-control"
         id="timelionColCount"
         ng-change="opts.search()"
@@ -14,7 +24,15 @@
       </select>
     </div>
     <div class="form-group col-md-6">
-      <label for="timelionRowCount">Rows <small>This is a target based on the current window height</small></label>
+      <label
+        for="timelionRowCount"
+        i18n-id="timelion.topNavMenu.options.rowsCount"
+        i18n-default-message="Rows {openSmallTag}This is a target based on the current window height{closeSmallTag}"
+        i18n-values="{
+          openSmallTag: '<small>',
+          closeSmallTag: '</small>',
+        }"
+      ></label>
       <select class="form-control"
         id="timelionRowCount"
         ng-change="opts.search()"

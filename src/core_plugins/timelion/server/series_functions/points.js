@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
@@ -33,26 +34,39 @@ export default new Chainable('points', {
     {
       name: 'radius',
       types: ['number', 'null'],
-      help: 'Size of points'
+      help: i18n.translate('timelion.help.functions.points.radiusArg', {
+        defaultMessage: 'Size of points',
+      }),
     },
     {
       name: 'weight',
       types: ['number', 'null'],
-      help: 'Thickness of line around point'
+      help: i18n.translate('timelion.help.functions.points.weightArg', {
+        defaultMessage: 'Thickness of line around point',
+      }),
     },
     {
       name: 'fill',
       types: ['number', 'null'],
-      help: 'Number between 0 and 10 representing opacity of fill'
+      help: i18n.translate('timelion.help.functions.points.fillArg', {
+        defaultMessage: 'Number between 0 and 10 representing opacity of fill',
+      }),
     },
     {
       name: 'fillColor',
       types: ['string', 'null'],
-      help: 'Color with which to fill point'
+      help: i18n.translate('timelion.help.functions.points.fillColorArg', {
+        defaultMessage: 'Color with which to fill point',
+      }),
     },
     {
       name: 'symbol',
-      help: `point symbol. One of: ${validSymbols.join(', ')}`,
+      help: i18n.translate('timelion.help.functions.points.symbolArg', {
+        defaultMessage: 'point symbol. One of: {validSymbols}',
+        values: {
+          validSymbols: validSymbols.join(', '),
+        },
+      }),
       types: ['string', 'null'],
       suggestions: validSymbols.map(symbol => {
         const suggestion = { name: symbol };
@@ -65,10 +79,14 @@ export default new Chainable('points', {
     {
       name: 'show',
       types: ['boolean', 'null'],
-      help: 'Show points or not'
+      help: i18n.translate('timelion.help.functions.points.showArg', {
+        defaultMessage: 'Show points or not',
+      }),
     }
   ],
-  help: 'Show the series as points',
+  help: i18n.translate('timelion.help.functions.points.description', {
+    defaultMessage: 'Show the series as points',
+  }),
   fn: function pointsFn(args) {
     return alter(args, function (eachSeries, radius, weight, fill, fillColor, symbol, show) {
       eachSeries.points = eachSeries.points || {};
@@ -88,7 +106,14 @@ export default new Chainable('points', {
 
       symbol = symbol || defaultSymbol;
       if (!_.contains(validSymbols, symbol)) {
-        throw new Error('Valid symbols are: ' + validSymbols.join(', '));
+        throw new Error(
+          i18n.translate('timelion.serverSideErrors.pointsFunction.notValidSymbol', {
+            defaultMessage: 'Valid symbols are: {validSymbols}',
+            values: {
+              validSymbols: validSymbols.join(', '),
+            },
+          })
+        );
       }
 
       eachSeries.points.symbol = symbol;

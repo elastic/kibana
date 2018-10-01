@@ -17,32 +17,48 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import worldbank from './worldbank.js';
 import Promise from 'bluebird';
 import Datasource from '../lib/classes/datasource';
-
 
 export default new Datasource ('worldbank_indicators', {
   args: [
     {
       name: 'country', // countries/all/indicators/SP.POP.TOTL
       types: ['string', 'null'],
-      help: 'Worldbank country identifier. Usually the country\'s 2 letter code'
+      help: i18n.translate('timelion.help.functions.worldbankIndicators.countryArg', {
+        defaultMessage: 'Worldbank country identifier. Usually the country\'s 2 letter code',
+      }),
     },
     {
       name: 'indicator',
       types: ['string', 'null'],
-      help: 'The indicator code to use. You\'ll have to look this up on data.worldbank.org.' +
-        ' Often pretty obtuse. E.g., SP.POP.TOTL is population'
+      help: i18n.translate('timelion.help.functions.worldbankIndicators.indicatorArg', {
+        defaultMessage:
+          'The indicator code to use. You\'ll have to look this up on {worldbankUrl}. \
+Often pretty obtuse. E.g., {indicatorExample} is population',
+        values: {
+          worldbankUrl: 'data.worldbank.org',
+          indicatorExample: 'SP.POP.TOTL',
+        },
+      }),
     }
   ],
   aliases: ['wbi'],
-  help: `
-    [experimental]
-    Pull data from http://data.worldbank.org/ using the country name and indicator. The worldbank provides
-    mostly yearly data, and often has no data for the current year. Try offset=-1y if you get no data for recent
-    time ranges.`,
+  help: i18n.translate('timelion.help.functions.worldbankIndicators.description', {
+    defaultMessage:
+      '\n\
+    [experimental]\n\
+    Pull data from {worldbankUrl} using the country name and indicator. The worldbank provides\n\
+    mostly yearly data, and often has no data for the current year. Try {offsetQuery} if you get no data for recent\n\
+    time ranges.',
+    values: {
+      worldbankUrl: 'http://data.worldbank.org/',
+      offsetQuery: 'offset=-1y',
+    },
+  }),
   fn: function worldbankIndicators(args, tlConfig) {
     const config = _.defaults(args.byName, {
       country: 'wld',
