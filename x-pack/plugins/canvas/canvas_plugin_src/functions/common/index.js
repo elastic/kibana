@@ -15,7 +15,6 @@ import { pie } from './pie';
 import { plot } from './plot';
 import { ply } from './ply';
 import { progress } from './progress';
-import { render } from './render';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
 import { timefilter } from './timefilter';
@@ -33,7 +32,6 @@ export const functions = [
   plot,
   ply,
   progress,
-  render,
   repeatImage,
   revealImage,
   timefilter,
