@@ -2,7 +2,7 @@
 
 exports[`buildActiveMappings combines all mappings and includes core mappings 1`] = `
 Object {
-  "doc": Object {
+  "_doc": Object {
     "dynamic": "strict",
     "properties": Object {
       "aaa": Object {
