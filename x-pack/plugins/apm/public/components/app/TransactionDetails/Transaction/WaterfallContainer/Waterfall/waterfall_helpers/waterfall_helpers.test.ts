@@ -15,6 +15,7 @@ it('getWaterfallRoot', () => {
       name: 'SELECT',
       duration: 210,
       timestamp: '2018-09-12T14:48:56.371Z',
+      offset: 0,
       eventType: 'span'
     },
     {
@@ -24,6 +25,7 @@ it('getWaterfallRoot', () => {
       name: 'GET [0:0:0:0:0:0:0:1]',
       duration: 4694,
       timestamp: '2018-09-12T14:48:56.368Z',
+      offset: 0,
       eventType: 'span'
     },
     {
@@ -33,6 +35,7 @@ it('getWaterfallRoot', () => {
       name: 'GET [0:0:0:0:0:0:0:1]',
       duration: 4694,
       timestamp: '2018-09-12T14:48:56.367Z',
+      offset: 0,
       eventType: 'span'
     },
     {
@@ -42,6 +45,7 @@ it('getWaterfallRoot', () => {
       name: 'APIRestController#productsRemote',
       duration: 3581,
       timestamp: '2018-09-12T14:48:56.369Z',
+      offset: 0,
       eventType: 'transaction'
     },
     {
@@ -50,6 +54,7 @@ it('getWaterfallRoot', () => {
       name: 'APIRestController#products',
       duration: 9480,
       timestamp: '2018-09-12T14:48:56.366Z',
+      offset: 0,
       eventType: 'transaction'
     }
   ];

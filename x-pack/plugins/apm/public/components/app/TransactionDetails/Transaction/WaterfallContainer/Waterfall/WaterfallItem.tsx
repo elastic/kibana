@@ -31,7 +31,10 @@ const ItemLabel = styled.div`
   font-size: ${fontSizes.small};
 `;
 
-const Container = styled.div`
+const Container = styled<
+  { timelineMargins: TimelineMargins; isSelected: boolean },
+  'div'
+>('div')`
   position: relative;
   display: block;
   user-select: none;
@@ -45,13 +48,15 @@ const Container = styled.div`
   }
 `;
 
+interface TimelineMargins {
+  right: number;
+  left: number;
+  top: number;
+  bottom: number;
+}
+
 interface Props {
-  timelineMargins: {
-    right: number;
-    left: number;
-    top: number;
-    bottom: number;
-  };
+  timelineMargins: TimelineMargins;
   totalDuration: number;
   item: IWaterfallItem;
   color: string;

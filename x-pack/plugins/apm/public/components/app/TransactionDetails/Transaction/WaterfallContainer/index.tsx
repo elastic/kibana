@@ -40,8 +40,8 @@ export class WaterfallContainer extends PureComponent<Props, State> {
   public maybeFetchTrace = async (prevProps?: Props) => {
     const { start, end } = this.props.urlParams;
     const traceId = get(this.props, `transaction.${TRACE_ID}`);
-    const prevTraceId = get(prevProps, `transaction.${TRACE_ID}`);
-    const prevUrlParams = get(prevProps, 'urlParams', {});
+    const prevTraceId: string = get(prevProps, `transaction.${TRACE_ID}`);
+    const prevUrlParams: IUrlParams = get(prevProps, 'urlParams') || {};
 
     if (
       traceId &&
