@@ -32,7 +32,7 @@ export function createPlatform(name) {
     }
 
     isWindows() {
-      return name === 'windows';
+      return name === 'win32';
     }
 
     isMac() {

@@ -77,7 +77,7 @@ describe('dev/build/lib/config', () => {
       const platforms = config.getPlatforms();
       expect(platforms).to.be.an('array');
       for (const platform of platforms) {
-        expect(['windows', 'linux', 'darwin']).to.contain(platform.getName());
+        expect(['win32', 'linux', 'darwin']).to.contain(platform.getName());
       }
     });
   });
@@ -90,7 +90,7 @@ describe('dev/build/lib/config', () => {
 
   describe('#getWindowsPlatform()', () => {
     it('returns the windows platform', () => {
-      expect(config.getWindowsPlatform().getName()).to.be('windows');
+      expect(config.getWindowsPlatform().getName()).to.be('win32');
     });
   });
 

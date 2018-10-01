@@ -42,7 +42,7 @@ describe('src/dev/build/lib/platform', () => {
 
   describe('isWindows()', () => {
     it('returns true if name is windows', () => {
-      expect(createPlatform('windows').isWindows()).to.be(true);
+      expect(createPlatform('win32').isWindows()).to.be(true);
       expect(createPlatform('linux').isWindows()).to.be(false);
       expect(createPlatform('darwin').isWindows()).to.be(false);
     });
@@ -50,7 +50,7 @@ describe('src/dev/build/lib/platform', () => {
 
   describe('isLinux()', () => {
     it('returns true if name is linux', () => {
-      expect(createPlatform('windows').isLinux()).to.be(false);
+      expect(createPlatform('win32').isLinux()).to.be(false);
       expect(createPlatform('linux').isLinux()).to.be(true);
       expect(createPlatform('darwin').isLinux()).to.be(false);
     });
@@ -58,7 +58,7 @@ describe('src/dev/build/lib/platform', () => {
 
   describe('isMac()', () => {
     it('returns true if name is darwin', () => {
-      expect(createPlatform('windows').isMac()).to.be(false);
+      expect(createPlatform('win32').isMac()).to.be(false);
       expect(createPlatform('linux').isMac()).to.be(false);
       expect(createPlatform('darwin').isMac()).to.be(true);
     });
