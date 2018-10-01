@@ -18,5 +18,7 @@
  */
 
 export { parseEsInterval } from './parse_es_interval';
-export { ParseEsIntervalInvalidCalendarIntervalError } from './parse_es_interval_invalid_calendar_interval_error';
+export {
+  ParseEsIntervalInvalidCalendarIntervalError,
+} from './parse_es_interval_invalid_calendar_interval_error';
 export { ParseEsIntervalInvalidFormatError } from './parse_es_interval_invalid_format_error';
