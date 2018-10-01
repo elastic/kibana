@@ -205,7 +205,7 @@ class WorkpadLoaderUI extends React.PureComponent {
       {
         field: '@created',
         name: this.props.intl.formatMessage({
-          id: 'xpack.canvas.workpadLoader.columnCreatedLabe',
+          id: 'xpack.canvas.workpadLoader.columnCreatedLabel',
           defaultMessage: 'Created',
         }),
         sortable: true,
