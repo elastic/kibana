@@ -47,7 +47,6 @@ export function initGisApp(resolve) {
     .get('app/gis', [])
     .controller('TimePickerController',
       ($scope, gisWorkspace) => {
-
         $scope.topNavMenu = [{
           key: 'inspect',
           description: 'Open Inspector',
@@ -64,13 +63,20 @@ export function initGisApp(resolve) {
           run: async () => {
             const currentMapState = await getCurrentMapState();
             console.log(currentMapState);
-            const saveSettings = () => {
-              return gisWorkspace.save({ mapState: currentMapState })
-                .then(({ id }) => {
-                  // TODO: Consider routing token for id
-                  if (id) gisStateSync.set('workspaceId', id);
-                  return { id };
-                });
+            const saveSettings = ({ newTitle }) => {
+              let savedObjectId = gisStateSync.get('workspaceId'); 
+              if (savedObjectId) {
+                return gisWorkspace.update(savedObjectId,
+                  { mapState: currentMapState, title: newTitle })
+                  .then(({ id }) => ({ id }));
+              } else {
+                return gisWorkspace.save({ mapState: currentMapState,
+                  title: newTitle })
+                  .then(({ id }) => {
+                    if (id) gisStateSync.set('workspaceId', id);
+                    return { id };
+                  });
+              }
             };
             const saveModal = (
               <SavedObjectSaveModal
