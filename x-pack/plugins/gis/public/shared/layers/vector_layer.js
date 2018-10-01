@@ -6,6 +6,7 @@
 
 import { ALayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
+import { LeftInnerJoin } from './joins/left_inner_join';
 
 
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
@@ -32,6 +33,16 @@ export class VectorLayer extends ALayer {
     return layerDescriptor;
   }
 
+  constructor(options) {
+    super(options);
+    this._joins =  [];
+    if (options.layerDescriptor.joins) {
+      options.layerDescriptor.joins.forEach((joinDescriptor) => {
+        this._joins.push(new LeftInnerJoin(joinDescriptor));
+      });
+    }
+  }
+
   isJoinable() {
     return true;
   }
@@ -45,21 +56,31 @@ export class VectorLayer extends ALayer {
   }
 
   async getStringFields() {
-    const stringFields = await this._source.getStringFields();
-    return stringFields;
+    return await this._source.getStringFields();
   }
 
   async getOrdinalFields() {
-    //best effort to avoid PEBCAK
-    const numberFields = await this._source.getNumberFieldNames();
-    return numberFields;
+
+    const numberFields = await this._source.getNumberFields();
+    const numberFieldOptions = numberFields.map(name => {
+      return { label: name, origin: 'source' };
+    });
+    const joinFields = this._joins.map(join => {
+      return {
+        label: join.displayHash(),
+        origin: 'join',
+        join: join
+      };
+    });
+
+    const ordinalFields = numberFieldOptions.concat(joinFields);
+    return ordinalFields;
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
-
     let timeAware;
     try {
       timeAware = await this._source.isTimeAware();
@@ -73,14 +94,6 @@ export class VectorLayer extends ALayer {
         return;
       }
     }
-
-    // TODO do not re-fetch data if dataFilters have not changed
-    // This is going to take some work since we have to consider all the combinations of what could have changed
-    /*if (this._descriptor.dataMeta && this._descriptor.dataMeta.timeFilters) {
-      if (dataFilters.timeFilters === this._descriptor.dataMeta.timeFilters) {
-        return;
-      }
-    }*/
 
     startLoading({ timeFilters: dataFilters.timeFilters });
     try {

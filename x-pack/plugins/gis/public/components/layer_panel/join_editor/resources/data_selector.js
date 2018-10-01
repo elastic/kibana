@@ -36,6 +36,9 @@ export class DataSelector extends React.Component {
     this.setState({
       indexPatternId,
     }, this._loadIndexPattern(indexPatternId));
+    this.props.onSelection({
+      indexPatternId: indexPatternId
+    });
   };
 
   _loadIndexPattern = (indexPatternId) => {
@@ -71,7 +74,8 @@ export class DataSelector extends React.Component {
 
     this.setState({
       isLoadingIndexPattern: false,
-      indexPattern: indexPattern
+      indexPattern: indexPattern,
+      indexPatternId: indexPatternId
     });
   }, 300);
 

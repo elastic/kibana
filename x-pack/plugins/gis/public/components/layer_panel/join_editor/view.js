@@ -25,8 +25,25 @@ export class JoinEditor extends React.Component {
   }
 
   _renderJoins() {
-    const joins = this.state.joins.map((join, index) => {
-      return (<EuiFlexItem key={index}><Join join={join} layer={this.props.layer}/></EuiFlexItem>);
+    const joins = this.state.joins.map((joinDescriptor, index) => {
+      const onJoinSelection = (joinDescriptor) => {
+        if (this.state.joins[index]) {
+          const updatedJoins = this.state.joins.slice();
+          updatedJoins[index] = joinDescriptor;
+          this.setState({
+            joins: updatedJoins
+          });
+          this.props.onJoinsEdited(this.props.layer, updatedJoins);
+        }
+      };
+      return (
+        <EuiFlexItem key={index}>
+          <Join
+            join={joinDescriptor}
+            layer={this.props.layer}
+            onJoinSelection={onJoinSelection}
+          />
+        </EuiFlexItem>);
     });
 
     return (

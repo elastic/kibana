@@ -97,7 +97,7 @@ export class VectorSource extends ASource {
     });
   }
 
-  async getNumberFieldNames() {
+  async getNumberFields() {
     console.warn('Should implement VectorSource#getNumberFields');
     return [];
   }

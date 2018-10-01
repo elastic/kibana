@@ -20,7 +20,7 @@ export class Join extends React.Component {
     this.state = {
       stringFields: null,
       leftField: null,
-      rightTable: null
+      right: null
     };
   }
 
@@ -34,7 +34,8 @@ export class Join extends React.Component {
     const stringFields = await this.props.layer.getStringFields();
 
     this.setState({
-      stringFields: stringFields
+      stringFields: stringFields,
+      leftField: stringFields[0] ? stringFields[0].name : null
     });
 
   }
@@ -61,6 +62,12 @@ export class Join extends React.Component {
       this.setState({
         leftField: field
       });
+
+      this.props.onJoinSelection({
+        leftField: field,
+        right: this.state.right
+      });
+
     };
 
     const selectedValue = this.state.leftField ? this.state.leftField : this.state.stringFields[0].name;
@@ -74,7 +81,17 @@ export class Join extends React.Component {
       return null;
     }
 
-    return (<DataSelector/>);
+    const onSelection = (rightDataSelection) => {
+      this.setState({
+        right: rightDataSelection
+      });
+      this.props.onJoinSelection({
+        leftField: this.state.leftField,
+        right: rightDataSelection
+      });
+    };
+
+    return (<DataSelector onSelection={onSelection}/>);
   }
 
   render() {

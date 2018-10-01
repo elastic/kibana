@@ -22,6 +22,7 @@ import {
 
 export function LayerPanel({ selectedLayer, cancelLayerPanel }) {
 
+
   if (!selectedLayer) {
     //todo: temp placeholder to bypass state-bug
     return (<div />);
@@ -48,7 +49,7 @@ export function LayerPanel({ selectedLayer, cancelLayerPanel }) {
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody style={{ paddingTop: 0 }}>
-        <EuiHorizontalRule margin="none"/>
+        <EuiTitle size="s"><h2><strong>Joins</strong></h2></EuiTitle>
         <EuiSpacer size="l"/>
         <JoinEditor layer={selectedLayer}/>
         <EuiSpacer size="l"/>

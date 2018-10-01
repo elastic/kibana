@@ -21,6 +21,7 @@ export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
 export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const LAYER_DATA_LOAD_ERROR = 'LAYER_DATA_LOAD_ERROR';
 export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
+export const SET_JOINS = 'SET_JOINS';
 export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
@@ -271,6 +272,21 @@ export function promoteTemporaryStyles() {
 export function clearTemporaryStyles() {
   return {
     type: CLEAR_TEMPORARY_STYLES
+  };
+}
+
+
+export function setJoinsForLayer(layer, joins) {
+  const tokenString = 'data_request_sync_setjoins';
+  return async (dispatch, getState) => {
+    await dispatch({
+      type: SET_JOINS,
+      layer: layer,
+      joins: joins
+    });
+    const dataFilters = getDataFilters(getState());
+    const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+    layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
 

@@ -22,7 +22,7 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
   PROMOTE_TEMPORARY_STYLES,
-  CLEAR_TEMPORARY_STYLES,
+  CLEAR_TEMPORARY_STYLES, SET_JOINS,
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -92,6 +92,17 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
+    case SET_JOINS:
+      console.log('must set join for layer', action);
+      const layerDescriptor = state.layerList.find(descriptor => descriptor.id === action.layer.getId());
+      if (layerDescriptor) {
+        const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };
+        const index = state.layerList.findIndex(descriptor => descriptor.id === action.layer.getId());
+        const newLayerList = state.layerList.slice();
+        newLayerList[index] = newLayerDescriptor;
+        return { ...state, layerList: newLayerList };
+      }
+      return state;
     case ADD_LAYER:
       // Remove temporary layers (if any)
       const preAddLayerList = action.layer.temporary ? state.layerList.filter(

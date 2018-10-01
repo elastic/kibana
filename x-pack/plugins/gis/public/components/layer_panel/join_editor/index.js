@@ -6,9 +6,14 @@
 
 import { connect } from 'react-redux';
 import { JoinEditor } from './view';
+import { setJoinsForLayer } from '../../../actions/store_actions';
 
-function mapDispatchToProps() {
-  return {};
+function mapDispatchToProps(dispatch) {
+  return {
+    onJoinsEdited: (layer, joins) => {
+      dispatch(setJoinsForLayer(layer, joins));
+    }
+  };
 }
 
 function mapStateToProps({}, props) {
