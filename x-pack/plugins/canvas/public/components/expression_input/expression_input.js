@@ -9,15 +9,12 @@ import PropTypes from 'prop-types';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { Autocomplete } from '../autocomplete';
-import {
-  getAutocompleteSuggestionsProvider,
-  getFnAtPositionProvider,
-} from '../../../common/lib/autocomplete';
+import { getAutocompleteSuggestions, getFnArgDef } from '../../../common/lib/autocomplete';
 import { FunctionReference } from './function_reference';
 import { ArgumentReference } from './argument_reference';
 
 export class ExpressionInput extends React.Component {
-  constructor({ value, functionDefinitions }) {
+  constructor({ value }) {
     super();
 
     this.undoHistory = [];
@@ -30,9 +27,6 @@ export class ExpressionInput extends React.Component {
       },
       suggestions: [],
     };
-
-    this.getAutocompleteSuggestions = getAutocompleteSuggestionsProvider(functionDefinitions);
-    this.getFnAtPosition = getFnAtPositionProvider(functionDefinitions);
   }
 
   componentDidUpdate() {
@@ -101,23 +95,29 @@ export class ExpressionInput extends React.Component {
 
   updateState = ({ value, selection }) => {
     this.stash(this.props.value);
-    const suggestions = this.getAutocompleteSuggestions(value, selection.start);
+    const suggestions = getAutocompleteSuggestions(
+      this.props.functionDefinitions,
+      value,
+      selection.start
+    );
     this.props.onChange(value);
     this.setState({ selection, suggestions });
   };
 
   getReference = selectedItem => {
-    const fnDef = selectedItem && selectedItem.fnDef;
+    const { fnDef, argDef } = selectedItem || {};
+    if (argDef) return <ArgumentReference argDef={argDef} />;
     if (fnDef) return <FunctionReference fnDef={fnDef} />;
 
-    const argDef = selectedItem && selectedItem.argDef;
-    if (argDef) return <ArgumentReference argDef={argDef} />;
+    const { fnDef: fnDefAtPosition, argDef: argDefAtPosition } = getFnArgDef(
+      this.props.functionDefinitions,
+      this.props.value,
+      this.state.selection.start
+    );
 
-    const fnAtPosition = this.getFnAtPosition(this.props.value, this.state.selection.start);
-    if (fnAtPosition) {
-      if (fnAtPosition.context) return <FunctionReference fnDef={fnAtPosition} />;
-      return <ArgumentReference argDef={fnAtPosition} />;
-    }
+    if (argDefAtPosition) return <ArgumentReference argDef={argDefAtPosition} />;
+    if (fnDefAtPosition) return <FunctionReference fnDef={fnDefAtPosition} />;
+
     return '';
   };
 
