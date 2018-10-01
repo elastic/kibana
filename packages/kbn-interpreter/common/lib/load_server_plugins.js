@@ -38,16 +38,12 @@ export const loadServerPlugins = () => {
     const loadType = () => {
       const type = remainingTypes.pop();
       getPluginPaths(type).then(paths => {
-        console.log('loading plugins for ', type);
         global.canvas = global.canvas || {};
         global.canvas.register = d => {
-          console.log('registering ', d);
           types[type].register(d);
         };
 
         paths.forEach(path => {
-
-          console.log('loading path: ', path);
           require(path);
         });
 
