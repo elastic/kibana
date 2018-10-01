@@ -6,6 +6,9 @@
 
 import seriesConfig from '../explorer/explorer_charts/__mocks__/mock_series_config_filebeat';
 
+// A copy of these mocks for ui/chrome and ui/timefilter are also
+// used in explorer_charts_container.test.js.
+// TODO: Refactor the involved tests to avoid this duplication
 jest.mock('ui/chrome',
   () => ({
     getBasePath: () => {
@@ -47,6 +50,8 @@ import { timefilter } from 'ui/timefilter';
 import {
   getExploreSeriesLink,
   getTickValues,
+  isLabelLengthAboveThreshold,
+  getXTransform,
   removeLabelOverlap
 } from './chart_utils';
 
@@ -130,6 +135,45 @@ describe('getTickValues', () => {
       1518652800000,
       1519257600000
     ]);
+  });
+});
+
+describe('isLabelLengthAboveThreshold', () => {
+
+  test('short label', () => {
+    const isLongLabel = isLabelLengthAboveThreshold({
+      detectorLabel: 'count',
+      entityFields: seriesConfig.entityFields
+    });
+    expect(isLongLabel).toBeFalsy();
+  });
+
+  test('long label', () => {
+    const isLongLabel = isLabelLengthAboveThreshold(seriesConfig);
+    expect(isLongLabel).toBeTruthy();
+  });
+
+});
+
+describe('getXTransform', () => {
+  const expectedXTransform = 0.007167499999999999;
+
+  test('Chrome/Safari/Firefox String variant.', () => {
+    const transformStr = 'translate(0.007167499999999999,0)';
+    const xTransform = getXTransform(transformStr);
+    expect(xTransform).toEqual(expectedXTransform);
+  });
+
+  test('IE11 String variant.', () => {
+    const transformStr = 'translate(0.007167499999999999)';
+    const xTransform = getXTransform(transformStr);
+    expect(xTransform).toEqual(expectedXTransform);
+  });
+
+  test('Invalid String.', () => {
+    const transformStr = 'translate()';
+    const xTransform = getXTransform(transformStr);
+    expect(xTransform).toEqual(NaN);
   });
 });
 
