@@ -25,7 +25,7 @@ export class RollupIndexPatternListConfig extends IndexPatternListConfig {
     }
 
     const allAggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
-    const fieldAggs = allAggs && Object.keys(allAggs).filter(agg => allAggs[agg][field] && Array.isArray(allAggs[agg][field]));
+    const fieldAggs = allAggs && Object.keys(allAggs).filter(agg => allAggs[agg][field]);
 
     if(!fieldAggs || !fieldAggs.length) {
       return [];
