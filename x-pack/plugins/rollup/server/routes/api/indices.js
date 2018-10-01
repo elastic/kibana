@@ -44,7 +44,7 @@ export function registerIndicesRoute(server) {
   });
 
   /**
-   * Returns information on validiity of an index pattern for creating a rollup job:
+   * Returns information on validity of an index pattern for creating a rollup job:
    *  - Does the index pattern match any indices?
    *  - Does the index pattern match rollup indices?
    *  - Which date fields, numeric fields, and keyword fields are available in the matching indices?

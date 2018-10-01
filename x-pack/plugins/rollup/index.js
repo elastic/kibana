@@ -13,6 +13,7 @@ import {
   registerSearchRoute,
   registerJobsRoute,
 } from './server/routes/api';
+import { registerRollupUsageCollector } from './server/usage';
 
 export function rollup(kibana) {
   return new kibana.Plugin({
@@ -49,6 +50,7 @@ export function rollup(kibana) {
       registerFieldsForWildcardRoute(server);
       registerSearchRoute(server);
       registerJobsRoute(server);
+      registerRollupUsageCollector(server);
     }
   });
 }
