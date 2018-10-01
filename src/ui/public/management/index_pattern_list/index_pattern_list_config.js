@@ -17,20 +17,24 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+export class IndexPatternListConfig {
+  static key = 'default';
 
-import { Header } from './components/header';
-import { List } from './components/list';
+  constructor({
+    enableScriptedFields = true
+  }) {
+    this.enableScriptedFields = enableScriptedFields;
+  }
 
-export const IndexPatternList = ({
-  indexPatternCreationOptions,
-  defaultIndex,
-  indexPatterns
-}) => (
-  <Fragment>
-    <div className="indexPatternList__headerWrapper">
-      <Header indexPatternCreationOptions={indexPatternCreationOptions} />
-    </div>
-    <List indexPatterns={indexPatterns} defaultIndex={defaultIndex} />
-  </Fragment>
-);
+  getIndexPatternTags = () => {
+    return [];
+  }
+
+  getFieldInfo = () => {
+    return [];
+  }
+
+  areScriptedFieldsEnabled = () => {
+    return this.enableScriptedFields;
+  }
+}

@@ -17,20 +17,10 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import { uiRegistry } from 'ui/registry/_registry';
 
-import { Header } from './components/header';
-import { List } from './components/list';
-
-export const IndexPatternList = ({
-  indexPatternCreationOptions,
-  defaultIndex,
-  indexPatterns
-}) => (
-  <Fragment>
-    <div className="indexPatternList__headerWrapper">
-      <Header indexPatternCreationOptions={indexPatternCreationOptions} />
-    </div>
-    <List indexPatterns={indexPatterns} defaultIndex={defaultIndex} />
-  </Fragment>
-);
+export const IndexPatternListConfigRegistry = uiRegistry({
+  name: 'indexPatternList',
+  index: ['name'],
+  order: ['order'],
+});
