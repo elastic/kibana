@@ -30,8 +30,6 @@ import { chrome } from '../../chrome/chrome';
 import { debounce } from 'lodash';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFieldText,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
@@ -338,36 +336,33 @@ export class QueryBar extends Component {
               role="search"
             >
               <div className="kuiLocalSearchAssistedInput">
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiFieldText
-                      placeholder="Search..."
-                      value={this.state.query.query}
-                      onChange={this.onInputChange}
-                      onClick={this.onClickInput}
-                      fullWidth
-                      autoFocus={!this.props.disableAutoFocus}
-                      inputRef={node => {
-                        if (node) {
-                          this.inputRef = node;
-                        }
-                      }}
-                      autoComplete="off"
-                      spellCheck={false}
-                    />
-                    <div className="kuiLocalSearchAssistedInput__assistance">
-                      <QueryLanguageSwitcher
-                        language={this.state.query.language}
-                        onSelectLanguage={(language) => {
-                          this.props.onSubmit({
-                            query: '',
-                            language: language,
-                          });
-                        }}
-                      />
-                    </div>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiFieldText
+                  placeholder="Search..."
+                  value={this.state.query.query}
+                  onChange={this.onInputChange}
+                  onClick={this.onClickInput}
+                  fullWidth
+                  autoFocus={!this.props.disableAutoFocus}
+                  inputRef={node => {
+                    if (node) {
+                      this.inputRef = node;
+                    }
+                  }}
+                  autoComplete="off"
+                  spellCheck={false}
+                  icon="console"
+                />
+                <div className="kuiLocalSearchAssistedInput__assistance">
+                  <QueryLanguageSwitcher
+                    language={this.state.query.language}
+                    onSelectLanguage={(language) => {
+                      this.props.onSubmit({
+                        query: '',
+                        language: language,
+                      });
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </form>

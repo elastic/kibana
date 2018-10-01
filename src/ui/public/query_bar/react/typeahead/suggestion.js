@@ -20,6 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon } from '@elastic/eui';
+import classNames from 'classnames';
 
 function getEuiIconType(type) {
   switch (type) {
@@ -41,8 +42,10 @@ function getEuiIconType(type) {
 export function Suggestion(props) {
   return (
     <div
-      className="typeahead-item"
-      selected={props.selected}
+      className={classNames({
+        'typeahead-item': true,
+        active: props.selected,
+      })}
       onClick={() => props.onClick(props.suggestion)}
       onMouseEnter={props.onMouseEnter}
     >
