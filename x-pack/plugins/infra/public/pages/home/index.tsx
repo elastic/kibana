@@ -14,6 +14,7 @@ import { Header } from '../../components/header';
 import { ColumnarPage } from '../../components/page';
 
 import { WithWaffleFilterUrlState } from '../../containers/waffle/with_waffle_filters';
+import { WithWaffleOptionsUrlState } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTimeUrlState } from '../../containers/waffle/with_waffle_time';
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
 import { WithSource } from '../../containers/with_source';
@@ -28,6 +29,7 @@ export class HomePage extends React.PureComponent {
               <>
                 <WithWaffleTimeUrlState />
                 <WithWaffleFilterUrlState />
+                <WithWaffleOptionsUrlState />
                 <Header />
                 <HomeToolbar />
                 <HomePageContent />

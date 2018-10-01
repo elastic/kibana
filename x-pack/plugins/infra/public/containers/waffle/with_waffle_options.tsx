@@ -53,7 +53,7 @@ interface WaffleOptionsUrlState {
   nodeType?: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
 }
 
-export const WithWaffleMetricsUrlState = () => (
+export const WithWaffleOptionsUrlState = () => (
   <WithWaffleOptions>
     {({ changeMetrics, urlState }) => (
       <UrlStateContainer
