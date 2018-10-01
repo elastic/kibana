@@ -30,7 +30,7 @@ export function buildQueryFromKuery(indexPattern, queries = [], config) {
       } catch (legacyParseError) {
         throw parseError;
       }
-      throw new Error(`It looks like you're using an outdated Kuery syntax. See what changed in the docs.`);
+      throw Error('OutdatedKuerySyntaxError');
     }
   });
   return buildQuery(indexPattern, queryASTs);
