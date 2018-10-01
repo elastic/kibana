@@ -25,12 +25,14 @@ export function i18nDirective(i18n) {
       values: '<i18nValues',
     },
     link: function($scope, $element) {
-      $element.html(
-        i18n($scope.id, {
-          values: $scope.values,
-          defaultMessage: $scope.defaultMessage,
-        })
-      );
+      $scope.$watch('values', () => {
+        $element.html(
+          i18n($scope.id, {
+            values: $scope.values,
+            defaultMessage: $scope.defaultMessage,
+          })
+        );
+      });
     },
   };
 }
