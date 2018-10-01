@@ -19,7 +19,7 @@
 
 import { flatten } from 'lodash';
 import { fetch } from '@kbn/interpreter/common/lib/fetch';
-import { buildBoolArray } from '@kbn/interpreter/server';
+import { buildBoolArray } from '@kbn/interpreter/server/index';
 
 export const timelion = () => ({
   name: 'timelion',
