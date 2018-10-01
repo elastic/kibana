@@ -1,0 +1,17 @@
+[role="xpack"]
+[[xpack-spaces]]
+== Spaces
+
+With spaces, you can organize your dashboards and other saved objects into meaningful categories.
+After creating your own spaces, you will be asked to choose a space when you enter {kib}. Once inside a space,
+you will only see the dashboards and other saved objects that belong to that space. You can change your active space at any time.
+
+With security enabled, you can control which users have access to individual spaces.
+
+[role="screenshot"]
+image::spaces/images/space-selector.png["Space selector screen"]
+
+include::getting-started.asciidoc[]
+include::managing-spaces.asciidoc[]
+include::securing-spaces.asciidoc[]
+include::moving-saved-objects.asciidoc[]
