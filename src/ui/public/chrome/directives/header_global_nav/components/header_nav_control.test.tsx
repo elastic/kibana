@@ -27,7 +27,7 @@ describe('HeaderNavControl', () => {
 
   it('calls navControl.render with div node', () => {
     const renderSpy = jest.fn();
-    const navControl: NavControl = { ...defaultNavControl, render: renderSpy } as NavControl;
+    const navControl = { ...defaultNavControl, render: renderSpy } as NavControl;
 
     mount(<HeaderNavControl navControl={navControl} />);
 
@@ -40,7 +40,7 @@ describe('HeaderNavControl', () => {
   it('calls unrender callback when unmounted', () => {
     const unrenderSpy = jest.fn();
     const render = () => unrenderSpy;
-    const navControl: NavControl = { ...defaultNavControl, render } as NavControl;
+    const navControl = { ...defaultNavControl, render } as NavControl;
 
     const wrapper = mount(<HeaderNavControl navControl={navControl} />);
 

@@ -39,10 +39,12 @@ export class HeaderNavControls extends Component<Props> {
       return null;
     }
 
-    return navControls.map(navControl => (
-      <EuiHeaderSectionItem key={navControl.name}>
-        <HeaderNavControl navControl={navControl} />
-      </EuiHeaderSectionItem>
-    ));
+    return navControls.map(this.renderNavControl);
   }
+
+  private renderNavControl = (navControl: NavControl) => (
+    <EuiHeaderSectionItem key={navControl.name}>
+      <HeaderNavControl navControl={navControl} />
+    </EuiHeaderSectionItem>
+  );
 }

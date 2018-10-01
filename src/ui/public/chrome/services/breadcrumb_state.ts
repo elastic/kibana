@@ -17,14 +17,22 @@
  * under the License.
  */
 
+// @ts-ignore
+import { Subject, Subscribable } from 'rxjs';
 import { uiModules } from '../../modules';
-import { Observable } from 'rxjs';
+import { Breadcrumb } from '../directives/header_global_nav';
 
-let shouldClear = false; // flag used to keep track of clearing between route changes
-let observer;
+// A flag used to keep track of clearing between route changes.
+let shouldClear = false;
 
-// Observable used by Header component to subscribe to breadcrumbs changes.
-export const observable = Observable.create((o) => observer = o);
+// Subject used by Header component to subscribe to breadcrumbs changes.
+// This is not exposed publicly.
+const breadcrumbsSubject = new Subject();
+
+/**
+ * A rxjs subscribable that can be used to subscribe to breadcrumb updates.
+ */
+export const breadcrumbs: Subscribable<Breadcrumb[]> = breadcrumbsSubject;
 
 /**
  * Should be called by plugins to set breadcrumbs in the header navigation.
@@ -32,27 +40,23 @@ export const observable = Observable.create((o) => observer = o);
  * @param breadcrumbs: Array<Breadcrumb> where Breadcrumb has shape
  *                     { text: '', href?: '' }
  */
-export const set = (breadcrumbs) => {
-  if (observer) {
-    observer.next(breadcrumbs);
-  }
+export const set = (newBreadcrumbs: Breadcrumb[]) => {
+  breadcrumbsSubject.next(newBreadcrumbs);
 
   // If a plugin called set, don't clear on route change.
   shouldClear = false;
 };
 
-
-uiModules.get('kibana')
-  .service('breadcrumbState', ($rootScope) => {
-    // When a route change happens we want to clear the breadcrumbs ONLY if
-    // the new route does not set any breadcrumbs. Deferring the clearing until
-    // the route finishes changing helps avoiding the breadcrumbs from 'flickering'.
-    $rootScope.$on('$routeChangeStart', () => shouldClear = true);
-    $rootScope.$on('$routeChangeSuccess', () => {
-      if (shouldClear) {
-        set([]);
-      }
-    });
-
-    return { observable, set };
+uiModules.get('kibana').service('breadcrumbState', ($rootScope: any) => {
+  // When a route change happens we want to clear the breadcrumbs ONLY if
+  // the new route does not set any breadcrumbs. Deferring the clearing until
+  // the route finishes changing helps avoiding the breadcrumbs from 'flickering'.
+  $rootScope.$on('$routeChangeStart', () => (shouldClear = true));
+  $rootScope.$on('$routeChangeSuccess', () => {
+    if (shouldClear) {
+      set([]);
+    }
   });
+
+  return { set };
+});

@@ -51,18 +51,6 @@ export class HeaderAppMenu extends Component<Props, State> {
     };
   }
 
-  public onMenuButtonClick = () => {
-    this.setState({
-      isOpen: !this.state.isOpen,
-    });
-  };
-
-  public closeMenu = () => {
-    this.setState({
-      isOpen: false,
-    });
-  };
-
   public render() {
     const { navLinks = [] } = this.props;
 
@@ -87,18 +75,32 @@ export class HeaderAppMenu extends Component<Props, State> {
         closePopover={this.closeMenu}
       >
         <EuiKeyPadMenu id="keyPadMenu" style={{ width: 288 }}>
-          {navLinks.map(navLink => (
-            <EuiKeyPadMenuItem
-              label={navLink.title}
-              href={navLink.url}
-              key={navLink.id}
-              onClick={this.closeMenu}
-            >
-              <EuiIcon type={navLink.euiIconType} size="l" />
-            </EuiKeyPadMenuItem>
-          ))}
+          {navLinks.map(this.renderNavLink)}
         </EuiKeyPadMenu>
       </EuiPopover>
     );
   }
+
+  private onMenuButtonClick = () => {
+    this.setState({
+      isOpen: !this.state.isOpen,
+    });
+  };
+
+  private closeMenu = () => {
+    this.setState({
+      isOpen: false,
+    });
+  };
+
+  private renderNavLink = (navLink: NavLink) => (
+    <EuiKeyPadMenuItem
+      label={navLink.title}
+      href={navLink.url}
+      key={navLink.id}
+      onClick={this.closeMenu}
+    >
+      <EuiIcon type={navLink.euiIconType} size="l" />
+    </EuiKeyPadMenuItem>
+  );
 }

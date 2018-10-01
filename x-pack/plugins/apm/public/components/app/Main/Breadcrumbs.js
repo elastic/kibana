@@ -34,7 +34,7 @@ class Breadcrumbs extends React.Component {
     const { breadcrumbs, location, showPluginBreadcrumbs } = this.props;
     const { _g = '', kuery = '' } = toQuery(location.search);
 
-    // If we're not display plugin breadcrumbs, render null, but continue
+    // If we don't display plugin breadcrumbs, render null, but continue
     // to push updates to header.
     if (!showPluginBreadcrumbs) {
       return null;

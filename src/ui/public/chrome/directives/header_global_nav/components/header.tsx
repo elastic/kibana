@@ -18,7 +18,7 @@
  */
 
 import React, { Component } from 'react';
-import { Observable } from 'rxjs';
+import { Subscribable } from 'rxjs';
 
 import {
   // TODO: add type annotations
@@ -40,20 +40,22 @@ import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_c
 import { Breadcrumb, NavControlSide, NavLink } from '../';
 
 interface Props {
-  breadcrumbObservable: Observable<Breadcrumb[]>;
+  appTitle?: string;
+  breadcrumbs: Subscribable<Breadcrumb[]>;
+  homeHref: string;
+  isVisible: boolean;
   navLinks: NavLink[];
   navControls: ChromeHeaderNavControlsRegistry;
-  isVisible: boolean;
-  appTitle?: string;
 }
 
 export class Header extends Component<Props> {
   public renderLogo() {
-    return <EuiHeaderLogo iconType="logoKibana" href="/" aria-label="Go to home page" />;
+    const { homeHref } = this.props;
+    return <EuiHeaderLogo iconType="logoKibana" href={homeHref} aria-label="Go to home page" />;
   }
 
   public render() {
-    const { appTitle, breadcrumbObservable, navControls, navLinks, isVisible } = this.props;
+    const { appTitle, breadcrumbs, isVisible, navControls, navLinks } = this.props;
 
     if (!isVisible) {
       return null;
@@ -69,7 +71,7 @@ export class Header extends Component<Props> {
 
           <HeaderNavControls navControls={leftNavControls} />
 
-          <HeaderBreadcrumbs appTitle={appTitle} breadcrumbObservable={breadcrumbObservable} />
+          <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs={breadcrumbs} />
         </EuiHeaderSection>
 
         <EuiHeaderSection side="right">

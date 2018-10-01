@@ -19,24 +19,24 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { observable, set } from '../../../services/breadcrumb_state';
+import { breadcrumbs, set } from '../../../services/breadcrumb_state';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 
 describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs observable', () => {
-    const wrapper = mount(<HeaderBreadcrumbs breadcrumbObservable={observable} />);
+    const wrapper = mount(<HeaderBreadcrumbs breadcrumbs={breadcrumbs} />);
 
     set([{ text: 'First' }]);
     // Unfortunately, enzyme won't update the wrapper until we call update.
     wrapper.update();
-    expect(wrapper.find('.euiBreadcrumb').hostNodes().length).toEqual(1);
+    expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
 
     set([{ text: 'First' }, { text: 'Second' }]);
     wrapper.update();
-    expect(wrapper.find('.euiBreadcrumb').hostNodes().length).toEqual(2);
+    expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
 
     set([]);
     wrapper.update();
-    expect(wrapper.find('.euiBreadcrumb').hostNodes().length).toEqual(0);
+    expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
   });
 });

@@ -18,7 +18,7 @@
  */
 
 import React, { Component } from 'react';
-import { Observable, Subscription } from 'rxjs';
+import { Subscribable, Unsubscribable } from 'rxjs';
 
 import {
   // @ts-ignore
@@ -29,7 +29,7 @@ import { Breadcrumb } from '../';
 
 interface Props {
   appTitle?: string;
-  breadcrumbObservable: Observable<Breadcrumb[]>;
+  breadcrumbs: Subscribable<Breadcrumb[]>;
 }
 
 interface State {
@@ -37,7 +37,7 @@ interface State {
 }
 
 export class HeaderBreadcrumbs extends Component<Props, State> {
-  private subscription?: Subscription;
+  private unsubscribable?: Unsubscribable;
 
   constructor(props: Props) {
     super(props);
@@ -50,7 +50,7 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Props) {
-    if (prevProps.breadcrumbObservable === this.props.breadcrumbObservable) {
+    if (prevProps.breadcrumbs === this.props.breadcrumbs) {
       return;
     }
 
@@ -63,7 +63,7 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
   }
 
   public render() {
-    let breadcrumbs: Breadcrumb[] = this.state.breadcrumbs;
+    let breadcrumbs = this.state.breadcrumbs;
 
     if (breadcrumbs.length === 0 && this.props.appTitle) {
       breadcrumbs = [{ text: this.props.appTitle }];
@@ -73,15 +73,15 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
   }
 
   private subscribe() {
-    this.subscription = this.props.breadcrumbObservable.subscribe(breadcrumbs => {
+    this.unsubscribable = this.props.breadcrumbs.subscribe(breadcrumbs => {
       this.setState({ breadcrumbs });
     });
   }
 
   private unsubscribe() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
+    if (this.unsubscribable) {
+      this.unsubscribable.unsubscribe();
+      delete this.unsubscribable;
     }
   }
 }
