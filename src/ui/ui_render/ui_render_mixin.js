@@ -152,15 +152,15 @@ export function uiRenderMixin(kbnServer, server, config) {
             defaultInjectedVars,
           ),
         ),
-      },
 
-      legacyMetadata: await getLegacyKibanaPayload({
-        app,
-        translations,
-        request,
-        includeUserProvidedConfig,
-        injectedVarsOverrides
-      }),
+        legacyMetadata: await getLegacyKibanaPayload({
+          app,
+          translations,
+          request,
+          includeUserProvidedConfig,
+          injectedVarsOverrides
+        }),
+      },
     });
   }
 

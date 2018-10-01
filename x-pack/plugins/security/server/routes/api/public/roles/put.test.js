@@ -188,7 +188,7 @@ describe('PUT role', () => {
         statusCode: 400,
         result: {
           error: 'Bad Request',
-          message: `child \"kibana\" fails because [child \"space\" fails because [\"&#x2a;\" is not allowed]]`,
+          message: `child \"kibana\" fails because [child \"space\" fails because [\"*\" is not allowed]]`,
           statusCode: 400,
           validation: {
             keys: ['kibana.space.&#x2a;'],
@@ -211,7 +211,7 @@ describe('PUT role', () => {
         statusCode: 400,
         result: {
           error: 'Bad Request',
-          message: `child \"kibana\" fails because [child \"space\" fails because [\"foo-&#x2a;\" is not allowed]]`,
+          message: `child \"kibana\" fails because [child \"space\" fails because [\"foo-*\" is not allowed]]`,
           statusCode: 400,
           validation: {
             keys: ['kibana.space.foo-&#x2a;'],

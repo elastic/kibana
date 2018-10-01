@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore
-import { Server } from 'hapi';
+import { PluginProperties, Server } from 'hapi';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
 
@@ -17,7 +17,7 @@ export interface TestOptions {
   setupFn?: (server: any) => void;
   testConfig?: TestConfig;
   payload?: any;
-  preCheckLicenseImpl?: (req: any, reply: any) => any;
+  preCheckLicenseImpl?: (req: any, h: any) => any;
   expectSpacesClientCall?: boolean;
 }
 
@@ -35,11 +35,22 @@ export type RequestRunner = (
   options?: TestOptions
 ) => Promise<RequestRunnerResult>;
 
-export const defaultPreCheckLicenseImpl = (request: any, reply: any) => reply();
+export const defaultPreCheckLicenseImpl = (request: any) => '';
 
 const baseConfig: TestConfig = {
   'server.basePath': '',
 };
+
+// Merge / extend default interfaces for hapi. This is all faked out below.
+declare module 'hapi' {
+  interface Server {
+    savedObjects: any;
+  }
+
+  interface PluginProperties {
+    spaces: any;
+  }
+}
 
 export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: any) => void) {
   const teardowns: TeardownFn[] = [];
@@ -72,8 +83,6 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       ...baseConfig,
       ...testConfig,
     };
-
-    server.connection({ port: 0 });
 
     await setupFn(server);
 

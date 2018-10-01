@@ -181,9 +181,9 @@
   version "23.3.2"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.2.tgz#07b90f6adf75d42c34230c026a2529e56c249dbb"
 
-"@types/joi@^10.4.4":
-  version "10.6.4"
-  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-10.6.4.tgz#0989d69e792a7db13e951852e6949df6787f113f"
+"@types/joi@^13.4.2":
+  version "13.6.0"
+  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-13.6.0.tgz#69b289d18619efb298aed9a3efdc9ad286fb0c64"
 
 "@types/loglevel@^1.5.3":
   version "1.5.3"

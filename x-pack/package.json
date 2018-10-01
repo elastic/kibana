@@ -27,7 +27,7 @@
     "@kbn/test": "link:../packages/kbn-test",
     "@types/expect.js": "^0.3.29",
     "@types/jest": "^23.3.1",
-    "@types/joi": "^10.4.4",
+    "@types/joi": "^13.4.2",
     "@types/mocha": "^5.2.5",
     "@types/pngjs": "^3.3.1",
     "@types/supertest": "^2.0.5",
