@@ -26,7 +26,7 @@ export const DatasourcePreview = ({ done, datatable }) => (
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
-            id="xpack.canvas.datasource.previewHeaderTitle"
+            id="xpack.canvas.datasource.previewModalTitle"
             defaultMessage="Datasource Preview"
           />
         </EuiModalHeaderTitle>
@@ -36,12 +36,12 @@ export const DatasourcePreview = ({ done, datatable }) => (
           <p>
             <FormattedMessage
               id="xpack.canvas.datasource.previewModalDescription"
-              defaultMessage="Click {strongSave} in the sidebar to use this data"
+              defaultMessage="Click {saveButton} in the sidebar to use this data"
               values={{
-                strongSave: (
+                saveButton: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.canvas.datasource.previewModalStrongSaveLabel"
+                      id="xpack.canvas.datasource.previewModalDescription.buttonToClickLabel"
                       defaultMessage="Save"
                     />
                   </strong>
@@ -61,7 +61,7 @@ export const DatasourcePreview = ({ done, datatable }) => (
                 title={
                   <h2>
                     <FormattedMessage
-                      id="xpack.canvas.datasource.noDocumentFoundHeaderTitle"
+                      id="xpack.canvas.datasource.noDocumentFoundTitle"
                       defaultMessage="No documents found"
                     />
                   </h2>

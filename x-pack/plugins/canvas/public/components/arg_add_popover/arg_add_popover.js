@@ -5,14 +5,22 @@
  */
 
 import React from 'react';
+import { injectI18n } from '@kbn/i18n/react';
 import { PropTypes } from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
 import { Popover } from '../popover';
 import { ArgAdd } from '../arg_add';
 
-export const ArgAddPopover = ({ options }) => {
+const ArgAddPopoverUI = ({ options, intl }) => {
   const button = handleClick => (
-    <EuiButtonIcon iconType="plusInCircle" aria-label="Add Argument" onClick={handleClick} />
+    <EuiButtonIcon
+      iconType="plusInCircle"
+      aria-label={intl.formatMessage({
+        id: 'xpack.canvas.argAddPopover.addArgumentButtonLabel',
+        defaultMessage: 'Add Argument',
+      })}
+      onClick={handleClick}
+    />
   );
 
   return (
@@ -39,6 +47,8 @@ export const ArgAddPopover = ({ options }) => {
   );
 };
 
-ArgAddPopover.propTypes = {
+ArgAddPopoverUI.propTypes = {
   options: PropTypes.array.isRequired,
 };
+
+export const ArgAddPopover = injectI18n(ArgAddPopoverUI);

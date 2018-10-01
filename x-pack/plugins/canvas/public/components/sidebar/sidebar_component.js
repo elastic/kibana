@@ -60,7 +60,7 @@ const SidebarComponentUI = ({
               <EuiTitle size="s">
                 <h3>
                   <FormattedMessage
-                    id="xpack.canvas.sidebar.headerTitle"
+                    id="xpack.canvas.sidebar.selectedLayerTitle"
                     defaultMessage="Selected layer"
                   />
                 </h3>

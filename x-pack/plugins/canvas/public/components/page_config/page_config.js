@@ -21,13 +21,15 @@ export const PageConfig = ({
   return (
     <Fragment>
       <EuiTitle size="xs">
-        <h4>Page</h4>
+        <h4>
+          <FormattedMessage id="xpack.canvas.pageConfig.pageConfigTitle" defaultMessage="Page" />
+        </h4>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.canvas.page.config.backgroundLabel"
+            id="xpack.canvas.pageConfig.backgroundFormRowLabel"
             defaultMessage="Background"
           />
         }
@@ -42,7 +44,7 @@ export const PageConfig = ({
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.canvas.page.config.transitionLabel"
+                id="xpack.canvas.pageConfig.transitionFormRowLabel"
                 defaultMessage="transition"
               />
             }
@@ -57,7 +59,7 @@ export const PageConfig = ({
             <EuiFormRow
               label={
                 <FormattedMessage
-                  id="xpack.canvas.page.config.previewLabel"
+                  id="xpack.canvas.pageConfig.previewFormRowLabel"
                   defaultMessage="Preview"
                 />
               }

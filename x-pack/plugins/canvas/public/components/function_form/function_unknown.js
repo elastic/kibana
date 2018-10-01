@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const FunctionUnknown = ({ argType }) => (
   <div className="canvasFunctionForm canvasFunctionForm--unknown-expression">
     <FormattedMessage
-      id="xpack.canvas.function.form.unknownExpressionTypeErrorMessage"
+      id="xpack.canvas.functionForm.unknownExpressionTypeErrorMessage"
       defaultMessage="Unknown expression type '{typeError}'"
       values={{ typeError: argType }}
     />

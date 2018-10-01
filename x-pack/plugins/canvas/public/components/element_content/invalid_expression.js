@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const InvalidExpression = ({ selectElement }) => (
   <h3 onClick={selectElement}>
     <FormattedMessage
-      id="xpack.canvas.element.content.invalidExpressionHeaderTitle"
+      id="xpack.canvas.elementContent.invalidExpressionTitle"
       defaultMessage="Invalid expression"
     />
   </h3>

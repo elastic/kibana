@@ -19,7 +19,7 @@ const ShowDebuggingComponent = ({ payload, expanded, setExpanded }) =>
         onClick={() => setExpanded(!expanded)}
       >
         <FormattedMessage
-          id="xpack.canvas.error.showDebuggingButtonTitle"
+          id="xpack.canvas.error.showDebuggingButtonLabel"
           defaultMessage="See Details"
         />
       </EuiButtonEmpty>

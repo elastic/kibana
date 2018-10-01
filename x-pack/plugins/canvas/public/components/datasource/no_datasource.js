@@ -14,14 +14,14 @@ export const NoDatasource = () => (
     <EuiText>
       <h4>
         <FormattedMessage
-          id="xpack.canvas.datasource.noDataHeaderTitle"
+          id="xpack.canvas.datasource.noDataSourceTitle"
           defaultMessage="No data source present"
         />
       </h4>
       <p>
         <FormattedMessage
-          id="xpack.canvas.datasource.noDataDescription"
-          defaultMessage=" This element does not have an attached data source. This is usually because the element is
+          id="xpack.canvas.datasource.noDataSourceDescription"
+          defaultMessage="This element does not have an attached data source. This is usually because the element is
             an image or other static asset. If that's not the case you might want to check your
             expression to make sure it is not malformed."
         />

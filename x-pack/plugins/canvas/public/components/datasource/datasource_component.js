@@ -118,7 +118,7 @@ export class DatasourceComponent extends PureComponent {
             onClick={() => setSelecting(!selecting)}
           >
             <FormattedMessage
-              id="xpack.canvas.datasource.changeSourceButtonTitle"
+              id="xpack.canvas.datasource.changeSourceButtonLabel"
               defaultMessage="Change your data source"
             />
           </EuiButtonEmpty>
@@ -135,7 +135,7 @@ export class DatasourceComponent extends PureComponent {
             <EuiFlexItem grow={false}>
               <EuiButton size="s" onClick={() => setPreviewing(true)} icon="check">
                 <FormattedMessage
-                  id="xpack.canvas.datasource.previewButtonTitle"
+                  id="xpack.canvas.datasource.previewButtonLabel"
                   defaultMessage="Preview"
                 />
               </EuiButton>
@@ -150,7 +150,7 @@ export class DatasourceComponent extends PureComponent {
                 icon="check"
               >
                 <FormattedMessage
-                  id="xpack.canvas.datasource.saveButtonTitle"
+                  id="xpack.canvas.datasource.saveButtonLabel"
                   defaultMessage="Save"
                 />
               </EuiButton>

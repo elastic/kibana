@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withState, withHandlers } from 'recompose';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import { getId } from '../../../lib/get_id';
 import { notify } from '../../../lib/notify';
 import { WorkpadDropzone as Component } from './workpad_dropzone';
 
-export const WorkpadDropzone = compose(
+const WorkpadDropzoneUI = compose(
   withState('isDropping', 'setDropping', false),
   withHandlers({
     onDropAccepted: ({ onUpload, setDropping }) => ([file]) => {
@@ -20,25 +19,27 @@ export const WorkpadDropzone = compose(
       const reader = new FileReader();
 
       // handle reading the uploaded file
-      reader.onload = () => {
+      reader.onload = ({ intl }) => {
         try {
           const workpad = JSON.parse(reader.result);
           workpad.id = getId('workpad');
           onUpload(workpad);
         } catch (e) {
           notify.error(e, {
-            title: file.name ? (
-              <FormattedMessage
-                id="xpack.canvas.workpad.loader.dropzone.loadFileErrorTitle"
-                defaultMessage="Couldn't upload {fileName}"
-                values={{ fileName: file.name }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.canvas.workpad.loader.dropzone.commonLoadFileErrorTitle"
-                defaultMessage="Couldn't upload file"
-              />
-            ),
+            title: file.name
+              ? intl.formatMessage(
+                  {
+                    id: 'xpack.canvas.workpadLoader.dropzone.loadFileErrorMessage',
+                    defaultMessage: "Couldn't upload '{fileName}'",
+                  },
+                  {
+                    fileName: file.name,
+                  }
+                )
+              : intl.formatMessage({
+                  id: 'xpack.canvas.workpadLoader.dropzone.commonLoadFileErrorMessage',
+                  defaultMessage: "Couldn't upload 'file'",
+                }),
           });
         }
       };
@@ -47,25 +48,27 @@ export const WorkpadDropzone = compose(
       reader.readAsText(file);
       setDropping(false);
     },
-    onDropRejected: ({ setDropping }) => ([file]) => {
+    onDropRejected: ({ setDropping, intl }) => ([file]) => {
       notify.warning(
-        <FormattedMessage
-          id="xpack.canvas.workpad.loader.dropzone.fileTypeErrorMessage"
-          defaultMessage="Only JSON files are accepted"
-        />,
+        intl.formatMessage({
+          id: 'xpack.canvas.workpadLoader.dropzone.fileTypeErrorMessage',
+          defaultMessage: 'Only JSON files are accepted',
+        }),
         {
-          title: file.name ? (
-            <FormattedMessage
-              id="xpack.canvas.workpad.loader.dropzone.readFileErrorTitle"
-              defaultMessage="Couldn't upload {fileName}"
-              values={{ fileName: file.name }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.canvas.workpad.loader.dropzone.readCommonFileErrorTitle"
-              defaultMessage="Couldn't upload file"
-            />
-          ),
+          title: file.name
+            ? intl.formatMessage(
+                {
+                  id: 'xpack.canvas.workpadLoader.dropzone.readFileErrorMessage',
+                  defaultMessage: "Couldn't upload '{fileName}'",
+                },
+                {
+                  fileName: file.name,
+                }
+              )
+            : intl.formatMessage({
+                id: 'xpack.canvas.workpadLoader.dropzone.readCommonFileErrorMessage',
+                defaultMessage: "Couldn't upload 'file'",
+              }),
         }
       );
       setDropping(false);
@@ -73,6 +76,8 @@ export const WorkpadDropzone = compose(
   })
 )(Component);
 
-WorkpadDropzone.propTypes = {
+WorkpadDropzoneUI.propTypes = {
   onUpload: PropTypes.func.isRequired,
 };
+
+export const WorkpadDropzone = injectI18n(WorkpadDropzoneUI);

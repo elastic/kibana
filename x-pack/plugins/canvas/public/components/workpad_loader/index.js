@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withState, getContext, withHandlers } from 'recompose';
 import fileSaver from 'file-saver';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import * as workpadService from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
 import { getWorkpad } from '../../state/selectors/workpad';
@@ -20,7 +19,7 @@ const mapStateToProps = state => ({
   workpadId: getWorkpad(state).id,
 });
 
-export const WorkpadLoader = compose(
+const WorkpadLoaderUI = compose(
   getContext({
     router: PropTypes.object,
   }),
@@ -28,7 +27,7 @@ export const WorkpadLoader = compose(
   withState('workpads', 'setWorkpads', null),
   withHandlers({
     // Workpad creation via navigation
-    createWorkpad: props => async workpad => {
+    createWorkpad: ({ intl, ...props }) => async workpad => {
       // workpad data uploaded, create and load it
       if (workpad != null) {
         try {
@@ -36,12 +35,10 @@ export const WorkpadLoader = compose(
           props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
         } catch (err) {
           notify.error(err, {
-            title: (
-              <FormattedMessage
-                id="xpack.canvas.workpad.loader.uploadWorkpadErrorTitle"
-                defaultMessage="Couldn't upload workpad"
-              />
-            ),
+            title: intl.formatMessage({
+              id: 'xpack.canvas.workpadLoader.uploadWorkpadErrorMessage',
+              defaultMessage: "Couldn't upload workpad",
+            }),
           });
         }
         return;
@@ -51,42 +48,38 @@ export const WorkpadLoader = compose(
     },
 
     // Workpad search
-    findWorkpads: ({ setWorkpads }) => async text => {
+    findWorkpads: ({ setWorkpads, intl }) => async text => {
       try {
         const workpads = await workpadService.find(text);
         setWorkpads(workpads);
       } catch (err) {
         notify.error(err, {
-          title: (
-            <FormattedMessage
-              id="xpack.canvas.workpad.loader.searchWorkpadErrorTitle"
-              defaultMessage="Couldn't find workpads"
-            />
-          ),
+          title: intl.formatMessage({
+            id: 'xpack.canvas.workpadLoader.searchWorkpadErrorMessage',
+            defaultMessage: "Couldn't find workpads",
+          }),
         });
       }
     },
 
     // Workpad import/export methods
-    downloadWorkpad: () => async workpadId => {
+    downloadWorkpad: ({ intl }) => async workpadId => {
       try {
         const workpad = await workpadService.get(workpadId);
         const jsonBlob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });
         fileSaver.saveAs(jsonBlob, `canvas-workpad-${workpad.name}-${workpad.id}.json`);
       } catch (err) {
         notify.error(err, {
-          title: (
-            <FormattedMessage
-              id="xpack.canvas.workpad.loader.downloadWorkpadErrorTitle"
-              defaultMessage="Couldn't download workpad"
-            />
-          ),
+          title: intl.formatMessage({
+            id: 'xpack.canvas.workpadLoader.downloadWorkpadErrorMessage',
+            defaultMessage: "Couldn't download workpad",
+          }),
         });
       }
     },
 
     // Clone workpad given an id
-    cloneWorkpad: props => async workpadId => {
+    cloneWorkpad: ({ intl, ...props }) => async workpadId => {
       try {
         const workpad = await workpadService.get(workpadId);
         workpad.name += ' - Copy';
@@ -95,18 +88,16 @@ export const WorkpadLoader = compose(
         props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
       } catch (err) {
         notify.error(err, {
-          title: (
-            <FormattedMessage
-              id="xpack.canvas.workpad.loader.cloneWorkpadErrorTitle"
-              defaultMessage="Couldn't clone workpad"
-            />
-          ),
+          title: intl.formatMessage({
+            id: 'xpack.canvas.workpadLoader.cloneWorkpadErrorMessage',
+            defaultMessage: "Couldn't clone workpad",
+          }),
         });
       }
     },
 
     // Remove workpad given an array of id
-    removeWorkpads: props => async workpadIds => {
+    removeWorkpads: ({ intl, ...props }) => async workpadIds => {
       const { setWorkpads, workpads, workpadId: loadedWorkpad } = props;
 
       const removeWorkpads = workpadIds.map(id =>
@@ -143,10 +134,10 @@ export const WorkpadLoader = compose(
 
         if (errors.length > 0) {
           notify.error(
-            <FormattedMessage
-              id="xpack.canvas.workpad.loader.removeWorkpadErrorTitle"
-              defaultMessage="Couldn't delete all workpads"
-            />
+            intl.formatMessage({
+              id: 'xpack.canvas.workpadLoader.removeWorkpadsErrorMessage',
+              defaultMessage: "Couldn't delete all workpads",
+            })
           );
         }
 
@@ -159,3 +150,5 @@ export const WorkpadLoader = compose(
     },
   })
 )(Component);
+
+export const WorkpadLoader = injectI18n(WorkpadLoaderUI);

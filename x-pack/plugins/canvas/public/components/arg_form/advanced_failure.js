@@ -51,7 +51,7 @@ export const AdvancedFailureComponent = props => {
       <div>
         <EuiButton disabled={!valid} onClick={e => valueChange(e)} size="s" type="submit">
           <FormattedMessage
-            id="xpack.canvas.arg.form.submitInvalidExpressionButtonTitle"
+            id="xpack.canvas.argForm.advancedFailure.submitInvalidExpressionButtonLabel"
             defaultMessage="Apply"
           />
         </EuiButton>
@@ -59,7 +59,7 @@ export const AdvancedFailureComponent = props => {
           defaultValue.length && (
             <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
               <FormattedMessage
-                id="xpack.canvas.arg.form.resetInvalidExpressionButtonTitle"
+                id="xpack.canvas.argForm.advancedFailure.resetInvalidExpressionButtonLabel"
                 defaultMessage="Reset"
               />
             </EuiButtonEmpty>

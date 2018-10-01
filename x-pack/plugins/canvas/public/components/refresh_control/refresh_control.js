@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Popover } from '../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
 
@@ -37,7 +38,10 @@ export const RefreshControl = ({ inFlight, setRefreshInterval, refreshInterval, 
 
   const popoverButton = handleClick => (
     <EuiButtonEmpty isLoading={inFlight} size="s" onClick={handleClick}>
-      Refresh
+      <FormattedMessage
+        id="xpack.canvas.refreshControl.refreshPopoverButtonLabel"
+        defaultMessage="Refresh"
+      />
     </EuiButtonEmpty>
   );
 

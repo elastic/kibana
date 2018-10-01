@@ -16,7 +16,7 @@ export const SimpleFailure = () => (
       icon="warning"
       content={
         <FormattedMessage
-          id="xpack.canvas.arg.form.simpleFailureTooltip"
+          id="xpack.canvas.argForm.simpleFailureTooltip"
           defaultMessage="The interface for this argument could not parse the value, so a fallback input is being used"
         />
       }

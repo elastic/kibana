@@ -55,7 +55,7 @@ export class Link extends React.PureComponent {
       return (
         <div>
           <FormattedMessage
-            id="xpack.canvas.link.errorMessage"
+            id="xpack.canvas.link.linkErrorMessage"
             defaultMessage="LINK ERROR: {errorMessage}"
             values={{ errorMessage: e.message }}
           />

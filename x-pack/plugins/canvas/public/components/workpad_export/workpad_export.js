@@ -42,7 +42,7 @@ class WorkpadExportUI extends React.PureComponent {
             <EuiFormRow
               label={
                 <FormattedMessage
-                  id="xpack.canvas.workpad.export.createPdfButtonLabel"
+                  id="xpack.canvas.workpadExport.createPdfButtonLabel"
                   defaultMessage="Click below to create a PDF. You'll be notified when the export is complete"
                 />
               }
@@ -53,7 +53,10 @@ class WorkpadExportUI extends React.PureComponent {
                   closePopover();
                 }}
               >
-                Export as PDF
+                <FormattedMessage
+                  id="xpack.canvas.workpadExport.exportAsPdfButtonLabel"
+                  defaultMessage="Export as PDF"
+                />
               </EuiButton>
             </EuiFormRow>
           </EuiFlexItem>
@@ -62,7 +65,7 @@ class WorkpadExportUI extends React.PureComponent {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.canvas.workpad.export.generatePdfLinkLabel"
+              id="xpack.canvas.workpadExport.generatePdfLinkLabel"
               defaultMessage="To generate a PDF from a script or with Watcher, use this URL."
             />
           }
@@ -84,7 +87,7 @@ class WorkpadExportUI extends React.PureComponent {
               >
                 <EuiButtonIcon
                   aria-label={intl.formatMessage({
-                    id: 'xpack.canvas.workpad.export.copyToClipboardLabel',
+                    id: 'xpack.canvas.workpadExport.copyToClipboardAriaLabel',
                     defaultMessage: 'Copy to clipboard',
                   })}
                   iconType="copy"
@@ -101,7 +104,7 @@ class WorkpadExportUI extends React.PureComponent {
     return (
       <div>
         <FormattedMessage
-          id="xpack.canvas.workpad.export.renderDisabledMessage"
+          id="xpack.canvas.workpadExport.exportToPdfIsDisabledMessage"
           defaultMessage="Export to PDF is disabled. You must configure reporting to use the Chromium browser. Add
           this to your kibana.yml file."
         />
@@ -119,7 +122,7 @@ class WorkpadExportUI extends React.PureComponent {
       <EuiButtonIcon
         iconType="exportAction"
         aria-label={intl.formatMessage({
-          id: 'xpack.canvas.workpad.export.createPdfAriaLabel',
+          id: 'xpack.canvas.workpadExport.createPdfButtonAriaLabel',
           defaultMessage: 'Create PDF',
         })}
         onClick={togglePopover}
@@ -129,12 +132,10 @@ class WorkpadExportUI extends React.PureComponent {
     return (
       <Popover
         button={exportControl}
-        tooltip={
-          <FormattedMessage
-            id="xpack.canvas.workpad.export.workpadExportButtonTooltip"
-            defaultMessage="Export workpad"
-          />
-        }
+        tooltip={this.props.intl.formatMessage({
+          id: 'xpack.canvas.workpadExport.exportWorkpadButtonTooltip',
+          defaultMessage: 'Export workpad',
+        })}
         tooltipPosition="bottom"
       >
         {({ closePopover }) => (

@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import lowerCase from 'lodash.lowercase';
 import { map, includes, sortBy } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 
-export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
+const ElementTypesUI = ({ elements, onClick, search, setSearch, intl }) => {
   search = lowerCase(search);
   elements = sortBy(map(elements, (element, name) => ({ name, ...element })), 'displayName');
   const elementList = map(elements, (element, name) => {
@@ -52,12 +52,10 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFieldSearch
-              placeholder={
-                <FormattedMessage
-                  id="xpack.canvas.element.types.searchInputPlaceholder"
-                  defaultMessage="Filter elements"
-                />
-              }
+              placeholder={intl.formatMessage({
+                id: 'xpack.canvas.elementTypes.searchInputPlaceholder',
+                defaultMessage: 'Filter elements',
+              })}
               onChange={e => setSearch(e.target.value)}
               value={search}
             />
@@ -73,9 +71,11 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   );
 };
 
-ElementTypes.propTypes = {
+ElementTypesUI.propTypes = {
   elements: PropTypes.object,
   onClick: PropTypes.func,
   search: PropTypes.string,
   setSearch: PropTypes.func,
 };
+
+export const ElementTypes = injectI18n(ElementTypesUI);

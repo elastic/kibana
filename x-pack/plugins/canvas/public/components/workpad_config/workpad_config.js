@@ -47,7 +47,7 @@ const WorkpadConfigUI = ({ size, name, setSize, setName, intl }) => {
     <div>
       <EuiTitle size="xs">
         <h4>
-          <FormattedMessage id="xpack.canvas.workpad.config.headerTitle" defaultMessage="Workpad" />
+          <FormattedMessage id="xpack.canvas.workpadConfig.workpadTitle" defaultMessage="Workpad" />
         </h4>
       </EuiTitle>
 
@@ -56,7 +56,7 @@ const WorkpadConfigUI = ({ size, name, setSize, setName, intl }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.canvas.workpad.config.workpadNameLabel"
+            id="xpack.canvas.workpadConfig.nameFormRowLabel"
             defaultMessage="Name"
           />
         }
@@ -70,7 +70,7 @@ const WorkpadConfigUI = ({ size, name, setSize, setName, intl }) => {
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.canvas.workpad.config.workpadWidthLabel"
+                id="xpack.canvas.workpadConfig.widthFormRowLabel"
                 defaultMessage="Width"
               />
             }
@@ -88,7 +88,7 @@ const WorkpadConfigUI = ({ size, name, setSize, setName, intl }) => {
               position="bottom"
               content={
                 <FormattedMessage
-                  id="xpack.canvas.workpad.config.flipSizeButtonTooltip"
+                  id="xpack.canvas.workpadConfig.flipSizeButtonTooltip"
                   defaultMessage="Flip the width and height"
                 />
               }
@@ -98,7 +98,7 @@ const WorkpadConfigUI = ({ size, name, setSize, setName, intl }) => {
                 color="text"
                 onClick={rotate}
                 aria-label={intl.formatMessage({
-                  id: 'xpack.canvas.workpad.config.flipSizeButtonLabel',
+                  id: 'xpack.canvas.workpadConfig.flipSizeButtonAriaLabel',
                   defaultMessage: 'Swap Page Dimensions',
                 })}
                 style={{ marginBottom: 12 }}
@@ -110,7 +110,7 @@ const WorkpadConfigUI = ({ size, name, setSize, setName, intl }) => {
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.canvas.workpad.config.workpadHeightLabel"
+                id="xpack.canvas.workpadConfig.heightFormRowLabel"
                 defaultMessage="Height"
               />
             }
@@ -134,14 +134,14 @@ const WorkpadConfigUI = ({ size, name, setSize, setName, intl }) => {
             onClick={() => setSize(badge.size)}
             aria-label={intl.formatMessage(
               {
-                id: 'xpack.canvas.workpad.config.presetPageSizeAriaLabel',
+                id: 'xpack.canvas.workpadConfig.presetPageSizeBadgeAriaLabel',
                 defaultMessage: 'Preset Page Size: {badgeName}',
               },
               { badgeName: badge.name }
             )}
             onClickAriaLabel={intl.formatMessage(
               {
-                id: 'xpack.canvas.workpad.config.setPageSizeAriaLabel',
+                id: 'xpack.canvas.workpadConfig.setPageSizeBadgeAriaLabel',
                 defaultMessage: 'Set page size to {badgeName}',
               },
               { badgeName: badge.name }

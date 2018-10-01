@@ -8,9 +8,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldSearch } from '@elastic/eui';
 import { debounce } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 
-export class WorkpadSearch extends React.PureComponent {
+class WorkpadSearchUI extends React.PureComponent {
   static propTypes = {
     onChange: PropTypes.func.isRequired,
     initialText: PropTypes.string,
@@ -32,12 +32,10 @@ export class WorkpadSearch extends React.PureComponent {
     return (
       <EuiFieldSearch
         compressed
-        placeholder={
-          <FormattedMessage
-            id="xpack.canvas.workpad.search.inputPlaceholder"
-            defaultMessage="Find workpad"
-          />
-        }
+        placeholder={this.props.intl.formatMessage({
+          id: 'xpack.canvas.workpadLoader.workpadSearch.InputPlaceholder',
+          defaultMessage: 'Find workpad',
+        })}
         value={this.state.searchText}
         onChange={this.setSearchText}
         fullWidth
@@ -46,3 +44,5 @@ export class WorkpadSearch extends React.PureComponent {
     );
   }
 }
+
+export const WorkpadSearch = injectI18n(WorkpadSearchUI);

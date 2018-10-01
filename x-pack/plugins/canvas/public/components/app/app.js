@@ -6,12 +6,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { routes } from '../../apps';
 import { shortcutManager } from '../../lib/shortcut_manager';
 import { Router } from '../router';
 
-export class App extends React.PureComponent {
+class AppUI extends React.PureComponent {
   static childContextTypes = {
     shortcuts: PropTypes.object.isRequired,
   };
@@ -57,12 +57,10 @@ export class App extends React.PureComponent {
         <Router
           routes={routes}
           showLoading={this.props.appState.ready === false}
-          loadingMessage={
-            <FormattedMessage
-              id="xpack.canvas..app.canvasLoadingTitle"
-              defaultMessage="Canvas is loading"
-            />
-          }
+          loadingMessage={this.props.intl.formatMessage({
+            id: 'xpack.canvas.app.canvasLoadingTitle',
+            defaultMessage: 'Canvas is loading',
+          })}
           onRouteChange={this.props.onRouteChange}
           onLoad={() => this.props.setAppReady(true)}
           onError={err => this.props.setAppError(err)}
@@ -71,3 +69,5 @@ export class App extends React.PureComponent {
     );
   }
 }
+
+export const App = injectI18n(AppUI);

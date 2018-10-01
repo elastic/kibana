@@ -7,12 +7,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import { FontPicker } from '../font_picker';
 import { ColorPickerMini } from '../color_picker_mini';
 import { fontSizes } from './font_sizes';
 
-export const TextStylePicker = ({
+const TextStylePickerUI = ({
   family,
   size,
   align,
@@ -22,36 +22,31 @@ export const TextStylePicker = ({
   italic,
   onChange,
   colors,
+  intl,
 }) => {
   const alignmentButtons = [
     {
       id: 'left',
-      label: (
-        <FormattedMessage
-          id="xpack.canvas.text.style.picker.alignLeftLabel"
-          defaultMessage="Align left"
-        />
-      ),
+      label: intl.formatMessage({
+        id: 'xpack.canvas.textStylePicker.alignmentButtons.leftLabel',
+        defaultMessage: 'Align left',
+      }),
       iconType: 'editorAlignLeft',
     },
     {
       id: 'center',
-      label: (
-        <FormattedMessage
-          id="xpack.canvas.text.style.picker.alignCenterLabel"
-          defaultMessage="Align center"
-        />
-      ),
+      label: intl.formatMessage({
+        id: 'xpack.canvas.textStylePicker.alignmentButtons.centerLabel',
+        defaultMessage: 'Align center',
+      }),
       iconType: 'editorAlignCenter',
     },
     {
       id: 'right',
-      label: (
-        <FormattedMessage
-          id="xpack.canvas.text.style.picker.alignRightLabel"
-          defaultMessage="Align right"
-        />
-      ),
+      label: intl.formatMessage({
+        id: 'xpack.canvas.textStylePicker.alignmentButtons.rightLabel',
+        defaultMessage: 'Align right',
+      }),
       iconType: 'editorAlignRight',
     },
   ];
@@ -59,32 +54,26 @@ export const TextStylePicker = ({
   const styleButtons = [
     {
       id: 'bold',
-      label: (
-        <FormattedMessage
-          id="xpack.canvas.text.style.picker.styleBoldLabel"
-          defaultMessage="Bold"
-        />
-      ),
+      label: intl.formatMessage({
+        id: 'xpack.canvas.textStylePicker.styleButtons.boldLabel',
+        defaultMessage: 'Bold',
+      }),
       iconType: 'editorBold',
     },
     {
       id: 'italic',
-      label: (
-        <FormattedMessage
-          id="xpack.canvas.text.style.picker.styleItalicLabel"
-          defaultMessage="Italic"
-        />
-      ),
+      label: intl.formatMessage({
+        id: 'xpack.canvas.textStylePicker.styleButtons.italicLabel',
+        defaultMessage: 'Italic',
+      }),
       iconType: 'editorItalic',
     },
     {
       id: 'underline',
-      label: (
-        <FormattedMessage
-          id="xpack.canvas.text.style.picker.styleUnderlineLabel"
-          defaultMessage="Underline"
-        />
-      ),
+      label: intl.formatMessage({
+        id: 'xpack.canvas.textStylePicker.styleButtons.underlineLabel',
+        defaultMessage: 'Underline',
+      }),
       iconType: 'editorUnderline',
     },
   ];
@@ -173,7 +162,7 @@ export const TextStylePicker = ({
   );
 };
 
-TextStylePicker.propTypes = {
+TextStylePickerUI.propTypes = {
   family: PropTypes.string,
   size: PropTypes.number,
   align: PropTypes.string,
@@ -185,6 +174,8 @@ TextStylePicker.propTypes = {
   colors: PropTypes.array,
 };
 
-TextStylePicker.defaultProps = {
+TextStylePickerUI.defaultProps = {
   align: 'left',
 };
+
+export const TextStylePicker = injectI18n(TextStylePickerUI);

@@ -18,7 +18,7 @@ const TrayUI = ({ children, done, intl }) => {
             size="s"
             onClick={done}
             aria-label={intl.formatMessage({
-              id: 'xpack.canvas.toolbar.tray.dismissButtonAriaLabel',
+              id: 'xpack.canvas.toolbar.tray.dismissTrayButtonAriaLabel',
               defaultMessage: 'Dismiss tray',
             })}
             iconType="arrowDown"

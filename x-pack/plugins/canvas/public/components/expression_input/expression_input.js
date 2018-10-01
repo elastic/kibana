@@ -7,11 +7,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 import { ContextMenu } from '../context_menu';
 import { matchPairsProvider } from './match_pairs';
 import { Suggestion } from './suggestion';
 
-export class ExpressionInput extends React.Component {
+class ExpressionInputUI extends React.Component {
   constructor({ value, onChange }) {
     super();
     this.state = {
@@ -83,7 +84,11 @@ export class ExpressionInput extends React.Component {
 
     const helpText = error
       ? null
-      : 'This is the coded expression that backs this element. You better know what you are doing here.';
+      : this.props.intl.formatMessage({
+          id: 'xpack.canvas.expression.expressionInputErrorMessage',
+          defaultMessage:
+            'This is the coded expression that backs this element. You better know what you are doing here.',
+        });
     return (
       <div className="expressionInput">
         <ContextMenu
@@ -107,8 +112,10 @@ export class ExpressionInput extends React.Component {
   }
 }
 
-ExpressionInput.propTypes = {
+ExpressionInputUI.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   error: PropTypes.string,
 };
+
+export const ExpressionInput = injectI18n(ExpressionInputUI);

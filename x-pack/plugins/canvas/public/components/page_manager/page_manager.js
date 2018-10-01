@@ -122,16 +122,11 @@ class PageManagerUI extends React.PureComponent {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <Link
-                  name={
-                    <FormattedMessage
-                      id="xpack.canvas.page.manager.pageNumberLinkTitle"
-                      defaultMessage="loadWorkpad"
-                    />
-                  }
+                  name="loadWorkpad"
                   params={{ id: workpadId, page: pageNumber }}
                   aria-label={this.props.intl.formatMessage(
                     {
-                      id: 'xpack.canvas.page.manager.pageNumberLinkAriaLabel',
+                      id: 'xpack.canvas.pageManager.pageNumberLinkAriaLabel',
                       defaultMessage: 'Load page number {pageNumber}',
                     },
                     { pageNumber }
@@ -188,7 +183,7 @@ class PageManagerUI extends React.PureComponent {
               anchorClassName="canvasPageManager__addPageTip"
               content={
                 <FormattedMessage
-                  id="xpack.canvas.page.manager.addPageButtonTooltip"
+                  id="xpack.canvas.pageManager.addPageButtonTooltip"
                   defaultMessage="Add a new page to this workpad"
                 />
               }
@@ -202,24 +197,18 @@ class PageManagerUI extends React.PureComponent {
         </EuiFlexGroup>
         <ConfirmModal
           isOpen={deleteId != null}
-          title={
-            <FormattedMessage
-              id="xpack.canvas.page.manager.removePageButtonTitle"
-              defaultMessage="Remove Page"
-            />
-          }
-          message={
-            <FormattedMessage
-              id="xpack.canvas.page.manager.removePageButtonDescription"
-              defaultMessage="Are you sure you want to remove this page?"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.canvas.page.manager.confirmRemovePageButtonTitle"
-              defaultMessage="Remove"
-            />
-          }
+          title={this.props.intl.formatMessage({
+            id: 'xpack.canvas.pageManager.removePageModalTitle',
+            defaultMessage: 'Remove Page',
+          })}
+          message={this.props.intl.formatMessage({
+            id: 'xpack.canvas.pageManager.removePageModalDescription',
+            defaultMessage: 'Are you sure you want to remove this page?',
+          })}
+          confirmButtonText={this.props.intl.formatMessage({
+            id: 'xpack.canvas.pageManager.removePageModal.confirmButtonLabel',
+            defaultMessage: 'Remove',
+          })}
           onConfirm={this.doDelete}
           onCancel={this.resetDelete}
         />

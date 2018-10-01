@@ -30,7 +30,7 @@ const PageControlsUI = ({ pageId, onDelete, onDuplicate, intl }) => {
         <EuiToolTip
           content={
             <FormattedMessage
-              id="xpack.canvas.page.preview.duplicateButtonTooltip"
+              id="xpack.canvas.pagePreview.duplicatePageButtonTooltip"
               defaultMessage="Duplicate"
             />
           }
@@ -38,7 +38,7 @@ const PageControlsUI = ({ pageId, onDelete, onDuplicate, intl }) => {
           <EuiButtonIcon
             iconType="document"
             aria-label={intl.formatMessage({
-              id: 'xpack.canvas.page.preview.duplicateButtonAriaLabel',
+              id: 'xpack.canvas.pagePreview.duplicatePageButtonAriaLabel',
               defaultMessage: 'Duplicate Page',
             })}
             onClick={handleDuplicate}
@@ -49,7 +49,7 @@ const PageControlsUI = ({ pageId, onDelete, onDuplicate, intl }) => {
         <EuiToolTip
           content={
             <FormattedMessage
-              id="xpack.canvas.page.preview.deleteButtonTooltip"
+              id="xpack.canvas.pagePreview.deletePageButtonTooltip"
               defaultMessage="Delete"
             />
           }
@@ -58,7 +58,7 @@ const PageControlsUI = ({ pageId, onDelete, onDuplicate, intl }) => {
             color="danger"
             iconType="trash"
             aria-label={intl.formatMessage({
-              id: 'xpack.canvas.page.preview.deleteButtonAriaLabel',
+              id: 'xpack.canvas.pagePreview.deletePageButtonAriaLabel',
               defaultMessage: 'Delete Page',
             })}
             onClick={handleDelete}

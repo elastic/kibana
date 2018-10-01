@@ -7,10 +7,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isEqual, cloneDeep } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import { RenderToDom } from '../render_to_dom';
 
-export class RenderWithFn extends React.Component {
+class RenderWithFnUI extends React.Component {
   static propTypes = {
     name: PropTypes.string.isRequired,
     renderFn: PropTypes.func.isRequired,
@@ -83,21 +83,19 @@ export class RenderWithFn extends React.Component {
     } catch (err) {
       console.error('renderFn threw', err);
       this.props.onError(err, {
-        title: (
-          <FormattedMessage
-            id="xpack.canvas.render.with.fn.renderErrorMessage"
-            defaultMessage="Rendering {functionName} failed"
-            values={{
-              functionName: functionName ? (
-                functionName
-              ) : (
-                <FormattedMessage
-                  id="xpack.canvas.render.with.fn.emptyFunctionNameTitle"
-                  defaultMessage="function"
-                />
-              ),
-            }}
-          />
+        title: this.props.intl.formatMessage(
+          {
+            id: 'xpack.canvas.renderWithFn.renderErrorMessage',
+            defaultMessage: "Rendering '{functionName}' failed",
+          },
+          {
+            functionName:
+              functionName ||
+              this.props.intl.formatMessage({
+                id: 'xpack.canvas.renderWithFn.functionLabel',
+                defaultMessage: 'function',
+              }),
+          }
         ),
       });
     }
@@ -108,12 +106,10 @@ export class RenderWithFn extends React.Component {
 
     if (!domNode) {
       throw new Error(
-        (
-          <FormattedMessage
-            id="xpack.canvas.render.with.fn.resetRenderErrorMessage"
-            defaultMessage="RenderWithFn can not reset undefined target node"
-          />
-        )
+        this.props.intl.formatMessage({
+          id: 'xpack.canvas.renderWithFn.canNotResetUndefinedTargetNodeErrorMessage',
+          defaultMessage: 'RenderWithFn can not reset undefined target node',
+        })
       );
     }
 
@@ -165,3 +161,5 @@ export class RenderWithFn extends React.Component {
     );
   }
 }
+
+export const RenderWithFn = injectI18n(RenderWithFnUI);

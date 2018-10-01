@@ -8,39 +8,39 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFilePicker } from '@elastic/eui';
 import { get } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getId } from '../../lib/get_id';
 import { notify } from '../../lib/notify';
 
-export const WorkpadUpload = ({ onUpload }) => (
+const WorkpadUploadUI = ({ onUpload, intl }) => (
   <EuiFilePicker
     compressed
     initialPromptText={
       <FormattedMessage
-        id="xpack.canvas.workpad.upload.buttonTitle"
+        id="xpack.canvas.workpadLoader.workpadUpload.importWorkpadJsonFileMessage"
         defaultMessage="Import workpad JSON file"
       />
     }
     onChange={([file]) => {
       if (get(file, 'type') !== 'application/json') {
         return notify.warning(
-          <FormattedMessage
-            id="xpack.canvas.workpad.upload.fileTypeErrorMessage"
-            defaultMessage="Only JSON files are accepted"
-          />,
+          intl.formatMessage({
+            id: 'xpack.canvas.workpadLoader.workpadUpload.fileTypeErrorMessage',
+            defaultMessage: 'Only JSON files are accepted',
+          }),
           {
-            title: file.name ? (
-              <FormattedMessage
-                id="xpack.canvas.workpad.upload.fileTypeErrorTitle"
-                defaultMessage="Couldn't upload {fileName}"
-                values={{ fileName: file.name }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.canvas.workpad.upload.commonFileTypeErrorTitle"
-                defaultMessage="Couldn't upload file"
-              />
-            ),
+            title: file.name
+              ? intl.formatMessage(
+                  {
+                    id: 'xpack.canvas.workpadLoader.workpadUpload.fileTypeErrorMessageTitle',
+                    defaultMessage: "Couldn't upload '{fileName}'",
+                  },
+                  { fileName: file.name }
+                )
+              : intl.formatMessage({
+                  id: 'xpack.canvas.workpadLoader.workpadUpload.commonFileTypeErrorMessageTitle',
+                  defaultMessage: "Couldn't upload 'file'",
+                }),
           }
         );
       }
@@ -55,18 +55,18 @@ export const WorkpadUpload = ({ onUpload }) => (
           onUpload(workpad);
         } catch (e) {
           notify.error(e, {
-            title: file.name ? (
-              <FormattedMessage
-                id="xpack.canvas.workpad.upload.fileReadingErrorTitle"
-                defaultMessage="Couldn't upload {fileName}"
-                values={{ fileName: file.name }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.canvas.workpad.upload.commonFileReadingErrorTitle"
-                defaultMessage="Couldn't upload file"
-              />
-            ),
+            title: file.name
+              ? intl.formatMessage(
+                  {
+                    id: 'xpack.canvas.workpadLoader.workpadUpload.readingFileErrorMessageTitle',
+                    defaultMessage: "Couldn't upload '{fileName}'",
+                  },
+                  { fileName: file.name }
+                )
+              : intl.formatMessage({
+                  id: 'xpack.canvas.workpadLoader.workpadUpload.readingCommonFileErrorMessageTitle',
+                  defaultMessage: "Couldn't upload 'file'",
+                }),
           });
         }
       };
@@ -77,6 +77,8 @@ export const WorkpadUpload = ({ onUpload }) => (
   />
 );
 
-WorkpadUpload.propTypes = {
+WorkpadUploadUI.propTypes = {
   onUpload: PropTypes.func.isRequired,
 };
+
+export const WorkpadUpload = injectI18n(WorkpadUploadUI);

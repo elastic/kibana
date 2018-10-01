@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import { ColorDot } from '../color_dot/color_dot';
 
 const ColorManagerUI = ({ value, addColor, removeColor, onChange, intl }) => (
@@ -19,12 +19,10 @@ const ColorManagerUI = ({ value, addColor, removeColor, onChange, intl }) => (
       <EuiFieldText
         compressed
         value={value || ''}
-        placeholder={
-          <FormattedMessage
-            id="xpack.canvas.color.manager.inputPlaceholder"
-            defaultMessage="#hex color"
-          />
-        }
+        placeholder={intl.formatMessage({
+          id: 'xpack.canvas.colorManager.inputPlaceholder',
+          defaultMessage: '#hex color',
+        })}
         onChange={e => onChange(e.target.value)}
       />
     </EuiFlexItem>
@@ -33,7 +31,7 @@ const ColorManagerUI = ({ value, addColor, removeColor, onChange, intl }) => (
         {addColor && (
           <EuiButtonIcon
             aria-label={intl.formatMessage({
-              id: 'xpack.canvas.color.manager.addButtonAriaLabel',
+              id: 'xpack.canvas.colorManager.addColorButtonAriaLabel',
               defaultMessage: 'Add Color',
             })}
             iconType="plusInCircle"
@@ -43,7 +41,7 @@ const ColorManagerUI = ({ value, addColor, removeColor, onChange, intl }) => (
         {removeColor && (
           <EuiButtonIcon
             aria-label={intl.formatMessage({
-              id: 'xpack.canvas.color.manager.removeButtonAriaLabel',
+              id: 'xpack.canvas.color.manager.removeColorButtonAriaLabel',
               defaultMessage: 'Remove Color',
             })}
             iconType="minusInCircle"

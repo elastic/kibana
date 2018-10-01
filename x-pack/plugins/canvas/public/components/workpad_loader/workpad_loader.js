@@ -134,7 +134,7 @@ class WorkpadLoaderUI extends React.PureComponent {
               <EuiToolTip
                 content={
                   <FormattedMessage
-                    id="xpack.canvas.workpad.loader.downloadButtonTooltip"
+                    id="xpack.canvas.workpadLoader.downloadWorkpadButtonTooltip"
                     defaultMessage="Download"
                   />
                 }
@@ -143,8 +143,8 @@ class WorkpadLoaderUI extends React.PureComponent {
                   iconType="sortDown"
                   onClick={() => this.props.downloadWorkpad(workpad.id)}
                   aria-label={this.props.intl.formatMessage({
-                    id: 'xpack.canvas.workpad.loader.downloadButtonAriaLabel',
-                    defaultMessage: '"Download Workpad',
+                    id: 'xpack.canvas.workpadLoader.downloadWorkpadButtonAriaLabel',
+                    defaultMessage: 'Download Workpad',
                   })}
                 />
               </EuiToolTip>
@@ -153,7 +153,7 @@ class WorkpadLoaderUI extends React.PureComponent {
               <EuiToolTip
                 content={
                   <FormattedMessage
-                    id="xpack.canvas.workpad.loader.cloneButtonTooltip"
+                    id="xpack.canvas.workpadLoader.cloneWorkpadButtonTooltip"
                     defaultMessage="Clone"
                   />
                 }
@@ -162,8 +162,8 @@ class WorkpadLoaderUI extends React.PureComponent {
                   iconType="copy"
                   onClick={() => this.cloneWorkpad(workpad)}
                   aria-label={this.props.intl.formatMessage({
-                    id: 'xpack.canvas.workpad.loader.cloneButtonAriaLabel',
-                    defaultMessage: '"Clone Workpad',
+                    id: 'xpack.canvas.workpadLoader.cloneWorkpadButtonAriaLabel',
+                    defaultMessage: 'Clone Workpad',
                   })}
                 />
               </EuiToolTip>
@@ -176,12 +176,10 @@ class WorkpadLoaderUI extends React.PureComponent {
     const columns = [
       {
         field: 'name',
-        name: (
-          <FormattedMessage
-            id="xpack.canvas.workpad.loader.columnNameTitle"
-            defaultMessage="Workpad Name"
-          />
-        ),
+        name: this.props.intl.formatMessage({
+          id: 'xpack.canvas.workpadLoader.columnWorkpadNameLabel',
+          defaultMessage: 'Workpad Name',
+        }),
         sortable: true,
         dataType: 'string',
         render: (name, workpad) => {
@@ -189,16 +187,11 @@ class WorkpadLoaderUI extends React.PureComponent {
 
           return (
             <Link
-              name={
-                <FormattedMessage
-                  id="xpack.canvas.workpad.loader.loadLinkTitle"
-                  defaultMessage="loadWorkpad"
-                />
-              }
+              name="loadWorkpad"
               params={{ id: workpad.id }}
               aria-label={this.props.intl.formatMessage(
                 {
-                  id: 'xpack.canvas.workpad.loader.loadLinkAriaLabel',
+                  id: 'xpack.canvas.workpadLoader.loadWorkpadLinkAriaLabel',
                   defaultMessage: 'Load workpad {workpadName}',
                 },
                 { workpadName }
@@ -211,12 +204,10 @@ class WorkpadLoaderUI extends React.PureComponent {
       },
       {
         field: '@created',
-        name: (
-          <FormattedMessage
-            id="xpack.canvas.workpad.loader.columnCreatedTitle"
-            defaultMessage="Created"
-          />
-        ),
+        name: this.props.intl.formatMessage({
+          id: 'xpack.canvas.workpadLoader.columnCreatedLabe',
+          defaultMessage: 'Created',
+        }),
         sortable: true,
         dataType: 'date',
         width: '20%',
@@ -224,12 +215,10 @@ class WorkpadLoaderUI extends React.PureComponent {
       },
       {
         field: '@timestamp',
-        name: (
-          <FormattedMessage
-            id="xpack.canvas.workpad.loader.columnUpdatedTitle"
-            defaultMessage="Updated"
-          />
-        ),
+        name: this.props.intl.formatMessage({
+          id: 'xpack.canvas.workpadLoader.columnUpdatedLabel',
+          defaultMessage: 'Updated',
+        }),
         sortable: true,
         dataType: 'date',
         width: '20%',
@@ -256,7 +245,7 @@ class WorkpadLoaderUI extends React.PureComponent {
         title={
           <h2>
             <FormattedMessage
-              id="xpack.canvas.workpad.loader.epmtyTableTitle"
+              id="xpack.canvas.workpadLoader.emptyTableTitle"
               defaultMessage="Add your first workpad"
             />
           </h2>
@@ -266,7 +255,7 @@ class WorkpadLoaderUI extends React.PureComponent {
           <Fragment>
             <p>
               <FormattedMessage
-                id="xpack.canvas.workpad.loader.epmtyTableDescription"
+                id="xpack.canvas.workpadLoader.emptyTableDescription"
                 defaultMessage="Create a new workpad or drag and drop previously built workpad JSON files here."
               />
             </p>
@@ -311,36 +300,38 @@ class WorkpadLoaderUI extends React.PureComponent {
     } = this.state;
     const isLoading = this.props.workpads == null;
     const modalTitle =
-      selectedWorkpads.length === 1 ? (
-        <FormattedMessage
-          id="xpack.canvas.workpad.loader.deleteOneWorkpadButtonTitle"
-          defaultMessage="Delete workpad {workpadName}?"
-          values={{ workpadName: selectedWorkpads[0].name }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.canvas.workpad.loader.deleteWorkpadsButtonTitle"
-          defaultMessage="Delete {workpadCount} workpads?"
-          values={{ workpadCount: selectedWorkpads.length }}
-        />
-      );
+      selectedWorkpads.length === 1
+        ? this.props.intl.formatMessage(
+            {
+              id: 'xpack.canvas.workpadLoader.deleteOneWorkpadButtonLabel',
+              defaultMessage: "Delete workpad '{workpadName}'?",
+            },
+            {
+              workpadName: selectedWorkpads[0].name,
+            }
+          )
+        : this.props.intl.formatMessage(
+            {
+              id: 'xpack.canvas.workpadLoader.deleteWorkpadsButtonLabel',
+              defaultMessage: 'Delete {workpadCount} workpads?',
+            },
+            {
+              workpadCount: selectedWorkpads.length,
+            }
+          );
 
     const confirmModal = (
       <ConfirmModal
         isOpen={deletingWorkpad}
         title={modalTitle}
-        message={
-          <FormattedMessage
-            id="xpack.canvas.workpad.loader.modalWindowDeleteDescription"
-            defaultMessage="You can't recover deleted workpads."
-          />
-        }
-        confirmButtonText={
-          <FormattedMessage
-            id="xpack.canvas.workpad.loader..modalWindowDeleteButtonTitle"
-            defaultMessage="Delete"
-          />
-        }
+        message={this.props.intl.formatMessage({
+          id: 'xpack.canvas.workpadLoader.modalWindowDeleteWorkpadsDescription',
+          defaultMessage: "You can't recover deleted workpads.",
+        })}
+        confirmButtonText={this.props.intl.formatMessage({
+          id: 'xpack.canvas.workpadLoader.modalWindowDeleteWorkpadsConfirmButtonLabel',
+          defaultMessage: 'Delete',
+        })}
         onConfirm={this.removeWorkpads}
         onCancel={this.closeRemoveConfirm}
       />
@@ -361,7 +352,7 @@ class WorkpadLoaderUI extends React.PureComponent {
               <div style={{ width: '100%' }}>
                 <EuiModalHeaderTitle>
                   <FormattedMessage
-                    id="xpack.canvas.workpad.loader.modalHeaderTitle"
+                    id="xpack.canvas.workpadLoader.modalHeaderTitle"
                     defaultMessage="Canvas workpads"
                   />
                 </EuiModalHeaderTitle>
@@ -379,7 +370,7 @@ class WorkpadLoaderUI extends React.PureComponent {
                               iconType="sortDown"
                             >
                               <FormattedMessage
-                                id="xpack.canvas.workpad.loader.downloadButtonTitle"
+                                id="xpack.canvas.workpadLoader.downloadButtonLabel"
                                 defaultMessage="Download ({workpadCount})"
                                 values={{ workpadCount: selectedWorkpads.length }}
                               />

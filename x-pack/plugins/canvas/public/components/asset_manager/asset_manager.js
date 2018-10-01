@@ -62,12 +62,10 @@ class AssetManagerUI extends React.PureComponent {
             size="original"
             url={asset.value}
             fullScreenIconColor="dark"
-            alt={
-              <FormattedMessage
-                id="xpack.canvas.asset.manager.imageAltTitle"
-                defaultMessage="Asset thumbnail"
-              />
-            }
+            alt={this.props.intl.formatMessage({
+              id: 'xpack.canvas.assetManager.imageAltTitle',
+              defaultMessage: 'Asset thumbnail',
+            })}
             style={{ backgroundImage: `url(${asset.value})` }}
           />
         </div>
@@ -92,15 +90,13 @@ class AssetManagerUI extends React.PureComponent {
               <EuiButtonIcon
                 iconType="sortDown"
                 aria-label={this.props.intl.formatMessage({
-                  id: 'xpack.canvas.asset.manager.downloadButtonAriaLabel',
+                  id: 'xpack.canvas.assetManager.downloadButtonAriaLabel',
                   defaultMessage: 'Download',
                 })}
-                title={
-                  <FormattedMessage
-                    id="xpack.canvas.asset.manager.downloadButtonTitle"
-                    defaultMessage="Download"
-                  />
-                }
+                title={this.props.intl.formatMessage({
+                  id: 'xpack.canvas.assetManager.downloadButtonTitle',
+                  defaultMessage: 'Download',
+                })}
               />
             </Download>
           </EuiFlexItem>
@@ -112,15 +108,13 @@ class AssetManagerUI extends React.PureComponent {
               <EuiButtonIcon
                 iconType="copyClipboard"
                 aria-label={this.props.intl.formatMessage({
-                  id: 'xpack.canvas.asset.manager.copyToClipboardButtonAriaLabel',
+                  id: 'xpack.canvas.assetManager.copyToClipboardButtonAriaLabel',
                   defaultMessage: 'Copy to clipboard',
                 })}
-                title={
-                  <FormattedMessage
-                    id="xpack.canvas.asset.manager.copyToClipboardButtonTitle"
-                    defaultMessage="Copy to clipboard"
-                  />
-                }
+                title={this.props.intl.formatMessage({
+                  id: 'xpack.canvas.assetManager.copyToClipboardButtonTitle',
+                  defaultMessage: 'Copy to clipboard',
+                })}
               />
             </Clipboard>
           </EuiFlexItem>
@@ -129,15 +123,13 @@ class AssetManagerUI extends React.PureComponent {
               iconType="trash"
               color="danger"
               aria-label={this.props.intl.formatMessage({
-                id: 'xpack.canvas.asset.manager.deleteAssetButtonAriaLabel',
+                id: 'xpack.canvas.assetManager.deleteAssetButtonAriaLabel',
                 defaultMessage: 'Delete asset',
               })}
-              title={
-                <FormattedMessage
-                  id="xpack.canvas.asset.manager.deleteAssetButtonTitle"
-                  defaultMessage="Delete asset"
-                />
-              }
+              title={this.props.intl.formatMessage({
+                id: 'xpack.canvas.assetManager.deleteAssetButtonTitle',
+                defaultMessage: 'Delete asset',
+              })}
               onClick={() => this.setState({ deleteId: asset.id })}
             />
           </EuiFlexItem>
@@ -163,7 +155,7 @@ class AssetManagerUI extends React.PureComponent {
           <EuiModalHeader className="canvasAssetManager__modalHeader">
             <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
               <FormattedMessage
-                id="xpack.canvas.asset.manager.modalHeaderTitle"
+                id="xpack.canvas.assetManager.manageWorkpadAssetsModal.headerTitle"
                 defaultMessage="Manage workpad assets"
               />
             </EuiModalHeaderTitle>
@@ -179,10 +171,10 @@ class AssetManagerUI extends React.PureComponent {
               </EuiFlexItem>
               <EuiFlexItem grow={false} className="eui-textNoWrap">
                 <EuiText id="CanvasAssetManagerLabel">
-                  {percentageUsed}
                   <FormattedMessage
-                    id="xpack.canvas.asset.manager.spaceUsedTitle"
-                    defaultMessage="% space used"
+                    id="xpack.canvas.assetManager.spaceUsedTitle"
+                    defaultMessage="{percentageUsed}% space used"
+                    values={{ percentageUsed }}
                   />
                 </EuiText>
               </EuiFlexItem>
@@ -192,7 +184,7 @@ class AssetManagerUI extends React.PureComponent {
             <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
-                  id="xpack.canvas.asset.manager.spaceUsedDescription"
+                  id="xpack.canvas.assetManager.spaceUsedDescription"
                   defaultMessage="Below are the image assets that you added to this workpad. To reclaim space, delete
                   assets that you no longer need. Unfortunately, any assets that are actually in use
                   cannot be determined at this time."
@@ -206,7 +198,7 @@ class AssetManagerUI extends React.PureComponent {
           <EuiModalFooter>
             <EuiButton size="s" onClick={this.closeModal}>
               <FormattedMessage
-                id="xpack.canvas.asset.manager.closeButtonTitle"
+                id="xpack.canvas.assetManager.manageWorkpadAssetsModal.closeButtonLabel"
                 defaultMessage="Close"
               />
             </EuiButton>
@@ -219,7 +211,7 @@ class AssetManagerUI extends React.PureComponent {
       <Fragment>
         <EuiButtonEmpty size="s" onClick={this.showModal}>
           <FormattedMessage
-            id="xpack.canvas.asset.manager.showModalButtonTitle"
+            id="xpack.canvas.assetManager.manageAssetsButtonLabel"
             defaultMessage="Manage assets"
           />
         </EuiButtonEmpty>
@@ -228,24 +220,18 @@ class AssetManagerUI extends React.PureComponent {
 
         <ConfirmModal
           isOpen={this.state.deleteId != null}
-          title={
-            <FormattedMessage
-              id="xpack.canvas.asset.manager.modalConfirmRemoveTitle"
-              defaultMessage="Remove Asset"
-            />
-          }
-          message={
-            <FormattedMessage
-              id="xpack.canvas.asset.manager.modalConfirmRemoveDescription"
-              defaultMessage="Are you sure you want to remove this asset?"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.canvas.asset.manager.modalConfirmRemoveButtonTitle"
-              defaultMessage="Remove"
-            />
-          }
+          title={this.props.intl.formatMessage({
+            id: 'xpack.canvas.assetManager.removeAssetConfirmModalTitle',
+            defaultMessage: 'Remove Asset',
+          })}
+          message={this.props.intl.formatMessage({
+            id: 'xpack.canvas.assetManager.removeAssetConfirmModalDescription',
+            defaultMessage: 'Are you sure you want to remove this asset?',
+          })}
+          confirmButtonText={this.props.intl.formatMessage({
+            id: 'xpack.canvas.assetManager.removeAssetConfirmModal.confirmButtonLabel',
+            defaultMessage: 'Remove',
+          })}
           onConfirm={this.doDelete}
           onCancel={this.resetDelete}
         />

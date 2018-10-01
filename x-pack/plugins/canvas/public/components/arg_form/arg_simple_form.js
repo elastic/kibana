@@ -22,7 +22,7 @@ const ArgSimpleFormUI = ({ children, required, valueMissing, onRemove, intl }) =
             icon="error"
             content={
               <FormattedMessage
-                id="xpack.canvas.arg.form.requiredValueTooltip"
+                id="xpack.canvas.argForm.requiredValueTooltip"
                 defaultMessage="This argument is required, you should specify a value."
               />
             }
@@ -36,7 +36,7 @@ const ArgSimpleFormUI = ({ children, required, valueMissing, onRemove, intl }) =
           onClick={onRemove}
           iconType="trash"
           aria-label={intl.formatMessage({
-            id: 'xpack.canvas.arg.form.removeButtonAriaLabel',
+            id: 'xpack.canvas.argForm.removeButtonAriaLabel',
             defaultMessage: 'Remove',
           })}
           className="canvasArg__remove"

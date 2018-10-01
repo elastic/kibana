@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const FunctionFormContextError = ({ context }) => (
   <div className="canvasFunctionForm canvasFunctionForm--error">
     <FormattedMessage
-      id="xpack.canvas.function.form.contextErrorMessage"
+      id="xpack.canvas.functionForm.contextErrorMessage"
       defaultMessage="ERROR: {contextError}"
       values={{ contextError: context.error }}
     />

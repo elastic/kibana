@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const WorkpadCreate = ({ createPending, onCreate }) => (
   <EuiButton iconType="plusInCircle" size="s" fill onClick={onCreate} isLoading={createPending}>
     <FormattedMessage
-      id="xpack.canvas.workpad.create.buttonTitle"
+      id="xpack.canvas.workpadLoader.createWorkpadButtonLabel"
       defaultMessage="Create workpad"
     />
   </EuiButton>

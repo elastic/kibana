@@ -30,7 +30,7 @@ CanvasLoading.propTypes = {
 };
 
 CanvasLoading.defaultProps = {
-  msg: i18n.translate('xpack.canvas.router.canvasLoadingTitle', {
+  msg: i18n.translate('xpack.canvas.router.canvasLoadingMessage', {
     defaultMessage: 'Loading...',
   }),
 };

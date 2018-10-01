@@ -27,12 +27,12 @@ export const Expression = ({ formState, updateValue, setExpression, done, error 
           <EuiButtonEmpty size="s" color={formState.dirty ? 'danger' : 'primary'} onClick={done}>
             {formState.dirty ? (
               <FormattedMessage
-                id="xpack.canvas.expression.cancelButtonTitle"
+                id="xpack.canvas.expression.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             ) : (
               <FormattedMessage
-                id="xpack.canvas.expression.closeButtonTitle"
+                id="xpack.canvas.expression.closeButtonLabel"
                 defaultMessage="Close"
               />
             )}
@@ -45,7 +45,7 @@ export const Expression = ({ formState, updateValue, setExpression, done, error 
             onClick={() => setExpression(formState.expression)}
             size="s"
           >
-            <FormattedMessage id="xpack.canvas.expression.runButtonTitle" defaultMessage="Run" />
+            <FormattedMessage id="xpack.canvas.expression.runButtonLabel" defaultMessage="Run" />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

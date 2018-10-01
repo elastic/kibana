@@ -52,8 +52,8 @@ export class PendingArgValue extends React.PureComponent {
               animated
               text={
                 <FormattedMessage
-                  id="xpack.canvas.arg.form.pendingValueTitle"
-                  defaultMessage="'Loading"
+                  id="xpack.canvas.argForm.pendingValueLoadingMessage"
+                  defaultMessage="Loading"
                 />
               }
             />

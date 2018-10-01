@@ -53,7 +53,7 @@ const ToolbarUI = props => {
         <EuiModalFooter>
           <EuiButton size="s" onClick={done}>
             <FormattedMessage
-              id="xpack.canvas.toolbar.dismissButtonTitle"
+              id="xpack.canvas.toolbar.dismissButtonLabel"
               defaultMessage="Dismiss"
             />
           </EuiButton>
@@ -99,15 +99,15 @@ const ToolbarUI = props => {
             <EuiButtonEmpty color="text" onClick={() => showHideTray('pageManager')}>
               {totalPages > 1 ? (
                 <FormattedMessage
-                  id="xpack.canvas.toolbar.currentPageOfPagesButtonTitle"
-                  defaultMessage="Page {currentPage} of {totalPages}"
-                  values={{ currentPage: selectedPageNumber, totalPages }}
+                  id="xpack.canvas.toolbar.currentPageOfPagesButtonLabel"
+                  defaultMessage="Page {selectedPageNumber} of {totalPages}"
+                  values={{ selectedPageNumber, totalPages }}
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.canvas.toolbar.currentPageButtonTitle"
-                  defaultMessage="Page {currentPage}"
-                  values={{ currentPage: selectedPageNumber }}
+                  id="xpack.canvas.toolbar.currentPageButtonLabel"
+                  defaultMessage="Page {selectedPageNumber}"
+                  values={{ selectedPageNumber }}
                 />
               )}
             </EuiButtonEmpty>
@@ -133,7 +133,7 @@ const ToolbarUI = props => {
                 onClick={() => showHideTray('expression')}
               >
                 <FormattedMessage
-                  id="xpack.canvas.toolbar.expressionEditorButtonTitle"
+                  id="xpack.canvas.toolbar.expressionEditorButtonLabel"
                   defaultMessage="Expression editor"
                 />
               </EuiButtonEmpty>

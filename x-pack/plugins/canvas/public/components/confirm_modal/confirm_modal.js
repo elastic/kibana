@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export const ConfirmModal = props => {
   const {
@@ -64,7 +65,13 @@ ConfirmModal.propTypes = {
 };
 
 ConfirmModal.defaultProps = {
-  title: 'Confirm',
-  confirmButtonText: 'Confirm',
-  cancelButtonText: 'Cancel',
+  title: i18n.translate('xpack.canvas.confirmModal.confirmModalTitle', {
+    defaultMessage: 'Confirm',
+  }),
+  confirmButtonText: i18n.translate('xpack.canvas.confirmModal.confirmButtonLabel', {
+    defaultMessage: 'Confirm',
+  }),
+  cancelButtonText: i18n.translate('xpack.canvas.confirmModal.cancelButtonLabel', {
+    defaultMessage: 'Cancel',
+  }),
 };

@@ -8,9 +8,9 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 import { EuiIconTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 
-export const TooltipIcon = ({ icon = 'info', ...rest }) => {
+const TooltipIconUI = ({ intl, icon = 'info', ...rest }) => {
   const icons = {
     error: { type: 'alert', color: 'danger' },
     warning: { type: 'alert', color: 'warning' },
@@ -19,18 +19,22 @@ export const TooltipIcon = ({ icon = 'info', ...rest }) => {
 
   if (!Object.keys(icons).includes(icon)) {
     throw new Error(
-      (
-        <FormattedMessage
-          id="xpack.canvas.tooltip.icon.iconTypeErrorMessage"
-          defaultMessage="Unsupported icon type: {icon}"
-          values={{ icon }}
-        />
+      intl.formatMessage(
+        {
+          id: 'xpack.canvas.tooltipIcon.unsupportedIconTypeErrorMessage',
+          defaultMessage: 'Unsupported icon type: {icon}',
+        },
+        {
+          icon,
+        }
       )
     );
   }
   return <EuiIconTip {...rest} type={icons[icon].type} color={icons[icon].color} />;
 };
 
-TooltipIcon.propTypes = {
+TooltipIconUI.propTypes = {
   icon: PropTypes.string,
 };
+
+export const TooltipIcon = injectI18n(TooltipIconUI);

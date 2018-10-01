@@ -53,7 +53,7 @@ const WorkpadHeaderUI = ({
         <EuiModalFooter>
           <EuiButton size="s" onClick={() => setShowElementModal(false)}>
             <FormattedMessage
-              id="xpack.canvas.workpad.header.dismissButtonTitle"
+              id="xpack.canvas.workpadHeader.dismissButtonLabel"
               defaultMessage="Dismiss"
             />
           </EuiButton>
@@ -78,7 +78,7 @@ const WorkpadHeaderUI = ({
                     position="bottom"
                     content={
                       <FormattedMessage
-                        id="xpack.canvas.workpad.header.fullscreenButtonTooltip"
+                        id="xpack.canvas.workpadHeader.fullscreenButtonTooltip"
                         defaultMessage="Toggle fullscreen mode"
                       />
                     }
@@ -86,7 +86,7 @@ const WorkpadHeaderUI = ({
                     <EuiButtonIcon
                       iconType="fullScreen"
                       aria-label={intl.formatMessage({
-                        id: 'xpack.canvas.workpad.header.fullscreenButtonAriaLabel',
+                        id: 'xpack.canvas.workpadHeader.fullscreenButtonAriaLabel',
                         defaultMessage: 'View fullscreen',
                       })}
                       onClick={toggleFullscreen}
@@ -105,12 +105,12 @@ const WorkpadHeaderUI = ({
                 content={
                   editing ? (
                     <FormattedMessage
-                      id="xpack.canvas.workpad.header.editorOpenButtonTooltip"
+                      id="xpack.canvas.workpadHeader.editorOpenButtonTooltip"
                       defaultMessage="Hide editing controls"
                     />
                   ) : (
                     <FormattedMessage
-                      id="xpack.canvas.workpad.header.editorCloseButtonTooltip"
+                      id="xpack.canvas.workpadHeader.editorCloseButtonTooltip"
                       defaultMessage="Show editing controls"
                     />
                   )
@@ -125,11 +125,11 @@ const WorkpadHeaderUI = ({
                   aria-label={
                     editing
                       ? intl.formatMessage({
-                          id: 'xpack.canvas.workpad.header.editorOpenButtonAriaLabel',
+                          id: 'xpack.canvas.workpadHeader.editorOpenButtonAriaLabel',
                           defaultMessage: 'Hide editing controls',
                         })
                       : intl.formatMessage({
-                          id: 'xpack.canvas.workpad.header.editorCloseButtonAriaLabel',
+                          id: 'xpack.canvas.workpadHeader.editorCloseButtonAriaLabel',
                           defaultMessage: 'Show editing controls',
                         })
                   }
@@ -153,7 +153,10 @@ const WorkpadHeaderUI = ({
                   iconType="vector"
                   onClick={() => setShowElementModal(true)}
                 >
-                  Add element
+                  <FormattedMessage
+                    id="xpack.canvas.workpadHeader.addElementButtonLabel"
+                    defaultMessage="Add element"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -45,7 +45,7 @@ export class AutoRefreshControls extends Component {
             <EuiDescriptionList textStyle="reverse">
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.headerTitle"
+                  id="xpack.canvas.refreshControl.refreshPageTitle"
                   defaultMessage="Refresh this page"
                 />
               </EuiDescriptionListTitle>
@@ -54,15 +54,15 @@ export class AutoRefreshControls extends Component {
                   <Fragment>
                     <span>
                       <FormattedMessage
-                        id="xpack.canvas.refresh.control.frequencyDescriptionTitle"
-                        defaultMessage="Every"
+                        id="xpack.canvas.refreshControl.refreshIntervalDescription"
+                        defaultMessage="Every {timeDuration}"
+                        values={{ timeDuration: timeDurationString(refreshInterval) }}
                       />
-                      {timeDurationString(refreshInterval)}
                     </span>
                     <div>
                       <EuiLink size="s" onClick={disableInterval}>
                         <FormattedMessage
-                          id="xpack.canvas.refresh.control.disableAutoRefreshLinkTitle"
+                          id="xpack.canvas.refreshControl.disableAutoRefreshLinkText"
                           defaultMessage="Disable auto-refresh"
                         />
                       </EuiLink>
@@ -71,7 +71,7 @@ export class AutoRefreshControls extends Component {
                 ) : (
                   <span>
                     <FormattedMessage
-                      id="xpack.canvas.refresh.control.refreshTypeTitle"
+                      id="xpack.canvas..refreshControl.manualRefreshDescription"
                       defaultMessage="Manually"
                     />
                   </span>
@@ -82,7 +82,7 @@ export class AutoRefreshControls extends Component {
           <EuiFlexItem grow={false}>
             <EuiButton size="s" fill iconType="refresh" onClick={doRefresh}>
               <FormattedMessage
-                id="xpack.canvas.refresh.control.refreshButtonTitle"
+                id="xpack.canvas.refreshControl.refreshButtonLabel"
                 defaultMessage="Refresh"
               />
             </EuiButton>
@@ -93,7 +93,7 @@ export class AutoRefreshControls extends Component {
 
         <EuiFormLabel>
           <FormattedMessage
-            id="xpack.canvas.refresh.control.changeAutoRefreshIntervalLabel"
+            id="xpack.canvas.refreshControl.changeAutoRefreshIntervalFormLabel"
             defaultMessage="Change auto-refresh interval"
           />
         </EuiFormLabel>
@@ -103,7 +103,7 @@ export class AutoRefreshControls extends Component {
             <EuiFlexItem>
               <EuiLink onClick={() => setRefresh(5000)}>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.autoRefreshInterval5sButtonTitle"
+                  id="xpack.canvas.refreshControl.autoRefreshInterval5sButtonLabel"
                   defaultMessage="5 Seconds"
                 />
               </EuiLink>
@@ -111,7 +111,7 @@ export class AutoRefreshControls extends Component {
             <EuiFlexItem>
               <EuiLink onClick={() => setRefresh(15000)}>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.autoRefreshInterval15sButtonTitle"
+                  id="xpack.canvas.refreshControl.autoRefreshInterval15sButtonLabel"
                   defaultMessage="15 Seconds"
                 />
               </EuiLink>
@@ -119,7 +119,7 @@ export class AutoRefreshControls extends Component {
             <EuiFlexItem>
               <EuiLink onClick={() => setRefresh(30000)}>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.autoRefreshInterval30sButtonTitle"
+                  id="xpack.canvas.refreshControl.autoRefreshInterval30sButtonLabel"
                   defaultMessage="30 Seconds"
                 />
               </EuiLink>
@@ -127,7 +127,7 @@ export class AutoRefreshControls extends Component {
             <EuiFlexItem>
               <EuiLink onClick={() => setRefresh(60000)}>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.autoRefreshInterval1mButtonTitle"
+                  id="xpack.canvas.refreshControl.autoRefreshInterval1mButtonLabel"
                   defaultMessage="1 Minute"
                 />
               </EuiLink>
@@ -135,7 +135,7 @@ export class AutoRefreshControls extends Component {
             <EuiFlexItem>
               <EuiLink onClick={() => setRefresh(300000)}>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.autoRefreshInterval5mButtonTitle"
+                  id="xpack.canvas.refreshControl.autoRefreshInterval5mButtonLabel"
                   defaultMessage="5 Minutes"
                 />
               </EuiLink>
@@ -143,7 +143,7 @@ export class AutoRefreshControls extends Component {
             <EuiFlexItem>
               <EuiLink onClick={() => setRefresh(900000)}>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.autoRefreshInterval15mButtonTitle"
+                  id="xpack.canvas.refreshControl.autoRefreshInterval15mButtonLabel"
                   defaultMessage="15 Minutes"
                 />
               </EuiLink>
@@ -151,7 +151,7 @@ export class AutoRefreshControls extends Component {
             <EuiFlexItem>
               <EuiLink onClick={() => setRefresh(1800000)}>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.autoRefreshInterval30mButtonTitle"
+                  id="xpack.canvas.refreshControl.autoRefreshInterval30mButtonLabel"
                   defaultMessage="30 Minutes"
                 />
               </EuiLink>
@@ -159,7 +159,7 @@ export class AutoRefreshControls extends Component {
             <EuiFlexItem>
               <EuiLink onClick={() => setRefresh(3600000)}>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.autoRefreshInterval1hButtonTitle"
+                  id="xpack.canvas.refreshControl.autoRefreshInterval1hButtonLabel"
                   defaultMessage="1 Hour"
                 />
               </EuiLink>
@@ -167,7 +167,7 @@ export class AutoRefreshControls extends Component {
             <EuiFlexItem>
               <EuiLink onClick={() => setRefresh(7200000)}>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.autoRefreshInterval2hButtonTitle"
+                  id="xpack.canvas.refreshControl.autoRefreshInterval2hButtonLabel"
                   defaultMessage="2 Hours"
                 />
               </EuiLink>
@@ -175,7 +175,7 @@ export class AutoRefreshControls extends Component {
             <EuiFlexItem>
               <EuiLink onClick={() => setRefresh(21600000)}>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.autoRefreshInterval6hButtonTitle"
+                  id="xpack.canvas.refreshControl.autoRefreshInterval6hButtonLabel"
                   defaultMessage="6 Hours"
                 />
               </EuiLink>
@@ -183,7 +183,7 @@ export class AutoRefreshControls extends Component {
             <EuiFlexItem>
               <EuiLink onClick={() => setRefresh(43200000)}>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.autoRefreshInterval12hButtonTitle"
+                  id="xpack.canvas.refreshControl.autoRefreshInterval12hButtonLabel"
                   defaultMessage="12 Hours"
                 />
               </EuiLink>
@@ -191,7 +191,7 @@ export class AutoRefreshControls extends Component {
             <EuiFlexItem>
               <EuiLink onClick={() => setRefresh(86400000)}>
                 <FormattedMessage
-                  id="xpack.canvas.refresh.control.autoRefreshInterval24hButtonTitle"
+                  id="xpack.canvas.refreshControl.autoRefreshInterval24hButtonLabel"
                   defaultMessage="24 Hours"
                 />
               </EuiLink>
@@ -212,13 +212,13 @@ export class AutoRefreshControls extends Component {
               <EuiFormRow
                 label={
                   <FormattedMessage
-                    id="xpack.canvas.refresh.control.customIntervalInputLabel"
+                    id="xpack.canvas.refreshControl.customIntervalFormRowLabel"
                     defaultMessage="Set a custom intervale"
                   />
                 }
                 helpText={
                   <FormattedMessage
-                    id="xpack.canvas.refresh.control.customIntervalInputDescriptionMessage"
+                    id="xpack.canvas.refreshControl.customIntervalFormRowHelpText"
                     defaultMessage="Use shorthand notation, like 30s, 10m, or 1h"
                   />
                 }
@@ -231,7 +231,7 @@ export class AutoRefreshControls extends Component {
               <EuiFormRow label="&nbsp;">
                 <EuiButton size="s" type="submit" style={{ minWidth: 'auto' }}>
                   <FormattedMessage
-                    id="xpack.canvas.refresh.control.setCustomAutoRefreshIntervalButtonTitle"
+                    id="xpack.canvas.refreshControl.setCustomAutoRefreshIntervalButtonLabel"
                     defaultMessage="Set"
                   />
                 </EuiButton>
