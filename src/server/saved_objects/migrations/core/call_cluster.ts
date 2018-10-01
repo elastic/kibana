@@ -25,7 +25,7 @@
 
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
-  (path: 'count', opts: CountOpts): Promise<{ count: number }>;
+  (path: 'count', opts: CountOpts & Ignorable): Promise<{ count: number }>;
   (path: 'clearScroll', opts: { scrollId: string }): Promise<any>;
   (path: 'indices.create' | 'indices.delete', opts: IndexCreationOpts): Promise<any>;
   (path: 'indices.exists', opts: IndexOpts): Promise<boolean>;
@@ -48,15 +48,15 @@ export interface CallCluster {
 ///////////////////////////////////////////////////////////////////
 
 export interface Ignorable {
-  ignore: number[];
+  ignore?: number[];
 }
 
 export interface CountOpts {
-  body: {
+  body?: {
     query: object;
   };
   index: string;
-  type: string;
+  type?: string;
 }
 
 export interface PutMappingOpts {

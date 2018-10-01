@@ -19,293 +19,305 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { ROOT_TYPE, SavedObjectDoc } from '../../serialization';
-import { CallCluster } from './call_cluster';
-import { IndexMigrator } from './index_migrator';
+import { ROOT_TYPE } from '../../serialization';
+import { createIndexMigrator } from './index_migrator';
 
-describe('IndexMigrator', () => {
-  test('patches the index mappings if the index is already migrated', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
-
-    opts.mappingProperties = { foo: { type: 'text' } };
-
-    withIndex(callCluster);
-
-    const result = await new IndexMigrator(opts).migrate();
-
-    expect(ranMigration(opts)).toBeFalsy();
-    expect(result.status).toEqual('patched');
-    sinon.assert.calledWith(callCluster, 'indices.putMapping', {
-      body: {
-        dynamic: 'strict',
-        properties: {
-          config: {
-            dynamic: 'true',
-            properties: { buildNum: { type: 'keyword' } },
-          },
-          foo: { type: 'text' },
-          migrationVersion: { dynamic: 'true', type: 'object' },
-          type: { type: 'keyword' },
-          updated_at: { type: 'date' },
-        },
+describe('index_migrator', () => {
+  describe('migrate', () => {
+    const defaultMappings = {
+      config: {
+        dynamic: 'true',
+        properties: { buildNum: { type: 'keyword' } },
       },
-      index: '.kibana_1',
-      type: ROOT_TYPE,
-    });
-  });
-
-  test('creates the index if it does not exist', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
-
-    opts.mappingProperties = { foo: { type: 'long' } };
-
-    withIndex(callCluster, { index: { status: 404 }, alias: { status: 404 } });
-
-    await new IndexMigrator(opts).migrate();
-
-    expect(ranMigration(opts)).toBeTruthy();
-    sinon.assert.calledWith(callCluster, 'indices.create', {
-      body: {
-        mappings: {
-          doc: {
-            dynamic: 'strict',
-            properties: {
-              config: {
-                dynamic: 'true',
-                properties: { buildNum: { type: 'keyword' } },
-              },
-              foo: { type: 'long' },
-              migrationVersion: { dynamic: 'true', type: 'object' },
-              type: { type: 'keyword' },
-              updated_at: { type: 'date' },
-            },
-          },
-        },
-      },
-      index: '.kibana_1',
-    });
-  });
-
-  test('returns stats about the migration', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
-
-    withIndex(callCluster, { index: { status: 404 }, alias: { status: 404 } });
-
-    const result = await new IndexMigrator(opts).migrate();
-
-    expect(result).toMatchObject({
-      destIndex: '.kibana_1',
-      sourceIndex: '.kibana',
-      status: 'migrated',
-    });
-  });
-
-  test('fails if there are multiple root doc types', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
-
-    withIndex(callCluster, {
-      index: {
-        '.kibana_1': {
-          aliases: {},
-          mappings: {
-            foo: { properties: {} },
-            doc: {
-              properties: {
-                author: { type: 'text' },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    await expect(new IndexMigrator(opts).migrate()).rejects.toThrow(
-      /use the X-Pack upgrade assistant/
-    );
-  });
-
-  test('fails if root doc type is not "doc"', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
-
-    withIndex(callCluster, {
-      index: {
-        '.kibana_1': {
-          aliases: {},
-          mappings: {
-            poc: {
-              properties: {
-                author: { type: 'text' },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    await expect(new IndexMigrator(opts).migrate()).rejects.toThrow(
-      /use the X-Pack upgrade assistant/
-    );
-  });
-
-  test('retains mappings from the previous index', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
-
-    opts.mappingProperties = { foo: { type: 'text' } };
-
-    withIndex(callCluster, {
-      index: {
-        '.kibana_1': {
-          aliases: {},
-          mappings: {
-            doc: {
-              properties: {
-                author: { type: 'text' },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    await new IndexMigrator(opts).migrate();
-
-    sinon.assert.calledWith(callCluster, 'indices.create', {
-      body: {
-        mappings: {
-          doc: {
-            dynamic: 'strict',
-            properties: {
-              author: { type: 'text' },
-              config: {
-                dynamic: 'true',
-                properties: { buildNum: { type: 'keyword' } },
-              },
-              foo: { type: 'text' },
-              migrationVersion: { dynamic: 'true', type: 'object' },
-              type: { type: 'keyword' },
-              updated_at: { type: 'date' },
-            },
-          },
-        },
-      },
-      index: '.kibana_2',
-    });
-  });
-
-  test('points the alias at the dest index', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
-
-    withIndex(callCluster, { index: { status: 404 }, alias: { status: 404 } });
-
-    await new IndexMigrator(opts).migrate();
-
-    expect(ranMigration(opts)).toBeTruthy();
-    sinon.assert.calledWith(callCluster, 'indices.updateAliases', {
-      body: { actions: [{ add: { alias: '.kibana', index: '.kibana_1' } }] },
-    });
-  });
-
-  test('removes previous indices from the alias', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
-
-    opts.documentMigrator.migrationVersion = {
-      dashboard: '2.4.5',
+      foo: { type: 'long' },
+      migrationVersion: { dynamic: 'true', type: 'object' },
+      type: { type: 'keyword' },
+      updated_at: { type: 'date' },
     };
 
-    withIndex(callCluster, { numOutOfDate: 1 });
+    test('patches the index mappings if the index is already migrated', async () => {
+      const { callCluster, migrator } = await createTestMigrator({
+        mappingProperties: { foo: { type: 'text' } },
+      });
 
-    await new IndexMigrator(opts).migrate();
+      const result = await migrator.migrate();
+      expect(ranMigration({ callCluster })).toBeFalsy();
+      expect(result.status).toEqual('patched');
+      sinon.assert.calledWith(callCluster, 'indices.putMapping', {
+        body: {
+          dynamic: 'strict',
+          properties: {
+            ...defaultMappings,
+            foo: { type: 'text' },
+          },
+        },
+        index: '.kibana_1',
+        type: ROOT_TYPE,
+      });
+    });
 
-    expect(ranMigration(opts)).toBeTruthy();
-    sinon.assert.calledWith(callCluster, 'indices.updateAliases', {
-      body: {
-        actions: [
-          { remove: { alias: '.kibana', index: '.kibana_1' } },
-          { add: { alias: '.kibana', index: '.kibana_2' } },
+    test('creates the index if it does not exist', async () => {
+      const { callCluster, migrator } = await createTestMigrator({
+        index: { status: 404 },
+        mappingProperties: { foo: { type: 'long' } },
+      });
+
+      await migrator.migrate();
+
+      expect(ranMigration({ callCluster })).toBeTruthy();
+      sinon.assert.calledWith(callCluster, 'indices.create', {
+        body: {
+          mappings: {
+            doc: {
+              dynamic: 'strict',
+              properties: {
+                ...defaultMappings,
+                foo: { type: 'long' },
+              },
+            },
+          },
+        },
+        index: '.kibana_1',
+      });
+    });
+
+    test('returns stats about the migration', async () => {
+      const { migrator } = await createTestMigrator({
+        index: { status: 404 },
+        mappingProperties: { foo: { type: 'long' } },
+      });
+
+      const result = await migrator.migrate();
+
+      expect(result).toMatchObject({
+        destIndex: '.kibana_1',
+        sourceIndex: '.kibana',
+        status: 'migrated',
+      });
+    });
+
+    test('fails if there are multiple root doc types', async () => {
+      const migrate = async () => {
+        const { migrator } = await createTestMigrator({
+          index: {
+            '.kibana_1': {
+              aliases: {},
+              mappings: {
+                foo: { properties: {} },
+                doc: { properties: {} },
+              },
+            },
+          },
+        });
+
+        await migrator.migrate();
+      };
+
+      await expect(migrate()).rejects.toThrow(/use the X-Pack upgrade assistant/);
+    });
+
+    test('fails if root doc type is not "doc"', async () => {
+      const migrate = async () => {
+        const { migrator } = await createTestMigrator({
+          index: {
+            '.kibana_1': {
+              aliases: {},
+              mappings: {
+                soc: { properties: {} },
+              },
+            },
+          },
+        });
+
+        await migrator.migrate();
+      };
+
+      await expect(migrate()).rejects.toThrow(/use the X-Pack upgrade assistant/);
+    });
+
+    test('retains mappings from the previous index', async () => {
+      const { callCluster, migrator } = await createTestMigrator({
+        mappingProperties: { foo: { type: 'text' } },
+        index: {
+          '.kibana_1': {
+            aliases: {},
+            mappings: {
+              doc: { properties: { author: { type: 'text' } } },
+            },
+          },
+        },
+      });
+
+      await migrator.migrate();
+
+      sinon.assert.calledWith(callCluster, 'indices.create', {
+        body: {
+          mappings: {
+            doc: {
+              dynamic: 'strict',
+              properties: {
+                ...defaultMappings,
+                author: { type: 'text' },
+                foo: { type: 'text' },
+              },
+            },
+          },
+        },
+        index: '.kibana_2',
+      });
+    });
+
+    test('points the alias at the dest index', async () => {
+      const { callCluster, migrator } = await createTestMigrator({
+        mappingProperties: { foo: { type: 'text' } },
+        index: { status: 404 },
+      });
+
+      await migrator.migrate();
+
+      expect(ranMigration({ callCluster })).toBeTruthy();
+      sinon.assert.calledWith(callCluster, 'indices.updateAliases', {
+        body: { actions: [{ add: { alias: '.kibana', index: '.kibana_1' } }] },
+      });
+    });
+
+    test('removes previous indices from the alias', async () => {
+      const { callCluster, migrator } = await createTestMigrator({
+        migrationVersion: { dashboard: '2.4.5' },
+        numOutOfDate: 1,
+      });
+
+      await migrator.migrate();
+
+      expect(ranMigration({ callCluster })).toBeTruthy();
+      sinon.assert.calledWith(callCluster, 'indices.updateAliases', {
+        body: {
+          actions: [
+            { remove: { alias: '.kibana', index: '.kibana_1' } },
+            { add: { alias: '.kibana', index: '.kibana_2' } },
+          ],
+        },
+      });
+    });
+
+    test('transforms all docs from the original index', async () => {
+      const migrate = sinon.spy((doc: any) => ({
+        ...doc,
+        attributes: { name: doc.attributes.name + '!!!' },
+      }));
+      const { callCluster, migrator } = await createTestMigrator({
+        migrate,
+        migrationVersion: { foo: '1.2.3' },
+        search: [
+          [{ _id: 'foo:1', _source: { type: 'foo', foo: { name: 'Bar' } } }],
+          [{ _id: 'foo:2', _source: { type: 'foo', foo: { name: 'Baz' } } }],
         ],
-      },
+      });
+
+      await migrator.migrate();
+
+      sinon.assert.calledTwice(migrate);
+
+      sinon.assert.calledWith(migrate, {
+        id: '1',
+        type: 'foo',
+        attributes: { name: 'Bar' },
+        migrationVersion: {},
+      });
+
+      sinon.assert.calledWith(migrate, {
+        id: '2',
+        type: 'foo',
+        attributes: { name: 'Baz' },
+        migrationVersion: {},
+      });
+
+      expect(callCluster.args.filter(([action]) => action === 'bulk').length).toEqual(2);
+
+      sinon.assert.calledWith(callCluster, 'bulk', {
+        body: [
+          { index: { _id: 'foo:1', _index: '.kibana_2', _type: ROOT_TYPE } },
+          { foo: { name: 'Bar!!!' }, type: 'foo', migrationVersion: {} },
+        ],
+      });
+
+      sinon.assert.calledWith(callCluster, 'bulk', {
+        body: [
+          { index: { _id: 'foo:2', _index: '.kibana_2', _type: ROOT_TYPE } },
+          { foo: { name: 'Baz!!!' }, type: 'foo', migrationVersion: {} },
+        ],
+      });
     });
   });
 
-  test('transforms all docs from the original index', async () => {
-    let count = 0;
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
-    const migrateDoc = sinon.spy((doc: SavedObjectDoc) => ({
-      ...doc,
-      attributes: { name: ++count },
-    }));
-
-    opts.documentMigrator = {
-      migrationVersion: { foo: '1.2.3' },
-      migrate: migrateDoc,
-    };
-
-    withIndex(callCluster, {
-      numOutOfDate: 1,
-      docs: [
-        [{ _id: 'foo:1', _source: { type: 'foo', foo: { name: 'Bar' } } }],
-        [{ _id: 'foo:2', _source: { type: 'foo', foo: { name: 'Baz' } } }],
-      ],
+  describe('fetchProgress', () => {
+    test('progress is not 100% until migration finishes', async () => {
+      const { migrator } = await createTestMigrator({
+        count: {
+          '.kibana': 9,
+          '.kibana_1': 9,
+          '.kibana_2': 9,
+        },
+      });
+      expect(await migrator.fetchProgress()).toBeGreaterThan(0.8);
+      expect(await migrator.fetchProgress()).toBeLessThan(1);
+      await migrator.migrate();
+      expect(await migrator.fetchProgress()).toEqual(1);
     });
 
-    await new IndexMigrator(opts).migrate();
+    test('progress handles 404 and 503 errors', async () => {
+      const { callCluster, migrator } = await createTestMigrator({
+        count: {
+          '.kibana': 2,
+        },
+      });
 
-    expect(count).toEqual(2);
-    sinon.assert.calledWith(migrateDoc, {
-      id: '1',
-      type: 'foo',
-      attributes: { name: 'Bar' },
-      migrationVersion: {},
+      expect(await migrator.fetchProgress()).toEqual(0);
+      const [, args] = callCluster.args.find(([path]) => path === 'count')!;
+      expect(args.ignore).toEqual([404, 503]);
     });
-    sinon.assert.calledWith(migrateDoc, {
-      id: '2',
-      type: 'foo',
-      attributes: { name: 'Baz' },
-      migrationVersion: {},
+
+    test('progress is based on how many docs have been moved', async () => {
+      const { migrator } = await createTestMigrator({
+        count: {
+          '.kibana': 20,
+          '.kibana_2': 8,
+        },
+      });
+      expect(await migrator.fetchProgress()).toEqual(0.4);
+      await migrator.migrate();
+      expect(await migrator.fetchProgress()).toEqual(1);
     });
-    expect(callCluster.args.filter(([action]) => action === 'bulk').length).toEqual(2);
-    sinon.assert.calledWith(callCluster, 'bulk', {
-      body: [
-        { index: { _id: 'foo:1', _index: '.kibana_2', _type: ROOT_TYPE } },
-        { foo: { name: 1 }, type: 'foo', migrationVersion: {} },
-      ],
-    });
-    sinon.assert.calledWith(callCluster, 'bulk', {
-      body: [
-        { index: { _id: 'foo:2', _index: '.kibana_2', _type: ROOT_TYPE } },
-        { foo: { name: 2 }, type: 'foo', migrationVersion: {} },
-      ],
+
+    test('progress takes reindexing into account', async () => {
+      const { migrator } = await createTestMigrator({
+        index: {
+          '.kibana': {
+            aliases: {},
+            mappings: { doc: { dynamic: 'strict', properties: {} } },
+          },
+        },
+        count: {
+          '.kibana': 20,
+          '.kibana_2': 4,
+          '.kibana_1': 3,
+        },
+      });
+
+      expect(await migrator.fetchProgress()).toEqual(0.175);
+      await migrator.migrate();
+      expect(await migrator.fetchProgress()).toEqual(1);
     });
   });
 });
 
-function defaultOpts() {
-  return {
-    batchSize: 10,
-    callCluster: sinon.stub(),
-    index: '.kibana',
-    log: sinon.stub(),
-    mappingProperties: {},
-    pollInterval: 1,
-    scrollDuration: '1m',
-    documentMigrator: {
-      migrationVersion: {},
-      migrate: _.identity,
-    },
-  };
+function ranMigration({ callCluster }: { callCluster: sinon.SinonSpy }) {
+  return callCluster.args.filter(([path]) => path === 'indices.create').length > 0;
 }
 
-function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
-  const defaultIndex = {
+async function createTestMigrator(testOpts: any = {}) {
+  let searchCount = 0;
+  const index = testOpts.index || {
     '.kibana_1': {
       aliases: { '.kibana': {} },
       mappings: {
@@ -318,45 +330,45 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
       },
     },
   };
-  const defaultAlias = {
-    '.kibana_1': {},
-  };
-  const { numOutOfDate = 0 } = opts;
-  const { alias = defaultAlias } = opts;
-  const { index = defaultIndex } = opts;
-  const { docs = [] } = opts;
-  const searchResult = (i: number) =>
-    Promise.resolve({
-      _scroll_id: i,
-      hits: {
-        hits: docs[i] || [],
-      },
-    });
-  callCluster.withArgs('indices.get').returns(Promise.resolve(index));
-  callCluster.withArgs('indices.getAlias').returns(Promise.resolve(alias));
 
-  callCluster.withArgs('search').returns(searchResult(0));
-
-  _.range(1, docs.length).forEach(i => {
-    callCluster
-      .withArgs('scroll')
-      .onCall(i - 1)
-      .returns(searchResult(i));
+  const callCluster = sinon.spy(async (path: string, args: any) => {
+    switch (path) {
+      case 'count':
+        if (args.body) {
+          return { count: testOpts.numOutOfDate };
+        }
+        return { count: _.get(testOpts, ['count', args.index], undefined) };
+      case 'indices.get':
+        return index;
+      case 'indices.getAlias':
+        return Object.keys(index)
+          .filter((k: string) => _.get(index, [k, 'aliases', args.name]))
+          .reduce((acc: any, k: string) => ({ ...acc, [k]: {} }), {});
+      case 'search':
+        const hits = _.get(testOpts, ['search', searchCount], []);
+        ++searchCount;
+        return { hits: { hits } };
+      case 'bulk':
+        return { items: [] };
+    }
   });
 
-  callCluster
-    .withArgs('scroll')
-    .onCall(docs.length - 1)
-    .returns(searchResult(docs.length));
+  const opts = {
+    batchSize: 10,
+    callCluster,
+    index: '.kibana',
+    log: sinon.stub(),
+    mappingProperties: testOpts.mappingProperties || {},
+    pollInterval: 1,
+    scrollDuration: '1m',
+    documentMigrator: {
+      migrationVersion: testOpts.migrationVersion || {},
+      migrate: testOpts.migrate || _.identity,
+    },
+  };
 
-  callCluster.withArgs('bulk').returns(Promise.resolve({ items: [] }));
-  callCluster.withArgs('count').returns(Promise.resolve({ count: numOutOfDate }));
-}
-
-function clusterStub(opts: { callCluster: CallCluster }) {
-  return opts.callCluster as sinon.SinonStub;
-}
-
-function ranMigration(opts: { callCluster: CallCluster }) {
-  return clusterStub(opts).calledWith('indices.create', sinon.match.any);
+  return {
+    callCluster,
+    migrator: await createIndexMigrator(opts),
+  };
 }

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { KibanaMigrator } from './kibana';
+export { KibanaMigrator, MigrationUI } from './kibana';

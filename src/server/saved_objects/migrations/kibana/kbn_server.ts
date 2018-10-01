@@ -17,5 +17,30 @@
  * under the License.
  */
 
-export { KibanaMigrator } from './kibana_migrator';
-export { MigrationUI } from './migration_ui';
+import { CallCluster, LogFn } from '../core';
+
+export interface KbnServer {
+  server: Server;
+  version: string;
+  uiExports: {
+    savedObjectMappings: any[];
+    savedObjectMigrations: any;
+    savedObjectValidations: any;
+  };
+}
+
+export interface Server {
+  log: LogFn;
+  config: () => {
+    get: {
+      (path: 'kibana.index' | 'migrations.scrollDuration'): string;
+      (path: 'migrations.batchSize' | 'migrations.pollInterval'): number;
+    };
+  };
+  plugins: { elasticsearch: ElasticsearchPlugin | undefined };
+}
+
+interface ElasticsearchPlugin {
+  getCluster: ((name: 'admin') => { callWithInternalUser: CallCluster });
+  waitUntilReady: () => Promise<any>;
+}

@@ -17,25 +17,79 @@
  * under the License.
  */
 
-import { determineMigrationAction, MigrationAction } from './determine_migration_action';
 import * as Index from './elastic_index';
 import { migrateRawDocs } from './migrate_raw_docs';
-import { Context, migrationContext, MigrationOpts } from './migration_context';
+import {
+  Context,
+  MigrationAction,
+  migrationContext,
+  MigrationOpts,
+  requiredAction,
+} from './migration_context';
 import { coordinateMigration, MigrationResult } from './migration_coordinator';
+
+export interface IndexMigrator {
+  requiresMigration: boolean;
+  fetchProgress: () => Promise<number>;
+  migrate(): Promise<MigrationResult>;
+}
+
+export async function createIndexMigrator(opts: MigrationOpts) {
+  const context = await migrationContext(opts);
+  return new ConcreteIndexMigrator(context);
+}
 
 /*
  * Core logic for migrating the mappings and documents in an index.
  */
-export class IndexMigrator {
-  private opts: MigrationOpts;
+class ConcreteIndexMigrator implements IndexMigrator {
+  private context: Context;
+  private isComplete = false;
 
   /**
    * Creates an instance of IndexMigrator.
    *
-   * @param {MigrationOpts} opts
+   * @param {Context} context
    */
-  constructor(opts: MigrationOpts) {
-    this.opts = opts;
+  constructor(context: Context) {
+    this.context = context;
+  }
+
+  get requiresMigration() {
+    return this.context.action === MigrationAction.Migrate;
+  }
+
+  /**
+   * Fetches the migration progress. which is a function of how many docs we
+   * expect to be in the destination index (or indices, if our migration also
+   * includes a reindex of the original). The value is from 0-1, and once it
+   * hits 1, all docs are in the destination index (but aliasing, etc may not
+   * be complete yet).
+   */
+  public async fetchProgress() {
+    if (this.isComplete) {
+      return 1;
+    }
+
+    const { callCluster, alias, dest, source, requiresReindex } = this.context;
+
+    async function countDocs(index: string) {
+      // If the index doesn't exist yet, we'll get 404 or 503s back from Elasticsearch,
+      // so we handle those cases specially.
+      const result = await callCluster('count', { index, ignore: [404, 503] });
+      return result.count || 0;
+    }
+
+    const originalCount = await countDocs(alias);
+    const destCount = await countDocs(dest.indexName);
+    const reindexCount = requiresReindex ? await countDocs(source.indexName) : 0;
+    const expectedCount = requiresReindex ? originalCount * 2 : originalCount;
+    const progress = expectedCount === 0 ? 1 : (destCount + reindexCount) / expectedCount;
+
+    // We don't want to return 1 (completed / 100%) because there is still a bit
+    // of work to do even if all the docs have been moved. We only want to return
+    // 1 when isComplete has been set.
+    return Math.min(0.999, progress);
   }
 
   /**
@@ -45,9 +99,8 @@ export class IndexMigrator {
    * @returns {Promise<MigrationResult>}
    */
   public async migrate(): Promise<MigrationResult> {
-    const context = await migrationContext(this.opts);
-
-    return coordinateMigration({
+    const context = this.context;
+    const result = await coordinateMigration({
       log: context.log,
 
       pollInterval: context.pollInterval,
@@ -71,32 +124,11 @@ export class IndexMigrator {
         return migrateIndex(context);
       },
     });
+
+    this.isComplete = true;
+
+    return result;
   }
-}
-
-/**
- * Determines what action the migration system needs to take (none, patch, migrate).
- */
-async function requiredAction(context: Context): Promise<MigrationAction> {
-  const { callCluster, alias, documentMigrator, dest } = context;
-
-  const hasMigrations = await Index.migrationsUpToDate(
-    callCluster,
-    alias,
-    documentMigrator.migrationVersion
-  );
-
-  if (!hasMigrations) {
-    return MigrationAction.Migrate;
-  }
-
-  const refreshedSource = await Index.fetchInfo(callCluster, alias);
-
-  if (!refreshedSource.aliases[alias]) {
-    return MigrationAction.Migrate;
-  }
-
-  return determineMigrationAction(refreshedSource.mappings, dest.mappings);
 }
 
 /**
@@ -148,14 +180,14 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
  * a situation where the alias moves out from under us as we're migrating docs.
  */
 async function migrateSourceToDest(context: Context) {
-  const { callCluster, alias, dest, source, batchSize } = context;
+  const { callCluster, alias, dest, source, requiresReindex, batchSize } = context;
   const { scrollDuration, documentMigrator, log } = context;
 
   if (!source.exists) {
     return;
   }
 
-  if (!source.aliases[alias]) {
+  if (requiresReindex) {
     log.info(`Reindexing ${alias} to ${source.indexName}`);
 
     await Index.convertToAlias(callCluster, source, alias);

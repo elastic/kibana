@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { determineMigrationAction, MigrationAction } from './determine_migration_action';
+import { determineMigrationAction, MigrationAction } from './migration_context';
 
 describe('determineMigrationAction', () => {
   test('requires no action if mappings are identical', () => {

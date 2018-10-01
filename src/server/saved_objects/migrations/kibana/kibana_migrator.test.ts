@@ -19,10 +19,11 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { KbnServer, KibanaMigrator } from './kibana_migrator';
+import { KbnServer } from './kbn_server';
+import { KibanaMigrator } from './kibana_migrator';
 
 describe('KibanaMigrator', () => {
-  describe('migratorOptsFromKbnServer', () => {
+  describe('getActiveMappings', () => {
     it('returns full index mappings w/ core properties', () => {
       const { kbnServer } = mockKbnServer();
       kbnServer.uiExports.savedObjectMappings = [
@@ -74,8 +75,28 @@ describe('KibanaMigrator', () => {
           return Promise.resolve().then(() => ++count);
         },
       };
-      await expect(new KibanaMigrator({ kbnServer }).migrateIndex()).rejects.toThrow(/Doh!/);
+
+      await expect(
+        new KibanaMigrator({ kbnServer }).createIndexMigrator().then(m => m.migrate())
+      ).rejects.toThrow(/Doh!/);
       expect(count).toEqual(1);
+    });
+  });
+
+  describe('createIndexMigrator', () => {
+    it('warns if elasticsearch is disabled and returns a noop migrator', async () => {
+      const { kbnServer } = mockKbnServer();
+      const log = sinon.spy();
+      kbnServer.server.plugins.elasticsearch = undefined;
+      kbnServer.server.log = log;
+
+      const migrator = await new KibanaMigrator({ kbnServer }).createIndexMigrator();
+      expect(migrator.requiresMigration).toBeFalsy();
+      expect(await migrator.migrate()).toEqual({ status: 'skipped' });
+      expect(await migrator.fetchProgress()).toEqual(1);
+      expect(log.args).toEqual([
+        [['warning', 'migration'], 'The elasticsearch plugin is disabled. Skipping migrations.'],
+      ]);
     });
   });
 });

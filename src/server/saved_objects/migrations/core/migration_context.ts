@@ -28,7 +28,17 @@ import { buildActiveMappings } from './build_active_mappings';
 import { CallCluster, MappingProperties } from './call_cluster';
 import { VersionedTransformer } from './document_migrator';
 import { fetchInfo, FullIndexInfo } from './elastic_index';
+import * as Index from './elastic_index';
 import { LogFn, Logger, MigrationLogger } from './migration_logger';
+
+import _ from 'lodash';
+import { IndexMapping } from './call_cluster';
+
+export enum MigrationAction {
+  None = 0,
+  Patch = 1,
+  Migrate = 2,
+}
 
 export interface MigrationOpts {
   batchSize: number;
@@ -46,11 +56,13 @@ export interface Context {
   alias: string;
   source: FullIndexInfo;
   dest: FullIndexInfo;
+  requiresReindex: boolean;
   documentMigrator: VersionedTransformer;
   log: Logger;
   batchSize: number;
   pollInterval: number;
   scrollDuration: string;
+  action: MigrationAction;
 }
 
 /**
@@ -58,23 +70,124 @@ export interface Context {
  * and various info needed to migrate the source index.
  */
 export async function migrationContext(opts: MigrationOpts): Promise<Context> {
-  const { callCluster } = opts;
+  const { callCluster, documentMigrator } = opts;
   const log = new MigrationLogger(opts.log);
   const alias = opts.index;
   const source = createSourceContext(await fetchInfo(callCluster, alias), alias);
   const dest = createDestContext(source, alias, opts.mappingProperties);
+  const action = await requiredAction({ callCluster, alias, documentMigrator, dest });
 
   return {
+    action,
     callCluster,
     alias,
     source,
     dest,
     log,
+    documentMigrator,
+    requiresReindex: !source.aliases[alias],
     batchSize: opts.batchSize,
-    documentMigrator: opts.documentMigrator,
     pollInterval: opts.pollInterval,
     scrollDuration: opts.scrollDuration,
   };
+}
+
+/**
+ * Determines what action the migration system needs to take (none, patch, migrate).
+ */
+export async function requiredAction(context: {
+  callCluster: CallCluster;
+  alias: string;
+  documentMigrator: VersionedTransformer;
+  dest: FullIndexInfo;
+}): Promise<MigrationAction> {
+  const { callCluster, alias, documentMigrator, dest } = context;
+
+  const isUpToDate = await Index.migrationsUpToDate(
+    callCluster,
+    alias,
+    documentMigrator.migrationVersion
+  );
+
+  if (!isUpToDate) {
+    return MigrationAction.Migrate;
+  }
+
+  const refreshedSource = await Index.fetchInfo(callCluster, alias);
+
+  if (!refreshedSource.aliases[alias]) {
+    return MigrationAction.Migrate;
+  }
+
+  return determineMigrationAction(refreshedSource.mappings, dest.mappings);
+}
+
+/**
+ * Provides logic that diffs the actual index mappings with the expected
+ * mappings. It ignores differences in dynamic mappings.
+ *
+ * If mappings differ in a patchable way, the result is 'patch', if mappings
+ * differ in a way that requires migration, the result is 'migrate', and if
+ * the mappings are equivalent, the result is 'none'.
+ */
+export function determineMigrationAction(
+  actual: IndexMapping,
+  expected: IndexMapping
+): MigrationAction {
+  if (actual.doc.dynamic !== expected.doc.dynamic) {
+    return MigrationAction.Migrate;
+  }
+
+  const actualProps = actual.doc.properties;
+  const expectedProps = expected.doc.properties;
+
+  // There's a special case for root-level properties: if a root property is in actual,
+  // but not in expected, it is treated like a disabled plugin and requires no action.
+  return Object.keys(expectedProps).reduce((acc: number, key: string) => {
+    return Math.max(acc, diffSubProperty(actualProps[key], expectedProps[key]));
+  }, MigrationAction.None);
+}
+
+function diffSubProperty(actual: any, expected: any): MigrationAction {
+  // We've added a sub-property
+  if (actual === undefined && expected !== undefined) {
+    return MigrationAction.Patch;
+  }
+
+  // We've removed a sub property
+  if (actual !== undefined && expected === undefined) {
+    return MigrationAction.Migrate;
+  }
+
+  // If a property has changed to/from dynamic, we need to migrate,
+  // otherwise, we ignore dynamic properties, as they can differ
+  if (isDynamic(actual) || isDynamic(expected)) {
+    return isDynamic(actual) !== isDynamic(expected)
+      ? MigrationAction.Migrate
+      : MigrationAction.None;
+  }
+
+  // We have a leaf property, so we do a comparison. A change (e.g. 'text' -> 'keyword')
+  // should result in a migration.
+  if (typeof actual !== 'object') {
+    // We perform a string comparison here, because Elasticsearch coerces some primitives
+    // to string (such as dynamic: true and dynamic: 'true'), so we report a mapping
+    // equivalency if the string comparison checks out. This does mean that {} === '[object Object]'
+    // by this logic, but that is an edge case which should not occur in mapping definitions.
+    return `${actual}` === `${expected}` ? MigrationAction.None : MigrationAction.Migrate;
+  }
+
+  // Recursively compare the sub properties
+  const keys = _.uniq(Object.keys(actual).concat(Object.keys(expected)));
+  return keys.reduce((acc: number, key: string) => {
+    return acc === MigrationAction.Migrate
+      ? acc
+      : Math.max(acc, diffSubProperty(actual[key], expected[key]));
+  }, MigrationAction.None);
+}
+
+function isDynamic(prop: any) {
+  return prop && `${prop.dynamic}` === 'true';
 }
 
 function createSourceContext(source: FullIndexInfo, alias: string) {

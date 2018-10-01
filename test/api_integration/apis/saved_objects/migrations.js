@@ -25,7 +25,7 @@ import _ from 'lodash';
 import { assert } from 'chai';
 import {
   DocumentMigrator,
-  IndexMigrator,
+  createIndexMigrator,
 } from '../../../../src/server/saved_objects/migrations/core';
 
 export default ({ getService }) => {
@@ -239,7 +239,7 @@ async function migrateIndex({ callCluster, index, migrations, mappingProperties,
     validateDoc: validateDoc || _.noop,
   });
 
-  const migrator = new IndexMigrator({
+  const migrator = await createIndexMigrator({
     batchSize: 10,
     callCluster,
     documentMigrator,
