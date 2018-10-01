@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdvancedSettingsTitle renders as expected 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  component="div"
+  direction="row"
+  gutterSize="s"
+  justifyContent="flexStart"
+  responsive={false}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <Component
+      space={
+        Object {
+          "id": "my-space",
+          "name": "My Space",
+        }
+      }
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+    style={
+      Object {
+        "marginLeft": "10px",
+      }
+    }
+  >
+    <EuiText
+      grow={true}
+    >
+      <h1
+        data-test-subj="managementSettingsTitle"
+      >
+        Settings
+      </h1>
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
