@@ -14,12 +14,13 @@ import 'ui/autoload/all';
 import {
   timefilter
 } from 'ui/timefilter';
-import { getStore, gisStateSync } from './store/store';
+import { getStore } from './store/store';
 import { setTimeFilters } from './actions/store_actions';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters } from './kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { saveMapSettings } from './shared/services/save_map_state';
 
 // hack to wait for angular template to be ready
 const waitForAngularReady = new Promise(resolve => {
@@ -79,38 +80,6 @@ export function initGisApp(resolve) {
         Promise.all([waitForAngularReady]).then(resolve());
       });
 }
-
-const saveMapSettings = async gisWorkspace => {
-  const currentMapState = await getCurrentMapState();
-  return ({ newTitle }) => {
-    let savedObjectId = gisStateSync.get('workspaceId'); 
-    let newState = { mapState: currentMapState, title: newTitle };
-    if (savedObjectId) {
-      return gisWorkspace.update(savedObjectId, newState)
-    } else {
-      return gisWorkspace.save(newState)
-        .then(({ id }) => {
-          if (id) gisStateSync.set('workspaceId', id);
-          return { id };
-        });
-    }
-  };
-};
-
-const getCurrentMapState = (() => {
-  const customReplacer = (key, value) => {
-    if (typeof value === 'number') {
-      return value.toString();
-    }
-    return value;
-  };
-  return async () => {
-    const store = await getStore();
-    const { map } = store.getState();
-    const stringMap = JSON.stringify(map, customReplacer);
-    return (stringMap);
-  }
-})();
 
 getStore().then(store => {
   timefilter.on('timeUpdate', () => {
