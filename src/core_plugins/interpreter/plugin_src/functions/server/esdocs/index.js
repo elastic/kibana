@@ -19,7 +19,7 @@
 
 import squel from 'squel';
 import { map, zipObject } from 'lodash';
-import { buildBoolArray, normalizeType, sanitizeName } from '@kbn/interpreter/server';
+import { buildBoolArray, normalizeType, sanitizeName } from '@kbn/interpreter/server/index';
 
 export const esdocs = () => ({
   name: 'esdocs',
