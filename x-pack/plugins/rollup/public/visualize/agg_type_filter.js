@@ -17,6 +17,6 @@ aggTypeFilters.addFilter(
     }
     const aggName = aggType.name;
     const aggs = indexPattern.typeMeta.aggs;
-    return Object.keys(aggs).includes(aggName);
+    return aggName === 'count' || Object.keys(aggs).includes(aggName);
   }
 );

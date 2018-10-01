@@ -24,7 +24,7 @@
   </span>
 
   <!-- error -->
-  <span ng-if="!editorOpen && aggForm.$invalid && aggForm.softErrorCount()" class="visEditorAggHeader__description visEditorAggHeader__description--danger" title="{{aggForm.describeErrors()}}">
+  <span ng-if="!editorOpen && aggForm.$invalid" class="visEditorAggHeader__description visEditorAggHeader__description--danger" title="{{aggForm.describeErrors()}}">
     {{ aggForm.describeErrors() }}
   </span>
 
