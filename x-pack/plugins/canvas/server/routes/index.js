@@ -5,9 +5,7 @@
  */
 
 import { workpad } from './workpad';
-import { plugins } from './plugins';
 
 export function routes(server) {
   workpad(server);
-  plugins(server);
 }

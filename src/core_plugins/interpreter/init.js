@@ -19,7 +19,9 @@
 
 import { routes } from './server/routes';
 import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
-import { loadServerPlugins } from './server/lib/load_server_plugins';
+import { pathsRegistry } from '@kbn/interpreter/common/lib/paths_registry';
+import { loadServerPlugins } from '@kbn/interpreter/common/lib/load_server_plugins';
+import { pluginPaths } from './plugin_paths';
 
 export default function (server /*options*/) {
   server.injectUiAppVars('canvas', () => {
@@ -37,6 +39,6 @@ export default function (server /*options*/) {
     };
   });
 
-  loadServerPlugins();
-  routes(server);
+  pathsRegistry.registerAll(pluginPaths);
+  loadServerPlugins().then(() => routes(server));
 }

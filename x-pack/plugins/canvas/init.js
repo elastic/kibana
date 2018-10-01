@@ -5,10 +5,12 @@
  */
 
 import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
+import { pathsRegistry } from '@kbn/interpreter/common/lib/paths_registry';
+import { loadServerPlugins } from '@kbn/interpreter/common/lib/load_server_plugins';
 import { routes } from './server/routes';
 import { commonFunctions } from './common/functions';
-import { loadServerPlugins } from './server/lib/load_server_plugins';
 import { registerCanvasUsageCollector } from './server/usage';
+import { pluginPaths } from './plugin_paths';
 
 export default function(server /*options*/) {
   server.injectUiAppVars('canvas', () => {
@@ -29,6 +31,7 @@ export default function(server /*options*/) {
   // There are some common functions that use private APIs, load them here
   commonFunctions.forEach(func => functionsRegistry.register(func));
 
+  pathsRegistry.registerAll(pluginPaths);
   loadServerPlugins().then(() => routes(server));
   registerCanvasUsageCollector(server);
 }
