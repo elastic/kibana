@@ -92,7 +92,8 @@ export async function migrateKibanaIndex({ client, log }) {
     uiExports,
   };
 
-  return await new KibanaMigrator({ kbnServer }).migrateIndex();
+  const migrator = await new KibanaMigrator({ kbnServer }).createIndexMigrator();
+  return migrator.migrate();
 }
 
 async function loadElasticVersion() {
