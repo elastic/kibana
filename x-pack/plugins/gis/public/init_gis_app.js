@@ -61,26 +61,10 @@ export function initGisApp(resolve) {
           description: 'Save Visualization',
           testId: 'visualizeSaveButton',
           run: async () => {
-            const currentMapState = await getCurrentMapState();
-            console.log(currentMapState);
-            const saveSettings = ({ newTitle }) => {
-              let savedObjectId = gisStateSync.get('workspaceId'); 
-              if (savedObjectId) {
-                return gisWorkspace.update(savedObjectId,
-                  { mapState: currentMapState, title: newTitle })
-                  .then(({ id }) => ({ id }));
-              } else {
-                return gisWorkspace.save({ mapState: currentMapState,
-                  title: newTitle })
-                  .then(({ id }) => {
-                    if (id) gisStateSync.set('workspaceId', id);
-                    return { id };
-                  });
-              }
-            };
+            const onSave = await saveMapSettings(gisWorkspace);
             const saveModal = (
               <SavedObjectSaveModal
-                onSave={saveSettings}
+                onSave={onSave}
                 onClose={() => {}}
                 title={'Save map settings'}
                 showCopyOnSave={false}
@@ -96,19 +80,37 @@ export function initGisApp(resolve) {
       });
 }
 
-async function getCurrentMapState() {
-  const store = await getStore();
+const saveMapSettings = async gisWorkspace => {
+  const currentMapState = await getCurrentMapState();
+  return ({ newTitle }) => {
+    let savedObjectId = gisStateSync.get('workspaceId'); 
+    let newState = { mapState: currentMapState, title: newTitle };
+    if (savedObjectId) {
+      return gisWorkspace.update(savedObjectId, newState)
+    } else {
+      return gisWorkspace.save(newState)
+        .then(({ id }) => {
+          if (id) gisStateSync.set('workspaceId', id);
+          return { id };
+        });
+    }
+  };
+};
+
+const getCurrentMapState = (() => {
   const customReplacer = (key, value) => {
     if (typeof value === 'number') {
       return value.toString();
     }
     return value;
   };
-  const { map } = store.getState();
-  const stringMap = JSON.stringify(map, customReplacer);
-  return (stringMap);
-}
-
+  return async () => {
+    const store = await getStore();
+    const { map } = store.getState();
+    const stringMap = JSON.stringify(map, customReplacer);
+    return (stringMap);
+  }
+})();
 
 getStore().then(store => {
   timefilter.on('timeUpdate', () => {
