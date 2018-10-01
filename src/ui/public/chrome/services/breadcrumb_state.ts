@@ -17,8 +17,8 @@
  * under the License.
  */
 
-// @ts-ignore
 import { Subject, Subscribable } from 'rxjs';
+// @ts-ignore
 import { uiModules } from '../../modules';
 import { Breadcrumb } from '../directives/header_global_nav';
 
