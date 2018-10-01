@@ -54,7 +54,7 @@
     "keymirror": "0.1.1",
     "moment": "^2.20.1",
     "node-sass": "^4.9.3",
-    "postcss": "^7.0.2",
+    "postcss": "^7.0.4",
     "postcss-loader": "^3.0.0",
     "raw-loader": "^0.5.1",
     "react-dom": "^16.2.0",
@@ -66,9 +66,9 @@
     "redux-thunk": "2.2.0",
     "sass-loader": "^7.1.0",
     "sinon": "^5.0.7",
-    "style-loader": "^0.22.1",
-    "webpack": "^4.17.1",
-    "webpack-dev-server": "^3.1.5",
+    "style-loader": "^0.23.0",
+    "webpack": "^4.20.2",
+    "webpack-dev-server": "^3.1.9",
     "yeoman-generator": "1.1.1",
     "yo": "2.0.0"
   }
