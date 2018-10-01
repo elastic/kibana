@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n }  from '@kbn/i18n';
 
 const TIMEFILTER = '%timefilter%';
 const AUTOINTERVAL = '%autointerval%';
@@ -56,7 +57,10 @@ export class EsQueryParser {
     if (body === undefined) {
       url.body = body = {};
     } else if (!_.isPlainObject(body)) {
-      throw new Error('url.body must be an object');
+      throw new Error(i18n.translate('vega.esQueryParser.urlBodyValueTypeErrorMessage', {
+        defaultMessage: '{configName} must be an object',
+        values: { configName: 'url.body' },
+      }));
     }
 
     // Migrate legacy %context_query% into context & timefield values
@@ -64,12 +68,28 @@ export class EsQueryParser {
     delete url[LEGACY_CONTEXT];
     if (legacyContext !== undefined) {
       if (body.query !== undefined) {
-        throw new Error(`Data url must not have legacy "${LEGACY_CONTEXT}" and "body.query" values at the same time`);
+        throw new Error(i18n.translate('vega.esQueryParser.dataUrlMustNotHaveLegacyAndBodyQueryValuesAtTheSameTimeErrorMessage', {
+          defaultMessage: 'Data url must not have legacy "{legacyContext}" and "{bodyQueryConfigName}" values at the same time',
+          values: {
+            legacyContext: LEGACY_CONTEXT,
+            bodyQueryConfigName: 'body.query',
+          },
+        }));
       } else if (usesContext) {
-        throw new Error(`Data url must not have "${LEGACY_CONTEXT}" together with "${CONTEXT}" or "${TIMEFIELD}"`);
+        throw new Error(i18n.translate('vega.esQueryParser.dataUrlMustNotHaveLegacyContextTogetherWithContextOrTimefieldErrorMessage', {
+          defaultMessage: 'Data url must not have "{legacyContext}" together with "{context}" or "{timefield}"',
+          values: {
+            legacyContext: LEGACY_CONTEXT,
+            context: CONTEXT,
+            timefiels: TIMEFIELD,
+          },
+        }));
       } else if (legacyContext !== true && (typeof legacyContext !== 'string' || legacyContext.length === 0)) {
-        throw new Error(`Legacy "${LEGACY_CONTEXT}" can either be true (ignores time range picker), ` +
-          'or it can be the name of the time field, e.g. "@timestamp"');
+        throw new Error(i18n.translate('vega.esQueryParser.legacyContextCanBeTrueErrorMessage', {
+          defaultMessage: 'Legacy "{legacyContext}" can either be true (ignores time range picker), \
+or it can be the name of the time field, e.g. "@timestamp"',
+          values: { legacyContext: LEGACY_CONTEXT },
+        }));
       }
 
       usesContext = true;
@@ -81,13 +101,26 @@ export class EsQueryParser {
       }
       result += '}';
 
-      this._onWarning(
-        `Legacy "url": {"${LEGACY_CONTEXT}": ${JSON.stringify(legacyContext)}} should change to ${result}`);
+      this._onWarning(i18n.translate('vega.esQueryParser.legacyUrlShouldChangeToWarningMessage', {
+        defaultMessage: 'Legacy {legacyContext} should change to {result}',
+        values: {
+          legacyContext: `"url": {"${LEGACY_CONTEXT}": {legacyContextValue}}`,
+          legacyContextValue: JSON.stringify(legacyContext),
+          result,
+        },
+      }));
     }
 
     if (body.query !== undefined) {
       if (usesContext) {
-        throw new Error(`url.${CONTEXT} and url.${TIMEFIELD} must not be used when url.body.query is set`);
+        throw new Error(i18n.translate('vega.esQueryParser.urlContextAndUrlTimefieldMustNotBeUsedErrorMessage', {
+          defaultMessage: '{urlContext} and {timefield} must not be used when {queryParam} is set',
+          values: {
+            timefield: `url.${TIMEFIELD}`,
+            urlContext: `url.${CONTEXT}`,
+            queryParam: 'url.body.query',
+          },
+        }));
       }
       this._injectContextVars(body.query, true);
     } else if (usesContext) {
@@ -168,7 +201,10 @@ export class EsQueryParser {
             if (size === true) {
               size = 50; // by default, try to get ~80 values
             } else if (typeof size !== 'number') {
-              throw new Error(`"${AUTOINTERVAL}" must be either true or a number`);
+              throw new Error(i18n.translate('vega.esQueryParser.autointervalValueTypeErrorMessage', {
+                defaultMessage: '"{autointerval}" must be either true or a number',
+                values: { autointerval: AUTOINTERVAL },
+              }));
             }
             const bounds = this._timeCache.getTimeBounds();
             obj.interval = EsQueryParser._roundInterval((bounds.max - bounds.min) / size);
@@ -190,7 +226,10 @@ export class EsQueryParser {
               this._injectContextVars(subObj, isQuery);
               continue;
             default:
-              throw new Error(`"${TIMEFILTER}" property must be set to true, "min", or "max"`);
+              throw new Error(i18n.translate('vega.esQueryParser.timefilterValueErrorMessage', {
+                defaultMessage: '"{timefilter}" property must be set to true, "min", or "max"',
+                values: { timefilter: TIMEFILTER },
+              }));
           }
         }
       }
@@ -227,7 +266,9 @@ export class EsQueryParser {
     if (opts.shift) {
       const shift = opts.shift;
       if (typeof shift !== 'number') {
-        throw new Error('shift must be a numeric value');
+        throw new Error(i18n.translate('vega.esQueryParser.shiftMustValueTypeErrorMessage', {
+          defaultMessage: 'shift must be a numeric value',
+        }));
       }
       let multiplier;
       switch (opts.unit || 'd') {
@@ -252,7 +293,9 @@ export class EsQueryParser {
           multiplier = 1000;
           break;
         default:
-          throw new Error('Unknown unit value. Must be one of: [week, day, hour, minute, second]');
+          throw new Error(i18n.translate('vega.esQueryParser.unknownUnitValueErrorMessage', {
+            defaultMessage: 'Unknown unit value. Must be one of: [week, day, hour, minute, second]',
+          }));
       }
       result += shift * multiplier;
     }
