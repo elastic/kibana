@@ -17,18 +17,19 @@
  * under the License.
  */
 
-import { socketApi } from './socket';
-import { translate } from './translate';
-import { esFields } from './es_fields';
-import { esIndices } from './es_indices';
-import { getAuth } from './get_auth';
-import { plugins } from './plugins';
+import fs from 'fs';
+import ss from 'stream-stream';
+import { getPluginPaths } from '@kbn/interpreter/common/lib/get_plugin_paths';
 
-export function routes(server) {
-  socketApi(server);
-  translate(server);
-  esFields(server);
-  esIndices(server);
-  getAuth(server);
-  plugins(server);
-}
+export const getPluginStream = type => {
+  const stream = ss();
+
+  getPluginPaths(type).then(files => {
+    files.forEach(file => {
+      stream.write(fs.createReadStream(file));
+    });
+    stream.end();
+  });
+
+  return stream;
+};
