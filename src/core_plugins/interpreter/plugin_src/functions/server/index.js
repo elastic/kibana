@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { esdocs } from './esdocs';
+import { esdocs } from './esdocs/index';
 import { timelion } from './timelion';
 
 export const serverFunctions = [esdocs, timelion];
