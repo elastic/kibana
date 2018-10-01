@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { typeSpecs } from './index';
+import { commonFunctions } from './index';
 
 // eslint-disable-next-line no-undef
-typeSpecs.forEach(canvas.register);
+commonFunctions.forEach(canvas.register);
