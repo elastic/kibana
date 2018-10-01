@@ -56,7 +56,7 @@ test(`returns the id for the current space when a server basepath is defined`, (
 test(`returns true if the current space is the default one`, () => {
   const request = createRequest(DEFAULT_SPACE_ID, '/foo');
   const server = createMockServer({
-    'server.basePath': '/foo'
+    'server.basePath': '/foo',
   });
 
   const service = createSpacesService(server);
@@ -66,7 +66,7 @@ test(`returns true if the current space is the default one`, () => {
 test(`returns false if the current space is not the default one`, () => {
   const request = createRequest('my-space-context', '/foo');
   const server = createMockServer({
-    'server.basePath': '/foo'
+    'server.basePath': '/foo',
   });
 
   const service = createSpacesService(server);
