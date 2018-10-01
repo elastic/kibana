@@ -17,14 +17,36 @@
  * under the License.
  */
 
-import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
 import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
-import { commonFunctions } from '../../common/functions/index';
-import { typeSpecs } from '../../common/types/index';
-import { serverFunctions } from '../../server/functions/index';
+import { functionsRegistry as serverFunctions } from '@kbn/interpreter/common/lib/functions_registry';
+import { getPluginPaths } from './get_plugin_paths';
 
-export const loadServerPlugins = () => {
-  serverFunctions.forEach(fn => functionsRegistry.register(fn));
-  commonFunctions.forEach(fn => functionsRegistry.register(fn));
-  typeSpecs.forEach(fn => typesRegistry.register(fn));
+const types = {
+  serverFunctions: serverFunctions,
+  commonFunctions: serverFunctions,
+  types: typesRegistry,
 };
+
+const loaded = new Promise(resolve => {
+  const remainingTypes = Object.keys(types);
+
+  const loadType = () => {
+    const type = remainingTypes.pop();
+    getPluginPaths(type).then(paths => {
+      global.canvas = global.canvas || {};
+      global.canvas.register = d => types[type].register(d);
+
+      paths.forEach(path => {
+        require(path);
+      });
+
+      global.canvas = undefined;
+      if (remainingTypes.length) loadType();
+      else resolve(true);
+    });
+  };
+
+  loadType();
+});
+
+export const loadServerPlugins = () => loaded;
