@@ -108,7 +108,9 @@ export class GeohashGridLayer extends ALayer {
 
     mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     this._style.setMBPaintProperties(mbMap, heatmapLayerId, scaledPropertyName);
-
+    if (!this._descriptor.showAtAllZoomLevels) {
+      mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    }
   }
 
 
@@ -117,6 +119,9 @@ export class GeohashGridLayer extends ALayer {
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
+      return;
+    }
 
     if (!dataFilters.extent) {
       return;

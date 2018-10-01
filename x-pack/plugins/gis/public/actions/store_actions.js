@@ -285,22 +285,65 @@ export async function loadMapResources(dispatch) {
 
   await dispatch(replaceLayerList(
     [
+
       {
-        "dataDirty": false,
-        "id": "0hmz5",
-        "sourceDescriptor": { "type": "EMS_TMS", "id": "road_map" },
-        "visible": true,
-        "temporary": false,
-        "style": {},
-        "type": "TILE"
+        dataDirty: false,
+        id: "0hmz5",
+        label: 'light theme tiles',
+        sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
+        visible: false,
+        temporary: false,
+        style: {},
+        type: "TILE",
+        showAtAllZoomLevels: true,
+        minZoom: 0,
+        maxZoom: 24,
       },
       {
-        "id": "0pmk0",
-        "sourceDescriptor": { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
-        "visible": false,
+        id: "0pmk0",
+        label: 'dark theme tiles',
+        sourceDescriptor: {
+          "type": "EMS_XYZ",
+          "urlTemplate": "https://api.mapbox.com/styles/v1/npeihl/cjgib11ei001w2rrva9nomul9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibnBlaWhsIiwiYSI6InVmU21qeVUifQ.jwa9V6XsmccKsEHKh5QfmQ"
+        },
+        visible: true,
+        temporary: false,
+        style: {},
+        type: "TILE",
+        showAtAllZoomLevels: true,
+        minZoom: 0,
+        maxZoom: 24,
+      },
+      {
+        "dataDirty": false,
+        "id": "fn5wx",
+        "label": "logs* documents",
+        "showAtAllZoomLevels": false,
+        "minZoom": 6,
+        "maxZoom": 24,
+        "sourceDescriptor": {
+          "type": "ES_SEARCH",
+          "indexPatternId": "90943e30-9a47-11e8-b64d-95841ca0b247",
+          "geoField": "geo.coordinates",
+          "limit": 1000,
+          "filterByMapBounds": true,
+          "showTooltip": true,
+          "tooltipProperties": ["timestamp", "clientip", "response"],
+        },
+        "visible": true,
         "temporary": false,
-        "style": {},
-        "type": "TILE"
+        "style": {
+          "type": "VECTOR",
+          "properties": {
+            "fillColor": {
+              "type": "STATIC",
+              "options": {
+                "color": "#e6194b"
+              }
+            }
+          }
+        },
+        "type": "VECTOR"
       },
       // {
       //   "id": "1pnwt",

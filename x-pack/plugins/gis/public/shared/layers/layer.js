@@ -11,6 +11,7 @@ export class ALayer {
     this._descriptor = layerDescriptor;
     this._source = source;
     this._style = style;
+    this._listenersMap = new Map(); // key is mbLayerId, value eventHandlers map
   }
 
   static createDescriptor(options) {
@@ -22,13 +23,52 @@ export class ALayer {
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.showAtAllZoomLevels = _.get(options, 'showAtAllZoomLevels', true);
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
-    layerDescriptor.maxZoom = _.get(options, 'maxZoom', 22);
+    layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.source = options.source;
     layerDescriptor.sourceDescriptor = options.sourceDescriptor;
     layerDescriptor.visible = options.visible || true;
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
     return layerDescriptor;
+  }
+
+  destroy(mbMap) {
+    this.removeAllListeners(mbMap);
+  }
+
+  removeAllListeners(mbMap) {
+    this._listenersMap.forEach((value, mbLayerId) => {
+      this.removeAllListenersForMbLayer(mbMap, mbLayerId);
+    });
+  }
+
+  removeAllListenersForMbLayer(mbMap, mbLayerId) {
+    if (this._listenersMap.has(mbLayerId)) {
+      const eventHandlersMap = this._listenersMap.get(mbLayerId);
+      eventHandlersMap.forEach((value, eventType) => {
+        this.removeEventListenerForMbLayer(mbMap, mbLayerId, eventType);
+      });
+      this._listenersMap.delete(mbLayerId);
+    }
+  }
+
+  removeEventListenerForMbLayer(mbMap, mbLayerId, eventType) {
+    if (this._listenersMap.has(mbLayerId)) {
+      const eventHandlersMap = this._listenersMap.get(mbLayerId);
+      if (eventHandlersMap.has(eventType)) {
+        mbMap.off(eventType, mbLayerId, eventHandlersMap.get(eventType));
+      }
+    }
+  }
+
+  addEventListenerForMbLayer(mbMap, mbLayerId, eventType, handler) {
+    mbMap.on(eventType, mbLayerId, handler);
+
+    const eventHandlersMap = !this._listenersMap.has(mbLayerId)
+      ? new Map()
+      : this._listenersMap.get(mbLayerId);
+    eventHandlersMap.set(eventType, handler);
+    this._listenersMap.set(mbLayerId, eventHandlersMap);
   }
 
   getDisplayName() {
@@ -51,6 +91,26 @@ export class ALayer {
     return this._descriptor.visible;
   }
 
+  showAtZoomLevel(zoom) {
+    if (this._descriptor.showAtAllZoomLevels) {
+      return true;
+    }
+
+    if (zoom >= this._descriptor.minZoom && zoom <= this._descriptor.maxZoom) {
+      return true;
+    }
+
+    return false;
+  }
+
+  getZoomConfig() {
+    return {
+      showAtAllZoomLevels: this._descriptor.showAtAllZoomLevels,
+      minZoom: this._descriptor.minZoom,
+      maxZoom: this._descriptor.maxZoom,
+    };
+  }
+
   isTemporary() {
     return this._descriptor.temporary;
   }
@@ -69,6 +129,14 @@ export class ALayer {
 
   isLayerLoading() {
     return false;
+  }
+
+  hasLoadError() {
+    return this._descriptor.hasLoadError;
+  }
+
+  getLoadError() {
+    return this._descriptor.loadError;
   }
 
   toLayerDescriptor() {

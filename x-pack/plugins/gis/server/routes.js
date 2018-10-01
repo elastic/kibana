@@ -46,7 +46,7 @@ export function initRoutes(server) {
        * The "real" implementation needs to handle any kind of metric.
        * e.g.: http://localhost:5601/wth/api/gis/data/geohash_grid?index_pattern=log*&geo_point_field=geo.coordinates
        */
-      const indexPattern = request.query.index_pattern;
+      const indexPatternTitle = request.query.index_pattern;
       const geoPointField = request.query.geo_point_field;
       const gteTime = request.query.from;
       const lteTime = request.query.to;
@@ -54,6 +54,10 @@ export function initRoutes(server) {
       if (isNaN(precision)) {
         precision = 1;
       }
+
+      const indexPatterns = await getIndexPatterns(request);
+      const indexPattern = indexPatterns.find(ip => ip.title === indexPatternTitle);
+      const timeField = indexPattern.timeFieldName;
 
       const maxLat = clamp(request.query.maxlat, -90, 90, 90);
       const minLat = clamp(request.query.minlat, -90, 90, -90);
@@ -72,16 +76,17 @@ export function initRoutes(server) {
         }
       };
 
+
       try {
         const esClient = new elasticsearch.Client({
           host: elasticsearchHost,
           log: 'info'
         });
 
-        const resp = await esClient.search({
-          index: indexPattern,
+        const query = {
+          index: indexPatternTitle,
           body: {
-            size: 0,
+            "size": 0,
             "_source": {
               "excludes": []
             },
@@ -112,7 +117,7 @@ export function initRoutes(server) {
                 "must": [
                   {
                     "range": {
-                      "utc_time": {
+                      [timeField]: {
                         "gte": gteTime,
                         "lte": lteTime
                       }
@@ -122,7 +127,8 @@ export function initRoutes(server) {
               }
             }
           }
-        });
+        };
+        const resp = await esClient.search(query);
 
         const featureCollection = convertEsResponseToGeoJsonFeatureCollection(resp, (aggregations) => {
           return aggregations.bbox.grid.buckets;

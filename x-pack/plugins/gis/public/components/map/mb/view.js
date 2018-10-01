@@ -7,6 +7,7 @@
 import React from 'react';
 import { createGlobalMbMapInstance } from './global_mb_map';
 import { ResizeChecker } from 'ui/resize_checker';
+import { EuiPanel } from '@elastic/eui';
 
 export class MBMapContainer extends React.Component {
 
@@ -71,9 +72,9 @@ export class MBMapContainer extends React.Component {
 
   render() {
     return (
-      <div>
+      <EuiPanel style={{ minHeight: '100vh', borderRadius: '0' }} paddingSize="none">
         <div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>
-      </div>
+      </EuiPanel>
     );
   }
 }

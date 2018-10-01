@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { connect } from 'react-redux';
-import { TOCEntry } from './view';
+import { TOCEntry } from './toc_entry';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
 import { setSelectedLayer, toggleLayerVisible } from '../../../actions/store_actions';
 
+function mapStateToProps(state = {}) {
+  return {
+    zoom: _.get(state, 'map.mapState.zoom', 0)
+  };
+}
+
 function mapDispatchToProps(dispatch) {
   return ({
-    onButtonClick: layerId => {
+    openLayerPanel: layerId => {
       dispatch(setSelectedLayer(layerId));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
@@ -19,5 +26,5 @@ function mapDispatchToProps(dispatch) {
   });
 }
 
-const connectedTOCEntry = connect(null, mapDispatchToProps)(TOCEntry);
+const connectedTOCEntry = connect(mapStateToProps, mapDispatchToProps)(TOCEntry);
 export { connectedTOCEntry as TOCEntry };

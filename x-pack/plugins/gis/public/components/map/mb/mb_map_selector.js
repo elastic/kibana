@@ -9,6 +9,8 @@ import { getLayerList, getMapState, getMapReady } from "../../../selectors/map_s
 import { getMbMap } from './global_mb_map';
 import _ from 'lodash';
 
+
+
 function removeOrphanedSourcesAndLayers(mbMap, layerList) {
 
   const layerIds = layerList.map((layer) => layer.getId());
@@ -41,7 +43,7 @@ function syncLayerOrder(mbMap, layerList) {
   for (let i = 0; i < layerList.length - 1; i++) {
     const layer = layerList[i];
     const nextLayer = layerList[i + 1];
-    const mbLayersToMove = mbLayers.filter((mbLayer) => mbLayer.source === layer.getId());
+    const mbLayersToMove = mbLayers.filter((mbLayer) => mbLayer.id === layer.getId());
     const nextMbLayer = mbLayers.find(mbLayer => mbLayer.source === nextLayer.getId());//first layer of "next" source
     if (nextMbLayer) {
       for (let j = 0; j < mbLayersToMove.length; j++) {
@@ -49,7 +51,6 @@ function syncLayerOrder(mbMap, layerList) {
       }
     }
   }
-
 }
 
 // Selectors
@@ -79,10 +80,7 @@ const getMbMapAndSyncWithMapState = createSelector(
   }
 );
 
-export const syncMBState = createSelector(
-  getMapReady,
-  getMbMapAndSyncWithMapState,
-  getLayerList,
+export const syncMBState = createSelector(getMapReady, getMbMapAndSyncWithMapState, getLayerList,
   (mapReady, mbMap, layerList) => {
     if (!mapReady) {
       return;
