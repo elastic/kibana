@@ -21,28 +21,9 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 import { Suggestion } from './suggestion';
-import { units, colors, px, unit } from '../../../../../../x-pack/plugins/apm/public/style/variables';
-import { rgba } from 'polished';
-
-
-// TODO get rid of styled usage?
-
-const List = styled.ul`
-  width: 100%;
-  border: 1px solid ${colors.gray4};
-  border-radius: ${px(units.quarter)};
-  box-shadow: 0px ${px(units.quarter)} ${px(units.double)}
-    ${rgba(colors.black, 0.1)};
-  position: absolute;
-  background: #fff;
-  z-index: 10;
-  left: 0;
-  max-height: ${px(unit * 20)};
-  overflow: scroll;
-`;
+import './suggestion.less';
 
 export class Suggestions extends Component {
   childNodes = [];
@@ -78,7 +59,7 @@ export class Suggestions extends Component {
       const key = suggestion + '_' + index;
       return (
         <Suggestion
-          innerRef={node => (this.childNodes[index] = node)}
+          ref={node => (this.childNodes[index] = node)}
           selected={index === this.props.index}
           suggestion={suggestion}
           onClick={this.props.onClick}
@@ -89,7 +70,13 @@ export class Suggestions extends Component {
     });
 
     return (
-      <List innerRef={node => (this.parentNode = node)}>{suggestions}</List>
+      <div className="reactSuggestionTypeahead">
+        <div className="typeahead">
+          <div className="typeahead-popover">
+            <div className="typeahead-items" ref={node => (this.parentNode = node)}>{suggestions}</div>
+          </div>
+        </div>
+      </div>
     );
   }
 }
