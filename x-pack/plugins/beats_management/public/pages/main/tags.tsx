@@ -18,6 +18,7 @@ import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { AppURLState } from '../../app';
 import { Table, TagsTableType } from '../../components/table';
+import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { URLStateProps } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 
@@ -57,14 +58,24 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
 
   public render() {
     return (
-      <Table
-        actionHandler={this.handleTagsAction}
-        items={this.state.tags}
-        renderAssignmentOptions={item => item}
-        ref={this.tableRef}
-        showAssignmentOptions={true}
-        type={TagsTableType}
-      />
+      <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="tag">
+        {autocompleteProps => (
+          <Table
+            {...autocompleteProps}
+            isKueryValid={this.props.libs.elasticsearch.isKueryValid(this.props.urlState.tagsKBar)} // todo check if query converts to es query correctly
+            kueryValue={this.props.urlState.tagsKBar}
+            onKueryBarChange={(value: any) => this.props.setUrlState({ tagsKBar: value })} // todo
+            onKueryBarSubmit={() => null} // todo
+            filterQueryDraft={'false'} // todo
+            actionHandler={this.handleTagsAction}
+            items={this.state.tags || []}
+            renderAssignmentOptions={item => item}
+            ref={this.tableRef}
+            showAssignmentOptions={true}
+            type={TagsTableType}
+          />
+        )}
+      </WithKueryAutocompletion>
     );
   }
 

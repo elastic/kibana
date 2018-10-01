@@ -138,8 +138,12 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       type: '_doc',
       body: {
         query: {
-          match: {
-            type: 'beat',
+          bool: {
+            must: {
+              term: {
+                type: 'beat',
+              },
+            },
           },
         },
       },
@@ -151,6 +155,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
         ...ESQuery,
       };
     }
+
     let response;
     try {
       response = await this.database.search(user, params);

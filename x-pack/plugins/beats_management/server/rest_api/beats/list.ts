@@ -46,8 +46,8 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
 
         default:
           beats = await libs.beats.getAll(
-            request.user
-            // request.query ? JSON.parse(request.query.ESQuery) : undefined
+            request.user,
+            request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
           );
 
           break;

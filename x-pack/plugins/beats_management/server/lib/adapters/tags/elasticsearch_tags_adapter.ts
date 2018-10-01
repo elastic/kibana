@@ -26,8 +26,12 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       type: '_doc',
       body: {
         query: {
-          match: {
-            type: 'tag',
+          bool: {
+            must: {
+              term: {
+                type: 'tag',
+              },
+            },
           },
         },
       },

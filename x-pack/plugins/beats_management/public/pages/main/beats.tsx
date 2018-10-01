@@ -60,17 +60,15 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     return (
       <div>
         <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="beat">
-          {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
+          {autocompleteProps => (
             <Table
-              isLoadingSuggestions={isLoadingSuggestions}
+              {...autocompleteProps}
               isKueryValid={this.props.libs.elasticsearch.isKueryValid(
                 this.props.urlState.beatsKBar
               )} // todo check if query converts to es query correctly
-              loadSuggestions={loadSuggestions}
               kueryValue={this.props.urlState.beatsKBar}
               onKueryBarChange={(value: any) => this.props.setUrlState({ beatsKBar: value })} // todo
               onKueryBarSubmit={() => null} // todo
-              suggestions={suggestions}
               filterQueryDraft={'false'} // todo
               actionHandler={this.handleBeatsActions}
               assignmentOptions={this.state.tags}
