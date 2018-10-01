@@ -21,6 +21,45 @@ jest.mock('../../services/field_format_service', () => ({
     getFieldFormat: jest.fn()
   }
 }));
+jest.mock('ui/chrome', () => ({
+  getBasePath: (path) => path,
+  getUiSettingsClient: () => ({
+    get: () => null
+  }),
+}));
+
+// The mocks for ui/chrome and ui/timefilter are copied from charts_utils.test.js
+// TODO: Refactor the involved tests to avoid this duplication
+jest.mock('ui/chrome',
+  () => ({
+    getBasePath: () => {
+      return '<basepath>';
+    },
+    getUiSettingsClient: () => {
+      return {
+        get: (key) => {
+          switch (key) {
+            case 'timepicker:timeDefaults':
+              return { from: 'now-15m', to: 'now', mode: 'quick' };
+            case 'timepicker:refreshIntervalDefaults':
+              return { pause: false, value: 0 };
+            default:
+              throw new Error(`Unexpected config key: ${key}`);
+          }
+        }
+      };
+    },
+  }), { virtual: true });
+
+import moment from 'moment';
+import { timefilter } from 'ui/timefilter';
+
+timefilter.enableTimeRangeSelector();
+timefilter.enableAutoRefreshSelector();
+timefilter.setTime({
+  from: moment(seriesConfig.selectedEarliest).toISOString(),
+  to: moment(seriesConfig.selectedLatest).toISOString()
+});
 
 import { shallow } from 'enzyme';
 import React from 'react';
@@ -69,8 +108,8 @@ describe('ExplorerChartsContainer', () => {
       mlChartTooltipService={mlChartTooltipService}
     />);
 
-    // Only do a snapshot of the label section, the included
-    // ExplorerChart component does that in its own tests anyway.
-    expect(wrapper.find('.explorer-chart-label')).toMatchSnapshot();
+    // We test child components with snapshots separately
+    // so we just do some high level sanity check here.
+    expect(wrapper.find('.ml-explorer-chart-container').children()).toHaveLength(3);
   });
 });

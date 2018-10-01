@@ -28,8 +28,8 @@ export default function (kibana) {
         icon: 'plugins/timelion/icon.svg',
         euiIconType: 'timelionApp',
         main: 'plugins/timelion/app',
-        styleSheetPath: `${__dirname}/public/index.scss`,
       },
+      styleSheetPaths: `${__dirname}/public/index.scss`,
       hacks: [
         'plugins/timelion/lib/panel_registry',
         'plugins/timelion/panels/timechart/timechart'

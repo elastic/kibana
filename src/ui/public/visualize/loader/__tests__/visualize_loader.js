@@ -185,12 +185,6 @@ describe('visualize loader', () => {
         expect(vis.attr('data-foo')).to.be('');
         expect(vis.attr('data-with-dash')).to.be('value');
       });
-
-      it('should hide spy panel control by default', () => {
-        const vis = embedWithParams({});
-        expect(vis.find('[data-test-subj="spyToggleButton"]').length).to.be(0);
-      });
-
     });
 
     describe('embedVisualizationWithId', () => {
