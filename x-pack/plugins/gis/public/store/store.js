@@ -39,14 +39,14 @@ const updateAppState = (fetchedId, workspaceId) => {
   if (fetchedId && fetchedId !== workspaceId) {
     gisStateSync.set('workspaceId', fetchedId);
   }
-}
+};
 
 let initConfig = null;
 uiModules
   .get('kibana')
-  .run((gisWorkspace, AppState, getAppState) => {
+  .run((gisWorkspace, AppState) => {
     // Load saved workspace if present
-    gisStateSync = new AppState().makeStateful('gis')
+    gisStateSync = new AppState().makeStateful('gis');
     const workspaceId = gisStateSync.get('workspaceId');
     (async () => {
       const workspace = await gisWorkspace.get(workspaceId) ||
@@ -58,7 +58,6 @@ uiModules
         initConfig = getMapInitState(attributes);
       } else {
         gisStateSync.reset('workspaceId');
-        location.assign(location.href.split('&')[0]) // Reset location
         initConfig = {};
       }
     })();
