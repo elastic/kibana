@@ -24,7 +24,7 @@ export const savedObjects = [
   {
     "id": "37cc8650-b882-11e8-a6d9-e546fe2bba5f",
     "type": "visualization",
-    "updated_at": "2018-09-18T14:14:35.310Z",
+    "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
     "attributes": {
       "title": "[eCommerce] Sales by Category",
@@ -40,7 +40,7 @@ export const savedObjects = [
   {
     "id": "ed8436b0-b88b-11e8-a6d9-e546fe2bba5f",
     "type": "visualization",
-    "updated_at": "2018-09-18T14:14:35.310Z",
+    "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
     "attributes": {
       "title": "[eCommerce] Sales by Gender",
@@ -56,7 +56,7 @@ export const savedObjects = [
   {
     "id": "09ffee60-b88c-11e8-a6d9-e546fe2bba5f",
     "type": "visualization",
-    "updated_at": "2018-09-18T14:14:35.310Z",
+    "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
     "attributes": {
       "title": "[eCommerce] Markdown",
@@ -72,7 +72,7 @@ export const savedObjects = [
   {
     "id": "1c389590-b88d-11e8-a6d9-e546fe2bba5f",
     "type": "visualization",
-    "updated_at": "2018-09-18T14:14:35.310Z",
+    "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
     "attributes": {
       "title": "[eCommerce] Controls",
@@ -88,11 +88,11 @@ export const savedObjects = [
   {
     "id": "45e07720-b890-11e8-a6d9-e546fe2bba5f",
     "type": "visualization",
-    "updated_at": "2018-09-18T14:16:18.181Z",
+    "updated_at": "2018-10-01T15:17:30.755Z",
     "version": 2,
     "attributes": {
       "title": "[eCommerce] Promotion Tracking",
-      "visState": "{\"title\":\"[eCommerce] Promotion Tracking\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(23,233,230,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"sum\",\"field\":\"taxful_total_price\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"filter\":\"products.product_name:*bag*\",\"label\":\"Revenue Bags\",\"value_template\":\"${{value}}\"},{\"id\":\"ea20ae70-b88d-11e8-a451-f37365e9f268\",\"color\":\"rgba(240,138,217,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"ea20ae71-b88d-11e8-a451-f37365e9f268\",\"type\":\"sum\",\"field\":\"taxful_total_price\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"filter\":\"products.product_name:*trouster*\",\"label\":\"Revenue Trousers\",\"value_template\":\"${{value}}\"},{\"id\":\"faa2c170-b88d-11e8-a451-f37365e9f268\",\"color\":\"rgba(235,186,180,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"faa2c171-b88d-11e8-a451-f37365e9f268\",\"type\":\"sum\",\"field\":\"taxful_total_price\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"filter\":\"products.product_name:*cocktail dress*\",\"label\":\"Revenue Cocktail Dresses\",\"value_template\":\"${{value}}\"},{\"id\":\"062d77b0-b88e-11e8-a451-f37365e9f268\",\"color\":\"rgba(191,240,129,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"062d77b1-b88e-11e8-a451-f37365e9f268\",\"type\":\"sum\",\"field\":\"taxful_total_price\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"filter\":\"products.product_name:*watch*\",\"label\":\"Revenue Watches\",\"value_template\":\"${{value}}\"}],\"time_field\":\"order_date\",\"index_pattern\":\"kibana_sample_data_ecommerce\",\"interval\":\">=12h\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"legend_position\":\"bottom\",\"annotations\":[{\"fields\":\"taxful_total_price\",\"template\":\"Ring the bell! ${{taxful_total_price}}\",\"index_pattern\":\"kibana_sample_data_ecommerce\",\"query_string\":\"taxful_total_price:>250\",\"id\":\"c8c30be0-b88f-11e8-a451-f37365e9f268\",\"color\":\"rgba(25,77,51,1)\",\"time_field\":\"order_date\",\"icon\":\"fa-bell\",\"ignore_global_filters\":1,\"ignore_panel_filters\":1}]},\"aggs\":[]}",
+      "visState": "{\"title\":\"[eCommerce] Promotion Tracking\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"ea20ae70-b88d-11e8-a451-f37365e9f268\",\"color\":\"rgba(240,138,217,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"ea20ae71-b88d-11e8-a451-f37365e9f268\",\"type\":\"sum\",\"field\":\"taxful_total_price\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"0.7\",\"stacked\":\"none\",\"filter\":\"products.product_name:*trouser*\",\"label\":\"Revenue Trousers\",\"value_template\":\"${{value}}\"},{\"id\":\"062d77b0-b88e-11e8-a451-f37365e9f268\",\"color\":\"rgba(191,240,129,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"062d77b1-b88e-11e8-a451-f37365e9f268\",\"type\":\"sum\",\"field\":\"taxful_total_price\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"0.7\",\"stacked\":\"none\",\"filter\":\"products.product_name:*watch*\",\"label\":\"Revenue Watches\",\"value_template\":\"${{value}}\"},{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(23,233,230,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"sum\",\"field\":\"taxful_total_price\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"0.7\",\"stacked\":\"none\",\"filter\":\"products.product_name:*bag*\",\"label\":\"Revenue Bags\",\"value_template\":\"${{value}}\"},{\"id\":\"faa2c170-b88d-11e8-a451-f37365e9f268\",\"color\":\"rgba(235,186,180,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"faa2c171-b88d-11e8-a451-f37365e9f268\",\"type\":\"sum\",\"field\":\"taxful_total_price\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"0.7\",\"stacked\":\"none\",\"filter\":\"products.product_name:*cocktail dress*\",\"label\":\"Revenue Cocktail Dresses\",\"value_template\":\"${{value}}\"}],\"time_field\":\"order_date\",\"index_pattern\":\"kibana_sample_data_ecommerce\",\"interval\":\">=12h\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"legend_position\":\"bottom\",\"annotations\":[{\"fields\":\"taxful_total_price\",\"template\":\"Ring the bell! ${{taxful_total_price}}\",\"index_pattern\":\"kibana_sample_data_ecommerce\",\"query_string\":\"taxful_total_price:>250\",\"id\":\"c8c30be0-b88f-11e8-a451-f37365e9f268\",\"color\":\"rgba(25,77,51,1)\",\"time_field\":\"order_date\",\"icon\":\"fa-bell\",\"ignore_global_filters\":1,\"ignore_panel_filters\":1}]},\"aggs\":[]}",
       "uiStateJSON": "{}",
       "description": "",
       "version": 1,
@@ -104,7 +104,7 @@ export const savedObjects = [
   {
     "id": "10f1a240-b891-11e8-a6d9-e546fe2bba5f",
     "type": "visualization",
-    "updated_at": "2018-09-18T14:14:35.310Z",
+    "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
     "attributes": {
       "title": "[eCommerce] Total Revenue",
@@ -120,7 +120,7 @@ export const savedObjects = [
   {
     "id": "b80e6540-b891-11e8-a6d9-e546fe2bba5f",
     "type": "visualization",
-    "updated_at": "2018-09-18T14:14:35.310Z",
+    "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
     "attributes": {
       "title": "[eCommerce] Sold Products per Day",
@@ -136,7 +136,7 @@ export const savedObjects = [
   {
     "id": "4b3ec120-b892-11e8-a6d9-e546fe2bba5f",
     "type": "visualization",
-    "updated_at": "2018-09-18T14:14:35.310Z",
+    "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
     "attributes": {
       "title": "[eCommerce] Average Sales Price",
@@ -152,7 +152,7 @@ export const savedObjects = [
   {
     "id": "9ca7aa90-b892-11e8-a6d9-e546fe2bba5f",
     "type": "visualization",
-    "updated_at": "2018-09-18T14:14:35.310Z",
+    "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
     "attributes": {
       "title": "[eCommerce] Average Sold Quantity",
@@ -168,7 +168,7 @@ export const savedObjects = [
   {
     "id": "3ba638e0-b894-11e8-a6d9-e546fe2bba5f",
     "type": "search",
-    "updated_at": "2018-09-18T14:14:35.310Z",
+    "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
     "attributes": {
       "title": "[eCommerce] Orders",
@@ -193,7 +193,7 @@ export const savedObjects = [
   {
     "id": "9c6f83f0-bb4d-11e8-9c84-77068524bcab",
     "type": "visualization",
-    "updated_at": "2018-09-18T14:17:44.622Z",
+    "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
     "attributes": {
       "title": "[eCommerce] Average Sales Per Region",
@@ -209,8 +209,8 @@ export const savedObjects = [
   {
     "id": "b72dd430-bb4d-11e8-9c84-77068524bcab",
     "type": "visualization",
-    "updated_at": "2018-09-18T14:18:42.554Z",
-    "version": 2,
+    "updated_at": "2018-10-01T15:13:03.270Z",
+    "version": 1,
     "attributes": {
       "title": "[eCommerce] Top Selling Products",
       "visState": "{\"title\":\"[eCommerce] Top Selling Products\",\"type\":\"tagcloud\",\"params\":{\"scale\":\"linear\",\"orientation\":\"single\",\"minFontSize\":18,\"maxFontSize\":72,\"showLabel\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"products.product_name.keyword\",\"size\":7,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}",
@@ -225,7 +225,7 @@ export const savedObjects = [
   {
     "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
     "type": "index-pattern",
-    "updated_at": "2018-09-18T14:14:35.310Z",
+    "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
     "attributes": {
       "title": "kibana_sample_data_ecommerce",
@@ -237,8 +237,8 @@ export const savedObjects = [
   {
     "id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
     "type": "dashboard",
-    "updated_at": "2018-09-18T14:19:09.753Z",
-    "version": 2,
+    "updated_at": "2018-10-01T15:13:03.270Z",
+    "version": 1,
     "attributes": {
       "title": "[eCommerce] Revenue Dashboard",
       "hits": 0,
