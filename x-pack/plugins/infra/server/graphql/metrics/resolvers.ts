@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraNodeType, InfraSourceResolvers } from '../../../common/graphql/types';
+import { InfraSourceResolvers } from '../../../common/graphql/types';
 import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
 import { InfraMetricsDomain } from '../../lib/domains/metrics_domain';
 import { InfraContext } from '../../lib/infra_types';
@@ -30,16 +30,7 @@ export const createMetricResolvers = (
 } => ({
   InfraSource: {
     async metrics(source, args, { req }) {
-      switch (args.nodeType) {
-        case InfraNodeType.pod:
-          UsageCollector.countKubernetes();
-          break;
-        case InfraNodeType.container:
-          UsageCollector.countDocker();
-          break;
-        default:
-          UsageCollector.countHost();
-      }
+      UsageCollector.countNode(args.nodeType);
       const options = {
         nodeId: args.nodeId,
         nodeType: args.nodeType,

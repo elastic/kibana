@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InfraNodeType } from '../../common/graphql/types';
 import { KbnServer } from '../kibana.index';
 
 const KIBANA_REPORTING_TYPE = 'infraops';
@@ -29,16 +30,17 @@ export class UsageCollector {
     });
   }
 
-  public static countHost() {
-    this.infraopsHosts += 1;
-  }
-
-  public static countDocker() {
-    this.infraopsDocker += 1;
-  }
-
-  public static countKubernetes() {
-    this.infraopsKubernetes += 1;
+  public static countNode(nodeType: InfraNodeType) {
+    switch (nodeType) {
+      case InfraNodeType.pod:
+        this.infraopsKubernetes += 1;
+        break;
+      case InfraNodeType.container:
+        this.infraopsDocker += 1;
+        break;
+      default:
+        this.infraopsHosts += 1;
+    }
   }
 
   public static countLogs() {
