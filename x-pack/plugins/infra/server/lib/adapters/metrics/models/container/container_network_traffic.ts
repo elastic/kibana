@@ -44,7 +44,7 @@ export const containerNetworkTraffic: InfraMetricModelCreator = (
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: 'max-network-in',
+              field: 'avg-network-in',
               id: 'var-rate',
               name: 'rate',
             },

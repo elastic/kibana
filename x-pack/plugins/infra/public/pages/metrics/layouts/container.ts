@@ -76,7 +76,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
           type: InfraMetricLayoutVisualizationType.area,
           formatter: InfraFormatterType.percent,
           seriesOverrides: {
-            cpu: { color: theme.eui.euiColorVis1 },
+            memory: { color: theme.eui.euiColorVis1 },
           },
         },
       },
