@@ -25,14 +25,22 @@ export function i18nDirective(i18n) {
       values: '<i18nValues',
     },
     link: function($scope, $element) {
-      $scope.$watch('values', () => {
-        $element.html(
-          i18n($scope.id, {
-            values: $scope.values,
-            defaultMessage: $scope.defaultMessage,
-          })
-        );
-      });
+      if ($scope.values) {
+        $scope.$watch('values', () => {
+          setHtmlContent($element, $scope, i18n);
+        });
+      } else {
+        setHtmlContent($element, $scope, i18n);
+      }
     },
   };
+}
+
+function setHtmlContent($element, $scope, i18n) {
+  $element.html(
+    i18n($scope.id, {
+      values: $scope.values,
+      defaultMessage: $scope.defaultMessage,
+    })
+  );
 }
