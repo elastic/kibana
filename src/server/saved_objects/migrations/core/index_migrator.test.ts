@@ -32,6 +32,7 @@ describe('index_migrator', () => {
       },
       foo: { type: 'long' },
       migrationVersion: { dynamic: 'true', type: 'object' },
+      namespace: { type: 'keyword' },
       type: { type: 'keyword' },
       updated_at: { type: 'date' },
     };
