@@ -154,7 +154,7 @@ export async function migrationsUpToDate(
 ): Promise<boolean> {
   const indexInfo = await fetchInfo(callCluster, index);
 
-  if (!_.get(indexInfo, 'mappings.doc.properties.migrationVersion')) {
+  if (!_.get(indexInfo, 'mappings._doc.properties.migrationVersion')) {
     return false;
   }
 

@@ -45,7 +45,7 @@ export function indexMissingSuite() {
         });
 
         expect(resp[indexName].mappings).to.have.property('_doc');
-        expect(resp[indexName].mappings.doc.properties).to.have.keys(
+        expect(resp[indexName].mappings._doc.properties).to.have.keys(
           'index-pattern',
           'visualization',
           'search',
