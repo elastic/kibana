@@ -9,7 +9,6 @@ export const pluginPaths = {
   serverFunctions: resolve(__dirname, 'canvas_plugin/functions/server'),
   browserFunctions: resolve(__dirname, 'canvas_plugin/functions/browser'),
   commonFunctions: resolve(__dirname, 'canvas_plugin/functions/common'),
-  types: resolve(__dirname, 'canvas_plugin/types'),
   elements: resolve(__dirname, 'canvas_plugin/elements'),
   renderers: resolve(__dirname, 'canvas_plugin/renderers'),
   interfaces: resolve(__dirname, 'canvas_plugin/interfaces'),
