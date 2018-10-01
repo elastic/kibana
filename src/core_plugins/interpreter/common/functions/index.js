@@ -43,6 +43,7 @@ import { lte } from './lte';
 import { mapColumn } from './map_column';
 import { math } from './math';
 import { neq } from './neq';
+import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
 import { rowCount } from './row_count';
@@ -84,6 +85,7 @@ export const commonFunctions = [
   mapColumn,
   math,
   neq,
+  render,
   replace,
   rounddate,
   rowCount,
