@@ -60,7 +60,7 @@ export class UiApp {
       // unless an app is hidden it gets a navlink, but we only respond to `getNavLink()`
       // if the app is also listed. This means that all apps in the kibanaPayload will
       // have a navLink property since that list includes all normally accessible apps
-      this._navLink = new UiNavLink(kbnServer.config.get('server.basePath'), {
+      this._navLink = new UiNavLink({
         id: this._id,
         title: this._title,
         order: this._order,

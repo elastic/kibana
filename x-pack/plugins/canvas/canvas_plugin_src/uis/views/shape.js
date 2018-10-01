@@ -16,12 +16,8 @@ export const shape = () => ({
       name: '_',
       displayName: 'Select a Shape',
       argType: 'shape',
-      help: 'A basic shape',
       options: {
-        choices: Object.keys(shapes).map(shape => ({
-          value: shape,
-          name: shape,
-        })),
+        shapes,
       },
     },
     {
