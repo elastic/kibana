@@ -22,7 +22,9 @@ import ss from 'stream-stream';
 import { getPluginPaths } from '@kbn/interpreter/common/lib/get_plugin_paths';
 
 export const getPluginStream = type => {
-  const stream = ss();
+  const stream = ss({
+    separator: '\n',
+  });
 
   getPluginPaths(type).then(files => {
     files.forEach(file => {
