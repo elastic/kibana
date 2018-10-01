@@ -126,9 +126,7 @@ export const spaces = (kibana: any) =>
             callWithRequestRepository,
             server.config(),
             internalRepository,
-            request,
-            savedObjects.schema,
-            savedObjects.types
+            request
           );
         },
       });
