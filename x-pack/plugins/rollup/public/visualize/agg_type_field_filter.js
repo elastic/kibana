@@ -11,8 +11,9 @@ import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
  * and limit available fields for a given aggType based on that.
  */
 aggTypeFieldFilters.addFilter(
-  (field, fieldParamType, indexPattern, aggConfig) => {
-    if(indexPattern.type !== 'rollup') {
+  (field, fieldParamType, aggConfig) => {
+    const indexPattern = aggConfig.getIndexPattern();
+    if(!indexPattern || indexPattern.type !== 'rollup') {
       return true;
     }
     const aggName = aggConfig.type.name;
