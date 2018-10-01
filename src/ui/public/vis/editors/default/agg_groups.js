@@ -17,24 +17,9 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
-import { fieldFormats } from '../../registry/field_formats';
 import { i18n } from '@kbn/i18n';
 
-export const countMetricAgg = new MetricAggType({
-  name: 'count',
-  title: i18n.translate('common.ui.aggTypes.metrics.countLabel', { defaultMessage: 'Count' }),
-  hasNoDsl: true,
-  makeLabel: function () {
-    return i18n.translate('common.ui.aggTypes.metrics.countText', { defaultMessage: 'Count' });
-  },
-  getFormat: function () {
-    return fieldFormats.getDefaultInstance('number');
-  },
-  getValue: function (agg, bucket) {
-    return bucket.doc_count;
-  },
-  isScalable: function () {
-    return true;
-  }
+export const aggGroupNameMaps = () => ({
+  metrics: i18n.translate('common.ui.vis.editors.aggGroups.metricsText', { defaultMessage: 'metrics' }),
+  buckets: i18n.translate('common.ui.vis.editors.aggGroups.bucketsText', { defaultMessage: 'buckets' })
 });
