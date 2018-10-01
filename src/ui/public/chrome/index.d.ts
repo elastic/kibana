@@ -28,6 +28,7 @@ declare class Chrome {
   public getXsrfToken(): string;
   public getKibanaVersion(): string;
   public getUiSettingsClient(): any;
+  public setVisible(visible: boolean): any;
   public getInjected(key: string, defaultValue?: any): any;
 }
 
