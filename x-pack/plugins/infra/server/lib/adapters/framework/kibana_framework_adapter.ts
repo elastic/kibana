@@ -93,13 +93,12 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     }
     return this.server.indexPatternsServiceFactory({
       callCluster: async (method: string, args: [object], ...rest: any[]) => {
-        const fieldCaps = await this.callWithRequest(
+        return await this.callWithRequest(
           request,
           method,
           { ...args, allowNoIndices: true },
           ...rest
         );
-        return fieldCaps;
       },
     });
   }
