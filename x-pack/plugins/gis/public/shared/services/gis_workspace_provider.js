@@ -14,6 +14,7 @@ export function GISWorkspaceProvider(Private, Promise, confirmModal) {
   const createOpts = { overwrite: true };
   this._type = 'config';
   this.isSaving = false;
+  this.description = 'GIS Saved Settings';
 
   this.get = async id => {
     let savedWorkspaceObject;
@@ -25,8 +26,11 @@ export function GISWorkspaceProvider(Private, Promise, confirmModal) {
 
   this.find = async () => {
     const { savedObjects } = await savedObjectsClient.find({
+      search: this.description,
       type: this._type,
+      searchFields: ['description']
     });
+    // Return first by default. Could eventually return multiple for selection
     return savedObjects && savedObjects.length && savedObjects[0] || null;
   };
 
@@ -44,11 +48,25 @@ export function GISWorkspaceProvider(Private, Promise, confirmModal) {
       });
   };
 
+  this.update = (id, gisSettings) => {
+    this.isSaving = true;
+
+    const source = this._serialize(gisSettings);
+    return this._updateSource(id, source)
+      .then(objRef => {
+        this.isSaving = false;
+        return objRef;
+      }).catch(err => {
+        this.isSaving = false;
+        return Promise.reject(err);
+      });
+  };
+
   this.getType = () => this._type;
 
   this._serialize = (gisSettings) => {
     // TODO: Determine best serialization
-    return gisSettings;
+    return { description: this.description, ...gisSettings };
   };
 
   this._createSource = (source) => {
@@ -67,6 +85,10 @@ export function GISWorkspaceProvider(Private, Promise, confirmModal) {
         }
         return Promise.reject(err);
       });
+  };
+
+  this._updateSource = (id, source) => {
+    return savedObjectsClient.update(this._type, id, source)
   };
 }
 
