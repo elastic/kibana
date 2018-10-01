@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`deep freezes exposed service 1`] = `"Cannot delete property 'checkPrivilegesWithRequest' of #<Object>"`;
-
-exports[`deep freezes exposed service 2`] = `"Cannot add property foo, object is not extensible"`;
-
-exports[`deep freezes exposed service 3`] = `"Cannot assign to read only property 'login' of object '#<Object>'"`;
-
-exports[`deep freezes exposed service 4`] = `"Cannot assign to read only property 'application' of object '#<Object>'"`;

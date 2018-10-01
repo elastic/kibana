@@ -5,6 +5,13 @@
  */
 
 export async function getTelemetryOptIn(request) {
+  const isRequestingApplication = request.path.startsWith('/app');
+
+  // Prevent interstitial screens (such as the space selector) from prompting for telemetry
+  if (!isRequestingApplication) {
+    return false;
+  }
+
   const savedObjectsClient = request.getSavedObjectsClient();
 
   try {

@@ -1,0 +1,179 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<CollapsiblePanel
+  iconType="logoElasticsearch"
+  title="Elasticsearch"
+>
+  <React.Fragment>
+    <EuiDescribedFormGroup
+      description={
+        <p>
+          Manage the actions this role can perform against your cluster.
+           
+          <EuiLink
+            className="editRole__learnMore"
+            color="primary"
+            href="undefinedguide/en/x-pack/undefined/security-privileges.html#security-privileges"
+            target="_blank"
+            type="button"
+          >
+            Learn more
+          </EuiLink>
+        </p>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      title={
+        <h3>
+          Cluster privileges
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        fullWidth={true}
+        hasEmptyLabelSpace={true}
+      >
+        <ClusterPrivileges
+          onChange={[Function]}
+          role={
+            Object {
+              "elasticsearch": Object {
+                "cluster": Array [],
+                "indices": Array [],
+                "run_as": Array [],
+              },
+              "kibana": Object {
+                "global": Array [],
+                "space": Object {},
+              },
+              "name": "",
+            }
+          }
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiDescribedFormGroup
+      description={
+        <p>
+          Allow requests to be submitted on the behalf of other users.
+           
+          <EuiLink
+            className="editRole__learnMore"
+            color="primary"
+            href="undefinedguide/en/x-pack/undefined/security-privileges.html#_run_as_privilege"
+            target="_blank"
+            type="button"
+          >
+            Learn more
+          </EuiLink>
+        </p>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      title={
+        <h3>
+          Run As privileges
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        fullWidth={false}
+        hasEmptyLabelSpace={true}
+      >
+        <EuiComboBox
+          fullWidth={false}
+          isClearable={true}
+          isDisabled={false}
+          onChange={[Function]}
+          options={Array []}
+          placeholder="Add a user..."
+          selectedOptions={Array []}
+          singleSelection={false}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiTitle
+      size="xs"
+    >
+      <h3>
+        Index privileges
+      </h3>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiText
+      color="subdued"
+      grow={true}
+      size="s"
+    >
+      <p>
+        Control access to the data in your cluster.
+         
+        <EuiLink
+          className="editRole__learnMore"
+          color="primary"
+          href="undefinedguide/en/x-pack/undefined/security-privileges.html#privileges-list-indices"
+          target="_blank"
+          type="button"
+        >
+          Learn more
+        </EuiLink>
+      </p>
+    </EuiText>
+    <IndexPrivileges
+      allowDocumentLevelSecurity={true}
+      allowFieldLevelSecurity={true}
+      httpClient={[MockFunction]}
+      indexPatterns={Array []}
+      onChange={[MockFunction]}
+      role={
+        Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "indices": Array [],
+            "run_as": Array [],
+          },
+          "kibana": Object {
+            "global": Array [],
+            "space": Object {},
+          },
+          "name": "",
+        }
+      }
+      validator={
+        RoleValidator {
+          "inProgressSpacePrivileges": Array [],
+          "shouldValidate": undefined,
+        }
+      }
+    />
+    <EuiHorizontalRule
+      margin="l"
+      size="full"
+    />
+    <EuiButton
+      color="primary"
+      fill={false}
+      iconSide="left"
+      iconType="plusInCircle"
+      onClick={[Function]}
+      size="s"
+      type="button"
+    >
+      Add index privilege
+    </EuiButton>
+  </React.Fragment>
+</CollapsiblePanel>
+`;
