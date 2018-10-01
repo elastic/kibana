@@ -31,6 +31,7 @@ export class PageManager extends React.PureComponent {
   };
 
   componentDidMount() {
+    // keep track of whether or not the component is mounted, to prevent rogue setState calls
     this._isMounted = true;
 
     // gives the tray pop animation time to finish

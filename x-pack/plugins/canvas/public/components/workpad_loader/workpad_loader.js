@@ -56,6 +56,8 @@ export class WorkpadLoader extends React.PureComponent {
   async componentDidMount() {
     // on component load, kick off the workpad search
     this.props.findWorkpads();
+
+    // keep track of whether or not the component is mounted, to prevent rogue setState calls
     this._isMounted = true;
   }
 
