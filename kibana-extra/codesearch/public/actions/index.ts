@@ -11,6 +11,7 @@ export * from './search';
 export * from './file';
 export * from './structure';
 export * from './editor';
+export * from './user';
 
 export interface Match {
   isExact?: boolean;

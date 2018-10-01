@@ -17,6 +17,7 @@ import {
   findReferences,
   gotoRepo,
   loadStructure,
+  loadUserConfig,
   Match,
   revealPosition,
   routeChange,
@@ -90,6 +91,7 @@ function* handleLocationChange(action: Action<Match>) {
   if (ROUTES.ADMIN === path) {
     yield put(fetchRepos());
     yield put(fetchRepoConfigs());
+    yield put(loadUserConfig());
   } else if (ROUTES.REPO === path) {
     yield put(gotoRepo(url));
   } else if (ROUTES.MAIN === path || ROUTES.MAIN_ROOT === path) {

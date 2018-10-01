@@ -20,6 +20,9 @@ export class ServerOptions {
 
   public readonly maxWorkspace: number = this.options.maxWorkspace;
 
+  // This is a temporary config item.
+  public readonly isAdmin: boolean = this.options.isAdmin;
+
   public readonly repoConfigs: RepoConfigs = (this.options.repos as RepoConfig[]).reduce(
     (previous, current) => {
       previous[current.repo] = current;

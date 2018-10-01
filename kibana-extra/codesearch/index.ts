@@ -23,6 +23,7 @@ import {
   symbolSearchRoute,
 } from './server/routes/search';
 import { socketRoute } from './server/routes/socket';
+import { userRoute } from './server/routes/user';
 import { workspaceRoute } from './server/routes/workspace';
 import { IndexScheduler, UpdateScheduler } from './server/scheduler';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from './server/search';
@@ -57,7 +58,8 @@ export default (kibana: any) =>
         indexFrequencyMs: Joi.number().default(24 * 60 * 60 * 1000), // 1 day by default
         lspRequestTimeout: Joi.number().default(5 * 60), // timeout a request over 30s
         repos: Joi.array().default([]),
-        maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
+        maxWorkspace: Joi.number().default(5), // max workspace folder for each language server,
+        isAdmin: Joi.boolean().default(true), // If we show the admin buttons
       }).default();
     },
 
@@ -151,6 +153,7 @@ export default (kibana: any) =>
       monacoRoute(server);
       symbolByQnameRoute(server, symbolSearchClient);
       socketRoute(server, socketService, log);
+      userRoute(server, serverOptions);
 
       lspService.launchServers().then(() => {
         // register lsp route after language server launched

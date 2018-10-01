@@ -13,6 +13,7 @@ import { route, RouteState } from './route';
 import { status, StatusState } from './status';
 import { symbol, SymbolState } from './symbol';
 import { symbolSearch, SymbolSearchState } from './symbol_search';
+import { userConfig, UserConfigState } from './user';
 export interface RootState {
   repository: RepositoryState;
   symbolSearch: SymbolSearchState;
@@ -22,6 +23,7 @@ export interface RootState {
   editor: EditorState;
   route: RouteState;
   status: StatusState;
+  userConfig: UserConfigState;
 }
 
 export const rootReducer = combineReducers({
@@ -33,4 +35,5 @@ export const rootReducer = combineReducers({
   symbolSearch,
   route,
   status,
+  userConfig,
 });

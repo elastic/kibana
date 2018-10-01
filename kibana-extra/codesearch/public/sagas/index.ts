@@ -21,6 +21,7 @@ import {
 import { watchLoadRepo, watchLocationChange } from './route';
 import { watchLoadStructure } from './structure';
 import { watchSymbolSearchQueryChanged } from './symbol_search';
+import { watchLoadUserConfig } from './user';
 
 export function* rootSaga() {
   yield fork(watchFetchRepos);
@@ -39,4 +40,5 @@ export function* rootSaga() {
   yield fork(watchInitRepoCmd);
   yield fork(watchGotoRepo);
   yield fork(watchLoadRepo);
+  yield fork(watchLoadUserConfig);
 }

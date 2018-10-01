@@ -63,6 +63,7 @@ interface Props {
   callOutMessage?: string;
   callOutType?: CallOutType;
   status: { [key: string]: any };
+  isAdmin: boolean;
 }
 
 interface State {
@@ -80,6 +81,7 @@ interface RepositoryItemProps {
   initRepoCommand: () => void;
   hasInitCmd?: boolean;
   status: any;
+  isAdmin: boolean;
 }
 
 const Caption = styled.div`
@@ -118,6 +120,15 @@ const RepositoryItem = (props: RepositoryItemProps) => {
       <Progress progress={props.status.progress}>{progressPrompt}</Progress>
     );
 
+  const adminButtons = props.isAdmin ? (
+    <div>
+      {props.hasInitCmd && initRepoButton}
+      <EuiButtonIcon iconType="indexSettings" aria-label="settings" />
+      <EuiButtonIcon iconType="indexOpen" aria-label="index" onClick={props.indexRepo} />
+      <EuiButtonIcon iconType="trash" aria-label="delete" onClick={props.deleteRepo} />
+    </div>
+  ) : null;
+
   return (
     <EuiFlexGroup className="repoItem" wrap={true} justifyContent="spaceBetween">
       <EuiFlexItem>
@@ -133,14 +144,7 @@ const RepositoryItem = (props: RepositoryItemProps) => {
         </EuiFlexGroup>
       </EuiFlexItem>
       {progress}
-      <EuiFlexItem grow={false}>
-        <div>
-          {props.hasInitCmd && initRepoButton}
-          <EuiButtonIcon iconType="indexSettings" aria-label="settings" />
-          <EuiButtonIcon iconType="indexOpen" aria-label="index" onClick={props.indexRepo} />
-          <EuiButtonIcon iconType="trash" aria-label="delete" onClick={props.deleteRepo} />
-        </div>
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{adminButtons}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -269,7 +273,7 @@ class AdminPage extends React.PureComponent<Props, State> {
     const repos = this.filterRepos();
     const repositoriesCount = repos.length;
     const items = this.getSideNavItems();
-    const { callOutMessage, status, showCallOut, callOutType } = this.props;
+    const { callOutMessage, status, showCallOut, callOutType, isAdmin } = this.props;
 
     const callOut = showCallOut && (
       <EuiCallOut title={callOutTitle[callOutType!]} color={callOutType} iconType="cross">
@@ -306,6 +310,7 @@ class AdminPage extends React.PureComponent<Props, State> {
         initRepoCommand={this.props.initRepoCommand.bind(this, repo.uri)}
         hasInitCmd={this.hasInitCmd(repo)}
         status={status[repo.uri]}
+        isAdmin={isAdmin}
       />
     ));
 
@@ -362,6 +367,7 @@ const mapStateToProps = (state: RootState) => ({
   callOutMessage: state.repository.callOutMessage,
   callOutType: state.repository.callOutType,
   status: state.status.status,
+  isAdmin: state.userConfig.isAdmin,
 });
 
 const mapDispatchToProps = {
