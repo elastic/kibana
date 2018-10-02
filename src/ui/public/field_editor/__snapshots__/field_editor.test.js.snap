@@ -923,6 +923,14 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "geo_point",
             },
             Object {
+              "text": "object",
+              "value": "object",
+            },
+            Object {
+              "text": "nested",
+              "value": "nested",
+            },
+            Object {
               "text": "geo_shape",
               "value": "geo_shape",
             },
