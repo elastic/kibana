@@ -102,7 +102,7 @@ export class JobListUi extends Component {
           <Fragment>
             <p>
               <FormattedMessage
-                id="xpack.rollupJobs.jobList.emptyPrompt.description"
+                id="xpack.rollupJobs.jobList.emptyPromptDescription"
                 defaultMessage={`
                   Rollup jobs summarize and store your data in a format that's compressed, yet aggregatable.
                 `}
@@ -117,7 +117,7 @@ export class JobListUi extends Component {
             iconType="plusInCircle"
           >
             <FormattedMessage
-              id="xpack.rollupJobs.jobList.emptyPrompt.createButton.label"
+              id="xpack.rollupJobs.jobList.emptyPrompt.createButtonLabel"
               defaultMessage="Create rollup job"
             />
           </EuiButton>
@@ -175,7 +175,7 @@ export class JobListUi extends Component {
           <EuiPageContentHeaderSection>
             <EuiButton fill {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}>
               <FormattedMessage
-                id="xpack.rollupJobs.jobList.createButton.label"
+                id="xpack.rollupJobs.jobList.createButtonLabel"
                 defaultMessage="Create rollup job"
               />
             </EuiButton>

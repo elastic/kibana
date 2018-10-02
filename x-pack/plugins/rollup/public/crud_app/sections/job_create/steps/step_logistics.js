@@ -84,7 +84,7 @@ export class StepLogisticsUi extends Component {
         <EuiTextColor color="secondary">
           <p>
             <FormattedMessage
-              id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpHasMatches.label"
+              id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpHasMatchesLabel"
               defaultMessage="Success! Index pattern has matching indices."
             />
           </p>
@@ -98,7 +98,7 @@ export class StepLogisticsUi extends Component {
       indexPatternValidationStatus = (
         <p>
           <FormattedMessage
-            id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpSearching.label"
+            id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpSearchingLabel"
             defaultMessage="Looking for matching indices..."
           />
         </p>
@@ -107,7 +107,7 @@ export class StepLogisticsUi extends Component {
       indexPatternValidationStatus = (
         <p>
           <FormattedMessage
-            id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpMustMatch.label"
+            id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpMustMatchLabel"
             defaultMessage="Index pattern must match at least one non-rollup index."
           />
         </p>
@@ -119,14 +119,14 @@ export class StepLogisticsUi extends Component {
         {indexPatternValidationStatus}
         <p>
           <FormattedMessage
-            id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpAllow.label"
+            id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpAllowLabel"
             defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
             values={{ asterisk: <strong>*</strong> }}
           />
         </p>
         <p>
           <FormattedMessage
-            id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpDisallow.label"
+            id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpDisallowLabel"
             defaultMessage="You can't use spaces or the characters {characterList}"
             values={{ characterList: <strong>{indexPatternIllegalCharacters}</strong> }}
           />
@@ -160,7 +160,7 @@ export class StepLogisticsUi extends Component {
           <EuiFormRow
             label={(
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistics.fieldCron.label"
+                id="xpack.rollupJobs.create.stepLogistics.fieldCronLabel"
                 defaultMessage="Cron pattern"
               />
             )}
@@ -170,7 +170,7 @@ export class StepLogisticsUi extends Component {
               <Fragment>
                 <p>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.label"
+                    id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLabel"
                     defaultMessage="{link}"
                     values={{ link: (
                       <EuiLink href={cronUrl} target="_blank">
@@ -197,7 +197,7 @@ export class StepLogisticsUi extends Component {
           <EuiText size="s">
             <EuiLink onClick={this.hideAdvancedCron}>
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvanced.label"
+                id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvancedLabel"
                 defaultMessage="Create basic interval"
               />
             </EuiLink>
@@ -226,7 +226,7 @@ export class StepLogisticsUi extends Component {
         <EuiText size="s">
           <EuiLink onClick={this.showAdvancedCron}>
             <FormattedMessage
-              id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvanced.label"
+              id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvancedLabel"
               defaultMessage="Create advanced cron expression"
             />
           </EuiLink>
@@ -279,7 +279,7 @@ export class StepLogisticsUi extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistics.description"
+                  id="xpack.rollupJobs.create.stepLogisticsDescription"
                   defaultMessage="Define the manner in which data will be rolled up."
                 />
               </p>
@@ -295,7 +295,7 @@ export class StepLogisticsUi extends Component {
               iconType="help"
             >
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistics.readDocsButton.label"
+                id="xpack.rollupJobs.create.stepLogistics.readDocsButtonLabel"
                 defaultMessage="Logistics docs"
               />
             </EuiButtonEmpty>
@@ -318,7 +318,7 @@ export class StepLogisticsUi extends Component {
             )}
             description={(
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistics.sectionId.description"
+                id="xpack.rollupJobs.create.stepLogistics.sectionIdDescription"
                 defaultMessage="This name will be used as a unique identifier for this rollup job."
               />
             )}
@@ -327,7 +327,7 @@ export class StepLogisticsUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistics.fieldId.label"
+                  id="xpack.rollupJobs.create.stepLogistics.fieldIdLabel"
                   defaultMessage="Name"
                 />
               )}
@@ -357,7 +357,7 @@ export class StepLogisticsUi extends Component {
             )}
             description={(
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistics.sectionDataFlow.description"
+                id="xpack.rollupJobs.create.stepLogistics.sectionDataFlowDescription"
                 defaultMessage="Which indices do you want to pull data from and which rollup index should store this data?"
               />
             )}
@@ -366,7 +366,7 @@ export class StepLogisticsUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.label"
+                  id="xpack.rollupJobs.create.stepLogistics.fieldIndexPatternLabel"
                   defaultMessage="Index pattern"
                 />
               )}
@@ -387,7 +387,7 @@ export class StepLogisticsUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistics.fieldRollupIndex.label"
+                  id="xpack.rollupJobs.create.stepLogistics.fieldRollupIndexLabel"
                   defaultMessage="Rollup index name"
                 />
               )}
@@ -395,7 +395,7 @@ export class StepLogisticsUi extends Component {
               isInvalid={Boolean(areStepErrorsVisible && errorRollupIndex)}
               helpText={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistics.fieldRollupIndex.helpDisallow.label"
+                  id="xpack.rollupJobs.create.stepLogistics.fieldRollupIndex.helpDisallowLabel"
                   defaultMessage="You can't use spaces, commas, or the characters {characterList}"
                   values={{ characterList: <strong>{indexIllegalCharacters}</strong> }}
                 />
@@ -424,7 +424,7 @@ export class StepLogisticsUi extends Component {
             )}
             description={(
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.description"
+                id="xpack.rollupJobs.create.stepLogistics.sectionScheduleDescription"
                 defaultMessage={`
                   How often should data be rolled up?
                 `}
@@ -448,7 +448,7 @@ export class StepLogisticsUi extends Component {
             )}
             description={(
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistics.sectionPageSize.description"
+                id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeDescription"
                 defaultMessage={`
                   A larger page size
                   will roll up data more quickly, but will require more memory during processing.
@@ -460,7 +460,7 @@ export class StepLogisticsUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistics.fieldPageSize.label"
+                  id="xpack.rollupJobs.create.stepLogistics.fieldPageSizeLabel"
                   defaultMessage="Page size"
                 />
               )}
@@ -491,7 +491,7 @@ export class StepLogisticsUi extends Component {
             )}
             description={(
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistics.sectionDelay.description"
+                id="xpack.rollupJobs.create.stepLogistics.sectionDelayDescription"
                 defaultMessage={`
                   Waiting will yield a higher-fidelity rollup by adjusting for variable ingest latency.
                   By default, the rollup job attempts to roll up all data that is available.
@@ -503,7 +503,7 @@ export class StepLogisticsUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.label"
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldDelayLabel"
                   defaultMessage="Delay (optional)"
                 />
               )}
@@ -513,7 +513,7 @@ export class StepLogisticsUi extends Component {
                 <Fragment>
                   <p>
                     <FormattedMessage
-                      id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.helpExample.label"
+                      id="xpack.rollupJobs.create.stepDateHistogram.fieldDelay.helpExampleLabel"
                       defaultMessage="Example delay values: 30s, 20m, 24h, 2d, 1w, 1M"
                     />
                   </p>

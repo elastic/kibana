@@ -6,6 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { intl } from '@kbn/i18n';
 
 import {
   EuiDescriptionList,
@@ -18,7 +19,9 @@ import { FieldList } from '../../field_list';
 
 const columns = [{
   field: 'name',
-  name: 'Field',
+  name: intl.formatMessage({
+    id: 'xpack.rollupJobs.jobDetails.tabHistogram.nameColumnLabel',
+    defaultMessage: 'Field' }),
   truncateText: true,
   sortable: true,
 }];
@@ -28,7 +31,7 @@ export const TabHistogramUi = ({ histogram, histogramInterval }) => (
     <EuiDescriptionList textStyle="reverse">
       <EuiDescriptionListTitle>
         <FormattedMessage
-          id="xpack.rollupJobs.jobDetails.tabHistogram.interval.label"
+          id="xpack.rollupJobs.jobDetails.tabHistogram.intervalLabel"
           defaultMessage="Histogram interval"
         />
       </EuiDescriptionListTitle>

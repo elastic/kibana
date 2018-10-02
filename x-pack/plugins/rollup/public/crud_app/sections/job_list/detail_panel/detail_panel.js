@@ -196,7 +196,7 @@ export class DetailPanelUi extends Component {
               <EuiText>
                 <EuiTextColor color="subdued">
                   <FormattedMessage
-                    id="xpack.rollupJobs.detailPanel.loading.label"
+                    id="xpack.rollupJobs.detailPanel.loadingLabel"
                     defaultMessage="Loading rollup job..."
                   />
                 </EuiTextColor>
@@ -225,7 +225,7 @@ export class DetailPanelUi extends Component {
               <EuiText>
                 <EuiTextColor color="subdued">
                   <FormattedMessage
-                    id="xpack.rollupJobs.detailPanel.notFound.label"
+                    id="xpack.rollupJobs.detailPanel.notFoundLabel"
                     defaultMessage="Rollup job not found"
                   />
                 </EuiTextColor>

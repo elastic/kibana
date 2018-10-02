@@ -27,7 +27,7 @@ export const CronDaily = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="xpack.rollupJobs.cronEditor.cronDaily.fieldTime.label"
+          id="xpack.rollupJobs.cronEditor.cronDaily.fieldTimeLabel"
           defaultMessage="Time"
         />
       )}
@@ -44,7 +44,7 @@ export const CronDaily = ({
               <EuiText size="xs">
                 <strong>
                   <FormattedMessage
-                    id="xpack.rollupJobs.cronEditor.cronDaily.fieldHour.textAt.label"
+                    id="xpack.rollupJobs.cronEditor.cronDaily.fieldHour.textAtLabel"
                     defaultMessage="At"
                   />
                 </strong>

@@ -84,7 +84,7 @@ export class StepDateHistogramUi extends Component {
               <EuiTextColor color="warning">
                 <p>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningDay.label"
+                    id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningDayLabel"
                     defaultMessage="Consider using 24h instead of 1d. This will allow for more flexible queries."
                   />
                 </p>
@@ -97,7 +97,7 @@ export class StepDateHistogramUi extends Component {
               <EuiTextColor color="warning">
                 <p>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningHour.label"
+                    id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningHourLabel"
                     defaultMessage="Consider using 60m instead of 1h. This will allow for more flexible queries."
                   />
                 </p>
@@ -113,7 +113,7 @@ export class StepDateHistogramUi extends Component {
             <EuiTextColor color="warning">
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningYear.label"
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningYearLabel"
                   defaultMessage="Consider using the d unit instead of y. This will allow for more flexible queries."
                 />
               </p>
@@ -126,7 +126,7 @@ export class StepDateHistogramUi extends Component {
             <EuiTextColor color="warning">
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningMonth.label"
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningMonthLabel"
                   defaultMessage="Consider using the d unit instead of M. This will allow for more flexible queries."
                 />
               </p>
@@ -139,7 +139,7 @@ export class StepDateHistogramUi extends Component {
             <EuiTextColor color="warning">
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningWeek.label"
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.preferFixedWarningWeekLabel"
                   defaultMessage="Consider using the d unit instead of w. This will allow for more flexible queries."
                 />
               </p>
@@ -157,7 +157,7 @@ export class StepDateHistogramUi extends Component {
 
         <p>
           <FormattedMessage
-            id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.helpExample.label"
+            id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.helpExampleLabel"
             defaultMessage="Example intervals: 1000ms, 30s, 20m, 24h, 2d, 1w, 1M, 1y"
           />
         </p>
@@ -212,7 +212,7 @@ export class StepDateHistogramUi extends Component {
               iconType="help"
             >
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepDateHistogram.readDocsButton.label"
+                id="xpack.rollupJobs.create.stepDateHistogram.readDocsButtonLabel"
                 defaultMessage="Date histogram docs"
               />
             </EuiButtonEmpty>
@@ -228,7 +228,7 @@ export class StepDateHistogramUi extends Component {
               <Fragment>
                 <p>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepDateHistogram.description"
+                    id="xpack.rollupJobs.create.stepDateHistogramDescription"
                     defaultMessage="Define how {link} will operate on your rollup data."
                     values={{
                       link: (
@@ -245,7 +245,7 @@ export class StepDateHistogramUi extends Component {
 
                 <p>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepDateHistogram.sectionDataSource.description"
+                    id="xpack.rollupJobs.create.stepDateHistogram.sectionDataSourceDescription"
                     defaultMessage={`
                       Which field contains the date histogram data and how large should its time buckets be?
                       Note that smaller, more granular intervals take up proportionally more space.
@@ -261,7 +261,7 @@ export class StepDateHistogramUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepDateHistogram.fieldDateField.label"
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldDateFieldLabel"
                   defaultMessage="Date field"
                 />
               )}
@@ -281,7 +281,7 @@ export class StepDateHistogramUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepDateHistogram.fieldInterval.label"
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldIntervalLabel"
                   defaultMessage="Interval"
                 />
               )}
@@ -301,7 +301,7 @@ export class StepDateHistogramUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZone.label"
+                  id="xpack.rollupJobs.create.stepDateHistogram.fieldTimeZoneLabel"
                   defaultMessage="Time zone"
                 />
               )}

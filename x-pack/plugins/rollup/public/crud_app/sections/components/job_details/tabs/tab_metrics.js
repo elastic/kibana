@@ -5,25 +5,28 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
+import { intl } from '@kbn/i18n';
+
 
 import { FieldList } from '../../field_list';
 
 const columns = [{
   field: 'name',
-  name: 'Field',
+  name: intl.formatMessage({
+    id: 'xpack.rollupJobs.jobDetails.tabMetrics.nameColumnLabel',
+    defaultMessage: 'Field' }),
   truncateText: true,
   sortable: true,
 }, {
-  name: 'Types',
+  name: intl.formatMessage({
+    id: 'xpack.rollupJobs.jobDetails.tabMetrics.typesColumnLabel',
+    defaultMessage: 'Types' }),
   render: ({ types }) => types.join(', '),
 }];
 
-export const TabMetricsUi = ({ metrics }) => (
+export const TabMetrics = ({ metrics }) => (
   <FieldList
     columns={columns}
     fields={metrics}
   />
 );
-
-export const TabMetrics = injectI18n(TabMetricsUi);

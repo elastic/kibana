@@ -96,7 +96,7 @@ export class StepHistogramUi extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepHistogram.description"
+                  id="xpack.rollupJobs.create.stepHistogramDescription"
                   defaultMessage={`
                     Select the fields you want to bucket using numeric histogram intervals.
                   `}
@@ -114,7 +114,7 @@ export class StepHistogramUi extends Component {
               iconType="help"
             >
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepHistogram.readDocsButton.label"
+                id="xpack.rollupJobs.create.stepHistogram.readDocsButtonLabel"
                 defaultMessage="Histogram docs"
               />
             </EuiButtonEmpty>
@@ -132,7 +132,7 @@ export class StepHistogramUi extends Component {
             <FieldChooser
               buttonLabel={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepHistogram.fieldsChooser.label"
+                  id="xpack.rollupJobs.create.stepHistogram.fieldsChooserLabel"
                   defaultMessage="Add histogram fields"
                 />
               )}
@@ -189,7 +189,7 @@ export class StepHistogramUi extends Component {
           )}
           description={(
             <FormattedMessage
-              id="xpack.rollupJobs.create.stepHistogram.sectionHistogramInterval.description"
+              id="xpack.rollupJobs.create.stepHistogram.sectionHistogramIntervalDescription"
               defaultMessage={`
                 This is the interval of histogram buckets to be generated when rolling up, e.g. 5
                 will create buckets that are five units wide (0-5, 5-10, etc). Note that only one
@@ -203,7 +203,7 @@ export class StepHistogramUi extends Component {
           <EuiFormRow
             label={(
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepHistogram.fieldHistogramInterval.label"
+                id="xpack.rollupJobs.create.stepHistogram.fieldHistogramIntervalLabel"
                 defaultMessage="Interval"
               />
             )}

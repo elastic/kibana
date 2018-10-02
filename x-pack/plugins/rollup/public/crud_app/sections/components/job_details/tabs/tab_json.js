@@ -5,13 +5,12 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiCodeEditor,
 } from '@elastic/eui';
 
-export const TabJsonUi = ({
+export const TabJson = ({
   json,
 }) => {
   const jsonString = JSON.stringify(json, null, 2);
@@ -29,5 +28,3 @@ export const TabJsonUi = ({
     />
   );
 };
-
-export const TabJson = injectI18n(TabJsonUi);
