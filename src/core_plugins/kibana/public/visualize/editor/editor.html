@@ -37,14 +37,13 @@
         </div>
 
         <div ng-if="vis.type.requiresSearch && vis.type.options.showQueryBar" class="fullWidth">
-          <query-bar
+          <react-query-bar
             query="state.query"
             app-name="'visualize'"
-            on-submit="updateQueryAndFetch($query)"
+            on-submit="updateQueryAndFetch"
             disable-auto-focus="true"
-            index-patterns="[indexPattern]"
-          >
-          </query-bar>
+            index-patterns="[indexPatter]"
+          ></react-query-bar>
         </div>
       </div>
     </div>
