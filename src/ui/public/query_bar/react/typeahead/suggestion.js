@@ -46,9 +46,11 @@ export function Suggestion(props) {
         'typeahead-item': true,
         active: props.selected,
       })}
+      role="option"
       onClick={() => props.onClick(props.suggestion)}
       onMouseEnter={props.onMouseEnter}
       ref={props.innerRef}
+      id={props.ariaId}
     >
       <div className={'suggestionItem suggestionItem--' + props.suggestion.type}>
         <div className="suggestionItem__type" type={props.suggestion.type}>
@@ -74,5 +76,6 @@ Suggestion.propTypes = {
   selected: PropTypes.bool,
   suggestion: PropTypes.object.isRequired,
   innerRef: PropTypes.func.isRequired,
+  ariaId: PropTypes.string.isRequired,
 };
 

@@ -324,6 +324,10 @@ export class QueryBar extends Component {
         {/* position:relative required on container so the suggestions appear under the query bar*/}
         <div
           style={{ position: 'relative' }}
+          role="combobox"
+          aria-haspopup="true"
+          aria-expanded={this.state.isSuggestionsVisible}
+          aria-owns="typeahead-items"
         >
           <form
             role="form"
@@ -337,7 +341,7 @@ export class QueryBar extends Component {
             >
               <div className="kuiLocalSearchAssistedInput">
                 <EuiFieldText
-                  placeholder="Search..."
+                  placeholder="Search... (e.g. status:200 AND extension:PHP)"
                   value={this.state.query.query}
                   onChange={this.onInputChange}
                   onClick={this.onClickInput}
@@ -351,6 +355,13 @@ export class QueryBar extends Component {
                   autoComplete="off"
                   spellCheck={false}
                   icon="console"
+                  aria-label="Search input"
+                  type="text"
+                  data-test-subj="queryInput"
+                  aria-autocomplete="list"
+                  aria-controls="typeahead-items"
+                  aria-activedescendant={'suggestion-' + this.state.index}
+                  role="textbox"
                 />
                 <div className="kuiLocalSearchAssistedInput__assistance">
                   <QueryLanguageSwitcher

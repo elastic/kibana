@@ -56,7 +56,6 @@ export class Suggestions extends Component {
     }
 
     const suggestions = this.props.suggestions.map((suggestion, index) => {
-      const key = suggestion + '_' + index;
       return (
         <Suggestion
           innerRef={node => (this.childNodes[index] = node)}
@@ -64,7 +63,7 @@ export class Suggestions extends Component {
           suggestion={suggestion}
           onClick={this.props.onClick}
           onMouseEnter={() => this.props.onMouseEnter(index)}
-          key={key}
+          ariaId={'suggestion-' + index}
         />
       );
     });
@@ -73,7 +72,14 @@ export class Suggestions extends Component {
       <div className="reactSuggestionTypeahead">
         <div className="typeahead">
           <div className="typeahead-popover">
-            <div className="typeahead-items" ref={node => (this.parentNode = node)}>{suggestions}</div>
+            <div
+              id="typeahead-items"
+              className="typeahead-items"
+              role="listbox"
+              ref={node => (this.parentNode = node)}
+            >
+              {suggestions}
+            </div>
           </div>
         </div>
       </div>
