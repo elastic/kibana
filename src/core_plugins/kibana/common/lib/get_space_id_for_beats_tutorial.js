@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import { metadata } from 'ui/metadata';
-import {
-  I18nProvider,
-  i18nFilter,
-  i18nDirective,
-} from '@kbn/i18n/angular';
+/**
+ * Returns valid configuration for a beat.yml file for adding the space id
+ * if there is an active space and that space is not the default one.
+ *
+ * @param {object} context - Context object generated from tutorial factory (see #22760)
+ */
+export function getSpaceIdForBeatsTutorial(context) {
+  if (!context || !context.spaceId || context.isInDefaultSpace) {
+    return '';
+  }
 
-uiModules.get('i18n')
-  .provider('i18n', I18nProvider)
-  .filter('i18n', i18nFilter)
-  .directive('i18nId', i18nDirective)
-  .config((i18nProvider) => {
-    i18nProvider.init(metadata.translations);
-  });
+  return `  space.id: "${context.spaceId}"`;
+}

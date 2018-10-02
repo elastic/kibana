@@ -17,18 +17,6 @@
  * under the License.
  */
 
-import * as i18n from '../core';
-
-export function i18nProvider() {
-  this.addMessages = i18n.addMessages;
-  this.getMessages = i18n.getMessages;
-  this.setLocale = i18n.setLocale;
-  this.getLocale = i18n.getLocale;
-  this.setDefaultLocale = i18n.setDefaultLocale;
-  this.getDefaultLocale = i18n.getDefaultLocale;
-  this.setFormats = i18n.setFormats;
-  this.getFormats = i18n.getFormats;
-  this.getRegisteredLocales = i18n.getRegisteredLocales;
-  this.init = i18n.init;
-  this.$get = () => i18n.translate;
+declare module 'intl-relativeformat' {
+  export let defaultLocale: string;
 }

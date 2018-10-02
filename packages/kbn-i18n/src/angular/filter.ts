@@ -17,6 +17,13 @@
  * under the License.
  */
 
-export { i18nProvider } from './provider';
-export { i18nFilter } from './filter';
-export { i18nDirective } from './directive';
+import { I18nServiceType } from './provider';
+
+export function i18nFilter(i18n: I18nServiceType) {
+  return (id: string, { defaultMessage = '', values = {} } = {}) => {
+    return i18n(id, {
+      values,
+      defaultMessage,
+    });
+  };
+}
