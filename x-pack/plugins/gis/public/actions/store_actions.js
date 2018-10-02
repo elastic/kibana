@@ -331,17 +331,6 @@ export async function loadMapResources(dispatch) {
         maxZoom: 24,
       },
       {
-        id: "0pmk0",
-        sourceDescriptor: { "type": "EMS_XYZ", "urlTemplate": "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png" },
-        visible: false,
-        temporary: false,
-        style: {},
-        type: "TILE",
-        showAtAllZoomLevels: true,
-        minZoom: 0,
-        maxZoom: 24,
-      },
-      {
         "id": "giflh",
         "label": null,
         "showAtAllZoomLevels": true,

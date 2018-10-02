@@ -109,12 +109,13 @@ export class VectorStyle {
     }
 
     const dynamicFieldNames = [];
-    if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options.field) {
-      dynamicFieldNames.push(this._descriptor.properties.fillColor.options.field);
+    if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options.fieldValue) {
+      dynamicFieldNames.push(this._descriptor.properties.fillColor.options.fieldValue.label);
     }
-    if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options.field) {
-      dynamicFieldNames.push(this._descriptor.properties.lineColor.options.field);
+    if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options.fieldValue) {
+      dynamicFieldNames.push(this._descriptor.properties.lineColor.options.fieldValue.label);
     }
+    console.log('dynamic field names', dynamicFieldNames);
 
     const returns = dynamicFieldNames.map((fieldName) => {
       if (featureCollection.computed.find(f => f === fieldName)) {
@@ -133,7 +134,7 @@ export class VectorStyle {
         max = Math.max(max, features[i].properties[fieldName]);
       }
 
-      //scale to 0 -1
+      //scale to [0,1]
       const propName = `__kbn__${fieldName}__`;
       for (let i = 0; i < features.length; i++) {
         features[i].properties[propName] = (features[i].properties[fieldName] - min) / (max - min);
