@@ -17,5 +17,15 @@
  * under the License.
  */
 
-import './global_nav_state';
-import './breadcrumb_state';
+import { IndexedArray, IndexedArrayConfig } from '../indexed_array';
+
+interface UIRegistry<T> extends IndexedArray<T> {
+  register<T>(privateModule: T): UIRegistry<T>;
+}
+
+interface UIRegistrySpec<T> extends IndexedArrayConfig<T> {
+  name: string;
+  filter?(item: T): boolean;
+}
+
+declare function uiRegistry<T>(spec: UIRegistrySpec<T>): UIRegistry<T>;
