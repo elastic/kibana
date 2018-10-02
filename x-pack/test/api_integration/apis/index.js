@@ -6,6 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('apis', () => {
+    loadTestFile(require.resolve('./es'));
     loadTestFile(require.resolve('./security'));
     loadTestFile(require.resolve('./monitoring'));
     loadTestFile(require.resolve('./xpack_main'));

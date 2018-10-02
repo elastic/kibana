@@ -1,0 +1,51 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "space:default",
+    "source": {
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "space": {
+        "name": "Default Space",
+        "description": "This is the default space",
+        "_reserved": true
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "space:space_1",
+    "source": {
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "space": {
+        "name": "Space 1",
+        "description": "This is the first test space"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "space:space_2",
+    "source": {
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "space": {
+        "name": "Space 2",
+        "description": "This is the second test space"
+      }
+    }
+  }
+}
