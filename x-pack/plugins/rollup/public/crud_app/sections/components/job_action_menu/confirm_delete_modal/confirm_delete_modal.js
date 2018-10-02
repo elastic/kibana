@@ -7,7 +7,6 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { intl } from '@kbn/i18n';
 
 import {
   EuiConfirmModal,
@@ -24,7 +23,7 @@ class ConfirmDeleteModalUi extends Component {
   }
 
   renderJobs() {
-    const { jobs } = this.props;
+    const { jobs, intl } = this.props;
     const jobItems = jobs.map(({ id, status }) => {
       const startedMessage = intl.formatMessage({
         id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.startedMessage',
