@@ -12,7 +12,7 @@ import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { cryptoFactory } from '../../../../server/lib/crypto';
-import { compatibilityShimFactory } from '../../../common/execute_job/compatibility_shim';
+import { compatibilityShimFactory } from './compatibility_shim';
 
 const KBN_SCREENSHOT_HEADER_BLACKLIST = [
   'accept-encoding',
