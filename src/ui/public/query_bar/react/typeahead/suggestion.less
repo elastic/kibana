@@ -1,9 +1,105 @@
 @import (reference) "~ui/styles/variables";
+@import (reference) "~ui/styles/mixins";
 
 
-// TODO An override of an override, ugh. We should be able to clean up this mess once the angular version
-// of the query bar and typeahead are deleted.
-.reactSuggestionTypeahead {
+.typeahead {
+  position: relative;
+
+  .typeahead-popover {
+    border: 1px solid;
+    border-color: @typeahead-item-border;
+    color: @typeahead-item-color;
+    background-color: @typeahead-item-bg;
+    position: absolute;
+    top: -10px;
+    z-index: @zindex-typeahead;
+    box-shadow: 0px 4px 8px rgba(0,0,0,.1);
+    width: 100%;
+    border-radius: 4px;
+
+    .typeahead-items {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .typeahead-item {
+      height: 32px;
+      white-space: nowrap;
+      font-size: 12px;
+      vertical-align: middle;
+      padding: 0;
+      border-bottom: none;
+      line-height: normal;
+    }
+
+    .typeahead-item:hover {
+      cursor: pointer;
+    }
+
+    .typeahead-item:last-child {
+      border-bottom: 0px;
+      border-radius: 0 0 4px 4px;
+    }
+
+    .typeahead-item:first-child {
+      border-bottom: 0px;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .typeahead-item.active {
+      background-color: @globalColorLightestGray;
+
+
+      .suggestionItem__callout {
+        background: #fff;
+      }
+
+      .suggestionItem__text {
+        color: #000;
+      }
+
+      .suggestionItem__type {
+        color: #000;
+      }
+
+      .suggestionItem--field {
+        .suggestionItem__type {
+          background-color: tint(@globalColorOrange, 80%);
+        }
+      }
+
+      .suggestionItem--value {
+        .suggestionItem__type {
+          background-color: tint(@globalColorTeal, 80%);
+        }
+      }
+
+      .suggestionItem--operator {
+        .suggestionItem__type {
+          background-color: tint(@globalColorBlue, 80%);
+        }
+      }
+
+      .suggestionItem--conjunction {
+        .suggestionItem__type {
+          background-color: tint(@globalColorPurple, 80%);
+        }
+      }
+
+    }
+  }
+}
+
+.inline-form .typeahead.visible .input-group {
+  > :first-child {
+    .border-bottom-radius(0);
+  }
+  > :last-child {
+    .border-bottom-radius(0);
+  }
+}
+
+
 
   .suggestionItem {
     display: flex;
@@ -101,65 +197,3 @@
     padding: 0 4px;
     display: inline-block;
   }
-
-  .typeahead {
-    .typeahead-popover {
-      top: -10px;
-
-      .typeahead-items {
-        max-height: 60vh;
-        overflow-y: auto;
-
-        .typeahead-item {
-          padding: 0;
-          border-bottom: none;
-          line-height: normal;
-
-          &:hover {
-            cursor: pointer;
-          }
-
-          &.active {
-            background-color: @globalColorLightestGray;
-
-            .suggestionItem__callout {
-              background: #fff;
-            }
-
-            .suggestionItem__text {
-              color: #000;
-            }
-
-            .suggestionItem__type {
-              color: #000;
-            }
-
-            .suggestionItem--field {
-              .suggestionItem__type {
-                background-color: tint(@globalColorOrange, 80%);
-              }
-            }
-
-            .suggestionItem--value {
-              .suggestionItem__type {
-                background-color: tint(@globalColorTeal, 80%);
-              }
-            }
-
-            .suggestionItem--operator {
-              .suggestionItem__type {
-                background-color: tint(@globalColorBlue, 80%);
-              }
-            }
-
-            .suggestionItem--conjunction {
-              .suggestionItem__type {
-                background-color: tint(@globalColorPurple, 80%);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}

@@ -47,7 +47,6 @@ import '../style_compile';
 import '../timefilter';
 import '../timepicker';
 import '../tooltip';
-import '../typeahead';
 import '../url';
 import '../validate_date_interval';
 import '../watch_multi';

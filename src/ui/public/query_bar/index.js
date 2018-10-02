@@ -17,5 +17,4 @@
  * under the License.
  */
 
-import './directive/query_bar';
 import './react';
