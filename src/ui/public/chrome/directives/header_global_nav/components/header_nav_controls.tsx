@@ -17,5 +17,34 @@
  * under the License.
  */
 
-import './global_nav_state';
-import './breadcrumb_state';
+import React, { Component } from 'react';
+
+import {
+  // @ts-ignore
+  EuiHeaderSectionItem,
+} from '@elastic/eui';
+
+import { NavControl } from '../';
+import { HeaderNavControl } from './header_nav_control';
+
+interface Props {
+  navControls: NavControl[];
+}
+
+export class HeaderNavControls extends Component<Props> {
+  public render() {
+    const { navControls } = this.props;
+
+    if (!navControls) {
+      return null;
+    }
+
+    return navControls.map(this.renderNavControl);
+  }
+
+  private renderNavControl = (navControl: NavControl) => (
+    <EuiHeaderSectionItem key={navControl.name}>
+      <HeaderNavControl navControl={navControl} />
+    </EuiHeaderSectionItem>
+  );
+}
