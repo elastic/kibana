@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const InvalidElementType = ({ renderableType, selectElement }) => (
   <h3 onClick={selectElement}>
     <FormattedMessage
-      id="xpack.canvas.elementContent.invalidTypeTitle"
+      id="xpack.canvas.elementContent.elementNotFoundTitle"
       defaultMessage="Element not found: {renderableType}"
       values={{ renderableType }}
     />

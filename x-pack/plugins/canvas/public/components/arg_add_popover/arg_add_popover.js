@@ -16,7 +16,7 @@ const ArgAddPopoverUI = ({ options, intl }) => {
     <EuiButtonIcon
       iconType="plusInCircle"
       aria-label={intl.formatMessage({
-        id: 'xpack.canvas.argAddPopover.addArgumentButtonLabel',
+        id: 'xpack.canvas.argAddPopover.addArgumentButtonAriaLabel',
         defaultMessage: 'Add Argument',
       })}
       onClick={handleClick}

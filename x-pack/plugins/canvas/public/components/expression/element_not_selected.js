@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const ElementNotSelected = ({ done }) => (
   <div>
     <FormattedMessage
-      id="xpack.canvas.expression.elementNotSelected.descriptionTitle"
+      id="xpack.canvas.expression.elementNotSelected.howToShowExpressionInputDescription"
       defaultMessage="Select an element to show expression input"
     />
     {done && (

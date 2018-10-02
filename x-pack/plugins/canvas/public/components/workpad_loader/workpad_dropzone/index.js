@@ -26,20 +26,21 @@ const WorkpadDropzoneUI = compose(
           onUpload(workpad);
         } catch (e) {
           notify.error(e, {
-            title: file.name
-              ? intl.formatMessage(
-                  {
-                    id: 'xpack.canvas.workpadLoader.dropzone.loadFileErrorMessage',
-                    defaultMessage: "Couldn't upload '{fileName}'",
-                  },
-                  {
-                    fileName: file.name,
-                  }
-                )
-              : intl.formatMessage({
-                  id: 'xpack.canvas.workpadLoader.dropzone.commonLoadFileErrorMessage',
-                  defaultMessage: "Couldn't upload 'file'",
-                }),
+            title: intl.formatMessage(
+              {
+                id: 'xpack.canvas.workpadLoader.dropzone.loadFileErrorMessageTitle.fileErrorDetail',
+                defaultMessage: "Couldn't upload '{fileName}'",
+              },
+              {
+                fileName:
+                  file.name ||
+                  intl.formatMessage({
+                    id:
+                      'xpack.canvas.workpadLoader.dropzone.loadFileErrorMessageTitle.fileNameText',
+                    defaultMessage: 'file',
+                  }),
+              }
+            ),
           });
         }
       };
@@ -55,20 +56,20 @@ const WorkpadDropzoneUI = compose(
           defaultMessage: 'Only JSON files are accepted',
         }),
         {
-          title: file.name
-            ? intl.formatMessage(
-                {
-                  id: 'xpack.canvas.workpadLoader.dropzone.readFileErrorMessage',
-                  defaultMessage: "Couldn't upload '{fileName}'",
-                },
-                {
-                  fileName: file.name,
-                }
-              )
-            : intl.formatMessage({
-                id: 'xpack.canvas.workpadLoader.dropzone.readCommonFileErrorMessage',
-                defaultMessage: "Couldn't upload 'file'",
-              }),
+          title: intl.formatMessage(
+            {
+              id: 'xpack.canvas.workpadLoader.dropzone.readFileErrorMessageTitle.fileErrorDetail',
+              defaultMessage: "Couldn't upload '{fileName}'",
+            },
+            {
+              fileName:
+                file.name ||
+                intl.formatMessage({
+                  id: 'xpack.canvas.workpadLoader.dropzone.readFileErrorMessageTitle.fileNameText',
+                  defaultMessage: 'file',
+                }),
+            }
+          ),
         }
       );
       setDropping(false);

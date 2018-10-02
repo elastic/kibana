@@ -29,18 +29,22 @@ const WorkpadUploadUI = ({ onUpload, intl }) => (
             defaultMessage: 'Only JSON files are accepted',
           }),
           {
-            title: file.name
-              ? intl.formatMessage(
-                  {
-                    id: 'xpack.canvas.workpadLoader.workpadUpload.fileTypeErrorMessageTitle',
-                    defaultMessage: "Couldn't upload '{fileName}'",
-                  },
-                  { fileName: file.name }
-                )
-              : intl.formatMessage({
-                  id: 'xpack.canvas.workpadLoader.workpadUpload.commonFileTypeErrorMessageTitle',
-                  defaultMessage: "Couldn't upload 'file'",
-                }),
+            title: intl.formatMessage(
+              {
+                id:
+                  'xpack.canvas.workpadLoader.workpadUpload.fileTypeErrorMessageTitle.fileErrorDetail',
+                defaultMessage: "Couldn't upload '{fileName}'",
+              },
+              {
+                fileName:
+                  file.name ||
+                  intl.formatMessage({
+                    id:
+                      'xpack.canvas.workpadLoader.workpadUpload.fileTypeErrorMessageTitle.fileNameText',
+                    defaultMessage: 'file',
+                  }),
+              }
+            ),
           }
         );
       }
@@ -55,18 +59,22 @@ const WorkpadUploadUI = ({ onUpload, intl }) => (
           onUpload(workpad);
         } catch (e) {
           notify.error(e, {
-            title: file.name
-              ? intl.formatMessage(
-                  {
-                    id: 'xpack.canvas.workpadLoader.workpadUpload.readingFileErrorMessageTitle',
-                    defaultMessage: "Couldn't upload '{fileName}'",
-                  },
-                  { fileName: file.name }
-                )
-              : intl.formatMessage({
-                  id: 'xpack.canvas.workpadLoader.workpadUpload.readingCommonFileErrorMessageTitle',
-                  defaultMessage: "Couldn't upload 'file'",
-                }),
+            title: intl.formatMessage(
+              {
+                id:
+                  'xpack.canvas.workpadLoader.workpadUpload.readingFileErrorMessageTitle.fileErrorDetail',
+                defaultMessage: "Couldn't upload '{fileName}'",
+              },
+              {
+                fileName:
+                  file.name ||
+                  intl.formatMessage({
+                    id:
+                      'xpack.canvas.workpadLoader.workpadUpload.readingFileErrorMessageTitle.fileNameText',
+                    defaultMessage: 'file',
+                  }),
+              }
+            ),
           });
         }
       };

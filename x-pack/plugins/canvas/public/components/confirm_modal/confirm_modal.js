@@ -65,7 +65,7 @@ ConfirmModal.propTypes = {
 };
 
 ConfirmModal.defaultProps = {
-  title: i18n.translate('xpack.canvas.confirmModal.confirmModalTitle', {
+  title: i18n.translate('xpack.canvas.confirmModal.title', {
     defaultMessage: 'Confirm',
   }),
   confirmButtonText: i18n.translate('xpack.canvas.confirmModal.confirmButtonLabel', {

@@ -30,21 +30,13 @@ export const Error = ({ payload }) => {
       <p>
         <FormattedMessage
           id="xpack.canvas.error.expressionErrorDescription"
-          defaultMessage="The function {functionName} failed {message}"
+          defaultMessage="The function {functionName} failed{message}"
           values={{
-            functionName: (
-              <strong>
-                <FormattedMessage
-                  id="xpack.canvas.error.expressionErrorDescription.functionName"
-                  defaultMessage="{functionName}"
-                  values={{ functionName }}
-                />
-              </strong>
-            ),
+            functionName: <strong>{functionName}</strong>,
             message: message ? (
               <FormattedMessage
                 id="xpack.canvas.error.expressionErrorDescription.withFollowingMessage"
-                defaultMessage="with the following message: "
+                defaultMessage=" with the following message: "
               />
             ) : (
               '.'
