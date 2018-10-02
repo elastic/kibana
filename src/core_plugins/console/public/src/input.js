@@ -173,7 +173,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
             if (mode === null || mode === 'application/json') {
               // assume json - auto pretty
               try {
-                value = utils.expandLiteralStrings(JSON.stringify(JSON.parse(value), null, 2));
+                value = utils.expandLiteralStrings(value);
               }
               catch (e) {
                 // nothing to do here

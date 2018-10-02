@@ -21,9 +21,19 @@ import Joi from 'joi';
 import Boom from 'boom';
 import Wreck from 'wreck';
 import { trimLeft, trimRight } from 'lodash';
+import { unicodeBytesToString } from './lib/decode';
 
 function resolveUri(base, path) {
-  return `${trimRight(base, '/')}/${trimLeft(path, '/')}`;
+  let pathToUse = `${trimRight(base, '/')}/${trimLeft(path, '/')}`;
+  const questionMarkIndex = pathToUse.indexOf('?');
+  // no query string in pathToUse, append '?pretty'
+  if (questionMarkIndex === -1) {
+    pathToUse = `${pathToUse}?pretty`;
+  } else {
+    // pathToUse has query string, append '&pretty'
+    pathToUse = `${pathToUse}&pretty`;
+  }
+  return pathToUse;
 }
 
 function extendCommaList(obj, property, value) {
@@ -114,18 +124,19 @@ export const createProxyRoute = ({
         if (err) {
           return reply(err);
         }
-
-        if (method.toUpperCase() !== 'HEAD') {
-          reply(esResponse)
-            .code(esResponse.statusCode)
-            .header('warning', esResponse.headers.warning);
-          return;
-        }
-
-        reply(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
-          .code(esResponse.statusCode)
-          .type('text/plain')
-          .header('warning', esResponse.headers.warning);
+        Wreck.read(esResponse, null, (err, body) => {
+          if (method.toUpperCase() !== 'HEAD') {
+            const responseString = unicodeBytesToString(body);
+            reply(responseString)
+              .code(esResponse.statusCode)
+              .header('warning', esResponse.headers.warning);
+          } else {
+            reply(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
+              .code(esResponse.statusCode)
+              .type('text/plain')
+              .header('warning', esResponse.headers.warning);
+          }
+        });
       });
     }
   }
