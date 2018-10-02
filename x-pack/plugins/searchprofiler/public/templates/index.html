@@ -1,7 +1,7 @@
-<kbn-dev-tools-app class="profilerDevTool">
-  <div class="profilerDevTool__container kuiViewContent kuiViewContentItem" ng-controller="profileViz">
-    <div class="wrapper">
-      <div class="main">
+<kbn-dev-tools-app class="prfDevTool">
+  <div class="prfDevTool__container kuiViewContent kuiViewContentItem" ng-controller="profileViz">
+    <div class="prfDevTool__wrapper">
+      <div class="prfDevTool__main">
         <tabset ng-show="profileResponse.length > 0">
           <tab heading="Query Profile"
             active="activeTab.search"
@@ -36,7 +36,7 @@
         </div>
       </div>
 
-      <div class="aside sense">
+      <div class="prfDevTool__sense">
         <!-- Form -->
         <div class="kuiFieldGroup">
           <div class="kuiFieldGroupSection">
@@ -98,7 +98,7 @@
           Profile
         </button>
       </div>
-      <aside class="aside details">
+      <aside class="prfDevTool__details">
         <highlightdetails ng-show="highlight.details && licenseEnabled"></highlightdetails>
       </aside>
     </div>
