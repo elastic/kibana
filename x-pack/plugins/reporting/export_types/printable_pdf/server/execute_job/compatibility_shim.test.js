@@ -5,7 +5,7 @@
  */
 
 import { compatibilityShimFactory } from './compatibility_shim';
-import { cryptoFactory } from '../../../server/lib/crypto';
+import { cryptoFactory } from '../../../../server/lib/crypto';
 
 const createMockServer = ({ security = null } = {}) => {
   const config = {
