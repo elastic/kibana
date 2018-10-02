@@ -31,22 +31,21 @@ export async function listSampleDataSets() {
   return await kfetch({ method: 'GET', pathname: sampleDataUrl });
 }
 
-export async function installSampleDataSet(id, defaultIndex) {
+export async function installSampleDataSet(id, sampleDataDefaultIndex) {
   await kfetch({ method: 'POST', pathname: `${sampleDataUrl}/${id}` });
 
-  const existingDefaultIndex = chrome.getUiSettingsClient().get('defaultIndex');
-  if (existingDefaultIndex === null) {
-    chrome.getUiSettingsClient().set('defaultIndex', defaultIndex);
+  if (chrome.getUiSettingsClient().isDefault('defaultIndex')) {
+    chrome.getUiSettingsClient().set('defaultIndex', sampleDataDefaultIndex);
   }
 
   clearIndexPatternsCache();
 }
 
-export async function uninstallSampleDataSet(id, defaultIndex) {
+export async function uninstallSampleDataSet(id, sampleDataDefaultIndex) {
   await kfetch({ method: 'DELETE', pathname: `${sampleDataUrl}/${id}` });
 
-  const existingDefaultIndex = chrome.getUiSettingsClient().get('defaultIndex');
-  if (existingDefaultIndex && existingDefaultIndex === defaultIndex) {
+  if (!chrome.getUiSettingsClient().isDefault('defaultIndex')
+    && chrome.getUiSettingsClient().get('defaultIndex') === sampleDataDefaultIndex) {
     chrome.getUiSettingsClient().set('defaultIndex', null);
   }
 
