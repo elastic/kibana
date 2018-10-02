@@ -125,7 +125,7 @@ export class WorkpadLoader extends React.PureComponent {
 
   renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
     const { sortField, sortDirection } = this.state;
-    const { readOnlyUser } = this.props;
+    const { readOnlyUser, createPending } = this.props;
 
     const actions = [
       {
@@ -140,17 +140,18 @@ export class WorkpadLoader extends React.PureComponent {
                 />
               </EuiToolTip>
             </EuiFlexItem>
-            {!readOnlyUser && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content="Clone">
-                  <EuiButtonIcon
-                    iconType="copy"
-                    onClick={() => this.cloneWorkpad(workpad)}
-                    aria-label="Clone Workpad"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={readOnlyUser ? "You don't have permission to clone workpads" : 'Clone'}
+              >
+                <EuiButtonIcon
+                  iconType="copy"
+                  onClick={() => this.cloneWorkpad(workpad)}
+                  aria-label="Clone Workpad"
+                  disabled={readOnlyUser}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
         ),
       },
@@ -222,7 +223,7 @@ export class WorkpadLoader extends React.PureComponent {
 
     return (
       <Fragment>
-        <WorkpadDropzone onUpload={this.uploadWorkpad} disabled={readOnlyUser}>
+        <WorkpadDropzone onUpload={this.uploadWorkpad} disabled={createPending || readOnlyUser}>
           <EuiBasicTable
             compressed
             items={rows}
@@ -303,18 +304,23 @@ export class WorkpadLoader extends React.PureComponent {
                               {`Download (${selectedWorkpads.length})`}
                             </EuiButton>
                           </EuiFlexItem>
-                          {!readOnlyUser && (
-                            <EuiFlexItem grow={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiToolTip
+                              content={
+                                readOnlyUser ? "You don't have permission to delete workpads" : ''
+                              }
+                            >
                               <EuiButton
                                 size="s"
                                 color="danger"
                                 iconType="trash"
                                 onClick={this.openRemoveConfirm}
+                                disabled={readOnlyUser}
                               >
                                 {`Delete (${selectedWorkpads.length})`}
                               </EuiButton>
-                            </EuiFlexItem>
-                          )}
+                            </EuiToolTip>
+                          </EuiFlexItem>
                         </Fragment>
                       )}
                       <EuiFlexItem grow={1}>
@@ -328,22 +334,33 @@ export class WorkpadLoader extends React.PureComponent {
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={2}>
-                    {!readOnlyUser && (
-                      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                        <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip
+                          content={
+                            readOnlyUser ? "You don't have permission to upload workpads" : ''
+                          }
+                        >
                           <WorkpadUpload
-                            createPending={createPending}
                             onUpload={this.uploadWorkpad}
+                            disabled={createPending || readOnlyUser}
                           />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip
+                          content={
+                            readOnlyUser ? "You don't have permission to create workpads" : ''
+                          }
+                        >
                           <WorkpadCreate
                             createPending={createPending}
                             onCreate={this.createWorkpad}
+                            disabled={readOnlyUser}
                           />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    )}
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </div>
