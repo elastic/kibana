@@ -95,7 +95,7 @@ export class StepTermsUi extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepTerms.description"
+                  id="xpack.rollupJobs.create.stepTermsDescription"
                   defaultMessage={`
                     Select the fields you want to bucket using terms aggregations. This can be
                     potentially costly for high-cardinality groups such as IP addresses, especially
@@ -115,7 +115,7 @@ export class StepTermsUi extends Component {
               iconType="help"
             >
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepTerms.readDocsButton.label"
+                id="xpack.rollupJobs.create.stepTerms.readDocsButtonLabel"
                 defaultMessage="Terms docs"
               />
             </EuiButtonEmpty>
@@ -133,7 +133,7 @@ export class StepTermsUi extends Component {
             <FieldChooser
               buttonLabel={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepTerms.fieldsChooser.label"
+                  id="xpack.rollupJobs.create.stepTerms.fieldsChooserLabel"
                   defaultMessage="Add terms fields"
                 />
               )}
