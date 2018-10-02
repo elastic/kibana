@@ -4,34 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import { getState } from '../state/store';
 import { getAssetById } from '../state/selectors/assets';
 
-export const asset = () => ({
+const assetUI = intl => ({
   name: 'asset',
   aliases: [],
   context: {
     types: ['null'],
   },
   type: 'string',
-  help: (
-    <FormattedMessage
-      id="xpack.canvas.functions.asset.assetValueDescription"
-      defaultMessage="Use Canvas workpad asset objects to provide argument values. Usually images."
-    />
-  ),
+  help: intl.formatMessage({
+    id: 'xpack.canvas.functions.asset.usingCanvasWorkpadAssetHelpText',
+    defaultMessage: 'Use Canvas workpad asset objects to provide argument values. Usually images.',
+  }),
   args: {
     id: {
       aliases: ['_'],
       types: ['string'],
-      help: (
-        <FormattedMessage
-          id="xpack.canvas.functions.asset.assetValueIdDescription"
-          defaultMessage="The ID of the asset value to return"
-        />
-      ),
+      help: intl.formatMessage({
+        id: 'xpack.canvas.functions.asset.returnedAssetValueIdHelpText',
+        defaultMessage: 'The ID of the asset value to return',
+      }),
       multi: false,
     },
   },
@@ -41,13 +36,17 @@ export const asset = () => ({
     if (asset !== undefined) return asset.value;
 
     throw new Error(
-      (
-        <FormattedMessage
-          id="xpack.canvas.functions.asset.assetValueIdErrorMessage"
-          defaultMessage="Could not get the asset by ID: {assetId}"
-          values={{ assetId }}
-        />
+      intl.formatMessage(
+        {
+          id: 'xpack.canvas.functions.asset.returnedAssetValueIdErrorMessage',
+          defaultMessage: 'Could not get the asset by ID: {assetId}',
+        },
+        {
+          assetId,
+        }
       )
     );
   },
 });
+
+export const asset = injectI18n(assetUI);

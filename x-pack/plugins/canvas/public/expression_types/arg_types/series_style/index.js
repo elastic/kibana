@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { lifecycle } from 'recompose';
 import { get } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { SimpleTemplate } from './simple_template';
 import { ExtendedTemplate } from './extended_template';
@@ -18,7 +18,7 @@ const EnhancedExtendedTemplate = lifecycle({
     if (typeof label !== 'string') this.props.renderError();
     return (
       <FormattedMessage
-        id="xpack.canvas.expression.types.style.template.labelStyleTitle"
+        id="xpack.canvas.expressionTypes.seriesStyle.styleLabelTitle"
         defaultMessage="Style: {label}"
         values={{ label }}
       />
@@ -41,21 +41,19 @@ EnhancedExtendedTemplate.propTypes = {
   label: PropTypes.string,
 };
 
-export const seriesStyle = () => ({
+const seriesStyleUI = intl => ({
   name: 'seriesStyle',
-  displayName: (
-    <FormattedMessage
-      id="xpack.canvas.expression.types.style.template.seriesStyleTitle"
-      defaultMessage="Series Style"
-    />
-  ),
-  help: (
-    <FormattedMessage
-      id="xpack.canvas.expression.types.style.template.seriesStyleDescription"
-      defaultMessage="Set the style for a selected named series"
-    />
-  ),
+  displayName: intl.formatMessage({
+    id: 'xpack.canvas.expressionTypes.seriesStyleLabel',
+    defaultMessage: 'Series Style',
+  }),
+  help: intl.formatMessage({
+    id: 'xpack.canvas.expressionTypes.seriesStyleHelpText',
+    defaultMessage: 'Set the style for a selected named series',
+  }),
   template: templateFromReactComponent(EnhancedExtendedTemplate),
   simpleTemplate: templateFromReactComponent(SimpleTemplate),
   default: '{seriesStyle}',
 });
+
+export const seriesStyle = injectI18n(seriesStyleUI);

@@ -36,7 +36,7 @@ const SimpleTemplateUI = ({ intl, ...props }) => {
           <EuiFlexItem grow={false}>
             <label>
               <FormattedMessage
-                id="xpack.canvas.expression.types.style.template.noColorLabel"
+                id="xpack.canvas.expressionTypes.seriesStyle.colorIsEmptyLabel"
                 defaultMessage="Color"
               />
               &nbsp;
@@ -45,7 +45,7 @@ const SimpleTemplateUI = ({ intl, ...props }) => {
           <EuiFlexItem grow={false}>
             <EuiLink onClick={() => handlePlain('color', '#000000')}>
               <FormattedMessage
-                id="xpack.canvas.expression.types.style.template.autoLinkTitle"
+                id="xpack.canvas.expressionTypes.seriesStyle.autoLinkLabel"
                 defaultMessage="Auto"
               />
               <EuiIcon type="bolt" />
@@ -57,7 +57,7 @@ const SimpleTemplateUI = ({ intl, ...props }) => {
           <EuiFlexItem grow={false}>
             <label>
               <FormattedMessage
-                id="xpack.canvas.expression.types.style.template.colorLabel"
+                id="xpack.canvas.expressionTypes.seriesStyle.colorLabel"
                 defaultMessage="Color"
               />
               &nbsp;
@@ -78,7 +78,7 @@ const SimpleTemplateUI = ({ intl, ...props }) => {
               color="danger"
               onClick={() => handlePlain('color', '')}
               aria-label={intl.formatMessage({
-                id: 'xpack.canvas.expression.types.style.template.removeSeriesColorAriaLabel',
+                id: 'xpack.canvas.expressionTypes.seriesStyle.removeSeriesColorAriaLabel',
                 defaultMessage: 'Remove Series Color',
               })}
             />
@@ -93,7 +93,7 @@ const SimpleTemplateUI = ({ intl, ...props }) => {
               icon="warning"
               content={
                 <FormattedMessage
-                  id="xpack.canvas.expression.types.style.template.addColorDimensionDescription"
+                  id="xpack.canvas.expressionTypes.seriesStyle.addColorDimensionTooltip"
                   defaultMessage="Data has no series to style, add a color dimension"
                 />
               }

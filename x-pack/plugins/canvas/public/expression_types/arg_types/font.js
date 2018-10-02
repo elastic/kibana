@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get, mapValues, set } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import { openSans } from '../../../common/lib/fonts';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 import { TextStylePicker } from '../../components/text_style_picker';
@@ -52,20 +52,18 @@ FontArgInput.propTypes = {
 
 FontArgInput.displayName = 'FontArgInput';
 
-export const font = () => ({
+const fontUI = intl => ({
   name: 'font',
-  displayName: (
-    <FormattedMessage
-      id="xpack.canvas.expression.types.textSettingsTitle"
-      defaultMessage="Text Settings"
-    />
-  ),
-  help: (
-    <FormattedMessage
-      id="xpack.canvas.expression.types.textSettingsDescription"
-      defaultMessage="Set the font, size and color"
-    />
-  ),
+  displayName: intl.formatMessage({
+    id: 'xpack.canvas.expressionTypes.textSettingsLabel',
+    defaultMessage: 'Text Settings',
+  }),
+  help: intl.formatMessage({
+    id: 'xpack.canvas.expressionTypes.textSettingsHelpText',
+    defaultMessage: 'Set the font, size and color',
+  }),
   template: templateFromReactComponent(FontArgInput),
   default: `{font size=14 family="${openSans.value}" color="#000000" align=left}`,
 });
+
+export const font = injectI18n(fontUI);

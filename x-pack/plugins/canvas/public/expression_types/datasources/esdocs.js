@@ -7,14 +7,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSelect, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getSimpleArg, setSimpleArg } from '../../lib/arg_helpers';
 import { ESFieldsSelect } from '../../components/es_fields_select';
 import { ESFieldSelect } from '../../components/es_field_select';
 import { ESIndexSelect } from '../../components/es_index_select';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
-const EsdocsDatasource = ({ args, updateArgs }) => {
+const EsdocsDatasourceUI = ({ args, updateArgs, intl }) => {
   const setArg = (name, value) => {
     updateArgs &&
       updateArgs({
@@ -58,21 +58,17 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
   const sortOptions = [
     {
       value: 'asc',
-      text: (
-        <FormattedMessage
-          id="xpack.canvas.expression.types.datasource.ascendingTitle"
-          defaultMessage="Ascending"
-        />
-      ),
+      text: intl.formatMessage({
+        id: 'xpack.canvas.expressionTypes.datasource.ascendingText',
+        defaultMessage: 'Ascending',
+      }),
     },
     {
       value: 'desc',
-      text: (
-        <FormattedMessage
-          id="xpack.canvas.expression.types.datasource.descendingTitle"
-          defaultMessage="Descending"
-        />
-      ),
+      text: intl.formatMessage({
+        id: 'xpack.canvas.expressionTypes.datasource.descendingText',
+        defaultMessage: 'Descending',
+      }),
     },
   ];
 
@@ -80,17 +76,15 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
     <div>
       <EuiCallOut
         size="s"
-        title={
-          <FormattedMessage
-            id="xpack.canvas.expression.types.datasource.warningMessageTitle"
-            defaultMessage="Be careful"
-          />
-        }
+        title={intl.formatMessage({
+          id: 'xpack.canvas.expressionTypes.datasource.warningMessageTitle',
+          defaultMessage: 'Be careful',
+        })}
         color="warning"
       >
         <p>
           <FormattedMessage
-            id="xpack.canvas.expression.types.datasource.warningMessageDescription"
+            id="xpack.canvas.expressionTypes.datasource.warningMessageDescription"
             defaultMessage="The Elasticsearch Docs datasource is used to pull documents directly from Elasticsearch
             without the use of aggregations. It is best used with low volume datasets and in
             situations where you need to view raw documents or plot exact, non-aggregated values on a
@@ -104,13 +98,13 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.canvas.expression.types.datasource.indexLabel"
+            id="xpack.canvas.expressionTypes.datasource.formRowIndexLabel"
             defaultMessage="Index"
           />
         }
         helpText={
           <FormattedMessage
-            id="xpack.canvas.expression.types.datasource.indexDescription"
+            id="xpack.canvas.expressionTypes.datasource.formRowIndexHelpText"
             defaultMessage="Enter an index name or select an index pattern"
           />
         }
@@ -121,13 +115,13 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.canvas.expression.types.datasource.queryLabel"
+            id="xpack.canvas.expressionTypes.datasource.formRowQueryLabel"
             defaultMessage="Query"
           />
         }
         helpText={
           <FormattedMessage
-            id="xpack.canvas.expression.types.datasource.queryDescription"
+            id="xpack.canvas.expressionTypes.datasource.formRowQueryHelpText"
             defaultMessage="Lucene query string syntax"
           />
         }
@@ -138,13 +132,13 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.canvas.expression.types.datasource.sortFieldLabel"
+            id="xpack.canvas.expressionTypes.datasource.formRowSortFieldLabel"
             defaultMessage="Sort Field"
           />
         }
         helpText={
           <FormattedMessage
-            id="xpack.canvas.expression.types.datasource.sortFieldDescription"
+            id="xpack.canvas.expressionTypes.datasource.formRowSortFieldHelpText"
             defaultMessage="Document sort field"
           />
         }
@@ -158,13 +152,13 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.canvas.expression.types.datasource.sortOrderLabel"
+            id="xpack.canvas.expressionTypes.datasource.formRowSortOrderLabel"
             defaultMessage="Sort Order"
           />
         }
         helpText={
           <FormattedMessage
-            id="xpack.canvas.expression.types.datasource.sortOrderDescription"
+            id="xpack.canvas.expressionTypes.datasource.formRowSortOrderHelpText"
             defaultMessage="Document sort order"
           />
         }
@@ -179,19 +173,19 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.canvas.expression.types.datasource.fieldsLabel"
+            id="xpack.canvas.expressionTypes.datasource.formRowFieldsLabel"
             defaultMessage="Fields"
           />
         }
         helpText={
           fields.length <= 10 ? (
             <FormattedMessage
-              id="xpack.canvas.expression.types.datasource.fieldsMoreThen10Description"
+              id="xpack.canvas.expressionTypes.datasource.formRowFields.fieldsLessThen10HelpText"
               defaultMessage="The fields to extract. Kibana scripted fields are not currently available"
             />
           ) : (
             <FormattedMessage
-              id="xpack.canvas.expression.types.datasource.fieldsLessThen10Description"
+              id="xpack.canvas.expressionTypes.datasource.formRowFields.fieldsMoreThen10HelpText"
               defaultMessage="This datasource performs best with 10 or fewer fields"
             />
           )
@@ -207,25 +201,25 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
   );
 };
 
-EsdocsDatasource.propTypes = {
+EsdocsDatasourceUI.propTypes = {
   args: PropTypes.object.isRequired,
   updateArgs: PropTypes.func,
 };
 
-export const esdocs = () => ({
+const EsdocsDatasource = injectI18n(EsdocsDatasourceUI);
+
+const esdocsUI = intl => ({
   name: 'esdocs',
-  displayName: (
-    <FormattedMessage
-      id="xpack.canvas.expression.types.datasource.esdocsTitle"
-      defaultMessage="Elasticsearch Raw Documents"
-    />
-  ),
-  help: (
-    <FormattedMessage
-      id="xpack.canvas.expression.types.datasource.esdocsDescription"
-      defaultMessage="Pull back raw documents from elasticsearch"
-    />
-  ),
+  displayName: intl.formatMessage({
+    id: 'xpack.canvas.expressionTypes.datasource.esRowDocumentsLabel',
+    defaultMessage: 'Elasticsearch Raw Documents',
+  }),
+  help: intl.formatMessage({
+    id: 'xpack.canvas.expressionTypes.datasource.esRowDocumentsHelpText',
+    defaultMessage: 'Pull back raw documents from elasticsearch',
+  }),
   image: 'logoElasticsearch',
   template: templateFromReactComponent(EsdocsDatasource),
 });
+
+export const esdocs = injectI18n(esdocsUI);

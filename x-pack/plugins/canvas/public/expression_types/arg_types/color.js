@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 import { ColorPickerMini } from '../../components/color_picker_mini/';
@@ -27,17 +27,18 @@ ColorArgInput.propTypes = {
   }).isRequired,
 };
 
-export const color = () => ({
+const colorUI = intl => ({
   name: 'color',
-  displayName: (
-    <FormattedMessage id="xpack.canvas.expression.types.colorTitle" defaultMessage="Color" />
-  ),
-  help: (
-    <FormattedMessage
-      id="xpack.canvas.expression.types.colorDescription"
-      defaultMessage="Color picker"
-    />
-  ),
+  displayName: intl.formatMessage({
+    id: 'xpack.canvas.expressionTypes.colorPickerLabel',
+    defaultMessage: 'Color',
+  }),
+  help: intl.formatMessage({
+    id: 'xpack.canvas.expressionTypes.colorPickerHelpText',
+    defaultMessage: 'Color picker',
+  }),
   simpleTemplate: templateFromReactComponent(ColorArgInput),
   default: '#000000',
 });
+
+export const color = injectI18n(colorUI);

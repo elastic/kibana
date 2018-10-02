@@ -9,9 +9,9 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const ExtendedTemplate = props => {
+const ExtendedTemplateUI = ({ intl, ...props }) => {
   const { typeInstance, onValueChange, labels, argValue } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
@@ -41,12 +41,10 @@ export const ExtendedTemplate = props => {
   const labelOptions = [
     {
       value: '',
-      text: (
-        <FormattedMessage
-          id="xpack.canvas.expression.types.style.template.selectSeriesTitle"
-          defaultMessage="Select Series"
-        />
-      ),
+      text: intl.formatMessage({
+        id: 'xpack.canvas.expressionTypes.seriesStyle.selectSeriesLabel',
+        defaultMessage: 'Select Series',
+      }),
     },
   ];
   labels.sort().forEach(val => labelOptions.push({ value: val, text: val }));
@@ -57,7 +55,7 @@ export const ExtendedTemplate = props => {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.canvas.expression.types.style.template.seriesIdentifierLabel"
+              id="xpack.canvas.expressionTypes.seriesStyle.seriesIdentifierLabel"
               defaultMessage="Series Identifier"
             />
           }
@@ -77,7 +75,7 @@ export const ExtendedTemplate = props => {
               <EuiFormRow
                 label={
                   <FormattedMessage
-                    id="xpack.canvas.expression.types.style.template.lineLabel"
+                    id="xpack.canvas.expressionTypes.seriesStyle.lineLabel"
                     defaultMessage="Line"
                   />
                 }
@@ -96,7 +94,7 @@ export const ExtendedTemplate = props => {
               <EuiFormRow
                 label={
                   <FormattedMessage
-                    id="xpack.canvas.expression.types.style.template.barLabel"
+                    id="xpack.canvas.expressionTypes.seriesStyle.barLabel"
                     defaultMessage="Bar"
                   />
                 }
@@ -115,7 +113,7 @@ export const ExtendedTemplate = props => {
               <EuiFormRow
                 label={
                   <FormattedMessage
-                    id="xpack.canvas.expression.types.style.template.pointLabel"
+                    id="xpack.canvas.expressionTypes.seriesStyle.pointLabel"
                     defaultMessage="Point"
                   />
                 }
@@ -135,12 +133,14 @@ export const ExtendedTemplate = props => {
   );
 };
 
-ExtendedTemplate.displayName = 'SeriesStyleArgAdvancedInput';
+ExtendedTemplateUI.displayName = 'SeriesStyleArgAdvancedInput';
 
-ExtendedTemplate.propTypes = {
+ExtendedTemplateUI.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
   typeInstance: PropTypes.object,
   labels: PropTypes.array.isRequired,
   renderError: PropTypes.func,
 };
+
+export const ExtendedTemplate = injectI18n(ExtendedTemplateUI);

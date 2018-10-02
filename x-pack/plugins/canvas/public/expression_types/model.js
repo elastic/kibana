@@ -70,7 +70,7 @@ class ModelUI extends FunctionForm {
   }
 }
 
-const Model = injectI18n(ModelUI);
+export const Model = injectI18n(ModelUI);
 
 class ModelRegistry extends Registry {
   wrapper(obj) {
