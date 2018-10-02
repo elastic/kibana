@@ -54,7 +54,8 @@ Plugins define tasks by calling the `registerTaskDefinitions` method on `server.
 A sample task can be found in the [plugin_functional/sample_task_plugin](../../test/plugin_functional/sample_task_plugin/) folder.
 
 ```js
-server.taskManager.registerTaskDefinitions({
+const { client: taskManagerClient } = server.plugins.taskManager;
+taskManagerClient.registerTaskDefinitions({
   sampleTask: {
     title: 'Sample Task',
     description: 'A sample task for testing the task_manager.',
@@ -214,12 +215,11 @@ The data stored for a task instance looks something like this:
 The task manager mixin exposes a taskManager object on the Kibana server which plugins can use to manage scheduled tasks. Each method takes an optional `scope` argument and ensures that only tasks with the specified scope(s) will be affected.
 
 ```js
-const manager = server.taskManager;
-
+const { client: taskManagerClient } = server.plugins.taskManager;
 // Schedules a task. All properties are as documented in the previous
 // storage section, except that here, params is an object, not a JSON
 // string.
-const task = await manager.schedule({
+const task = await taskManagerClient.schedule({
   taskType,
   runAt,
   interval,
@@ -258,7 +258,7 @@ For example:
 
 ```js
 // In your plugin's init
-server.taskManager.addMiddleware({
+server.plugins.taskManager.client.addMiddleware({
   async beforeSave({ taskInstance, ...opts }) {
     console.log(`About to save a task of type ${taskInstance.taskType}`);
 

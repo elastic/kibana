@@ -30,7 +30,10 @@ export default function (kibana) {
     },
 
     init(server) {
-      server.taskManager.registerTaskDefinitions({
+      const { task_manager: taskManagerPlugin } = server.plugins;
+      const { taskManager: taskManagerClient } = taskManagerPlugin;
+
+      taskManagerClient.registerTaskDefinitions({
         sampleTask: {
           title: 'Sample Task',
           description: 'A sample task for testing the task_manager.',
@@ -73,7 +76,7 @@ export default function (kibana) {
         },
       });
 
-      server.taskManager.addMiddleware({
+      taskManagerClient.addMiddleware({
         async beforeSave({ taskInstance, ...opts }) {
           const modifiedInstance = {
             ...taskInstance,
