@@ -274,8 +274,9 @@ export async function claimAlias(
  * @param {FullIndexInfo} indexInfo
  */
 async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
-  const currentTypes = getTypes(indexInfo.mappings);
-  const isV5Index = currentTypes.length > 1 || currentTypes[0] !== ROOT_TYPE;
+  const [docType, ...extraRootTypes] = getTypes(indexInfo.mappings);
+  const v6DocType = 'doc';
+  const isV5Index = extraRootTypes.length || (docType !== ROOT_TYPE && docType !== v6DocType);
   if (isV5Index) {
     throw new Error(
       `Index ${indexInfo.indexName} belongs to a version of Kibana ` +

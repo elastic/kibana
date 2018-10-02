@@ -159,6 +159,27 @@ describe('determineMigrationAction', () => {
     expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Migrate);
   });
 
+  test('requires migration if v6 doc is detected', () => {
+    const actual: any = {
+      doc: {
+        dynamic: 'strict',
+        properties: {
+          world: { type: 'text' },
+        },
+      },
+    };
+    const expected = {
+      _doc: {
+        dynamic: 'strict',
+        properties: {
+          world: { type: 'text' },
+        },
+      },
+    };
+
+    expect(determineMigrationAction(actual, expected)).toEqual(MigrationAction.Migrate);
+  });
+
   test('requires migration if doc dynamic value differs', () => {
     const actual = {
       _doc: {
