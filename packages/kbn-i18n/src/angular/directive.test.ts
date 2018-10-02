@@ -19,27 +19,30 @@
 
 import angular from 'angular';
 import 'angular-mocks';
+
 import { i18nDirective } from './directive';
-import { i18nProvider } from './provider';
+import { I18nProvider } from './provider';
 
 angular
   .module('app', [])
-  .provider('i18n', i18nProvider)
+  .provider('i18n', I18nProvider)
   .directive('i18nId', i18nDirective);
 
 describe('i18nDirective', () => {
-  let compile;
-  let scope;
+  let compile: angular.ICompileService;
+  let scope: angular.IRootScopeService;
 
   beforeEach(angular.mock.module('app'));
   beforeEach(
-    angular.mock.inject(($compile, $rootScope) => {
-      compile = $compile;
-      scope = $rootScope.$new();
-    })
+    angular.mock.inject(
+      ($compile: angular.ICompileService, $rootScope: angular.IRootScopeService) => {
+        compile = $compile;
+        scope = $rootScope.$new();
+      }
+    )
   );
 
-  it('inserts correct translation html content', () => {
+  test('inserts correct translation html content', () => {
     const id = 'id';
     const defaultMessage = 'default-message';
 
@@ -56,7 +59,7 @@ describe('i18nDirective', () => {
     expect(element.html()).toEqual(defaultMessage);
   });
 
-  it('inserts correct translation html content with values', () => {
+  test('inserts correct translation html content with values', () => {
     const id = 'id';
     const defaultMessage = 'default-message {word}';
     const compiledContent = 'default-message word';
