@@ -5,21 +5,19 @@
  */
 
 import React from 'react';
-import { intl } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 
 
 import { FieldList } from '../../field_list';
 
 const columns = [{
   field: 'name',
-  name: intl.formatMessage({
-    id: 'xpack.rollupJobs.jobDetails.tabMetrics.nameColumnLabel',
+  name: i18n.translate('xpack.rollupJobs.jobDetails.tabMetrics.nameColumnLabel', {
     defaultMessage: 'Field' }),
   truncateText: true,
   sortable: true,
 }, {
-  name: intl.formatMessage({
-    id: 'xpack.rollupJobs.jobDetails.tabMetrics.typesColumnLabel',
+  name: i18n.translate('xpack.rollupJobs.jobDetails.tabMetrics.typesColumnLabel', {
     defaultMessage: 'Types' }),
   render: ({ types }) => types.join(', '),
 }];
