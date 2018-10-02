@@ -37,6 +37,7 @@ describe('createSpacesTutorialContextFactory', () => {
 
     expect(contextFactory(request)).toEqual({
       spaceId: 'my-space-id',
+      isInDefaultSpace: false,
     });
   });
 
@@ -50,6 +51,7 @@ describe('createSpacesTutorialContextFactory', () => {
 
     expect(contextFactory(request)).toEqual({
       spaceId: DEFAULT_SPACE_ID,
+      isInDefaultSpace: true,
     });
   });
 });
