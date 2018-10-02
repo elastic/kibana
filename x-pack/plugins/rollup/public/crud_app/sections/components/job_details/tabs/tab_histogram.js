@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { intl } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiDescriptionList,
@@ -19,8 +19,7 @@ import { FieldList } from '../../field_list';
 
 const columns = [{
   field: 'name',
-  name: intl.formatMessage({
-    id: 'xpack.rollupJobs.jobDetails.tabHistogram.nameColumnLabel',
+  name: i18n.translate('xpack.rollupJobs.jobDetails.tabHistogram.nameColumnLabel', {
     defaultMessage: 'Field' }),
   truncateText: true,
   sortable: true,
