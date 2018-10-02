@@ -162,15 +162,16 @@ export class TaskStore {
       throw new Error(`Unsupported task type "${taskInstance.taskType}".`);
     }
 
-    const { id, type, task } = rawSource(taskInstance);
+    const { id, ...body } = rawSource(taskInstance);
     const result = await this.callCluster('index', {
       id,
-      body: { type, task },
+      body,
       index: this.index,
       type: DOC_TYPE,
       refresh: true,
     });
 
+    const { task } = body;
     return {
       ...taskInstance,
       id: result._id,
