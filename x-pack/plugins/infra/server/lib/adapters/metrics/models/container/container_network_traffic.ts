@@ -24,7 +24,7 @@ export const containerNetworkTraffic: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'docker.network.out.bytes',
-          id: 'max-network-out',
+          id: 'avg-network-out',
           type: InfraMetricModelMetricType.avg,
         },
       ],
@@ -35,7 +35,7 @@ export const containerNetworkTraffic: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'docker.network.in.bytes',
-          id: 'max-network-in',
+          id: 'avg-network-in',
           type: InfraMetricModelMetricType.avg,
         },
         {
@@ -44,7 +44,7 @@ export const containerNetworkTraffic: InfraMetricModelCreator = (
           type: InfraMetricModelMetricType.calculation,
           variables: [
             {
-              field: 'max-network-in',
+              field: 'avg-network-in',
               id: 'var-rate',
               name: 'rate',
             },
