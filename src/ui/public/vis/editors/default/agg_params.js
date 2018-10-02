@@ -47,11 +47,6 @@ uiModules
         $scope.aggTypeOptions = aggTypeFilters
           .filter(aggTypes.byType[$scope.groupName], $scope.indexPattern, $scope.agg);
 
-        // If current agg type is not part of allowed agg types, set to first element of allowed agg types
-        if(!$scope.aggTypeOptions.includes($scope.agg.type)) {
-          $scope.agg.type = $scope.aggTypeOptions[0];
-        }
-
         $scope.advancedToggled = false;
 
         // We set up this watch prior to adding the controls below, because when the controls are added,

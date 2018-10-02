@@ -23,16 +23,18 @@ import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiBadge,
+  EuiCallOut,
 } from '@elastic/eui';
 
 export class List extends Component {
   static propTypes = {
     indexPatterns: PropTypes.array,
+    defaultIndex: PropTypes.string,
   }
 
-  render() {
+  renderList() {
     const { indexPatterns } = this.props;
-    return (
+    return indexPatterns && indexPatterns.length ? (
       <div>
         {
           indexPatterns.map(pattern => {
@@ -50,6 +52,29 @@ export class List extends Component {
             );
           })
         }
+      </div>
+    ) : null;
+  }
+
+  renderNoDefaultMessage() {
+    const { defaultIndex } = this.props;
+    return !defaultIndex ? (
+      <div className="indexPatternList__headerWrapper">
+        <EuiCallOut
+          color="warning"
+          size="s"
+          iconType="alert"
+          title="No default index pattern. You must select or create one to continue."
+        />
+      </div>
+    ) : null;
+  }
+
+  render() {
+    return (
+      <div>
+        {this.renderNoDefaultMessage()}
+        {this.renderList()}
       </div>
     );
   }
