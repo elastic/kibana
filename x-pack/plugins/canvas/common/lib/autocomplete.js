@@ -164,7 +164,7 @@ function maybeQuote(value) {
 
 function prevFnTypeComparator(prevFnType) {
   return (a, b) =>
-    Boolean(b.context.types && a.context.types.includes(prevFnType)) -
+    Boolean(b.context.types && b.context.types.includes(prevFnType)) -
     Boolean(a.context.types && a.context.types.includes(prevFnType));
 }
 
