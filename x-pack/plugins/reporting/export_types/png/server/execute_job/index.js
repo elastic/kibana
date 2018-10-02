@@ -11,7 +11,7 @@ import { omit } from 'lodash';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { generatePngObservableFactory } from '../lib/generate_png';
 import { cryptoFactory } from '../../../../server/lib/crypto';
-import { compatibilityShimFactory } from '../../../common/execute_job/compatibility_shim';
+import { getAbsoluteUrlFactory } from '../../../common/execute_job/get_absolute_url';
 
 const KBN_SCREENSHOT_HEADER_BLACKLIST = [
   'accept-encoding',
@@ -28,7 +28,7 @@ const KBN_SCREENSHOT_HEADER_BLACKLIST = [
 function executeJobFn(server) {
   const generatePngObservable = generatePngObservableFactory(server);
   const crypto = cryptoFactory(server);
-  const compatibilityShim = compatibilityShimFactory(server);
+  const getAbsoluteUrl = getAbsoluteUrlFactory(server);
 
   const decryptJobHeaders = async (job) => {
     const decryptedHeaders = await crypto.decrypt(job.headers);
@@ -40,8 +40,28 @@ function executeJobFn(server) {
     return { job, filteredHeaders };
   };
 
+  const getSavedObjectAbsoluteUrl = (job, savedObject) => {
+    if (savedObject.urlHash) {
+      return getAbsoluteUrl({ hash: savedObject.urlHash });
+    }
+
+    if (savedObject.relativeUrl) {
+      const { pathname: path, hash, search } = url.parse(savedObject.relativeUrl);
+      return getAbsoluteUrl({ basePath: job.basePath, path, hash, search });
+    }
+
+    if (savedObject.url.startsWith(getAbsoluteUrl())) {
+      return savedObject.url;
+    }
+
+    throw new Error(`Unable to generate report for url ${savedObject.url}, it's not a Kibana URL`);
+  };
+
   const addForceNowQuerystring = async ({ job, filteredHeaders }) => {
-    const urls = job.urls.map(jobUrl => {
+
+    const urls = job.objects.map(savedObject => getSavedObjectAbsoluteUrl(job, savedObject));
+
+    urls.map(jobUrl => {
       if (!job.forceNow) {
         return jobUrl;
       }
@@ -65,7 +85,7 @@ function executeJobFn(server) {
     return { job, filteredHeaders, urls };
   };
 
-  return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
+  return function executeJob(jobToExecute, cancellationToken) {
     const process$ = Rx.of(jobToExecute).pipe(
       mergeMap(decryptJobHeaders),
       catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
@@ -85,7 +105,7 @@ function executeJobFn(server) {
     return process$.pipe(
       takeUntil(stop$)
     ).toPromise();
-  });
+  };
 }
 
 export const executeJobFactory = oncePerServer(executeJobFn);

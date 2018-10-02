@@ -6,13 +6,11 @@
 
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { compatibilityShimFactory } from '../../../common/create_job/compatibility_shim';
 
 function createJobFn(server) {
-  const compatibilityShim = compatibilityShimFactory(server);
   const crypto = cryptoFactory(server);
 
-  return compatibilityShim(async function createJob({
+  return async function createJob({
     objectType,
     title,
     relativeUrls,
@@ -30,7 +28,7 @@ function createJobFn(server) {
       layout,
       forceNow: new Date().toISOString(),
     };
-  });
+  };
 }
 
 export const createJobFactory = oncePerServer(createJobFn);

@@ -6,7 +6,7 @@
 
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { compatibilityShimFactory } from '../../../common/create_job/compatibility_shim';
+import { compatibilityShimFactory } from './compatibility_shim';
 
 function createJobFn(server) {
   const compatibilityShim = compatibilityShimFactory(server);
