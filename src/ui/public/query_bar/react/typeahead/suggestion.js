@@ -48,6 +48,7 @@ export function Suggestion(props) {
       })}
       onClick={() => props.onClick(props.suggestion)}
       onMouseEnter={props.onMouseEnter}
+      ref={props.innerRef}
     >
       <div className={'suggestionItem suggestionItem--' + props.suggestion.type}>
         <div className="suggestionItem__type" type={props.suggestion.type}>
@@ -72,5 +73,6 @@ Suggestion.propTypes = {
   onMouseEnter: PropTypes.func.isRequired,
   selected: PropTypes.bool,
   suggestion: PropTypes.object.isRequired,
+  innerRef: PropTypes.func.isRequired,
 };
 

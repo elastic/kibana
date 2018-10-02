@@ -59,7 +59,7 @@ export class Suggestions extends Component {
       const key = suggestion + '_' + index;
       return (
         <Suggestion
-          ref={node => (this.childNodes[index] = node)}
+          innerRef={node => (this.childNodes[index] = node)}
           selected={index === this.props.index}
           suggestion={suggestion}
           onClick={this.props.onClick}
