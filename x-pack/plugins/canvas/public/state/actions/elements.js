@@ -204,17 +204,20 @@ export const duplicateElement = createThunk(
   }
 );
 
-export const removeElement = createThunk(
-  'removeElement',
-  ({ dispatch, getState }, elementId, pageId) => {
-    const element = getElementById(getState(), elementId, pageId);
-    const shouldRefresh = element.filter != null && element.filter.length > 0;
+export const removeElements = createThunk(
+  'removeElements',
+  ({ dispatch, getState }, elementIds, pageId) => {
+    const shouldRefresh = elementIds.some(elementId => {
+      const element = getElementById(getState(), elementId, pageId);
+      const filterIsApplied = element.filter != null && element.filter.length > 0;
+      return filterIsApplied;
+    });
 
-    const _removeElement = createAction('removeElement', (elementId, pageId) => ({
+    const _removeElements = createAction('removeElements', (elementIds, pageId) => ({
       pageId,
-      elementId,
+      elementIds,
     }));
-    dispatch(_removeElement(elementId, pageId));
+    dispatch(_removeElements(elementIds, pageId));
 
     if (shouldRefresh) dispatch(fetchAllRenderables());
   }

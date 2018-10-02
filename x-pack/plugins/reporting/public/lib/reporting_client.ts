@@ -10,7 +10,7 @@ import { kfetch } from 'ui/kfetch';
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import { QueryString } from 'ui/utils/query_string';
-import { jobCompletionNotifications } from '../services/job_completion_notifications';
+import { jobCompletionNotifications } from './job_completion_notifications';
 
 const API_BASE_URL = '/api/reporting/generate';
 

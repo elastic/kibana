@@ -14,6 +14,7 @@ import { palette } from './palette';
 import { pie } from './pie';
 import { plot } from './plot';
 import { ply } from './ply';
+import { progress } from './progress';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
 import { timefilter } from './timefilter';
@@ -30,6 +31,7 @@ export const functions = [
   pie,
   plot,
   ply,
+  progress,
   repeatImage,
   revealImage,
   timefilter,
