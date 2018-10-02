@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import React from 'react';
+import { mount, shallow } from 'enzyme';
+import * as React from 'react';
 import { intlShape } from 'react-intl';
-import { shallow, mount } from 'enzyme';
-import { I18nProvider } from './provider';
 import { injectI18n } from './inject';
+import { I18nProvider } from './provider';
 
 describe('I18nProvider', () => {
-  it('renders children', () => {
-    const ChildrenMock = () => {};
+  test('renders children', () => {
+    const ChildrenMock = () => null;
 
     const wrapper = shallow(
       <I18nProvider>
@@ -36,7 +36,7 @@ describe('I18nProvider', () => {
     expect(wrapper.children()).toMatchSnapshot();
   });
 
-  it('provides with context', () => {
+  test('provides with context', () => {
     const childrenMock = () => <div />;
     const WithIntl = injectI18n(childrenMock);
 
