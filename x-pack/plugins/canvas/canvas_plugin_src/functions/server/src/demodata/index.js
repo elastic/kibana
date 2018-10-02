@@ -26,6 +26,7 @@ export const demodata = () => ({
   },
   fn: (context, args) => {
     const demoRows = getDemoRows(args.type);
+
     let set = {};
     if (args.type === 'ci') {
       set = {
@@ -38,6 +39,7 @@ export const demodata = () => ({
           { name: 'country', type: 'string' },
           { name: 'state', type: 'string' },
           { name: 'project', type: 'string' },
+          { name: 'percent_uptime', type: 'number' },
         ],
         rows: sortBy(demoRows, 'time'),
       };
