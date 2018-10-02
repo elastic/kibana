@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { IndexMapping } from './call_cluster';
+import { DocMapping, IndexMapping } from './call_cluster';
 
 export enum MigrationAction {
   None = 0,
@@ -35,10 +35,10 @@ export enum MigrationAction {
  * the mappings are equivalent, the result is 'none'.
  */
 export function determineMigrationAction(
-  actual: IndexMapping,
+  actual: { _doc?: DocMapping },
   expected: IndexMapping
 ): MigrationAction {
-  if (actual._doc.dynamic !== expected._doc.dynamic) {
+  if (!actual._doc || actual._doc.dynamic !== expected._doc.dynamic) {
     return MigrationAction.Migrate;
   }
 

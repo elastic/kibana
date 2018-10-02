@@ -74,6 +74,25 @@ describe('ElasticIndex', () => {
       );
     });
 
+    test('supports v6 doc types', async () => {
+      const callCluster = sinon.spy(async (path: string, { index }: any) => {
+        return {
+          [index]: {
+            aliases: { foo: index },
+            mappings: { doc: { dynamic: 'strict', properties: { a: 'b' } } },
+          },
+        };
+      });
+
+      const info = await Index.fetchInfo(callCluster, '.baz');
+      expect(info).toEqual({
+        aliases: { foo: '.baz' },
+        mappings: { doc: { dynamic: 'strict', properties: { a: 'b' } } },
+        exists: true,
+        indexName: '.baz',
+      });
+    });
+
     test('decorates index info with exists and indexName', async () => {
       const callCluster = sinon.spy(async (path: string, { index }: any) => {
         return {
