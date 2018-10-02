@@ -35,7 +35,7 @@ export function i18nDirective(i18n: I18nServiceType): IDirective<I18nScope> {
       defaultMessage: '@i18nDefaultMessage',
       values: '<i18nValues',
     },
-    link: function ($scope, $element) {
+    link($scope, $element) {
       if ($scope.values) {
         $scope.$watch('values', () => {
           setHtmlContent($element, $scope, i18n);
@@ -44,7 +44,7 @@ export function i18nDirective(i18n: I18nServiceType): IDirective<I18nScope> {
         setHtmlContent($element, $scope, i18n);
       }
     },
-  }
+  };
 }
 
 function setHtmlContent($element: IRootElementService, $scope: I18nScope, i18n: I18nServiceType) {
