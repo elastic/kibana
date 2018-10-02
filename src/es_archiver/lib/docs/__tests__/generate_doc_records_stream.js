@@ -120,7 +120,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
 
     expect(docRecords).to.eql([
       {
-        type: 'doc',
+        type: '_doc',
         value: {
           index: undefined,
           type: undefined,
@@ -129,7 +129,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         }
       },
       {
-        type: 'doc',
+        type: '_doc',
         value: {
           index: undefined,
           type: undefined,

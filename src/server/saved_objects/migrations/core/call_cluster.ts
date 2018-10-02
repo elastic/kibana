@@ -195,5 +195,5 @@ export interface DocMapping {
 }
 
 export interface IndexMapping {
-  doc: DocMapping;
+  _doc: DocMapping;
 }

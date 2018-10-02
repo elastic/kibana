@@ -219,14 +219,14 @@ async function createIndex({ callCluster, index }) {
   };
   await callCluster('indices.create', {
     index,
-    body: { mappings: { doc: { dynamic: 'strict', properties } } },
+    body: { mappings: { _doc: { dynamic: 'strict', properties } } },
   });
 }
 
 async function createDocs({ callCluster, index, docs }) {
   await callCluster('bulk', {
     body: docs.reduce((acc, doc) => {
-      acc.push({ index: { _id: doc.id, _index: index, _type: 'doc' } });
+      acc.push({ index: { _id: doc.id, _index: index, _type: '_doc' } });
       acc.push(_.omit(doc, 'id'));
       return acc;
     }, []),
@@ -259,7 +259,7 @@ async function migrateIndex({ callCluster, index, migrations, mappingProperties,
 async function fetchDocs({ callCluster, index }) {
   const {
     hits: { hits },
-  } = await callCluster('search', { index, type: 'doc' });
+  } = await callCluster('search', { index, type: '_doc' });
   return hits.map(h => ({
     ...h._source,
     id: h._id,

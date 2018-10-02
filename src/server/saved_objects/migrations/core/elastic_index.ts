@@ -50,7 +50,7 @@ export async function fetchInfo(callCluster: CallCluster, index: string): Promis
       aliases: {},
       exists: false,
       indexName: index,
-      mappings: { doc: { dynamic: 'strict', properties: {} } },
+      mappings: { _doc: { dynamic: 'strict', properties: {} } },
     };
   }
 
@@ -154,7 +154,7 @@ export async function migrationsUpToDate(
 ): Promise<boolean> {
   const indexInfo = await fetchInfo(callCluster, index);
 
-  if (!_.get(indexInfo, 'mappings.doc.properties.migrationVersion')) {
+  if (!_.get(indexInfo, 'mappings._doc.properties.migrationVersion')) {
     return false;
   }
 
@@ -193,7 +193,7 @@ export async function migrationsUpToDate(
  * @param {IndexMapping} mappings
  */
 export function putMappings(callCluster: CallCluster, index: string, mappings: IndexMapping) {
-  return callCluster('indices.putMapping', { body: mappings.doc, index, type: ROOT_TYPE });
+  return callCluster('indices.putMapping', { body: mappings._doc, index, type: ROOT_TYPE });
 }
 
 export async function createIndex(
@@ -274,8 +274,9 @@ export async function claimAlias(
  * @param {FullIndexInfo} indexInfo
  */
 async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
-  const currentTypes = getTypes(indexInfo.mappings);
-  const isV5Index = currentTypes.length > 1 || currentTypes[0] !== ROOT_TYPE;
+  const [docType, ...extraRootTypes] = getTypes(indexInfo.mappings);
+  const v6DocType = 'doc';
+  const isV5Index = extraRootTypes.length || (docType !== ROOT_TYPE && docType !== v6DocType);
   if (isV5Index) {
     throw new Error(
       `Index ${indexInfo.indexName} belongs to a version of Kibana ` +

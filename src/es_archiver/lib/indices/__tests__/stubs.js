@@ -42,7 +42,7 @@ export const createStubIndexRecord = (index, aliases = {}) => ({
 });
 
 export const createStubDocRecord = (index, id) => ({
-  type: 'doc',
+  type: '_doc',
   value: { index, id }
 });
 

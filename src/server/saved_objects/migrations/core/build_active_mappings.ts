@@ -39,9 +39,9 @@ export function buildActiveMappings({
 }): IndexMapping {
   const mapping = defaultMapping();
   return _.cloneDeep({
-    doc: {
-      ...mapping.doc,
-      properties: validateAndMerge(mapping.doc.properties, properties),
+    _doc: {
+      ...mapping._doc,
+      properties: validateAndMerge(mapping._doc.properties, properties),
     },
   });
 }
@@ -53,7 +53,7 @@ export function buildActiveMappings({
  */
 function defaultMapping(): IndexMapping {
   return {
-    doc: {
+    _doc: {
       dynamic: 'strict',
       properties: {
         config: {

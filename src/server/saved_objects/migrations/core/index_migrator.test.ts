@@ -71,7 +71,7 @@ describe('IndexMigrator', () => {
     sinon.assert.calledWith(callCluster, 'indices.create', {
       body: {
         mappings: {
-          doc: {
+          _doc: {
             dynamic: 'strict',
             properties: {
               config: {
@@ -116,7 +116,7 @@ describe('IndexMigrator', () => {
           aliases: {},
           mappings: {
             foo: { properties: {} },
-            doc: {
+            _doc: {
               properties: {
                 author: { type: 'text' },
               },
@@ -166,7 +166,7 @@ describe('IndexMigrator', () => {
         '.kibana_1': {
           aliases: {},
           mappings: {
-            doc: {
+            _doc: {
               properties: {
                 author: { type: 'text' },
               },
@@ -181,7 +181,7 @@ describe('IndexMigrator', () => {
     sinon.assert.calledWith(callCluster, 'indices.create', {
       body: {
         mappings: {
-          doc: {
+          _doc: {
             dynamic: 'strict',
             properties: {
               author: { type: 'text' },
@@ -314,7 +314,7 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
     '.kibana_1': {
       aliases: { '.kibana': {} },
       mappings: {
-        doc: {
+        _doc: {
           dynamic: 'strict',
           properties: {
             migrationVersion: { dynamic: 'true', type: 'object' },

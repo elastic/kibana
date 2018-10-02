@@ -9,7 +9,7 @@
       }
     },
     "mappings": {
-      "doc": {
+      "_doc": {
         "properties": {
           "speaker": {"type": "keyword"},
           "play_name": {"type": "keyword"},

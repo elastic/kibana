@@ -28,7 +28,7 @@ export const createStubStats = () => ({
 });
 
 export const createPersonDocRecords = n => times(n, () => ({
-  type: 'doc',
+  type: '_doc',
   value: {
     index: 'people',
     type: 'person',

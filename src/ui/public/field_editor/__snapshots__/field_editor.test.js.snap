@@ -274,7 +274,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
                 "format": Format {},
                 "lang": "painless",
                 "name": "test",
-                "script": "doc.test.value",
+                "script": "_doc.test.value",
                 "scripted": true,
                 "type": "number",
               },
@@ -285,7 +285,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
         lang="painless"
         name="test"
         onClose={[Function]}
-        script="doc.test.value"
+        script="_doc.test.value"
       />
     </React.Fragment>
     <eui-form-row
@@ -399,7 +399,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
           data-test-subj="editorFieldScript"
           isInvalid={false}
           onChange={[Function]}
-          value="doc.test.value"
+          value="_doc.test.value"
         />
       </eui-form-row>
       <eui-form-row>
@@ -527,7 +527,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
                 "format": Format {},
                 "lang": "painless",
                 "name": "test",
-                "script": "doc.test.value",
+                "script": "_doc.test.value",
                 "scripted": true,
                 "type": "number",
               },
@@ -535,7 +535,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
                 "format": Format {},
                 "lang": "testlang",
                 "name": "test",
-                "script": "doc.test.value",
+                "script": "_doc.test.value",
                 "scripted": true,
                 "type": "number",
               },
@@ -811,7 +811,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                 "format": Format {},
                 "lang": "painless",
                 "name": "test",
-                "script": "doc.test.value",
+                "script": "_doc.test.value",
                 "scripted": true,
                 "type": "number",
               },
@@ -819,7 +819,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                 "format": Format {},
                 "lang": "testlang",
                 "name": "test",
-                "script": "doc.test.value",
+                "script": "_doc.test.value",
                 "scripted": true,
                 "type": "number",
               },
@@ -830,7 +830,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
         lang="testlang"
         name="test"
         onClose={[Function]}
-        script="doc.test.value"
+        script="_doc.test.value"
       />
     </React.Fragment>
     <eui-form-row
@@ -1018,7 +1018,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           data-test-subj="editorFieldScript"
           isInvalid={false}
           onChange={[Function]}
-          value="doc.test.value"
+          value="_doc.test.value"
         />
       </eui-form-row>
       <eui-form-row>

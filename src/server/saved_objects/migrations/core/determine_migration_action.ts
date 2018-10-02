@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { IndexMapping } from './call_cluster';
+import { DocMapping, IndexMapping } from './call_cluster';
 
 export enum MigrationAction {
   None = 0,
@@ -35,15 +35,15 @@ export enum MigrationAction {
  * the mappings are equivalent, the result is 'none'.
  */
 export function determineMigrationAction(
-  actual: IndexMapping,
+  actual: { _doc?: DocMapping },
   expected: IndexMapping
 ): MigrationAction {
-  if (actual.doc.dynamic !== expected.doc.dynamic) {
+  if (!actual._doc || actual._doc.dynamic !== expected._doc.dynamic) {
     return MigrationAction.Migrate;
   }
 
-  const actualProps = actual.doc.properties;
-  const expectedProps = expected.doc.properties;
+  const actualProps = actual._doc.properties;
+  const expectedProps = expected._doc.properties;
 
   // There's a special case for root-level properties: if a root property is in actual,
   // but not in expected, it is treated like a disabled plugin and requires no action.

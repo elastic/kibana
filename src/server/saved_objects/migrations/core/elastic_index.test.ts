@@ -37,7 +37,7 @@ describe('ElasticIndex', () => {
         aliases: {},
         exists: false,
         indexName: '.kibana-test',
-        mappings: { doc: { dynamic: 'strict', properties: {} } },
+        mappings: { _doc: { dynamic: 'strict', properties: {} } },
       });
     });
 
@@ -62,7 +62,7 @@ describe('ElasticIndex', () => {
           [index]: {
             aliases: { foo: index },
             mappings: {
-              doc: { dynamic: 'strict', properties: { a: 'b' } },
+              _doc: { dynamic: 'strict', properties: { a: 'b' } },
               doctor: { dynamic: 'strict', properties: { a: 'b' } },
             },
           },
@@ -74,7 +74,7 @@ describe('ElasticIndex', () => {
       );
     });
 
-    test('decorates index info with exists and indexName', async () => {
+    test('supports v6 doc types', async () => {
       const callCluster = sinon.spy(async (path: string, { index }: any) => {
         return {
           [index]: {
@@ -88,6 +88,25 @@ describe('ElasticIndex', () => {
       expect(info).toEqual({
         aliases: { foo: '.baz' },
         mappings: { doc: { dynamic: 'strict', properties: { a: 'b' } } },
+        exists: true,
+        indexName: '.baz',
+      });
+    });
+
+    test('decorates index info with exists and indexName', async () => {
+      const callCluster = sinon.spy(async (path: string, { index }: any) => {
+        return {
+          [index]: {
+            aliases: { foo: index },
+            mappings: { _doc: { dynamic: 'strict', properties: { a: 'b' } } },
+          },
+        };
+      });
+
+      const info = await Index.fetchInfo(callCluster, '.baz');
+      expect(info).toEqual({
+        aliases: { foo: '.baz' },
+        mappings: { _doc: { dynamic: 'strict', properties: { a: 'b' } } },
         exists: true,
         indexName: '.baz',
       });
@@ -134,7 +153,7 @@ describe('ElasticIndex', () => {
       });
 
       await Index.putMappings(callCluster, '.shazm', {
-        doc: {
+        _doc: {
           dynamic: 'strict',
           properties: {
             foo: 'bar',
@@ -243,7 +262,7 @@ describe('ElasticIndex', () => {
           case 'indices.create':
             expect(arg.body).toEqual({
               mappings: {
-                doc: {
+                _doc: {
                   dynamic: 'strict',
                   properties: { foo: 'bar' },
                 },
@@ -285,7 +304,7 @@ describe('ElasticIndex', () => {
         exists: true,
         indexName: '.ze-index',
         mappings: {
-          doc: {
+          _doc: {
             dynamic: 'strict',
             properties: { foo: 'bar' },
           },
@@ -477,7 +496,7 @@ describe('ElasticIndex', () => {
       const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
+          _doc: {
             properties: {
               dashboard: { type: 'text' },
             },
@@ -495,7 +514,7 @@ describe('ElasticIndex', () => {
       const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
+          _doc: {
             properties: {
               migrationVersion: {
                 dynamic: 'true',
@@ -518,7 +537,7 @@ describe('ElasticIndex', () => {
       const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
+          _doc: {
             properties: {
               migrationVersion: {
                 dynamic: 'true',
@@ -542,7 +561,7 @@ describe('ElasticIndex', () => {
       const { hasMigrations, callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
+          _doc: {
             properties: {
               migrationVersion: {
                 dynamic: 'true',
@@ -566,7 +585,7 @@ describe('ElasticIndex', () => {
       const { callCluster } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
-          doc: {
+          _doc: {
             properties: {
               migrationVersion: {
                 dynamic: 'true',
