@@ -30,7 +30,7 @@ export function initTracesApi(server) {
     handler: (req, reply) => {
       const { traceId } = req.params;
       const { setup } = req.pre;
-      return getTrace({ traceId, setup })
+      return getTrace(traceId, setup)
         .then(reply)
         .catch(defaultErrorHandler(reply));
     }

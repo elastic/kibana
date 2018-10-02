@@ -21,6 +21,7 @@ export interface Span extends APMDoc {
   context: {
     db?: DbContext;
     service: ContextService;
+    [key: string]: any;
   };
   span: {
     duration: {
