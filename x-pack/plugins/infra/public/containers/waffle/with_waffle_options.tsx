@@ -10,7 +10,6 @@ import { createSelector } from 'reselect';
 import { InfraMetricInput, InfraMetricType, InfraPathType } from '../../../common/graphql/types';
 import { InfraNodeType } from '../../../server/lib/adapters/nodes';
 import { State, waffleOptionsActions, waffleOptionsSelectors } from '../../store';
-import { changeGroupBy, changeNodeType } from '../../store/local/waffle_options/actions';
 import { initialWaffleOptionsState } from '../../store/local/waffle_options/reducer';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
@@ -53,9 +52,9 @@ interface WaffleOptionsUrlState {
   nodeType?: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
 }
 
-export const WithWaffleMetricsUrlState = () => (
+export const WithWaffleOptionsUrlState = () => (
   <WithWaffleOptions>
-    {({ changeMetrics, urlState }) => (
+    {({ changeMetrics, urlState, changeGroupBy, changeNodeType }) => (
       <UrlStateContainer
         urlState={urlState}
         urlStateKey="waffleOptions"
