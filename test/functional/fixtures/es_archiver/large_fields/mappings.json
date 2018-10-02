@@ -14,7 +14,7 @@
       }
     },
     "mappings": {
-      "test": {
+      "_doc": {
         "properties": {
           "date": {
             "type": "date"

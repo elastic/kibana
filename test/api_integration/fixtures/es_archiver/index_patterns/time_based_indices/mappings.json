@@ -9,7 +9,7 @@
       }
     },
     "mappings": {
-      "type": {
+      "_doc": {
         "properties": {
           "count": {
             "type": "long"
@@ -34,7 +34,7 @@
       }
     },
     "mappings": {
-      "type": {
+      "_doc": {
         "properties": {
           "count": {
             "type": "long"
@@ -59,7 +59,7 @@
       }
     },
     "mappings": {
-      "type": {
+      "_doc": {
         "properties": {
           "count": {
             "type": "long"
@@ -84,7 +84,7 @@
       }
     },
     "mappings": {
-      "type": {
+      "_doc": {
         "properties": {
           "count": {
             "type": "long"
@@ -109,7 +109,7 @@
       }
     },
     "mappings": {
-      "type": {
+      "_doc": {
         "properties": {
           "count": {
             "type": "long"

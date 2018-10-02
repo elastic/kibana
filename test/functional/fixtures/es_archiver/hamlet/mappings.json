@@ -9,7 +9,7 @@
       }
     },
     "mappings": {
-      "test": {
+      "_doc": {
         "properties": {
           "mybook": {
             "type": "text",

@@ -9,7 +9,7 @@
       }
     },
     "mappings": {
-      "dls": {
+      "_doc": {
         "properties": {
           "name": {
             "type": "text",

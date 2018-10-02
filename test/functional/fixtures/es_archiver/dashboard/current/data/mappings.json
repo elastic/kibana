@@ -9,7 +9,7 @@
       }
     },
     "mappings": {
-      "data": {
+      "_doc": {
         "properties": {
           "@timestamp": {
             "type": "date"
@@ -61,7 +61,7 @@
       }
     },
     "mappings": {
-      "data": {
+      "_doc": {
         "properties": {
           "@timestamp": {
             "type": "date"
@@ -113,7 +113,7 @@
       }
     },
     "mappings": {
-      "data": {
+      "_doc": {
         "properties": {
           "@timestamp": {
             "type": "date"
@@ -165,7 +165,7 @@
       }
     },
     "mappings": {
-      "data": {
+      "_doc": {
         "properties": {
           "@timestamp": {
             "type": "date"
@@ -217,7 +217,7 @@
       }
     },
     "mappings": {
-      "data": {
+      "_doc": {
         "properties": {
           "activity level": {
             "type": "long"

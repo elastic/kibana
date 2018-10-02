@@ -9,7 +9,7 @@
       }
     },
     "mappings": {
-      "type": {
+      "_doc": {
         "properties": {
           "bar": {
             "type": "boolean"

@@ -9,7 +9,7 @@
       }
     },
     "mappings": {
-      "type": {
+      "_doc": {
         "properties": {
           "Jan01": {
             "type": "boolean"
@@ -34,7 +34,7 @@
       }
     },
     "mappings": {
-      "type": {
+      "_doc": {
         "properties": {
           "Jan02": {
             "type": "boolean"

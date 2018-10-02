@@ -10,7 +10,7 @@
       }
     },
     "mappings": {
-      "esqueue": {
+      "_doc": {
         "properties": {
           "attempts": {
             "type": "short"

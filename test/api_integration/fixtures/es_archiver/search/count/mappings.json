@@ -256,7 +256,7 @@
       }
     },
     "mappings": {
-      "bar": {
+      "_doc": {
         "properties": {
           "foo": {
             "type": "text",
@@ -284,7 +284,7 @@
       }
     },
     "mappings": {
-      "bar": {
+      "_doc": {
         "properties": {
           "foo": {
             "type": "text",

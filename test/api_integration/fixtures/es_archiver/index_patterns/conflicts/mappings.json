@@ -9,7 +9,7 @@
       }
     },
     "mappings": {
-      "type": {
+      "_doc": {
         "properties": {
           "@timestamp": {
             "type": "date"
@@ -40,7 +40,7 @@
       }
     },
     "mappings": {
-      "type": {
+      "_doc": {
         "properties": {
           "@timestamp": {
             "type": "date"

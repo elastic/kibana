@@ -9,7 +9,7 @@
       }
     },
     "mappings": {
-      "customer_type": {
+      "_doc": {
         "properties": {
           "customer_name": {
             "type": "text",
