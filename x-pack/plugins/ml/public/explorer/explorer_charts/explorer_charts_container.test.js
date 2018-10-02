@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+
+import { testImage } from '../../../../../dev-tools/jest/test_image';
+const { toMatchImageSnapshot } = require('jest-image-snapshot');
+expect.extend({ toMatchImageSnapshot });
+
 import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 import seriesConfigRare from './__mocks__/mock_series_config_rare.json';
@@ -63,6 +68,7 @@ timefilter.setTime({
 });
 
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { chartLimits } from '../../util/chart_utils';
@@ -124,4 +130,26 @@ describe('ExplorerChartsContainer', () => {
     // Check if the additional y-axis information for rare charts is part of the chart
     expect(wrapper.html().search(rareChartUniqueString)).toBeGreaterThan(0);
   });
+
+  test('Image Snapshot', (done) => {
+    const wrapper = mount(<ExplorerChartsContainer
+      seriesToPlot={[{
+        ...seriesConfig,
+        chartData,
+        chartLimits: chartLimits(chartData)
+      }]}
+      layoutCellsPerChart={12}
+      tooManyBuckets={false}
+      mlSelectSeverityService={mlSelectSeverityServiceMock}
+      mlChartTooltipService={mlChartTooltipService}
+    />);
+
+    testImage(wrapper.html(), (image) => {
+      expect(image).toMatchImageSnapshot({
+        customSnapshotIdentifier: 'explorer_charts_container'
+      });
+      done();
+    });
+  });
+
 });

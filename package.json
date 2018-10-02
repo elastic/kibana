@@ -357,6 +357,7 @@
     "istanbul-instrumenter-loader": "3.0.1",
     "jest": "^23.6.0",
     "jest-cli": "^23.6.0",
+    "jest-image-snapshot": "2.5.0",
     "jest-raw-loader": "^1.0.1",
     "jimp": "0.2.28",
     "json5": "^1.0.1",

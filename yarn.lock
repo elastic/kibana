@@ -4117,6 +4117,13 @@ base64-js@^1.2.1:
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.3.0.tgz#cab1e6118f051095e58b5281aea8c1cd22bfc0e3"
   integrity sha512-ccav/yGvoa80BQDljCxsmmQ3Xvx60/UpBIij5QN21W3wBi/hhIC9OoO+KLpu9IJTS9j4DRVJ3aDDF9cMSoa2lw==
 
+base64-stream@0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/base64-stream/-/base64-stream-0.1.3.tgz#76b0370b779bb816d12fd41764a6b8573eb5fec3"
+  integrity sha1-drA3C3ebuBbRL9QXZKa4Vz61/sM=
+  dependencies:
+    readable-stream "^2.0.2"
+
 base64id@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/base64id/-/base64id-1.0.0.tgz#47688cb99bb6804f0e06d3e763b1c32e57d8e6b6"
@@ -9617,6 +9624,10 @@ get-stdin@^4.0.1:
   resolved "https://registry.yarnpkg.com/get-stdin/-/get-stdin-4.0.1.tgz#b968c6b0a04384324902e8bf1a5df32579a450fe"
   integrity sha1-uWjGsKBDhDJJAui/Gl3zJXmkUP4=
 
+get-stdin@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/get-stdin/-/get-stdin-5.0.1.tgz#122e161591e21ff4c52530305693f20e6393a398"
+
 get-stdin@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/get-stdin/-/get-stdin-6.0.0.tgz#9e09bf712b360ab9225e812048f71fde9c89657b"
@@ -12576,6 +12587,18 @@ jest-haste-map@^23.6.0:
     jest-worker "^23.2.0"
     micromatch "^2.3.11"
     sane "^2.0.0"
+
+jest-image-snapshot@2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/jest-image-snapshot/-/jest-image-snapshot-2.5.0.tgz#bb9fbe932a0daa58baf861ab8d7f23a2072dd9e0"
+  dependencies:
+    chalk "^1.1.3"
+    get-stdin "^5.0.1"
+    lodash "^4.17.4"
+    mkdirp "^0.5.1"
+    pixelmatch "^4.0.2"
+    pngjs "^3.3.3"
+    rimraf "^2.6.2"
 
 jest-jasmine2@^23.6.0:
   version "23.6.0"
@@ -16669,7 +16692,7 @@ pivotal-ui@13.0.1:
     through "^2.3.8"
     trie-search "^1.0.1"
 
-pixelmatch@4.0.2, pixelmatch@^4.0.0:
+pixelmatch@4.0.2, pixelmatch@^4.0.0, pixelmatch@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/pixelmatch/-/pixelmatch-4.0.2.tgz#8f47dcec5011b477b67db03c243bc1f3085e8854"
   integrity sha1-j0fc7FARtHe2fbA8JDvB8wheiFQ=
@@ -16778,6 +16801,10 @@ pngjs@3.3.1, pngjs@^3.0.0:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-3.3.1.tgz#8e14e6679ee7424b544334c3b2d21cea6d8c209a"
   integrity sha512-ggXCTsqHRIsGMkHlCEhbHhUmNTA2r1lpkE0NL4Q9S8spkXbm4vE9TVmPso2AGYn90Gltdz8W5CyzhcIGg2Gejg==
+
+pngjs@^3.3.3:
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-3.3.3.tgz#85173703bde3edac8998757b96e5821d0966a21b"
 
 podium@3.x.x:
   version "3.1.2"
