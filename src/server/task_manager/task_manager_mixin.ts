@@ -23,7 +23,7 @@
  *
  * - pre-init, it allows middleware registration, but disallows task manipulation
  * - post-init, it disallows middleware registration, but allows task manipulation
- * 
+ *
  * Due to its complexity, this is mostly tested by integration tests (see readme).
  */
 
@@ -37,12 +37,9 @@ import { TaskPool } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
 import { FetchOpts, TaskStore } from './task_store';
 
-export async function taskManagerMixin(kbnServer: any, server: any, config: any) {
+export async function taskManagerMixin(server: any, config: any) {
   const taskManager = new TaskManager();
-
   server.decorate('server', 'taskManager', taskManager);
-
-  kbnServer.afterPluginsInit(() => taskManager.init(kbnServer, server, config));
 }
 
 /**

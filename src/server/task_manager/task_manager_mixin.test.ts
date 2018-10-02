@@ -39,22 +39,9 @@ describe('taskManagerMixin', () => {
 
   afterEach(() => clock.restore());
 
-  test('logs a warning if the elasticsearch plugin is disabled', async () => {
-    const { $test, opts } = testOpts();
-    (opts.server.plugins as any).elasticsearch = undefined;
-    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
-    $test.afterPluginsInit();
-
-    sinon.assert.calledWith(
-      opts.server.log,
-      ['warning', 'task_manager'],
-      'The task manager cannot be initialized when the elasticsearch plugin is disabled.'
-    );
-  });
-
   test('starts / stops the poller when es goes green / red', async () => {
     const { $test, opts } = testOpts();
-    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    taskManagerMixin(opts.server, opts.config);
     $test.afterPluginsInit();
 
     const { store, poller } = (opts.server as any).taskManager;
@@ -81,7 +68,7 @@ describe('taskManagerMixin', () => {
 
   test('disallows schedule before init', async () => {
     const { opts } = testOpts();
-    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    taskManagerMixin(opts.server, opts.config);
     const { taskManager } = opts.server as any;
     const task = {
       taskType: 'foo',
@@ -92,21 +79,21 @@ describe('taskManagerMixin', () => {
 
   test('disallows fetch before init', async () => {
     const { opts } = testOpts();
-    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    taskManagerMixin(opts.server, opts.config);
     const { taskManager } = opts.server as any;
     await expect(taskManager.fetch({})).rejects.toThrow(/The task manager is initializing/i);
   });
 
   test('disallows remove before init', async () => {
     const { opts } = testOpts();
-    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    taskManagerMixin(opts.server, opts.config);
     const { taskManager } = opts.server as any;
     await expect(taskManager.remove('23')).rejects.toThrow(/The task manager is initializing/i);
   });
 
   test('allows middleware registration before init', () => {
     const { opts } = testOpts();
-    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    taskManagerMixin(opts.server, opts.config);
     const { taskManager } = opts.server as any;
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
@@ -117,7 +104,7 @@ describe('taskManagerMixin', () => {
 
   test('disallows middleware registration after init', async () => {
     const { $test, opts } = testOpts();
-    taskManagerMixin(opts.kbnServer, opts.server, opts.config);
+    taskManagerMixin(opts.server, opts.config);
     const { taskManager } = opts.server as any;
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
@@ -140,14 +127,6 @@ describe('taskManagerMixin', () => {
     const opts = {
       config: {
         get: (path: string) => _.get(defaultConfig, path),
-      },
-      kbnServer: {
-        uiExports: {
-          taskDefinitions: {},
-        },
-        afterPluginsInit(callback: any) {
-          $test.afterPluginsInit = callback;
-        },
       },
       server: {
         log: sinon.spy(),

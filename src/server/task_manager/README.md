@@ -49,53 +49,53 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 
 ## Task definitions
 
-Plugins define tasks by adding a `taskDefinitions` property to their `uiExports`.
+Plugins define tasks by calling the `registerTaskDefinitions` method on `server.plugins.taskManager`.
 
 A sample task can be found in the [plugin_functional/sample_task_plugin](../../test/plugin_functional/sample_task_plugin/) folder.
 
 ```js
-{
-  taskDefinitions: {
-    // clusterMonitoring is the task type, and must be unique across the entire system
-    clusterMonitoring: {
-      // Human friendly name, used to represent this task in logs, UI, etc
-      title: 'Human friendly name',
+server.taskManager.registerTaskDefinitions({
+  sampleTask: {
+    title: 'Sample Task',
+    description: 'A sample task for testing the task_manager.',
+    timeOut: '1m',
+    numWorkers: 2,
 
-      // Optional, human-friendly, more detailed description
-      description: 'Amazing!!',
+    // This task allows tests to specify its behavior (whether it reschedules itself, whether it errors, etc)
+    // taskInstance.params has the following optional fields:
+    // nextRunMilliseconds: number - If specified, the run method will return a runAt that is now + nextRunMilliseconds
+    // failWith: string - If specified, the task will throw an error with the specified message
+    createTaskRunner: ({ kbnServer, taskInstance }) => ({
+      async run() {
+        const { params, state } = taskInstance;
+        const prevState = state || { count: 0 };
 
-      // Optional, how long, in minutes, the system should wait before
-      // a running instance of this task is considered to be timed out.
-      // This defaults to 5 minutes.
-      timeOut: '5m',
+        if (params.failWith) {
+          throw new Error(params.failWith);
+        }
 
-      // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
-      // 5 clusterMonitoring tasks could run concurrently per Kibana instance. This value is
-      // overridden by the `override_num_workers` config value, if specified.
-      numWorkers: 2,
+        const callCluster = kbnServer.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+        await callCluster('index', {
+          index: '.task_manager_test_result',
+          type: '_doc',
+          body: {
+            type: 'task',
+            taskId: taskInstance.id,
+            params: JSON.stringify(params),
+            state: JSON.stringify(state),
+            ranAt: new Date(),
+          },
+          refresh: true,
+        });
 
-      // The createTaskRunner function / method returns an object that is responsible for
-      // performing the work of the task. context: { taskInstance, kbnServer }, is documented below.
-      createTaskRunner(context) {
         return {
-          // Perform the work of the task. The return value should fit the TaskResult interface, documented
-          // below. Invalid return values will result in a logged warning.
-          async run() {
-            // Do some work
-            // Conditionally send some alerts
-            // Return some result or other...
-          },
-  
-          // Optional, will be called if a running instance of this task times out, allowing the task
-          // to attempt to clean itself up.
-          async cancel() {
-            // Do whatever is required to cancel this task, such as killing any spawned processes
-          },
+          state: { count: (prevState.count || 0) + 1 },
+          runAt: millisecondsFromNow(params.nextRunMilliseconds),
         };
-      }
-    },
+      },
+    }),
   },
-}
+});
 ```
 
 When Kibana attempts to claim and run a task instance, it looks its definition up, and executes its createTaskRunner's method, passing it a run context which looks like this:
@@ -124,8 +124,7 @@ When Kibana attempts to claim and run a task instance, it looks its definition u
 
 ## Task result
 
-The task runner's `run` method is expected to return a promise that resolves to either undefined, or to an object that looks like the following. Other return values will result in a warning, but the system should continue to work.
-
+The task runner's `run` method is expected to return a promise that resolves to undefined or to an object that looks like the following:
 ```js
 {
   // Optional, if specified, this is used as the tasks' nextRun, overriding
@@ -143,6 +142,8 @@ The task runner's `run` method is expected to return a promise that resolves to 
   },
 }
 ```
+
+Other return values will result in a warning, but the system should continue to work.
 
 ## Task instances
 
