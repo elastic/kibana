@@ -12,6 +12,13 @@ import React from 'react';
 
 import { ExplorerSwimlane } from './explorer_swimlane';
 
+jest.mock('ui/chrome', () => ({
+  getBasePath: path => path,
+  getUiSettingsClient: () => ({
+    get: jest.fn()
+  }),
+}));
+
 function getExplorerSwimlaneMocks() {
   const mlExplorerDashboardService = {
     allowCellRangeSelection: false,
