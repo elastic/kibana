@@ -44,11 +44,11 @@ export class TableComponent extends PureComponent {
     const { intl } = this.props;
 
     const infoLabel = intl.formatMessage({
-      id: 'kbn.management.editIndexPattern.fields.table.additionalInfo',
+      id: 'kbn.management.editIndexPattern.fields.table.additionalInfoAriaLabel',
       defaultMessage: 'Additional field information'
     });
     const timeLabel = intl.formatMessage({
-      id: 'kbn.management.editIndexPattern.fields.table.primaryTimeAria',
+      id: 'kbn.management.editIndexPattern.fields.table.primaryTimeAriaLabel',
       defaultMessage: 'Primary time field'
     });
     const timeContent = intl.formatMessage({

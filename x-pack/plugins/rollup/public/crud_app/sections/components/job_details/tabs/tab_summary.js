@@ -66,7 +66,7 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemDocumentsProcessed.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemDocumentsProcessedLabel"
                   defaultMessage="Documents processed"
                 />
               </EuiDescriptionListTitle>
@@ -79,7 +79,7 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemPagesProcessed.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemPagesProcessedLabel"
                   defaultMessage="Pages processed"
                 />
               </EuiDescriptionListTitle>
@@ -95,7 +95,7 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemRollupsIndexed.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemRollupsIndexedLabel"
                   defaultMessage="Rollups indexed"
                 />
               </EuiDescriptionListTitle>
@@ -108,7 +108,7 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemTriggerCount.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemTriggerCountLabel"
                   defaultMessage="Trigger count"
                 />
               </EuiDescriptionListTitle>
@@ -141,7 +141,7 @@ export class TabSummaryUi extends Component {
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.rollupJobs.jobDetails.tabSummary.sectionLogistics.label"
+              id="xpack.rollupJobs.jobDetails.tabSummary.sectionLogisticsLabel"
               defaultMessage="Logistics"
             />
           </h3>
@@ -154,7 +154,7 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemIndexPattern.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemIndexPatternLabel"
                   defaultMessage="Index pattern"
                 />
               </EuiDescriptionListTitle>
@@ -167,7 +167,7 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemRollupIndex.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemRollupIndexLabel"
                   defaultMessage="Rollup index"
                 />
               </EuiDescriptionListTitle>
@@ -183,13 +183,13 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemCron.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemCronLabel"
                   defaultMessage="Cron"
                 />{' '}
                 <EuiIconTip
                   content={(
                     <FormattedMessage
-                      id="xpack.rollupJobs.jobDetails.tabSummary.itemCron.tip"
+                      id="xpack.rollupJobs.jobDetails.tabSummary.itemCronTip"
                       defaultMessage="The frequency with which data is rolled up"
                     />
                   )}
@@ -204,7 +204,7 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemDelay.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemDelayLabel"
                   defaultMessage="Delay"
                 />
               </EuiDescriptionListTitle>
@@ -226,7 +226,7 @@ export class TabSummaryUi extends Component {
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.rollupJobs.jobDetails.tabSummary.sectionDateHistogram.label"
+              id="xpack.rollupJobs.jobDetails.tabSummary.sectionDateHistogramLabel"
               defaultMessage="Date histogram"
             />
           </h3>
@@ -239,7 +239,7 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemTimeField.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemTimeFieldLabel"
                   defaultMessage="Time field"
                 />
               </EuiDescriptionListTitle>
@@ -252,7 +252,7 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemTimezone.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemTimezoneLabel"
                   defaultMessage="Timezone"
                 />
               </EuiDescriptionListTitle>
@@ -267,13 +267,13 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemInterval.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemIntervalLabel"
                   defaultMessage="Interval"
                 />{' '}
                 <EuiIconTip
                   content={(
                     <FormattedMessage
-                      id="xpack.rollupJobs.jobDetails.tabSummary.itemInterval.tip"
+                      id="xpack.rollupJobs.jobDetails.tabSummary.itemIntervalTip"
                       defaultMessage="The time bucket interval into which data is rolled up"
                     />
                   )}

@@ -197,12 +197,15 @@ class JobActionMenuUi extends Component {
     const panels = this.panels();
     const isSingleSelection = this.isSingleSelection();
     const entity = this.getEntity(isSingleSelection);
-
+    const actionsAriaLabel = intl.formatMessage({
+      id: 'xpack.rollupJobs.jobActionMenu.jobActionMenuButtonAriaLabel',
+      defaultMessage: '{entity} options',
+    }, { entity });
     const button = (
       <EuiButton
         data-test-subj="jobActionMenuButton"
         iconSide={iconSide}
-        aria-label={`${entity} options`}
+        aria-label={actionsAriaLabel}
         onClick={this.onButtonClick}
         iconType={iconType}
         fill

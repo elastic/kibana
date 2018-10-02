@@ -19,11 +19,17 @@
 
 import React from 'react';
 import { CreateButton } from '../create_button';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const Header = ({
+const HeaderUi = ({
   indexPatternCreationOptions
 }) => (
   <CreateButton options={indexPatternCreationOptions}>
-    Create index pattern
+    <FormattedMessage
+      id="kbn.management.indexPatternList.header.createIndexPatternButtonLabel"
+      defaultMessage="Create index pattern"
+    />
   </CreateButton>
 );
+export const Header = injectI18n(HeaderUi);
+

@@ -55,7 +55,7 @@ export class StepMetricsUi extends Component {
       name: '',
       label: (
         <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxMin.label"
+          id="xpack.rollupJobs.create.stepMetrics.checkboxMinLabel"
           defaultMessage="Minimum"
         />
       ),
@@ -64,7 +64,7 @@ export class StepMetricsUi extends Component {
       name: '',
       label: (
         <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxMax.label"
+          id="xpack.rollupJobs.create.stepMetrics.checkboxMaxLabel"
           defaultMessage="Maximum"
         />
       ),
@@ -73,7 +73,7 @@ export class StepMetricsUi extends Component {
       name: '',
       label: (
         <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxSum.label"
+          id="xpack.rollupJobs.create.stepMetrics.checkboxSumLabel"
           defaultMessage="Sum"
         />
       ),
@@ -82,7 +82,7 @@ export class StepMetricsUi extends Component {
       name: '',
       label: (
         <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxAverage.label"
+          id="xpack.rollupJobs.create.stepMetrics.checkboxAverageLabel"
           defaultMessage="Average"
         />
       ),
@@ -91,7 +91,7 @@ export class StepMetricsUi extends Component {
       name: '',
       label: (
         <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxValueCount.label"
+          id="xpack.rollupJobs.create.stepMetrics.checkboxValueCountLabel"
           defaultMessage="Value count"
         />
       ),
@@ -187,7 +187,7 @@ export class StepMetricsUi extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepMetrics.description"
+                  id="xpack.rollupJobs.create.stepMetricsDescription"
                   defaultMessage={`
                     Select the metrics that should be collected from rolled-up data. By default,
                     only the doc_counts are collected for each group.
@@ -206,7 +206,7 @@ export class StepMetricsUi extends Component {
               iconType="help"
             >
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepMetrics.readDocsButton.label"
+                id="xpack.rollupJobs.create.stepMetrics.readDocsButtonLabel"
                 defaultMessage="Metrics docs"
               />
             </EuiButtonEmpty>
@@ -224,7 +224,7 @@ export class StepMetricsUi extends Component {
             <FieldChooser
               buttonLabel={(
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepMetrics.fieldsChooser.label"
+                  id="xpack.rollupJobs.create.stepMetrics.fieldsChooserLabel"
                   defaultMessage="Add metrics fields"
                 />
               )}
