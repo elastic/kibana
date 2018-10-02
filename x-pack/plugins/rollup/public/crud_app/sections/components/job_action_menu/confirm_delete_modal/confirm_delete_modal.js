@@ -27,7 +27,7 @@ class ConfirmDeleteModalUi extends Component {
     const { jobs } = this.props;
     const jobItems = jobs.map(({ id, status }) => {
       const startedMessage = intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.startMessage',
+        id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.startedMessage',
         defaultMessage: 'started'
       });
       const statusText = status === 'started' ? ` (${startedMessage})` : null;
