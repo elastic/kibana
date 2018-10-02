@@ -20,6 +20,7 @@ export function canvas(kibana) {
         title: 'Canvas',
         description: 'Data driven workpads',
         icon: 'plugins/canvas/icon.svg',
+        euiIconType: 'canvasApp',
         main: 'plugins/canvas/app',
       },
       styleSheetPaths: `${__dirname}/public/style/index.scss`,
