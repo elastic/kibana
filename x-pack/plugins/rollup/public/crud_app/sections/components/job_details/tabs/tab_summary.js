@@ -66,7 +66,7 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemDocumentsProcessed.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemDocumentsProcessedLabel"
                   defaultMessage="Documents processed"
                 />
               </EuiDescriptionListTitle>
@@ -79,7 +79,7 @@ export class TabSummaryUi extends Component {
             <EuiFlexItem>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemPagesProcessed.label"
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemPagesProcessedLabel"
                   defaultMessage="Pages processed"
                 />
               </EuiDescriptionListTitle>

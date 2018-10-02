@@ -252,7 +252,7 @@ export class StepIndexPatternComponent extends Component {
       const errorMessage = intl.formatMessage(
         {
           id: 'kbn.management.createIndexPattern.step.invalidCharactersErrorMessage',
-          defaultMessage: 'A ${indexPatternName} cannot contain spaces or the characters: {characterList}'
+          defaultMessage: 'A {indexPatternName} cannot contain spaces or the characters: {characterList}'
         },
         { characterList, indexPatternName });
 
