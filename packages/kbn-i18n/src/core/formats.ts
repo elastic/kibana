@@ -28,7 +28,7 @@
  * described in `options` section of [DateTimeFormat constructor].
  * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat}
  */
-export const formats = {
+export const formats: Formats = {
   number: {
     currency: {
       style: 'currency',
@@ -84,3 +84,43 @@ export const formats = {
     },
   },
 };
+
+interface NumberFormatOptions<TStyle extends string> extends Intl.NumberFormatOptions {
+  style?: TStyle;
+  localeMatcher?: 'lookup' | 'best fit';
+  currencyDisplay?: 'symbol' | 'code' | 'name';
+}
+
+export interface Formats {
+  number?: Partial<{
+    [key: string]: NumberFormatOptions<'currency' | 'percent' | 'decimal'>;
+    currency: NumberFormatOptions<'currency'>;
+    percent: NumberFormatOptions<'percent'>;
+  }>;
+  date?: Partial<{
+    [key: string]: DateTimeFormatOptions;
+    short: DateTimeFormatOptions;
+    medium: DateTimeFormatOptions;
+    long: DateTimeFormatOptions;
+    full: DateTimeFormatOptions;
+  }>;
+  time?: Partial<{
+    [key: string]: DateTimeFormatOptions;
+    short: DateTimeFormatOptions;
+    medium: DateTimeFormatOptions;
+    long: DateTimeFormatOptions;
+    full: DateTimeFormatOptions;
+  }>;
+}
+
+interface DateTimeFormatOptions extends Intl.DateTimeFormatOptions {
+  weekday?: 'narrow' | 'short' | 'long';
+  era?: 'narrow' | 'short' | 'long';
+  year?: 'numeric' | '2-digit';
+  month?: 'numeric' | '2-digit' | 'narrow' | 'short' | 'long';
+  day?: 'numeric' | '2-digit';
+  hour?: 'numeric' | '2-digit';
+  minute?: 'numeric' | '2-digit';
+  second?: 'numeric' | '2-digit';
+  timeZoneName?: 'short' | 'long';
+}

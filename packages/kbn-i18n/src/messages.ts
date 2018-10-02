@@ -17,18 +17,23 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import { metadata } from 'ui/metadata';
-import {
-  I18nProvider,
-  i18nFilter,
-  i18nDirective,
-} from '@kbn/i18n/angular';
+import { Formats } from './core/formats';
 
-uiModules.get('i18n')
-  .provider('i18n', I18nProvider)
-  .filter('i18n', i18nFilter)
-  .directive('i18nId', i18nDirective)
-  .config((i18nProvider) => {
-    i18nProvider.init(metadata.translations);
-  });
+/**
+ * Messages tree, where leafs are translated strings
+ */
+export interface Messages {
+  [key: string]: PlainMessages;
+}
+
+export interface PlainMessages {
+  [key: string]: any;
+  /**
+   * locale of the messages
+   */
+  locale?: string;
+  /**
+   * set of options to the underlying formatter
+   */
+  formats?: Formats;
+}

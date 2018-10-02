@@ -17,11 +17,13 @@
  * under the License.
  */
 
+import * as i18nModule from './i18n';
+
 describe('I18n engine', () => {
-  let i18n;
+  let i18n: typeof i18nModule;
 
   beforeEach(() => {
-    i18n = require('./i18n');
+    i18n = require.requireActual('./i18n');
   });
 
   afterEach(() => {
@@ -181,11 +183,11 @@ describe('I18n engine', () => {
 
   describe('setLocale', () => {
     test('should throw error if locale is not a non-empty string', () => {
-      expect(() => i18n.setLocale(undefined)).toThrow();
-      expect(() => i18n.setLocale(null)).toThrow();
-      expect(() => i18n.setLocale(true)).toThrow();
-      expect(() => i18n.setLocale(5)).toThrow();
-      expect(() => i18n.setLocale({})).toThrow();
+      expect(() => i18n.setLocale(undefined as any)).toThrow();
+      expect(() => i18n.setLocale(null as any)).toThrow();
+      expect(() => i18n.setLocale(true as any)).toThrow();
+      expect(() => i18n.setLocale(5 as any)).toThrow();
+      expect(() => i18n.setLocale({} as any)).toThrow();
       expect(() => i18n.setLocale('')).toThrow();
     });
 
@@ -214,11 +216,11 @@ describe('I18n engine', () => {
 
   describe('setDefaultLocale', () => {
     test('should throw error if locale is not a non-empty string', () => {
-      expect(() => i18n.setDefaultLocale(undefined)).toThrow();
-      expect(() => i18n.setDefaultLocale(null)).toThrow();
-      expect(() => i18n.setDefaultLocale(true)).toThrow();
-      expect(() => i18n.setDefaultLocale(5)).toThrow();
-      expect(() => i18n.setDefaultLocale({})).toThrow();
+      expect(() => i18n.setDefaultLocale(undefined as any)).toThrow();
+      expect(() => i18n.setDefaultLocale(null as any)).toThrow();
+      expect(() => i18n.setDefaultLocale(true as any)).toThrow();
+      expect(() => i18n.setDefaultLocale(5 as any)).toThrow();
+      expect(() => i18n.setDefaultLocale({} as any)).toThrow();
       expect(() => i18n.setDefaultLocale('')).toThrow();
     });
 
@@ -265,16 +267,16 @@ describe('I18n engine', () => {
 
   describe('setFormats', () => {
     test('should throw error if formats parameter is not a non-empty object', () => {
-      expect(() => i18n.setFormats(undefined)).toThrow();
-      expect(() => i18n.setFormats(null)).toThrow();
-      expect(() => i18n.setFormats(true)).toThrow();
-      expect(() => i18n.setFormats(5)).toThrow();
-      expect(() => i18n.setFormats('foo')).toThrow();
-      expect(() => i18n.setFormats({})).toThrow();
+      expect(() => i18n.setFormats(undefined as any)).toThrow();
+      expect(() => i18n.setFormats(null as any)).toThrow();
+      expect(() => i18n.setFormats(true as any)).toThrow();
+      expect(() => i18n.setFormats(5 as any)).toThrow();
+      expect(() => i18n.setFormats('foo' as any)).toThrow();
+      expect(() => i18n.setFormats({} as any)).toThrow();
     });
 
     test('should merge current formats with a passed formats', () => {
-      expect(i18n.getFormats().date.short).not.toEqual({
+      expect(i18n.getFormats().date!.short).not.toEqual({
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -290,7 +292,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.getFormats().date.short).toEqual({
+      expect(i18n.getFormats().date!.short).toEqual({
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -304,7 +306,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.getFormats().date.short).toEqual({
+      expect(i18n.getFormats().date!.short).toEqual({
         month: 'long',
         day: 'numeric',
         year: 'numeric',
@@ -323,12 +325,23 @@ describe('I18n engine', () => {
       const { formats } = require('./formats');
 
       i18n.setFormats({
-        foo: 'bar',
+        number: {
+          currency: {
+            style: 'currency',
+            currency: 'EUR',
+          },
+        },
       });
 
       expect(i18n.getFormats()).toEqual({
         ...formats,
-        foo: 'bar',
+        number: {
+          ...formats.number,
+          currency: {
+            style: 'currency',
+            currency: 'EUR',
+          },
+        },
       });
     });
   });
@@ -349,25 +362,28 @@ describe('I18n engine', () => {
         locale: 'ru',
       });
 
-      expect(i18n.getRegisteredLocales()).toContain('en', 'ru');
+      expect(i18n.getRegisteredLocales()).toContain('en');
+      expect(i18n.getRegisteredLocales()).toContain('ru');
       expect(i18n.getRegisteredLocales().length).toBe(2);
 
       i18n.addMessages({
         locale: 'fr',
       });
 
-      expect(i18n.getRegisteredLocales()).toContain('en', 'ru', 'fr');
+      expect(i18n.getRegisteredLocales()).toContain('en');
+      expect(i18n.getRegisteredLocales()).toContain('fr');
+      expect(i18n.getRegisteredLocales()).toContain('ru');
       expect(i18n.getRegisteredLocales().length).toBe(3);
     });
   });
 
   describe('translate', () => {
     test('should throw error if id is not a non-empty string', () => {
-      expect(() => i18n.translate(undefined)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate(null)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate(true)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate(5)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate({})).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(undefined as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(null as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(true as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(5 as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate({} as any)).toThrowErrorMatchingSnapshot();
       expect(() => i18n.translate('')).toThrowErrorMatchingSnapshot();
     });
 
@@ -764,7 +780,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.getFormats().date.custom).toEqual({
+      expect((i18n.getFormats().date as any).custom).toEqual({
         month: 'short',
         day: 'numeric',
         year: 'numeric',
