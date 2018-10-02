@@ -163,12 +163,10 @@ describe('fetch with ancestors', () => {
       expect(listControl.isEnabled()).toBe(false);
     });
 
-    test('should reset lastAncestorValues and value', async () => {
+    test('should reset lastAncestorValues', async () => {
       listControl.lastAncestorValues = 'last ancestor value';
-      listControl.set([{ value: 'Zurich Airport' }]);
       await listControl.fetch();
       expect(listControl.lastAncestorValues).toBeUndefined();
-      expect(listControl.hasValue()).toBe(false);
     });
   });
 });
