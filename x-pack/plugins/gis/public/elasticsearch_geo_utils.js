@@ -118,9 +118,9 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   // 2) bounds are all west of -180
   const noWrapMapExtent = {
     min_lon: mapExtent.min_lon < -180 ? -180 : mapExtent.min_lon,
-    min_lat: mapExtent.min_lat,
+    min_lat: mapExtent.min_lat < -90 ? -90 : mapExtent.min_lat,
     max_lon: mapExtent.max_lon > 180 ? 180 : mapExtent.max_lon,
-    max_lat: mapExtent.max_lat
+    max_lat: mapExtent.max_lat > 90 ? 90 : mapExtent.max_lat,
   };
 
   if (geoFieldType === 'geo_point') {

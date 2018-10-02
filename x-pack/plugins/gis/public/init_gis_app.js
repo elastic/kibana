@@ -38,14 +38,11 @@ const waitForAngularReady = new Promise(resolve => {
 
 export function initGisApp(resolve) {
   // default the timepicker to the last 24 hours
-  chrome.getUiSettingsClient().overrideLocalDefault(
-    'timepicker:timeDefaults',
-    JSON.stringify({
-      from: 'now-24h',
-      to: 'now',
-      mode: 'quick'
-    })
-  );
+  timefilter.setTime({
+    from: 'now-24h',
+    to: 'now',
+    mode: 'quick'
+  });
 
   uiModules
     .get('app/gis', [])

@@ -312,8 +312,26 @@ export async function loadMapResources(dispatch) {
         maxZoom: 24,
       },
       {
-        "dataDirty": false,
-        "id": "fn5wx",
+        "id": "heatmap_demo",
+        "label": "logs* heatmap",
+        "showAtAllZoomLevels": false,
+        "minZoom": 0,
+        "maxZoom": 8,
+        "sourceDescriptor": {
+          "type": "ES_GEOHASH_GRID",
+          "indexPatternId": "90943e30-9a47-11e8-b64d-95841ca0b247",
+          "geoField": "geo.coordinates",
+        },
+        "visible": true,
+        "temporary": false,
+        "style": {
+          refinement: 'most_fine',
+          type: 'HEATMAP',
+        },
+        "type": "GEOHASH_GRID"
+      },
+      {
+        "id": "doc_demo",
         "label": "logs* documents",
         "showAtAllZoomLevels": false,
         "minZoom": 6,

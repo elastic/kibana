@@ -110,7 +110,7 @@ export class ESSearchSource extends VectorSource {
           filters.push(createExtentFilter(searchFilters.extent, geoField.name, geoField.type));
         }
         if (isTimeAware) {
-          filters.push(timefilter.createFilter(indexPattern, searchFilters.timefilter));
+          filters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
         }
         return filters;
       });
