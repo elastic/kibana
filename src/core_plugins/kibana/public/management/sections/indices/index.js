@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { management, IndexPatternListFactory } from 'ui/management';
+import { management } from 'ui/management';
+import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
 import { IndexPatternCreationFactory } from 'ui/management/index_pattern_creation';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
@@ -126,7 +127,7 @@ uiModules.get('apps/management')
               return 1;
             }
             return 0;
-          });
+          }) || [];
 
           updateIndexPatternList($scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList);
         };

@@ -33,6 +33,15 @@ export function rollup(kibana) {
       search: [
         'plugins/rollup/search',
       ],
+      migrations: {
+        'index-pattern': {
+          '6.5.0': (doc) => {
+            doc.attributes.type = doc.attributes.type || undefined;
+            doc.attributes.typeMeta = doc.attributes.typeMeta || undefined;
+            return doc;
+          }
+        },
+      }
     },
     init: function (server) {
       registerLicenseChecker(server);

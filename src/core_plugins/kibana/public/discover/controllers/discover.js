@@ -285,7 +285,7 @@ function discoverController(
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.create();
   timeRangeSearchSource.setField('filter', () => {
-    return timefilter.createFilter($scope.indexPattern);
+    return isDefaultTypeIndexPattern($scope.indexPattern) && timefilter.createFilter($scope.indexPattern);
   });
 
   $scope.searchSource.setParent(timeRangeSearchSource);
@@ -397,7 +397,7 @@ function discoverController(
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    timefield: $scope.indexPattern.timeFieldName,
+    timefield: isDefaultTypeIndexPattern($scope.indexPattern) && $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.ip.list,
   };

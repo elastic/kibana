@@ -17,6 +17,7 @@
  * under the License.
  */
 
-export { parseEsInterval } from './parse_es_interval';
-export { ParseEsIntervalInvalidCalendarIntervalError } from './parse_es_interval_invalid_calendar_interval_error';
-export { ParseEsIntervalInvalidFormatError } from './parse_es_interval_invalid_format_error';
+import { IndexPatternListConfig } from './index_pattern_list_config';
+import { IndexPatternListConfigRegistry } from './index_pattern_list_config_registry';
+
+IndexPatternListConfigRegistry.register(() => IndexPatternListConfig);

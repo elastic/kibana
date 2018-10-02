@@ -17,11 +17,8 @@
  * under the License.
  */
 
+export { parseEsInterval } from './parse_es_interval';
 export {
-  PAGE_TITLE_COMPONENT,
-  PAGE_SUBTITLE_COMPONENT,
-  PAGE_FOOTER_COMPONENT,
-} from '../../../core_plugins/kibana/public/management/sections/settings/components/default_component_registry';
-export { registerSettingsComponent } from '../../../core_plugins/kibana/public/management/sections/settings/components/component_registry';
-export { Field } from '../../../core_plugins/kibana/public/management/sections/settings/components/field/field';
-export { management } from './sections_register';
+  ParseEsIntervalInvalidCalendarIntervalError,
+} from './parse_es_interval_invalid_calendar_interval_error';
+export { ParseEsIntervalInvalidFormatError } from './parse_es_interval_invalid_format_error';

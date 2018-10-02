@@ -6,3 +6,4 @@
 
 import './agg_type_filter';
 import './agg_type_field_filter';
+import './editor_config';
