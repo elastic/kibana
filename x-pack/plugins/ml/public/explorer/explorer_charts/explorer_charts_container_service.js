@@ -269,6 +269,7 @@ export function explorerChartsContainerServiceFactory(
 
     Promise.all(seriesPromises)
       .then(response => {
+        // TODO: Add test to prevent this regression.
         // Ignore this response if it's returned by an out of date promise
         if (newRequestCount < requestCount) {
           return;
