@@ -29,7 +29,7 @@ export const AssetManager = compose(
     copyAsset: assetId => {
       notify.success(
         i18n.translate('xpack.canvas.assetManager.assetCopiedToClipboardTitle', {
-          defaultMessage: 'Copied {assetId} to clipboard',
+          defaultMessage: "Copied '{assetId}' to clipboard",
           values: { assetId },
         })
       );

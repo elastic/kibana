@@ -132,7 +132,7 @@ class WorkpadExportUI extends React.PureComponent {
     return (
       <Popover
         button={exportControl}
-        tooltip={this.props.intl.formatMessage({
+        tooltip={intl.formatMessage({
           id: 'xpack.canvas.workpadExport.exportWorkpadButtonTooltip',
           defaultMessage: 'Export workpad',
         })}

@@ -45,7 +45,7 @@ export const PageConfig = ({
             label={
               <FormattedMessage
                 id="xpack.canvas.pageConfig.transitionFormRowLabel"
-                defaultMessage="transition"
+                defaultMessage="Transition"
               />
             }
           >

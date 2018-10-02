@@ -41,7 +41,7 @@ const ColorManagerUI = ({ value, addColor, removeColor, onChange, intl }) => (
         {removeColor && (
           <EuiButtonIcon
             aria-label={intl.formatMessage({
-              id: 'xpack.canvas.color.manager.removeColorButtonAriaLabel',
+              id: 'xpack.canvas.colorManager.removeColorButtonAriaLabel',
               defaultMessage: 'Remove Color',
             })}
             iconType="minusInCircle"

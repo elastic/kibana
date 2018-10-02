@@ -12,7 +12,7 @@ export const FunctionUnknown = ({ argType }) => (
   <div className="canvasFunctionForm canvasFunctionForm--unknown-expression">
     <FormattedMessage
       id="xpack.canvas.functionForm.unknownExpressionTypeErrorMessage"
-      defaultMessage="Unknown expression type '{typeError}'"
+      defaultMessage="Unknown expression type &quot;{typeError}&quot;"
       values={{ typeError: argType }}
     />
   </div>

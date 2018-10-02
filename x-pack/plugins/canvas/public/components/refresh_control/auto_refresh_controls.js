@@ -71,7 +71,7 @@ export class AutoRefreshControls extends Component {
                 ) : (
                   <span>
                     <FormattedMessage
-                      id="xpack.canvas..refreshControl.manualRefreshDescription"
+                      id="xpack.canvas.refreshControl.manualRefreshDescription"
                       defaultMessage="Manually"
                     />
                   </span>
@@ -213,7 +213,7 @@ export class AutoRefreshControls extends Component {
                 label={
                   <FormattedMessage
                     id="xpack.canvas.refreshControl.customIntervalFormRowLabel"
-                    defaultMessage="Set a custom intervale"
+                    defaultMessage="Set a custom interval"
                   />
                 }
                 helpText={

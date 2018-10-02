@@ -125,6 +125,7 @@ class WorkpadLoaderUI extends React.PureComponent {
 
   renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
     const { sortField, sortDirection } = this.state;
+    const { intl } = this.props;
 
     const actions = [
       {
@@ -142,7 +143,7 @@ class WorkpadLoaderUI extends React.PureComponent {
                 <EuiButtonIcon
                   iconType="sortDown"
                   onClick={() => this.props.downloadWorkpad(workpad.id)}
-                  aria-label={this.props.intl.formatMessage({
+                  aria-label={intl.formatMessage({
                     id: 'xpack.canvas.workpadLoader.downloadWorkpadButtonAriaLabel',
                     defaultMessage: 'Download Workpad',
                   })}
@@ -161,7 +162,7 @@ class WorkpadLoaderUI extends React.PureComponent {
                 <EuiButtonIcon
                   iconType="copy"
                   onClick={() => this.cloneWorkpad(workpad)}
-                  aria-label={this.props.intl.formatMessage({
+                  aria-label={intl.formatMessage({
                     id: 'xpack.canvas.workpadLoader.cloneWorkpadButtonAriaLabel',
                     defaultMessage: 'Clone Workpad',
                   })}
@@ -189,7 +190,7 @@ class WorkpadLoaderUI extends React.PureComponent {
             <Link
               name="loadWorkpad"
               params={{ id: workpad.id }}
-              aria-label={this.props.intl.formatMessage(
+              aria-label={intl.formatMessage(
                 {
                   id: 'xpack.canvas.workpadLoader.loadWorkpadLinkAriaLabel',
                   defaultMessage: 'Load workpad {workpadName}',
@@ -204,7 +205,7 @@ class WorkpadLoaderUI extends React.PureComponent {
       },
       {
         field: '@created',
-        name: this.props.intl.formatMessage({
+        name: intl.formatMessage({
           id: 'xpack.canvas.workpadLoader.columnCreatedLabel',
           defaultMessage: 'Created',
         }),
@@ -215,7 +216,7 @@ class WorkpadLoaderUI extends React.PureComponent {
       },
       {
         field: '@timestamp',
-        name: this.props.intl.formatMessage({
+        name: intl.formatMessage({
           id: 'xpack.canvas.workpadLoader.columnUpdatedLabel',
           defaultMessage: 'Updated',
         }),
@@ -298,10 +299,11 @@ class WorkpadLoaderUI extends React.PureComponent {
       sortField,
       sortDirection,
     } = this.state;
+    const { intl } = this.props;
     const isLoading = this.props.workpads == null;
     const modalTitle =
       selectedWorkpads.length === 1
-        ? this.props.intl.formatMessage(
+        ? intl.formatMessage(
             {
               id: 'xpack.canvas.workpadLoader.deleteOneWorkpadButtonLabel',
               defaultMessage: "Delete workpad '{workpadName}'?",
@@ -310,7 +312,7 @@ class WorkpadLoaderUI extends React.PureComponent {
               workpadName: selectedWorkpads[0].name,
             }
           )
-        : this.props.intl.formatMessage(
+        : intl.formatMessage(
             {
               id: 'xpack.canvas.workpadLoader.deleteWorkpadsButtonLabel',
               defaultMessage: 'Delete {workpadCount} workpads?',
@@ -324,11 +326,11 @@ class WorkpadLoaderUI extends React.PureComponent {
       <ConfirmModal
         isOpen={deletingWorkpad}
         title={modalTitle}
-        message={this.props.intl.formatMessage({
+        message={intl.formatMessage({
           id: 'xpack.canvas.workpadLoader.modalWindowDeleteWorkpadsDescription',
           defaultMessage: "You can't recover deleted workpads.",
         })}
-        confirmButtonText={this.props.intl.formatMessage({
+        confirmButtonText={intl.formatMessage({
           id: 'xpack.canvas.workpadLoader.modalWindowDeleteWorkpadsConfirmButtonLabel',
           defaultMessage: 'Delete',
         })}

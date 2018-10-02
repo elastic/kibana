@@ -96,7 +96,7 @@ class PageManagerUI extends React.PureComponent {
   };
 
   renderPage = (page, i) => {
-    const { selectedPage, workpadId, movePage, duplicatePage } = this.props;
+    const { selectedPage, workpadId, movePage, duplicatePage, intl } = this.props;
     const pageNumber = i + 1;
 
     return (
@@ -124,7 +124,7 @@ class PageManagerUI extends React.PureComponent {
                 <Link
                   name="loadWorkpad"
                   params={{ id: workpadId, page: pageNumber }}
-                  aria-label={this.props.intl.formatMessage(
+                  aria-label={intl.formatMessage(
                     {
                       id: 'xpack.canvas.pageManager.pageNumberLinkAriaLabel',
                       defaultMessage: 'Load page number {pageNumber}',
@@ -151,7 +151,7 @@ class PageManagerUI extends React.PureComponent {
   };
 
   render() {
-    const { pages, addPage, deleteId } = this.props;
+    const { pages, addPage, deleteId, intl } = this.props;
     const { showTrayPop } = this.state;
 
     return (
@@ -197,15 +197,15 @@ class PageManagerUI extends React.PureComponent {
         </EuiFlexGroup>
         <ConfirmModal
           isOpen={deleteId != null}
-          title={this.props.intl.formatMessage({
+          title={intl.formatMessage({
             id: 'xpack.canvas.pageManager.removePageModalTitle',
             defaultMessage: 'Remove Page',
           })}
-          message={this.props.intl.formatMessage({
+          message={intl.formatMessage({
             id: 'xpack.canvas.pageManager.removePageModalDescription',
             defaultMessage: 'Are you sure you want to remove this page?',
           })}
-          confirmButtonText={this.props.intl.formatMessage({
+          confirmButtonText={intl.formatMessage({
             id: 'xpack.canvas.pageManager.removePageModal.confirmButtonLabel',
             defaultMessage: 'Remove',
           })}
