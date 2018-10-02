@@ -467,6 +467,7 @@ export class SavedObjectsRepository {
 
   async _writeToCluster(method, params) {
     try {
+      this._assertMigrated();
       await this._onBeforeWrite();
       return await this._callCluster(method, params);
     } catch (err) {
@@ -476,9 +477,18 @@ export class SavedObjectsRepository {
 
   async _callCluster(method, params) {
     try {
+      this._assertMigrated();
       return await this._unwrappedCallCluster(method, params);
     } catch (err) {
       throw decorateEsError(err);
+    }
+  }
+
+  _assertMigrated() {
+    if (!this._migrator.isMigrated) {
+      const error = new Error(`The saved object index ${this._index} is being migrated.`);
+      error.code = 'migrating_index';
+      throw error;
     }
   }
 

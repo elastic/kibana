@@ -35,6 +35,7 @@ import {
 export function savedObjectsMixin(kbnServer, server) {
   const migrator = new KibanaMigrator({ kbnServer });
 
+  server.decorate('server', 'kibanaMigrator', migrator);
   server.decorate('server', 'getKibanaIndexMappingsDsl', () => migrator.getActiveMappings());
 
   // we use kibana.index which is technically defined in the kibana plugin, so if

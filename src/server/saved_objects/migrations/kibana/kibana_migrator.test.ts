@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import { KbnServer, KibanaMigrator } from './kibana_migrator';
 
 describe('KibanaMigrator', () => {
-  describe('migratorOptsFromKbnServer', () => {
+  describe('getActiveMappings', () => {
     it('returns full index mappings w/ core properties', () => {
       const { kbnServer } = mockKbnServer();
       kbnServer.uiExports.savedObjectMappings = [
@@ -55,6 +55,17 @@ describe('KibanaMigrator', () => {
         /Plugin bbb is attempting to redefine mapping "amap"/
       );
     });
+  });
+
+  describe('awaitMigration', () => {
+    it('changes isMigrated to true if migrations were skipped', async () => {
+      const { kbnServer } = mockKbnServer();
+      kbnServer.server.plugins.elasticsearch = undefined;
+      const migrator = new KibanaMigrator({ kbnServer });
+      expect(migrator.isMigrated).toBeFalsy();
+      await migrator.awaitMigration();
+      expect(migrator.isMigrated).toBeTruthy();
+    });
 
     it('exposes callCluster as a function that waits for elasticsearch before running', async () => {
       const { kbnServer } = mockKbnServer();
@@ -74,7 +85,7 @@ describe('KibanaMigrator', () => {
           return Promise.resolve().then(() => ++count);
         },
       };
-      await expect(new KibanaMigrator({ kbnServer }).migrateIndex()).rejects.toThrow(/Doh!/);
+      await expect(new KibanaMigrator({ kbnServer }).awaitMigration()).rejects.toThrow(/Doh!/);
       expect(count).toEqual(1);
     });
   });

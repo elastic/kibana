@@ -92,6 +92,7 @@ export const spaces = (kibana: any) =>
       const xpackMainPlugin = server.plugins.xpack_main;
 
       watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin, async () => {
+        await server.kibanaMigrator.awaitMigration();
         await createDefaultSpace(server);
       });
 

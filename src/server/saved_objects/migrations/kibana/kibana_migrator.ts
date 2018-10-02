@@ -25,7 +25,14 @@
 import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
 import { SavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator } from '../../validation';
-import { buildActiveMappings, CallCluster, IndexMigrator, LogFn, MappingProperties } from '../core';
+import {
+  buildActiveMappings,
+  CallCluster,
+  IndexMigrator,
+  LogFn,
+  MappingProperties,
+  MigrationResult,
+} from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 
 export interface KbnServer {
@@ -67,6 +74,10 @@ export class KibanaMigrator {
   private mappingProperties: MappingProperties;
   private log: LogFn;
   private serializer: SavedObjectsSerializer;
+  private migrationPromise?: Promise<MigrationResult>;
+
+  // tslint:disable-next-line:variable-name
+  private _isMigrated = false;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -91,6 +102,14 @@ export class KibanaMigrator {
   }
 
   /**
+   * Gets a value indicating whether or not the Kibana index has
+   * been migrated.
+   */
+  public get isMigrated() {
+    return this._isMigrated;
+  }
+
+  /**
    * Gets the index mappings defined by Kibana's enabled plugins.
    *
    * @returns
@@ -112,12 +131,25 @@ export class KibanaMigrator {
   }
 
   /**
-   * Migrates the mappings and documents in the Kibana index.
+   * Migrates the mappings and documents in the Kibana index. This will run only
+   * once and subsequent calls will return the promise of the original call, allowing
+   * multiple callers to wait for a the same migration run.
    *
    * @returns
    * @memberof KibanaMigrator
    */
-  public migrateIndex() {
+  public awaitMigration() {
+    if (!this.migrationPromise) {
+      this.migrationPromise = this.migrateIndex().then(result => {
+        this._isMigrated = true;
+        return result;
+      });
+    }
+
+    return this.migrationPromise;
+  }
+
+  private async migrateIndex(): Promise<MigrationResult> {
     const { server } = this.kbnServer;
 
     // We can't do anything if the elasticsearch plugin has been disabled.
@@ -129,10 +161,12 @@ export class KibanaMigrator {
       return { status: 'skipped' };
     }
 
+    await server.plugins.elasticsearch.waitUntilReady();
+
     const config = server.config();
     const migrator = new IndexMigrator({
       batchSize: config.get('migrations.batchSize'),
-      callCluster: createCallCluster(server),
+      callCluster: server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
       documentMigrator: this.documentMigrator,
       index: config.get('kibana.index'),
       log: this.log,
@@ -144,21 +178,6 @@ export class KibanaMigrator {
 
     return migrator.migrate();
   }
-}
-
-/**
- * Wait until the elasticsearch plugin says it's ready, then return the
- * elasticsearch connection that will be used to run migrations.
- */
-function createCallCluster(server: Server): any {
-  let callCluster: CallCluster;
-  return async (path: any, opts: any) => {
-    if (!callCluster) {
-      await server.plugins.elasticsearch!.waitUntilReady();
-      callCluster = server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser;
-    }
-    return await callCluster(path, opts);
-  };
 }
 
 /**
