@@ -1,8 +1,8 @@
 [role="xpack"]
 [[spaces-settings-kb]]
-=== Spaces Settings in Kibana
+=== Spaces settings in {kib}
 ++++
-<titleabbrev>Spaces Settings</titleabbrev>
+<titleabbrev>Spaces settings</titleabbrev>
 ++++
 
 By default, Spaces is enabled in Kibana, and you can secure Spaces using 
@@ -10,11 +10,13 @@ roles when Security is enabled.
 
 [float]
 [[spaces-settings]]
-==== Spaces Settings
+==== Spaces settings
 
 `xpack.spaces.enabled`::
 Set to `true` (default) to enable Spaces in {kib}.
 
 `xpack.spaces.maxSpaces`::
-The maximum amount of Spaces that can be used with this instance of Kibana.
+The maximum amount of Spaces that can be used with this instance of Kibana. Some operations
+in Kibana return all spaces using a single `_search` from Elasticsearch, so this must be
+set lower than the `index.max_result_window` in Elasticsearch.
 Defaults to `1000`.
