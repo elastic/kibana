@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { relative, resolve } from 'path';
+import { relative, resolve } from 'upath';
 import { readFileSync } from 'fs';
 
 import { callLicenseChecker } from './license_checker';

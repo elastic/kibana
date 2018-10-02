@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { dirname, extname, join, relative, resolve, sep } from 'path';
+import { dirname, extname, join, relative, resolve, sep } from 'upath';
 
 import { REPO_ROOT } from './constants';
 
@@ -30,10 +30,6 @@ export class File {
     this.path = resolve(path);
     this.relativePath = relative(REPO_ROOT, this.path);
     this.ext = extname(this.path);
-    if (process.platform === 'win32') {
-      this.path = this.path.replace(/\\/g, '/');
-      this.relativePath = this.relativePath.replace(/\\/g, '/');
-    }
   }
 
   public getAbsolutePath() {
@@ -61,16 +57,13 @@ export class File {
 
     while (true) {
       // NOTE: resolve() produces absolute paths, so we have to use join()
-      let parent = parents.length
+      const parent = parents.length
         ? join(parents[parents.length - 1], '..')
         : dirname(this.relativePath);
 
       if (parent === '..' || parent === '.') {
         break;
       } else {
-        if (process.platform === 'win32') {
-          parent = parent.replace(/\\/g, '/');
-        }
         parents.push(parent);
       }
     }
