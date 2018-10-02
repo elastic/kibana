@@ -6,8 +6,8 @@
 
 import url from 'url';
 import cookie from 'cookie';
-import { getAbsoluteUrlFactory } from './get_absolute_url';
 import { cryptoFactory } from '../../../../server/lib/crypto';
+import { getAbsoluteUrlFactory } from '../../../common/execute_job/get_absolute_url';
 
 export function compatibilityShimFactory(server) {
   const getAbsoluteUrl = getAbsoluteUrlFactory(server);
