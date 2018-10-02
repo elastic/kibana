@@ -2,7 +2,7 @@
   "name": "sample_panel_action",
   "version": "kibana",
   "dependencies": {
-    "@elastic/eui": "0.0.55",
-    "react": "^16.4.1"
+    "@elastic/eui": "^4.0.1",
+    "react": "^16.3.1"
   }
 }
