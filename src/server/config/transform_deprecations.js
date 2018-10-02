@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import _, { partial } from 'lodash';
+import _, { partial, set } from 'lodash';
 import { createTransform, Deprecations } from '../../deprecation';
+import { unset } from '../../utils';
 
 const { rename, unused } = Deprecations;
 
@@ -55,6 +56,15 @@ const rewriteBasePath = (settings, log) => {
   }
 };
 
+const loggingTimezone = (settings, log) => {
+  if (_.has(settings, 'logging.useUTC')) {
+    const timezone = settings.logging.useUTC ? 'UTC' : false;
+    set('logging.timezone', timezone);
+    unset(settings, 'logging.UTC');
+    log(`Config key "logging.useUTC" is deprecated. It has been replaced with "logging.timezone"`);
+  }
+};
+
 const deprecations = [
   //server
   rename('server.ssl.cert', 'server.ssl.certificate'),
@@ -68,6 +78,7 @@ const deprecations = [
   serverSslEnabled,
   savedObjectsIndexCheckTimeout,
   rewriteBasePath,
+  loggingTimezone,
 ];
 
 export const transformDeprecations = createTransform(deprecations);

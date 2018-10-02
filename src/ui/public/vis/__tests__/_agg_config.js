@@ -414,11 +414,10 @@ describe('AggConfig', function () {
       const label = aggConfig.makeLabel();
       expect(label).to.be('Count');
     });
-    it('default label should be "Percentage of Count" when Vis is in percentage mode', function () {
+    it('default label should be "Percentage of Count" when percentageMode is set to true', function () {
       const vis = new Vis(indexPattern, {});
       const aggConfig = vis.aggs[0];
-      aggConfig.vis.params.mode = 'percentage';
-      const label = aggConfig.makeLabel();
+      const label = aggConfig.makeLabel(true);
       expect(label).to.be('Percentage of Count');
     });
     it('empty label if the Vis type is not defined', function () {

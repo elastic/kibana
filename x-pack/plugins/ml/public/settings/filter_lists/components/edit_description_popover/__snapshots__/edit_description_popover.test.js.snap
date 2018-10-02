@@ -8,6 +8,7 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
       <EuiButtonIcon
         aria-label="Edit description"
         color="primary"
+        iconSize="m"
         iconType="pencil"
         onClick={[Function]}
         size="s"
@@ -15,6 +16,7 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
       />
     }
     closePopover={[Function]}
+    hasArrow={true}
     id="filter_list_description_popover"
     isOpen={true}
     ownFocus={true}
@@ -57,6 +59,7 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
       <EuiButtonIcon
         aria-label="Edit description"
         color="primary"
+        iconSize="m"
         iconType="pencil"
         onClick={[Function]}
         size="s"
@@ -64,6 +67,7 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
       />
     }
     closePopover={[Function]}
+    hasArrow={true}
     id="filter_list_description_popover"
     isOpen={false}
     ownFocus={true}
@@ -106,6 +110,7 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
       <EuiButtonIcon
         aria-label="Edit description"
         color="primary"
+        iconSize="m"
         iconType="pencil"
         onClick={[Function]}
         size="s"
@@ -113,6 +118,7 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
       />
     }
     closePopover={[Function]}
+    hasArrow={true}
     id="filter_list_description_popover"
     isOpen={false}
     ownFocus={true}

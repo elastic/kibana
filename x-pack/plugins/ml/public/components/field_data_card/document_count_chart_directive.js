@@ -16,18 +16,16 @@ import d3 from 'd3';
 import moment from 'moment';
 
 import { parseInterval } from 'ui/utils/parse_interval';
-import { numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
-import { calculateTextWidth } from 'plugins/ml/util/string_utils';
-import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { numTicksForDateFormat } from '../../util/chart_utils';
+import { calculateTextWidth } from '../../util/string_utils';
+import { IntervalHelperProvider } from '../../util/ml_time_buckets';
+import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlDocumentCountChart', function (
-  Private,
-  mlChartTooltipService) {
-
+module.directive('mlDocumentCountChart', function (Private) {
   function link(scope, element, attrs) {
     const svgWidth = attrs.width ? +attrs.width : 400;
     const svgHeight = scope.height = attrs.height ? +attrs.height : 400;

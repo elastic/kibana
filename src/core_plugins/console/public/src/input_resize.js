@@ -37,7 +37,7 @@ export default function (input, output) {
     $left.width(editorWidth);
   }
 
-  const $resizer = $('#editor_resizer');
+  const $resizer = $('#ConAppResizer');
   $resizer
     .on('mousedown', function (event) {
       $resizer.addClass('active');

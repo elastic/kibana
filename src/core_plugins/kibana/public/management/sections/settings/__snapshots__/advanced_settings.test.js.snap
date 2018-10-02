@@ -17,15 +17,7 @@ exports[`AdvancedSettings should render normally 1`] = `
       component="div"
       grow={true}
     >
-      <EuiText
-        grow={true}
-      >
-        <h1
-          data-test-subj="managementSettingsTitle"
-        >
-          Settings
-        </h1>
-      </EuiText>
+      <advanced_settings_page_title />
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
@@ -59,6 +51,7 @@ exports[`AdvancedSettings should render normally 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
+  <advanced_settings_page_subtitle />
   <EuiSpacer
     size="m"
   />
@@ -310,6 +303,27 @@ exports[`AdvancedSettings should render normally 1`] = `
         ],
       }
     }
+    showNoResultsMessage={true}
+  />
+  <advanced_settings_page_footer
+    onQueryMatchChange={[Function]}
+    query={
+      Query {
+        "ast": _AST {
+          "_clauses": Array [],
+          "_indexedClauses": Object {
+            "field": Object {},
+            "is": Object {},
+            "term": Array [],
+          },
+        },
+        "syntax": Object {
+          "parse": [Function],
+          "print": [Function],
+        },
+        "text": "",
+      }
+    }
   />
 </div>
 `;
@@ -331,15 +345,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
       component="div"
       grow={true}
     >
-      <EuiText
-        grow={true}
-      >
-        <h1
-          data-test-subj="managementSettingsTitle"
-        >
-          Settings
-        </h1>
-      </EuiText>
+      <advanced_settings_page_title />
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
@@ -391,6 +397,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
       />
     </EuiFlexItem>
   </EuiFlexGroup>
+  <advanced_settings_page_subtitle />
   <EuiSpacer
     size="m"
   />
@@ -434,6 +441,45 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
             "value": undefined,
           },
         ],
+      }
+    }
+    showNoResultsMessage={true}
+  />
+  <advanced_settings_page_footer
+    onQueryMatchChange={[Function]}
+    query={
+      Query {
+        "ast": _AST {
+          "_clauses": Array [
+            Object {
+              "field": "ariaName",
+              "match": "must",
+              "operator": "eq",
+              "type": "field",
+              "value": "test string setting",
+            },
+          ],
+          "_indexedClauses": Object {
+            "field": Object {
+              "ariaName": Array [
+                Object {
+                  "field": "ariaName",
+                  "match": "must",
+                  "operator": "eq",
+                  "type": "field",
+                  "value": "test string setting",
+                },
+              ],
+            },
+            "is": Object {},
+            "term": Array [],
+          },
+        },
+        "syntax": Object {
+          "parse": [Function],
+          "print": [Function],
+        },
+        "text": "ariaName:\\"test string setting\\"",
       }
     }
   />

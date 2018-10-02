@@ -90,10 +90,6 @@ describe('ui apps / UiApp', () => {
         expect(app.getMainModuleId()).to.be(undefined);
       });
 
-      it('has no styleSheetPath', () => {
-        expect(app.getStyleSheetUrlPath()).to.be(undefined);
-      });
-
       it('has a mostly empty JSON representation', () => {
         expect(JSON.parse(JSON.stringify(app))).to.eql({
           id: spec.id,
@@ -310,17 +306,6 @@ describe('ui apps / UiApp', () => {
     it('returns main module id', () => {
       const app = createUiApp({ id: 'foo', main: 'bar' });
       expect(app.getMainModuleId()).to.be('bar');
-    });
-  });
-
-  describe('#getStyleSheetUrlPath', () => {
-    it('returns public path to styleSheetPath', () => {
-      const app = createUiApp(
-        createStubUiAppSpec({ pluginId: 'foo', id: 'foo', styleSheetPath: '/bar/public/baz/style.scss' }),
-        createStubKbnServer({ plugins: [{ id: 'foo', publicDir: '/bar/public' }] })
-      );
-
-      expect(app.getStyleSheetUrlPath()).to.eql('plugins/foo/baz/style.css');
     });
   });
 });

@@ -17,17 +17,26 @@
  * under the License.
  */
 
-import './tutorial.less';
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
-import { RadioButtonGroup } from './radio_button_group';
 import { SavedObjectsInstaller } from './saved_objects_installer';
-import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText, EuiPageBody } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiPage,
+  EuiPanel,
+  EuiLink,
+  EuiText,
+  EuiPageBody,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -35,7 +44,7 @@ const INSTRUCTIONS_TYPE = {
   ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud'
 };
 
-export class Tutorial extends React.Component {
+class TutorialUi extends React.Component {
 
   constructor(props) {
     super(props);
@@ -177,25 +186,33 @@ export class Tutorial extends React.Component {
     return numHits === 0 ? StatusCheckStates.NO_DATA : StatusCheckStates.HAS_DATA;
   };
 
-  onPrem = () => {
-    this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM);
-  };
-
-  onPremElasticCloud = () => {
-    this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD);
-  };
-
   renderInstructionSetsToggle = () => {
     if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
+      const selfManagedLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.selfManagedButtonLabel',
+        defaultMessage: 'Self managed' });
+      const cloudLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.elasticCloudButtonLabel',
+        defaultMessage: 'Elastic Cloud' });
       const radioButtons = [
-        { onClick: this.onPrem, label: 'Self managed', dataTestSubj: 'onPremBtn' },
-        { onClick: this.onPremElasticCloud, label: 'Elastic Cloud', dataTestSubj: 'onPremElasticCloudBtn' },
+        {
+          id: INSTRUCTIONS_TYPE.ON_PREM,
+          label: selfManagedLabel,
+        },
+        {
+          id: INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD,
+          label: cloudLabel,
+        }
       ];
       return (
-        <RadioButtonGroup
-          buttons={radioButtons}
-          selectedBtnLabel={radioButtons[0].label}
-        />
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              options={radioButtons}
+              idSelected={this.state.visibleInstructions}
+              onChange={this.setVisibleInstructions}
+              color="primary"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
   };
@@ -281,10 +298,14 @@ export class Tutorial extends React.Component {
     let content;
     if (this.state.notFound) {
       content = (
-        <div className="homePanel">
+        <div className="homTutorial__notFoundPanel">
           <EuiText>
             <p>
-              Unable to find tutorial {this.props.tutorialId}
+              <FormattedMessage
+                id="kbn.home.tutorial.noTutorialLabel"
+                defaultMessage="Unable to find tutorial {tutorialId}"
+                values={{ tutorialId: this.props.tutorialId }}
+              />
             </p>
           </EuiText>
         </div>
@@ -315,7 +336,7 @@ export class Tutorial extends React.Component {
           />
 
           <EuiSpacer />
-          <div className="text-center">
+          <div className="eui-textCenter">
             {this.renderInstructionSetsToggle()}
           </div>
 
@@ -329,7 +350,7 @@ export class Tutorial extends React.Component {
       );
     }
     return (
-      <EuiPage className="home">
+      <EuiPage className="homPage">
         <EuiPageBody>
 
           <div>
@@ -344,7 +365,7 @@ export class Tutorial extends React.Component {
   }
 }
 
-Tutorial.propTypes = {
+TutorialUi.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   isCloudEnabled: PropTypes.bool.isRequired,
   getTutorial: PropTypes.func.isRequired,
@@ -352,3 +373,5 @@ Tutorial.propTypes = {
   tutorialId: PropTypes.string.isRequired,
   bulkCreate: PropTypes.func.isRequired,
 };
+
+export const Tutorial = injectI18n(TutorialUi);

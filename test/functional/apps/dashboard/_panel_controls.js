@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('are shown in edit mode', async function () {
-        await PageObjects.dashboard.clickEdit();
+        await PageObjects.dashboard.switchToEditMode();
 
         const isContextMenuIconVisible = await dashboardPanelActions.isContextMenuIconVisible();
         expect(isContextMenuIconVisible).to.equal(true);
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('in edit mode hides remove icons ', async function () {
-          await PageObjects.dashboard.clickEdit();
+          await PageObjects.dashboard.switchToEditMode();
           await dashboardPanelActions.openContextMenu();
           const editLinkExists = await dashboardPanelActions.editPanelActionExists();
           const removeExists = await dashboardPanelActions.removePanelActionExists();

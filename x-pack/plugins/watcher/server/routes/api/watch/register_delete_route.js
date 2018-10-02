@@ -32,7 +32,7 @@ export function registerDeleteRoute(server) {
         .then(() => reply().code(204))
         .catch(err => {
 
-        // Case: Error from Elasticsearch JS client
+          // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
             const statusCodeToMessageMap = {
               404: `Watch with id = ${watchId} not found`

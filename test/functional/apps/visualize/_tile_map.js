@@ -33,7 +33,6 @@ export default function ({ getService, getPageObjects }) {
 
 
       before(async function () {
-        // Make sure the window is height enough to show the spy panel without hiding the map
         remote.setWindowSize(1280, 1000);
 
         const fromTime = '2015-09-19 06:31:44.000';
@@ -64,7 +63,6 @@ export default function ({ getService, getPageObjects }) {
 
     describe('complete config', function describeIndexTests() {
       before(async function () {
-        // Make sure the window is height enough to show the spy panel without hiding the map
         remote.setWindowSize(1280, 1000);
 
         const fromTime = '2015-09-19 06:31:44.000';
@@ -183,7 +181,7 @@ export default function ({ getService, getPageObjects }) {
           const mapBounds = await PageObjects.visualize.getMapBounds();
           await PageObjects.visualize.closeInspector();
 
-          await PageObjects.visualize.saveVisualization(vizName1);
+          await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
 
           const afterSaveMapBounds = await PageObjects.visualize.getMapBounds();
 
