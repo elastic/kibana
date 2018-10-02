@@ -19,3 +19,5 @@ include::development/security/index.asciidoc[]
 
 include::development/pr-review.asciidoc[]
 
+include::development/architecture/index.asciidoc[]
+

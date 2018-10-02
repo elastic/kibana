@@ -1,0 +1,45 @@
+[[development-architecture]]
+=== Kibana architectural overview
+
+Kibana is in a state of great transition!  
+As it has been for many years, as we strive to build a dynamic,
+ fleixble, and pluggable system for users to search, explore, manage, analyze their data.
+
+As such, we've been delayed in getting some decent high level architectural overviews
+ of the current system and where we want to take it.  But here we are, taking a first stab at it! 
+  I'm sure this document will evolve greatly over time.
+
+[float]
+==== Where we are
+
+We're in a bit of a mixed world at the moment. 
+We've made great strides tackling some of our tech debt with the start of what we've been calling,
+*the new platform*. The new platform code mostly resides under `src/core` and will be discussed later. This section I'll focus on the legacy architecture.
+
+[float]
+==== Life in the legacy lane
+
+At a very high level, this is a view of the legacy world, focusing on some key parts of our folder structure.
+
+image::images/architecture/current-folder-view.png
+
+All of the code inside `src/ui/public` is accessible by plugins on the client side. This is *not* how it will work in the new platform world.  The problem's we face with this now are:
+ - No API contracts
+ - We can, and do, make backward compatibility changes all the time in this code base
+ - No organized structure, and difficult to follow.  This folder has been called our "kitchen sink".
+
+ Our goal is to eventually disseminate this folder into new platform core services and plugins.
+
+ Another goal is to separate the main "kibana" plugin. We haven't done that yet because bundling up the plugins like this is the reason our users don't go through an optimization step when clicking between the Discover, Dashboard, Visualize, etc apps. Other plugin applications (for instance, if you click on Timelion), will cause an optimization step.  We are trying to remove this step. 
+
+ A note about the `x-pack` folder. This is a special plugin and contains our commercial code. Once Kibana is built the x-pack code resides in the `node_modules` folder. This is different from external plugins which end up in the `plugins` folder. It also has some other quirks, like there is some shared code all of our commercial products reference.
+
+[float]
+ ==== Plugin communication
+
+ Plugins communicate with eachother through `uiExports` on the client side, and via a `server` object on the server side. They can both gather information other plugins have exposed via these modules, as well as expose their own information. 
+
+image::images/architecture/plugin-communication.png[]
+
+
+
