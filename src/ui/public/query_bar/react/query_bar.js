@@ -367,6 +367,7 @@ export class QueryBar extends Component {
                   <QueryLanguageSwitcher
                     language={this.state.query.language}
                     onSelectLanguage={(language) => {
+                      this.props.store.set('kibana.userQueryLanguage', language);
                       this.props.onSubmit({
                         query: '',
                         language: language,
@@ -401,4 +402,5 @@ QueryBar.propTypes = {
   disableAutoFocus: PropTypes.bool,
   appName: PropTypes.string,
   indexPatterns: PropTypes.array,
+  store: PropTypes.object,
 };

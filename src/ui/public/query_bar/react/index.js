@@ -26,5 +26,15 @@ import { uiModules } from '../../modules';
 
 const app = uiModules.get('app/kibana', ['react']);
 
-app.directive('reactQueryBar', reactDirective => reactDirective(QueryBar));
+app.directive('reactQueryBar', (reactDirective, localStorage) => {
+  return reactDirective(
+    QueryBar,
+    undefined,
+    {},
+    {
+      store: localStorage,
+    }
+  );
+});
+
 app.directive('queryPopover', reactDirective => reactDirective(QueryLanguageSwitcher));

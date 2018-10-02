@@ -56,8 +56,6 @@ export class QueryLanguageSwitcher extends Component {
 
   onSwitchChange = () => {
     const newLanguage = this.props.language === 'lucene' ? 'kuery' : 'lucene';
-    // TODO implement this
-    //localStorage.set('kibana.userQueryLanguage', newLanguage);
     this.props.onSelectLanguage(newLanguage);
   };
 
