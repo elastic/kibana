@@ -38,9 +38,6 @@ export function HomeApp({
   addBasePath,
   directories,
   recentlyAccessed,
-  getConfig,
-  setConfig,
-  clearIndexPatternsCache,
 }) {
 
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
@@ -53,9 +50,6 @@ export function HomeApp({
         addBasePath={addBasePath}
         openTab={props.match.params.tab}
         isCloudEnabled={isCloudEnabled}
-        getConfig={getConfig}
-        setConfig={setConfig}
-        clearIndexPatternsCache={clearIndexPatternsCache}
       />
     );
   };
@@ -124,7 +118,4 @@ HomeApp.propTypes = {
     category: PropTypes.string.isRequired
   })),
   recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
-  getConfig: PropTypes.func.isRequired,
-  setConfig: PropTypes.func.isRequired,
-  clearIndexPatternsCache: PropTypes.func.isRequired,
 };
