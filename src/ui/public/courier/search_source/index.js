@@ -18,9 +18,3 @@
  */
 
 export { SearchSourceProvider } from './search_source';
-export {
-  migrateFilter,
-  decorateQuery,
-  buildQueryFromFilters,
-  luceneStringToDsl
-} from '../../../../utils/es_query';

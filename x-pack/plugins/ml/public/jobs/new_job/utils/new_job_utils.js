@@ -7,7 +7,7 @@
 
 
 import _ from 'lodash';
-import { migrateFilter } from 'ui/courier';
+import { migrateFilter } from '../../../../../../../src/utils/es_query';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlJobService } from 'plugins/ml/services/job_service';
 

@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from 'ui/kuery';
+import {
+  fromKueryExpression,
+  toElasticsearchQuery
+} from '../../../../../src/utils/kuery';
 import { getAutocompleteProvider } from 'ui/autocomplete_providers';
 
 export function convertKueryToEsQuery(kuery, indexPattern) {
