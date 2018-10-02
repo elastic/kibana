@@ -46,7 +46,7 @@ const defaultEditor = function ($rootScope, $compile, i18n) {
       if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
         this.vis.type.editorConfig.optionTabs = [
           { name: 'options',
-            title: i18n('common.ui.vis.editors.default.tabs.optionsLabel', { defaultMessage: 'Options' }),
+            title: i18n('common.ui.vis.editors.sidebar.tabs.optionsLabel', { defaultMessage: 'Options' }),
             editor: this.vis.type.editorConfig.optionsTemplate }
         ];
       }

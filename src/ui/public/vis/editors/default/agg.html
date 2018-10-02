@@ -34,7 +34,7 @@
     <button
       ng-if="agg.enabled && canRemove(agg)"
       ng-click="agg.enabled = false"
-      aria-label="Disable aggregation"
+      aria-label="{{'common.ui.vis.editors.agg.disableAggAriaLabel' | i18n: { defaultMessage: 'Disable aggregation' } }}"
       tooltip="{{'common.ui.vis.editors.agg.disableAggTooltip' | i18n: { defaultMessage: 'Disable aggregation' } }}"
       tooltip-append-to-body="true"
       data-test-subj="disableAggregationBtn"
@@ -47,7 +47,7 @@
     <button
       ng-if="!agg.enabled"
       ng-click="agg.enabled = true"
-      aria-label="Enable aggregation"
+      aria-label="{{'common.ui.vis.editors.agg.anableAggAriaLabel' | i18n: { defaultMessage: 'Enable aggregation' } }}"
       tooltip="{{'common.ui.vis.editors.agg.anableAggTooltip' | i18n: { defaultMessage: 'Enable aggregation' } }}"
       tooltip-append-to-body="true"
       data-test-subj="disableAggregationBtn"
@@ -67,7 +67,7 @@
       class="kuiButton kuiButton--basic kuiButton--small">
       <i aria-hidden="true" class="fa fa-arrows-v"></i>
       <span class="kuiScreenReaderOnly"
-        i18n-id="common.ui.vis.editors.default.modifyPriorityScreenReaderDescription"
+        i18n-id="common.ui.vis.editors.modifyPriorityScreenReaderDescription"
         i18n-default-message="Use up and down key on this button to move this aggregation up and down in the priority order."
       >
       </span>
