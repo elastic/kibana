@@ -77,6 +77,13 @@ export class QueryBar extends Component {
     isSuggestionsVisible: false,
     index: null,
     suggestions: [],
+    suggestionLimit: 50,
+  };
+
+  increaseLimit = () => {
+    this.setState({
+      suggestionLimit: this.state.suggestionLimit + 50,
+    });
   };
 
   incrementIndex = (currentIndex) => {
@@ -185,6 +192,7 @@ export class QueryBar extends Component {
       inputIsPristine: false,
       isSuggestionsVisible: hasValue,
       index: null,
+      suggestionLimit: 50,
     });
   };
 
@@ -381,10 +389,11 @@ export class QueryBar extends Component {
 
           <Suggestions
             show={this.state.isSuggestionsVisible}
-            suggestions={this.state.suggestions}
+            suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
             index={this.state.index}
             onClick={this.onClickSuggestion}
             onMouseEnter={this.onMouseEnterSuggestion}
+            loadMore={this.increaseLimit}
           />
         </div>
       </EuiOutsideClickDetector>

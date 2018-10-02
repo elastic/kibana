@@ -44,6 +44,20 @@ export class Suggestions extends Component {
     parent.scrollTop = scrollTop;
   };
 
+  handleScroll = () => {
+    if (!this.props.loadMore) return;
+
+    const position = this.parentNode.scrollTop + this.parentNode.offsetHeight;
+    const height = this.parentNode.scrollHeight;
+    const remaining = height - position;
+    const margin = 50;
+
+    if (!height || !position) return;
+    if (remaining <= margin) {
+      this.props.loadMore();
+    }
+  };
+
   componentDidUpdate(prevProps) {
     if (prevProps.index !== this.props.index) {
       this.scrollIntoView();
@@ -78,6 +92,7 @@ export class Suggestions extends Component {
               className="typeahead-items"
               role="listbox"
               ref={node => (this.parentNode = node)}
+              onScroll={this.handleScroll}
             >
               {suggestions}
             </div>
@@ -93,5 +108,6 @@ Suggestions.propTypes = {
   onClick: PropTypes.func.isRequired,
   onMouseEnter: PropTypes.func.isRequired,
   show: PropTypes.bool,
-  suggestions: PropTypes.array.isRequired
+  suggestions: PropTypes.array.isRequired,
+  loadMore: PropTypes.func,
 };
