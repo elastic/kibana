@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import { metadata } from 'ui/metadata';
-import {
-  I18nProvider,
-  i18nFilter,
-  i18nDirective,
-} from '@kbn/i18n/angular';
+declare module 'intl-format-cache' {
+  import IntlMessageFormat from 'intl-messageformat';
 
-uiModules.get('i18n')
-  .provider('i18n', I18nProvider)
-  .filter('i18n', i18nFilter)
-  .directive('i18nId', i18nDirective)
-  .config((i18nProvider) => {
-    i18nProvider.init(metadata.translations);
-  });
+  interface Message {
+    format: (values: { [key: string]: string | number | Date }) => string;
+  }
+
+  function memoizeIntlConstructor(
+    IntlMessageFormatCtor: typeof IntlMessageFormat
+  ): (msg: string, locale: string, formats: any) => Message;
+
+  export = memoizeIntlConstructor;
+}
