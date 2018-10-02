@@ -17,5 +17,21 @@
  * under the License.
  */
 
-import './global_nav_state';
-import './breadcrumb_state';
+import { NavControl } from '../chrome/directives/header_global_nav';
+import { IndexedArray } from '../indexed_array';
+import { uiRegistry, UIRegistry } from './_registry';
+
+interface BySideDictionary {
+  // this key should be from NavControlSide
+  [side: string]: IndexedArray<NavControl>;
+}
+
+export interface ChromeHeaderNavControlsRegistry extends UIRegistry<NavControl> {
+  bySide: BySideDictionary;
+}
+
+export const chromeHeaderNavControlsRegistry: ChromeHeaderNavControlsRegistry = uiRegistry({
+  name: 'chromeHeaderNavControls',
+  order: ['order'],
+  group: ['side'],
+}) as ChromeHeaderNavControlsRegistry;

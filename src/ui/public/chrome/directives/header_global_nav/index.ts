@@ -17,5 +17,29 @@
  * under the License.
  */
 
-import './global_nav_state';
-import './breadcrumb_state';
+import { IconType } from '@elastic/eui';
+import './header_global_nav';
+
+export enum NavControlSide {
+  Left = 'left',
+  Right = 'right',
+}
+
+export interface NavControl {
+  name: string;
+  order: number;
+  side: NavControlSide;
+  render: (targetDomElement: HTMLDivElement) => (() => void) | void;
+}
+
+export interface NavLink {
+  title: string;
+  url: string;
+  id: string;
+  euiIconType: IconType;
+}
+
+export interface Breadcrumb {
+  text: string;
+  href?: string;
+}
