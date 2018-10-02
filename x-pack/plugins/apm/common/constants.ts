@@ -7,6 +7,8 @@
 export const SERVICE_NAME = 'context.service.name';
 export const SERVICE_AGENT_NAME = 'context.service.agent.name';
 export const SERVICE_LANGUAGE_NAME = 'context.service.language.name';
+export const REQUEST_URL_FULL = 'context.request.url.full';
+export const USER_ID = 'context.user.id';
 
 export const PROCESSOR_NAME = 'processor.name';
 export const PROCESSOR_EVENT = 'processor.event';
@@ -33,7 +35,3 @@ export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_MESSAGE = 'error.log.message';
 export const ERROR_EXC_MESSAGE = 'error.exception.message';
 export const ERROR_EXC_HANDLED = 'error.exception.handled';
-
-export const REQUEST_URL_FULL = 'context.request.url.full';
-
-export const USER_ID = 'context.user.id';

@@ -430,6 +430,10 @@
   resolved "https://registry.yarnpkg.com/@types/delay/-/delay-2.0.1.tgz#61bcf318a74b61e79d1658fbf054f984c90ef901"
   integrity sha512-D1/YuYOcdOIdaQnaiUJ77VcilVvESkynw79CtGqpjkXyv4OUezEVZtdXnSOwXL8Zcelu66QbyC8QQcVQ/ZPdig==
 
+"@types/elasticsearch@^5.0.26":
+  version "5.0.26"
+  resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.26.tgz#f05d27974b0f14f48295904fa228c830f20de0ea"
+
 "@types/enzyme@^3.1.12":
   version "3.1.12"
   resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.1.12.tgz#293bb07c1ef5932d37add3879e72e0f5bc614f3c"

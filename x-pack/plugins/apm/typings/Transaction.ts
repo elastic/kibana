@@ -16,6 +16,15 @@ export interface Transaction extends APMDoc {
       pid: number;
     };
     service: ContextService;
+    request: {
+      url: {
+        full: string;
+      };
+    };
+    user?: {
+      id: string;
+    };
+    [key: string]: any;
   };
   transaction: {
     duration: {
@@ -26,9 +35,8 @@ export interface Transaction extends APMDoc {
     result?: string;
     sampled: boolean;
 
-    // span_count.started not available in v1
     span_count?: {
-      started?: number;
+      started?: number; // span_count.started not available in v1
       dropped?: {
         total?: number;
       };
