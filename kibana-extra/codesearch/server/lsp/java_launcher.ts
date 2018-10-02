@@ -56,6 +56,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     }
 
     if (!this.detach) {
+      process.env.CLIENT_PORT = port.toString();
       const spawnJava = () => {
         return spawn(
           'java',
@@ -76,12 +77,12 @@ export class JavaLauncher implements ILanguageServerLauncher {
           {
             detached: false,
             stdio: 'inherit',
-            env: { CLIENT_PORT: port.toString() },
+            env: process.env,
           }
         );
       };
       let child = spawnJava();
-      log.info(`Launch Java Language Server at port ${port}, pid:${child.pid}`);
+      log.info(`Launch Java Language Server at port ${process.env.CLIENT_PORT}, pid:${child.pid}, JAVA_HOME:${process.env.JAVA_HOME}`);
       proxy.onDisconnected(() => {
         if (!proxy.isClosed) {
           child.kill();
