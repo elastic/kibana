@@ -38,33 +38,33 @@ export class DomPreview extends React.Component {
   }
 
   update = original => () => {
-    if (this.content && this.container) {
-      const thumb = original.cloneNode(true);
+    if (this.content && this.container) return;
 
-      const originalStyle = window.getComputedStyle(original, null);
-      const originalWidth = parseInt(originalStyle.getPropertyValue('width'), 10);
-      const originalHeight = parseInt(originalStyle.getPropertyValue('height'), 10);
+    const thumb = original.cloneNode(true);
 
-      const thumbHeight = this.props.height;
-      const scale = thumbHeight / originalHeight;
-      const thumbWidth = originalWidth * scale;
+    const originalStyle = window.getComputedStyle(original, null);
+    const originalWidth = parseInt(originalStyle.getPropertyValue('width'), 10);
+    const originalHeight = parseInt(originalStyle.getPropertyValue('height'), 10);
 
-      if (this.content.hasChildNodes()) this.content.removeChild(this.content.firstChild);
-      this.content.appendChild(thumb);
+    const thumbHeight = this.props.height;
+    const scale = thumbHeight / originalHeight;
+    const thumbWidth = originalWidth * scale;
 
-      this.content.style.cssText = `transform: scale(${scale}); transform-origin: top left;`;
-      this.container.style.cssText = `width: ${thumbWidth}px; height: ${thumbHeight}px;`;
+    if (this.content.hasChildNodes()) this.content.removeChild(this.content.firstChild);
+    this.content.appendChild(thumb);
 
-      // Copy canvas data
-      const originalCanvas = original.querySelectorAll('canvas');
-      const thumbCanvas = thumb.querySelectorAll('canvas');
+    this.content.style.cssText = `transform: scale(${scale}); transform-origin: top left;`;
+    this.container.style.cssText = `width: ${thumbWidth}px; height: ${thumbHeight}px;`;
 
-      // Cloned canvas elements are blank and need to be explicitly redrawn
-      if (originalCanvas.length > 0) {
-        Array.from(originalCanvas).map((img, i) =>
-          thumbCanvas[i].getContext('2d').drawImage(img, 0, 0)
-        );
-      }
+    // Copy canvas data
+    const originalCanvas = original.querySelectorAll('canvas');
+    const thumbCanvas = thumb.querySelectorAll('canvas');
+
+    // Cloned canvas elements are blank and need to be explicitly redrawn
+    if (originalCanvas.length > 0) {
+      Array.from(originalCanvas).map((img, i) =>
+        thumbCanvas[i].getContext('2d').drawImage(img, 0, 0)
+      );
     }
   };
 
