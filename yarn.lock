@@ -4287,7 +4287,7 @@ elasticsearch-browser@^15.1.1:
   version "15.1.1"
   resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-15.1.1.tgz#aff065eff546a585c7e61da896b808fe5812de3d"
 
-elasticsearch@^14.1.0, elasticsearch@^14.2.0:
+elasticsearch@^14.2.0:
   version "14.2.1"
   resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-14.2.1.tgz#d10cb0b9562ca6614d178c30a112b93f6e8570d1"
   dependencies:
