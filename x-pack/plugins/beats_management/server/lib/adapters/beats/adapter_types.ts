@@ -11,7 +11,7 @@ export interface CMBeatsAdapter {
   insert(user: FrameworkUser, beat: CMBeat): Promise<void>;
   update(user: FrameworkUser, beat: CMBeat): Promise<void>;
   get(user: FrameworkUser, id: string): Promise<CMBeat | null>;
-  getAll(user: FrameworkUser): Promise<CMBeat[]>;
+  getAll(user: FrameworkUser, ESQuery?: any): Promise<CMBeat[]>;
   getWithIds(user: FrameworkUser, beatIds: string[]): Promise<CMBeat[]>;
   getAllWithTags(user: FrameworkUser, tagIds: string[]): Promise<CMBeat[]>;
   getBeatWithToken(user: FrameworkUser, enrollmentToken: string): Promise<CMBeat | null>;

@@ -19,13 +19,29 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     this.database = database;
   }
 
-  public async getAll(user: FrameworkUser) {
+  public async getAll(user: FrameworkUser, ESQuery?: any) {
     const params = {
       _source: true,
       index: INDEX_NAMES.BEATS,
-      q: 'type:tag',
       type: '_doc',
+      body: {
+        query: {
+          bool: {
+            must: {
+              term: {
+                type: 'tag',
+              },
+            },
+          },
+        },
+      },
     };
+    if (ESQuery) {
+      params.body.query = {
+        ...params.body.query,
+        ...ESQuery,
+      };
+    }
     const response = await this.database.search(user, params);
     const tags = get<any>(response, 'hits.hits', []);
 

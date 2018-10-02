@@ -16,12 +16,21 @@ import { ControlBar } from './controls';
 import { TableType } from './table_type_configs';
 
 interface TableProps {
-  assignmentOptions: any[] | null;
-  assignmentTitle: string | null;
+  assignmentOptions?: any[] | null;
+  assignmentTitle?: string | null;
   items: any[];
   renderAssignmentOptions?: (item: any, key: string) => any;
   showAssignmentOptions: boolean;
   type: TableType;
+
+  isLoadingSuggestions: boolean;
+  loadSuggestions: any;
+  onKueryBarSubmit: any;
+  isKueryValid: any;
+  kueryValue: any;
+  onKueryBarChange: any;
+  suggestions: any;
+  filterQueryDraft: any;
   actionHandler(action: string, payload?: any): void;
 }
 
@@ -61,6 +70,14 @@ export class Table extends React.Component<TableProps, TableState> {
       items,
       showAssignmentOptions,
       type,
+      isLoadingSuggestions,
+      loadSuggestions,
+      onKueryBarSubmit,
+      isKueryValid,
+      kueryValue,
+      onKueryBarChange,
+      suggestions,
+      filterQueryDraft,
     } = this.props;
 
     const pagination = {
@@ -78,10 +95,18 @@ export class Table extends React.Component<TableProps, TableState> {
     return (
       <TableContainer>
         <ControlBar
+          isLoadingSuggestions={isLoadingSuggestions}
+          kueryValue={kueryValue}
+          isKueryValid={isKueryValid}
+          loadSuggestions={loadSuggestions}
+          onKueryBarChange={onKueryBarChange}
+          onKueryBarSubmit={onKueryBarSubmit}
+          suggestions={suggestions}
+          filterQueryDraft={filterQueryDraft}
           actionHandler={actionHandler}
-          assignmentOptions={assignmentOptions}
+          assignmentOptions={assignmentOptions || null}
           renderAssignmentOptions={renderAssignmentOptions}
-          assignmentTitle={assignmentTitle}
+          assignmentTitle={assignmentTitle || null}
           controlDefinitions={type.controlDefinitions(items)}
           selectionCount={this.state.selection.length}
           showAssignmentOptions={showAssignmentOptions}

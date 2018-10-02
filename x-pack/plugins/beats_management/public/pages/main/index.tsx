@@ -12,15 +12,17 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
+import { AppURLState } from '../../app';
 import { PrimaryLayout } from '../../components/layouts/primary';
+import { URLStateProps, withUrlState } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 import { ActivityPage } from './activity';
 import { BeatsPage } from './beats';
 import { TagsPage } from './tags';
 
-interface MainPagesProps {
-  history: any;
+interface MainPagesProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
+  location: any;
 }
 
 interface MainPagesState {
@@ -29,13 +31,12 @@ interface MainPagesState {
   } | null;
 }
 
-export class MainPages extends React.PureComponent<MainPagesProps, MainPagesState> {
-  constructor(props: any) {
+class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesState> {
+  constructor(props: MainPagesProps) {
     super(props);
   }
-
   public onSelectedTabChanged = (id: string) => {
-    this.props.history.push(id);
+    this.props.goTo(id);
   };
 
   public render() {
@@ -45,11 +46,11 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
         name: 'Beats List',
         disabled: false,
       },
-      {
-        id: '/overview/activity',
-        name: 'Beats Activity',
-        disabled: false,
-      },
+      // {
+      //   id: '/overview/activity',
+      //   name: 'Beats Activity',
+      //   disabled: false,
+      // },
       {
         id: '/overview/tags',
         name: 'Tags',
@@ -60,13 +61,14 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
     const renderedTabs = tabs.map((tab, index) => (
       <EuiTab
         onClick={() => this.onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === this.props.history.location.pathname}
+        isSelected={tab.id === this.props.location.pathname}
         disabled={tab.disabled}
         key={index}
       >
         {tab.name}
       </EuiTab>
     ));
+
     return (
       <PrimaryLayout
         title="Beats"
@@ -74,11 +76,15 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
           <Switch>
             <Route
               path="/overview/beats/:action?/:enrollmentToken?"
-              render={(props: any) => <BeatsPage.ActionArea libs={this.props.libs} {...props} />}
+              render={(props: any) => (
+                <BeatsPage.ActionArea {...this.props} {...props} libs={this.props.libs} />
+              )}
             />
             <Route
               path="/overview/tags"
-              render={(props: any) => <TagsPage.ActionArea libs={this.props.libs} {...props} />}
+              render={(props: any) => (
+                <TagsPage.ActionArea {...this.props} {...props} libs={this.props.libs} />
+              )}
             />
           </Switch>
         }
@@ -88,20 +94,24 @@ export class MainPages extends React.PureComponent<MainPagesProps, MainPagesStat
         <Switch>
           <Route
             path="/overview/beats/:action?/:enrollmentToken?"
-            render={(props: any) => <BeatsPage libs={this.props.libs} {...props} />}
+            render={(props: any) => <BeatsPage {...this.props} libs={this.props.libs} {...props} />}
           />
           <Route
             path="/overview/activity"
             exact={true}
-            render={(props: any) => <ActivityPage libs={this.props.libs} {...props} />}
+            render={(props: any) => (
+              <ActivityPage {...this.props} libs={this.props.libs} {...props} />
+            )}
           />
           <Route
             path="/overview/tags"
             exact={true}
-            render={(props: any) => <TagsPage libs={this.props.libs} {...props} />}
+            render={(props: any) => <TagsPage {...this.props} libs={this.props.libs} {...props} />}
           />
         </Switch>
       </PrimaryLayout>
     );
   }
 }
+
+export const MainPages = withUrlState<MainPagesProps>(MainPagesComponent);

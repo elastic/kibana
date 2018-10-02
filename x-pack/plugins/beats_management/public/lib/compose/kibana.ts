@@ -19,18 +19,22 @@ import { Notifier } from 'ui/notify';
 // @ts-ignore: path dynamic for kibana
 import routes from 'ui/routes';
 
+import { INDEX_NAMES } from '../../../common/constants/index_names';
 import { supportedConfigs } from '../../config_schemas';
 import { RestBeatsAdapter } from '../adapters/beats/rest_beats_adapter';
+import { RestElasticsearchAdapter } from '../adapters/elasticsearch/rest';
 import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { AxiosRestAPIAdapter } from '../adapters/rest_api/axios_rest_api_adapter';
 import { RestTagsAdapter } from '../adapters/tags/rest_tags_adapter';
 import { RestTokensAdapter } from '../adapters/tokens/rest_tokens_adapter';
-import { BeatsLib } from '../domains/beats';
-import { TagsLib } from '../domains/tags';
+import { BeatsLib } from '../beats';
+import { ElasticsearchLib } from '../elasticsearch';
 import { FrontendDomainLibs, FrontendLibs } from '../lib';
+import { TagsLib } from '../tags';
 
 export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
+  const esAdapter = new RestElasticsearchAdapter(api, INDEX_NAMES.BEATS);
 
   const tags = new TagsLib(new RestTagsAdapter(api), supportedConfigs);
   const tokens = new RestTokensAdapter(api);
@@ -56,6 +60,7 @@ export function compose(): FrontendLibs {
 
   const libs: FrontendLibs = {
     framework,
+    elasticsearch: new ElasticsearchLib(esAdapter),
     ...domainLibs,
   };
   return libs;

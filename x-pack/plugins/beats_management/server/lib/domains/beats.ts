@@ -40,8 +40,10 @@ export class CMBeatsDomain {
     return beat && beat.active ? beat : null;
   }
 
-  public async getAll(user: FrameworkUser) {
-    return (await this.adapter.getAll(user)).filter((beat: CMBeat) => beat.active === true);
+  public async getAll(user: FrameworkUser, ESQuery?: any) {
+    return (await this.adapter.getAll(user, ESQuery)).filter(
+      (beat: CMBeat) => beat.active === true
+    );
   }
 
   public async getAllWithTag(user: FrameworkUser, tagId: string) {

@@ -14,7 +14,9 @@ import {
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { CMPopulatedBeat } from '../../../common/domain_types';
+import { AppURLState } from '../../app';
 import { PrimaryLayout } from '../../components/layouts/primary';
+import { URLStateProps, withUrlState } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 import { BeatDetailsActionSection } from './action_section';
 import { BeatActivityPage } from './activity';
@@ -25,7 +27,8 @@ interface Match {
   params: any;
 }
 
-interface BeatDetailsPageProps {
+interface BeatDetailsPageProps extends URLStateProps<AppURLState> {
+  location: any;
   history: any;
   libs: FrontendLibs;
   match: Match;
@@ -37,7 +40,7 @@ interface BeatDetailsPageState {
   isLoading: boolean;
 }
 
-export class BeatDetailsPage extends React.PureComponent<
+class BeatDetailsPageComponent extends React.PureComponent<
   BeatDetailsPageProps,
   BeatDetailsPageState
 > {
@@ -53,7 +56,10 @@ export class BeatDetailsPage extends React.PureComponent<
   }
 
   public onSelectedTabChanged = (id: string) => {
-    this.props.history.push(id);
+    this.props.history.push({
+      pathname: id,
+      search: this.props.location.search,
+    });
   };
 
   public render() {
@@ -72,11 +78,11 @@ export class BeatDetailsPage extends React.PureComponent<
         name: 'Config',
         disabled: false,
       },
-      {
-        id: `/beat/${id}/activity`,
-        name: 'Beat Activity',
-        disabled: false,
-      },
+      // {
+      //   id: `/beat/${id}/activity`,
+      //   name: 'Beat Activity',
+      //   disabled: false,
+      // },
       {
         id: `/beat/${id}/tags`,
         name: 'Tags',
@@ -93,7 +99,10 @@ export class BeatDetailsPage extends React.PureComponent<
               key={index}
               isSelected={tab.id === this.props.history.location.pathname}
               onClick={() => {
-                this.props.history.push(tab.id);
+                this.props.history.push({
+                  pathname: tab.id,
+                  search: this.props.location.search,
+                });
               }}
             >
               {tab.name}
@@ -142,3 +151,4 @@ export class BeatDetailsPage extends React.PureComponent<
     this.setState({ beat, isLoading: false });
   }
 }
+export const BeatDetailsPage = withUrlState<BeatDetailsPageProps>(BeatDetailsPageComponent);

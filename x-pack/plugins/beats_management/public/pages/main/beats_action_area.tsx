@@ -17,11 +17,16 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { CMBeat } from '../../../common/domain_types';
+import { AppURLState } from '../../app';
+import { URLStateProps } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
-
-export class BeatsActionArea extends React.Component<any, any> {
+interface BeatsProps extends URLStateProps<AppURLState> {
+  match: any
+  libs: FrontendLibs;
+}
+export class BeatsActionArea extends React.Component<BeatsProps, any> {
   private pinging = false
-  constructor(props: any) {
+  constructor(props: BeatsProps) {
     super(props)
 
     this.state = {
@@ -55,108 +60,111 @@ export class BeatsActionArea extends React.Component<any, any> {
     this.pinging = false
   }
   public render() {
+
     const {
       match,
-      history,
+      goTo,
       libs,
-    } = this.props
+    } = this.props;
   return (
-  <div>
-    <EuiButtonEmpty
-      onClick={() => {
-        window.alert('This will later go to more general beats install instructions.');
-        window.location.href = '#/home/tutorial/dockerMetrics';
-      }}
-    >
-      Learn how to install beats
-    </EuiButtonEmpty>
-    <EuiButton
-      size="s"
-      color="primary"
-      onClick={async () => {
-        const token = await libs.tokens.createEnrollmentToken();
-        history.push(`/overview/beats/enroll/${token}`);
-        this.waitForToken(token);
-      }}
-    >
-      Enroll Beats
-    </EuiButton>
+    <div>
+      <EuiButtonEmpty
+        onClick={() => {
+          // random, but spacific number ensures new tab does not overwrite another _newtab in chrome
+          // and at the same time not truly random so that many clicks of the link open many tabs at this same URL
+          window.open('https://www.elastic.co/guide/en/beats/libbeat/current/getting-started.html','_newtab35628937456');
+        }}
+      >
+        Learn how to install beats
+      </EuiButtonEmpty>
+      <EuiButton
+        size="s"
+        color="primary"
+        onClick={async () => {
+          const token = await libs.tokens.createEnrollmentToken();
+          this.props.goTo(`/overview/beats/enroll/${token}`);
+          this.waitForToken(token);
+        }}
+      >
+        Enroll Beats
+      </EuiButton>
 
-    {match.params.enrollmentToken != null && (
-      <EuiOverlayMask>
-        <EuiModal onClose={() => { 
-          this.pinging = false; 
-          this.setState({
-            enrolledBeat: null
-          }, () => history.push('/overview/beats'))
-        }} style={{ width: '640px' }}>
-          <EuiModalHeader>
-          <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
-          </EuiModalHeader>
-          {!this.state.enrolledBeat && (
-            <EuiModalBody style={{ textAlign: 'center' }}>
-              To enroll a Beat with Centeral Management, run this command on the host that has Beats
-              installed.
-              <br />
-              <br />
-              <br />
-              <div className="euiFormControlLayout euiFormControlLayout--fullWidth">
-                <div className="euiFieldText euiFieldText--fullWidth" style={{ textAlign: 'left' }}>
-                  $ beats enroll {window.location.protocol}//{window.location.host} {match.params.enrollmentToken}
+      {match.params.enrollmentToken != null && (
+        <EuiOverlayMask>
+          <EuiModal onClose={() => { 
+            this.pinging = false; 
+            this.setState({
+              enrolledBeat: null
+            }, () => goTo(`/overview/beats`))
+          }} style={{ width: '640px' }}>
+            <EuiModalHeader>
+            <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
+            </EuiModalHeader>
+            {!this.state.enrolledBeat && (
+              <EuiModalBody style={{ textAlign: 'center' }}>
+                To enroll a Beat with Centeral Management, run this command on the host that has Beats
+                installed.
+                <br />
+                <br />
+                <br />
+                <div className="euiFormControlLayout euiFormControlLayout--fullWidth">
+                  <div className="euiFieldText euiFieldText--fullWidth" style={{ textAlign: 'left' }}>
+                    $ beats enroll {window.location.protocol}//{window.location.host} {match.params.enrollmentToken}
+                  </div>
                 </div>
-              </div>
-              <br />
-              <br />
-              <EuiLoadingSpinner size="l" />
-              <br />
-              <br />
-              Waiting for enroll command to be run...
+                <br />
+                <br />
+                <EuiLoadingSpinner size="l" />
+                <br />
+                <br />
+                Waiting for enroll command to be run...
 
-            </EuiModalBody>
-          )}
-          {this.state.enrolledBeat && (
-            <EuiModalBody style={{ textAlign: 'center' }}>
-              A Beat was enrolled with the following data:
-              <br />
-              <br />
-              <br />
-              <EuiBasicTable
-                items={[this.state.enrolledBeat]}
-                columns={[{
-                  field: 'type',
-                  name: 'Beat Type',
-                  sortable: false,
-                }, {
-                  field: 'version',
-                  name: 'Version',
-                  sortable: false,
-                },{
-                  field: 'host_name',
-                  name: 'Hostname',
-                  sortable: false,
-                }]}
-              />
-              <br />
-              <br />
-              <EuiButton
-                size="s"
-                color="primary"
-                onClick={async () => {
-                  this.setState({
-                    enrolledBeat: null
-                  })
-                  const token = await libs.tokens.createEnrollmentToken();
-                  history.push(`/overview/beats/enroll/${token}`);
-                  this.waitForToken(token);
-                }}
-              >
-               Enroll Another Beat
-              </EuiButton>
-            </EuiModalBody>
-          )}
+              </EuiModalBody>
+            )}
+            {this.state.enrolledBeat && (
+              <EuiModalBody style={{ textAlign: 'center' }}>
+                A Beat was enrolled with the following data:
+                <br />
+                <br />
+                <br />
+                <EuiBasicTable
+                  items={[this.state.enrolledBeat]}
+                  columns={[{
+                    field: 'type',
+                    name: 'Beat Type',
+                    sortable: false,
+                  }, {
+                    field: 'version',
+                    name: 'Version',
+                    sortable: false,
+                  },{
+                    field: 'host_name',
+                    name: 'Hostname',
+                    sortable: false,
+                  }]}
+                />
+                <br />
+                <br />
+                <EuiButton
+                  size="s"
+                  color="primary"
+                  onClick={async () => {
+                    this.setState({
+                      enrolledBeat: null
+                    })
+                    const token = await libs.tokens.createEnrollmentToken();
+                    goTo(`/overview/beats/enroll/${token}`)
+                    this.waitForToken(token);
+                  }}
+                >
+                Enroll Another Beat
+                </EuiButton>
+              </EuiModalBody>
+            )}
 
-        </EuiModal>
-      </EuiOverlayMask>
-    )}
-  </div>
-)}}
+          </EuiModal>
+        </EuiOverlayMask>
+      )}
+    </div>
+  )}
+}

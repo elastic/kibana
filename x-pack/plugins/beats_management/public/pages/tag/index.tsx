@@ -10,13 +10,14 @@ import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
+import { AppURLState } from '../../app';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { TagEdit } from '../../components/tag';
+import { URLStateProps, withUrlState } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 
-interface TagPageProps {
+interface TagPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
-  history: any;
   match: any;
 }
 
@@ -26,7 +27,7 @@ interface TagPageState {
   tag: BeatTag;
 }
 
-export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
+export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageState> {
   private mode: 'edit' | 'create' = 'create';
   constructor(props: TagPageProps) {
     super(props);
@@ -78,7 +79,7 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => this.props.history.push('/overview/tags')}>
+              <EuiButtonEmpty onClick={() => this.props.goTo('/overview/tags')}>
                 Cancel
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -106,6 +107,7 @@ export class TagPage extends React.PureComponent<TagPageProps, TagPageState> {
   };
   private saveTag = async () => {
     await this.props.libs.tags.upsertTag(this.state.tag as BeatTag);
-    this.props.history.push('/overview/tags');
+    this.props.goTo(`/overview/tags`);
   };
 }
+export const TagPage = withUrlState<TagPageProps>(TagPageComponent);

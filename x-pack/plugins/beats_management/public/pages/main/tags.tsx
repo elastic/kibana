@@ -16,10 +16,13 @@ import {
 import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
+import { AppURLState } from '../../app';
 import { Table, TagsTableType } from '../../components/table';
+import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
+import { URLStateProps } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 
-interface TagsPageProps {
+interface TagsPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
 }
 
@@ -29,12 +32,12 @@ interface TagsPageState {
 }
 
 export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> {
-  public static ActionArea = ({ history }: any) => (
+  public static ActionArea = ({ goTo }: TagsPageProps) => (
     <EuiButton
       size="s"
       color="primary"
       onClick={async () => {
-        history.push(`/tag/create`);
+        goTo('/tag/create');
       }}
     >
       Add Tag
@@ -55,16 +58,24 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
 
   public render() {
     return (
-      <Table
-        actionHandler={this.handleTagsAction}
-        assignmentOptions={this.state.beats}
-        assignmentTitle={'Assign Beats'}
-        items={this.state.tags}
-        renderAssignmentOptions={item => item}
-        ref={this.tableRef}
-        showAssignmentOptions={true}
-        type={TagsTableType}
-      />
+      <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="tag">
+        {autocompleteProps => (
+          <Table
+            {...autocompleteProps}
+            isKueryValid={this.props.libs.elasticsearch.isKueryValid(this.props.urlState.tagsKBar)} // todo check if query converts to es query correctly
+            kueryValue={this.props.urlState.tagsKBar}
+            onKueryBarChange={(value: any) => this.props.setUrlState({ tagsKBar: value })} // todo
+            onKueryBarSubmit={() => null} // todo
+            filterQueryDraft={'false'} // todo
+            actionHandler={this.handleTagsAction}
+            items={this.state.tags || []}
+            renderAssignmentOptions={item => item}
+            ref={this.tableRef}
+            showAssignmentOptions={true}
+            type={TagsTableType}
+          />
+        )}
+      </WithKueryAutocompletion>
     );
   }
 

@@ -5,9 +5,9 @@
  */
 import yaml from 'js-yaml';
 import { omit, pick } from 'lodash';
-import { BeatTag, ConfigurationBlock } from '../../../common/domain_types';
-import { CMTagsAdapter } from '../adapters/tags/adapter_types';
-import { ConfigContent } from './../../../common/domain_types';
+import { BeatTag, ConfigurationBlock } from '../../common/domain_types';
+import { ConfigContent } from '../../common/domain_types';
+import { CMTagsAdapter } from './adapters/tags/adapter_types';
 
 export class TagsLib {
   constructor(private readonly adapter: CMTagsAdapter, private readonly tagConfigs: any) {}
@@ -38,7 +38,7 @@ export class TagsLib {
       // NOTE: The perk of this, is that as we support more features via controls
       // vs yaml editing, it should "just work", and things that were in YAML
       // will now be in the UI forms...
-      transformedTag.configuration_blocks = tag.configuration_blocks.map(block => {
+      transformedTag.configuration_blocks = (tag.configuration_blocks || []).map(block => {
         const { type, description, configs } = block;
         const activeConfig = configs[0];
         const thisConfig = this.tagConfigs.find((conf: any) => conf.value === type).config;
@@ -72,7 +72,7 @@ export class TagsLib {
       // configurations is the JS representation of the config yaml,
       // so here we take that JS and convert it into a YAML string.
       // we do so while also flattening "other" into the flat yaml beats expect
-      transformedTag.configuration_blocks = tag.configuration_blocks.map(block => {
+      transformedTag.configuration_blocks = (tag.configuration_blocks || []).map(block => {
         const { type, description, configs } = block;
         const activeConfig = configs[0];
         const thisConfig = this.tagConfigs.find((conf: any) => conf.value === type).config;

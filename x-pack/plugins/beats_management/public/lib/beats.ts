@@ -5,14 +5,14 @@
  */
 
 import { flatten } from 'lodash';
-import { CMBeat, CMPopulatedBeat } from '../../../common/domain_types';
+import { CMBeat, CMPopulatedBeat } from './../../common/domain_types';
 import {
   BeatsRemovalReturn,
   BeatsTagAssignment,
   CMAssignmentReturn,
   CMBeatsAdapter,
-} from '../adapters/beats/adapter_types';
-import { FrontendDomainLibs } from '../lib';
+} from './adapters/beats/adapter_types';
+import { FrontendDomainLibs } from './lib';
 
 export class BeatsLib {
   constructor(
@@ -35,8 +35,8 @@ export class BeatsLib {
     return await this.mergeInTags(beats);
   }
 
-  public async getAll(): Promise<CMPopulatedBeat[]> {
-    const beats = await this.adapter.getAll();
+  public async getAll(ESQuery?: any): Promise<CMPopulatedBeat[]> {
+    const beats = await this.adapter.getAll(ESQuery);
     return await this.mergeInTags(beats);
   }
 

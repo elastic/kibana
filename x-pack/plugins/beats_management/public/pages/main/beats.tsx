@@ -10,12 +10,15 @@ import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
+import { AppURLState } from '../../app';
 import { BeatsTableType, Table } from '../../components/table';
 import { TagAssignment } from '../../components/tag';
+import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
+import { URLStateProps } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 import { BeatsActionArea } from './beats_action_area';
 
-interface BeatsPageProps {
+interface BeatsPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
   location: any;
 }
@@ -44,6 +47,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     this.mounted = true;
     this.loadBeats();
   }
+
   public componentWillUnmount() {
     this.mounted = false;
   }
@@ -55,16 +59,29 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
   public render() {
     return (
       <div>
-        <Table
-          actionHandler={this.handleBeatsActions}
-          assignmentOptions={this.state.tags}
-          assignmentTitle="Set tags"
-          items={sortBy(this.state.beats, 'id') || []}
-          ref={this.state.tableRef}
-          showAssignmentOptions={true}
-          renderAssignmentOptions={this.renderTagAssignment}
-          type={BeatsTableType}
-        />
+        <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="beat">
+          {autocompleteProps => (
+            <Table
+              {...autocompleteProps}
+              isKueryValid={this.props.libs.elasticsearch.isKueryValid(
+                this.props.urlState.beatsKBar
+              )} // todo check if query converts to es query correctly
+              kueryValue={this.props.urlState.beatsKBar}
+              onKueryBarChange={(value: any) => this.props.setUrlState({ beatsKBar: value })} // todo
+              onKueryBarSubmit={() => null} // todo
+              filterQueryDraft={'false'} // todo
+              actionHandler={this.handleBeatsActions}
+              assignmentOptions={this.state.tags}
+              assignmentTitle="Set tags"
+              items={sortBy(this.state.beats, 'id') || []}
+              ref={this.state.tableRef}
+              showAssignmentOptions={true}
+              renderAssignmentOptions={this.renderTagAssignment}
+              type={BeatsTableType}
+            />
+          )}
+        </WithKueryAutocompletion>
+
         <EuiGlobalToastList
           toasts={this.state.notifications}
           dismissToast={() => this.setState({ notifications: [] })}
@@ -116,7 +133,14 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
   };
 
   private async loadBeats() {
-    const beats = await this.props.libs.beats.getAll();
+    let query;
+    if (this.props.urlState.beatsKBar) {
+      query = await this.props.libs.elasticsearch.convertKueryToEsQuery(
+        this.props.urlState.beatsKBar
+      );
+    }
+
+    const beats = await this.props.libs.beats.getAll(query);
     if (this.mounted) {
       this.setState({
         beats,
