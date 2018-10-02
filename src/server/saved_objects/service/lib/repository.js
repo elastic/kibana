@@ -49,6 +49,7 @@ export class SavedObjectsRepository {
     this._migrator = migrator;
     this._index = index;
     this._mappings = mappings;
+    this._schema = schema;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
