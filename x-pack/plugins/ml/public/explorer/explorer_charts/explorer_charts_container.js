@@ -68,7 +68,7 @@ export function ExplorerChartsContainer({
                     iconSide="right"
                     iconType="popout"
                     size="xs"
-                    onClick={() => getExploreSeriesLink(series)}
+                    onClick={() => window.open(getExploreSeriesLink(series), '_blank')}
                   >
                     View
                   </EuiButtonEmpty>
