@@ -11,29 +11,29 @@ import { i18n } from '@kbn/i18n';
 export function compatibilityShimFactory(server) {
   const getAbsoluteUrl = getAbsoluteUrlFactory(server);
 
-  const getSavedObjectAbsoluteUrl = (savedObj) => {
-    if (savedObj.urlHash) {
-      return getAbsoluteUrl({ hash: savedObj.urlHash });
+  const getSavedObjectAbsoluteUrl = (job, savedObject) => {
+    if (savedObject.urlHash) {
+      return getAbsoluteUrl({ hash: savedObject.urlHash });
     }
 
-    if (savedObj.relativeUrl) {
-      const { pathname: path, hash, search } = url.parse(savedObj.relativeUrl);
-      return getAbsoluteUrl({ path, hash, search });
+    if (savedObject.relativeUrl) {
+      const { pathname: path, hash, search } = url.parse(savedObject.relativeUrl);
+      return getAbsoluteUrl({ basePath: job.basePath, path, hash, search });
     }
 
-    if (savedObj.url.startsWith(getAbsoluteUrl())) {
-      return savedObj.url;
+    if (savedObject.url.startsWith(getAbsoluteUrl())) {
+      return savedObject.url;
     }
 
     throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.unableToGenerateErrorMessage', {
       defaultMessage: 'Unable to generate report for url {savedObjUrl}, it\'s not a Kibana URL',
-      values: { savedObjUrl: savedObj.url }
+      values: { savedObjUrl: savedObject.url }
     }));
   };
 
   return function (executeJob) {
     return async function (job, cancellationToken) {
-      const urls = job.objects.map(getSavedObjectAbsoluteUrl);
+      const urls = job.objects.map(savedObject => getSavedObjectAbsoluteUrl(job, savedObject));
 
       return await executeJob({ ...job, urls }, cancellationToken);
     };

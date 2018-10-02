@@ -51,6 +51,7 @@ exports[`AdvancedSettings should render normally 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
+  <advanced_settings_page_subtitle />
   <EuiSpacer
     size="m"
   />
@@ -396,6 +397,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
       />
     </EuiFlexItem>
   </EuiFlexGroup>
+  <advanced_settings_page_subtitle />
   <EuiSpacer
     size="m"
   />
