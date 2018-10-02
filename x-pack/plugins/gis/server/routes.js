@@ -8,7 +8,6 @@
 import { EMS_V2 } from '../common/ems_v2';
 import { GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
-import *  as elasticsearch from 'elasticsearch';
 import _ from 'lodash';
 import ZIPCODES from './junk/usa_zip_codes_v2';
 // import WORLD_COUNTRIES from './junk/world_countries';
@@ -19,7 +18,6 @@ export function initRoutes(server) {
 
   const serverConfig = server.config();
   const mapConfig = serverConfig.get('map');
-  const elasticsearchHost = serverConfig.get('elasticsearch.url');
 
   const emsV2 = new EMS_V2({
     kbnVersion: serverConfig.get('pkg.version'),
@@ -33,116 +31,6 @@ export function initRoutes(server) {
     path: `${ROOT}/junk`,
     handler: async (request, reply) => {
       reply(ZIPCODES);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/data/geohash_grid`,
-    handler: async (request, reply) => {
-
-      /**
-       * todo: this is a placeholder information to get doc-counts for geohash_grid aggs.
-       * The "real" implementation needs to handle any kind of metric.
-       * e.g.: http://localhost:5601/wth/api/gis/data/geohash_grid?index_pattern=log*&geo_point_field=geo.coordinates
-       */
-      const indexPatternTitle = request.query.index_pattern;
-      const geoPointField = request.query.geo_point_field;
-      const gteTime = request.query.from;
-      const lteTime = request.query.to;
-      let precision = parseInt(request.query.precision);
-      if (isNaN(precision)) {
-        precision = 1;
-      }
-
-      const indexPatterns = await getIndexPatterns(request);
-      const indexPattern = indexPatterns.find(ip => ip.title === indexPatternTitle);
-      const timeField = indexPattern.timeFieldName;
-
-      const maxLat = clamp(request.query.maxlat, -90, 90, 90);
-      const minLat = clamp(request.query.minlat, -90, 90, -90);
-      const maxLon = clamp(request.query.maxlon, -180, 180, 180);
-      const minLon = clamp(request.query.minlon, -180, 180, -180);
-
-      const boundingBox = {};
-      boundingBox[geoPointField] = {
-        "top_left": {
-          "lat": maxLat,
-          "lon": minLon
-        },
-        "bottom_right": {
-          "lat": minLat,
-          "lon": maxLon
-        }
-      };
-
-
-      try {
-        const esClient = new elasticsearch.Client({
-          host: elasticsearchHost,
-          log: 'info'
-        });
-
-        const query = {
-          index: indexPatternTitle,
-          body: {
-            "size": 0,
-            "_source": {
-              "excludes": []
-            },
-            "aggs": {
-              "bbox": {
-                "filter": {
-                  "geo_bounding_box": boundingBox
-                },
-                "aggs": {
-                  "grid": {
-                    "geohash_grid": {
-                      "field": geoPointField,
-                      "precision": precision
-                    },
-                    "aggs": {
-                      "centroid": {
-                        "geo_centroid": {
-                          "field": geoPointField
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "query": {
-              "bool": {
-                "must": [
-                  {
-                    "range": {
-                      [timeField]: {
-                        "gte": gteTime,
-                        "lte": lteTime
-                      }
-                    }
-                  }
-                ]
-              }
-            }
-          }
-        };
-        const resp = await esClient.search(query);
-
-        const featureCollection = convertEsResponseToGeoJsonFeatureCollection(resp, (aggregations) => {
-          return aggregations.bbox.grid.buckets;
-        }, (bucket) => {
-          return bucket.centroid.location;
-        });
-
-        reply(featureCollection);
-
-      } catch (e) {
-        console.error(e);
-        reply({ type: 'FeatureCollection', features: [] });
-      }
-
     }
   });
 
@@ -241,39 +129,6 @@ export function initRoutes(server) {
     const fileLayers = await emsV2.getFileLayers();
     const tmsServices = await emsV2.getTMSServices();
     return { fileLayers, tmsServices };
-  }
-
-  function convertEsResponseToGeoJsonFeatureCollection(esResponse, getBuckets, getCentroidForBucket) {
-
-    const buckets = getBuckets(esResponse.aggregations);
-
-    return {
-      'type': 'FeatureCollection',
-      features: buckets.map((bucket) => {
-        const latlon = getCentroidForBucket(bucket);
-        return {
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [latlon.lon, latlon.lat]
-          },
-          properties: {
-            doc_count: bucket.doc_count,
-            key: bucket.key
-          }
-        };
-
-      })
-    };
-  }
-
-  function clamp(numb, min, max, defaultValue) {
-    const n = parseFloat(numb);
-    if (!isNaN(n)) {
-      return Math.min(max, Math.max(min, n));
-    } else {
-      return defaultValue;
-    }
   }
 }
 

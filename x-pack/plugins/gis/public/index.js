@@ -13,6 +13,7 @@ import './vendor/jquery_ui_sortable.css';
 import 'uiExports/fieldFormats';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
+import 'ui/agg_types';
 
 import chrome from 'ui/chrome';
 import React from 'react';
