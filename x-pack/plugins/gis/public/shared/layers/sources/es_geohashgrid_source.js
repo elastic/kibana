@@ -4,16 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
 
 import {
+  EuiFormRow,
   EuiButton,
-  EuiSelect
 } from '@elastic/eui';
+import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
+import { SingleFieldSelect } from './single_field_select';
 
 import { ASource } from './source';
 import { GeohashGridLayer } from '../geohashgrid_layer';
-import { GIS_API_PATH } from '../../../../common/constants';
+import { Schemas } from 'ui/vis/editors/default/schemas';
+import {
+  indexPatternService,
+  inspectorAdapters,
+  SearchSource,
+  timeService,
+} from '../../../kibana_services';
+import { createExtentFilter } from '../../../elasticsearch_geo_utils';
+import { AggConfigs } from 'ui/vis/agg_configs';
+import { tabifyAggResponse } from 'ui/agg_response/tabify';
+import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
+import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+
+const aggSchemas = new Schemas([
+  {
+    group: 'metrics',
+    name: 'metric',
+    title: 'Value',
+    min: 1,
+    max: 1,  // TODO add support for multiple metric aggregations - convertToGeoJson will need to be tweeked
+    aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
+    defaults: [
+      { schema: 'metric', type: 'count' }
+    ]
+  },
+  {
+    group: 'buckets',
+    name: 'segment',
+    title: 'Geo Coordinates',
+    aggFilter: 'geohash_grid',
+    min: 1,
+    max: 1
+  }
+]);
 
 export class ESGeohashGridSource extends ASource {
 
@@ -21,26 +58,22 @@ export class ESGeohashGridSource extends ASource {
 
   static typeDisplayName = 'Elasticsearch geoHash grid';
 
-  static createDescriptor({ esIndexPattern, pointField }) {
+  static createDescriptor({ indexPatternId, geoField }) {
     return {
       type: ESGeohashGridSource.type,
-      esIndexPattern: esIndexPattern,
-      pointField: pointField
+      indexPatternId: indexPatternId,
+      geoField: geoField,
     };
   }
 
-  static renderEditor({ onPreviewSource, dataSourcesMeta }) {
-    const indexPatterns = dataSourcesMeta.elasticsearch.indexPatterns.filter(indexPattern => indexPattern.isGeohashable);
-    const onSelect = (selection) => {
-      const sourceDescriptor = ESGeohashGridSource.createDescriptor({
-        esIndexPattern: selection.esIndexPattern,
-        pointField: selection.pointField
-      });
+  static renderEditor({ onPreviewSource }) {
+    const onSelect = (layerConfig) => {
+      const sourceDescriptor = ESGeohashGridSource.createDescriptor(layerConfig);
       const source = new ESGeohashGridSource(sourceDescriptor);
       onPreviewSource(source);
     };
 
-    return (<GeohashableIndexPatternEditor indexPatterns={indexPatterns} onSelect={onSelect}/>);
+    return (<Editor onSelect={onSelect}/>);
   }
 
   renderDetails() {
@@ -59,25 +92,81 @@ export class ESGeohashGridSource extends ASource {
     );
   }
 
-  async getGeoJsonPointsWithTotalCount(precision, extent, timeFilters) {
-    try {
-      let url = `../${GIS_API_PATH}/data/geohash_grid`;
-      url += `?index_pattern=${encodeURIComponent(this._descriptor.esIndexPattern)}`;
-      url += `&geo_point_field=${encodeURIComponent(this._descriptor.pointField)}`;
-      url += `&precision=${precision}`;
-      url += `&minlon=${extent.min_lon}`;
-      url += `&maxlon=${extent.max_lon}`;
-      url += `&minlat=${extent.min_lat}`;
-      url += `&maxlat=${extent.max_lat}`;
-      url += `&from=${timeFilters.from}`;
-      url += `&to=${timeFilters.to}`;
+  async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerId, layerName }) {
+    inspectorAdapters.requests.resetRequest(layerId);
 
-      const data = await fetch(url);
-      return data.json();
-    } catch (e) {
-      console.error('Cant load data', e);
-      return { type: 'FeatureCollection', features: [] };
+    let indexPattern;
+    try {
+      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
+    } catch (error) {
+      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
     }
+
+    const geoField = indexPattern.fields.byName[this._descriptor.geoField];
+    if (!geoField) {
+      throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
+    }
+
+    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(precision), aggSchemas.all);
+
+    let inspectorRequest;
+    let resp;
+    try {
+      const searchSource = new SearchSource();
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('size', 0);
+      searchSource.setField('aggs', aggConfigs.toDsl());
+      searchSource.setField('filter', () => {
+        const filters = [];
+        filters.push(createExtentFilter(extent, geoField.name, geoField.type));
+        filters.push(timeService.createFilter(indexPattern, timeFilters));
+        return filters;
+      });
+
+      inspectorRequest = inspectorAdapters.requests.start(layerId, layerName);
+      inspectorRequest.stats(getRequestInspectorStats(searchSource));
+      searchSource.getSearchRequestBody().then(body => {
+        inspectorRequest.json(body);
+      });
+      resp = await searchSource.fetch();
+      inspectorRequest
+        .stats(getResponseInspectorStats(searchSource, resp))
+        .ok({ json: resp });
+    } catch(error) {
+      inspectorRequest.error({ error });
+      throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
+    }
+
+    const tabifiedResp = tabifyAggResponse(aggConfigs, resp);
+    const { featureCollection } = convertToGeoJson(tabifiedResp);
+
+    return featureCollection;
+  }
+
+  _makeAggConfigs(precision) {
+    return [
+      // TODO allow user to configure metric(s) aggregations
+      {
+        id: '1',
+        enabled: true,
+        type: 'count',
+        schema: 'metric',
+        params: {}
+      },
+      {
+        id: '2',
+        enabled: true,
+        type: 'geohash_grid',
+        schema: 'segment',
+        params: {
+          field: this._descriptor.geoField,
+          isFilteredByCollar: false, // map extent filter is in query so no need to filter in aggregation
+          useGeocentroid: true, // TODO make configurable
+          autoPrecision: false, // false so we can define our own precision levels based on styling
+          precision: precision,
+        }
+      }
+    ];
   }
 
   _createDefaultLayerDescriptor(options) {
@@ -95,112 +184,146 @@ export class ESGeohashGridSource extends ASource {
   }
 
   getDisplayName() {
-    return this._descriptor.esIndexPattern + ' grid';
+    return `geohash_grid ${this._descriptor.indexPatternId}`;
   }
-
-
 }
 
-class GeohashableIndexPatternEditor extends React.Component {
+class Editor extends React.Component {
+
+  static propTypes = {
+    onSelect: PropTypes.func.isRequired,
+  }
 
   constructor() {
     super();
     this.state = {
-      selectedIndexPattern: null,
-      selectedPointField: null
+      isLoadingIndexPattern: false,
+      indexPatternId: '',
+      geoField: '',
     };
-    this._pointFieldSelect = null;
   }
 
-  _getSelectedIndexPattern() {
-    return this.props.indexPatterns.find(indexPattern => indexPattern.id === this.state.selectedIndexPattern);
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
-  _getPointFields() {
-    const indexPattern = this._getSelectedIndexPattern();
-    return indexPattern.fields.filter(field => field.type === 'geo_point');
+  componentDidMount() {
+    this._isMounted = true;
+    this.loadIndexPattern(this.state.indexPatternId);
   }
 
-  render() {
+  onIndexPatternSelect = (indexPatternId) => {
+    this.setState({
+      indexPatternId,
+    }, this.loadIndexPattern(indexPatternId));
+  };
 
-    const indexPatterns = this.props.indexPatterns.map((indexPattern) => {
-      return {
-        value: indexPattern.id,
-        text: indexPattern.title
-      };
-    });
-    let pointOptions;
-    if (this.state.selectedIndexPattern) {
-      const pointFields = this._getPointFields();
-      pointOptions = pointFields.map(field => {
-        return {
-          text: field.name,
-          value: field.name
-        };
-      });
-    } else {
-      pointOptions = [];
+  loadIndexPattern = (indexPatternId) => {
+    this.setState({
+      isLoadingIndexPattern: true,
+      indexPattern: undefined,
+      geoField: undefined,
+    }, this.debouncedLoad.bind(null, indexPatternId));
+  }
+
+  debouncedLoad = _.debounce(async (indexPatternId) => {
+    if (!indexPatternId || indexPatternId.length === 0) {
+      return;
     }
 
-    const onIndexPatternChange = (e) => {
-      this.setState({
-        selectedIndexPattern: e.target.value,
-        selectedPointField: null
-      });
-    };
-    const onPointFieldChange = (e) => {
-      this.setState({
-        selectedPointField: e.target.value
-      });
-    };
+    let indexPattern;
+    try {
+      indexPattern = await indexPatternService.get(indexPatternId);
+    } catch (err) {
+      // index pattern no longer exists
+      return;
+    }
 
+    if (!this._isMounted) {
+      return;
+    }
 
-    let geoFieldSelect;
-    if (this.state.selectedIndexPattern) {
-      geoFieldSelect = (
-        <EuiSelect
-          options={pointOptions}
-          aria-label="Select geo_point field"
-          onChange={onPointFieldChange}
-        />
-      );
+    // props.indexPatternId may be updated before getIndexPattern returns
+    // ignore response when fetched index pattern does not match active index pattern
+    if (indexPattern.id !== indexPatternId) {
+      return;
+    }
+
+    this.setState({
+      isLoadingIndexPattern: false,
+      indexPattern: indexPattern
+    });
+  }, 300);
+
+  onGeoFieldSelect = (geoField) => {
+    this.setState({
+      geoField
+    }, this.previewLayer);
+  };
+
+  filterGeoField = (field) => {
+    return ['geo_point'].includes(field.type);
+  }
+
+  previewLayer = () => {
+    const {
+      indexPatternId,
+      geoField,
+    } = this.state;
+    if (indexPatternId && geoField) {
+      this.props.onSelect({
+        indexPatternId,
+        geoField,
+      });
+    }
+  }
+
+  _renderGeoSelect() {
+    if (!this.state.indexPattern) {
+      return;
     }
 
     return (
-      <Fragment>
-        <EuiSelect
-          hasNoInitialSelection
-          options={indexPatterns}
-          onChange={onIndexPatternChange}
-          aria-label="Select index-pattern"
+      <EuiFormRow
+        label="Geospatial field"
+        compressed
+      >
+        <SingleFieldSelect
+          placeholder="Select geo field"
+          value={this.state.geoField}
+          onChange={this.onGeoFieldSelect}
+          filterField={this.filterGeoField}
+          fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
         />
-        {geoFieldSelect}
-        <EuiButton
-          size="s"
-          onClick={() => {
-            if (!this.state.selectedIndexPattern) {
-              return;
-            }
-            const indexPattern = this._getSelectedIndexPattern();
-            let pointField;
-            if (this.state.selectedPointField) {
-              pointField = this.state.selectedPointField;
-            } else {
-              const pointFields = this._getPointFields();
-              pointField = pointFields[0].name;
-            }
-            this.props.onSelect({
-              esIndexPattern: indexPattern.title,
-              pointField: pointField
-            });
-          }}
-          isDisabled={!this.state.selectedIndexPattern}
-        >
-          Preview geohash layer
-        </EuiButton>
-      </Fragment>
+      </EuiFormRow>
     );
   }
 
+  render() {
+    return (
+      <Fragment>
 
+        <EuiFormRow
+          label="Index pattern"
+          compressed
+        >
+          <IndexPatternSelect
+            indexPatternId={this.state.indexPatternId}
+            onChange={this.onIndexPatternSelect}
+            placeholder="Select index pattern"
+          />
+        </EuiFormRow>
+
+        {this._renderGeoSelect()}
+
+        <EuiButton
+          size="s"
+          onClick={this.previewLayer}
+        >
+          Preview geohash layer
+        </EuiButton>
+
+      </Fragment>
+    );
+  }
 }

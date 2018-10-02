@@ -95,13 +95,14 @@ export class GeohashGridLayer extends ALayer {
     }
 
     const scaledPropertyName = '__kbn_heatmap_weight__';
+    const propertyName = 'value';
     if (this._descriptor.data !== mbSourceAfter._data) {
       let max = 0;
       for (let i = 0; i < this._descriptor.data.features.length; i++) {
-        max = Math.max(this._descriptor.data.features[i].properties.doc_count, max);
+        max = Math.max(this._descriptor.data.features[i].properties[propertyName], max);
       }
       for (let i = 0; i < this._descriptor.data.features.length; i++) {
-        this._descriptor.data.features[i].properties[scaledPropertyName] = this._descriptor.data.features[i].properties.doc_count / max;
+        this._descriptor.data.features[i].properties[scaledPropertyName] = this._descriptor.data.features[i].properties[propertyName] / max;
       }
       mbSourceAfter.setData(this._descriptor.data);
     }
@@ -181,8 +182,13 @@ export class GeohashGridLayer extends ALayer {
     const { precision, timeFilters, extent } = dataMeta;
     startLoading(dataMeta);
     try {
-      const data = await this._source.getGeoJsonPointsWithTotalCount(
-        precision, extent, timeFilters);
+      const data = await this._source.getGeoJsonPointsWithTotalCount({
+        precision,
+        extent,
+        timeFilters,
+        layerId: this.getId(),
+        layerName: this.getDisplayName(),
+      });
       stopLoading(data);
     } catch(error) {
       onLoadError(error.message);

@@ -7,6 +7,7 @@
 import { resolve } from 'path';
 import { initRoutes } from './server/routes';
 import { kySaltTrucksSpecProvider } from './server/sample_data/ky_salt_trucks';
+import { mappings } from './mappings.json';
 
 export function gis(kibana) {
 
@@ -23,7 +24,7 @@ export function gis(kibana) {
         icon: 'plugins/gis/icon.svg'
       },
       home: ['plugins/gis/register_feature'],
-      mappings: require('./mappings.json'),
+      mappings
     },
     config(Joi) {
       return Joi.object({

@@ -290,18 +290,15 @@ export function setJoinsForLayer(layer, joins) {
   };
 }
 
-
-
-export async function loadMapResources(dispatch) {
-
+export async function loadMetaResources(dispatch) {
   const meta = await fetch(`${GIS_API_RELATIVE}/meta`);
   const metaJson = await meta.json();
   await dispatch(setMeta(metaJson));
+}
 
-
+export async function loadMapResources(dispatch) {
   await dispatch(replaceLayerList(
     [
-
       {
         dataDirty: false,
         id: "0hmz5",

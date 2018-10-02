@@ -8,6 +8,7 @@ import React from 'react';
 import {
   uiModules
 } from 'ui/modules';
+import './shared/services/gis_workspace_provider';
 import chrome from 'ui/chrome';
 import { applyTheme } from 'ui/theme';
 import 'ui/autoload/all';
@@ -21,6 +22,7 @@ import { Inspector } from 'ui/inspector';
 import { inspectorAdapters } from './kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { saveMapSettings } from './shared/services/save_map_state';
 import { showOptionsPopover } from './components/top_nav/show_options_popover';
 
 // hack to wait for angular template to be ready
@@ -36,18 +38,15 @@ const waitForAngularReady = new Promise(resolve => {
 
 export function initGisApp(resolve) {
   // default the timepicker to the last 24 hours
-  chrome.getUiSettingsClient().overrideLocalDefault(
-    'timepicker:timeDefaults',
-    JSON.stringify({
-      from: 'now-24h',
-      to: 'now',
-      mode: 'quick'
-    })
-  );
+  timefilter.setTime({
+    from: 'now-24h',
+    to: 'now',
+    mode: 'quick'
+  });
 
   uiModules
     .get('app/gis', [])
-    .controller('TimePickerController', ($scope) => {
+    .controller('TimePickerController', ($scope, gisWorkspace) => {
 
       let isDarkTheme;
       let unsubscribe;
@@ -85,22 +84,17 @@ export function initGisApp(resolve) {
         }
       }, {
         key: 'save',
-        description: 'Save',
-        testId: 'saveButton',
+        description: 'Save Visualization',
+        testId: 'visualizeSaveButton',
         run: async () => {
-          const onSave = () => {
-            return new Promise(resolve => {
-              resolve({ id: 'id' });
-            });
-          };
-
+          const onSave = await saveMapSettings(gisWorkspace);
           const saveModal = (
             <SavedObjectSaveModal
               onSave={onSave}
               onClose={() => {}}
               title={'Save map settings'}
               showCopyOnSave={false}
-              objectType="visualization"
+              objectType={gisWorkspace.getType()}
             />);
           showSaveModal(saveModal);
         }
