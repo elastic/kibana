@@ -21,6 +21,7 @@ export function graph(kibana) {
         title: 'Graph',
         order: 9000,
         icon: 'plugins/graph/icon.png',
+        euiIconType: 'graphApp',
         description: 'Graph exploration',
         main: 'plugins/graph/app',
       },

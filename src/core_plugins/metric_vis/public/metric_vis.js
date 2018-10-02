@@ -32,16 +32,16 @@ import { MetricVisComponent } from './metric_vis_controller';
 // register the provider with the visTypes registry
 VisTypesRegistryProvider.register(MetricVisProvider);
 
-function MetricVisProvider(Private) {
+function MetricVisProvider(Private, i18n) {
   const VisFactory = Private(VisFactoryProvider);
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
   return VisFactory.createReactVisualization({
     name: 'metric',
-    title: 'Metric',
+    title: i18n('metricVis.metricTitle', { defaultMessage: 'Metric' }),
     icon: 'visMetric',
-    description: 'Display a calculation as a single number',
+    description: i18n('metricVis.metricDescription', { defaultMessage: 'Display a calculation as a single number' }),
     category: CATEGORY.DATA,
     visConfig: {
       component: MetricVisComponent,
@@ -73,7 +73,20 @@ function MetricVisProvider(Private) {
     },
     editorConfig: {
       collections: {
-        metricColorMode: ['None', 'Labels', 'Background'],
+        metricColorMode: [
+          {
+            id: 'None',
+            label: i18n('metricVis.colorModes.noneOptionLabel', { defaultMessage: 'None' })
+          },
+          {
+            id: 'Labels',
+            label: i18n('metricVis.colorModes.labelsOptionLabel', { defaultMessage: 'Labels' })
+          },
+          {
+            id: 'Background',
+            label: i18n('metricVis.colorModes.backgroundOptionLabel', { defaultMessage: 'Background' })
+          }
+        ],
         colorSchemas: Object.keys(vislibColorMaps),
       },
       optionsTemplate: '<metric-vis-params></metric-vis-params>',
@@ -81,7 +94,7 @@ function MetricVisProvider(Private) {
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Metric',
+          title: i18n('metricVis.schemas.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
           aggFilter: [
             '!std_dev', '!geo_centroid',
@@ -92,7 +105,7 @@ function MetricVisProvider(Private) {
         }, {
           group: 'buckets',
           name: 'group',
-          title: 'Split Group',
+          title: i18n('metricVis.schemas.splitGroupTitle', { defaultMessage: 'Split Group' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!filter']
