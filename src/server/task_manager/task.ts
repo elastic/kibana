@@ -50,10 +50,9 @@ export interface RunContext {
  */
 export interface RunResult {
   /**
-   * Specifies the next run date / time for this task. If unspecified, the system
-   * will reschedule the task based on the interval defined by the tasks' definition.
-   * If there is no runAt and there is no interval in the task's definition, this
-   * is treated as a single-run task, and will not be rescheduled after completion.
+   * Specifies the next run date / time for this task. If unspecified, this is
+   * treated as a single-run task, and will not be rescheduled after
+   * completion.
    */
   runAt?: Date;
 
@@ -159,13 +158,21 @@ export type TaskStatus = 'idle' | 'running';
  */
 export interface TaskInstance {
   /**
+   * Optional ID that can be passed by the caller. When ID is undefined, ES
+   * will auto-generate a unique id. Otherwise, ID will be used to either
+   * create a new document, or update existing document
+   */
+  id?: string;
+
+  /**
    * The task definition type whose run function will execute this instance.
    */
   taskType: string;
 
   /**
-   * The date and time that this task is scheduled to be run. It is not guaranteed
-   * to run at this time, but it is guaranteed not to run earlier than this.
+   * The date and time that this task is scheduled to be run. It is not
+   * guaranteed to run at this time, but it is guaranteed not to run earlier
+   * than this. Defaults to immediately.
    */
   runAt?: Date;
 
@@ -204,7 +211,8 @@ export interface TaskInstance {
  */
 export interface ConcreteTaskInstance extends TaskInstance {
   /**
-   * The id of the Elastic document that stores this instance's data.
+   * The id of the Elastic document that stores this instance's data. This can
+   * be passed by the caller when scheduling the task.
    */
   id: string;
 

@@ -162,15 +162,16 @@ export class TaskStore {
       throw new Error(`Unsupported task type "${taskInstance.taskType}".`);
     }
 
-    const body = rawSource(taskInstance);
-    const { task } = body;
+    const { id, ...body } = rawSource(taskInstance);
     const result = await this.callCluster('index', {
+      id,
       body,
       index: this.index,
       type: DOC_TYPE,
       refresh: true,
     });
 
+    const { task } = body;
     return {
       ...taskInstance,
       id: result._id,
@@ -319,8 +320,9 @@ function paginatableSort(sort: any[] = []) {
 }
 
 function rawSource(doc: ConcreteTaskInstance | TaskInstance) {
+  const { id, ...taskFields } = doc;
   const source = {
-    ...doc,
+    ...taskFields,
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
@@ -333,16 +335,19 @@ function rawSource(doc: ConcreteTaskInstance | TaskInstance) {
   delete (source as any).type;
 
   return {
+    id,
     type: 'task',
     task: source,
   };
 }
 
 function taskDocToRaw(doc: ConcreteTaskInstance, index: string): RawTaskDoc {
+  const { type, task } = rawSource(doc);
+
   return {
     _id: doc.id,
     _index: index,
-    _source: rawSource(doc),
+    _source: { type, task },
     _type: DOC_TYPE,
     _version: doc.version,
   };
