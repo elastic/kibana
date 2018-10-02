@@ -4,24 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { pick } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import { Registry } from '../../common/lib/registry';
 import { FunctionForm } from './function_form';
 
-export class View extends FunctionForm {
+class ViewUI extends FunctionForm {
   constructor(props) {
     super(props);
 
     const propNames = ['help', 'modelArgs', 'requiresContext'];
     const defaultProps = {
-      help: (
-        <FormattedMessage
-          id="xpack.canvas.expression.types.viewElementDescription"
-          defaultMessage="Element: {elementName}"
-          values={{ elementName: props.name }}
-        />
+      help: this.props.intl.formatMessage(
+        {
+          id: 'xpack.canvas.expressionTypes.view.elementHelpText',
+          defaultMessage: 'Element: {elementName}',
+        },
+        {
+          elementName: props.name,
+        }
       ),
       requiresContext: true,
     };
@@ -32,17 +33,21 @@ export class View extends FunctionForm {
 
     if (!Array.isArray(this.modelArgs)) {
       throw new Error(
-        (
-          <FormattedMessage
-            id="xpack.canvas.expression.types.viewElementMessageError"
-            defaultMessage="{elementName} element is invalid, modelArgs must be an array"
-            values={{ elementName: this.name }}
-          />
+        this.props.intl.formatMessage(
+          {
+            id: 'xpack.canvas.expressionTypes.view.elementIsInvalidMessageError',
+            defaultMessage: '{elementName} element is invalid, modelArgs must be an array',
+          },
+          {
+            elementName: this.name,
+          }
         )
       );
     }
   }
 }
+
+export const View = injectI18n(ViewUI);
 
 class ViewRegistry extends Registry {
   wrapper(obj) {

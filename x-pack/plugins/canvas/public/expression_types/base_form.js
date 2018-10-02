@@ -3,19 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 
-export class BaseForm {
+class BaseFormUI {
   constructor(props) {
     if (!props.name) {
       throw new Error(
-        (
-          <FormattedMessage
-            id="xpack.canvas.expression.types.requireNamePropertyErrorMessage"
-            defaultMessage="Expression specs require a name property"
-          />
-        )
+        this.props.intl.formatMessage({
+          id: 'xpack.canvas.expressionTypes.namePropertyRequiredErrorMessage',
+          defaultMessage: 'Expression specs require a name property',
+        })
       );
     }
 
@@ -24,3 +21,4 @@ export class BaseForm {
     this.help = props.help || '';
   }
 }
+export const BaseForm = injectI18n(BaseFormUI);

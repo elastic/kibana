@@ -7,7 +7,7 @@
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
 import { isPlainObject, uniq, last, compact } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import { fromExpression } from '../../common/lib/ast';
 import { ArgAddPopover } from '../components/arg_add_popover';
 import { SidebarSection } from '../components/sidebar/sidebar_section';
@@ -15,7 +15,7 @@ import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title
 import { BaseForm } from './base_form';
 import { Arg } from './arg';
 
-export class FunctionForm extends BaseForm {
+class FunctionFormUI extends BaseForm {
   constructor(props) {
     super({ ...props });
 
@@ -115,12 +115,10 @@ export class FunctionForm extends BaseForm {
         <EuiCallOut
           color="danger"
           iconType="cross"
-          title={
-            <FormattedMessage
-              id="xpack.canvas.expression.types.expressionRenderingErrorMessage"
-              defaultMessage="Expression rendering error"
-            />
-          }
+          title={this.props.intl.formatMessage({
+            id: 'xpack.canvas.expressionTypes.expressionRenderingErrorMessage',
+            defaultMessage: 'Expression rendering error',
+          })}
         >
           <p>{e.message}</p>
         </EuiCallOut>
@@ -128,3 +126,5 @@ export class FunctionForm extends BaseForm {
     }
   }
 }
+
+export const FunctionForm = injectI18n(FunctionFormUI);

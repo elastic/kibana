@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { get, pick } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import { Registry } from '../../common/lib/registry';
 import { FunctionForm } from './function_form';
 
@@ -19,7 +18,7 @@ function getModelArgs(expressionType) {
   return expressionType.modelArgs.length > 0 ? expressionType.modelArgs : MISSING_MODEL_ARGS;
 }
 
-export class Model extends FunctionForm {
+class ModelUI extends FunctionForm {
   constructor(props) {
     super(props);
 
@@ -41,13 +40,15 @@ export class Model extends FunctionForm {
     if (modelArgs === MISSING_MODEL_ARGS) {
       // if there is a next expression, it is lacking modelArgs, so we throw
       throw new Error(
-        (
-          <FormattedMessage
-            id="xpack.canvas.expression.types.emptyModelErrorMessage"
-            defaultMessage="{nextExpressionType} modelArgs Error: The modelArgs value is empty. Either it should contain an arg,
-            or a model should not be used in the expression."
-            values={{ nextExpressionType: nextExpressionType.displayName }}
-          />
+        this.props.intl.formatMessage(
+          {
+            id: 'xpack.canvas.expressionTypes.model.ArgsValueIsEmptyErrorMessage',
+            defaultMessage:
+              '{nextExpressionType} modelArgs Error: The modelArgs value is empty. Either it should contain an arg, or a model should not be used in the expression.',
+          },
+          {
+            nextExpressionType: nextExpressionType.displayName,
+          }
         )
       );
     }
@@ -68,6 +69,8 @@ export class Model extends FunctionForm {
     };
   }
 }
+
+const Model = injectI18n(ModelUI);
 
 class ModelRegistry extends Registry {
   wrapper(obj) {
