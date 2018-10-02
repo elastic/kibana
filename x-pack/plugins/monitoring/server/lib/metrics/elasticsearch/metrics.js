@@ -460,7 +460,7 @@ export const metrics = {
     // CGroup CPU Utilization Fields
     const quotaMetricConfig = {
       app: 'elasticsearch',
-      uuidField: 'source_node.uuid',
+      uuidField: 'node_stats.node_id',
       timestampField: 'timestamp',
       fieldSource: 'node_stats.os.cgroup',
       usageField: 'cpuacct.usage_nanos',

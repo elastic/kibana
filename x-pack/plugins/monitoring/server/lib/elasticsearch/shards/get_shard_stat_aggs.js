@@ -34,7 +34,7 @@ export function getShardAggs(config, includeNodes) {
         terms: { field: 'source_node.name', size: aggSize }
       },
       node_ids: {
-        terms: { field: 'source_node.uuid', size: 1 } // node can only have 1 id
+        terms: { field: 'shard.node', size: 1 } // node can only have 1 id
       }
     }
   };

@@ -64,12 +64,12 @@ export async function getNodes(req, esIndexPattern, clusterStats, shardStats) {
         metric: metricFields
       }),
       collapse: {
-        field: 'source_node.uuid'
+        field: 'node_stats.node_id'
       },
       aggs: {
         nodes: {
           terms: {
-            field: `source_node.uuid`,
+            field: `node_stats.node_id`,
             size: config.get('xpack.monitoring.max_bucket_size')
           },
           aggs: getMetricAggs(LISTING_METRICS_NAMES, bucketSize)

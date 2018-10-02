@@ -26,6 +26,14 @@ export const createTypeFilter = (type) => {
   };
 };
 
+function getUuidFieldFromType(type) {
+  switch (type) {
+    case 'node_stats':
+      return 'node_stats.node_id';
+  }
+  throw 'Unable to infer uuid field from type: ' + type;
+}
+
 /*
  * Creates the boilerplace for querying monitoring data, including filling in
  * document UUIDs, start time and end time, and injecting additional filters.
@@ -59,7 +67,12 @@ export function createQuery(options) {
   let uuidFilter;
   // options.uuid can be null, for example getting all the clusters
   if (uuid) {
-    const uuidField = get(options, 'metric.uuidField');
+    let uuidField = get(options, 'metric.uuidField');
+    if (!uuidField) {
+      const field = get(options, 'metric.field');
+      const documentType = field.split('.')[0];
+      uuidField = getUuidFieldFromType(documentType);
+    }
     if (!uuidField) {
       throw new MissingRequiredError('options.uuid given but options.metric.uuidField is false');
     }

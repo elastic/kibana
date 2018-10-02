@@ -18,7 +18,6 @@ export class ElasticsearchMetric extends Metric {
     super({
       ...opts,
       app: 'elasticsearch',
-      uuidField: 'source_node.uuid',
       timestampField: 'timestamp'
     });
 
@@ -27,7 +26,6 @@ export class ElasticsearchMetric extends Metric {
 
   static getMetricFields() {
     return {
-      uuidField: 'source_node.uuid', // ???
       timestampField: 'timestamp'
     };
   }

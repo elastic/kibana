@@ -69,7 +69,7 @@ export function esNodeRoute(server) {
         const clusterState = get(cluster, 'cluster_state', { nodes: {} });
         const shardStats = await getShardStats(req, esIndexPattern, cluster, { includeIndices: true, includeNodes: true });
         const nodeSummary = await getNodeSummary(req, esIndexPattern, clusterState, shardStats, { clusterUuid, nodeUuid, start, end });
-        const metrics = await getMetrics(req, esIndexPattern, metricSet, [{ term: { 'source_node.uuid': nodeUuid } }]);
+        const metrics = await getMetrics(req, esIndexPattern, metricSet, [{ term: { 'node_stats.node_id': nodeUuid } }]);
 
         let shardAllocation;
         if (!isAdvanced) {
