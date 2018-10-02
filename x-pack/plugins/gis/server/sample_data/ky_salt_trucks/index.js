@@ -7,6 +7,7 @@
 import path from 'path';
 import { savedObjects } from './saved_objects';
 import { countiesFieldMappings } from './counties_field_mappings';
+import { avlFieldMappings } from './avl_field_mappings';
 
 export function kySaltTrucksSpecProvider() {
   return {
@@ -25,7 +26,14 @@ export function kySaltTrucksSpecProvider() {
         // index does not contain time fields so these are not used
         // Setting the fime field
         timeFields: ['there_are_no_timefields'],
-        currentTimeMarker: '2018-01-09T00:00:00',
+        currentTimeMarker: '2018-02-25T00:00:00',
+      },
+      {
+        id: 'avl',
+        dataPath: path.join(__dirname, './avl.json.gz'),
+        fields: avlFieldMappings,
+        timeFields: ['kytcDataCaptureTimeUTC', 'kytcDateExistsET', 'kytcDateExistsUTC'],
+        currentTimeMarker: '2018-02-25T00:00:00'
       }
     ]
   };
