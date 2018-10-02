@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
+import * as React from 'react';
 import { IntlProvider } from 'react-intl';
 
 import * as i18n from '../core';
@@ -28,12 +28,12 @@ import * as i18n from '../core';
  * of components. This component is used to setup the i18n context for a tree.
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
-export class I18nProvider extends PureComponent {
-  static propTypes = {
+export class I18nProvider extends React.PureComponent {
+  public static propTypes = {
     children: PropTypes.object,
   };
 
-  render() {
+  public render() {
     const { children } = this.props;
 
     return (
