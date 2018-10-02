@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const vislibColorMaps = () => ({
+export const createVislibColorMaps = () => ({
   // Sequential
   Blues: {
     id: 'Blues',

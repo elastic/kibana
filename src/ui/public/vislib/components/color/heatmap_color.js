@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { vislibColorMaps } from './colormaps';
+import { createVislibColorMaps } from './colormaps';
 
 function enforceBounds(x) {
   if (x < 0) {
@@ -60,7 +60,8 @@ export function getHeatmapColors(value, colorSchemaName) {
     throw new Error('heatmap_color expects a number from 0 to 1 as first parameter');
   }
 
-  const colorSchema = vislibColorMaps()[colorSchemaName].value;
+  const COLOR_MAPS = createVislibColorMaps();
+  const colorSchema = COLOR_MAPS[colorSchemaName].value;
   if (!colorSchema) {
     throw new Error('invalid colorSchemaName provided');
   }

@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { vislibColorMaps } from './colormaps';
+import { createVislibColorMaps } from './colormaps';
 
 let truncatedMaps;
 
-export const truncatedColorMaps = () => {
+export const createTruncatedColorMaps = () => {
   if (!truncatedMaps) {
     truncatedMaps = {};
 
-    const colormaps = vislibColorMaps();
+    const colormaps = createVislibColorMaps();
     for (const key in colormaps) {
       if (colormaps.hasOwnProperty(key)) {
         //slice off lightest colors
