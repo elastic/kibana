@@ -31,7 +31,7 @@ export const TabHistogramUi = ({ histogram, histogramInterval }) => (
     <EuiDescriptionList textStyle="reverse">
       <EuiDescriptionListTitle>
         <FormattedMessage
-          id="xpack.rollupJobs.jobDetails.tabHistogram.interval.label"
+          id="xpack.rollupJobs.jobDetails.tabHistogram.intervalLabel"
           defaultMessage="Histogram interval"
         />
       </EuiDescriptionListTitle>

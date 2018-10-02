@@ -29,7 +29,7 @@ export const CronMonthly = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="xpack.rollupJobs.cronEditor.cronMonthly.fieldDate.label"
+          id="xpack.rollupJobs.cronEditor.cronMonthly.fieldDateLabel"
           defaultMessage="Date"
         />
       )}
@@ -44,7 +44,7 @@ export const CronMonthly = ({
           <EuiText size="xs">
             <strong>
               <FormattedMessage
-                id="xpack.rollupJobs.cronEditor.cronMonthly.textOnThe.label"
+                id="xpack.rollupJobs.cronEditor.cronMonthly.textOnTheLabel"
                 defaultMessage="On the"
               />
             </strong>
@@ -56,7 +56,7 @@ export const CronMonthly = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="xpack.rollupJobs.cronEditor.cronMonthly.fieldTime.label"
+          id="xpack.rollupJobs.cronEditor.cronMonthly.fieldTimeLabel"
           defaultMessage="Time"
         />
       )}
@@ -73,7 +73,7 @@ export const CronMonthly = ({
               <EuiText size="xs">
                 <strong>
                   <FormattedMessage
-                    id="xpack.rollupJobs.cronEditor.cronMonthly.fieldHour.textAt.label"
+                    id="xpack.rollupJobs.cronEditor.cronMonthly.fieldHour.textAtLabel"
                     defaultMessage="At"
                   />
                 </strong>

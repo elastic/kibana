@@ -31,7 +31,7 @@ export const CronYearly = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="xpack.rollupJobs.cronEditor.cronYearly.fieldMonth.label"
+          id="xpack.rollupJobs.cronEditor.cronYearly.fieldMonthLabel"
           defaultMessage="Month"
         />
       )}
@@ -46,7 +46,7 @@ export const CronYearly = ({
           <EuiText size="xs">
             <strong>
               <FormattedMessage
-                id="xpack.rollupJobs.cronEditor.cronYearly.fieldMonth.textIn.label"
+                id="xpack.rollupJobs.cronEditor.cronYearly.fieldMonth.textInLabel"
                 defaultMessage="In"
               />
             </strong>
@@ -58,7 +58,7 @@ export const CronYearly = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="xpack.rollupJobs.cronEditor.cronYearly.fieldDate.label"
+          id="xpack.rollupJobs.cronEditor.cronYearly.fieldDateLabel"
           defaultMessage="Date"
         />
       )}
@@ -73,7 +73,7 @@ export const CronYearly = ({
           <EuiText size="xs">
             <strong>
               <FormattedMessage
-                id="xpack.rollupJobs.cronEditor.cronYearly.fieldDate.textOnThe.label"
+                id="xpack.rollupJobs.cronEditor.cronYearly.fieldDate.textOnTheLabel"
                 defaultMessage="On the"
               />
             </strong>
@@ -85,7 +85,7 @@ export const CronYearly = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="xpack.rollupJobs.cronEditor.cronYearly.fieldTime.label"
+          id="xpack.rollupJobs.cronEditor.cronYearly.fieldTimeLabel"
           defaultMessage="Time"
         />
       )}
@@ -102,7 +102,7 @@ export const CronYearly = ({
               <EuiText size="xs">
                 <strong>
                   <FormattedMessage
-                    id="xpack.rollupJobs.cronEditor.cronYearly.fieldHour.textAt.label"
+                    id="xpack.rollupJobs.cronEditor.cronYearly.fieldHour.textAtLabel"
                     defaultMessage="At"
                   />
                 </strong>

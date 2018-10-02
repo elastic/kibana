@@ -23,7 +23,7 @@ export const CronHourly = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="xpack.rollupJobs.cronEditor.cronHourly.fieldTime.label"
+          id="xpack.rollupJobs.cronEditor.cronHourly.fieldTimeLabel"
           defaultMessage="Minute"
         />
       )}
@@ -38,7 +38,7 @@ export const CronHourly = ({
           <EuiText size="xs">
             <strong>
               <FormattedMessage
-                id="xpack.rollupJobs.cronEditor.cronHourly.fieldMinute.textAt.label"
+                id="xpack.rollupJobs.cronEditor.cronHourly.fieldMinute.textAtLabel"
                 defaultMessage="At"
               />
             </strong>
