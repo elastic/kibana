@@ -18,7 +18,7 @@
  */
 
 export class UiNavLink {
-  constructor(urlBasePath, spec) {
+  constructor(spec) {
     const {
       id,
       title,
@@ -36,8 +36,8 @@ export class UiNavLink {
     this._id = id;
     this._title = title;
     this._order = order;
-    this._url = `${urlBasePath || ''}${url}`;
-    this._subUrlBase = `${urlBasePath || ''}${subUrlBase || url}`;
+    this._url = url;
+    this._subUrlBase = subUrlBase || url;
     this._description = description;
     this._icon = icon;
     this._linkToLastSubUrl = linkToLastSubUrl;
