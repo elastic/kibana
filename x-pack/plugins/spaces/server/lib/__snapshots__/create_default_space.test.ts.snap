@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it throws all other errors from the saved objects client when checking for the default space 1`] = `"unit test: unexpected exception condition"`;
+
+exports[`it throws other errors if there is an error creating the default space 1`] = `"unit test: some other unexpected error"`;

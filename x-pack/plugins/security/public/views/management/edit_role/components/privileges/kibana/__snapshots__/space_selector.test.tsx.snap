@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SpaceSelector renders without crashing 1`] = `
+<EuiComboBox
+  fullWidth={false}
+  isClearable={true}
+  onChange={[Function]}
+  options={Array []}
+  renderOption={[Function]}
+  selectedOptions={Array []}
+  singleSelection={false}
+/>
+`;
