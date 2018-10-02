@@ -17,5 +17,25 @@
  * under the License.
  */
 
-import './global_nav_state';
-import './breadcrumb_state';
+import { ListIterator } from 'lodash';
+
+interface IndexedArrayConfig<T> {
+  index?: string[];
+  group?: string[];
+  order?: string[];
+  initialSet?: T[];
+  immutable?: boolean;
+}
+
+declare class IndexedArray<T> extends Array<T> {
+  public immutable: boolean;
+  public raw: T[];
+  // May not actually be present, is dynamically defined.
+  public inOrder: T[];
+
+  constructor(config: IndexedArrayConfig<T>);
+
+  public remove(predicate: ListIterator<T, boolean>): T[];
+
+  public toJSON(): T[];
+}
