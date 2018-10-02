@@ -64,6 +64,7 @@ export class Suggestions extends Component {
           onClick={this.props.onClick}
           onMouseEnter={() => this.props.onMouseEnter(index)}
           ariaId={'suggestion-' + index}
+          key={`${suggestion.type} - ${suggestion.text}`}
         />
       );
     });
