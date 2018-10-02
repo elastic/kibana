@@ -30,7 +30,7 @@ export class PanelUtils {
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
   public static convertPanelDataPre_6_1(panel: {
     panelIndex: string;
-    gridData: { x: number; y: number; w: number; h: number; i: string };
+    gridData: { x: number; y: number; w: number; h: number; id: string };
     col: number;
     row: number;
     size_x: any;
@@ -51,7 +51,7 @@ export class PanelUtils {
       y: panel.row - 1,
       w: panel.size_x || DEFAULT_PANEL_WIDTH,
       h: panel.size_y || DEFAULT_PANEL_HEIGHT,
-      i: panel.panelIndex.toString(),
+      id: panel.panelIndex.toString(),
     };
     panel.version = chrome.getKibanaVersion();
     panel.panelIndex = panel.panelIndex;
