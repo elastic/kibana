@@ -21,6 +21,12 @@ jest.mock('../../services/field_format_service', () => ({
     getFieldFormat: jest.fn()
   }
 }));
+jest.mock('ui/chrome', () => ({
+  getBasePath: (path) => path,
+  getUiSettingsClient: () => ({
+    get: () => null
+  }),
+}));
 
 // The mocks for ui/chrome and ui/timefilter are copied from charts_utils.test.js
 // TODO: Refactor the involved tests to avoid this duplication
