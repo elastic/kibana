@@ -5,6 +5,22 @@
  */
 
 import { getStore, gisStateSync } from '../../store/store';
+import _ from 'lodash';
+
+
+export const getMapInitState = overallState => {
+  let { mapState } = overallState;
+  if (mapState && !_.isEmpty(mapState)) {
+    mapState = JSON.parse(mapState, (key, val) => {
+      if (isNaN(val) || typeof val === 'boolean') {
+        return val;
+      } else {
+        return +val;
+      }
+    });
+    return mapState;
+  }
+};
 
 const getCurrentMapState = (() => {
   const customReplacer = (key, value) => {
@@ -13,10 +29,21 @@ const getCurrentMapState = (() => {
     }
     return value;
   };
+  // Filter out unneeded fields
+  const filteredState = map => {
+    const layerList = map.layerList.map(layer => {
+      /*eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }]*/
+      const { data, ...layerDetails } = layer;
+      return layerDetails;
+    });
+    const filteredMap = { ...map, layerList };
+    return filteredMap;
+  };
   return async () => {
     const store = await getStore();
     const { map } = store.getState();
-    const stringMap = JSON.stringify(map, customReplacer);
+    const filteredMap = filteredState(map);
+    const stringMap = JSON.stringify(filteredMap, customReplacer);
     return (stringMap);
   };
 })();

@@ -10,9 +10,10 @@ import { combineReducers, applyMiddleware, createStore, compose }
 import thunk from 'redux-thunk';
 import ui from './ui';
 import { map } from './map';
-import { loadMapResources } from "../actions/store_actions";
+import { loadMapResources, replaceLayerList, loadMetaResources } from "../actions/store_actions";
 import _ from 'lodash';
 import config from './config';
+import { getMapInitState } from '../shared/services/save_map_state';
 
 const rootReducer = combineReducers({
   map,
@@ -23,13 +24,6 @@ const rootReducer = combineReducers({
 const enhancers = [ applyMiddleware(thunk) ];
 window.__REDUX_DEVTOOLS_EXTENSION
   && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
-
-const getMapInitState = ({ mapState }) => {
-  if (mapState && !_.isEmpty(mapState)) {
-    mapState = JSON.parse(mapState, (key, val) => isNaN(val) ? val : +val);
-    return { map: { mapState: mapState.mapState } };
-  }
-};
 
 export let gisStateSync;
 const updateAppState = (fetchedId, workspaceId) => {
@@ -70,13 +64,20 @@ export const getStore = async function () {
     const handle = setInterval(() => {
       if (initConfig !== null) {
         clearInterval(handle);
+        const storeConfig = (_.isEmpty(initConfig)) ? initConfig : { map: { ...initConfig, layerList: [], ready: false } };
         const store = createStore(
           rootReducer,
-          initConfig,
+          storeConfig,
           compose(...enhancers)
         );
         resolve(store);
-        loadMapResources(store.dispatch);
+        loadMetaResources(store.dispatch).then(()=> {
+          if (initConfig.layerList && initConfig.layerList.length) {
+            store.dispatch(replaceLayerList(initConfig.layerList));
+          } else { // Load init/sample data
+            loadMapResources(store.dispatch);
+          }
+        });
       }
     }, 10);
   });

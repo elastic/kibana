@@ -20,7 +20,7 @@ export function GISWorkspaceProvider(Private, Promise, confirmModal) {
     let savedWorkspaceObject;
     if (id) {
       savedWorkspaceObject = await savedObjectsClient.get(this._type, id);
-    } 
+    }
     return savedWorkspaceObject ? savedWorkspaceObject : null;
   };
 
@@ -88,7 +88,7 @@ export function GISWorkspaceProvider(Private, Promise, confirmModal) {
   };
 
   this._updateSource = (id, source) => {
-    return savedObjectsClient.update(this._type, id, source)
+    return savedObjectsClient.update(this._type, id, source);
   };
 }
 
