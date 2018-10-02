@@ -34,12 +34,6 @@ import {
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 
-/*
-TODO: styling
-TODO: refactoring
- */
-
-
 const KEY_CODES = {
   LEFT: 37,
   UP: 38,
