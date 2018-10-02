@@ -386,7 +386,7 @@ class WorkpadLoaderUI extends React.PureComponent {
                               onClick={this.openRemoveConfirm}
                             >
                               <FormattedMessage
-                                id="xpack.canvas.workpad.loader.deleteButtonTitle"
+                                id="xpack.canvas.workpadLoader.deleteButtonTitle"
                                 defaultMessage="Delete ({workpadCount})"
                                 values={{ workpadCount: selectedWorkpads.length }}
                               />
@@ -427,7 +427,7 @@ class WorkpadLoaderUI extends React.PureComponent {
               {createPending && (
                 <div>
                   <FormattedMessage
-                    id="xpack.canvas.workpad.loader.createPendingDescription"
+                    id="xpack.canvas.workpadLoader.createPendingDescription"
                     defaultMessage="Creating Workpad..."
                   />
                 </div>
@@ -437,7 +437,7 @@ class WorkpadLoaderUI extends React.PureComponent {
                 isLoading && (
                   <div>
                     <FormattedMessage
-                      id="xpack.canvas.workpad.loader.fetchPendingDescription"
+                      id="xpack.canvas.workpadLoader.fetchPendingDescription"
                       defaultMessage="Fetching Workpads..."
                     />
                   </div>
