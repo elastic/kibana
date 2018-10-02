@@ -36,7 +36,7 @@ export class HeadlessChromiumDriver {
     this.logger.debug(`HeadlessChromiumDriver:opening url ${url}`);
 
     await this.page.setExtraHTTPHeaders(headers);
-    await this.page.goto(url, { waitUntil: 'networkidle0' });
+    await this.page.goto(url, { waitUntil: 'domcontentloaded' });
     await this.page.waitFor(waitForSelector);
   }
 
