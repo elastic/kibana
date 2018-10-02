@@ -48,7 +48,11 @@ export function explorerChartsContainerServiceFactory(
 
   callback(getDefaultData());
 
+  let requestCount = 0;
   const anomalyDataChangeListener = function (anomalyRecords, earliestMs, latestMs) {
+    const newRequestCount = ++requestCount;
+    requestCount = newRequestCount;
+
     const data = getDefaultData();
 
     const threshold = mlSelectSeverityService.state.get('threshold');
@@ -265,6 +269,10 @@ export function explorerChartsContainerServiceFactory(
 
     Promise.all(seriesPromises)
       .then(response => {
+        // Ignore this response if it's returned by an out of date promise
+        if (newRequestCount < requestCount) {
+          return;
+        }
         // calculate an overall min/max for all series
         const processedData = response.map(processChartData);
         const allDataPoints = _.reduce(processedData, (datapoints, series) => {
