@@ -352,6 +352,10 @@ async function createTestMigrator(testOpts: any = {}) {
         return { hits: { hits } };
       case 'bulk':
         return { items: [] };
+      case 'reindex':
+        return { task: 23 };
+      case 'tasks.get':
+        return { completed: true };
     }
   });
 
