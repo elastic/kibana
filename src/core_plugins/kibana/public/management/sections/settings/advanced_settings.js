@@ -35,7 +35,12 @@ import { Form } from './components/form';
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import './advanced_settings.less';
-import { registerDefaultComponents, PAGE_TITLE_COMPONENT, PAGE_FOOTER_COMPONENT } from './components/default_component_registry';
+import {
+  registerDefaultComponents,
+  PAGE_TITLE_COMPONENT,
+  PAGE_SUBTITLE_COMPONENT,
+  PAGE_FOOTER_COMPONENT
+} from './components/default_component_registry';
 import { getSettingsComponent } from './components/component_registry';
 
 export class AdvancedSettings extends Component {
@@ -145,6 +150,7 @@ export class AdvancedSettings extends Component {
     const { filteredSettings, query, footerQueryMatched } = this.state;
 
     const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT);
+    const PageSubtitle = getSettingsComponent(PAGE_SUBTITLE_COMPONENT);
     const PageFooter = getSettingsComponent(PAGE_FOOTER_COMPONENT);
 
     return (
@@ -161,6 +167,7 @@ export class AdvancedSettings extends Component {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <PageSubtitle />
         <EuiSpacer size="m" />
         <CallOuts />
         <EuiSpacer size="m" />

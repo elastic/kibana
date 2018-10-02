@@ -34,6 +34,13 @@ jest.mock('../../util/string_utils', () => ({
   mlEscape(d) { return d; }
 }));
 
+jest.mock('ui/chrome', () => ({
+  getBasePath: (path) => path,
+  getUiSettingsClient: () => ({
+    get: () => null
+  }),
+}));
+
 const mockMlSelectSeverityService = {
   state: {
     get() { return { display: 'warning', val: 0 }; }
