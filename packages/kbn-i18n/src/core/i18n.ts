@@ -17,25 +17,20 @@
  * under the License.
  */
 
-/**
- @typedef Messages - messages tree, where leafs are translated strings
- @type {object<string, object>}
- @property {string} [locale] - locale of the messages
- @property {object} [formats] - set of options to the underlying formatter
- */
-
+import memoizeIntlConstructor from 'intl-format-cache';
 import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
-import memoizeIntlConstructor from 'intl-format-cache';
-import { isString, isObject, hasValues, mergeAll } from './helper';
-import { formats as EN_FORMATS } from './formats';
+
+import { Messages, PlainMessages } from '../messages';
+import { Formats, formats as EN_FORMATS } from './formats';
+import { hasValues, isObject, isString, mergeAll } from './helper';
 
 // Add all locale data to `IntlMessageFormat`.
-import './locales';
+import './locales.js';
 
 const EN_LOCALE = 'en';
 const LOCALE_DELIMITER = '-';
-const messages = {};
+const messages: Messages = {};
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
 let defaultLocale = EN_LOCALE;
@@ -47,28 +42,26 @@ IntlRelativeFormat.defaultLocale = defaultLocale;
 
 /**
  * Returns message by the given message id.
- * @param {string} id - path to the message
- * @returns {string} message - translated message from messages tree
+ * @param id - path to the message
  */
-function getMessageById(id) {
+function getMessageById(id: string): string {
   return getMessages()[id];
 }
 
 /**
  * Normalizes locale to make it consistent with IntlMessageFormat locales
- * @param {string} locale
- * @returns {string} normalizedLocale
+ * @param locale
  */
-function normalizeLocale(locale) {
+function normalizeLocale(locale: string) {
   return locale.toLowerCase().replace('_', LOCALE_DELIMITER);
 }
 
 /**
  * Provides a way to register translations with the engine
- * @param {Messages} newMessages
- * @param {string} [locale = messages.locale]
+ * @param newMessages
+ * @param [locale = messages.locale]
  */
-export function addMessages(newMessages = {}, locale = newMessages.locale) {
+export function addMessages(newMessages: PlainMessages = {}, locale = newMessages.locale) {
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string to add messages.');
   }
@@ -89,17 +82,16 @@ export function addMessages(newMessages = {}, locale = newMessages.locale) {
 
 /**
  * Returns messages for the current language
- * @returns {Messages} messages
  */
-export function getMessages() {
+export function getMessages(): PlainMessages {
   return messages[currentLocale] || {};
 }
 
 /**
  * Tells the engine which language to use by given language key
- * @param {string} locale
+ * @param locale
  */
-export function setLocale(locale) {
+export function setLocale(locale: string) {
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string.');
   }
@@ -109,7 +101,6 @@ export function setLocale(locale) {
 
 /**
  * Returns the current locale
- * @returns {string} locale
  */
 export function getLocale() {
   return currentLocale;
@@ -117,9 +108,9 @@ export function getLocale() {
 
 /**
  * Tells the library which language to fallback when missing translations
- * @param {string} locale
+ * @param locale
  */
-export function setDefaultLocale(locale) {
+export function setDefaultLocale(locale: string) {
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string.');
   }
@@ -129,10 +120,6 @@ export function setDefaultLocale(locale) {
   IntlRelativeFormat.defaultLocale = defaultLocale;
 }
 
-/**
- * Returns the default locale
- * @returns {string} defaultLocale
- */
 export function getDefaultLocale() {
   return defaultLocale;
 }
@@ -143,12 +130,12 @@ export function getDefaultLocale() {
  * {@link https://github.com/yahoo/intl-messageformat/blob/master/src/core.js#L62}
  * These are used when constructing the internal Intl.NumberFormat
  * and Intl.DateTimeFormat instances.
- * @param {object} newFormats
- * @param {object} [newFormats.number]
- * @param {object} [newFormats.date]
- * @param {object} [newFormats.time]
+ * @param newFormats
+ * @param [newFormats.number]
+ * @param [newFormats.date]
+ * @param [newFormats.time]
  */
-export function setFormats(newFormats) {
+export function setFormats(newFormats: Formats) {
   if (!isObject(newFormats) || !hasValues(newFormats)) {
     throw new Error('[I18n] A `formats` must be a non-empty object.');
   }
@@ -158,7 +145,6 @@ export function setFormats(newFormats) {
 
 /**
  * Returns current formats
- * @returns {object} formats
  */
 export function getFormats() {
   return formats;
@@ -166,21 +152,30 @@ export function getFormats() {
 
 /**
  * Returns array of locales having translations
- * @returns {string[]} locales
  */
 export function getRegisteredLocales() {
   return Object.keys(messages);
 }
 
+interface TranslateArguments {
+  values?: { [key: string]: string | number | Date };
+  defaultMessage?: string;
+}
+
 /**
  * Translate message by id
- * @param {string} id - translation id to be translated
- * @param {object} [options]
- * @param {object} [options.values] - values to pass into translation
- * @param {string} [options.defaultMessage] - will be used unless translation was successful
- * @returns {string}
+ * @param id - translation id to be translated
+ * @param [options]
+ * @param [options.values] - values to pass into translation
+ * @param [options.defaultMessage] - will be used unless translation was successful
  */
-export function translate(id, { values = {}, defaultMessage = '' } = {}) {
+export function translate(
+  id: string,
+  { values = {}, defaultMessage = '' }: TranslateArguments = {
+    values: {},
+    defaultMessage: '',
+  }
+) {
   if (!id || !isString(id)) {
     throw new Error('[I18n] An `id` must be a non-empty string to translate a message.');
   }
@@ -218,9 +213,9 @@ export function translate(id, { values = {}, defaultMessage = '' } = {}) {
 
 /**
  * Initializes the engine
- * @param {Messages} newMessages
+ * @param newMessages
  */
-export function init(newMessages) {
+export function init(newMessages?: PlainMessages) {
   if (!newMessages) {
     return;
   }

@@ -17,18 +17,6 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import { metadata } from 'ui/metadata';
-import {
-  I18nProvider,
-  i18nFilter,
-  i18nDirective,
-} from '@kbn/i18n/angular';
-
-uiModules.get('i18n')
-  .provider('i18n', I18nProvider)
-  .filter('i18n', i18nFilter)
-  .directive('i18nId', i18nDirective)
-  .config((i18nProvider) => {
-    i18nProvider.init(metadata.translations);
-  });
+export { I18nProvider } from './provider';
+export { i18nFilter } from './filter';
+export { i18nDirective } from './directive';
