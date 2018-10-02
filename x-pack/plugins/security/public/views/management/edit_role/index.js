@@ -91,8 +91,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const $route = $injector.get('$route');
     const Private = $injector.get('Private');
 
-    const Notifier = $injector.get('Notifier');
-
     const role = $route.current.locals.role;
 
     const xpackInfo = Private(XPackInfoProvider);
@@ -139,7 +137,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         httpClient={$http}
         allowDocumentLevelSecurity={allowDocumentLevelSecurity}
         allowFieldLevelSecurity={allowFieldLevelSecurity}
-        notifier={Notifier}
         spaces={spaces}
         spacesEnabled={enableSpaceAwarePrivileges}
         userProfile={userProfile}
