@@ -606,7 +606,7 @@ describe('#create', () => {
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
 
-    test(`throws Boom.badRequest when we are at the maximum number of spaces`, async () => {
+    test(`throws bad request when we are at the maximum number of spaces`, async () => {
       const maxSpaces = 5;
       const mockAuditLogger = createMockAuditLogger();
       const authorization = null;
@@ -685,7 +685,7 @@ describe('#create', () => {
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
 
-    test(`throws Boom.badRequest when we're at the maximum number of spaces`, async () => {
+    test(`throws bad request when we're at the maximum number of spaces`, async () => {
       const maxSpaces = 5;
       const mockAuditLogger = createMockAuditLogger();
       const { mockAuthorization } = createMockAuthorization();
@@ -806,7 +806,7 @@ describe('#create', () => {
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'create');
     });
 
-    test(`throws Boom.badRequest when we are at the maximum number of spaces`, async () => {
+    test(`throws bad request when we are at the maximum number of spaces`, async () => {
       const username = Symbol();
       const maxSpaces = 5;
       const mockAuditLogger = createMockAuditLogger();
@@ -1042,7 +1042,7 @@ describe('#delete', () => {
   };
 
   describe(`authorization is null`, () => {
-    test(`throws Boom.badRequest when the space is reserved`, async () => {
+    test(`throws bad request when the space is reserved`, async () => {
       const mockAuditLogger = createMockAuditLogger();
       const authorization = null;
       const mockCallWithRequestRepository = {
@@ -1094,7 +1094,7 @@ describe('#delete', () => {
   });
 
   describe(`authorization.mode.useRbacForRequest returns false`, () => {
-    test(`throws Boom.badRequest when the space is reserved`, async () => {
+    test(`throws bad request when the space is reserved`, async () => {
       const mockAuditLogger = createMockAuditLogger();
       const { mockAuthorization } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
@@ -1180,7 +1180,7 @@ describe('#delete', () => {
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
 
-    test(`throws Boom.badRequest if the user is authorized but the space is reserved`, async () => {
+    test(`throws bad request if the user is authorized but the space is reserved`, async () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
