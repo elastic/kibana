@@ -5,14 +5,19 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { get } from 'lodash';
+// @ts-ignore
 import { StickyContainer } from 'react-sticky';
+import styled from 'styled-components';
+
+// @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
-import WaterfallItem from './WaterfallItem';
 import { SpanFlyout } from './SpanFlyout';
 import { TransactionFlyout } from './TransactionFlyout';
+import {
+  IWaterfall,
+  IWaterfallItem
+} from './waterfall_helpers/waterfall_helpers';
+import { WaterfallItem } from './WaterfallItem';
 
 const Container = styled.div`
   transition: 0.1s padding ease;
@@ -27,38 +32,58 @@ const TIMELINE_MARGINS = {
   bottom: 0
 };
 
-class Waterfall extends Component {
-  state = {
+// TODO: moved to shared
+export interface IUrlParams {
+  serviceName: string;
+  transactionType: string;
+  transactionName: string;
+  errorGroupId: string;
+  start: string;
+  end: string;
+}
+
+interface Props {
+  urlParams: IUrlParams;
+  waterfall: IWaterfall;
+  location: any;
+  serviceColors: {
+    [key: string]: string;
+  };
+}
+
+interface State {
+  currentItem: IWaterfallItem | null;
+}
+
+export class Waterfall extends Component<Props, State> {
+  public state: Readonly<State> = {
     currentItem: null
   };
 
-  onOpenFlyout = currentItem => {
+  public onOpenFlyout = (currentItem: IWaterfallItem) => {
     this.setState({ currentItem });
   };
 
-  onCloseFlyout = () => {
+  public onCloseFlyout = () => {
     this.setState({ currentItem: null });
   };
 
-  renderWaterfall = item => {
+  public renderWaterfall = (item?: IWaterfallItem) => {
     if (!item) {
       return null;
     }
 
-    const { urlParams, location, serviceColors, waterfall } = this.props;
+    const { serviceColors, waterfall }: Props = this.props;
 
     return (
       <Fragment key={item.id}>
         <WaterfallItem
-          location={location}
           timelineMargins={TIMELINE_MARGINS}
           color={serviceColors[item.serviceName]}
           item={item}
           totalDuration={waterfall.duration}
-          isSelected={item.id === urlParams.id} // TODO: urlParams.id is just a dummy
-          onClick={() => {
-            this.onOpenFlyout(item);
-          }}
+          isSelected={true} // TODO: implement logic
+          onClick={() => this.onOpenFlyout(item)}
         />
 
         {item.children && item.children.map(this.renderWaterfall)}
@@ -66,8 +91,35 @@ class Waterfall extends Component {
     );
   };
 
-  render() {
+  public getFlyOut = () => {
     const { currentItem } = this.state;
+    const { waterfall } = this.props;
+    if (!currentItem) {
+      return null;
+    }
+
+    switch (currentItem.eventType) {
+      case 'span':
+        return (
+          <SpanFlyout
+            totalDuration={waterfall.duration}
+            span={currentItem.span}
+            onClose={this.onCloseFlyout}
+          />
+        );
+      case 'transaction':
+        return (
+          <TransactionFlyout
+            transaction={currentItem.transaction}
+            onClose={this.onCloseFlyout}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  public render() {
     const { waterfall } = this.props;
     const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
     const waterfallHeight = itemContainerHeight * waterfall.childrenCount;
@@ -89,36 +141,13 @@ class Waterfall extends Component {
           </div>
         </StickyContainer>
 
-        {get(currentItem, 'eventType') === 'span' && (
-          <SpanFlyout
-            totalDuration={waterfall.duration}
-            span={currentItem.span}
-            onClose={this.onCloseFlyout}
-          />
-        )}
-
-        {get(currentItem, 'eventType') === 'transaction' && (
-          <TransactionFlyout
-            totalDuration={waterfall.duration}
-            transaction={currentItem.transaction}
-            onClose={this.onCloseFlyout}
-          />
-        )}
+        {this.getFlyOut()}
       </Container>
     );
   }
 }
 
-Waterfall.propTypes = {
-  // TODO: the agent marks and note about dropped spans were removed. Need to be re-added
-  //   agentMarks: PropTypes.array,
-  //   agentName: PropTypes.string.isRequired,
-  //   droppedSpans: PropTypes.number.isRequired,
-
-  location: PropTypes.object.isRequired,
-  serviceColors: PropTypes.object.isRequired,
-  urlParams: PropTypes.object.isRequired,
-  waterfall: PropTypes.object.isRequired
-};
-
-export default Waterfall;
+// TODO: the agent marks and note about dropped spans were removed. Need to be re-added
+//   agentMarks: PropTypes.array,
+//   agentName: PropTypes.string.isRequired,
+//   droppedSpans: PropTypes.number.isRequired,
