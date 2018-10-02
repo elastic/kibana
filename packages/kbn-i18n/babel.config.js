@@ -17,11 +17,35 @@
  * under the License.
  */
 
-export function i18nFilter(i18n) {
-  return function(id, { defaultMessage = '', values = {} } = {}) {
-    return i18n(id, {
-      values,
-      defaultMessage,
-    });
-  };
-}
+// We can't use common Kibana presets here because of babel versions incompatibility
+module.exports = {
+  plugins: ['@babel/plugin-proposal-class-properties', '@babel/plugin-proposal-object-rest-spread'],
+  presets: ['@babel/preset-react', '@babel/typescript'],
+  env: {
+    web: {
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              browsers: ['last 2 versions', '> 5%', 'Safari 7'],
+            },
+          },
+        ],
+      ],
+    },
+    node: {
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              node: 'current',
+            },
+          },
+        ],
+      ],
+    },
+  },
+  ignore: ['**/*.test.ts', '**/*.test.tsx'],
+};
