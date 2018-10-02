@@ -25,7 +25,7 @@ import {
 import { socketRoute } from './server/routes/socket';
 import { userRoute } from './server/routes/user';
 import { workspaceRoute } from './server/routes/workspace';
-import { IndexScheduler, UpdateScheduler } from './server/scheduler';
+import { UpdateScheduler } from './server/scheduler';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from './server/search';
 import { ServerOptions } from './server/server_options';
 import { SocketService } from './server/socket_service';
@@ -126,15 +126,16 @@ export default (kibana: any) =>
         adminCluster.getClient(),
         log
       );
-      const indexScheduler = new IndexScheduler(
-        indexWorker,
-        serverOptions,
-        objectsClient,
-        adminCluster.getClient(),
-        log
-      );
+      // const indexScheduler = new IndexScheduler(
+      //   indexWorker,
+      //   serverOptions,
+      //   objectsClient,
+      //   adminCluster.getClient(),
+      //   log
+      // );
       updateScheduler.start();
-      indexScheduler.start();
+      // Disable index scheduling before having the scheduling state persisted.
+      // indexScheduler.start();
 
       // Add server routes and initialize the plugin here
       repositoryRoute(
