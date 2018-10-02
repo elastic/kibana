@@ -17,6 +17,21 @@
  * under the License.
  */
 
-export { QueryBar } from './components';
 
 
+import 'ngreact';
+import { uiModules } from '../../modules';
+import { QueryBar } from '../components';
+
+const app = uiModules.get('app/kibana', ['react']);
+
+app.directive('queryBar', (reactDirective, localStorage) => {
+  return reactDirective(
+    QueryBar,
+    undefined,
+    {},
+    {
+      store: localStorage,
+    }
+  );
+});

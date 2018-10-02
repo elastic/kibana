@@ -24,12 +24,12 @@
 
       <!-- Search. -->
       <div data-transclude-slot="bottomRow" class="fullWidth">
-        <react-query-bar
+        <query-bar
           query="state.query"
           on-submit="updateQueryAndFetch"
           app-name="'discover'"
           index-patterns="[indexPattern]"
-        ></react-query-bar>
+        ></query-bar>
       </div>
     </div>
   </kbn-top-nav>

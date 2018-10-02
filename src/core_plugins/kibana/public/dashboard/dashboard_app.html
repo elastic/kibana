@@ -25,12 +25,12 @@
 
       <!-- Search. -->
       <div ng-show="chrome.getVisible()" class="fullWidth" data-transclude-slot="bottomRow">
-        <react-query-bar
+        <query-bar
           query="model.query"
           app-name="'dashboard'"
           on-submit="updateQueryAndFetch"
           index-patterns="indexPatterns"
-        ></react-query-bar>
+        ></query-bar>
       </div>
     </div>
   </kbn-top-nav>

@@ -17,24 +17,8 @@
  * under the License.
  */
 
-import 'ngreact';
 
-import { QueryBar } from './query_bar';
-import { QueryLanguageSwitcher } from './language_switcher';
 
-import { uiModules } from '../../modules';
+export { QueryBar } from './query_bar';
 
-const app = uiModules.get('app/kibana', ['react']);
 
-app.directive('reactQueryBar', (reactDirective, localStorage) => {
-  return reactDirective(
-    QueryBar,
-    undefined,
-    {},
-    {
-      store: localStorage,
-    }
-  );
-});
-
-app.directive('queryPopover', reactDirective => reactDirective(QueryLanguageSwitcher));
