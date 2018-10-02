@@ -7,19 +7,8 @@
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { LoadingPage } from '../../components/loading_page';
-import { WithSource } from '../../containers/with_source';
-
-export const RedirectToPodDetail = ({ match, location }: RouteComponentProps<{ name: string }>) => (
-  <WithSource>
-    {({ configuredFields }) => {
-      if (!configuredFields) {
-        return <LoadingPage message="Loading pod details" />;
-      }
-
-      return <Redirect to={`/metrics/pod/${match.params.name}`} />;
-    }}
-  </WithSource>
+export const RedirectToPodDetail = ({ match }: RouteComponentProps<{ name: string }>) => (
+  <Redirect to={`/metrics/pod/${match.params.name}`} />
 );
 
 export const getPodDetailUrl = ({ name }: { name: string }) => `#/link-to/pod-detail/${name}`;

@@ -7,22 +7,8 @@
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { LoadingPage } from '../../components/loading_page';
-import { WithSource } from '../../containers/with_source';
-
-export const RedirectToContainerDetail = ({
-  match,
-  location,
-}: RouteComponentProps<{ name: string }>) => (
-  <WithSource>
-    {({ configuredFields }) => {
-      if (!configuredFields) {
-        return <LoadingPage message="Loading container details" />;
-      }
-
-      return <Redirect to={`/metrics/container/${match.params.name}`} />;
-    }}
-  </WithSource>
+export const RedirectToContainerDetail = ({ match }: RouteComponentProps<{ name: string }>) => (
+  <Redirect to={`/metrics/container/${match.params.name}`} />
 );
 
 export const getContainerDetailUrl = ({ name }: { name: string }) =>
