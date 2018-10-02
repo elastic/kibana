@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { px, unit } from '../../../../../style/variables';
+// @ts-ignore
 import Legend from '../../../../shared/charts/Legend';
-import { unit, px } from '../../../../../style/variables';
 
 const Legends = styled.div`
   display: flex;
@@ -21,7 +21,13 @@ const Legends = styled.div`
   }
 `;
 
-export default function ServiceLegends({ serviceColors }) {
+interface Props {
+  serviceColors: {
+    [key: string]: string;
+  };
+}
+
+export function ServiceLegends({ serviceColors }: Props) {
   return (
     <Legends>
       {Object.entries(serviceColors).map(([label, color]) => (
@@ -30,7 +36,3 @@ export default function ServiceLegends({ serviceColors }) {
     </Legends>
   );
 }
-
-ServiceLegends.propTypes = {
-  serviceColors: PropTypes.object.isRequired
-};

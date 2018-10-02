@@ -47,7 +47,7 @@ function getDiscoverQuery(id: number) {
 interface Props {
   span?: Span;
   totalDuration: number;
-  onClose: () => {};
+  onClose: () => void;
 }
 
 export function SpanFlyout({ span, totalDuration, onClose }: Props) {

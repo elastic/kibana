@@ -8,7 +8,7 @@ import { groupBy, sortBy } from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
 import { Transaction } from '../../../../../../../../typings/Transaction';
 
-interface WaterfallItem {
+export interface IWaterfallItem {
   transaction?: Transaction;
   span?: Span;
   id: string;
@@ -17,12 +17,12 @@ interface WaterfallItem {
   name: string;
   duration: number;
   timestamp: string;
-  offset?: number;
+  offset: number;
   eventType: string;
-  children?: WaterfallItem[];
+  children?: IWaterfallItem[];
 }
 
-export function getTransactionItem(transaction: Transaction): WaterfallItem {
+export function getTransactionItem(transaction: Transaction): IWaterfallItem {
   const timestamp = transaction['@timestamp'];
 
   return {
@@ -32,12 +32,13 @@ export function getTransactionItem(transaction: Transaction): WaterfallItem {
     name: transaction.transaction.name,
     duration: transaction.transaction.duration.us,
     timestamp,
+    offset: 0,
     eventType: 'transaction',
     transaction
   };
 }
 
-export function getSpanItem(span: Span): WaterfallItem {
+export function getSpanItem(span: Span): IWaterfallItem {
   const timestamp = span['@timestamp'];
 
   return {
@@ -47,6 +48,7 @@ export function getSpanItem(span: Span): WaterfallItem {
     name: span.span.name,
     duration: span.span.duration.us,
     timestamp,
+    offset: 0,
     eventType: 'span',
     span
   };
@@ -57,15 +59,15 @@ export function getOffset(t1: string, t2: string) {
 }
 
 export function getWaterfallRoot(
-  items: WaterfallItem[],
-  entryTransactionItem: WaterfallItem
+  items: IWaterfallItem[],
+  entryTransactionItem: IWaterfallItem
 ) {
   const groupedItems = groupBy(
     items,
     item => (item.parentId ? item.parentId : 'root')
   );
 
-  function findChildren(parent: WaterfallItem): WaterfallItem {
+  function findChildren(parent: IWaterfallItem): IWaterfallItem {
     const children = groupedItems[parent.id] || [];
     const nextChildren = sortBy(children, 'timestamp').map(findChildren);
     return {
@@ -78,18 +80,18 @@ export function getWaterfallRoot(
   return findChildren(entryTransactionItem);
 }
 
-interface Waterfall {
+export interface IWaterfall {
   duration: number;
   services: string[];
   childrenCount: number;
-  root: WaterfallItem;
+  root: IWaterfallItem;
 }
 
 export function getWaterfall(
   hits: Array<Span | Transaction>,
   services: string[],
   entryTransaction: Transaction
-): Waterfall {
+): IWaterfall {
   const items = hits
     .map(hit => {
       const eventType = hit.processor.event;

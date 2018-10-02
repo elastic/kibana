@@ -4,26 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import Waterfall from './Waterfall';
-import { getServiceColors } from './getServiceColors';
-import ServiceLegends from './ServiceLegends';
-import { loadTrace } from '../../../../../services/rest/apm';
+import React, { PureComponent } from 'react';
+// @ts-ignore
 import { TRACE_ID } from '../../../../../../common/constants';
+import { Transaction } from '../../../../../../typings/Transaction';
+
+import { Span } from '../../../../../../typings/Span';
+// @ts-ignore
+import { loadTrace } from '../../../../../services/rest/apm';
+import { getServiceColors } from './getServiceColors';
+import { ServiceLegends } from './ServiceLegends';
+import { IUrlParams, Waterfall } from './Waterfall';
 import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 
-export class WaterfallContainer extends PureComponent {
-  state = {
+interface Props {
+  urlParams: IUrlParams;
+  transaction: Transaction;
+  location: any;
+}
+
+interface State {
+  // TODO: reuse typings from get_trace.js
+  trace: {
+    services: string[];
+    hits: Array<Span | Transaction>;
+  } | null;
+}
+
+export class WaterfallContainer extends PureComponent<Props, State> {
+  public state: Readonly<State> = {
     trace: null
   };
 
-  maybeFetchTrace = async prevProps => {
+  public maybeFetchTrace = async (prevProps?: Props) => {
     const { start, end } = this.props.urlParams;
     const traceId = get(this.props, `transaction.${TRACE_ID}`);
-    const prevTraceId = get(prevProps, `transaction.${TRACE_ID}`);
-    const prevUrlParams = get(prevProps, 'urlParams', {});
+    const prevTraceId: string = get(prevProps, `transaction.${TRACE_ID}`);
+    const prevUrlParams: IUrlParams = get(prevProps, 'urlParams') || {};
 
     if (
       traceId &&
@@ -38,15 +56,15 @@ export class WaterfallContainer extends PureComponent {
     }
   };
 
-  componentDidMount() {
+  public componentDidMount() {
     this.maybeFetchTrace();
   }
 
-  async componentDidUpdate(prevProps) {
+  public async componentDidUpdate(prevProps: Props) {
     this.maybeFetchTrace(prevProps);
   }
 
-  render() {
+  public render() {
     const { location, urlParams, transaction } = this.props;
     const { trace } = this.state;
 
@@ -73,9 +91,3 @@ export class WaterfallContainer extends PureComponent {
     );
   }
 }
-
-WaterfallContainer.propTypes = {
-  location: PropTypes.object.isRequired,
-  transaction: PropTypes.object,
-  urlParams: PropTypes.object.isRequired
-};
