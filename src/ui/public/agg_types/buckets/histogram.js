@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 
+import { toastNotifications } from 'ui/notify';
 import '../../validate_date_interval';
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
@@ -95,6 +96,12 @@ export const histogramBucketAgg = new BucketAggType({
               min: _.get(resp, 'aggregations.minAgg.value'),
               max: _.get(resp, 'aggregations.maxAgg.value')
             });
+          })
+          .catch(() => {
+            toastNotifications.addWarning(`
+              Unable to retrieve max and min values to auto-scale histogram buckets. 
+              This may lead to poor visualization performance.
+            `);
           });
       },
       write: function (aggConfig, output) {

@@ -17,6 +17,9 @@ aggTypeFilters.addFilter(
     }
     const aggName = aggType.name;
     const aggs = indexPattern.typeMeta.aggs;
-    return Object.keys(aggs).includes(aggName);
+
+    // Return doc_count (which is collected by default for rollup date histogram, histogram, and terms)
+    // and the rest of the defined metrics from capabilities.
+    return aggName === 'count' || Object.keys(aggs).includes(aggName);
   }
 );

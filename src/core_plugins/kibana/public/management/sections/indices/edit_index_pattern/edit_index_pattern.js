@@ -27,7 +27,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
 import { FieldWildcardProvider } from 'ui/field_wildcard';
-import { IndexPatternListFactory } from 'ui/management';
+import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
@@ -201,7 +201,7 @@ uiModules.get('apps/management')
     });
 
     $scope.$watch('indexPattern.fields', function () {
-      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
+      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, indexPatternListProvider);
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
       updateIndexedFieldsTable($scope, $state);
