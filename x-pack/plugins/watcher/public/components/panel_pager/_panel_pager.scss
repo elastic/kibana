@@ -1,5 +1,5 @@
 .kuiPanelPager {
-  height:0px;
+  height: 0px;
 }
 
 .panelPagerPrevious,
@@ -7,8 +7,8 @@
   position: relative;
   top: -155px;
   border-radius: 20px;
-  border:1px solid #e0e0e0;
-  background-color: white;
+  border: 1px solid $euiColorLightShade;
+  background-color: $euiColorEmptyShade;
   height: 40px;
   width: 40px;
 }
@@ -18,7 +18,7 @@
 }
 
 .panelPagerPrevious__icon {
-  margin-left: 2px;
+  margin-left: 2px; // positions the icon horizontally inside the circle container
 }
 
 .panelPagerNext {
@@ -27,5 +27,5 @@
 }
 
 .panelPagerNext__icon {
-  margin-left: 4px;
+  margin-left: 4px; // positions the icon horizontally inside the circle container
 }
