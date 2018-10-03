@@ -24,7 +24,7 @@ export const getFields = (index = '_all') => {
     .catch(err =>
       notify.error(err, {
         title: i18n.translate(
-          'xpack.canvas.lib.esService.fetchElasticsearchFieldsForIndexErrorMessage',
+          'xpack.canvas.lib.esService.fetchElasticsearchFieldsForIndexErrorMessageTitle',
           {
             defaultMessage: "Couldn't fetch Elasticsearch fields for '{index}'",
             values: { index },
@@ -41,7 +41,7 @@ export const getIndices = () => {
     .catch(err =>
       notify.error(err, {
         title: i18n.translate(
-          'xpack.canvas.lib.esService.fetchElasticsearchFieldsForIndicesErrorMessage',
+          'xpack.canvas.lib.esService.fetchElasticsearchFieldsForIndicesErrorMessageTitle',
           {
             defaultMessage: "Couldn't fetch Elasticsearch indices",
           }
