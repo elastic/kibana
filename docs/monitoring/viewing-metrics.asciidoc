@@ -15,15 +15,15 @@ same instance of {kib}. To learn more about typical monitoring architectures
 with separate production and monitoring clusters, see
 {xpack-ref}/how-monitoring-works.html[How monitoring works].
 
-. {ref}/configuring-monitoring.html[Configure monitoring in {es}]. If you want
+. Optional: {ref}/configuring-monitoring.html[Configure monitoring in {es}]. If you want
 to use a separate monitoring cluster, see
 {xpack-ref}/monitoring-production.html[Monitoring in a production environment].
 
-. <<monitoring-kibana,Configure monitoring in {kib}>>.
+. Optional: <<monitoring-kibana,Configure monitoring in {kib}>>.
 
-. {logstash-ref}/configuring-logstash.html[Configure monitoring in Logstash].
+. Optional: {logstash-ref}/configuring-logstash.html[Configure monitoring in Logstash].
 
-. Configure monitoring in {auditbeat-ref}/monitoring.html[Auditbeat],
+. Optional: Configure monitoring in {auditbeat-ref}/monitoring.html[Auditbeat],
 {filebeat-ref}/monitoring.html[Filebeat],
 {heartbeat-ref}/monitoring.html[Heartbeat],
 {metricbeat-ref}/monitoring.html[Metricbeat],
