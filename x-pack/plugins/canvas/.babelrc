@@ -10,7 +10,8 @@
     "canvas_plugin/types/*.js",
     "canvas_plugin/uis/**/*.js",
     "canvas_plugin/function/brower/*.js",
-    "canvas_plugin/function/common/*.js"
+		"canvas_plugin/function/common/*.js",
+		"canvas_plugin/function/server/*.js"
   ],
   "presets": [
     "react",
