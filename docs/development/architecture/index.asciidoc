@@ -3,7 +3,7 @@
 
 Kibana is in a state of great transition!  
 As it has been for many years, as we strive to build a dynamic,
- fleixble, and pluggable system for users to search, explore, manage, analyze their data.
+ flexible, and pluggable system for users to search, explore, manage, analyze their data.
 
 As such, we've been delayed in getting some decent high level architectural overviews
  of the current system and where we want to take it.  But here we are, taking a first stab at it! 
@@ -35,11 +35,9 @@ All of the code inside `src/ui/public` is accessible by plugins on the client si
  A note about the `x-pack` folder. This is a special plugin and contains our commercial code. Once Kibana is built the x-pack code resides in the `node_modules` folder. This is different from external plugins which end up in the `plugins` folder. It also has some other quirks, like there is some shared code all of our commercial products reference.
 
 [float]
- ==== Plugin communication
+==== Plugin communication
 
  Plugins communicate with eachother through `uiExports` on the client side, and via a `server` object on the server side. They can both gather information other plugins have exposed via these modules, as well as expose their own information. 
 
 image::images/architecture/plugin-communication.png[]
-
-
 
