@@ -19,19 +19,9 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
     indices: string[]
   ): Promise<IndexFieldDescriptor[]> {
     const indexPatternsService = this.framework.getIndexPatternsService(request);
-    const IndexFieldResponses = await Promise.all(
-      indices.map(indice =>
-        indexPatternsService.getFieldsForWildcard({ pattern: indice }).catch(error => {
-          if (error && error.output && error.output.statusCode === 404) {
-            return [];
-          }
-          throw error;
-        })
-      )
-    );
-    return IndexFieldResponses.reduce(
-      (indexFields, indexFieldResponse) => [...indexFields, ...indexFieldResponse],
-      [] as IndexFieldDescriptor[]
-    );
+    const response = await indexPatternsService.getFieldsForWildcard({
+      pattern: indices,
+    });
+    return response;
   }
 }
