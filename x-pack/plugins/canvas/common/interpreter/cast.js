@@ -29,7 +29,7 @@ export function castProvider(types) {
     }
 
     throw new Error(
-      i18n.translate('xpack.canvas.interpreter.typeNameCastErrorMessage', {
+      i18n.translate('xpack.canvas.interpreter.castFromTypeNameToAnyTypeNamesErrorMessage', {
         defaultMessage: "Can not cast '{fromTypeName}' to any of '{toTypeNames}'",
         values: { fromTypeName, toTypeNames: toTypeNames.join(', ') },
       })
