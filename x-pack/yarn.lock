@@ -23,9 +23,9 @@
   dependencies:
     moment "^2.13.0"
 
-"@elastic/eui@4.4.0":
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-4.4.0.tgz#a43d424c2e2ee4f9e1b2bb0bcd5f5ef3ac25a831"
+"@elastic/eui@4.4.1":
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-4.4.1.tgz#a1a4ab5bb209da8ea6d48c065476e74b1f48249b"
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
