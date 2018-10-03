@@ -77,10 +77,10 @@ export function onPremInstructions(apmIndexPattern) {
             defaultMessage: 'Check APM Server status',
           }),
           success: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.successMessage', {
-            defaultMessage: 'You have correctly setup APM-Server',
+            defaultMessage: 'You have correctly setup APM Server',
           }),
           error: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.errorMessage', {
-            defaultMessage: 'APM-Server has still not connected to Elasticsearch',
+            defaultMessage: 'APM Server has still not connected to Elasticsearch',
           }),
           esHitsCheck: {
             index: apmIndexPattern,
