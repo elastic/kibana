@@ -6,6 +6,7 @@
 
 // All types must be universal and be castable on the client or on the server
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { getType } from '../lib/get_type';
 
 // TODO: Currently all casting functions must be syncronous.
@@ -35,17 +36,35 @@ export function Type(config) {
 
   this.to = (node, toTypeName, types) => {
     const typeName = getType(node);
-    if (typeName !== this.name)
-      throw new Error(`Can not cast object of type '${typeName}' using '${this.name}'`);
-    else if (!this.castsTo(toTypeName))
-      throw new Error(`Can not cast '${typeName}' to '${toTypeName}'`);
+    if (typeName !== this.name) {
+      throw new Error(
+        i18n.translate('xpack.canvas.lib.type.castObjectOfTypeUsingWrongNameErrorMessage', {
+          defaultMessage: "Can not cast object of type '{typeName}' using '{name}'",
+          values: { typeName, name: this.name },
+        })
+      );
+    } else if (!this.castsTo(toTypeName)) {
+      throw new Error(
+        i18n.translate('xpack.canvas.lib.type.castTypeNameToOtherTypeNameErrorMessage', {
+          defaultMessage: "Can not cast '{typeName}' to '{toTypeName}'",
+          values: { typeName, toTypeName },
+        })
+      );
+    }
 
     return getToFn(toTypeName)(node, types);
   };
 
   this.from = (node, types) => {
     const typeName = getType(node);
-    if (!this.castsFrom(typeName)) throw new Error(`Can not cast '${this.name}' from ${typeName}`);
+    if (!this.castsFrom(typeName)) {
+      throw new Error(
+        i18n.translate('xpack.canvas.lib.type.castWrongNameFromObjectOfTypeErrorMessage', {
+          defaultMessage: "Can not cast '{name}' from {typeName}",
+          values: { typeName, name: this.name },
+        })
+      );
+    }
 
     return getFromFn(typeName)(node, types);
   };

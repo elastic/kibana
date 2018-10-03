@@ -4,23 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { castProvider } from '../interpreter/cast';
 
 export const to = () => ({
   name: 'to',
   aliases: [],
-  help: 'Explicitly cast from one type to another.',
+  help: i18n.translate('xpack.canvas.functions.explicityCastFromTypeToTypeHelpText', {
+    defaultMessage: 'Explicitly cast from one type to another.',
+  }),
   context: {},
   args: {
     type: {
       types: ['string'],
-      help: 'A known type',
+      help: i18n.translate('xpack.canvas.functions.knownTypeHelpText', {
+        defaultMessage: 'A known type',
+      }),
       aliases: ['_'],
       multi: true,
     },
   },
   fn: (context, args, { types }) => {
-    if (!args.type) throw new Error('Must specify a casting type');
+    if (!args.type) {
+      throw new Error(
+        i18n.translate('xpack.canvas.functions.specifyCastingTypeErrorMessage', {
+          defaultMessage: 'Must specify a casting type',
+        })
+      );
+    }
 
     return castProvider(types)(context, args.type);
   },

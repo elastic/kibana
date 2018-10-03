@@ -5,9 +5,16 @@
  */
 
 import { includes } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 export function Arg(config) {
-  if (config.name === '_') throw Error('Arg names must not be _. Use it in aliases instead.');
+  if (config.name === '_') {
+    throw Error(
+      i18n.translate('xpack.canvas.interpreter.argsNamesNotContainUnderscoreSignErrorMessage', {
+        defaultMessage: 'Arg names must not be _. Use it in aliases instead.',
+      })
+    );
+  }
   this.name = config.name;
   this.required = config.required || false;
   this.help = config.help;

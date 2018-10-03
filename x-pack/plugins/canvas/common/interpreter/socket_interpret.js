@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid/v4';
+import { i18n } from '@kbn/i18n';
 import { getByAlias } from '../lib/get_by_alias';
 import { serializeProvider } from '../lib/serialize';
 import { interpretProvider } from './interpret';
@@ -40,8 +41,14 @@ export function socketInterpreterProvider({
       // Get the list of functions that are known elsewhere
       return Promise.resolve(referableFunctions).then(referableFunctionMap => {
         // Check if the not-found function is in the list of alternatives, if not, throw
-        if (!getByAlias(referableFunctionMap, functionName))
-          throw new Error(`Function not found: ${functionName}`);
+        if (!getByAlias(referableFunctionMap, functionName)) {
+          throw new Error(
+            i18n.translate('xpack.canvas.interpreter.functionNotFoundErrorMessage', {
+              defaultMessage: 'Function not found: {functionName}',
+              values: { functionName },
+            })
+          );
+        }
 
         // set a unique message ID so the code knows what response to process
         const id = uuid();

@@ -5,6 +5,7 @@
  */
 
 import clone from 'lodash.clone';
+import { i18n } from '@kbn/i18n';
 import { each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { getType } from '../lib/get_type';
 import { fromExpression } from '../lib/ast';
@@ -42,7 +43,12 @@ export function interpretProvider(config) {
       case 'boolean':
         return node;
       default:
-        throw new Error(`Unknown AST object: ${JSON.stringify(node)}`);
+        throw new Error(
+          i18n.translate('xpack.canvas.interpreter.unknownAstObjectErrorMessage', {
+            defaultMessage: 'Unknown AST object: {node}',
+            values: { node: JSON.stringify(node) },
+          })
+        );
     }
   }
 
@@ -93,8 +99,11 @@ export function interpretProvider(config) {
     const expectedType = fnDef.type;
     if (expectedType && returnType !== expectedType) {
       throw new Error(
-        `Function '${fnDef.name}' should return '${expectedType}',` +
-          ` actually returned '${returnType}'`
+        i18n.translate('xpack.canvas.interpreter.functionReturnCorrectTypeErrorMessage', {
+          defaultMessage:
+            "Function '{fnDefName}' should return '{expectedType}', actually returned '{returnType}'",
+          values: { fnDefName: fnDef.name, expectedType, returnType },
+        })
       );
     }
 
@@ -104,7 +113,12 @@ export function interpretProvider(config) {
       try {
         type.validate(fnOutput);
       } catch (e) {
-        throw new Error(`Output of '${fnDef.name}' is not a valid type '${fnDef.type}': ${e}`);
+        throw new Error(
+          i18n.translate('xpack.canvas.interpreter.outputFunctionTypeIsNotValidErrorMessage', {
+            defaultMessage: "Output of '{fnDefName}' is not a valid type '{fnDefType}': {e}",
+            values: { fnDefName: fnDef.name, fndefType: fnDef.type, e },
+          })
+        );
       }
     }
 
@@ -121,8 +135,14 @@ export function interpretProvider(config) {
       (argAsts, argAst, argName) => {
         const argDef = getByAlias(argDefs, argName);
         // TODO: Implement a system to allow for undeclared arguments
-        if (!argDef)
-          throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
+        if (!argDef) {
+          throw new Error(
+            i18n.translate('xpack.canvas.interpreter.unknownArgumentPassedToFunctionErrorMessage', {
+              defaultMessage: "Unknown argument '{argName}' passed to function '{fnDefName}'",
+              values: { fnDefName: fnDef.name, argName },
+            })
+          );
+        }
 
         argAsts[argDef.name] = (argAsts[argDef.name] || []).concat(argAst);
         return argAsts;
@@ -139,10 +159,20 @@ export function interpretProvider(config) {
         typeof dealiasedArgAsts[argName] === 'undefined'
       ) {
         if (aliases.length === 0) {
-          throw new Error(`${fnDef.name} requires an argument`);
+          throw new Error(
+            i18n.translate('xpack.canvas.interpreter.functionRequireArgumentErrorMessage', {
+              defaultMessage: '{fnDefName} requires an argument',
+              values: { fnDefName: fnDef.name },
+            })
+          );
         } else {
           const errorArg = argName === '_' ? aliases[0] : argName; // use an alias if _ is the missing arg
-          throw new Error(`${fnDef.name} requires an "${errorArg}" argument`);
+          throw new Error(
+            i18n.translate('xpack.canvas.interpreter.functionRequireCorrectArgumentErrorMessage', {
+              defaultMessage: '{fnDefName} requires an "{errorArg}" argument',
+              values: { fnDefName: fnDef.name, errorArg },
+            })
+          );
         }
       }
     });

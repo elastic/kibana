@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { getType } from '../lib/get_type';
 
 export function castProvider(types) {
@@ -27,6 +28,11 @@ export function castProvider(types) {
       if (toTypeDef && toTypeDef.castsFrom(fromTypeName)) return toTypeDef.from(node, types);
     }
 
-    throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
+    throw new Error(
+      i18n.translate('xpack.canvas.interpreter.typeNameCastErrorMessage', {
+        defaultMessage: "Can not cast '{fromTypeName}' to any of '{toTypeNames}'",
+        values: { fromTypeName, toTypeNames: toTypeNames.join(', ') },
+      })
+    );
   };
 }

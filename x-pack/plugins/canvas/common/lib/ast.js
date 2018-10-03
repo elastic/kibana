@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { getType } from '../lib/get_type';
 import { parse } from './grammar';
 
@@ -31,14 +32,25 @@ function getArgumentString(arg, argKey, level = 0) {
   }
 
   // unknown type, throw with type value
-  throw new Error(`Invalid argument type in AST: ${type}`);
+  throw new Error(
+    i18n.translate('xpack.canvas.lib.ast.invalidArgumentTypeErrorMessage', {
+      defaultMessage: "Invalid argument type in AST: {type}'",
+      values: { type },
+    })
+  );
 }
 
 function getExpressionArgs(block, level = 0) {
   const args = block.arguments;
   const hasValidArgs = typeof args === 'object' && args != null && !Array.isArray(args);
 
-  if (!hasValidArgs) throw new Error('Arguments can only be an object');
+  if (!hasValidArgs) {
+    throw new Error(
+      i18n.translate('xpack.canvas.lib.ast.argumentsCanBeObjectErrorMessage', {
+        defaultMessage: 'Arguments can only be an object',
+      })
+    );
+  }
 
   const argKeys = Object.keys(args);
   const MAX_LINE_LENGTH = 80; // length before wrapping arguments
@@ -66,7 +78,13 @@ function fnWithArgs(fnName, args) {
 }
 
 function getExpression(chain, level = 0) {
-  if (!chain) throw new Error('Expressions must contain a chain');
+  if (!chain) {
+    throw new Error(
+      i18n.translate('xpack.canvas.lib.ast.expressionsMustContainChainErrorMessage', {
+        defaultMessage: 'Expressions must contain a chain',
+      })
+    );
+  }
 
   // break new functions onto new lines if we're not in a nested/sub-expression
   const separator = level > 0 ? ' | ' : '\n| ';
@@ -77,7 +95,13 @@ function getExpression(chain, level = 0) {
 
       if (type === 'function') {
         const fn = chainObj.function;
-        if (!fn || fn.length === 0) throw new Error('Functions must have a function name');
+        if (!fn || fn.length === 0) {
+          throw new Error(
+            i18n.translate('xpack.canvas.lib.ast.functionMustHaveNameErrorMessage', {
+              defaultMessage: 'Functions must have a function name',
+            })
+          );
+        }
 
         const expArgs = getExpressionArgs(chainObj, level);
 
@@ -91,7 +115,12 @@ export function fromExpression(expression, type = 'expression') {
   try {
     return parse(String(expression), { startRule: type });
   } catch (e) {
-    throw new Error(`Unable to parse expression: ${e.message}`);
+    throw new Error(
+      i18n.translate('xpack.canvas.lib.ast.unableParseExpressionErrorMessage', {
+        defaultMessage: 'Unable to parse expression: {errorMessage}',
+        values: { errorMessage: e.message },
+      })
+    );
   }
 }
 
@@ -117,10 +146,25 @@ export function toExpression(astObj, type = 'expression') {
   if (type === 'argument') return getArgumentString(astObj);
 
   const validType = ['expression', 'function'].includes(getType(astObj));
-  if (!validType) throw new Error('Expression must be an expression or argument function');
+  if (!validType) {
+    throw new Error(
+      i18n.translate(
+        'xpack.canvas.lib.ast.expressionMustBeExpressionOrArgumentFunctionErrorMessage',
+        {
+          defaultMessage: 'Expression must be an expression or argument function',
+        }
+      )
+    );
+  }
 
   if (getType(astObj) === 'expression') {
-    if (!Array.isArray(astObj.chain)) throw new Error('Expressions must contain a chain');
+    if (!Array.isArray(astObj.chain)) {
+      throw new Error(
+        i18n.translate('xpack.canvas.lib.ast.expressionMustContainChainErrorMessage', {
+          defaultMessage: 'Expressions must contain a chain',
+        })
+      );
+    }
 
     return getExpression(astObj.chain);
   }
