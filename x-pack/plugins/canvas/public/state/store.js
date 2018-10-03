@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { createStore as createReduxStore } from 'redux';
 import { isPlainObject } from 'lodash';
 import { middleware } from './middleware';
@@ -12,9 +13,21 @@ import { getRootReducer } from './reducers';
 let store;
 
 export function createStore(initialState) {
-  if (typeof store !== 'undefined') throw new Error('Redux store can only be initialized once');
+  if (typeof store !== 'undefined') {
+    throw new Error(
+      i18n.translate('xpack.canvas.state.reduxStoreCanBeInitializedOncedErrorMessage', {
+        defaultMessage: 'Redux store can only be initialized once',
+      })
+    );
+  }
 
-  if (!isPlainObject(initialState)) throw new Error('Initial state must be a plain object');
+  if (!isPlainObject(initialState)) {
+    throw new Error(
+      i18n.translate('xpack.canvas.state.initialStateMustBePlainObjectErrorMessage', {
+        defaultMessage: 'Initial state must be a plain object',
+      })
+    );
+  }
 
   const rootReducer = getRootReducer(initialState);
   store = createReduxStore(rootReducer, initialState, middleware);

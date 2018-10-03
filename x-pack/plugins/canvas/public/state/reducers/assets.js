@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { handleActions, combineActions } from 'redux-actions';
 import { set, assign, del } from 'object-path-immutable';
 import { get } from 'lodash';
@@ -24,7 +25,14 @@ export const assetsReducer = handleActions(
     [setAssetValue]: (assetState, { payload }) => {
       const { id, value } = payload;
       const asset = get(assetState, [id]);
-      if (!asset) throw new Error(`Can not set asset data, id not found: ${id}`);
+      if (!asset) {
+        throw new Error(
+          i18n.translate('xpack.canvas.state.idNotFoundToSetAssetDataErrorMessage', {
+            defaultMessage: 'Can not set asset data, id not found: {id}',
+            values: { id },
+          })
+        );
+      }
       return assign(assetState, id, { value });
     },
 

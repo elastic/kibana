@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { handleActions } from 'redux-actions';
 import { assign, push, del, set } from 'object-path-immutable';
 import { get } from 'lodash';
@@ -43,7 +44,11 @@ function moveElementLayer(workpadState, pageId, elementId, movement) {
     if (movement < Infinity && movement > -Infinity) return elementIndex + movement;
     if (movement === Infinity) return elements.length - 1;
     if (movement === -Infinity) return 0;
-    throw new Error('Invalid element layer movement');
+    throw new Error(
+      i18n.translate('xpack.canvas.state.invalidElementLayerMovementErrorMessage', {
+        defaultMessage: 'Invalid element layer movement',
+      })
+    );
   })();
 
   if (to > elements.length - 1 || to < 0) return workpadState;

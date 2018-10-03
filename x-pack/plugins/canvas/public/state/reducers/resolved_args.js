@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { handleActions } from 'redux-actions';
 import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
@@ -52,7 +53,14 @@ function getContext(value, loading = false, oldVal = null) {
 function getFullPath(path) {
   const isArray = Array.isArray(path);
   const isString = typeof path === 'string';
-  if (!isArray && !isString) throw new Error(`Resolved argument path is invalid: ${path}`);
+  if (!isArray && !isString) {
+    throw new Error(
+      i18n.translate('xpack.canvas.state.resolvedArgumentPathIsInvalidErrorMessage', {
+        defaultMessage: 'Resolved argument path is invalid: {path}',
+        values: { path },
+      })
+    );
+  }
   return prepend(path, 'resolvedArgs');
 }
 

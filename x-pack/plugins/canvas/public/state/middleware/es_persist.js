@@ -5,6 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { getWorkpad, getWorkpadPersisted } from '../selectors/workpad';
 import { getAssetIds } from '../selectors/assets';
 import { setWorkpad } from '../actions/workpad';
@@ -49,23 +50,36 @@ export const esPersistMiddleware = ({ getState }) => {
       return update(persistedWorkpad.id, persistedWorkpad).catch(err => {
         if (err.response.status === 400) {
           return notify.error(err.response, {
-            title: `Couldn't save your changes to Elasticsearch`,
+            title: i18n.translate(
+              'xpack.canvas.state.saveChangesToElasticsearchErrorMessageTitle',
+              {
+                defaultMessage: "Couldn't save your changes to Elasticsearch",
+              }
+            ),
           });
         }
 
         if (err.response.status === 413) {
           return notify.error(
-            `The server gave a response that the workpad data was too large. This
-            usually means uploaded image assets that are too large for Kibana or
-            a proxy. Try removing some assets in the asset manager.`,
+            i18n.translate('xpack.canvas.state.workpadDataTooLargeErrorMessage', {
+              defaultMessage:
+                'The server gave a response that the workpad data was too large. This usually means uploaded image assets that are too large for Kibana or a proxy. Try removing some assets in the asset manager.',
+            }),
             {
-              title: `Couldn't save your changes to Elasticsearch`,
+              title: i18n.translate(
+                'xpack.canvas.state.saveChangesToElasticsearchErrorMessageTitle',
+                {
+                  defaultMessage: "Couldn't save your changes to Elasticsearch",
+                }
+              ),
             }
           );
         }
 
         return notify.error(err.response, {
-          title: `Couldn't update workpad`,
+          title: i18n.translate('xpack.canvas.state.saveChangesToElasticsearchErrorMessageTitle', {
+            defaultMessage: "Couldn't save your changes to Elasticsearch",
+          }),
         });
       });
     }
