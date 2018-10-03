@@ -222,11 +222,12 @@ export function explorerChartsContainerServiceFactory(
 
       // Iterate through the anomaly records, adding anomalyScore properties
       // to the chartData entries for anomalous buckets.
+      const chartDataForPointSearch = getChartDataForPointSearch(chartData, records[0], chartType);
       _.each(records, (record) => {
         // Look for a chart point with the same time as the record.
         // If none found, find closest time in chartData set.
         const recordTime = record[ML_TIME_FIELD_NAME];
-        let chartPoint = findNearestChartPointToTime(getChartDataForPointSearch(chartData, record), recordTime, chartType);
+        let chartPoint = findNearestChartPointToTime(chartDataForPointSearch, recordTime);
 
         if (chartPoint === undefined) {
           // In case there is a record with a time after that of the last chart point, set the score
@@ -264,7 +265,7 @@ export function explorerChartsContainerServiceFactory(
       // which correspond to times of scheduled events for the job.
       if (scheduledEvents !== undefined) {
         _.each(scheduledEvents, (events, time) => {
-          const chartPoint = findNearestChartPointToTime(getChartDataForPointSearch(chartData, records[0]), Number(time), chartType);
+          const chartPoint = findNearestChartPointToTime(chartDataForPointSearch, Number(time));
           if (chartPoint !== undefined) {
             // Note if the scheduled event coincides with an absence of the underlying metric data,
             // we don't worry about plotting the event.
