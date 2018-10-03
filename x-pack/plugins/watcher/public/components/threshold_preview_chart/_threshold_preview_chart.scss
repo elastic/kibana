@@ -1,11 +1,9 @@
-@import (reference) "~ui/styles/variables";
-
 .thresholdPreviewChart {
   height: 100%;
   position: relative;
 
   .flot-tick-label {
-    color: @vis-axis-title-color;
+    color: $euiColorDarkShade;
   }
 }
 
