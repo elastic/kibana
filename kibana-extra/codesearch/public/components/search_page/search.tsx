@@ -243,7 +243,7 @@ class SearchPage extends React.PureComponent<Props, State> {
 
       const mainComp = (
         <EuiFlexGroup>
-          <EuiFlexItem grow={3}>
+          <EuiFlexItem grow={2}>
             <div>
               <p>
                 <strong>Repository</strong>
@@ -258,7 +258,7 @@ class SearchPage extends React.PureComponent<Props, State> {
               {langStatsComp}
             </div>
           </EuiFlexItem>
-          <EuiFlexItem grow={7}>
+          <EuiFlexItem grow={8}>
             <div>{statsComp}</div>
             <div>{resultComps}</div>
           </EuiFlexItem>
