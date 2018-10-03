@@ -34,6 +34,7 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
           title={displayName}
           description={help}
           onClick={whenClicked}
+          className="canvasCard"
         />
       </EuiFlexItem>
     );

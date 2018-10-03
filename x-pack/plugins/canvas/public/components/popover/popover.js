@@ -62,12 +62,15 @@ export class Popover extends Component {
       return button(handleClick);
     };
 
+    const appWrapper = document.querySelector('.app-wrapper');
+
     return (
       <EuiPopover
         {...rest}
         button={wrappedButton(this.handleClick)}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
+        container={appWrapper}
       >
         {children({ closePopover: this.closePopover })}
       </EuiPopover>
