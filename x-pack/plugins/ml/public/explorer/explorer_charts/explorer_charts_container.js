@@ -65,7 +65,7 @@ function ExplorerChartContainer({
           <ExplorerChartLabel
             detectorLabel={detectorLabel}
             entityFields={entityFields}
-            infoTooltip={series.infoTooltip}
+            infoTooltip={{ ...series.infoTooltip, chartType }}
             wrapLabel={wrapLabel}
           />
         </EuiFlexItem>

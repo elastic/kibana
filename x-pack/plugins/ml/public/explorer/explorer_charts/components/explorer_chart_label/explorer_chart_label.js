@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './styles/explorer_chart_label.less';
+
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -12,7 +14,7 @@ import {
 } from '@elastic/eui';
 
 import { ExplorerChartLabelBadge } from './explorer_chart_label_badge';
-import { ExplorerChartTooltip } from '../../explorer_chart_tooltip';
+import { ExplorerChartInfoTooltip } from '../../explorer_chart_info_tooltip';
 
 export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, wrapLabel = false }) {
   // Depending on whether we wrap the entityField badges to a new line, we render this differently:
@@ -41,7 +43,8 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
   const infoIcon = (
     <span className="ml-explorer-chart-info-icon">
       <EuiIconTip
-        content={<ExplorerChartTooltip {...infoTooltip} />}
+        className="ml-explorer-chart-eui-icon-tip"
+        content={<ExplorerChartInfoTooltip {...infoTooltip} />}
         position="top"
         size="s"
       />
