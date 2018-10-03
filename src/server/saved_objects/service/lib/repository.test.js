@@ -1314,6 +1314,35 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
+    it('migrates the doc if an upsert is required', async () => {
+      migrator.migrateDocument = (doc) => {
+        doc.attributes.buildNum = 42;
+        doc.migrationVersion = { foo: '2.3.4' };
+        return doc;
+      };
+
+      await savedObjectsRepository.incrementCounter(
+        'config',
+        'doesnotexist',
+        'buildNum',
+        {
+          namespace: 'foo-namespace',
+        }
+      );
+
+      sinon.assert.calledOnce(callAdminCluster);
+      expect(callAdminCluster.firstCall.args[1]).toMatchObject({
+        body: {
+          upsert: {
+            config: { buildNum: 42 },
+            migrationVersion: { foo: '2.3.4' },
+            type: 'config',
+            ...mockTimestampFields
+          }
+        },
+      });
+    });
+
     it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
       await savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', 'buildNum', {
         namespace: 'foo-namespace',
