@@ -15,10 +15,9 @@ export class ALayer {
     this._listenersMap = new Map(); // key is mbLayerId, value eventHandlers map
 
     if (this._descriptor.dataRequest) {
-      console.log(this._descriptor.dataRequest);
-      this._dataRequest = this._descriptor.dataRequest.map(dataRequest => new DataRequest(dataRequest));
+      this._dataRequests = this._descriptor.dataRequest.map(dataRequest => new DataRequest(dataRequest));
     } else {
-      this._dataRequest = [];
+      this._dataRequests = [];
     }
   }
 
@@ -139,15 +138,15 @@ export class ALayer {
   }
 
   isLayerLoading() {
-    return false;
+    return this._dataRequests[0] ?  this._dataRequests[0].isLoading() : false;
   }
 
   dataHasLoadError() {
-    return this._dataRequest[0] ? this._dataRequest[0].hasLoadError() : false;
+    return this._dataRequests[0] ? this._dataRequests[0].hasLoadError() : false;
   }
 
   getDataLoadError() {
-    return this._dataRequest[0].getLoadError();
+    return this._dataRequests[0].getLoadError();
   }
 
   toLayerDescriptor() {
