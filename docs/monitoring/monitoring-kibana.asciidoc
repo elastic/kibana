@@ -6,18 +6,20 @@
 ++++
 
 If you enable the collection of monitoring data in your cluster, you can 
-optionally collect metrics about {kib}. This method involves sending the metrics 
-to {es}, which ultimately routes them to the monitoring cluster. For an 
-alternative method, see <<monitoring-kibana>>. 
+optionally collect metrics about {kib}. 
+
+The following method involves sending the metrics to {es}, which ultimately 
+routes them to the monitoring cluster. For an alternative method, see 
+<<monitoring-metricbeat>>. 
 
 To learn about monitoring in general, see 
 {stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
 
-. Verify that the `xpack.monitoring.collection.enabled` setting is `true` on
-the production cluster. +
+. Enable the collection of monitoring data in the {stack}. Set 
+`xpack.monitoring.collection.enabled` to `true` on the production cluster.  +
 + 
 --
-For example, you can use the following API to review and change this setting:
+For example, you can use the following APIs to review and change this setting:
 
 [source,js]
 ----------------------------------
@@ -31,16 +33,14 @@ PUT _cluster/settings
 }
 ----------------------------------
 
-If that setting is `false`, which is the default value, the collection of 
-monitoring data is disabled in {es} and data is ignored from all other sources. 
-For more information, see 
-{ref}/monitoring-settings.html[Monitoring settings in {es}].
+For more information, see {ref}/monitoring-settings.html[Monitoring settings in {es}] 
+and {ref}/cluster-update-settings.html[Cluster update settings].
 --
 
 . Verify that `xpack.monitoring.enabled` and
 `xpack.monitoring.kibana.collection.enabled` are set to `true` in the 
 `kibana.yml` file on your production cluster. These are the default values. For 
-more information, see <<monitoring-settings-kb>>.
+more information, see <<monitoring-settings-kb,Monitoring settings in {kib}>>.
 
 . Identify where to send monitoring data. {kib} automatically
 sends metrics to the {es} cluster specified in the `elasticsearch.url` setting

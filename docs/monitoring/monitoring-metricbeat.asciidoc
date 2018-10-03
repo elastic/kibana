@@ -5,11 +5,11 @@
 beta[] In 6.4 and later, you can use {metricbeat} to collect and ship data about 
 {kib}, rather than routing it through {es} as described in <<monitoring-kibana>>. 
 
-. Verify that the `xpack.monitoring.collection.enabled` setting is `true` on
-the production cluster. +
+. Enable the collection of monitoring data in the {stack}. Set 
+`xpack.monitoring.collection.enabled` to `true` on the production cluster. +
 + 
 --
-For example, you can use the following API to review and change this setting:
+For example, you can use the following APIs to review and change this setting:
 
 [source,js]
 ----------------------------------
@@ -23,36 +23,92 @@ PUT _cluster/settings
 }
 ----------------------------------
 
-If that setting is `false`, which is the default value,
-the collection of monitoring data is disabled in {es} and data is ignored from
-all other sources. For more information, see
-{ref}/monitoring-settings.html[Monitoring settings in {es}].
+For more information, see {ref}/monitoring-settings.html[Monitoring settings in {es}] 
+and {ref}/cluster-update-settings.html[Cluster update settings].
 --
 
-. Disable the default collection of {kib} monitoring metrics. Set the 
-`xpack.monitoring.kibana.collection.enabled` setting to `false` in the `kibana.yml` 
-file on your production cluster. For more information, see <<monitoring-settings-kb>>.
+. Disable the default collection of {kib} monitoring metrics. +
++
+--
+Add the following setting in the `kibana.yml` file on your production cluster: 
+
+[source,yaml]
+----------------------------------
+xpack.monitoring.kibana.collection.enabled: false
+----------------------------------
+
+For more information, see 
+<<monitoring-settings-kb,Monitoring settings in {kib}>>.
 //TBD: What does xpack.monitoring.enabled need to be set to?
+--
 
-. Install {metricbeat} on the same node as {kib}. 
+. {metricbeat-ref}/metricbeat-installation.html[Install {metricbeat}] on the 
+same node as {kib}.
 
-. Enable the {metricbeat} module for {kib}. 
+. Enable the {kib} module in {metricbeat}. +
++
+--
+For example, to enable the default configuration in the `modules.d` directory, 
+run the following command:
 
-. Identify where to send monitoring data. +
+["source","sh",subs="attributes,callouts"]
+----------------------------------------------------------------------
+metricbeat modules enable kibana
+----------------------------------------------------------------------
+
+Alternatively, you can enable module configs in the `metricbeat.yml` file. For 
+more information, see 
+{metricbeat-ref}/configuration-metricbeat.html[Specify which modules to run] and 
+{metricbeat-ref}/metricbeat-module-kibana.html[{kib} module]. 
+--
+
+. Configure the {kib} module in {metricbeat}. +
++
+--
+For example, you can change the default module configuration by modifying the 
+`kibana.yml` file in the `modules.d` directory:
+
+[source,yaml]
+----------------------------------
+- module: kibana
+  metricsets:
+    - stats
+  period: 10s
+  hosts: ["http://localhost:5601"] <1>
+  xpack.enabled: true
+----------------------------------
+<1> This setting identifies the host and port number that are used to access {kib}.  
+
+NOTE: If you configured {kib} to use <<configuring-tls,encrypted communications>>, 
+you must access it via HTTPS. For example, `https://localhost:5601`. 
+
+--
+
+. Identify where to send the monitoring data. +
 +
 --
 TIP: In production environments, we strongly recommend using a separate cluster 
 (referred to as the _monitoring cluster_) to store the data. Using a separate 
 monitoring cluster prevents production cluster outages from impacting your 
 ability to access your monitoring data. It also prevents monitoring activities 
-from impacting the performance of your production cluster. 
+from impacting the performance of your production cluster.
 
-If {security} is enabled on the monitoring cluster, use an HTTPS URL such
-as `https://<your_monitoring_cluster>:9200`.
+For example, specify the {es} output information in the `kibana.yml` file in the 
+`modules.d` directory:
+
+[source,yaml]
+----------------------------------
+output.elasticsearch:
+  hosts: ["http://es-mon-1:9200", "http://es-mon2:9200"] <1>
+----------------------------------
+<1> In this example, the data is stored on a monitoring cluster with nodes 
+`es-mon-1` and `es-mon-2`. 
+
+NOTE: If you configured the monitoring cluster to use 
+{ref}/configuring-tls.html[encrypted communications], you must access it via 
+HTTPS. For example, `https://es-mon-1:9200`. 
 
 --
-
-. Configure the module.  
 
 . Start {kib}.
 
