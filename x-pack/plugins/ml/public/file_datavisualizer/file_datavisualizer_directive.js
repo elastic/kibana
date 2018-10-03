@@ -10,7 +10,7 @@ import 'ngreact';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { checkBasicLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
@@ -24,7 +24,7 @@ uiRoutes
   .when('/filedatavisualizer/?', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkBasicLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
       loadNewJobDefaults,

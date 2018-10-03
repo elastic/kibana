@@ -12,7 +12,7 @@
  */
 
 import uiRoutes from 'ui/routes';
-import { checkLicenseExpired } from 'plugins/ml/license/check_license';
+import { checkLicenseExpired, checkBasicLicense } from 'plugins/ml/license/check_license';
 import { preConfiguredJobRedirect } from 'plugins/ml/jobs/new_job/wizard/preconfigured_job_redirect';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
@@ -35,7 +35,22 @@ uiRoutes
       indexPatterns: loadIndexPatterns,
       preConfiguredJobRedirect,
       checkMlNodesAvailable,
-      initPromise: initPromise(true)
+      initPromise: initPromise(true),
+      nextStepPath: () => '#/jobs/new_job/step/job_type',
+    }
+  });
+
+uiRoutes
+  .when('/datavisualizer_index_select', {
+    template,
+    resolve: {
+      CheckLicense: checkBasicLicense,
+      privileges: checkCreateJobsPrivilege,
+      indexPatterns: loadIndexPatterns,
+      preConfiguredJobRedirect,
+      checkMlNodesAvailable,
+      initPromise: initPromise(true),
+      nextStepPath: () => '#jobs/new_job/datavisualizer',
     }
   });
 
@@ -43,27 +58,26 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.controller('MlNewJobStepIndexOrSearch',
-  function ($scope) {
+  function ($scope, $route) {
 
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
 
     $scope.indexPatterns = getIndexPatterns();
 
+    const path = $route.current.locals.nextStepPath;
+
     $scope.withIndexPatternUrl = function (pattern) {
       if (!pattern) {
         return;
       }
-
-      return '#/jobs/new_job/step/job_type?index=' + encodeURIComponent(pattern.id);
+      return `${path}?index=${encodeURIComponent(pattern.id)}`;
     };
 
     $scope.withSavedSearchUrl = function (savedSearch) {
       if (!savedSearch) {
         return;
       }
-
-      return '#/jobs/new_job/step/job_type?savedSearchId=' + encodeURIComponent(savedSearch.id);
+      return `${path}?savedSearchId=${encodeURIComponent(savedSearch.id)}`;
     };
-
   });

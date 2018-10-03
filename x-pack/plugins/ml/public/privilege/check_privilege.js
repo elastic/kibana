@@ -7,7 +7,7 @@
 
 
 import { getPrivileges } from 'plugins/ml/privilege/get_privileges';
-import { getLicenseHasExpired } from 'plugins/ml/license/check_license';
+import { hasLicenseExpired } from 'plugins/ml/license/check_license';
 
 let privileges = {};
 
@@ -48,7 +48,7 @@ export function checkCreateJobsPrivilege(Private, Promise, kbnUrl) {
 // check the privilege type and the license to see whether a user has permission to access a feature.
 // takes the name of the privilege variable as specified in get_privileges.js
 export function checkPermission(privilegeType) {
-  const licenseHasExpired = getLicenseHasExpired();
+  const licenseHasExpired = hasLicenseExpired();
   return (privileges[privilegeType] === true && licenseHasExpired !== true);
 }
 
@@ -56,7 +56,7 @@ export function checkPermission(privilegeType) {
 // expired or if they don't have the privilege to press that button
 export function createPermissionFailureMessage(privilegeType) {
   let message = '';
-  const licenseHasExpired = getLicenseHasExpired();
+  const licenseHasExpired = hasLicenseExpired();
   if (licenseHasExpired) {
     message = 'Your license has expired.';
   } else if (privilegeType === 'canCreateJob') {

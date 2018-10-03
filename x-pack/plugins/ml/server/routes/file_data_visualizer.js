@@ -30,6 +30,7 @@ export function fileDataVisualizerRoutes(server, commonRouteConfig) {
     config: {
       ...commonRouteConfig,
       payload: { maxBytes: MAX_BYTES },
+      timeout: { socket: false, server: (1200000) },
     }
   });
 }

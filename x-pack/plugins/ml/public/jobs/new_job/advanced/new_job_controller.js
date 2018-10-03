@@ -14,7 +14,7 @@ import { parseInterval } from 'ui/utils/parse_interval';
 import { timefilter } from 'ui/timefilter';
 
 import uiRoutes from 'ui/routes';
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import template from './new_job.html';
 import saveStatusTemplate from 'plugins/ml/jobs/new_job/advanced/save_status_modal/save_status_modal.html';
@@ -38,7 +38,7 @@ uiRoutes
   .when('/jobs/new_job/advanced', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkCreateJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       indexPatterns: loadIndexPatterns,
@@ -51,7 +51,7 @@ uiRoutes
   .when('/jobs/new_job/advanced/:jobId', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkCreateJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       indexPatterns: loadIndexPatterns,

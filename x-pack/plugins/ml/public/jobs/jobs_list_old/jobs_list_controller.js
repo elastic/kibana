@@ -20,7 +20,7 @@ import { copyTextToClipboard } from 'plugins/ml/util/clipboard_utils';
 
 import { timefilter } from 'ui/timefilter';
 import uiRoutes from 'ui/routes';
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission, createPermissionFailureMessage } from 'plugins/ml/privilege/check_privilege';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { getMlNodeCount, mlNodesAvailable, permissionToViewMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
@@ -43,7 +43,7 @@ uiRoutes
   .when('/jobs_old/?', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
       loadNewJobDefaults,
