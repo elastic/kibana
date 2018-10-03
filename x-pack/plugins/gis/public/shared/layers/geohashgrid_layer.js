@@ -151,14 +151,12 @@ export class GeohashGridLayer extends ALayer {
         ]);
 
         isContained = turfBooleanContains(dataExtent, mapStateExtent);
-        console.log('bfore');
         samePrecision = dataMeta.precision === targetPrecision;
       }
       if (dataMeta.timeFilters) {
         sameTime = dataFilters.timeFilters === dataMeta.timeFilters;
       }
     }
-    console.log('blargh');
     if (samePrecision && isContained && sameTime) {
       return;
     }

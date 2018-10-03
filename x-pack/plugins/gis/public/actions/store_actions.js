@@ -30,8 +30,7 @@ export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
-function getLayerLoadingCallbacks(dispatch, layerId, tokenString) {
-  // const requestToken = Symbol(tokenString);
+function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
     startLoading: (dataId, requestToken, initData) => dispatch(startDataLoad(layerId, dataId, requestToken, initData)),
     stopLoading: (dataId, requestToken, returnData) => dispatch(endDataLoad(layerId, dataId, requestToken, returnData)),
@@ -40,8 +39,6 @@ function getLayerLoadingCallbacks(dispatch, layerId, tokenString) {
 }
 
 export function replaceLayerList(newLayerList) {
-  const tokenString = 'data_request_sync_layerreplacement';
-
   return async (dispatch, getState) => {
     await dispatch({
       type: REPLACE_LAYERLIST,
@@ -53,7 +50,7 @@ export function replaceLayerList(newLayerList) {
     const dataFilters = getDataFilters(state);
 
     layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId(), tokenString);
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
       layer.syncData({ ...loadingFunctions, dataFilters });
     });
   };
@@ -110,7 +107,6 @@ export function mapReady() {
 }
 
 export function mapExtentChanged(newMapConstants) {
-  const tokenString = 'data_request_sync_extentchange';
   return async (dispatch, getState) => {
     const state = getState();
     const dataFilters = getDataFilters(state);
@@ -125,7 +121,7 @@ export function mapExtentChanged(newMapConstants) {
 
     const layerList = getLayerList(state);
     layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId(), tokenString);
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
       layer.syncData({
         ...loadingFunctions,
         dataFilters: { ...dataFilters, ...newMapConstants }
@@ -165,13 +161,13 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
 }
 
 export function addPreviewLayer(layer, position) {
-  const tokenString = 'data_request';
+
   const layerDescriptor = layer.toLayerDescriptor();
 
   return async (dispatch, getState) => {
     await dispatch(addLayer(layerDescriptor, position));
     const dataFilters = getDataFilters(getState());
-    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId(), tokenString);
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
     layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
@@ -229,7 +225,6 @@ export function setMeta(metaJson) {
 }
 
 export function setTimeFilters(timeFilters) {
-  const tokenString = 'data_request_sync_timechange';
   return async (dispatch, getState) => {
     dispatch({
       type: SET_TIME_FILTERS,
@@ -239,7 +234,7 @@ export function setTimeFilters(timeFilters) {
     const dataFilters = getDataFilters(state);
     const layerList = getLayerList(getState());
     layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId(), tokenString);
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
       layer.syncData({
         ...loadingFunctions,
         dataFilters: { ...dataFilters, timeFilters: { ...timeFilters } }
@@ -249,7 +244,6 @@ export function setTimeFilters(timeFilters) {
 }
 
 export function updateLayerStyle(style, temporary = true) {
-  const tokenString = 'data_request_sync_style_change';
   return async (dispatch, getState) => {
     await dispatch({
       type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
@@ -261,7 +255,7 @@ export function updateLayerStyle(style, temporary = true) {
     const state = getState();
     const dataFilters = getDataFilters(state);
     const layer = getSelectedLayer(state);
-    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId(), tokenString);
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
     layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
@@ -280,7 +274,6 @@ export function clearTemporaryStyles() {
 
 
 export function setJoinsForLayer(layer, joins) {
-  const tokenString = 'data_request_sync_setjoins';
   return async (dispatch, getState) => {
     await dispatch({
       type: SET_JOINS,
@@ -290,7 +283,7 @@ export function setJoinsForLayer(layer, joins) {
     const dataFilters = getDataFilters(getState());
     const layersWithJoin = getLayerList(getState());
     const layerWithJoin = layersWithJoin.find(lwj => lwj.getId() === layer.getId());
-    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId(), tokenString);
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
     layerWithJoin.syncData({ ...loadingFunctions, dataFilters });
   };
 }
