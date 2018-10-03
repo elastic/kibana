@@ -5,11 +5,11 @@
  */
 // @ts-ignore
 import { EuiColorPicker, EuiFieldText, EuiFlexItem, EuiFormRow, EuiLink } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
-import { MAX_SPACE_INITIALS } from '../../../../common/constants';
-import { Space } from '../../../../common/model/space';
-import { getSpaceColor, getSpaceInitials } from '../../../../common/space_attributes';
+import { MAX_SPACE_INITIALS } from '../../../../../common/constants';
+import { Space } from '../../../../../common/model/space';
+import { getSpaceColor, getSpaceInitials } from '../../../../../common/space_attributes';
 
 interface Props {
   space: Partial<Space>;
@@ -18,7 +18,6 @@ interface Props {
 }
 
 interface State {
-  expanded: boolean;
   initialsHasFocus: boolean;
   pendingInitials?: string | null;
 }
@@ -29,16 +28,11 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      expanded: false,
       initialsHasFocus: false,
     };
   }
 
   public render() {
-    return this.state.expanded ? this.getCustomizeFields() : this.getCustomizeLink();
-  }
-
-  public getCustomizeFields = () => {
     const { space, intl } = this.props;
 
     const { initialsHasFocus, pendingInitials } = this.state;
@@ -74,7 +68,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
         </EuiFlexItem>
       </Fragment>
     );
-  };
+  }
 
   public initialsInputRef = (ref: HTMLInputElement) => {
     if (ref) {
@@ -101,27 +95,6 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
     this.setState({
       initialsHasFocus: false,
       pendingInitials: null,
-    });
-  };
-
-  public getCustomizeLink = () => {
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiFormRow hasEmptyLabelSpace={true}>
-          <EuiLink name="customize_space_link" onClick={this.showFields}>
-            <FormattedMessage
-              id="xpack.spaces.management.customizeSpaceAvatar.customizeLinkText"
-              defaultMessage="Customize"
-            />
-          </EuiLink>
-        </EuiFormRow>
-      </EuiFlexItem>
-    );
-  };
-
-  public showFields = () => {
-    this.setState({
-      expanded: true,
     });
   };
 

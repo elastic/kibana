@@ -16,6 +16,7 @@ import { setupXPackMain } from './server/lib/setup_xpack_main';
 import {
   xpackInfoRoute,
   telemetryRoute,
+  featuresRoute,
 } from './server/routes/api/v1';
 import {
   CONFIG_TELEMETRY,
@@ -126,6 +127,7 @@ export const xpackMain = (kibana) => {
       xpackInfoRoute(server);
       telemetryRoute(server);
       settingsRoute(server, this.kbnServer);
+      featuresRoute(server);
     }
   });
 };

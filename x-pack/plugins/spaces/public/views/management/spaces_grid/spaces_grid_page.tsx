@@ -20,15 +20,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { uiCapabilities } from 'ui/capabilities';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
-
-import { SpacesNavState } from 'plugins/spaces/views/nav_control';
-import { uiCapabilities } from 'ui/capabilities';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
 import { SpacesManager } from '../../../lib/spaces_manager';
+import { SpacesNavState } from '../../nav_control';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';

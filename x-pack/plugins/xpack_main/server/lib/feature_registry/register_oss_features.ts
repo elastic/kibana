@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature, registerFeature } from './feature_registry';
+import { Feature } from 'x-pack/common/feature';
+import { registerFeature } from './feature_registry';
 
 const kibanaFeatures: Feature[] = [
   {

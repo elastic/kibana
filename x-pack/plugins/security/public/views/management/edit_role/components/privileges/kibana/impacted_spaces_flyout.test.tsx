@@ -28,11 +28,13 @@ const buildProps = (customProps = {}) => {
       {
         id: 'default',
         name: 'Default Space',
+        disabledFeatures: [],
         _reserved: true,
       },
       {
         id: 'marketing',
         name: 'Marketing',
+        disabledFeatures: [],
       },
     ],
     kibanaAppPrivileges: [

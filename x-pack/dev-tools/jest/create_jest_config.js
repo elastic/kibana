@@ -13,6 +13,7 @@ export function createJestConfig({
     roots: [
       "<rootDir>/plugins",
       "<rootDir>/server",
+      "<rootDir>/public",
     ],
     moduleFileExtensions: [
       "js",

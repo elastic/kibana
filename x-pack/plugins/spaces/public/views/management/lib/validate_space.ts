@@ -4,19 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { Feature } from 'x-pack/common/feature';
 import { isReservedSpace } from '../../../../common/is_reserved_space';
 import { Space } from '../../../../common/model/space';
 import { isValidSpaceIdentifier } from './space_identifier_utils';
 
 interface SpaceValidatorOptions {
+  features: Feature[];
   shouldValidate?: boolean;
 }
 
 export class SpaceValidator {
   private shouldValidate: boolean;
+  private featureIds: string[];
 
-  constructor(options: SpaceValidatorOptions = {}) {
+  constructor(options: SpaceValidatorOptions) {
     this.shouldValidate = options.shouldValidate || false;
+    this.featureIds = options.features.map(feature => feature.id);
   }
 
   public enableValidation() {
@@ -99,12 +103,30 @@ export class SpaceValidator {
     return valid();
   }
 
+  public validateEnabledFeatures(space: Partial<Space>) {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    const knownDisabledFeatures = (space.disabledFeatures || []).filter(id =>
+      this.featureIds.includes(id)
+    );
+
+    const totalFeatureCount = this.featureIds.length;
+
+    if (knownDisabledFeatures.length === totalFeatureCount) {
+      return invalid(`At least 1 feature must be enabled`);
+    }
+    return valid();
+  }
+
   public validateForSave(space: Space) {
     const { isInvalid: isNameInvalid } = this.validateSpaceName(space);
     const { isInvalid: isDescriptionInvalid } = this.validateSpaceDescription(space);
     const { isInvalid: isIdentifierInvalid } = this.validateURLIdentifier(space);
+    const { isInvalid: areFeaturesInvalid } = this.validateEnabledFeatures(space);
 
-    if (isNameInvalid || isDescriptionInvalid || isIdentifierInvalid) {
+    if (isNameInvalid || isDescriptionInvalid || isIdentifierInvalid || areFeaturesInvalid) {
       return invalid();
     }
 

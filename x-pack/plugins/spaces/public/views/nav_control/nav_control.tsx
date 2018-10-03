@@ -12,8 +12,8 @@ import { NavControlPopover } from 'plugins/spaces/views/nav_control/nav_control_
 // @ts-ignore
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import ReactDOM from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { NavControlSide } from 'ui/chrome/directives/header_global_nav';
 // @ts-ignore
 import { uiModules } from 'ui/modules';

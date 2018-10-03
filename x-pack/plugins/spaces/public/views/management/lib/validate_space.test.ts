@@ -4,13 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Feature } from 'x-pack/common/feature';
 import { SpaceValidator } from './validate_space';
 
 let validator: SpaceValidator;
 
+const ALL_FEATURES: Feature[] = [
+  {
+    id: 'foo',
+    name: 'foo',
+    type: 'app',
+  },
+  {
+    id: 'bar',
+    name: 'bar',
+    type: 'app',
+  },
+];
+
 describe('validateSpaceName', () => {
   beforeEach(() => {
-    validator = new SpaceValidator({ shouldValidate: true });
+    validator = new SpaceValidator({
+      shouldValidate: true,
+      features: [
+        {
+          id: 'foo',
+          name: 'foo',
+          type: 'app',
+        },
+        {
+          id: 'bar',
+          name: 'bar',
+          type: 'app',
+        },
+      ],
+    });
   });
 
   test('it allows a name with special characters', () => {
@@ -125,5 +153,46 @@ describe('validateURLIdentifier', () => {
     };
 
     expect(validator.validateURLIdentifier(space)).toEqual({ isInvalid: false });
+  });
+});
+
+describe('validateSpaceFeatures', () => {
+  it('allows features to be disabled', () => {
+    const space = {
+      id: '',
+      name: '',
+      disabledFeatures: ['foo'],
+    };
+
+    expect(validator.validateEnabledFeatures(space)).toEqual({ isInvalid: false });
+  });
+
+  it('does not allow all features to be disabled', () => {
+    const space = {
+      id: '',
+      name: '',
+      disabledFeatures: ['foo', 'bar'],
+    };
+
+    expect(validator.validateEnabledFeatures(space)).toEqual({
+      isInvalid: true,
+      error: `At least 1 feature must be enabled`,
+    });
+  });
+
+  it('ignores unknown features', () => {
+    // builds a list of unknown features, of the same length of known features.
+    // this enables us to verify that we don't get the "at least 1 feature must be enabled"
+    // message when specifying the unknown features
+
+    const unknownFeatureIds = ALL_FEATURES.map(feature => `${feature.id}-unknown`);
+
+    const space = {
+      id: '',
+      name: '',
+      disabledFeatures: unknownFeatureIds,
+    };
+
+    expect(validator.validateEnabledFeatures(space)).toEqual({ isInvalid: false });
   });
 });

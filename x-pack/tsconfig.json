@@ -2,6 +2,7 @@
   "extends": "../tsconfig.json",
   "include": [
     "common/**/*",
+    "public/**/*",
     "server/**/*",
     "plugins/**/*",
     "test_utils/**/*"

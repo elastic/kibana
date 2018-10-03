@@ -9,8 +9,10 @@ import { resolve } from 'path';
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
+import { registerUserProfileCapabilityDecorator } from '../xpack_main/server/lib/user_profile';
 import mappings from './mappings.json';
 import { SpacesAuditLogger } from './server/lib/audit_logger';
+import { spacesCapabilityDecorator } from './server/lib/capability_decorator';
 import { checkLicense } from './server/lib/check_license';
 import { createDefaultSpace } from './server/lib/create_default_space';
 import { createSpacesService } from './server/lib/create_spaces_service';
@@ -55,6 +57,14 @@ export const spaces = (kibana: any) =>
       ],
       hacks: [],
       mappings,
+      migrations: {
+        space: {
+          '6.6.0': (doc: Record<string, any>) => {
+            doc.attributes.disabledFeatures = [];
+            return doc;
+          },
+        },
+      },
       savedObjectSchemas: {
         space: {
           isNamespaceAgnostic: true,
@@ -113,6 +123,8 @@ export const spaces = (kibana: any) =>
       watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin, async () => {
         await createDefaultSpace(server);
       });
+
+      registerUserProfileCapabilityDecorator(Number.MAX_VALUE, spacesCapabilityDecorator);
 
       // Register a function that is called whenever the xpack info changes,
       // to re-compute the license check results for this plugin

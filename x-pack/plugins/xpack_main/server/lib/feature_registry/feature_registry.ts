@@ -39,6 +39,10 @@ export function registerFeature(feature: Feature) {
   features[feature.id] = feature;
 }
 
+export function unregisterFeature(feature: Feature) {
+  delete features[feature.id];
+}
+
 export function getFeatures(): Feature[] {
   return _.cloneDeep(Object.values(features));
 }

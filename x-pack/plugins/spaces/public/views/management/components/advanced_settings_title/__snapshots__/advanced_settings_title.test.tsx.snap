@@ -17,6 +17,7 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
     <Component
       space={
         Object {
+          "disabledFeatures": Array [],
           "id": "my-space",
           "name": "My Space",
         }

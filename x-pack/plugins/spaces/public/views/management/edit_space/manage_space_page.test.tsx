@@ -13,6 +13,7 @@ import { ManageSpacePage } from './manage_space_page';
 const space = {
   id: 'my-space',
   name: 'My Space',
+  disabledFeatures: [],
 };
 const buildMockChrome = () => {
   return {
@@ -39,6 +40,7 @@ describe('ManageSpacePage', () => {
       <ManageSpacePage.WrappedComponent
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
+        features={[{ id: 'foo', name: 'foo', type: 'app' }]}
         intl={null as any}
       />
     );
@@ -58,6 +60,7 @@ describe('ManageSpacePage', () => {
       description: 'some description',
       color: undefined,
       initials: undefined,
+      disabledFeatures: [],
     });
   });
 
@@ -71,6 +74,7 @@ describe('ManageSpacePage', () => {
             description: 'hey an existing space',
             color: '#aabbcc',
             initials: 'AB',
+            disabledFeatures: [],
           },
         });
       }),
@@ -91,6 +95,7 @@ describe('ManageSpacePage', () => {
         spaceId={'existing-space'}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
+        features={[{ id: 'foo', name: 'foo', type: 'app' }]}
         intl={null as any}
       />
     );
@@ -119,6 +124,7 @@ describe('ManageSpacePage', () => {
       description: 'some description',
       color: '#aabbcc',
       initials: 'AB',
+      disabledFeatures: [],
     });
   });
 });

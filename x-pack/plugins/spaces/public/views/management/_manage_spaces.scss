@@ -1,3 +1,5 @@
+@import 'x-pack/public/components/collapsible_panel/collapsible_panel';
+
 #manageSpacesReactRoot {
   background: $euiColorLightestShade;
   flex-grow: 1;
@@ -9,7 +11,7 @@
 }
 
 .spcManagePage__content {
-  max-width: 640px;
+  max-width: 1280px;
   margin-left: auto;
   margin-right: auto;
   flex-grow: 0;
