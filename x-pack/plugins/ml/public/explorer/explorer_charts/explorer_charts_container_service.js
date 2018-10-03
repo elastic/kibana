@@ -220,24 +220,13 @@ export function explorerChartsContainerServiceFactory(
         }));
       }
 
-      let chartDataForPointSearch = chartData;
-
       // Iterate through the anomaly records, adding anomalyScore properties
       // to the chartData entries for anomalous buckets.
       _.each(records, (record) => {
-
-        if (
-          chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
-          chartType === CHART_TYPE.POPULATION_DISTRIBUTION
-        ) {
-          chartDataForPointSearch = chartData.filter((d) => {
-            return d.entity === (record.by_field_value || record.over_field_value);
-          });
-        }
-
         // Look for a chart point with the same time as the record.
         // If none found, find closest time in chartData set.
-        let chartPoint = findNearestChartPointToTime(chartDataForPointSearch, record);
+        const recordTime = record[ML_TIME_FIELD_NAME];
+        let chartPoint = findNearestChartPointToTime(getChartDataForPointSearch(chartData, record), recordTime, chartType);
 
         if (chartPoint === undefined) {
           // In case there is a record with a time after that of the last chart point, set the score
@@ -275,7 +264,7 @@ export function explorerChartsContainerServiceFactory(
       // which correspond to times of scheduled events for the job.
       if (scheduledEvents !== undefined) {
         _.each(scheduledEvents, (events, time) => {
-          const chartPoint = findNearestChartPointToTime(chartData, time);
+          const chartPoint = findNearestChartPointToTime(getChartDataForPointSearch(chartData, records[0]), Number(time), chartType);
           if (chartPoint !== undefined) {
             // Note if the scheduled event coincides with an absence of the underlying metric data,
             // we don't worry about plotting the event.
@@ -287,9 +276,20 @@ export function explorerChartsContainerServiceFactory(
       return chartData;
     }
 
-    function findNearestChartPointToTime(chartData, record) {
-      const time = record[ML_TIME_FIELD_NAME];
+    function getChartDataForPointSearch(chartData, record, chartType) {
+      if (
+        chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
+        chartType === CHART_TYPE.POPULATION_DISTRIBUTION
+      ) {
+        return chartData.filter((d) => {
+          return d.entity === (record.by_field_value || record.over_field_value);
+        });
+      }
 
+      return chartData;
+    }
+
+    function findNearestChartPointToTime(chartData, time) {
       let chartPoint;
       for (let i = 0; i < chartData.length; i++) {
         if (chartData[i].date === time) {
