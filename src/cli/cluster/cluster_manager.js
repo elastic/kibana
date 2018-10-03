@@ -44,44 +44,40 @@ export default class ClusterManager {
     this.basePathProxy = basePathProxy;
 
     const serverArgv = [];
-    const optimizerArgv = [
-      '--plugins.initialize=false',
-      '--server.autoListen=false',
-    ];
+    const optimizerArgv = ['--plugins.initialize=false', '--server.autoListen=false'];
 
     if (this.basePathProxy) {
       optimizerArgv.push(
         `--server.basePath=${this.basePathProxy.basePath}`,
-        '--server.rewriteBasePath=true',
+        '--server.rewriteBasePath=true'
       );
 
       serverArgv.push(
         `--server.port=${this.basePathProxy.targetPort}`,
         `--server.basePath=${this.basePathProxy.basePath}`,
-        '--server.rewriteBasePath=true',
+        '--server.rewriteBasePath=true'
       );
     }
 
     this.workers = [
-      this.optimizer = new Worker({
+      (this.optimizer = new Worker({
         type: 'optmzr',
         title: 'optimizer',
         log: this.log,
         argv: optimizerArgv,
-        watch: false
-      }),
-
-      this.server = new Worker({
+        watch: false,
+      })),
+      (this.server = new Worker({
         type: 'server',
         log: this.log,
-        argv: serverArgv
-      })
+        argv: serverArgv,
+      })),
     ];
 
     // broker messages between workers
-    this.workers.forEach((worker) => {
-      worker.on('broadcast', (msg) => {
-        this.workers.forEach((to) => {
+    this.workers.forEach(worker => {
+      worker.on('broadcast', msg => {
+        this.workers.forEach(to => {
           if (to !== worker && to.online) {
             to.fork.send(msg);
           }
@@ -94,26 +90,26 @@ export default class ClusterManager {
     if (opts.watch) {
       const pluginPaths = config.get('plugins.paths');
       const scanDirs = config.get('plugins.scanDirs');
-      const extraPaths = [
-        ...pluginPaths,
-        ...scanDirs,
-      ];
+      const extraPaths = [...pluginPaths, ...scanDirs];
 
       const extraIgnores = scanDirs
         .map(scanDir => resolve(scanDir, '*'))
         .concat(pluginPaths)
-        .reduce((acc, path) => acc.concat(
-          resolve(path, 'test'),
-          resolve(path, 'build'),
-          resolve(path, 'target'),
-          resolve(path, 'scripts'),
-          resolve(path, 'docs'),
-        ), []);
+        .reduce(
+          (acc, path) =>
+            acc.concat(
+              resolve(path, 'test'),
+              resolve(path, 'build'),
+              resolve(path, 'target'),
+              resolve(path, 'scripts'),
+              resolve(path, 'docs'),
+              resolve(path, 'x-pack/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
+            ),
+          []
+        );
 
       this.setupWatching(extraPaths, extraIgnores);
-    }
-
-    else this.startCluster();
+    } else this.startCluster();
   }
 
   startCluster() {
@@ -141,7 +137,7 @@ export default class ClusterManager {
       fromRoot('x-pack/server'),
       fromRoot('x-pack/webpackShims'),
       fromRoot('config'),
-      ...extraPaths
+      ...extraPaths,
     ].map(path => resolve(path));
 
     this.watcher = chokidar.watch(uniq(watchPaths), {
@@ -149,21 +145,24 @@ export default class ClusterManager {
       ignored: [
         /[\\\/](\..*|node_modules|bower_components|public|__[a-z0-9_]+__|coverage)[\\\/]/,
         /\.test\.js$/,
-        ...extraIgnores
-      ]
+        ...extraIgnores,
+      ],
     });
 
     this.watcher.on('add', this.onWatcherAdd);
     this.watcher.on('error', this.onWatcherError);
 
-    this.watcher.on('ready', once(() => {
-      // start sending changes to workers
-      this.watcher.removeListener('add', this.onWatcherAdd);
-      this.watcher.on('all', this.onWatcherChange);
+    this.watcher.on(
+      'ready',
+      once(() => {
+        // start sending changes to workers
+        this.watcher.removeListener('add', this.onWatcherAdd);
+        this.watcher.on('all', this.onWatcherChange);
 
-      this.log.good('watching for changes', `(${this.addedCount} files)`);
-      this.startCluster();
-    }));
+        this.log.good('watching for changes', `(${this.addedCount} files)`);
+        this.startCluster();
+      })
+    );
   }
 
   setupManualRestart() {
@@ -171,7 +170,7 @@ export default class ClusterManager {
     const rl = readline.createInterface(process.stdin, process.stdout);
 
     let nls = 0;
-    const clear = () => nls = 0;
+    const clear = () => (nls = 0);
     const clearSoon = debounce(clear, 2000);
 
     rl.setPrompt('');
@@ -223,9 +222,8 @@ export default class ClusterManager {
       return Promise.resolve();
     }
 
-    return race(
-      fromEvent(this.server, 'listening'),
-      fromEvent(this.server, 'crashed')
-    ).pipe(first()).toPromise();
+    return race(fromEvent(this.server, 'listening'), fromEvent(this.server, 'crashed'))
+      .pipe(first())
+      .toPromise();
   }
 }
