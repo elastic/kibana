@@ -18,11 +18,11 @@
  */
 import { i18n } from '@kbn/i18n';
 
-const indexPatternTypeName = i18n.translate('kbn.management.editIndexPattern.createIndex.defaultTypeName',
+const indexPatternTypeName = i18n.translate('common.ui.management.editIndexPattern.createIndex.defaultTypeName',
   { defaultMessage: 'index pattern' });
-const indexPatternButtonText = i18n.translate('kbn.management.editIndexPattern.createIndex.defaultButtonText',
+const indexPatternButtonText = i18n.translate('common.ui.management.editIndexPattern.createIndex.defaultButtonText',
   { defaultMessage: 'Standard index pattern' });
-const indexPatternButtonDescription = i18n.translate('kbn.management.editIndexPattern.createIndex.defaultButtonDescription',
+const indexPatternButtonDescription = i18n.translate('common.ui.management.editIndexPattern.createIndex.defaultButtonDescription',
   { defaultMessage: 'Can perform full aggregations against any data' });
 
 export class IndexPatternCreationConfig {
