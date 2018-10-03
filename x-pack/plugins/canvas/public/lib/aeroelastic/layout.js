@@ -1173,38 +1173,6 @@ const axisAlignedBoundingBoxShape = shapesToBox => {
   return aabbShape;
 };
 
-/*
-// alternative to `resizeGroup` that scales the elements inside pixel-wise, rather than responsively
-// todo consider activating it via a modifier key, if it's deemed useful (could be useful for effects esp. w/ 3D)
-// code is draft and didn't get even the same level of care as its alternative, `resizeGroup`
-const scaleGroup = (shapes, selectedShapes, elements) => {
-  if (!elements.length) return { shapes, selectedShapes };
-  const e = elements[0];
-  if (e.subtype !== 'adHocGroup') return { shapes, selectedShapes };
-  if (!e.baseAB) {
-    return {
-      shapes: shapes.map(s => ({ ...s, baseLocalTransformMatrix: null })),
-      selectedShapes,
-    };
-  }
-  const xRatio = e.a / e.baseAB[0];
-  const yRatio = e.b / e.baseAB[1];
-  const pt1delta = matrix.scale(xRatio, yRatio, 1);
-  return {
-    shapes: shapes.map(s => {
-      if (s.parent !== e.id) return s;
-      const baseLocalTransformMatrix = s.baseLocalTransformMatrix || s.localTransformMatrix;
-      return {
-        ...s,
-        localTransformMatrix: matrix.multiply(pt1delta, baseLocalTransformMatrix),
-        baseLocalTransformMatrix,
-      };
-    }),
-    selectedShapes,
-  };
-};
-*/
-
 const resizeGroup = (shapes, selectedShapes, elements) => {
   if (!elements.length) return { shapes, selectedShapes };
   const e = elements[0];
