@@ -20,10 +20,10 @@
 import React from 'react';
 import { getDisplayName } from './lib/get_display_name';
 import { last, findIndex, first } from 'lodash';
-import calculateLabel  from '../../common/calculate_label';
+import calculateLabel from '../../common/calculate_label';
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
-    const { model, visData } = props;
+    const { model, visData, getConfig } = props;
     if (!model || !visData || !visData[model.id]) return (<WrappedComponent {...props} />);
     if (visData[model.id].series.every(s => s.id.split(':').length === 1)) {
       return (<WrappedComponent {...props} />);
@@ -57,17 +57,18 @@ export function visWithSplits(WrappedComponent) {
     const rows = Object.keys(splitsVisData).map(key => {
       const splitData = splitsVisData[key];
       const { series, label } = splitData;
-      const newSeries = (indexOfNonSplit != null && indexOfNonSplit > 0) ?  [...series, nonSplitSeries] : [nonSplitSeries, ...series];
+      const newSeries = (indexOfNonSplit != null && indexOfNonSplit > 0) ? [...series, nonSplitSeries] : [nonSplitSeries, ...series];
       const newVisData = {
         [model.id]: {
           id: model.id,
-          series: newSeries || series
+          series: (newSeries || series).filter(s => s != null)
         }
       };
       return (
         <div key={key} className="splitVis_split">
           <div className="splitVis_visualization">
             <WrappedComponent
+              getConfig={getConfig}
               model={model}
               visData={newVisData}
               onBrush={props.onBrush}

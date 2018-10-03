@@ -57,7 +57,11 @@ function MetricVisualization(props) {
         newProps.formatter = tickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig);
       }
       if (i === 0 && colors.color) newProps.color = colors.color;
-      return _.assign({}, _.pick(row, ['label', 'data']), newProps);
+      return {
+        data: row.data,
+        label: row.label,
+        ...newProps
+      };
     });
   const params = {
     metric: series[0],
@@ -76,7 +80,7 @@ function MetricVisualization(props) {
   const style = { backgroundColor: panelBackgroundColor };
   return (
     <div className="dashboard__visualization" style={style}>
-      <Metric {...params}/>
+      <Metric {...params} />
     </div>
   );
 

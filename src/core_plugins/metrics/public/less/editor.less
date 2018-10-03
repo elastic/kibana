@@ -71,8 +71,9 @@
 
 .vis_editor__input {
   padding: 8px 10px;
-  border-radius: @borderRadius;
-  border: 1px solid @grayLight;
+  // border-radius: @borderRadius;
+  border: 1px solid @grayLighter;
+  border-bottom: 2px solid @grayLighter;
   font-size: 1.1em;
 }
 .vis_editor__input-grows {
@@ -119,6 +120,7 @@
   display: flex;
   align-items: center;
   position: relative;
+  z-index: 2010;
 }
 .vis_editor__color_picker-swatch {
   border: 1px solid @grayDark;
