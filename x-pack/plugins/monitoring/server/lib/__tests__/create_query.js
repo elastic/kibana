@@ -27,7 +27,10 @@ describe('Create Type Filter', () => {
 
 describe('Create Query', () => {
   beforeEach(() => {
-    metric = ElasticsearchMetric.getMetricFields();
+    metric = {
+      ...ElasticsearchMetric.getMetricFields(),
+      field: 'node_stats.some_field'
+    };
   });
 
   it('Allows UUID to not be passed', () => {
@@ -42,7 +45,7 @@ describe('Create Query', () => {
     const result = createQuery(options);
     let expected = {};
     expected = set(expected, 'bool.filter[0].term', {
-      'source_node.uuid': 'abc123'
+      'node_stats.node_id': 'abc123'
     });
     expected = set(expected, 'bool.filter[1].range.timestamp', {
       format: 'epoch_millis',
@@ -86,6 +89,7 @@ describe('Create Query', () => {
     function callCreateQuery() {
       const options = { uuid: 'abc123', metric };
       delete options.metric.uuidField;
+      delete options.metric.field;
       return createQuery(options);
     }
     expect(callCreateQuery).to.throwException((e) => {
@@ -113,7 +117,7 @@ describe('Create Query', () => {
     let expected = {};
     expected = set(expected, 'bool.filter[0].bool.should', [ { term: { _type: 'test-type-yay' } }, { term: { type: 'test-type-yay' } } ]);
     expected = set(expected, 'bool.filter[1].term', {
-      'source_node.uuid': 'abc123'
+      'node_stats.node_id': 'abc123'
     });
     expected = set(expected, 'bool.filter[2].range.timestamp', {
       format: 'epoch_millis',

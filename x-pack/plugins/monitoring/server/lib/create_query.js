@@ -70,8 +70,10 @@ export function createQuery(options) {
     let uuidField = get(options, 'metric.uuidField');
     if (!uuidField) {
       const field = get(options, 'metric.field');
-      const documentType = field.split('.')[0];
-      uuidField = getUuidFieldFromType(documentType);
+      if (field) {
+        const documentType = field.split('.')[0];
+        uuidField = getUuidFieldFromType(documentType);
+      }
     }
     if (!uuidField) {
       throw new MissingRequiredError('options.uuid given but options.metric.uuidField is false');
