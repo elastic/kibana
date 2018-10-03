@@ -39,4 +39,8 @@ export class MemoryTokensAdapter implements CMTokensAdapter {
     });
     return tokens;
   }
+
+  public setDB(tokenDB: TokenEnrollmentData[]) {
+    this.tokenDB = tokenDB;
+  }
 }

@@ -36,4 +36,8 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
     }
     return tag;
   }
+
+  public setDB(tagsDB: BeatTag[]) {
+    this.tagsDB = tagsDB;
+  }
 }

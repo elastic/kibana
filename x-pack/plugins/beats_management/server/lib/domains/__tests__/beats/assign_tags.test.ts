@@ -7,7 +7,7 @@
 import { FrameworkInternalUser } from '../../../adapters/framework/adapter_types';
 
 import { MemoryBeatsAdapter } from '../../../adapters/beats/memory_beats_adapter';
-import { TestingBackendFrameworkAdapter } from '../../../adapters/framework/testing_framework_adapter';
+import { HapiBackendFrameworkAdapter } from '../../../adapters/framework/hapi_framework_adapter';
 import { MemoryTagsAdapter } from '../../../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../../../adapters/tokens/memory_tokens_adapter';
 
@@ -93,7 +93,7 @@ describe('Beats Domain Lib', () => {
           last_updated: new Date(),
         },
       ];
-      const framework = new TestingBackendFrameworkAdapter(settings);
+      const framework = new HapiBackendFrameworkAdapter(settings);
 
       const tokensLib = new CMTokensDomain(new MemoryTokensAdapter([]), {
         framework,
