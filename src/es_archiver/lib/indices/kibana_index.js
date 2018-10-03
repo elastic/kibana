@@ -73,11 +73,12 @@ export async function migrateKibanaIndex({ client, log }) {
     'migrations.batchSize': 100,
     'migrations.pollInterval': 100,
   };
+  const ready = async () => undefined;
   const elasticsearch = {
     getCluster: () => ({
       callWithInternalUser: (path, ...args) => _.get(client, path).call(client, ...args),
     }),
-    waitUntilReady: () => Promise.resolve(),
+    waitUntilReady: ready,
   };
 
   const server = {
@@ -90,9 +91,10 @@ export async function migrateKibanaIndex({ client, log }) {
     server,
     version,
     uiExports,
+    ready,
   };
 
-  return await new KibanaMigrator({ kbnServer }).migrateIndex();
+  return await new KibanaMigrator({ kbnServer }).awaitMigration();
 }
 
 async function loadElasticVersion() {
