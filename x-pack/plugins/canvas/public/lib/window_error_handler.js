@@ -22,15 +22,15 @@ function showError(err) {
   };
   notice.appendChild(close);
 
-  // const uncaughtErrorSwalwedInDevModeMessage =
-  //   '<h3>' +
-  //   i18n.translate('xpack.canvas.lib.windowErrorHandler.uncaughtErrorSwallowedInDevModeMessage', {
-  //     defaultMessage: 'Uncaught error swallowed in dev mode',
-  //   }) +
-  //   '</h3>';
+  const uncaughtErrorMessage = i18n.translate(
+    'xpack.canvas.lib.windowErrorHandler.uncaughtErrorSwallowedInDevModeMessage',
+    {
+      defaultMessage: 'Uncaught error swallowed in dev mode',
+    }
+  );
 
-  // notice.insertAdjacentHTML('beforeend', uncaughtErrorSwalwedInDevModeMessage);
-  notice.insertAdjacentHTML('beforeend', '<h3>Uncaught error swallowed in dev mode</h3>');
+  // eslint-disable-next-line
+  notice.insertAdjacentHTML('beforeend', `<h3>${uncaughtErrorMessage}</h3>`);
 
   const message = document.createElement('p');
   message.textContent = i18n.translate('xpack.canvas.lib.windowErrorHandlerErrorMessage', {
@@ -49,7 +49,15 @@ function showError(err) {
     notice.appendChild(stack);
   }
 
-  notice.insertAdjacentHTML('beforeend', `<p>Check console for more information</p>`);
+  const checkConsoleMessage = i18n.translate(
+    'xpack.canvas.lib.windowErrorHandler.checkConsoleMessage',
+    {
+      defaultMessage: 'Check console for more information',
+    }
+  );
+
+  // eslint-disable-next-line
+  notice.insertAdjacentHTML('beforeend', `<p>${checkConsoleMessage}</p>`);
   body.appendChild(notice);
 }
 
