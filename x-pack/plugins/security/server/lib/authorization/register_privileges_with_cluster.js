@@ -51,12 +51,12 @@ export async function registerPrivilegesWithCluster(server) {
     });
   };
 
-  const shouldRemovePrivileges = (existingPrivileges, expectedPrivileges) => {
+  const getPrivilegesToDelete = (existingPrivileges, expectedPrivileges) => {
     if (isEmpty(existingPrivileges)) {
-      return false;
+      return [];
     }
 
-    return difference(Object.keys(existingPrivileges[application]), Object.keys(expectedPrivileges[application])).length > 0;
+    return difference(Object.keys(existingPrivileges[application]), Object.keys(expectedPrivileges[application]));
   };
 
   const privilegeMap = buildPrivilegeMap(savedObjectTypes, actions);
@@ -75,18 +75,19 @@ export async function registerPrivilegesWithCluster(server) {
       return;
     }
 
-    // The ES privileges POST endpoint only allows us to add new privileges, or update specified privileges; it doesn't
-    // remove unspecified privileges. We don't currently have a need to remove privileges, as this would be a
-    // backwards compatibility issue, and we'd have to figure out how to migrate roles, so we're throwing an Error if we
-    // unintentionally get ourselves in this position.
-    if (shouldRemovePrivileges(existingPrivileges, expectedPrivileges)) {
-      throw new Error(`Privileges are missing and can't be removed, currently.`);
+    const privilegesToDelete = getPrivilegesToDelete(existingPrivileges, expectedPrivileges);
+    for (const privilegeToDelete of privilegesToDelete) {
+      server.log(['security', 'debug'], `Deleting Kibana Privilege ${privilegeToDelete} from Elasticearch for ${application}`);
+      await callCluster('shield.deletePrivilege', {
+        application,
+        privilege: privilegeToDelete
+      });
     }
 
-    server.log(['security', 'debug'], `Updated Kibana Privileges with Elasticearch for ${application}`);
     await callCluster('shield.postPrivileges', {
       body: expectedPrivileges
     });
+    server.log(['security', 'debug'], `Updated Kibana Privileges with Elasticearch for ${application}`);
   } catch (err) {
     server.log(['security', 'error'], `Error registering Kibana Privileges with Elasticsearch for ${application}: ${err.message}`);
     throw err;

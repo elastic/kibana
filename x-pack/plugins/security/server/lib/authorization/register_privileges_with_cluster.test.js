@@ -67,9 +67,9 @@ const registerPrivilegesWithClusterTest = (description, {
   };
 
   const createExpectUpdatedPrivileges = (mockServer, mockCallWithInternalUser, error) => {
-    return (postPrivilegesBody) => {
+    return (postPrivilegesBody, deletedPrivileges = []) => {
       expect(error).toBeUndefined();
-      expect(mockCallWithInternalUser).toHaveBeenCalledTimes(2);
+      expect(mockCallWithInternalUser).toHaveBeenCalledTimes(2 + deletedPrivileges.length);
       expect(mockCallWithInternalUser).toHaveBeenCalledWith('shield.getPrivilege', {
         privilege: application,
       });
@@ -79,7 +79,19 @@ const registerPrivilegesWithClusterTest = (description, {
           body: postPrivilegesBody,
         }
       );
-
+      for (const deletedPrivilege of deletedPrivileges) {
+        expect(mockServer.log).toHaveBeenCalledWith(
+          ['security', 'debug'],
+          `Deleting Kibana Privilege ${deletedPrivilege} from Elasticearch for ${application}`
+        );
+        expect(mockCallWithInternalUser).toHaveBeenCalledWith(
+          'shield.deletePrivilege',
+          {
+            application,
+            privilege: deletedPrivilege
+          }
+        );
+      }
       expect(mockServer.log).toHaveBeenCalledWith(
         ['security', 'debug'],
         `Registering Kibana Privileges with Elasticsearch for ${application}`
@@ -208,7 +220,7 @@ registerPrivilegesWithClusterTest(`inserts privileges when we don't have any exi
   }
 });
 
-registerPrivilegesWithClusterTest(`throws error when we should be removing privilege`, {
+registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
   privilegeMap: {
     global: {
       foo: ['action:foo'],
@@ -236,11 +248,32 @@ registerPrivilegesWithClusterTest(`throws error when we should be removing privi
         name: 'space_bar',
         actions: ['action:not-bar'],
         metadata: {},
+      },
+      space_baz: {
+        application,
+        name: 'space_baz',
+        actions: ['action:not-baz'],
+        metadata: {},
       }
     }
   },
-  assert: ({ expectErrorThrown }) => {
-    expectErrorThrown(`Privileges are missing and can't be removed, currently.`);
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges({
+      [application]: {
+        foo: {
+          application,
+          name: 'foo',
+          actions: ['action:foo'],
+          metadata: {},
+        },
+        space_bar: {
+          application,
+          name: 'space_bar',
+          actions: ['action:bar'],
+          metadata: {},
+        }
+      }
+    }, [ 'quz', 'space_baz' ]);
   }
 });
 

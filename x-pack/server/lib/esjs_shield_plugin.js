@@ -390,6 +390,23 @@
       }]
     });
 
+    shield.deletePrivilege = ca({
+      method: 'DELETE',
+      urls: [{
+        fmt: '/_xpack/security/privilege/<%=application%>/<%=privilege%>',
+        req: {
+          application: {
+            type: 'string',
+            required: true
+          },
+          privilege: {
+            type: 'string',
+            required: true
+          }
+        }
+      }]
+    });
+
     shield.postPrivileges = ca({
       method: 'POST',
       needBody: true,
