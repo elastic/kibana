@@ -35,7 +35,7 @@ export function taskManager(kibana) {
     init(server) {
       const config = server.config();
       const taskManager = new TaskManager(this.kbnServer, server, config);
-      server.expose('client', taskManager);
+      server.decorate('server', 'taskManager', taskManager);
     }
   });
 }

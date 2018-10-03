@@ -7,7 +7,7 @@
 import Joi from 'joi';
 
 export function initRoutes(server) {
-  const { client: taskManagerClient } = server.plugins.taskManager;
+  const { taskManager } = server;
 
   server.route({
     path: '/api/sample_tasks',
@@ -24,7 +24,7 @@ export function initRoutes(server) {
     },
     async handler(request, reply) {
       try {
-        const task = await taskManagerClient.schedule(request.payload, { request });
+        const task = await taskManager.schedule(request.payload, { request });
         reply(task);
       } catch (err) {
         reply(err);
@@ -37,7 +37,7 @@ export function initRoutes(server) {
     method: 'GET',
     async handler(_req, reply) {
       try {
-        reply(taskManagerClient.fetch());
+        reply(taskManager.fetch());
       } catch (err) {
         reply(err);
       }
@@ -49,8 +49,8 @@ export function initRoutes(server) {
     method: 'DELETE',
     async handler(_req, reply) {
       try {
-        const { docs: tasks } = await taskManagerClient.fetch();
-        reply(Promise.all(tasks.map((task) => taskManagerClient.remove(task.id))));
+        const { docs: tasks } = await taskManager.fetch();
+        reply(Promise.all(tasks.map((task) => taskManager.remove(task.id))));
       } catch (err) {
         reply(err);
       }
