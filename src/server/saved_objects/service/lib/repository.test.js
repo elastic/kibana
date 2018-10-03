@@ -183,7 +183,12 @@ describe('SavedObjectsRepository', () => {
     onBeforeWrite = sandbox.stub();
     migrator = {
       migrateDocument: sinon.spy((doc) => doc),
-      isMigrated: true,
+      indexMigration() {
+        return {
+          isComplete: true,
+          awaitCompletion: async () => ({ status: 'skipped' }),
+        };
+      }
     };
 
     const serializer = new SavedObjectsSerializer(schema);
@@ -216,7 +221,9 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('throws an error if the index is not migrated', async () => {
-      migrator.isMigrated = false;
+      migrator.indexMigration = () => ({
+        isComplete: false,
+      });
       await expect(savedObjectsRepository.create('index-pattern', {
         title: 'Logstash'
       }, {
@@ -385,7 +392,9 @@ describe('SavedObjectsRepository', () => {
 
   describe('#bulkCreate', () => {
     it('throws an error if the index is not migrated', async () => {
-      migrator.isMigrated = false;
+      migrator.indexMigration = () => ({
+        isComplete: false,
+      });
       await expect(savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
@@ -619,7 +628,9 @@ describe('SavedObjectsRepository', () => {
 
   describe('#delete', () => {
     it('throws an error if the index is not migrated', async () => {
-      migrator.isMigrated = false;
+      migrator.indexMigration = () => ({
+        isComplete: false,
+      });
       await expect(
         savedObjectsRepository.delete('index-pattern', 'logstash-*')
       ).rejects.toThrow(/is being migrated/);
@@ -700,7 +711,9 @@ describe('SavedObjectsRepository', () => {
 
   describe('#find', () => {
     it('throws an error if the index is not migrated', async () => {
-      migrator.isMigrated = false;
+      migrator.indexMigration = () => ({
+        isComplete: false,
+      });
       await expect(
         savedObjectsRepository.find({ type: 'foo' })
       ).rejects.toThrow(/is being migrated/);
@@ -867,7 +880,9 @@ describe('SavedObjectsRepository', () => {
     };
 
     it('throws an error if the index is not migrated', async () => {
-      migrator.isMigrated = false;
+      migrator.indexMigration = () => ({
+        isComplete: false,
+      });
       await expect(
         savedObjectsRepository.get('index-pattern', 'logstash-*')
       ).rejects.toThrow(/is being migrated/);
@@ -946,7 +961,9 @@ describe('SavedObjectsRepository', () => {
 
   describe('#bulkGet', () => {
     it('throws an error if the index is not migrated', async () => {
-      migrator.isMigrated = false;
+      migrator.indexMigration = () => ({
+        isComplete: false,
+      });
       await expect(
         savedObjectsRepository.bulkGet([
           { id: 'one', type: 'config' },
@@ -1069,7 +1086,9 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('throws an error if the index is not migrated', async () => {
-      migrator.isMigrated = false;
+      migrator.indexMigration = () => ({
+        isComplete: false,
+      });
       await expect(
         savedObjectsRepository.update('index-pattern', 'logstash-*', attributes, { namespace: 'foo-namespace' })
       ).rejects.toThrow(/is being migrated/);

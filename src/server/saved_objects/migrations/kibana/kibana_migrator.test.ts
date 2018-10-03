@@ -57,13 +57,13 @@ describe('KibanaMigrator', () => {
     });
   });
 
-  describe('migrateIndex', () => {
+  describe('indexMigration', () => {
     it('changes isMigrated to true if migrations were skipped', async () => {
       const { kbnServer } = mockKbnServer();
       kbnServer.server.plugins.elasticsearch = undefined;
-      const migrator = new KibanaMigrator({ kbnServer }).migrateIndex();
+      const migrator = new KibanaMigrator({ kbnServer }).indexMigration();
       expect(migrator.isMigrated).toBeFalsy();
-      await migrator.awaitMigration();
+      await migrator.awaitCompletion();
       expect(migrator.isMigrated).toBeTruthy();
     });
 
@@ -82,7 +82,7 @@ describe('KibanaMigrator', () => {
         },
       };
       await expect(
-        new KibanaMigrator({ kbnServer }).migrateIndex().awaitMigration()
+        new KibanaMigrator({ kbnServer }).indexMigration().awaitCompletion()
       ).rejects.toThrow(/Doh!/);
     });
   });

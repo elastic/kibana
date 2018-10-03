@@ -82,13 +82,13 @@ export class KibanaMigrator {
    * @returns
    * @memberof KibanaMigrator
    */
-  public migrateIndex = once(() => {
+  public indexMigration = once(() => {
     const promise = this.kbnServer.ready().then(() => this.performMigration());
 
     const status = {
       isMigrated: false,
 
-      async awaitMigration() {
+      async awaitCompletion() {
         const result = await promise;
         status.isMigrated = true;
         return result;

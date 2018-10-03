@@ -485,7 +485,7 @@ export class SavedObjectsRepository {
   }
 
   _assertMigrated() {
-    if (!this._migrator.isMigrated) {
+    if (!this._migrator.indexMigration().isComplete) {
       throw errors.decorateConflictError(
         new Error(`The saved object index ${this._index} is being migrated.`)
       );
