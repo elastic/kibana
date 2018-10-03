@@ -182,7 +182,7 @@ export class GeohashGridLayer extends ALayer {
 
   async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
     const { precision, timeFilters, extent } = dataMeta;
-    startLoading(dataMeta);
+    startLoading('source', dataMeta);
     try {
       const data = await this._source.getGeoJsonPointsWithTotalCount({
         precision,
@@ -191,9 +191,9 @@ export class GeohashGridLayer extends ALayer {
         layerId: this.getId(),
         layerName: this.getDisplayName(),
       });
-      stopLoading(data);
+      stopLoading('source', data);
     } catch(error) {
-      onLoadError(error.message);
+      onLoadError('source', error.message);
     }
   }
 }

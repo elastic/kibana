@@ -116,15 +116,15 @@ export class VectorLayer extends ALayer {
       }
     }
 
-    startLoading({ timeFilters: dataFilters.timeFilters });
+    startLoading('source', { timeFilters: dataFilters.timeFilters });
     try {
       const data = await this._source.getGeoJson({
         layerId: this.getId(),
         layerName: this.getDisplayName(),
       }, dataFilters);
-      stopLoading(data);
+      stopLoading('source', data);
     } catch(error) {
-      onLoadError(error.message);
+      onLoadError('source', error.message);
     }
   }
 

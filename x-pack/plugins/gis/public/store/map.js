@@ -176,6 +176,7 @@ function updateWithDataRequest(state, action) {
   layerRequestingData.dataRequest.dataDirty = true; // needs to be synced to MB
   layerRequestingData.dataRequest.dataMetaAtStart = action.meta;
   layerRequestingData.dataRequest.dataRequestToken = action.requestToken;
+  layerRequestingData.dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
@@ -204,6 +205,7 @@ function updateWithDataResponse(state, action) {
   layerReceivingData.dataRequest.dataMetaAtStart = null;
   layerReceivingData.dataRequest.dataDirty = false;
   layerReceivingData.dataRequest.dataRequestToken = null;
+  layerReceivingData.dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
@@ -230,6 +232,7 @@ function updateWithDataLoadError(state, action) {
   layer.dataRequest.dataLoadError = action.errorMessage;
   layer.dataRequest.dataDirty = false;
   layer.dataRequest.dataRequestToken = null;
+  layer.dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }

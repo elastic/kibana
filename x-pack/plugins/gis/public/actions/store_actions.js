@@ -30,12 +30,12 @@ export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
-function getLayerLoadingFunctions(dispatch, layerId, tokenString) {
+function getLayerLoadingCallbacks(dispatch, layerId, tokenString) {
   const requestToken = Symbol(tokenString);
   return {
-    startLoading: initData => dispatch(startDataLoad(layerId, requestToken, initData)),
-    stopLoading: returnData => dispatch(endDataLoad(layerId, requestToken, returnData)),
-    onLoadError: errorMessage => dispatch(onDataLoadError(layerId, requestToken, errorMessage)),
+    startLoading: (dataId, initData) => dispatch(startDataLoad(layerId, dataId, requestToken, initData)),
+    stopLoading: (dataId, returnData) => dispatch(endDataLoad(layerId, dataId, requestToken, returnData)),
+    onLoadError: (dataId, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
   };
 }
 
@@ -53,7 +53,7 @@ export function replaceLayerList(newLayerList) {
     const dataFilters = getDataFilters(state);
 
     layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId(), tokenString);
       layer.syncData({ ...loadingFunctions, dataFilters });
     });
   };
@@ -125,7 +125,7 @@ export function mapExtentChanged(newMapConstants) {
 
     const layerList = getLayerList(state);
     layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId(), tokenString);
       layer.syncData({
         ...loadingFunctions,
         dataFilters: { ...dataFilters, ...newMapConstants }
@@ -134,28 +134,31 @@ export function mapExtentChanged(newMapConstants) {
   };
 }
 
-export function startDataLoad(layerId, requestToken, meta = {}) {
+export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
   return ({
     meta,
     type: LAYER_DATA_LOAD_STARTED,
     layerId,
+    dataId,
     requestToken
   });
 }
 
-export function endDataLoad(layerId, requestToken, data) {
+export function endDataLoad(layerId, dataId, requestToken, data) {
   return ({
     type: LAYER_DATA_LOAD_ENDED,
     layerId,
+    dataId,
     data,
     requestToken
   });
 }
 
-export function onDataLoadError(layerId, requestToken, errorMessage) {
+export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
   return ({
     type: LAYER_DATA_LOAD_ERROR,
     layerId,
+    dataId,
     requestToken,
     errorMessage
   });
@@ -168,7 +171,7 @@ export function addPreviewLayer(layer, position) {
   return async (dispatch, getState) => {
     await dispatch(addLayer(layerDescriptor, position));
     const dataFilters = getDataFilters(getState());
-    const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId(), tokenString);
     layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
@@ -236,7 +239,7 @@ export function setTimeFilters(timeFilters) {
     const dataFilters = getDataFilters(state);
     const layerList = getLayerList(getState());
     layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId(), tokenString);
       layer.syncData({
         ...loadingFunctions,
         dataFilters: { ...dataFilters, timeFilters: { ...timeFilters } }
@@ -258,7 +261,7 @@ export function updateLayerStyle(style, temporary = true) {
     const state = getState();
     const dataFilters = getDataFilters(state);
     const layer = getSelectedLayer(state);
-    const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId(), tokenString);
     layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
@@ -287,7 +290,7 @@ export function setJoinsForLayer(layer, joins) {
     const dataFilters = getDataFilters(getState());
     const layersWithJoin = getLayerList(getState());
     const layerWithJoin = layersWithJoin.find(lwj => lwj.getId() === layer.getId());
-    const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId(), tokenString);
     layerWithJoin.syncData({ ...loadingFunctions, dataFilters });
   };
 }

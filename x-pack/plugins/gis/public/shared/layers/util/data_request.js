@@ -33,5 +33,9 @@ export class DataRequest {
    return this._descriptor.data || this._descriptor.dataRequestToken;
   }
 
+  getDataId() {
+    return this._descriptor.dataId;
+  }
+
 }
 
