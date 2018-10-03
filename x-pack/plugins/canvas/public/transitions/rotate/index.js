@@ -5,11 +5,16 @@
  */
 
 import './rotate.css';
+import { i18n } from '@kbn/i18n';
 
 export const rotate = () => ({
   name: 'rotate',
-  displayName: 'Rotate',
-  help: 'Rotate from one page to the next',
+  displayName: i18n.translate('xpack.canvas.transitions.rotateDisplayNameLabel', {
+    defaultMessage: 'Rotate',
+  }),
+  help: i18n.translate('xpack.canvas.transitions.rotateHelpText', {
+    defaultMessage: 'Rotate from one page to the next',
+  }),
   enter: 'rotateIn',
   exit: 'rotateOut',
 });

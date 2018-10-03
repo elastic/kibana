@@ -5,11 +5,16 @@
  */
 
 import './fade.css';
+import { i18n } from '@kbn/i18n';
 
 export const fade = () => ({
   name: 'fade',
-  displayName: 'Fade',
-  help: 'Fade from one page to the next',
+  displayName: i18n.translate('xpack.canvas.transitions.fadeDisplayNameLabel', {
+    defaultMessage: 'Fade',
+  }),
+  help: i18n.translate('xpack.canvas.transitions.fadeHelpText', {
+    defaultMessage: 'Fade from one page to the next',
+  }),
   enter: 'fadeIn',
   exit: 'fadeOut',
 });

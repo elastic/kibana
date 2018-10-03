@@ -5,11 +5,16 @@
  */
 
 import './zoom.css';
+import { i18n } from '@kbn/i18n';
 
 export const zoom = () => ({
   name: 'zoom',
-  displayName: 'Zoom',
-  help: 'Zoom from one page to the next',
+  displayName: i18n.translate('xpack.canvas.transitions.zoomDisplayNameLabel', {
+    defaultMessage: 'Zoom',
+  }),
+  help: i18n.translate('xpack.canvas.transitions.zoomHelpText', {
+    defaultMessage: 'Zoom from one page to the next',
+  }),
   enter: 'zoomIn',
   exit: 'zoomOut',
 });

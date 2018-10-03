@@ -5,11 +5,16 @@
  */
 
 import './slide.css';
+import { i18n } from '@kbn/i18n';
 
 export const slide = () => ({
   name: 'slide',
-  displayName: 'Slide',
-  help: 'Slide from one page to the next',
+  displayName: i18n.translate('xpack.canvas.transitions.slideDisplayNameLabel', {
+    defaultMessage: 'Slide',
+  }),
+  help: i18n.translate('xpack.canvas.transitions.slideHelpText', {
+    defaultMessage: 'Slide from one page to the next',
+  }),
   enter: 'slideIn',
   exit: 'slideOut',
 });
