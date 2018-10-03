@@ -137,6 +137,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
         <WalkthroughLayout
           title="Get Started With Beats Centeral Management"
           walkthroughSteps={walkthroughSteps}
+          goTo={this.props.goTo}
           activePath={this.props.location.pathname}
         >
           <Switch>

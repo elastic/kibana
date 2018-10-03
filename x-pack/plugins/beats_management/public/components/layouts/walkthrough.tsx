@@ -18,6 +18,7 @@ import {
 
 interface LayoutProps {
   title: string;
+  goTo: (path: string) => any;
   walkthroughSteps: Array<{
     id: string;
     name: string;
@@ -30,6 +31,7 @@ export const WalkthroughLayout: React.SFC<LayoutProps> = ({
   walkthroughSteps,
   title,
   activePath,
+  goTo,
   children,
 }) => {
   const indexOfCurrent = walkthroughSteps.findIndex(step => activePath === step.id);
@@ -46,7 +48,7 @@ export const WalkthroughLayout: React.SFC<LayoutProps> = ({
             steps={walkthroughSteps.map((step, i) => ({
               title: step.name,
               isComplete: i <= indexOfCurrent,
-              onClick: () => window.alert('Step 1 clicked'),
+              onClick: () => goTo(step.id),
             }))}
           />
           <br />
