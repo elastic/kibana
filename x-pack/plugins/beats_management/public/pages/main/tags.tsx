@@ -62,9 +62,11 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
         {autocompleteProps => (
           <Table
             {...autocompleteProps}
-            isKueryValid={this.props.libs.elasticsearch.isKueryValid(this.props.urlState.tagsKBar)} // todo check if query converts to es query correctly
+            isKueryValid={this.props.libs.elasticsearch.isKueryValid(
+              this.props.urlState.tagsKBar || ''
+            )}
             kueryValue={this.props.urlState.tagsKBar}
-            onKueryBarChange={(value: any) => this.props.setUrlState({ tagsKBar: value })} // todo
+            onKueryBarChange={(value: any) => this.props.setUrlState({ tagsKBar: value })}
             onKueryBarSubmit={() => null} // todo
             filterQueryDraft={'false'} // todo
             actionHandler={this.handleTagsAction}

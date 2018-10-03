@@ -7,6 +7,8 @@
 export type FlatObject<T> = { [Key in keyof T]: string };
 
 export interface AppURLState {
-  beatsKBar: string;
-  tagsKBar: string;
+  beatsKBar?: string;
+  tagsKBar?: string;
+  enrollmentToken?: string;
+  createdTag?: string;
 }
