@@ -20,8 +20,9 @@
 import { i18n } from '@kbn/i18n';
 import { INSTRUCTION_VARIANT } from './instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
+import { getSpaceIdForBeatsTutorial } from '../lib/get_space_id_for_beats_tutorial';
 
-export const createMetricbeatInstructions = () => ({
+export const createMetricbeatInstructions = context => ({
   INSTALL: {
     OSX: {
       title: i18n.translate('kbn.common.tutorials.metricbeatInstructions.install.osxTitle', {
@@ -168,6 +169,7 @@ export const createMetricbeatInstructions = () => ({
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
+        getSpaceIdForBeatsTutorial(context)
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.osxTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
@@ -196,6 +198,7 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
+        getSpaceIdForBeatsTutorial(context)
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.debTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
@@ -224,6 +227,7 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
+        getSpaceIdForBeatsTutorial(context)
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.rpmTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
@@ -252,6 +256,7 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
+        getSpaceIdForBeatsTutorial(context)
       ],
       textPost: i18n.translate('kbn.common.tutorials.metricbeatInstructions.config.windowsTextPost', {
         defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
@@ -444,8 +449,8 @@ export function metricbeatStatusCheck(moduleName) {
   };
 }
 
-export function onPremInstructions(moduleName) {
-  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions();
+export function onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context) {
+  const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions(context);
 
   return {
     instructionSets: [

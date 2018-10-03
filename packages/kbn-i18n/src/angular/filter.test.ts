@@ -17,41 +17,44 @@
  * under the License.
  */
 
+jest.mock('../core/i18n', () => ({
+  translate: jest.fn().mockImplementation(() => 'translation'),
+}));
+
 import angular from 'angular';
 import 'angular-mocks';
-import { i18nProvider } from './provider';
+
 import * as i18n from '../core/i18n';
+import { i18nFilter as angularI18nFilter } from './filter';
+import { I18nProvider, I18nServiceType } from './provider';
 
-angular.module('app', []).provider('i18n', i18nProvider);
+angular
+  .module('app', [])
+  .provider('i18n', I18nProvider)
+  .filter('i18n', angularI18nFilter);
 
-describe('i18nProvider', () => {
-  let provider;
-  let service;
+describe('i18nFilter', () => {
+  let filter: I18nServiceType;
 
+  beforeEach(angular.mock.module('app'));
   beforeEach(
-    angular.mock.module('app', [
-      'i18nProvider',
-      i18n => {
-        service = i18n;
-      },
-    ])
-  );
-  beforeEach(
-    angular.mock.inject(i18n => {
-      provider = i18n;
+    angular.mock.inject(i18nFilter => {
+      filter = i18nFilter;
     })
   );
-
-  it('provides wrapper around i18n engine', () => {
-    expect(provider).toEqual(i18n.translate);
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
-  it('provides service wrapper around i18n engine', () => {
-    const serviceMethodNames = Object.keys(service);
-    const pluginMethodNames = Object.keys(i18n);
+  test('provides wrapper around i18n engine', () => {
+    const id = 'id';
+    const defaultMessage = 'default-message';
+    const values = {};
 
-    expect([...serviceMethodNames, 'translate'].sort()).toEqual(
-      [...pluginMethodNames, '$get'].sort()
-    );
+    const result = filter(id, { defaultMessage, values });
+
+    expect(result).toEqual('translation');
+    expect(i18n.translate).toHaveBeenCalledTimes(1);
+    expect(i18n.translate).toHaveBeenCalledWith(id, { defaultMessage, values });
   });
 });

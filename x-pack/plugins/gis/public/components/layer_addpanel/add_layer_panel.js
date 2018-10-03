@@ -130,7 +130,7 @@ export class AddLayerPanel extends React.Component {
         disabled={!temporaryLayers || layerLoading}
         isLoading={layerLoading}
         iconType={temporaryLayers && !layerLoading ? 'check' : undefined}
-        onClick={() => addAction()}
+        onClick={() => { this.layer = null; return addAction(); }}
         fill
       >
         {addToMapBtnText}
