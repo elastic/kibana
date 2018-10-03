@@ -20,7 +20,7 @@ start
   = expression
 
 expression
-  = first:function rest:('|' space? fn:function { return fn; })* {
+  = space? first:function rest:('|' space? fn:function { return fn; })* {
     return addMeta({
       type: 'expression',
       chain: [first].concat(rest)
