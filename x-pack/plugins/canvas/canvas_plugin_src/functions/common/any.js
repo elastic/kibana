@@ -4,17 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const any = () => ({
   name: 'any',
   type: 'boolean',
-  help: 'Return true if any of the conditions are true',
+  help: i18n.translate('xpack.canvas.functions.anyHelpText', {
+    defaultMessage: 'Return true if any of the conditions are true',
+  }),
   args: {
     condition: {
       aliases: ['_'],
       types: ['boolean', 'null'],
       required: true,
       multi: true,
-      help: 'One or more conditions to check',
+      help: i18n.translate('xpack.canvas.functions.any.argsConditionHelpText', {
+        defaultMessage: 'One or more conditions to check',
+      }),
     },
   },
   fn: (context, args) => {

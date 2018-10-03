@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 const getInputDate = input => {
@@ -20,19 +21,25 @@ export const date = () => ({
   context: {
     types: ['null'],
   },
-  help: 'Returns the current time, or a time parsed from a string, as milliseconds since epoch.',
+  help: i18n.translate('xpack.canvas.functions.dateHelpText', {
+    defaultMessage:
+      'Returns the current time, or a time parsed from a string, as milliseconds since epoch.',
+  }),
   args: {
     value: {
       aliases: ['_'],
       types: ['string', 'null'],
-      help:
-        'An optional date string to parse into milliseconds since epoch. ' +
-        'Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format.',
+      help: i18n.translate('xpack.canvas.functions.date.argsValueHelpText', {
+        defaultMessage:
+          'An optional date string to parse into milliseconds since epoch. Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format.',
+      }),
     },
     format: {
       types: ['string'],
-      help:
-        'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/).',
+      help: i18n.translate('xpack.canvas.functions.date.argsFormatHelpText', {
+        defaultMessage:
+          'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/).',
+      }),
     },
   },
   fn: (context, args) => {
@@ -40,7 +47,14 @@ export const date = () => ({
     const useMoment = date && format;
     const outputDate = useMoment ? moment.utc(date, format).toDate() : new Date(getInputDate(date));
 
-    if (isNaN(outputDate.getTime())) throw new Error(`Invalid date input: ${date}`);
+    if (isNaN(outputDate.getTime())) {
+      throw new Error(
+        i18n.translate('xpack.canvas.functions.date.invalidDateInputErrorMessage', {
+          defaultMessage: 'Invalid date input: {date}',
+          values: { date },
+        })
+      );
+    }
 
     return outputDate.valueOf();
   },

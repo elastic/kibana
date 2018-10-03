@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const doFn = () => ({
   name: 'do',
-  help:
-    'Runs multiple sub-expressions. Returns the passed in context. Nice for running actions producing functions.',
+  help: i18n.translate('xpack.canvas.functions.doFnHelpText', {
+    defaultMessage:
+      'Runs multiple sub-expressions. Returns the passed in context. Nice for running actions producing functions.',
+  }),
   args: {
     fn: {
       aliases: ['_'],
       multi: true,
-      help:
-        'One or more sub-expressions. The value of these is not available in the root pipeline as this function simply returns the passed in context',
+      help: i18n.translate('xpack.canvas.functions.doFn.argsFnHelpText', {
+        defaultMessage:
+          'One or more sub-expressions. The value of these is not available in the root pipeline as this function simply returns the passed in context',
+      }),
     },
   },
   fn: context => context,

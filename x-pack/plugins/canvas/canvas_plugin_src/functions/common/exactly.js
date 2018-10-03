@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const exactly = () => ({
   name: 'exactly',
   aliases: [],
@@ -11,17 +13,23 @@ export const exactly = () => ({
   context: {
     types: ['filter'],
   },
-  help: 'Create a filter that matches a given column for a perfectly exact value',
+  help: i18n.translate('xpack.canvas.functions.exactlyHelpText', {
+    defaultMessage: 'Create a filter that matches a given column for a perfectly exact value',
+  }),
   args: {
     column: {
       types: ['string'],
       aliases: ['field', 'c'],
-      help: 'The column or field to attach the filter to',
+      help: i18n.translate('xpack.canvas.functions.exactly.argsColumnHelpText', {
+        defaultMessage: 'The column or field to attach the filter to',
+      }),
     },
     value: {
       types: ['string'],
       aliases: ['v', 'val'],
-      help: 'The value to match exactly, including white space and capitalization',
+      help: i18n.translate('xpack.canvas.functions.exactly.argsValueHelpText', {
+        defaultMessage: 'The value to match exactly, including white space and capitalization',
+      }),
     },
   },
   fn: (context, args) => {

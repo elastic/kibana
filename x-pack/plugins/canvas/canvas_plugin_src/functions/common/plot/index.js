@@ -5,6 +5,7 @@
  */
 
 import keyBy from 'lodash.keyby';
+import { i18n } from '@kbn/i18n';
 import { groupBy, get, set, map, sortBy } from 'lodash';
 import { getColorsFromPalette } from '../../../../common/lib/get_colors_from_palette';
 import { getLegendConfig } from '../../../../common/lib/get_legend_config';
@@ -17,7 +18,9 @@ export const plot = () => ({
   name: 'plot',
   aliases: [],
   type: 'render',
-  help: 'Configure a plot element',
+  help: i18n.translate('xpack.canvas.functions.plotHelpText', {
+    defaultMessage: 'Configure a plot element',
+  }),
   context: {
     types: ['pointseries'],
   },
@@ -25,37 +28,51 @@ export const plot = () => ({
     seriesStyle: {
       multi: true,
       types: ['seriesStyle', 'null'],
-      help: 'A style of a specific series',
+      help: i18n.translate('xpack.canvas.functions.plot.argsSeriesStyleHelpText', {
+        defaultMessage: 'A style of a specific series',
+      }),
     },
     defaultStyle: {
       multi: false,
       types: ['seriesStyle'],
-      help: 'The default style to use for every series',
+      help: i18n.translate('xpack.canvas.functions.plot.argsDefaultStyleHelpText', {
+        defaultMessage: 'The default style to use for every series',
+      }),
       default: '{seriesStyle points=5}',
     },
     palette: {
       types: ['palette'],
-      help: 'A palette object for describing the colors to use on this plot',
+      help: i18n.translate('xpack.canvas.functions.plot.argsPaletteHelpText', {
+        defaultMessage: 'A palette object for describing the colors to use on this plot',
+      }),
       default: '{palette}',
     },
     font: {
       types: ['style'],
-      help: 'Legend and tick mark fonts',
+      help: i18n.translate('xpack.canvas.functions.plot.argsFontHelpText', {
+        defaultMessage: 'Legend and tick mark fonts',
+      }),
       default: '{font}',
     },
     legend: {
       types: ['string', 'boolean'],
-      help: 'Legend position, nw, sw, ne, se or false',
+      help: i18n.translate('xpack.canvas.functions.plot.argsLegendHelpText', {
+        defaultMessage: 'Legend position, nw, sw, ne, se or false',
+      }),
       default: 'ne',
     },
     yaxis: {
       types: ['boolean', 'axisConfig'],
-      help: 'Axis configuration, or false to disable',
+      help: i18n.translate('xpack.canvas.functions.plot.argsYaxisHelpText', {
+        defaultMessage: 'Axis configuration, or false to disable',
+      }),
       default: true,
     },
     xaxis: {
       types: ['boolean', 'axisConfig'],
-      help: 'Axis configuration, or false to disable',
+      help: i18n.translate('xpack.canvas.functions.plot.argsXaxisHelpText', {
+        defaultMessage: 'Axis configuration, or false to disable',
+      }),
       default: true,
     },
   },

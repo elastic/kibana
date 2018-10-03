@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 const noop = () => {};
 
 export const location = () => ({
@@ -12,8 +14,10 @@ export const location = () => ({
   context: {
     types: ['null'],
   },
-  help:
-    "Use the browser's location functionality to get your current location. Usually quite slow, but fairly accurate",
+  help: i18n.translate('xpack.canvas.functions.locationHelpText', {
+    defaultMessage:
+      "Use the browser's location functionality to get your current location. Usually quite slow, but fairly accurate",
+  }),
   fn: () => {
     return new Promise(resolve => {
       function createLocation(geoposition) {

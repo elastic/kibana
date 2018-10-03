@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 
 export const alterColumn = () => ({
   name: 'alterColumn',
   type: 'datatable',
-  help: 'Converts between core types, eg string, number, null, boolean, date and rename columns',
+  help: i18n.translate('xpack.canvas.functions.alterColumnHelpText', {
+    defaultMessage:
+      'Converts between core types, eg string, number, null, boolean, date and rename columns',
+  }),
   context: {
     types: ['datatable'],
   },
@@ -17,16 +21,22 @@ export const alterColumn = () => ({
     column: {
       aliases: ['_'],
       types: ['string'],
-      help: 'The name of the column to alter',
+      help: i18n.translate('xpack.canvas.functions.alterColumn.argsColumnHelpText', {
+        defaultMessage: 'The name of the column to alter',
+      }),
     },
     type: {
       types: ['string'],
-      help: 'The type to convert the column to. Leave blank to not change type.',
+      help: i18n.translate('xpack.canvas.functions.alterColumn.argsTypeHelpText', {
+        defaultMessage: 'The type to convert the column to. Leave blank to not change type.',
+      }),
       default: null,
     },
     name: {
       types: ['string'],
-      help: 'The resultant column name. Leave blank to not rename.',
+      help: i18n.translate('xpack.canvas.functions.alterColumn.argsNameHelpText', {
+        defaultMessage: 'The resultant column name. Leave blank to not rename.',
+      }),
       default: null,
     },
   },
@@ -64,7 +74,12 @@ export const alterColumn = () => ({
           case 'null':
             return () => null;
           default:
-            throw new Error(`Cannot convert to ${type}`);
+            throw new Error(
+              i18n.translate('xpack.canvas.functions.alterColumn.convertToTypeErrorMessage', {
+                defaultMessage: 'Cannot convert to {type}',
+                values: { type },
+              })
+            );
         }
       })();
     }

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const filterrows = () => ({
   name: 'filterrows',
   aliases: [],
@@ -11,15 +13,18 @@ export const filterrows = () => ({
   context: {
     types: ['datatable'],
   },
-  help: 'Filter rows in a datatable based on the return value of a subexpression.',
+  help: i18n.translate('xpack.canvas.functions.filterRowsHelpText', {
+    defaultMessage: 'Filter rows in a datatable based on the return value of a subexpression.',
+  }),
   args: {
     fn: {
       resolve: false,
       aliases: ['_'],
       types: ['boolean'],
-      help:
-        'An expression to pass each rows in the datatable into. The expression should return a boolean. ' +
-        'A true value will preserve the row, and a false value will remove it.',
+      help: i18n.translate('xpack.canvas.functions.filterRows.argsFnHelpText', {
+        defaultMessage:
+          'An expression to pass each rows in the datatable into. The expression should return a boolean. A true value will preserve the row, and a false value will remove it.',
+      }),
     },
   },
   fn(context, { fn }) {

@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const compare = () => ({
   name: 'compare',
-  help:
-    'Compare the input to something else to determine true or false. Usually used in combination with `{if}`. This only works with primitive types, such as number, string, and boolean.',
+  help: i18n.translate('xpack.canvas.functions.compareHelpText', {
+    defaultMessage:
+      'Compare the input to something else to determine true or false. Usually used in combination with `{if}`. This only works with primitive types, such as number, string, and boolean.',
+  }),
   aliases: ['condition'],
   example: 'math "random()" | compare gt this=0.5',
   type: 'boolean',
@@ -19,13 +23,16 @@ export const compare = () => ({
       aliases: ['_'],
       types: ['string'],
       default: 'eq',
-      help:
-        'The operator to use in the comparison: ' +
-        ' eq (equal), ne (not equal), lt (less than), gt (greater than), lte (less than equal), gte (greater than eq)',
+      help: i18n.translate('xpack.canvas.functions.compare.argsOpHelpText', {
+        defaultMessage:
+          'The operator to use in the comparison: eq (equal), ne (not equal), lt (less than), gt (greater than), lte (less than equal), gte (greater than eq)',
+      }),
     },
     to: {
       aliases: ['this', 'b'],
-      help: 'The value to compare the context to, usually returned by a subexpression',
+      help: i18n.translate('xpack.canvas.functions.compare.argsToHelpText', {
+        defaultMessage: 'The value to compare the context to, usually returned by a subexpression',
+      }),
     },
   },
   fn: (context, args) => {
@@ -52,7 +59,11 @@ export const compare = () => ({
         if (typesMatch) return a >= b;
         return false;
       default:
-        throw new Error('Invalid compare operator. Use eq, ne, lt, gt, lte, or gte.');
+        throw new Error(
+          i18n.translate('xpack.canvas.functions.compare.invalidCompareOperatorErrorMessage', {
+            defaultMessage: 'Invalid compare operator. Use eq, ne, lt, gt, lte, or gte.',
+          })
+        );
     }
 
     return false;

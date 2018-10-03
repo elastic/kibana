@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 
 export const dropdownControl = () => ({
@@ -13,15 +14,22 @@ export const dropdownControl = () => ({
   context: {
     types: ['datatable'],
   },
-  help: 'Configure a drop down filter control element',
+  help: i18n.translate('xpack.canvas.functions.dropdownControlHelpText', {
+    defaultMessage: 'Configure a drop down filter control element',
+  }),
   args: {
     filterColumn: {
       type: ['string'],
-      help: 'The column or field to attach the filter to',
+      help: i18n.translate('xpack.canvas.functions.dropdownControl.argsFilterColumnHelpText', {
+        defaultMessage: 'The column or field to attach the filter to',
+      }),
     },
     valueColumn: {
       type: ['string'],
-      help: 'The datatable column from which to extract the unique values for the drop down',
+      help: i18n.translate('xpack.canvas.functions.dropdownControl.argsValueColumnHelpText', {
+        defaultMessage:
+          'The datatable column from which to extract the unique values for the drop down',
+      }),
     },
   },
   fn: (context, { valueColumn, filterColumn }) => {

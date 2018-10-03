@@ -4,25 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const caseFn = () => ({
   name: 'case',
   type: 'case',
-  help: 'Build a case (including a condition/result) to pass to the switch function.',
+  help: i18n.translate('xpack.canvas.functions.caseHelpText', {
+    defaultMessage: 'Build a case (including a condition/result) to pass to the switch function.',
+  }),
   args: {
     when: {
       aliases: ['_'],
       resolve: false,
-      help:
-        'This value is compared to the context to see if the condition is met. It is overridden by the "if" argument if both are provided.',
+      help: i18n.translate('xpack.canvas.functions.case.argsWhenHelpText', {
+        defaultMessage:
+          'This value is compared to the context to see if the condition is met. It is overridden by the "if" argument if both are provided.',
+      }),
     },
     if: {
       types: ['boolean'],
-      help:
-        'This value is used as whether or not the condition is met. It overrides the unnamed argument if both are provided.',
+      help: i18n.translate('xpack.canvas.functions.case.argsIfHelpText', {
+        defaultMessage:
+          'This value is used as whether or not the condition is met. It overrides the unnamed argument if both are provided.',
+      }),
     },
     then: {
       resolve: false,
-      help: 'The value to return if the condition is met',
+      help: i18n.translate('xpack.canvas.functions.case.argsThenHelpText', {
+        defaultMessage: 'The value to return if the condition is met',
+      }),
     },
   },
   fn: async (context, args) => {

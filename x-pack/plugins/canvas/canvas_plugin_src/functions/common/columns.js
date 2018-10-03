@@ -4,25 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { omit, pick, find } from 'lodash';
 
 export const columns = () => ({
   name: 'columns',
   type: 'datatable',
-  help:
-    'Include or exclude columns from a data table. If you specify both, this will exclude first',
+  help: i18n.translate('xpack.canvas.functions.columnsHelpText', {
+    defaultMessage:
+      'Include or exclude columns from a data table. If you specify both, this will exclude first',
+  }),
   context: {
     types: ['datatable'],
   },
   args: {
     include: {
       types: ['string'],
-      help: 'A comma separated list of column names to keep in the table',
+      help: i18n.translate('xpack.canvas.functions.columns.argsIncludeHelpText', {
+        defaultMessage: 'A comma separated list of column names to keep in the table',
+      }),
       default: null,
     },
     exclude: {
       types: ['string'],
-      help: 'A comma separated list of column names to remove from the table',
+      help: i18n.translate('xpack.canvas.functions.columns.argsExcludeHelpText', {
+        defaultMessage: 'A comma separated list of column names to remove from the table',
+      }),
       default: null,
     },
   },

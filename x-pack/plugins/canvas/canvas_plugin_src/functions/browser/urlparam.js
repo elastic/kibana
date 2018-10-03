@@ -5,13 +5,16 @@
  */
 
 import { parse } from 'url';
+import { i18n } from '@kbn/i18n';
 
 export const urlparam = () => ({
   name: 'urlparam',
   aliases: [],
   type: 'string',
-  help:
-    'Access URL parameters and use them in expressions. Eg https://localhost:5601/app/canvas?myVar=20. This will always return a string',
+  help: i18n.translate('xpack.canvas.functions.urlparamHelpText', {
+    defaultMessage:
+      'Access URL parameters and use them in expressions. Eg https://localhost:5601/app/canvas?myVar=20. This will always return a string',
+  }),
   context: {
     types: ['null'],
   },
@@ -19,13 +22,17 @@ export const urlparam = () => ({
     param: {
       types: ['string'],
       aliases: ['_', 'var', 'variable'],
-      help: 'The URL hash parameter to access',
+      help: i18n.translate('xpack.canvas.functions.urlparam.argsParamHelpText', {
+        defaultMessage: 'The URL hash parameter to access',
+      }),
       multi: false,
     },
     default: {
       types: ['string'],
       default: '""',
-      help: 'Return this string if the url parameter is not defined',
+      help: i18n.translate('xpack.canvas.functions.urlparam.argsDefaultHelpText', {
+        defaultMessage: 'Return this string if the url parameter is not defined',
+      }),
     },
   },
   fn: (context, args) => {

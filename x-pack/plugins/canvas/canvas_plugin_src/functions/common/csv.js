@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import Papa from 'papaparse';
 
 export const csv = () => ({
@@ -16,18 +18,26 @@ export const csv = () => ({
     data: {
       aliases: ['_'],
       types: ['string'],
-      help: 'CSV data to use',
+      help: i18n.translate('xpack.canvas.functions.csv.argsDataHelpText', {
+        defaultMessage: 'CSV data to use',
+      }),
     },
     delimiter: {
       types: ['string'],
-      help: 'Data separation character',
+      help: i18n.translate('xpack.canvas.functions.csv.argsDelimiterHelpText', {
+        defaultMessage: 'Data separation character',
+      }),
     },
     newline: {
       types: ['string'],
-      help: 'Row separation character',
+      help: i18n.translate('xpack.canvas.functions.csv.argsNewLineHelpText', {
+        defaultMessage: 'Row separation character',
+      }),
     },
   },
-  help: 'Create datatable from csv input',
+  help: i18n.translate('xpack.canvas.functions.csvHelpText', {
+    defaultMessage: 'Create datatable from csv input',
+  }),
   fn(context, args) {
     const { data: csvString, delimiter, newline } = args;
 

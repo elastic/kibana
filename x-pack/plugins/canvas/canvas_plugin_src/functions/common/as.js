@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { getType } from '../../../common/lib/get_type';
 
 export const asFn = () => ({
@@ -12,12 +13,16 @@ export const asFn = () => ({
   context: {
     types: ['string', 'boolean', 'number', 'null'],
   },
-  help: 'Creates a datatable with a single value',
+  help: i18n.translate('xpack.canvas.functions.asHelpText', {
+    defaultMessage: 'Creates a datatable with a single value',
+  }),
   args: {
     name: {
       types: ['string'],
       aliases: ['_'],
-      help: 'A name to give the column',
+      help: i18n.translate('xpack.canvas.functions.as.argsNameHelpText', {
+        defaultMessage: 'A name to give the column',
+      }),
       default: 'value',
     },
   },
