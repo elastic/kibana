@@ -30,6 +30,10 @@ export {
 } from './saved_object';
 
 export {
+  userProfile
+} from './user_profile';
+
+export {
   app,
   apps,
 } from './ui_apps';

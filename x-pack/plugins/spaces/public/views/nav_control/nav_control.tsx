@@ -44,8 +44,6 @@ let spacesManager: SpacesManager;
 module.controller(
   'spacesNavController',
   ($scope: any, $http: any, chrome: any, Private: any, activeSpace: any) => {
-    const userProfile = Private(UserProfileProvider);
-
     const domNode = document.getElementById(`spacesNavReactRoot`);
     const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
 
@@ -55,6 +53,7 @@ module.controller(
 
     $scope.$parent.$watch('isVisible', function isVisibleWatcher(isVisible: boolean) {
       if (isVisible && !mounted) {
+        const userProfile = Private(UserProfileProvider);
         render(
           <NavControlPopover
             spacesManager={spacesManager}

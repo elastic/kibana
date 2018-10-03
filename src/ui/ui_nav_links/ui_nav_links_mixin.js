@@ -35,7 +35,16 @@ export function uiNavLinksMixin(kbnServer, server) {
     .concat(fromApps)
     .sort((a, b) => a.getOrder() - b.getOrder());
 
-  server.decorate('server', 'getUiNavLinks', () => (
+  server.decorate('server', 'getAllUiNavLinks', () => (
     uiNavLinks.slice(0)
   ));
+
+  server.decorate('request', 'getUiNavLinks', async function getUiNavLinks() {
+    const request = this;
+    const userProfile = await request.getUserProfile();
+
+    return uiNavLinks.filter(navLink => {
+      return userProfile.canAccessFeature(navLink._id);
+    });
+  });
 }

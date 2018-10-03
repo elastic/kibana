@@ -129,7 +129,14 @@ export default function (kibana) {
       injectDefaultVars(server, options) {
         return {
           kbnIndex: options.index,
-          kbnBaseUrl
+          kbnBaseUrl,
+          userProfileData: {}
+        };
+      },
+      async replaceInjectedVars(vars, request) {
+        return {
+          ...vars,
+          userProfileData: (await request.getUserProfile()).toJSON()
         };
       },
 

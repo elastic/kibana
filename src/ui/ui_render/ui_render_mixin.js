@@ -114,7 +114,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       app,
       translations,
       bundleId: `app:${app.getId()}`,
-      nav: server.getUiNavLinks(),
+      nav: await request.getUiNavLinks(),
       version: kbnServer.version,
       branch: config.get('pkg.branch'),
       buildNum: config.get('pkg.buildNum'),

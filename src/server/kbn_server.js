@@ -37,6 +37,7 @@ import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
+import { userProfileMixin } from './user_profile/user_profile_mixin';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
@@ -88,6 +89,8 @@ export default class KbnServer {
 
       // setup saved object routes
       savedObjectsMixin,
+
+      userProfileMixin,
 
       // setup routes for installing/uninstalling sample data sets
       sampleDataMixin,

@@ -47,7 +47,6 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
-      userProfile: {},
     });
 
     sinon.assert.calledOnce(server.plugins.security.isAuthenticated);
@@ -67,7 +66,6 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
-      userProfile: {},
     });
   });
 
@@ -84,7 +82,6 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
-      userProfile: {},
     });
   });
 
@@ -101,7 +98,6 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
-      userProfile: {},
     });
   });
 
@@ -118,7 +114,6 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
-      userProfile: {},
     });
   });
 
@@ -135,7 +130,6 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
-      userProfile: {},
     });
   });
 
@@ -171,7 +165,6 @@ describe('replaceInjectedVars uiExport', () => {
       a: 1,
       telemetryOptedIn: null,
       xpackInitialInfo: undefined,
-      userProfile: {},
     });
   });
 

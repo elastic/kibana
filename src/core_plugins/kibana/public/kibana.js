@@ -65,6 +65,16 @@ import 'leaflet';
 routes.enable();
 
 routes
+  .addSetupWork(function setupRouteWork($route, kbnUrl, userProfile) {
+    const { originalPath } = $route.current;
+    const appFeature = originalPath.split('/', 2)[1];
+
+    if (!userProfile.canAccessFeature(`kibana:${appFeature}`)) {
+      kbnUrl.change('/home');
+    }
+  });
+
+routes
   .otherwise({
     redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
   });
