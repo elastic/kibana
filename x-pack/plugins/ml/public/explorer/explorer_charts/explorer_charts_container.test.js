@@ -110,6 +110,6 @@ describe('ExplorerChartsContainer', () => {
 
     // We test child components with snapshots separately
     // so we just do some high level sanity check here.
-    expect(wrapper.find('.ml-explorer-chart-container').children()).toHaveLength(3);
+    expect(wrapper.find('.ml-explorer-chart-container').children()).toHaveLength(2);
   });
 });

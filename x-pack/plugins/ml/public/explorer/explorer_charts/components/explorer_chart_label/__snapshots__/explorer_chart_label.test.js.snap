@@ -34,8 +34,9 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
       >
         <EuiIconTip
           aria-label="Info"
+          className="ml-explorer-chart-eui-icon-tip"
           content={
-            <ExplorerChartTooltip
+            <ExplorerChartInfoTooltip
               aggregationInterval="1h"
               chartFunction="sum nginx.access.body_sent.bytes"
               entityFields={
@@ -77,8 +78,9 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
     >
       <EuiIconTip
         aria-label="Info"
+        className="ml-explorer-chart-eui-icon-tip"
         content={
-          <ExplorerChartTooltip
+          <ExplorerChartInfoTooltip
             aggregationInterval="1h"
             chartFunction="sum nginx.access.body_sent.bytes"
             entityFields={
@@ -98,9 +100,7 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
       />
     </span>
   </span>
-  <div
-    className="ml-explorer-chart-label-fields"
-  >
+  <div>
     <React.Fragment
       key="nginx.access.remote_ip 72.57.0.53"
     >

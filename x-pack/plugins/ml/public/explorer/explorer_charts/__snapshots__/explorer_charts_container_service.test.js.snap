@@ -71,7 +71,7 @@ Object {
 
 exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 3`] = `
 Object {
-  "layoutCellsPerChart": 12,
+  "chartsPerRow": 1,
   "seriesToPlot": Array [
     Object {
       "bucketSpanSeconds": 900,
@@ -582,6 +582,7 @@ Object {
       "entityFields": Array [
         Object {
           "fieldName": "airline",
+          "fieldType": "partition",
           "fieldValue": "AAL",
         },
       ],
