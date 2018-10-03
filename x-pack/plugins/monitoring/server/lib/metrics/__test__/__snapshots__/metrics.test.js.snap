@@ -1793,7 +1793,7 @@ Object {
     "app": "elasticsearch",
     "calculation": [Function],
     "derivative": false,
-    "description": "The amount of time the follower index is lagging behind the leader.",
+    "description": "The number of operations the follower index is lagging behind the leader.",
     "field": "",
     "format": "0,0.[00]",
     "label": "Ops delay",
@@ -1801,7 +1801,7 @@ Object {
     "timestampField": "timestamp",
     "title": "Ops delay",
     "type": "ccr",
-    "units": "ms",
+    "units": "",
     "uuidField": "source_node.uuid",
   },
   "ccr_sync_lag_time": MillisecondsToSecondsMetric {
