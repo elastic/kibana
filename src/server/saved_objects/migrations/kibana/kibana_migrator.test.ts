@@ -56,27 +56,27 @@ describe('KibanaMigrator', () => {
       );
     });
 
-    it('exposes callCluster as a function that waits for elasticsearch before running', async () => {
-      const { kbnServer } = mockKbnServer();
-      const clusterStub = sinon.stub();
+    // it('exposes callCluster as a function that waits for elasticsearch before running', async () => {
+    //   const { kbnServer } = mockKbnServer();
+    //   const clusterStub = sinon.stub();
 
-      clusterStub.throws(new Error('Doh!'));
+    //   clusterStub.throws(new Error('Doh!'));
 
-      let count = 0;
-      kbnServer.server.plugins.elasticsearch = {
-        getCluster() {
-          expect(count).toEqual(1);
-          return {
-            callWithInternalUser: clusterStub,
-          };
-        },
-        waitUntilReady() {
-          return Promise.resolve().then(() => ++count);
-        },
-      };
-      await expect(new KibanaMigrator({ kbnServer }).migrateIndex()).rejects.toThrow(/Doh!/);
-      expect(count).toEqual(1);
-    });
+    //   let count = 0;
+    //   kbnServer.server.plugins.elasticsearch = {
+    //     getCluster() {
+    //       expect(count).toEqual(1);
+    //       return {
+    //         callWithInternalUser: clusterStub,
+    //       };
+    //     },
+    //     waitUntilReady() {
+    //       return Promise.resolve().then(() => ++count);
+    //     },
+    //   };
+    //   await expect(new KibanaMigrator({ kbnServer }).migrateIndex()).rejects.toThrow(/Doh!/);
+    //   expect(count).toEqual(1);
+    // });
   });
 });
 

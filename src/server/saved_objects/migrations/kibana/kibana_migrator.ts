@@ -118,6 +118,8 @@ export class KibanaMigrator {
    * @memberof KibanaMigrator
    */
   public migrateIndex() {
+    return;
+
     const { server } = this.kbnServer;
 
     // We can't do anything if the elasticsearch plugin has been disabled.
