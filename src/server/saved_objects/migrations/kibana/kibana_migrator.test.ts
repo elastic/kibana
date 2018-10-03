@@ -57,36 +57,33 @@ describe('KibanaMigrator', () => {
     });
   });
 
-  describe('awaitMigration', () => {
+  describe('migrateIndex', () => {
     it('changes isMigrated to true if migrations were skipped', async () => {
       const { kbnServer } = mockKbnServer();
       kbnServer.server.plugins.elasticsearch = undefined;
-      const migrator = new KibanaMigrator({ kbnServer });
+      const migrator = new KibanaMigrator({ kbnServer }).migrateIndex();
       expect(migrator.isMigrated).toBeFalsy();
       await migrator.awaitMigration();
       expect(migrator.isMigrated).toBeTruthy();
     });
 
-    it('exposes callCluster as a function that waits for elasticsearch before running', async () => {
+    it('waits for kbnServer.ready before attempting migrations', async () => {
       const { kbnServer } = mockKbnServer();
       const clusterStub = sinon.stub();
 
       clusterStub.throws(new Error('Doh!'));
 
-      let count = 0;
       kbnServer.server.plugins.elasticsearch = {
         getCluster() {
-          expect(count).toEqual(1);
+          sinon.assert.calledOnce(kbnServer.ready as any);
           return {
             callWithInternalUser: clusterStub,
           };
         },
-        waitUntilReady() {
-          return Promise.resolve().then(() => ++count);
-        },
       };
-      await expect(new KibanaMigrator({ kbnServer }).awaitMigration()).rejects.toThrow(/Doh!/);
-      expect(count).toEqual(1);
+      await expect(
+        new KibanaMigrator({ kbnServer }).migrateIndex().awaitMigration()
+      ).rejects.toThrow(/Doh!/);
     });
   });
 });
@@ -95,6 +92,7 @@ function mockKbnServer({ configValues }: { configValues?: any } = {}) {
   const callCluster = sinon.stub();
   const kbnServer: KbnServer = {
     version: '8.2.3',
+    ready: sinon.spy(async () => undefined),
     uiExports: {
       savedObjectValidations: {},
       savedObjectMigrations: {},
@@ -127,7 +125,6 @@ function mockKbnServer({ configValues }: { configValues?: any } = {}) {
           getCluster: () => ({
             callWithInternalUser: callCluster,
           }),
-          waitUntilReady: sinon.spy(() => Promise.resolve()),
         },
       },
     },

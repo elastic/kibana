@@ -140,9 +140,7 @@ export default class KbnServer {
 
     const { server, config } = this;
 
-    if (server.kibanaMigrator) {
-      await server.kibanaMigrator.awaitMigration();
-    }
+    await server.kibanaMigrator.awaitMigration();
 
     if (isWorker) {
       // help parent process know when we are ready

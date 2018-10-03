@@ -22,6 +22,7 @@
  * (the shape of the mappings and documents in the index).
  */
 
+import { once } from 'lodash';
 import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
 import { SavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator } from '../../validation';
@@ -38,6 +39,7 @@ import { DocumentMigrator, VersionedTransformer } from '../core/document_migrato
 export interface KbnServer {
   server: Server;
   version: string;
+  ready: () => Promise<any>;
   uiExports: {
     savedObjectMappings: any[];
     savedObjectMigrations: any;
@@ -59,7 +61,11 @@ interface Server {
 
 interface ElasticsearchPlugin {
   getCluster: ((name: 'admin') => { callWithInternalUser: CallCluster });
-  waitUntilReady: () => Promise<any>;
+}
+
+interface MigrationStatus {
+  isMigrated: boolean;
+  awaitMigration: () => Promise<MigrationResult>;
 }
 
 /**
@@ -69,15 +75,39 @@ interface ElasticsearchPlugin {
  * @class KibanaMigrator
  */
 export class KibanaMigrator {
+  /**
+   * Migrates the mappings and documents in the Kibana index. This will run only
+   * once and subsequent calls will return the result of the original call.
+   *
+   * This returns an object, rather than a promise, because we have some code that
+   * needs to await the migration result, and we have some code that simply needs
+   * to quickly check whether or not the migration has completed, and then error.
+   * The { isMigrated, awaitMigration } object allows for both scenarios.
+   *
+   * @returns
+   * @memberof KibanaMigrator
+   */
+  public migrateIndex = once(() => {
+    const promise = this.kbnServer.ready().then(() => this.performMigration());
+
+    const status = {
+      isMigrated: false,
+
+      async awaitMigration() {
+        const result = await promise;
+        status.isMigrated = true;
+        return result;
+      },
+    };
+
+    return status;
+  });
+
   private kbnServer: KbnServer;
   private documentMigrator: VersionedTransformer;
   private mappingProperties: MappingProperties;
   private log: LogFn;
   private serializer: SavedObjectsSerializer;
-  private migrationPromise?: Promise<MigrationResult>;
-
-  // tslint:disable-next-line:variable-name
-  private _isMigrated = false;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -102,14 +132,6 @@ export class KibanaMigrator {
   }
 
   /**
-   * Gets a value indicating whether or not the Kibana index has
-   * been migrated.
-   */
-  public get isMigrated() {
-    return this._isMigrated;
-  }
-
-  /**
    * Gets the index mappings defined by Kibana's enabled plugins.
    *
    * @returns
@@ -130,26 +152,7 @@ export class KibanaMigrator {
     return this.documentMigrator.migrate(doc);
   }
 
-  /**
-   * Migrates the mappings and documents in the Kibana index. This will run only
-   * once and subsequent calls will return the promise of the original call, allowing
-   * multiple callers to wait for a the same migration run.
-   *
-   * @returns
-   * @memberof KibanaMigrator
-   */
-  public awaitMigration() {
-    if (!this.migrationPromise) {
-      this.migrationPromise = this.migrateIndex().then(result => {
-        this._isMigrated = true;
-        return result;
-      });
-    }
-
-    return this.migrationPromise;
-  }
-
-  private async migrateIndex(): Promise<MigrationResult> {
+  private async performMigration(): Promise<MigrationResult> {
     const { server } = this.kbnServer;
 
     // We can't do anything if the elasticsearch plugin has been disabled.
@@ -160,8 +163,6 @@ export class KibanaMigrator {
       );
       return { status: 'skipped' };
     }
-
-    await server.plugins.elasticsearch.waitUntilReady();
 
     const config = server.config();
     const migrator = new IndexMigrator({
