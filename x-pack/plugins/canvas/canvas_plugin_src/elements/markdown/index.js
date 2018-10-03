@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import header from './header.png';
 
 export const markdown = () => ({
   name: 'markdown',
-  displayName: 'Markdown',
-  help: 'Markup from Markdown',
+  displayName: i18n.translate('xpack.canvas.elements.markdownDisplayName', {
+    defaultMessage: 'Markdown',
+  }),
+  help: i18n.translate('xpack.canvas.elements.markdownHelpText', {
+    defaultMessage: 'Markup from Markdown',
+  }),
   image: header,
   expression: `filters
 | demodata

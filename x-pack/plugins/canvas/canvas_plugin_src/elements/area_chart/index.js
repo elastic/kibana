@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const areaChart = () => {
   return {
     name: 'areaChart',
-    displayName: 'Area chart',
-    help: 'A line chart with a filled body',
+    displayName: i18n.translate('xpack.canvas.elements.areaChartDisplayName', {
+      defaultMessage: 'Area chart',
+    }),
+    help: i18n.translate('xpack.canvas.elements.areaChartHelpText', {
+      defaultMessage: 'A line chart with a filled body',
+    }),
     image: require('./header.png'),
     expression: `filters
   | demodata
