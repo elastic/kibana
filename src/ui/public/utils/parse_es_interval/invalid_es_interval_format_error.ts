@@ -17,19 +17,19 @@
  * under the License.
  */
 
-export class ParseEsIntervalInvalidFormatError extends Error {
+export class InvalidEsIntervalFormatError extends Error {
   constructor(public readonly interval: string) {
     super(`Invalid interval format: ${interval}`);
-    this.name = 'ParseEsIntervalInvalidFormatError';
+    this.name = 'InvalidEsIntervalFormatError';
 
     // captureStackTrace is only available in the V8 engine, so any browser using
     // a different JS engine won't have access to this method.
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ParseEsIntervalInvalidFormatError);
+      Error.captureStackTrace(this, InvalidEsIntervalFormatError);
     }
 
     // Babel doesn't support traditional `extends` syntax for built-in classes.
     // https://babeljs.io/docs/en/caveats/#classes
-    Object.setPrototypeOf(this, ParseEsIntervalInvalidFormatError.prototype);
+    Object.setPrototypeOf(this, InvalidEsIntervalFormatError.prototype);
   }
 }

@@ -19,8 +19,8 @@
 
 import dateMath from '@kbn/datemath';
 
-import { ParseEsIntervalInvalidCalendarIntervalError } from './parse_es_interval_invalid_calendar_interval_error';
-import { ParseEsIntervalInvalidFormatError } from './parse_es_interval_invalid_format_error';
+import { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
+import { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';
 
 const ES_INTERVAL_STRING_REGEX = new RegExp(
   '^([1-9][0-9]*)\\s*(' + dateMath.units.join('|') + ')$'
@@ -51,7 +51,7 @@ export function parseEsInterval(interval: string): { value: number; unit: string
     .match(ES_INTERVAL_STRING_REGEX);
 
   if (!matches) {
-    throw new ParseEsIntervalInvalidFormatError(interval);
+    throw new InvalidEsIntervalFormatError(interval);
   }
 
   const value = matches && parseFloat(matches[1]);
@@ -59,7 +59,7 @@ export function parseEsInterval(interval: string): { value: number; unit: string
   const type = unit && dateMath.unitsMap[unit].type;
 
   if (type === 'calendar' && value !== 1) {
-    throw new ParseEsIntervalInvalidCalendarIntervalError(interval, value, unit, type);
+    throw new InvalidEsCalendarIntervalError(interval, value, unit, type);
   }
 
   return {
