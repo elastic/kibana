@@ -1254,6 +1254,23 @@ describe('SavedObjectsRepository', () => {
 
   describe('#incrementCounter', () => {
     beforeEach(() => {
+      callAdminCluster.callsFake((method, params) => ({
+        _type: 'doc',
+        _id: params.id,
+        _version: 2,
+        _index: '.kibana',
+        get: {
+          found: true,
+          _source: {
+            type: 'config',
+            ...mockTimestampFields,
+            config: {
+              buildNum: 8468,
+              defaultIndex: 'logstash-*',
+            },
+          },
+        },
+      }));
     });
 
     it('formats Elasticsearch response', async () => {
@@ -1295,6 +1312,69 @@ describe('SavedObjectsRepository', () => {
           defaultIndex: 'logstash-*'
         }
       });
+    });
+
+    it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
+      await savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', 'buildNum', {
+        namespace: 'foo-namespace',
+      });
+
+      sinon.assert.calledOnce(callAdminCluster);
+
+      const requestDoc = callAdminCluster.firstCall.args[1];
+      expect(requestDoc.id).toBe('foo-namespace:config:6.0.0-alpha1');
+      expect(requestDoc.body.script.params.type).toBe('config');
+      expect(requestDoc.body.upsert.type).toBe('config');
+      expect(requestDoc).toHaveProperty('body.upsert.config');
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
+      await savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', 'buildNum');
+
+      sinon.assert.calledOnce(callAdminCluster);
+
+      const requestDoc = callAdminCluster.firstCall.args[1];
+      expect(requestDoc.id).toBe('config:6.0.0-alpha1');
+      expect(requestDoc.body.script.params.type).toBe('config');
+      expect(requestDoc.body.upsert.type).toBe('config');
+      expect(requestDoc).toHaveProperty('body.upsert.config');
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
+      callAdminCluster.callsFake((method, params) => ({
+        _type: 'doc',
+        _id: params.id,
+        _version: 2,
+        _index: '.kibana',
+        get: {
+          found: true,
+          _source: {
+            type: 'globaltype',
+            ...mockTimestampFields,
+            globaltype: {
+              counter: 1,
+            },
+          },
+        },
+      }));
+
+      await savedObjectsRepository.incrementCounter('globaltype', 'foo', 'counter', {
+        namespace: 'foo-namespace',
+      });
+
+      sinon.assert.calledOnce(callAdminCluster);
+
+      const requestDoc = callAdminCluster.firstCall.args[1];
+      expect(requestDoc.id).toBe('globaltype:foo');
+      expect(requestDoc.body.script.params.type).toBe('globaltype');
+      expect(requestDoc.body.upsert.type).toBe('globaltype');
+      expect(requestDoc).toHaveProperty('body.upsert.globaltype');
+
+      sinon.assert.calledOnce(onBeforeWrite);
     });
   });
 
