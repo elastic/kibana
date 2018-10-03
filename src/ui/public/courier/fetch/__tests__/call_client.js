@@ -348,18 +348,21 @@ describe('callClient', () => {
       searchRequestA = createSearchRequest('a', {
         source: {
           getField: () => ({ type: 'a' }),
+          getSearchStrategyForSearchRequest: () => {},
         },
       });
 
       searchRequestB = createSearchRequest('b', {
         source: {
           getField: () => ({ type: 'b' }),
+          getSearchStrategyForSearchRequest: () => {},
         },
       });
 
       searchRequestA2 = createSearchRequest('a2', {
         source: {
           getField: () => ({ type: 'a' }),
+          getSearchStrategyForSearchRequest: () => {},
         },
       });
     });
