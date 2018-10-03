@@ -320,7 +320,7 @@ export class WorkpadLoader extends React.PureComponent {
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={2}>
-                    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" wrap>
                       <EuiFlexItem grow={false}>
                         <WorkpadUpload
                           createPending={createPending}
