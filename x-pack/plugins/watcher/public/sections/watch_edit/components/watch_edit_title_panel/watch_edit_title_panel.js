@@ -9,7 +9,6 @@ import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import template from './watch_edit_title_panel.html';
 import { TIME_UNITS } from 'plugins/watcher/../common/constants';
-import './watch_edit_title_panel.less';
 
 import 'plugins/watcher/components/index_select';
 import 'plugins/watcher/components/duration_select';
