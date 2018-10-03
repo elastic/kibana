@@ -22,12 +22,20 @@ import moment from 'moment';
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
 import { formatValue } from '../../formatters/format_value';
-import { getSeverityWithLow } from '../../../common/util/anomaly_utils';
 import {
+  getSeverityWithLow,
+  getMultiBucketImpactLabel,
+} from '../../../common/util/anomaly_utils';
+import {
+  LINE_CHART_ANOMALY_RADIUS,
+  MULTI_BUCKET_SYMBOL_SIZE,
+  SCHEDULED_EVENT_SYMBOL_HEIGHT,
   drawLineChartDots,
   getTickValues,
   numTicksForDateFormat,
-  removeLabelOverlap
+  removeLabelOverlap,
+  showMultiBucketAnomalyMarker,
+  showMultiBucketAnomalyTooltip,
 } from '../../util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
@@ -74,8 +82,6 @@ export class ExplorerChart extends React.Component {
 
     let vizWidth = 0;
     const chartHeight = 170;
-    const LINE_CHART_ANOMALY_RADIUS = 7;
-    const SCHEDULED_EVENT_MARKER_HEIGHT = 5;
 
     // Left margin is adjusted later for longest y-axis label.
     const margin = { top: 10, right: 0, bottom: 30, left: 60 };
@@ -260,11 +266,11 @@ export class ExplorerChart extends React.Component {
     function drawLineChartMarkers(data) {
       // Render circle markers for the points.
       // These are used for displaying tooltips on mouseover.
-      // Don't render dots where value=null (data gaps)
+      // Don't render dots where value=null (data gaps) or for multi-bucket anomalies.
       const dots = lineChartGroup.append('g')
         .attr('class', 'chart-markers')
         .selectAll('.metric-value')
-        .data(data.filter(d => d.value !== null));
+        .data(data.filter(d => (d.value !== null && !showMultiBucketAnomalyMarker(d))));
 
       // Remove dots that are no longer needed i.e. if number of chart points has decreased.
       dots.exit().remove();
@@ -283,11 +289,27 @@ export class ExplorerChart extends React.Component {
         .attr('class', function (d) {
           let markerClass = 'metric-value';
           if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= threshold.val) {
-            markerClass += ' anomaly-marker ';
-            markerClass += getSeverityWithLow(d.anomalyScore);
+            markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore)}`;
           }
           return markerClass;
         });
+
+      // Render cross symbols for any multi-bucket anomalies.
+      const multiBucketMarkers = lineChartGroup.select('.chart-markers').selectAll('.multi-bucket')
+        .data(data.filter(d => (d.anomalyScore !== null && showMultiBucketAnomalyMarker(d) === true)));
+
+      // Remove multi-bucket markers that are no longer needed
+      multiBucketMarkers.exit().remove();
+
+      // Update markers to new positions.
+      multiBucketMarkers.enter().append('path')
+        .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
+        .attr('transform', d => `translate(${lineChartXScale(d.date)}, ${lineChartYScale(d.value)})`)
+        .attr('class', d => `metric-value anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`)
+        .on('mouseover', function (d) {
+          showLineChartTooltip(d, this);
+        })
+        .on('mouseout', () => mlChartTooltipService.hide());
 
       // Add rectangular markers for any scheduled events.
       const scheduledEventMarkers = lineChartGroup.select('.chart-markers').selectAll('.scheduled-event-marker')
@@ -298,14 +320,14 @@ export class ExplorerChart extends React.Component {
       // Create any new markers that are needed i.e. if number of chart points has increased.
       scheduledEventMarkers.enter().append('rect')
         .attr('width', LINE_CHART_ANOMALY_RADIUS * 2)
-        .attr('height', SCHEDULED_EVENT_MARKER_HEIGHT)
+        .attr('height', SCHEDULED_EVENT_SYMBOL_HEIGHT)
         .attr('class', 'scheduled-event-marker')
         .attr('rx', 1)
         .attr('ry', 1);
 
       // Update all markers to new positions.
       scheduledEventMarkers.attr('x', (d) => lineChartXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
-        .attr('y', (d) => lineChartYScale(d.value) - (SCHEDULED_EVENT_MARKER_HEIGHT / 2));
+        .attr('y', (d) => lineChartYScale(d.value) - (SCHEDULED_EVENT_SYMBOL_HEIGHT / 2));
 
     }
 
@@ -319,6 +341,11 @@ export class ExplorerChart extends React.Component {
         const score = parseInt(marker.anomalyScore);
         const displayScore = (score > 0 ? score : '< 1');
         contents += ('anomaly score: ' + displayScore);
+
+        if (showMultiBucketAnomalyTooltip(marker) === true) {
+          contents += `<br/>multi-bucket impact: ${getMultiBucketImpactLabel(marker.multiBucketImpact)}`;
+        }
+
         // Show actual/typical when available except for rare detectors.
         // Rare detectors always have 1 as actual and the probability as typical.
         // Exposing those values in the tooltip with actual/typical labels might irritate users.
