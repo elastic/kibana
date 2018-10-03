@@ -17,10 +17,10 @@ export const aeroelastic = {
   },
 
   createStore(initialState, onChangeCallback = () => {}, page) {
-    if (true) {
+    if (stores.has(page)) {
       throw new Error(
         i18n.translate('xpack.canvas.lib.aeroelasticKibana.createStoreErrorMessage', {
-          defaultMessage: 'Only a single aeroelastic store per page should exist {p}',
+          defaultMessage: 'Only a single aeroelastic store per page should exist',
         })
       );
     }
