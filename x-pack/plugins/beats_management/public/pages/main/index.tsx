@@ -71,7 +71,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
       this.state.beats.length === 0 &&
       !this.props.location.pathname.includes('/overview/initial')
     ) {
-      return <Redirect from="/" exact={true} to="/overview/initial/help" />;
+      return <Redirect to="/overview/initial/help" />;
     }
     const tabs = [
       {
@@ -225,7 +225,12 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
       );
     }
 
-    const beats = await this.props.libs.beats.getAll(query);
+    let beats: CMPopulatedBeat[];
+    try {
+      beats = await this.props.libs.beats.getAll(query);
+    } catch (e) {
+      beats = [];
+    }
     if (this.mounted) {
       this.setState({
         loadedBeatsAtLeastOnce: true,
