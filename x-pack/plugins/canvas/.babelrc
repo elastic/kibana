@@ -4,7 +4,14 @@
     "transform-async-to-generator",
     "transform-class-properties"
   ],
-  "ignore": ["canvas_plugin/**/*.js"],
+  "ignore": [
+    "canvas_plugin/elements/*.js",
+    "canvas_plugin/renderers/*.js",
+    "canvas_plugin/types/*.js",
+    "canvas_plugin/uis/**/*.js",
+    "canvas_plugin/function/brower/*.js",
+    "canvas_plugin/function/common/*.js"
+  ],
   "presets": [
     "react",
     [
