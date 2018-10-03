@@ -16,7 +16,7 @@ export function checkGetJobsPrivilege(Private, Promise, kbnUrl) {
     getPrivileges()
       .then((priv) => {
         privileges = priv;
-        // the minimum privilege for using ML is being able to get the jobs list.
+        // the minimum privilege for using ML with a platinum license is being able to get the jobs list.
         // all other functionality is controlled by the return privileges object
         if (privileges.canGetJobs) {
           return resolve(privileges);
@@ -39,6 +39,23 @@ export function checkCreateJobsPrivilege(Private, Promise, kbnUrl) {
           // if the user has no permission to create a job,
           // redirect them back to the Jobs Management page
           kbnUrl.redirect('/jobs');
+          return reject();
+        }
+      });
+  });
+}
+
+export function checkFindFileStructurePrivilege(Private, Promise, kbnUrl) {
+  return new Promise((resolve, reject) => {
+    getPrivileges()
+      .then((priv) => {
+        privileges = priv;
+        // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
+        // all other functionality is controlled by the return privileges object
+        if (privileges.canFindFileStructure) {
+          return resolve(privileges);
+        } else {
+          kbnUrl.redirect('/access-denied');
           return reject();
         }
       });

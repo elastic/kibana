@@ -102,7 +102,7 @@ function redirectToKibana(features, kbnBaseUrl) {
 }
 
 function redirectToBasic(kbnUrl) {
-  kbnUrl.redirect('/filedatavisualizer');
+  kbnUrl.redirect('/filedatavisualizer'); // TODO: update this with the new fancy basic landing page
   return Promise.halt();
 }
 

@@ -14,7 +14,7 @@
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired, checkBasicLicense } from 'plugins/ml/license/check_license';
 import { preConfiguredJobRedirect } from 'plugins/ml/jobs/new_job/wizard/preconfigured_job_redirect';
-import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
+import { checkCreateJobsPrivilege, checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_privilege';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { initPromise } from 'plugins/ml/util/promise';
@@ -45,7 +45,7 @@ uiRoutes
     template,
     resolve: {
       CheckLicense: checkBasicLicense,
-      privileges: checkCreateJobsPrivilege,
+      privileges: checkFindFileStructurePrivilege,
       indexPatterns: loadIndexPatterns,
       preConfiguredJobRedirect,
       checkMlNodesAvailable,
