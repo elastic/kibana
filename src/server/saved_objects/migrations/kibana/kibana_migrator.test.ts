@@ -65,20 +65,25 @@ describe('KibanaMigrator', () => {
       expect(result).toEqual({ status: 'skipped' });
     });
 
-    it('waits for kbnServer.ready before attempting migrations', async () => {
+    it('waits for kbnServer.ready and elasticsearch.ready before attempting migrations', async () => {
       const { kbnServer } = mockKbnServer();
       const clusterStub = sinon.stub();
+      const waitUntilReady = sinon.spy(async () => undefined);
 
       clusterStub.throws(new Error('Doh!'));
 
       kbnServer.server.plugins.elasticsearch = {
+        waitUntilReady,
         getCluster() {
           sinon.assert.calledOnce(kbnServer.ready as any);
+          sinon.assert.calledOnce(waitUntilReady);
+
           return {
             callWithInternalUser: clusterStub,
           };
         },
       };
+
       await expect(new KibanaMigrator({ kbnServer }).awaitMigration()).rejects.toThrow(/Doh!/);
     });
   });
@@ -121,6 +126,7 @@ function mockKbnServer({ configValues }: { configValues?: any } = {}) {
           getCluster: () => ({
             callWithInternalUser: callCluster,
           }),
+          waitUntilReady: async () => undefined,
         },
       },
     },
