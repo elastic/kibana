@@ -187,11 +187,12 @@ export function FindProvider({ getService }) {
       return await this.exists(async remote => await remote.findByCssSelector(selector), timeout);
     }
 
-    async clickByCssSelectorWhenNotDisabled(element, options = { doubleClick: false }) {
+    async clickByCssSelectorWhenNotDisabled(selector, { timeout } = { timeout: defaultFindTimeout }) {
       log.debug(`Find.clickByCssSelectorWhenNotDisabled`);
       // Don't wrap this code in a retry, or stale element checks may get caught here and the element
       // will never be re-grabbed.  Let errors bubble, but continue checking for disabled property until
       // it's gone.
+      const element = await this.byCssSelector(selector, timeout);
       await remote.moveMouseTo(element);
 
       const clickIfNotDisabled = async (element, resolve) => {
@@ -200,7 +201,7 @@ export function FindProvider({ getService }) {
           log.debug('Element is disabled, try again');
           setTimeout(() => clickIfNotDisabled(element, resolve), 250);
         } else {
-          options.doubleClick ? await remote.doubleClick() : await element.click();
+          await element.click();
           resolve();
         }
       };
