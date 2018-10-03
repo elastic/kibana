@@ -10,6 +10,7 @@ import React from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   EuiToolTip
@@ -54,40 +55,45 @@ function ExplorerChartContainer({
   } = series;
 
   return (
-    // Needs to be a div, Using React.Fragment would break the Flex Layout
-    <div>
-      <div className="ml-explorer-chart-icons">
-        {tooManyBuckets && (
-          <span className="ml-explorer-chart-icon">
-            <EuiIconTip
-              content={textTooManyBuckets}
+    <React.Fragment>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <ExplorerChartLabel
+            detectorLabel={detectorLabel}
+            entityFields={entityFields}
+            infoTooltip={series.infoTooltip}
+            wrapLabel={wrapLabel}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <div className="ml-explorer-chart-icons">
+            {tooManyBuckets && (
+              <span className="ml-explorer-chart-icon">
+                <EuiIconTip
+                  content={textTooManyBuckets}
+                  position="top"
+                  size="s"
+                  type="alert"
+                  color="warning"
+                />
+              </span>
+            )}
+            <EuiToolTip
               position="top"
-              size="s"
-              type="alert"
-              color="warning"
-            />
-          </span>
-        )}
-        <EuiToolTip
-          position="top"
-          content={textViewButton}
-        >
-          <EuiButtonEmpty
-            iconSide="right"
-            iconType="popout"
-            size="xs"
-            onClick={() => window.open(getExploreSeriesLink(series), '_blank')}
-          >
-            View
-          </EuiButtonEmpty>
-        </EuiToolTip>
-      </div>
-      <ExplorerChartLabel
-        detectorLabel={detectorLabel}
-        entityFields={entityFields}
-        infoTooltip={series.infoTooltip}
-        wrapLabel={wrapLabel}
-      />
+              content={textViewButton}
+            >
+              <EuiButtonEmpty
+                iconSide="right"
+                iconType="popout"
+                size="xs"
+                onClick={() => window.open(getExploreSeriesLink(series), '_blank')}
+              >
+                View
+              </EuiButtonEmpty>
+            </EuiToolTip>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {(() => {
         if (functionDescription === 'rare') {
           return (
@@ -98,7 +104,7 @@ function ExplorerChartContainer({
             />
           );
         }
-        if (functionDescription === 'count') {
+        if (functionDescription === 'count' && series.entityFields.find(f => f.fieldType === 'over')) {
           return (
             <ExplorerChartRare
               tooManyBuckets={tooManyBuckets}
@@ -115,7 +121,7 @@ function ExplorerChartContainer({
           />
         );
       })()}
-    </div>
+    </React.Fragment>
   );
 }
 

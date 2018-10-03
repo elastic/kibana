@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './styles/explorer_chart_label.less';
-
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -62,7 +60,7 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
         )}
       </span>
       {wrapLabel && (
-        <div className="ml-explorer-chart-label-fields">{entityFieldBadges}</div>
+        <div>{entityFieldBadges}</div>
       )}
     </React.Fragment>
   );
