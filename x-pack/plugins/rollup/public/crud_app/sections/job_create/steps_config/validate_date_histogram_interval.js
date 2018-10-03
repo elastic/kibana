@@ -45,7 +45,7 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
             suggestion: (
               <strong>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidCalendarInterval.suggestion"
+                  id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidCalendarIntervalSuggestion"
                   defaultMessage="1{unit}"
                   values={{ unit }}
                 />

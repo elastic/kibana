@@ -85,7 +85,7 @@ export class StepHistogramUi extends Component {
             <EuiTitle>
               <h3>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepHistogram.title"
+                  id="xpack.rollupJobs.create.stepHistogramTitle"
                   defaultMessage="Histogram (optional)"
                 />
               </h3>
@@ -181,7 +181,7 @@ export class StepHistogramUi extends Component {
             <EuiTitle size="s">
               <h4>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepHistogram.sectionHistogramInterval.title"
+                  id="xpack.rollupJobs.create.stepHistogram.sectionHistogramIntervalTitle"
                   defaultMessage="Histogram interval"
                 />
               </h4>
@@ -236,7 +236,7 @@ export class StepHistogramUi extends Component {
         <EuiCallOut
           title={(
             <FormattedMessage
-              id="xpack.rollupJobs.create.stepGroups.stepError.title"
+              id="xpack.rollupJobs.create.stepGroups.stepErrorTitle"
               defaultMessage="Fix errors before going to next step"
             />
           )}

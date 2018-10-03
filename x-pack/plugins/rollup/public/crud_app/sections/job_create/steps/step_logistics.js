@@ -268,7 +268,7 @@ export class StepLogisticsUi extends Component {
             <EuiTitle>
               <h3>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogistics.title"
+                  id="xpack.rollupJobs.create.stepLogisticsTitle"
                   defaultMessage="Logistics"
                 />
               </h3>
@@ -310,7 +310,7 @@ export class StepLogisticsUi extends Component {
               <EuiTitle size="s">
                 <h4>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.sectionId.title"
+                    id="xpack.rollupJobs.create.stepLogistics.sectionIdTitle"
                     defaultMessage="Name"
                   />
                 </h4>
@@ -349,7 +349,7 @@ export class StepLogisticsUi extends Component {
               <EuiTitle size="s">
                 <h4>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.sectionDataFlow.title"
+                    id="xpack.rollupJobs.create.stepLogistics.sectionDataFlowTitle"
                     defaultMessage="Data flow"
                   />
                 </h4>
@@ -416,7 +416,7 @@ export class StepLogisticsUi extends Component {
               <EuiTitle size="s">
                 <h4>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.title"
+                    id="xpack.rollupJobs.create.stepLogistics.sectionScheduleTitle"
                     defaultMessage="Schedule"
                   />
                 </h4>
@@ -440,7 +440,7 @@ export class StepLogisticsUi extends Component {
               <EuiTitle size="xs">
                 <h5>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.sectionPageSize.title"
+                    id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeTitle"
                     defaultMessage="How many documents should be rolled up at a time?"
                   />
                 </h5>
@@ -483,7 +483,7 @@ export class StepLogisticsUi extends Component {
               <EuiTitle size="xs">
                 <h5>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.sectionPageSize.title"
+                    id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeTitle"
                     defaultMessage="How long should the rollup job wait before rolling up new data?"
                   />
                 </h5>
@@ -549,7 +549,7 @@ export class StepLogisticsUi extends Component {
         <EuiCallOut
           title={(
             <FormattedMessage
-              id="xpack.rollupJobs.create.stepLogistics.stepError.title"
+              id="xpack.rollupJobs.create.stepLogistics.stepErrorTitle"
               defaultMessage="Fix errors before going to next step"
             />
           )}

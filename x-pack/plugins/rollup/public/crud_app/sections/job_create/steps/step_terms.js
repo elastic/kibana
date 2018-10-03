@@ -84,7 +84,7 @@ export class StepTermsUi extends Component {
             <EuiTitle>
               <h3>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepTerms.title"
+                  id="xpack.rollupJobs.create.stepTermsTitle"
                   defaultMessage="Terms (optional)"
                 />
               </h3>
