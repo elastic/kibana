@@ -3,8 +3,11 @@
   background: $euiColorEmptyShade;
 }
 
+// SASSTODO: Remove when this is replaced by the side nav
 .mgtPanel__link {
   @include euiFontSizeL;
+
+  line-height: 2; // Give some buffer for when they wrap
 
   &.mgtPanel__link--disabled {
     opacity: $euiColorDarkShade;
