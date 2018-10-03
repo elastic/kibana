@@ -56,45 +56,43 @@ A sample task can be found in the [plugin_functional/sample_task_plugin](../../t
 ```js
 const { client: taskManagerClient } = server.plugins.taskManager;
 taskManagerClient.registerTaskDefinitions({
-  sampleTask: {
-    title: 'Sample Task',
-    description: 'A sample task for testing the task_manager.',
-    timeOut: '1m',
+  // clusterMonitoring is the task type, and must be unique across the entire system
+  clusterMonitoring: {
+    // Human friendly name, used to represent this task in logs, UI, etc
+    title: 'Human friendly name',
+
+    // Optional, human-friendly, more detailed description
+    description: 'Amazing!!',
+
+    // Optional, how long, in minutes, the system should wait before
+    // a running instance of this task is considered to be timed out.
+    // This defaults to 5 minutes.
+    timeOut: '5m',
+
+    // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
+    // 5 clusterMonitoring tasks could run concurrently per Kibana instance. This value is
+    // overridden by the `override_num_workers` config value, if specified.
     numWorkers: 2,
 
-    // This task allows tests to specify its behavior (whether it reschedules itself, whether it errors, etc)
-    // taskInstance.params has the following optional fields:
-    // nextRunMilliseconds: number - If specified, the run method will return a runAt that is now + nextRunMilliseconds
-    // failWith: string - If specified, the task will throw an error with the specified message
-    createTaskRunner: ({ kbnServer, taskInstance }) => ({
-      async run() {
-        const { params, state } = taskInstance;
-        const prevState = state || { count: 0 };
+    // The createTaskRunner function / method returns an object that is responsible for
+    // performing the work of the task. context: { taskInstance, kbnServer }, is documented below.
+    createTaskRunner(context) {
+      return {
+        // Perform the work of the task. The return value should fit the TaskResult interface, documented
+        // below. Invalid return values will result in a logged warning.
+        async run() {
+          // Do some work
+          // Conditionally send some alerts
+          // Return some result or other...
+        },
 
-        if (params.failWith) {
-          throw new Error(params.failWith);
-        }
-
-        const callCluster = kbnServer.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-        await callCluster('index', {
-          index: '.task_manager_test_result',
-          type: '_doc',
-          body: {
-            type: 'task',
-            taskId: taskInstance.id,
-            params: JSON.stringify(params),
-            state: JSON.stringify(state),
-            ranAt: new Date(),
-          },
-          refresh: true,
-        });
-
-        return {
-          state: { count: (prevState.count || 0) + 1 },
-          runAt: millisecondsFromNow(params.nextRunMilliseconds),
-        };
-      },
-    }),
+        // Optional, will be called if a running instance of this task times out, allowing the task
+        // to attempt to clean itself up.
+        async cancel() {
+          // Do whatever is required to cancel this task, such as killing any spawned processes
+        },
+      };
+    }
   },
 });
 ```
