@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { fromExpression } from '../../common/lib/ast';
 import { getType } from '../../common/lib/get_type';
 import { interpretAst } from './interpreter';
@@ -30,7 +31,12 @@ export function runInterpreter(ast, context = null, options = {}) {
         });
       }
 
-      return new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);
+      return new Error(
+        i18n.translate('xpack.canvas.lib.runInterpreter.unknownTypeForRenderErrorMessage', {
+          defaultMessage: "Ack! I don't know how to render a '{getType)}",
+          values: { getType: getType(renderable) },
+        })
+      );
     })
     .catch(err => {
       notify.error(err);

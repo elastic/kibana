@@ -5,6 +5,7 @@
  */
 
 import { get, mapValues, map } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { fromExpression } from '../../common/lib/ast';
 
 export function parseSingleFunctionChain(filterString) {
@@ -13,7 +14,16 @@ export function parseSingleFunctionChain(filterString) {
   // Check if the current column is what we expect it to be. If the user changes column this will be called again,
   // but we don't want to run setFilter() unless we have to because it will cause a data refresh
   const name = get(ast, 'chain[0].function');
-  if (!name) throw new Error('Could not find function name in chain');
+  if (!name) {
+    throw new Error(
+      i18n.translate(
+        'xpack.canvas.lib.parseSingleFunctionChain.functionNameInChainNotFindErrorMessage',
+        {
+          defaultMessage: 'Could not find function name in chain',
+        }
+      )
+    );
+  }
 
   const args = mapValues(get(ast, 'chain[0].arguments'), val => {
     // TODO Check for literals only

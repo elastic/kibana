@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import defaultHeader from './default_header.png';
 
 export function Element(config) {
@@ -19,7 +20,13 @@ export function Element(config) {
   // A sentence or few about what this element does
   this.help = config.help;
 
-  if (!config.expression) throw new Error('Element types must have a default expression');
+  if (!config.expression) {
+    throw new Error(
+      i18n.translate('xpack.canvas.lib.element.elementTypesMustHaveDefaultExpressionErrorMessage', {
+        defaultMessage: 'Element types must have a default expression',
+      })
+    );
+  }
   this.expression = config.expression;
   this.filter = config.filter;
   this.width = config.width || 500;

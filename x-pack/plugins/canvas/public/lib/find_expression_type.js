@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { datasourceRegistry } from '../expression_types/datasource';
 import { transformRegistry } from '../expression_types/transform';
 import { modelRegistry } from '../expression_types/model';
@@ -36,6 +37,13 @@ export function findExpressionType(name, type) {
     }
   }, []);
 
-  if (matches.length > 1) throw new Error(`Found multiple expressions with name "${name}"`);
+  if (matches.length > 1) {
+    throw new Error(
+      i18n.translate('xpack.canvas.lib.findExpressionType.foundMultipleExpressionErrorMessage', {
+        defaultMessage: 'Found multiple expressions with name "{name}"',
+        values: { name },
+      })
+    );
+  }
   return matches[0] || null;
 }

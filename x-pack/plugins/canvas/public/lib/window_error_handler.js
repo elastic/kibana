@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import * as knownErrors from '../../common/lib/errors';
 
 const oldHandler = window.onerror;
@@ -21,10 +22,21 @@ function showError(err) {
   };
   notice.appendChild(close);
 
+  // const uncaughtErrorSwalwedInDevModeMessage =
+  //   '<h3>' +
+  //   i18n.translate('xpack.canvas.lib.windowErrorHandler.uncaughtErrorSwallowedInDevModeMessage', {
+  //     defaultMessage: 'Uncaught error swallowed in dev mode',
+  //   }) +
+  //   '</h3>';
+
+  // notice.insertAdjacentHTML('beforeend', uncaughtErrorSwalwedInDevModeMessage);
   notice.insertAdjacentHTML('beforeend', '<h3>Uncaught error swallowed in dev mode</h3>');
 
   const message = document.createElement('p');
-  message.textContent = `Error: ${err.message}`;
+  message.textContent = i18n.translate('xpack.canvas.lib.windowErrorHandlerErrorMessage', {
+    defaultMessage: 'Error: {errorMessage}',
+    values: { errorMessage: err.message },
+  });
   notice.appendChild(message);
 
   if (err.stack) {

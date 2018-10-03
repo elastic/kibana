@@ -5,6 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 import { API_ROUTE } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
 import { notify } from './notify';
@@ -21,7 +22,15 @@ export const getFields = (index = '_all') => {
         .sort()
     )
     .catch(err =>
-      notify.error(err, { title: `Couldn't fetch Elasticsearch fields for '${index}'` })
+      notify.error(err, {
+        title: i18n.translate(
+          'xpack.canvas.lib.esService.fetchElasticsearchFieldsForIndexErrorMessage',
+          {
+            defaultMessage: "Couldn't fetch Elasticsearch fields for '{index}'",
+            values: { index },
+          }
+        ),
+      })
     );
 };
 
@@ -29,5 +38,14 @@ export const getIndices = () => {
   return fetch
     .get(`${apiPath}/es_indices`)
     .then(({ data: indices }) => indices)
-    .catch(err => notify.error(err, { title: `Couldn't fetch Elasticsearch indices` }));
+    .catch(err =>
+      notify.error(err, {
+        title: i18n.translate(
+          'xpack.canvas.lib.esService.fetchElasticsearchFieldsForIndicesErrorMessage',
+          {
+            defaultMessage: "Couldn't fetch Elasticsearch indices",
+          }
+        ),
+      })
+    );
 };

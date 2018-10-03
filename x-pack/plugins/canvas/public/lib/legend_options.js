@@ -4,25 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const legendOptions = [
   {
-    name: 'Hidden',
+    name: i18n.translate('xpack.canvas.lib.legendOptions.hiddenNameText', {
+      defaultMessage: 'Hidden',
+    }),
     value: false,
   },
   {
-    name: 'Top Left',
+    name: i18n.translate('xpack.canvas.lib.legendOptions.topLeftNameText', {
+      defaultMessage: 'Top Left',
+    }),
     value: 'nw',
   },
   {
-    name: 'Top Right',
+    name: i18n.translate('xpack.canvas.lib.legendOptions.topRightNameText', {
+      defaultMessage: 'Top Right',
+    }),
     value: 'ne',
   },
   {
-    name: 'Bottom Left',
+    name: i18n.translate('xpack.canvas.lib.legendOptions.bottomLeftNameText', {
+      defaultMessage: 'Bottom Left',
+    }),
     value: 'sw',
   },
   {
-    name: 'Bottom Right',
+    name: i18n.translate('xpack.canvas.lib.legendOptions.bottomRightNameText', {
+      defaultMessage: 'Bottom Right',
+    }),
     value: 'se',
   },
 ];

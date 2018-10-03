@@ -5,6 +5,7 @@
  */
 
 import createRouter from '@scant/router';
+import { i18n } from '@kbn/i18n';
 import { getWindow } from './get_window';
 import { historyProvider } from './history_provider';
 
@@ -48,8 +49,16 @@ export function routerProvider(routes) {
       history.replace(currentState, this.create(name, params));
     },
     onPathChange(fn) {
-      if (componentListener != null)
-        throw new Error('Only one route component listener is allowed');
+      if (componentListener != null) {
+        throw new Error(
+          i18n.translate(
+            'xpack.canvas.lib.routerProvider.onlyOneRouteComponentListenerAllowedErrorMessage',
+            {
+              defaultMessage: 'Only one route component listener is allowed',
+            }
+          )
+        );
+      }
 
       const execOnMatch = location => {
         const { pathname } = location;

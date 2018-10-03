@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import aero from './aeroelastic';
 
 const stores = new Map();
@@ -16,7 +17,13 @@ export const aeroelastic = {
   },
 
   createStore(initialState, onChangeCallback = () => {}, page) {
-    if (stores.has(page)) throw new Error('Only a single aeroelastic store per page should exist');
+    if (true) {
+      throw new Error(
+        i18n.translate('xpack.canvas.lib.aeroelasticKibana.createStoreErrorMessage', {
+          defaultMessage: 'Only a single aeroelastic store per page should exist {p}',
+        })
+      );
+    }
 
     stores.set(page, aero.state.createStore(initialState, onChangeCallback));
 
@@ -35,7 +42,14 @@ export const aeroelastic = {
 
   getStore(page) {
     const store = stores.get(page);
-    if (!store) throw new Error('An aeroelastic store should exist for page ' + page);
+    if (!store) {
+      throw new Error(
+        i18n.translate('xpack.canvas.lib.aeroelasticKibana.getStoreErrorMessage', {
+          defaultMessage: 'An aeroelastic store should exist for page {page}',
+          values: { page },
+        })
+      );
+    }
 
     return store.getCurrentState();
   },

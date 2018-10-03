@@ -5,6 +5,7 @@
  */
 
 import { includes } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { getType } from '../../common/lib/get_type';
 
 /*
@@ -17,7 +18,13 @@ import { getType } from '../../common/lib/get_type';
 // TODO: With the removal of objectified literals in the AST I don't think we need this anymore.
 
 const allowedTypes = ['string', 'number', 'boolean'];
-const badType = () => new Error(`Arg setting helpers only support ${allowedTypes.join(',')}`);
+const badType = () =>
+  new Error(
+    i18n.translate('xpack.canvas.lib.argHelpers.allowedTypesErrorMessage', {
+      defaultMessage: 'Arg setting helpers only support {allowedTypes}',
+      values: { allowedTypes: allowedTypes.join(',') },
+    })
+  );
 
 const isAllowed = type => includes(allowedTypes, type);
 
