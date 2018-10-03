@@ -1,40 +1,38 @@
-@import (reference) '~ui/styles/variables/colors';
-
 .watchAction {
-  border-top: 1px dashed @globalColorMediumGray;
+  border-top: 1px dashed $euiColorMediumShade;
 }
 
 .watchAction__error {
-  background-color: #fbe9f1;
+  background-color: $euiColorLightestShade;
 }
 
 .watchActionErrorMessage {
-  color: #db3a81;
+  color: $euiColorDanger;
 }
 
 .watchActionSummaryButton {
-  padding: 15px;
+  padding: $euiSize;
   width: 100%;
   background: transparent;
   border: transparent;
   text-align: left;
 
   &:hover {
-    background: tint(@globalColorBlue, 95%);
+    background: tint($euiColorPrimary, 95%);
   }
 }
 
 .watchActionSummaryToggleIcon {
-  margin-right: 10px;
-  width: 14px;
+  margin-right: $euiSizeS;
+  width: $euiSizeM;
 }
 
 .watchActionSummaryTypeIcon {
-  margin-right: 5px;
+  margin-right: $euiSizeXS;
 }
 
 .watchActionSummaryType {
-  font-size: 12pt;
+  font-size: $euiFontSizeXS;
 }
 
 .watchActionHeader {
@@ -43,14 +41,14 @@
 
 .watchActionDescription {
   display: block;
-  color: #787879;
-  margin-left: 25px;
+  color: $euiColorDarkShade;
+  margin-left: $euiSizeL;
+  margin-top: $euiSizeS;
 }
 
 .watchActionDetails {
   background-color: inherit;
-  padding:0 10px 10px 10px;
-  padding-left: 44px;
+  padding: 0 $euiSizeM $euiSizeM $euiSizeXXL;
 }
 
 .watchActionSimulateButton {

@@ -1,14 +1,12 @@
-@import (reference) "~ui/styles/variables";
-
-.indexSelectSubText() {
-  color: #b4bcc2;
-  font-size: 12px;
-  padding: 3px 20px;
-  line-height: 1.42;
+@mixin indexSelectSubText() {
+  color: $euiColorDarkShade;
+  font-size: $euiFontSizeXS;
+  padding: $euiSizeXS $euiSizeL;
+  line-height: $euiLineHeight;
 }
 
 .indexSelectNoChoice {
-  .indexSelectSubText();
+  @include indexSelectSubText;
 }
 
 /**
@@ -23,7 +21,7 @@
 
     &:after {
       content: 'Choose...'; /* 2 */
-      .indexSelectSubText(); /* 2 */
+      @include indexSelectSubText; /* 2 */
     }
   }
 }
@@ -43,9 +41,9 @@
 .indexSelect--fetchingWithNoIndices {
   .ui-select-choices:before {
     content: 'Loading...'; /* 1 */
-    margin-left: 15px; /* 1 */
+    margin-left: $euiSize; /* 1 */
     font-style: italic; /* 1 */
-    color: @kibanaGray2; /* 1 */
+    color: $euiColorDarkShade; /* 1 */
   }
 }
 
@@ -53,5 +51,5 @@
  * 1. Ensure that an invalid ui-select shows a red border
  */
 .ui-select-multiple.ui-select-bootstrap.ng-invalid {
-  border-color: #D86051 !important; /* 1 */
+  border-color: $euiColorDanger !important; /* 1 */
 }
