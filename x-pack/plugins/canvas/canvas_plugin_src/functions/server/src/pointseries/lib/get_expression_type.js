@@ -5,7 +5,7 @@
  */
 
 import { parse } from 'tinymath';
-import { getFieldType } from '../../../../../common/lib/get_field_type';
+import { getFieldType } from '../../../../../../common/lib/get_field_type';
 import { isColumnReference } from './is_column_reference';
 import { getFieldNames } from './get_field_names';
 
