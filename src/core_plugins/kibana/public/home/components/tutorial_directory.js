@@ -148,9 +148,6 @@ class TutorialDirectoryUi extends React.Component {
     if (this.state.selectedTabId === SAMPLE_DATA_TAB_ID) {
       return (
         <SampleDataSetCards
-          getConfig={this.props.getConfig}
-          setConfig={this.props.setConfig}
-          clearIndexPatternsCache={this.props.clearIndexPatternsCache}
           addBasePath={this.props.addBasePath}
         />
       );
@@ -222,9 +219,6 @@ TutorialDirectoryUi.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   openTab: PropTypes.string,
   isCloudEnabled: PropTypes.bool.isRequired,
-  getConfig: PropTypes.func.isRequired,
-  setConfig: PropTypes.func.isRequired,
-  clearIndexPatternsCache: PropTypes.func.isRequired,
 };
 
 export const TutorialDirectory = injectI18n(TutorialDirectoryUi);

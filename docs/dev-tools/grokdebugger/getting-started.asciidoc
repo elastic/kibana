@@ -16,6 +16,9 @@ endif::gs-mini[]
 TIP: See the documentation about the ingest node
 {ref}/grok-processor.html[grok processor] and the Logstash {logstash-ref}/plugins-filters-grok.html[grok filter] more info about grok.
 
+NOTE: If you're using {security}, you must have the `manage_pipeline`
+permission in order to use the Grok Debugger.
+
 The Grok Debugger is automatically enabled in {kib}.  It is located under the *DevTools* tab in {kib}.
 
 To start debugging grok patterns:
