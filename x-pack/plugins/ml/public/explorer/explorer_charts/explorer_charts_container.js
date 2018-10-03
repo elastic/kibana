@@ -21,7 +21,7 @@ import {
   getExploreSeriesLink,
   isLabelLengthAboveThreshold
 } from '../../util/chart_utils';
-import { ExplorerChartRare } from './explorer_chart_rare';
+import { ExplorerChartDistribution } from './explorer_chart_distribution';
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
@@ -101,7 +101,7 @@ function ExplorerChartContainer({
       {(() => {
         if (chartType === CHART_TYPE.EVENT_DISTRIBUTION || chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
           return (
-            <ExplorerChartRare
+            <ExplorerChartDistribution
               tooManyBuckets={tooManyBuckets}
               seriesConfig={series}
               mlSelectSeverityService={mlSelectSeverityService}

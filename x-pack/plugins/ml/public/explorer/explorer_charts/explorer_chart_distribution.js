@@ -39,7 +39,7 @@ import { CHART_TYPE } from '../explorer_constants';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
 
-export class ExplorerChartRare extends React.Component {
+export class ExplorerChartDistribution extends React.Component {
   static propTypes = {
     seriesConfig: PropTypes.object,
     mlSelectSeverityService: PropTypes.object.isRequired
