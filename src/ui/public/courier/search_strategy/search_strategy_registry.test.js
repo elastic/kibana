@@ -45,22 +45,22 @@ describe('SearchStrategyRegistry', () => {
 
       const searchRequest0 = {
         id: 0,
-        source: { getField: () => 'b' },
+        source: { getField: () => 'b', getPreferredSearchStrategyId: () => {} },
       };
 
       const searchRequest1 = {
         id: 1,
-        source: { getField: () => 'a' },
+        source: { getField: () => 'a', getPreferredSearchStrategyId: () => {} },
       };
 
       const searchRequest2 = {
         id: 2,
-        source: { getField: () => 'a' },
+        source: { getField: () => 'a', getPreferredSearchStrategyId: () => {} },
       };
 
       const searchRequest3 = {
         id: 3,
-        source: { getField: () => 'b' },
+        source: { getField: () => 'b', getPreferredSearchStrategyId: () => {} },
       };
 
       const searchRequests = [ searchRequest0, searchRequest1, searchRequest2, searchRequest3];

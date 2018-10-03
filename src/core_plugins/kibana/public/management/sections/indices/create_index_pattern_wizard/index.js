@@ -21,7 +21,6 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import uiRoutes from 'ui/routes';
 import angularTemplate from './angular_template.html';
 import 'ui/index_patterns';
-import { documentationLinks } from 'ui/documentation_links';
 import { IndexPatternCreationFactory } from 'ui/management/index_pattern_creation';
 
 import { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } from './render';
