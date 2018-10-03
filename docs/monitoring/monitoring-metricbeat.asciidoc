@@ -1,0 +1,60 @@
+[[monitoring-metricbeat]]
+=== Monitoring {kib} with {metricbeat}
+
+[beta] In 6.4 and later, you can use {metricbeat} to collect and ship data about 
+{kib}, rather than routing it through {es} as described in <<monitoring-kibana>>. 
+
+. Verify that the `xpack.monitoring.collection.enabled` setting is `true` on
+the production cluster. +
++ 
+--
+For example, you can use the following API to review and change this setting:
+
+[source,js]
+----------------------------------
+GET _cluster/settings
+
+PUT _cluster/settings
+{
+  "persistent": {
+    "xpack.monitoring.collection.enabled": true
+  }
+}
+----------------------------------
+
+If that setting is `false`, which is the default value,
+the collection of monitoring data is disabled in {es} and data is ignored from
+all other sources. For more information, see
+{ref}/monitoring-settings.html[Monitoring settings in {es}].
+--
+
+. Disable the default collection of {kib} monitoring metrics. Set the 
+`xpack.monitoring.kibana.collection.enabled` setting to `false` in the `kibana.yml` 
+file on your production cluster. For more information, see <<monitoring-settings-kb>>.
+//TBD: What does xpack.monitoring.enabled need to be set to?
+
+. Install {metricbeat} on the same node as {kib}. 
+
+. Enable the {metricbeat} module for {kib}. 
+
+. Identify where to send monitoring data. +
++
+--
+TIP: In production environments, we strongly recommend using a separate cluster 
+(referred to as the _monitoring cluster_) to store the data. Using a separate 
+monitoring cluster prevents production cluster outages from impacting your 
+ability to access your monitoring data. It also prevents monitoring activities 
+from impacting the performance of your production cluster. 
+
+If {security} is enabled on the monitoring cluster, use an HTTPS URL such
+as `https://<your_monitoring_cluster>:9200`.
+
+--
+
+. Configure the module.  
+
+. Start {kib}.
+
+. Start {metricbeat}. 
+
+. <<monitoring-data,View the monitoring data in {kib}>>. 
