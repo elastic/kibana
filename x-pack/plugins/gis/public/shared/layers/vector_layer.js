@@ -140,7 +140,8 @@ export class VectorLayer extends ALayer {
 
     //todo: similar problem as OL here. keeping track of data via MB source directly
     const mbSourceAfterAdding = mbMap.getSource(this.getId());
-    const featureCollection = this._dataRequests[0] ? this._dataRequests[0].getData() : null;
+    const sourceDataRequest = this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     if (featureCollection !== mbSourceAfterAdding._data) {
       mbSourceAfterAdding.setData(featureCollection);
     }

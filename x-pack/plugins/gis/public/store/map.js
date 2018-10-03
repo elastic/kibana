@@ -191,7 +191,6 @@ function updateWithDataRequest(state, action) {
   }
   dataRequest.dataHasLoadError = false;
   dataRequest.dataLoadError = null;
-  dataRequest.dataDirty = true;
   dataRequest.dataMetaAtStart = action.meta;
   dataRequest.dataRequestToken = action.requestToken;
   const layerList = [...state.layerList];
@@ -221,7 +220,6 @@ function updateWithDataResponse(state, action) {
   dataRequest.data = action.data;
   dataRequest.dataMeta = layerReceivingData.dataMetaAtStart;
   dataRequest.dataMetaAtStart = null;
-  dataRequest.dataDirty = false;
   dataRequest.dataRequestToken = null;
   dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];
@@ -249,7 +247,6 @@ function updateWithDataLoadError(state, action) {
 
   dataRequest.dataHasLoadError = true;
   dataRequest.dataLoadError = action.errorMessage;
-  dataRequest.dataDirty = false;
   dataRequest.dataRequestToken = null;
   dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];

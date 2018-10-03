@@ -22,7 +22,7 @@ export class DataRequest {
   }
 
   isLoading() {
-    return !!this._descriptor.dataDirty;
+    return !!this._descriptor.dataRequestToken;
   }
 
   getMeta() {

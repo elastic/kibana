@@ -298,7 +298,6 @@ export async function loadMapResources(dispatch) {
   await dispatch(replaceLayerList(
     [
       {
-        dataDirty: false,
         id: "0hmz5",
         label: 'light theme tiles',
         sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
