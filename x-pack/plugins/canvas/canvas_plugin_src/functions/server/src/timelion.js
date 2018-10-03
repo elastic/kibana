@@ -5,8 +5,8 @@
  */
 
 import { flatten } from 'lodash';
-import { fetch } from '../../../common/lib/fetch';
-import { buildBoolArray } from '../../../server/lib/build_bool_array';
+import { fetch } from '../../../../common/lib/fetch';
+import { buildBoolArray } from '../../../../server/lib/build_bool_array';
 
 export const timelion = () => ({
   name: 'timelion',
