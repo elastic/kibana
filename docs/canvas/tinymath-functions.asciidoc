@@ -1,0 +1,72 @@
+[[tinymath-functions]]
+== TinyMath functions
+
+This document provides detailed information about the functions available in 
+Tinymath and lists what parameters each function accepts, the return value of 
+that function, and examples of how each function behaves. 
+
+Most of the functions below accept arrays and apply JavaScript Math methods to 
+each element of that array. For the functions that accept multiple arrays as parameters, 
+the function generally does calculation index by index. 
+
+Any function below can be wrapped by another function as long as the return 
+type of the inner function matches the acceptable parameter type of the outer function.
+
+[float]
+=== abs( a )
+
+Calculates the absolute value of a number. For arrays, the function will be applied index-wise to each element.
+
+[cols="<,<m,<",options="header",]
+|=======================================================================
+| Name | Type | Description
+| a
+  | number or Array.<number>
+  | A number or an array of numbers
+
+|=======================================================================
+
+*Returns*
+
+(`number` or Array.<number>`) The absolute value of a. Returns an array with the the absolute values of each element if a is an array.
+
+*Example*
+
+[source,shell]
+abs(-1) // returns 1
+abs(2) // returns 2
+abs([-1 , -2, 3, -4]) // returns [1, 2, 3, 4]
+
+[float]
+=== add( ...args )
+
+Calculates the sum of one or more numbers/arrays passed into the function. 
+If at least one array of numbers is passed into the function, the function will calculate the sum by index.
+
+[cols="<,<m,<",options="header",]
+|=======================================================================
+| Name | Type | Description
+| ...args
+  | number or Array.<number>
+  | One or more numbers or arrays of numbers
+
+|=======================================================================
+
+*Returns*
+
+(`number` or Array.<number>`) The sum of all numbers in `args` if `args` contains 
+only numbers. Returns an array of sums of the elements at each index, 
+including all scalar numbers in `args` in the calculation at each index if `args` contains at least one array.
+
+*Throws*
+
+`Array length mismatch` if `args` contains arrays of different lengths
+
+
+*Example*
+
+[source,shell]
+add(1, 2, 3) // returns 6
+add([10, 20, 30, 40], 10, 20, 30) // returns [70, 80, 90, 100]
+add([1, 2], 3, [4, 5], 6) // returns [(1 + 3 + 4 + 6), (2 + 3 + 5 + 6)] = [14, 16]
+

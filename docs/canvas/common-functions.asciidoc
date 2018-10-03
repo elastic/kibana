@@ -1,0 +1,231 @@
+[[canvas-common-functions]]
+== Canvas common functions (example 1)
+
+These functions can run anywhere, so they'll execute wherever the expression 
+is currently executing. For example, if the engine is currently
+running on the server, things will continue to run on the server.
+
+[float]
+=== all
+
+Returns true if all of the conditions are true
+
+- *Accepts:* Anything or nothing
+- *Returns:* boolean
+
+[cols="<h,<,<m,<",options="header",]
+|=======================================================================
+| Name | Description | Type | Default
+| _Unnamed*_
+  | The conditions to check
+  | boolean
+ d|
+
+|=======================================================================
+
+
+[float]
+=== alterColumn
+
+Converts between core types, for example, string, number, null, boolean, date and rename columns
+
+- *Accepts:* datatable
+- *Returns:* datatable
+
+[cols="<h,<,<m,<",options="header",]
+|=======================================================================
+| Name | Description | Type | Default
+| column*
+  | The name of the column to alter
+  | string
+  | null
+ 
+ | type
+   | The type to convert the column to. Leave blank to not change type.
+   | string
+   | null
+  
+  | name
+    | The resultant column name. Leave blank to not rename.
+    | string
+    | null
+
+|=======================================================================
+
+[float]
+=== any
+
+Returns true if any of the conditions are true
+
+- *Accepts:* Anything or nothing
+- *Returns:* boolean
+
+[cols="<h,<,<m,<",options="header",]
+|=======================================================================
+| Name | Description | Type | Default
+| _Unnamed*_
+  | The conditions to check
+  | boolean
+  | 
+
+|=======================================================================
+
+[float]
+=== as
+
+Creates a datatable with a single value
+
+- *Accepts:* string, boolean, number, null
+- *Returns:* datatable
+
+[cols="<h,<,<m,<",options="header",]
+|=======================================================================
+| Name | Description | Type | Default
+| _Unnamed*_
+  | A name to give the column.  Alias: name
+  | string
+  | value
+
+|=======================================================================
+
+
+== Canvas common functions (example 2)
+
+These functions can run anywhere, so they'll execute wherever the expression 
+is currently executing. For example, if the engine is currently
+running on the server, things will continue to run on the server.
+
+[float]
+=== axisConfig
+
+Configures axis of a visualization
+
+- *Accepts:* datatable
+- *Returns:* axisConfig
+
+
+[cols="1,3", options="header",]
+|=======================================================================
+| Name | Description 
+| show
+  | (boolean) Shows the axis labels? The default is `true.`
+ 
+ | position
+   | (string) The position of the axis labels. Eg, top, bottom, left, and right.
+   
+|=======================================================================
+
+[float]
+=== clog
+
+Outputs the context to the console
+
+- *Accepts:* Anything or nothing
+- *Returns:* Depends on your input and arguments
+
+
+[float]
+=== columns
+
+Includes or excludes columns from a data table. If you specify both, this will exclude first
+
+- *Accepts:* datatable
+- *Returns:* datatable
+
+
+[cols="1,3",options="header",]
+|=======================================================================
+| Name | Description 
+| include
+  | (string) A comma separated list of column names to keep in the table. +
+  The default is `null.`
+ 
+ | exclude
+   | (string) A comma separated list of column names to remove from the table.  +
+   The default is `null.`
+   
+|=======================================================================
+
+[float]
+=== compare
+
+Compares the input to something else to determine true or false. Usually used in combination with `if`. 
+This only works with primitive types, such as number, string, and boolean.
+
+- *Accepts:* datatable
+- *Returns:* datatable
+
+[cols="1,3",options="header",]
+|=======================================================================
+| Name | Description 
+| _Unnamed_
+  | (string) The operator to use in the comparison: 
+  eq (equal), ne (not equal), lt (less than), gt (greater than), lte (less than equal), 
+  gte (greater than eq). The default is `eq`. Alias: op.
+ 
+ | to
+   | (any) The value to compare the context to, usually returned by a subexpression.  Aliases: this, b.
+   
+|=======================================================================
+
+== Canvas common functions (example 3)
+
+These functions can run anywhere, so they'll execute wherever the expression 
+is currently executing. For example, if the engine is currently
+running on the server, things will continue to run on the server.
+
+
+[float]
+=== containerStyle
+
+Creates an object used for describing the properties of a series on a chart. 
+You would usually use this inside of a charting function.
+
+- *Accepts:* null
+- *Returns:* containerStyle
+
+*Arguments*
+
+border::  (string) Valid CSS border string
+
+borderRadius::  (string) Number of pixels to use when rounding the border
+
+padding::  (string) Content distance in pixels from border
+
+backgroundColor::  (string) Valid CSS background color string
+
+backgroundImage::  (string) Valid CSS background image string
+
+backgroundSize::  (string) Valid CSS background size string. The default is `contain.`
+
+backgroundRepeat::  (string) Valid CSS background repeat string.  The default is `no-repeat.`
+
+opacity::  (number) A number between 0 and 1 representing the degree of transparency of the element.
+
+[float]
+=== context
+
+Returns whatever you pass into it. This can be useful when you need to use 
+context as argument to a function as a sub-expression.
+
+- *Accepts:* Anything or nothing
+- *Returns:* Depends on your input and arguments
+
+[float]
+=== csv
+
+Creates datatable from csv input
+
+- *Accepts:* null
+- *Returns:* containerStyle
+
+*Arguments*
+
+_Unnamed*_::  (string) CSV data to use
+
+delimiter*::  (string) Data separation character
+
+newline*::  (string) Row separation character
+
+
+

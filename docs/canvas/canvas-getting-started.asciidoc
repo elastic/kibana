@@ -1,0 +1,172 @@
+[[canvas-getting-started]]
+== Getting started with Canvas
+
+When you first start Canvas, you’re presented you with a blank workpad to which 
+you can add a selection of elements.  You can connect these elements to data 
+and configure them using a simple UI.  You can experiment with colors, 
+fonts, background, borders, and more. 
+
+In this tutorial, you’ll learn how to use Canvas to generate a report based on live data. 
+
+* <<canvas-create-workpad>>
+* <<canvas-add-element>>
+* <<canvas-change-data-source>>
+* <<canvas-add-markdown-element>>
+* <<canvas-add-coordinate-plot>>
+
+This tutorial uses the sample web logs data set.  Install it as follows:
+
+.  On the {kib} home page, click the *Load a data set and a Kibana dashboard*.
+.  On the Sample web logs card, click *Add*.
+
+[[canvas-create-workpad]]
+== Create a workpad
+
+Your first step is to create and style your workpad.  That’s the space in which you’ll add elements.
+
+. In the Kibana side navigation, click *Canvas*.
+. Click *Create workpad*. 
++
+You’re presented with an empty workpad. On the right, is a sidebar for manipulating the style.
+
+. In the sidebar, set Name to *Welcome to Canvas*.
+. Set to the workspace size to 720p.
++
+[role="screenshot"]
+image::images/canvas_workpad.png[]
+
+Next you’ll add some elements to the page. You can choose from:
+
+* *Data visualizations.*  These include charts, coordinate plots, images, Markdown, and a data table.
+* *Input controls.*  A dropdown filter allows you to  interact with data in realtime data.  
+A time filter allows you to jump in between different times frames.
+* *Debugging.* The debug element allows you to see the configuration of an element.
+
+To see the full list, click *Add element*.  You’ll work with many of these elements in this Getting Started. 
+
+[role="screenshot"]
+image::images/canvas_elements.png[]
+
+[[canvas-add-element]]
+== Add and style a pie chart
+
+You’re probably familiar with a pie chart, so that’s the first element you’ll add to the workpad. 
+A pie chart divides data into slices&mdash;it’s good for comparing parts of a whole. 
+
+
+. Click *Add element*.
+. Select *Pie chart*.  
++
+Each element you create in Canvas already has data associated with it.
+This gives you something to work with even if you don’t have any data in Elasticsearch. 
+
+. In the sidebar, expand the *Chart style* menu.
++
+You'll see styles for colors, labels, text settings, and more.
++
+[role="screenshot"]
+image::images/canvas_chart_style.png[]
+
+. Set the *Legend Position* to *Bottom Right*.
+. Try out other settings and change the pie chart to your liking.
+. If there is a style you want, but it isn't in the menu, you can tweak 
+the raw CSS in the *Element Style* section. 
+
+[[canvas-change-data-source]]
+=== Change the data source
+
+Every Canvas element is connected to a data source by default.  This gives you 
+the freedom to experiment with the element.  When you’re ready, you can connect 
+the element to your own data source and then set the parameters to the display that you want.  
+
+In this tutorial, you’ll connect to the {es} data source, which allows you to pull back 
+the raw data.
+
+. In the sidebar, select the *Data* tab.
+. Click *Change your data source*.  
+. Click *{es} Raw Documents*.
++
+You can configure this data source with a several different options, 
+including an index pattern, which fields to pull back, and optionally, a query. 
+
+. Set *Index* to *kibana_sample_data_logs*.
+. Set *Fields* to *machine.os*.
+. Click *Preview* to show the data that will populate the field. 
++
+You can try out the element with different fields.  This enables you to hone in 
+on the data interests you most. If you don’t set a field, Canvas displays all fields. 
+
+. Click *Save*.  
++
+The pie chart changes to a single slice.  That’s because because you haven’t yet 
+set the slice labels and slice angles parameters.
+
+. Go to *Display*.
+. In Slice Labels, set *Value* to *machine.os*. 
++
+The demo data changes to what you saw in the preview. 
++
+[role="screenshot"]
+image::images/canvas_data_source.png[]
+
+[[canvas-add-markdown-element]]
+== Add a Markdown element
+
+Markdown is a simple, human-readable syntax that you can use to generate styled output. 
+It’s useful for showing anything from simple text to structured output and can 
+include calculations based on the data that you used.  In this example, you’ll 
+create a Markdown element that shows the number of bytes downloaded. 
+
+. Add a Markdown element. 
++
+This element starts with some sample Markdown. If you’re familiar with Markdown, 
+some of the syntax in the middle might look a little strange.  That’s because Canvas 
+supports https://asciidoctor.org[Handlebars] in Markdown. 
++
+A language for simple string substitution, iteration, and conditionals, 
+Handelbars allows you to use your data in a Markdown output. If you are not 
+familiar with Handlebars, there is a link to the documentation in the example Markdown. 
++
+[role="screenshot"]
+image::images/canvas_markdown_example.png[]
+
+. In the sidebar, remove all content from the Markdown element and click *Apply*.
+. Change your data source to *Elasticsearch Raw Documents*.
+. Set *Index* to *kibana_sample_data_logs* and *Fields* to *bytes*.
+. Click *Save*.
+
+To show the number of bytes downloaded over the specified time frame, use the mathhelper in Handlebars.
+
+. In the *Display* tab, add the math function to the Markdown content.
++
+[source,shell]
+# {{ math rows 'sum(bytes)' }}
+## Bytes downloaded
++
+This function expects a collection or an array.  In this case, you pass it all of 
+the rows and give it a math jS expression to ask for the sum of the bytes. 
+This generates the total number of bytes for all rows. 
+
+. Click *Apply*.
++
+[role="screenshot"]
+image::images/canvas_markdown_example.png[]
+
+[[canvas-add-coordinate-plot]]
+== Add a coordinate plot
+
+Now you’ll add a coordinate plot to chart point series data on a continuous x-y plane. 
+In this case, you’ll be looking at the median number of bytes.
+
+. Add a coordinate plot to the workpad.
+. Change data source Elasticsearch Raw documents .to kibana_sample_data_logs.
+. Set *Index* to *kibana_sample_data_logs*.
+. Set *Fields* to *bytes* and *utc_time*.
+. Click *Save*.
+. In Display, set the X-axis value to utc_time so you can see the time.
+. For the Y-axis, set median to the number of bytes.
++
+[role="screenshot"]
+image::images/canvas_coordinate_plot.png[]
+
+

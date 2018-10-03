@@ -1,0 +1,8 @@
+[[canvas-reference]]
+== Canvas reference
+
+Canvas has two sets of functions:
+
+* <<canvas-common-functions>>. List of functions that drive Canvas and their APIs
+* <<tinymath-functions>>:. List of functions available in TinyMath that can be 
+used with the Canvas expression language.

@@ -1,0 +1,26 @@
+[[canvas]]
+= Canvas
+
+[partintro]
+--
+
+Canvas is an extensible, creative space for presenting live data.  A complement to Kibana dashboards, 
+Canvas allows you to combine charts, coordinate plots, and other data visualizations 
+to create dynamic, pixel-perfect reports and infographics. 
+
+[role="screenshot"]
+image::images/canvas_overview.gif[]
+
+
+
+
+
+--
+
+include::canvas/canvas-getting-started.asciidoc[]
+
+include::canvas/canvas-reference.asciidoc[]
+
+include::canvas/common-functions.asciidoc[]
+
+include::canvas/tinymath-functions.asciidoc[]
