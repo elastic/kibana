@@ -174,4 +174,29 @@ declare module '@elastic/eui' {
   export const EuiHideFor: React.SFC<EuiResponsiveProps>;
 
   export const EuiShowFor: React.SFC<EuiResponsiveProps>;
+
+  export const EuiKeyPadMenu: React.SFC;
+
+  type EuiKeyPadMenuItemProps = CommonProps & {
+    label?: string;
+    onClick?: (arg: any) => void;
+  };
+  export const EuiKeyPadMenuItem: React.SFC<EuiKeyPadMenuItemProps>;
+
+  type EuiDatePickerRangeProps = CommonProps & {
+    startDateControl: React.ReactNode;
+    endDateControl: React.ReactNode;
+    iconType?: IconType | boolean;
+    fullWidth?: boolean;
+    onBlur?: (arg: any) => void;
+  };
+
+  export const EuiDatePickerRange: React.SFC<EuiDatePickerRangeProps>;
+
+  type EuiFieldNumberProps = CommonProps & {
+    defaultValue: string;
+    onChange?: (arg: any) => void;
+  };
+
+  export const EuiFieldNumber: React.SFC<EuiFieldNumberProps>;
 }

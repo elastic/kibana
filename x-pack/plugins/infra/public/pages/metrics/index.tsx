@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import moment from 'moment';
 import React from 'react';
 
 import {
@@ -24,6 +24,7 @@ import { AutoSizer } from '../../components/auto_sizer';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
 import { ColumnarPage, PageContent } from '../../components/page';
+import { RangeDatePicker } from '../../components/range_date_picker';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
 import { WithOptions } from '../../containers/with_options';
 import { Error, ErrorPageBody } from '../error';
@@ -116,6 +117,10 @@ class MetricDetailPage extends React.PureComponent<Props> {
                                 <EuiHideFor sizes={['xs', 's']}>
                                   <EuiPageHeader style={{ flex: '0 0 auto' }}>
                                     <EuiPageHeaderSection>
+                                      <RangeDatePicker
+                                        startDate={moment()}
+                                        endDate={moment().add(11, 'd')}
+                                      />
                                       <EuiTitle size="m">
                                         <h1>{nodeName}</h1>
                                       </EuiTitle>
