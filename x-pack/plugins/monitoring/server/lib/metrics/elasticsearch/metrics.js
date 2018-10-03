@@ -966,9 +966,9 @@ export const metrics = {
     metric: 'leader_max_seq_no',
     metric2: 'follower_global_checkpoint',
     label: 'Ops delay',
-    description: 'The amount of time the follower index is lagging behind the leader.',
+    description: 'The number of operations the follower index is lagging behind the leader.',
     format: SMALL_FLOAT,
     metricAgg: 'max',
-    units: 'ms'
+    units: ''
   }),
 };

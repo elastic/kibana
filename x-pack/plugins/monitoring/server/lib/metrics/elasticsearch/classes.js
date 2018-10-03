@@ -40,7 +40,6 @@ export class DifferenceMetric extends ElasticsearchMetric {
       field: '', // NOTE: this is not used for this
       format: LARGE_FLOAT,
       metricAgg: 'sum', // NOTE: this is used for a pointless aggregation
-      units: 'ms'
     });
 
     this.checkRequiredParams({
