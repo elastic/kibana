@@ -45,27 +45,18 @@ export class StepLogisticsUi extends Component {
     indexPatternAsyncErrors: PropTypes.array,
   }
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      simpleRollupCron: props.fields.rollupCron,
-    };
-  }
-
   showAdvancedCron = () => {
     const { onFieldsChange } = this.props;
-    this.setState({
-      simpleRollupCron: this.props.fields.rollupCron,
-    });
+
     onFieldsChange({
       isAdvancedCronVisible: true,
     });
   };
 
   hideAdvancedCron = () => {
-    const { onFieldsChange } = this.props;
-    const { simpleRollupCron } = this.state;
+    const { onFieldsChange, fields } = this.props;
+    const { simpleRollupCron } = fields;
+
     onFieldsChange({
       isAdvancedCronVisible: false,
       // Restore the last value of the simple cron editor.
@@ -218,6 +209,7 @@ export class StepLogisticsUi extends Component {
             fieldToPreferredValueMap,
           }) => onFieldsChange({
             rollupCron: cronExpression,
+            simpleRollupCron: cronExpression,
             cronFrequency: frequency,
             fieldToPreferredValueMap,
           })}
