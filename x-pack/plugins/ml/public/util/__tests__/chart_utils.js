@@ -9,7 +9,14 @@
 import $ from 'jquery';
 import d3 from 'd3';
 import expect from 'expect.js';
-import { chartLimits, filterAxisLabels, numTicks } from '../chart_utils';
+import {
+  chartLimits,
+  filterAxisLabels,
+  numTicks,
+  showMultiBucketAnomalyMarker,
+  showMultiBucketAnomalyTooltip,
+} from '../chart_utils';
+import { MULTI_BUCKET_IMPACT } from 'plugins/ml/../common/constants/multi_bucket_impact';
 
 describe('ML - chart utils', () => {
 
@@ -116,6 +123,36 @@ describe('ML - chart utils', () => {
 
     it('returns 10 for 1000', () => {
       expect(numTicks(1000)).to.be(10);
+    });
+
+  });
+
+  describe('showMultiBucketAnomalyMarker', () => {
+
+    it('returns true for points with multiBucketImpact at or above medium impact', () => {
+      expect(showMultiBucketAnomalyMarker({ multiBucketImpact: MULTI_BUCKET_IMPACT.HIGH })).to.be(true);
+      expect(showMultiBucketAnomalyMarker({ multiBucketImpact: MULTI_BUCKET_IMPACT.MEDIUM })).to.be(true);
+    });
+
+    it('returns false for points with multiBucketImpact missing or below medium impact', () => {
+      expect(showMultiBucketAnomalyMarker({})).to.be(false);
+      expect(showMultiBucketAnomalyMarker({ multiBucketImpact: MULTI_BUCKET_IMPACT.LOW })).to.be(false);
+      expect(showMultiBucketAnomalyMarker({ multiBucketImpact: MULTI_BUCKET_IMPACT.NONE })).to.be(false);
+    });
+
+  });
+
+  describe('showMultiBucketAnomalyTooltip', () => {
+
+    it('returns true for points with multiBucketImpact at or above low impact', () => {
+      expect(showMultiBucketAnomalyTooltip({ multiBucketImpact: MULTI_BUCKET_IMPACT.HIGH })).to.be(true);
+      expect(showMultiBucketAnomalyTooltip({ multiBucketImpact: MULTI_BUCKET_IMPACT.MEDIUM })).to.be(true);
+      expect(showMultiBucketAnomalyTooltip({ multiBucketImpact: MULTI_BUCKET_IMPACT.LOW })).to.be(true);
+    });
+
+    it('returns false for points with multiBucketImpact missing or below medium impact', () => {
+      expect(showMultiBucketAnomalyTooltip({})).to.be(false);
+      expect(showMultiBucketAnomalyTooltip({ multiBucketImpact: MULTI_BUCKET_IMPACT.NONE })).to.be(false);
     });
 
   });

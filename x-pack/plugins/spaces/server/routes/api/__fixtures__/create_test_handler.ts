@@ -39,6 +39,7 @@ export const defaultPreCheckLicenseImpl = (request: any) => '';
 
 const baseConfig: TestConfig = {
   'server.basePath': '',
+  'xpack.spaces.maxSpaces': 1000,
 };
 
 // Merge / extend default interfaces for hapi. This is all faked out below.
@@ -86,15 +87,11 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
 
     await setupFn(server);
 
-    server.decorate(
-      'server',
-      'config',
-      jest.fn(() => {
-        return {
-          get: (key: string) => config[key],
-        };
-      })
-    );
+    const mockConfig = {
+      get: (key: string) => config[key],
+    };
+
+    server.decorate('server', 'config', jest.fn(() => mockConfig));
 
     initApiFn(server, pre);
 
@@ -148,6 +145,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
             null as any,
             null,
             mockSavedObjectsRepository,
+            mockConfig,
             mockSavedObjectsRepository,
             req
           );
