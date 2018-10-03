@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
+import { DataRequest } from './util/data_request';
 
 export class ALayer {
 
@@ -12,13 +13,15 @@ export class ALayer {
     this._source = source;
     this._style = style;
     this._listenersMap = new Map(); // key is mbLayerId, value eventHandlers map
+    this._dataRequest = new DataRequest(this._descriptor.dataRequest ? this._descriptor.dataRequest : {});
   }
 
   static createDescriptor(options) {
     const layerDescriptor = {};
-    layerDescriptor.data = options.data || null;
-    layerDescriptor.dataMeta = options.dataMeta || {};
-    layerDescriptor.dataDirty = typeof options.dataDirty === 'boolean' ? options.dataDirty : false;
+    layerDescriptor.dataRequest = {};
+    layerDescriptor.dataRequest.data = options.dataRequest && options.dataRequest.data ? options.dataRequest : null;
+    layerDescriptor.dataRequest.dataMeta = options.dataRequest && options.dataRequest.dataMeta ? options.dataRequest.dataMeta : {};
+    layerDescriptor.dataRequest.dataDirty = options.dataRequest && typeof options.dataRequest.dataDirty === 'boolean' ? options.dataRequest.dataDirty : false;
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.showAtAllZoomLevels = _.get(options, 'showAtAllZoomLevels', true);
@@ -135,12 +138,12 @@ export class ALayer {
     return false;
   }
 
-  hasLoadError() {
-    return this._descriptor.hasLoadError;
+  dataHasLoadError() {
+    return this._dataRequest ? this._dataRequest.hasLoadError() : false;
   }
 
-  getLoadError() {
-    return this._descriptor.loadError;
+  getDataLoadError() {
+    return this._dataRequest.getLoadError();
   }
 
   toLayerDescriptor() {

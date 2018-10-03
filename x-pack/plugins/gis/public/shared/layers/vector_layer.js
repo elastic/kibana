@@ -65,7 +65,7 @@ export class VectorLayer extends ALayer {
   }
 
   isLayerLoading() {
-    return !!this._descriptor.dataDirty;
+    return this._dataRequest.isLoading();
   }
 
   async getStringFields() {
@@ -108,9 +108,10 @@ export class VectorLayer extends ALayer {
       onLoadError(error.message);
       return;
     }
-    const extentAware = this._source.filterByMapBounds();
+    const extentAware = this._source.isFilterByMapBounds();
+
     if (!timeAware && !extentAware) {
-      if (this._descriptor.data || this._descriptor.dataRequestToken) {
+      if (this._dataRequest.hasDataOrRequestInProgress()) {
         return;
       }
     }
@@ -141,25 +142,25 @@ export class VectorLayer extends ALayer {
 
     //todo: similar problem as OL here. keeping track of data via MB source directly
     const mbSourceAfterAdding = mbMap.getSource(this.getId());
-    if (this._descriptor.data !== mbSourceAfterAdding._data) {
-      //keep track of the on the data.
-      mbSourceAfterAdding.setData(this._descriptor.data);
+    const featureCollection = this._dataRequest.getData();
+    if (featureCollection !== mbSourceAfterAdding._data) {
+      mbSourceAfterAdding.setData(featureCollection);
     }
 
     if (
       this._style.isPropertyDynamic('fillColor') ||
       this._style.isPropertyDynamic('lineColor')
     ) {
-      const shouldRefresh = this._style.enrichFeatureCollectionWithScaledProps(this._descriptor.data);
+      const shouldRefresh = this._style.enrichFeatureCollectionWithScaledProps(featureCollection);
       if (shouldRefresh) {
-        mbSourceAfterAdding.setData(this._descriptor.data);
+        mbSourceAfterAdding.setData(featureCollection);
       }
     }
 
     let isPointsOnly = true;
-    if (this._descriptor.data) {
-      for (let i = 0; i < this._descriptor.data.features.length; i++) {
-        if (this._descriptor.data.features[i].geometry.type !== 'Point') {
+    if (featureCollection) {
+      for (let i = 0; i < featureCollection.features.length; i++) {
+        if (featureCollection.features[i].geometry.type !== 'Point') {
           isPointsOnly = false;
           break;
         }

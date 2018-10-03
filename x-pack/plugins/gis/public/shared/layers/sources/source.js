@@ -41,7 +41,7 @@ export class ASource {
     return '';
   }
 
-  filterByMapBounds() {
+  isFilterByMapBounds() {
     return _.get(this._descriptor, 'filterByMapBounds', false);
   }
 }

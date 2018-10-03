@@ -93,10 +93,8 @@ export function map(state = INITIAL_STATE, action) {
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
     case SET_JOINS:
-      console.log('must set join for layer', action);
       const layerDescriptor = state.layerList.find(descriptor => descriptor.id === action.layer.getId());
       if (layerDescriptor) {
-        console.log('I joined...');
         const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };
         const index = state.layerList.findIndex(descriptor => descriptor.id === action.layer.getId());
         const newLayerList = state.layerList.slice();
@@ -169,11 +167,15 @@ function updateWithDataRequest(state, action) {
     return state;
   }
 
-  layerRequestingData.hasLoadError = false;
-  layerRequestingData.loadError = null;
-  layerRequestingData.dataDirty = true; // needs to be synced to MB
-  layerRequestingData.dataMetaAtStart = action.meta;
-  layerRequestingData.dataRequestToken = action.requestToken;
+  if (!layerRequestingData.dataRequest) {
+    layerRequestingData.dataRequest = {};
+  }
+
+  layerRequestingData.dataRequest.dataHasLoadError = false;
+  layerRequestingData.dataRequest.dataLoadError = null;
+  layerRequestingData.dataRequest.dataDirty = true; // needs to be synced to MB
+  layerRequestingData.dataRequest.dataMetaAtStart = action.meta;
+  layerRequestingData.dataRequest.dataRequestToken = action.requestToken;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
@@ -184,19 +186,24 @@ function updateWithDataResponse(state, action) {
     return state;
   }
 
+
+  if (!layerReceivingData.dataRequest) {
+    layerReceivingData.dataRequest = {};
+  }
+
   if (
-    layerReceivingData.dataRequestToken &&
-    layerReceivingData.dataRequestToken !== action.requestToken
+    layerReceivingData.dataRequest.dataRequestToken &&
+    layerReceivingData.dataRequest.dataRequestToken !== action.requestToken
   ) {
     // ignore responses to outdated requests
     return { ...state };
   }
 
-  layerReceivingData.data = action.data;
-  layerReceivingData.dataMeta = layerReceivingData.dataMetaAtStart;
-  layerReceivingData.dataMetaAtStart = null;
-  layerReceivingData.dataDirty = false;
-  layerReceivingData.dataRequestToken = null;
+  layerReceivingData.dataRequest.data = action.data;
+  layerReceivingData.dataRequest.dataMeta = layerReceivingData.dataMetaAtStart;
+  layerReceivingData.dataRequest.dataMetaAtStart = null;
+  layerReceivingData.dataRequest.dataDirty = false;
+  layerReceivingData.dataRequest.dataRequestToken = null;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
@@ -207,18 +214,22 @@ function updateWithDataLoadError(state, action) {
     return state;
   }
 
+  if (!layer.dataRequest) {
+    layer.dataRequest = {};
+  }
+
   if (
-    layer.dataRequestToken &&
-    layer.dataRequestToken !== action.requestToken
+    layer.dataRequest.dataRequestToken &&
+    layer.dataRequest.dataRequestToken !== action.requestToken
   ) {
     // ignore responses to outdated requests
     return state;
   }
 
-  layer.hasLoadError = true;
-  layer.loadError = action.errorMessage;
-  layer.dataDirty = false;
-  layer.dataRequestToken = null;
+  layer.dataRequest.dataHasLoadError = true;
+  layer.dataRequest.dataLoadError = action.errorMessage;
+  layer.dataRequest.dataDirty = false;
+  layer.dataRequest.dataRequestToken = null;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }

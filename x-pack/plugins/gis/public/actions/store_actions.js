@@ -285,9 +285,9 @@ export function setJoinsForLayer(layer, joins) {
       joins: joins
     });
     const dataFilters = getDataFilters(getState());
-    const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
     const layersWithJoin = getLayerList(getState());
     const layerWithJoin = layersWithJoin.find(lwj => lwj.getId() === layer.getId());
+    const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
     layerWithJoin.syncData({ ...loadingFunctions, dataFilters });
   };
 }

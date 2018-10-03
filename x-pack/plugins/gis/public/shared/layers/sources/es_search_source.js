@@ -46,7 +46,7 @@ export class ESSearchSource extends VectorSource {
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
       limit: descriptor.limit,
-      filterByMapBounds: descriptor.filterByMapBounds,
+      filterByMapBounds: descriptor.isFilterByMapBounds,
       showTooltip: _.get(descriptor, 'showTooltip', false),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     });
@@ -106,7 +106,7 @@ export class ESSearchSource extends VectorSource {
       const isTimeAware = await this.isTimeAware();
       searchSource.setField('filter', () => {
         const filters = [];
-        if (this.filterByMapBounds()) {
+        if (this.isFilterByMapBounds()) {
           filters.push(createExtentFilter(searchFilters.extent, geoField.name, geoField.type));
         }
         if (isTimeAware) {
