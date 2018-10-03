@@ -7,6 +7,7 @@
 
 
 import './styles/main.less';
+import './selector';
 import './datavisualizer_controller';
 import 'plugins/ml/components/data_recognizer';
 import 'plugins/ml/components/field_data_card';
