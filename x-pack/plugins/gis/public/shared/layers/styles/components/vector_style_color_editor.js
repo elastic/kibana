@@ -116,7 +116,6 @@ export class VectorStyleColorEditor extends React.Component {
   }
 
   render() {
-    console.log('render color editor');
     let style = this.props.seedStyle;
     if (style === null) {
       const fallbackDescriptor = VectorStyle.createDescriptor(

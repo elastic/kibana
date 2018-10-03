@@ -86,14 +86,20 @@ export class VectorLayer extends ALayer {
       };
     });
 
-    const ordinalFields = numberFieldOptions.concat(joinFields);
-    return ordinalFields;
+    return numberFieldOptions.concat(joinFields);
+  }
+
+  async syncJoinData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+    console.log('do I have my join data...??', this._joins);
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
+
+    this.syncJoinData({});
 
     let timeAware;
     try {

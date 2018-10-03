@@ -108,16 +108,17 @@ export class VectorStyle {
       featureCollection.computed = [];
     }
 
-    const dynamicFieldNames = [];
+    const dynamicFields = [];
     if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options.fieldValue) {
-      dynamicFieldNames.push(this._descriptor.properties.fillColor.options.fieldValue.label);
+      dynamicFields.push(this._descriptor.properties.fillColor.options.fieldValue);
     }
     if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options.fieldValue) {
-      dynamicFieldNames.push(this._descriptor.properties.lineColor.options.fieldValue.label);
+      dynamicFields.push(this._descriptor.properties.lineColor.options.fieldValue);
     }
-    console.log('dynamic field names', dynamicFieldNames);
 
-    const returns = dynamicFieldNames.map((fieldName) => {
+    const returns = dynamicFields.map((field) => {
+
+      const fieldName = field.label;
       if (featureCollection.computed.find(f => f === fieldName)) {
         return false;
       }

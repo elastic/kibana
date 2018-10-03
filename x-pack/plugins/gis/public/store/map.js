@@ -96,6 +96,7 @@ export function map(state = INITIAL_STATE, action) {
       console.log('must set join for layer', action);
       const layerDescriptor = state.layerList.find(descriptor => descriptor.id === action.layer.getId());
       if (layerDescriptor) {
+        console.log('I joined...');
         const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };
         const index = state.layerList.findIndex(descriptor => descriptor.id === action.layer.getId());
         const newLayerList = state.layerList.slice();
