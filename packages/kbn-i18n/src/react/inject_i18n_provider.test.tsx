@@ -28,9 +28,7 @@ describe('injectI18nProvider', () => {
     const ChildrenMock = () => null;
     const Injected = injectI18nProvider(ChildrenMock);
 
-    const wrapper = shallow(<Injected />);
-
-    expect(wrapper.children()).toMatchSnapshot();
+    expect(shallow(<Injected />)).toMatchSnapshot();
   });
 
   test('provides with context', () => {
