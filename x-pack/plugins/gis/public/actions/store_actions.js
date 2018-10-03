@@ -31,11 +31,11 @@ export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 function getLayerLoadingCallbacks(dispatch, layerId, tokenString) {
-  const requestToken = Symbol(tokenString);
+  // const requestToken = Symbol(tokenString);
   return {
-    startLoading: (dataId, initData) => dispatch(startDataLoad(layerId, dataId, requestToken, initData)),
-    stopLoading: (dataId, returnData) => dispatch(endDataLoad(layerId, dataId, requestToken, returnData)),
-    onLoadError: (dataId, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
+    startLoading: (dataId, requestToken, initData) => dispatch(startDataLoad(layerId, dataId, requestToken, initData)),
+    stopLoading: (dataId, requestToken, returnData) => dispatch(endDataLoad(layerId, dataId, requestToken, returnData)),
+    onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage))
   };
 }
 

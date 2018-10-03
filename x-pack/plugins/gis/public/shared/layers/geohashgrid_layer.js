@@ -151,12 +151,14 @@ export class GeohashGridLayer extends ALayer {
         ]);
 
         isContained = turfBooleanContains(dataExtent, mapStateExtent);
+        console.log('bfore');
         samePrecision = dataMeta.precision === targetPrecision;
       }
       if (dataMeta.timeFilters) {
         sameTime = dataFilters.timeFilters === dataMeta.timeFilters;
       }
     }
+    console.log('blargh');
     if (samePrecision && isContained && sameTime) {
       return;
     }
@@ -177,12 +179,13 @@ export class GeohashGridLayer extends ALayer {
       extent: expandExtent,
       precision: targetPrecision
     };
-    return this._fetchNewData({ startLoading, stopLoading, onLoadError, newDataMeta });
+    return this._fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta: newDataMeta });
   }
 
   async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
     const { precision, timeFilters, extent } = dataMeta;
-    startLoading('source', dataMeta);
+    const requestToken = Symbol(`layer-source-refresh: this.getId()`);
+    startLoading('source', requestToken, dataMeta);
     try {
       const data = await this._source.getGeoJsonPointsWithTotalCount({
         precision,
@@ -191,9 +194,9 @@ export class GeohashGridLayer extends ALayer {
         layerId: this.getId(),
         layerName: this.getDisplayName(),
       });
-      stopLoading('source', data);
+      stopLoading('source', requestToken, data);
     } catch(error) {
-      onLoadError('source', error.message);
+      onLoadError('source', requestToken, error.message);
     }
   }
 }

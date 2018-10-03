@@ -116,15 +116,16 @@ export class VectorLayer extends ALayer {
       }
     }
 
-    startLoading('source', { timeFilters: dataFilters.timeFilters });
+    const requestToken = Symbol(`layer-source-refresh: this.getId()`);
+    startLoading('source', requestToken, { timeFilters: dataFilters.timeFilters });
     try {
       const data = await this._source.getGeoJson({
         layerId: this.getId(),
         layerName: this.getDisplayName(),
       }, dataFilters);
-      stopLoading('source', data);
+      stopLoading('source', requestToken, data);
     } catch(error) {
-      onLoadError('source', error.message);
+      onLoadError('source', requestToken, error.message);
     }
   }
 
