@@ -57,14 +57,12 @@ describe('KibanaMigrator', () => {
     });
   });
 
-  describe('indexMigration', () => {
+  describe('awaitMigration', () => {
     it('changes isMigrated to true if migrations were skipped', async () => {
       const { kbnServer } = mockKbnServer();
       kbnServer.server.plugins.elasticsearch = undefined;
-      const migrator = new KibanaMigrator({ kbnServer }).indexMigration();
-      expect(migrator.isMigrated).toBeFalsy();
-      await migrator.awaitCompletion();
-      expect(migrator.isMigrated).toBeTruthy();
+      const result = await new KibanaMigrator({ kbnServer }).awaitMigration();
+      expect(result).toEqual({ status: 'skipped' });
     });
 
     it('waits for kbnServer.ready before attempting migrations', async () => {
@@ -81,9 +79,7 @@ describe('KibanaMigrator', () => {
           };
         },
       };
-      await expect(
-        new KibanaMigrator({ kbnServer }).indexMigration().awaitCompletion()
-      ).rejects.toThrow(/Doh!/);
+      await expect(new KibanaMigrator({ kbnServer }).awaitMigration()).rejects.toThrow(/Doh!/);
     });
   });
 });

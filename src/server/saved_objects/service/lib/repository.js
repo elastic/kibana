@@ -52,7 +52,10 @@ export class SavedObjectsRepository {
     this._schema = schema;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
-    this._unwrappedCallCluster = callCluster;
+    this._unwrappedCallCluster = async (...args) => {
+      await migrator.awaitMigration();
+      return callCluster(...args);
+    };
     this._schema = schema;
     this._serializer = serializer;
   }
@@ -467,7 +470,6 @@ export class SavedObjectsRepository {
 
   async _writeToCluster(method, params) {
     try {
-      this._assertMigrated();
       await this._onBeforeWrite();
       return await this._callCluster(method, params);
     } catch (err) {
@@ -477,18 +479,9 @@ export class SavedObjectsRepository {
 
   async _callCluster(method, params) {
     try {
-      this._assertMigrated();
       return await this._unwrappedCallCluster(method, params);
     } catch (err) {
       throw decorateEsError(err);
-    }
-  }
-
-  _assertMigrated() {
-    if (!this._migrator.indexMigration().isComplete) {
-      throw errors.decorateConflictError(
-        new Error(`The saved object index ${this._index} is being migrated.`)
-      );
     }
   }
 

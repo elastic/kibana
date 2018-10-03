@@ -183,12 +183,7 @@ describe('SavedObjectsRepository', () => {
     onBeforeWrite = sandbox.stub();
     migrator = {
       migrateDocument: sinon.spy((doc) => doc),
-      indexMigration() {
-        return {
-          isComplete: true,
-          awaitCompletion: async () => ({ status: 'skipped' }),
-        };
-      }
+      awaitMigration: async () => ({ status: 'skipped' }),
     };
 
     const serializer = new SavedObjectsSerializer(schema);
@@ -218,18 +213,6 @@ describe('SavedObjectsRepository', () => {
         _id: params.id,
         _version: 2
       }));
-    });
-
-    it('throws an error if the index is not migrated', async () => {
-      migrator.indexMigration = () => ({
-        isComplete: false,
-      });
-      await expect(savedObjectsRepository.create('index-pattern', {
-        title: 'Logstash'
-      }, {
-        id: 'logstash-*',
-        namespace: 'foo-namespace',
-      })).rejects.toThrow(/is being migrated/);
     });
 
     it('formats Elasticsearch response', async () => {
@@ -391,16 +374,6 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#bulkCreate', () => {
-    it('throws an error if the index is not migrated', async () => {
-      migrator.indexMigration = () => ({
-        isComplete: false,
-      });
-      await expect(savedObjectsRepository.bulkCreate([
-        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
-        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
-      ])).rejects.toThrow(/is being migrated/);
-    });
-
     it('formats Elasticsearch request', async () => {
       callAdminCluster.returns({ items: [] });
 
@@ -627,15 +600,6 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#delete', () => {
-    it('throws an error if the index is not migrated', async () => {
-      migrator.indexMigration = () => ({
-        isComplete: false,
-      });
-      await expect(
-        savedObjectsRepository.delete('index-pattern', 'logstash-*')
-      ).rejects.toThrow(/is being migrated/);
-    });
-
     it('throws notFound when ES is unable to find the document', async () => {
       expect.assertions(1);
 
@@ -710,15 +674,6 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#find', () => {
-    it('throws an error if the index is not migrated', async () => {
-      migrator.indexMigration = () => ({
-        isComplete: false,
-      });
-      await expect(
-        savedObjectsRepository.find({ type: 'foo' })
-      ).rejects.toThrow(/is being migrated/);
-    });
-
     it('requires type to be defined', async () => {
       await expect(savedObjectsRepository.find({})).rejects.toThrow(/options\.type must be/);
       sinon.assert.notCalled(callAdminCluster);
@@ -879,15 +834,6 @@ describe('SavedObjectsRepository', () => {
       }
     };
 
-    it('throws an error if the index is not migrated', async () => {
-      migrator.indexMigration = () => ({
-        isComplete: false,
-      });
-      await expect(
-        savedObjectsRepository.get('index-pattern', 'logstash-*')
-      ).rejects.toThrow(/is being migrated/);
-    });
-
     it('formats Elasticsearch response when there is no namespace', async () => {
       callAdminCluster.returns(Promise.resolve(noNamespaceResult));
       const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
@@ -960,18 +906,6 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#bulkGet', () => {
-    it('throws an error if the index is not migrated', async () => {
-      migrator.indexMigration = () => ({
-        isComplete: false,
-      });
-      await expect(
-        savedObjectsRepository.bulkGet([
-          { id: 'one', type: 'config' },
-          { id: 'two', type: 'index-pattern' },
-        ])
-      ).rejects.toThrow(/is being migrated/);
-    });
-
     it('prepends type to id when getting objects when there is no namespace', async () => {
       callAdminCluster.returns({ docs: [] });
 
@@ -1083,15 +1017,6 @@ describe('SavedObjectsRepository', () => {
         _version: newVersion,
         result: 'updated'
       }));
-    });
-
-    it('throws an error if the index is not migrated', async () => {
-      migrator.indexMigration = () => ({
-        isComplete: false,
-      });
-      await expect(
-        savedObjectsRepository.update('index-pattern', 'logstash-*', attributes, { namespace: 'foo-namespace' })
-      ).rejects.toThrow(/is being migrated/);
     });
 
     it('returns current ES document version', async () => {
