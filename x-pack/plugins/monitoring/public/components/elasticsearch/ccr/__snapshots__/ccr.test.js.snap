@@ -12,6 +12,7 @@ exports[`Ccr that it renders normally 1`] = `
     >
       <EuiPageContentBody>
         <EuiInMemoryTable
+          className="monitoringElasticsearchCcrListingTable"
           columns={
             Array [
               Object {
@@ -19,13 +20,11 @@ exports[`Ccr that it renders normally 1`] = `
                 "name": "Index",
                 "render": [Function],
                 "sortable": true,
-                "width": "200px",
               },
               Object {
                 "field": "follows",
                 "name": "Follows",
                 "sortable": true,
-                "width": "200px",
               },
               Object {
                 "field": "opsSynced",
