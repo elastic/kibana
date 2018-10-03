@@ -23,7 +23,7 @@ function TooltipDefinitionList({ toolTipData }) {
     <dl className="mlDescriptionList">
       {toolTipData.map(({ title, description }) => {
         return (
-          <React.Fragment>
+          <React.Fragment key={`${title} ${description}`}>
             <dt className="mlDescriptionList__title">{title}</dt>
             <dd className="mlDescriptionList__description">{description}</dd>
           </React.Fragment>
