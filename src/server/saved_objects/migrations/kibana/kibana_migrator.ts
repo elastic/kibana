@@ -63,11 +63,6 @@ interface ElasticsearchPlugin {
   getCluster: ((name: 'admin') => { callWithInternalUser: CallCluster });
 }
 
-interface MigrationStatus {
-  isMigrated: boolean;
-  awaitMigration: () => Promise<MigrationResult>;
-}
-
 /**
  * Manages the shape of mappings and documents in the Kibana index.
  *
