@@ -107,7 +107,8 @@ export class VectorLayer extends ALayer {
     const extentAware = this._source.isFilterByMapBounds();
 
     if (!timeAware && !extentAware) {
-      if (this._dataRequests[0] && this._dataRequests[0].hasDataOrRequestInProgress()) {
+      const sourceDataRequest = this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+      if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
         return;
       }
     }
