@@ -16,10 +16,20 @@
 ### END INIT INFO
 
 #
-# Source function library if present.
+# Source function libraries if present.
 #
+# Red Hat
 if [ -f /etc/rc.d/init.d/functions ]; then
     . /etc/rc.d/init.d/functions
+
+# Debian
+elif [ -f /lib/lsb/init-functions ]; then
+    . /lib/lsb/init-functions
+
+# SUSE
+elif [ -f /etc/rc.status ]; then
+    . /etc/rc.status
+    rc_reset
 fi
 
 name=kibana
