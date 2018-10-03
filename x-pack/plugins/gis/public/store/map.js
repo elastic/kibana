@@ -162,11 +162,11 @@ export function map(state = INITIAL_STATE, action) {
 
 function findDataRequest(layerDescriptor, dataRequestAction) {
 
-  if (!layerDescriptor.dataRequest) {
+  if (!layerDescriptor.dataRequests) {
     return;
   }
 
-  return layerDescriptor.dataRequest.find(dataRequest => {
+  return layerDescriptor.dataRequests.find(dataRequest => {
     return dataRequest.dataId === dataRequestAction.dataId;
   });
 }
@@ -178,8 +178,8 @@ function updateWithDataRequest(state, action) {
     return state;
   }
 
-  if (!layerRequestingData.dataRequest) {
-    layerRequestingData.dataRequest = [];
+  if (!layerRequestingData.dataRequests) {
+    layerRequestingData.dataRequests = [];
   }
 
   let dataRequest = findDataRequest(layerRequestingData, action);
@@ -187,7 +187,7 @@ function updateWithDataRequest(state, action) {
     dataRequest = {
       dataId: action.dataId
     };
-    layerRequestingData.dataRequest.push(dataRequest);
+    layerRequestingData.dataRequests.push(dataRequest);
   }
   dataRequest.dataHasLoadError = false;
   dataRequest.dataLoadError = null;

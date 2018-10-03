@@ -14,8 +14,8 @@ export class ALayer {
     this._style = style;
     this._listenersMap = new Map(); // key is mbLayerId, value eventHandlers map
 
-    if (this._descriptor.dataRequest) {
-      this._dataRequests = this._descriptor.dataRequest.map(dataRequest => new DataRequest(dataRequest));
+    if (this._descriptor.dataRequests) {
+      this._dataRequests = this._descriptor.dataRequests.map(dataRequest => new DataRequest(dataRequest));
     } else {
       this._dataRequests = [];
     }
@@ -24,7 +24,7 @@ export class ALayer {
   static createDescriptor(options) {
     const layerDescriptor = {};
 
-    layerDescriptor.dataRequest = [];
+    layerDescriptor.dataRequests = [];
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.showAtAllZoomLevels = _.get(options, 'showAtAllZoomLevels', true);
@@ -138,15 +138,16 @@ export class ALayer {
   }
 
   isLayerLoading() {
-    return this._dataRequests[0] ?  this._dataRequests[0].isLoading() : false;
+    return this._dataRequests.some(dataRequest => dataRequest.isLoading());
   }
 
   dataHasLoadError() {
-    return this._dataRequests[0] ? this._dataRequests[0].hasLoadError() : false;
+    return this._dataRequests.some(dataRequest => dataRequest.hasLoadError());
   }
 
   getDataLoadError() {
-    return this._dataRequests[0].getLoadError();
+    const loadErrors =  this._dataRequests.filter(dataRequest => dataRequest.hasLoadError());
+    return loadErrors.join(',');//todo
   }
 
   toLayerDescriptor() {
