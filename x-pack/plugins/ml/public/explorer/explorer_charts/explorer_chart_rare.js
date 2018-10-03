@@ -77,9 +77,11 @@ export class ExplorerChartRare extends React.Component {
     const LINE_CHART_ANOMALY_RADIUS = 7;
     const SCHEDULED_EVENT_MARKER_HEIGHT = 5;
 
+    const chartType = getChartType(config);
+
     // Left margin is adjusted later for longest y-axis label.
     const margin = { top: 10, right: 0, bottom: 30, left: 0 };
-    if (config.functionDescription === 'count') {
+    if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
       margin.left = 60;
     }
 
@@ -88,7 +90,6 @@ export class ExplorerChartRare extends React.Component {
     let lineChartGroup;
     let lineChartValuesLine = null;
 
-    const chartType = getChartType(config);
     const CHART_Y_ATTRIBUTE = (chartType === CHART_TYPE.EVENT_DISTRIBUTION) ? 'entity' : 'value';
 
     let highlight = config.chartData.find(d => (d.anomalyScore !== undefined));
@@ -188,7 +189,9 @@ export class ExplorerChartRare extends React.Component {
       d3.select('.temp-axis-label').remove();
 
       // Set the size of the left margin according to the width of the largest y axis tick label.
-      // margin.left = (Math.max(maxYAxisLabelWidth, 40));
+      if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
+        margin.left = (Math.max(maxYAxisLabelWidth, 40));
+      }
       vizWidth = svgWidth - margin.left - margin.right;
 
       // Set the x axis domain to match the request plot range.
