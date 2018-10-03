@@ -1,3 +1,4 @@
+[role="xpack"]
 [[monitoring-kibana]]
 == Configuring monitoring in {kib}
 ++++

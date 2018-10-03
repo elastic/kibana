@@ -1,7 +1,8 @@
+[role="xpack"]
 [[monitoring-metricbeat]]
 === Monitoring {kib} with {metricbeat}
 
-[beta] In 6.4 and later, you can use {metricbeat} to collect and ship data about 
+beta[] In 6.4 and later, you can use {metricbeat} to collect and ship data about 
 {kib}, rather than routing it through {es} as described in <<monitoring-kibana>>. 
 
 . Verify that the `xpack.monitoring.collection.enabled` setting is `true` on
