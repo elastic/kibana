@@ -24,8 +24,8 @@ import Promise from 'bluebird';
 const uiSettingDefaults = getUiSettingDefaults();
 const defaultSearchQueryLanguageSetting = uiSettingDefaults['search:queryLanguage'].value;
 
-export function makeUsageCollector(server) {
-  const kibanaUsageCollector = server.usage.collectorSet.makeUsageCollector({
+export function makeKQLUsageCollector(server) {
+  const kqlUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'kql',
     fetch: async callCluster => {
       const [response, config] = await Promise.all([
@@ -68,5 +68,5 @@ export function makeUsageCollector(server) {
     },
   });
 
-  server.usage.collectorSet.register(kibanaUsageCollector);
+  server.usage.collectorSet.register(kqlUsageCollector);
 }

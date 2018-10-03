@@ -36,7 +36,7 @@ import * as systemApi from './server/lib/system_api';
 import handleEsError from './server/lib/handle_es_error';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
-import { makeUsageCollector } from './server/lib/make_usage_collector';
+import { makeKQLUsageCollector } from './server/lib/make_kql_usage_collector';
 import { injectVars } from './inject_vars';
 
 const mkdirp = Promise.promisify(mkdirpNode);
@@ -166,7 +166,7 @@ export default function (kibana) {
       registerKqlTelemetryApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
-      makeUsageCollector(server);
+      makeKQLUsageCollector(server);
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);
       server.injectUiAppVars('kibana', () => injectVars(server));
