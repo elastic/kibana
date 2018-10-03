@@ -6,22 +6,20 @@
 
 import { SearchParams, SearchResponse } from 'elasticsearch';
 import { SERVICE_NAME, TRACE_ID } from '../../../common/constants';
+import { TermsAggsBucket } from '../../../typings/elasticsearch';
 import { Span } from '../../../typings/Span';
 import { Transaction } from '../../../typings/Transaction';
+import { Setup } from '../helpers/setup_request';
 
-interface ServerConfig {
-  get: (key: string) => string;
+export interface TraceResponse {
+  services: string[];
+  hits: Array<Transaction | Span>;
 }
 
-// TODO: move to shared
-interface Setup<T = any> {
-  start: string;
-  end: string;
-  client: (type: string, params: object) => Promise<SearchResponse<T>>;
-  config: ServerConfig;
-}
-
-export async function getTrace(traceId: string, setup: Setup) {
+export async function getTrace(
+  traceId: string,
+  setup: Setup
+): Promise<TraceResponse> {
   const { start, end, client, config } = setup;
 
   const params: SearchParams = {
@@ -55,18 +53,14 @@ export async function getTrace(traceId: string, setup: Setup) {
     }
   };
 
-  interface ServiceBucket {
-    key: string;
-  }
-
   const resp: SearchResponse<Span | Transaction> = await client(
     'search',
     params
   );
 
   return {
-    services: resp.aggregations.services.buckets.map(
-      (bucket: ServiceBucket) => bucket.key
+    services: (resp.aggregations.services.buckets as TermsAggsBucket[]).map(
+      bucket => bucket.key
     ),
     hits: resp.hits.hits.map(hit => hit._source)
   };
