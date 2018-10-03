@@ -13,7 +13,7 @@ import { map } from './map';
 import { loadMapResources, replaceLayerList, loadMetaResources } from "../actions/store_actions";
 import _ from 'lodash';
 import config from './config';
-import { getMapInitState } from '../shared/services/save_map_state';
+import { storeFromSavedObjectAttributes } from '../shared/services/save_map_state';
 
 const rootReducer = combineReducers({
   map,
@@ -49,7 +49,7 @@ uiModules
         const workspaceId = gisStateSync.get('workspaceId');
         const { id, attributes } = workspace;
         updateAppState(id, workspaceId);
-        initConfig = getMapInitState(attributes);
+        initConfig = storeFromSavedObjectAttributes(attributes);
       } else {
         gisStateSync.reset('workspaceId');
         initConfig = {};

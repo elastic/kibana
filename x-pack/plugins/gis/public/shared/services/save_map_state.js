@@ -8,8 +8,8 @@ import { getStore, gisStateSync } from '../../store/store';
 import _ from 'lodash';
 
 
-export const getMapInitState = overallState => {
-  let { mapState } = overallState;
+export const storeFromSavedObjectAttributes = attributes => {
+  let { mapState } = attributes;
   if (mapState && !_.isEmpty(mapState)) {
     mapState = JSON.parse(mapState, (key, val) => {
       if (isNaN(val) || typeof val === 'boolean') {
@@ -48,7 +48,7 @@ const getCurrentMapState = (() => {
   };
 })();
 
-export const saveMapSettings = async gisWorkspace => {
+export const getWorkspaceSaveFunction = async gisWorkspace => {
   const currentMapState = await getCurrentMapState();
   return ({ newTitle }) => {
     const savedObjectId = gisStateSync.get('workspaceId');

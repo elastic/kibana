@@ -22,7 +22,7 @@ import { Inspector } from 'ui/inspector';
 import { inspectorAdapters } from './kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { saveMapSettings } from './shared/services/save_map_state';
+import { getWorkspaceSaveFunction } from './shared/services/save_map_state';
 import { showOptionsPopover } from './components/top_nav/show_options_popover';
 
 // hack to wait for angular template to be ready
@@ -87,10 +87,10 @@ export function initGisApp(resolve) {
         description: 'Save Visualization',
         testId: 'visualizeSaveButton',
         run: async () => {
-          const onSave = await saveMapSettings(gisWorkspace);
+          const workspaceSave = await getWorkspaceSaveFunction(gisWorkspace);
           const saveModal = (
             <SavedObjectSaveModal
-              onSave={onSave}
+              onSave={workspaceSave}
               onClose={() => {}}
               title={'Save map settings'}
               showCopyOnSave={false}
