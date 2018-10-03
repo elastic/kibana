@@ -65,7 +65,7 @@ export class VectorLayer extends ALayer {
   }
 
   isLayerLoading() {
-    return this._dataRequest.isLoading();
+    return this._dataRequest[0] && this._dataRequest[0].isLoading();
   }
 
   async getStringFields() {
@@ -111,7 +111,7 @@ export class VectorLayer extends ALayer {
     const extentAware = this._source.isFilterByMapBounds();
 
     if (!timeAware && !extentAware) {
-      if (this._dataRequest.hasDataOrRequestInProgress()) {
+      if (this._dataRequest[0] && this._dataRequest[0].hasDataOrRequestInProgress()) {
         return;
       }
     }
@@ -143,7 +143,7 @@ export class VectorLayer extends ALayer {
 
     //todo: similar problem as OL here. keeping track of data via MB source directly
     const mbSourceAfterAdding = mbMap.getSource(this.getId());
-    const featureCollection = this._dataRequest.getData();
+    const featureCollection = this._dataRequest[0] ? this._dataRequest[0].getData() : null;
     if (featureCollection !== mbSourceAfterAdding._data) {
       mbSourceAfterAdding.setData(featureCollection);
     }

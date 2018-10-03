@@ -160,6 +160,17 @@ export function map(state = INITIAL_STATE, action) {
   }
 }
 
+function findDataRequest(layerDescriptor, dataRequestAction) {
+
+  if (!layerDescriptor.dataRequest) {
+    return;
+  }
+
+  return layerDescriptor.dataRequest.find(dataRequest => {
+    return dataRequest.dataId === dataRequestAction.dataId;
+  });
+}
+
 
 function updateWithDataRequest(state, action) {
   const layerRequestingData = findLayerById(state, action.layerId);
@@ -168,15 +179,21 @@ function updateWithDataRequest(state, action) {
   }
 
   if (!layerRequestingData.dataRequest) {
-    layerRequestingData.dataRequest = {};
+    layerRequestingData.dataRequest = [];
   }
 
-  layerRequestingData.dataRequest.dataHasLoadError = false;
-  layerRequestingData.dataRequest.dataLoadError = null;
-  layerRequestingData.dataRequest.dataDirty = true; // needs to be synced to MB
-  layerRequestingData.dataRequest.dataMetaAtStart = action.meta;
-  layerRequestingData.dataRequest.dataRequestToken = action.requestToken;
-  layerRequestingData.dataRequest.dataId = action.dataId;
+  let dataRequest = findDataRequest(layerRequestingData, action);
+  if (!dataRequest) {
+    dataRequest = {
+      dataId: action.dataId
+    };
+    layerRequestingData.dataRequest.push(dataRequest);
+  }
+  dataRequest.dataHasLoadError = false;
+  dataRequest.dataLoadError = null;
+  dataRequest.dataDirty = true;
+  dataRequest.dataMetaAtStart = action.meta;
+  dataRequest.dataRequestToken = action.requestToken;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
@@ -188,24 +205,25 @@ function updateWithDataResponse(state, action) {
   }
 
 
-  if (!layerReceivingData.dataRequest) {
-    layerReceivingData.dataRequest = {};
+  const dataRequest = findDataRequest(layerReceivingData, action);
+  if (!dataRequest) {
+    throw new Error('Data request should be initialized. Cannot call stopLoading before startLoading');
   }
 
   if (
-    layerReceivingData.dataRequest.dataRequestToken &&
-    layerReceivingData.dataRequest.dataRequestToken !== action.requestToken
+    dataRequest.dataRequestToken &&
+    dataRequest.dataRequestToken !== action.requestToken
   ) {
     // ignore responses to outdated requests
     return { ...state };
   }
 
-  layerReceivingData.dataRequest.data = action.data;
-  layerReceivingData.dataRequest.dataMeta = layerReceivingData.dataMetaAtStart;
-  layerReceivingData.dataRequest.dataMetaAtStart = null;
-  layerReceivingData.dataRequest.dataDirty = false;
-  layerReceivingData.dataRequest.dataRequestToken = null;
-  layerReceivingData.dataRequest.dataId = action.dataId;
+  dataRequest.data = action.data;
+  dataRequest.dataMeta = layerReceivingData.dataMetaAtStart;
+  dataRequest.dataMetaAtStart = null;
+  dataRequest.dataDirty = false;
+  dataRequest.dataRequestToken = null;
+  dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
@@ -216,23 +234,24 @@ function updateWithDataLoadError(state, action) {
     return state;
   }
 
-  if (!layer.dataRequest) {
-    layer.dataRequest = {};
+  const dataRequest = findDataRequest(layer, action);
+  if (!dataRequest) {
+    throw new Error('Data request should be initialized. Cannot call loadError before startLoading');
   }
 
   if (
-    layer.dataRequest.dataRequestToken &&
-    layer.dataRequest.dataRequestToken !== action.requestToken
+    dataRequest.dataRequestToken &&
+    dataRequest.dataRequestToken !== action.requestToken
   ) {
     // ignore responses to outdated requests
     return state;
   }
 
-  layer.dataRequest.dataHasLoadError = true;
-  layer.dataRequest.dataLoadError = action.errorMessage;
-  layer.dataRequest.dataDirty = false;
-  layer.dataRequest.dataRequestToken = null;
-  layer.dataRequest.dataId = action.dataId;
+  dataRequest.dataHasLoadError = true;
+  dataRequest.dataLoadError = action.errorMessage;
+  dataRequest.dataDirty = false;
+  dataRequest.dataRequestToken = null;
+  dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }

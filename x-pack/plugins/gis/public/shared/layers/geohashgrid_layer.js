@@ -89,7 +89,7 @@ export class GeohashGridLayer extends ALayer {
 
     //todo: similar problem as OL here. keeping track of data via MB source directly
     const mbSourceAfter = mbMap.getSource(this.getId());
-    const featureCollection = this._dataRequest.getData();
+    const featureCollection = this._dataRequest[0] ? this._dataRequest[0].getData() : null;
     if (!featureCollection) {
       mbSourceAfter.setData({ 'type': 'FeatureCollection', 'features': [] });
       return;
@@ -117,7 +117,7 @@ export class GeohashGridLayer extends ALayer {
 
 
   isLayerLoading() {
-    return this._dataRequest.isLoading();
+    return this._dataRequest[0] ?  this._dataRequest[0].isLoading() : false;
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -134,7 +134,7 @@ export class GeohashGridLayer extends ALayer {
     let samePrecision = false;
     let isContained = false;
     let sameTime = false;
-    const dataMeta = this._dataRequest.getMeta();
+    const dataMeta = this._dataRequest[0] ? this._dataRequest[0].getMeta() : null;
     if (dataMeta) {
       if (dataMeta.extent) {
         const dataExtent = turf.bboxPolygon([

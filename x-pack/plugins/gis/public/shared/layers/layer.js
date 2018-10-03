@@ -13,15 +13,19 @@ export class ALayer {
     this._source = source;
     this._style = style;
     this._listenersMap = new Map(); // key is mbLayerId, value eventHandlers map
-    this._dataRequest = new DataRequest(this._descriptor.dataRequest ? this._descriptor.dataRequest : {});
+
+    if (this._descriptor.dataRequest) {
+      console.log(this._descriptor.dataRequest);
+      this._dataRequest = this._descriptor.dataRequest.map(dataRequest => new DataRequest(dataRequest));
+    } else {
+      this._dataRequest = [];
+    }
   }
 
   static createDescriptor(options) {
     const layerDescriptor = {};
-    layerDescriptor.dataRequest = {};
-    layerDescriptor.dataRequest.data = options.dataRequest && options.dataRequest.data ? options.dataRequest : null;
-    layerDescriptor.dataRequest.dataMeta = options.dataRequest && options.dataRequest.dataMeta ? options.dataRequest.dataMeta : {};
-    layerDescriptor.dataRequest.dataDirty = options.dataRequest && typeof options.dataRequest.dataDirty === 'boolean' ? options.dataRequest.dataDirty : false;
+
+    layerDescriptor.dataRequest = [];
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.showAtAllZoomLevels = _.get(options, 'showAtAllZoomLevels', true);
@@ -139,11 +143,11 @@ export class ALayer {
   }
 
   dataHasLoadError() {
-    return this._dataRequest ? this._dataRequest.hasLoadError() : false;
+    return this._dataRequest[0] ? this._dataRequest[0].hasLoadError() : false;
   }
 
   getDataLoadError() {
-    return this._dataRequest.getLoadError();
+    return this._dataRequest[0].getLoadError();
   }
 
   toLayerDescriptor() {
