@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { RunContext } from '../task';
-import { extractTaskDefinitions } from './extract_task_definitions';
+import { sanitizeTaskDefinitions } from './sanitize_task_definitions';
 
 interface Opts {
   numTasks: number;
@@ -40,12 +40,12 @@ const getMockTaskDefinitions = (opts: Opts) => {
   return tasks;
 };
 
-describe('extractTaskDefinitions', () => {
+describe('sanitizeTaskDefinitions', () => {
   it('provides tasks with defaults if there are no overrides', () => {
     const maxWorkers = 10;
     const overrideNumWorkers = {};
     const taskDefinitions = getMockTaskDefinitions({ numTasks: 3 });
-    const result = extractTaskDefinitions(taskDefinitions, maxWorkers, overrideNumWorkers);
+    const result = sanitizeTaskDefinitions(taskDefinitions, maxWorkers, overrideNumWorkers);
 
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -81,7 +81,7 @@ Object {
     const maxWorkers = 2;
     const overrideNumWorkers = {};
     const taskDefinitions = getMockTaskDefinitions({ numTasks: 2, numWorkers: 5 });
-    const result = extractTaskDefinitions(taskDefinitions, maxWorkers, overrideNumWorkers);
+    const result = sanitizeTaskDefinitions(taskDefinitions, maxWorkers, overrideNumWorkers);
 
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -112,7 +112,7 @@ Object {
     };
     const maxWorkers = 5;
     const taskDefinitions = getMockTaskDefinitions({ numTasks: 3 });
-    const result = extractTaskDefinitions(taskDefinitions, maxWorkers, overrideNumWorkers);
+    const result = sanitizeTaskDefinitions(taskDefinitions, maxWorkers, overrideNumWorkers);
 
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -145,7 +145,7 @@ Object {
   });
 
   it('throws a validation exception for invalid task definition', () => {
-    const runExtract = () => {
+    const runsanitize = () => {
       const maxWorkers = 10;
       const overrideNumWorkers = {};
       const taskDefinitions = {
@@ -164,9 +164,9 @@ Object {
         },
       };
 
-      return extractTaskDefinitions(taskDefinitions, maxWorkers, overrideNumWorkers);
+      return sanitizeTaskDefinitions(taskDefinitions, maxWorkers, overrideNumWorkers);
     };
 
-    expect(runExtract).toThrowError();
+    expect(runsanitize).toThrowError();
   });
 });

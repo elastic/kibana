@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { extractTaskDefinitions } from './lib/extract_task_definitions';
 import { fillPool } from './lib/fill_pool';
 import { TaskManagerLogger } from './lib/logger';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
+import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
 import { ConcreteTaskInstance, RunContext, TaskInstance } from './task';
 import { SanitizedTaskDefinition, TaskDefinition, TaskDictionary } from './task';
 import { TaskPoller } from './task_poller';
@@ -100,7 +100,7 @@ export class TaskManager {
   }
 
   public registerTaskDefinitions(taskDefinitions: TaskDictionary<TaskDefinition>) {
-    const sanitized = extractTaskDefinitions(
+    const sanitized = sanitizeTaskDefinitions(
       taskDefinitions,
       this.maxWorkers,
       this.overrideNumWorkers

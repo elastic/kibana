@@ -22,7 +22,7 @@ import {
  * @param taskDefinitions - The Kibana task definitions dictionary
  * @param overrideNumWorkers - The kibana.yml overrides numWorkers per task type.
  */
-export function extractTaskDefinitions(
+export function sanitizeTaskDefinitions(
   taskDefinitions: TaskDictionary<TaskDefinition> = {},
   maxWorkers: number,
   overrideNumWorkers: { [taskType: string]: number }
