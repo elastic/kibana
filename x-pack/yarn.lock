@@ -237,6 +237,13 @@
   version "0.10.2"
   resolved "https://registry.yarnpkg.com/@types/retry/-/retry-0.10.2.tgz#bd1740c4ad51966609b058803ee6874577848b37"
 
+"@types/styled-components@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@types/styled-components/-/styled-components-3.0.1.tgz#0f591a38e005aeb10687e85eb078c92d9b988ed1"
+  dependencies:
+    "@types/node" "*"
+    "@types/react" "*"
+
 "@types/superagent@*":
   version "3.8.4"
   resolved "https://registry.yarnpkg.com/@types/superagent/-/superagent-3.8.4.tgz#24a5973c7d1a9c024b4bbda742a79267c33fb86a"
@@ -249,12 +256,6 @@
   resolved "https://registry.yarnpkg.com/@types/supertest/-/supertest-2.0.5.tgz#18d082a667eaed22759be98f4923e0061ae70c62"
   dependencies:
     "@types/superagent" "*"
-"@types/styled-components@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@types/styled-components/-/styled-components-3.0.1.tgz#0f591a38e005aeb10687e85eb078c92d9b988ed1"
-  dependencies:
-    "@types/node" "*"
-    "@types/react" "*"
 
 "@types/url-join@^0.8.2":
   version "0.8.2"
@@ -385,6 +386,10 @@ ammo@2.x.x:
   dependencies:
     boom "5.x.x"
     hoek "4.x.x"
+
+angular-paging@2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/angular-paging/-/angular-paging-2.2.1.tgz#8090864f71bc4c9b89307b02ab02afb205983c43"
 
 angular-resource@1.4.9:
   version "1.4.9"
