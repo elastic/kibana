@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 
+import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import '../../validate_date_interval';
 import chrome from '../../chrome';
@@ -98,10 +99,10 @@ export const histogramBucketAgg = new BucketAggType({
             });
           })
           .catch(() => {
-            toastNotifications.addWarning(`
-              Unable to retrieve max and min values to auto-scale histogram buckets. 
-              This may lead to poor visualization performance.
-            `);
+            toastNotifications.addWarning(i18n.translate('ui.aggTypes.histogram.missingMaxMinValuesWarning', {
+              defaultMessage: 'Unable to retrieve max and min values to auto-scale histogram buckets.'
+                + ' This may lead to poor visualization performance.'
+            }));
           });
       },
       write: function (aggConfig, output) {
