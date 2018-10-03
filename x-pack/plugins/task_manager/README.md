@@ -51,7 +51,7 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 
 Plugins define tasks by calling the `registerTaskDefinitions` method on `server.plugins.taskManager`.
 
-A sample task can be found in the [plugin_functional/sample_task_plugin](../../test/plugin_functional/sample_task_plugin/) folder.
+A sample task can be found in the [x-pack/test/plugin_api_integration/plugins/task_manager](../../test/plugin_api_integration/plugins/task_manager/index.js) folder.
 
 ```js
 const { client: taskManagerClient } = server.plugins.taskManager;
