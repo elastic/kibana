@@ -10,8 +10,8 @@ import 'ngreact';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { checkLicense } from 'plugins/ml/license/check_license';
-import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
+import { checkBasicLicense } from 'plugins/ml/license/check_license';
+import { checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { initPromise } from 'plugins/ml/util/promise';
@@ -24,8 +24,8 @@ uiRoutes
   .when('/filedatavisualizer/?', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
-      privileges: checkGetJobsPrivilege,
+      CheckLicense: checkBasicLicense,
+      privileges: checkFindFileStructurePrivilege,
       mlNodeCount: getMlNodeCount,
       loadNewJobDefaults,
       initPromise: initPromise(true)

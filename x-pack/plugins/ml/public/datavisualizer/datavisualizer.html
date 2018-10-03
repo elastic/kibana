@@ -11,7 +11,10 @@
       </div>
     </div>
 
-    <div class="main-container">
+    <div
+      class="main-container"
+      ng-class="{'no-sidebar': showSidebar===false}"
+    >
 
       <div class="kuiPanel kuiVerticalRhythm datavisualizer-panel">
 
@@ -170,7 +173,7 @@
 
     </div>
 
-    <div class="datavisualizer-sidebar">
+    <div ng-if="showSidebar" class="datavisualizer-sidebar">
       <ng-include src="urlBasePath+'/plugins/ml/datavisualizer/datavisualizer_sidebar.html'"></ng-include>
     </div>
 
