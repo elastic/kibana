@@ -31,7 +31,7 @@ export class SpaceValidator {
       return valid();
     }
 
-    if (!space.name) {
+    if (!space.name || !space.name.trim()) {
       return invalid(`Name is required`);
     }
 
