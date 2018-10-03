@@ -72,10 +72,3 @@ considered unique based on its persistent UUID, which is written to the path.dat
 The port is now protocol dependent: https ports will use 443, and http ports will use 80.
 
 *Impact:* If your `elasticsearch.url` was dependent on an unspecified port set to 9200, `:9200` will have to be appended to the url.
-
-[float]
-=== Upgraded Hapi framework for plugin backend endpoints
-*Details:* The Hapi framework has been upgraded from v14.2.0 to v17.5.3. There are a number of breaking changes affecting plugins that register custom bacekend routes. The `reply` callback interface for supply responses has been replaced with an async/await and response toolkit. More details in the Hapi upgrade guide:
-
-*Impact:* 3rd party plugins with backend routes will need to take care upgrading for v6.5 to handle the new interface. Plugins that have no backend routes are unaffected.
-As plugins have always had to release new versions for new Kibana releases, users of Kibana will have to wait for their plugin suppliers to upgrade their plugins for v6.5 as they always have.
