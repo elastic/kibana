@@ -50,34 +50,28 @@ export const esPersistMiddleware = ({ getState }) => {
       return update(persistedWorkpad.id, persistedWorkpad).catch(err => {
         if (err.response.status === 400) {
           return notify.error(err.response, {
-            title: i18n.translate(
-              'xpack.canvas.state.saveChangesToElasticsearchErrorMessageTitle',
-              {
-                defaultMessage: "Couldn't save your changes to Elasticsearch",
-              }
-            ),
+            title: i18n.translate('xpack.canvas.state.saveChanges.400ErrorMessageTitle', {
+              defaultMessage: "Couldn't save your changes to Elasticsearch",
+            }),
           });
         }
 
         if (err.response.status === 413) {
           return notify.error(
-            i18n.translate('xpack.canvas.state.workpadDataTooLargeErrorMessage', {
+            i18n.translate('xpack.canvas.state.workpadDataTooLarge.413ErrorMessage', {
               defaultMessage:
                 'The server gave a response that the workpad data was too large. This usually means uploaded image assets that are too large for Kibana or a proxy. Try removing some assets in the asset manager.',
             }),
             {
-              title: i18n.translate(
-                'xpack.canvas.state.saveChangesToElasticsearchErrorMessageTitle',
-                {
-                  defaultMessage: "Couldn't save your changes to Elasticsearch",
-                }
-              ),
+              title: i18n.translate('xpack.canvas.state.workpadDataTooLarge.413ErrorMessage', {
+                defaultMessage: "Couldn't save your changes to Elasticsearch",
+              }),
             }
           );
         }
 
         return notify.error(err.response, {
-          title: i18n.translate('xpack.canvas.state.saveChangesToElasticsearchErrorMessageTitle', {
+          title: i18n.translate('xpack.canvas.state.saveChanges.commonErrorMessageTitle', {
             defaultMessage: "Couldn't save your changes to Elasticsearch",
           }),
         });
