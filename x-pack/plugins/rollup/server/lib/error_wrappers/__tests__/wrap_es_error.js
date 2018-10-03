@@ -14,7 +14,7 @@ describe('wrap_es_error', () => {
     beforeEach(() => {
       originalError = new Error('I am an error');
       originalError.statusCode = 404;
-      originalError.response = {};
+      originalError.response = '{}';
     });
 
     it('should return a Boom object', () => {
