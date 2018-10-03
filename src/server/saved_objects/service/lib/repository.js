@@ -35,7 +35,7 @@ export class SavedObjectsRepository {
       callCluster,
       schema,
       serializer,
-      migrator = { migrateDocument: (doc) => doc },
+      migrator,
       onBeforeWrite = () => { },
     } = options;
 
