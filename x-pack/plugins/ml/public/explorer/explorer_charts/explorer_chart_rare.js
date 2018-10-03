@@ -24,6 +24,7 @@ import moment from 'moment';
 import { formatValue } from '../../formatters/format_value';
 import { getSeverityWithLow } from '../../../common/util/anomaly_utils';
 import {
+  getChartType,
   getTickValues,
   numTicksForDateFormat,
   removeLabelOverlap
@@ -33,6 +34,8 @@ import { LoadingIndicator } from '../../components/loading_indicator/loading_ind
 import { mlEscape } from '../../util/string_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
+
+import { CHART_TYPE } from '../explorer_constants';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
 
@@ -85,8 +88,8 @@ export class ExplorerChartRare extends React.Component {
     let lineChartGroup;
     let lineChartValuesLine = null;
 
-    const CHART_TYPE = (config.functionDescription === 'rare') ? 'rare' : 'population';
-    const CHART_Y_ATTRIBUTE = (config.functionDescription === 'rare') ? 'entity' : 'value';
+    const chartType = getChartType(config);
+    const CHART_Y_ATTRIBUTE = (chartType === CHART_TYPE.EVENT_DISTRIBUTION) ? 'entity' : 'value';
 
     let highlight = config.chartData.find(d => (d.anomalyScore !== undefined));
     highlight = highlight && highlight.entity;
@@ -119,7 +122,7 @@ export class ExplorerChartRare extends React.Component {
         })
         .filter((d, i) => {
           // only filter for rare charts
-          if (CHART_TYPE === 'rare') {
+          if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
             return true;
           }
           return (i < categoryLimit || d.key === highlight);
@@ -130,7 +133,7 @@ export class ExplorerChartRare extends React.Component {
         return (scaleCategories.includes(d.entity));
       });
 
-      if (CHART_TYPE === 'population') {
+      if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
         const focusData = chartData.filter((d) => {
           return d.entity === highlight;
         }).map(d => d.value);
@@ -145,14 +148,14 @@ export class ExplorerChartRare extends React.Component {
           .range([chartHeight, 0])
           .domain([0, focusExtent[1]])
           .nice();
-      } else if (CHART_TYPE === 'rare') {
+      } else if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
         // avoid overflowing the border of the highlighted area
         const rowMargin = 5;
         lineChartYScale = d3.scale.ordinal()
           .rangePoints([rowMargin, chartHeight - rowMargin])
           .domain(scaleCategories);
       } else {
-        throw `CHART_TYPE '${CHART_TYPE}' not supported`;
+        throw `chartType '${chartType}' not supported`;
       }
 
       const yAxis = d3.svg.axis().scale(lineChartYScale)
@@ -164,7 +167,7 @@ export class ExplorerChartRare extends React.Component {
       let maxYAxisLabelWidth = 0;
       const tempLabelText = svg.append('g')
         .attr('class', 'temp-axis-label tick');
-      const tempLabelTextData = (CHART_TYPE === 'population') ? lineChartYScale.ticks() : scaleCategories;
+      const tempLabelTextData = (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) ? lineChartYScale.ticks() : scaleCategories;
       tempLabelText.selectAll('text.temp.axis').data(tempLabelTextData)
         .enter()
         .append('text')
@@ -172,7 +175,7 @@ export class ExplorerChartRare extends React.Component {
           if (fieldFormat !== undefined) {
             return fieldFormat.convert(d, 'text');
           } else {
-            if (CHART_TYPE === 'population') {
+            if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
               return lineChartYScale.tickFormat()(d);
             }
             return d;
@@ -387,7 +390,7 @@ export class ExplorerChartRare extends React.Component {
         // Show actual/typical when available except for rare detectors.
         // Rare detectors always have 1 as actual and the probability as typical.
         // Exposing those values in the tooltip with actual/typical labels might irritate users.
-        if (_.has(marker, 'actual') && config.functionDescription !== 'rare') {
+        if (_.has(marker, 'actual') && chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
           contents += (`<br/>actual: ${formatValue(marker.actual, config.functionDescription, fieldFormat)}`);

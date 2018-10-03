@@ -14,6 +14,8 @@ import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
 
+import { CHART_TYPE } from '../explorer/explorer_constants';
+
 const MAX_LABEL_WIDTH = 100;
 
 export function chartLimits(data = []) {
@@ -119,6 +121,18 @@ export function filterAxisLabels(selection, chartWidth) {
         parent.remove();
       }
     });
+}
+
+export function getChartType(config) {
+  if (config.functionDescription === 'rare') {
+    return CHART_TYPE.EVENT_DISTRIBUTION;
+  }
+
+  if (config.functionDescription === 'count' && config.entityFields.find(f => f.fieldType === 'over')) {
+    return CHART_TYPE.POPULATION_DISTRIBUTION;
+  }
+
+  return CHART_TYPE.SINGLE_METRIC;
 }
 
 export function getExploreSeriesLink(series) {

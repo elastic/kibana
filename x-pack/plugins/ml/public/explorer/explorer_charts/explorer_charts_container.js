@@ -17,12 +17,15 @@ import {
 } from '@elastic/eui';
 
 import {
+  getChartType,
   getExploreSeriesLink,
   isLabelLengthAboveThreshold
 } from '../../util/chart_utils';
 import { ExplorerChartRare } from './explorer_chart_rare';
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
+
+import { CHART_TYPE } from '../explorer_constants';
 
 const textTooManyBuckets = `This selection contains too many buckets to be displayed.
  The dashboard is best viewed over a shorter time range.`;
@@ -50,9 +53,10 @@ function ExplorerChartContainer({
 }) {
   const {
     detectorLabel,
-    entityFields,
-    functionDescription
+    entityFields
   } = series;
+
+  const chartType = getChartType(series);
 
   return (
     <React.Fragment>
@@ -95,16 +99,7 @@ function ExplorerChartContainer({
         </EuiFlexItem>
       </EuiFlexGroup>
       {(() => {
-        if (functionDescription === 'rare') {
-          return (
-            <ExplorerChartRare
-              tooManyBuckets={tooManyBuckets}
-              seriesConfig={series}
-              mlSelectSeverityService={mlSelectSeverityService}
-            />
-          );
-        }
-        if (functionDescription === 'count' && series.entityFields.find(f => f.fieldType === 'over')) {
+        if (chartType === CHART_TYPE.EVENT_DISTRIBUTION || chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
           return (
             <ExplorerChartRare
               tooManyBuckets={tooManyBuckets}
