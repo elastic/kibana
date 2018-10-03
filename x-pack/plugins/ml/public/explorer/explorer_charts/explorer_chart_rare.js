@@ -76,6 +76,9 @@ export class ExplorerChartRare extends React.Component {
 
     // Left margin is adjusted later for longest y-axis label.
     const margin = { top: 10, right: 0, bottom: 30, left: 0 };
+    if (config.functionDescription === 'count') {
+      margin.left = 60;
+    }
 
     let lineChartXScale = null;
     let lineChartYScale = null;
@@ -85,10 +88,13 @@ export class ExplorerChartRare extends React.Component {
     const CHART_TYPE = (config.functionDescription === 'rare') ? 'rare' : 'population';
     const CHART_Y_ATTRIBUTE = (config.functionDescription === 'rare') ? 'entity' : 'value';
 
+    let highlight = config.chartData.find(d => (d.anomalyScore !== undefined));
+    highlight = highlight && highlight.entity;
+
     const filteredChartData = init(config);
     drawRareChart(filteredChartData);
 
-    function init({ chartLimits, chartData }) {
+    function init({ chartData }) {
       const $el = $('.ml-explorer-chart');
 
       // Clear any existing elements from the visualization,
@@ -104,8 +110,6 @@ export class ExplorerChartRare extends React.Component {
         .attr('width', svgWidth)
         .attr('height', svgHeight);
 
-      let highlight = chartData.find(d => (d.anomalyScore !== undefined));
-      highlight = highlight && highlight.entity;
       const categoryLimit = 30;
       const scaleCategories = d3.nest()
         .key(d => d.entity)
@@ -114,21 +118,32 @@ export class ExplorerChartRare extends React.Component {
           return b.values.length - a.values.length;
         })
         .filter((d, i) => {
+          // only filter for rare charts
+          if (CHART_TYPE === 'rare') {
+            return true;
+          }
           return (i < categoryLimit || d.key === highlight);
         })
         .map(d => d.key);
 
       chartData = chartData.filter((d) => {
-        return (scaleCategories.findIndex(s => (s === d.entity)) > -1);
+        return (scaleCategories.includes(d.entity));
       });
 
       if (CHART_TYPE === 'population') {
+        const focusData = chartData.filter((d) => {
+          return d.entity === highlight;
+        }).map(d => d.value);
+        const focusExtent = d3.extent(focusData);
+
+        // now again filter chartData to include only the data points within the domain
+        chartData = chartData.filter((d) => {
+          return (d.value <= focusExtent[1]);
+        });
+
         lineChartYScale = d3.scale.linear()
           .range([chartHeight, 0])
-          .domain([
-            chartLimits.min,
-            chartLimits.max
-          ])
+          .domain([0, focusExtent[1]])
           .nice();
       } else if (CHART_TYPE === 'rare') {
         // avoid overflowing the border of the highlighted area
@@ -239,7 +254,6 @@ export class ExplorerChartRare extends React.Component {
         xAxis.ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat));
       }
 
-
       const yAxis = d3.svg.axis().scale(lineChartYScale)
         .orient('left')
         .innerTickSize(0)
@@ -277,7 +291,11 @@ export class ExplorerChartRare extends React.Component {
       const dots = dotGroup.selectAll('circle').data(dotsData);
 
       dots.enter().append('circle')
-        .attr('r', radius);
+        .classed('values-dots-circle', true)
+        .classed('values-dots-circle-blur', (d) => {
+          return (d.entity !== highlight);
+        })
+        .attr('r', d => ((d.entity === highlight) ? (radius * 1.5) : radius));
 
       dots
         .attr('cx', rareChartValuesLine.x())

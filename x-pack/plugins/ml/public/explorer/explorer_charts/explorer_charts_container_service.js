@@ -138,12 +138,25 @@ export function explorerChartsContainerServiceFactory(
       );
     }
 
-    // Query 4 - load the rare chart's event distribution
+    // Query 4 - load context data distribution
     function getEventDistribution(config, range) {
-      let splitField = config.entityFields.find(f => f.fieldType === 'partition');
+      // Defaults to use the "partition" field to group the data
+      let splitField;
       let filterField = null;
+
+      // If this is a detector using the rare function,
+      // use the "by" field to split the data and filter by the selection partition.
       if (config.functionDescription === 'rare') {
         splitField = config.entityFields.find(f => f.fieldType === 'by');
+        filterField = config.entityFields.find(f => f.fieldType === 'partition');
+      }
+
+      // Logic to consider an over field: If the above didn't result in choosing a split Field,
+      // check if an over field is part of the detector, if yes, use that to split and
+      // filter by a possible partition field.
+      const overField = config.entityFields.find(f => f.fieldType === 'over');
+      if (splitField === undefined && overField !== undefined) {
+        splitField = overField;
         filterField = config.entityFields.find(f => f.fieldType === 'partition');
       }
 
@@ -190,7 +203,7 @@ export function explorerChartsContainerServiceFactory(
 
       let chartData;
       if (eventDistribution.length > 0) {
-        const filterField = records[0].by_field_value;
+        const filterField = records[0].by_field_value || records[0].over_field_value;
         chartData = eventDistribution.filter(d => (d.entity !== filterField));
         _.map(metricData, (value, time) => {
           if (value > 0) {
@@ -267,9 +280,9 @@ export function explorerChartsContainerServiceFactory(
     function findNearestChartPointToTime(chartData, record) {
       const time = record[ML_TIME_FIELD_NAME];
 
-      if (record.function === 'rare' || record.function === 'count') {
+      if (record.function === 'rare' || record.over_field_value !== 'undefined') {
         chartData = chartData.filter((d) => {
-          return d.entity === record.by_field_value;
+          return d.entity === (record.by_field_value || record.over_field_value);
         });
       }
 

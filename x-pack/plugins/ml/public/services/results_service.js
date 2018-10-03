@@ -1414,7 +1414,7 @@ function getEventDistributionData(
   interval) {
   return new Promise((resolve, reject) => {
     // only get this data for count (used by rare chart)
-    if (metricFunction !== 'count') {
+    if (metricFunction !== 'count' || splitField === undefined) {
       return resolve([]);
     }
 
