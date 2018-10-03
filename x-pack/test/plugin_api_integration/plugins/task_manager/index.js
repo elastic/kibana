@@ -9,6 +9,7 @@ import { initRoutes } from './init_routes';
 export default function (kibana) {
   return new kibana.Plugin({
     name: 'sampleTask',
+    require: ['elasticsearch', 'task_manager'],
 
     config(Joi) {
       return Joi.object({
