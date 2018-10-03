@@ -67,11 +67,6 @@ export class KibanaMigrator {
    * Migrates the mappings and documents in the Kibana index. This will run only
    * once and subsequent calls will return the result of the original call.
    *
-   * This returns an object, rather than a promise, because we have some code that
-   * needs to await the migration result, and we have some code that simply needs
-   * to quickly check whether or not the migration has completed, and then error.
-   * The { isMigrated, awaitMigration } object allows for both scenarios.
-   *
    * @returns
    * @memberof KibanaMigrator
    */
