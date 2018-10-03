@@ -7,7 +7,7 @@ Object {
     data-test-subj="createIndexPatternStep1Header"
     errors={
       Array [
-        "An index pattern cannot contain spaces or the characters: {characterList}",
+        "A {indexPatternName} cannot contain spaces or the characters: {characterList}",
       ]
     }
     goToNextStep={[Function]}
@@ -19,38 +19,42 @@ Object {
   "i18n": Array [
     Array [
       Object {
-        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
+        "defaultMessage": "A {indexPatternName} cannot contain spaces or the characters: {characterList}",
         "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
       },
       Object {
         "characterList": "\\\\, /, ?, \\", <, >, |",
+        "indexPatternName": "name",
       },
     ],
     Array [
       Object {
-        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
+        "defaultMessage": "A {indexPatternName} cannot contain spaces or the characters: {characterList}",
         "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
       },
       Object {
         "characterList": "\\\\, /, ?, \\", <, >, |",
+        "indexPatternName": "name",
       },
     ],
     Array [
       Object {
-        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
+        "defaultMessage": "A {indexPatternName} cannot contain spaces or the characters: {characterList}",
         "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
       },
       Object {
         "characterList": "\\\\, /, ?, \\", <, >, |",
+        "indexPatternName": "name",
       },
     ],
     Array [
       Object {
-        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
+        "defaultMessage": "A {indexPatternName} cannot contain spaces or the characters: {characterList}",
         "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
       },
       Object {
         "characterList": "\\\\, /, ?, \\", <, >, |",
+        "indexPatternName": "name",
       },
     ],
   ],

@@ -63,9 +63,10 @@ exports[`StepTimeField should render a selected timeField 1`] = `
 >
   <Header
     indexPattern="ki*"
+    indexPatternName="name"
   />
   <EuiSpacer
-    size="xs"
+    size="m"
   />
   <TimeField
     fetchTimeFields={[Function]}
@@ -120,9 +121,10 @@ exports[`StepTimeField should render advanced options 1`] = `
 >
   <Header
     indexPattern="ki*"
+    indexPatternName="name"
   />
   <EuiSpacer
-    size="xs"
+    size="m"
   />
   <TimeField
     fetchTimeFields={[Function]}
@@ -166,9 +168,10 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
 >
   <Header
     indexPattern="ki*"
+    indexPatternName="name"
   />
   <EuiSpacer
-    size="xs"
+    size="m"
   />
   <TimeField
     fetchTimeFields={[Function]}
@@ -212,9 +215,10 @@ exports[`StepTimeField should render normally 1`] = `
 >
   <Header
     indexPattern="ki*"
+    indexPatternName="name"
   />
   <EuiSpacer
-    size="xs"
+    size="m"
   />
   <TimeField
     fetchTimeFields={[Function]}
@@ -258,9 +262,10 @@ exports[`StepTimeField should render timeFields 1`] = `
 >
   <Header
     indexPattern="ki*"
+    indexPatternName="name"
   />
   <EuiSpacer
-    size="xs"
+    size="m"
   />
   <TimeField
     fetchTimeFields={[Function]}
