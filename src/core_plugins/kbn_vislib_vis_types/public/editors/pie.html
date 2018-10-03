@@ -2,14 +2,17 @@
   <div class="form-group">
     <div class="kuiSideBarSectionTitle">
       <div class="kuiSideBarSectionTitle__text">
-        Pie Settings
+        <span i18n-id="kbnVislibVisTypes.editors.pie.pieSettings" i18n-default-message="Pie Settings"></span>
       </div>
     </div>
 
     <div class="kuiSideBarFormRow">
-      <label class="kuiSideBarFormRow__label" for="isDonut">
-        Donut
-      </label>
+      <label
+        class="kuiSideBarFormRow__label"
+        for="isDonut"
+        i18n-id="kbnVislibVisTypes.editors.pie.donut"
+        i18n-default-message="Donut"
+      ></label>
       <div class="kuiSideBarFormRow__control">
         <input id="isDonut" name="isDonut" type="checkbox" value="{{isDonut}}"
                ng-checked="editorState.params.isDonut"
@@ -27,41 +30,53 @@
   <div class="form-group">
     <div class="kuiSideBarSectionTitle">
       <div class="kuiSideBarSectionTitle__text">
-        Labels Settings
+        <span i18n-id="kbnVislibVisTypes.editors.pie.labelsSettings" i18n-default-message="Labels Settings"></span>
       </div>
     </div>
 
     <div class="kuiSideBarFormRow">
-      <label class="kuiSideBarFormRow__label" for="showLabels">
-        Show Labels
-      </label>
+      <label
+        class="kuiSideBarFormRow__label"
+        for="showLabels"
+        i18n-id="kbnVislibVisTypes.editors.pie.showLabels"
+        i18n-default-message="Show Labels"
+      ></label>
       <div class="kuiSideBarFormRow__control">
         <input class="kuiCheckBox" id="showLabels" type="checkbox" ng-model="editorState.params.labels.show">
       </div>
     </div>
 
     <div class="kuiSideBarFormRow">
-      <label class="kuiSideBarFormRow__label" for="showLastLevel">
-        Show Top Level Only
-      </label>
+      <label
+        class="kuiSideBarFormRow__label"
+        for="showLastLevel"
+        i18n-id="kbnVislibVisTypes.editors.pie.showTopLevelOnly"
+        i18n-default-message="Show Top Level Only"
+      ></label>
       <div class="kuiSideBarFormRow__control">
         <input class="kuiCheckBox" id="showLastLevel" type="checkbox" ng-model="editorState.params.labels.last_level">
       </div>
     </div>
 
     <div class="kuiSideBarFormRow">
-      <label class="kuiSideBarFormRow__label" for="showValues">
-        Show Values
-      </label>
+      <label
+        class="kuiSideBarFormRow__label"
+        for="showValues"
+        i18n-id="kbnVislibVisTypes.editors.pie.showValues"
+        i18n-default-message="Show Values"
+      ></label>
       <div class="kuiSideBarFormRow__control">
         <input class="kuiCheckBox" id="showValues" type="checkbox" ng-model="editorState.params.labels.values">
       </div>
     </div>
 
     <div class="kuiSideBarFormRow">
-      <label class="kuiSideBarFormRow__label" for="truncateLabels">
-        Truncate
-      </label>
+      <label
+        class="kuiSideBarFormRow__label"
+        for="truncateLabels"
+        i18n-id="kbnVislibVisTypes.editors.pie.truncate"
+        i18n-default-message="Truncate"
+      ></label>
       <div class="kuiSideBarFormRow__control">
         <input
           id="truncateLabels"
