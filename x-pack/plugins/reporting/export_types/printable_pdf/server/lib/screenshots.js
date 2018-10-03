@@ -226,7 +226,7 @@ export function screenshotsObservableFactory(server) {
     return screenshots;
   };
 
-  return function screenshotsObservable(url, headers, layout) {
+  return function screenshotsObservable(url, headers, layout, browserTimezone) {
 
     return Rx.defer(async () => await getPort()).pipe(
       mergeMap(bridgePort => {
@@ -236,6 +236,7 @@ export function screenshotsObservableFactory(server) {
           viewport: layout.getBrowserViewport(),
           zoom: layout.getBrowserZoom(),
           logger,
+          browserTimezone,
         });
       }),
       tap(() => logger.debug('Driver factory created')),

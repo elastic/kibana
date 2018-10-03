@@ -102,33 +102,7 @@ node scripts/functional_tests --config test/saml_api_integration/config
 
 #### Running Reporting functional tests
 
-prerequisites:
-The reporting functional tests use [pdf-image](https://www.npmjs.com/package/pdf-image) to convert PDF's pages to png files for image comparisions between generated reports and baseline reports.
-pdf-image requires the system commands `convert`, `gs`, and `pdfinfo` to function. Those can be set up by running the following.
-
-```sh
-//OSX
-brew install imagemagick ghostscript poppler
-
-//Ubutnu
-sudo apt-get install imagemagick ghostscript poppler-utils
-```
-
-To run the reporting functional tests:
-
-Start the test server
-```sh
-// Run from the directory KIBANA_HOME/x-pack
-node scripts/functional_tests_server
-```
-
-Start the test runner
-```sh
-// Run from the directory KIBANA_HOME/x-pack
-node ../scripts/functional_test_runner --config test/reporting/configs/chromium_functional.js
-```
-
-**Note** Configurations from `kibana.dev.yml` are picked up when running the tests. Ensure that `kibana.dev.yml` does not contain any `xpack.reporting` configurations.
+See [here](test/reporting/README.md) for more information on running reporting tests.
 
 #### Developing functional tests
 
