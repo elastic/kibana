@@ -51,24 +51,7 @@ function serializeFetchParams(searchRequestsWithFetchParams) {
         aggs,
         query: _query,
       },
-      index,
     } = searchRequestWithFetchParams;
-
-    // TODO: Temporarily automatically assign same timezone and interval as what's defined by
-    // the rollup job. This should be done by the visualization itself.
-    Object.keys(aggs).forEach(aggName => {
-      const subAggs = aggs[aggName];
-
-      Object.keys(subAggs).forEach(subAggName => {
-        if (subAggName === 'date_histogram') {
-          const dateHistogramAgg = index.typeMeta.aggs.date_histogram;
-          const subAgg = subAggs[subAggName];
-          const field = subAgg.field;
-          subAgg.time_zone = dateHistogramAgg[field].time_zone;
-          subAgg.interval = dateHistogramAgg[field].interval;
-        }
-      });
-    });
 
     const query = {
       'size': size,
