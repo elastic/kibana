@@ -205,6 +205,10 @@ export function explorerChartsContainerServiceFactory(
               }
             }
           }
+
+          if (_.has(record, 'multi_bucket_impact')) {
+            chartPoint.multiBucketImpact = record.multi_bucket_impact;
+          }
         }
       });
 
