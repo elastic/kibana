@@ -29,8 +29,8 @@ export function makeKQLUsageCollector(server) {
     type: 'kql',
     fetch: async callCluster => {
       const [response, config] = await Promise.all([
-        callCluster('search', { index: '.kibana', q: 'type:kql-telemetry' }),
-        callCluster('search', { index: '.kibana', q: 'type:config' })
+        callCluster('search', { index: '.kibana', q: 'type:kql-telemetry', ignore: [404] }),
+        callCluster('search', { index: '.kibana', q: 'type:config', ignore: [404] })
       ]);
 
       const queryLanguageConfigValue = get(
@@ -58,7 +58,7 @@ export function makeKQLUsageCollector(server) {
       const kqlTelemetryDoc = {
         opt_in_count: 0,
         opt_out_count: 0,
-        ...get(response, 'hits.hits[0]._source.kql-telemetry'),
+        ...get(response, 'hits.hits[0]._source.kql-telemetry', {}),
       };
 
       return {
