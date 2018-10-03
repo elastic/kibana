@@ -191,6 +191,7 @@ export function explorerChartsContainerServiceFactory(
       const jobId = seriesConfigs[seriesIndex].jobId;
       const scheduledEvents = response[2].events[jobId];
       const eventDistribution = response[3];
+      const chartType = getChartType(seriesConfigs[seriesIndex]);
 
       // Return dataset in format used by the chart.
       // i.e. array of Objects with keys date (timestamp), value,
@@ -219,13 +220,24 @@ export function explorerChartsContainerServiceFactory(
         }));
       }
 
+      let chartDataForPointSearch = chartData;
+
       // Iterate through the anomaly records, adding anomalyScore properties
       // to the chartData entries for anomalous buckets.
       _.each(records, (record) => {
 
+        if (
+          chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
+          chartType === CHART_TYPE.POPULATION_DISTRIBUTION
+        ) {
+          chartDataForPointSearch = chartData.filter((d) => {
+            return d.entity === (record.by_field_value || record.over_field_value);
+          });
+        }
+
         // Look for a chart point with the same time as the record.
         // If none found, find closest time in chartData set.
-        let chartPoint = findNearestChartPointToTime(chartData, record);
+        let chartPoint = findNearestChartPointToTime(chartDataForPointSearch, record);
 
         if (chartPoint === undefined) {
           // In case there is a record with a time after that of the last chart point, set the score
@@ -277,12 +289,6 @@ export function explorerChartsContainerServiceFactory(
 
     function findNearestChartPointToTime(chartData, record) {
       const time = record[ML_TIME_FIELD_NAME];
-
-      if (record.function === 'rare' || record.over_field_value !== 'undefined') {
-        chartData = chartData.filter((d) => {
-          return d.entity === (record.by_field_value || record.over_field_value);
-        });
-      }
 
       let chartPoint;
       for (let i = 0; i < chartData.length; i++) {
