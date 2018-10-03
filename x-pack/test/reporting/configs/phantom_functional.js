@@ -22,6 +22,7 @@ export default async function ({ readConfigFile }) {
         ...functionalConfig.kbnTestServer.serverArgs,
         `--xpack.reporting.capture.browser.type=phantom`,
         `--logging.verbose=true`,
+        `--xpack.spaces.enabled=false`,
       ],
     },
   };
