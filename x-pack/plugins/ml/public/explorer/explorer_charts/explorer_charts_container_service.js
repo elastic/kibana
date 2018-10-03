@@ -16,11 +16,15 @@
 import _ from 'lodash';
 
 import { buildConfig } from './explorer_chart_config_builder';
-import { chartLimits } from '../../util/chart_utils';
+import {
+  chartLimits,
+  getChartType
+} from '../../util/chart_utils';
 import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
 
+import { CHART_TYPE } from '../explorer_constants';
 
 export function explorerChartsContainerServiceFactory(
   mlSelectSeverityService,
@@ -140,23 +144,17 @@ export function explorerChartsContainerServiceFactory(
 
     // Query 4 - load context data distribution
     function getEventDistribution(config, range) {
-      // Defaults to use the "partition" field to group the data
+      const chartType = getChartType(config);
+
       let splitField;
       let filterField = null;
 
-      // If this is a detector using the rare function,
-      // use the "by" field to split the data and filter by the selection partition.
-      if (config.functionDescription === 'rare') {
+      // Define splitField and filterField based on chartType
+      if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
         splitField = config.entityFields.find(f => f.fieldType === 'by');
         filterField = config.entityFields.find(f => f.fieldType === 'partition');
-      }
-
-      // Logic to consider an over field: If the above didn't result in choosing a split Field,
-      // check if an over field is part of the detector, if yes, use that to split and
-      // filter by a possible partition field.
-      const overField = config.entityFields.find(f => f.fieldType === 'over');
-      if (splitField === undefined && overField !== undefined) {
-        splitField = overField;
+      } else if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
+        splitField = config.entityFields.find(f => f.fieldType === 'over');
         filterField = config.entityFields.find(f => f.fieldType === 'partition');
       }
 

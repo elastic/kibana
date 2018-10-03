@@ -123,12 +123,22 @@ export function filterAxisLabels(selection, chartWidth) {
     });
 }
 
-export function getChartType(config) {
-  if (config.functionDescription === 'rare') {
-    return CHART_TYPE.EVENT_DISTRIBUTION;
-  }
+// feature flags for chart types
+const EVENT_DISTRIBUTION_ENABLED = true;
+const POPULATION_DISTRIBUTION_ENABLED = true;
 
-  if (config.functionDescription === 'count' && config.entityFields.find(f => f.fieldType === 'over')) {
+// get the chart type based on its configuration
+export function getChartType(config) {
+  if (
+    EVENT_DISTRIBUTION_ENABLED &&
+    config.functionDescription === 'rare'
+  ) {
+    return CHART_TYPE.EVENT_DISTRIBUTION;
+  } else if (
+    POPULATION_DISTRIBUTION_ENABLED &&
+    config.functionDescription === 'count' &&
+    config.entityFields.find(f => f.fieldType === 'over')
+  ) {
     return CHART_TYPE.POPULATION_DISTRIBUTION;
   }
 
