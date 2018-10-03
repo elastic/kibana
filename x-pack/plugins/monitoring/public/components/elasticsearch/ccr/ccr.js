@@ -17,6 +17,8 @@ import {
   EuiTextColor
 } from '@elastic/eui';
 
+import './ccr.css';
+
 function toSeconds(ms) {
   return Math.floor(ms / 1000) + 's';
 }
@@ -53,7 +55,6 @@ export class Ccr extends Component {
             {
               field: 'shardId',
               name: 'Shard',
-              width: '390px',
               render: shardId => {
                 return (
                   <EuiLink href={`#/elasticsearch/ccr/${index}/shard/${shardId}`}>
@@ -61,6 +62,9 @@ export class Ccr extends Component {
                   </EuiLink>
                 );
               }
+            },
+            {
+              render: () => null
             },
             {
               field: 'opsSynced',
@@ -133,11 +137,11 @@ export class Ccr extends Component {
 
     return (
       <EuiInMemoryTable
+        className="monitoringElasticsearchCcrListingTable"
         columns={[
           {
             field: 'index',
             name: 'Index',
-            width: '200px',
             sortable: true,
             render: (index, { shards }) => {
               const expanded = !!this.state.itemIdToExpandedRowMap[index];
@@ -152,7 +156,6 @@ export class Ccr extends Component {
           },
           {
             field: 'follows',
-            width: '200px',
             sortable: true,
             name: 'Follows'
           },
