@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const rotate = () => ({
   name: 'rotate',
-  displayName: i18n.translate('xpack.canvas.transitions.rotateDisplayNameLabel', {
+  displayName: i18n.translate('xpack.canvas.transitions.rotateDisplayName', {
     defaultMessage: 'Rotate',
   }),
   help: i18n.translate('xpack.canvas.transitions.rotateHelpText', {

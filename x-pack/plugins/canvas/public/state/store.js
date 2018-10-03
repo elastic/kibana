@@ -15,7 +15,7 @@ let store;
 export function createStore(initialState) {
   if (typeof store !== 'undefined') {
     throw new Error(
-      i18n.translate('xpack.canvas.state.reduxStoreCanBeInitializedOncedErrorMessage', {
+      i18n.translate('xpack.canvas.state.reduxStoreCanBeInitializedOnceErrorMessage', {
         defaultMessage: 'Redux store can only be initialized once',
       })
     );

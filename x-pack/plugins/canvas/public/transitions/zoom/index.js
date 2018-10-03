@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const zoom = () => ({
   name: 'zoom',
-  displayName: i18n.translate('xpack.canvas.transitions.zoomDisplayNameLabel', {
+  displayName: i18n.translate('xpack.canvas.transitions.zoomDisplayName', {
     defaultMessage: 'Zoom',
   }),
   help: i18n.translate('xpack.canvas.transitions.zoomHelpText', {

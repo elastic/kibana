@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const slide = () => ({
   name: 'slide',
-  displayName: i18n.translate('xpack.canvas.transitions.slideDisplayNameLabel', {
+  displayName: i18n.translate('xpack.canvas.transitions.slideDisplayName', {
     defaultMessage: 'Slide',
   }),
   help: i18n.translate('xpack.canvas.transitions.slideHelpText', {

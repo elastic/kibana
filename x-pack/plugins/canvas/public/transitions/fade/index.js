@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const fade = () => ({
   name: 'fade',
-  displayName: i18n.translate('xpack.canvas.transitions.fadeDisplayNameLabel', {
+  displayName: i18n.translate('xpack.canvas.transitions.fadeDisplayName', {
     defaultMessage: 'Fade',
   }),
   help: i18n.translate('xpack.canvas.transitions.fadeHelpText', {
