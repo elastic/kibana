@@ -125,7 +125,11 @@ export class AssetManager extends React.PureComponent {
 
     const assetModal = isModalVisible ? (
       <EuiOverlayMask>
-        <EuiModal onClose={this.closeModal} className="canvasAssetManager" maxWidth="1000px">
+        <EuiModal
+          onClose={this.closeModal}
+          className="canvasAssetManager canvasModal--fixedSize"
+          maxWidth="1000px"
+        >
           <EuiModalHeader className="canvasAssetManager__modalHeader">
             <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
               Manage workpad assets
