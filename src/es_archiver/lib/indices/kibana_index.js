@@ -90,6 +90,7 @@ export async function migrateKibanaIndex({ client, log }) {
     server,
     version,
     uiExports,
+    ready: async () => {}
   };
 
   return await new KibanaMigrator({ kbnServer }).awaitMigration();
