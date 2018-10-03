@@ -17,9 +17,36 @@
  * under the License.
  */
 
-export { runKibanaServer } from './run_kibana_server';
-export { runElasticsearch } from './run_elasticsearch';
-export { runFtr } from './run_ftr';
-export { runVagrant } from './run_vagrant';
-export { KIBANA_ROOT, KIBANA_FTR_SCRIPT, FUNCTIONAL_CONFIG_PATH, API_CONFIG_PATH } from './paths';
-export { runCli } from './run_cli';
+export async function runVagrant({ procs, config }) {
+  if (!config.get('vagrant')) {
+    return;
+  }
+
+  await procs.run('vagrant', {
+    cmd: 'vagrant',
+    args: ['up'],
+    cwd: config.get('vagrant.path'),
+    wait: true,
+  });
+
+  const commands = config.get('vagrant.commands');
+  for (const command of commands) {
+    await procs.run('vagrant', {
+      cmd: 'vagrant',
+      args: ['ssh', '--command', command],
+      cwd: config.get('vagrant.path'),
+      wait: true,
+    });
+  }
+
+  return {
+    async cleanup() {
+      await procs.run('vagrant', {
+        cmd: 'vagrant',
+        args: ['destroy'],
+        cmd: config.get('path'),
+        wait: true,
+      });
+    },
+  };
+}

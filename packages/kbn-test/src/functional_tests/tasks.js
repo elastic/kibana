@@ -22,7 +22,7 @@ import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
 import { withProcRunner } from '@kbn/dev-utils';
 
-import { runElasticsearch, runKibanaServer, runFtr, KIBANA_FTR_SCRIPT } from './lib';
+import { runElasticsearch, runKibanaServer, runFtr, runVagrant, KIBANA_FTR_SCRIPT } from './lib';
 
 import { readConfigFile } from '../../../../src/functional_test_runner/lib';
 
@@ -70,6 +70,7 @@ export async function startServers(options) {
   await withProcRunner(log, async procs => {
     const config = await readConfigFile(log, configPath);
 
+    const vagrant = await runVagrant({ procs, config });
     const es = await runElasticsearch({ config, options: opts });
     await runKibanaServer({
       procs,
@@ -87,6 +88,7 @@ export async function startServers(options) {
 
     await procs.waitForAllToStop();
     await es.cleanup();
+    await vagrant.cleanup();
   });
 }
 

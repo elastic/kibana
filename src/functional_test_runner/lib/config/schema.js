@@ -115,6 +115,11 @@ export const schema = Joi.object().keys({
     elasticsearch: urlPartsSchema(),
   }).default(),
 
+  vagrant: Joi.object().keys({
+    path: Joi.string().default(),
+    commands: Joi.array().items(Joi.string()).default([])
+  }).default(),
+
   esTestCluster: Joi.object().keys({
     license: Joi.string().default('oss'),
     from: Joi.string().default('snapshot'),
