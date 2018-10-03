@@ -47,8 +47,6 @@ uiRoutes
       CheckLicense: checkBasicLicense,
       privileges: checkFindFileStructurePrivilege,
       indexPatterns: loadIndexPatterns,
-      preConfiguredJobRedirect,
-      checkMlNodesAvailable,
       initPromise: initPromise(true),
       nextStepPath: () => '#jobs/new_job/datavisualizer',
     }
