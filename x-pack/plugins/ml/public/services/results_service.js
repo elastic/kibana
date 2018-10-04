@@ -1398,7 +1398,6 @@ function getEventRateData(
 // Extra query object can be supplied, or pass null if no additional query.
 // Returned response contains a results property, which is an object
 // of document counts against time (epoch millis).
-// const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 200;
 function getEventDistributionData(
   index,
