@@ -20,6 +20,7 @@ export function createAuthorizationService(server, xpackInfoFeature) {
     actions,
     checkPrivilegesWithRequest,
     config,
+    (...args) => server.log(...args),
     server.plugins,
     server.savedObjects,
     xpackInfoFeature

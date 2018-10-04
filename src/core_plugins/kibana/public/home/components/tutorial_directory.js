@@ -58,10 +58,10 @@ class TutorialDirectoryUi extends React.Component {
       name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.metricsTitle', defaultMessage: 'Metrics' }),
     }, {
       id: 'security',
-      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.securityAnalyticsTitle', defaultMessage: 'Security Analytics' }),
+      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.securityAnalyticsTitle', defaultMessage: 'Security analytics' }),
     }, {
       id: SAMPLE_DATA_TAB_ID,
-      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.sampleDataTitle', defaultMessage: 'Sample Data' }),
+      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.sampleDataTitle', defaultMessage: 'Sample data' }),
     }];
 
     let openTab = ALL_TAB_ID;
