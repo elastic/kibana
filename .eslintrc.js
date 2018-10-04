@@ -32,6 +32,7 @@ module.exports = {
       files: [
         '.eslintrc.js',
         'packages/eslint-plugin-kibana-custom/**/*',
+        'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',
         'packages/kbn-es/**/*',
         'packages/kbn-datemath/**/*',

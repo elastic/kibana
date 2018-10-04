@@ -3,7 +3,6 @@
   "browser": "./target/web/browser.js",
   "main": "./target/node/index.js",
   "types": "./target/types/index.d.ts",
-  "module": "./src/index.js",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
