@@ -16,19 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 
-export {
-  intlShape,
-  InjectedIntl,
-  FormattedDate,
-  FormattedTime,
-  FormattedRelative,
-  FormattedNumber,
-  FormattedPlural,
-  FormattedMessage,
-  FormattedHTMLMessage,
-} from 'react-intl';
+import { I18nProvider } from './provider';
 
-export { I18nProvider } from './provider';
-export { injectI18nProvider } from './inject_i18n_provider';
-export { injectI18n } from './inject';
+export function injectI18nProvider<P>(WrappedComponent: React.ComponentType<P>) {
+  const I18nProviderWrapper: React.SFC<P> = props => {
+    return (
+      <I18nProvider>
+        <WrappedComponent {...props} />
+      </I18nProvider>
+    );
+  };
+
+  // Original propTypes from the wrapped component should be re-exposed
+  // since it will be used by reactDirective Angular service
+  // that will rely on propTypes to watch attributes with these names
+  I18nProviderWrapper.propTypes = WrappedComponent.propTypes;
+
+  return I18nProviderWrapper;
+}
