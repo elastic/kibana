@@ -17,54 +17,45 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { documentationLinks } from '../../documentation_links/documentation_links';
+declare module '@elastic/eui' {
+  export const EuiPopoverTitle: React.SFC<any>;
+}
+
 import {
-  EuiPopover,
   EuiButtonEmpty,
   EuiForm,
   EuiFormRow,
-  EuiSwitch,
-  EuiLink,
-  EuiText,
-  EuiSpacer,
   EuiHorizontalRule,
+  EuiLink,
+  EuiPopover,
   EuiPopoverTitle,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
+import React, { Component } from 'react';
+import { documentationLinks } from '../../documentation_links/documentation_links';
 
 const luceneQuerySyntaxDocs = documentationLinks.query.luceneQuerySyntax;
 const kueryQuerySyntaxDocs = documentationLinks.query.kueryQuerySyntax;
 
-export class QueryLanguageSwitcher extends Component {
+interface State {
+  isPopoverOpen: boolean;
+}
 
-  state = {
+interface Props {
+  language: string;
+  onSelectLanguage: (newLanguage: string) => void;
+}
+
+export class QueryLanguageSwitcher extends Component<Props, State> {
+  public state = {
     isPopoverOpen: false,
   };
 
-  togglePopover = () => {
-    this.setState({
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
-  };
-
-  closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
-    });
-  };
-
-  onSwitchChange = () => {
-    const newLanguage = this.props.language === 'lucene' ? 'kuery' : 'lucene';
-    this.props.onSelectLanguage(newLanguage);
-  };
-
-  render() {
+  public render() {
     const button = (
-      <EuiButtonEmpty
-        size="xs"
-        onClick={this.togglePopover}
-      >
+      <EuiButtonEmpty size="xs" onClick={this.togglePopover}>
         Options
       </EuiButtonEmpty>
     );
@@ -83,21 +74,18 @@ export class QueryLanguageSwitcher extends Component {
         <div style={{ width: '350px' }}>
           <EuiText>
             <p>
-              Our experimental autocomplete and simple syntax features can help you create your queries. Just start
-              typing and you’ll see matches related to your data.
-
-              See docs {(
-                <EuiLink
-                  href={kueryQuerySyntaxDocs}
-                  target="_blank"
-                >
-                here
+              Our experimental autocomplete and simple syntax features can help you create your
+              queries. Just start typing and you’ll see matches related to your data. See docs{' '}
+              {
+                <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
+                  here
                 </EuiLink>
-              )}.
+              }
+              .
             </p>
           </EuiText>
 
-          <EuiSpacer size="m"/>
+          <EuiSpacer size="m" />
 
           <EuiForm>
             <EuiFormRow>
@@ -111,27 +99,38 @@ export class QueryLanguageSwitcher extends Component {
             </EuiFormRow>
           </EuiForm>
 
-          <EuiHorizontalRule margin="s"/>
+          <EuiHorizontalRule margin="s" />
 
           <EuiText size="xs">
             <p>
-              Not ready yet? Find our lucene docs {(
-                <EuiLink
-                  href={luceneQuerySyntaxDocs}
-                  target="_blank"
-                >
-                here
+              Not ready yet? Find our lucene docs{' '}
+              {
+                <EuiLink href={luceneQuerySyntaxDocs} target="_blank">
+                  here
                 </EuiLink>
-              )}.
+              }
+              .
             </p>
           </EuiText>
         </div>
       </EuiPopover>
     );
   }
-}
 
-QueryLanguageSwitcher.propTypes = {
-  language: PropTypes.string,
-  onSelectLanguage: PropTypes.func,
-};
+  private togglePopover = () => {
+    this.setState({
+      isPopoverOpen: !this.state.isPopoverOpen,
+    });
+  };
+
+  private closePopover = () => {
+    this.setState({
+      isPopoverOpen: false,
+    });
+  };
+
+  private onSwitchChange = () => {
+    const newLanguage = this.props.language === 'lucene' ? 'kuery' : 'lucene';
+    this.props.onSelectLanguage(newLanguage);
+  };
+}
