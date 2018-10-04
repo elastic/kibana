@@ -390,9 +390,6 @@ export class ExplorerChartDistribution extends React.Component {
         const score = parseInt(marker.anomalyScore);
         const displayScore = (score > 0 ? score : '< 1');
         contents += ('anomaly score: ' + displayScore);
-        // Show actual/typical when available except for rare detectors.
-        // Rare detectors always have 1 as actual and the probability as typical.
-        // Exposing those values in the tooltip with actual/typical labels might irritate users.
         if (_.has(marker, 'actual') && chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
@@ -406,8 +403,9 @@ export class ExplorerChartDistribution extends React.Component {
           if (typeof marker.byFieldName !== 'undefined' && _.has(marker, 'numberOfCauses')) {
             const numberOfCauses = marker.numberOfCauses;
             const byFieldName = mlEscape(marker.byFieldName);
-            if (numberOfCauses < 10) {
-              // If numberOfCauses === 1, won't go into this block as actual/typical copied to top level fields.
+            if (numberOfCauses === 1) {
+              contents += `<br/> 1 unusual ${byFieldName} value`;
+            } else if (numberOfCauses < 10) {
               contents += `<br/> ${numberOfCauses} unusual ${byFieldName} values`;
             } else {
               // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
