@@ -15,6 +15,7 @@ import {
   logMinimapSelectors as localLogMinimapSelectors,
   logPositionSelectors as localLogPositionSelectors,
   logTextviewSelectors as localLogTextviewSelectors,
+  metricTimeSelectors as localMetricTimeSelectors,
   waffleFilterSelectors as localWaffleFilterSelectors,
   waffleOptionsSelectors as localWaffleOptionsSelectors,
   waffleTimeSelectors as localWaffleTimeSelectors,
@@ -36,6 +37,7 @@ export const logFilterSelectors = globalizeSelectors(selectLocal, localLogFilter
 export const logMinimapSelectors = globalizeSelectors(selectLocal, localLogMinimapSelectors);
 export const logPositionSelectors = globalizeSelectors(selectLocal, localLogPositionSelectors);
 export const logTextviewSelectors = globalizeSelectors(selectLocal, localLogTextviewSelectors);
+export const metricTimeSelectors = globalizeSelectors(selectLocal, localMetricTimeSelectors);
 export const waffleFilterSelectors = globalizeSelectors(selectLocal, localWaffleFilterSelectors);
 export const waffleTimeSelectors = globalizeSelectors(selectLocal, localWaffleTimeSelectors);
 export const waffleOptionsSelectors = globalizeSelectors(selectLocal, localWaffleOptionsSelectors);

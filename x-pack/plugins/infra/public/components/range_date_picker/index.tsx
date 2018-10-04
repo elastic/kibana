@@ -42,6 +42,7 @@ const commonDates = [
 interface RangeDatePickerProps {
   startDate: moment.Moment;
   endDate: moment.Moment;
+  onChangeRangeTime: (to: moment.Moment, from: moment.Moment, search: boolean) => void;
 }
 
 interface RecentlyUsed {
@@ -107,42 +108,35 @@ export class RangeDatePicker extends React.PureComponent<
         </div>
       </EuiPopover>
     );
-    const actionButton = (
-      <EuiButton fill onClick={() => window.alert('Button clicked')}>
-        Go
-      </EuiButton>
-    );
+
     return (
-      <div>
-        <EuiFormControlLayout prepend={quickSelectPopover}>
-          <EuiDatePickerRange
-            iconType={false}
-            startDateControl={
-              <EuiDatePicker
-                selected={this.state.startDate}
-                onChange={this.handleChangeStart}
-                startDate={this.state.startDate}
-                endDate={this.state.endDate}
-                isInvalid={this.state.startDate > this.state.endDate}
-                aria-label="Start date"
-                showTimeSelect
-              />
-            }
-            endDateControl={
-              <EuiDatePicker
-                selected={this.state.endDate}
-                onChange={this.handleChangeEnd}
-                startDate={this.state.startDate}
-                endDate={this.state.endDate}
-                isInvalid={this.state.startDate > this.state.endDate}
-                aria-label="End date"
-                showTimeSelect
-              />
-            }
-          />
-        </EuiFormControlLayout>
-        {actionButton}
-      </div>
+      <EuiFormControlLayout prepend={quickSelectPopover}>
+        <EuiDatePickerRange
+          iconType={false}
+          startDateControl={
+            <EuiDatePicker
+              selected={this.state.startDate}
+              onChange={this.handleChangeStart}
+              startDate={this.state.startDate}
+              endDate={this.state.endDate}
+              isInvalid={this.state.startDate > this.state.endDate}
+              aria-label="Start date"
+              showTimeSelect
+            />
+          }
+          endDateControl={
+            <EuiDatePicker
+              selected={this.state.endDate}
+              onChange={this.handleChangeEnd}
+              startDate={this.state.startDate}
+              endDate={this.state.endDate}
+              isInvalid={this.state.startDate > this.state.endDate}
+              aria-label="End date"
+              showTimeSelect
+            />
+          }
+        />
+      </EuiFormControlLayout>
     );
   }
 
@@ -150,12 +144,14 @@ export class RangeDatePicker extends React.PureComponent<
     this.setState({
       startDate: date,
     });
+    this.props.onChangeRangeTime(date, this.state.endDate, false);
   };
 
   private handleChangeEnd = (date: moment.Moment) => {
     this.setState({
       endDate: date,
     });
+    this.props.onChangeRangeTime(this.state.startDate, date, false);
   };
 
   private onButtonClick = () => {
@@ -166,13 +162,18 @@ export class RangeDatePicker extends React.PureComponent<
 
   private closePopover = (type: string) => {
     const { startDate, endDate, recentlyUsed } = this.managedStartEndDateFromType(type);
-    this.setState({
-      ...this.state,
-      isPopoverOpen: false,
-      startDate,
-      endDate,
-      recentlyUsed,
-    });
+    this.setState(
+      {
+        ...this.state,
+        isPopoverOpen: false,
+        startDate,
+        endDate,
+        recentlyUsed,
+      },
+      () => {
+        this.props.onChangeRangeTime(startDate, endDate, true);
+      }
+    );
   };
 
   private managedStartEndDateFromType(type: string) {

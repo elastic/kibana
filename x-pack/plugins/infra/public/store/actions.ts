@@ -9,6 +9,7 @@ export {
   logMinimapActions,
   logPositionActions,
   logTextviewActions,
+  metricTimeActions,
   waffleFilterActions,
   waffleTimeActions,
   waffleOptionsActions,
