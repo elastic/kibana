@@ -19,6 +19,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -42,7 +43,7 @@ export class List extends Component {
             return (
               <div key={pattern.id} >
                 <EuiButtonEmpty size="xs" href={pattern.url} data-test-subj="indexPatternLink">
-                  {pattern.default ? <Fragment><i aria-label="Default index pattern" className="fa fa-star" /> </Fragment> : ''}
+                  {pattern.default ? <Fragment><em aria-label="Default index pattern" className="fa fa-star" /> </Fragment> : ''}
                   {pattern.active ? <strong>{pattern.title}</strong> : pattern.title} {pattern.tag ? (
                     <Fragment key={pattern.tag.key}>
                       {<EuiBadge color={pattern.tag.color || 'primary'}>{pattern.tag.name}</EuiBadge> }
@@ -66,7 +67,12 @@ export class List extends Component {
           color="warning"
           size="s"
           iconType="alert"
-          title="No default index pattern. You must select or create one to continue."
+          title={(
+            <FormattedMessage
+              id="kbn.management.indexPatternList.noDefaultIndexPatternTitle"
+              defaultMessage="No default index pattern. You must select or create one to continue."
+            />
+          )}
         />
       </div>
     ) : null;
