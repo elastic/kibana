@@ -23,16 +23,16 @@
  * in the vis creation wizard.
  */
 
-const CATEGORY = {
-  BASIC: 'basic',
-  DATA: 'data',
-  GRAPHIC: 'graphic',
-  MAP: 'map',
-  OTHER: 'other',
-  TIME: 'time',
+enum CATEGORY {
+  BASIC = 'basic',
+  DATA = 'data',
+  GRAPHIC = 'graphic',
+  MAP = 'map',
+  OTHER = 'other',
+  TIME = 'time',
   // Hidden is a specific category and doesn't need a display name below
-  HIDDEN: 'hidden'
-};
+  HIDDEN = 'hidden',
+}
 
 const CATEGORY_DISPLAY_NAMES = {
   [CATEGORY.BASIC]: 'Basic Charts',
@@ -40,7 +40,7 @@ const CATEGORY_DISPLAY_NAMES = {
   [CATEGORY.GRAPHIC]: 'Graphic',
   [CATEGORY.MAP]: 'Maps',
   [CATEGORY.OTHER]: 'Other',
-  [CATEGORY.TIME]: 'Time Series'
+  [CATEGORY.TIME]: 'Time Series',
 };
 
 export { CATEGORY, CATEGORY_DISPLAY_NAMES };

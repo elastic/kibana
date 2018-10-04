@@ -1,0 +1,38 @@
+.visNewVisDialog {
+  background: linear-gradient(-25deg, rgba(0,179,164,0.3) 0%,rgba(255,255,255,0) 30%) #FFF;
+}
+
+.visNewVisDialog__types {
+  width: 400px;
+  overflow-y: auto;
+}
+
+.visNewVisDialog__description {
+  width: 380px;
+  padding: $euiSizeM;
+}
+
+.visNewVisDialog__body {
+  display: flex;
+  overflow-y: hidden;
+}
+
+.visNewVisDialog__type:disabled {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.visNewVisDialog__typeLegacyIcon {
+  font-size: $euiSizeL;
+  color: $euiColorSecondary;
+}
+
+.visNewVisDialog__typeImage {
+  @include size($euiSizeL);
+}
+
+@include euiBreakpoint('xs', 's') {
+  .visNewVisDialog__types {
+    width: auto;
+  }
+}

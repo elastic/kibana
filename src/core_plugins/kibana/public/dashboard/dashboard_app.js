@@ -37,7 +37,6 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { DocTitleProvider } from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-import { VisualizeConstants } from '../visualize/visualize_constants';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
@@ -45,6 +44,7 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { DashboardSaveModal } from './top_nav/save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
 import { showOptionsPopover } from './top_nav/show_options_popover';
+import { showNewVisModal } from '../visualize/wizard';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
@@ -393,10 +393,7 @@ app.directive('dashboardApp', function ($injector) {
       };
       navActions[TopNavIds.ADD] = () => {
         const addNewVis = () => {
-          kbnUrl.change(
-            `${VisualizeConstants.WIZARD_STEP_1_PAGE_PATH}?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
-          // Function is called outside of angular. Must apply digest cycle to trigger URL update
-          $scope.$apply();
+          showNewVisModal(visTypes, { editorParams: [DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM] });
         };
 
         showAddPanel(dashboardStateManager.addNewPanel, addNewVis, visTypes);

@@ -29,7 +29,6 @@ import { VisualizeConstants } from '../visualize_constants';
 import routes from 'ui/routes';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { uiModules } from 'ui/modules';
-import visualizeWizardStep1Template from './step_1.html';
 import visualizeWizardStep2Template from './step_2.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { timefilter } from 'ui/timefilter';
@@ -40,25 +39,17 @@ const module = uiModules.get('app/visualize', ['kibana/courier']);
 /** Wizard Step 1
 /********/
 
-// Redirect old route to new route.
-routes.when('/visualize/step/1', {
-  redirectTo: VisualizeConstants.WIZARD_STEP_1_PAGE_PATH,
-});
-
-routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
-  template: visualizeWizardStep1Template,
-  controller: 'VisualizeWizardStep1',
-});
-
 module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, Private, config) {
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
+  const visTypes = Private(VisTypesRegistryProvider);
+
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
-  const visTypes = Private(VisTypesRegistryProvider);
   const isLabsEnabled = config.get('visualize:enableLabs');
+  // TODO: unused
   $scope.toggleLabView = () => {
     $route.current.params.lab = !$route.current.params.lab;
     $route.updateParams($route.current.params);

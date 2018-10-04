@@ -259,8 +259,8 @@ export class VisualizeListingTable extends Component {
     this.setState({ selectedRowIds: newSelectedIds });
   };
 
-  onCreate() {
-    window.location = '#/visualize/new';
+  onCreate = () => {
+    this.props.onCreateVis();
   }
 
   renderToolBarActions() {
@@ -322,4 +322,5 @@ export class VisualizeListingTable extends Component {
 VisualizeListingTable.propTypes = {
   deleteSelectedItems: PropTypes.func,
   fetchItems: PropTypes.func,
+  onCreateVis: PropTypes.func.isRequired,
 };
