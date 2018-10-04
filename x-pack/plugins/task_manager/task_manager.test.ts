@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { TaskManager } from './task_manager';
+import { bindToElasticSearchStatus, TaskManager } from './task_manager';
 
 describe('TaskManager', () => {
   let clock: sinon.SinonFakeTimers;
@@ -27,31 +27,32 @@ describe('TaskManager', () => {
   afterEach(() => clock.restore());
 
   test('starts / stops the poller when es goes green / red', async () => {
-    const { $test, opts } = testOpts();
-    const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
+    const handlers: any = {};
+    const es = {
+      status: {
+        on: (color: string, handler: any) => (handlers[color] = () => Promise.resolve(handler())),
+      },
+    };
+    const start = sinon.spy(async () => undefined);
+    const stop = sinon.spy(async () => undefined);
+    const init = sinon.spy(async () => undefined);
 
-    $test.afterPluginsInit();
+    bindToElasticSearchStatus(es, { info: _.noop, debug: _.noop }, { stop, start }, { init });
 
-    const { store, poller } = client as any;
+    await handlers.green();
+    sinon.assert.calledOnce(init);
+    sinon.assert.calledOnce(start);
+    sinon.assert.notCalled(stop);
 
-    store.init = sinon.spy(async () => undefined);
-    poller.start = sinon.spy(async () => undefined);
-    poller.stop = sinon.spy(async () => undefined);
+    await handlers.red();
+    sinon.assert.calledOnce(init);
+    sinon.assert.calledOnce(start);
+    sinon.assert.calledOnce(stop);
 
-    await $test.events.green();
-    sinon.assert.calledOnce(store.init as any);
-    sinon.assert.calledOnce(poller.start as any);
-    sinon.assert.notCalled(poller.stop as any);
-
-    await $test.events.red();
-    sinon.assert.calledOnce(store.init as any);
-    sinon.assert.calledOnce(poller.start as any);
-    sinon.assert.calledOnce(poller.stop as any);
-
-    await $test.events.green();
-    sinon.assert.calledTwice(store.init as any);
-    sinon.assert.calledTwice(poller.start as any);
-    sinon.assert.calledOnce(poller.stop as any);
+    await handlers.green();
+    sinon.assert.calledTwice(init);
+    sinon.assert.calledTwice(start);
+    sinon.assert.calledOnce(stop);
   });
 
   test('disallows schedule before init', async () => {

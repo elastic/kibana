@@ -47,7 +47,7 @@ export class TaskPoller {
   /**
    * Starts the poller. If the poller is already running, this has no effect.
    */
-  public start() {
+  public async start() {
     if (this.isStarted) {
       return;
     }

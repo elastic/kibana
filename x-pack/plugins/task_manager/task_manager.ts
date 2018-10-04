@@ -80,18 +80,7 @@ export class TaskManager {
         },
       });
 
-      server.plugins.elasticsearch.status.on('red', () => {
-        logger.debug('Lost connection to Elasticsearch, stopping the poller.');
-        poller.stop();
-      });
-
-      server.plugins.elasticsearch.status.on('green', async () => {
-        logger.debug('Initializing store');
-        await store.init();
-        logger.debug('Starting poller');
-        await poller.start();
-        logger.info('Connected to Elasticsearch, and watching for tasks');
-      });
+      bindToElasticSearchStatus(server.plugins.elasticsearch, logger, poller, store);
 
       this.store = store;
       this.poller = poller;
@@ -177,4 +166,26 @@ export class TaskManager {
       throw new Error('The task manager is initializing.');
     }
   }
+}
+
+// This is exported for test purposes. It is responsible for starting / stopping
+// the poller based on the elasticsearch plugin status.
+export function bindToElasticSearchStatus(
+  elasticsearch: any,
+  logger: { debug: (s: string) => any; info: (s: string) => any },
+  poller: { stop: () => any; start: () => Promise<any> },
+  store: { init: () => Promise<any> }
+) {
+  elasticsearch.status.on('red', () => {
+    logger.debug('Lost connection to Elasticsearch, stopping the poller.');
+    poller.stop();
+  });
+
+  elasticsearch.status.on('green', async () => {
+    logger.debug('Initializing store');
+    await store.init();
+    logger.debug('Starting poller');
+    await poller.start();
+    logger.info('Connected to Elasticsearch, and watching for tasks');
+  });
 }
