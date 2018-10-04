@@ -26,7 +26,6 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
             }
           }
         />
-         
       </React.Fragment>
        
       <span
@@ -100,7 +99,9 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
       />
     </span>
   </span>
-  <div>
+  <span
+    className="ml-explorer-chart-label-badges"
+  >
     <React.Fragment
       key="nginx.access.remote_ip 72.57.0.53"
     >
@@ -113,8 +114,7 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
           }
         }
       />
-       
     </React.Fragment>
-  </div>
+  </span>
 </React.Fragment>
 `;
