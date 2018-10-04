@@ -18,4 +18,4 @@
  */
 
 export { KibanaMigrator } from './kibana_migrator';
-export { MigrationUI } from './migration_ui';
+export { injectMigrationUI } from './inject_migration_ui';

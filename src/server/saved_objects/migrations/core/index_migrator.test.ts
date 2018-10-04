@@ -255,6 +255,8 @@ describe('index_migrator', () => {
   describe('fetchProgress', () => {
     test('progress is not 100% until migration finishes', async () => {
       const { migrator } = await createTestMigrator({
+        numOutOfDate: 9,
+        migrationVersion: { dash: '1.2.3' },
         count: {
           '.kibana': 9,
           '.kibana_1': 9,
@@ -269,18 +271,20 @@ describe('index_migrator', () => {
 
     test('progress handles 404 and 503 errors', async () => {
       const { callCluster, migrator } = await createTestMigrator({
-        count: {
-          '.kibana': 2,
-        },
+        numOutOfDate: 9,
+        migrationVersion: { dash: '1.2.3' },
+        count: {},
       });
 
       expect(await migrator.fetchProgress()).toEqual(0);
-      const [, args] = callCluster.args.find(([path]) => path === 'count')!;
+      const [, args] = _.last(callCluster.args.filter(([path]) => path === 'count'));
       expect(args.ignore).toEqual([404, 503]);
     });
 
     test('progress is based on how many docs have been moved', async () => {
       const { migrator } = await createTestMigrator({
+        numOutOfDate: 9,
+        migrationVersion: { dash: '1.2.3' },
         count: {
           '.kibana': 20,
           '.kibana_2': 8,
@@ -293,6 +297,8 @@ describe('index_migrator', () => {
 
     test('progress takes reindexing into account', async () => {
       const { migrator } = await createTestMigrator({
+        numOutOfDate: 9,
+        migrationVersion: { dash: '1.2.3' },
         index: {
           '.kibana': {
             aliases: {},

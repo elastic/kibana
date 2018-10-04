@@ -19,24 +19,29 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { MigrationUI } from './migration_ui';
+import { injectMigrationUI } from './inject_migration_ui';
 
-describe('migration_ui', () => {
-  it('registers the migration progress API endpoint', () => {
+describe('injectMigrationUI', () => {
+  it('registers the migration progress API endpoint', async () => {
     const route = sinon.spy();
     const ext = sinon.spy();
     const server: any = {
       route,
       ext,
+      kibanaMigrator: {
+        fetchMigrationProgress: async () => 0,
+        awaitMigration: async () => ({ status: 'skipped' }),
+      },
     };
-    const migrator: any = {};
-    // tslint:disable-next-line:no-unused-expression
-    new MigrationUI(server, migrator);
+
+    await injectMigrationUI(server);
+
     expect(route.args[0]).toMatchObject([
       {
         path: '/api/migration_progress',
       },
     ]);
+
     sinon.assert.calledWith(ext, 'onRequest');
   });
 
@@ -56,9 +61,9 @@ describe('migration_ui', () => {
 
   it('passes API requests through when disabled', async () => {
     const result = await testRequest({
-      disable: true,
+      progress: 1,
       accept: 'application/json',
-      path: '/some/where',
+      path: '/api/migration_progress',
     });
     expect(result.returnValue).toEqual(result.continueResult);
     sinon.assert.calledOnce(result.continue);
@@ -83,24 +88,9 @@ describe('migration_ui', () => {
     sinon.assert.calledWith(result.type, 'application/json');
   });
 
-  it('serves progress JSON when disabled', async () => {
-    const progress = Math.random();
-    const result = await testRequest({
-      progress,
-      disable: true,
-      accept: 'application/json',
-      path: '/api/migration_progress',
-    });
-    expect(result.returnValue).toEqual(result.responseResult);
-    sinon.assert.notCalled(result.continue);
-    sinon.assert.notCalled(result.view);
-    sinon.assert.calledWith(result.response, { progress });
-    sinon.assert.calledOnce(result.takeover);
-    sinon.assert.calledWith(result.type, 'application/json');
-  });
-
   it('intercepts HTML requests when enabled', async () => {
     const result = await testRequest({
+      progress: 0.1,
       accept: '*/*',
       path: '/somepath',
     });
@@ -120,6 +110,7 @@ describe('migration_ui', () => {
   it('rejects API requests when enabled', async () => {
     await expect(
       testRequest({
+        progress: 0.1,
         accept: 'application/json',
         path: '/somepath',
       })
@@ -129,7 +120,7 @@ describe('migration_ui', () => {
 
 async function testRequest(opts: any) {
   let onRequest: any;
-  const continueResult = Math.random();
+  const continueResult = 'to be continued...';
   const takeover = sinon.spy(() => undefined);
   const type = sinon.spy(() => undefined);
   const viewResult = { takeover, type };
@@ -157,16 +148,13 @@ async function testRequest(opts: any) {
         },
       };
     },
+    kibanaMigrator: {
+      awaitMigration: () => new Promise(r => setTimeout(r, 1)),
+      fetchMigrationProgress: async () => opts.progress,
+    },
   };
-  const migrator: any = {
-    requiresMigration: opts.requiresMigration !== false,
-    fetchProgress: async () => opts.progress,
-  };
-  const ui = new MigrationUI(server, migrator);
 
-  if (opts.disable) {
-    ui.disable();
-  }
+  await injectMigrationUI(server);
 
   return {
     takeover,

@@ -143,7 +143,7 @@ export default class KbnServer {
 
     // Shows the migration progress UI until migrations
     // have completed, hijacks all incoming HTTP requests
-    injectMigrationUI(server);
+    await injectMigrationUI(server);
 
     if (isWorker) {
       // help parent process know when we are ready

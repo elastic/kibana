@@ -29,7 +29,6 @@ import {
 import { coordinateMigration, MigrationResult } from './migration_coordinator';
 
 export interface IndexMigrator {
-  requiresMigration: boolean;
   fetchProgress: () => Promise<number>;
   migrate(): Promise<MigrationResult>;
 }
@@ -53,10 +52,7 @@ class ConcreteIndexMigrator implements IndexMigrator {
    */
   constructor(context: Context) {
     this.context = context;
-  }
-
-  get requiresMigration() {
-    return this.context.action === MigrationAction.Migrate;
+    this.isComplete = context.action !== MigrationAction.Migrate;
   }
 
   /**
@@ -84,7 +80,7 @@ class ConcreteIndexMigrator implements IndexMigrator {
     const destCount = await countDocs(dest.indexName);
     const reindexCount = requiresReindex ? await countDocs(source.indexName) : 0;
     const expectedCount = requiresReindex ? originalCount * 2 : originalCount;
-    const progress = expectedCount === 0 ? 1 : (destCount + reindexCount) / expectedCount;
+    const progress = expectedCount === 0 ? 0 : (destCount + reindexCount) / expectedCount;
 
     // We don't want to return 1 (completed / 100%) because there is still a bit
     // of work to do even if all the docs have been moved. We only want to return

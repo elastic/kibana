@@ -23,39 +23,18 @@
  */
 
 import { once } from 'lodash';
-import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
+import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator } from '../../validation';
-import { buildActiveMappings, CallCluster, IndexMigrator, LogFn, MappingProperties } from '../core';
+import {
+  buildActiveMappings,
+  createIndexMigrator,
+  IndexMigrator,
+  LogFn,
+  MappingProperties,
+} from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
-
-export interface KbnServer {
-  server: Server;
-  version: string;
-  ready: () => Promise<any>;
-  uiExports: {
-    savedObjectMappings: any[];
-    savedObjectMigrations: any;
-    savedObjectValidations: any;
-    savedObjectSchemas: SavedObjectsSchemaDefinition;
-  };
-}
-
-interface Server {
-  log: LogFn;
-  config: () => {
-    get: {
-      (path: 'kibana.index' | 'migrations.scrollDuration'): string;
-      (path: 'migrations.batchSize' | 'migrations.pollInterval'): number;
-    };
-  };
-  plugins: { elasticsearch: ElasticsearchPlugin | undefined };
-}
-
-interface ElasticsearchPlugin {
-  getCluster: ((name: 'admin') => { callWithInternalUser: CallCluster });
-  waitUntilReady: () => Promise<any>;
-}
+import { KbnServer } from './kbn_server';
 
 /**
  * Manages the shape of mappings and documents in the Kibana index.
@@ -71,39 +50,44 @@ export class KibanaMigrator {
    * @returns
    * @memberof KibanaMigrator
    */
-  public awaitMigration = once(async () => {
-    const { server } = this.kbnServer;
+  public awaitMigration = once(() => this.getIndexMigrator().then(migrator => migrator.migrate()));
 
-    // Wait until the plugins have been found an initialized...
-    await this.kbnServer.ready();
+  private getIndexMigrator = once(
+    async (): Promise<IndexMigrator> => {
+      const { server } = this.kbnServer;
 
-    // We can't do anything if the elasticsearch plugin has been disabled.
-    if (!server.plugins.elasticsearch) {
-      server.log(
-        ['warning', 'migration'],
-        'The elasticsearch plugin is disabled. Skipping migrations.'
-      );
-      return { status: 'skipped' };
+      // Wait until the plugins have been found an initialized...
+      await this.kbnServer.ready();
+
+      // We can't do anything if the elasticsearch plugin has been disabled.
+      if (!server.plugins.elasticsearch) {
+        server.log(
+          ['warning', 'migration'],
+          'The elasticsearch plugin is disabled. Skipping migrations.'
+        );
+        return {
+          fetchProgress: async () => 1,
+          migrate: async () => ({ status: 'skipped' }),
+        };
+      }
+
+      // Wait until elasticsearch is green...
+      await server.plugins.elasticsearch.waitUntilReady();
+
+      const config = server.config();
+      return createIndexMigrator({
+        batchSize: config.get('migrations.batchSize'),
+        callCluster: server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
+        documentMigrator: this.documentMigrator,
+        index: config.get('kibana.index'),
+        log: this.log,
+        mappingProperties: this.mappingProperties,
+        pollInterval: config.get('migrations.pollInterval'),
+        scrollDuration: config.get('migrations.scrollDuration'),
+        serializer: this.serializer,
+      });
     }
-
-    // Wait until elasticsearch is green...
-    await server.plugins.elasticsearch.waitUntilReady();
-
-    const config = server.config();
-    const migrator = new IndexMigrator({
-      batchSize: config.get('migrations.batchSize'),
-      callCluster: server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
-      documentMigrator: this.documentMigrator,
-      index: config.get('kibana.index'),
-      log: this.log,
-      mappingProperties: this.mappingProperties,
-      pollInterval: config.get('migrations.pollInterval'),
-      scrollDuration: config.get('migrations.scrollDuration'),
-      serializer: this.serializer,
-    });
-
-    return migrator.migrate();
-  });
+  );
 
   private kbnServer: KbnServer;
   private documentMigrator: VersionedTransformer;
@@ -152,6 +136,15 @@ export class KibanaMigrator {
    */
   public migrateDocument(doc: SavedObjectDoc): SavedObjectDoc {
     return this.documentMigrator.migrate(doc);
+  }
+
+  /**
+   * Fetches the progress of the Kibana index migration.
+   */
+  public fetchMigrationProgress() {
+    return this.getIndexMigrator()
+      .then(migrator => migrator.fetchProgress())
+      .catch(() => 0);
   }
 }
 
