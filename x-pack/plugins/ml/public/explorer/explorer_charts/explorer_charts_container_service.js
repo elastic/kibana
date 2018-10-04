@@ -291,7 +291,7 @@ export function explorerChartsContainerServiceFactory(
         chartType === CHART_TYPE.POPULATION_DISTRIBUTION
       ) {
         return chartData.filter((d) => {
-          return d.entity === (record.by_field_value || record.over_field_value);
+          return d.entity === (record && (record.by_field_value || record.over_field_value));
         });
       }
 
