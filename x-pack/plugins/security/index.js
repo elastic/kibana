@@ -12,6 +12,7 @@ import { initPublicRolesApi } from './server/routes/api/public/roles';
 import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initLoginView } from './server/routes/views/login';
 import { initLogoutView } from './server/routes/views/logout';
+import { initLoggedOutView } from './server/routes/views/logged_out';
 import { validateConfig } from './server/lib/validate_config';
 import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
@@ -65,6 +66,11 @@ export const security = (kibana) => new kibana.Plugin({
       id: 'logout',
       title: 'Logout',
       main: 'plugins/security/views/logout',
+      hidden: true
+    }, {
+      id: 'logged_out',
+      title: 'Logged out',
+      main: 'plugins/security/views/logged_out',
       hidden: true
     }],
     hacks: [
@@ -162,6 +168,7 @@ export const security = (kibana) => new kibana.Plugin({
     initIndicesApi(server);
     initLoginView(server, xpackMainPlugin);
     initLogoutView(server);
+    initLoggedOutView(server);
 
     server.injectUiAppVars('login', () => {
 

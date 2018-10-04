@@ -21,7 +21,7 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
   const xpackInfo = Private(XPackInfoProvider);
   const xpackInfoSignature = Private(XPackInfoSignatureProvider);
   const debounce = Private(DebounceProvider);
-  const isLoginOrLogout = Private(PathProvider).isLoginOrLogout();
+  const isLoginOrLogoutOrLoggedOut = Private(PathProvider).isLoginOrLogoutOrLoggedOut();
   let isLicenseExpirationBannerShown = false;
 
   const notifyIfLicenseIsExpired = debounce(() => {
@@ -59,7 +59,7 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
    *  @return
    */
   function interceptor(response, handleResponse) {
-    if (isLoginOrLogout) {
+    if (isLoginOrLogoutOrLoggedOut) {
       return handleResponse(response);
     }
 

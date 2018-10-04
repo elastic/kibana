@@ -16,6 +16,9 @@
       "plugins/xpack_main/*": [
         "x-pack/plugins/xpack_main/public/*"
       ],
+      "plugins/security/*": [
+        "x-pack/plugins/security/public/*"
+      ],
       "plugins/spaces/*": [
         "x-pack/plugins/spaces/public/*"
       ]
