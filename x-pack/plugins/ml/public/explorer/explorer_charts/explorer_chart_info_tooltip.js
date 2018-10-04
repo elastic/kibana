@@ -18,6 +18,8 @@ more frequent event types at the top and more rare ones at the bottom.',
   [CHART_TYPE.POPULATION_DISTRIBUTION]: 'The gray dots depict the distribution of values over time for a sample of over_field_values.'
 };
 
+import { EuiSpacer } from '@elastic/eui';
+
 function TooltipDefinitionList({ toolTipData }) {
   return (
     <dl className="mlDescriptionList">
@@ -68,7 +70,10 @@ export function ExplorerChartInfoTooltip({
     <div className="ml-explorer-chart-info-tooltip">
       <TooltipDefinitionList toolTipData={toolTipData} />
       {chartDescription && (
-        <span className="ml-explorer-chart-description">{chartDescription}</span>
+        <React.Fragment>
+          <EuiSpacer size="s" />
+          <div className="ml-explorer-chart-description">{chartDescription}</div>
+        </React.Fragment>
       )}
     </div>
   );
