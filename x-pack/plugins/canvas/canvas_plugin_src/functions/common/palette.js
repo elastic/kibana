@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { palettes } from '../../../common/lib/palettes';
+
 export const palette = () => ({
   name: 'palette',
   aliases: [],
   type: 'palette',
-  help: 'Create a color palette',
+  help: i18n.translate('xpack.canvas.functions.paletteHelpText', {
+    defaultMessage: 'Create a color palette',
+  }),
   context: {
     types: ['null'],
   },
@@ -18,17 +22,24 @@ export const palette = () => ({
       aliases: ['_'],
       multi: true,
       types: ['string'],
-      help: 'Palette colors, rgba, hex, or HTML color string. Pass this multiple times.',
+      help: i18n.translate('xpack.canvas.functions.palette.argsColorHelpText', {
+        defaultMessage:
+          'Palette colors, rgba, hex, or HTML color string. Pass this multiple times.',
+      }),
     },
     gradient: {
       types: ['boolean'],
       default: false,
-      help: 'Prefer to make a gradient where supported and useful?',
+      help: i18n.translate('xpack.canvas.functions.palette.argsGradientHelpText', {
+        defaultMessage: 'Prefer to make a gradient where supported and useful?',
+      }),
     },
     reverse: {
       type: ['boolean'],
       default: false,
-      help: 'Reverse the palette',
+      help: i18n.translate('xpack.canvas.functions.palette.argsReverseHelpText', {
+        defaultMessage: 'Reverse the palette',
+      }),
     },
   },
   fn: (context, args) => {

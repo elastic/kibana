@@ -4,40 +4,54 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const shape = () => ({
   name: 'shape',
   aliases: [],
   type: 'shape',
-  help: 'Create a shape',
+  help: i18n.translate('xpack.canvas.functions.shapeHelpText', {
+    defaultMessage: 'Create a shape',
+  }),
   context: {
     types: ['null'],
   },
   args: {
     shape: {
       types: ['string', 'null'],
-      help: 'Pick a shape',
+      help: i18n.translate('xpack.canvas.functions.shape.argsShapeHelpText', {
+        defaultMessage: 'Pick a shape',
+      }),
       aliases: ['_'],
       default: 'square',
     },
     fill: {
       types: ['string', 'null'],
-      help: 'Valid CSS color string',
+      help: i18n.translate('xpack.canvas.functions.shape.argsFillHelpText', {
+        defaultMessage: 'Valid CSS color string',
+      }),
       default: 'black',
     },
     border: {
       types: ['string', 'null'],
       aliases: ['stroke'],
-      help: 'Valid CSS color string',
+      help: i18n.translate('xpack.canvas.functions.shape.argsBorderHelpText', {
+        defaultMessage: 'Valid CSS color string',
+      }),
     },
     borderWidth: {
       types: ['number', 'null'],
       aliases: ['strokeWidth'],
-      help: 'Thickness of the border',
+      help: i18n.translate('xpack.canvas.functions.shape.argsBorderWidthHelpText', {
+        defaultMessage: 'Thickness of the border',
+      }),
       default: '0',
     },
     maintainAspect: {
       types: ['boolean'],
-      help: 'Select true to maintain aspect ratio',
+      help: i18n.translate('xpack.canvas.functions.shape.argsMaintainAspectHelpText', {
+        defaultMessage: 'Select true to maintain aspect ratio',
+      }),
       default: false,
     },
   },

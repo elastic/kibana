@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { takeRight } from 'lodash';
 
 export const tail = () => ({
   name: 'tail',
   aliases: [],
   type: 'datatable',
-  help: 'Get the last N rows from the end of a datatable. Also see `head`',
+  help: i18n.translate('xpack.canvas.functions.tailHelpText', {
+    defaultMessage: 'Get the last N rows from the end of a datatable. Also see `head`',
+  }),
   context: {
     types: ['datatable'],
   },
@@ -18,7 +21,9 @@ export const tail = () => ({
     count: {
       aliases: ['_'],
       types: ['number'],
-      help: 'Return this many rows from the end of the datatable',
+      help: i18n.translate('xpack.canvas.functions.tail.argsCountHelpText', {
+        defaultMessage: 'Return this many rows from the end of the datatable',
+      }),
     },
   },
   fn: (context, args) => ({

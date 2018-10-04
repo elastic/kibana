@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const timefilterControl = () => ({
   name: 'timefilterControl',
   aliases: [],
@@ -11,16 +13,22 @@ export const timefilterControl = () => ({
   context: {
     types: ['null'],
   },
-  help: 'Configure a time filter control element',
+  help: i18n.translate('xpack.canvas.functions.timefilterControlHelpText', {
+    defaultMessage: 'Configure a time filter control element',
+  }),
   args: {
     column: {
       type: ['string'],
       aliases: ['field', 'c'],
-      help: 'The column or field to attach the filter to',
+      help: i18n.translate('xpack.canvas.functions.timefilterControl.argsColumnHelpText', {
+        defaultMessage: 'The column or field to attach the filter to',
+      }),
     },
     compact: {
       type: ['boolean'],
-      help: 'Show the time filter as a button that triggers a popover',
+      help: i18n.translate('xpack.canvas.functions.timefilterControl.argsCompactHelpText', {
+        defaultMessage: 'Show the time filter as a button that triggers a popover',
+      }),
       default: true,
     },
   },

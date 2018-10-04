@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 
 export const sort = () => ({
   name: 'sort',
   type: 'datatable',
-  help: 'Sorts a datatable on a column',
+  help: i18n.translate('xpack.canvas.functions.sortHelpText', {
+    defaultMessage: 'Sorts a datatable on a column',
+  }),
   context: {
     types: ['datatable'],
   },
@@ -18,13 +21,17 @@ export const sort = () => ({
       types: ['string'],
       aliases: ['_', 'column'],
       multi: false, // TODO: No reason you couldn't.
-      help:
-        'The column to sort on. If column is not specified, the datatable will be sorted on the first column.',
+      help: i18n.translate('xpack.canvas.functions.sort.argsByHelpText', {
+        defaultMessage:
+          'The column to sort on. If column is not specified, the datatable will be sorted on the first column.',
+      }),
     },
     reverse: {
       types: ['boolean'],
-      help:
-        'Reverse the sort order. If reverse is not specified, the datatable will be sorted in ascending order.',
+      help: i18n.translate('xpack.canvas.functions.sort.argsReverseHelpText', {
+        defaultMessage:
+          'Reverse the sort order. If reverse is not specified, the datatable will be sorted in ascending order.',
+      }),
     },
   },
   fn: (context, args) => {

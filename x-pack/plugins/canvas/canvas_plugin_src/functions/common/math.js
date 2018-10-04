@@ -5,14 +5,16 @@
  */
 
 import { evaluate } from 'tinymath';
+import { i18n } from '@kbn/i18n';
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
 
 export const math = () => ({
   name: 'math',
   type: 'number',
-  help:
-    'Interpret a math expression, with a number or datatable as context. Datatable columns are available by their column name. ' +
-    'If you pass in a number it is available as "value" (without the quotes)',
+  help: i18n.translate('xpack.canvas.functions.mathHelpText', {
+    defaultMessage:
+      'Interpret a math expression, with a number or datatable as context. Datatable columns are available by their column name. If you pass in a number it is available as "value" (without the quotes)',
+  }),
   context: {
     types: ['number', 'datatable'],
   },
@@ -20,8 +22,10 @@ export const math = () => ({
     expression: {
       aliases: ['_'],
       types: ['string'],
-      help:
-        'An evaluated TinyMath expression. (See [TinyMath Functions](http://canvas.elastic.co/reference/tinymath.html))',
+      help: i18n.translate('xpack.canvas.functions.math.argsExpressionHelpText', {
+        defaultMessage:
+          'An evaluated TinyMath expression. (See [TinyMath Functions](http://canvas.elastic.co/reference/tinymath.html))',
+      }),
     },
   },
   fn: (context, args) => {
@@ -36,15 +40,30 @@ export const math = () => ({
       if (Array.isArray(result)) {
         if (result.length === 1) return result[0];
         throw new Error(
-          'Expressions must return a single number. Try wrapping your expression in mean() or sum()'
+          i18n.translate('xpack.canvas.functions.math.expressionReturnMultipleNumberErrorMessage', {
+            defaultMessage:
+              'Expressions must return a single number. Try wrapping your expression in mean() or sum()',
+          })
         );
       }
-      if (isNaN(result))
-        throw new Error('Failed to execute math expression. Check your column names');
+      if (isNaN(result)) {
+        throw new Error(
+          i18n.translate('xpack.canvas.functions.math.executeMathExpressionErrorMessage', {
+            defaultMessage: 'Failed to execute math expression. Check your column names',
+          })
+        );
+      }
       return result;
     } catch (e) {
-      if (context.rows.length === 0) throw new Error('Empty datatable');
-      else throw e;
+      if (context.rows.length === 0) {
+        throw new Error(
+          i18n.translate('xpack.canvas.functions.math.emptyDatabaseErrorMessage', {
+            defaultMessage: 'Empty datatable',
+          })
+        );
+      } else {
+        throw e;
+      }
     }
   },
 });

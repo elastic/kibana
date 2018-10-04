@@ -4,25 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const ifFn = () => ({
   name: 'if',
-  help: 'Perform conditional logic',
+  help: i18n.translate('xpack.canvas.functions.ifFnHelpText', {
+    defaultMessage: 'Perform conditional logic',
+  }),
   args: {
     condition: {
       types: ['boolean', 'null'],
       aliases: ['_'],
-      help:
-        'A boolean true or false, usually returned by a subexpression. If this is not supplied then the input context will be used',
+      help: i18n.translate('xpack.canvas.functions.ifFn.argsConditionHelpText', {
+        defaultMessage:
+          'A boolean true or false, usually returned by a subexpression. If this is not supplied then the input context will be used',
+      }),
     },
     then: {
       resolve: false,
-      help: 'The return value if true',
+      help: i18n.translate('xpack.canvas.functions.ifFn.argsThenHelpText', {
+        defaultMessage: 'The return value if true',
+      }),
     },
     else: {
       resolve: false,
-      help:
-        'The return value if false. If else is not specified, and the condition is false' +
-        'then the input context to the function will be returned',
+      help: i18n.translate('xpack.canvas.functions.ifFn.argsElseHelpText', {
+        defaultMessage:
+          'The return value if false. If else is not specified, and the condition is false then the input context to the function will be returned',
+      }),
     },
   },
   fn: async (context, args) => {

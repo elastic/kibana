@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const gte = () => ({
   name: 'gte',
   type: 'boolean',
-  help: 'Return if the context is greater than or equal to the argument',
+  help: i18n.translate('xpack.canvas.functions.gteHelpText', {
+    defaultMessage: 'Return if the context is greater than or equal to the argument',
+  }),
   args: {
     value: {
       aliases: ['_'],
       types: ['boolean', 'number', 'string', 'null'],
       required: true,
-      help: 'The value to compare the context to',
+      help: i18n.translate('xpack.canvas.functions.gte.argsValueHelpText', {
+        defaultMessage: 'The value to compare the context to',
+      }),
     },
   },
   fn: (context, args) => {

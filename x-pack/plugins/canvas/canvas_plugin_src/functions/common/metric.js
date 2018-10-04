@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { openSans } from '../../../common/lib/fonts';
+
 export const metric = () => ({
   name: 'metric',
   aliases: [],
   type: 'render',
-  help: 'A number with a label',
+  help: i18n.translate('xpack.canvas.functions.metricHelpText', {
+    defaultMessage: 'A number with a label',
+  }),
   context: {
     types: ['string', 'null'],
   },
@@ -17,17 +21,25 @@ export const metric = () => ({
     label: {
       types: ['string'],
       aliases: ['_', 'text', 'description'],
-      help: 'Text describing the metric',
+      help: i18n.translate('xpack.canvas.functions.metric.argsLabelHelpText', {
+        defaultMessage: 'Text describing the metric',
+      }),
       default: '""',
     },
     metricFont: {
       types: ['style'],
-      help: 'Font settings for the metric. Technically you can stick other styles in here too!',
+      help: i18n.translate('xpack.canvas.functions.metric.argsMetricFontHelpText', {
+        defaultMessage:
+          'Font settings for the metric. Technically you can stick other styles in here too!',
+      }),
       default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
     },
     labelFont: {
       types: ['style'],
-      help: 'Font settings for the label. Technically you can stick other styles in here too!',
+      help: i18n.translate('xpack.canvas.functions.metric.argsLabelFontHelpText', {
+        defaultMessage:
+          'Font settings for the label. Technically you can stick other styles in here too!',
+      }),
       default: `{font size=14 family="${openSans.value}" color="#000000" align=center}`,
     },
   },

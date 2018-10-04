@@ -4,21 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const switchFn = () => ({
   name: 'switch',
-  help: 'Perform conditional logic with multiple conditions',
+  help: i18n.translate('xpack.canvas.functions.switchFnHelpText', {
+    defaultMessage: 'Perform conditional logic with multiple conditions',
+  }),
   args: {
     case: {
       types: ['case'],
       aliases: ['_'],
       resolve: false,
       multi: true,
-      help: 'The list of conditions to check',
+      help: i18n.translate('xpack.canvas.functions.switchFn.argsCaseHelpText', {
+        defaultMessage: 'The list of conditions to check',
+      }),
     },
     default: {
       aliases: ['finally'],
       resolve: false,
-      help: 'The default case if no cases match',
+      help: i18n.translate('xpack.canvas.functions.switchFn.argsDefaultHelpText', {
+        defaultMessage: 'The default case if no cases match',
+      }),
     },
   },
   fn: async (context, args) => {

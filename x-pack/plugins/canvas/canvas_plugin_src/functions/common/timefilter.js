@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import dateMath from '@elastic/datemath';
 
 export const timefilter = () => ({
@@ -13,23 +14,31 @@ export const timefilter = () => ({
   context: {
     types: ['filter'],
   },
-  help: 'Create a timefilter for querying a source',
+  help: i18n.translate('xpack.canvas.functions.timefilterHelpText', {
+    defaultMessage: 'Create a timefilter for querying a source',
+  }),
   args: {
     column: {
       type: ['string'],
       aliases: ['field', 'c'],
       default: '@timestamp',
-      help: 'The column or field to attach the filter to',
+      help: i18n.translate('xpack.canvas.functions.timefilter.argsColumnHelpText', {
+        defaultMessage: 'The column or field to attach the filter to',
+      }),
     },
     from: {
       types: ['string', 'null'],
       aliases: ['f', 'start'],
-      help: 'Beginning of the range, in ISO8601 or Elasticsearch datemath format',
+      help: i18n.translate('xpack.canvas.functions.timefilter.argsFromHelpText', {
+        defaultMessage: 'Beginning of the range, in ISO8601 or Elasticsearch datemath format',
+      }),
     },
     to: {
       types: ['string', 'null'],
       aliases: ['t', 'end'],
-      help: 'End of the range, in ISO8601 or Elasticsearch datemath format',
+      help: i18n.translate('xpack.canvas.functions.timefilter.argsToHelpText', {
+        defaultMessage: 'End of the range, in ISO8601 or Elasticsearch datemath format',
+      }),
     },
   },
   fn: (context, args) => {
@@ -45,7 +54,14 @@ export const timefilter = () => ({
       if (!str) return;
 
       const moment = dateMath.parse(str);
-      if (!moment || !moment.isValid()) throw new Error(`Invalid date/time string ${str}`);
+      if (!moment || !moment.isValid()) {
+        throw new Error(
+          i18n.translate('xpack.canvas.functions.timefilter.invalidDateTimeStringErrorMessage', {
+            defaultMessage: 'Invalid date/time string {str}',
+            values: { str },
+          })
+        );
+      }
       return moment.toISOString();
     }
 

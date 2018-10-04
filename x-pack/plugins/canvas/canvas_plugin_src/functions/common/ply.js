@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { groupBy, flatten, pick, map } from 'lodash';
 
 function combineColumns(arrayOfColumnsArrays) {
@@ -27,8 +28,16 @@ function combineAcross(datatableArray) {
 
   // Sanity check
   datatableArray.forEach(datatable => {
-    if (datatable.rows.length !== targetRowLength)
-      throw new Error('All expressions must return the same number of rows');
+    if (datatable.rows.length !== targetRowLength) {
+      throw new Error(
+        i18n.translate(
+          'xpack.canvas.functions.ply.expressionsReturnDifferentRowsNumberErrorMessage',
+          {
+            defaultMessage: 'All expressions must return the same number of rows',
+          }
+        )
+      );
+    }
   });
 
   // Merge columns and rows.
@@ -54,15 +63,19 @@ function combineAcross(datatableArray) {
 export const ply = () => ({
   name: 'ply',
   type: 'datatable',
-  help:
-    'Subdivide a datatable and pass the resulting tables into an expression, then merge the output',
+  help: i18n.translate('xpack.canvas.functions.plyHelpText', {
+    defaultMessage:
+      'Subdivide a datatable and pass the resulting tables into an expression, then merge the output',
+  }),
   context: {
     types: ['datatable'],
   },
   args: {
     by: {
       types: ['string'],
-      help: 'The column to subdivide on',
+      help: i18n.translate('xpack.canvas.functions.ply.argsByHelpText', {
+        defaultMessage: 'The column to subdivide on',
+      }),
       multi: true,
     },
     expression: {
@@ -70,12 +83,10 @@ export const ply = () => ({
       resolve: false,
       multi: true,
       aliases: ['fn', 'function'],
-      help:
-        'An expression to pass each resulting data table into. Tips: \n' +
-        ' Expressions must return a datatable. Use `as` to turn literals into datatables.\n' +
-        ' Multiple expressions must return the same number of rows.' +
-        ' If you need to return a differing row count, pipe into another instance of ply.\n' +
-        ' If multiple expressions return the same columns, the last one wins.',
+      help: i18n.translate('xpack.canvas.functions.ply.argsExpressionHelpText', {
+        defaultMessage:
+          'An expression to pass each resulting data table into. Tips: \n Expressions must return a datatable. Use `as` to turn literals into datatables.\n Multiple expressions must return the same number of rows. If you need to return a differing row count, pipe into another instance of ply.\n If multiple expressions return the same columns, the last one wins.',
+      }),
     },
     // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
     // The way the function below is written you can add as many arbitrary named args as you want.

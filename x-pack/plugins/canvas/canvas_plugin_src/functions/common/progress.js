@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { openSans } from '../../../common/lib/fonts';
 import { shapes } from '../../renderers/progress/shapes';
@@ -12,7 +13,9 @@ export const progress = () => ({
   name: 'progress',
   aliases: [],
   type: 'render',
-  help: 'Configure a progress element',
+  help: i18n.translate('xpack.canvas.functions.progressHelpText', {
+    defaultMessage: 'Configure a progress element',
+  }),
   context: {
     types: ['number'],
   },
@@ -20,50 +23,94 @@ export const progress = () => ({
     shape: {
       type: ['string'],
       alias: ['_'],
-      help: `Select ${Object.keys(shapes)
-        .map((key, i, src) => (i === src.length - 1 ? `or ${shapes[key].name}` : shapes[key].name))
-        .join(', ')}`,
+      help: i18n.translate('xpack.canvas.functions.progress.argsShapeHelpText', {
+        defaultMessage: 'Select {shapeNames}',
+        values: {
+          shapeNames: Object.keys(shapes)
+            .map((key, i, src) => {
+              return i === src.length - 1
+                ? i18n.translate('xpack.canvas.functions.progress.argsShape.orText', {
+                    defaultMessage: 'or {shapeName}',
+                    values: { shapeName: shapes[key].name },
+                  })
+                : shapes[key].name;
+            })
+            .join(', '),
+        },
+      }),
       default: 'gauge',
     },
     max: {
       type: ['number'],
-      help: 'Maximum value of the progress element',
+      help: i18n.translate('xpack.canvas.functions.progress.argsMaxHelpText', {
+        defaultMessage: 'Maximum value of the progress element',
+      }),
       default: 1,
     },
     valueColor: {
       type: ['string'],
-      help: 'Color of the progress bar',
+      help: i18n.translate('xpack.canvas.functions.progress.argsValueColorHelpText', {
+        defaultMessage: 'Color of the progress bar',
+      }),
       default: `#1785b0`,
     },
     barColor: {
       type: ['string'],
-      help: 'Color of the background bar',
+      help: i18n.translate('xpack.canvas.functions.progress.argsBarColorHelpText', {
+        defaultMessage: 'Color of the background bar',
+      }),
       default: `#f0f0f0`,
     },
     valueWeight: {
       type: ['number'],
-      help: 'Thickness of the progress bar',
+      help: i18n.translate('xpack.canvas.functions.progress.argsValueWeightHelpText', {
+        defaultMessage: 'Thickness of the progress bar',
+      }),
       default: 20,
     },
     barWeight: {
       type: ['number'],
-      help: 'Thickness of the background bar',
+      help: i18n.translate('xpack.canvas.functions.progress.argsBarWeightHelpText', {
+        defaultMessage: 'Thickness of the background bar',
+      }),
       default: 20,
     },
     label: {
       type: ['boolean', 'string'],
-      help: `Set true/false to show/hide label or provide a string to display as the label`,
+      help: i18n.translate('xpack.canvas.functions.progress.argsLabelHelpText', {
+        defaultMessage:
+          'Set true/false to show/hide label or provide a string to display as the label',
+      }),
       default: true,
     },
     font: {
       types: ['style'],
-      help: 'Font settings for the label. Technically you can stick other styles in here too!',
+      help: i18n.translate('xpack.canvas.functions.progress.argsFontHelpText', {
+        defaultMessage:
+          'Font settings for the label. Technically you can stick other styles in here too!',
+      }),
       default: `{font size=24 family="${openSans.value}" color="#000000" align=center}`,
     },
   },
   fn: (value, args) => {
-    if (args.max <= 0) throw new Error(`'max' must be greater than 0`);
-    if (value > args.max || value < 0) throw new Error(`Context must be between 0 and ${args.max}`);
+    if (args.max <= 0) {
+      throw new Error(
+        i18n.translate('xpack.canvas.functions.progress.maxValueLessOrEqualZeroMessageError', {
+          defaultMessage: "'max' must be greater than 0",
+        })
+      );
+    }
+    if (value > args.max || value < 0) {
+      throw new Error(
+        i18n.translate(
+          'xpack.canvas.functions.progress.contextIsNotBetweenZeroAndMaxValueMessageError',
+          {
+            defaultMessage: 'Context must be between 0 and {max}',
+            values: { max: args.max },
+          }
+        )
+      );
+    }
 
     let label = '';
     if (args.label) label = typeof args.label === 'string' ? args.label : `${value}`;

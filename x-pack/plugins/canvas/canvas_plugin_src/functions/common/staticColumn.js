@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { getType } from '../../../common/lib/get_type';
 
 export const staticColumn = () => ({
   name: 'staticColumn',
   type: 'datatable',
-  help: 'Add a column with a static value.',
+  help: i18n.translate('xpack.canvas.functions.staticColumnHelpText', {
+    defaultMessage: 'Add a column with a static value.',
+  }),
   context: {
     types: ['datatable'],
   },
@@ -17,13 +20,17 @@ export const staticColumn = () => ({
     name: {
       types: ['string'],
       aliases: ['_', 'column'],
-      help: 'The name of the new column column',
+      help: i18n.translate('xpack.canvas.functions.staticColumn.argsNameHelpText', {
+        defaultMessage: 'The name of the new column column',
+      }),
       required: true,
     },
     value: {
       types: ['string', 'number', 'boolean', 'null'],
-      help:
-        'The value to insert in each column. Tip: use a sub-expression to rollup other columns into a static value',
+      help: i18n.translate('xpack.canvas.functions.staticColumn.argsValueHelpText', {
+        defaultMessage:
+          'The value to insert in each column. Tip: use a sub-expression to rollup other columns into a static value',
+      }),
       default: null,
     },
   },

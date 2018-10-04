@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const lt = () => ({
   name: 'lt',
   type: 'boolean',
-  help: 'Return if the context is less than the argument',
+  help: i18n.translate('xpack.canvas.functions.ltHelpText', {
+    defaultMessage: 'Return if the context is less than the argument',
+  }),
   args: {
     value: {
       aliases: ['_'],
       types: ['boolean', 'number', 'string', 'null'],
       required: true,
-      help: 'The value to compare the context to',
+      help: i18n.translate('xpack.canvas.functions.lt.argsValueHelpText', {
+        defaultMessage: 'The value to compare the context to',
+      }),
     },
   },
   fn: (context, args) => {

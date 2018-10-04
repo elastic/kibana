@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const rowCount = () => ({
   name: 'rowCount',
   aliases: [],
@@ -11,8 +13,10 @@ export const rowCount = () => ({
   context: {
     types: ['datatable'],
   },
-  help:
-    'Return the number of rows. Pair with ply to get the count of unique column values, or combinations of unique column values.',
+  help: i18n.translate('xpack.canvas.functions.rowCountHelpText', {
+    defaultMessage:
+      'Return the number of rows. Pair with ply to get the count of unique column values, or combinations of unique column values.',
+  }),
   args: {},
   fn: context => context.rows.length,
 });

@@ -4,28 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const render = () => ({
   name: 'render',
   aliases: [],
   type: 'render',
-  help: 'Render an input as a specific element and set element level options such as styling',
+  help: i18n.translate('xpack.canvas.functions.renderHelpText', {
+    defaultMessage:
+      'Render an input as a specific element and set element level options such as styling',
+  }),
   context: {
     types: ['render'],
   },
   args: {
     as: {
       types: ['string', 'null'],
-      help:
-        'The element type to use in rendering. You probably want a specialized function instead, such as plot or grid',
+      help: i18n.translate('xpack.canvas.functions.render.argsAsHelpText', {
+        defaultMessage:
+          'The element type to use in rendering. You probably want a specialized function instead, such as plot or grid',
+      }),
     },
     css: {
       types: ['string', 'null'],
       default: '"* > * {}"',
-      help: 'Any block of custom CSS to be scoped to this element.',
+      help: i18n.translate('xpack.canvas.functions.render.argsCssHelpText', {
+        defaultMessage: 'Any block of custom CSS to be scoped to this element.',
+      }),
     },
     containerStyle: {
       types: ['containerStyle', 'null'],
-      help: 'Style for the container, including background, border, and opacity',
+      help: i18n.translate('xpack.canvas.functions.render.argsContainerStyleHelpText', {
+        defaultMessage: 'Style for the container, including background, border, and opacity',
+      }),
     },
   },
   fn: (context, args) => {

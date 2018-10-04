@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const getCell = () => ({
   name: 'getCell',
-  help: 'Fetch a single cell in a table',
+  help: i18n.translate('xpack.canvas.functions.getCellHelpText', {
+    defaultMessage: 'Fetch a single cell in a table',
+  }),
   context: {
     types: ['datatable'],
   },
@@ -14,23 +18,41 @@ export const getCell = () => ({
     column: {
       types: ['string'],
       aliases: ['_', 'c'],
-      help: 'The name of the column value to fetch',
+      help: i18n.translate('xpack.canvas.functions.getCell.argsColumnHelpText', {
+        defaultMessage: 'The name of the column value to fetch',
+      }),
     },
     row: {
       types: ['number'],
       aliases: ['r'],
-      help: 'The row number, starting at 0',
+      help: i18n.translate('xpack.canvas.functions.getCell.argsRowHelpText', {
+        defaultMessage: 'The row number, starting at 0',
+      }),
       default: 0,
     },
   },
   fn: (context, args) => {
     const row = context.rows[args.row];
-    if (!row) throw new Error(`Row not found: ${args.row}`);
+    if (!row) {
+      throw new Error(
+        i18n.translate('xpack.canvas.functions.getCell.rowNotFoundErrorMessage', {
+          defaultMessage: 'Row not found: {row}',
+          values: { row: args.row },
+        })
+      );
+    }
 
     const { column = context.columns[0].name } = args;
     const value = row[column];
 
-    if (typeof value === 'undefined') throw new Error(`Column not found: ${column}`);
+    if (typeof value === 'undefined') {
+      throw new Error(
+        i18n.translate('xpack.canvas.functions.getCell.columnNotFoundErrorMessage', {
+          defaultMessage: 'Column not found: {column}',
+          values: { column },
+        })
+      );
+    }
 
     return value;
   },

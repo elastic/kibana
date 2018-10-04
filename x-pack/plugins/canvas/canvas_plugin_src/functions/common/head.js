@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { take } from 'lodash';
 
 export const head = () => ({
   name: 'head',
   aliases: [],
   type: 'datatable',
-  help: 'Get the first N rows from the datatable. Also see `tail`',
+  help: i18n.translate('xpack.canvas.functions.headHelpText', {
+    defaultMessage: 'Get the first N rows from the datatable. Also see `tail`',
+  }),
   context: {
     types: ['datatable'],
   },
@@ -18,7 +21,9 @@ export const head = () => ({
     count: {
       aliases: ['_'],
       types: ['number'],
-      help: 'Return this many rows from the beginning of the datatable',
+      help: i18n.translate('xpack.canvas.functions.head.argsCountHelpText', {
+        defaultMessage: 'Return this many rows from the beginning of the datatable',
+      }),
       default: 1,
     },
   },

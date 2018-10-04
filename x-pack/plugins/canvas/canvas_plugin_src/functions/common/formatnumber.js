@@ -5,11 +5,14 @@
  */
 
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 
 export const formatnumber = () => ({
   name: 'formatnumber',
   type: 'string',
-  help: 'Turn a number into a string using a NumberJS format',
+  help: i18n.translate('xpack.canvas.functions.formatNumberHelpText', {
+    defaultMessage: 'Turn a number into a string using a NumberJS format',
+  }),
   context: {
     types: ['number'],
   },
@@ -17,7 +20,9 @@ export const formatnumber = () => ({
     format: {
       aliases: ['_'],
       types: ['string'],
-      help: 'NumeralJS format string http://numeraljs.com/#format',
+      help: i18n.translate('xpack.canvas.functions.formatNumber.argsFormatHelpText', {
+        defaultMessage: 'NumeralJS format string http://numeraljs.com/#format',
+      }),
     },
   },
   fn: (context, args) => {

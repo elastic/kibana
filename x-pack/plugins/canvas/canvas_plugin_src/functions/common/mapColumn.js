@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { getType } from '../../../common/lib/get_type';
 
 export const mapColumn = () => ({
   name: 'mapColumn',
   aliases: ['mc'], // midnight commander. So many times I've launched midnight commander instead of moving a file.
   type: 'datatable',
-  help: 'Add a column calculated as the result of other columns, or not',
+  help: i18n.translate('xpack.canvas.functions.mapColumnHelpText', {
+    defaultMessage: 'Add a column calculated as the result of other columns, or not',
+  }),
   context: {
     types: ['datatable'],
   },
@@ -18,14 +21,19 @@ export const mapColumn = () => ({
     name: {
       types: ['string'],
       aliases: ['_', 'column'],
-      help: 'The name of the resulting column',
+      help: i18n.translate('xpack.canvas.functions.mapColumn.argsNameHelpText', {
+        defaultMessage: 'The name of the resulting column',
+      }),
       required: true,
     },
     expression: {
       types: ['boolean', 'number', 'string', 'null'],
       resolve: false,
       aliases: ['exp', 'fn'],
-      help: 'A canvas expression which will be passed each row as a single row datatable',
+      help: i18n.translate('xpack.canvas.functions.mapColumn.argsExpressionHelpText', {
+        defaultMessage:
+          'A canvas expression which will be passed each row as a single row datatable',
+      }),
     },
   },
   fn: (context, args) => {

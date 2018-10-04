@@ -5,10 +5,14 @@
  */
 
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
+
 export const formatdate = () => ({
   name: 'formatdate',
   type: 'string',
-  help: 'Output a ms since epoch number as a formatted string',
+  help: i18n.translate('xpack.canvas.functions.formatDateHelpText', {
+    defaultMessage: 'Output a ms since epoch number as a formatted string',
+  }),
   context: {
     types: ['number'],
   },
@@ -16,7 +20,10 @@ export const formatdate = () => ({
     format: {
       aliases: ['_'],
       types: ['string'],
-      help: 'MomentJS Format with which to bucket (See https://momentjs.com/docs/#/displaying/)',
+      help: i18n.translate('xpack.canvas.functions.formatDate.argsFormatHelpText', {
+        defaultMessage:
+          'MomentJS Format with which to bucket (See https://momentjs.com/docs/#/displaying/)',
+      }),
     },
   },
   fn: (context, args) => {
