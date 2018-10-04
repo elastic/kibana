@@ -9,7 +9,6 @@ import { uiModules } from 'ui/modules';
 import template from './action_type_select.html';
 import 'angular-ui-select';
 import { Action } from 'plugins/watcher/models/action';
-import './action_type_select.less';
 import 'plugins/watcher/services/settings';
 
 const app = uiModules.get('xpack/watcher');

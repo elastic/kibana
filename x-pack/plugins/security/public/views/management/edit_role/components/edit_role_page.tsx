@@ -44,7 +44,6 @@ interface Props {
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   kibanaAppPrivileges: KibanaPrivilege[];
-  notifier: any;
   spaces?: Space[];
   spacesEnabled: boolean;
   userProfile: UserProfile;
@@ -275,7 +274,7 @@ export class EditRolePage extends Component<Props, State> {
         formError: null,
       });
 
-      const { httpClient, notifier } = this.props;
+      const { httpClient } = this.props;
 
       const role = {
         ...this.state.role,
@@ -292,13 +291,13 @@ export class EditRolePage extends Component<Props, State> {
           this.backToRoleList();
         })
         .catch((error: any) => {
-          notifier.error(get(error, 'data.message'));
+          toastNotifications.addDanger(get(error, 'data.message'));
         });
     }
   };
 
   public handleDeleteRole = () => {
-    const { httpClient, role, notifier } = this.props;
+    const { httpClient, role } = this.props;
 
     deleteRole(httpClient, role.name)
       .then(() => {
@@ -306,7 +305,7 @@ export class EditRolePage extends Component<Props, State> {
         this.backToRoleList();
       })
       .catch((error: any) => {
-        notifier.error(get(error, 'data.message'));
+        toastNotifications.addDanger(get(error, 'data.message'));
       });
   };
 
