@@ -67,7 +67,7 @@ export default function HistogramVisType(Private, i18n) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('kbnVislibVisTypes.pie.sliceSizeButtonLabel', { defaultMessage: 'Slice Size' }),
+          title: i18n('kbnVislibVisTypes.pie.metricTitle', { defaultMessage: 'Slice Size' }),
           min: 1,
           max: 1,
           aggFilter: ['sum', 'count', 'cardinality', 'top_hits'],
@@ -79,7 +79,7 @@ export default function HistogramVisType(Private, i18n) {
           group: 'buckets',
           name: 'segment',
           icon: 'fa fa-scissors',
-          title: i18n('kbnVislibVisTypes.pie.splitSlicesButtonLabel', { defaultMessage: 'Split Slices' }),
+          title: i18n('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split Slices' }),
           min: 0,
           max: Infinity,
           aggFilter: ['!geohash_grid', '!filter']
@@ -88,7 +88,7 @@ export default function HistogramVisType(Private, i18n) {
           group: 'buckets',
           name: 'split',
           icon: 'fa fa-th',
-          title: i18n('kbnVislibVisTypes.pie.splitChartButtonLabel', { defaultMessage: 'Split Chart' }),
+          title: i18n('kbnVislibVisTypes.pie.splitTitle', { defaultMessage: 'Split Chart' }),
           mustBeFirst: true,
           min: 0,
           max: 1,
