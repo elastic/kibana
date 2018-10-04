@@ -29,7 +29,17 @@ async function fetchRollupIndexPatterns(kibanaIndex, callCluster) {
     index: kibanaIndex,
     ignoreUnavailable: true,
     filterPath: [ 'hits.hits._id' ],
-    body: { query: { term: { 'index-pattern.type': { value: 'rollup' } } } },
+    body: {
+      query: {
+        bool: {
+          filter: {
+            term: {
+              'index-pattern.type': 'rollup',
+            },
+          },
+        },
+      },
+    },
   };
 
   const esResponse = await callCluster('search', searchParams);
@@ -46,7 +56,17 @@ async function fetchRollupSavedSearches(kibanaIndex, callCluster, rollupIndexPat
     index: kibanaIndex,
     ignoreUnavailable: true,
     filterPath: [ 'hits.hits._id', 'hits.hits._source.search.kibanaSavedObjectMeta' ],
-    body: { query: { term: { 'type': { value: 'search' } } } },
+    body: {
+      query: {
+        bool: {
+          filter: {
+            term: {
+              type: 'search',
+            },
+          },
+        },
+      },
+    },
   };
 
   const esResponse = await callCluster('search', searchParams);
@@ -85,7 +105,17 @@ async function fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPa
       'hits.hits._source.visualization.savedSearchId',
       'hits.hits._source.visualization.kibanaSavedObjectMeta',
     ],
-    body: { query: { term: { 'type': { value: 'visualization' } } } },
+    body: {
+      query: {
+        bool: {
+          filter: {
+            term: {
+              type: 'visualization',
+            },
+          },
+        },
+      },
+    },
   };
 
   const esResponse = await callCluster('search', searchParams);
