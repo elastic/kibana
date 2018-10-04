@@ -63,8 +63,7 @@ run the following command:
 metricbeat modules enable kibana
 ----------------------------------------------------------------------
 
-Alternatively, you can enable module configs in the {metricbeat} configuration 
-file (`metricbeat.yml`). For more information, see 
+For more information, see 
 {metricbeat-ref}/configuration-metricbeat.html[Specify which modules to run] and 
 {metricbeat-ref}/metricbeat-module-kibana.html[{kib} module]. 
 --
@@ -72,8 +71,7 @@ file (`metricbeat.yml`). For more information, see
 . Configure the {kib} module in {metricbeat}. +
 +
 --
-You must specify the following settings, either in the `modules.d/kibana.yml` 
-file or the `metricbeat.yml` file:
+You must specify the following settings in the `modules.d/kibana.yml` file:
 
 [source,yaml]
 ----------------------------------
