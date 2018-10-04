@@ -140,17 +140,6 @@ declare module '@elastic/eui' {
 
   export const EuiErrorBoundary: React.SFC<EuiErrorBoundaryProps>;
 
-  type EuiComboBoxProps = CommonProps & {
-    placeholder?: string;
-    options?: any[];
-    selectedOptions?: any[];
-    onChange?: (arg: any) => void;
-    fullWidth?: boolean;
-    isClearable?: boolean;
-    singleSelection?: boolean;
-  };
-  export const EuiComboBox: React.SFC<EuiComboBoxProps>;
-
   type EuiSelectProps = CommonProps & {
     compressed?: boolean;
     disabled?: boolean;
