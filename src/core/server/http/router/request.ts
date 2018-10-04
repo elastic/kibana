@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request } from 'hapi-latest';
-import { ObjectType, TypeOf } from '../../config/schema';
 
 import { filterHeaders, Headers } from './headers';
 import { RouteSchemas } from './route';
