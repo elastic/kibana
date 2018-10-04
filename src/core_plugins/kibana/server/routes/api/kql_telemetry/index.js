@@ -30,6 +30,7 @@ export function registerKqlTelemetryApi(server) {
           opt_in: Joi.bool().required(),
         },
       },
+      tags: ['api'],
     },
     handler: async function (request, reply) {
       const { savedObjects: { SavedObjectsClient, getSavedObjectsRepository } } = server;
