@@ -99,7 +99,7 @@ export function interpretProvider(config) {
     const expectedType = fnDef.type;
     if (expectedType && returnType !== expectedType) {
       throw new Error(
-        i18n.translate('xpack.canvas.interpreter.functionReturnCorrectTypeErrorMessage', {
+        i18n.translate('xpack.canvas.interpreter.functionReturnedTypeErrorMessage', {
           defaultMessage:
             "Function '{fnDefName}' should return '{expectedType}', actually returned '{returnType}'",
           values: { fnDefName: fnDef.name, expectedType, returnType },
@@ -114,9 +114,9 @@ export function interpretProvider(config) {
         type.validate(fnOutput);
       } catch (e) {
         throw new Error(
-          i18n.translate('xpack.canvas.interpreter.outputFunctionTypeIsNotValidErrorMessage', {
-            defaultMessage: "Output of '{fnDefName}' is not a valid type '{fnDefType}': {e}",
-            values: { fnDefName: fnDef.name, fndefType: fnDef.type, e },
+          i18n.translate('xpack.canvas.interpreter.notValidFunctionTypeErrorMessage', {
+            defaultMessage: "Output of '{fnDefName}' is not a valid type '{fnDefType}': {error}",
+            values: { fnDefName: fnDef.name, fndefType: fnDef.type, error: e },
           })
         );
       }

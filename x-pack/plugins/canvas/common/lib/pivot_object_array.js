@@ -13,12 +13,9 @@ export function pivotObjectArray(rows, columns) {
   const columnNames = columns || Object.keys(rows[0]);
   if (!columnNames.every(isString)) {
     throw new Error(
-      i18n.translate(
-        'xpack.canvas.lib.pivotObjectArray.columnsShouldBeArrayOfStringsErrorMessage',
-        {
-          defaultMessage: 'Columns should be an array of strings',
-        }
-      )
+      i18n.translate('xpack.canvas.pivotObjectArray.columnsTypeErrorMessage', {
+        defaultMessage: 'Columns should be an array of strings',
+      })
     );
   }
 

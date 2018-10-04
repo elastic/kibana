@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export function Arg(config) {
   if (config.name === '_') {
     throw Error(
-      i18n.translate('xpack.canvas.lib.argsNamesNotContainUnderscoreSignErrorMessage', {
+      i18n.translate('xpack.canvas.args.undercoreIsNotAllowedInArgNameErrorMessage', {
         defaultMessage: 'Arg names must not be _. Use it in aliases instead.',
       })
     );

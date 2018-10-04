@@ -11,7 +11,7 @@ export class Registry {
   constructor(prop = 'name') {
     if (typeof prop !== 'string') {
       throw new Error(
-        i18n.translate('xpack.canvas.lib.registry.propertyNameMustBeStringErrorMessage', {
+        i18n.translate('xpack.canvas.registry.registryPropertyNameTypeErrorMessage', {
           defaultMessage: 'Registry property name must be a string',
         })
       );
@@ -27,9 +27,12 @@ export class Registry {
   register(fn) {
     if (typeof fn !== 'function') {
       throw new Error(
-        i18n.translate('xpack.canvas.lib.registry.registerRequiresFunctionErrorMessage', {
-          defaultMessage: 'Register requires an function',
-        })
+        i18n.translate(
+          'xpack.canvas.registry.functionsMustReturnObjectWithSpecificProprtyErrorMessage',
+          {
+            defaultMessage: 'Register requires an function',
+          }
+        )
       );
     }
 

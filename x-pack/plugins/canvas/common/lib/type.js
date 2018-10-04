@@ -38,14 +38,14 @@ export function Type(config) {
     const typeName = getType(node);
     if (typeName !== this.name) {
       throw new Error(
-        i18n.translate('xpack.canvas.lib.type.castObjectOfTypeUsingWrongNameErrorMessage', {
+        i18n.translate('xpack.canvas.type.castObjectOfTypeUsingWrongNameErrorMessage', {
           defaultMessage: "Can not cast object of type '{typeName}' using '{name}'",
           values: { typeName, name: this.name },
         })
       );
     } else if (!this.castsTo(toTypeName)) {
       throw new Error(
-        i18n.translate('xpack.canvas.lib.type.castTypeNameToOtherTypeNameErrorMessage', {
+        i18n.translate('xpack.canvas.type.castTypeNameToOtherTypeNameErrorMessage', {
           defaultMessage: "Can not cast '{typeName}' to '{toTypeName}'",
           values: { typeName, toTypeName },
         })
@@ -59,7 +59,7 @@ export function Type(config) {
     const typeName = getType(node);
     if (!this.castsFrom(typeName)) {
       throw new Error(
-        i18n.translate('xpack.canvas.lib.type.castWrongNameFromObjectOfTypeErrorMessage', {
+        i18n.translate('xpack.canvas.type.castWrongNameFromObjectOfTypeErrorMessage', {
           defaultMessage: "Can not cast '{name}' from {typeName}",
           values: { typeName, name: this.name },
         })

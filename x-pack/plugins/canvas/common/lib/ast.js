@@ -33,7 +33,7 @@ function getArgumentString(arg, argKey, level = 0) {
 
   // unknown type, throw with type value
   throw new Error(
-    i18n.translate('xpack.canvas.lib.ast.invalidArgumentTypeErrorMessage', {
+    i18n.translate('xpack.canvas.ast.invalidArgumentTypeErrorMessage', {
       defaultMessage: "Invalid argument type in AST: {type}'",
       values: { type },
     })
@@ -46,7 +46,7 @@ function getExpressionArgs(block, level = 0) {
 
   if (!hasValidArgs) {
     throw new Error(
-      i18n.translate('xpack.canvas.lib.ast.argumentsCanBeObjectErrorMessage', {
+      i18n.translate('xpack.canvas.ast.argumentsTypeErrorMessage', {
         defaultMessage: 'Arguments can only be an object',
       })
     );
@@ -80,7 +80,7 @@ function fnWithArgs(fnName, args) {
 function getExpression(chain, level = 0) {
   if (!chain) {
     throw new Error(
-      i18n.translate('xpack.canvas.lib.ast.expressionsMustContainChainErrorMessage', {
+      i18n.translate('xpack.canvas.ast.expressionsMustContainChainErrorMessage', {
         defaultMessage: 'Expressions must contain a chain',
       })
     );
@@ -97,7 +97,7 @@ function getExpression(chain, level = 0) {
         const fn = chainObj.function;
         if (!fn || fn.length === 0) {
           throw new Error(
-            i18n.translate('xpack.canvas.lib.ast.functionMustHaveNameErrorMessage', {
+            i18n.translate('xpack.canvas.ast.functionMustHaveNameErrorMessage', {
               defaultMessage: 'Functions must have a function name',
             })
           );
@@ -116,7 +116,7 @@ export function fromExpression(expression, type = 'expression') {
     return parse(String(expression), { startRule: type });
   } catch (e) {
     throw new Error(
-      i18n.translate('xpack.canvas.lib.ast.unableParseExpressionErrorMessage', {
+      i18n.translate('xpack.canvas.ast.unableParseExpressionErrorMessage', {
         defaultMessage: 'Unable to parse expression: {errorMessage}',
         values: { errorMessage: e.message },
       })
@@ -148,12 +148,9 @@ export function toExpression(astObj, type = 'expression') {
   const validType = ['expression', 'function'].includes(getType(astObj));
   if (!validType) {
     throw new Error(
-      i18n.translate(
-        'xpack.canvas.lib.ast.expressionMustBeExpressionOrArgumentFunctionErrorMessage',
-        {
-          defaultMessage: 'Expression must be an expression or argument function',
-        }
-      )
+      i18n.translate('xpack.canvas.ast.expressionTypeErrorMessage', {
+        defaultMessage: 'Expression must be an expression or argument function',
+      })
     );
   }
 

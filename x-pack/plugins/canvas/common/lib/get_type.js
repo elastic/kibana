@@ -11,8 +11,8 @@ export function getType(node) {
   if (typeof node === 'object') {
     if (!node.type) {
       throw new Error(
-        i18n.translate('xpack.canvas.lib.getType.objectsMustHaveTypePropertyErrorMessage', {
-          defaultMessage: 'Objects must have a type propery',
+        i18n.translate('xpack.canvas.getType.missedTypePropertyInObjectErrorMessage', {
+          defaultMessage: 'Objects must have a type property',
         })
       );
     }

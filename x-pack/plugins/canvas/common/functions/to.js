@@ -10,14 +10,14 @@ import { castProvider } from '../interpreter/cast';
 export const to = () => ({
   name: 'to',
   aliases: [],
-  help: i18n.translate('xpack.canvas.functions.explicityCastFromTypeToTypeHelpText', {
+  help: i18n.translate('xpack.canvas.functions.toHelpText', {
     defaultMessage: 'Explicitly cast from one type to another.',
   }),
   context: {},
   args: {
     type: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.knownTypeHelpText', {
+      help: i18n.translate('xpack.canvas.functions.toTypeHelpText', {
         defaultMessage: 'A known type',
       }),
       aliases: ['_'],
@@ -27,7 +27,7 @@ export const to = () => ({
   fn: (context, args, { types }) => {
     if (!args.type) {
       throw new Error(
-        i18n.translate('xpack.canvas.functions.specifyCastingTypeErrorMessage', {
+        i18n.translate('xpack.canvas.functions.to.castingTypeIsNotSpecifiedErrorMessage', {
           defaultMessage: 'Must specify a casting type',
         })
       );
