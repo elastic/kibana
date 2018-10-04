@@ -225,6 +225,7 @@ class JobActionMenuUi extends Component {
           panelPaddingSize="none"
           withTitle
           anchorPosition={anchorPosition}
+          repositionOnScroll
         >
           <EuiContextMenu initialPanelId={0} panels={panels} />
         </EuiPopover>
