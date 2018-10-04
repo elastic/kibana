@@ -64,6 +64,17 @@ export async function loadServiceDetails({ serviceName, start, end, kuery }) {
   });
 }
 
+export async function loadTraceList({ start, end, kuery }) {
+  return callApi({
+    pathname: '/api/apm/traces',
+    query: {
+      start,
+      end,
+      esFilterQuery: await getEncodedEsQuery(kuery)
+    }
+  });
+}
+
 export async function loadTransactionList({
   serviceName,
   start,
