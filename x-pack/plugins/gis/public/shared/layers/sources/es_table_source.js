@@ -87,7 +87,7 @@ export class ESTableSource extends ASource {
     return false;
   }
 
-  async isFilterByMapBounds() {
+  isFilterByMapBounds() {
     //todo
     return false;
   }

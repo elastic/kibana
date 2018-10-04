@@ -88,7 +88,9 @@ export class VectorLayer extends ALayer {
   async _canSkipSourceUpdate(source, sourceDataId) {
     const timeAware = await source.isTimeAware();
     const extentAware = source.isFilterByMapBounds();
+    console.log('tee', timeAware, extentAware);
     if (!timeAware && !extentAware) {
+      console.log('not timearea');
       const sourceDataRequest = this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
         return true;
