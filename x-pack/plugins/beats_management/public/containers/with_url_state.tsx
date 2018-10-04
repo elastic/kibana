@@ -15,7 +15,10 @@ type StateCallback<T> = (previousState: T) => T;
 export interface URLStateProps<URLState = object> {
   goTo: (path: string) => void;
   setUrlState: (
-    newState: FlatObject<URLState> | StateCallback<URLState> | Promise<StateCallback<URLState>>
+    newState:
+      | Partial<FlatObject<URLState>>
+      | StateCallback<URLState>
+      | Promise<StateCallback<URLState>>
   ) => void;
   urlState: URLState;
 }
@@ -49,7 +52,10 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
   }
 
   private setURLState = async (
-    state: FlatObject<URLState> | StateCallback<URLState> | Promise<StateCallback<URLState>>
+    state:
+      | Partial<FlatObject<URLState>>
+      | StateCallback<URLState>
+      | Promise<StateCallback<URLState>>
   ) => {
     let newState;
     const pastState = this.URLState;
@@ -70,6 +76,7 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
     };
 
     this.props.history.replace(newLocation);
+    this.forceUpdate();
   };
 
   private goTo = (path: string) => {

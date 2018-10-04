@@ -107,4 +107,8 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
       status: 200,
     }));
   }
+
+  public setDB(beatsDB: CMBeat[]) {
+    this.beatsDB = beatsDB;
+  }
 }

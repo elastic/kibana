@@ -25,16 +25,20 @@ module.exports = function (wallaby) {
     },
     testFramework: 'jest',
     compilers: {
-      '**/*.ts?(x)': wallaby.compilers.typeScript({ module: 'commonjs' }),
+      '**/*.ts?(x)': wallaby.compilers.typeScript({
+        typescript: require('typescript'), // eslint-disable-line
+      }),
       '**/*.js': wallaby.compilers.babel({
         babelrc: false,
         presets: [require.resolve('@kbn/babel-preset/node_preset')],
       }),
     },
+
     setup: wallaby => {
       const path = require('path');
 
       const kibanaDirectory = path.resolve(wallaby.localProjectDir, '..', '..', '..');
+
       wallaby.testFramework.configure({
         rootDir: wallaby.localProjectDir,
         moduleNameMapper: {

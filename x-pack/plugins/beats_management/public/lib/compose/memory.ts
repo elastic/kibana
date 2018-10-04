@@ -20,13 +20,22 @@ import { MemoryTokensAdapter } from '../adapters/tokens/memory_tokens_adapter';
 import { BeatsLib } from '../beats';
 import { FrontendDomainLibs, FrontendLibs } from '../lib';
 
+import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import { supportedConfigs } from '../../config_schemas';
 import { TagsLib } from '../tags';
-import { TestElasticsearchAdapter } from './../adapters/elasticsearch/test';
+import { MemoryElasticsearchAdapter } from './../adapters/elasticsearch/memory';
 import { ElasticsearchLib } from './../elasticsearch';
 
-export function compose(): FrontendLibs {
-  const esAdapter = new TestElasticsearchAdapter();
+export function compose(
+  mockIsKueryValid: (kuery: string) => boolean,
+  mockKueryToEsQuery: (kuery: string) => string,
+  suggestions: AutocompleteSuggestion[]
+): FrontendLibs {
+  const esAdapter = new MemoryElasticsearchAdapter(
+    mockIsKueryValid,
+    mockKueryToEsQuery,
+    suggestions
+  );
   const tags = new TagsLib(new MemoryTagsAdapter([]), supportedConfigs);
   const tokens = new MemoryTokensAdapter();
   const beats = new BeatsLib(new MemoryBeatsAdapter([]), { tags });

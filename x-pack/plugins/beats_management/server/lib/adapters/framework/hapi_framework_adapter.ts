@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { wrapRequest } from '../../../utils/wrap_request';
 import { FrameworkInternalUser } from './adapter_types';
-
 import {
   BackendFrameworkAdapter,
   FrameworkRouteOptions,
@@ -17,19 +17,22 @@ interface TestSettings {
   encryptionKey: string;
 }
 
-export class TestingBackendFrameworkAdapter implements BackendFrameworkAdapter {
+export class HapiBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public readonly internalUser: FrameworkInternalUser = {
     kind: 'internal',
   };
   public version: string;
   private settings: TestSettings;
+  private server: any;
 
   constructor(
     settings: TestSettings = {
       encryptionKey: 'something_who_cares',
       enrollmentTokensTtlInSeconds: 10 * 60, // 10 minutes
-    }
+    },
+    hapiServer?: any
   ) {
+    this.server = hapiServer;
     this.settings = settings;
     this.version = 'testing';
   }
@@ -44,12 +47,42 @@ export class TestingBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
-    // not yet testable
+    if (!this.server) {
+      throw new Error('Must pass a hapi server into the adapter to use exposeStaticDir');
+    }
+    this.server.route({
+      handler: {
+        directory: {
+          path: dir,
+        },
+      },
+      method: 'GET',
+      path: urlPath,
+    });
   }
 
   public registerRoute<RouteRequest extends FrameworkWrappableRequest, RouteResponse>(
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ) {
-    // not yet testable
+    if (!this.server) {
+      throw new Error('Must pass a hapi server into the adapter to use registerRoute');
+    }
+    const wrappedHandler = (licenseRequired: boolean) => (request: any, reply: any) => {
+      return route.handler(wrapRequest(request), reply);
+    };
+
+    this.server.route({
+      handler: wrappedHandler(route.licenseRequired || false),
+      method: route.method,
+      path: route.path,
+      config: {
+        ...route.config,
+        auth: false,
+      },
+    });
+  }
+
+  public async injectRequstForTesting({ method, url, headers, payload }: any) {
+    return await this.server.inject({ method, url, headers, payload });
   }
 }

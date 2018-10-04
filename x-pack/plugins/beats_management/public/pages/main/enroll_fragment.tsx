@@ -7,24 +7,20 @@ import {
   // @ts-ignore typings for EuiBasicTable not present in current version
   EuiBasicTable,
   EuiButton,
-  EuiButtonEmpty,
   EuiLoadingSpinner,
-  EuiModal,
   EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiOverlayMask
 } from '@elastic/eui';
 import React from 'react';
+import { RouteComponentProps } from 'react-router';
 import { CMBeat } from '../../../common/domain_types';
 import { AppURLState } from '../../app';
-import { URLStateProps } from '../../containers/with_url_state';
+import { URLStateProps, withUrlState } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
-interface BeatsProps extends URLStateProps<AppURLState> {
+interface BeatsProps extends URLStateProps<AppURLState>, RouteComponentProps<any> {
   match: any
   libs: FrontendLibs;
 }
-export class BeatsActionArea extends React.Component<BeatsProps, any> {
+export class EnrollBeat extends React.Component<BeatsProps, any> {
   private pinging = false
   constructor(props: BeatsProps) {
     super(props)
@@ -47,59 +43,57 @@ export class BeatsActionArea extends React.Component<BeatsProps, any> {
     }
   }
   public async componentDidMount() {
-    if(this.props.match.params.enrollmentToken) {
-      this.waitForToken(this.props.match.params.enrollmentToken)
+    if(!this.props.urlState.enrollmentToken) {
+      const enrollmentToken = await this.props.libs.tokens.createEnrollmentToken();
+      this.props.setUrlState({
+        enrollmentToken
+      })
     }
   }
   public waitForToken = async (token: string) => {
+    if(this.pinging) { return } 
     this.pinging = true;
     const enrolledBeat = await this.pingForBeatWithToken(this.props.libs, token) as CMBeat;
+
     this.setState({
       enrolledBeat
     })
     this.pinging = false
   }
   public render() {
-
+    if(this.props.urlState.enrollmentToken && !this.state.enrolledBeat) {
+      this.waitForToken(this.props.urlState.enrollmentToken)
+    } 
     const {
-      match,
       goTo,
-      libs,
     } = this.props;
+
+    const actions = [];
+
+    switch(this.props.location.pathname) {
+      case '/overview/initial/beats':
+      actions.push({
+        goTo: '/overview/initial/tag',
+        name: 'Continue'
+      })
+      break
+      case '/overview/beats/enroll': 
+      actions.push({
+        goTo: '/overview/beats/enroll',
+        name: 'Enroll another Beat',
+        newToken: true
+      })
+      actions.push({
+        goTo: '/overview/beats',
+        name: 'Done',
+        clearToken: true
+      })
+      break;
+    }
   return (
     <div>
-      <EuiButtonEmpty
-        onClick={() => {
-          // random, but spacific number ensures new tab does not overwrite another _newtab in chrome
-          // and at the same time not truly random so that many clicks of the link open many tabs at this same URL
-          window.open('https://www.elastic.co/guide/en/beats/libbeat/current/getting-started.html','_newtab35628937456');
-        }}
-      >
-        Learn how to install beats
-      </EuiButtonEmpty>
-      <EuiButton
-        size="s"
-        color="primary"
-        onClick={async () => {
-          const token = await libs.tokens.createEnrollmentToken();
-          this.props.goTo(`/overview/beats/enroll/${token}`);
-          this.waitForToken(token);
-        }}
-      >
-        Enroll Beats
-      </EuiButton>
-
-      {match.params.enrollmentToken != null && (
-        <EuiOverlayMask>
-          <EuiModal onClose={() => { 
-            this.pinging = false; 
-            this.setState({
-              enrolledBeat: null
-            }, () => goTo(`/overview/beats`))
-          }} style={{ width: '640px' }}>
-            <EuiModalHeader>
-            <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
-            </EuiModalHeader>
+      {this.props.urlState.enrollmentToken && (
+       <div>
             {!this.state.enrolledBeat && (
               <EuiModalBody style={{ textAlign: 'center' }}>
                 To enroll a Beat with Centeral Management, run this command on the host that has Beats
@@ -109,7 +103,7 @@ export class BeatsActionArea extends React.Component<BeatsProps, any> {
                 <br />
                 <div className="euiFormControlLayout euiFormControlLayout--fullWidth">
                   <div className="euiFieldText euiFieldText--fullWidth" style={{ textAlign: 'left' }}>
-                    $ beats enroll {window.location.protocol}//{window.location.host} {match.params.enrollmentToken}
+                    $ beats enroll {window.location.protocol}//{window.location.host} {this.props.urlState.enrollmentToken}
                   </div>
                 </div>
                 <br />
@@ -145,26 +139,40 @@ export class BeatsActionArea extends React.Component<BeatsProps, any> {
                 />
                 <br />
                 <br />
-                <EuiButton
+                {actions.map(action => (
+                  <EuiButton
+                  key={action.name}
                   size="s"
                   color="primary"
+                  style={{marginLeft: 10}}
                   onClick={async () => {
-                    this.setState({
-                      enrolledBeat: null
-                    })
-                    const token = await libs.tokens.createEnrollmentToken();
-                    goTo(`/overview/beats/enroll/${token}`)
-                    this.waitForToken(token);
+                    if(action.clearToken) {
+                      this.props.setUrlState({enrollmentToken: ''})
+                    }
+
+                    if(action.newToken) {
+                      const enrollmentToken = await this.props.libs.tokens.createEnrollmentToken();
+  
+                      this.props.setUrlState({enrollmentToken});
+                      return this.setState({
+                        enrolledBeat: null
+                      })
+                    }
+                    goTo(action.goTo)
+
                   }}
                 >
-                Enroll Another Beat
+                {action.name}
                 </EuiButton>
+                ))}
+       
               </EuiModalBody>
             )}
 
-          </EuiModal>
-        </EuiOverlayMask>
+       </div>
       )}
     </div>
   )}
 }
+
+export const EnrollBeatPage = withUrlState<BeatsProps>(EnrollBeat);

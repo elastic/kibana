@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestingBackendFrameworkAdapter } from '../../adapters/framework/testing_framework_adapter';
+import { HapiBackendFrameworkAdapter } from '../../adapters/framework/hapi_framework_adapter';
 import { TokenEnrollmentData } from '../../adapters/tokens/adapter_types';
 import { MemoryTokensAdapter } from '../../adapters/tokens/memory_tokens_adapter';
 import { CMTokensDomain } from '../tokens';
@@ -28,7 +28,7 @@ describe('Token Domain Lib', () => {
 
   beforeEach(async () => {
     tokensDB = [];
-    framework = new TestingBackendFrameworkAdapter(settings);
+    framework = new HapiBackendFrameworkAdapter(settings);
 
     tokensLib = new CMTokensDomain(new MemoryTokensAdapter(tokensDB), {
       framework,

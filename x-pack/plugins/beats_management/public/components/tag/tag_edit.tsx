@@ -62,26 +62,23 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h3>Define this tag</h3>
+              <h3>Tag details</h3>
             </EuiTitle>
             <EuiText color="subdued">
               <p>
-                Tags will apply a set configuration to a group of beats.
+                Tags will apply the configurations below to all beats assigned this tag.
                 <br />
                 The tag type defines the options available.
               </p>
             </EuiText>
             <div>
               <TagBadge tag={{ color: tag.color || '#FF0', id: tag.id }} />
-              {/* <EuiBadge color={tag.color ? tag.color : '#FF0'}>
-                {tag.id ? tag.id : 'Tag name'}
-              </EuiBadge> */}
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiForm>
               <EuiFormRow
-                label="Name"
+                label="Tag Name"
                 isInvalid={!!this.getNameError(tag.id)}
                 error={this.getNameError(tag.id) || undefined}
               >
@@ -95,7 +92,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                 />
               </EuiFormRow>
               {this.props.mode === 'create' && (
-                <EuiFormRow label="Color">
+                <EuiFormRow label="Tag Color">
                   <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
                 </EuiFormRow>
               )}
@@ -112,13 +109,13 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         >
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h3>Configurations</h3>
+              <h3>Tag Configurations</h3>
             </EuiTitle>
             <EuiText color="subdued">
               <p>
-                You can have multiple configurations applied to an individual tag. These
-                configurations can repeat or mix types as necessary. For example, you may utilize
-                three metricbeat configurations alongside one input and filebeat configuration.
+                Tags can contain multiple configurations. These configurations can repeat or mix
+                types as necessary. For example, you may utilize three metricbeat configurations
+                alongside one input and filebeat configuration.
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -148,7 +145,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                   this.setState({ showFlyout: true });
                 }}
               >
-                Add a new configuration
+                Add configuration
               </EuiButton>
             </div>
           </EuiFlexItem>
