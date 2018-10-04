@@ -5,14 +5,19 @@
  */
 
 import $ from 'jquery';
+import { i18n } from '@kbn/i18n';
 import { times } from 'lodash';
 import { elasticOutline } from '../lib/elastic_outline';
 import { isValid } from '../../common/lib/url';
 
 export const repeatImage = () => ({
   name: 'repeatImage',
-  displayName: 'Image Repeat',
-  help: 'Repeat an image a given number of times',
+  displayName: i18n.translate('xpack.canvas.renderers.repeatImageDisplayName', {
+    defaultMessage: 'Image Repeat',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.repeatImageHelpText', {
+    defaultMessage: 'Repeat an image a given number of times',
+  }),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const settings = {
@@ -40,7 +45,13 @@ export const repeatImage = () => ({
       times(settings.count, () => container.append(img.cloneNode(true)));
 
       if (isValid(settings.emptyImage)) {
-        if (settings.max == null) throw new Error('max must be set if using an emptyImage');
+        if (settings.max == null) {
+          throw new Error(
+            i18n.translate('xpack.canvas.renderers.repeatImage.useEmptyImageErrorMessage', {
+              defaultMessage: 'max must be set if using an emptyImage',
+            })
+          );
+        }
 
         const emptyImage = new Image();
         emptyImage.onload = function() {

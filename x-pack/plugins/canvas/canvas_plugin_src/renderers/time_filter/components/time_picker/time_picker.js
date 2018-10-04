@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import dateMath from '@elastic/datemath';
 import { EuiButton } from '@elastic/eui';
 import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DatetimeRangeAbsolute } from '../datetime_range_absolute';
 import { DatetimeQuickList } from '../datetime_quick_list';
 import './time_picker.scss';
@@ -48,7 +49,10 @@ export const TimePicker = ({ range, setRange, dirty, setDirty, onSelect }) => {
             onSelect(range.from, range.to);
           }}
         >
-          Apply
+          <FormattedMessage
+            id="xpack.canvas.renderers.timePicker.applyButtonLabel"
+            defaultMessage="Apply"
+          />
         </EuiButton>
       </DatetimeQuickList>
     </div>

@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { getId } from '../../../public/lib/get_id';
 import { shapes } from './shapes';
 
 export const progress = () => ({
   name: 'progress',
-  displayName: 'Progress',
-  help: 'Reveal a percentage of an element',
+  displayName: i18n.translate('xpack.canvas.renderers.progressDisplayName', {
+    defaultMessage: 'Progress',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.progressHelpText', {
+    defaultMessage: 'Reveal a percentage of an element',
+  }),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const { shape, value, max, valueColor, barColor, valueWeight, barWeight, label, font } = config;

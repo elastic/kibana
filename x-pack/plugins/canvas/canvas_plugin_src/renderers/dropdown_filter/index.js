@@ -6,14 +6,19 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 import { DropdownFilter } from './component';
 
 export const dropdownFilter = () => ({
   name: 'dropdown_filter',
-  displayName: 'Dropdown Filter',
-  help: 'A dropdown from which you can select values for an "exactly" filter',
+  displayName: i18n.translate('xpack.canvas.renderers.dropdownFilterDisplayName', {
+    defaultMessage: 'Dropdown Filter',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.dropdownFilterHelpText', {
+    defaultMessage: 'A dropdown from which you can select values for an "exactly" filter',
+  }),
   reuseDomNode: true,
   height: 50,
   render(domNode, config, handlers) {

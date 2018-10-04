@@ -6,11 +6,16 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { i18n } from '@kbn/i18n';
 
 export const metric = () => ({
   name: 'metric',
-  displayName: 'Metric',
-  help: 'Render HTML Markup for the Metric element',
+  displayName: i18n.translate('xpack.canvas.renderers.metricDisplayName', {
+    defaultMessage: 'Metric',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.metricHelpText', {
+    defaultMessage: 'Render HTML Markup for the Metric element',
+  }),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const metricFontStyle = config.metricFont ? config.metricFont.spec : {};

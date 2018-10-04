@@ -6,12 +6,17 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { Debug } from '../../public/components/debug';
 
 export const debug = () => ({
   name: 'debug',
-  displayName: 'Debug',
-  help: 'Render debug output as formatted JSON',
+  displayName: i18n.translate('xpack.canvas.renderers.debugDisplayName', {
+    defaultMessage: 'Debug',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.debugHelpText', {
+    defaultMessage: 'Render debug output as formatted JSON',
+  }),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const renderDebug = () => (

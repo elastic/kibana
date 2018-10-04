@@ -7,9 +7,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import './advanced_filter.scss';
 
-export const AdvancedFilter = ({ value, onChange, commit }) => (
+const AdvancedFilterUI = ({ value, onChange, commit, intl }) => (
   <form
     onSubmit={e => {
       e.preventDefault();
@@ -22,7 +23,10 @@ export const AdvancedFilter = ({ value, onChange, commit }) => (
         <input
           type="text"
           className="canvasAdvancedFilter__input"
-          placeholder="Enter filter expression"
+          placeholder={intl.formatMessage({
+            id: 'xpack.canvas.renderers.advancedFilter.inputPlaceholder',
+            defaultMessage: 'Enter filter expression',
+          })}
           value={value}
           onChange={e => onChange(e.target.value)}
         />
@@ -33,15 +37,20 @@ export const AdvancedFilter = ({ value, onChange, commit }) => (
           type="submit"
           onClick={() => commit(value)}
         >
-          Apply
+          <FormattedMessage
+            id="xpack.canvas.renderers.advancedFilter.applyButtonLabel"
+            defaultMessage="Apply"
+          />
         </button>
       </EuiFlexItem>
     </EuiFlexGroup>
   </form>
 );
 
-AdvancedFilter.propTypes = {
+AdvancedFilterUI.propTypes = {
   onChange: PropTypes.func,
   value: PropTypes.string,
   commit: PropTypes.func,
 };
+
+export const AdvancedFilter = injectI18n(AdvancedFilterUI);

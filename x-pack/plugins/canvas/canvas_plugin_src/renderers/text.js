@@ -6,11 +6,16 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 export const text = () => ({
   name: 'text',
-  displayName: 'Plain Text',
-  help: 'Render output as plain text',
+  displayName: i18n.translate('xpack.canvas.renderers.textDisplayName', {
+    defaultMessage: 'Plain Text',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.textHelpText', {
+    defaultMessage: 'Render output as plain text',
+  }),
   reuseDomNode: true,
   render(domNode, { text }, handlers) {
     ReactDOM.render(<div>{text}</div>, domNode, () => handlers.done());

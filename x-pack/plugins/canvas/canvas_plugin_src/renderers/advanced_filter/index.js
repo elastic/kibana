@@ -6,12 +6,17 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { AdvancedFilter } from './component';
 
 export const advancedFilter = () => ({
   name: 'advanced_filter',
-  displayName: 'Advanced Filter',
-  help: 'Render a Canvas filter expression',
+  displayName: i18n.translate('xpack.canvas.renderers.advancedFilterDisplayName', {
+    defaultMessage: 'Advanced Filter',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.advancedFilterHelpText', {
+    defaultMessage: 'Render a Canvas filter expression',
+  }),
   reuseDomNode: true,
   height: 50,
   render(domNode, config, handlers) {

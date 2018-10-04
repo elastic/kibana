@@ -9,12 +9,17 @@ import 'jquery';
 import '../../lib/flot-charts';
 
 import { debounce, includes } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { pie as piePlugin } from './plugins/pie';
 
 export const pie = () => ({
   name: 'pie',
-  displayName: 'Pie chart',
-  help: 'Render a pie chart from data',
+  displayName: i18n.translate('xpack.canvas.renderers.pieDisplayName', {
+    defaultMessage: 'Pie chart',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.pieHelpText', {
+    defaultMessage: 'Render a pie chart from data',
+  }),
   reuseDomNode: false,
   render(domNode, config, handlers) {
     if (!includes($.plot.plugins, piePlugin)) $.plot.plugins.push(piePlugin);

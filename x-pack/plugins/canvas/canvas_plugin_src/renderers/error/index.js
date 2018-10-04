@@ -7,13 +7,18 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Error } from '../../../public/components/error';
 import { Popover } from '../../../public/components/popover';
 
 export const error = () => ({
   name: 'error',
-  displayName: 'Error Information',
-  help: 'Render error data in a way that is helpful to users',
+  displayName: i18n.translate('xpack.canvas.renderers.errorDisplayName', {
+    defaultMessage: 'Error Information',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.errorHelpText', {
+    defaultMessage: 'Render error data in a way that is helpful to users',
+  }),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const draw = () => {

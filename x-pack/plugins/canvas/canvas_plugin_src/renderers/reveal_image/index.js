@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { elasticOutline } from '../../lib/elastic_outline';
 import { isValid } from '../../../common/lib/url';
 import './reveal_image.scss';
 
 export const revealImage = () => ({
   name: 'revealImage',
-  displayName: 'Image Reveal',
-  help: 'Reveal a percentage of an image to make a custom gauge-style chart',
+  displayName: i18n.translate('xpack.canvas.renderers.revealImageDisplayName', {
+    defaultMessage: 'Image Reveal',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.revealImageHelpText', {
+    defaultMessage: 'Reveal a percentage of an image to make a custom gauge-style chart',
+  }),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const aligner = document.createElement('div');

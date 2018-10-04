@@ -7,13 +7,18 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { get, set } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 import { TimeFilter } from './components/time_filter';
 
 export const timeFilter = () => ({
   name: 'time_filter',
-  displayName: 'Time Filter',
-  help: 'Set a time window',
+  displayName: i18n.translate('xpack.canvas.renderers.timeFilterDisplayName', {
+    defaultMessage: 'Time Filter',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.timeFilterHelpText', {
+    defaultMessage: 'Set a time window',
+  }),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const ast = fromExpression(handlers.getFilter());

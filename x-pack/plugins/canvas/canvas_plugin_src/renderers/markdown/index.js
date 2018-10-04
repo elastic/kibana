@@ -7,14 +7,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Markdown from 'markdown-it';
+import { i18n } from '@kbn/i18n';
 import './markdown.scss';
 
 const md = new Markdown();
 
 export const markdown = () => ({
   name: 'markdown',
-  displayName: 'Markdown',
-  help: 'Render HTML Markup using Markdown input',
+  displayName: i18n.translate('xpack.canvas.renderers.markdownDisplayName', {
+    defaultMessage: 'Markdown',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.markdownHelpText', {
+    defaultMessage: 'Render HTML Markup using Markdown input',
+  }),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const html = { __html: md.render(String(config.content)) };

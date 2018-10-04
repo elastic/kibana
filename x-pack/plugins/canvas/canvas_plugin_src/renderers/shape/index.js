@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { shapes } from './shapes';
 
 export const shape = () => ({
   name: 'shape',
-  displayName: 'Shape',
-  help: 'Render an shape',
+  displayName: i18n.translate('xpack.canvas.renderers.shapeDisplayName', {
+    defaultMessage: 'Shape',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.shapeHelpText', {
+    defaultMessage: 'Render an shape',
+  }),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const { shape, fill, border, borderWidth, maintainAspect } = config;

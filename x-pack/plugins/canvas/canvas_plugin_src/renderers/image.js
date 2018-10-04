@@ -6,13 +6,18 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { elasticLogo } from '../lib/elastic_logo';
 import { isValid } from '../../common/lib/url';
 
 export const image = () => ({
   name: 'image',
-  displayName: 'Image',
-  help: 'Render an image',
+  displayName: i18n.translate('xpack.canvas.renderers.imageDisplayName', {
+    defaultMessage: 'Image',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.imageHelpText', {
+    defaultMessage: 'Render an image',
+  }),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const dataurl = isValid(config.dataurl) ? config.dataurl : elasticLogo;

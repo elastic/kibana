@@ -9,6 +9,7 @@ import 'jquery';
 import '../../lib/flot-charts';
 
 import { debounce, includes } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { size } from './plugins/size';
 import { text } from './plugins/text';
 import './plot.scss';
@@ -59,7 +60,11 @@ const render = (domNode, config, handlers) => {
 
 export const plot = () => ({
   name: 'plot',
-  displayName: 'Coordinate plot',
-  help: 'Render an XY plot from your data',
+  displayName: i18n.translate('xpack.canvas.renderers.plotDisplayName', {
+    defaultMessage: 'Coordinate plot',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.plotHelpText', {
+    defaultMessage: 'Render an XY plot from your data',
+  }),
   render,
 });

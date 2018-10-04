@@ -6,13 +6,18 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { Datatable } from '../../public/components/datatable';
 
 export const table = () => ({
   name: 'table',
-  displayName: 'Data Table',
-  help: 'Render tabular data as HTML',
+  displayName: i18n.translate('xpack.canvas.renderers.tableDisplayName', {
+    defaultMessage: 'Data Table',
+  }),
+  help: i18n.translate('xpack.canvas.renderers.tableHelpText', {
+    defaultMessage: 'Render tabular data as HTML',
+  }),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const { datatable, paginate, perPage, font, showHeader } = config;
