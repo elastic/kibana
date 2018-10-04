@@ -102,6 +102,7 @@ class RequestSelector extends Component {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        repositionOnScroll
       >
         <EuiContextMenuPanel
           className="insRequestSelector__menuPanel"
