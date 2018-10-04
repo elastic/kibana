@@ -7,8 +7,6 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { TaskManager } from './task_manager';
-import { TaskPoller } from './task_poller';
-import { TaskStore } from './task_store';
 
 describe('TaskManager', () => {
   let clock: sinon.SinonFakeTimers;
@@ -34,7 +32,7 @@ describe('TaskManager', () => {
 
     $test.afterPluginsInit();
 
-    const { store = new TaskStore(), poller = new TaskPoller() } = client;
+    const { store, poller } = client as any;
 
     store.init = sinon.spy(async () => undefined);
     poller.start = sinon.spy(async () => undefined);
