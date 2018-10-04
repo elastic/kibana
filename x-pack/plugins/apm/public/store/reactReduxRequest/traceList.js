@@ -7,7 +7,7 @@
 import React from 'react';
 import { Request } from 'react-redux-request';
 import { createSelector } from 'reselect';
-import mockTraceList from '../mockData/mockTraceList.json';
+import { loadTraceList } from '../../services/rest/apm';
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'traceList';
@@ -23,10 +23,6 @@ export const selectTraceList = createSelector(
   }
 );
 
-function loadMockTraces() {
-  return Promise.resolve(mockTraceList);
-}
-
 export function TraceListRequest({ urlParams = {}, render }) {
   const { start, end, kuery } = urlParams;
 
@@ -37,7 +33,7 @@ export function TraceListRequest({ urlParams = {}, render }) {
   return (
     <Request
       id={ID}
-      fn={loadMockTraces}
+      fn={loadTraceList}
       args={[
         {
           start,

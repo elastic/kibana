@@ -11,29 +11,31 @@ import React, { Component } from 'react';
 import { StringMap } from '../../../../typings/common';
 
 // TODO: this should really be imported from EUI
-interface TableColumn {
+export interface ITableColumn {
   field: string;
   name: string;
+  dataType?: string;
+  align?: string;
   width?: string;
   sortable?: boolean;
   render: (value: any, item?: any) => any;
 }
 
-interface ManagedTableProps {
+export interface IManagedTableProps {
   items: Array<StringMap<any>>;
-  columns: TableColumn[];
+  columns: ITableColumn[];
   initialPageIndex?: number;
   initialPageSize?: number;
   hidePerPageOptions?: boolean;
   initialSort?: {
     field: string;
-    direction: string;
+    direction: 'asc' | 'desc';
   };
   noItemsMessage?: any;
 }
 
-export class ManagedTable extends Component<ManagedTableProps, any> {
-  constructor(props: ManagedTableProps) {
+export class ManagedTable extends Component<IManagedTableProps, any> {
+  constructor(props: IManagedTableProps) {
     super(props);
 
     const defaultSort = {
