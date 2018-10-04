@@ -123,6 +123,10 @@ class ConcreteIndexMigrator implements IndexMigrator {
 
     this.isComplete = true;
 
+    const message =
+      result.status === 'skipped' ? 'skipped' : `finished in ${(result as any).elapsedMs}ms`;
+    context.log.info(`Migrations ${message}.`);
+
     return result;
   }
 }
@@ -158,16 +162,12 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
 
   await Index.claimAlias(callCluster, dest.indexName, alias);
 
-  const result: MigrationResult = {
+  return {
     status: 'migrated',
     destIndex: dest.indexName,
     sourceIndex: source.indexName,
     elapsedMs: Date.now() - startTime,
   };
-
-  log.info(`Finished in ${result.elapsedMs}ms.`);
-
-  return result;
 }
 
 /**
