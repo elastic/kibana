@@ -9,12 +9,12 @@ import header from './header.png';
 
 export const pie = () => ({
   name: 'pie',
-  displayName: i18n.translate('xpack.canvas.elements.pieChartDisplayName', {
+  displayName: i18n.translate('xpack.canvas.elements.pieDisplayName', {
     defaultMessage: 'Pie chart',
   }),
   width: 300,
   height: 300,
-  help: i18n.translate('xpack.canvas.elements.pieChartHelpText', {
+  help: i18n.translate('xpack.canvas.elements.pieHelpText', {
     defaultMessage: 'Pie chart',
   }),
   image: header,

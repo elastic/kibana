@@ -9,12 +9,12 @@ import header from './header.png';
 
 export const tiltedPie = () => ({
   name: 'tiltedPie',
-  displayName: i18n.translate('xpack.canvas.elements.tiltedPieChartDisplayName', {
+  displayName: i18n.translate('xpack.canvas.elements.tiltedPieDisplayName', {
     defaultMessage: 'Tilted pie chart',
   }),
   width: 500,
   height: 250,
-  help: i18n.translate('xpack.canvas.elements.tiltedPieChartHelpText', {
+  help: i18n.translate('xpack.canvas.elements.tiltedPieHelpText', {
     defaultMessage: 'A customizable tilted pie chart',
   }),
   image: header,

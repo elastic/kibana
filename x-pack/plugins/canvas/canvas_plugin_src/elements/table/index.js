@@ -9,10 +9,10 @@ import header from './header.png';
 
 export const table = () => ({
   name: 'table',
-  displayName: i18n.translate('xpack.canvas.elements.dataTableDisplayName', {
+  displayName: i18n.translate('xpack.canvas.elements.tableDisplayName', {
     defaultMessage: 'Data table',
   }),
-  help: i18n.translate('xpack.canvas.elements.dataTableHelpText', {
+  help: i18n.translate('xpack.canvas.elements.tableHelpText', {
     defaultMessage: 'A scrollable grid for displaying data in a tabular format',
   }),
   image: header,

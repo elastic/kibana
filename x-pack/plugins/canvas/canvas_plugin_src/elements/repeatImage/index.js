@@ -9,10 +9,10 @@ import header from './header.png';
 
 export const repeatImage = () => ({
   name: 'repeatImage',
-  displayName: i18n.translate('xpack.canvas.elements.imageRepeatDisplayName', {
+  displayName: i18n.translate('xpack.canvas.elements.repeatImageDisplayName', {
     defaultMessage: 'Image repeat',
   }),
-  help: i18n.translate('xpack.canvas.elements.imageRepeatHelpText', {
+  help: i18n.translate('xpack.canvas.elements.repeatImageHelpText', {
     defaultMessage: 'Repeats an image N times',
   }),
   image: header,

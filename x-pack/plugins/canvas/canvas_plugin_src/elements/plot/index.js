@@ -9,10 +9,10 @@ import header from './header.png';
 
 export const plot = () => ({
   name: 'plot',
-  displayName: i18n.translate('xpack.canvas.elements.coordinatePlotDisplayName', {
+  displayName: i18n.translate('xpack.canvas.elements.plotDisplayName', {
     defaultMessage: 'Coordinate plot',
   }),
-  help: i18n.translate('xpack.canvas.elements.coordinatePlotHelpText', {
+  help: i18n.translate('xpack.canvas.elements.plotHelpText', {
     defaultMessage: 'Mixed line, bar or dot charts',
   }),
   image: header,
