@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import * as fs from 'fs';
+import { resolve } from 'path';
+const fse = require('fs-extra');
 
 /**
  * Recursive deletion for a directory
@@ -25,16 +26,5 @@ import * as fs from 'fs';
  * @param {String} path
  */
 export function rmrfSync(path) {
-  if (fs.existsSync(path)) {
-    fs.readdirSync(path).forEach(file => {
-      const curPath = path + '/' + file;
-
-      if (fs.lstatSync(curPath).isDirectory()) {
-        rmrfSync(curPath);
-      } else {
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(path);
-  }
+  fse.removeSync(resolve(path));
 }
