@@ -145,7 +145,12 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
               <Route
                 path={step.id}
                 render={(props: any) => (
-                  <step.page {...this.props} {...props} libs={this.props.libs} />
+                  <step.page
+                    {...this.props}
+                    {...props}
+                    libs={this.props.libs}
+                    loadBeats={this.loadBeats}
+                  />
                 )}
               />
             ))}

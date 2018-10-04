@@ -12,7 +12,7 @@ import { AppURLState } from '../../app';
 import { URLStateProps, withUrlState } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 interface PageProps extends URLStateProps<AppURLState>, RouteComponentProps<any> {
-  match: any;
+  loadBeats: any;
   libs: FrontendLibs;
 }
 export class ReviewWalkthrough extends React.Component<PageProps, any> {
@@ -26,6 +26,8 @@ export class ReviewWalkthrough extends React.Component<PageProps, any> {
 
   public componentDidMount() {
     setTimeout(async () => {
+      await this.props.loadBeats();
+
       const done = await this.assignTagToBeat();
 
       if (done) {
@@ -60,7 +62,9 @@ export class ReviewWalkthrough extends React.Component<PageProps, any> {
                 <EuiButton
                   fill
                   disabled={!this.state.assigned}
-                  onClick={() => goTo('/overview/beats')}
+                  onClick={async () => {
+                    goTo('/overview/beats');
+                  }}
                 >
                   Done
                 </EuiButton>
