@@ -40,9 +40,7 @@ function startTrialDescription() {
 
 export function DatavisualizerSelector() {
 
-  // TODO - add correct logic for determining whether to show the link to the
-  // license management page allowing the user to start a trial of the Platinum feature set.
-  const shouldShowStartTrialLink = (isFullLicense() === false);
+  const startTrialVisible = (isFullLicense() === false);
 
   return (
     <EuiPage>
@@ -98,7 +96,7 @@ export function DatavisualizerSelector() {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {shouldShowStartTrialLink === true &&
+        {startTrialVisible === true &&
           <React.Fragment>
             <EuiSpacer size="xxl" />
             <EuiSpacer size="xxl" />
