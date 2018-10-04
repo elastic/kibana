@@ -80,6 +80,7 @@
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
+    "@kbn/config-schema": "link:packages/kbn-config-schema",
     "@kbn/datemath": "link:packages/kbn-datemath",
     "@kbn/i18n": "link:packages/kbn-i18n",
     "@kbn/pm": "link:packages/kbn-pm",

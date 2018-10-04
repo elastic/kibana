@@ -81,6 +81,9 @@ export abstract class Type<V> {
     return validatedValue;
   }
 
+  /**
+   * @internal
+   */
   public getSchema() {
     return this.internalSchema;
   }

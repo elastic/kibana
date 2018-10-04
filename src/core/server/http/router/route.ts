@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ObjectType, Schema } from '../../config/schema';
+import { ObjectType, Schema } from '@kbn/config-schema';
 export type RouteMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {
