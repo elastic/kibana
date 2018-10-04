@@ -41,6 +41,7 @@ export const containerStyle = () => ({
       types: ['string'],
       help: 'Valid CSS background size string',
       default: 'contain',
+      options: ['contain', 'cover', 'auto'],
     },
     backgroundRepeat: {
       types: ['string'],
@@ -54,7 +55,8 @@ export const containerStyle = () => ({
     },
     overflow: {
       types: ['string'],
-      help: `Sets overflow of the container`,
+      help: 'Sets overflow of the container',
+      options: ['visible', 'hidden', 'scroll', 'auto'],
     },
   },
   fn: (context, args) => {

@@ -6,19 +6,21 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, keyCodes } from '@elastic/eui';
-import { startCase } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, keyCodes } from '@elastic/eui';
 
 /**
  * An autocomplete component. Currently this is only used for the expression editor but in theory
- * it could be extended to any autocomplete-related component. It expects three props:
+ * it could be extended to any autocomplete-related component. It expects these props:
  *
+ * header: The header node
  * items: The list of items for autocompletion
  * onSelect: The function to invoke when an item is selected (passing in the item)
  * children: Any child nodes, which should include the text input itself
+ * reference: A function that is passed the selected item which generates a reference node
  */
 export class Autocomplete extends React.Component {
   static propTypes = {
+    header: PropTypes.node,
     items: PropTypes.array,
     onSelect: PropTypes.func,
     children: PropTypes.node,
@@ -172,6 +174,7 @@ export class Autocomplete extends React.Component {
   };
 
   render() {
+    const { header, items, reference } = this.props;
     return (
       <div
         className="autocomplete"
@@ -192,34 +195,27 @@ export class Autocomplete extends React.Component {
             onMouseLeave={this.onMouseLeave}
           >
             <EuiFlexGroup gutterSize="none">
-              {this.props.items && this.props.items.length ? (
+              {items && items.length ? (
                 <EuiFlexItem style={{ maxWidth: 400 }}>
                   <div
                     className="autocompleteItems"
                     ref={ref => (this.containerRef = ref)}
                     role="listbox"
                   >
-                    {this.props.items.map((item, i, items) => (
-                      <div key={i}>
-                        {i === 0 || items[i - 1].type !== item.type ? (
-                          <EuiTitle className="autocompleteType" size="xs">
-                            <h3>{startCase(item.type)}</h3>
-                          </EuiTitle>
-                        ) : (
-                          ''
-                        )}
-                        <div
-                          ref={ref => (this.itemRefs[i] = ref)}
-                          className={
-                            'autocompleteItem' +
-                            (this.state.selectedIndex === i ? ' autocompleteItem--isActive' : '')
-                          }
-                          onMouseEnter={() => this.setState({ selectedIndex: i })}
-                          onClick={this.onSubmit}
-                          role="option"
-                        >
-                          {item.text}
-                        </div>
+                    {header}
+                    {items.map((item, i) => (
+                      <div
+                        key={i}
+                        ref={ref => (this.itemRefs[i] = ref)}
+                        className={
+                          'autocompleteItem' +
+                          (this.state.selectedIndex === i ? ' autocompleteItem--isActive' : '')
+                        }
+                        onMouseEnter={() => this.setState({ selectedIndex: i })}
+                        onClick={this.onSubmit}
+                        role="option"
+                      >
+                        {item.text}
                       </div>
                     ))}
                   </div>
@@ -228,9 +224,7 @@ export class Autocomplete extends React.Component {
                 ''
               )}
               <EuiFlexItem>
-                <div className="autocompleteReference">
-                  {this.props.reference(this.getSelectedItem())}
-                </div>
+                <div className="autocompleteReference">{reference(this.getSelectedItem())}</div>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

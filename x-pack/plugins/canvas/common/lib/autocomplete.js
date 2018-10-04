@@ -10,7 +10,11 @@ import { getByAlias } from './get_by_alias';
 
 const MARKER = 'CANVAS_SUGGESTION_MARKER';
 
-export function getFnArgDef(specs, expression, position) {
+/**
+ * Generates the AST with the given expression and then returns the function and argument definitions
+ * at the given position in the expression, if there are any.
+ */
+export function getFnArgDefAtPosition(specs, expression, position) {
   const text = expression.substr(0, position) + MARKER + expression.substr(position);
   try {
     const ast = parse(text, { addMeta: true });
@@ -29,6 +33,13 @@ export function getFnArgDef(specs, expression, position) {
   return [];
 }
 
+/**
+ * Gets a list of suggestions for the given expression at the given position. It does this by
+ * inserting a marker at the given position, then parsing the resulting expression. This way we can
+ * see what the marker would turn into, which tells us what sorts of things to suggest. For
+ * example, if the marker turns into a function name, then we suggest functions. If it turns into
+ * an unnamed argument, we suggest argument names. If it turns into a value, we suggest values.
+ */
 export function getAutocompleteSuggestions(specs, expression, position) {
   const text = expression.substr(0, position) + MARKER + expression.substr(position);
   try {
@@ -47,6 +58,9 @@ export function getAutocompleteSuggestions(specs, expression, position) {
   return [];
 }
 
+/**
+ * Get the function and argument (if there is one) at the given position.
+ */
 export function getFnArgAtPosition(ast, position) {
   const fnIndex = ast.node.chain.findIndex(fn => fn.start <= position && position <= fn.end);
   const fn = ast.node.chain[fnIndex];

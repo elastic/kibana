@@ -6,10 +6,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiTextArea, EuiFormRow } from '@elastic/eui';
-import { debounce } from 'lodash';
+import { EuiTextArea, EuiFormRow, EuiTitle } from '@elastic/eui';
+import { debounce, startCase } from 'lodash';
 import { Autocomplete } from '../autocomplete';
-import { getAutocompleteSuggestions, getFnArgDef } from '../../../common/lib/autocomplete';
+import {
+  getAutocompleteSuggestions,
+  getFnArgDefAtPosition,
+} from '../../../common/lib/autocomplete';
 import { FunctionReference } from './function_reference';
 import { ArgumentReference } from './argument_reference';
 
@@ -104,12 +107,22 @@ export class ExpressionInput extends React.Component {
     this.setState({ selection, suggestions });
   };
 
+  getHeader = () => {
+    const { suggestions } = this.state;
+    if (!suggestions.length) return '';
+    return (
+      <EuiTitle className="autocompleteType" size="xs">
+        <h3>{startCase(suggestions[0].type)}</h3>
+      </EuiTitle>
+    );
+  };
+
   getReference = selectedItem => {
     const { fnDef, argDef } = selectedItem || {};
     if (argDef) return <ArgumentReference argDef={argDef} />;
     if (fnDef) return <FunctionReference fnDef={fnDef} />;
 
-    const { fnDef: fnDefAtPosition, argDef: argDefAtPosition } = getFnArgDef(
+    const { fnDef: fnDefAtPosition, argDef: argDefAtPosition } = getFnArgDefAtPosition(
       this.props.functionDefinitions,
       this.props.value,
       this.state.selection.start
@@ -132,6 +145,7 @@ export class ExpressionInput extends React.Component {
       <div className="expressionInput">
         <EuiFormRow fullWidth isInvalid={Boolean(error)} error={error} helpText={helpText}>
           <Autocomplete
+            header={this.getHeader()}
             items={suggestions}
             onSelect={this.onSuggestionSelect}
             reference={this.getReference}
