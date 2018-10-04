@@ -10,7 +10,9 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, {
+  Component
+} from 'react';
 
 import {
   EuiComboBox,
@@ -26,10 +28,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import {
-  isValidCustomUrlLabel,
-  isValidCustomUrlSettingsTimeRange
-} from 'plugins/ml/jobs/components/custom_url_editor/utils';
+import { isValidCustomUrlSettingsTimeRange } from '../../../jobs/components/custom_url_editor/utils';
+import { isValidLabel } from '../../../util/custom_url_utils';
 
 import './styles/main.less';
 
@@ -51,264 +51,285 @@ function getLinkToOptions() {
   }];
 }
 
-function onLabelChange(e, customUrl, setEditCustomUrl) {
-  setEditCustomUrl({
-    ...customUrl,
-    label: e.target.value
-  });
-}
+export class CustomUrlEditor extends Component {
 
-function onTypeChange(linkType, customUrl, setEditCustomUrl) {
-  setEditCustomUrl({
-    ...customUrl,
-    type: linkType
-  });
-}
-
-function onDashboardChange(e, customUrl, setEditCustomUrl) {
-  const kibanaSettings = customUrl.kibanaSettings;
-  setEditCustomUrl({
-    ...customUrl,
-    kibanaSettings: {
-      ...kibanaSettings,
-      dashboardId: e.target.value
-    }
-  });
-}
-function onDiscoverIndexPatternChange(e, customUrl, setEditCustomUrl) {
-  const kibanaSettings = customUrl.kibanaSettings;
-  setEditCustomUrl({
-    ...customUrl,
-    kibanaSettings: {
-      ...kibanaSettings,
-      discoverIndexPatternId: e.target.value
-    }
-  });
-}
-
-function onQueryEntitiesChange(selectedOptions, customUrl, setEditCustomUrl) {
-  const selectedFieldNames = selectedOptions.map(option => option.label);
-
-  const kibanaSettings = customUrl.kibanaSettings;
-  setEditCustomUrl({
-    ...customUrl,
-    kibanaSettings: {
-      ...kibanaSettings,
-      queryFieldNames: selectedFieldNames
-    }
-  });
-}
-
-function onOtherUrlValueChange(e, customUrl, setEditCustomUrl) {
-  setEditCustomUrl({
-    ...customUrl,
-    otherUrlSettings: {
-      urlValue: e.target.value
-    }
-  });
-}
-
-function onTimeRangeTypeChange(e, customUrl, setEditCustomUrl) {
-  const timeRange = customUrl.timeRange;
-  setEditCustomUrl({
-    ...customUrl,
-    timeRange: {
-      ...timeRange,
-      type: e.target.value
-    }
-  });
-}
-
-function onTimeRangeIntervalChange(e, customUrl, setEditCustomUrl) {
-  const timeRange = customUrl.timeRange;
-  setEditCustomUrl({
-    ...customUrl,
-    timeRange: {
-      ...timeRange,
-      interval: e.target.value
-    }
-  });
-}
-
-
-export function CustomUrlEditor({
-  customUrl,
-  setEditCustomUrl,
-  dashboards,
-  indexPatterns,
-  queryEntityFieldNames }) {
-
-  if (customUrl === undefined) {
-    return;
+  constructor(props) {
+    super(props);
   }
 
-  const {
-    label,
-    type,
-    timeRange,
-    kibanaSettings,
-    otherUrlSettings
-  } = customUrl;
+  onLabelChange = (e) => {
+    const { customUrl, setEditCustomUrl } = this.props;
+    setEditCustomUrl({
+      ...customUrl,
+      label: e.target.value
+    });
+  };
 
-  const dashboardOptions = dashboards.map((dashboard) => {
-    return { value: dashboard.id, text: dashboard.title };
-  });
+  onTypeChange = (linkType) => {
+    const { customUrl, setEditCustomUrl } = this.props;
+    setEditCustomUrl({
+      ...customUrl,
+      type: linkType
+    });
+  };
 
-  const indexPatternOptions = indexPatterns.map((indexPattern) => {
-    return { value: indexPattern.id, text: indexPattern.title };
-  });
+  onDashboardChange = (e) => {
+    const { customUrl, setEditCustomUrl } = this.props;
+    const kibanaSettings = customUrl.kibanaSettings;
+    setEditCustomUrl({
+      ...customUrl,
+      kibanaSettings: {
+        ...kibanaSettings,
+        dashboardId: e.target.value
+      }
+    });
+  };
 
-  const entityOptions = queryEntityFieldNames.map(fieldName => ({ label: fieldName }));
-  const queryFieldNames = kibanaSettings.queryFieldNames;
-  let selectedEntityOptions = [];
-  if (queryFieldNames !== undefined) {
-    selectedEntityOptions = queryFieldNames.map(fieldName => ({ label: fieldName }));
-  }
+  onDiscoverIndexPatternChange = (e) => {
+    const { customUrl, setEditCustomUrl } = this.props;
+    const kibanaSettings = customUrl.kibanaSettings;
+    setEditCustomUrl({
+      ...customUrl,
+      kibanaSettings: {
+        ...kibanaSettings,
+        discoverIndexPatternId: e.target.value
+      }
+    });
+  };
 
-  const timeRangeOptions = Object.keys(TIME_RANGE_TYPE).map((timeRangeType) => {
-    return { value: TIME_RANGE_TYPE[timeRangeType], text: TIME_RANGE_TYPE[timeRangeType] };
-  });
+  onQueryEntitiesChange = (selectedOptions) => {
+    const { customUrl, setEditCustomUrl } = this.props;
+    const selectedFieldNames = selectedOptions.map(option => option.label);
 
+    const kibanaSettings = customUrl.kibanaSettings;
+    setEditCustomUrl({
+      ...customUrl,
+      kibanaSettings: {
+        ...kibanaSettings,
+        queryFieldNames: selectedFieldNames
+      }
+    });
+  };
 
-  const isInvalidTimeRange = !isValidCustomUrlSettingsTimeRange(timeRange);
-  const invalidIntervalError = (isInvalidTimeRange === true) ?
-    ['Invalid interval format'] : [];
+  onOtherUrlValueChange = (e) => {
+    const { customUrl, setEditCustomUrl } = this.props;
+    setEditCustomUrl({
+      ...customUrl,
+      otherUrlSettings: {
+        urlValue: e.target.value
+      }
+    });
+  };
 
-  return (
-    <React.Fragment>
-      <EuiTitle size="xs">
-        <h4>Create new custom URL</h4>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiForm>
-        <EuiFormRow
-          label="Label"
-          className="url-label"
-          compressed
-        >
-          <EuiFieldText
-            value={label}
-            onChange={(e) => onLabelChange(e, customUrl, setEditCustomUrl)}
-            isInvalid={!isValidCustomUrlLabel(label)}
-            compressed
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label="Link to"
-          compressed
-        >
-          <EuiRadioGroup
-            options={getLinkToOptions()}
-            idSelected={type}
-            onChange={(linkType) => onTypeChange(linkType, customUrl, setEditCustomUrl)}
-            className="url-link-to-radio"
-          />
-        </EuiFormRow>
+  onTimeRangeTypeChange = (e) => {
+    const { customUrl, setEditCustomUrl } = this.props;
+    const timeRange = customUrl.timeRange;
+    setEditCustomUrl({
+      ...customUrl,
+      timeRange: {
+        ...timeRange,
+        type: e.target.value
+      }
+    });
+  };
 
-        {type === URL_TYPE.KIBANA_DASHBOARD &&
+  onTimeRangeIntervalChange = (e) => {
+    const { customUrl, setEditCustomUrl } = this.props;
+    const timeRange = customUrl.timeRange;
+    setEditCustomUrl({
+      ...customUrl,
+      timeRange: {
+        ...timeRange,
+        interval: e.target.value
+      }
+    });
+  };
+
+  render() {
+    const {
+      customUrl,
+      savedCustomUrls,
+      dashboards,
+      indexPatterns,
+      queryEntityFieldNames,
+    } = this.props;
+
+    if (customUrl === undefined) {
+      return;
+    }
+
+    const {
+      label,
+      type,
+      timeRange,
+      kibanaSettings,
+      otherUrlSettings
+    } = customUrl;
+
+    const dashboardOptions = dashboards.map((dashboard) => {
+      return { value: dashboard.id, text: dashboard.title };
+    });
+
+    const indexPatternOptions = indexPatterns.map((indexPattern) => {
+      return { value: indexPattern.id, text: indexPattern.title };
+    });
+
+    const entityOptions = queryEntityFieldNames.map(fieldName => ({ label: fieldName }));
+    let selectedEntityOptions = [];
+    if (kibanaSettings !== undefined && kibanaSettings.queryFieldNames !== undefined) {
+      const queryFieldNames = kibanaSettings.queryFieldNames;
+      selectedEntityOptions = queryFieldNames.map(fieldName => ({ label: fieldName }));
+    }
+
+    const timeRangeOptions = Object.keys(TIME_RANGE_TYPE).map((timeRangeType) => {
+      return { value: TIME_RANGE_TYPE[timeRangeType], text: TIME_RANGE_TYPE[timeRangeType] };
+    });
+
+    const isInvalidLabel = !isValidLabel(label, savedCustomUrls);
+    const invalidLabelError = (isInvalidLabel === true) ? ['A unique label must be supplied'] : [];
+
+    const isInvalidTimeRange = !isValidCustomUrlSettingsTimeRange(timeRange);
+    const invalidIntervalError = (isInvalidTimeRange === true) ? ['Invalid interval format'] : [];
+
+    return (
+      <React.Fragment>
+        <EuiTitle size="xs">
+          <h4>Create new custom URL</h4>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiForm className="ml-edit-url-form">
           <EuiFormRow
-            label="Dashboard name"
+            label="Label"
+            className="url-label"
+            error={invalidLabelError}
+            isInvalid={isInvalidLabel}
             compressed
           >
-            <EuiSelect
-              options={dashboardOptions}
-              value={kibanaSettings.dashboardId}
-              onChange={(e) => onDashboardChange(e, customUrl, setEditCustomUrl)}
+            <EuiFieldText
+              value={label}
+              onChange={this.onLabelChange}
+              isInvalid={isInvalidLabel}
               compressed
             />
           </EuiFormRow>
-        }
-
-        {type === URL_TYPE.KIBANA_DISCOVER &&
           <EuiFormRow
-            label="Index pattern"
+            label="Link to"
             compressed
           >
-            <EuiSelect
-              options={indexPatternOptions}
-              value={kibanaSettings.discoverIndexPatternId}
-              onChange={(e) => onDiscoverIndexPatternChange(e, customUrl, setEditCustomUrl)}
+            <EuiRadioGroup
+              options={getLinkToOptions()}
+              idSelected={type}
+              onChange={this.onTypeChange}
+              className="url-link-to-radio"
+            />
+          </EuiFormRow>
+
+          {type === URL_TYPE.KIBANA_DASHBOARD &&
+            <EuiFormRow
+              label="Dashboard name"
               compressed
-            />
-          </EuiFormRow>
-        }
-
-        {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
-          entityOptions.length > 0 &&
-          <EuiFormRow
-            label="Query entities"
-          >
-            <EuiComboBox
-              placeholder="Select entities"
-              options={entityOptions}
-              selectedOptions={selectedEntityOptions}
-              onChange={(e) => onQueryEntitiesChange(e, customUrl, setEditCustomUrl)}
-              isClearable={true}
-            />
-          </EuiFormRow>
-        }
-
-        {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiFormRow
-                label="Time range"
-                className="url-time-range"
+            >
+              <EuiSelect
+                options={dashboardOptions}
+                value={kibanaSettings.dashboardId}
+                onChange={this.onDashboardChange}
                 compressed
-              >
-                <EuiSelect
-                  options={timeRangeOptions}
-                  value={timeRange.type}
-                  onChange={(e) => onTimeRangeTypeChange(e, customUrl, setEditCustomUrl)}
-                  compressed
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            {(timeRange.type === TIME_RANGE_TYPE.INTERVAL) &&
-              <EuiFlexItem>
+              />
+            </EuiFormRow>
+          }
+
+          {type === URL_TYPE.KIBANA_DISCOVER &&
+            <EuiFormRow
+              label="Index pattern"
+              compressed
+            >
+              <EuiSelect
+                options={indexPatternOptions}
+                value={kibanaSettings.discoverIndexPatternId}
+                onChange={this.onDiscoverIndexPatternChange}
+                compressed
+              />
+            </EuiFormRow>
+          }
+
+          {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
+            entityOptions.length > 0 &&
+            <EuiFormRow
+              label="Query entities"
+            >
+              <EuiComboBox
+                placeholder="Select entities"
+                options={entityOptions}
+                selectedOptions={selectedEntityOptions}
+                onChange={this.onQueryEntitiesChange}
+                isClearable={true}
+              />
+            </EuiFormRow>
+          }
+
+          {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
                 <EuiFormRow
-                  label="Interval"
+                  label="Time range"
                   className="url-time-range"
-                  error={invalidIntervalError}
-                  isInvalid={isInvalidTimeRange}
                   compressed
                 >
-                  <EuiFieldText
-                    value={timeRange.interval}
-                    onChange={(e) => onTimeRangeIntervalChange(e, customUrl, setEditCustomUrl)}
-                    isInvalid={isInvalidTimeRange}
+                  <EuiSelect
+                    options={timeRangeOptions}
+                    value={timeRange.type}
+                    onChange={this.onTimeRangeTypeChange}
                     compressed
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-            }
-          </EuiFlexGroup>
-        }
+              {(timeRange.type === TIME_RANGE_TYPE.INTERVAL) &&
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label="Interval"
+                    className="url-time-range"
+                    error={invalidIntervalError}
+                    isInvalid={isInvalidTimeRange}
+                    compressed
+                  >
+                    <EuiFieldText
+                      value={timeRange.interval}
+                      onChange={this.onTimeRangeIntervalChange}
+                      isInvalid={isInvalidTimeRange}
+                      compressed
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              }
+            </EuiFlexGroup>
+          }
 
-        {type === URL_TYPE.OTHER &&
-          <EuiFormRow
-            label="URL"
-            compressed
-            fullWidth={true}
-          >
-            <EuiTextArea
-              fullWidth={true}
-              rows={2}
-              value={otherUrlSettings.urlValue}
-              onChange={(e) => onOtherUrlValueChange(e, customUrl, setEditCustomUrl)}
+          {type === URL_TYPE.OTHER &&
+            <EuiFormRow
+              label="URL"
               compressed
-            />
-          </EuiFormRow>
-        }
+              fullWidth={true}
+            >
+              <EuiTextArea
+                fullWidth={true}
+                rows={2}
+                value={otherUrlSettings.urlValue}
+                onChange={this.onOtherUrlValueChange}
+                compressed
+              />
+            </EuiFormRow>
+          }
 
-      </EuiForm>
+        </EuiForm>
 
-    </React.Fragment>
-  );
+      </React.Fragment>
+    );
+  }
 }
 CustomUrlEditor.propTypes = {
   customUrl: PropTypes.object,
   setEditCustomUrl: PropTypes.func.isRequired,
+  savedCustomUrls: PropTypes.array.isRequired,
   dashboards: PropTypes.array.isRequired,
   indexPatterns: PropTypes.array.isRequired,
   queryEntityFieldNames: PropTypes.array.isRequired,

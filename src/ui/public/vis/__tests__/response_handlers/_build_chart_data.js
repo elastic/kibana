@@ -21,9 +21,8 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { TabifyTable } from '../../../agg_response/tabify/_table';
 import { AggResponseIndexProvider } from '../../../agg_response';
-import { BasicResponseHandlerProvider } from '../../response_handlers/basic';
+import { VislibSeriesResponseHandlerProvider } from '../../response_handlers/vislib';
 
 describe('renderbot#buildChartData', function () {
   let buildChartData;
@@ -32,7 +31,7 @@ describe('renderbot#buildChartData', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     aggResponse = Private(AggResponseIndexProvider);
-    buildChartData = Private(BasicResponseHandlerProvider).handler;
+    buildChartData = Private(VislibSeriesResponseHandlerProvider).handler;
   }));
 
   describe('for hierarchical vis', function () {
@@ -79,7 +78,7 @@ describe('renderbot#buildChartData', function () {
         }
       };
       const esResp = { hits: { total: 1 } };
-      const tabbed = { tables: [ new TabifyTable() ] };
+      const tabbed = { tables: [ {}] };
 
       sinon.stub(aggResponse, 'tabify').returns(tabbed);
       expect(buildChartData.call(renderbot, esResp)).to.eql(chart);
@@ -88,7 +87,7 @@ describe('renderbot#buildChartData', function () {
     it('converts table groups into rows/columns wrappers for charts', function () {
       const converter = sinon.stub().returns('chart');
       const esResp = { hits: { total: 1 } };
-      const tables = [new TabifyTable(), new TabifyTable(), new TabifyTable(), new TabifyTable()];
+      const tables = [{}, {}, {}, {}];
 
       const renderbot = {
         vis: {

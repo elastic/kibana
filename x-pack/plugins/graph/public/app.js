@@ -25,7 +25,6 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
-import './less/main.less';
 import appTemplate from './templates/index.html';
 
 import './angular-venn-simple.js';
@@ -101,7 +100,7 @@ uiRoutes
         return savedGraphWorkspaces.get($route.current.params.id)
           .catch(
             function () {
-              notify.error('Missing workspace');
+              toastNotifications.addDanger('Missing workspace');
             }
           );
 
@@ -830,7 +829,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
       }
     });
     if(!savedObjectIndexPattern) {
-      notify.error('Missing index pattern:' + wsObj.indexPattern);
+      toastNotifications.addDanger(`'Missing index pattern ${wsObj.indexPattern}`);
       return;
     }
 

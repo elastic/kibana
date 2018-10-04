@@ -18,61 +18,57 @@
  */
 
 import _ from 'lodash';
-import { PointSeriesFakeXAxisProvider } from './_fake_x_aspect';
+import { makeFakeXAspect } from './_fake_x_aspect';
 
-export function PointSeriesGetAspectsProvider(Private) {
-  const fakeXAspect = Private(PointSeriesFakeXAxisProvider);
+const map = {
+  segment: 'x',
+  metric: 'y',
+  radius: 'z',
+  width: 'width',
+  group: 'series'
+};
 
-  const map = {
-    segment: 'x',
-    metric: 'y',
-    radius: 'z',
-    width: 'width',
-    group: 'series'
+function columnToAspect(aspects, col, i) {
+  const schema = col.aggConfig.schema.name;
+
+  const name = map[schema];
+  if (!name) throw new TypeError('unknown schema name "' + schema + '"');
+
+  const aspect = {
+    i: i,
+    title: col.title,
+    aggConfig: col.aggConfig
   };
 
-  function columnToAspect(aspects, col, i) {
-    const schema = col.aggConfig.schema.name;
+  if (!aspects[name]) aspects[name] = [];
+  aspects[name].push(aspect);
+}
 
-    const name = map[schema];
-    if (!name) throw new TypeError('unknown schema name "' + schema + '"');
+/**
+ * Identify and group the columns based on the aspect of the pointSeries
+ * they represent.
+ *
+ * @param  {array} columns - the list of columns
+ * @return {object} - an object with a key for each aspect (see map). The values
+ *                    may be undefined, a single aspect, or an array of aspects.
+ */
+export function getAspects(table) {
+  const aspects = _(table.columns)
+  // write each column into the aspects under it's group
+    .transform(columnToAspect, {})
+    // unwrap groups that only have one value, and validate groups that have more
+    .transform(function (aspects, group, name) {
+      if ((name !== 'y' && name !== 'series') && group.length > 1) {
+        throw new TypeError('Only multiple metrics and series are supported in point series');
+      }
 
-    const aspect = {
-      i: i,
-      col: col,
-      agg: col.aggConfig
-    };
+      aspects[name] = group.length > 1 ? group : group[0];
+    })
+    .value();
 
-    if (!aspects[name]) aspects[name] = [];
-    aspects[name].push(aspect);
+  if (!aspects.x) {
+    aspects.x = makeFakeXAspect();
   }
 
-  /**
-   * Identify and group the columns based on the aspect of the pointSeries
-   * they represent.
-   *
-   * @param  {array} columns - the list of columns
-   * @return {object} - an object with a key for each aspect (see map). The values
-   *                    may be undefined, a single aspect, or an array of aspects.
-   */
-  return function getAspects(vis, table) {
-    const aspects = _(table.columns)
-    // write each column into the aspects under it's group
-      .transform(columnToAspect, {})
-      // unwrap groups that only have one value, and validate groups that have more
-      .transform(function (aspects, group, name) {
-        if ((name !== 'y' && name !== 'series') && group.length > 1) {
-          throw new TypeError('Only multiple metrics and series are supported in point series');
-        }
-
-        aspects[name] = group.length > 1 ? group : group[0];
-      })
-      .value();
-
-    if (!aspects.x) {
-      aspects.x = fakeXAspect(vis);
-    }
-
-    return aspects;
-  };
+  return aspects;
 }

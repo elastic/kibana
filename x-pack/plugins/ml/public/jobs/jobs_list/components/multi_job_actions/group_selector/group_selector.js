@@ -231,6 +231,7 @@ export class GroupSelector extends Component {
 
           <NewGroupInput
             addNewGroup={this.addNewGroup}
+            allJobIds={this.props.allJobIds}
           />
 
           <EuiHorizontalRule margin="m" />
@@ -254,5 +255,6 @@ export class GroupSelector extends Component {
 }
 GroupSelector.propTypes = {
   jobs: PropTypes.array.isRequired,
+  allJobIds: PropTypes.array.isRequired,
   refreshJobs: PropTypes.func.isRequired,
 };

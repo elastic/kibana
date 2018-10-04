@@ -17,23 +17,35 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function kibanaMetricsSpecProvider() {
+export function kibanaMetricsSpecProvider(server, context) {
   const moduleName = 'kibana';
   return {
     id: 'kibanaMetrics',
-    name: 'Kibana metrics',
+    name: i18n.translate('kbn.server.tutorials.kibanaMetrics.nameTitle', {
+      defaultMessage: 'Kibana metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from Kibana.',
-    longDescription: 'The `kibana` Metricbeat module fetches internal metrics from Kibana.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-kibana.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.kibanaMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from Kibana.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.kibanaMetrics.longDescription', {
+      defaultMessage: 'The `kibana` Metricbeat module fetches internal metrics from Kibana. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kibana.html',
+      },
+    }),
     euiIconType: 'logoKibana',
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.kibanaMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],
@@ -42,7 +54,7 @@ export function kibanaMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

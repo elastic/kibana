@@ -34,6 +34,10 @@ const onChange = jest.fn();
 const onError = jest.fn();
 
 describe('TruncateFormatEditor', () => {
+  it('should have a formatId', () => {
+    expect(TruncateFormatEditor.formatId).toEqual('truncate');
+  });
+
   it('should render normally', async () => {
     const component = shallow(
       <TruncateFormatEditor

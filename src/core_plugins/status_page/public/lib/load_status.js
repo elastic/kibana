@@ -20,7 +20,8 @@
 import _ from 'lodash';
 
 import chrome from 'ui/chrome';
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
+import { i18n }  from '@kbn/i18n';
 
 // Module-level error returned by notify.error
 let errorNotif;
@@ -35,15 +36,21 @@ function formatMetrics(data) {
 
   return [
     {
-      name: 'Heap total',
+      name: i18n.translate('statusPage.metricsTiles.columns.heapTotalHeader', {
+        defaultMessage: 'Heap total',
+      }),
       value: _.get(data.metrics, 'process.memory.heap.size_limit'),
       type: 'byte'
     }, {
-      name: 'Heap used',
+      name: i18n.translate('statusPage.metricsTiles.columns.heapUsedHeader', {
+        defaultMessage: 'Heap used',
+      }),
       value: _.get(data.metrics, 'process.memory.heap.used_in_bytes'),
       type: 'byte'
     }, {
-      name: 'Load',
+      name: i18n.translate('statusPage.metricsTiles.columns.loadHeader', {
+        defaultMessage: 'Load',
+      }),
       value: [
         _.get(data.metrics, 'os.load.1m'),
         _.get(data.metrics, 'os.load.5m'),
@@ -51,19 +58,42 @@ function formatMetrics(data) {
       ],
       type: 'float'
     }, {
-      name: 'Response time avg',
+      name: i18n.translate('statusPage.metricsTiles.columns.resTimeAvgHeader', {
+        defaultMessage: 'Response time avg',
+      }),
       value: _.get(data.metrics, 'response_times.avg_in_millis'),
       type: 'ms'
     }, {
-      name: 'Response time max',
+      name: i18n.translate('statusPage.metricsTiles.columns.resTimeMaxHeader', {
+        defaultMessage: 'Response time max',
+      }),
       value: _.get(data.metrics, 'response_times.max_in_millis'),
       type: 'ms'
     }, {
-      name: 'Requests per second',
+      name: i18n.translate('statusPage.metricsTiles.columns.requestsPerSecHeader', {
+        defaultMessage: 'Requests per second',
+      }),
       value: _.get(data.metrics, 'requests.total') * 1000 / _.get(data.metrics, 'collection_interval_in_millis')
     }
   ];
 }
+
+
+/**
+ * Reformat the backend data to make the frontend views simpler.
+ */
+function formatStatus(status) {
+  return {
+    id: status.id,
+    state: {
+      id: status.state,
+      title: status.title,
+      message: status.message,
+      uiColor: status.uiColor
+    }
+  };
+}
+
 
 async function fetchData() {
   return fetch(
@@ -93,13 +123,28 @@ async function loadStatus(fetchFn = fetchData) {
     response = await fetchFn();
   } catch (e) {
     // If the fetch failed to connect, display an error and bail.
-    errorNotif = notify.error('Failed to request server status. Perhaps your server is down?');
+    const serverIsDownErrorMessage = i18n.translate(
+      'statusPage.loadStatus.serverIsDownErrorMessage',
+      {
+        defaultMessage: 'Failed to request server status. Perhaps your server is down?',
+      },
+    );
+
+    errorNotif = toastNotifications.addDanger(serverIsDownErrorMessage);
     return e;
   }
 
   if (response.status >= 400) {
     // If the server does not respond with a successful status, display an error and bail.
-    errorNotif = notify.error(`Failed to request server status with status code ${response.status}`);
+    const serverStatusCodeErrorMessage = i18n.translate(
+      'statusPage.loadStatus.serverStatusCodeErrorMessage',
+      {
+        defaultMessage: 'Failed to request server status with status code {responseStatus}',
+        values: { responseStatus: response.status },
+      },
+    );
+
+    errorNotif = toastNotifications.addDanger(serverStatusCodeErrorMessage);
     return;
   }
 
@@ -107,8 +152,8 @@ async function loadStatus(fetchFn = fetchData) {
 
   return {
     name: data.name,
-    statuses: data.status.statuses,
-    serverState: data.status.overall.state,
+    statuses: data.status.statuses.map(formatStatus),
+    serverState: formatStatus(data.status.overall).state,
     metrics: formatMetrics(data),
   };
 }

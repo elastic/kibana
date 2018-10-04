@@ -54,7 +54,7 @@ function MetricVisualization(props) {
       const seriesDef = model.series.find(s => _.includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        newProps.formatter = tickFormatter(seriesDef.formatter, seriesDef.value_template);
+        newProps.formatter = tickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig);
       }
       if (i === 0 && colors.color) newProps.color = colors.color;
       return _.assign({}, _.pick(row, ['label', 'data']), newProps);

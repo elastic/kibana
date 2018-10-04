@@ -83,7 +83,7 @@ export const watch = {
                         script: {
                           lang: 'painless',
                           inline: `LocalDateTime.ofEpochSecond((doc["timestamp"].date.getMillis()-((doc["bucket_span"].value * 1000)
- * params.padding)) / 1000, 0, ZoneOffset.UTC)`,
+ * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()+\":00.000Z\"`,
                           params: {
                             'padding': 10
                           }
@@ -93,7 +93,7 @@ export const watch = {
                         script: {
                           lang: 'painless',
                           inline: `LocalDateTime.ofEpochSecond((doc["timestamp"].date.getMillis()+((doc["bucket_span"].value * 1000)
- * params.padding)) / 1000, 0, ZoneOffset.UTC)`,
+ * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()+\":00.000Z\"`,
                           params: {
                             'padding': 10
                           }

@@ -28,14 +28,11 @@ import {
 
 export function indexMissingSuite() {
   async function setup() {
-    const { callCluster, kbnServer } = getServices();
+    const { callCluster, kbnServer, deleteKibanaIndex } = getServices();
     const indexName = kbnServer.config.get('kibana.index');
 
     // ensure the kibana index does not exist
-    await callCluster('indices.delete', {
-      index: indexName,
-      ignore: [404],
-    });
+    await deleteKibanaIndex(callCluster);
 
     return {
       kbnServer,
@@ -59,7 +56,7 @@ export function indexMissingSuite() {
   }
 
   describe('get route', () => {
-    it('returns a 200 and with empty values', async () => {
+    it('returns a 200 and with just overridden values', async () => {
       const { kbnServer } = await setup();
 
       const { statusCode, result } = await kbnServer.inject({
@@ -68,7 +65,14 @@ export function indexMissingSuite() {
       });
 
       expect(statusCode).to.be(200);
-      expect(result).to.eql({ settings: {} });
+      expect(result).to.eql({
+        settings: {
+          foo: {
+            userValue: 'bar',
+            isOverridden: true
+          }
+        }
+      });
     });
   });
 
@@ -93,6 +97,10 @@ export function indexMissingSuite() {
           },
           defaultIndex: {
             userValue: defaultIndex
+          },
+          foo: {
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });
@@ -122,6 +130,10 @@ export function indexMissingSuite() {
           },
           defaultIndex: {
             userValue: defaultIndex
+          },
+          foo: {
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });
@@ -144,6 +156,10 @@ export function indexMissingSuite() {
         settings: {
           buildNum: {
             userValue: sinon.match.number
+          },
+          foo: {
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });

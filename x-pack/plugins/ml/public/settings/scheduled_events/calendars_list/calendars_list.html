@@ -102,7 +102,7 @@
                         ng-attr-tooltip="{{buttonChecks.newButtonWrapperTooltip()}}">
                         <button
                           class="kuiMenuButton kuiMenuButton--basic kuiMenuButton--iconText"
-                          title="Edit"
+                          aria-label="Edit {{calendar.calendar_id}}"
                           ng-disabled='buttonChecks.newButtonDisabled()'
                           ng-click="editCalendarClick(calendar.calendar_id)">
                           <span class="kuiMenuButton__icon kuiIcon fa-pencil"></span>
@@ -114,7 +114,7 @@
                         ng-attr-tooltip="{{buttonChecks.deleteButtonWrapperTooltip()}}">
                         <button
                           class="kuiMenuButton kuiMenuButton--danger kuiMenuButton--iconText"
-                          title="Edit"
+                          aria-label="Delete {{calendar.calendar_id}}"
                           ng-disabled='buttonChecks.deleteButtonDisabled()'
                           ng-click="deleteCalendarClick(calendar.calendar_id)"
                           href="" >

@@ -44,7 +44,7 @@ export function registerVisualizeRoute(server) {
         })
         .catch(err => {
 
-        // Case: Error from Elasticsearch JS client
+          // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
             return reply(wrapEsError(err));
           }

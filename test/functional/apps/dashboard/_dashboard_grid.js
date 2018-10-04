@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
     });
 
     describe('move panel', () => {

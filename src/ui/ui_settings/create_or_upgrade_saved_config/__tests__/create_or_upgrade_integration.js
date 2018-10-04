@@ -20,39 +20,19 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 
-import { createEsTestCluster } from '@kbn/test';
-import { createServerWithCorePlugins } from '../../../../test_utils/kbn_server';
-import { createToolingLog } from '@kbn/dev-utils';
+import { startTestServers } from '../../../../test_utils/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient;
   let kbnServer;
-  const cleanup = [];
+  let servers;
 
   before(async function () {
-    const log = createToolingLog('debug');
-    log.pipe(process.stdout);
-    log.indent(6);
-
-    log.info('starting elasticsearch');
-    log.indent(4);
-
-    const es = createEsTestCluster({ log });
-    this.timeout(es.getStartTimeout());
-
-    log.indent(-4);
-    cleanup.push(async () => await es.cleanup());
-
-    await es.start();
-
-    kbnServer = createServerWithCorePlugins();
-    await kbnServer.ready();
-    cleanup.push(async () => {
-      await kbnServer.close();
-      kbnServer = null;
-      savedObjectsClient = null;
+    servers = await startTestServers({
+      adjustTimeout: (t) => this.timeout(t),
     });
+    kbnServer = servers.kbnServer;
 
     await kbnServer.server.plugins.elasticsearch.waitUntilReady();
 
@@ -87,10 +67,7 @@ describe('createOrUpgradeSavedConfig()', () => {
     ]);
   });
 
-  after(async () => {
-    await Promise.all(cleanup.map(fn => fn()));
-    cleanup.length = 0;
-  });
+  after(() => servers.stop());
 
   it('upgrades the previous version on each increment', async function () {
     this.timeout(30000);

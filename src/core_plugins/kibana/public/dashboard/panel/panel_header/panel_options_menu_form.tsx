@@ -45,10 +45,7 @@ export function PanelOptionsMenuForm({
   }
 
   return (
-    <div
-      className="dashboardPanelMenuOptionsForm"
-      data-test-subj="dashboardPanelTitleInputMenuItem"
-    >
+    <div className="dshPanel__optionsMenuForm" data-test-subj="dashboardPanelTitleInputMenuItem">
       <EuiFormRow label="Panel title">
         <EuiFieldText
           id="panelTitleInput"

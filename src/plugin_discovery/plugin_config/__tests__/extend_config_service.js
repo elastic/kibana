@@ -96,21 +96,21 @@ describe('plugin discovery/extend config service', () => {
     });
 
     it('adds the schema for a plugin spec to its config prefix', async () => {
-      const config = await Config.withDefaultSchema();
+      const config = Config.withDefaultSchema();
       expect(config.has('foo.bar.baz')).to.be(false);
       await extendConfigService(pluginSpec, config);
       expect(config.has('foo.bar.baz')).to.be(true);
     });
 
     it('initializes it with the default settings', async () => {
-      const config = await Config.withDefaultSchema();
+      const config = Config.withDefaultSchema();
       await extendConfigService(pluginSpec, config);
       expect(config.get('foo.bar.baz.enabled')).to.be(true);
       expect(config.get('foo.bar.baz.test')).to.be('bonk');
     });
 
     it('initializes it with values from root settings if defined', async () => {
-      const config = await Config.withDefaultSchema();
+      const config = Config.withDefaultSchema();
       await extendConfigService(pluginSpec, config, {
         foo: {
           bar: {
@@ -125,7 +125,7 @@ describe('plugin discovery/extend config service', () => {
     });
 
     it('throws if root settings are invalid', async () => {
-      const config = await Config.withDefaultSchema();
+      const config = Config.withDefaultSchema();
       try {
         await extendConfigService(pluginSpec, config, {
           foo: {
@@ -145,7 +145,7 @@ describe('plugin discovery/extend config service', () => {
     });
 
     it('calls logDeprecation() with deprecation messages', async () => {
-      const config = await Config.withDefaultSchema();
+      const config = Config.withDefaultSchema();
       const logDeprecation = sinon.stub();
       await extendConfigService(pluginSpec, config, {
         foo: {
@@ -161,7 +161,7 @@ describe('plugin discovery/extend config service', () => {
     });
 
     it('uses settings after transforming deprecations', async () => {
-      const config = await Config.withDefaultSchema();
+      const config = Config.withDefaultSchema();
       await extendConfigService(pluginSpec, config, {
         foo: {
           bar: {
@@ -177,7 +177,7 @@ describe('plugin discovery/extend config service', () => {
 
   describe('disableConfigExtension()', () => {
     it('removes added config', async () => {
-      const config = await Config.withDefaultSchema();
+      const config = Config.withDefaultSchema();
       await extendConfigService(pluginSpec, config);
       expect(config.has('foo.bar.baz.test')).to.be(true);
       await disableConfigExtension(pluginSpec, config);
@@ -185,7 +185,7 @@ describe('plugin discovery/extend config service', () => {
     });
 
     it('leaves {configPrefix}.enabled config', async () => {
-      const config = await Config.withDefaultSchema();
+      const config = Config.withDefaultSchema();
       expect(config.has('foo.bar.baz.enabled')).to.be(false);
       await extendConfigService(pluginSpec, config);
       expect(config.get('foo.bar.baz.enabled')).to.be(true);

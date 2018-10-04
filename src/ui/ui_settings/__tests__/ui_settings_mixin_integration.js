@@ -34,13 +34,13 @@ import { uiSettingsMixin } from '../ui_settings_mixin';
 describe('uiSettingsMixin()', () => {
   const sandbox = sinon.createSandbox();
 
-  async function setup(options = {}) {
-    const {
-      enabled = true
-    } = options;
-
-    const config = await Config.withDefaultSchema({
-      uiSettings: { enabled }
+  function setup() {
+    const config = Config.withDefaultSchema({
+      uiSettings: {
+        overrides: {
+          foo: 'bar'
+        }
+      }
     });
 
     // maps of decorations passed to `server.decorate()`
@@ -89,8 +89,8 @@ describe('uiSettingsMixin()', () => {
   afterEach(() => sandbox.restore());
 
   describe('server.uiSettingsServiceFactory()', () => {
-    it('decorates server with "uiSettingsServiceFactory"', async () => {
-      const { decorations } = await setup();
+    it('decorates server with "uiSettingsServiceFactory"', () => {
+      const { decorations } = setup();
       expect(decorations.server).to.have.property('uiSettingsServiceFactory').a('function');
 
       sandbox.stub(uiSettingsServiceFactoryNS, 'uiSettingsServiceFactory');
@@ -99,8 +99,8 @@ describe('uiSettingsMixin()', () => {
       sinon.assert.calledOnce(uiSettingsServiceFactory);
     });
 
-    it('passes `server` and `options` argument to factory', async () => {
-      const { decorations, server } = await setup();
+    it('passes `server` and `options` argument to factory', () => {
+      const { decorations, server } = setup();
       expect(decorations.server).to.have.property('uiSettingsServiceFactory').a('function');
 
       sandbox.stub(uiSettingsServiceFactoryNS, 'uiSettingsServiceFactory');
@@ -111,14 +111,17 @@ describe('uiSettingsMixin()', () => {
       sinon.assert.calledOnce(uiSettingsServiceFactory);
       sinon.assert.calledWithExactly(uiSettingsServiceFactory, server, {
         foo: 'bar',
+        overrides: {
+          foo: 'bar'
+        },
         getDefaults: sinon.match.func,
       });
     });
   });
 
   describe('request.getUiSettingsService()', () => {
-    it('exposes "getUiSettingsService" on requests', async () => {
-      const { decorations } = await setup();
+    it('exposes "getUiSettingsService" on requests', () => {
+      const { decorations } = setup();
       expect(decorations.request).to.have.property('getUiSettingsService').a('function');
 
       sandbox.stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest');
@@ -127,8 +130,8 @@ describe('uiSettingsMixin()', () => {
       sinon.assert.calledOnce(getUiSettingsServiceForRequest);
     });
 
-    it('passes request to getUiSettingsServiceForRequest', async () => {
-      const { server, decorations } = await setup();
+    it('passes request to getUiSettingsServiceForRequest', () => {
+      const { server, decorations } = setup();
       expect(decorations.request).to.have.property('getUiSettingsService').a('function');
 
       sandbox.stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest');
@@ -140,8 +143,8 @@ describe('uiSettingsMixin()', () => {
   });
 
   describe('server.uiSettings()', () => {
-    it('throws an error, links to pr', async () => {
-      const { decorations } = await setup();
+    it('throws an error, links to pr', () => {
+      const { decorations } = setup();
       expect(decorations.server).to.have.property('uiSettings').a('function');
       expect(() => {
         decorations.server.uiSettings();

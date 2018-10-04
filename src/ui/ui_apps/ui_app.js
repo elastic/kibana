@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import path from 'path';
 import { UiNavLink } from '../ui_nav_links';
 
 export class UiApp {
@@ -30,11 +29,11 @@ export class UiApp {
       order = 0,
       description,
       icon,
+      euiIconType,
       hidden,
       linkToLastSubUrl,
       listed,
       url = `/app/${id}`,
-      styleSheetPath,
     } = spec;
 
     if (!id) {
@@ -47,13 +46,13 @@ export class UiApp {
     this._order = order;
     this._description = description;
     this._icon = icon;
+    this._euiIconType = euiIconType;
     this._linkToLastSubUrl = linkToLastSubUrl;
     this._hidden = hidden;
     this._listed = listed;
     this._url = url;
     this._pluginId = pluginId;
     this._kbnServer = kbnServer;
-    this._styleSheetPath = styleSheetPath;
 
     if (this._pluginId && !this._getPlugin()) {
       throw new Error(`Unknown plugin id "${this._pluginId}"`);
@@ -63,12 +62,13 @@ export class UiApp {
       // unless an app is hidden it gets a navlink, but we only respond to `getNavLink()`
       // if the app is also listed. This means that all apps in the kibanaPayload will
       // have a navLink property since that list includes all normally accessible apps
-      this._navLink = new UiNavLink(kbnServer.config.get('server.basePath'), {
+      this._navLink = new UiNavLink({
         id: this._id,
         title: this._title,
         order: this._order,
         description: this._description,
         icon: this._icon,
+        euiIconType: this._euiIconType,
         url: this._url,
         linkToLastSubUrl: this._linkToLastSubUrl
       });
@@ -105,25 +105,6 @@ export class UiApp {
     return this._main;
   }
 
-  getStyleSheetUrlPath() {
-    if (!this._styleSheetPath) {
-      return;
-    }
-
-    const plugin = this._getPlugin();
-
-    // get the path of the stylesheet relative to the public dir for the plugin
-    let relativePath = path.relative(plugin.publicDir, this._styleSheetPath);
-
-    // replace back slashes on windows
-    relativePath = relativePath.split('\\').join('/');
-
-    // replace the extension of relativePath to be .css
-    relativePath = relativePath.slice(0, -path.extname(relativePath).length) + '.css';
-
-    return `plugins/${this.getId()}/${relativePath}`;
-  }
-
   _getPlugin() {
     const pluginId = this._pluginId;
     const { plugins } = this._kbnServer;
@@ -139,10 +120,10 @@ export class UiApp {
       title: this._title,
       description: this._description,
       icon: this._icon,
+      euiIconType: this._euiIconType,
       main: this._main,
       navLink: this._navLink,
       linkToLastSubUrl: this._linkToLastSubUrl,
-      styleSheetPath: this._styleSheetPath,
     };
   }
 }

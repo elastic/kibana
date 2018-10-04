@@ -20,11 +20,43 @@
 import { readFileSync } from 'fs';
 import { safeLoad } from 'js-yaml';
 
+import { isPlainObject, set } from 'lodash';
 import { ensureDeepObject } from './ensure_deep_object';
 
 const readYaml = (path: string) => safeLoad(readFileSync(path, 'utf8'));
 
-export const getConfigFromFile = (configFile: string) => {
-  const yaml = readYaml(configFile);
-  return yaml == null ? yaml : ensureDeepObject(yaml);
+function replaceEnvVarRefs(val: string) {
+  return val.replace(/\$\{(\w+)\}/g, (match, envVarName) => {
+    const envVarValue = process.env[envVarName];
+    if (envVarValue !== undefined) {
+      return envVarValue;
+    }
+
+    throw new Error(`Unknown environment variable referenced in config : ${envVarName}`);
+  });
+}
+
+function merge(target: Record<string, any>, value: any, key?: string) {
+  if (isPlainObject(value) || Array.isArray(value)) {
+    for (const [subKey, subVal] of Object.entries(value)) {
+      merge(target, subVal, key ? `${key}.${subKey}` : subKey);
+    }
+  } else if (key !== undefined) {
+    set(target, key, typeof value === 'string' ? replaceEnvVarRefs(value) : value);
+  }
+
+  return target;
+}
+
+export const getConfigFromFiles = (configFiles: ReadonlyArray<string>) => {
+  let mergedYaml = {};
+
+  for (const configFile of configFiles) {
+    const yaml = readYaml(configFile);
+    if (yaml !== null) {
+      mergedYaml = merge(mergedYaml, yaml);
+    }
+  }
+
+  return ensureDeepObject(mergedYaml);
 };

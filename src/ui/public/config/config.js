@@ -38,6 +38,7 @@ module.service(`config`, function ($rootScope, Promise) {
   this.isDeclared = (...args) => uiSettings.isDeclared(...args);
   this.isDefault = (...args) => uiSettings.isDefault(...args);
   this.isCustom = (...args) => uiSettings.isCustom(...args);
+  this.isOverridden = (...args) => uiSettings.isOverridden(...args);
 
   // modify remove() to use angular Promises
   this.remove = (key) => (
@@ -58,7 +59,7 @@ module.service(`config`, function ($rootScope, Promise) {
   //* angular specific methods *
   //////////////////////////////
 
-  const subscription = uiSettings.subscribe(({ key, newValue, oldValue }) => {
+  const subscription = uiSettings.getUpdate$().subscribe(({ key, newValue, oldValue }) => {
     const emit = () => {
       $rootScope.$broadcast('change:config',        newValue, oldValue, key, this);
       $rootScope.$broadcast(`change:config.${key}`, newValue, oldValue, key, this);

@@ -27,6 +27,7 @@ async function getSavedObject(doc, services) {
 
   const obj = await service.get();
   obj.id = doc._id;
+  obj.migrationVersion = doc._migrationVersion;
   return obj;
 }
 
@@ -223,6 +224,9 @@ export async function resolveSavedObjects(
       }
     } catch (error) {
       if (error instanceof SavedObjectNotFound) {
+        if (error.savedObjectType === 'search') {
+          failedImports.push({ obj, error });
+        }
         if (error.savedObjectType === 'index-pattern') {
           if (obj.savedSearchId) {
             conflictedSavedObjectsLinkedToSavedSearches.push(obj);
