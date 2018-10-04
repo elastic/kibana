@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`NavControlPopover renders without crashing 1`] = `
+exports[`NavControlPopover renders for the global nav without crashing 1`] = `
 <EuiPopover
-  anchorPosition="rightCenter"
+  anchorPosition="downRight"
   button={
     <div
       className="global-nav-link"
@@ -36,6 +36,47 @@ exports[`NavControlPopover renders without crashing 1`] = `
         </div>
       </a>
     </div>
+  }
+  closePopover={[Function]}
+  data-test-subj="spacesNavSelector"
+  hasArrow={true}
+  id="spacesMenuPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <Component
+    userProfile={
+      Object {
+        "hasCapability": [Function],
+      }
+    }
+  />
+</EuiPopover>
+`;
+
+exports[`NavControlPopover renders for the header without crashing 1`] = `
+<EuiPopover
+  anchorPosition="rightCenter"
+  button={
+    <EuiHeaderSectionItemButton
+      aria-controls="headerSpacesMenuList"
+      aria-expanded={false}
+      aria-haspopup="true"
+      aria-label="foo"
+      onClick={[Function]}
+    >
+      <Unknown
+        className="spaceNavGraphic"
+        size="s"
+        space={
+          Object {
+            "id": "",
+            "name": "foo",
+          }
+        }
+      />
+    </EuiHeaderSectionItemButton>
   }
   closePopover={[Function]}
   data-test-subj="spacesNavSelector"

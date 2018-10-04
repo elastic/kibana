@@ -39,7 +39,7 @@ const createMockHttpAgent = (withSpaces = false) => {
 };
 
 describe('NavControlPopover', () => {
-  it('renders without crashing', () => {
+  it('renders for the global nav without crashing', () => {
     const activeSpace = {
       space: { id: '', name: 'foo' },
       valid: true,
@@ -52,6 +52,28 @@ describe('NavControlPopover', () => {
         activeSpace={activeSpace}
         spacesManager={spacesManager}
         userProfile={{ hasCapability: () => true }}
+        anchorPosition={'downRight'}
+        location={'globalNav'}
+      />
+    );
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders for the header without crashing', () => {
+    const activeSpace = {
+      space: { id: '', name: 'foo' },
+      valid: true,
+    };
+
+    const spacesManager = new SpacesManager(createMockHttpAgent(), mockChrome, '/');
+
+    const wrapper = shallow(
+      <NavControlPopover
+        activeSpace={activeSpace}
+        spacesManager={spacesManager}
+        userProfile={{ hasCapability: () => true }}
+        anchorPosition={'rightCenter'}
+        location={'header'}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -72,6 +94,8 @@ describe('NavControlPopover', () => {
         activeSpace={activeSpace}
         spacesManager={spacesManager}
         userProfile={{ hasCapability: () => true }}
+        anchorPosition={'rightCenter'}
+        location={'header'}
       />
     );
 
