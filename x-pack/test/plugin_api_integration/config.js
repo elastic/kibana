@@ -17,7 +17,6 @@ export default async function ({ readConfigFile }) {
 
   return {
     testFiles: [
-      require.resolve('./test_suites/xpack_main_info'),
       require.resolve('./test_suites/task_manager'),
     ],
     services: {

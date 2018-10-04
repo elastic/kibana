@@ -19,6 +19,7 @@ export function initRoutes(server) {
           interval: Joi.string().optional(),
           params: Joi.object().required(),
           state: Joi.object().optional(),
+          id: Joi.string().optional(),
         }),
       },
     },

@@ -16,7 +16,7 @@ export default function ({ getService }) {
   const testHistoryIndex = '.task_manager_test_result';
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
-  describe('running tasks', () => {
+  describe('scheduling and running tasks', () => {
     beforeEach(() => supertest.delete('/api/sample_tasks')
       .set('kbn-xsrf', 'xxx')
       .expect(200));
@@ -85,6 +85,16 @@ export default function ({ getService }) {
         expect(history.length).to.eql(1);
         expect((await currentTasks()).docs).to.eql([]);
       });
+    });
+
+    it('should use a given ID as the task document ID', async () => {
+      const result = await scheduleTask({
+        id: 'test-task-for-sample-task-plugin-to-test-task-manager',
+        taskType: 'sampleTask',
+        params: { },
+      });
+
+      expect(result.id).to.be('test-task-for-sample-task-plugin-to-test-task-manager');
     });
 
     it('should reschedule if task errors', async () => {

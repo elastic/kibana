@@ -80,7 +80,7 @@ export class TaskPool {
         task
           .run()
           .catch(error => {
-            this.logger.warning(`Task ${task} failed: ${error.stack}`);
+            this.logger.warning(`Task ${task} failed in attempt to run: ${error.stack}`);
           })
           .then(() => this.running.delete(task));
       }

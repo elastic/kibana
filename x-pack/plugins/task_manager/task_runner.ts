@@ -208,7 +208,17 @@ export class TaskManagerRunner implements TaskRunner {
         attempts: result.error ? this.instance.attempts + 1 : 0,
       });
     } else {
-      await this.store.remove(this.instance.id);
+      try {
+        await this.store.remove(this.instance.id);
+      } catch (err) {
+        if (err.statusCode === 404) {
+          this.logger.warning(
+            `Task cleanup of ${this} failed in processing. Was remove called twice?`
+          );
+        } else {
+          throw err;
+        }
+      }
     }
 
     return result;
