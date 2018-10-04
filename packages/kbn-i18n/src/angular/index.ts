@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { I18nProvider } from './provider';
+export { I18nProvider, I18nServiceType } from './provider';
 export { i18nFilter } from './filter';
 export { i18nDirective } from './directive';
