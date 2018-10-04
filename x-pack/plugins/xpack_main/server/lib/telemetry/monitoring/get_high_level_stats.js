@@ -79,13 +79,23 @@ function groupInstancesByCluster(instances, product) {
     const clusterUuid = get(instance, '_source.cluster_uuid');
     const version = get(instance, `_source.${product}_stats.${product}.version`);
     const cloud = get(instance, `_source.${product}_stats.cloud`);
+    const os = get(instance, `_source.${product}_stats.os`);
 
-    // put the instance into the right cluster map
     if (clusterUuid) {
       let cluster = clusterMap.get(clusterUuid);
 
       if (!cluster) {
-        cluster = { count: 0, versions: new Map(), cloudMap: new Map() };
+        cluster = {
+          count: 0,
+          versions: new Map(),
+          cloudMap: new Map(),
+          os: {
+            platform: new Map(),
+            platformRelease: new Map(),
+            distro: new Map(),
+            distroRelease: new Map(),
+          }
+        };
         clusterMap.set(clusterUuid, cluster);
       }
 
@@ -94,6 +104,13 @@ function groupInstancesByCluster(instances, product) {
 
       incrementByKey(cluster.versions, version);
       reduceCloudForCluster(cluster.cloudMap, cloud);
+
+      if (os) {
+        incrementByKey(cluster.os.platform, os.platform);
+        incrementByKey(cluster.os.platformRelease, os.platformRelease);
+        incrementByKey(cluster.os.distro, os.distro);
+        incrementByKey(cluster.os.distroRelease, os.distroRelease);
+      }
     }
   });
 
@@ -159,6 +176,7 @@ export function fetchHighLevelStats(server, callCluster, clusterUuids, start, en
     filterPath: [
       'hits.hits._source.cluster_uuid',
       `hits.hits._source.${product}_stats.${product}.version`,
+      `hits.hits._source.${product}_stats.os`,
       `hits.hits._source.${product}_stats.usage`,
       // we don't want metadata
       `hits.hits._source.${product}_stats.cloud.name`,
@@ -221,6 +239,12 @@ export function handleHighLevelStatsResponse(response, product) {
       count: cluster.count,
       // remap the versions into something more digestable that won't blowup mappings:
       versions: mapToList(cluster.versions, 'version'),
+      os: {
+        platforms: mapToList(cluster.os.platform, 'platform'),
+        platformReleases: mapToList(cluster.os.platformRelease, 'platformRelease'),
+        distros: mapToList(cluster.os.distro, 'distro'),
+        distroReleases: mapToList(cluster.os.distroRelease, 'distroRelease'),
+      },
       cloud: clouds.length > 0 ? clouds : undefined
     };
   }
