@@ -138,7 +138,7 @@ export function registerCanvasUsageCollector(server) {
         index,
         ignoreUnavailable: true,
         filterPath: ['hits.hits._source.canvas-workpad'],
-        body: { query: { term: { type: { value: CANVAS_TYPE } } } },
+        body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
       };
 
       const esResponse = await callCluster('search', searchParams);
