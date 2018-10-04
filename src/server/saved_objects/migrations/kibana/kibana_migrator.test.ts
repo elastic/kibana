@@ -19,7 +19,8 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { KbnServer, KibanaMigrator } from './kibana_migrator';
+import { KbnServer } from './kbn_server';
+import { KibanaMigrator } from './kibana_migrator';
 
 describe('KibanaMigrator', () => {
   describe('getActiveMappings', () => {
