@@ -106,7 +106,9 @@ export class SPNEGOAuthenticationProvider {
 
       this._options.log(['debug', 'security', 'spnego'], 'Request has been authenticated via header.');
 
-      return AuthenticationResult.succeeded(user);
+      return AuthenticationResult.succeeded(user, {
+        accessToken
+      });
     } catch(err) {
       this._options.log(['debug', 'security', 'spnego'], `Failed to authenticate request via header: ${err.message}`);
       return AuthenticationResult.failed(err);
