@@ -106,13 +106,24 @@ export class VectorLayer extends ALayer {
     try {
       const canSkip = await this._canSkipSourceUpdate(tableSource, sourceDataId);
       if (canSkip) {
-        return;
+        return {
+          sourceDataId: sourceDataId,
+          didRefresh: false
+        };
       }
       startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
       const data = await tableSource.getTable(dataFilters);
       stopLoading(sourceDataId, requestToken, data);
+      return {
+        sourceDataId: sourceDataId,
+        didRefresh: true
+      };
     } catch(e) {
       onLoadError(sourceDataId, requestToken, e.medium);
+      return {
+        sourceDataId: sourceDataId,
+        didRefresh: true
+      };
     }
   }
 
@@ -121,7 +132,7 @@ export class VectorLayer extends ALayer {
     const joinSyncs = this._joins.map(async join => {
       return this._syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters });
     });
-    await Promise.all(joinSyncs);
+    return await Promise.all(joinSyncs);
   }
 
 
@@ -129,26 +140,22 @@ export class VectorLayer extends ALayer {
     const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
     try {
-
       const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId);
       if (canSkip) {
         return;
       }
-
       startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
       const data = await this._source.getGeoJson({
         layerId: this.getId(),
         layerName: this.getDisplayName()
       }, dataFilters);
       stopLoading(sourceDataId, requestToken, data);
-
     } catch (error) {
       onLoadError(sourceDataId, requestToken, error.message);
     }
   }
 
-  async getJoinDataRequests() {
-
+  async _getJoinDataRequests() {
     const joinDataRequests = this._dataRequests.filter(dataRequest => {
       const correspondingJoin = this._joins.find(join => {
         return join.getSourceId() === dataRequest.getDataId();
@@ -158,16 +165,22 @@ export class VectorLayer extends ALayer {
     return joinDataRequests;
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+  async _performJoins(refreshStates) {
+    console.log('refresh states', refreshStates);
+    const featureCollection = this._getSourceFeatureCollection();
+    if (!featureCollection) {
+      return;
+    }
+  }
 
+  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
-    //todo: could parallelize this, but this avoids dealing with some race-conditions
     await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
-    await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
+    const refreshStates = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
+    await this._performJoins(refreshStates);
   }
-
 
   _getSourceFeatureCollection() {
     const sourceDataRequest = this.getSourceDataRequest();
@@ -196,28 +209,14 @@ export class VectorLayer extends ALayer {
     if (featureCollection !== mbSourceAfterAdding._data) {
       mbSourceAfterAdding.setData(featureCollection);
     }
-    const shouldRefresh = this._style.enrichFeatureCollectionWithScaledProps(featureCollection);
+    const joinDataRequests = this._getJoinDataRequests();
+    const shouldRefresh = this._style.enrichFeatureCollectionWithScaledProps(featureCollection, joinDataRequests);
     if (shouldRefresh) {
       mbSourceAfterAdding.setData(featureCollection);
     }
   }
 
-  syncLayerWithMB(mbMap) {
-
-    const mbSource = mbMap.getSource(this.getId());
-    if (!mbSource) {
-      //todo: hack, but want to get some quick visual indication for points data
-      //cannot map single kibana layer to single mapbox source
-      mbMap.addSource(this.getId(), {
-        type: 'geojson',
-        data: { 'type': 'FeatureCollection', 'features': [] }
-      });
-    }
-
-
-
-    this._syncFeatureCollectionWithMb(mbMap);
-
+  _syncStylePropertiesWithMb(mbMap) {
     const isPointsOnly = this._isPointsOnly();
     if (isPointsOnly) {
       const pointLayerId = this.getId() +  '_circle';
@@ -226,7 +225,7 @@ export class VectorLayer extends ALayer {
       if (!this._descriptor.showAtAllZoomLevels) {
         mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
       }
-      this.addToolipListeners(mbMap, pointLayerId);
+      this._addToolipListeners(mbMap, pointLayerId);
     } else {
       const fillLayerId = this.getId() + '_fill';
       const strokeLayerId = this.getId() + '_line';
@@ -237,8 +236,26 @@ export class VectorLayer extends ALayer {
         mbMap.setLayerZoomRange(strokeLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
         mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
       }
-      this.addToolipListeners(mbMap, fillLayerId);
+      this._addToolipListeners(mbMap, fillLayerId);
     }
+  }
+
+  _syncSourceBindingWithMb(mbMap) {
+    const mbSource = mbMap.getSource(this.getId());
+    if (!mbSource) {
+      //todo: hack, but want to get some quick visual indication for points data
+      //cannot map single kibana layer to single mapbox source
+      mbMap.addSource(this.getId(), {
+        type: 'geojson',
+        data: { 'type': 'FeatureCollection', 'features': [] }
+      });
+    }
+  }
+
+  syncLayerWithMB(mbMap) {
+    this._syncSourceBindingWithMb(mbMap);
+    this._syncFeatureCollectionWithMb(mbMap);
+    this._syncStylePropertiesWithMb(mbMap);
   }
 
   renderStyleEditor(style, options) {
@@ -248,7 +265,7 @@ export class VectorLayer extends ALayer {
     });
   }
 
-  addToolipListeners(mbMap, mbLayerId) {
+  _addToolipListeners(mbMap, mbLayerId) {
     this.removeAllListenersForMbLayer(mbMap, mbLayerId);
 
     if (!this._source.areFeatureTooltipsEnabled()) {
