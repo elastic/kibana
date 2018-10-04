@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }) {
     'settings']);
   const dashboardName = 'Dashboard View Mode Test Dashboard';
 
-  describe('Dashboard View Mode', () => {
+  describe.skip('Dashboard View Mode', () => {
 
     before('initialize tests', async () => {
       log.debug('Dashboard View Mode:initTests');
