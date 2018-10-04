@@ -38,7 +38,7 @@ import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
-import { KibanaMigrator, MigrationUI } from './saved_objects/migrations';
+import { injectMigrationUI } from './saved_objects/migrations';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
@@ -141,12 +141,9 @@ export default class KbnServer {
 
     const { server, config } = this;
 
-    const migrator = await new KibanaMigrator({ kbnServer: this }).createIndexMigrator();
-    const migrationUI = new MigrationUI(server, migrator);
-
-    // We don't await the migraiton, as we need to allow the server to serve up
-    // the migration UI while this runs.
-    migrator.migrate().then(() => migrationUI.disable());
+    // Shows the migration progress UI until migrations
+    // have completed, hijacks all incoming HTTP requests
+    injectMigrationUI(server);
 
     if (isWorker) {
       // help parent process know when we are ready

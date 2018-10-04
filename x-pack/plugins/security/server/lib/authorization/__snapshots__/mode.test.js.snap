@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`#initialize can't be initialized twice for the same request 1`] = `"Authorization mode is already intitialized"`;
