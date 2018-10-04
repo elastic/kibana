@@ -23,39 +23,57 @@ describe('callApi', () => {
   });
 
   describe('callApi', () => {
-    describe('debug param', () => {
-      describe('when apm_debug is true', () => {
-        beforeEach(() => {
-          sessionStorage.setItem('apm_debug', 'true');
-        });
+    describe('apm_debug', () => {
+      beforeEach(() => {
+        sessionStorage.setItem('apm_debug', 'true');
+      });
 
-        it('should add debug param for APM endpoints', async () => {
-          await callApi({ pathname: `/api/apm/status/server` });
+      it('should add debug param for APM endpoints', async () => {
+        await callApi({ pathname: `/api/apm/status/server` });
 
-          expect(kfetchSpy).toHaveBeenCalledWith(
-            { pathname: '/api/apm/status/server', query: { _debug: true } },
-            { camelcase: true }
-          );
-        });
+        expect(kfetchSpy).toHaveBeenCalledWith(
+          { pathname: '/api/apm/status/server', query: { _debug: true } },
+          expect.any(Object)
+        );
+      });
 
-        it('should not add debug param for non-APM endpoints', async () => {
-          await callApi({ pathname: `/api/kibana` });
+      it('should not add debug param for non-APM endpoints', async () => {
+        await callApi({ pathname: `/api/kibana` });
 
-          expect(kfetchSpy).toHaveBeenCalledWith(
-            { pathname: '/api/kibana' },
-            { camelcase: true }
-          );
-        });
+        expect(kfetchSpy).toHaveBeenCalledWith(
+          { pathname: '/api/kibana' },
+          expect.any(Object)
+        );
+      });
+    });
+
+    describe('prependBasePath', () => {
+      it('should be true by default', async () => {
+        await callApi({ pathname: `/api/kibana` });
+
+        expect(kfetchSpy).toHaveBeenCalledWith(
+          { pathname: '/api/kibana' },
+          { prependBasePath: true }
+        );
+      });
+
+      it('should respect settings', async () => {
+        await callApi({ pathname: `/api/kibana` }, { prependBasePath: false });
+
+        expect(kfetchSpy).toHaveBeenCalledWith(
+          { pathname: '/api/kibana' },
+          { prependBasePath: false }
+        );
       });
     });
 
     describe('camelcase', () => {
-      it('camelcase param should be true by default', async () => {
+      it('should be true by default', async () => {
         const res = await callApi({ pathname: `/api/kibana` });
 
         expect(kfetchSpy).toHaveBeenCalledWith(
           { pathname: '/api/kibana' },
-          { camelcase: true }
+          expect.any(Object)
         );
 
         expect(res).toEqual({ myKey: 'hello world' });
@@ -69,7 +87,7 @@ describe('callApi', () => {
 
         expect(kfetchSpy).toHaveBeenCalledWith(
           { pathname: '/api/kibana' },
-          { camelcase: false }
+          expect.any(Object)
         );
 
         expect(res).toEqual({ my_key: 'hello world' });

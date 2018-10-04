@@ -7,11 +7,22 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiIconTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiIconTip,
+  EuiToolTip
+} from '@elastic/eui';
 
-import { getExploreSeriesLink } from '../../util/chart_utils';
+import {
+  getExploreSeriesLink,
+  isLabelLengthAboveThreshold
+} from '../../util/chart_utils';
 import { ExplorerChart } from './explorer_chart';
-import { ExplorerChartTooltip } from './explorer_chart_tooltip';
+import { ExplorerChartLabel } from './components/explorer_chart_label';
+
+const textTooManyBuckets = `This selection contains too many buckets to be displayed.
+ The dashboard is best viewed over a shorter time range.`;
+const textViewButton = 'Open in Single Metric Viewer';
 
 export function ExplorerChartsContainer({
   seriesToPlot,
@@ -19,6 +30,8 @@ export function ExplorerChartsContainer({
   tooManyBuckets,
   mlSelectSeverityService
 }) {
+  const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
+
   return (
     <div className="explorer-charts">
       {(seriesToPlot.length > 0) &&
@@ -35,36 +48,40 @@ export function ExplorerChartsContainer({
 
           return (
             <div className={`ml-explorer-chart-container col-md-${layoutCellsPerChart}`} key={id}>
-              <div className="explorer-chart-label">
-                <div className="explorer-chart-label-fields">
-                  {(entityFields.length > 0) && (
-                    <span>{detectorLabel} - </span>
-                  )}
-                  {(entityFields.length === 0) && (
-                    <span>{detectorLabel}</span>
-                  )}
-                  {entityFields.map((entity, j) => {
-                    return (
-                      <span key={j}>{entity.fieldName} {entity.fieldValue}</span>
-                    );
-                  })}
-                </div>
-                <EuiIconTip content={<ExplorerChartTooltip {...series.infoTooltip} />} position="left" size="s" />
+              <div className="ml-explorer-chart-icons">
                 {tooManyBuckets && (
-                  <EuiIconTip
-                    content={'This selection contains too many buckets to be displayed.' +
-                     'The dashboard is best viewed over a shorter time range.'}
-                    position="bottom"
-                    size="s"
-                    type="alert"
-                    color="warning"
-                  />
+                  <span className="ml-explorer-chart-icon">
+                    <EuiIconTip
+                      content={textTooManyBuckets}
+                      position="top"
+                      size="s"
+                      type="alert"
+                      color="warning"
+                    />
+                  </span>
                 )}
-                <a className="euiLink" onClick={() => window.open(getExploreSeriesLink(series), '_blank')}>
-                  View <i className="fa fa-external-link" aria-hidden="true" />
-                </a>
+                <EuiToolTip
+                  position="top"
+                  content={textViewButton}
+                >
+                  <EuiButtonEmpty
+                    iconSide="right"
+                    iconType="popout"
+                    size="xs"
+                    onClick={() => window.open(getExploreSeriesLink(series), '_blank')}
+                  >
+                    View
+                  </EuiButtonEmpty>
+                </EuiToolTip>
               </div>
+              <ExplorerChartLabel
+                detectorLabel={detectorLabel}
+                entityFields={entityFields}
+                infoTooltip={series.infoTooltip}
+                wrapLabel={wrapLabel}
+              />
               <ExplorerChart
+                tooManyBuckets={tooManyBuckets}
                 seriesConfig={series}
                 mlSelectSeverityService={mlSelectSeverityService}
               />

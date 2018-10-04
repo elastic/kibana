@@ -18,7 +18,7 @@
  */
 
 jest.mock('../../layouts/layouts', () => {
-  const { schema } = require('../../../config/schema');
+  const { schema } = require('@kbn/config-schema');
   return {
     Layouts: {
       configSchema: schema.object({
@@ -82,8 +82,10 @@ test('`append()` correctly formats records and pushes them to console.', () => {
 
   for (const record of records) {
     appender.append(record);
+    // tslint:disable-next-line no-console
     expect(console.log).toHaveBeenCalledWith(`mock-${JSON.stringify(record)}`);
   }
 
+  // tslint:disable-next-line no-console
   expect(console.log).toHaveBeenCalledTimes(records.length);
 });

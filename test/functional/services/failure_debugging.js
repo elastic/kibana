@@ -48,6 +48,12 @@ export async function FailureDebuggingProvider({ getService }) {
     await writeFileAsync(htmlOutputFileName, pageSource);
   }
 
+  async function logBrowserConsole() {
+    const browserLogs = await remote.getLogsFor('browser');
+    const browserOutput = browserLogs.reduce((acc, log) => acc += `${log.message.replace(/\\n/g, '\n')}\n`, '');
+    log.info(`Browser output is: ${browserOutput}`);
+  }
+
   async function onFailure(error, test) {
     // Replace characters in test names which can't be used in filenames, like *
     const name = test.fullTitle().replace(/([^ a-zA-Z0-9-]+)/g, '_');
@@ -55,11 +61,16 @@ export async function FailureDebuggingProvider({ getService }) {
     await Promise.all([
       screenshots.takeForFailure(name),
       logCurrentUrl(),
-      savePageHtml(name)
+      savePageHtml(name),
+      logBrowserConsole(),
     ]);
   }
 
   lifecycle
     .on('testFailure', onFailure)
     .on('testHookFailure', onFailure);
+
+  return {
+    logBrowserConsole
+  };
 }

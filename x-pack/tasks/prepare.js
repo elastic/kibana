@@ -7,6 +7,12 @@
 import { ensureAllBrowsersDownloaded } from '../plugins/reporting/server/browsers';
 
 export default gulp => {
-  // anything that needs to happen pre-build or pre-dev
+  // anything that should always happen before anything else
   gulp.task('prepare', () => ensureAllBrowsersDownloaded());
+
+  // anything that needs to happen before development
+  gulp.task('prepare:dev', ['prepare']);
+
+  // anything that needs to happen before building
+  gulp.task('prepare:build', ['prepare', 'canvas:prepare']);
 };

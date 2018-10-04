@@ -7,9 +7,9 @@
 
 
 /*
- * Angular controller for the container for the anomaly charts in the
+ * Service for the container for the anomaly charts in the
  * Machine Learning Explorer dashboard.
- * The controller processes the data required to draw each of the charts
+ * The service processes the data required to draw each of the charts
  * and manages the layout of the charts in the containing div.
  */
 
@@ -48,7 +48,11 @@ export function explorerChartsContainerServiceFactory(
 
   callback(getDefaultData());
 
+  let requestCount = 0;
   const anomalyDataChangeListener = function (anomalyRecords, earliestMs, latestMs) {
+    const newRequestCount = ++requestCount;
+    requestCount = newRequestCount;
+
     const data = getDefaultData();
 
     const threshold = mlSelectSeverityService.state.get('threshold');
@@ -58,7 +62,10 @@ export function explorerChartsContainerServiceFactory(
     const allSeriesRecords = processRecordsForDisplay(filteredRecords);
     // Calculate the number of charts per row, depending on the width available, to a max of 4.
     const chartsContainerWidth = Math.floor($chartContainer.width());
-    const chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), MAX_CHARTS_PER_ROW);
+    let chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), MAX_CHARTS_PER_ROW);
+    if (allSeriesRecords.length === 1) {
+      chartsPerRow = 1;
+    }
 
     data.layoutCellsPerChart = DEFAULT_LAYOUT_CELLS_PER_CHART / chartsPerRow;
 
@@ -71,8 +78,15 @@ export function explorerChartsContainerServiceFactory(
 
     // Calculate the time range of the charts, which is a function of the chart width and max job bucket span.
     data.tooManyBuckets = false;
-    const { chartRange, tooManyBuckets } = calculateChartRange(seriesConfigs, earliestMs, latestMs,
-      Math.floor(chartsContainerWidth / chartsPerRow), recordsToPlot, data.timeFieldName);
+    const chartWidth = Math.floor(chartsContainerWidth / chartsPerRow);
+    const { chartRange, tooManyBuckets } = calculateChartRange(
+      seriesConfigs,
+      earliestMs,
+      latestMs,
+      chartWidth,
+      recordsToPlot,
+      data.timeFieldName
+    );
     data.tooManyBuckets = tooManyBuckets;
 
     // initialize the charts with loading indicators
@@ -195,6 +209,10 @@ export function explorerChartsContainerServiceFactory(
               }
             }
           }
+
+          if (_.has(record, 'multi_bucket_impact')) {
+            chartPoint.multiBucketImpact = record.multi_bucket_impact;
+          }
         }
       });
 
@@ -255,6 +273,11 @@ export function explorerChartsContainerServiceFactory(
 
     Promise.all(seriesPromises)
       .then(response => {
+        // TODO: Add test to prevent this regression.
+        // Ignore this response if it's returned by an out of date promise
+        if (newRequestCount < requestCount) {
+          return;
+        }
         // calculate an overall min/max for all series
         const processedData = response.map(processChartData);
         const allDataPoints = _.reduce(processedData, (datapoints, series) => {

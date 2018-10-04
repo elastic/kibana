@@ -39,7 +39,7 @@ function getUuid(req, metric) {
   } else if (metric.app === 'logstash') {
     return req.params.logstashUuid;
   } else if (metric.app === 'elasticsearch') {
-    return req.params.resolver;
+    return req.params.nodeUuid;
   }
 }
 
@@ -110,6 +110,10 @@ function fetchSeries(req, indexPattern, metric, min, max, bucketSize, filters) {
       }
     }
   };
+
+  if (metric.debug) {
+    console.log('metric.debug', JSON.stringify(params));
+  }
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params);

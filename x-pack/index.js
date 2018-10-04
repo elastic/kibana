@@ -21,8 +21,10 @@ import { licenseManagement } from './plugins/license_management';
 import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
 import { consoleExtensions } from './plugins/console_extensions';
+import { spaces } from './plugins/spaces';
 import { notifications } from './plugins/notifications';
 import { kueryAutocomplete } from './plugins/kuery_autocomplete';
+import { canvas } from './plugins/canvas';
 
 module.exports = function (kibana) {
   return [
@@ -30,6 +32,7 @@ module.exports = function (kibana) {
     graph(kibana),
     monitoring(kibana),
     reporting(kibana),
+    spaces(kibana),
     security(kibana),
     searchprofiler(kibana),
     ml(kibana),
@@ -39,6 +42,7 @@ module.exports = function (kibana) {
     dashboardMode(kibana),
     logstash(kibana),
     apm(kibana),
+    canvas(kibana),
     licenseManagement(kibana),
     cloud(kibana),
     indexManagement(kibana),

@@ -32,6 +32,7 @@ module.exports = {
       files: [
         '.eslintrc.js',
         'packages/eslint-plugin-kibana-custom/**/*',
+        'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',
         'packages/kbn-es/**/*',
         'packages/kbn-datemath/**/*',
@@ -329,6 +330,116 @@ module.exports = {
     {
       files: ['x-pack/plugins/monitoring/public/**/*'],
       env: { browser: true },
+    },
+
+    /**
+     * Canvas overrides
+     */
+    {
+      files: ['x-pack/plugins/canvas/**/*'],
+      plugins: ['prettier'],
+      rules: {
+        // preferences
+        'comma-dangle': [2, 'always-multiline'],
+        'no-multiple-empty-lines': [2, { max: 1, maxEOF: 1 }],
+        'no-multi-spaces': 2,
+        radix: 2,
+        curly: [2, 'multi-or-nest', 'consistent'],
+
+        // annoying rules that conflict with prettier
+        'space-before-function-paren': 0,
+        indent: 0,
+        'wrap-iife': 0,
+        'max-len': 0,
+
+        // module importing
+        'import/order': [
+          2,
+          { groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'] },
+        ],
+        'import/extensions': [2, 'never', { json: 'always', less: 'always', svg: 'always' }],
+
+        // prettier
+        'prettier/prettier': 2,
+
+        // react
+        'jsx-quotes': 2,
+        'react/no-did-mount-set-state': 2,
+        'react/no-did-update-set-state': 2,
+        'react/no-multi-comp': [2, { ignoreStateless: true }],
+        'react/self-closing-comp': 2,
+        'react/sort-comp': 2,
+        'react/jsx-boolean-value': 2,
+        'react/jsx-wrap-multilines': 2,
+        'react/no-unescaped-entities': [2, { forbid: ['>', '}'] }],
+        'react/forbid-elements': [
+          2,
+          {
+            forbid: [
+              {
+                element: 'EuiConfirmModal',
+                message: 'Use <ConfirmModal> instead',
+              },
+              {
+                element: 'EuiPopover',
+                message: 'Use <Popover> instead',
+              },
+              {
+                element: 'EuiIconTip',
+                message: 'Use <TooltipIcon> instead',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/*', 'x-pack/plugins/canvas/**/*'],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            packageDir: './x-pack/',
+          },
+        ],
+      },
+    },
+    {
+      files: [
+        'x-pack/plugins/canvas/gulpfile.js',
+        'x-pack/plugins/canvas/tasks/*.js',
+        'x-pack/plugins/canvas/tasks/**/*.js',
+        'x-pack/plugins/canvas/__tests__/**/*',
+        'x-pack/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
+      ],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            devDependencies: true,
+            peerDependencies: true,
+            packageDir: './x-pack/',
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*'],
+      globals: { canvas: true, $: true },
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            packageDir: './x-pack/',
+          },
+        ],
+        'import/no-unresolved': [
+          'error',
+          {
+            ignore: ['!!raw-loader.+.svg$'],
+          },
+        ],
+      },
     },
   ],
 };

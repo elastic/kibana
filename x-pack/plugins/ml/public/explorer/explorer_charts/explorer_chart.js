@@ -22,8 +22,21 @@ import moment from 'moment';
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
 import { formatValue } from '../../formatters/format_value';
-import { getSeverityWithLow } from '../../../common/util/anomaly_utils';
-import { drawLineChartDots, numTicksForDateFormat } from '../../util/chart_utils';
+import {
+  getSeverityWithLow,
+  getMultiBucketImpactLabel,
+} from '../../../common/util/anomaly_utils';
+import {
+  LINE_CHART_ANOMALY_RADIUS,
+  MULTI_BUCKET_SYMBOL_SIZE,
+  SCHEDULED_EVENT_SYMBOL_HEIGHT,
+  drawLineChartDots,
+  getTickValues,
+  numTicksForDateFormat,
+  removeLabelOverlap,
+  showMultiBucketAnomalyMarker,
+  showMultiBucketAnomalyTooltip,
+} from '../../util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { mlEscape } from '../../util/string_utils';
@@ -31,9 +44,11 @@ import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
+const CONTENT_WRAPPER_CLASS = 'ml-explorer-chart-content-wrapper';
 
 export class ExplorerChart extends React.Component {
   static propTypes = {
+    tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,
     mlSelectSeverityService: PropTypes.object.isRequired
   }
@@ -48,6 +63,7 @@ export class ExplorerChart extends React.Component {
 
   renderChart() {
     const {
+      tooManyBuckets,
       mlSelectSeverityService
     } = this.props;
 
@@ -66,8 +82,6 @@ export class ExplorerChart extends React.Component {
 
     let vizWidth = 0;
     const chartHeight = 170;
-    const LINE_CHART_ANOMALY_RADIUS = 7;
-    const SCHEDULED_EVENT_MARKER_HEIGHT = 5;
 
     // Left margin is adjusted later for longest y-axis label.
     const margin = { top: 10, right: 0, bottom: 30, left: 60 };
@@ -85,13 +99,14 @@ export class ExplorerChart extends React.Component {
 
       // Clear any existing elements from the visualization,
       // then build the svg elements for the chart.
-      const chartElement = d3.select(element).select('.content-wrapper');
+      const chartElement = d3.select(element).select(`.${CONTENT_WRAPPER_CLASS}`);
       chartElement.select('svg').remove();
 
       const svgWidth = $el.width();
       const svgHeight = chartHeight + margin.top + margin.bottom;
 
       const svg = chartElement.append('svg')
+        .classed('ml-explorer-chart-svg', true)
         .attr('width', svgWidth)
         .attr('height', svgHeight);
 
@@ -176,13 +191,27 @@ export class ExplorerChart extends React.Component {
       timeBuckets.setInterval('auto');
       const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
+      const emphasisStart = Math.max(config.selectedEarliest, config.plotEarliest);
+      const emphasisEnd = Math.min(config.selectedLatest, config.plotLatest);
+      // +1 ms to account for the ms that was substracted for query aggregations.
+      const interval = emphasisEnd - emphasisStart + 1;
+      const tickValues = getTickValues(emphasisStart, interval, config.plotEarliest, config.plotLatest);
+
       const xAxis = d3.svg.axis().scale(lineChartXScale)
         .orient('bottom')
         .innerTickSize(-chartHeight)
         .outerTickSize(0)
         .tickPadding(10)
-        .ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat))
         .tickFormat(d => moment(d).format(xAxisTickFormat));
+
+      // With tooManyBuckets the chart would end up with no x-axis labels
+      // because the ticks are based on the span of the emphasis section,
+      // and the highlighted area spans the whole chart.
+      if (tooManyBuckets === false) {
+        xAxis.tickValues(tickValues);
+      } else {
+        xAxis.ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat));
+      }
 
       const yAxis = d3.svg.axis().scale(lineChartYScale)
         .orient('left')
@@ -196,7 +225,7 @@ export class ExplorerChart extends React.Component {
 
       const axes = lineChartGroup.append('g');
 
-      axes.append('g')
+      const gAxis = axes.append('g')
         .attr('class', 'x axis')
         .attr('transform', 'translate(0,' + chartHeight + ')')
         .call(xAxis);
@@ -204,6 +233,10 @@ export class ExplorerChart extends React.Component {
       axes.append('g')
         .attr('class', 'y axis')
         .call(yAxis);
+
+      if (tooManyBuckets === false) {
+        removeLabelOverlap(gAxis, emphasisStart, interval, vizWidth);
+      }
     }
 
     function drawLineChartHighlightedSpan() {
@@ -216,10 +249,12 @@ export class ExplorerChart extends React.Component {
 
       lineChartGroup.append('rect')
         .attr('class', 'selected-interval')
-        .attr('x', lineChartXScale(new Date(rectStart)))
-        .attr('y', 1)
-        .attr('width', rectWidth)
-        .attr('height', chartHeight - 1);
+        .attr('x', lineChartXScale(new Date(rectStart)) + 2)
+        .attr('y', 2)
+        .attr('rx', 3)
+        .attr('ry', 3)
+        .attr('width', rectWidth - 4)
+        .attr('height', chartHeight - 4);
     }
 
     function drawLineChartPaths(data) {
@@ -231,11 +266,11 @@ export class ExplorerChart extends React.Component {
     function drawLineChartMarkers(data) {
       // Render circle markers for the points.
       // These are used for displaying tooltips on mouseover.
-      // Don't render dots where value=null (data gaps)
+      // Don't render dots where value=null (data gaps) or for multi-bucket anomalies.
       const dots = lineChartGroup.append('g')
         .attr('class', 'chart-markers')
         .selectAll('.metric-value')
-        .data(data.filter(d => d.value !== null));
+        .data(data.filter(d => (d.value !== null && !showMultiBucketAnomalyMarker(d))));
 
       // Remove dots that are no longer needed i.e. if number of chart points has decreased.
       dots.exit().remove();
@@ -254,11 +289,27 @@ export class ExplorerChart extends React.Component {
         .attr('class', function (d) {
           let markerClass = 'metric-value';
           if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= threshold.val) {
-            markerClass += ' anomaly-marker ';
-            markerClass += getSeverityWithLow(d.anomalyScore);
+            markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore)}`;
           }
           return markerClass;
         });
+
+      // Render cross symbols for any multi-bucket anomalies.
+      const multiBucketMarkers = lineChartGroup.select('.chart-markers').selectAll('.multi-bucket')
+        .data(data.filter(d => (d.anomalyScore !== null && showMultiBucketAnomalyMarker(d) === true)));
+
+      // Remove multi-bucket markers that are no longer needed
+      multiBucketMarkers.exit().remove();
+
+      // Update markers to new positions.
+      multiBucketMarkers.enter().append('path')
+        .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
+        .attr('transform', d => `translate(${lineChartXScale(d.date)}, ${lineChartYScale(d.value)})`)
+        .attr('class', d => `metric-value anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`)
+        .on('mouseover', function (d) {
+          showLineChartTooltip(d, this);
+        })
+        .on('mouseout', () => mlChartTooltipService.hide());
 
       // Add rectangular markers for any scheduled events.
       const scheduledEventMarkers = lineChartGroup.select('.chart-markers').selectAll('.scheduled-event-marker')
@@ -269,14 +320,14 @@ export class ExplorerChart extends React.Component {
       // Create any new markers that are needed i.e. if number of chart points has increased.
       scheduledEventMarkers.enter().append('rect')
         .attr('width', LINE_CHART_ANOMALY_RADIUS * 2)
-        .attr('height', SCHEDULED_EVENT_MARKER_HEIGHT)
+        .attr('height', SCHEDULED_EVENT_SYMBOL_HEIGHT)
         .attr('class', 'scheduled-event-marker')
         .attr('rx', 1)
         .attr('ry', 1);
 
       // Update all markers to new positions.
       scheduledEventMarkers.attr('x', (d) => lineChartXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
-        .attr('y', (d) => lineChartYScale(d.value) - (SCHEDULED_EVENT_MARKER_HEIGHT / 2));
+        .attr('y', (d) => lineChartYScale(d.value) - (SCHEDULED_EVENT_SYMBOL_HEIGHT / 2));
 
     }
 
@@ -290,6 +341,11 @@ export class ExplorerChart extends React.Component {
         const score = parseInt(marker.anomalyScore);
         const displayScore = (score > 0 ? score : '< 1');
         contents += ('anomaly score: ' + displayScore);
+
+        if (showMultiBucketAnomalyTooltip(marker) === true) {
+          contents += `<br/>multi-bucket impact: ${getMultiBucketImpactLabel(marker.multiBucketImpact)}`;
+        }
+
         // Show actual/typical when available except for rare detectors.
         // Rare detectors always have 1 as actual and the probability as typical.
         // Exposing those values in the tooltip with actual/typical labels might irritate users.
@@ -355,7 +411,7 @@ export class ExplorerChart extends React.Component {
           <LoadingIndicator height={CONTENT_WRAPPER_HEIGHT} />
         )}
         {!isLoading && (
-          <div className="content-wrapper" />
+          <div className={CONTENT_WRAPPER_CLASS} />
         )}
       </div>
     );
