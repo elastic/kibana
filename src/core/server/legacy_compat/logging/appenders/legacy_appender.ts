@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '../../../config/schema';
+import { schema } from '@kbn/config-schema';
 import { DisposableAppender } from '../../../logging/appenders/appenders';
 import { LogRecord } from '../../../logging/log_record';
 import { LegacyLoggingServer } from '../legacy_logging_server';
