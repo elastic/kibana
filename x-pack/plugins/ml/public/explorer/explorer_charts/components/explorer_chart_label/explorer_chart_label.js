@@ -35,7 +35,7 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
   const entityFieldBadges = entityFields.map((entity) => {
     return (
       <React.Fragment key={`${entity.fieldName} ${entity.fieldValue}`}>
-        <ExplorerChartLabelBadge entity={entity} />&nbsp;
+        <ExplorerChartLabelBadge entity={entity} />
       </React.Fragment>
     );
   });
@@ -63,7 +63,7 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
         )}
       </span>
       {wrapLabel && (
-        <div>{entityFieldBadges}</div>
+        <span className="ml-explorer-chart-label-badges">{entityFieldBadges}</span>
       )}
     </React.Fragment>
   );
