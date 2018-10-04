@@ -195,7 +195,7 @@ exports[`apmUiEnabled 1`] = `
         }
         layout="vertical"
         textAlign="center"
-        title="Security Analytics"
+        title="Security analytics"
         titleElement="span"
       />
     </EuiFlexItem>
@@ -454,7 +454,7 @@ exports[`isNewKibanaInstance 1`] = `
         }
         layout="vertical"
         textAlign="center"
-        title="Security Analytics"
+        title="Security analytics"
         titleElement="span"
       />
     </EuiFlexItem>
@@ -713,7 +713,7 @@ exports[`render 1`] = `
         }
         layout="vertical"
         textAlign="center"
-        title="Security Analytics"
+        title="Security analytics"
         titleElement="span"
       />
     </EuiFlexItem>
