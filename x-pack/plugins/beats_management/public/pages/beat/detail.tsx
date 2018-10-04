@@ -32,7 +32,6 @@ export const BeatDetailPage = (props: BeatDetailPageProps) => {
   }
   const configurationBlocks = flatten(
     beat.full_tags.map((tag: BeatTag) => {
-
       return tag.configuration_blocks.map(configuration => ({
         // @ts-ignore one of the types on ConfigurationBlock doesn't define a "module" property
         module: configuration.configs[0].module || null,
