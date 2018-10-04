@@ -17,7 +17,7 @@ export function parseSingleFunctionChain(filterString) {
   if (!name) {
     throw new Error(
       i18n.translate(
-        'xpack.canvas.lib.parseSingleFunctionChain.functionNameInChainNotFindErrorMessage',
+        'xpack.canvas.parseSingleFunctionChain.functionNameInChainNotFindErrorMessage',
         {
           defaultMessage: 'Could not find function name in chain',
         }

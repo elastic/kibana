@@ -6,6 +6,7 @@
 
 import chrome from 'ui/chrome';
 import lzString from 'lz-string';
+import { i18n } from '@kbn/i18n';
 import { createBrowserHistory, createMemoryHistory, parsePath, createPath } from 'history';
 import { get } from 'lodash';
 import { APP_ROUTE } from '../../common/lib/constants';
@@ -52,7 +53,12 @@ function wrapHistoryInstance(history) {
         const stateJSON = JSON.stringify(state);
         return lzString.compress(stateJSON);
       } catch (e) {
-        throw new Error('Could not encode state: ', e.message);
+        throw new Error(
+          i18n.translate('xpack.canvas.historyProvider.encodeStateErrorMessage', {
+            defaultMessage: 'Could not encode state: {errorMessage}',
+            values: { errorMessage: e.message },
+          })
+        );
       }
     },
 

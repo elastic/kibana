@@ -39,10 +39,13 @@ export function findExpressionType(name, type) {
 
   if (matches.length > 1) {
     throw new Error(
-      i18n.translate('xpack.canvas.lib.findExpressionType.foundMultipleExpressionErrorMessage', {
-        defaultMessage: 'Found multiple expressions with name "{name}"',
-        values: { name },
-      })
+      i18n.translate(
+        'xpack.canvas.findExpressionType.multipleExpressionWithTheSameNameErrorMessage',
+        {
+          defaultMessage: 'Found multiple expressions with name "{name}"',
+          values: { name },
+        }
+      )
     );
   }
   return matches[0] || null;

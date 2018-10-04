@@ -8,31 +8,31 @@ import { i18n } from '@kbn/i18n';
 
 export const legendOptions = [
   {
-    name: i18n.translate('xpack.canvas.lib.legendOptions.hiddenNameText', {
+    name: i18n.translate('xpack.canvas.legendOptions.hiddenNameText', {
       defaultMessage: 'Hidden',
     }),
     value: false,
   },
   {
-    name: i18n.translate('xpack.canvas.lib.legendOptions.topLeftNameText', {
+    name: i18n.translate('xpack.canvas.legendOptions.topLeftNameText', {
       defaultMessage: 'Top Left',
     }),
     value: 'nw',
   },
   {
-    name: i18n.translate('xpack.canvas.lib.legendOptions.topRightNameText', {
+    name: i18n.translate('xpack.canvas.legendOptions.topRightNameText', {
       defaultMessage: 'Top Right',
     }),
     value: 'ne',
   },
   {
-    name: i18n.translate('xpack.canvas.lib.legendOptions.bottomLeftNameText', {
+    name: i18n.translate('xpack.canvas.legendOptions.bottomLeftNameText', {
       defaultMessage: 'Bottom Left',
     }),
     value: 'sw',
   },
   {
-    name: i18n.translate('xpack.canvas.lib.legendOptions.bottomRightNameText', {
+    name: i18n.translate('xpack.canvas.legendOptions.bottomRightNameText', {
       defaultMessage: 'Bottom Right',
     }),
     value: 'se',

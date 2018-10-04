@@ -23,7 +23,7 @@ function showError(err) {
   notice.appendChild(close);
 
   const uncaughtErrorMessage = i18n.translate(
-    'xpack.canvas.lib.windowErrorHandler.uncaughtErrorSwallowedInDevModeMessage',
+    'xpack.canvas.windowErrorHandler.uncaughtErrorSwallowedInDevModeMessage',
     {
       defaultMessage: 'Uncaught error swallowed in dev mode',
     }
@@ -33,7 +33,7 @@ function showError(err) {
   notice.insertAdjacentHTML('beforeend', `<h3>${uncaughtErrorMessage}</h3>`);
 
   const message = document.createElement('p');
-  message.textContent = i18n.translate('xpack.canvas.lib.windowErrorHandlerErrorMessage', {
+  message.textContent = i18n.translate('xpack.canvas.windowErrorHandler.errorMessage', {
     defaultMessage: 'Error: {errorMessage}',
     values: { errorMessage: err.message },
   });
@@ -50,7 +50,7 @@ function showError(err) {
   }
 
   const checkConsoleMessage = i18n.translate(
-    'xpack.canvas.lib.windowErrorHandler.checkConsoleMessage',
+    'xpack.canvas.windowErrorHandler.checkConsoleMessage',
     {
       defaultMessage: 'Check console for more information',
     }

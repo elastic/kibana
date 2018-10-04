@@ -22,7 +22,7 @@ export function Element(config) {
 
   if (!config.expression) {
     throw new Error(
-      i18n.translate('xpack.canvas.lib.element.elementTypesMustHaveDefaultExpressionErrorMessage', {
+      i18n.translate('xpack.canvas.element.elementTypesDefaultExpressionErrorMessage', {
         defaultMessage: 'Element types must have a default expression',
       })
     );

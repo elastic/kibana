@@ -23,13 +23,10 @@ export const getFields = (index = '_all') => {
     )
     .catch(err =>
       notify.error(err, {
-        title: i18n.translate(
-          'xpack.canvas.lib.esService.fetchElasticsearchFieldsForIndexErrorMessageTitle',
-          {
-            defaultMessage: "Couldn't fetch Elasticsearch fields for '{index}'",
-            values: { index },
-          }
-        ),
+        title: i18n.translate('xpack.canvas.esService.fetchElasticsearchFieldsErrorMessageTitle', {
+          defaultMessage: "Couldn't fetch Elasticsearch fields for '{index}'",
+          values: { index },
+        }),
       })
     );
 };
@@ -40,12 +37,9 @@ export const getIndices = () => {
     .then(({ data: indices }) => indices)
     .catch(err =>
       notify.error(err, {
-        title: i18n.translate(
-          'xpack.canvas.lib.esService.fetchElasticsearchFieldsForIndicesErrorMessageTitle',
-          {
-            defaultMessage: "Couldn't fetch Elasticsearch indices",
-          }
-        ),
+        title: i18n.translate('xpack.canvas.esService.fetchElasticsearchIndicesErrorMessageTitle', {
+          defaultMessage: "Couldn't fetch Elasticsearch indices",
+        }),
       })
     );
 };

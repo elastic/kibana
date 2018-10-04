@@ -52,7 +52,7 @@ export function routerProvider(routes) {
       if (componentListener != null) {
         throw new Error(
           i18n.translate(
-            'xpack.canvas.lib.routerProvider.onlyOneRouteComponentListenerAllowedErrorMessage',
+            'xpack.canvas.routerProvider.multipleRouteComponentListenersErrorMessage',
             {
               defaultMessage: 'Only one route component listener is allowed',
             }

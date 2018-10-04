@@ -20,7 +20,7 @@ import { getType } from '../../common/lib/get_type';
 const allowedTypes = ['string', 'number', 'boolean'];
 const badType = () =>
   new Error(
-    i18n.translate('xpack.canvas.lib.argHelpers.allowedTypesErrorMessage', {
+    i18n.translate('xpack.canvas.argHelpers.allowedTypesErrorMessage', {
       defaultMessage: 'Arg setting helpers only support {allowedTypes}',
       values: { allowedTypes: allowedTypes.join(',') },
     })

@@ -17,13 +17,7 @@ export const aeroelastic = {
   },
 
   createStore(initialState, onChangeCallback = () => {}, page) {
-    if (stores.has(page)) {
-      throw new Error(
-        i18n.translate('xpack.canvas.lib.aeroelasticKibana.createStoreErrorMessage', {
-          defaultMessage: 'Only a single aeroelastic store per page should exist',
-        })
-      );
-    }
+    if (stores.has(page)) throw new Error('Only a single aeroelastic store per page should exist');
 
     stores.set(page, aero.state.createStore(initialState, onChangeCallback));
 
@@ -44,7 +38,7 @@ export const aeroelastic = {
     const store = stores.get(page);
     if (!store) {
       throw new Error(
-        i18n.translate('xpack.canvas.lib.aeroelasticKibana.getStoreErrorMessage', {
+        i18n.translate('xpack.canvas.aeroelasticKibana.storeDoesNotExistForPageErrorMessage', {
           defaultMessage: 'An aeroelastic store should exist for page {page}',
           values: { page },
         })
