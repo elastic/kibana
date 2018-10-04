@@ -56,7 +56,7 @@ function interceptRequest(server: any, request: any, h: any) {
 
   // If we're enabled, and someone's making an API request other
   // than our migration progress API, we'll disallow it.
-  if (request.headers.accept.includes('json')) {
+  if ((request.headers.accept || '').includes('json')) {
     throw Boom.serverUnavailable('Kibana is migrating and should be back online in a few minutes.');
   }
 

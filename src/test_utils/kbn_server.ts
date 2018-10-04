@@ -170,7 +170,7 @@ export async function startTestServers({
   await root.start();
 
   const kbnServer = getKbnServer(root);
-  await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+  await kbnServer.server.kibanaMigrator.awaitMigration();
 
   return {
     kbnServer,

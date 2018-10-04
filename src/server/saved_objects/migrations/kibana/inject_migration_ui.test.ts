@@ -91,7 +91,7 @@ describe('injectMigrationUI', () => {
   it('intercepts HTML requests when enabled', async () => {
     const result = await testRequest({
       progress: 0.1,
-      accept: '*/*',
+      accept: undefined,
       path: '/somepath',
     });
 
