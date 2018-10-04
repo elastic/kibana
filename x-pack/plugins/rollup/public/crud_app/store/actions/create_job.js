@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toastNotifications } from 'ui/notify';
-
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
   createJob as sendCreateJobRequest,
@@ -65,14 +63,13 @@ export const createJob = (jobConfig) => async (dispatch) => {
     return;
   }
 
-  toastNotifications.addSuccess(`Rollup job '${jobConfig.id}' was created`);
-
   dispatch({
     type: CREATE_JOB_SUCCESS,
     payload: { job: deserializeJob(newJob.data) },
   });
 
-  // This will open the new job in the detail panel.
+  // This will open the new job in the detail panel. Note that we're *not* showing a success toast
+  // here, because it would partially obscure the detail panel.
   getRouter().history.push({
     pathname: `${CRUD_APP_BASE_PATH}/job_list`,
     search: `?job=${jobConfig.id}`,
