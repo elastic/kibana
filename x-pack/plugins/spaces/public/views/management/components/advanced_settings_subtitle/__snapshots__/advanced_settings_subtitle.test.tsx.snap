@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdvancedSettingsSubtitle renders as expected 1`] = `
+<React.Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiCallOut
+    color="primary"
+    iconType="spacesApp"
+    size="m"
+    title={
+      <p>
+        The settings on this page apply to the 
+        <strong>
+          My Space
+        </strong>
+         space, unless otherwise specified.
+      </p>
+    }
+  />
+</React.Fragment>
+`;

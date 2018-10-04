@@ -105,7 +105,7 @@ module.controller('MlExplorerController', function (
   $scope.queryFilters = [];
 
   const dragSelect = new DragSelect({
-    selectables: document.querySelectorAll('.sl-cell'),
+    selectables: document.getElementsByClassName('sl-cell'),
     callback(elements) {
       if (elements.length > 1 && !ALLOW_CELL_RANGE_SELECTION) {
         elements = [elements[0]];
@@ -508,7 +508,8 @@ module.controller('MlExplorerController', function (
 
   // Listens to render updates of the swimlanes to update dragSelect
   const swimlaneRenderDoneListener = function () {
-    dragSelect.addSelectables(document.querySelectorAll('.sl-cell'));
+    dragSelect.clearSelection();
+    dragSelect.setSelectables(document.getElementsByClassName('sl-cell'));
   };
   mlExplorerDashboardService.swimlaneRenderDone.watch(swimlaneRenderDoneListener);
 

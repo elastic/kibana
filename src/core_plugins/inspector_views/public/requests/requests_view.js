@@ -32,8 +32,6 @@ import { RequestStatus } from 'ui/inspector/adapters';
 import { RequestSelector } from './request_selector';
 import { RequestDetails } from './request_details';
 
-import './requests_inspector.less';
-
 class RequestsViewComponent extends Component {
 
   constructor(props) {

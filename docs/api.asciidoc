@@ -26,7 +26,7 @@ entirely.
 
 [float]
 == APIs
-
+* <<spaces-api>>
 * <<role-management-api>>
 * <<saved-objects-api>>
 * <<dashboard-import-api>>
@@ -34,6 +34,7 @@ entirely.
 * <<url-shortening-api>>
 --
 
+include::api/spaces-management.asciidoc[]
 include::api/role-management.asciidoc[]
 include::api/saved-objects.asciidoc[]
 include::api/dashboard-import.asciidoc[]

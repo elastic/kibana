@@ -27,7 +27,7 @@ export class HeadlessChromiumDriverFactory {
 
   type = 'chromium';
 
-  create({ viewport }) {
+  create({ viewport, browserTimezone }) {
     return Rx.Observable.create(async observer => {
       const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
       const chromiumArgs = args({
@@ -46,6 +46,9 @@ export class HeadlessChromiumDriverFactory {
           executablePath: this.binaryPath,
           ignoreHTTPSErrors: true,
           args: chromiumArgs,
+          env: {
+            TZ: browserTimezone
+          },
         });
 
         page = await chromium.newPage();

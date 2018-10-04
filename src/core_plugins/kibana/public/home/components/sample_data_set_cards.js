@@ -37,7 +37,7 @@ import {
   listSampleDataSets,
   installSampleDataSet,
   uninstallSampleDataSet
-} from '../sample_data_sets';
+} from '../sample_data_client';
 
 import { i18n } from '@kbn/i18n';
 
@@ -90,12 +90,6 @@ export class SampleDataSetCards extends React.Component {
   }
 
   install = async (id) => {
-    const {
-      getConfig,
-      setConfig,
-      clearIndexPatternsCache,
-    } = this.props;
-
     const targetSampleDataSet = this.state.sampleDataSets.find((sampleDataSet) => {
       return sampleDataSet.id === id;
     });
@@ -105,7 +99,7 @@ export class SampleDataSetCards extends React.Component {
     }));
 
     try {
-      await installSampleDataSet(id, targetSampleDataSet.defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
+      await installSampleDataSet(id, targetSampleDataSet.defaultIndex);
     } catch (fetchError) {
       if (this._isMounted) {
         this.setState((prevState) => ({
@@ -139,12 +133,6 @@ export class SampleDataSetCards extends React.Component {
   }
 
   uninstall = async (id) => {
-    const {
-      getConfig,
-      setConfig,
-      clearIndexPatternsCache,
-    } = this.props;
-
     const targetSampleDataSet = this.state.sampleDataSets.find((sampleDataSet) => {
       return sampleDataSet.id === id;
     });
@@ -154,7 +142,7 @@ export class SampleDataSetCards extends React.Component {
     }));
 
     try {
-      await uninstallSampleDataSet(id, targetSampleDataSet.defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
+      await uninstallSampleDataSet(id, targetSampleDataSet.defaultIndex);
     } catch (fetchError) {
       if (this._isMounted) {
         this.setState((prevState) => ({
@@ -216,8 +204,5 @@ export class SampleDataSetCards extends React.Component {
 }
 
 SampleDataSetCards.propTypes = {
-  getConfig: PropTypes.func.isRequired,
-  setConfig: PropTypes.func.isRequired,
-  clearIndexPatternsCache: PropTypes.func.isRequired,
   addBasePath: PropTypes.func.isRequired,
 };
