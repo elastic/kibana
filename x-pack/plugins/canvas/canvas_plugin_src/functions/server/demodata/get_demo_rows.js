@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import ci from './ci.json';
 import shirts from './shirts.json';
@@ -11,5 +12,10 @@ import shirts from './shirts.json';
 export function getDemoRows(arg) {
   if (arg === 'ci') return cloneDeep(ci);
   if (arg === 'shirts') return cloneDeep(shirts);
-  throw new Error(`Invalid data set: ${arg}, use 'ci' or 'shirts'.`);
+  throw new Error(
+    i18n.translate('xpack.canvas.functions.getDemoRows.invalidDataSetErrorMessage', {
+      defaultMessage: "Invalid data set: {arg}, use 'ci' or 'shirts'.",
+      values: { arg },
+    })
+  );
 }

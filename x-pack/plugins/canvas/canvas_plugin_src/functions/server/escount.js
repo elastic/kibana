@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { buildESRequest } from '../../../server/lib/build_es_request';
 
 export const escount = () => ({
   name: 'escount',
   type: 'number',
-  help: 'Query elasticsearch for a count of the number of hits matching a query',
+  help: i18n.translate('xpack.canvas.functions.escountHelpText', {
+    defaultMessage: 'Query elasticsearch for a count of the number of hits matching a query',
+  }),
   context: {
     types: ['filter'],
   },
@@ -17,12 +20,16 @@ export const escount = () => ({
     index: {
       types: ['string', 'null'],
       default: '_all',
-      help: 'Specify an index pattern. Eg "logstash-*"',
+      help: i18n.translate('xpack.canvas.functions.escount.argsIndexHelpText', {
+        defaultMessage: 'Specify an index pattern. Eg "logstash-*"',
+      }),
     },
     query: {
       types: ['string'],
       aliases: ['_', 'q'],
-      help: 'A Lucene query string',
+      help: i18n.translate('xpack.canvas.functions.escount.argsQueryHelpText', {
+        defaultMessage: 'A Lucene query string',
+      }),
       default: '"-_index:.kibana"',
     },
   },

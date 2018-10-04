@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { flatten } from 'lodash';
 import { fetch } from '../../../common/lib/fetch';
 import { buildBoolArray } from '../../../server/lib/build_bool_array';
@@ -17,32 +18,44 @@ export const timelion = () => ({
     query: {
       types: ['string'],
       aliases: ['_', 'q'],
-      help: 'A timelion query',
+      help: i18n.translate('xpack.canvas.functions.timelion.argsQueryHelpText', {
+        defaultMessage: 'A timelion query',
+      }),
       default: '".es(*)"',
     },
     interval: {
       types: ['string'],
-      help: 'Bucket interval for the time series',
+      help: i18n.translate('xpack.canvas.functions.timelion.argsIntervalHelpText', {
+        defaultMessage: 'Bucket interval for the time series',
+      }),
       default: 'auto',
     },
     from: {
       type: ['string'],
-      help: 'Elasticsearch date math string for the start of the time range',
+      help: i18n.translate('xpack.canvas.functions.timelion.argsFromHelpText', {
+        defaultMessage: 'Elasticsearch date math string for the start of the time range',
+      }),
       default: 'now-1y',
     },
     to: {
       type: ['string'],
-      help: 'Elasticsearch date math string for the end of the time range',
+      help: i18n.translate('xpack.canvas.functions.timelion.argsToHelpText', {
+        defaultMessage: 'Elasticsearch date math string for the end of the time range',
+      }),
       default: 'now',
     },
     timezone: {
       type: ['string'],
-      help: 'Timezone for the time range',
+      help: i18n.translate('xpack.canvas.functions.timelion.argsTimezoneHelpText', {
+        defaultMessage: 'Timezone for the time range',
+      }),
       default: 'UTC',
     },
   },
   type: 'datatable',
-  help: 'Use timelion to extract one or more timeseries from many sources.',
+  help: i18n.translate('xpack.canvas.functions.timelionHelpText', {
+    defaultMessage: 'Use timelion to extract one or more timeseries from many sources.',
+  }),
   fn: (context, args, handlers) => {
     // Timelion requires a time range. Use the time range from the timefilter element in the
     // workpad, if it exists. Otherwise fall back on the function args.

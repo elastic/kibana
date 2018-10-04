@@ -5,6 +5,7 @@
  */
 
 import uniqBy from 'lodash.uniqby';
+import { i18n } from '@kbn/i18n';
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit, values } from 'lodash';
 import moment from 'moment';
@@ -20,33 +21,43 @@ const columnExists = (cols, colName) => cols.includes(unquoteString(colName));
 export const pointseries = () => ({
   name: 'pointseries',
   type: 'pointseries',
-  help:
-    'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a [TinyMath function](http://canvas.elastic.co/reference/tinymath.html). ' +
-    'If you enter a TinyMath expression in your argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique ' +
-    'keys. Measures are then deduplicated by those keys using the specified TinyMath function',
+  help: i18n.translate('xpack.canvas.functions.pointseriesHelpText', {
+    defaultMessage:
+      'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a [TinyMath function](http://canvas.elastic.co/reference/tinymath.html). If you enter a TinyMath expression in your argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique keys. Measures are then deduplicated by those keys using the specified TinyMath function',
+  }),
   context: {
     types: ['datatable'],
   },
   args: {
     x: {
       types: ['string', 'null'],
-      help: 'The values along the X-axis',
+      help: i18n.translate('xpack.canvas.functions.pointseries.argsXHelpText', {
+        defaultMessage: 'The values along the X-axis',
+      }),
     },
     y: {
       types: ['string', 'null'],
-      help: 'The values along the y-axis',
+      help: i18n.translate('xpack.canvas.functions.pointseries.argsYHelpText', {
+        defaultMessage: 'The values along the y-axis',
+      }),
     },
     color: {
       types: ['string', 'null'],
-      help: "An expression to use in determining the mark's color", // If you need categorization, transform the field.
+      help: i18n.translate('xpack.canvas.functions.pointseries.argsColorHelpText', {
+        defaultMessage: "An expression to use in determining the mark's color", // If you need categorization, transform the field.
+      }),
     },
     size: {
       types: ['string', 'null'],
-      help: 'For elements that support it, the size of the marks',
+      help: i18n.translate('xpack.canvas.functions.pointseries.argsSizeHelpText', {
+        defaultMessage: 'For elements that support it, the size of the marks',
+      }),
     },
     text: {
       types: ['string', 'null'],
-      help: 'For use in charts that support it, the text to show in the mark',
+      help: i18n.translate('xpack.canvas.functions.pointseries.argsTextHelpText', {
+        defaultMessage: 'For use in charts that support it, the text to show in the mark',
+      }),
     },
     // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
     // The way the function below is written you can add as many arbitrary named args as you want.
@@ -147,8 +158,16 @@ export const pointseries = () => ({
       const measureValues = measureNames.map(measure => {
         try {
           const ev = evaluate(args[measure], subScope);
-          if (Array.isArray(ev))
-            throw new Error('Expressions must be wrapped in a function such as sum()');
+          if (Array.isArray(ev)) {
+            throw new Error(
+              i18n.translate(
+                'xpack.canvas.functions.pointseries.expressionsIsNotWrappedErrorMessage',
+                {
+                  defaultMessage: 'Expressions must be wrapped in a function such as sum()',
+                }
+              )
+            );
+          }
 
           return ev;
         } catch (e) {

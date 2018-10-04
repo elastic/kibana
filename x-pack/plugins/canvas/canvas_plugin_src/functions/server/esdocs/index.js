@@ -5,6 +5,7 @@
  */
 
 import squel from 'squel';
+import { i18n } from '@kbn/i18n';
 import { map, zipObject } from 'lodash';
 import { buildBoolArray } from '../../../../server/lib/build_bool_array';
 import { normalizeType } from '../../../../server/lib/normalize_type';
@@ -13,9 +14,10 @@ import { sanitizeName } from '../../../../server/lib/sanitize_name';
 export const esdocs = () => ({
   name: 'esdocs',
   type: 'datatable',
-  help:
-    'Query elasticsearch and get back raw documents. We recommend you specify the fields you want, ' +
-    'especially if you are going to ask for a lot of rows',
+  help: i18n.translate('xpack.canvas.functions.esdocsHelpText', {
+    defaultMessage:
+      'Query elasticsearch and get back raw documents. We recommend you specify the fields you want, especially if you are going to ask for a lot of rows',
+  }),
   context: {
     types: ['filter'],
   },
@@ -23,30 +25,43 @@ export const esdocs = () => ({
     index: {
       types: ['string', 'null'],
       default: '_all',
-      help: 'Specify an index pattern. Eg "logstash-*"',
+      help: i18n.translate('xpack.canvas.functions.esdocs.argsIndexHelpText', {
+        defaultMessage: 'Specify an index pattern. Eg "logstash-*"',
+      }),
     },
     query: {
       types: ['string'],
       aliases: ['_', 'q'],
-      help: 'A Lucene query string',
+      help: i18n.translate('xpack.canvas.functions.esdocs.argsQueryHelpText', {
+        defaultMessage: 'A Lucene query string',
+      }),
       default: '-_index:.kibana',
     },
     sort: {
       types: ['string', 'null'],
-      help: 'Sort directions as "field, direction". Eg "@timestamp, desc" or "bytes, asc"',
+      help: i18n.translate('xpack.canvas.functions.esdocs.argsSortHelpText', {
+        defaultMessage:
+          'Sort directions as "field, direction". Eg "@timestamp, desc" or "bytes, asc"',
+      }),
     },
     fields: {
-      help: 'Comma separated list of fields. Fewer fields will perform better.',
+      help: i18n.translate('xpack.canvas.functions.esdocs.argsFieldsHelpText', {
+        defaultMessage: 'Comma separated list of fields. Fewer fields will perform better.',
+      }),
       types: ['string', 'null'],
     },
     metaFields: {
-      help: 'Comma separated list of meta fields, eg "_index,_type"',
+      help: i18n.translate('xpack.canvas.functions.esdocs.argsMetaFieldsHelpText', {
+        defaultMessage: 'Comma separated list of meta fields, eg "_index,_type"',
+      }),
       types: ['string', 'null'],
     },
     count: {
       types: ['number'],
       default: 100,
-      help: 'The number of docs to pull back. Smaller numbers perform better',
+      help: i18n.translate('xpack.canvas.functions.esdocs.argsCountHelpText', {
+        defaultMessage: 'The number of docs to pull back. Smaller numbers perform better',
+      }),
     },
   },
   fn: (context, args, handlers) => {

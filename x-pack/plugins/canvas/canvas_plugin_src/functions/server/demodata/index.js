@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 import { queryDatatable } from '../../../../common/lib/datatable/query';
 import { getDemoRows } from './get_demo_rows';
@@ -12,7 +13,11 @@ export const demodata = () => ({
   name: 'demodata',
   aliases: [],
   type: 'datatable',
-  help: 'A mock data set that includes project CI times with usernames, countries and run phases.',
+  help: i18n.translate('xpack.canvas.functions.demodataHelpText', {
+    defaultMessage:
+      'A mock data set that includes project CI times with usernames, countries and run phases.',
+  }),
+
   context: {
     types: ['filter'],
   },
@@ -20,7 +25,9 @@ export const demodata = () => ({
     type: {
       types: ['string', 'null'],
       aliases: ['_'],
-      help: 'The name of the demo data set to use',
+      help: i18n.translate('xpack.canvas.functions.demodata.argsTypeHelpText', {
+        defaultMessage: 'The name of the demo data set to use',
+      }),
       default: 'ci',
     },
   },

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { map, zipObject } from 'lodash';
 import { normalizeType } from '../../../../server/lib/normalize_type';
 import { buildBoolArray } from '../../../../server/lib/build_bool_array';
@@ -15,12 +16,16 @@ export const essql = () => ({
   context: {
     types: ['filter'],
   },
-  help: 'Elasticsearch SQL',
+  help: i18n.translate('xpack.canvas.functions.essqlHelpText', {
+    defaultMessage: 'Elasticsearch SQL',
+  }),
   args: {
     query: {
       aliases: ['_', 'q'],
       types: ['string'],
-      help: 'SQL query',
+      help: i18n.translate('xpack.canvas.functions.essql.argsQueryHelpText', {
+        defaultMessage: 'SQL query',
+      }),
     },
     count: {
       types: ['number'],
@@ -57,12 +62,22 @@ export const essql = () => ({
       .catch(e => {
         if (e.message.indexOf('parsing_exception') > -1) {
           throw new Error(
-            `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${
-              e.message
-            }`
+            i18n.translate('xpack.canvas.functions.essql.elasticsearchSqlQueryParseErrorMessage', {
+              defaultMessage:
+                "Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: {errorMessage}",
+              values: { errorMessage: e.message },
+            })
           );
         }
-        throw new Error(`Unexpected error from Elasticsearch: ${e.message}`);
+        throw new Error(
+          i18n.translate(
+            'xpack.canvas.functions.essql.unexpectedErrorFormElasticsearchErrorMessage',
+            {
+              defaultMessage: 'Unexpected error from Elasticsearch: {errorMessage}',
+              values: { errorMessage: e.message },
+            }
+          )
+        );
       });
   },
 });
