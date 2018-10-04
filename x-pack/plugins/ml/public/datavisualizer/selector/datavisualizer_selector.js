@@ -20,6 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { isFullLicense } from '../../license/check_license';
 
 function startTrialDescription() {
   return (
@@ -41,7 +42,7 @@ export function DatavisualizerSelector() {
 
   // TODO - add correct logic for determining whether to show the link to the
   // license management page allowing the user to start a trial of the Platinum feature set.
-  const shouldShowStartTrialLink = true;
+  const shouldShowStartTrialLink = (isFullLicense() === false);
 
   return (
     <EuiPage>
