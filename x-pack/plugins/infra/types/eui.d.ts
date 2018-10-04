@@ -57,6 +57,7 @@ declare module '@elastic/eui' {
         | 'withPortal'
         | 'ref'
         | 'placeholderText'
+        | 'selected'
       >
     > & {
       fullWidth?: boolean;
@@ -64,6 +65,7 @@ declare module '@elastic/eui' {
       injectTimes?: Moment[];
       isInvalid?: boolean;
       isLoading?: boolean;
+      selected?: Moment | null | undefined;
       placeholder?: string;
       shadow?: boolean;
     };
@@ -137,21 +139,17 @@ declare module '@elastic/eui' {
 
   export const EuiErrorBoundary: React.SFC<EuiErrorBoundaryProps>;
 
-  type EuiComboBoxProps = CommonProps & {
-    placeholder?: string;
-    options?: any[];
-    selectedOptions?: any[];
-    onChange?: (arg: any) => void;
-    fullWidth?: boolean;
-    isClearable?: boolean;
-    singleSelection?: boolean;
-  };
-  export const EuiComboBox: React.SFC<EuiComboBoxProps>;
-
   type EuiSelectProps = CommonProps & {
+    compressed?: boolean;
+    disabled?: boolean;
+    fullWidth?: boolean;
+    hasNoInitialSelection?: boolean;
+    inputRef?: Ref<HTMLSelectElement>;
+    isInvalid?: boolean;
+    isLoading?: boolean;
+    onChange?: (arg: any) => void;
     options?: any[];
     value: any;
-    onChange?: (arg: any) => void;
   };
   export const EuiSelect: React.SFC<EuiSelectProps>;
 

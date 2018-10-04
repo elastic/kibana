@@ -22,14 +22,17 @@
  */
 
 interface RouteConfiguration {
-  controller?: string | (() => void);
+  controller?: string | ((...args: any[]) => void);
+  redirectTo?: string;
   reloadOnSearch?: boolean;
+  resolve?: object;
   template?: string;
 }
 
 interface RouteManager {
   when(path: string, routeConfiguration: RouteConfiguration): RouteManager;
   otherwise(routeConfiguration: RouteConfiguration): RouteManager;
+  defaults(path: string | RegExp, defaults: RouteConfiguration): RouteManager;
 }
 
 export default RouteManager;

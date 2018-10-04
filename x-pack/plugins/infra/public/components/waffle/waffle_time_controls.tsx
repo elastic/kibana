@@ -56,10 +56,10 @@ export class WaffleTimeControls extends React.Component<WaffleTimeControlsProps>
     );
   }
 
-  private handleChangeDate = (time: Moment) => {
+  private handleChangeDate = (time: Moment | null) => {
     const { onChangeTime } = this.props;
 
-    if (onChangeTime) {
+    if (onChangeTime && time) {
       onChangeTime(time.valueOf());
     }
   };
