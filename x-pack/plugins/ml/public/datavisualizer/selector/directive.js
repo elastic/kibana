@@ -9,9 +9,8 @@ import 'ngreact';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-// TODO - add in correct license and privilege checks.
-//import { checkBasicLicense } from 'plugins/ml/license/check_license';
-//import { checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_privilege';
+import { checkBasicLicense } from 'plugins/ml/license/check_license';
+import { checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_privilege';
 import { initPromise } from 'plugins/ml/util/promise';
 
 import uiRoutes from 'ui/routes';
@@ -22,8 +21,8 @@ uiRoutes
   .when('/datavisualizer', {
     template,
     resolve: {
-      //CheckLicense: checkBasicLicense,
-      //privileges: checkFindFileStructurePrivilege,
+      CheckLicense: checkBasicLicense,
+      privileges: checkFindFileStructurePrivilege,
       initPromise: initPromise(false)
     }
   });
