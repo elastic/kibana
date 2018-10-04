@@ -5,10 +5,10 @@
  */
 
 import Boom from 'boom';
-
 import { setupRequest } from '../lib/helpers/setup_request';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { getTrace } from '../lib/traces/get_trace';
+import { getTopTraces } from '../lib/traces/get_top_traces';
 
 const pre = [{ method: setupRequest, assign: 'setup' }];
 const ROOT = '/api/apm/traces';
@@ -18,6 +18,26 @@ const defaultErrorHandler = reply => err => {
 };
 
 export function initTracesApi(server) {
+  // Get trace list
+  server.route({
+    method: 'GET',
+    path: ROOT,
+    config: {
+      pre,
+      validate: {
+        query: withDefaultValidators()
+      }
+    },
+    handler: (req, reply) => {
+      const { setup } = req.pre;
+
+      return getTopTraces({ setup })
+        .then(reply)
+        .catch(defaultErrorHandler(reply));
+    }
+  });
+
+  // Get individual trace
   server.route({
     method: 'GET',
     path: `${ROOT}/{traceId}`,

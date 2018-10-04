@@ -9,12 +9,13 @@ import React from 'react';
 import { StringMap } from '../../../../typings/common';
 
 // TODO: extend from EUI's EuiProgress prop interface
-interface Props extends StringMap<any> {
+export interface ImpactBarProps extends StringMap<any> {
   value: number;
+  max?: number;
 }
 
-export function ImpactBar({ value, ...rest }: Props) {
+export function ImpactBar({ value, max = 100, ...rest }: ImpactBarProps) {
   return (
-    <EuiProgress size="l" value={value} max={100} color="primary" {...rest} />
+    <EuiProgress size="l" value={value} max={max} color="primary" {...rest} />
   );
 }

@@ -6,15 +6,14 @@
 
 import React from 'react';
 import styled from 'styled-components';
-
-import { StringMap } from '../../../../typings/common';
+import { ITransactionGroup } from '../../../../typings/TransactionGroup';
 import { fontSizes, truncate } from '../../../style/variables';
 // @ts-ignore
 import { asMillisWithDefault } from '../../../utils/formatters';
 // @ts-ignore
 import { RelativeLink } from '../../../utils/url';
 import { ImpactBar } from '../../shared/ImpactBar';
-import { ManagedTable } from '../../shared/ManagedTable';
+import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 // @ts-ignore
 import TooltipOverlay from '../../shared/TooltipOverlay';
 
@@ -27,21 +26,18 @@ const AppLink = styled(RelativeLink)`
   ${truncate('100%')};
 `;
 
-interface TraceItem {
-  name: string;
-  serviceName: string;
-  averageResponseTime: number;
-  tracesPerMinute: number;
-  impact: number;
+interface Props {
+  items: ITransactionGroup[];
+  noItemsMessage: any;
 }
 
-const TRACE_COLUMNS = [
+const traceListColumns: ITableColumn[] = [
   {
     field: 'name',
     name: 'Name',
     width: '40%',
     sortable: true,
-    render: (name: string, { serviceName }: TraceItem) => (
+    render: (name: string, { serviceName }: ITransactionGroup) => (
       <TooltipOverlay content={formatString(name)}>
         <AppLink path={`${serviceName}/traces/${name}`}>
           {formatString(name)}
@@ -63,7 +59,7 @@ const TRACE_COLUMNS = [
     render: (value: number) => asMillisWithDefault(value * 1000)
   },
   {
-    field: 'tracesPerMinute',
+    field: 'transactionsPerMinute',
     name: 'Traces per minute',
     sortable: true,
     dataType: 'number',
@@ -79,18 +75,15 @@ const TRACE_COLUMNS = [
   }
 ];
 
-interface Props {
-  items: Array<StringMap<any>>;
-  noItemsMessage: any;
-}
-
-export function TraceList({ items = [], noItemsMessage }: Props) {
+export function TraceList({ items = [], noItemsMessage, ...rest }: Props) {
   return (
     <ManagedTable
-      columns={TRACE_COLUMNS}
+      columns={traceListColumns}
       items={items}
-      noItemsMessage={noItemsMessage}
       initialSort={{ field: 'impact', direction: 'desc' }}
+      noItemsMessage={noItemsMessage}
+      initialPageSize={25}
+      {...rest}
     />
   );
 }

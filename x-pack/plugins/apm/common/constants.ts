@@ -20,6 +20,8 @@ export const TRANSACTION_NAME = 'transaction.name';
 export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
 
+export const TRACE_ID = 'trace.id';
+
 export const SPAN_START = 'span.start.us';
 export const SPAN_DURATION = 'span.duration.us';
 export const SPAN_TYPE = 'span.type';
@@ -28,7 +30,8 @@ export const SPAN_ID = 'span.id';
 export const SPAN_SQL = 'context.db.statement';
 export const SPAN_HEX_ID = 'span.hex_id';
 
-export const TRACE_ID = 'trace.id';
+// Parent ID for a transaction or span
+export const PARENT_ID = 'parent.id';
 
 export const ERROR_GROUP_ID = 'error.grouping_key';
 export const ERROR_CULPRIT = 'error.culprit';

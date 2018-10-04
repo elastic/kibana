@@ -6,6 +6,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { ITransactionGroup } from '../../../../typings/TransactionGroup';
 // @ts-ignore
 import { TraceListRequest } from '../../../store/reactReduxRequest/traceList';
 import EmptyMessage from '../../shared/EmptyMessage';
@@ -23,7 +24,7 @@ export function TraceOverview(props: Props) {
       <EuiSpacer />
       <TraceListRequest
         urlParams={urlParams}
-        render={({ data }: { data: object[] }) => (
+        render={({ data }: { data: ITransactionGroup[] }) => (
           <TraceList
             items={data}
             noItemsMessage={

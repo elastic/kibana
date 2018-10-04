@@ -31,8 +31,14 @@ const TransactionNameLink = styled(RelativeLink)`
   font-family: ${fontFamilyCode};
 `;
 
-function getColumns({ agentName, serviceName, type }) {
-  return [
+export default function TransactionList({
+  items,
+  agentName,
+  serviceName,
+  type,
+  ...rest
+}) {
+  const columns = [
     {
       field: 'name',
       name: 'Name',
@@ -53,7 +59,7 @@ function getColumns({ agentName, serviceName, type }) {
       }
     },
     {
-      field: 'avg',
+      field: 'averageResponseTime',
       name: avgLabel(agentName),
       sortable: true,
       dataType: 'number',
@@ -67,34 +73,26 @@ function getColumns({ agentName, serviceName, type }) {
       render: value => asMillisWithDefault(value)
     },
     {
-      field: 'tpm',
+      field: 'transactionsPerMinute',
       name: tpmLabel(type),
       sortable: true,
       dataType: 'number',
       render: value => `${asDecimal(value)} ${tpmUnit(type)}`
     },
     {
-      field: 'impactRelative',
+      field: 'impact',
       name: 'Impact',
       sortable: true,
       dataType: 'number',
       render: value => <ImpactBar value={value} />
     }
   ];
-}
 
-export default function TransactionList({
-  items,
-  agentName,
-  serviceName,
-  type,
-  ...rest
-}) {
   return (
     <ManagedTable
-      columns={getColumns({ agentName, serviceName, type })}
+      columns={columns}
       items={items}
-      initialSort={{ field: 'impactRelative', direction: 'desc' }}
+      initialSort={{ field: 'impact', direction: 'desc' }}
       initialPageSize={25}
       {...rest}
     />
