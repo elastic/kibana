@@ -4,40 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { render } from 'react-dom';
 import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
-import { InitAfterBindingsWorkaround } from 'ui/compat';
-import template from './upgrade_failure.html';
+import { UpgradeFailure } from '../../../../components/upgrade_failure';
 
 const app = uiModules.get('xpack/logstash');
 
-app.directive('upgradeFailure', function ($injector) {
+app.directive('upgradeFailure', $injector => {
   const $route = $injector.get('$route');
   const kbnUrl = $injector.get('kbnUrl');
 
   return {
-    restrict: 'E',
-    template: template,
-    scope: {
-      pipeline: '='
-    },
-    bindToController: true,
-    controllerAs: 'upgradeFailure',
-    controller: class UpgradeController extends InitAfterBindingsWorkaround {
-      initAfterBindings() {
-        this.isNewPipeline = isEmpty(this.pipeline.id);
-        this.isManualUpgrade = !!$route.current.params.retry;
-      }
-
-      onRetry = () => {
-        // Reloading the route re-attempts the upgrade
+    link: (scope, el) => {
+      const onRetry = () => {
         $route.updateParams({ retry: true });
         $route.reload();
-      }
+      };
+      const onClose = () => {
+        scope.$evalAsync(kbnUrl.change('management/logstash/pipelines', {}));
+      };
+      const isNewPipeline = isEmpty(scope.pipeline.id);
+      const isManualUpgrade = !!$route.current.params.retry;
 
-      onClose = () => {
-        kbnUrl.change('/management/logstash/pipelines', {});
-      }
-    }
+      render(
+        <UpgradeFailure
+          isNewPipeline={isNewPipeline}
+          isManualUpgrade={isManualUpgrade}
+          onRetry={onRetry}
+          onClose={onClose}
+        />,
+        el[0]
+      );
+    },
+    restrict: 'E',
+    scope: {
+      pipeline: '=',
+    },
   };
 });
