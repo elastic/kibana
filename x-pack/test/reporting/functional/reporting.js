@@ -153,7 +153,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe.skip('Preserve Layout', () => {
+      describe('Preserve Layout', () => {
         it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
