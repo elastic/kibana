@@ -23,12 +23,16 @@ export class LeftInnerJoin {
   }
 
   getSourceId() {
-    return `join:${this.displayHash()}`;
+    return `${this.displayHash()}`;
+  }
+
+  getJoinFieldName() {
+    return `__kbn__join(${this.getSourceId()})`;
   }
 
   joinTableToFeatureCollection(featureCollection, table) {
-    console.log('must join', featureCollection, table);
-    const newField = `__kbn__join_${this.getSourceId()}`;
+    const newField = this.getJoinFieldName();
+
     //todo: poor man's join with nested loop
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];

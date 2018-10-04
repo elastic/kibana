@@ -21,7 +21,7 @@ export class VectorStyle {
   static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
 
   static getComputedFieldName(fieldName) {
-    return `__kbn__${fieldName}__`;
+    return `__kbn__scaled(${fieldName})`;
   }
 
   constructor(descriptor) {
@@ -95,17 +95,44 @@ export class VectorStyle {
     return this._descriptor.properties[colorProperty].options.color;
   }
 
-  isPropertyDynamic(property) {
+  _isPropertyDynamic(property) {
     if (!this._descriptor.properties[property]) {
       return false;
     }
     return this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.DYNAMIC;
   }
 
-  enrichFeatureCollectionWithScaledProps(featureCollection, joinDataRequests) {
+  static computeScaledValues(featureCollection, field) {
+    const fieldName = field.label;
+    if (featureCollection.computed.find(f => f === fieldName)) {
+      return false;
+    }
+
+    const features = featureCollection.features;
+    if (!features.length) {
+      return false;
+    }
+
+    let min = features[0].properties[fieldName];
+    let max = features[0].properties[fieldName];
+    for (let i = 1; i < features.length; i++) {
+      min = Math.min(min, features[i].properties[fieldName]);
+      max = Math.max(max, features[i].properties[fieldName]);
+    }
+
+    //scale to [0,1]
+    const propName = VectorStyle.getComputedFieldName(fieldName);
+    for (let i = 0; i < features.length; i++) {
+      features[i].properties[propName] = (features[i].properties[fieldName] - min) / (max - min);
+    }
+    featureCollection.computed.push(fieldName);
+    return true;
+  }
+
+  addScaledPropertiesBasedOnStyle(featureCollection) {
 
 
-    if (!this.isPropertyDynamic('fillColor') && !this.isPropertyDynamic('lineColor')) {
+    if (!this._isPropertyDynamic('fillColor') && !this._isPropertyDynamic('lineColor')) {
       return false;
     }
 
@@ -125,37 +152,16 @@ export class VectorStyle {
       dynamicFields.push(this._descriptor.properties.lineColor.options.fieldValue);
     }
 
-    console.log('must join!', joinDataRequests);
+    console.log('dyn fie;s', dynamicFields);
 
-    const returns = dynamicFields.map((field) => {
-
-      const fieldName = field.label;
-      if (featureCollection.computed.find(f => f === fieldName)) {
-        return false;
-      }
-
-      const features = featureCollection.features;
-      if (!features.length) {
-        return false;
-      }
-
-      let min = features[0].properties[fieldName];
-      let max = features[0].properties[fieldName];
-      for (let i = 1; i < features.length; i++) {
-        min = Math.min(min, features[i].properties[fieldName]);
-        max = Math.max(max, features[i].properties[fieldName]);
-      }
-
-      //scale to [0,1]
-      const propName = VectorStyle.getComputedFieldName(fieldName);
-      for (let i = 0; i < features.length; i++) {
-        features[i].properties[propName] = (features[i].properties[fieldName] - min) / (max - min);
-      }
-      featureCollection.computed.push(fieldName);
-      return true;
+    const updateStatuses = dynamicFields.map((field) => {
+      return VectorStyle.computeScaledValues(featureCollection, field);
     });
 
-    return returns.some(r => r === true);
+    console.log('fc', featureCollection);
+    console.log('us', updateStatuses);
+
+    return updateStatuses.some(r => r === true);
 
   }
 
@@ -165,8 +171,9 @@ export class VectorStyle {
       return null;
     }
 
-    if (this._descriptor.properties[property].options.field) {
-      const targetName = VectorStyle.getComputedFieldName(this._descriptor.properties[property].options.field);
+    if (this._descriptor.properties[property].options.fieldValue) {
+      const originalFieldName = this._descriptor.properties[property].options.fieldValue.label;
+      const targetName = VectorStyle.getComputedFieldName(originalFieldName);
       return [
         'interpolate',
         ['linear'],

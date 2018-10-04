@@ -80,7 +80,7 @@ export class VectorLayer extends ALayer {
     });
     const joinFields = this._joins.map(join => {
       return {
-        label: join.displayHash(),
+        label: join.getJoinFieldName(),
         origin: 'join',
         join: join
       };
@@ -197,7 +197,6 @@ export class VectorLayer extends ALayer {
     for (let i = 0; i < joinStates.length; i++) {
       this._joinToFeatureCollection(sourceResult, joinStates[i]);
     }
-    console.log('done joining', sourceResult.featureCollection);
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -233,16 +232,11 @@ export class VectorLayer extends ALayer {
   _syncFeatureCollectionWithMb(mbMap) {
 
     const featureCollection = this._getSourceFeatureCollection();
-
-    //check join state....
-
-
     const mbSourceAfterAdding = mbMap.getSource(this.getId());
     if (featureCollection !== mbSourceAfterAdding._data) {
       mbSourceAfterAdding.setData(featureCollection);
     }
-    const joinDataRequests = this._getJoinDataRequests();
-    const shouldRefresh = this._style.enrichFeatureCollectionWithScaledProps(featureCollection, joinDataRequests);
+    const shouldRefresh = this._style.addScaledPropertiesBasedOnStyle(featureCollection);
     if (shouldRefresh) {
       mbSourceAfterAdding.setData(featureCollection);
     }
