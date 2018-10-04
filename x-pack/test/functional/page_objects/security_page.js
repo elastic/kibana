@@ -105,7 +105,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         }
 
         await find.clickByLinkText('Logout');
+      });
 
+      await retry.try(async () => {
         const loginFormExists = await find.existsByDisplayedByCssSelector('.login-form');
 
         if (!loginFormExists) {
