@@ -20,7 +20,8 @@ export class Join extends React.Component {
     this.state = {
       stringFields: null,
       leftField: null,
-      right: null
+      right: null,
+      id: null
     };
   }
 
@@ -59,6 +60,7 @@ export class Join extends React.Component {
     });
 
     const onChange = (field) => {
+
       this.setState({
         leftField: field
       });

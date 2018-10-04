@@ -106,8 +106,13 @@ export class ESSearchSource extends VectorSource {
       const isTimeAware = await this.isTimeAware();
       searchSource.setField('filter', () => {
         const filters = [];
+        //todo: this seems somewhat redundant. Have this be passed in as arguments in the getGeoJson.
+        //no need to submit time and extent filters in the method if they are not supposed to be applied anyway
         if (this.isFilterByMapBounds()) {
+          console.log('filtered by map bounds');
           filters.push(createExtentFilter(searchFilters.extent, geoField.name, geoField.type));
+        } else {
+          console.log('not filttered by map bounds');
         }
         if (isTimeAware) {
           filters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));

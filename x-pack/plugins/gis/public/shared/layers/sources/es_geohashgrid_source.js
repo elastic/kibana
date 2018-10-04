@@ -316,13 +316,6 @@ class Editor extends React.Component {
 
         {this._renderGeoSelect()}
 
-        <EuiButton
-          size="s"
-          onClick={this.previewLayer}
-        >
-          Preview geohash layer
-        </EuiButton>
-
       </Fragment>
     );
   }

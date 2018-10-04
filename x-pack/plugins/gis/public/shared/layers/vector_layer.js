@@ -85,8 +85,69 @@ export class VectorLayer extends ALayer {
     return numberFieldOptions.concat(joinFields);
   }
 
-  async syncJoinData({ startLoading, stopLoading, onLoadError, dataFilters }) {
-    console.log('do I have my join data...??', this._joins);
+  async _canSkipSourceUpdate(source, sourceDataId) {
+    const timeAware = await source.isTimeAware();
+    const extentAware = source.isFilterByMapBounds();
+    if (!timeAware && !extentAware) {
+      const sourceDataRequest = this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
+      if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
+    console.log('should sync', join, join.displayHash());
+    const tableSource = join.getTableSource();
+    const sourceDataId = `join:${join.displayHash()}`;
+
+    const canSkip = await this._canSkipSourceUpdate(tableSource, sourceDataId);
+
+    if (canSkip) {
+      console.log('can skip!');
+      return;
+    }
+    console.log('cannot skip!');
+
+
+    const requestToken = Symbol(`layer-join-refresh:${ this.getId()} - ${sourceDataId}`);
+
+    startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
+    const data = await tableSource.getTable(dataFilters);
+    console.log('got a dat', data);
+    stopLoading(sourceDataId, requestToken, data);
+  }
+
+
+  async _syncJoins({ startLoading, stopLoading, onLoadError, dataFilters }) {
+    const joinSyncs = this._joins.map(async join => {
+      return this._syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters });
+    });
+    await Promise.all(joinSyncs);
+  }
+
+
+  async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
+    const sourceDataId = 'source';
+    const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
+    try {
+
+      const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId);
+      if (canSkip) {
+        return;
+      }
+
+      startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
+      const data = await this._source.getGeoJson({
+        layerId: this.getId(),
+        layerName: this.getDisplayName()
+      }, dataFilters);
+      stopLoading(sourceDataId, requestToken, data);
+
+    } catch (error) {
+      onLoadError(sourceDataId, requestToken, error.message);
+    }
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -94,36 +155,9 @@ export class VectorLayer extends ALayer {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
-
-    this.syncJoinData({});
-
-    let timeAware;
-    try {
-      timeAware = await this._source.isTimeAware();
-    } catch (error) {
-      onLoadError(error.message);
-      return;
-    }
-    const extentAware = this._source.isFilterByMapBounds();
-
-    if (!timeAware && !extentAware) {
-      const sourceDataRequest = this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
-      if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
-        return;
-      }
-    }
-
-    const requestToken = Symbol(`layer-source-refresh: this.getId()`);
-    startLoading('source', requestToken, { timeFilters: dataFilters.timeFilters });
-    try {
-      const data = await this._source.getGeoJson({
-        layerId: this.getId(),
-        layerName: this.getDisplayName(),
-      }, dataFilters);
-      stopLoading('source', requestToken, data);
-    } catch(error) {
-      onLoadError('source', requestToken, error.message);
-    }
+    //todo: could parallelize this, but this avoids dealing with some race-conditions
+    await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
+    await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
   }
 
   syncLayerWithMB(mbMap) {

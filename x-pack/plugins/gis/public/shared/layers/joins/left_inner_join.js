@@ -5,16 +5,30 @@
  */
 
 
+import { ESTableSource } from '../sources/es_table_source';
+
 export class LeftInnerJoin {
+
+  static toHash(descriptor) {
+    return JSON.stringify(descriptor);
+  }
 
   constructor(joinDescriptor) {
     this._descriptor = joinDescriptor;
+    this._rightSource = new ESTableSource(joinDescriptor.right);
   }
 
   displayHash() {
-    return JSON.stringify(this._descriptor);
+    return LeftInnerJoin.toHash(this._descriptor);
   }
 
+  getTableSource() {
+    return this._rightSource;
+  }
+
+  getId() {
+    return this._descriptor.id;
+  }
 
 }
 
