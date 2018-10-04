@@ -384,18 +384,13 @@ export class ExplorerChartDistribution extends React.Component {
       // Show the time and metric values in the tooltip.
       // Uses date, value, upper, lower and anomalyScore (optional) marker properties.
       const formattedDate = moment(marker.date).format('MMMM Do YYYY, HH:mm');
-      let contents = formattedDate + '<br/><hr/>';
+      let contents = `${formattedDate}<br/><hr/>`;
 
       if (_.has(marker, 'anomalyScore')) {
         const score = parseInt(marker.anomalyScore);
         const displayScore = (score > 0 ? score : '< 1');
-        contents += ('anomaly score: ' + displayScore);
-        if (_.has(marker, 'actual') && chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
-          // Display the record actual in preference to the chart value, which may be
-          // different depending on the aggregation interval of the chart.
-          contents += (`<br/>actual: ${formatValue(marker.actual, config.functionDescription, fieldFormat)}`);
-          contents += (`<br/>typical: ${formatValue(marker.typical, config.functionDescription, fieldFormat)}`);
-        } else {
+        contents += `anomaly score: ${displayScore}`;
+        if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
           contents += (`<br/>value: ${formatValue(marker.value, config.functionDescription, fieldFormat)}`);
           if (typeof marker.numberOfCauses === 'undefined' || marker.numberOfCauses === 1) {
             contents += (`<br/>typical: ${formatValue(marker.typical, config.functionDescription, fieldFormat)}`);
@@ -413,16 +408,16 @@ export class ExplorerChartDistribution extends React.Component {
             }
           }
         }
-      } else {
+      } else if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
         contents += `value: ${formatValue(marker.value, config.functionDescription, fieldFormat)}`;
       }
 
       if (_.has(marker, 'entity')) {
-        contents += `<br/>fieldName: ${marker.entity}`;
+        contents += `<div>${marker.entity}</div>`;
       }
 
       if (_.has(marker, 'scheduledEvents')) {
-        contents += `<br/><hr/>Scheduled events:<br/>${marker.scheduledEvents.map(mlEscape).join('<br/>')}`;
+        contents += `<div><hr/>Scheduled events:<br/>${marker.scheduledEvents.map(mlEscape).join('<br/>')}</div>`;
       }
 
       mlChartTooltipService.show(contents, circle, {

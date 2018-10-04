@@ -359,8 +359,9 @@ export class ExplorerChartSingleMetric extends React.Component {
           if (_.has(marker, 'byFieldName') && _.has(marker, 'numberOfCauses')) {
             const numberOfCauses = marker.numberOfCauses;
             const byFieldName = mlEscape(marker.byFieldName);
-            if (numberOfCauses < 10) {
-              // If numberOfCauses === 1, won't go into this block as actual/typical copied to top level fields.
+            if (numberOfCauses === 1) {
+              contents += `<br/> 1 unusual ${byFieldName} value`;
+            } else if (numberOfCauses < 10) {
               contents += `<br/> ${numberOfCauses} unusual ${byFieldName} values`;
             } else {
               // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
