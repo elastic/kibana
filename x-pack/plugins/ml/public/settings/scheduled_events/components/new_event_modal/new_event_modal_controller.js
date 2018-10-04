@@ -42,7 +42,7 @@ module.controller('MlNewEventModal', function (
       start: moment().startOf('day'),
       end: moment().startOf('day').add(1, 'days')
     },
-    setRangeType(event, i) {
+    setRangeType(i, event = undefined) {
       if (event && event.preventDefault) {
         event.preventDefault();
       }
@@ -60,7 +60,7 @@ module.controller('MlNewEventModal', function (
 
 
   $timeout(() => {
-    $scope.ui.setRangeType(false, '0');
+    $scope.ui.setRangeType('0');
     $('.ml-new-event-contents #id').focus();
   }, 0);
 
