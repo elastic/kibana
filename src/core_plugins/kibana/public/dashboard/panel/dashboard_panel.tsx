@@ -17,61 +17,87 @@
  * under the License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import { EuiPanel } from '@elastic/eui';
 import classNames from 'classnames';
 import _ from 'lodash';
-
-import { PanelHeader } from './panel_header';
+import { Component } from 'react';
+import React from 'react';
+import { ContainerState, Embeddable, EmbeddableFactory } from 'ui/embeddable';
+import { EmbeddableActions, EmbeddableErrorAction } from '../actions';
+import { PanelState } from '../selectors';
 import { PanelError } from './panel_error';
+import { PanelHeader } from './panel_header/panel_header';
 
-import {
-  EuiPanel,
-} from '@elastic/eui';
+interface DashboardPanelProps {
+  viewOnlyMode: boolean;
+  onPanelFocused: (panel: string) => {};
+  onPanelBlurred: (panel: string) => {};
+  error: string | object;
+  destroy: () => void;
+  containerState: ContainerState;
+  embeddableFactory: EmbeddableFactory;
+  embeddableStateChanged: (
+    embeddableStateChanges: import('ui/embeddable/types').EmbeddableState
+  ) => {};
+  embeddableIsInitializing: EmbeddableActions;
+  embeddableIsInitialized: (
+    embeddableIsInitialized: import('ui/embeddable/embeddable').EmbeddableMetadata
+  ) => void;
+  embeddableError: EmbeddableErrorAction;
+  initialized: boolean;
+  panel: PanelState;
+  isPopoverOpen: boolean;
+  isLoading: boolean;
+  calloutTitle: string;
+  className: any;
+}
 
-export class DashboardPanel extends React.Component {
-  constructor(props) {
+interface State {
+  error: string | null;
+}
+
+export class DashboardPanel extends Component<DashboardPanelProps, State> {
+  [panel: string]: any;
+  public mounted: boolean;
+  public embeddable!: Embeddable;
+  constructor(props: DashboardPanelProps) {
     super(props);
     this.state = {
       error: props.embeddableFactory ? null : `No factory found for embeddable`,
     };
-
     this.mounted = false;
   }
 
-  async componentDidMount() {
+  public async componentDidMount() {
     this.mounted = true;
     const {
       initialized,
       embeddableFactory,
-      embeddableIsInitializing,
       panel,
       embeddableStateChanged,
       embeddableIsInitialized,
-      embeddableError,
     } = this.props;
-
     if (!initialized) {
-      embeddableIsInitializing();
-      embeddableFactory.create(panel, embeddableStateChanged)
-        .then((embeddable) => {
+      embeddableFactory
+        .create(panel, embeddableStateChanged)
+        .then((embeddable: Embeddable) => {
           if (this.mounted) {
             this.embeddable = embeddable;
             embeddableIsInitialized(embeddable.metadata);
             this.embeddable.render(this.panelElement, this.props.containerState);
           } else {
-            embeddable.destroy();
+            this.embeddable.destroy();
           }
         })
-        .catch((error) => {
+        .catch(error => {
           if (this.mounted) {
-            embeddableError(error.message);
+            this.embeddableError = error.message;
           }
         });
     }
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this.props.destroy();
     this.mounted = false;
     if (this.embeddable) {
@@ -79,58 +105,60 @@ export class DashboardPanel extends React.Component {
     }
   }
 
-  onFocus = () => {
+  public onFocus = () => {
     const { onPanelFocused, panel } = this.props;
     if (onPanelFocused) {
-      onPanelFocused(panel.panelIndex);
+      return onPanelFocused(panel.panelIndex);
     }
   };
 
-  onBlur = () => {
+  public onBlur = () => {
     const { onPanelBlurred, panel } = this.props;
     if (onPanelBlurred) {
-      onPanelBlurred(panel.panelIndex);
+      return onPanelBlurred(panel.panelIndex);
     }
   };
 
-  renderEmbeddableViewport() {
+  public renderEmbeddableViewport() {
     return (
       <div
         id="embeddedPanel"
         className="panel-content"
-        ref={panelElement => this.panelElement = panelElement}
+        ref={panelElement => (this.panelElement = panelElement)}
       >
         {!this.props.initialized && 'loading...'}
       </div>
     );
   }
 
-  shouldComponentUpdate(nextProps) {
+  public shouldComponentUpdate(nextProps: {
+    containerState: ContainerState;
+    error: string | object;
+    initialized: boolean;
+  }) {
     if (this.embeddable && !_.isEqual(nextProps.containerState, this.props.containerState)) {
       this.embeddable.onContainerStateChanged(nextProps.containerState);
     }
-
-    return nextProps.error !== this.props.error ||
-      nextProps.initialized !== this.props.initialized;
+    return nextProps.error !== this.props.error || nextProps.initialized !== this.props.initialized;
   }
 
-  renderEmbeddedError() {
+  public renderEmbeddedError() {
     return <PanelError error={this.props.error} />;
   }
 
-  renderContent() {
+  public renderContent() {
     const { error } = this.props;
     if (error) {
-      return this.renderEmbeddedError(error);
+      return this.renderEmbeddedError();
     } else {
       return this.renderEmbeddableViewport();
     }
   }
 
-  render() {
+  public render() {
     const { viewOnlyMode, panel } = this.props;
     const classes = classNames('dshPanel', this.props.className, {
-      'dshPanel--editing': !viewOnlyMode
+      'dshPanel--editing': !viewOnlyMode,
     });
     return (
       <EuiPanel
@@ -143,6 +171,8 @@ export class DashboardPanel extends React.Component {
         <PanelHeader
           panelId={panel.panelIndex}
           embeddable={this.embeddable}
+          isViewOnlyMode={this.viewOnlyMode}
+          hidePanelTitles
         />
 
         {this.renderContent()}
@@ -150,32 +180,3 @@ export class DashboardPanel extends React.Component {
     );
   }
 }
-
-DashboardPanel.propTypes = {
-  viewOnlyMode: PropTypes.bool.isRequired,
-  onPanelFocused: PropTypes.func,
-  onPanelBlurred: PropTypes.func,
-  error: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.object
-  ]),
-  destroy: PropTypes.func.isRequired,
-  containerState: PropTypes.shape({
-    timeRange: PropTypes.object,
-    filters: PropTypes.array,
-    query: PropTypes.object,
-    embeddableCustomization: PropTypes.object,
-    hidePanelTitles: PropTypes.bool.isRequired,
-  }),
-  embeddableFactory: PropTypes.shape({
-    create: PropTypes.func,
-  }).isRequired,
-  embeddableStateChanged: PropTypes.func.isRequired,
-  embeddableIsInitialized: PropTypes.func.isRequired,
-  embeddableError: PropTypes.func.isRequired,
-  embeddableIsInitializing: PropTypes.func.isRequired,
-  initialized: PropTypes.bool.isRequired,
-  panel: PropTypes.shape({
-    panelIndex: PropTypes.string,
-  }).isRequired,
-};
