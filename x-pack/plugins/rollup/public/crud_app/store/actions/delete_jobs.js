@@ -25,11 +25,11 @@ export const deleteJobs = (jobIds) => async (dispatch, getState) => {
     toastNotifications.addSuccess(`${jobIds.length} rollup jobs were deleted`);
   }
 
-  dispatch(refreshJobs());
-
   // If we've just deleted a job we were looking at, we need to close the panel.
   const detailPanelJob = getDetailPanelJob(getState());
   if (detailPanelJob && jobIds.includes(detailPanelJob.id)) {
     dispatch(closeDetailPanel());
   }
+
+  dispatch(refreshJobs());
 };
