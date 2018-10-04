@@ -38,4 +38,5 @@ export const fetchPolicies = (withIndices) => async dispatch => {
   return policies;
 };
 
+
 export const setPhaseData = createAction(SET_PHASE_DATA, (phase, key, value) => ({ phase, key, value }));

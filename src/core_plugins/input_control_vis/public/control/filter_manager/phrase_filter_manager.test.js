@@ -154,6 +154,22 @@ describe('PhraseFilterManager', function () {
       ]);
       expect(filterManager.getValueFromFilterBar()).to.eql([{ value: 'ios', label: 'ios' }, { value: 'win xp', label: 'win xp' }]);
     });
+
+    test('should return undefined when filter value can not be extracted from Kibana filter', function () {
+      filterManager.setMockFilters([
+        {
+          query: {
+            match: {
+              myFieldWhichIsNotField1: {
+                query: 'ios',
+                type: 'phrase'
+              }
+            }
+          }
+        }
+      ]);
+      expect(filterManager.getValueFromFilterBar()).to.eql(undefined);
+    });
   });
 
 });

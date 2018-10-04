@@ -21,7 +21,6 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import pointSeriesTemplate from './editors/point_series.html';
-import image from './images/icon-area.svg';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -29,7 +28,7 @@ export default function PointSeriesVisType(Private) {
   return VisFactory.createVislibVisualization({
     name: 'area',
     title: 'Area',
-    image,
+    icon: 'visArea',
     description: 'Emphasize the quantity beneath a line chart',
     category: CATEGORY.BASIC,
     visConfig: {

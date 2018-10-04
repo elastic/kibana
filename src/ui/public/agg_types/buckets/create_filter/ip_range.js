@@ -32,5 +32,5 @@ export function createFilterIpRange(aggConfig, key) {
     };
   }
 
-  return buildRangeFilter(aggConfig.params.field, { gte: range.from, lte: range.to }, aggConfig._indexPattern);
+  return buildRangeFilter(aggConfig.params.field, { gte: range.from, lte: range.to }, aggConfig.getIndexPattern());
 }

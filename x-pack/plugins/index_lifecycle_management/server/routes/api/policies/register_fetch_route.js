@@ -73,6 +73,7 @@ export function registerFetchRoute(server) {
         if (isEsError(err)) {
           return reply(wrapEsError(err));
         }
+
         reply(wrapUnknownError(err));
       }
     },

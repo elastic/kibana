@@ -215,7 +215,7 @@ export const getLifecycle = state => {
         // These seem to be constants
         // TODO: verify this assumption
         if (phaseName === PHASE_HOT) {
-          accum[phaseName].after = '0s';
+          accum[phaseName].minimum_age = '0s';
         }
 
         if (phaseName === PHASE_DELETE) {
