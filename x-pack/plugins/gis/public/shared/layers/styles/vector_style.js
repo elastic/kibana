@@ -98,7 +98,12 @@ export class VectorStyle {
     return this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.DYNAMIC;
   }
 
-  enrichFeatureCollectionWithScaledProps(featureCollection) {
+  enrichFeatureCollectionWithScaledProps(featureCollection, joinDataRequests) {
+
+
+    if (!this.isPropertyDynamic('fillColor') && !this.isPropertyDynamic('lineColor')) {
+      return false;
+    }
 
     if (!featureCollection) {
       return false;
@@ -115,6 +120,8 @@ export class VectorStyle {
     if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options.fieldValue) {
       dynamicFields.push(this._descriptor.properties.lineColor.options.fieldValue);
     }
+
+    console.log('must join!', joinDataRequests);
 
     const returns = dynamicFields.map((field) => {
 

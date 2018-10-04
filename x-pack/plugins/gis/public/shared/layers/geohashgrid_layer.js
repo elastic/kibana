@@ -67,6 +67,7 @@ export class GeohashGridLayer extends ALayer {
     return [HeatmapStyle];
   }
 
+
   syncLayerWithMB(mbMap) {
 
     const mbSource = mbMap.getSource(this.getId());
@@ -89,7 +90,7 @@ export class GeohashGridLayer extends ALayer {
 
     //todo: similar problem as OL here. keeping track of data via MB source directly
     const mbSourceAfter = mbMap.getSource(this.getId());
-    const sourceDataRequest = this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+    const sourceDataRequest = this.getSourceDataRequest();
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     if (!featureCollection) {
       mbSourceAfter.setData({ 'type': 'FeatureCollection', 'features': [] });
@@ -131,7 +132,7 @@ export class GeohashGridLayer extends ALayer {
     let samePrecision = false;
     let isContained = false;
     let sameTime = false;
-    const sourceDataRequest = this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+    const sourceDataRequest = this.getSourceDataRequest();
     const dataMeta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
     if (dataMeta) {
       if (dataMeta.extent) {

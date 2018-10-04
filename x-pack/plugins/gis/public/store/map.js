@@ -93,6 +93,7 @@ export function map(state = INITIAL_STATE, action) {
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
     case SET_JOINS:
+      console.warn('when setting joins, must remove all corresponding datarequests as well');
       const layerDescriptor = state.layerList.find(descriptor => descriptor.id === action.layer.getId());
       if (layerDescriptor) {
         const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };

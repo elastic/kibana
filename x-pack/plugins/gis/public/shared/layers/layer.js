@@ -162,5 +162,9 @@ export class ALayer {
     return style.renderEditor(options);
   }
 
+  getSourceDataRequest() {
+    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+  }
+
 }
 

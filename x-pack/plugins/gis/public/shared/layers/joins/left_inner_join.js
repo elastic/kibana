@@ -22,6 +22,10 @@ export class LeftInnerJoin {
     return LeftInnerJoin.toHash(this._descriptor);
   }
 
+  getSourceId() {
+    return `join:${this.displayHash()}`;
+  }
+
   getTableSource() {
     return this._rightSource;
   }

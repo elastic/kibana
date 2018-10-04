@@ -88,9 +88,7 @@ export class VectorLayer extends ALayer {
   async _canSkipSourceUpdate(source, sourceDataId) {
     const timeAware = await source.isTimeAware();
     const extentAware = source.isFilterByMapBounds();
-    console.log('tee', timeAware, extentAware);
     if (!timeAware && !extentAware) {
-      console.log('not timearea');
       const sourceDataRequest = this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
         return true;
@@ -100,25 +98,22 @@ export class VectorLayer extends ALayer {
   }
 
   async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
-    console.log('should sync', join, join.displayHash());
+
     const tableSource = join.getTableSource();
-    const sourceDataId = `join:${join.displayHash()}`;
-
-    const canSkip = await this._canSkipSourceUpdate(tableSource, sourceDataId);
-
-    if (canSkip) {
-      console.log('can skip!');
-      return;
-    }
-    console.log('cannot skip!');
-
-
+    const sourceDataId = join.getSourceId();
     const requestToken = Symbol(`layer-join-refresh:${ this.getId()} - ${sourceDataId}`);
 
-    startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
-    const data = await tableSource.getTable(dataFilters);
-    console.log('got a dat', data);
-    stopLoading(sourceDataId, requestToken, data);
+    try {
+      const canSkip = await this._canSkipSourceUpdate(tableSource, sourceDataId);
+      if (canSkip) {
+        return;
+      }
+      startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
+      const data = await tableSource.getTable(dataFilters);
+      stopLoading(sourceDataId, requestToken, data);
+    } catch(e) {
+      onLoadError(sourceDataId, requestToken, e.medium);
+    }
   }
 
 
@@ -152,6 +147,17 @@ export class VectorLayer extends ALayer {
     }
   }
 
+  async getJoinDataRequests() {
+
+    const joinDataRequests = this._dataRequests.filter(dataRequest => {
+      const correspondingJoin = this._joins.find(join => {
+        return join.getSourceId() === dataRequest.getDataId();
+      });
+      return !!correspondingJoin;
+    });
+    return joinDataRequests;
+  }
+
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
 
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
@@ -160,6 +166,40 @@ export class VectorLayer extends ALayer {
     //todo: could parallelize this, but this avoids dealing with some race-conditions
     await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
     await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
+  }
+
+
+  _getSourceFeatureCollection() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    return sourceDataRequest ? sourceDataRequest.getData() : null;
+  }
+
+  _isPointsOnly() {
+    const featureCollection = this._getSourceFeatureCollection();
+    let isPointsOnly = true;
+    if (featureCollection) {
+      for (let i = 0; i < featureCollection.features.length; i++) {
+        if (featureCollection.features[i].geometry.type !== 'Point') {
+          isPointsOnly = false;
+          break;
+        }
+      }
+    } else {
+      isPointsOnly = false;
+    }
+    return isPointsOnly;
+  }
+
+  _syncFeatureCollectionWithMb(mbMap) {
+    const featureCollection = this._getSourceFeatureCollection();
+    const mbSourceAfterAdding = mbMap.getSource(this.getId());
+    if (featureCollection !== mbSourceAfterAdding._data) {
+      mbSourceAfterAdding.setData(featureCollection);
+    }
+    const shouldRefresh = this._style.enrichFeatureCollectionWithScaledProps(featureCollection);
+    if (shouldRefresh) {
+      mbSourceAfterAdding.setData(featureCollection);
+    }
   }
 
   syncLayerWithMB(mbMap) {
@@ -174,36 +214,11 @@ export class VectorLayer extends ALayer {
       });
     }
 
-    //todo: similar problem as OL here. keeping track of data via MB source directly
-    const mbSourceAfterAdding = mbMap.getSource(this.getId());
-    const sourceDataRequest = this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
-    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
-    if (featureCollection !== mbSourceAfterAdding._data) {
-      mbSourceAfterAdding.setData(featureCollection);
-    }
 
-    if (
-      this._style.isPropertyDynamic('fillColor') ||
-      this._style.isPropertyDynamic('lineColor')
-    ) {
-      const shouldRefresh = this._style.enrichFeatureCollectionWithScaledProps(featureCollection);
-      if (shouldRefresh) {
-        mbSourceAfterAdding.setData(featureCollection);
-      }
-    }
 
-    let isPointsOnly = true;
-    if (featureCollection) {
-      for (let i = 0; i < featureCollection.features.length; i++) {
-        if (featureCollection.features[i].geometry.type !== 'Point') {
-          isPointsOnly = false;
-          break;
-        }
-      }
-    } else {
-      isPointsOnly = false;
-    }
+    this._syncFeatureCollectionWithMb(mbMap);
 
+    const isPointsOnly = this._isPointsOnly();
     if (isPointsOnly) {
       const pointLayerId = this.getId() +  '_circle';
       this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId, this.isTemporary());
@@ -212,19 +227,18 @@ export class VectorLayer extends ALayer {
         mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
       }
       this.addToolipListeners(mbMap, pointLayerId);
-      return;
+    } else {
+      const fillLayerId = this.getId() + '_fill';
+      const strokeLayerId = this.getId() + '_line';
+      this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, strokeLayerId, this.isTemporary());
+      mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+      mbMap.setLayoutProperty(strokeLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+      if (!this._descriptor.showAtAllZoomLevels) {
+        mbMap.setLayerZoomRange(strokeLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+        mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+      }
+      this.addToolipListeners(mbMap, fillLayerId);
     }
-
-    const fillLayerId = this.getId() +  '_fill';
-    const strokeLayerId = this.getId() +  '_line';
-    this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, strokeLayerId, this.isTemporary());
-    mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    mbMap.setLayoutProperty(strokeLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    if (!this._descriptor.showAtAllZoomLevels) {
-      mbMap.setLayerZoomRange(strokeLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-      mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    }
-    this.addToolipListeners(mbMap, fillLayerId);
   }
 
   renderStyleEditor(style, options) {
