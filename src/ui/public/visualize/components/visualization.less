@@ -65,7 +65,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  .top { align-self: flext-start; }
+  .top { align-self: flex-start; }
   .item { }
-  .bottom { align-self: flext-end; }
+  .bottom { align-self: flex-end; }
+}
+
+/**
+ * 1. Prevent large request errors from overflowing the container
+ */
+.visualize-request-error {
+  max-width: 100%;
+  max-height: 100%;
 }

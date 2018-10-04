@@ -161,7 +161,7 @@ export function CallClientProvider(Private, Promise, es, config) {
           return;
         }
 
-        const segregatedResponses = await Promise.all(abortableSearches.map(({ searching }) => searching));
+        const segregatedResponses = await Promise.all(abortableSearches.map(({ searching }) => searching.catch((e) => [{ error: e }])));
 
         // Assigning searchRequests to strategies means that the responses come back in a different
         // order than the original searchRequests. So we'll put them back in order so that we can
