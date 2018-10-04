@@ -4,16 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { map, zipObject } from 'lodash';
 
 export const datatable = () => ({
   name: 'datatable',
   validate: datatable => {
     // TODO: Check columns types. Only string, boolean, number, date, allowed for now.
-    if (!datatable.columns)
-      throw new Error('datatable must have a columns array, even if it is empty');
+    if (!datatable.columns) {
+      throw new Error(
+        i18n.translate('xpack.canvas.datatable.missColumnsErrorMessage', {
+          defaultMessage: 'datatable must have a columns array, even if it is empty',
+        })
+      );
+    }
 
-    if (!datatable.rows) throw new Error('datatable must have a rows array, even if it is empty');
+    if (!datatable.rows) {
+      throw new Error(
+        i18n.translate('xpack.canvas.datatable.missRowsErrorMessage', {
+          defaultMessage: 'datatable must have a rows array, even if it is empty',
+        })
+      );
+    }
   },
   serialize: datatable => {
     const { columns, rows } = datatable;
