@@ -66,6 +66,9 @@ const anyCustomRule: Rules = {
   },
 };
 
+/**
+ * @internal
+ */
 export const internals = Joi.extend([
   {
     name: 'any',
