@@ -22,7 +22,8 @@ export function apm(kibana) {
         title: 'APM',
         description: 'APM for the Elastic Stack',
         main: 'plugins/apm/index',
-        icon: 'plugins/apm/icon.svg'
+        icon: 'plugins/apm/icon.svg',
+        euiIconType: 'apmApp'
       },
       home: ['plugins/apm/register_feature'],
       injectDefaultVars(server) {

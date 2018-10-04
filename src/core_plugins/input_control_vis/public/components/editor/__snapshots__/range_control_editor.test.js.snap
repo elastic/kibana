@@ -2,14 +2,12 @@
 
 exports[`renders RangeControlEditor 1`] = `
 <div>
-  <IndexPatternSelect
+  <InjectIntl(IndexPatternSelectFormRowUi)
     controlIndex={0}
-    getIndexPattern={[Function]}
-    getIndexPatterns={[Function]}
     indexPatternId="indexPattern1"
     onChange={[Function]}
   />
-  <FieldSelect
+  <InjectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="numberField"
     filterField={[Function]}
@@ -22,7 +20,13 @@ exports[`renders RangeControlEditor 1`] = `
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="stepSize-0"
-    label="Step Size"
+    label={
+      <FormattedMessage
+        defaultMessage="Step Size"
+        id="inputControl.editor.rangeControl.stepSizeLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldNumber
       compressed={false}
@@ -38,7 +42,13 @@ exports[`renders RangeControlEditor 1`] = `
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="decimalPlaces-0"
-    label="Decimal Places"
+    label={
+      <FormattedMessage
+        defaultMessage="Decimal Places"
+        id="inputControl.editor.rangeControl.decimalPlacesLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldNumber
       compressed={false}

@@ -42,6 +42,8 @@ import { initChromeXsrfApi } from './api/xsrf';
 import { initUiSettingsApi } from './api/ui_settings';
 import { initLoadingCountApi } from './api/loading_count';
 import { initSavedObjectClient } from './api/saved_object_client';
+import { initChromeBasePathApi } from './api/base_path';
+import { initChromeInjectedVarsApi } from './api/injected_vars';
 
 export const chrome = {};
 const internals = _.defaults(
@@ -63,6 +65,8 @@ initUiSettingsApi(chrome);
 initSavedObjectClient(chrome);
 appsApi(chrome, internals);
 initChromeXsrfApi(chrome, internals);
+initChromeBasePathApi(chrome);
+initChromeInjectedVarsApi(chrome);
 initChromeNavApi(chrome, internals);
 initLoadingCountApi(chrome, internals);
 initAngularApi(chrome, internals);
@@ -78,6 +82,9 @@ const waitForBootstrap = new Promise(resolve => {
     // and such setup by all other modules
     require('uiExports/chromeNavControls');
     require('uiExports/hacks');
+
+    // sets attribute on body for stylesheet sandboxing
+    document.body.setAttribute('id', `${internals.app.id}-app`);
 
     chrome.setupAngular();
     targetDomElement.setAttribute('id', 'kibana-body');

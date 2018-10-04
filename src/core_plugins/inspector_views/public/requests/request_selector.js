@@ -74,7 +74,7 @@ class RequestSelector extends Component {
             <EuiLoadingSpinner
               size="s"
               aria-label="Request in progress"
-              className="inspector-request-chooser__menu-spinner"
+              className="insRequestSelector__menuSpinner"
             />
           }
         </EuiTextColor>
@@ -88,7 +88,6 @@ class RequestSelector extends Component {
         iconType="arrowDown"
         iconSide="right"
         size="s"
-        className="inspector-request-chooser__request-title"
         onClick={this.togglePopover}
       >
         {this.props.selectedRequest.name}
@@ -105,7 +104,7 @@ class RequestSelector extends Component {
         anchorPosition="downLeft"
       >
         <EuiContextMenuPanel
-          className="inspector-request-chooser__menu-panel"
+          className="insRequestSelector__menuPanel"
           items={this.props.requests.map(this.renderRequestDropdownItem)}
         />
       </EuiPopover>
@@ -121,13 +120,12 @@ class RequestSelector extends Component {
       >
         <EuiFlexItem
           grow={false}
-          className="inspector-request-chooser__request-title"
         >
-          Request:
+          <strong>Request:</strong>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           {requests.length <= 1 &&
-            <div className="inspector-request-chooser__single-request">
+            <div className="insRequestSelector__singleRequest">
               {selectedRequest.name}
             </div>
           }

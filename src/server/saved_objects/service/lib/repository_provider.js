@@ -27,10 +27,16 @@ export class SavedObjectsRepositoryProvider {
   constructor({
     index,
     mappings,
+    migrator,
+    schema,
+    serializer,
     onBeforeWrite
   }) {
     this._index = index;
     this._mappings = mappings;
+    this._migrator = migrator;
+    this._schema = schema;
+    this._serializer = serializer;
     this._onBeforeWrite = onBeforeWrite;
   }
 
@@ -43,8 +49,11 @@ export class SavedObjectsRepositoryProvider {
     return new SavedObjectsRepository({
       index: this._index,
       mappings: this._mappings,
+      migrator: this._migrator,
+      schema: this._schema,
+      serializer: this._serializer,
       onBeforeWrite: this._onBeforeWrite,
-      callCluster
+      callCluster,
     });
   }
 }
