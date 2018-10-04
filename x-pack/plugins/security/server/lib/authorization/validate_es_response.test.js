@@ -5,11 +5,10 @@
  */
 
 import { validateEsPrivilegeResponse } from "./validate_es_response";
-import { buildLegacyIndexPrivileges } from "./privileges";
 
-const resource = 'foo-resource';
+const resource1 = 'foo-resource';
+const resource2 = 'bar-resource';
 const application = 'foo-application';
-const kibanaIndex = '.kibana';
 
 const commonResponse = {
   username: 'user',
@@ -17,31 +16,27 @@ const commonResponse = {
 };
 
 describe('validateEsPrivilegeResponse', () => {
-  const legacyIndexResponse = {
-    [kibanaIndex]: {
-      'create': true,
-      'delete': true,
-      'read': true,
-      'view_index_metadata': true,
-    }
-  };
 
   it('should validate a proper response', () => {
     const response = {
       ...commonResponse,
       application: {
         [application]: {
-          [resource]: {
+          [resource1]: {
+            action1: true,
+            action2: true,
+            action3: true
+          },
+          [resource2]: {
             action1: true,
             action2: true,
             action3: true
           }
         }
-      },
-      index: legacyIndexResponse
+      }
     };
 
-    const result = validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex);
+    const result = validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2]);
     expect(result).toEqual(response);
   });
 
@@ -50,17 +45,21 @@ describe('validateEsPrivilegeResponse', () => {
       ...commonResponse,
       application: {
         [application]: {
-          [resource]: {
+          [resource1]: {
             action1: true,
+            action3: true
+          },
+          [resource2]: {
+            action1: true,
+            action2: true,
             action3: true
           }
         }
-      },
-      index: legacyIndexResponse
+      }
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex)
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -69,19 +68,23 @@ describe('validateEsPrivilegeResponse', () => {
       ...commonResponse,
       application: {
         [application]: {
-          [resource]: {
+          [resource1]: {
             action1: true,
             action2: true,
             action3: true,
             action4: true,
+          },
+          [resource2]: {
+            action1: true,
+            action2: true,
+            action3: true
           }
         }
-      },
-      index: legacyIndexResponse
+      }
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex)
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -90,18 +93,22 @@ describe('validateEsPrivilegeResponse', () => {
       ...commonResponse,
       application: {
         [application]: {
-          [resource]: {
+          [resource1]: {
             action1: true,
             action2: true,
             action3: 'not a boolean',
+          },
+          [resource2]: {
+            action1: true,
+            action2: true,
+            action3: true,
           }
         }
       },
-      index: legacyIndexResponse
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex)
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -110,25 +117,34 @@ describe('validateEsPrivilegeResponse', () => {
       ...commonResponse,
       application: {
         [application]: {
-          [resource]: {
+          [resource1]: {
+            action1: true,
+            action2: true,
+            action3: true,
+          },
+          [resource2]: {
             action1: true,
             action2: true,
             action3: true,
           }
         },
         otherApplication: {
-          [resource]: {
+          [resource1]: {
+            action1: true,
+            action2: true,
+            action3: true,
+          },
+          [resource2]: {
             action1: true,
             action2: true,
             action3: true,
           }
         }
       },
-      index: legacyIndexResponse
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex)
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -136,11 +152,10 @@ describe('validateEsPrivilegeResponse', () => {
     const response = {
       ...commonResponse,
       application: {},
-      index: legacyIndexResponse
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex)
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -151,21 +166,40 @@ describe('validateEsPrivilegeResponse', () => {
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex)
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
     ).toThrowErrorMatchingSnapshot();
   });
 
-  it('fails validation when the expected resource property is missing from the response', () => {
+  it('fails validation when an expected resource property is missing from the response', () => {
     const response = {
       ...commonResponse,
       application: {
-        [application]: {}
+        [application]: {
+          [resource1]: {
+            action1: true,
+            action2: true,
+            action3: true,
+          },
+        }
       },
-      index: legacyIndexResponse
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex)
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  it('fails validation when there are no resource properties in the response', () => {
+    const response = {
+      ...commonResponse,
+      application: {
+        [application]: {
+        }
+      },
+    };
+
+    expect(() =>
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -174,6 +208,11 @@ describe('validateEsPrivilegeResponse', () => {
       ...commonResponse,
       application: {
         [application]: {
+          [resource1]: {
+            action1: true,
+            action2: true,
+            action3: true,
+          },
           'other-resource': {
             action1: true,
             action2: true,
@@ -181,11 +220,10 @@ describe('validateEsPrivilegeResponse', () => {
           }
         }
       },
-      index: legacyIndexResponse
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex)
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -194,164 +232,18 @@ describe('validateEsPrivilegeResponse', () => {
       ...commonResponse,
       application: {
         [application]: {
-          [resource]: 'not-an-object'
+          [resource1]: 'not-an-object',
+          [resource2]: {
+            action1: true,
+            action2: true,
+            action3: true,
+          },
         }
       },
-      index: legacyIndexResponse
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource], kibanaIndex)
+      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
     ).toThrowErrorMatchingSnapshot();
-  });
-
-  describe('legacy', () => {
-    it('should validate a proper response', () => {
-      const response = {
-        ...commonResponse,
-        application: {
-          [application]: {
-            [resource]: {
-              action1: true
-            }
-          }
-        },
-        index: legacyIndexResponse
-      };
-
-      const result = validateEsPrivilegeResponse(response, application, ['action1'], [resource], kibanaIndex);
-      expect(result).toEqual(response);
-    });
-
-    it('should fail if the index property is missing', () => {
-      const response = {
-        ...commonResponse,
-        application: {
-          [application]: {
-            [resource]: {
-              action1: true
-            }
-          }
-        }
-      };
-
-      expect(() =>
-        validateEsPrivilegeResponse(response, application, ['action1'], [resource], kibanaIndex)
-      ).toThrowErrorMatchingSnapshot();
-    });
-
-    it('should fail if the kibana index is missing from the response', () => {
-      const response = {
-        ...commonResponse,
-        application: {
-          [application]: {
-            [resource]: {
-              action1: true
-            }
-          }
-        },
-        index: {}
-      };
-
-      expect(() =>
-        validateEsPrivilegeResponse(response, application, ['action1'], [resource], kibanaIndex)
-      ).toThrowErrorMatchingSnapshot();
-    });
-
-    it('should fail if the index privilege response returns an extra index', () => {
-      const response = {
-        ...commonResponse,
-        application: {
-          [application]: {
-            [resource]: {
-              action1: true
-            }
-          }
-        },
-        index: {
-          ...legacyIndexResponse,
-          'anotherIndex': {
-            foo: true
-          }
-        }
-      };
-
-      expect(() =>
-        validateEsPrivilegeResponse(response, application, ['action1'], [resource], kibanaIndex)
-      ).toThrowErrorMatchingSnapshot();
-    });
-
-    it('should fail if the index privilege response contains an extra privilege', () => {
-      const response = {
-        ...commonResponse,
-        application: {
-          [application]: {
-            [resource]: {
-              action1: true
-            }
-          }
-        },
-        index: {
-          [kibanaIndex]: {
-            ...legacyIndexResponse[kibanaIndex],
-            'foo-permission': true
-          }
-        }
-      };
-
-      expect(() =>
-        validateEsPrivilegeResponse(response, application, ['action1'], [resource], kibanaIndex)
-      ).toThrowErrorMatchingSnapshot();
-    });
-
-    buildLegacyIndexPrivileges().forEach(privilege => {
-      test(`should fail if the ${privilege} index privilege is missing from the response`, () => {
-        const response = {
-          ...commonResponse,
-          application: {
-            [application]: {
-              [resource]: {
-                action1: true
-              }
-            }
-          },
-          index: {
-            [kibanaIndex]: {
-              ...legacyIndexResponse[kibanaIndex]
-            }
-          }
-        };
-
-        delete response.index[kibanaIndex][privilege];
-
-        expect(() =>
-          validateEsPrivilegeResponse(response, application, ['action1'], [resource], kibanaIndex)
-        ).toThrowErrorMatchingSnapshot();
-      });
-
-      test(`should fail if the ${privilege} index privilege is malformed`, () => {
-        const response = {
-          ...commonResponse,
-          application: {
-            [application]: {
-              [resource]: {
-                action1: true
-              }
-            }
-          },
-          index: {
-            [kibanaIndex]: {
-              ...legacyIndexResponse[kibanaIndex]
-            }
-          }
-        };
-
-        response.index[kibanaIndex][privilege] = 'not a boolean';
-
-        expect(() =>
-          validateEsPrivilegeResponse(response, application, ['action1'], [resource], kibanaIndex)
-        ).toThrowErrorMatchingSnapshot();
-      });
-    });
   });
 });

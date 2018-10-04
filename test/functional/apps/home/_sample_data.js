@@ -46,6 +46,13 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    it('should display registered ecommerce sample data sets', async ()=> {
+      await retry.try(async () => {
+        const exists = await PageObjects.home.doesSampleDataSetExist('ecommerce');
+        expect(exists).to.be(true);
+      });
+    });
+
     it('should install flights sample data set', async ()=> {
       await PageObjects.home.addSampleDataSet('flights');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
@@ -55,6 +62,12 @@ export default function ({ getService, getPageObjects }) {
     it('should install logs sample data set', async ()=> {
       await PageObjects.home.addSampleDataSet('logs');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('logs');
+      expect(isInstalled).to.be(true);
+    });
+
+    it('should install ecommerce sample data set', async ()=> {
+      await PageObjects.home.addSampleDataSet('ecommerce');
+      const isInstalled = await PageObjects.home.isSampleDataSetInstalled('ecommerce');
       expect(isInstalled).to.be(true);
     });
 
@@ -114,6 +127,18 @@ export default function ({ getService, getPageObjects }) {
         expect(panelCount).to.be(11);
       });
 
+      it('should launch sample ecommerce data set dashboard', async ()=> {
+        await PageObjects.home.launchSampleDataSet('ecommerce');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const today = new Date();
+        const todayYearMonthDay = today.toISOString().substring(0, 10);
+        const fromTime = `${todayYearMonthDay} 00:00:00.000`;
+        const toTime = `${todayYearMonthDay} 23:59:59.999`;
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        const panelCount = await PageObjects.dashboard.getPanelCount();
+        expect(panelCount).to.be(12);
+      });
+
     });
 
     // needs to be in describe block so it is run after 'dashboard describe block'
@@ -130,6 +155,11 @@ export default function ({ getService, getPageObjects }) {
         expect(isInstalled).to.be(false);
       });
 
+      it('should uninstall ecommerce sample data set', async ()=> {
+        await PageObjects.home.removeSampleDataSet('ecommerce');
+        const isInstalled = await PageObjects.home.isSampleDataSetInstalled('ecommerce');
+        expect(isInstalled).to.be(false);
+      });
     });
   });
 }

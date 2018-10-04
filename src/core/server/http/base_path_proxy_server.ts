@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { Server } from 'hapi-latest';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import { sample } from 'lodash';
-import { ByteSizeValue } from '../config/schema';
 import { DevConfig } from '../dev';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';

@@ -155,8 +155,8 @@ function discoverController(
   courier,
   kbnUrl,
   localStorage,
+  breadcrumbState
 ) {
-
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
@@ -288,6 +288,12 @@ function discoverController(
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   docTitle.change(`Discover${pageTitleSuffix}`);
+
+  if (savedSearch.id && savedSearch.title) {
+    breadcrumbState.set([{ text: 'Discover', href: '#/discover' }, { text: savedSearch.title }]);
+  } else {
+    breadcrumbState.set([{ text: 'Discover' }]);
+  }
 
   let stateMonitor;
 
@@ -460,45 +466,45 @@ function discoverController(
           'rows',
           'fetchStatus'
         ], (function updateResultState() {
-            let prev = {};
-            const status = {
-              LOADING: 'loading', // initial data load
-              READY: 'ready', // results came back
-              NO_RESULTS: 'none' // no results came back
+          let prev = {};
+          const status = {
+            LOADING: 'loading', // initial data load
+            READY: 'ready', // results came back
+            NO_RESULTS: 'none' // no results came back
+          };
+
+          function pick(rows, oldRows, fetchStatus) {
+            // initial state, pretend we are loading
+            if (rows == null && oldRows == null) return status.LOADING;
+
+            const rowsEmpty = _.isEmpty(rows);
+            // An undefined fetchStatus means the requests are still being
+            // prepared to be sent. When all requests are completed,
+            // fetchStatus is set to null, so it's important that we
+            // specifically check for undefined to determine a loading status.
+            const preparingForFetch = _.isUndefined(fetchStatus);
+            if (preparingForFetch) return status.LOADING;
+            else if (rowsEmpty && fetchStatus) return status.LOADING;
+            else if (!rowsEmpty) return status.READY;
+            else return status.NO_RESULTS;
+          }
+
+          return function () {
+            const current = {
+              rows: $scope.rows,
+              fetchStatus: $scope.fetchStatus
             };
 
-            function pick(rows, oldRows, fetchStatus) {
-              // initial state, pretend we are loading
-              if (rows == null && oldRows == null) return status.LOADING;
+            $scope.resultState = pick(
+              current.rows,
+              prev.rows,
+              current.fetchStatus,
+              prev.fetchStatus
+            );
 
-              const rowsEmpty = _.isEmpty(rows);
-              // An undefined fetchStatus means the requests are still being
-              // prepared to be sent. When all requests are completed,
-              // fetchStatus is set to null, so it's important that we
-              // specifically check for undefined to determine a loading status.
-              const preparingForFetch = _.isUndefined(fetchStatus);
-              if (preparingForFetch) return status.LOADING;
-              else if (rowsEmpty && fetchStatus) return status.LOADING;
-              else if (!rowsEmpty) return status.READY;
-              else return status.NO_RESULTS;
-            }
-
-            return function () {
-              const current = {
-                rows: $scope.rows,
-                fetchStatus: $scope.fetchStatus
-              };
-
-              $scope.resultState = pick(
-                current.rows,
-                prev.rows,
-                current.fetchStatus,
-                prev.fetchStatus
-              );
-
-              prev = current;
-            };
-          }()));
+            prev = current;
+          };
+        }()));
 
         if ($scope.opts.timefield) {
           setupVisualization();

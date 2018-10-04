@@ -60,35 +60,65 @@ function getFieldsForTypes(searchFields, types) {
 }
 
 /**
+ *  Gets the clause that will filter for the type in the namespace.
+ *  Some types are namespace agnostic, so they must be treated differently.
+ *  @param  {SavedObjectsSchema} schema
+ *  @param  {string} namespace
+ *  @param  {string} type
+ *  @return {Object}
+ */
+function getClauseForType(schema, namespace, type) {
+  if (!type) {
+    throw new Error(`type is required to build filter clause`);
+  }
+
+  if (namespace && !schema.isNamespaceAgnostic(type)) {
+    return {
+      bool: {
+        must: [
+          { term: { type } },
+          { term: { namespace } },
+        ]
+      }
+    };
+  }
+
+  return {
+    bool: {
+      must: [{ term: { type } }],
+      must_not: [{ exists: { field: 'namespace' } }]
+    }
+  };
+}
+
+/**
  *  Get the "query" related keys for the search body
  *  @param  {EsMapping} mapping mappings from Ui
+ * *@param  {SavedObjectsSchema} schema
  *  @param  {(string|Array<string>)} type
  *  @param  {String} search
  *  @param  {Array<string>} searchFields
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields) {
-  if (!type && !search) {
-    return {};
-  }
-
-  const bool = {};
-
-  if (type) {
-    bool.filter = [
-      { [Array.isArray(type) ? 'terms' : 'term']: { type } }
-    ];
-  }
+export function getQueryParams(mappings, schema, namespace, type, search, searchFields) {
+  const types = getTypes(mappings, type);
+  const bool = {
+    filter: [{
+      bool: {
+        should: types.map(type => getClauseForType(schema, namespace, type)),
+        minimum_should_match: 1
+      }
+    }],
+  };
 
   if (search) {
     bool.must = [
-      ...bool.must || [],
       {
         simple_query_string: {
           query: search,
           ...getFieldsForTypes(
             searchFields,
-            getTypes(mappings, type)
+            types
           )
         }
       }

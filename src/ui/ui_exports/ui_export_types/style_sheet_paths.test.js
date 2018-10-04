@@ -17,22 +17,25 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+import { tmpdir } from 'os';
 import { styleSheetPaths } from './style_sheet_paths';
 
 describe('uiExports.styleSheetPaths', () => {
+  const dir = tmpdir();
   const pluginSpec = {
-    getId: () => 'test',
-    getPublicDir: () => '/kibana/public'
+    getId: jest.fn(() => 'test'),
+    getPublicDir: jest.fn(() => resolve(dir, 'kibana/public'))
   };
 
   it('does not support relative paths', () => {
     expect(() => styleSheetPaths([], 'public/bar.css', 'styleSheetPaths', pluginSpec))
-      .toThrowError('[plugin:test] uiExports.styleSheetPaths must be an absolute path, got "public/bar.css"');
+      .toThrowError(/\[plugin:test\] uiExports.styleSheetPaths must be an absolute path/);
   });
 
   it('path must be child of public path', () => {
     expect(() => styleSheetPaths([], '/another/public/bar.css', 'styleSheetPaths', pluginSpec))
-      .toThrowError('[plugin:test] uiExports.styleSheetPaths must be child of publicDir [/kibana/public]');
+      .toThrowError(/\[plugin:test\] uiExports.styleSheetPaths must be child of publicDir/);
   });
 
   it('only supports css or scss extensions', () => {
@@ -41,7 +44,7 @@ describe('uiExports.styleSheetPaths', () => {
   });
 
   it('provides publicPath for scss extensions', () => {
-    const localPath = '/kibana/public/bar.scss';
+    const localPath = resolve(dir, 'kibana/public/bar.scss');
     const uiExports = styleSheetPaths([], localPath, 'styleSheetPaths', pluginSpec);
 
     expect(uiExports.styleSheetPaths).toHaveLength(1);
@@ -50,11 +53,19 @@ describe('uiExports.styleSheetPaths', () => {
   });
 
   it('provides publicPath for css extensions', () => {
-    const localPath = '/kibana/public/bar.css';
+    const localPath = resolve(dir, 'kibana/public/bar.scss');
     const uiExports = styleSheetPaths([], localPath, 'styleSheetPaths', pluginSpec);
 
     expect(uiExports.styleSheetPaths).toHaveLength(1);
     expect(uiExports.styleSheetPaths[0].localPath).toEqual(localPath);
     expect(uiExports.styleSheetPaths[0].publicPath).toEqual('plugins/test/bar.css');
+  });
+
+  it('should normalize mixed slashes', () => {
+    const localPath = resolve(dir, 'kibana/public\\bar.scss');
+    const uiExports = styleSheetPaths([], localPath, 'styleSheetPaths', pluginSpec);
+
+    expect(uiExports.styleSheetPaths).toHaveLength(1);
+    expect(uiExports.styleSheetPaths[0].localPath).toEqual(localPath);
   });
 });
