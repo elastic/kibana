@@ -8,14 +8,14 @@
 If you enable the collection of monitoring data in your cluster, you can 
 optionally collect metrics about {kib}. 
 
-The following method involves sending the metrics to {es}, which ultimately 
-routes them to the monitoring cluster. For an alternative method, see 
-<<monitoring-metricbeat>>. 
+The following method involves sending the metrics to the production cluster, 
+which ultimately routes them to the monitoring cluster. For an alternative 
+method, see <<monitoring-metricbeat>>. 
 
 To learn about monitoring in general, see 
 {stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
 
-. Enable the collection of monitoring data in the {stack}. Set 
+. Enable the collection of monitoring data in {stack}. Set 
 `xpack.monitoring.collection.enabled` to `true` on the production cluster.  +
 + 
 --
@@ -39,7 +39,7 @@ and {ref}/cluster-update-settings.html[Cluster update settings].
 
 . Verify that `xpack.monitoring.enabled` and
 `xpack.monitoring.kibana.collection.enabled` are set to `true` in the 
-`kibana.yml` file on your production cluster. These are the default values. For 
+`kibana.yml` file. These are the default values. For 
 more information, see <<monitoring-settings-kb,Monitoring settings in {kib}>>.
 
 . Identify where to send monitoring data. {kib} automatically
@@ -92,7 +92,7 @@ elasticsearch.ssl.certificateAuthorities: /path/to/your/cacert.pem
 For more information, see <<using-kibana-with-security>>.
 --
 
-. Restart {kib}.
+. <<start-stop,Start {kib}>>.
 
 . <<monitoring-data,View the monitoring data in {kib}>>. 
 

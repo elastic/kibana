@@ -2,10 +2,16 @@
 [[monitoring-metricbeat]]
 === Monitoring {kib} with {metricbeat}
 
-beta[] In 6.4 and later, you can use {metricbeat} to collect and ship data about 
-{kib}, rather than routing it through {es} as described in <<monitoring-kibana>>. 
+beta[] In 6.4 and later, you can use {metricbeat} to collect data about {kib} 
+and ship it to the monitoring cluster, rather than routing it through the 
+production cluster as described in <<monitoring-kibana>>. 
 
-. Enable the collection of monitoring data in the {stack}. Set 
+image::monitoring/images/metricbeat.png[Example monitoring architecture]
+
+To learn about monitoring in general, see 
+{stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
+
+. Enable the collection of monitoring data. Set 
 `xpack.monitoring.collection.enabled` to `true` on the production cluster. +
 + 
 --
@@ -30,7 +36,7 @@ and {ref}/cluster-update-settings.html[Cluster update settings].
 . Disable the default collection of {kib} monitoring metrics. +
 +
 --
-Add the following setting in the `kibana.yml` file on your production cluster: 
+Add the following setting in the {kib} configuration file (`kibana.yml`): 
 
 [source,yaml]
 ----------------------------------
@@ -44,7 +50,7 @@ For more information, see
 --
 
 . {metricbeat-ref}/metricbeat-installation.html[Install {metricbeat}] on the 
-same node as {kib}.
+same server as {kib}.
 
 . Enable the {kib} module in {metricbeat}. +
 +
@@ -57,8 +63,8 @@ run the following command:
 metricbeat modules enable kibana
 ----------------------------------------------------------------------
 
-Alternatively, you can enable module configs in the `metricbeat.yml` file. For 
-more information, see 
+Alternatively, you can enable module configs in the {metricbeat} configuration 
+file (`metricbeat.yml`). For more information, see 
 {metricbeat-ref}/configuration-metricbeat.html[Specify which modules to run] and 
 {metricbeat-ref}/metricbeat-module-kibana.html[{kib} module]. 
 --
@@ -66,8 +72,8 @@ more information, see
 . Configure the {kib} module in {metricbeat}. +
 +
 --
-For example, you can change the default module configuration by modifying the 
-`kibana.yml` file in the `modules.d` directory:
+You must specify the following settings, either in the `modules.d/kibana.yml` 
+file or the `metricbeat.yml` file:
 
 [source,yaml]
 ----------------------------------
@@ -94,8 +100,8 @@ monitoring cluster prevents production cluster outages from impacting your
 ability to access your monitoring data. It also prevents monitoring activities 
 from impacting the performance of your production cluster.
 
-For example, specify the {es} output information in the `kibana.yml` file in the 
-`modules.d` directory:
+For example, specify the {es} output information in the {metricbeat} 
+configuration file (`metricbeat.yml`):
 
 [source,yaml]
 ----------------------------------
@@ -109,10 +115,13 @@ NOTE: If you configured the monitoring cluster to use
 {ref}/configuring-tls.html[encrypted communications], you must access it via 
 HTTPS. For example, `https://es-mon-1:9200`. 
 
+For more information about these configuration options, see 
+{metricbeat-ref}/elasticsearch-output.html[Configure the {es} output].
+
 --
 
-. Start {kib}.
+. <<start-stop,Start {kib}>>.
 
-. Start {metricbeat}. 
+. {metricbeat-ref}/metricbeat-starting[Start {metricbeat}]. 
 
 . <<monitoring-data,View the monitoring data in {kib}>>. 
