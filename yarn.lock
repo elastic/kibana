@@ -164,6 +164,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/config-schema@link:packages/kbn-config-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/datemath@link:packages/kbn-datemath":
   version "0.0.0"
   uid ""

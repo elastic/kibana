@@ -17,7 +17,7 @@
  * under the License.
  */
 import * as Joi from 'joi';
-import { ByteSizeValue } from '../byte_size_value';
+import { ByteSizeValue } from '../src/byte_size_value';
 
 declare module 'joi' {
   interface BytesSchema extends AnySchema {
