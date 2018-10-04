@@ -410,7 +410,7 @@ export class SAMLAuthenticationProvider {
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.succeeded();
+      return DeauthenticationResult.redirectTo('/logged_out');
     } catch(err) {
       this._options.log(['debug', 'security', 'saml'], `Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);
