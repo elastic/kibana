@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function redisLogsSpecProvider() {
+export function redisLogsSpecProvider(server, context) {
   const moduleName = 'redis';
   const geoipRequired = false;
   const uaRequired = false;
@@ -36,7 +36,6 @@ export function redisLogsSpecProvider() {
       defaultMessage: 'Collect and parse error and slow logs created by Redis.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.redisLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `redis` Filebeat module parses error and slow logs created by Redis. \
 For Redis to write error logs, make sure the `logfile` option, from the \
 Redis configuration file, is set to `redis-server.log`. \
@@ -66,7 +65,7 @@ Note that the `slowlog` fileset is experimental. \
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/redis_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

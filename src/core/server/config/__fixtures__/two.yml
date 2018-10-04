@@ -1,0 +1,7 @@
+foo: 2
+baz: bonkers
+xyz: ['3', '4']
+abc:
+  ghi: test2
+  qwe: 2
+pom.mob: 4

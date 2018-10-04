@@ -6,6 +6,7 @@ exports[`BucketSpanEstimator renders the button 1`] = `
 >
   <EuiToolTip
     content="Experimental feature for estimating bucket span."
+    delay="regular"
     position="bottom"
   >
     <EuiButton
@@ -30,6 +31,7 @@ exports[`BucketSpanEstimator renders the loading button 1`] = `
 >
   <EuiToolTip
     content="Experimental feature for estimating bucket span."
+    delay="regular"
     position="bottom"
   >
     <EuiButton

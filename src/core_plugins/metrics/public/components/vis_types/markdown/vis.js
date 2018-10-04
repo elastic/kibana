@@ -29,7 +29,7 @@ import ErrorComponent from '../../error';
 function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, dateFormat } = props;
   const series = _.get(visData, `${model.id}.series`, []);
-  const variables = convertSeriesToVars(series, model, dateFormat);
+  const variables = convertSeriesToVars(series, model, dateFormat, props.getConfig);
   const style = {};
   let reversed = props.reversed;
   const panelBackgroundColor = model.background_color || backgroundColor;

@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { schema, TypeOf } from '@kbn/config-schema';
 import crypto from 'crypto';
-import { schema, TypeOf } from '../config/schema';
 
 // `crypto` type definitions doesn't currently include `crypto.constants`, see
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fa5baf1733f49cf26228a4e509914572c1b74adf/types/node/v6/index.d.ts#L3412

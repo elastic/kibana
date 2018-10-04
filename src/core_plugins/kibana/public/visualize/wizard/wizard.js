@@ -21,7 +21,6 @@ import '../saved_visualizations/saved_visualizations';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/paginated_selectable_list';
 import '../../discover/saved_searches/saved_searches';
-import './wizard.less';
 
 import _ from 'lodash';
 import { CATEGORY, CATEGORY_DISPLAY_NAMES } from 'ui/vis/vis_category';

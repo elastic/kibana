@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { reportFailedTests } from '../src/dev/failed_tests/report';
+
 module.exports = function (grunt) {
   grunt.registerTask('jenkins:docs', [
     'docker:docs'
@@ -26,6 +28,7 @@ module.exports = function (grunt) {
     'run:eslint',
     'run:tslint',
     'run:typeCheck',
+    'run:i18nCheck',
     'run:checkFileCasing',
     'licenses',
     'verifyDependencyVersions',
@@ -36,7 +39,6 @@ module.exports = function (grunt) {
     'test:projects',
     'test:browser-ci',
     'run:apiIntegrationTests',
-    'verifyTranslations',
   ]);
 
   grunt.registerTask('jenkins:selenium', [
@@ -44,4 +46,12 @@ module.exports = function (grunt) {
     'run:functionalTestsRelease',
     'run:pluginFunctionalTestsRelease',
   ]);
+
+  grunt.registerTask(
+    'jenkins:report',
+    'Reports failed tests found in junit xml files to Github issues',
+    function () {
+      reportFailedTests(this.async());
+    }
+  );
 };

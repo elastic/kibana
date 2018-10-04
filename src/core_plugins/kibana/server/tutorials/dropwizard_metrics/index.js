@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function dropwizardMetricsSpecProvider() {
+export function dropwizardMetricsSpecProvider(server, context) {
   const moduleName = 'dropwizard';
   return {
     id: 'dropwizardMetrics',
@@ -34,7 +34,6 @@ export function dropwizardMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from Dropwizard Java application.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.dropwizardMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `dropwizard` Metricbeat module fetches internal metrics from Dropwizard Java Application. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -54,7 +53,7 @@ export function dropwizardMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

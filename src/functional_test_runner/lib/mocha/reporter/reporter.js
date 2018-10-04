@@ -20,16 +20,19 @@
 import { format } from 'util';
 
 import Mocha from 'mocha';
+import { ToolingLogTextWriter } from '@kbn/dev-utils';
 
 import { setupJUnitReportGeneration } from '../../../../dev';
 import * as colors from './colors';
 import * as symbols from './symbols';
 import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
+import { recordLog, snapshotLogsForRunnable } from '../../../../dev/mocha/log_cache';
 
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
+  let originalLogWriters;
 
   return class MochaReporter extends Mocha.reporters.Base {
     constructor(runner, options) {
@@ -55,11 +58,40 @@ export function MochaReporterProvider({ getService }) {
     }
 
     onStart = () => {
+      if (config.get('mochaReporter.captureLogOutput')) {
+        log.warning('debug logs are being captured, only error logs will be written to the console');
+        originalLogWriters = log.getWriters();
+        log.setWriters([
+          new ToolingLogTextWriter({
+            level: 'error',
+            writeTo: process.stdout
+          }),
+          new ToolingLogTextWriter({
+            level: 'debug',
+            writeTo: {
+              write: (chunk) => {
+                // if the current runnable is a beforeEach hook then
+                // `runner.suite` is set to the suite that defined the
+                // hook, rather than the suite executing, so instead we
+                // grab the suite from the test, but that's only available
+                // when we are doing something test specific, so for global
+                // hooks we fallback to `runner.suite`
+                const currentSuite = this.runner.test
+                  ? this.runner.test.parent
+                  : this.runner.suite;
+
+                recordLog(currentSuite, chunk);
+              }
+            }
+          })
+        ]);
+      }
+
       log.write('');
     }
 
     onHookStart = hook => {
-      log.write('-> ' + colors.suite(hook.title));
+      log.write(`-> ${colors.suite(hook.title)}`);
       log.indent(2);
     }
 
@@ -76,7 +108,7 @@ export function MochaReporterProvider({ getService }) {
     }
 
     onSuiteEnd = () => {
-      if (log.indent(-2) === '') {
+      if (log.indent(-2) === 0) {
         log.write();
       }
     }
@@ -86,7 +118,8 @@ export function MochaReporterProvider({ getService }) {
       log.indent(2);
     }
 
-    onTestEnd = () => {
+    onTestEnd = (test) => {
+      snapshotLogsForRunnable(test);
       log.indent(-2);
     }
 
@@ -96,7 +129,6 @@ export function MochaReporterProvider({ getService }) {
     }
 
     onPass = test => {
-
       let time = '';
       if (test.speed !== 'fast') {
         time = colors.speed(test.speed, ` (${ms(test.duration)})`);
@@ -106,7 +138,7 @@ export function MochaReporterProvider({ getService }) {
       log.write(`- ${pass} ${time}`);
     }
 
-    onFail = test => {
+    onFail = runnable => {
       // NOTE: this is super gross
       //
       //  - I started by trying to extract the Base.list() logic from mocha
@@ -118,14 +150,13 @@ export function MochaReporterProvider({ getService }) {
       const realLog = console.log;
       console.log = (...args) => output += `${format(...args)}\n`;
       try {
-        Mocha.reporters.Base.list([test]);
+        Mocha.reporters.Base.list([runnable]);
       } finally {
         console.log = realLog;
       }
 
       log.write(
-        `- ${symbols.err} ` +
-        colors.fail(`fail: "${test.fullTitle()}"`) +
+        `- ${colors.fail(`${symbols.err} fail: "${runnable.fullTitle()}"`)}` +
         '\n' +
         output
           .split('\n')
@@ -136,9 +167,17 @@ export function MochaReporterProvider({ getService }) {
           .map(line => ` ${line}`)
           .join('\n')
       );
+
+      // failed hooks trigger the `onFail(runnable)` callback, so we snapshot the logs for
+      // them here. Tests will re-capture the snapshot in `onTestEnd()`
+      snapshotLogsForRunnable(runnable);
     }
 
     onEnd = () => {
+      if (originalLogWriters) {
+        log.setWriters(originalLogWriters);
+      }
+
       writeEpilogue(log, this.stats);
     }
   };

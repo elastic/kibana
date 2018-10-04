@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { Server } from 'hapi-latest';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import { sample } from 'lodash';
-import { ByteSizeValue } from '../config/schema';
 import { DevConfig } from '../dev';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
@@ -29,8 +29,6 @@ import { createServer, getServerOptions } from './http_tools';
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
 export interface BasePathProxyServerOptions {
-  httpConfig: HttpConfig;
-  devConfig: DevConfig;
   shouldRedirectFromOldBasePath: (path: string) => boolean;
   blockUntil: () => Promise<void>;
 }
@@ -40,34 +38,38 @@ export class BasePathProxyServer {
   private httpsAgent?: HttpsAgent;
 
   get basePath() {
-    return this.options.httpConfig.basePath;
+    return this.httpConfig.basePath;
   }
 
   get targetPort() {
-    return this.options.devConfig.basePathProxyTargetPort;
+    return this.devConfig.basePathProxyTargetPort;
   }
 
-  constructor(private readonly log: Logger, private readonly options: BasePathProxyServerOptions) {
+  constructor(
+    private readonly log: Logger,
+    private readonly httpConfig: HttpConfig,
+    private readonly devConfig: DevConfig
+  ) {
     const ONE_GIGABYTE = 1024 * 1024 * 1024;
-    options.httpConfig.maxPayload = new ByteSizeValue(ONE_GIGABYTE);
+    httpConfig.maxPayload = new ByteSizeValue(ONE_GIGABYTE);
 
-    if (!options.httpConfig.basePath) {
-      options.httpConfig.basePath = `/${sample(alphabet, 3).join('')}`;
+    if (!httpConfig.basePath) {
+      httpConfig.basePath = `/${sample(alphabet, 3).join('')}`;
     }
   }
 
-  public async start() {
-    const { httpConfig } = this.options;
+  public async start(options: Readonly<BasePathProxyServerOptions>) {
+    this.log.debug('starting basepath proxy server');
 
-    const options = getServerOptions(httpConfig);
-    this.server = createServer(options);
+    const serverOptions = getServerOptions(this.httpConfig);
+    this.server = createServer(serverOptions);
 
     // Register hapi plugin that adds proxying functionality. It can be configured
     // through the route configuration object (see { handler: { proxy: ... } }).
     await this.server.register({ plugin: require('h2o2-latest') });
 
-    if (httpConfig.ssl.enabled) {
-      const tlsOptions = options.tls as TlsOptions;
+    if (this.httpConfig.ssl.enabled) {
+      const tlsOptions = serverOptions.tls as TlsOptions;
       this.httpsAgent = new HttpsAgent({
         ca: tlsOptions.ca,
         cert: tlsOptions.cert,
@@ -77,22 +79,23 @@ export class BasePathProxyServer {
       });
     }
 
-    this.setupRoutes();
-
-    this.log.info(
-      `starting basepath proxy server at ${this.server.info.uri}${httpConfig.basePath}`
-    );
+    this.setupRoutes(options);
 
     await this.server.start();
+
+    this.log.info(
+      `basepath proxy server running at ${this.server.info.uri}${this.httpConfig.basePath}`
+    );
   }
 
   public async stop() {
-    this.log.info('stopping basepath proxy server');
-
-    if (this.server !== undefined) {
-      await this.server.stop();
-      this.server = undefined;
+    if (this.server === undefined) {
+      return;
     }
+
+    this.log.debug('stopping basepath proxy server');
+    await this.server.stop();
+    this.server = undefined;
 
     if (this.httpsAgent !== undefined) {
       this.httpsAgent.destroy();
@@ -100,17 +103,18 @@ export class BasePathProxyServer {
     }
   }
 
-  private setupRoutes() {
+  private setupRoutes({
+    blockUntil,
+    shouldRedirectFromOldBasePath,
+  }: Readonly<BasePathProxyServerOptions>) {
     if (this.server === undefined) {
       throw new Error(`Routes cannot be set up since server is not initialized.`);
     }
 
-    const { httpConfig, devConfig, blockUntil, shouldRedirectFromOldBasePath } = this.options;
-
     // Always redirect from root URL to the URL with basepath.
     this.server.route({
       handler: (request, responseToolkit) => {
-        return responseToolkit.redirect(httpConfig.basePath);
+        return responseToolkit.redirect(this.httpConfig.basePath);
       },
       method: 'GET',
       path: '/',
@@ -122,7 +126,7 @@ export class BasePathProxyServer {
           agent: this.httpsAgent,
           host: this.server.info.host,
           passThrough: true,
-          port: devConfig.basePathProxyTargetPort,
+          port: this.devConfig.basePathProxyTargetPort,
           protocol: this.server.info.protocol,
           xforward: true,
         },
@@ -138,7 +142,7 @@ export class BasePathProxyServer {
           },
         ],
       },
-      path: `${httpConfig.basePath}/{kbnPath*}`,
+      path: `${this.httpConfig.basePath}/{kbnPath*}`,
     });
 
     // It may happen that basepath has changed, but user still uses the old one,
@@ -152,7 +156,7 @@ export class BasePathProxyServer {
         const isBasepathLike = oldBasePath.length === 3;
 
         return isGet && isBasepathLike && shouldRedirectFromOldBasePath(kbnPath)
-          ? responseToolkit.redirect(`${httpConfig.basePath}/${kbnPath}`)
+          ? responseToolkit.redirect(`${this.httpConfig.basePath}/${kbnPath}`)
           : responseToolkit.response('Not Found').code(404);
       },
       method: '*',

@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function couchbaseMetricsSpecProvider() {
+export function couchbaseMetricsSpecProvider(server, context) {
   const moduleName = 'couchbase';
   return {
     id: 'couchbaseMetrics',
@@ -34,7 +34,6 @@ export function couchbaseMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from Couchbase.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.couchbaseMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `couchbase` Metricbeat module fetches internal metrics from Couchbase. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -54,7 +53,7 @@ export function couchbaseMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

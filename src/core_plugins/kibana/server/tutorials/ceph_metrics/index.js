@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function cephMetricsSpecProvider() {
+export function cephMetricsSpecProvider(server, context) {
   const moduleName = 'ceph';
   return {
     id: 'cephMetrics',
@@ -34,7 +34,6 @@ export function cephMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from the Ceph server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.cephMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `ceph` Metricbeat module fetches internal metrics from Ceph. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -54,7 +53,7 @@ export function cephMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

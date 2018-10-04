@@ -40,6 +40,7 @@ export const ipRangeBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'ip'
     }, {
       name: 'ipRangeType',
