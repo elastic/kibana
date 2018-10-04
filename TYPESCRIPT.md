@@ -4,8 +4,8 @@
 
 To convert existing code over to typescript:
 1. rename the file from `.js` to either `.ts` (if there is no html or jsx in the file) or `.tsx` (if there is).
-2. Ensure tslint is running and installed in the IDE of your choice.  There will usually be some linter errors after a save.
-3. Auto-fix what you can. This will save you a lot of time! I have VSCode set to auto fix tslint errors when I save the file.
+2. Ensure tslint is running and installed in the IDE of your choice.  There will usually be some linter errors after the file rename.
+3. Auto-fix what you can. This will save you a lot of time! VSCode can be set to auto fix tslint errors when files are saved.
 
 ### How to fix common typescript errors
 
@@ -72,7 +72,7 @@ export { metadata };
 
 Use the version number that we have installed in package.json. This may not always work, and you might get something like: 
 
-*Please choose a version of "@types/markdown-it" from this list:*
+`Please choose a version of "@types/markdown-it" from this list:`
 
 If that happens, just pick the closest one.
 
