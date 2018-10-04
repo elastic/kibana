@@ -88,34 +88,25 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async logout() {
       log.debug('SecurityPage.logout');
 
-      const [isWelcomeShowing, logoutLinkExists] = await Promise.all([
-        PageObjects.home.isWelcomeShowing(),
-        find.existsByLinkText('Logout'),
-      ]);
-
-      if (!logoutLinkExists) {
-        log.debug('Logout not found');
-        return;
-      }
-
       // This sometimes happens when hitting the home screen on a brand new / empty
       // Kibana instance. It may not *always* happen, depending on how
       // long it takes the home screen to query Elastic to see if it's a
       // new Kibana instance.
+      const isWelcomeShowing = await PageObjects.home.isWelcomeShowing();
       if (isWelcomeShowing) {
         log.debug('welcome screen showing when attempting logout');
         await PageObjects.home.hideWelcomeScreen();
       }
 
-      await find.clickByLinkText('Logout');
-
       await retry.try(async () => {
-        const loginFormExists = await find.existsByDisplayedByCssSelector('.login-form');
-
         const logoutLinkExists = await find.existsByLinkText('Logout');
-        if (logoutLinkExists) {
-          await find.clickByLinkText('Logout');
+        if (!logoutLinkExists) {
+          throw new Error(`Can't find logout link to click it`);
         }
+
+        await find.clickByLinkText('Logout');
+
+        const loginFormExists = await find.existsByDisplayedByCssSelector('.login-form');
 
         if (!loginFormExists) {
           throw new Error('Logout is not completed yet');
