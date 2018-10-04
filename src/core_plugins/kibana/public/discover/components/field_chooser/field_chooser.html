@@ -31,12 +31,12 @@
     </div>
   </div>
 
-  <div class="discover-sidebar-list-header sidebar-list-header" ng-if="fields.length">
+  <div class="dscSidebar__listHeader sidebar-list-header" ng-if="fields.length">
     <h3 class="sidebar-list-header-label" id="selected_fields" tabindex="0">
       Selected fields
     </h3>
   </div>
-  <ul class="list-unstyled discover-selected-fields" >
+  <ul class="list-unstyled dscFieldList--selected" >
     <discover-field
       ng-repeat="field in fields.raw|filter:{display:true}"
       field="field"
@@ -55,33 +55,34 @@
 
     <div class="euiFlexItem euiFlexItem--flexGrowZero">
       <button
-        ng-click="showFields = !showFields"
+        ng-click="$parent.showFields = !$parent.showFields"
         aria-hidden="true"
         class="kuiButton kuiButton--small visible-xs visible-sm pull-right field-collapse-toggle"
       >
         <span
           aria-hidden="true"
           class="kuiIcon"
-          ng-class="{ 'fa-chevron-right': !showFields, 'fa-chevron-down': showFields }"
+          ng-class="{ 'fa-chevron-right': !$parent.showFields, 'fa-chevron-down': $parent.showFields }"
         ></span>
       </button>
     </div>
     <div class="euiFlexItem euiFlexItem--flexGrowZero">
       <button
         type="button"
-        ng-class="{ 'kuiButton--basic': !filter.active, 'kuiButton--primary': filter.active, 'hidden-xs': !showFields, 'hidden-sm': !showFields }"
+        ng-class="{ 'kuiButton--basic': !filter.active, 'kuiButton--primary': filter.active, 'hidden-xs': !$parent.showFields, 'hidden-sm': !$parent.showFields }"
         class="kuiButton kuiButton--small pull-right discover-field-filter-toggle"
-        ng-click="showFilter = !showFilter"
-        aria-label="{{showFilter ? 'Hide' : 'Show'}} field settings"
-        aria-expanded="{{!!showFilter}}"
+        ng-click="$parent.showFilter = !$parent.showFilter"
+        aria-label="{{$parent.showFilter ? 'Hide' : 'Show'}} field settings"
+        aria-expanded="{{!!$parent.showFilter}}"
         aria-controls="discoverFieldFilter"
+        data-test-subj="toggleFieldFilterButton"
       >
         <span aria-hidden="true" class="kuiIcon fa-gear"></span>
       </button>
     </div>
   </div>
 
-  <div class="sidebar-item discover-field-details" ng-show="showFilter" id="discoverFieldFilter">
+  <div class="sidebar-item dscFieldDetails" ng-show="showFilter" id="discoverFieldFilter" data-test-subj="discoverFieldFilter">
     <form role="form">
       <div class="form-group">
         <label for="discoverFieldChooserFilterAggregatable">
@@ -146,7 +147,7 @@
   <ul
     ng-show="(popularFields | filter:filter.isFieldFiltered).length > 0"
     ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields }"
-    class="list-unstyled sidebar-well discover-popular-fields">
+    class="list-unstyled sidebar-well dscFieldList--popular">
     <li class="sidebar-item sidebar-list-header">
       <h6>Popular</h6>
     </li>
@@ -163,7 +164,7 @@
 
   <ul
     ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields  }"
-    class="list-unstyled discover-unpopular-fields">
+    class="list-unstyled dscFieldList--unpopular">
     <discover-field
       ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered"
       field="field"

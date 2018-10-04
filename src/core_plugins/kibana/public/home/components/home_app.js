@@ -32,14 +32,12 @@ import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import chrome from 'ui/chrome';
 import { recentlyAccessedShape } from './recently_accessed';
+import { I18nProvider } from '@kbn/i18n/react';
 
 export function HomeApp({
   addBasePath,
   directories,
   recentlyAccessed,
-  getConfig,
-  setConfig,
-  clearIndexPatternsCache,
 }) {
 
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
@@ -52,9 +50,6 @@ export function HomeApp({
         addBasePath={addBasePath}
         openTab={props.match.params.tab}
         isCloudEnabled={isCloudEnabled}
-        getConfig={getConfig}
-        setConfig={setConfig}
-        clearIndexPatternsCache={clearIndexPatternsCache}
       />
     );
   };
@@ -73,37 +68,41 @@ export function HomeApp({
   };
 
   return (
-    <Router>
-      <Switch>
-        <Route
-          path="/home/tutorial/:id"
-          render={renderTutorial}
-        />
-        <Route
-          path="/home/tutorial_directory/:tab?"
-          render={renderTutorialDirectory}
-        />
-        <Route
-          path="/home/feature_directory"
-        >
-          <FeatureDirectory
-            addBasePath={addBasePath}
-            directories={directories}
+    <I18nProvider>
+      <Router>
+        <Switch>
+          <Route
+            path="/home/tutorial/:id"
+            render={renderTutorial}
           />
-        </Route>
-        <Route
-          path="/home"
-        >
-          <Home
-            addBasePath={addBasePath}
-            directories={directories}
-            apmUiEnabled={apmUiEnabled}
-            recentlyAccessed={recentlyAccessed}
-            find={savedObjectsClient.find}
+          <Route
+            path="/home/tutorial_directory/:tab?"
+            render={renderTutorialDirectory}
           />
-        </Route>
-      </Switch>
-    </Router>
+          <Route
+            path="/home/feature_directory"
+          >
+            <FeatureDirectory
+              addBasePath={addBasePath}
+              directories={directories}
+            />
+          </Route>
+          <Route
+            path="/home"
+          >
+            <Home
+              addBasePath={addBasePath}
+              directories={directories}
+              apmUiEnabled={apmUiEnabled}
+              recentlyAccessed={recentlyAccessed}
+              find={savedObjectsClient.find}
+              localStorage={localStorage}
+              urlBasePath={chrome.getBasePath()}
+            />
+          </Route>
+        </Switch>
+      </Router>
+    </I18nProvider>
   );
 }
 
@@ -119,7 +118,4 @@ HomeApp.propTypes = {
     category: PropTypes.string.isRequired
   })),
   recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
-  getConfig: PropTypes.func.isRequired,
-  setConfig: PropTypes.func.isRequired,
-  clearIndexPatternsCache: PropTypes.func.isRequired,
 };

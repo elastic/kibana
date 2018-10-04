@@ -54,17 +54,17 @@ const alertRowFactory = (scope, kbnUrl) => {
 
     return (
       <KuiTableRow>
-        <KuiTableRowCell>
+        <KuiTableRowCell tabIndex="0">
           <Tooltip text={severityIcon.title} placement="bottom" trigger="hover">
             <EuiHealth color={severityIcon.color} data-test-subj="alertIcon" aria-label={severityIcon.title}>
               { capitalize(severityIcon.value) }
             </EuiHealth>
           </Tooltip>
         </KuiTableRowCell>
-        <KuiTableRowCell>
+        <KuiTableRowCell tabIndex="0">
           { resolution.icon } { resolution.text }
         </KuiTableRowCell>
-        <KuiTableRowCell>
+        <KuiTableRowCell tabIndex="0">
           <FormattedMessage
             prefix={props.prefix}
             suffix={props.suffix}
@@ -73,13 +73,13 @@ const alertRowFactory = (scope, kbnUrl) => {
             changeUrl={changeUrl}
           />
         </KuiTableRowCell>
-        <KuiTableRowCell>
+        <KuiTableRowCell tabIndex="0">
           { linkToCategories[props.metadata.link] ? linkToCategories[props.metadata.link] : 'General' }
         </KuiTableRowCell>
-        <KuiTableRowCell>
+        <KuiTableRowCell tabIndex="0">
           { formatDateTimeLocal(props.update_timestamp) }
         </KuiTableRowCell>
-        <KuiTableRowCell>
+        <KuiTableRowCell tabIndex="0">
           { formatTimestampToDuration(props.timestamp, CALCULATE_DURATION_SINCE) } ago
         </KuiTableRowCell>
       </KuiTableRow>

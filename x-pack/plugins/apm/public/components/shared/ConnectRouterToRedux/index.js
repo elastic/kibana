@@ -11,4 +11,7 @@ import { updateLocation } from '../../../store/location';
 const mapDispatchToProps = {
   updateLocation
 };
-export default connect(null, mapDispatchToProps)(view);
+export default connect(
+  null,
+  mapDispatchToProps
+)(view);

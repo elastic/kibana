@@ -5,10 +5,11 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { HeaderLarge } from '../../shared/UIComponents';
 import Transaction from './Transaction';
 import Distribution from './Distribution';
-import { DetailsChartsRequest } from '../../../store/reactReduxRequest/detailsCharts';
+import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
 import Charts from '../../shared/charts/TransactionCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
@@ -21,7 +22,9 @@ function TransactionDetails({ urlParams, location }) {
 
       <KueryBar />
 
-      <DetailsChartsRequest
+      <EuiSpacer size="s" />
+
+      <TransactionDetailsChartsRequest
         urlParams={urlParams}
         render={({ data }) => (
           <Charts charts={data} urlParams={urlParams} location={location} />

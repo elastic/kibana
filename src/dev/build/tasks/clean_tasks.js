@@ -39,6 +39,7 @@ export const CleanPackagesTask = {
     await deleteAll(log, [
       build.resolvePath('packages'),
       build.resolvePath('x-pack'),
+      build.resolvePath('yarn.lock'),
     ]);
   },
 };
@@ -50,7 +51,7 @@ export const CleanTypescriptTask = {
   async run(config, log, build) {
     await deleteAll(log, [
       build.resolvePath('**/*.{ts,tsx,d.ts}'),
-      build.resolvePath('**/tsconfig.json'),
+      build.resolvePath('**/tsconfig*.json'),
     ]);
   },
 };
@@ -100,7 +101,7 @@ export const CleanExtraFilesFromModulesTask = {
       '.jscs.json',
       '.lint',
     ];
-    const hints = ['*.flow', '*.webidl', '*.map'];
+    const hints = ['*.flow', '*.webidl', '*.map', '@types'];
     const scripts = [
       '*.sh',
       '*.bat',
@@ -186,6 +187,7 @@ export const CleanExtraBrowsersTask = {
         if (platforms.windows) {
           paths.push(phantomPath('phantomjs-*-windows.zip'));
           paths.push(chromiumPath('chromium-*-win32.zip'));
+          paths.push(chromiumPath('chromium-*-windows.zip'));
         }
 
         if (platforms.darwin) {

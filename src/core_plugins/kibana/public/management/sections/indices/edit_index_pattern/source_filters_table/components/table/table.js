@@ -28,7 +28,9 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-export class Table extends Component {
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
+export class TableComponent extends Component {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     items: PropTypes.array.isRequired,
@@ -71,13 +73,15 @@ export class Table extends Component {
       fieldWildcardMatcher,
       indexPattern,
       saveFilter,
+      intl,
     } = this.props;
 
     return [
       {
         field: 'value',
-        name: 'Filter',
-        description: `Filter name`,
+        name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.source.table.filterHeader', defaultMessage: 'Filter' }),
+        description: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.source.table.filterDescription', defaultMessage: 'Filter name' }),
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
@@ -97,8 +101,11 @@ export class Table extends Component {
       },
       {
         field: 'value',
-        name: 'Matches',
-        description: `Language used for the field`,
+        name: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.source.table.matchesHeader', defaultMessage: 'Matches' }),
+        description: intl.formatMessage({
+          id: 'kbn.management.editIndexPattern.source.table.matchesDescription',
+          defaultMessage: 'Language used for the field' }),
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
@@ -117,7 +124,12 @@ export class Table extends Component {
           }
 
           return (
-            <em>The source filter doesn&apos;t match any known fields.</em>
+            <em>
+              <FormattedMessage
+                id="kbn.management.editIndexPattern.source.table.notMatchedLabel"
+                defaultMessage="The source filter doesn't match any known fields."
+              />
+            </em>
           );
         },
       },
@@ -139,7 +151,8 @@ export class Table extends Component {
                     this.stopEditingFilter();
                   }}
                   iconType="checkInCircleFilled"
-                  aria-label="Save"
+                  aria-label={intl.formatMessage({
+                    id: 'kbn.management.editIndexPattern.source.table.saveAria', defaultMessage: 'Save' })}
                 />
                 <EuiButtonIcon
                   size="s"
@@ -147,7 +160,8 @@ export class Table extends Component {
                     this.stopEditingFilter();
                   }}
                   iconType="cross"
-                  aria-label="Cancel"
+                  aria-label={intl.formatMessage({
+                    id: 'kbn.management.editIndexPattern.source.table.cancelAria', defaultMessage: 'Cancel' })}
                 />
               </Fragment>
             );
@@ -160,7 +174,8 @@ export class Table extends Component {
                 color="danger"
                 onClick={() => deleteFilter(filter)}
                 iconType="trash"
-                aria-label="Delete"
+                aria-label={intl.formatMessage({
+                  id: 'kbn.management.editIndexPattern.source.table.deleteAria', defaultMessage: 'Delete' })}
               />
               <EuiButtonIcon
                 size="s"
@@ -168,7 +183,8 @@ export class Table extends Component {
                   this.startEditingFilter(filter.clientId, filter.value)
                 }
                 iconType="pencil"
-                aria-label="Edit"
+                aria-label={intl.formatMessage({
+                  id: 'kbn.management.editIndexPattern.source.table.editAria', defaultMessage: 'Edit' })}
               />
             </Fragment>
           );
@@ -196,3 +212,5 @@ export class Table extends Component {
     );
   }
 }
+
+export const Table = injectI18n(TableComponent);

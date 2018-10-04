@@ -43,7 +43,7 @@ function populateSingleMetricSettings(jobSettings, scope) {
       if (f.agg !== undefined) {
         // find the aggregation object in the aggTypeOptions list which has the same name
         // as the agg setting in the url
-        const agg = scope.ui.aggTypeOptions.find(o => (o.name === f.agg));
+        const agg = scope.ui.aggTypeOptions.find(o => (o.mlName === f.agg));
         if (agg !== undefined) {
           scope.formConfig.agg.type = agg;
           scope.aggChange();
@@ -83,7 +83,7 @@ function populateMultiMetricSettings(jobSettings, scope) {
       }
 
       if (f.agg !== undefined) {
-        const agg = scope.ui.aggTypeOptions.find(o => (o.name === f.agg));
+        const agg = scope.ui.aggTypeOptions.find(o => (o.mlName === f.agg));
         if (agg !== undefined) {
           scope.formConfig.fields[field.id].agg.type = agg;
         }
@@ -124,7 +124,7 @@ function populatePopulationSettings(jobSettings, scope) {
         if (field !== undefined) {
 
           if (f.agg !== undefined) {
-            const agg = scope.ui.aggTypeOptions.find(o => (o.name === f.agg));
+            const agg = scope.ui.aggTypeOptions.find(o => (o.mlName === f.agg));
             if (agg !== undefined) {
               field.agg = { type: agg };
             }
@@ -195,6 +195,9 @@ function populateCommonSettings(jobSettings, scope) {
   if (Array.isArray(jobSettings.influencers)) {
     scope.formConfig.influencerFields = jobSettings.influencers.map((i) => scope.ui.fields.find(f => f.id === i));
   }
+
+  scope.formConfig.useDedicatedIndex = (jobSettings.resultsIndexName !== 'shared');
+  scope.ui.showAdvanced = scope.formConfig.useDedicatedIndex;
 }
 
 function runEstimateBucketSpan(scope) {

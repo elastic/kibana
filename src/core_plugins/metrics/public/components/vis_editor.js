@@ -29,12 +29,14 @@ import { get } from 'lodash';
 class VisEditor extends Component {
   constructor(props) {
     super(props);
-    const { appState } = props;
-    const reversed = get(appState, 'options.darkTheme', false);
+    const { vis } = props;
+    this.appState = vis.API.getAppState();
+    const reversed = get(this.appState, 'options.darkTheme', false);
     this.state = { model: props.vis.params, dirty: false, autoApply: true, reversed };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.handleUiState = this.handleUiState.bind(this, props.vis);
     this.handleAppStateChange = this.handleAppStateChange.bind(this);
+    this.getConfig = (...args) => props.config.get(...args);
   }
 
   handleUiState(vis, ...args) {
@@ -42,9 +44,7 @@ class VisEditor extends Component {
   }
 
   componentWillMount() {
-    const { appState } = this.props;
-    if (appState) {
-      this.appState = appState;
+    if (this.appState) {
       this.appState.on('save_with_changes', this.handleAppStateChange);
     }
   }
@@ -94,6 +94,7 @@ class VisEditor extends Component {
           fields={this.props.vis.fields}
           model={this.props.vis.params}
           visData={this.props.visData}
+          getConfig={this.getConfig}
         />
       );
     }
@@ -110,7 +111,7 @@ class VisEditor extends Component {
             dirty={this.state.dirty}
             autoApply={this.state.autoApply}
             model={model}
-            appState={this.props.appState}
+            appState={this.appState}
             savedObj={this.props.savedObj}
             timeRange={this.props.timeRange}
             onUiState={this.handleUiState}
@@ -130,6 +131,7 @@ class VisEditor extends Component {
               visData={this.props.visData}
               dateFormat={this.props.config.get('dateFormat')}
               onChange={handleChange}
+              getConfig={this.getConfig}
             />
           </div>
         </div>
@@ -155,7 +157,6 @@ VisEditor.defaultProps = {
 VisEditor.propTypes = {
   vis: PropTypes.object,
   visData: PropTypes.object,
-  appState: PropTypes.object,
   renderComplete: PropTypes.func,
   config: PropTypes.object,
   isEditorMode: PropTypes.bool,

@@ -26,6 +26,11 @@ import { QueryLanguageType } from 'ui/embeddable/types';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelId, ViewState } from '../selectors';
 
+const closeContextMenu = (view: ViewState) => ({
+  ...view,
+  visibleContextMenuPanelId: undefined,
+});
+
 const setVisibleContextMenuPanelId = (view: ViewState, panelId: PanelId) => ({
   ...view,
   visibleContextMenuPanelId: panelId,
@@ -95,6 +100,8 @@ export const viewReducer: Reducer<ViewState> = (
       return maximizePanel(view, action.payload);
     case ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID:
       return setVisibleContextMenuPanelId(view, action.payload);
+    case ViewActionTypeKeys.CLOSE_CONTEXT_MENU:
+      return closeContextMenu(view);
     case ViewActionTypeKeys.UPDATE_HIDE_PANEL_TITLES:
       return updateHidePanelTitles(view, action.payload);
     case ViewActionTypeKeys.UPDATE_TIME_RANGE:

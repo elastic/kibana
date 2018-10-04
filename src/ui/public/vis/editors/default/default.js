@@ -21,7 +21,6 @@ import './sidebar';
 import './vis_options';
 import './vis_editor_resizer';
 import './vis_type_agg_filter';
-import './vis_type_field_filter';
 import $ from 'jquery';
 
 import _ from 'lodash';
@@ -32,6 +31,8 @@ import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
+import { updateEditorStateWithChanges } from './update_editor_state';
+
 
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
@@ -106,11 +107,11 @@ const defaultEditor = function ($rootScope, $compile) {
 
           $scope.getSidebarClass = () => {
             if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.SMALL) {
-              return 'collapsible-sidebar--small';
+              return 'visEditor__collapsibleSidebar--small';
             } else if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.MEDIUM) {
-              return 'collapsible-sidebar--medium';
+              return 'visEditor__collapsibleSidebar--medium';
             } else if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.LARGE) {
-              return 'collapsible-sidebar--large';
+              return 'visEditor__collapsibleSidebar--large';
             }
           };
 
@@ -128,7 +129,7 @@ const defaultEditor = function ($rootScope, $compile) {
 
             $scope.responseValueAggs = null;
             try {
-              $scope.responseValueAggs = $scope.vis.aggs.getResponseAggs().filter(function (agg) {
+              $scope.responseValueAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
                 return _.get(agg, 'schema.group') === 'metrics';
               });
             }
@@ -142,36 +143,9 @@ const defaultEditor = function ($rootScope, $compile) {
           $scope.$watch(() => {
             return $scope.vis.getCurrentState(false);
           }, (newState) => {
-            const updateEditorStateWithChanges = (newState, oldState, editorState) => {
-              for (const prop in newState) {
-                if (newState.hasOwnProperty(prop)) {
-                  const newStateValue = newState[prop];
-                  const oldStateValue = oldState[prop];
-                  const editorStateValue = editorState[prop];
-
-                  if (typeof newStateValue === 'object') {
-                    if (editorStateValue) {
-                      // Keep traversing.
-                      return updateEditorStateWithChanges(newStateValue, oldStateValue, editorStateValue);
-                    }
-
-                    const newStateValueCopy = _.cloneDeep(newStateValue);
-                    editorState[prop] = newStateValueCopy;
-                    oldState[prop] = newStateValueCopy;
-                    lockDirty = true;
-                    return;
-                  }
-
-                  if (newStateValue !== oldStateValue) {
-                    oldState[prop] = newStateValue;
-                    editorState[prop] = newStateValue;
-                    lockDirty = true;
-                  }
-                }
-              }
-            };
-
-            updateEditorStateWithChanges(newState, $scope.oldState, $scope.state);
+            if (updateEditorStateWithChanges(newState, $scope.oldState, $scope.state)) {
+              lockDirty = true;
+            }
           }, true);
 
           // Load the default editor template, attach it to the DOM and compile it.
@@ -186,7 +160,7 @@ const defaultEditor = function ($rootScope, $compile) {
         }
 
         if (!this._handler) {
-          const visualizationEl = this.el.find('.vis-editor-canvas')[0];
+          const visualizationEl = this.el.find('.visEditor__canvas')[0];
           getVisualizeLoader().then(loader => {
             if (!visualizationEl) {
               return;

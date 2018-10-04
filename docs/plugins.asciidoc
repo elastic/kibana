@@ -69,6 +69,13 @@ If plugins were installed as a different user and the server is not starting, th
 $ chown -R kibana:kibana /path/to/kibana/optimize
 
 [float]
+=== Installing plugins while deferring optimization
+
+The majority of the time spent installing a plugin is running the optimizer.  If you're installing multiple plugins it can make sense to omit that step and only run it once.
+This can be done by providing --no-optimize to the plugin installation command. You can then either execute bin/kibana --optimize to run the optimizer,
+or it will be ran the first time Kibana is started.
+
+[float]
 === Proxy support for plugin installation
 
 Kibana supports plugin installation via a proxy. It uses the `http_proxy` and `https_proxy`

@@ -20,19 +20,23 @@
 import _ from 'lodash';
 import moment from 'moment';
 import expect from 'expect.js';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import AggParamWriterProvider from '../../agg_param_writer';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import chrome from '../../../../chrome';
 import { aggTypes } from '../../..';
 import { AggConfig } from '../../../../vis/agg_config';
 import { timefilter } from 'ui/timefilter';
+
+const config = chrome.getUiSettingsClient();
 
 describe('params', function () {
 
   let paramWriter;
   let writeInterval;
 
-  let setTimeBounds;
+  let getTimeBounds;
   let timeField;
 
   beforeEach(ngMock.module('kibana'));
@@ -43,19 +47,17 @@ describe('params', function () {
     timeField = indexPattern.timeFieldName;
 
     paramWriter = new AggParamWriter({ aggType: 'date_histogram' });
-    writeInterval = function (interval) {
-      return paramWriter.write({ interval: interval, field: timeField });
+    writeInterval = function (interval, timeRange) {
+      return paramWriter.write({ interval: interval, field: timeField, timeRange: timeRange });
     };
 
     const now = moment();
-    setTimeBounds = function (n, units) {
+    getTimeBounds = function (n, units) {
       timefilter.enableAutoRefreshSelector();
       timefilter.enableTimeRangeSelector();
-      paramWriter.vis.filters = {
-        timeRange: {
-          from: now.clone().subtract(n, units),
-          to: now.clone()
-        }
+      return {
+        from: now.clone().subtract(n, units),
+        to: now.clone()
       };
     };
   }));
@@ -72,22 +74,22 @@ describe('params', function () {
     });
 
     it('automatically picks an interval', function () {
-      setTimeBounds(15, 'm');
-      const output = writeInterval('auto');
+      const timeBounds = getTimeBounds(15, 'm');
+      const output = writeInterval('auto', timeBounds);
       expect(output.params.interval).to.be('30s');
     });
 
     it('scales up the interval if it will make too many buckets', function () {
-      setTimeBounds(30, 'm');
-      const output = writeInterval('s');
+      const timeBounds = getTimeBounds(30, 'm');
+      const output = writeInterval('s', timeBounds);
       expect(output.params.interval).to.be('10s');
       expect(output.metricScaleText).to.be('second');
       expect(output.metricScale).to.be(0.1);
     });
 
     it('does not scale down the interval', function () {
-      setTimeBounds(1, 'm');
-      const output = writeInterval('h');
+      const timeBounds = getTimeBounds(1, 'm');
+      const output = writeInterval('h', timeBounds);
       expect(output.params.interval).to.be('1h');
       expect(output.metricScaleText).to.be(undefined);
       expect(output.metricScale).to.be(undefined);
@@ -105,21 +107,21 @@ describe('params', function () {
         const typeNames = test.slice();
 
         it(typeNames.join(', ') + ' should ' + (should ? '' : 'not') + ' scale', function () {
-          setTimeBounds(1, 'y');
+          const timeBounds = getTimeBounds(1, 'y');
 
           const vis = paramWriter.vis;
           vis.aggs.splice(0);
 
-          const histoConfig = new AggConfig(vis, {
+          const histoConfig = new AggConfig(vis.aggs, {
             type: aggTypes.byName.date_histogram,
             schema: 'segment',
-            params: { interval: 's', field: timeField }
+            params: { interval: 's', field: timeField, timeRange: timeBounds }
           });
 
           vis.aggs.push(histoConfig);
 
           typeNames.forEach(function (type) {
-            vis.aggs.push(new AggConfig(vis, {
+            vis.aggs.push(new AggConfig(vis.aggs, {
               type: aggTypes.byName[type],
               schema: 'metric'
             }));
@@ -129,6 +131,30 @@ describe('params', function () {
           expect(_.has(output, 'metricScale')).to.be(should);
         });
       });
+    });
+  });
+
+  describe('time_zone', () => {
+    beforeEach(() => {
+      sinon.stub(config, 'get');
+      sinon.stub(config, 'isDefault');
+    });
+
+    it('should use the specified time_zone', () => {
+      const output = paramWriter.write({ time_zone: 'Europe/Kiev' });
+      expect(output.params).to.have.property('time_zone', 'Europe/Kiev');
+    });
+
+    it('should use the Kibana time_zone if no parameter specified', () => {
+      config.isDefault.withArgs('dateFormat:tz').returns(false);
+      config.get.withArgs('dateFormat:tz').returns('Europe/Riga');
+      const output = paramWriter.write({});
+      expect(output.params).to.have.property('time_zone', 'Europe/Riga');
+    });
+
+    afterEach(() => {
+      config.get.restore();
+      config.isDefault.restore();
     });
   });
 

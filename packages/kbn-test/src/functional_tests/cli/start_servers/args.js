@@ -18,7 +18,7 @@
  */
 
 import dedent from 'dedent';
-import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
 const options = {
   help: { desc: 'Display this menu and exit.' },
@@ -27,9 +27,8 @@ const options = {
     desc: 'Pass in a config',
   },
   esFrom: {
-    arg: '<snapshot|source>',
-    choices: ['snapshot', 'source'],
-    desc: 'Build Elasticsearch from source or run from snapshot.',
+    arg: '<snapshot|source|path>',
+    desc: 'Build Elasticsearch from source, snapshot or path to existing install dir.',
     default: 'snapshot',
   },
   'kibana-install-dir': {
@@ -54,7 +53,7 @@ export function displayHelp() {
       };
     })
     .map(option => {
-      return `--${option.usage.padEnd(28)} ${option.desc} ${option.default}`;
+      return `--${option.usage.padEnd(30)} ${option.desc} ${option.default}`;
     })
     .join(`\n      `);
 
@@ -80,10 +79,20 @@ export function processOptions(userOptions, defaultConfigPath) {
     throw new Error(`functional_tests_server: config is required`);
   }
 
+  if (!userOptions.esFrom) {
+    userOptions.esFrom = 'snapshot';
+  }
+
+  if (userOptions['kibana-install-dir']) {
+    userOptions.installDir = userOptions['kibana-install-dir'];
+    delete userOptions['kibana-install-dir'];
+  }
+
   function createLogger() {
-    const log = createToolingLog(pickLevelFromFlags(userOptions));
-    log.pipe(process.stdout);
-    return log;
+    return new ToolingLog({
+      level: pickLevelFromFlags(userOptions),
+      writeTo: process.stdout,
+    });
   }
 
   return {

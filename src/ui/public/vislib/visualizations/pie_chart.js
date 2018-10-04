@@ -370,6 +370,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
           const svg = div.append('svg')
             .attr('width', width)
             .attr('height', height)
+            .attr('focusable', 'false')
             .append('g')
             .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 

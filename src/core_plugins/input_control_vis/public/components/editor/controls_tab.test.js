@@ -19,34 +19,19 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mount, shallow } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
 import {
   ControlsTab,
 } from './controls_tab';
 
-const savedObjectsClientMock = {
-  find: () => {
-    return Promise.resolve({
-      savedObjects: [
-        {
-          id: 'indexPattern1',
-          attributes: {
-            title: 'title1'
-          }
-        }
-      ]
-    });
-  }
-};
 const indexPatternsMock = {
   get: getIndexPatternMock
 };
 const scopeMock = {
   vis: {
     API: {
-      savedObjectsClient: savedObjectsClientMock,
       indexPatterns: indexPatternsMock
     },
   },
@@ -87,7 +72,7 @@ beforeEach(() => {
 });
 
 test('renders ControlsTab', () => {
-  const component = shallow(<ControlsTab
+  const component = shallowWithIntl(<ControlsTab.WrappedComponent
     scope={scopeMock}
     editorState={scopeMock.editorState}
     stageEditorParams={stageEditorParams}
@@ -96,21 +81,9 @@ test('renders ControlsTab', () => {
 });
 
 describe('behavior', () => {
-  // Mock MutationObserver used in EuiAccordion
-  beforeAll(() => {
-    global.MutationObserver = class {
-      constructor() {}
-      disconnect() {}
-      observe() {}
-    };
-  });
-
-  afterAll(() => {
-    delete global.MutationObserver;
-  });
 
   test('add control button', () => {
-    const component = mount(<ControlsTab
+    const component = mountWithIntl(<ControlsTab.WrappedComponent
       scope={scopeMock}
       editorState={scopeMock.editorState}
       stageEditorParams={stageEditorParams}
@@ -126,7 +99,7 @@ describe('behavior', () => {
   });
 
   test('remove control button', () => {
-    const component = mount(<ControlsTab
+    const component = mountWithIntl(<ControlsTab.WrappedComponent
       scope={scopeMock}
       editorState={scopeMock.editorState}
       stageEditorParams={stageEditorParams}
@@ -151,7 +124,7 @@ describe('behavior', () => {
 
 
   test('move down control button', () => {
-    const component = mount(<ControlsTab
+    const component = mountWithIntl(<ControlsTab.WrappedComponent
       scope={scopeMock}
       editorState={scopeMock.editorState}
       stageEditorParams={stageEditorParams}
@@ -188,7 +161,7 @@ describe('behavior', () => {
   });
 
   test('move up control button', () => {
-    const component = mount(<ControlsTab
+    const component = mountWithIntl(<ControlsTab.WrappedComponent
       scope={scopeMock}
       editorState={scopeMock.editorState}
       stageEditorParams={stageEditorParams}

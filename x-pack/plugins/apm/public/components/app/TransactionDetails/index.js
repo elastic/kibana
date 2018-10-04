@@ -16,6 +16,7 @@ function mapStateToProps(state = {}) {
 }
 
 const mapDispatchToProps = {};
-export default connect(mapStateToProps, mapDispatchToProps)(
-  TransactionsDetails
-);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TransactionsDetails);

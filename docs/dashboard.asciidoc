@@ -119,4 +119,4 @@ TIP: You can create a link to a dashboard by title by doing this: +
 
 TIP: When sharing a link to a dashboard snapshot, use the *Short URL*. Snapshot
 URLs are long and can be problematic for Internet Explorer and other
-tools.  To create a short URL, you must have write access to `.kibana`.
+tools.  To create a short URL, you must have write access to {kib}.

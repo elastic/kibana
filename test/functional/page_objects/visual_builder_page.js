@@ -24,6 +24,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
+  const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   class VisualBuilderPage {
@@ -63,7 +64,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
-      await input.session.pressKeys([Keys.CONTROL, 'a']); // Select all text
+      if (process.platform === 'darwin') {
+        await input.session.pressKeys([Keys.COMMAND, 'a']); // Select all Mac
+      } else {
+        await input.session.pressKeys([Keys.CONTROL, 'a']); // Select all for everything else
+      }
       await input.session.pressKeys(Keys.NULL); // Release modifier keys
       await input.session.pressKeys(Keys.BACKSPACE); // Delete all content
       await input.type(markdown);
@@ -119,8 +124,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       return await gaugeCount.getVisibleText();
     }
 
-    async clickTopN()
-    {
+    async clickTopN() {
       await testSubjects.click('top_nTsvbTypeBtn');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -154,7 +158,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async selectAggType(value, nth = 0) {
       const elements = await testSubjects.findAll('aggSelector');
-      await PageObjects.visualize.setComboBoxElement(elements[nth], value);
+      await comboBox.setElement(elements[nth], value);
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -169,14 +173,13 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       const varNameInput = await elements[nth].findByCssSelector('.vis_editor__calc_vars-name input');
       await varNameInput.type(name);
       const metricSelectWrapper = await elements[nth].findByCssSelector('.vis_editor__calc_vars-var');
-      await PageObjects.visualize.setComboBoxElement(metricSelectWrapper, metric);
+      await comboBox.setElement(metricSelectWrapper, metric);
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
 
     async selectGroupByField(fieldName) {
-      const element = await testSubjects.find('groupByField');
-      await PageObjects.visualize.setComboBoxElement(element, fieldName);
+      await comboBox.set('groupByField', fieldName);
     }
 
     async setLabelValue(value) {

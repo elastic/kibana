@@ -11,7 +11,9 @@ import React, {
 } from 'react';
 
 import { sortBy } from 'lodash';
+import moment from 'moment';
 
+import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../job_message_icon';
@@ -24,6 +26,7 @@ import {
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
+const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 export class JobsList extends Component {
   constructor(props) {
@@ -108,7 +111,7 @@ export class JobsList extends Component {
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
             iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
-            aria-label={this.state.itemIdToExpandedRowMap[item.id] ? 'Hide details' : 'Show details'}
+            aria-label={`${this.state.itemIdToExpandedRowMap[item.id] ? 'Hide' : 'Show'} details for ${item.id}`}
             data-row-id={item.id}
           />
         )
@@ -136,6 +139,8 @@ export class JobsList extends Component {
         name: 'Processed records',
         sortable: true,
         truncateText: false,
+        dataType: 'number',
+        render: count => toLocaleString(count)
       }, {
         field: 'memory_status',
         name: 'Memory status',
@@ -154,11 +159,13 @@ export class JobsList extends Component {
       }, {
         name: 'Latest timestamp',
         truncateText: false,
-        field: 'latestTimeStampUnix',
+        field: 'latestTimeStampSortValue',
         sortable: true,
         render: (time, item) => (
           <span className="euiTableCellContent__text">
-            { item.latestTimeStamp.string }
+            {
+              (item.latestTimestampMs === undefined) ? '' : moment(item.latestTimestampMs).format(TIME_FORMAT)
+            }
           </span>
         )
       }, {

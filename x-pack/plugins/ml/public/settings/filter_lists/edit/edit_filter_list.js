@@ -30,17 +30,21 @@ import { toastNotifications } from 'ui/notify';
 
 import { EditFilterListHeader } from './header';
 import { EditFilterListToolbar } from './toolbar';
-import { ItemsGrid } from 'plugins/ml/components/items_grid';
+import { ItemsGrid } from '../../../components/items_grid';
 import {
   isValidFilterListId,
   saveFilterList
 } from './utils';
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { ml } from '../../../services/ml_api_service';
 
 const DEFAULT_ITEMS_PER_PAGE = 50;
 
 // Returns the list of items that match the query entered in the EuiSearchBar.
 function getMatchingFilterItems(searchBarQuery, items) {
+  if (items === undefined) {
+    return [];
+  }
+
   if (searchBarQuery === undefined) {
     return [...items];
   }
@@ -116,7 +120,7 @@ export class EditFilterList extends Component {
 
       return {
         description: loadedFilter.description,
-        items: [...loadedFilter.items],
+        items: (loadedFilter.items !== undefined) ? [...loadedFilter.items] : [],
         matchingItems,
         selectedItems: [],
         loadedFilter,

@@ -37,6 +37,8 @@ export const UI_EXPORT_DEFAULTS = {
 
   translationPaths: [],
 
+  styleSheetPaths: [],
+
   appExtensions: {
     fieldFormatEditors: [
       'ui/field_editor/components/field_format_editor/register'
@@ -46,9 +48,9 @@ export const UI_EXPORT_DEFAULTS = {
       'ui/vis/request_handlers/none'
     ],
     visResponseHandlers: [
-      'ui/vis/response_handlers/basic',
+      'ui/vis/response_handlers/vislib',
       'ui/vis/response_handlers/none',
-      'ui/vis/response_handlers/tabify',
+      'ui/vis/response_handlers/legacy',
     ],
     visEditorTypes: [
       'ui/vis/editors/default/default',

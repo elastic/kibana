@@ -60,6 +60,7 @@ class List extends Component {
       {
         field: 'name',
         name: 'Name',
+        width: '50%',
         sortable: true,
         render: transactionName => {
           const transactionUrl = `${serviceName}/transactions/${legacyEncodeURIComponent(

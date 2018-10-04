@@ -21,19 +21,9 @@ import {
 } from '@elastic/eui';
 
 import { ScopeExpression } from './scope_expression';
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
+import { checkPermission } from '../../privilege/check_privilege';
 import { getScopeFieldDefaults } from './utils';
 
-
-function getScopeText(partitioningFieldNames) {
-  if (partitioningFieldNames.length === 1) {
-    return `Specify whether the rule should only apply if the ${partitioningFieldNames[0]} is ` +
-      `in a chosen list of values.`;
-  } else {
-    return `Specify whether the rule should only apply if the ${partitioningFieldNames.join(' or ')} are ` +
-    `in a chosen list of values.`;
-  }
-}
 
 function NoFilterListsCallOut() {
   return (
@@ -109,7 +99,7 @@ export function ScopeSection({
       <EuiSpacer size="s" />
       <EuiCheckbox
         id="enable_scope_checkbox"
-        label={getScopeText(partitioningFieldNames)}
+        label="Add a filter list to limit where the rule applies."
         checked={isEnabled}
         onChange={onEnabledChange}
       />

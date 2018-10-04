@@ -21,7 +21,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...reportingApiConfig.kbnTestServer.serverArgs,
         `--xpack.reporting.capture.browser.type=chromium`,
-        `--logging.verbose=true`,
+        `--xpack.spaces.enabled=false`,
       ],
     },
   };

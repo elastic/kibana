@@ -21,6 +21,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...functionalConfig.kbnTestServer.serverArgs,
         `--xpack.reporting.capture.browser.type=phantom`,
+        `--logging.verbose=true`,
       ],
     },
   };

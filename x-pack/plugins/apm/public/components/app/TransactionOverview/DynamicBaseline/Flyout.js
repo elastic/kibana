@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { toastNotifications } from 'ui/notify';
 import { startMlJob } from '../../../../services/rest/ml';
 import { getAPMIndexPattern } from '../../../../services/rest/savedObjects';
 import {
@@ -15,17 +16,15 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiGlobalToastList,
   EuiText,
   EuiTitle,
   EuiSpacer,
   EuiBetaBadge
 } from '@elastic/eui';
-import { getMlJobUrl } from '../../../../utils/url';
+import { KibanaLink, ViewMLJob } from '../../../../utils/url';
 
 export default class DynamicBaselineFlyout extends Component {
   state = {
-    toasts: [],
     isLoading: false,
     hasIndexPattern: null
   };
@@ -59,52 +58,43 @@ export default class DynamicBaselineFlyout extends Component {
 
   addErrorToast = () => {
     const { serviceName, transactionType, location } = this.props;
-    this.setState({
-      toasts: [
-        {
-          id: 2,
-          title: 'Job already exists',
-          color: 'warning',
-          text: (
-            <p>
-              There&apos;s already a job running for anomaly detection on{' '}
-              {serviceName} ({transactionType}).{' '}
-              <a href={getMlJobUrl(serviceName, transactionType, location)}>
-                View existing job
-              </a>
-            </p>
-          )
-        }
-      ]
+    toastNotifications.addWarning({
+      title: 'Job already exists',
+      text: (
+        <p>
+          There&apos;s already a job running for anomaly detection on{' '}
+          {serviceName} ({transactionType}
+          ).{' '}
+          <ViewMLJob
+            serviceName={serviceName}
+            transactionType={transactionType}
+            location={location}
+          >
+            View existing job
+          </ViewMLJob>
+        </p>
+      )
     });
   };
 
   addSuccessToast = () => {
     const { serviceName, transactionType, location } = this.props;
-    this.setState({
-      toasts: [
-        {
-          id: 1,
-          title: 'Job successfully created',
-          color: 'success',
-          text: (
-            <p>
-              The analysis is now running for {serviceName} ({transactionType}).
-              It might take a while before results are added to the response
-              times graph.{' '}
-              <a href={getMlJobUrl(serviceName, transactionType, location)}>
-                View job
-              </a>
-            </p>
-          )
-        }
-      ]
-    });
-  };
-
-  removeToasts = () => {
-    this.setState({
-      toasts: []
+    toastNotifications.addSuccess({
+      title: 'Job successfully created',
+      text: (
+        <p>
+          The analysis is now running for {serviceName} ({transactionType}
+          ). It might take a while before results are added to the response
+          times graph.{' '}
+          <ViewMLJob
+            serviceName={serviceName}
+            transactionType={transactionType}
+            location={location}
+          >
+            View job
+          </ViewMLJob>
+        </p>
+      )
     });
   };
 
@@ -117,9 +107,13 @@ export default class DynamicBaselineFlyout extends Component {
       serviceName,
       transactionType
     } = this.props;
-    const { isLoading, hasIndexPattern, toasts } = this.state;
+    const { isLoading, hasIndexPattern } = this.state;
 
-    const flyout = (
+    if (!isOpen) {
+      return null;
+    }
+
+    return (
       <EuiFlyout onClose={onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
@@ -140,12 +134,16 @@ export default class DynamicBaselineFlyout extends Component {
                 iconType="check"
               >
                 <p>
-                  There is currently a job running for {serviceName} ({
-                    transactionType
-                  }).{' '}
-                  <a href={getMlJobUrl(serviceName, transactionType, location)}>
+                  There is currently a job running for {serviceName} (
+                  {transactionType}
+                  ).{' '}
+                  <ViewMLJob
+                    serviceName={serviceName}
+                    transactionType={transactionType}
+                    location={location}
+                  >
                     View existing job
-                  </a>
+                  </ViewMLJob>
                 </p>
               </EuiCallOut>
               <EuiSpacer size="m" />
@@ -159,9 +157,12 @@ export default class DynamicBaselineFlyout extends Component {
                   <span>
                     No APM index pattern available. To create a job, please
                     import the APM index pattern via the{' '}
-                    <a href="/app/kibana#/home/tutorial/apm">
+                    <KibanaLink
+                      pathname={'/app/kibana'}
+                      hash={`/home/tutorial/apm`}
+                    >
                       Setup Instructions
-                    </a>
+                    </KibanaLink>
                   </span>
                 }
                 color="warning"
@@ -187,9 +188,11 @@ export default class DynamicBaselineFlyout extends Component {
               Jobs can be created per transaction type and based on the average
               response time. Once a job is created, you can manage it and see
               more details in the{' '}
-              <a href="/app/ml">Machine Learning jobs management page</a>. It
-              might take some time for the job to calculate the results. Please
-              refresh the graph a few minutes after creating the job.
+              <KibanaLink pathname={'/app/ml'}>
+                Machine Learning jobs management page
+              </KibanaLink>
+              . It might take some time for the job to calculate the results.
+              Please refresh the graph a few minutes after creating the job.
             </p>
             <p>
               {/* <a href="#">Learn more</a> about the Machine Learning integration. */}
@@ -211,17 +214,6 @@ export default class DynamicBaselineFlyout extends Component {
           </EuiButton>
         </EuiFlyoutFooter>
       </EuiFlyout>
-    );
-
-    return (
-      <React.Fragment>
-        {isOpen && flyout}
-        <EuiGlobalToastList
-          toasts={toasts}
-          dismissToast={this.removeToasts}
-          toastLifeTimeMs={5000}
-        />
-      </React.Fragment>
     );
   }
 }

@@ -17,31 +17,38 @@
  * under the License.
  */
 
-import { createEsTestCluster } from '@kbn/test';
-import { createToolingLog } from '@kbn/dev-utils';
-import * as kbnTestServer from '../../../../../test_utils/kbn_server';
+import { startTestServers } from '../../../../../test_utils/kbn_server';
 
 let kbnServer;
 let services;
-let es;
+let servers;
 
 export async function startServers() {
-  const log = createToolingLog('debug');
-  log.pipe(process.stdout);
-  log.indent(6);
+  servers = await startTestServers({
+    adjustTimeout: (t) => this.timeout(t),
+    settings: {
+      uiSettings: {
+        overrides: {
+          foo: 'bar',
+        }
+      },
+    }
+  });
+  kbnServer = servers.kbnServer;
+}
 
-  log.info('starting elasticsearch');
-  log.indent(4);
-
-  es = createEsTestCluster({ log });
-  this.timeout(es.getStartTimeout());
-
-  log.indent(-4);
-  await es.start();
-
-  kbnServer = kbnTestServer.createServerWithCorePlugins();
-  await kbnServer.ready();
-  await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+async function deleteKibanaIndex(callCluster) {
+  const kibanaIndices = await callCluster('cat.indices', { index: '.kibana*', format: 'json' });
+  const indexNames = kibanaIndices.map(x => x.index);
+  if (!indexNames.length) {
+    return;
+  }
+  await callCluster('indices.putSettings', {
+    index: indexNames,
+    body: { index: { blocks: { read_only: false } } },
+  });
+  await callCluster('indices.delete', { index: indexNames });
+  return indexNames;
 }
 
 export function getServices() {
@@ -49,7 +56,7 @@ export function getServices() {
     return services;
   }
 
-  const callCluster = es.getCallCluster();
+  const callCluster = servers.es.getCallCluster();
 
   const savedObjects = kbnServer.server.savedObjects;
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient();
@@ -63,6 +70,7 @@ export function getServices() {
     callCluster,
     savedObjectsClient,
     uiSettings,
+    deleteKibanaIndex,
   };
 
   return services;
@@ -70,14 +78,8 @@ export function getServices() {
 
 export async function stopServers() {
   services = null;
-
-  if (kbnServer) {
-    await kbnServer.close();
-    kbnServer = null;
-  }
-
-  if (es) {
-    await es.cleanup();
-    es = null;
+  kbnServer = null;
+  if (servers) {
+    await servers.stop();
   }
 }

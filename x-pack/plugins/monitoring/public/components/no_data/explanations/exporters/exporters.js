@@ -18,7 +18,7 @@ export function ExplainExporters({ context, property, data }) {
     <Fragment>
       <ChangesNeeded />
       <EuiHorizontalRule size="half" />
-      <EuiText className="noData__alignLeft">
+      <EuiText className="eui-textLeft">
         <p>
           We checked the <EuiCode>{context}</EuiCode> settings for{' '}
           <EuiCode>{property}</EuiCode>, and found the reason:{' '}

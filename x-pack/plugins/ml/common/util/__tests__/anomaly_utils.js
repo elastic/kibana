@@ -11,7 +11,7 @@ import {
   getSeverity,
   getSeverityWithLow,
   getSeverityColor,
-  labelDuplicateDetectorDescriptions,
+  getMultiBucketImpactLabel,
   getEntityFieldName,
   getEntityFieldValue,
   showActualForFunction,
@@ -282,22 +282,33 @@ describe('ML - anomaly utils', () => {
 
   });
 
-  describe('labelDuplicateDetectorDescriptions', () => {
-    const detectorsByJob = {
-      'job1': ['detector1', 'detector2'],
-      'job2': ['detector1', 'detector3']
-    };
-    const result = labelDuplicateDetectorDescriptions(detectorsByJob);
+  describe('getMultiBucketImpactLabel', () => {
 
-    it('appends the job ID for detectors with identical descriptions to those in other jobs', () => {
-      expect(result.job1[0]).to.be('detector1 (job1)');
-      expect(result.job2[0]).to.be('detector1 (job2)');
+    it('returns high for 4 <= score <= 5', () => {
+      expect(getMultiBucketImpactLabel(4)).to.be('high');
+      expect(getMultiBucketImpactLabel(5)).to.be('high');
     });
 
-    it('leaves description unchanged for detectors with different descriptions to those in other jobs', () => {
-      expect(result.job1[1]).to.be('detector2');
-      expect(result.job2[1]).to.be('detector3');
+    it('returns medium for 3 <= score < 4', () => {
+      expect(getMultiBucketImpactLabel(3)).to.be('medium');
+      expect(getMultiBucketImpactLabel(3.99)).to.be('medium');
     });
+
+    it('returns low for 1 <= score < 3', () => {
+      expect(getMultiBucketImpactLabel(1)).to.be('low');
+      expect(getMultiBucketImpactLabel(2.99)).to.be('low');
+    });
+
+    it('returns none for -5 <= score < 1', () => {
+      expect(getMultiBucketImpactLabel(-5)).to.be('none');
+      expect(getMultiBucketImpactLabel(0.99)).to.be('none');
+    });
+
+    it('returns expected label when impact outside normal bounds', () => {
+      expect(getMultiBucketImpactLabel(10)).to.be('high');
+      expect(getMultiBucketImpactLabel(-10)).to.be('none');
+    });
+
   });
 
   describe('getEntityFieldName', () => {

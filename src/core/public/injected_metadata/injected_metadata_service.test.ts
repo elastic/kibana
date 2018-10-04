@@ -19,23 +19,27 @@
 
 import { InjectedMetadataService } from './injected_metadata_service';
 
-describe('#start()', () => {
-  it('deeply freezes its injectedMetadata param', () => {
-    const params = {
-      injectedMetadata: { foo: true } as any,
-    };
+describe('#getKibanaVersion', () => {
+  it('returns version from injectedMetadata', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        version: 'foo',
+      },
+    } as any);
 
-    const injectedMetadata = new InjectedMetadataService(params);
+    expect(injectedMetadata.getKibanaVersion()).toBe('foo');
+  });
+});
 
-    expect(() => {
-      params.injectedMetadata.foo = false;
-    }).not.toThrowError();
+describe('#getKibanaBuildNumber', () => {
+  it('returns buildNumber from injectedMetadata', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        buildNumber: 'foo',
+      },
+    } as any);
 
-    injectedMetadata.start();
-
-    expect(() => {
-      params.injectedMetadata.foo = true;
-    }).toThrowError(`read only property 'foo'`);
+    expect(injectedMetadata.getKibanaBuildNumber()).toBe('foo');
   });
 });
 
@@ -44,10 +48,105 @@ describe('start.getLegacyMetadata()', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
         legacyMetadata: 'foo',
-      } as any,
-    });
+      },
+    } as any);
 
     const contract = injectedMetadata.start();
     expect(contract.getLegacyMetadata()).toBe('foo');
+  });
+
+  it('exposes frozen version of legacyMetadata', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        legacyMetadata: {
+          foo: true,
+        },
+      },
+    } as any);
+
+    const legacyMetadata = injectedMetadata.start().getLegacyMetadata();
+    expect(legacyMetadata).toEqual({
+      foo: true,
+    });
+    expect(() => {
+      // @ts-ignore TS knows this shouldn't be possible
+      legacyMetadata.foo = false;
+    }).toThrowError();
+  });
+});
+
+describe('start.getInjectedVar()', () => {
+  it('returns values from injectedMetadata.vars', () => {
+    const start = new InjectedMetadataService({
+      injectedMetadata: {
+        vars: {
+          foo: {
+            bar: '1',
+          },
+          'baz:box': {
+            foo: 2,
+          },
+        },
+      },
+    } as any).start();
+
+    expect(start.getInjectedVar('foo')).toEqual({
+      bar: '1',
+    });
+    expect(start.getInjectedVar('foo.bar')).toBe('1');
+    expect(start.getInjectedVar('baz:box')).toEqual({
+      foo: 2,
+    });
+    expect(start.getInjectedVar('')).toBe(undefined);
+  });
+
+  it('returns read-only values', () => {
+    const start = new InjectedMetadataService({
+      injectedMetadata: {
+        vars: {
+          foo: {
+            bar: 1,
+          },
+        },
+      },
+    } as any).start();
+
+    const foo: any = start.getInjectedVar('foo');
+    expect(() => {
+      foo.bar = 2;
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot assign to read only property 'bar' of object '#<Object>'"`
+    );
+    expect(() => {
+      foo.newProp = 2;
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot add property newProp, object is not extensible"`
+    );
+  });
+});
+
+describe('start.getInjectedVars()', () => {
+  it('returns all injected vars, readonly', () => {
+    const start = new InjectedMetadataService({
+      injectedMetadata: {
+        vars: {
+          foo: {
+            bar: 1,
+          },
+        },
+      },
+    } as any).start();
+
+    const vars: any = start.getInjectedVars();
+    expect(() => {
+      vars.foo = 2;
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot assign to read only property 'foo' of object '#<Object>'"`
+    );
+    expect(() => {
+      vars.newProp = 2;
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot add property newProp, object is not extensible"`
+    );
   });
 });

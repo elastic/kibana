@@ -68,6 +68,7 @@
     </label>
     <div class="kuiSideBarFormRow__control">
       <input
+        data-test-subj="heatmapOptionsColorsNumberInput"
         id="colorsNumber"
         class="kuiSideBarInput"
         ng-model="editorState.params.colorsNumber"
@@ -98,6 +99,7 @@
         </span>
       </div>
       <input
+        data-test-subj="heatmapEnableCustomRanges"
         aria-label="Enable custom ranges"
         ng-model="editorState.params.setColorRange"
         type="checkbox"
@@ -114,7 +116,10 @@
       class="kuiSideBarCollapsibleSection"
     >
       <div class="kuiSideBarSection">
-        <table class="vis-editor-agg-editor-ranges form-group" ng-show="editorState.params.colorsRange.length">
+        <table
+          data-test-subj="heatmapCustomRangesTable"
+          class="visEditorAgg__rangesTable form-group"
+          ng-show="editorState.params.colorsRange.length">
           <tr>
             <th scope="col">
               <label id="heatmapCustomRangeFrom">From</label>
@@ -167,6 +172,7 @@
         <button
           ng-click="addRange()"
           class="kuiButton kuiButton--primary kuiButton--fullWidth"
+          data-test-subj="heatmapAddRangeButton"
         >
           Add Range
         </button>

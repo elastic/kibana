@@ -13,34 +13,25 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
-  EuiDescriptionList,
   EuiLink,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
+import { DetectorDescriptionList } from '../components/detector_description_list';
 import { RuleActionPanel } from './rule_action_panel';
 
 
 export function SelectRuleAction({
   job,
   anomaly,
-  detectorIndex,
   setEditRuleIndex,
-  deleteRuleAtIndex }) {
+  updateRuleAtIndex,
+  deleteRuleAtIndex,
+  addItemToFilterList }) {
 
+  const detectorIndex = anomaly.detectorIndex;
   const detector = job.analysis_config.detectors[detectorIndex];
-  const descriptionListItems = [
-    {
-      title: 'job ID',
-      description: job.job_id,
-    },
-    {
-      title: 'detector',
-      description: detector.detector_description,
-    }
-  ];
-
   const rules = detector.custom_rules || [];
   let ruleActionPanels;
   if (rules.length > 0) {
@@ -49,11 +40,12 @@ export function SelectRuleAction({
         <React.Fragment key={`rule_panel_${index}`}>
           <RuleActionPanel
             job={job}
-            detectorIndex={detectorIndex}
             ruleIndex={index}
             anomaly={anomaly}
             setEditRuleIndex={setEditRuleIndex}
+            updateRuleAtIndex={updateRuleAtIndex}
             deleteRuleAtIndex={deleteRuleAtIndex}
+            addItemToFilterList={addItemToFilterList}
           />
           <EuiSpacer size="l"/>
         </React.Fragment>
@@ -62,13 +54,13 @@ export function SelectRuleAction({
   }
 
   return (
-    <React.Fragment>
+    <div className="select-rule-action">
       {rules.length > 0 &&
         <React.Fragment>
-          <EuiDescriptionList
-            className="select-rule-description-list"
-            type="column"
-            listItems={descriptionListItems}
+          <DetectorDescriptionList
+            job={job}
+            detector={detector}
+            anomaly={anomaly}
           />
           <EuiSpacer size="m" />
           {ruleActionPanels}
@@ -81,16 +73,17 @@ export function SelectRuleAction({
       <EuiLink
         onClick={() => setEditRuleIndex(rules.length)}
       >
-        create a new rule
+        create a rule
       </EuiLink>
-    </React.Fragment>
+    </div>
   );
 
 }
 SelectRuleAction.propTypes = {
   job: PropTypes.object.isRequired,
   anomaly: PropTypes.object.isRequired,
-  detectorIndex: PropTypes.number.isRequired,
   setEditRuleIndex: PropTypes.func.isRequired,
+  updateRuleAtIndex: PropTypes.func.isRequired,
   deleteRuleAtIndex: PropTypes.func.isRequired,
+  addItemToFilterList: PropTypes.func.isRequired,
 };

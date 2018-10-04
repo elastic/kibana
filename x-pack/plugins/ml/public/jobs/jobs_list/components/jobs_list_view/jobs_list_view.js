@@ -65,9 +65,10 @@ export class JobsListView extends Component {
   }
 
   initAutoRefresh() {
-    const { value, pause } = timefilter.getRefreshInterval();
-    if (pause === false && value === 0) {
-      // if the auto refresher isn't set, set it to the default
+    const { value } = timefilter.getRefreshInterval();
+    if (value === 0) {
+      // the auto refresher starts in an off state
+      // so switch it on and set the interval to 30s
       timefilter.setRefreshInterval({
         pause: false,
         value: DEFAULT_REFRESH_INTERVAL_MS
@@ -239,7 +240,7 @@ export class JobsListView extends Component {
               fullJobsList[job.id] = job.fullJob;
               delete job.fullJob;
             }
-            job.latestTimeStampUnix = job.latestTimeStamp.unix;
+            job.latestTimeStampSortValue = (job.latestTimeStampMs || 0);
             return job;
           });
           const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
@@ -259,11 +260,13 @@ export class JobsListView extends Component {
   }
 
   render() {
+    const jobIds = this.state.jobsSummaryList.map(j => j.id);
     return (
       <div>
         <div className="actions-bar">
           <MultiJobActions
             selectedJobs={this.state.selectedJobs}
+            allJobIds={jobIds}
             showStartDatafeedModal={this.showStartDatafeedModal}
             showDeleteJobModal={this.showDeleteJobModal}
             refreshJobs={() => this.refreshJobSummaryList(true)}
@@ -286,6 +289,7 @@ export class JobsListView extends Component {
           setShowFunction={this.setShowEditJobFlyoutFunction}
           unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
           refreshJobs={() => this.refreshJobSummaryList(true)}
+          allJobIds={jobIds}
         />
         <DeleteJobModal
           setShowFunction={this.setShowDeleteJobModalFunction}

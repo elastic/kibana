@@ -108,7 +108,7 @@ export class DashboardCloneModal extends React.Component {
       <EuiOverlayMask>
         <EuiModal
           data-test-subj="dashboardCloneModal"
-          className="dashboardModal"
+          className="dshCloneModal"
           onClose={this.props.onClose}
         >
           <EuiModalHeader>

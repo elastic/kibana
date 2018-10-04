@@ -2,8 +2,10 @@
 
 exports[`ScriptingHelpFlyout should render normally 1`] = `
 <EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
   data-test-subj="scriptedFieldsHelpFlyout"
   hideCloseButton={false}
+  maxWidth={false}
   onClose={[Function]}
   ownFocus={false}
   size="m"
@@ -32,7 +34,6 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
               indexPattern={Object {}}
               lang="painless"
               name="myScriptedField"
-              script={undefined}
             />,
             "data-test-subj": "testTab",
             "id": "test",

@@ -34,9 +34,9 @@ installDir="$PARENT_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
-
+export TEST_ES_FROM=${TEST_ES_FROM:-source}
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
-xvfb-run node scripts/functional_tests --bail --kibana-install-dir "$installDir" --esFrom=source
+xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir"
 echo ""
 echo ""

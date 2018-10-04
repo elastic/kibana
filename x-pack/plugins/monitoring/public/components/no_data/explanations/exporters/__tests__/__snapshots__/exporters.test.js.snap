@@ -22,7 +22,7 @@ Array [
     class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
   />,
   <div
-    class="euiText noData__alignLeft"
+    class="euiText eui-textLeft"
   >
     <p>
       We checked the 

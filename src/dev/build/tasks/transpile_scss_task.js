@@ -20,24 +20,25 @@
 import { toArray } from 'rxjs/operators';
 import { buildAll } from '../../../server/sass/build_all';
 import { findPluginSpecs } from '../../../plugin_discovery/find_plugin_specs';
+import { collectUiExports } from '../../../ui/ui_exports/collect_ui_exports';
 
 export const TranspileScssTask = {
   description: 'Transpiling SCSS to CSS',
 
   async run(config, log, build) {
     const scanDirs = [ build.resolvePath('src/core_plugins') ];
-    const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths: [] } });
+    const paths = [ build.resolvePath('node_modules/x-pack') ];
+
+    const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths } });
     const enabledPlugins = await spec$.pipe(toArray()).toPromise();
+    const uiExports = collectUiExports(enabledPlugins);
 
-    function onSuccess(builder) {
-      log.info(`Compiled SCSS: ${builder.source}`);
+    try {
+      const bundles = await buildAll(uiExports.styleSheetPaths);
+      bundles.forEach(bundle => log.info(`Compiled SCSS: ${bundle.source}`));
+    } catch (error) {
+      const { message, line, file } = error;
+      throw new Error(`${message} on line ${line} of ${file}`);
     }
-
-    function onError(builder, e) {
-      log.error(`Compiling SCSS failed: ${builder.source}`);
-      throw e;
-    }
-
-    await buildAll(enabledPlugins, { onSuccess, onError });
   }
 };

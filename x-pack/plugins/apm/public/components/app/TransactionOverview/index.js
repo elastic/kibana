@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import TransactionOverview from './view';
 import { getUrlParams } from '../../../store/urlParams';
-import { hasDynamicBaseline } from '../../../store/reactReduxRequest/overviewCharts';
+import { hasDynamicBaseline } from '../../../store/reactReduxRequest/transactionOverviewCharts';
 import { getLicense } from '../../../store/reactReduxRequest/license';
 
 function mapStateToProps(state = {}) {
@@ -21,6 +21,7 @@ function mapStateToProps(state = {}) {
 
 const mapDispatchToProps = {};
 
-export default connect(mapStateToProps, mapDispatchToProps)(
-  TransactionOverview
-);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TransactionOverview);

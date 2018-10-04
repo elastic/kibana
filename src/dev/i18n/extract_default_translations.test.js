@@ -17,29 +17,62 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import fs from 'fs';
-import { promisify } from 'util';
+import path from 'path';
 
-import { extractDefaultTranslations } from './extract_default_translations';
+import {
+  extractMessagesFromPathToMap,
+  validateMessageNamespace,
+} from './extract_default_translations';
 
-const readFileAsync = promisify(fs.readFile);
-const removeDirAsync = promisify(fs.rmdir);
-const unlinkAsync = promisify(fs.unlink);
+const fixturesPath = path.resolve(__dirname, '__fixtures__', 'extract_default_translations');
+const pluginsPaths = [
+  path.join(fixturesPath, 'test_plugin_1'),
+  path.join(fixturesPath, 'test_plugin_2'),
+  path.join(fixturesPath, 'test_plugin_3'),
+];
 
-const PLUGIN_PATH = resolve(__dirname, '__fixtures__', 'test_plugin');
+jest.mock('../../../.i18nrc.json', () => ({
+  paths: {
+    plugin_1: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_1',
+    plugin_2: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2',
+    plugin_3: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3',
+  },
+  exclude: [],
+}));
 
 describe('dev/i18n/extract_default_translations', () => {
-  it('injects default formats into en.json', async () => {
-    await extractDefaultTranslations(PLUGIN_PATH);
+  test('extracts messages from path to map', async () => {
+    const [pluginPath] = pluginsPaths;
+    const resultMap = new Map();
 
-    const extractedJSONBuffer = await readFileAsync(
-      resolve(PLUGIN_PATH, 'translations', 'en.json')
+    await extractMessagesFromPathToMap(pluginPath, resultMap);
+
+    expect([...resultMap].sort()).toMatchSnapshot();
+  });
+
+  test('throws on id collision', async () => {
+    const [, , pluginPath] = pluginsPaths;
+
+    await expect(
+      extractMessagesFromPathToMap(pluginPath, new Map())
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('validates message namespace', () => {
+    const id = 'plugin_2.message-id';
+    const filePath = path.resolve(
+      __dirname,
+      '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
+    expect(() => validateMessageNamespace(id, filePath)).not.toThrow();
+  });
 
-    await unlinkAsync(resolve(PLUGIN_PATH, 'translations', 'en.json'));
-    await removeDirAsync(resolve(PLUGIN_PATH, 'translations'));
-
-    expect(extractedJSONBuffer.toString()).toMatchSnapshot();
+  test('throws on wrong message namespace', () => {
+    const id = 'wrong_plugin_namespace.message-id';
+    const filePath = path.resolve(
+      __dirname,
+      '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
+    );
+    expect(() => validateMessageNamespace(id, filePath)).toThrowErrorMatchingSnapshot();
   });
 });

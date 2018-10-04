@@ -17,27 +17,39 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function apacheLogsSpecProvider() {
+export function apacheLogsSpecProvider(server, context) {
   const moduleName = 'apache2';
   const geoipRequired = true;
   const uaRequired = true;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'apacheLogs',
-    name: 'Apache logs',
+    name: i18n.translate('kbn.server.tutorials.apacheLogs.nameTitle', {
+      defaultMessage: 'Apache logs',
+    }),
     category: TUTORIAL_CATEGORY.LOGGING,
-    shortDescription: 'Collect and parse access and error logs created by the Apache HTTP server.',
-    longDescription: 'The apache2 Filebeat module parses access and error logs created by the Apache 2 HTTP server.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-apache2.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.apacheLogs.shortDescription', {
+      defaultMessage: 'Collect and parse access and error logs created by the Apache HTTP server.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.apacheLogs.longDescription', {
+      defaultMessage: 'The apache2 Filebeat module parses access and error logs created by the Apache 2 HTTP server. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-apache2.html',
+      },
+    }),
     euiIconType: 'logoApache',
     artifacts: {
       dashboards: [
         {
           id: 'Filebeat-Apache2-Dashboard',
-          linkLabel: 'Apache2 logs dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.apacheLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Apache2 logs dashboard',
+          }),
           isOverview: true
         }
       ],
@@ -47,7 +59,7 @@ export function apacheLogsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apache_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

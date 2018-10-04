@@ -33,6 +33,7 @@ import { EmbeddedVisualizeHandler } from '../embedded_visualize_handler';
 import { Inspector } from '../../../inspector/inspector';
 import { dispatchRenderComplete } from '../../../render_complete';
 import { VisualizeDataLoader } from '../visualize_data_loader';
+import { PersistedState } from '../../../persisted_state';
 
 describe('visualize loader', () => {
 
@@ -41,6 +42,7 @@ describe('visualize loader', () => {
   let $rootScope;
   let loader;
   let mockedSavedObject;
+  let sandbox;
 
   function createSavedObject() {
     return {
@@ -99,14 +101,22 @@ describe('visualize loader', () => {
 
     // Setup savedObject
     mockedSavedObject = createSavedObject();
+
+    sandbox = sinon.sandbox.create();
     // Mock savedVisualizations.get to return 'mockedSavedObject' when id is 'exists'
-    sinon.stub(savedVisualizations, 'get').callsFake((id) =>
+    sandbox.stub(savedVisualizations, 'get').callsFake((id) =>
       id === 'exists' ? Promise.resolve(mockedSavedObject) : Promise.reject()
     );
   }));
   setupAndTeardownInjectorStub();
   beforeEach(async () => {
     loader = await getVisualizeLoader();
+  });
+
+  afterEach(() => {
+    if (sandbox) {
+      sandbox.restore();
+    }
   });
 
   describe('getVisualizeLoader', () => {
@@ -175,12 +185,6 @@ describe('visualize loader', () => {
         expect(vis.attr('data-foo')).to.be('');
         expect(vis.attr('data-with-dash')).to.be('value');
       });
-
-      it('should hide spy panel control by default', () => {
-        const vis = embedWithParams({});
-        expect(vis.find('[data-test-subj="spyToggleButton"]').length).to.be(0);
-      });
-
     });
 
     describe('embedVisualizationWithId', () => {
@@ -228,7 +232,7 @@ describe('visualize loader', () => {
 
       it('should allow opening the inspector of the visualization and return its session', () => {
         const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
-        sinon.spy(Inspector, 'open');
+        sandbox.spy(Inspector, 'open');
         const inspectorSession = handler.openInspector();
         expect(Inspector.open.calledOnce).to.be(true);
         expect(inspectorSession.close).to.be.a('function');
@@ -303,7 +307,7 @@ describe('visualize loader', () => {
       });
 
       it('should allow updating the time range of the visualization', async () => {
-        const spy = sinon.spy(VisualizeDataLoader.prototype, 'fetch');
+        const spy = sandbox.spy(VisualizeDataLoader.prototype, 'fetch');
 
         const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {
           timeRange: { from: 'now-7d', to: 'now' }
@@ -322,6 +326,28 @@ describe('visualize loader', () => {
 
         sinon.assert.calledOnce(spy);
         sinon.assert.calledWith(spy, sinon.match({ timeRange: { from: 'now-10d/d', to: 'now' } }));
+      });
+
+      it('should not set forceFetch on uiState change', async () => {
+        const spy = sandbox.spy(VisualizeDataLoader.prototype, 'fetch');
+
+        const uiState = new PersistedState();
+        loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {
+          timeRange: { from: 'now-7d', to: 'now' },
+          uiState: uiState,
+        });
+
+        // Wait for the initial fetch and render to happen
+        await timeout(150);
+        spy.resetHistory();
+
+        uiState.set('property', 'value');
+
+        // Wait for fetch debounce to happen (as soon as we use lodash 4+ we could use fake timers here for the debounce)
+        await timeout(150);
+
+        sinon.assert.calledOnce(spy);
+        sinon.assert.calledWith(spy, sinon.match({ forceFetch: false }));
       });
     });
 
