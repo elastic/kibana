@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { StringMap } from '../../../../typings/common';
 
-export type KeySorter = (data: StringMap<any>, parentKey?: string) => string[];
+export interface TermsAggsBucket {
+  key: string;
+  doc_count: number;
+}
