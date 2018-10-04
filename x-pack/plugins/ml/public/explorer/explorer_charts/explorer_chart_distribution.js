@@ -400,6 +400,9 @@ export class ExplorerChartDistribution extends React.Component {
           contents += (`<br/>typical: ${formatValue(marker.typical, config.functionDescription, fieldFormat)}`);
         } else {
           contents += (`<br/>value: ${formatValue(marker.value, config.functionDescription, fieldFormat)}`);
+          if (typeof marker.numberOfCauses === 'undefined' || marker.numberOfCauses === 1) {
+            contents += (`<br/>typical: ${formatValue(marker.typical, config.functionDescription, fieldFormat)}`);
+          }
           if (typeof marker.byFieldName !== 'undefined' && _.has(marker, 'numberOfCauses')) {
             const numberOfCauses = marker.numberOfCauses;
             const byFieldName = mlEscape(marker.byFieldName);
