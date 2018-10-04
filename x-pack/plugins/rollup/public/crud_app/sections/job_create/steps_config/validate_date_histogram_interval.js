@@ -7,8 +7,8 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  ParseEsIntervalInvalidFormatError,
-  ParseEsIntervalInvalidCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  InvalidEsCalendarIntervalError,
   parseEsInterval,
 } from 'ui/utils/parse_es_interval';
 
@@ -25,7 +25,7 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
   try {
     parseEsInterval(dateHistogramInterval);
   } catch(error) {
-    if (error instanceof ParseEsIntervalInvalidFormatError) {
+    if (error instanceof InvalidEsIntervalFormatError) {
       return [(
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidFormat"
@@ -34,7 +34,7 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
       )];
     }
 
-    if (error instanceof ParseEsIntervalInvalidCalendarIntervalError) {
+    if (error instanceof InvalidEsCalendarIntervalError) {
       const { unit } = error;
       return [(
         <FormattedMessage
@@ -45,7 +45,7 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
             suggestion: (
               <strong>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidCalendarInterval.suggestion"
+                  id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidCalendarIntervalSuggestion"
                   defaultMessage="1{unit}"
                   values={{ unit }}
                 />

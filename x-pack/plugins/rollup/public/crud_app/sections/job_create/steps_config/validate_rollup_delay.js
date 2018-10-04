@@ -7,8 +7,8 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  ParseEsIntervalInvalidFormatError,
-  ParseEsIntervalInvalidCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  InvalidEsCalendarIntervalError,
   parseEsInterval,
 } from 'ui/utils/parse_es_interval';
 
@@ -21,7 +21,7 @@ export function validateRollupDelay(rollupDelay) {
   try {
     parseEsInterval(rollupDelay);
   } catch(error) {
-    if (error instanceof ParseEsIntervalInvalidFormatError) {
+    if (error instanceof InvalidEsIntervalFormatError) {
       return [(
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.rollupDelayInvalidFormat"
@@ -30,7 +30,7 @@ export function validateRollupDelay(rollupDelay) {
       )];
     }
 
-    if (error instanceof ParseEsIntervalInvalidCalendarIntervalError) {
+    if (error instanceof InvalidEsCalendarIntervalError) {
       const { unit } = error;
       return [(
         <FormattedMessage
@@ -41,7 +41,7 @@ export function validateRollupDelay(rollupDelay) {
             suggestion: (
               <strong>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.errors.rollupDelayInvalidCalendarInterval.suggestion"
+                  id="xpack.rollupJobs.create.errors.rollupDelayInvalidCalendarIntervalSuggestion"
                   defaultMessage="1{unit}"
                   values={{ unit }}
                 />

@@ -196,7 +196,7 @@ export class StepDateHistogramUi extends Component {
             <EuiTitle>
               <h3>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepDateHistogram.title"
+                  id="xpack.rollupJobs.create.stepDateHistogramTitle"
                   defaultMessage="Date histogram"
                 />
               </h3>
@@ -337,7 +337,7 @@ export class StepDateHistogramUi extends Component {
         <EuiCallOut
           title={(
             <FormattedMessage
-              id="xpack.rollupJobs.create.stepDateHistogram.stepError.title"
+              id="xpack.rollupJobs.create.stepDateHistogram.stepErrorTitle"
               defaultMessage="Fix errors before going to next step"
             />
           )}

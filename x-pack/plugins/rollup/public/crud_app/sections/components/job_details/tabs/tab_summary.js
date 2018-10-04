@@ -49,7 +49,7 @@ export class TabSummaryUi extends Component {
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.rollupJobs.jobDetails.tabSummary.sectionStats.title"
+              id="xpack.rollupJobs.jobDetails.tabSummary.sectionStatsTitle"
               defaultMessage="Stats"
             />
           </h3>
