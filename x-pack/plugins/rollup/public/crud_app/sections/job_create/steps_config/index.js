@@ -43,6 +43,7 @@ export const stepIdToStepConfigMap = {
       rollupIndex: '',
       // Every week on Saturday, at 00:00:00
       rollupCron: '0 0 0 ? * 7',
+      simpleRollupCron: '0 0 0 ? * 7',
       rollupPageSize: '',
       // Though the API doesn't require a delay, in many real-world cases, servers will go down for
       // a few hours as they're being restarted. A delay of 1d would allow them that period to reboot

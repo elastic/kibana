@@ -107,6 +107,10 @@ export class JobCreateUi extends Component {
     this.lastIndexPatternValidationTime = 0;
   }
 
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
   componentDidUpdate(prevProps, prevState) {
     const indexPattern = this.getIndexPattern();
     if (indexPattern !== this.getIndexPattern(prevState)) {
@@ -132,6 +136,7 @@ export class JobCreateUi extends Component {
   }
 
   componentWillUnmount() {
+    this._isMounted = false;
     // Clean up after ourselves.
     this.props.clearCreateJobErrors();
   }
@@ -141,6 +146,11 @@ export class JobCreateUi extends Component {
 
     const lastIndexPatternValidationTime = this.lastIndexPatternValidationTime = Date.now();
     validateIndexPattern(indexPattern).then(response => {
+      // We don't need to do anything if this component has been unmounted.
+      if (!this._isMounted) {
+        return;
+      }
+
       // Ignore all responses except that to the most recent request.
       if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
         return;
@@ -219,6 +229,11 @@ export class JobCreateUi extends Component {
         dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : null,
       }, STEP_DATE_HISTOGRAM);
     }).catch(() => {
+      // We don't need to do anything if this component has been unmounted.
+      if (!this._isMounted) {
+        return;
+      }
+
       // Ignore all responses except that to the most recent request.
       if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
         return;
