@@ -18,6 +18,7 @@
  */
 
 import Joi from 'joi';
+import Boom from 'boom';
 
 export function registerKqlTelemetryApi(server) {
   server.route({
@@ -41,12 +42,19 @@ export function registerKqlTelemetryApi(server) {
       } = request;
 
       const counterName = optIn ? 'optInCount' : 'optOutCount';
-      const incrementResponse = await savedObjectsClient.incrementCounter(
-        'kql-telemetry',
-        'kql-telemetry',
-        counterName
-      );
-      reply(incrementResponse);
+
+      try {
+        await savedObjectsClient.incrementCounter(
+          'kql-telemetry',
+          'kql-telemetry',
+          counterName,
+        );
+      }
+      catch (error) {
+        reply(new Boom('Something went wrong', { statusCode: error.status, data: { success: false } }));
+      }
+
+      reply({ success: true });
     },
   });
 }
