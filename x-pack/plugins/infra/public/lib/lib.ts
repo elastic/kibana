@@ -186,7 +186,7 @@ export interface InfraWaffleMapBounds {
 export type InfraFormatter = (value: string | number) => string;
 export enum InfraFormatterType {
   number = 'number',
-  abvNumber = 'abvNumber',
+  abbreviatedNumber = 'abbreviatedNumber',
   bytes = 'bytes',
   bits = 'bits',
   percent = 'percent',
