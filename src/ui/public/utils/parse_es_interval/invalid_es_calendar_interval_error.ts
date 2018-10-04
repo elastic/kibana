@@ -24,7 +24,12 @@ export class InvalidEsCalendarIntervalError extends Error {
     public readonly unit: string,
     public readonly type: string
   ) {
-    super(`Invalid calendar interval: ${interval}, value must be 1`);
+    super(
+      i18n.translate('common.ui.parseEsInterval.invalidEsCalendarIntervalErrorMessage', {
+        defaultMessage: 'Invalid calendar interval: {interval}, value must be 1',
+        values: { interval },
+      })
+    );
 
     this.name = 'InvalidEsCalendarIntervalError';
     this.value = value;
