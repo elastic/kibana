@@ -74,8 +74,24 @@ export class ESTableSource extends ASource {
             value: 1000,
           },
           {
+            key: 'CN',
+            value: 5000,
+          },
+          {
             key: 'US',
             value: 2000,
+          },
+          {
+            key: 'IN',
+            value: 4000,
+          },
+          {
+            key: 'BE',
+            value: 1000,
+          },
+          {
+            key: 'MC',
+            value: 1000,
           }
         ]);
       }, 500);

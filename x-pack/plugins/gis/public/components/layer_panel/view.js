@@ -28,6 +28,15 @@ export function LayerPanel({ selectedLayer, cancelLayerPanel }) {
     return (<div />);
   }
 
+  const joinSection = selectedLayer.isJoinable() ? (<EuiFlyoutBody style={{ paddingTop: 0 }}>
+    <EuiTitle size="s"><h2><strong>Joins</strong></h2></EuiTitle>
+    <EuiSpacer size="l"/>
+    <JoinEditor layer={selectedLayer}/>
+    <EuiSpacer size="l"/>
+  </EuiFlyoutBody>) : null;
+
+
+
   return (
     <EuiFlyout
       onClose={cancelLayerPanel}
@@ -48,12 +57,7 @@ export function LayerPanel({ selectedLayer, cancelLayerPanel }) {
         <EuiHorizontalRule margin="none"/>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody style={{ paddingTop: 0 }}>
-        <EuiTitle size="s"><h2><strong>Joins</strong></h2></EuiTitle>
-        <EuiSpacer size="l"/>
-        <JoinEditor layer={selectedLayer}/>
-        <EuiSpacer size="l"/>
-      </EuiFlyoutBody>
+      {joinSection}
 
       <EuiFlyoutBody style={{ paddingTop: 0 }}>
         <EuiSpacer size="l"/>
