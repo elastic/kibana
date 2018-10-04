@@ -39,7 +39,7 @@ function getUuid(req, metric) {
   } else if (metric.app === 'logstash') {
     return req.params.logstashUuid;
   } else if (metric.app === 'elasticsearch') {
-    return req.params.resolver;
+    return req.params.nodeUuid;
   }
 }
 

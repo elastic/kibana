@@ -8,11 +8,17 @@
 
 import d3 from 'd3';
 import { calculateTextWidth } from '../util/string_utils';
+import { MULTI_BUCKET_IMPACT } from '../../common/constants/multi_bucket_impact';
 import moment from 'moment';
 import rison from 'rison-node';
 
 import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
+
+
+export const LINE_CHART_ANOMALY_RADIUS = 7;
+export const MULTI_BUCKET_SYMBOL_SIZE = 144;   // In square pixels for use with d3 symbol.size
+export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
 
 const MAX_LABEL_WIDTH = 100;
 
@@ -176,6 +182,18 @@ export function getExploreSeriesLink(series) {
   });
 
   return `${chrome.getBasePath()}/app/ml#/timeseriesexplorer?_g=${_g}&_a=${encodeURIComponent(_a)}`;
+}
+
+export function showMultiBucketAnomalyMarker(point) {
+  // TODO - test threshold with real use cases
+  return (point.multiBucketImpact !== undefined &&
+    point.multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM);
+}
+
+export function showMultiBucketAnomalyTooltip(point) {
+  // TODO - test threshold with real use cases
+  return (point.multiBucketImpact !== undefined &&
+    point.multiBucketImpact >= MULTI_BUCKET_IMPACT.LOW);
 }
 
 export function numTicks(axisWidth) {
