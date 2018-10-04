@@ -119,6 +119,12 @@ function trimCurlyBraces(string) {
   return string.slice(2, -2).trim();
 }
 
+/**
+ * Removes parentheses from the start and the end of a string
+ *
+ * Example: `('id' | i18n: { defaultMessage: 'Message' })`
+ * @param {string} string string to trim
+ */
 function trimParentheses(string) {
   if (string.startsWith('(') && string.endsWith(')')) {
     return string.slice(1, -1);
@@ -127,6 +133,12 @@ function trimParentheses(string) {
   return string;
 }
 
+/**
+ * Removes one-time binding operator `::` from the start of a string.
+ *
+ * Example: `::'id' | i18n: { defaultMessage: 'Message' }`
+ * @param {string} string string to trim
+ */
 function trimOneTimeBindingOperator(string) {
   if (string.startsWith('::')) {
     return string.slice(2);

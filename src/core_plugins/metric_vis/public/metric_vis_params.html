@@ -32,7 +32,7 @@
         kbn-accessible-click
         aria-expanded="{{!!showColorRange}}"
         aria-controls="metricOptionsRanges"
-        aria-label="{{'metricVis.params.ranges.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle range options' } }}"
+        aria-label="{{::'metricVis.params.ranges.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle range options' } }}"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="showColorRange = !showColorRange"
       >
@@ -135,7 +135,7 @@
         kbn-accessible-click
         aria-expanded="{{!!showColorOptions}}"
         aria-controls="metricOptionsColors"
-        aria-label="{{'metricVis.params.color.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle color options' } }}"
+        aria-label="{{::'metricVis.params.color.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle color options' } }}"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="showColorOptions = !showColorOptions"
       >
@@ -219,7 +219,7 @@
         kbn-accessible-click
         aria-expanded="{{!!showStyle}}"
         aria-controls="metricOptionsStyle"
-        aria-label="{{'metricVis.params.style.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle style options' } }}"
+        aria-label="{{::'metricVis.params.style.toggleOptionsAriaLabel' | i18n: { defaultMessage: 'Toggle style options' } }}"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="showStyle = !showStyle"
       >

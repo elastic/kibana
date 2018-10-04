@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`i18nDirective inserts correct translation html content with values 1`] = `"default-message word"`;
+
+exports[`i18nDirective inserts correct translation html content with values 2`] = `"default-message anotherWord"`;

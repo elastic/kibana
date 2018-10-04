@@ -33,11 +33,11 @@ export function i18nDirective(i18n: I18nServiceType): IDirective<I18nScope> {
     scope: {
       id: '@i18nId',
       defaultMessage: '@i18nDefaultMessage',
-      values: '<i18nValues',
+      values: '<?i18nValues',
     },
     link($scope, $element) {
       if ($scope.values) {
-        $scope.$watch('values', () => {
+        $scope.$watchCollection('values', () => {
           setHtmlContent($element, $scope, i18n);
         });
       } else {
