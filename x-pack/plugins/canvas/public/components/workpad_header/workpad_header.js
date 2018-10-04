@@ -94,7 +94,7 @@ export const WorkpadHeader = ({
               )}
               <EuiToolTip position="bottom" content={readOnlyToolTip}>
                 <EuiButtonIcon
-                  iconType={!readOnly ? 'eye' : 'eyeClosed'}
+                  iconType={readOnly ? 'lock' : 'lockOpen'}
                   onClick={() => {
                     toggleReadOnly();
                   }}
