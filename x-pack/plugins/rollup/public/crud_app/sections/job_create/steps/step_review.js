@@ -110,7 +110,7 @@ export class StepReviewUi extends Component {
         <EuiTitle>
           <h3>
             <FormattedMessage
-              id="xpack.rollupJobs.create.stepTerms.title"
+              id="xpack.rollupJobs.create.stepReviewTitle"
               defaultMessage="Review details for '{jobId}'"
               values={{ jobId: job.id }}
             />

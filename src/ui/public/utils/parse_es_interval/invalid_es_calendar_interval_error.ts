@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export class ParseEsIntervalInvalidCalendarIntervalError extends Error {
+export class InvalidEsCalendarIntervalError extends Error {
   constructor(
     public readonly interval: string,
     public readonly value: number,
@@ -26,7 +26,7 @@ export class ParseEsIntervalInvalidCalendarIntervalError extends Error {
   ) {
     super(`Invalid calendar interval: ${interval}, value must be 1`);
 
-    this.name = 'ParseEsIntervalInvalidCalendarIntervalError';
+    this.name = 'InvalidEsCalendarIntervalError';
     this.value = value;
     this.unit = unit;
     this.type = type;
@@ -34,11 +34,11 @@ export class ParseEsIntervalInvalidCalendarIntervalError extends Error {
     // captureStackTrace is only available in the V8 engine, so any browser using
     // a different JS engine won't have access to this method.
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ParseEsIntervalInvalidCalendarIntervalError);
+      Error.captureStackTrace(this, InvalidEsCalendarIntervalError);
     }
 
     // Babel doesn't support traditional `extends` syntax for built-in classes.
     // https://babeljs.io/docs/en/caveats/#classes
-    Object.setPrototypeOf(this, ParseEsIntervalInvalidCalendarIntervalError.prototype);
+    Object.setPrototypeOf(this, InvalidEsCalendarIntervalError.prototype);
   }
 }

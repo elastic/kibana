@@ -57,11 +57,10 @@ export function updateIndexPatternList(
   );
 }
 
-export function destroyIndexPatternList() {
+export const destroyIndexPatternList = () => {
   const node = document.getElementById(INDEX_PATTERN_LIST_DOM_ELEMENT_ID);
   node && unmountComponentAtNode(node);
-}
-
+};
 
 const indexPatternsResolutions = {
   indexPatterns: function (Private) {
@@ -132,7 +131,7 @@ uiModules.get('apps/management')
           updateIndexPatternList($scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList);
         };
 
-        $scope.$on('$destroy', () => destroyIndexPatternList());
+        $scope.$on('$destroy', destroyIndexPatternList);
         $scope.editingId = $route.current.params.indexPatternId;
         $scope.$watch('defaultIndex', () => renderList());
         config.bindToScope($scope, 'defaultIndex');

@@ -86,7 +86,7 @@ export const Header = ({
           <EuiSpacer size="s" />
           {prompt}
         </Fragment>
-      ) : ''
+      ) : null
     }
     <EuiSpacer size="m"/>
   </div>

@@ -93,7 +93,7 @@ export class JobListUi extends Component {
         title={(
           <h1>
             <FormattedMessage
-              id="xpack.rollupJobs.jobList.emptyPrompt.title"
+              id="xpack.rollupJobs.jobList.emptyPromptTitle"
               defaultMessage="Create your first rollup job"
             />
           </h1>
@@ -146,7 +146,7 @@ export class JobListUi extends Component {
             <EuiText>
               <EuiTextColor color="subdued">
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobList.loading.title"
+                  id="xpack.rollupJobs.jobList.loadingTitle"
                   defaultMessage="Loading rollup jobs..."
                 />
               </EuiTextColor>
@@ -165,7 +165,7 @@ export class JobListUi extends Component {
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage
-                  id="xpack.rollupJobs.jobList.title"
+                  id="xpack.rollupJobs.jobListTitle"
                   defaultMessage="Rollup jobs"
                 />
               </h1>

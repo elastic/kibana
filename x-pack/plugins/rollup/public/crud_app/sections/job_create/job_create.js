@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import mapValues from 'lodash/object/mapValues';
 import cloneDeep from 'lodash/lang/cloneDeep';
 import debounce from 'lodash/function/debounce';
+import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -55,12 +56,24 @@ import {
 } from './steps_config';
 
 const stepIdToTitleMap = {
-  [STEP_LOGISTICS]: 'Logistics',
-  [STEP_DATE_HISTOGRAM]: 'Date histogram',
-  [STEP_TERMS]: 'Terms',
-  [STEP_HISTOGRAM]: 'Histogram',
-  [STEP_METRICS]: 'Metrics',
-  [STEP_REVIEW]: 'Review and save',
+  [STEP_LOGISTICS]: i18n.translate('xpack.rollupJobs.create.stepLogisticsTitle', {
+    defaultMessage: 'Logistics',
+  }),
+  [STEP_DATE_HISTOGRAM]: i18n.translate('xpack.rollupJobs.create.stepDateHistogramTitle', {
+    defaultMessage: 'Date histogram',
+  }),
+  [STEP_TERMS]: i18n.translate('xpack.rollupJobs.create.stepTermsTitle', {
+    defaultMessage: 'Terms',
+  }),
+  [STEP_HISTOGRAM]: i18n.translate('xpack.rollupJobs.create.stepHistogramTitle', {
+    defaultMessage: 'Histogram',
+  }),
+  [STEP_METRICS]: i18n.translate('xpack.rollupJobs.create.stepMetricsTitle', {
+    defaultMessage: 'Metrics',
+  }),
+  [STEP_REVIEW]: i18n.translate('xpack.rollupJobs.create.stepReviewTitle', {
+    defaultMessage: 'Review and save',
+  }),
 };
 
 export class JobCreateUi extends Component {
@@ -463,7 +476,7 @@ export class JobCreateUi extends Component {
                 <EuiTitle size="l">
                   <h1>
                     <FormattedMessage
-                      id="xpack.rollupJobs.create.title"
+                      id="xpack.rollupJobs.createTitle"
                       defaultMessage="Create rollup job"
                     />
                   </h1>

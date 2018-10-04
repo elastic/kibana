@@ -176,7 +176,7 @@ export class StepMetricsUi extends Component {
             <EuiTitle>
               <h3>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepMetrics.title"
+                  id="xpack.rollupJobs.create.stepMetricsTitle"
                   defaultMessage="Metrics (optional)"
                 />
               </h3>

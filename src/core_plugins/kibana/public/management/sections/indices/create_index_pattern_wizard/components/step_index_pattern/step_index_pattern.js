@@ -247,18 +247,18 @@ export class StepIndexPatternComponent extends Component {
     if (!query || !query.length || query === '.' || query === '..') {
       // This is an error scenario but do not report an error
       containsErrors = true;
-    }
-    else if (containsIllegalCharacters(query, ILLEGAL_CHARACTERS)) {
+    } else if (containsIllegalCharacters(query, ILLEGAL_CHARACTERS)) {
       const errorMessage = intl.formatMessage(
         {
           id: 'kbn.management.createIndexPattern.step.invalidCharactersErrorMessage',
           defaultMessage: 'A {indexPatternName} cannot contain spaces or the characters: {characterList}'
         },
-        { characterList, indexPatternName });
+        { characterList, indexPatternName }
+      );
 
       errors.push(errorMessage);
       containsErrors = true;
-    } else if(checkIndices) {
+    } else if (checkIndices) {
       errors.push(...checkIndices);
       containsErrors = true;
     }
