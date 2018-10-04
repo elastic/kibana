@@ -23,8 +23,8 @@ export const PHASE_ROLLOVER_MAX_AGE_UNITS = 'selectedMaxAgeUnits';
 export const PHASE_ROLLOVER_MAX_SIZE_STORED = 'selectedMaxSizeStored';
 export const PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS = 'selectedMaxSizeStoredUnits';
 export const PHASE_ROLLOVER_MAX_DOC_SIZE = 'selectedMaxDocSize';
-export const PHASE_ROLLOVER_AFTER = 'selectedAfter';
-export const PHASE_ROLLOVER_AFTER_UNITS = 'selectedAfterUnits';
+export const PHASE_ROLLOVER_MINIMUM_AGE = 'selectedMinimumAge';
+export const PHASE_ROLLOVER_MINIMUM_AGE_UNITS = 'selectedMinimumAgeUnits';
 
 export const PHASE_FORCE_MERGE_SEGMENTS = 'selectedForceMergeSegments';
 export const PHASE_FORCE_MERGE_ENABLED = 'forceMergeEnabled';
@@ -39,7 +39,7 @@ export const PHASE_ATTRIBUTES_THAT_ARE_NUMBERS = [
   PHASE_ROLLOVER_MAX_AGE,
   PHASE_ROLLOVER_MAX_SIZE_STORED,
   PHASE_ROLLOVER_MAX_DOC_SIZE,
-  PHASE_ROLLOVER_AFTER,
+  PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_FORCE_MERGE_SEGMENTS,
   PHASE_PRIMARY_SHARD_COUNT,
   PHASE_REPLICA_COUNT,
@@ -84,8 +84,8 @@ export const ERROR_STRUCTURE = {
     },
     [PHASE_WARM]: {
       [PHASE_ROLLOVER_ALIAS]: [],
-      [PHASE_ROLLOVER_AFTER]: [],
-      [PHASE_ROLLOVER_AFTER_UNITS]: [],
+      [PHASE_ROLLOVER_MINIMUM_AGE]: [],
+      [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: [],
       [PHASE_NODE_ATTRS]: [],
       [PHASE_PRIMARY_SHARD_COUNT]: [],
       [PHASE_REPLICA_COUNT]: [],
@@ -93,15 +93,15 @@ export const ERROR_STRUCTURE = {
     },
     [PHASE_COLD]: {
       [PHASE_ROLLOVER_ALIAS]: [],
-      [PHASE_ROLLOVER_AFTER]: [],
-      [PHASE_ROLLOVER_AFTER_UNITS]: [],
+      [PHASE_ROLLOVER_MINIMUM_AGE]: [],
+      [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: [],
       [PHASE_NODE_ATTRS]: [],
       [PHASE_REPLICA_COUNT]: [],
     },
     [PHASE_DELETE]: {
       [PHASE_ROLLOVER_ALIAS]: [],
-      [PHASE_ROLLOVER_AFTER]: [],
-      [PHASE_ROLLOVER_AFTER_UNITS]: [],
+      [PHASE_ROLLOVER_MINIMUM_AGE]: [],
+      [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: [],
     },
   },
   [STRUCTURE_REVIEW]: {

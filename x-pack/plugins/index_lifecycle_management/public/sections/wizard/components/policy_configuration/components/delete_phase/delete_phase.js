@@ -26,8 +26,8 @@ import {
 } from '@elastic/eui';
 import {
   PHASE_ENABLED,
-  PHASE_ROLLOVER_AFTER,
-  PHASE_ROLLOVER_AFTER_UNITS,
+  PHASE_ROLLOVER_MINIMUM_AGE,
+  PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
 } from '../../../../../../store/constants';
 import { ErrableFormRow } from '../../../../form_errors';
 
@@ -40,11 +40,11 @@ export class DeletePhase extends PureComponent {
     errors: PropTypes.object.isRequired,
     phaseData: PropTypes.shape({
       [PHASE_ENABLED]: PropTypes.bool.isRequired,
-      [PHASE_ROLLOVER_AFTER]: PropTypes.oneOfType([
+      [PHASE_ROLLOVER_MINIMUM_AGE]: PropTypes.oneOfType([
         PropTypes.number,
         PropTypes.string
       ]).isRequired,
-      [PHASE_ROLLOVER_AFTER_UNITS]: PropTypes.string.isRequired
+      [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: PropTypes.string.isRequired
     }).isRequired
   };
 
@@ -109,14 +109,14 @@ export class DeletePhase extends PureComponent {
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
                   label="Delete indices after"
-                  errorKey={PHASE_ROLLOVER_AFTER}
+                  errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
                   isShowingErrors={isShowingErrors}
                   errors={errors}
                 >
                   <EuiFieldNumber
-                    value={phaseData[PHASE_ROLLOVER_AFTER]}
+                    value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE]}
                     onChange={async e => {
-                      setPhaseData(PHASE_ROLLOVER_AFTER, e.target.value);
+                      setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
                       validate();
                     }}
                     min={1}
@@ -126,14 +126,13 @@ export class DeletePhase extends PureComponent {
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <EuiFormRow hasEmptyLabelSpace>
                   <EuiSelect
-                    value={phaseData[PHASE_ROLLOVER_AFTER_UNITS]}
+                    value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}
                     onChange={e =>
-                      setPhaseData(PHASE_ROLLOVER_AFTER_UNITS, e.target.value)
+                      setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value)
                     }
                     options={[
                       { value: 'd', text: 'days' },
                       { value: 'h', text: 'hours' },
-                      { value: 's', text: 'seconds' },
                     ]}
                   />
                 </EuiFormRow>

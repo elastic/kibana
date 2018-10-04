@@ -51,7 +51,7 @@ One example is the `auto_enable_phase.js` middleware. By default, the warm, cold
 
 #### Generic phase data
 
-Each of our four phases have some similar and some unique configuration options. Instead of making each individual phase a specific action for that phase, the code is written more generically to capture any data change within a phase to a single action. Therefore, each phase component's configuration inputs will look similar, like: `setPhaseData(PHASE_ROLLOVER_AFTER_UNITS, e.target.value)`. The top level container for each phase will handle automatically prefixing the `setPhaseData` prop with the right phase: ` setPhaseData: (key, value) => setPhaseData(PHASE_COLD, key, value),`.
+Each of our four phases have some similar and some unique configuration options. Instead of making each individual phase a specific action for that phase, the code is written more generically to capture any data change within a phase to a single action. Therefore, each phase component's configuration inputs will look similar, like: `setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value)`. The top level container for each phase will handle automatically prefixing the `setPhaseData` prop with the right phase: ` setPhaseData: (key, value) => setPhaseData(PHASE_COLD, key, value),`.
 
 To complement this generic logic, there is a list of constants that are used to ensure the right pieces of data are changed. These are contained within `store/constants.js`
 

@@ -18,8 +18,8 @@ import {
   PHASE_WARM,
   PHASE_COLD,
   PHASE_DELETE,
-  PHASE_ROLLOVER_AFTER,
-  PHASE_ROLLOVER_AFTER_UNITS,
+  PHASE_ROLLOVER_MINIMUM_AGE,
+  PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
   PHASE_ROLLOVER_ENABLED,
   PHASE_ROLLOVER_MAX_AGE,
   PHASE_ROLLOVER_MAX_AGE_UNITS,
@@ -97,15 +97,15 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
   policy[PHASE_ENABLED] = true;
   policy[PHASE_ROLLOVER_ENABLED] = false;
 
-  if (phase.after) {
-    if (phaseName === PHASE_WARM && phase.after === '0ms') {
+  if (phase.minimum_age) {
+    if (phaseName === PHASE_WARM && phase.minimum_age === '0ms') {
       policy[WARM_PHASE_ON_ROLLOVER] = true;
     } else {
-      const { size: after, units: afterUnits } = splitSizeAndUnits(
-        phase.after
+      const { size: minAge, units: minAgeUnits } = splitSizeAndUnits(
+        phase.minimum_age
       );
-      policy[PHASE_ROLLOVER_AFTER] = after;
-      policy[PHASE_ROLLOVER_AFTER_UNITS] = afterUnits;
+      policy[PHASE_ROLLOVER_MINIMUM_AGE] = minAge;
+      policy[PHASE_ROLLOVER_MINIMUM_AGE_UNITS] = minAgeUnits;
     }
   }
   if (phaseName === PHASE_WARM) {
@@ -162,10 +162,10 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
   return policy;
 };
 
-export const policyFromES = ({ name, type, phases }) => {
+export const policyFromES = (policy) => {
+  const { name, policy: { phases } } = policy;
   return {
     name,
-    type,
     phases: {
       [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], PHASE_HOT, defaultHotPhase),
       [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM, defaultWarmPhase),
@@ -184,8 +184,8 @@ export const phaseToES = (state, phase) => {
     return esPhase;
   }
 
-  if (isNumber(phase[PHASE_ROLLOVER_AFTER])) {
-    esPhase.after = `${phase[PHASE_ROLLOVER_AFTER]}${phase[PHASE_ROLLOVER_AFTER_UNITS]}`;
+  if (isNumber(phase[PHASE_ROLLOVER_MINIMUM_AGE])) {
+    esPhase.minimum_age = `${phase[PHASE_ROLLOVER_MINIMUM_AGE]}${phase[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}`;
   }
 
   esPhase.actions = {};

@@ -31,8 +31,8 @@ import {
   PHASE_NODE_ATTRS,
   PHASE_PRIMARY_SHARD_COUNT,
   PHASE_REPLICA_COUNT,
-  PHASE_ROLLOVER_AFTER,
-  PHASE_ROLLOVER_AFTER_UNITS,
+  PHASE_ROLLOVER_MINIMUM_AGE,
+  PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
   PHASE_SHRINK_ENABLED,
 } from '../../../../../../store/constants';
 import { ErrableFormRow } from '../../../../form_errors';
@@ -57,8 +57,8 @@ export class WarmPhase extends PureComponent {
       [PHASE_PRIMARY_SHARD_COUNT]: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
         .isRequired,
       [PHASE_REPLICA_COUNT]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-      [PHASE_ROLLOVER_AFTER]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-      [PHASE_ROLLOVER_AFTER_UNITS]: PropTypes.string.isRequired,
+      [PHASE_ROLLOVER_MINIMUM_AGE]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+      [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: PropTypes.string.isRequired,
     }).isRequired,
 
     hotPhaseReplicaCount: PropTypes.number.isRequired,
@@ -147,14 +147,14 @@ export class WarmPhase extends PureComponent {
                   <EuiFlexItem style={{ maxWidth: 188 }}>
                     <ErrableFormRow
                       label="Move to warm phase after"
-                      errorKey={PHASE_ROLLOVER_AFTER}
+                      errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
                       isShowingErrors={isShowingErrors}
                       errors={errors}
                     >
                       <EuiFieldNumber
-                        value={phaseData[PHASE_ROLLOVER_AFTER]}
+                        value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE]}
                         onChange={async e => {
-                          setPhaseData(PHASE_ROLLOVER_AFTER, e.target.value);
+                          setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
                           validate();
                         }}
                         min={1}
@@ -164,15 +164,14 @@ export class WarmPhase extends PureComponent {
                   <EuiFlexItem style={{ maxWidth: 188 }}>
                     <EuiFormRow hasEmptyLabelSpace>
                       <EuiSelect
-                        value={phaseData[PHASE_ROLLOVER_AFTER_UNITS]}
+                        value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}
                         onChange={async e => {
-                          await setPhaseData(PHASE_ROLLOVER_AFTER_UNITS, e.target.value);
+                          await setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value);
                           validate();
                         }}
                         options={[
                           { value: 'd', text: 'days' },
                           { value: 'h', text: 'hours' },
-                          { value: 's', text: 'seconds' },
                         ]}
                       />
                     </EuiFormRow>
