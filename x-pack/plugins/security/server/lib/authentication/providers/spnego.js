@@ -89,6 +89,16 @@ export class SPNEGOAuthenticationProvider {
     }
 
     try {
+      const { access_token: accessToken } = await this._options.client.callWithRequest(
+        request,
+        'shield.getToken',
+        { body: { grant_type: 'client_credentials' } }
+      );
+
+      this._options.log(['debug', 'security', 'spnego'], 'Received accessToken using client_credentials grant.');
+
+      request.headers.authorization = `Bearer ${accessToken}`;
+
       const user = await this._options.client.callWithRequest(
         request,
         'shield.authenticate'

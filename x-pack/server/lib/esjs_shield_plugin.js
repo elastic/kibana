@@ -362,6 +362,22 @@
       }
     });
 
+    /**
+     * Get token.
+     *
+     * @param {string} grant_type Currently only "refresh_token" grant type is supported.
+     * @param {string} refresh_token One-time refresh token that will be exchanged to the new access/refresh token pair.
+     *
+     * @returns {{access_token: string, type: string, expires_in: number, refresh_token: string}}
+     */
+    shield.getToken = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_xpack/security/oauth2/token'
+      }
+    });
+
     shield.getPrivilege = ca({
       method: 'GET',
       urls: [{
