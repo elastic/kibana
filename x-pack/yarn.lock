@@ -143,9 +143,9 @@
     url-join "^4.0.0"
     ws "^4.1.0"
 
-"@types/angular@^1.6.45":
-  version "1.6.48"
-  resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.48.tgz#e8f77bf41d00d3293421cbaaed2bafb4d5f399f9"
+"@types/angular@^1.6.50":
+  version "1.6.51"
+  resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.51.tgz#a67515b0ba6a2ff68894a39405c1343cbf9c36d4"
 
 "@types/async@2.0.49":
   version "2.0.49"
@@ -160,12 +160,6 @@
   resolved "https://registry.yarnpkg.com/@types/babylon/-/babylon-6.16.3.tgz#c2937813a89fcb5e79a00062fc4a8b143e7237bb"
   dependencies:
     "@types/babel-types" "*"
-
-"@types/boom@3.2.2":
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/@types/boom/-/boom-3.2.2.tgz#6773bb1bbfec111f5ea683874b8d932157d58885"
-  dependencies:
-    "@types/node" "*"
 
 "@types/cookiejar@*":
   version "2.1.0"
@@ -374,9 +368,9 @@
   version "0.10.2"
   resolved "https://registry.yarnpkg.com/@types/retry/-/retry-0.10.2.tgz#bd1740c4ad51966609b058803ee6874577848b37"
 
-"@types/sinon@^5.0.0":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-5.0.1.tgz#a15b36ec42f1f53166617491feabd1734cb03e21"
+"@types/sinon@^5.0.1":
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-5.0.3.tgz#2b1840122f372350c563e3ceda2f447b55f3a927"
 
 "@types/superagent@*":
   version "3.8.4"
@@ -395,9 +389,9 @@
   version "0.8.2"
   resolved "https://registry.yarnpkg.com/@types/url-join/-/url-join-0.8.2.tgz#1181ecbe1d97b7034e0ea1e35e62e86cc26b422d"
 
-"@types/uuid@^3.4.3":
-  version "3.4.3"
-  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-3.4.3.tgz#121ace265f5569ce40f4f6d0ff78a338c732a754"
+"@types/uuid@^3.4.4":
+  version "3.4.4"
+  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-3.4.4.tgz#7af69360fa65ef0decb41fd150bf4ca5c0cefdf5"
   dependencies:
     "@types/node" "*"
 

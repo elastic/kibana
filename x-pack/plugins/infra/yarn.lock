@@ -2,6 +2,12 @@
 # yarn lockfile v1
 
 
+"@types/boom@3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@types/boom/-/boom-3.2.2.tgz#6773bb1bbfec111f5ea683874b8d932157d58885"
+  dependencies:
+    "@types/node" "*"
+
 "@types/color-convert@*":
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/@types/color-convert/-/color-convert-1.9.0.tgz#bfa8203e41e7c65471e9841d7e306a7cd8b5172d"
@@ -21,6 +27,20 @@
 "@types/lodash@^4.14.110":
   version "4.14.110"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.110.tgz#fb07498f84152947f30ea09d89207ca07123461e"
+
+"@types/node@*":
+  version "10.11.4"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.11.4.tgz#e8bd933c3f78795d580ae41d86590bfc1f4f389d"
+
+boom@3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/boom/-/boom-3.1.1.tgz#b6424f01ed8d492b2b12ae86047c24e8b6a7c937"
+  dependencies:
+    hoek "3.x.x"
+
+hoek@3.x.x:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/hoek/-/hoek-3.0.4.tgz#268adff66bb6695c69b4789a88b1e0847c3f3123"
 
 lodash@^4.17.10:
   version "4.17.10"
