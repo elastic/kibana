@@ -20,6 +20,10 @@ export class VectorStyle {
   static DEFAULT_COLOR_HEX = '#ffffff';
   static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
 
+  static getComputedFieldName(fieldName) {
+    return `__kbn__${fieldName}__`;
+  }
+
   constructor(descriptor) {
     this._descriptor = descriptor;
   }
@@ -143,7 +147,7 @@ export class VectorStyle {
       }
 
       //scale to [0,1]
-      const propName = `__kbn__${fieldName}__`;
+      const propName = VectorStyle.getComputedFieldName(fieldName);
       for (let i = 0; i < features.length; i++) {
         features[i].properties[propName] = (features[i].properties[fieldName] - min) / (max - min);
       }
@@ -162,7 +166,7 @@ export class VectorStyle {
     }
 
     if (this._descriptor.properties[property].options.field) {
-      const targetName = `__kbn__${this._descriptor.properties[property].options.field}__`;
+      const targetName = VectorStyle.getComputedFieldName(this._descriptor.properties[property].options.field);
       return [
         'interpolate',
         ['linear'],

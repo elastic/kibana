@@ -29,6 +29,10 @@ export class VectorLayer extends ALayer {
 
   static tooltipContainer = document.createElement('div');
 
+  static getJoinFieldName(name) {
+    return `__kbn__join__${name}__`;
+  }
+
   static createDescriptor(options) {
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = VectorLayer.type;
@@ -91,6 +95,7 @@ export class VectorLayer extends ALayer {
     if (!timeAware && !extentAware) {
       const sourceDataRequest = this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
+        console.log('can skip update', sourceDataRequest);
         return true;
       }
     }
@@ -107,22 +112,23 @@ export class VectorLayer extends ALayer {
       const canSkip = await this._canSkipSourceUpdate(tableSource, sourceDataId);
       if (canSkip) {
         return {
-          sourceDataId: sourceDataId,
-          didRefresh: false
+          shouldJoin: false,
+          join: join
         };
       }
       startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
       const data = await tableSource.getTable(dataFilters);
       stopLoading(sourceDataId, requestToken, data);
       return {
-        sourceDataId: sourceDataId,
-        didRefresh: true
+        shouldJoin: true,
+        join: join,
+        table: data
       };
     } catch(e) {
       onLoadError(sourceDataId, requestToken, e.medium);
       return {
-        sourceDataId: sourceDataId,
-        didRefresh: true
+        shouldJoin: false,
+        join: join
       };
     }
   }
@@ -142,7 +148,11 @@ export class VectorLayer extends ALayer {
     try {
       const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId);
       if (canSkip) {
-        return;
+        const sourceDataRequest = this.getSourceDataRequest();
+        return {
+          refreshed: false,
+          featureCollection: sourceDataRequest.getData()
+        };
       }
       startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
       const data = await this._source.getGeoJson({
@@ -150,8 +160,15 @@ export class VectorLayer extends ALayer {
         layerName: this.getDisplayName()
       }, dataFilters);
       stopLoading(sourceDataId, requestToken, data);
+      return {
+        refreshed: true,
+        featureCollection: data
+      };
     } catch (error) {
       onLoadError(sourceDataId, requestToken, error.message);
+      return  {
+        refreshed: false
+      };
     }
   }
 
@@ -165,21 +182,31 @@ export class VectorLayer extends ALayer {
     return joinDataRequests;
   }
 
-  async _performJoins(refreshStates) {
-    console.log('refresh states', refreshStates);
-    const featureCollection = this._getSourceFeatureCollection();
-    if (!featureCollection) {
+  _joinToFeatureCollection(sourceResult, joinState) {
+    console.log('data', sourceResult, joinState);
+    if (!sourceResult.refreshed && !joinState.shouldJoin) {
       return;
     }
+    if (!sourceResult.featureCollection) {
+      return;
+    }
+    joinState.join.joinTableToFeatureCollection(sourceResult.featureCollection, joinState.table);
+  }
+
+  async _performJoins(sourceResult, joinStates) {
+    for (let i = 0; i < joinStates.length; i++) {
+      this._joinToFeatureCollection(sourceResult, joinStates[i]);
+    }
+    console.log('done joining', sourceResult.featureCollection);
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
-    await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
-    const refreshStates = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-    await this._performJoins(refreshStates);
+    const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
+    const joinResults = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
+    this._performJoins(sourceResult, joinResults);
   }
 
   _getSourceFeatureCollection() {
@@ -204,7 +231,12 @@ export class VectorLayer extends ALayer {
   }
 
   _syncFeatureCollectionWithMb(mbMap) {
+
     const featureCollection = this._getSourceFeatureCollection();
+
+    //check join state....
+
+
     const mbSourceAfterAdding = mbMap.getSource(this.getId());
     if (featureCollection !== mbSourceAfterAdding._data) {
       mbSourceAfterAdding.setData(featureCollection);
