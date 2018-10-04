@@ -92,6 +92,7 @@
     @include euiBottomShadowSmall;
     position: relative;
     overflow: hidden;
+    color: $euiTextColor;
 
     .canvasPositionable {
       position: absolute;

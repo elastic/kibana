@@ -1,0 +1,125 @@
+[role="xpack"]
+[[monitoring-metricbeat]]
+=== Monitoring {kib} with {metricbeat}
+
+beta[] In 6.4 and later, you can use {metricbeat} to collect data about {kib} 
+and ship it to the monitoring cluster, rather than routing it through the 
+production cluster as described in <<monitoring-kibana>>. 
+
+image::monitoring/images/metricbeat.png[Example monitoring architecture]
+
+To learn about monitoring in general, see 
+{stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
+
+. Enable the collection of monitoring data. Set 
+`xpack.monitoring.collection.enabled` to `true` on the production cluster. +
++ 
+--
+For example, you can use the following APIs to review and change this setting:
+
+[source,js]
+----------------------------------
+GET _cluster/settings
+
+PUT _cluster/settings
+{
+  "persistent": {
+    "xpack.monitoring.collection.enabled": true
+  }
+}
+----------------------------------
+
+For more information, see {ref}/monitoring-settings.html[Monitoring settings in {es}] 
+and {ref}/cluster-update-settings.html[Cluster update settings].
+--
+
+. Disable the default collection of {kib} monitoring metrics. +
++
+--
+Add the following setting in the {kib} configuration file (`kibana.yml`): 
+
+[source,yaml]
+----------------------------------
+xpack.monitoring.kibana.collection.enabled: false
+----------------------------------
+
+Leave the `xpack.monitoring.enabled` set to its default value (`true`). 
+
+For more information, see 
+<<monitoring-settings-kb,Monitoring settings in {kib}>>.
+--
+
+. {metricbeat-ref}/metricbeat-installation.html[Install {metricbeat}] on the 
+same server as {kib}.
+
+. Enable the {kib} module in {metricbeat}. +
++
+--
+For example, to enable the default configuration in the `modules.d` directory, 
+run the following command:
+
+["source","sh",subs="attributes,callouts"]
+----------------------------------------------------------------------
+metricbeat modules enable kibana
+----------------------------------------------------------------------
+
+For more information, see 
+{metricbeat-ref}/configuration-metricbeat.html[Specify which modules to run] and 
+{metricbeat-ref}/metricbeat-module-kibana.html[{kib} module]. 
+--
+
+. Configure the {kib} module in {metricbeat}. +
++
+--
+You must specify the following settings in the `modules.d/kibana.yml` file:
+
+[source,yaml]
+----------------------------------
+- module: kibana
+  metricsets:
+    - stats
+  period: 10s
+  hosts: ["http://localhost:5601"] <1>
+  xpack.enabled: true
+----------------------------------
+<1> This setting identifies the host and port number that are used to access {kib}.  
+
+NOTE: If you configured {kib} to use <<configuring-tls,encrypted communications>>, 
+you must access it via HTTPS. For example, `https://localhost:5601`. 
+
+--
+
+. Identify where to send the monitoring data. +
++
+--
+TIP: In production environments, we strongly recommend using a separate cluster 
+(referred to as the _monitoring cluster_) to store the data. Using a separate 
+monitoring cluster prevents production cluster outages from impacting your 
+ability to access your monitoring data. It also prevents monitoring activities 
+from impacting the performance of your production cluster.
+
+For example, specify the {es} output information in the {metricbeat} 
+configuration file (`metricbeat.yml`):
+
+[source,yaml]
+----------------------------------
+output.elasticsearch:
+  hosts: ["http://es-mon-1:9200", "http://es-mon2:9200"] <1>
+----------------------------------
+<1> In this example, the data is stored on a monitoring cluster with nodes 
+`es-mon-1` and `es-mon-2`. 
+
+NOTE: If you configured the monitoring cluster to use 
+{ref}/configuring-tls.html[encrypted communications], you must access it via 
+HTTPS. For example, `https://es-mon-1:9200`. 
+
+For more information about these configuration options, see 
+{metricbeat-ref}/elasticsearch-output.html[Configure the {es} output].
+
+--
+
+. <<start-stop,Start {kib}>>.
+
+. {metricbeat-ref}/metricbeat-starting.html[Start {metricbeat}]. 
+
+. <<monitoring-data,View the monitoring data in {kib}>>. 

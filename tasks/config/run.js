@@ -125,6 +125,13 @@ module.exports = function (grunt) {
         ...browserTestServerFlags,
       ]
     }),
+    browserSCSS: createKbnServerTask({
+      flags: [
+        ...browserTestServerFlags,
+        '--optimize',
+        '--optimize.enabled=false'
+      ]
+    }),
 
     // used by the test:coverage task
     //    runs the kibana server to serve the instrumented version of the browser test bundle
