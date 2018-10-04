@@ -1,142 +1,63 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`dev/i18n/extract_default_translations extracts messages to en.json 1`] = `
-"{
-  \\"formats\\": {
-    \\"number\\": {
-      \\"currency\\": {
-        \\"style\\": \\"currency\\"
-      },
-      \\"percent\\": {
-        \\"style\\": \\"percent\\"
-      }
+exports[`dev/i18n/extract_default_translations extracts messages from path to map 1`] = `
+Array [
+  Array [
+    "plugin_1.id_1",
+    Object {
+      "context": undefined,
+      "message": "Message 1",
     },
-    \\"date\\": {
-      \\"short\\": {
-        \\"month\\": \\"numeric\\",
-        \\"day\\": \\"numeric\\",
-        \\"year\\": \\"2-digit\\"
-      },
-      \\"medium\\": {
-        \\"month\\": \\"short\\",
-        \\"day\\": \\"numeric\\",
-        \\"year\\": \\"numeric\\"
-      },
-      \\"long\\": {
-        \\"month\\": \\"long\\",
-        \\"day\\": \\"numeric\\",
-        \\"year\\": \\"numeric\\"
-      },
-      \\"full\\": {
-        \\"weekday\\": \\"long\\",
-        \\"month\\": \\"long\\",
-        \\"day\\": \\"numeric\\",
-        \\"year\\": \\"numeric\\"
-      }
+  ],
+  Array [
+    "plugin_1.id_2",
+    Object {
+      "context": "Message context",
+      "message": "Message 2",
     },
-    \\"time\\": {
-      \\"short\\": {
-        \\"hour\\": \\"numeric\\",
-        \\"minute\\": \\"numeric\\"
-      },
-      \\"medium\\": {
-        \\"hour\\": \\"numeric\\",
-        \\"minute\\": \\"numeric\\",
-        \\"second\\": \\"numeric\\"
-      },
-      \\"long\\": {
-        \\"hour\\": \\"numeric\\",
-        \\"minute\\": \\"numeric\\",
-        \\"second\\": \\"numeric\\",
-        \\"timeZoneName\\": \\"short\\"
-      },
-      \\"full\\": {
-        \\"hour\\": \\"numeric\\",
-        \\"minute\\": \\"numeric\\",
-        \\"second\\": \\"numeric\\",
-        \\"timeZoneName\\": \\"short\\"
-      }
-    }
-  },
-  \\"plugin_1.id_1\\": \\"Message 1\\",
-  \\"plugin_1.id_2\\": {
-    \\"text\\": \\"Message 2\\",
-    \\"comment\\": \\"Message context\\"
-  },
-  \\"plugin_1.id_3\\": \\"Message 3\\",
-  \\"plugin_1.id_4\\": \\"Message 4\\",
-  \\"plugin_1.id_5\\": \\"Message 5\\",
-  \\"plugin_1.id_6\\": \\"Message 6\\",
-  \\"plugin_1.id_7\\": \\"Message 7\\"
-}"
-`;
-
-exports[`dev/i18n/extract_default_translations injects default formats into en.json 1`] = `
-"{
-  \\"formats\\": {
-    \\"number\\": {
-      \\"currency\\": {
-        \\"style\\": \\"currency\\"
-      },
-      \\"percent\\": {
-        \\"style\\": \\"percent\\"
-      }
+  ],
+  Array [
+    "plugin_1.id_3",
+    Object {
+      "context": undefined,
+      "message": "Message 3",
     },
-    \\"date\\": {
-      \\"short\\": {
-        \\"month\\": \\"numeric\\",
-        \\"day\\": \\"numeric\\",
-        \\"year\\": \\"2-digit\\"
-      },
-      \\"medium\\": {
-        \\"month\\": \\"short\\",
-        \\"day\\": \\"numeric\\",
-        \\"year\\": \\"numeric\\"
-      },
-      \\"long\\": {
-        \\"month\\": \\"long\\",
-        \\"day\\": \\"numeric\\",
-        \\"year\\": \\"numeric\\"
-      },
-      \\"full\\": {
-        \\"weekday\\": \\"long\\",
-        \\"month\\": \\"long\\",
-        \\"day\\": \\"numeric\\",
-        \\"year\\": \\"numeric\\"
-      }
+  ],
+  Array [
+    "plugin_1.id_4",
+    Object {
+      "context": undefined,
+      "message": "Message 4",
     },
-    \\"time\\": {
-      \\"short\\": {
-        \\"hour\\": \\"numeric\\",
-        \\"minute\\": \\"numeric\\"
-      },
-      \\"medium\\": {
-        \\"hour\\": \\"numeric\\",
-        \\"minute\\": \\"numeric\\",
-        \\"second\\": \\"numeric\\"
-      },
-      \\"long\\": {
-        \\"hour\\": \\"numeric\\",
-        \\"minute\\": \\"numeric\\",
-        \\"second\\": \\"numeric\\",
-        \\"timeZoneName\\": \\"short\\"
-      },
-      \\"full\\": {
-        \\"hour\\": \\"numeric\\",
-        \\"minute\\": \\"numeric\\",
-        \\"second\\": \\"numeric\\",
-        \\"timeZoneName\\": \\"short\\"
-      }
-    }
-  },
-  \\"plugin_2.message-id\\": \\"Message text\\"
-}"
+  ],
+  Array [
+    "plugin_1.id_5",
+    Object {
+      "context": undefined,
+      "message": "Message 5",
+    },
+  ],
+  Array [
+    "plugin_1.id_6",
+    Object {
+      "context": "",
+      "message": "Message 6",
+    },
+  ],
+  Array [
+    "plugin_1.id_7",
+    Object {
+      "context": undefined,
+      "message": "Message 7",
+    },
+  ],
+]
 `;
 
 exports[`dev/i18n/extract_default_translations throws on id collision 1`] = `
 "[37m[41m I18N ERROR [49m[39m Error in src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3/test_file.jsx
-Error: [37m[41m I18N ERROR [49m[39m There is more than one default message for the same id \\"plugin_3.duplicate_id\\":
+Error: There is more than one default message for the same id \\"plugin_3.duplicate_id\\":
 \\"Message 1\\" and \\"Message 2\\""
 `;
 
-exports[`dev/i18n/extract_default_translations throws on wrong message namespace 1`] = `"[37m[41m I18N ERROR [49m[39m Expected \\"wrong_plugin_namespace.message-id\\" id to have \\"plugin_2\\" namespace. See i18nrc.json for the list of supported namespaces."`;
+exports[`dev/i18n/extract_default_translations throws on wrong message namespace 1`] = `"Expected \\"wrong_plugin_namespace.message-id\\" id to have \\"plugin_2\\" namespace. See .i18nrc.json for the list of supported namespaces."`;

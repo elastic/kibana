@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function mysqlLogsSpecProvider() {
+export function mysqlLogsSpecProvider(server, context) {
   const moduleName = 'mysql';
   const geoipRequired = false;
   const uaRequired = false;
@@ -36,7 +36,6 @@ export function mysqlLogsSpecProvider() {
       defaultMessage: 'Collect and parse error and slow logs created by MySQL.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.mysqlLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `mysql` Filebeat module parses error and slow logs created by MySQL. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -60,7 +59,7 @@ export function mysqlLogsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/mysql_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function traefikLogsSpecProvider() {
+export function traefikLogsSpecProvider(server, context) {
   const moduleName = 'traefik';
   const geoipRequired = false;
   const uaRequired = false;
@@ -36,7 +36,6 @@ export function traefikLogsSpecProvider() {
       defaultMessage: 'Collect and parse access logs created by the Traefik Proxy.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.traefikLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `traefik` Filebeat module parses access logs created by Traefik. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -60,7 +59,7 @@ export function traefikLogsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/traefik_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

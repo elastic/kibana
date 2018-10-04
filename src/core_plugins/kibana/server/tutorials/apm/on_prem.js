@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
 import {
   createWindowsServerInstructions,
@@ -44,7 +45,9 @@ export function onPremInstructions(apmIndexPattern) {
   return {
     instructionSets: [
       {
-        title: 'APM Server',
+        title: i18n.translate('kbn.server.tutorials.apm.apmServer.title', {
+          defaultMessage: 'APM Server',
+        }),
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.OSX,
@@ -64,11 +67,21 @@ export function onPremInstructions(apmIndexPattern) {
           },
         ],
         statusCheck: {
-          title: 'APM Server status',
-          text: 'Make sure APM Server is running before you start implementing the APM agents.',
-          btnLabel: 'Check APM Server status',
-          success: 'You have correctly setup APM-Server',
-          error: 'APM-Server has still not connected to Elasticsearch',
+          title: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.title', {
+            defaultMessage: 'APM Server status',
+          }),
+          text: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.text', {
+            defaultMessage: 'Make sure APM Server is running before you start implementing the APM agents.',
+          }),
+          btnLabel: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.btnLabel', {
+            defaultMessage: 'Check APM Server status',
+          }),
+          success: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.successMessage', {
+            defaultMessage: 'You have correctly setup APM Server',
+          }),
+          error: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.errorMessage', {
+            defaultMessage: 'APM Server has still not connected to Elasticsearch',
+          }),
           esHitsCheck: {
             index: apmIndexPattern,
             query: {
@@ -84,7 +97,9 @@ export function onPremInstructions(apmIndexPattern) {
         },
       },
       {
-        title: 'APM Agents',
+        title: i18n.translate('kbn.server.tutorials.apm.apmAgents.title', {
+          defaultMessage: 'APM Agents',
+        }),
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.NODE,
@@ -120,11 +135,21 @@ export function onPremInstructions(apmIndexPattern) {
           },
         ],
         statusCheck: {
-          title: 'Agent status',
-          text: 'Make sure your application is running and the agents are sending data.',
-          btnLabel: 'Check agent status',
-          success: 'Data successfully received from one or more agents',
-          error: `No data has been received from agents yet`,
+          title: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.title', {
+            defaultMessage: 'Agent status',
+          }),
+          text: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.text', {
+            defaultMessage: 'Make sure your application is running and the agents are sending data.',
+          }),
+          btnLabel: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.btnLabel', {
+            defaultMessage: 'Check agent status',
+          }),
+          success: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.successMessage', {
+            defaultMessage: 'Data successfully received from one or more agents',
+          }),
+          error: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.errorMessage', {
+            defaultMessage: 'No data has been received from agents yet',
+          }),
           esHitsCheck: {
             index: apmIndexPattern,
             query: {

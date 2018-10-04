@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function mysqlMetricsSpecProvider() {
+export function mysqlMetricsSpecProvider(server, context) {
   const moduleName = 'mysql';
   return {
     id: 'mysqlMetrics',
@@ -33,7 +33,6 @@ export function mysqlMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from MySQL.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.mysqlMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `mysql` Metricbeat module fetches internal metrics from the MySQL server. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -57,7 +56,7 @@ export function mysqlMetricsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/mysql_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

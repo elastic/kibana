@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 6286.674715909091']);
     await dashboardExpect.tsvbTableCellCount(20);
     await dashboardExpect.tsvbTimeSeriesLegendCount(1);
-    await dashboardExpect.tsvbTopNValuesExist(['5,734.79', '6,286.67']);
+    await dashboardExpect.tsvbTopNValuesExist(['5,734.79', '6,286.675']);
     await dashboardExpect.vegaTextsExist(['5,000']);
   };
 

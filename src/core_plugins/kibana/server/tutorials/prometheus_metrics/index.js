@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function prometheusMetricsSpecProvider() {
+export function prometheusMetricsSpecProvider(server, context) {
   const moduleName = 'prometheus';
   return {
     id: moduleName + 'Metrics',
@@ -34,7 +34,6 @@ export function prometheusMetricsSpecProvider() {
       defaultMessage: 'Fetch metrics from a Prometheus exporter.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.prometheusMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `{moduleName}` Metricbeat module fetches metrics from Prometheus endpoint. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -55,7 +54,7 @@ export function prometheusMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

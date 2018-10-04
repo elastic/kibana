@@ -31,6 +31,8 @@ function executeJobFn(server) {
   const crypto = cryptoFactory(server);
   const compatibilityShim = compatibilityShimFactory(server);
 
+  const serverBasePath = server.config().get('server.basePath');
+
   const decryptJobHeaders = async (job) => {
     const decryptedHeaders = await crypto.decrypt(job.headers);
     return { job, decryptedHeaders };
@@ -44,6 +46,10 @@ function executeJobFn(server) {
   const getCustomLogo = async ({ job, filteredHeaders }) => {
     const fakeRequest = {
       headers: filteredHeaders,
+      // This is used by the spaces SavedObjectClientWrapper to determine the existing space.
+      // We use the basePath from the saved job, which we'll have post spaces being implemented;
+      // or we use the server base path, which uses the default space
+      getBasePath: () => job.basePath || serverBasePath
     };
 
     const savedObjects = server.savedObjects;

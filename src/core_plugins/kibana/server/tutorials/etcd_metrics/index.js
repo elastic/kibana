@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function etcdMetricsSpecProvider() {
+export function etcdMetricsSpecProvider(server, context) {
   const moduleName = 'etcd';
   return {
     id: 'etcdMetrics',
@@ -34,7 +34,6 @@ export function etcdMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from the Etcd server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.etcdMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `etcd` Metricbeat module fetches internal metrics from Etcd. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -54,7 +53,7 @@ export function etcdMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function muninMetricsSpecProvider() {
+export function muninMetricsSpecProvider(server, context) {
   const moduleName = 'munin';
   return {
     id: 'muninMetrics',
@@ -34,7 +34,6 @@ export function muninMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from the Munin server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.muninMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `munin` Metricbeat module fetches internal metrics from Munin. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -54,7 +53,7 @@ export function muninMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };
