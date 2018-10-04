@@ -2,6 +2,7 @@
   width: 100%;
   margin: 0 $euiSizeXS;
 
+  // Removes the browser's number stepper
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;

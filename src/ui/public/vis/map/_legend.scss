@@ -1,12 +1,12 @@
 .visMapLegend {
   @include fontSize(11px);
+  @include euiBottomShadowMedium($color: $euiShadowColorLarge, $opacity: .1);
   font-family: $euiFontFamily;
   font-weight: $euiFontWeightMedium;
   line-height: $euiLineHeight;
   color: $euiColorDarkShade;
   padding: $euiSizeS;
   background: transparentize($euiColorEmptyShade, .8);
-  @include euiBottomShadowMedium($color: $euiShadowColorLarge, $opacity: .1);
   border-radius: $euiBorderRadius;
 
   i {

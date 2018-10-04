@@ -24,8 +24,8 @@
 }
 
 .vgaVis__controls {
-  display: flex;
   @include euiFontSizeS;
+  display: flex;
 
   &:not(:empty) {
     padding: $euiSizeS 0; // Adding a little bit of padding helps with the unnecessary scrollbars
@@ -91,17 +91,15 @@
 }
 
 .vgaVis__message--warn .vgaVis__messageCode {
-  $backgroundColor: tintOrShade($euiColorWarning, 90%, 70%);
-  $textColor: makeHighContrastColor($euiColorWarning, $backgroundColor);
-  background-color: $backgroundColor;
-  color: $textColor;
+  $calculatedBackgroundColor: tintOrShade($euiColorWarning, 90%, 70%);
+  background-color: $calculatedBackgroundColor;
+  color: makeHighContrastColor($euiColorWarning, $calculatedBackgroundColor);
 }
 
 .vgaVis__message--err .vgaVis__messageCode {
-  $backgroundColor: tintOrShade($euiColorDanger, 90%, 70%);
-  $textColor: makeHighContrastColor($euiColorDanger, $backgroundColor);
-  background-color: $backgroundColor;
-  color: $textColor;
+  $calculateBackgroundColor: tintOrShade($euiColorDanger, 90%, 70%);
+  background-color: $calculateBackgroundColor;
+  color: makeHighContrastColor($euiColorDanger, $calculateBackgroundColor);
 }
 
 

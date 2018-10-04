@@ -6,8 +6,8 @@
 }
 
 .mtrVis__value {
-  font-weight: $euiFontWeightBold;
   @include euiTextTruncate;
+  font-weight: $euiFontWeightBold;
 }
 
 .mtrVis__container {

@@ -29,19 +29,18 @@
     min-height: $euiSize * 15;
   }
 
-  // SASSTODO: Update from other PR
-  #editor_actions {
-    position: absolute;
-    margin: 0.6em 1.3em;
-    z-index: 80;
-
-    ul.dropdown-menu {
-      left: auto;
-      right: 0;
-    }
-  }
+  position: relative;
 }
 
 .vgaEditor__aceEditor {
   flex: 1 1 auto;
+}
+
+.vgaEditor__aceEditorActions {
+  position: absolute;
+  z-index: $euiZLevel1;
+  top: 0;
+  // Adjust for possible scrollbars
+  right: $euiSize;
+  line-height: 1;
 }
