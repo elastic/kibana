@@ -37,9 +37,10 @@ Add the following setting in the `kibana.yml` file on your production cluster:
 xpack.monitoring.kibana.collection.enabled: false
 ----------------------------------
 
+Leave the `xpack.monitoring.enabled` set to its default value (`true`). 
+
 For more information, see 
 <<monitoring-settings-kb,Monitoring settings in {kib}>>.
-//TBD: What does xpack.monitoring.enabled need to be set to?
 --
 
 . {metricbeat-ref}/metricbeat-installation.html[Install {metricbeat}] on the 
