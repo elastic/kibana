@@ -39,7 +39,6 @@ import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
 import { taskManagerMixin } from './task_manager';
-import { KibanaMigrator } from './saved_objects/migrations';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
@@ -145,7 +144,7 @@ export default class KbnServer {
 
     const { server, config } = this;
 
-    await new KibanaMigrator({ kbnServer: this }).migrateIndex();
+    await server.kibanaMigrator.awaitMigration();
 
     if (isWorker) {
       // help parent process know when we are ready

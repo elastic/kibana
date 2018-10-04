@@ -161,6 +161,11 @@ export const aeroelastic = ({ dispatch, getState }) => {
       pages.map(p => p.id).forEach(createStore);
     }
 
+    if (action.type === restoreHistory.toString()) {
+      aero.clearStores();
+      action.payload.workpad.pages.map(p => p.id).forEach(createStore);
+    }
+
     if (action.type === appReady.toString()) {
       const pages = getPages(getState());
       aero.clearStores();
