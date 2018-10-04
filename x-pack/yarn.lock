@@ -10,9 +10,9 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@elastic/eui@3.0.6":
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.0.6.tgz#d707bc06c9e0c60723b8659ec1602a59777a008e"
+"@elastic/eui@3.0.7":
+  version "3.0.7"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-3.0.7.tgz#628b86450c99f5451ca05bfb4936d54e80c6e80f"
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"

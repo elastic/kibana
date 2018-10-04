@@ -94,18 +94,20 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
               >
                 <EuiModal
                   className="euiModal--confirmation"
+                  maxWidth={true}
                   onClose={[Function]}
                 >
                   <Component
                     focusTrapOptions={
                       Object {
                         "fallbackFocus": [Function],
+                        "initialFocus": undefined,
                       }
                     }
                   >
                     <div>
                       <div
-                        className="euiModal euiModal--confirmation"
+                        className="euiModal euiModal--maxWidth-default euiModal--confirmation"
                         onKeyDown={[Function]}
                         tabIndex={0}
                       >
@@ -113,6 +115,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                           aria-label="Closes this modal window"
                           className="euiModal__closeIcon"
                           color="text"
+                          iconSize="m"
                           iconType="cross"
                           onClick={[Function]}
                           type="button"
@@ -258,7 +261,9 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                   <span
                                     className="euiButtonEmpty__content"
                                   >
-                                    <span>
+                                    <span
+                                      className="euiButtonEmpty__text"
+                                    >
                                       Cancel
                                     </span>
                                   </span>
@@ -454,7 +459,9 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                             <span
                               className="euiButtonEmpty__content"
                             >
-                              <span>
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
                                 Cancel
                               </span>
                             </span>
@@ -778,7 +785,9 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                             <span
                               className="euiButtonEmpty__content"
                             >
-                              <span>
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
                                 Cancel
                               </span>
                             </span>
@@ -1102,7 +1111,9 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                             <span
                               className="euiButtonEmpty__content"
                             >
-                              <span>
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
                                 Cancel
                               </span>
                             </span>
@@ -1426,7 +1437,9 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                             <span
                               className="euiButtonEmpty__content"
                             >
-                              <span>
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
                                 Cancel
                               </span>
                             </span>
@@ -1750,7 +1763,9 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                             <span
                               className="euiButtonEmpty__content"
                             >
-                              <span>
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
                                 Cancel
                               </span>
                             </span>

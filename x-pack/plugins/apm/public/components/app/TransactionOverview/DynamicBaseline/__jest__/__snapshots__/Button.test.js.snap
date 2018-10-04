@@ -17,6 +17,7 @@ exports[`MLButton should render initial state 1`] = `
     </EuiButton>
   }
   closePopover={[Function]}
+  hasArrow={true}
   isOpen={false}
   ownFocus={false}
   panelPaddingSize="none"
