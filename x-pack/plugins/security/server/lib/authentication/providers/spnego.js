@@ -21,6 +21,18 @@ import { DeauthenticationResult } from '../deauthentication_result';
  */
 
 /**
+ * Checks the error returned by Elasticsearch as the result of `authenticate` call and returns `true` if request
+ * has been rejected because of expired token, otherwise returns `false`.
+ * @param {Object} err Error returned from Elasticsearch.
+ * @returns {boolean}
+ */
+function isAccessTokenExpiredError(err) {
+  return err.body
+    && err.body.error
+    && err.body.error.reason === 'token expired';
+}
+
+/**
  * Provider that supports SAML request authentication.
  */
 export class SPNEGOAuthenticationProvider {
@@ -152,7 +164,11 @@ export class SPNEGOAuthenticationProvider {
       // it's called with this request once again down the line (e.g. in the next authentication provider).
       delete request.headers.authorization;
 
-      return AuthenticationResult.failed(err);
+      if (isAccessTokenExpiredError(err)) {
+        return AuthenticationResult.challenge('negotiate');
+      } else {
+        return AuthenticationResult.failed(err);
+      }
     }
   }
 
@@ -165,41 +181,25 @@ export class SPNEGOAuthenticationProvider {
   async deauthenticate(request, state) {
     this._options.log(['debug', 'security', 'spnego'], `Trying to deauthenticate user via ${request.url.path}.`);
 
-    if ((!state || !state.accessToken) && !request.query.SAMLRequest) {
-      this._options.log(['debug', 'security', 'spnego'], 'There is neither access token nor SAML session to invalidate.');
+    if ((!state || !state.accessToken)) {
+      this._options.log(['debug', 'security', 'spnego'], 'There is no access token to invalidate');
       return DeauthenticationResult.notHandled();
     }
 
-    let logoutArgs;
-    if (request.query.SAMLRequest) {
-      this._options.log(['debug', 'security', 'spnego'], 'Logout has been initiated by the Identity Provider.');
-      logoutArgs = [
-        'shield.samlInvalidate',
-        // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
-        { body: { queryString: request.url.search.slice(1), acs: this._getACS() } }
-      ];
-    } else {
-      this._options.log(['debug', 'security', 'spnego'], 'Logout has been initiated by the user.');
-      logoutArgs = [
-        'shield.samlLogout',
-        { body: { token: state.accessToken, refresh_token: state.refreshToken } }
-      ];
-    }
+    console.log('shield.deleteToken',
+      { body: { token: state.accessToken } });
+    this._options.log(['debug', 'security', 'spnego'], 'Logout has been initiated by the user.');
+    const logoutArgs = [
+      'shield.deleteToken',
+      { body: { token: state.accessToken } }
+    ];
 
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/logout (invalidate)`.
-      const { redirect } = await this._options.client.callWithInternalUser(...logoutArgs);
+      await this._options.client.callWithInternalUser(...logoutArgs);
 
       this._options.log(['debug', 'security', 'spnego'], 'User session has been successfully invalidated.');
-
-      // Having non-null `redirect` field within logout response means that IdP
-      // supports SAML Single Logout and we should redirect user to the specified
-      // location to properly complete logout.
-      if (redirect != null) {
-        this._options.log(['debug', 'security', 'spnego'], 'Redirecting user to Identity Provider to complete logout.');
-        return DeauthenticationResult.redirectTo(redirect);
-      }
 
       return DeauthenticationResult.succeeded();
     } catch(err) {

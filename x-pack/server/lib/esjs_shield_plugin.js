@@ -365,13 +365,31 @@
     /**
      * Get token.
      *
-     * @param {string} grant_type Currently only "refresh_token" grant type is supported.
-     * @param {string} refresh_token One-time refresh token that will be exchanged to the new access/refresh token pair.
+     * @param {string} grant_type The type of grant. Supported grant types are: password, client_credentials and refresh_token.
+     * @param {string} password The user’s password. If you specify the password grant type, this parameter is required. This parameter is not valid with any other supported grant type.
+     * @param {string} refresh_token If you specify the refresh_token grant type, this parameter is required. It contains the string that was returned when you created the token and enables you to extend its life. This parameter is not valid with any other supported grant type.
+     * @param {string} scope The scope of the token. Currently tokens are only issued for a scope of FULL regardless of the value sent with the request.
+     * @param {string} username The username that identifies the user. If you specify the password grant type, this parameter is required. This parameter is not valid with any other supported grant type.
      *
      * @returns {{access_token: string, type: string, expires_in: number, refresh_token: string}}
      */
     shield.getToken = ca({
       method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_xpack/security/oauth2/token'
+      }
+    });
+
+    /**
+     * Delete token.
+     *
+     * @param {string} token An access token.
+     *
+     * @returns {{created: boolean}}
+     */
+    shield.deleteToken = ca({
+      method: 'DELETE',
       needBody: true,
       url: {
         fmt: '/_xpack/security/oauth2/token'
