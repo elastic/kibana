@@ -558,8 +558,8 @@ export function explorerChartsContainerServiceFactory(
 
       if ((maxMs - minMs) < maxTimeSpan) {
         // Expand out to cover as much as the requested time span as possible.
-        minMs = Math.max(earliestMs, maxMs - maxTimeSpan);
-        maxMs = Math.min(latestMs, minMs + maxTimeSpan);
+        minMs = Math.max(earliestMs, minMs - maxTimeSpan);
+        maxMs = Math.min(latestMs, maxMs + maxTimeSpan);
       }
 
       chartRange = { min: minMs, max: maxMs };
