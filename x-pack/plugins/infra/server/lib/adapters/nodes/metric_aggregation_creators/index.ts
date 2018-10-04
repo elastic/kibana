@@ -8,6 +8,7 @@ import { InfraMetricType } from '../../../../../common/graphql/types';
 import { count } from './count';
 import { cpu } from './cpu';
 import { load } from './load';
+import { logRate } from './log_rate';
 import { memory } from './memory';
 import { rx } from './rx';
 import { tx } from './tx';
@@ -19,4 +20,5 @@ export const metricAggregationCreators = {
   [InfraMetricType.rx]: rx,
   [InfraMetricType.tx]: tx,
   [InfraMetricType.load]: load,
+  [InfraMetricType.logRate]: logRate,
 };

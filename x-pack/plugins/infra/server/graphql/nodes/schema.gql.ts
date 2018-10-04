@@ -45,6 +45,7 @@ export const nodesSchema: any = gql`
     memory
     tx
     rx
+    logRate
   }
 
   input InfraMetricInput {

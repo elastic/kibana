@@ -39,6 +39,7 @@ const OPTIONS = {
     { text: 'Load', value: InfraMetricType.load },
     { text: 'Inbound Traffic', value: InfraMetricType.rx },
     { text: 'Outbound Traffic', value: InfraMetricType.tx },
+    { text: 'Log Rate', value: InfraMetricType.logRate },
   ],
 };
 

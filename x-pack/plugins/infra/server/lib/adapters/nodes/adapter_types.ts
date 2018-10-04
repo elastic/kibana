@@ -207,6 +207,12 @@ export interface InfraDerivativeAgg {
   };
 }
 
+export interface InfraCumulativeSumAgg {
+  cumulative_sum: {
+    buckets_path: string;
+  };
+}
+
 export interface InfraBucketScriptAgg {
   bucket_script: {
     buckets_path: { [key: string]: string };
@@ -218,7 +224,12 @@ export interface InfraBucketScriptAgg {
   };
 }
 
-export type InfraAgg = InfraBucketScriptAgg | InfraDerivativeAgg | InfraAvgAgg | InfraMaxAgg;
+export type InfraAgg =
+  | InfraBucketScriptAgg
+  | InfraDerivativeAgg
+  | InfraAvgAgg
+  | InfraMaxAgg
+  | InfraCumulativeSumAgg;
 export interface InfraNodeMetricAgg {
   [key: string]: InfraAgg;
 }

@@ -1586,7 +1586,8 @@
           { "name": "load", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "memory", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "tx", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "rx", "description": "", "isDeprecated": false, "deprecationReason": null }
+          { "name": "rx", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "logRate", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },

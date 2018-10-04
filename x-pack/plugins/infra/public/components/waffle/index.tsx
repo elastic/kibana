@@ -59,6 +59,7 @@ const METRIC_FORMATTERS: MetricFormatters = {
   },
   [InfraMetricType.rx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
   [InfraMetricType.tx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  [InfraMetricType.logRate]: { formatter: InfraFormatterType.abvNumber, template: '{{value}}/s' },
 };
 
 const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = []): number[] => {

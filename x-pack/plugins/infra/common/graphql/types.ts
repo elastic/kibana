@@ -565,6 +565,7 @@ export enum InfraMetricType {
   memory = 'memory',
   tx = 'tx',
   rx = 'rx',
+  logRate = 'logRate',
 }
 
 export enum InfraNodeType {
