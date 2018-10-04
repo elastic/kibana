@@ -234,7 +234,7 @@ export class StepDateHistogramUi extends Component {
                       link: (
                         <EuiLink href={dateHistogramAggregationUrl} target="_blank">
                           <FormattedMessage
-                            id="xpack.rollupJobs.create.stepDateHistogram.descriptio"
+                            id="xpack.rollupJobs.create.stepDateHistogramDescription.aggregationsLinkLabel"
                             defaultMessage="date histogram aggregations"
                           />
                         </EuiLink>
@@ -246,12 +246,12 @@ export class StepDateHistogramUi extends Component {
                 <p>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepDateHistogram.sectionDataSourceDescription"
-                    defaultMessage={`
-                      Which field contains the date histogram data and how large should its time buckets be?
-                      Note that smaller, more granular intervals take up proportionally more space.
-                      You can also customize the time zone stored with the rolled-up documents.
-                      The default time zone is UTC.
-                    `}
+                    defaultMessage={
+                      "Which field contains the date histogram data and how large should its time buckets be?" +
+                      " Note that smaller, more granular intervals take up proportionally more space." +
+                      " You can also customize the time zone stored with the rolled-up documents." +
+                      " The default time zone is UTC."
+                    }
                   />
                 </p>
               </Fragment>

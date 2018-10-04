@@ -416,7 +416,7 @@ export class JobCreateUi extends Component {
     const breadcrumbs = [{
       text: (
         <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.jobs"
+          id="xpack.rollupJobs.create.breadcrumbs.jobsText"
           defaultMessage="Rollup jobs"
         />
       ),
@@ -424,7 +424,7 @@ export class JobCreateUi extends Component {
     }, {
       text: (
         <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.create"
+          id="xpack.rollupJobs.create.breadcrumbs.createText"
           defaultMessage="Create"
         />
       ),

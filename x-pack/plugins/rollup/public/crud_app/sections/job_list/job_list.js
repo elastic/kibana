@@ -142,7 +142,7 @@ export class JobListUi extends Component {
               <FormattedMessage
                 id="xpack.rollupJobs.jobList.emptyPromptDescription"
                 defaultMessage={`
-                Rollup jobs summarize and store historical data in a smaller index for future analysis.
+                  Rollup jobs summarize and store historical data in a smaller index for future analysis.
                 `}
               />
             </p>

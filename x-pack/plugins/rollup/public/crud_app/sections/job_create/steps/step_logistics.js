@@ -158,22 +158,14 @@ export class StepLogisticsUi extends Component {
             error={errorRollupCron}
             isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
             helpText={(
-              <Fragment>
-                <p>
+              <p>
+                <EuiLink href={cronUrl} target="_blank">
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLabel"
-                    defaultMessage="{link}"
-                    values={{ link: (
-                      <EuiLink href={cronUrl} target="_blank">
-                        <FormattedMessage
-                          id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.link"
-                          defaultMessage="Learn more about cron syntax"
-                        />
-                      </EuiLink>
-                    ) }}
+                    id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.link"
+                    defaultMessage="Learn more about cron syntax"
                   />
-                </p>
-              </Fragment>
+                </EuiLink>
+              </p>
             )}
             fullWidth
           >
@@ -271,7 +263,7 @@ export class StepLogisticsUi extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogisticsDescription"
+                  id="xpack.rollupJobs.create.stepLogistics.logisticsDescription"
                   defaultMessage="Define the manner in which data will be rolled up."
                 />
               </p>
@@ -417,9 +409,7 @@ export class StepLogisticsUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionScheduleDescription"
-                defaultMessage={`
-                  How often should data be rolled up?
-                `}
+                defaultMessage="How often should data be rolled up?"
               />
             )}
             fullWidth
@@ -441,10 +431,7 @@ export class StepLogisticsUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeDescription"
-                defaultMessage={`
-                  A larger page size
-                  will roll up data more quickly, but will require more memory during processing.
-                `}
+                defaultMessage="A larger page size will roll up data more quickly, but will require more memory during processing."
               />
             )}
             fullWidth
@@ -484,10 +471,10 @@ export class StepLogisticsUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionDelayDescription"
-                defaultMessage={`
-                  Waiting will yield a higher-fidelity rollup by adjusting for variable ingest latency.
-                  By default, the rollup job attempts to roll up all data that is available.
-                `}
+                defaultMessage={
+                  "Waiting will yield a higher-fidelity rollup by adjusting for variable ingest latency." +
+                  " By default, the rollup job attempts to roll up all data that is available."
+                }
               />
             )}
             fullWidth
