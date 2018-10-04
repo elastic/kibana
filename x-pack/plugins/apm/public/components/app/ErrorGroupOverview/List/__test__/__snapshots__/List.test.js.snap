@@ -54,9 +54,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <span
-                  className="euiButtonEmpty__text"
-                >
+                <span>
                   Sorting
                 </span>
               </span>
@@ -68,21 +66,10 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
     <table
       className="euiTable euiTable--responsive"
     >
-      <caption
-        aria-live="polite"
-        aria-relevant="text"
-        className="euiScreenReaderOnly"
-        role="status"
-      >
-        Below is a table of 
-        0
-         items.
-      </caption>
       <thead>
         <tr>
           <th
             className="euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_groupId_0"
             scope="col"
             width="96px"
           >
@@ -98,7 +85,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_message_1"
             scope="col"
             width="50%"
           >
@@ -114,7 +100,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_handled_2"
             scope="col"
           >
             <div
@@ -127,13 +112,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_occurrenceCount_3"
             scope="col"
           >
             <button
               aria-label="Sort Occurrences ascending"
               className="euiTableHeaderButton"
-              data-test-subj="tableHeaderSortButton"
               onClick={[Function]}
               type="button"
             >
@@ -150,13 +133,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
             scope="col"
           >
             <button
               aria-label="Sort Latest occurrence ascending"
               className="euiTableHeaderButton euiTableHeaderButton-isSorted"
-              data-test-subj="tableHeaderSortButton"
               onClick={[Function]}
               type="button"
             >
@@ -274,9 +255,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <span
-                  className="euiButtonEmpty__text"
-                >
+                <span>
                   Rows per page: 25
                 </span>
               </span>
@@ -372,9 +351,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <span
-                  className="euiButtonEmpty__text"
-                >
+                <span>
                   Sorting
                 </span>
               </span>
@@ -386,21 +363,10 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
     <table
       className="euiTable euiTable--responsive"
     >
-      <caption
-        aria-live="polite"
-        aria-relevant="text"
-        className="euiScreenReaderOnly"
-        role="status"
-      >
-        Below is a table of 
-        4
-         items.
-      </caption>
       <thead>
         <tr>
           <th
             className="euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_groupId_0"
             scope="col"
             width="96px"
           >
@@ -416,7 +382,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_message_1"
             scope="col"
             width="50%"
           >
@@ -432,7 +397,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_handled_2"
             scope="col"
           >
             <div
@@ -445,13 +409,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_occurrenceCount_3"
             scope="col"
           >
             <button
               aria-label="Sort Occurrences ascending"
               className="euiTableHeaderButton"
-              data-test-subj="tableHeaderSortButton"
               onClick={[Function]}
               type="button"
             >
@@ -468,13 +430,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </th>
           <th
             className="euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
             scope="col"
           >
             <button
               aria-label="Sort Latest occurrence ascending"
               className="euiTableHeaderButton euiTableHeaderButton-isSorted"
-              data-test-subj="tableHeaderSortButton"
               onClick={[Function]}
               type="button"
             >
@@ -898,9 +858,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     xlinkHref="#arrow_down-a"
                   />
                 </svg>
-                <span
-                  className="euiButtonEmpty__text"
-                >
+                <span>
                   Rows per page: 25
                 </span>
               </span>
