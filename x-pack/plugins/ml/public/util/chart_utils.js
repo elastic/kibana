@@ -136,13 +136,14 @@ const POPULATION_DISTRIBUTION_ENABLED = true;
 export function getChartType(config) {
   if (
     EVENT_DISTRIBUTION_ENABLED &&
-    config.functionDescription === 'rare'
+    config.functionDescription === 'rare' &&
+    (config.entityFields.some(f => f.fieldType === 'over') === false)
   ) {
     return CHART_TYPE.EVENT_DISTRIBUTION;
   } else if (
     POPULATION_DISTRIBUTION_ENABLED &&
     config.functionDescription === 'count' &&
-    config.entityFields.find(f => f.fieldType === 'over')
+    config.entityFields.some(f => f.fieldType === 'over')
   ) {
     return CHART_TYPE.POPULATION_DISTRIBUTION;
   }
