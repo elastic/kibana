@@ -45,10 +45,10 @@ VisTypesRegistryProvider.register((Private) => {
 
   return VisFactory.createBaseVisualization({
     name: 'vega',
-    title: i18n.translate('vega.type.title', {
+    title: i18n.translate('vega.type.vegaTitle', {
       defaultMessage: 'Vega',
     }),
-    description: i18n.translate('vega.type.description', {
+    description: i18n.translate('vega.type.vegaВescription', {
       defaultMessage: 'Create custom visualizations using Vega and VegaLite',
     }),
     icon: 'visVega',
