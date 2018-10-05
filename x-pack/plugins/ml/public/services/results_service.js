@@ -9,6 +9,7 @@
 // Service for carrying out Elasticsearch queries to obtain data for the
 // Ml Results dashboards.
 import _ from 'lodash';
+// import d3 from 'd3';
 
 import { ML_MEDIAN_PERCENTS } from '../../common/util/job_utils';
 import { escapeForElasticsearchQuery } from '../util/string_utils';
@@ -1391,6 +1392,146 @@ function getEventRateData(
   });
 }
 
+// Queries Elasticsearch to obtain event distribution i.e. the count
+// of entities over time.
+// index can be a String, or String[], of index names to search.
+// Extra query object can be supplied, or pass null if no additional query.
+// Returned response contains a results property, which is an object
+// of document counts against time (epoch millis).
+const SAMPLER_TOP_TERMS_SHARD_SIZE = 200;
+function getEventDistributionData(
+  index,
+  types,
+  splitField,
+  filterField = null,
+  query,
+  metricFunction,
+  metricFieldName,
+  timeFieldName,
+  earliestMs,
+  latestMs,
+  interval) {
+  return new Promise((resolve, reject) => {
+    // only get this data for count (used by rare chart)
+    if (metricFunction !== 'count' || splitField === undefined) {
+      return resolve([]);
+    }
+
+    // Build the criteria to use in the bool filter part of the request.
+    // Add criteria for the types, time range, entity fields,
+    // plus any additional supplied query.
+    const mustCriteria = [];
+    const shouldCriteria = [];
+
+    if (types && types.length) {
+      mustCriteria.push({ terms: { _type: types } });
+    }
+
+    mustCriteria.push({
+      range: {
+        [timeFieldName]: {
+          gte: earliestMs,
+          lte: latestMs,
+          format: 'epoch_millis'
+        }
+      }
+    });
+
+    if (query) {
+      mustCriteria.push(query);
+    }
+
+    if (filterField !== null) {
+      mustCriteria.push({
+        term: {
+          [filterField.fieldName]: filterField.fieldValue
+        }
+      });
+    }
+
+    const body = {
+      query: {
+        bool: {
+          must: mustCriteria
+        }
+      },
+      size: 0,
+      _source: {
+        excludes: []
+      },
+      aggs: {
+        byTime: {
+          date_histogram: {
+            field: timeFieldName,
+            interval: interval,
+            min_doc_count: 0
+          },
+          aggs: {
+            sample: {
+              sampler: {
+                shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE
+              },
+              aggs: {
+                entities: {
+                  terms: {
+                    field: splitField.fieldName,
+                    size: 10
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    if (shouldCriteria.length > 0) {
+      body.query.bool.should = shouldCriteria;
+      body.query.bool.minimum_should_match = shouldCriteria.length / 2;
+    }
+
+    if (metricFieldName !== undefined && metricFieldName !== '') {
+      body.aggs.byTime.aggs = {};
+
+      const metricAgg = {
+        [metricFunction]: {
+          field: metricFieldName
+        }
+      };
+
+      if (metricFunction === 'percentiles') {
+        metricAgg[metricFunction].percents = [ML_MEDIAN_PERCENTS];
+      }
+      body.aggs.byTime.aggs.metric = metricAgg;
+    }
+
+    ml.esSearch({
+      index,
+      body
+    })
+      .then((resp) => {
+        // normalize data
+        const dataByTime = _.get(resp, ['aggregations', 'byTime', 'buckets'], []);
+        const data = dataByTime.reduce((d, dataForTime) => {
+          const date = +dataForTime.key;
+          const entities = _.get(dataForTime, ['sample', 'entities', 'buckets'], []);
+          entities.forEach((entity) => {
+            d.push({
+              date,
+              entity: entity.key,
+              value: entity.doc_count
+            });
+          });
+          return d;
+        }, []);
+        resolve(data);
+      })
+      .catch((resp) => {
+        reject(resp);
+      });
+  });
+}
+
 function getModelPlotOutput(
   jobId,
   detectorIndex,
@@ -1663,6 +1804,7 @@ export const mlResultsService = {
   getRecordsForCriteria,
   getMetricData,
   getEventRateData,
+  getEventDistributionData,
   getModelPlotOutput,
   getRecordMaxScoreByTime
 };
