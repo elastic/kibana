@@ -68,11 +68,7 @@ export function initSpacesRequestInterceptors(server: any) {
         if (spaces.length > 0) {
           // render spaces selector instead of home page
           const app = server.getHiddenUiAppById('space_selector');
-          return h
-            .renderApp(app, {
-              spaces,
-            })
-            .takeover();
+          return (await h.renderApp(app, { spaces })).takeover();
         }
       } catch (error) {
         return wrapError(error);
