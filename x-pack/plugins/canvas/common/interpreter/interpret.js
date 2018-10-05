@@ -43,12 +43,7 @@ export function interpretProvider(config) {
       case 'boolean':
         return node;
       default:
-        throw new Error(
-          i18n.translate('xpack.canvas.interpreter.unknownAstObjectErrorMessage', {
-            defaultMessage: 'Unknown AST object: {node}',
-            values: { node: JSON.stringify(node) },
-          })
-        );
+        throw new Error(`Unknown AST object: ${JSON.stringify(node)}`);
     }
   }
 
