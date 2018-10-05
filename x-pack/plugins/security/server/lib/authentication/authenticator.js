@@ -8,7 +8,7 @@ import { getClient } from '../../../../../server/lib/get_client_shield';
 import { AuthScopeService } from '../auth_scope_service';
 import { BasicAuthenticationProvider } from './providers/basic';
 import { SAMLAuthenticationProvider } from './providers/saml';
-import { SPNEGOAuthenticationProvider } from './providers/spnego';
+import { KerberosAuthenticationProvider } from './providers/kerberos';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
@@ -18,7 +18,7 @@ import { Session } from './session';
 const providerMap = new Map([
   ['basic', BasicAuthenticationProvider],
   ['saml', SAMLAuthenticationProvider],
-  ['spnego', SPNEGOAuthenticationProvider],
+  ['kerberos', KerberosAuthenticationProvider],
 ]);
 
 function assertRequest(request) {

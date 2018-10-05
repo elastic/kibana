@@ -35,7 +35,7 @@ function isAccessTokenExpiredError(err) {
 /**
  * Provider that supports SAML request authentication.
  */
-export class SPNEGOAuthenticationProvider {
+export class KerberosAuthenticationProvider {
   /**
    * Server options that may be needed by authentication provider.
    * @type {?ProviderOptions}
@@ -58,7 +58,7 @@ export class SPNEGOAuthenticationProvider {
    * @returns {Promise.<AuthenticationResult>}
    */
   async authenticate(request, state) {
-    this._options.log(['debug', 'security', 'spnego'], `Trying to authenticate user request to ${request.url.path}.`);
+    this._options.log(['debug', 'security', 'kerberos'], `Trying to authenticate user request to ${request.url.path}.`);
 
     let authenticationResult = await this._authenticateViaHeader(request);
     if (state && authenticationResult.notHandled()) {
@@ -80,17 +80,17 @@ export class SPNEGOAuthenticationProvider {
    * @private
    */
   async _authenticateViaHeader(request) {
-    this._options.log(['debug', 'security', 'spnego'], 'Trying to authenticate via header.');
+    this._options.log(['debug', 'security', 'kerberos'], 'Trying to authenticate via header.');
 
     const authorization = request.headers.authorization;
     if (!authorization) {
-      this._options.log(['debug', 'security', 'spnego'], 'Authorization header is not presented.');
+      this._options.log(['debug', 'security', 'kerberos'], 'Authorization header is not presented.');
       return AuthenticationResult.notHandled();
     }
 
     const authenticationSchema = authorization.split(/\s+/)[0];
     if (authenticationSchema.toLowerCase() !== 'negotiate') {
-      this._options.log(['debug', 'security', 'spnego'], `Unsupported authentication schema: ${authenticationSchema}`);
+      this._options.log(['debug', 'security', 'kerberos'], `Unsupported authentication schema: ${authenticationSchema}`);
 
       // It's essential that we fail if non-empty, but unsupported authentication schema
       // is provided to allow authenticator to consult other authentication providers
@@ -107,7 +107,7 @@ export class SPNEGOAuthenticationProvider {
         { body: { grant_type: 'client_credentials' } }
       );
 
-      this._options.log(['debug', 'security', 'spnego'], 'Received accessToken using client_credentials grant.');
+      this._options.log(['debug', 'security', 'kerberos'], 'Received accessToken using client_credentials grant.');
 
       request.headers.authorization = `Bearer ${accessToken}`;
 
@@ -116,13 +116,13 @@ export class SPNEGOAuthenticationProvider {
         'shield.authenticate'
       );
 
-      this._options.log(['debug', 'security', 'spnego'], 'Request has been authenticated via header.');
+      this._options.log(['debug', 'security', 'kerberos'], 'Request has been authenticated via header.');
 
       return AuthenticationResult.succeeded(user, {
         accessToken
       });
     } catch(err) {
-      this._options.log(['debug', 'security', 'spnego'], `Failed to authenticate request via header: ${err.message}`);
+      this._options.log(['debug', 'security', 'kerberos'], `Failed to authenticate request via header: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -136,10 +136,10 @@ export class SPNEGOAuthenticationProvider {
    * @private
    */
   async _authenticateViaState(request, { accessToken }) {
-    this._options.log(['debug', 'security', 'spnego'], 'Trying to authenticate via state.');
+    this._options.log(['debug', 'security', 'kerberos'], 'Trying to authenticate via state.');
 
     if (!accessToken) {
-      this._options.log(['debug', 'security', 'spnego'], 'Access token is not found in state.');
+      this._options.log(['debug', 'security', 'kerberos'], 'Access token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
@@ -151,11 +151,11 @@ export class SPNEGOAuthenticationProvider {
         'shield.authenticate'
       );
 
-      this._options.log(['debug', 'security', 'spnego'], 'Request has been authenticated via state.');
+      this._options.log(['debug', 'security', 'kerberos'], 'Request has been authenticated via state.');
 
       return AuthenticationResult.succeeded(user);
     } catch(err) {
-      this._options.log(['debug', 'security', 'spnego'], `Failed to authenticate request via state: ${err.message}`);
+      this._options.log(['debug', 'security', 'kerberos'], `Failed to authenticate request via state: ${err.message}`);
 
       // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
       // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
@@ -179,16 +179,14 @@ export class SPNEGOAuthenticationProvider {
    * @returns {Promise.<DeauthenticationResult>}
    */
   async deauthenticate(request, state) {
-    this._options.log(['debug', 'security', 'spnego'], `Trying to deauthenticate user via ${request.url.path}.`);
+    this._options.log(['debug', 'security', 'kerberos'], `Trying to deauthenticate user via ${request.url.path}.`);
 
     if ((!state || !state.accessToken)) {
-      this._options.log(['debug', 'security', 'spnego'], 'There is no access token to invalidate');
+      this._options.log(['debug', 'security', 'kerberos'], 'There is no access token to invalidate');
       return DeauthenticationResult.notHandled();
     }
 
-    console.log('shield.deleteToken',
-      { body: { token: state.accessToken } });
-    this._options.log(['debug', 'security', 'spnego'], 'Logout has been initiated by the user.');
+    this._options.log(['debug', 'security', 'kerberos'], 'Logout has been initiated by the user.');
     const logoutArgs = [
       'shield.deleteToken',
       { body: { token: state.accessToken } }
@@ -199,11 +197,11 @@ export class SPNEGOAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/saml/logout (invalidate)`.
       await this._options.client.callWithInternalUser(...logoutArgs);
 
-      this._options.log(['debug', 'security', 'spnego'], 'User session has been successfully invalidated.');
+      this._options.log(['debug', 'security', 'kerberos'], 'User session has been successfully invalidated.');
 
-      return DeauthenticationResult.succeeded();
+      return DeauthenticationResult.redirectTo('/logged_out');
     } catch(err) {
-      this._options.log(['debug', 'security', 'spnego'], `Failed to deauthenticate user: ${err.message}`);
+      this._options.log(['debug', 'security', 'kerberos'], `Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);
     }
   }
