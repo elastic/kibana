@@ -6,7 +6,13 @@ exports[`CallOuts should render normally 1`] = `
     color="danger"
     iconType="cross"
     size="m"
-    title="Deprecation languages in use"
+    title={
+      <FormattedMessage
+        defaultMessage="Deprecation languages in use"
+        id="kbn.management.editIndexPattern.scripted.deprecationLangHeader"
+        values={Object {}}
+      />
+    }
   >
     <p>
       <FormattedMessage
@@ -20,7 +26,11 @@ exports[`CallOuts should render normally 1`] = `
               href="http://www.elastic.co/painlessDocs"
               type="button"
             >
-              Painless
+              <FormattedMessage
+                defaultMessage="Painless"
+                id="kbn.management.editIndexPattern.scripted.deprecationLangLabel.painlessDescription"
+                values={Object {}}
+              />
             </EuiLink>,
           }
         }

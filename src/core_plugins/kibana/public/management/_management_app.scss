@@ -1,0 +1,55 @@
+.mgtPanel {
+  margin-bottom: $euiSize;
+  background: $euiColorEmptyShade;
+}
+
+// SASSTODO: Remove when this is replaced by the side nav
+.mgtPanel__link {
+  @include euiFontSizeL;
+
+  line-height: 2; // Give some buffer for when they wrap
+
+  &.mgtPanel__link--disabled {
+    opacity: $euiColorDarkShade;
+    cursor: default;
+
+    &:hover, &:visited {
+      color: $euiColorPrimary;
+    }
+  }
+}
+
+// SASSTODO: Remove when this form is replaced by EUI
+kbn-management-objects {
+  form {
+    margin-bottom: $euiSize;
+  }
+  .list-unstyled {
+    li {
+      border-bottom: $euiBorderThin;
+      padding: $euiSizeS;
+    }
+  }
+  .empty {
+    color: $euiColorDarkShade;
+  }
+
+  .item {
+    padding: $euiSizeM;
+
+    .item-title {
+      margin-left: $euiSizeL;
+    }
+
+    .actions {
+      margin-top: $euiSizeXS;
+    }
+  }
+
+  .header {
+    .title, .controls {
+      padding-right: 1em;
+      display: inline-block;
+    }
+  }
+}

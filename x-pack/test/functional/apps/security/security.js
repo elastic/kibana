@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }) {
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
+        await PageObjects.security.logout();
       });
 
       after(async () => {
@@ -29,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('displays message if login fails', async () => {
-        await PageObjects.security.loginPage.login('wrong-user', 'wrong-password', false);
+        await PageObjects.security.loginPage.login('wrong-user', 'wrong-password', { expectSuccess: false });
         const errorMessage = await PageObjects.security.loginPage.getErrorMessage();
         expect(errorMessage).to.be('Oops! Error. Try again.');
       });

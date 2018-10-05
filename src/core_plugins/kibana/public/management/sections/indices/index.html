@@ -1,52 +1,58 @@
-<div class="col-md-2 sidebar-container" role="region" aria-label="{{'kbn.management.editIndexPatternAria' | i18n: { defaultMessage: 'Index patterns' } }}">
-  <div class="sidebar-list">
-    <div class="sidebar-item-title full-title">
-      <h5 data-test-subj="createIndexPatternParent">
-        <a
-          ng-if="editingId"
-          href="#/management/kibana/index"
-          class="kuiButton kuiButton--primary kuiButton--small"
-          data-test-subj="createIndexPatternButton"
+<div class="euiPage">
+  <div class="col-md-2 sidebar-container" role="region" aria-label="{{'kbn.management.editIndexPatternAria' | i18n: { defaultMessage: 'Index patterns' } }}">
+    <div class="sidebar-list">
+      <div class="sidebar-item-title full-title">
+        <h5 data-test-subj="createIndexPatternParent">
+          <a
+            ng-if="editingId"
+            href="#/management/kibana/index"
+            class="kuiButton kuiButton--primary kuiButton--small"
+            data-test-subj="createIndexPatternButton"
+          >
+            <span aria-hidden="true" class="kuiIcon fa-plus"></span>
+            <span i18n-id="kbn.management.editIndexPattern.createIndexButton"
+                  i18n-default-message="Create Index Pattern"></span>
+          </a>
+        </h5>
+      </div>
+      <ul class="list-unstyled">
+        <li
+          ng-if="!defaultIndex"
+          class="sidebar-item"
         >
-          <span aria-hidden="true" class="kuiIcon fa-plus"></span>
-          <span i18n-id="kbn.management.editIndexPattern.createIndexButton"
-                i18n-default-message="Create Index Pattern"></span>
-        </a>
-      </h5>
-    </div>
-    <ul class="list-unstyled">
-      <li
-        ng-if="!defaultIndex"
-        class="sidebar-item"
-      >
-        <div class="sidebar-item-title full-title">
-          <div class="euiText euiText--extraSmall">
-            <div class="euiBadge euiBadge--warning"
-                 i18n-id="kbn.management.editIndexPattern.createIndex.warningHeader"
-                 i18n-default-message="Warning"></div>
-            <p i18n-id="kbn.management.editIndexPattern.createIndex.warningLabel"
-               i18n-default-message="No default index pattern. You must select or create one to continue."></p>
+          <div class="sidebar-item-title full-title">
+            <div class="euiText euiText--extraSmall">
+              <div class="euiBadge euiBadge--warning"
+                  i18n-id="kbn.management.editIndexPattern.createIndex.warningHeader"
+                  i18n-default-message="Warning"></div>
+              <p i18n-id="kbn.management.editIndexPattern.createIndex.warningLabel"
+                i18n-default-message="No default index pattern. You must select or create one to continue."></p>
+            </div>
           </div>
-        </div>
-      </li>
+        </li>
 
-      <li
-        ng-repeat="pattern in indexPatternList | orderBy:['-default','title'] track by pattern.id"
-        class="sidebar-item"
-      >
-        <a
-          href="{{::pattern.url}}"
-          class="euiLink euiLink--primary show"
-          data-test-subj="indexPatternLink"
+        <li
+          ng-repeat="pattern in indexPatternList | orderBy:['-default','title'] track by pattern.id"
+          class="sidebar-item"
         >
-          <div class="{{::pattern.class}}">
-            <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>
-            <span ng-bind="::pattern.title"></span>
-          </div>
-        </a>
-      </li>
-    </ul>
+          <a
+            href="{{::pattern.url}}"
+            class="euiLink euiLink--primary show"
+            data-test-subj="indexPatternLink"
+          >
+            <div class="{{::pattern.class}}">
+              <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>
+              <span ng-bind="::pattern.title"></span>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-10">
+    <div class="euiPanel euiPanel--paddingLarge">
+      <div ng-transclude></div>
+    </div>
   </div>
 </div>
-
-<div class="col-md-10" ng-transclude></div>

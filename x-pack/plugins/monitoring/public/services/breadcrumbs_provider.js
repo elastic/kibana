@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set as setBreadcrumbs } from 'ui/chrome/services/breadcrumb_state';
+
 // Helper for making objects to use in a link element
 const createCrumb = (url, label, testSubj) => {
   const crumb = { url, label };
@@ -25,6 +27,8 @@ function getElasticsearchBreadcrumbs(mainInstance) {
     } else if (mainInstance.name === 'ml') {
       // ML Instance (for user later)
       breadcrumbs.push(createCrumb('#/elasticsearch/ml_jobs', 'Jobs'));
+    } else if (mainInstance.name === 'ccr_shard') {
+      breadcrumbs.push(createCrumb('#/elasticsearch/ccr', 'CCR'));
     }
     breadcrumbs.push(createCrumb(null, mainInstance.instance));
   } else {
@@ -81,6 +85,19 @@ function getBeatsBreadcrumbs(mainInstance) {
   return breadcrumbs;
 }
 
+// generate Apm breadcrumbs
+function getApmBreadcrumbs(mainInstance) {
+  const breadcrumbs = [];
+  if (mainInstance.instance) {
+    breadcrumbs.push(createCrumb('#/apm', 'APM'));
+    breadcrumbs.push(createCrumb('#/apm/instances', 'Instances'));
+  } else {
+    // don't link to Overview when we're possibly on Overview or its sibling tabs
+    breadcrumbs.push(createCrumb(null, 'APM'));
+  }
+  return breadcrumbs;
+}
+
 export function breadcrumbsProvider() {
   return function createBreadcrumbs(clusterName, mainInstance) {
     let breadcrumbs = [ createCrumb('#/home', 'Clusters', 'breadcrumbClusters') ];
@@ -101,6 +118,11 @@ export function breadcrumbsProvider() {
     if (mainInstance.inBeats) {
       breadcrumbs = breadcrumbs.concat(getBeatsBreadcrumbs(mainInstance));
     }
+    if (mainInstance.inApm) {
+      breadcrumbs = breadcrumbs.concat(getApmBreadcrumbs(mainInstance));
+    }
+
+    setBreadcrumbs(breadcrumbs.map(b => ({ text: b.label, href: b.url })));
 
     return breadcrumbs;
   };

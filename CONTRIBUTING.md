@@ -30,6 +30,7 @@ A high level overview of our contributing guidelines.
       - [Browser Automation Notes](#browser-automation-notes)
   - [Building OS packages](#building-os-packages)
   - [Writing documentation](#writing-documentation)
+  - [Release Notes Process](#release-notes-process)
 - [Signing the contributor license agreement](#signing-the-contributor-license-agreement)
 - [Submitting a Pull Request](#submitting-a-pull-request)
 - [Code Reviewing](#code-reviewing)
@@ -189,9 +190,10 @@ node scripts/makelogs
 > Make sure to execute `node scripts/makelogs` *after* elasticsearch is up and running!
 
 Start the development server.
-  ```bash
-  yarn start
-  ```
+
+```bash
+yarn start
+```
 
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
@@ -403,6 +405,31 @@ README for getting the docs tooling set up.
 
 ```bash
 node scripts/docs.js --open
+```
+
+### Release Notes Process
+
+Part of this process only applies to maintainers, since it requires access to Github labels.
+
+Kibana publishes major, minor and patch releases periodically through the year. During this process we run a script against this repo to collect the applicable PRs against that release and generate [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html). To include your change in the Release Notes:
+
+1. In the title, summarize what the PR accomplishes in language that is meaningful to the user.  In general, use present tense (for example, Adds, Fixes) in sentence case.
+1. Label the PR with the targeted version (ex: 6.5).
+1. Label the PR with the appropriate github labels:
+    * For a new feature or functionality, use `release_note:enhancement`.
+    * For an external-facing fix, use `release_note:fix`.  Exception: docs, build, and test fixes do not go in the Release Notes.
+    * For a deprecated feature, use `release_note:deprecation`.
+    * For a breaking change, use `release-breaking:note`.
+
+We also produce a blog post that details more important breaking API changes every minor and major release. If the PR includes a breaking API change, apply the label `release_note:dev_docs`. Additionally add a brief summary of the break at the bottom of the PR using the format below:
+
+
+```
+# Dev Docs
+
+## Name the feature with the break (ex: Visualize Loader)
+
+Summary of the change. Anything Under `#Dev Docs` will be used in the blog.
 ```
 
 ## Signing the contributor license agreement

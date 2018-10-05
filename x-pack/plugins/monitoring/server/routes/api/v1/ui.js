@@ -26,7 +26,9 @@ export {
   esNodeRoute,
   esNodesRoute,
   esOverviewRoute,
-  mlJobRoute
+  mlJobRoute,
+  ccrRoute,
+  ccrShardRoute
 } from './elasticsearch';
 export {
   clusterSettingsCheckRoute,
@@ -39,6 +41,11 @@ export {
   kibanaInstancesRoute,
   kibanaOverviewRoute
 } from './kibana';
+export {
+  apmInstanceRoute,
+  apmInstancesRoute,
+  apmOverviewRoute
+} from './apm';
 export {
   logstashClusterPipelinesRoute,
   logstashNodePipelinesRoute,

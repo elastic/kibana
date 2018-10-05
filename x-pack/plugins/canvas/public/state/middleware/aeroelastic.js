@@ -9,7 +9,7 @@ import { aeroelastic as aero } from '../../lib/aeroelastic_kibana';
 import { matrixToAngle } from '../../lib/aeroelastic/matrix';
 import {
   addElement,
-  removeElement,
+  removeElements,
   duplicateElement,
   elementLayer,
   setPosition,
@@ -161,6 +161,11 @@ export const aeroelastic = ({ dispatch, getState }) => {
       pages.map(p => p.id).forEach(createStore);
     }
 
+    if (action.type === restoreHistory.toString()) {
+      aero.clearStores();
+      action.payload.workpad.pages.map(p => p.id).forEach(createStore);
+    }
+
     if (action.type === appReady.toString()) {
       const pages = getPages(getState());
       aero.clearStores();
@@ -212,7 +217,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
 
         break;
 
-      case removeElement.toString():
+      case removeElements.toString():
       case addElement.toString():
       case duplicateElement.toString():
       case elementLayer.toString():
