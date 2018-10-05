@@ -45,8 +45,8 @@ const aggSchemas = new Schemas([
   {
     group: 'buckets',
     name: 'segment',
-    title: 'Geo Coordinates',
-    aggFilter: 'geohash_grid',
+    title: 'Terms',
+    aggFilter: 'terms',
     min: 1,
     max: 1
   }
@@ -66,6 +66,66 @@ export class ESTableSource extends ASource {
   }
 
   async getTable() {
+
+    // inspectorAdapters.requests.resetRequest(layerId);
+
+    let indexPattern;
+    try {
+      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
+    } catch (error) {
+      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
+    }
+
+    console.log('ip', indexPattern);
+
+    // const geoField = indexPattern.fields.byName[this._descriptor.geoField];
+    // if (!geoField) {
+    //   throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
+    // }
+    //
+    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(), aggSchemas.all);
+    console.log('ac', aggConfigs);
+    //
+    // let inspectorRequest;
+    let resp;
+    try {
+      const searchSource = new SearchSource();
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('size', 0);
+
+      const dsl = aggConfigs.toDsl();
+      console.log('dsk', dsl)
+      searchSource.setField('aggs', dsl);
+      // searchSource.setField('filter', () => {
+      //   const filters = [];
+      //   filters.push(createExtentFilter(extent, geoField.name, geoField.type));
+      //   filters.push(timeService.createFilter(indexPattern, timeFilters));
+      //   return filters;
+      // });
+
+      // inspectorRequest = inspectorAdapters.requests.start(layerId, layerName);
+      // inspectorRequest.stats(getRequestInspectorStats(searchSource));
+      searchSource.getSearchRequestBody().then(body => {
+        // inspectorRequest.json(body);
+      });
+      console.log('go fetch');
+      resp = await searchSource.fetch();
+      // inspectorRequest
+      //   .stats(getResponseInspectorStats(searchSource, resp))
+      //   .ok({ json: resp });
+    } catch (error) {
+      // inspectorRequest.error({ error });
+      throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
+    }
+
+    console.log('response', resp);
+    //
+    // const tabifiedResp = tabifyAggResponse(aggConfigs, resp);
+    // const { featureCollection } = convertToGeoJson(tabifiedResp);
+    //
+    // return featureCollection;
+
+
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve([
@@ -96,7 +156,11 @@ export class ESTableSource extends ASource {
         ]);
       }, 500);
     });
+
+
   }
+
+
 
   async isTimeAware() {
     //todo
@@ -120,9 +184,16 @@ export class ESTableSource extends ASource {
       {
         id: '2',
         enabled: true,
-        type: 'term',
+        type: 'terms',
         schema: 'segment',
-        params: {}
+        params: {
+          "field": "geo.dest",
+          "size": 5
+          //,
+          // "order": {
+          //   "_count": "desc"
+          // }
+        }
       }
     ];
   }
