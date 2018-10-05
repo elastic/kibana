@@ -1,14 +1,11 @@
-#indexManagementReactRoot {
-  background-color: #F5F5F5;
+#indReactRoot {
+  background-color: $euiColorLightestShade;
 }
 
 .indTable__link {
   text-align: left;
 }
 
-.indexTable__header--name {
-  width: 25%;
-}
 .indTable__horizontalScrollContainer {
   overflow-x: auto;
   max-width: 100%;
@@ -17,8 +14,4 @@
 .indTable__horizontalScroll {
   min-width: 800px;
   width: 100%;
-}
-
-.indDetail__codeBlock {
-  background: transparent;
 }

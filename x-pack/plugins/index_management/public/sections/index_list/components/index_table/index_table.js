@@ -168,7 +168,7 @@ export class IndexTableUi extends Component {
     } else if (fieldName === 'name') {
       return (
         <EuiLink
-          className="indexTable__link"
+          className="indTable__link"
           data-test-subj="indexTableIndexNameLink"
           onClick={() => {
             openDetailPanel(value);
