@@ -4,17 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { shapes } from '../../renderers/shape/shapes';
 
 export const shape = () => ({
   name: 'shape',
-  displayName: 'Shape',
+  displayName: i18n.translate('xpack.canvas.uis.views.shapeDisplayName', {
+    defaultMessage: 'Shape',
+  }),
   modelArgs: [],
   requiresContext: false,
   args: [
     {
       name: '_',
-      displayName: 'Select a Shape',
+      displayName: i18n.translate('xpack.canvas.uis.views.shape.argsShapeDisplayName', {
+        defaultMessage: 'Select a Shape',
+      }),
       argType: 'shape',
       options: {
         shapes,
@@ -22,27 +27,43 @@ export const shape = () => ({
     },
     {
       name: 'fill',
-      displayName: 'Fill',
+      displayName: i18n.translate('xpack.canvas.uis.views.shape.argsFillDisplayName', {
+        defaultMessage: 'Fill',
+      }),
       argType: 'color',
-      help: 'Fill color of the shape',
+      help: i18n.translate('xpack.canvas.uis.views.shape.argsFillHelpText', {
+        defaultMessage: 'Fill color of the shape',
+      }),
     },
     {
       name: 'border',
-      displayName: 'Border',
+      displayName: i18n.translate('xpack.canvas.uis.views.shape.argsBorderDisplayName', {
+        defaultMessage: 'Border',
+      }),
       argType: 'color',
-      help: 'Border color',
+      help: i18n.translate('xpack.canvas.uis.views.shape.argsBorderHelpText', {
+        defaultMessage: 'Border color',
+      }),
     },
     {
       name: 'borderWidth',
-      displayName: 'Border Width',
+      displayName: i18n.translate('xpack.canvas.uis.views.shape.argsBorderWidthDisplayName', {
+        defaultMessage: 'Border Width',
+      }),
       argType: 'number',
-      help: 'Border width',
+      help: i18n.translate('xpack.canvas.uis.views.shape.argsBorderWidthHelpText', {
+        defaultMessage: 'Border width',
+      }),
     },
     {
       name: 'maintainAspect',
-      displayName: 'Maintain Aspect Ratio',
+      displayName: i18n.translate('xpack.canvas.uis.views.shape.argsMaintainAspectDisplayName', {
+        defaultMessage: 'Maintain Aspect Ratio',
+      }),
       argType: 'toggle',
-      help: `Select 'true' to maintain aspect ratio`,
+      help: i18n.translate('xpack.canvas.uis.views.shape.argsMaintainAspectHelpText', {
+        defaultMessage: "Select 'true' to maintain aspect ratio",
+      }),
     },
   ],
 });

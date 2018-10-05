@@ -4,18 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 
 export const timefilterControl = () => ({
   name: 'timefilterControl',
-  displayName: 'Time Filter',
+  displayName: i18n.translate('xpack.canvas.uis.views.timefilterControlDisplayName', {
+    defaultMessage: 'Time Filter',
+  }),
   modelArgs: [],
   args: [
     {
       name: 'column',
-      displayName: 'Column',
-      help: 'Column to which selected time is applied',
+      displayName: i18n.translate(
+        'xpack.canvas.uis.views.timefilterControl.argsColumnDisplayName',
+        {
+          defaultMessage: 'Column',
+        }
+      ),
+      help: i18n.translate('xpack.canvas.uis.views.timefilterControl.argsColumnHelpText', {
+        defaultMessage: 'Column to which selected time is applied',
+      }),
       argType: 'string',
       options: {
         confirm: 'Set',

@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const render = () => ({
   name: 'render',
-  displayName: 'Element style',
-  help: 'Setting for the container around your element',
+  displayName: i18n.translate('xpack.canvas.uis.views.renderDisplayName', {
+    defaultMessage: 'Element style',
+  }),
+  help: i18n.translate('xpack.canvas.uis.views.renderHelpText', {
+    defaultMessage: 'Setting for the container around your element',
+  }),
   modelArgs: [],
   requiresContext: false,
   args: [
@@ -17,8 +23,12 @@ export const render = () => ({
     },
     {
       name: 'css',
-      displayName: 'CSS',
-      help: 'A CSS stylesheet scoped to your element',
+      displayName: i18n.translate('xpack.canvas.uis.views.render.argsCssDisplayName', {
+        defaultMessage: 'CSS',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.render.argsCssHelpText', {
+        defaultMessage: 'A CSS stylesheet scoped to your element',
+      }),
       argType: 'textarea',
       default: `".canvasRenderEl {
 

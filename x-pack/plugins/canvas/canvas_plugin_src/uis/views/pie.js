@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { map, uniq } from 'lodash';
 import { legendOptions } from '../../../public/lib/legend_options';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 
 export const pie = () => ({
   name: 'pie',
-  displayName: 'Chart Style',
+  displayName: i18n.translate('xpack.canvas.uis.views.pieDisplayName', {
+    defaultMessage: 'Chart Style',
+  }),
   modelArgs: [['color', { label: 'Slice Labels' }], ['size', { label: 'Slice Angles' }]],
   args: [
     {
@@ -19,8 +22,12 @@ export const pie = () => ({
     },
     {
       name: 'hole',
-      displayName: 'Inner Radius',
-      help: 'Radius of the hole',
+      displayName: i18n.translate('xpack.canvas.uis.views.pie.argsHoleDisplayName', {
+        defaultMessage: 'Inner Radius',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.pie.argsHoleHelpText', {
+        defaultMessage: 'Radius of the hole',
+      }),
       argType: 'range',
       default: 50,
       options: {
@@ -30,15 +37,23 @@ export const pie = () => ({
     },
     {
       name: 'labels',
-      displayName: 'Labels',
-      help: 'Show/hide labels',
+      displayName: i18n.translate('xpack.canvas.uis.views.pie.argsLabelsDisplayName', {
+        defaultMessage: 'Labels',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.pie.argsLabelsHelpText', {
+        defaultMessage: 'Show/hide labels',
+      }),
       argType: 'toggle',
       default: true,
     },
     {
       name: 'labelRadius',
-      displayName: 'Label Radius',
-      help: 'Distance of the labels from the center of the pie',
+      displayName: i18n.translate('xpack.canvas.uis.views.pie.argsLabelRadiusDisplayName', {
+        defaultMessage: 'Label Radius',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.pie.argsLabelRadiusHelpText', {
+        defaultMessage: 'Distance of the labels from the center of the pie',
+      }),
       argType: 'range',
       default: 100,
       options: {
@@ -48,8 +63,12 @@ export const pie = () => ({
     },
     {
       name: 'legend',
-      displayName: 'Legend Position',
-      help: 'Disable or position the legend',
+      displayName: i18n.translate('xpack.canvas.uis.views.pie.argsLegendDisplayName', {
+        defaultMessage: 'Legend Position',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.pie.argsLegendHelpText', {
+        defaultMessage: 'Disable or position the legend',
+      }),
       argType: 'select',
       default: 'ne',
       options: {
@@ -58,8 +77,12 @@ export const pie = () => ({
     },
     {
       name: 'radius',
-      displayName: 'Radius',
-      help: 'Radius of the pie',
+      displayName: i18n.translate('xpack.canvas.uis.views.pie.argsRadiusDisplayName', {
+        defaultMessage: 'Radius',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.pie.argsRadiusHelpText', {
+        defaultMessage: 'Radius of the pie',
+      }),
       argType: 'percentage',
       default: 1,
     },
@@ -74,8 +97,12 @@ export const pie = () => ({
     },
     {
       name: 'tilt',
-      displayName: 'Tilt Angle',
-      help: 'Percentage of tilt where 1 is fully vertical and 0 is completely flat',
+      displayName: i18n.translate('xpack.canvas.uis.views.pie.argsTiltDisplayName', {
+        defaultMessage: 'Tilt Angle',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.pie.argsTiltHelpText', {
+        defaultMessage: 'Percentage of tilt where 1 is fully vertical and 0 is completely flat',
+      }),
       argType: 'percentage',
       default: 1,
     },

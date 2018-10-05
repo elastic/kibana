@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { elasticLogo } from '../../lib/elastic_logo';
 import { resolveFromArgs } from '../../../common/lib/resolve_dataurl';
 
 export const image = () => ({
   name: 'image',
-  displayName: 'Image',
+  displayName: i18n.translate('xpack.canvas.uis.views.imageDisplayName', {
+    defaultMessage: 'Image',
+  }),
   modelArgs: [],
   requiresContext: false,
   args: [
@@ -22,8 +25,12 @@ export const image = () => ({
     },
     {
       name: 'mode',
-      displayName: 'Fill mode',
-      help: 'Note: Stretched fill may not work with vector images',
+      displayName: i18n.translate('xpack.canvas.uis.views.image.argsFillModeDisplayName', {
+        defaultMessage: 'Fill mode',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.image.argsFillModeHelpText', {
+        defaultMessage: 'Note: Stretched fill may not work with vector images',
+      }),
       argType: 'select',
       options: {
         choices: [

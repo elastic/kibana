@@ -4,18 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 
 export const dropdownControl = () => ({
   name: 'dropdownControl',
-  displayName: 'Dropdown Filter',
+  displayName: i18n.translate('xpack.canvas.uis.views.dropdownControlDisplayName', {
+    defaultMessage: 'Dropdown Filter',
+  }),
   modelArgs: [],
   args: [
     {
       name: 'valueColumn',
-      displayName: 'Values Column',
-      help: 'Column from which to extract values to make available in the dropdown',
+      displayName: i18n.translate(
+        'xpack.canvas.uis.views.dropdownControl.argsValueColumnDisplayName',
+        {
+          defaultMessage: 'Values Column',
+        }
+      ),
+      help: i18n.translate('xpack.canvas.uis.views.dropdownControl.argsValueColumnHelpText', {
+        defaultMessage: 'Column from which to extract values to make available in the dropdown',
+      }),
       argType: 'string',
       options: {
         confirm: 'Set',
@@ -23,8 +33,15 @@ export const dropdownControl = () => ({
     },
     {
       name: 'filterColumn',
-      displayName: 'Filter Column ',
-      help: 'Column to which the value selected from the dropdown is applied',
+      displayName: i18n.translate(
+        'xpack.canvas.uis.views.dropdownControl.argsFilterColumnDisplayName',
+        {
+          defaultMessage: 'Filter Column ',
+        }
+      ),
+      help: i18n.translate('xpack.canvas.uis.views.dropdownControl.argsFilterColumnHelpText', {
+        defaultMessage: 'Column to which the value selected from the dropdown is applied',
+      }),
       argType: 'string',
       options: {
         confirm: 'Set',

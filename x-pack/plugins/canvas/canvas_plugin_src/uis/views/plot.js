@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { map, uniq } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { legendOptions } from '../../../public/lib/legend_options';
@@ -12,7 +13,9 @@ const styleProps = ['lines', 'bars', 'points', 'fill', 'stack'];
 
 export const plot = () => ({
   name: 'plot',
-  displayName: 'Chart Style',
+  displayName: i18n.translate('xpack.canvas.uis.views.plotDisplayName', {
+    defaultMessage: 'Chart Style',
+  }),
   modelArgs: ['x', 'y', 'color', 'size', 'text'],
   args: [
     {
@@ -21,8 +24,12 @@ export const plot = () => ({
     },
     {
       name: 'legend',
-      displayName: 'Legend Position',
-      help: 'Disable or position the legend',
+      displayName: i18n.translate('xpack.canvas.uis.views.plot.argsLegendDisplayName', {
+        defaultMessage: 'Legend Position',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.plot.argsLegendHelpText', {
+        defaultMessage: 'Disable or position the legend',
+      }),
       argType: 'select',
       default: 'ne',
       options: {
@@ -31,15 +38,23 @@ export const plot = () => ({
     },
     {
       name: 'xaxis',
-      displayName: 'X-Axis',
-      help: 'Configure or disable the x-axis',
+      displayName: i18n.translate('xpack.canvas.uis.views.plot.argsXaxisDisplayName', {
+        defaultMessage: 'X-Axis',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.plot.argsXaxisHelpText', {
+        defaultMessage: 'Configure or disable the x-axis',
+      }),
       argType: 'axisConfig',
       default: true,
     },
     {
       name: 'yaxis',
-      displayName: 'Y-Axis',
-      help: 'Configure or disable the Y-axis',
+      displayName: i18n.translate('xpack.canvas.uis.views.plot.argsYaxisDisplayName', {
+        defaultMessage: 'Y-Axis',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.plot.argsYaxisHelpText', {
+        defaultMessage: 'Configure or disable the Y-axis',
+      }),
       argType: 'axisConfig',
       default: true,
     },
@@ -49,8 +64,12 @@ export const plot = () => ({
     },
     {
       name: 'defaultStyle',
-      displayName: 'Default style',
-      help: 'Set the style to be used by default by every series, unless overridden.',
+      displayName: i18n.translate('xpack.canvas.uis.views.plot.argsDefaultStyleDisplayName', {
+        defaultMessage: 'Default style',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.plot.argsDefaultStyleHelpText', {
+        defaultMessage: 'Set the style to be used by default by every series, unless overridden.',
+      }),
       argType: 'seriesStyle',
       default: '{seriesStyle points=5}',
       options: {

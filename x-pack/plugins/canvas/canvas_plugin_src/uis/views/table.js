@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const table = () => ({
   name: 'table',
-  displayName: 'Table Style',
-  help: 'Set styling for a Table element',
+  displayName: i18n.translate('xpack.canvas.uis.views.tableDisplayName', {
+    defaultMessage: 'Table Style',
+  }),
+  help: i18n.translate('xpack.canvas.uis.views.tableHelpText', {
+    defaultMessage: 'Set styling for a Table element',
+  }),
   modelArgs: [],
   args: [
     {
@@ -16,8 +22,12 @@ export const table = () => ({
     },
     {
       name: 'perPage',
-      displayName: 'Rows per page',
-      help: 'Number of rows to display per table page.',
+      displayName: i18n.translate('xpack.canvas.uis.views.table.argsPerPageDisplayName', {
+        defaultMessage: 'Rows per page',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.table.argsPerPageHelpText', {
+        defaultMessage: 'Number of rows to display per table page.',
+      }),
       argType: 'select',
       default: 10,
       options: {
@@ -26,15 +36,24 @@ export const table = () => ({
     },
     {
       name: 'paginate',
-      displayName: 'Pagination',
-      help: 'Show or hide pagination controls. If disabled only the first page will be shown.',
+      displayName: i18n.translate('xpack.canvas.uis.views.table.argsPaginateDisplayName', {
+        defaultMessage: 'Pagination',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.table.argsPaginateHelpText', {
+        defaultMessage:
+          'Show or hide pagination controls. If disabled only the first page will be shown.',
+      }),
       argType: 'toggle',
       default: true,
     },
     {
       name: 'showHeader',
-      displayName: 'Header',
-      help: 'Show or hide the header row with titles for each column.',
+      displayName: i18n.translate('xpack.canvas.uis.views.table.argsShowHeaderDisplayName', {
+        defaultMessage: 'Header',
+      }),
+      help: i18n.translate('xpack.canvas.uis.views.table.argsShowHeaderHelpText', {
+        defaultMessage: 'Show or hide the header row with titles for each column.',
+      }),
       argType: 'toggle',
       default: true,
     },

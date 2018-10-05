@@ -4,21 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 
 export const sort = () => ({
   name: 'sort',
-  displayName: 'Datatable Sorting',
+  displayName: i18n.translate('xpack.canvas.uis.transforms.sortDisplayName', {
+    defaultMessage: 'Datatable Sorting',
+  }),
   args: [
     {
       name: '_',
-      displayName: 'Sort Field',
+      displayName: i18n.translate('xpack.canvas.uis.transforms.sort.argsSortFieldDisplayName', {
+        defaultMessage: 'Sort Field',
+      }),
       argType: 'datacolumn',
     },
     {
       name: 'reverse',
-      displayName: 'Descending',
+      displayName: i18n.translate('xpack.canvas.uis.transforms.sort.argsReverseDisplayName', {
+        defaultMessage: 'Descending',
+      }),
       argType: 'toggle',
     },
   ],

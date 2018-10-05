@@ -5,16 +5,24 @@
  */
 
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 
 export const math = () => ({
   name: 'math',
-  displayName: 'Measure',
+  displayName: i18n.translate('xpack.canvas.uis.models.mathDisplayName', {
+    defaultMessage: 'Measure',
+  }),
+
   args: [
     {
       name: '_',
-      displayName: 'Value',
-      help: 'Function and column to use in extracting a value from the datasource',
+      displayName: i18n.translate('xpack.canvas.uis.models.math.argsValueDisplayName', {
+        defaultMessage: 'Value',
+      }),
+      help: i18n.translate('xpack.canvas.uis.models.math.argsValueHelpText', {
+        defaultMessage: 'Function and column to use in extracting a value from the datasource',
+      }),
       argType: 'datacolumn',
       options: {
         onlyMath: false,
