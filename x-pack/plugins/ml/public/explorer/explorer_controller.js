@@ -360,7 +360,6 @@ module.controller('MlExplorerController', function (
       MlTimeBuckets: TimeBuckets,
       swimlaneData: getSwimlaneData(swimlaneType),
       swimlaneType,
-      mlExplorerDashboardService,
       selection: $scope.appState.mlExplorerSwimlane
     };
   }
