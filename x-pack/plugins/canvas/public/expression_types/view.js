@@ -35,7 +35,7 @@ class ViewUI extends FunctionForm {
       throw new Error(
         this.props.intl.formatMessage(
           {
-            id: 'xpack.canvas.expressionTypes.view.elementIsInvalidMessageError',
+            id: 'xpack.canvas.expressionTypes.view.invalidElementErrorMessage',
             defaultMessage: '{elementName} element is invalid, modelArgs must be an array',
           },
           {

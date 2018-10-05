@@ -42,7 +42,7 @@ const ExtendedTemplateUI = ({ intl, ...props }) => {
     {
       value: '',
       text: intl.formatMessage({
-        id: 'xpack.canvas.expressionTypes.seriesStyle.selectSeriesLabel',
+        id: 'xpack.canvas.expressionTypes.seriesStyle.extendedTemplate.labelOptionsText',
         defaultMessage: 'Select Series',
       }),
     },
@@ -55,7 +55,7 @@ const ExtendedTemplateUI = ({ intl, ...props }) => {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.canvas.expressionTypes.seriesStyle.seriesIdentifierLabel"
+              id="xpack.canvas.expressionTypes.seriesStyle.extendedTemplate.formRowSeriesIdentifierLabel"
               defaultMessage="Series Identifier"
             />
           }
@@ -75,7 +75,7 @@ const ExtendedTemplateUI = ({ intl, ...props }) => {
               <EuiFormRow
                 label={
                   <FormattedMessage
-                    id="xpack.canvas.expressionTypes.seriesStyle.lineLabel"
+                    id="xpack.canvas.expressionTypes.seriesStyle.extendedTemplate.formRowLineLabel"
                     defaultMessage="Line"
                   />
                 }
@@ -94,7 +94,7 @@ const ExtendedTemplateUI = ({ intl, ...props }) => {
               <EuiFormRow
                 label={
                   <FormattedMessage
-                    id="xpack.canvas.expressionTypes.seriesStyle.barLabel"
+                    id="xpack.canvas.expressionTypes.seriesStyle.extendedTemplate.formRowBarLabel"
                     defaultMessage="Bar"
                   />
                 }
@@ -113,7 +113,7 @@ const ExtendedTemplateUI = ({ intl, ...props }) => {
               <EuiFormRow
                 label={
                   <FormattedMessage
-                    id="xpack.canvas.expressionTypes.seriesStyle.pointLabel"
+                    id="xpack.canvas.expressionTypes.seriesStyle.extendedTemplate.formRowPointLabel"
                     defaultMessage="Point"
                   />
                 }

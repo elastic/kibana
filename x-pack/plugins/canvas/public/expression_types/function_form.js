@@ -75,7 +75,19 @@ class FunctionFormUI extends BaseForm {
     // Don't instaniate these until render time, to give the registries a chance to populate.
     const argInstances = this.args.map(argSpec => new Arg(argSpec));
 
-    if (!isPlainObject(args)) throw new Error(`Form "${this.name}" expects "args" object`);
+    if (!isPlainObject(args)) {
+      throw new Error(
+        this.props.intl.formatMessage(
+          {
+            id: 'xpack.canvas.expressionTypes.functionForm.FormExpectsCorrectTypeErrorMessage',
+            defaultMessage: 'Form "{name}" expects "args" object',
+          },
+          {
+            name: this.name,
+          }
+        )
+      );
+    }
 
     // get a mapping of arg values from the expression and from the renderable's schema
     const argNames = uniq(argInstances.map(arg => arg.name).concat(Object.keys(args)));
@@ -116,7 +128,7 @@ class FunctionFormUI extends BaseForm {
           color="danger"
           iconType="cross"
           title={this.props.intl.formatMessage({
-            id: 'xpack.canvas.expressionTypes.expressionRenderingErrorMessage',
+            id: 'xpack.canvas.expressionTypes.functionForm.expressionRenderingErrorMessage',
             defaultMessage: 'Expression rendering error',
           })}
         >

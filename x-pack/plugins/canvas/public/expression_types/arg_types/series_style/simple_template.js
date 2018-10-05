@@ -45,7 +45,7 @@ const SimpleTemplateUI = ({ intl, ...props }) => {
           <EuiFlexItem grow={false}>
             <EuiLink onClick={() => handlePlain('color', '#000000')}>
               <FormattedMessage
-                id="xpack.canvas.expressionTypes.seriesStyle.autoLinkLabel"
+                id="xpack.canvas.expressionTypes.seriesStyle.autoLinkText"
                 defaultMessage="Auto"
               />
               <EuiIcon type="bolt" />

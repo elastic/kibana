@@ -16,7 +16,7 @@ const assetUI = intl => ({
   },
   type: 'string',
   help: intl.formatMessage({
-    id: 'xpack.canvas.functions.asset.usingCanvasWorkpadAssetHelpText',
+    id: 'xpack.canvas.functions.asset.useCanvasWorkpadAssetHelpText',
     defaultMessage: 'Use Canvas workpad asset objects to provide argument values. Usually images.',
   }),
   args: {
@@ -38,7 +38,7 @@ const assetUI = intl => ({
     throw new Error(
       intl.formatMessage(
         {
-          id: 'xpack.canvas.functions.asset.returnedAssetValueIdErrorMessage',
+          id: 'xpack.canvas.functions.asset.couldNotGetAssetBySpecificIdErrorMessage',
           defaultMessage: 'Could not get the asset by ID: {assetId}',
         },
         {

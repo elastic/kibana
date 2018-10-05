@@ -16,7 +16,7 @@ export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
     <EuiTitle size="xxxs" textTransform="uppercase">
       <h6>
         <FormattedMessage
-          id="xpack.canvas.expressionTypes.containerStyle.appearanceTitle"
+          id="xpack.canvas.expressionTypes.containerStyle.extendedTemplateTitle"
           defaultMessage="Appearance"
         />
       </h6>
@@ -36,7 +36,7 @@ export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
     <EuiTitle size="xxxs" textTransform="uppercase">
       <h6>
         <FormattedMessage
-          id="xpack.canvas.expressionTypes.containerStyle.borderTitle"
+          id="xpack.canvas.expressionTypes.containerStyle.extendedTemplate.borderTitle"
           defaultMessage="Border"
         />
       </h6>

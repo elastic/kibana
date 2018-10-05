@@ -35,7 +35,7 @@ export const AppearanceForm = ({ padding, opacity, overflow, onChange }) => {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.canvas.expressionTypes.containerStyle.appearance.formRowPaddingLabel"
+              id="xpack.canvas.expressionTypes.containerStyle.appearanceForm.formRowPaddingLabel"
               defaultMessage="Padding"
             />
           }
@@ -48,7 +48,7 @@ export const AppearanceForm = ({ padding, opacity, overflow, onChange }) => {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.canvas.expressionTypes.containerStyle.appearance.formRowOpacityLabel"
+              id="xpack.canvas.expressionTypes.containerStyle.appearanceForm.formRowOpacityLabel"
               defaultMessage="Opacity"
             />
           }
@@ -61,7 +61,7 @@ export const AppearanceForm = ({ padding, opacity, overflow, onChange }) => {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.canvas.expressionTypes.containerStyle.appearance.formRowOverflowLabel"
+              id="xpack.canvas.expressionTypes.containerStyle.appearanceForm.formRowOverflowLabel"
               defaultMessage="Overflow"
             />
           }

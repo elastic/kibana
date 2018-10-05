@@ -42,7 +42,7 @@ class ModelUI extends FunctionForm {
       throw new Error(
         this.props.intl.formatMessage(
           {
-            id: 'xpack.canvas.expressionTypes.model.ArgsValueIsEmptyErrorMessage',
+            id: 'xpack.canvas.expressionTypes.model.emptyModelArgsValueErrorMessage',
             defaultMessage:
               '{nextExpressionType} modelArgs Error: The modelArgs value is empty. Either it should contain an arg, or a model should not be used in the expression.',
           },

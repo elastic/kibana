@@ -10,7 +10,8 @@ class BaseFormUI {
     if (!props.name) {
       throw new Error(
         this.props.intl.formatMessage({
-          id: 'xpack.canvas.expressionTypes.namePropertyRequiredErrorMessage',
+          id:
+            'xpack.canvas.expressionTypes.baseForm.namePropertyRequiredForExpressionSpecsErrorMessage',
           defaultMessage: 'Expression specs require a name property',
         })
       );

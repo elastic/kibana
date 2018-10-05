@@ -18,7 +18,7 @@ const EnhancedExtendedTemplate = lifecycle({
     if (typeof label !== 'string') this.props.renderError();
     return (
       <FormattedMessage
-        id="xpack.canvas.expressionTypes.seriesStyle.styleLabelTitle"
+        id="xpack.canvas.expressionTypes.seriesStyle.styleLabel"
         defaultMessage="Style: {label}"
         values={{ label }}
       />
@@ -44,7 +44,7 @@ EnhancedExtendedTemplate.propTypes = {
 const seriesStyleUI = intl => ({
   name: 'seriesStyle',
   displayName: intl.formatMessage({
-    id: 'xpack.canvas.expressionTypes.seriesStyleLabel',
+    id: 'xpack.canvas.expressionTypes.seriesStyleDisplayName',
     defaultMessage: 'Series Style',
   }),
   help: intl.formatMessage({

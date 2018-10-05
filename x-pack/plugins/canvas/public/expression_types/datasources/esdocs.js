@@ -180,12 +180,12 @@ const EsdocsDatasourceUI = ({ args, updateArgs, intl }) => {
         helpText={
           fields.length <= 10 ? (
             <FormattedMessage
-              id="xpack.canvas.expressionTypes.datasource.formRowFields.fieldsLessThen10HelpText"
+              id="xpack.canvas.expressionTypes.datasource.formRowFields.fewFieldsHelpText"
               defaultMessage="The fields to extract. Kibana scripted fields are not currently available"
             />
           ) : (
             <FormattedMessage
-              id="xpack.canvas.expressionTypes.datasource.formRowFields.fieldsMoreThen10HelpText"
+              id="xpack.canvas.expressionTypes.datasource.formRowFields.manyFieldsHelpText"
               defaultMessage="This datasource performs best with 10 or fewer fields"
             />
           )
@@ -211,11 +211,11 @@ const EsdocsDatasource = injectI18n(EsdocsDatasourceUI);
 const esdocsUI = intl => ({
   name: 'esdocs',
   displayName: intl.formatMessage({
-    id: 'xpack.canvas.expressionTypes.datasource.esRowDocumentsLabel',
+    id: 'xpack.canvas.expressionTypes.datasource.elasticsearchRawDocumentsDisplayName',
     defaultMessage: 'Elasticsearch Raw Documents',
   }),
   help: intl.formatMessage({
-    id: 'xpack.canvas.expressionTypes.datasource.esRowDocumentsHelpText',
+    id: 'xpack.canvas.expressionTypes.datasource.elasticsearchRawDocumentsHelpText',
     defaultMessage: 'Pull back raw documents from elasticsearch',
   }),
   image: 'logoElasticsearch',

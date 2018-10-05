@@ -28,11 +28,11 @@ const wrap = Component =>
 const containerStyleUI = intl => ({
   name: 'containerStyle',
   displayName: intl.formatMessage({
-    id: 'xpack.canvas.expressionTypes.containerStyle.containerStyleLabel',
+    id: 'xpack.canvas.expressionTypes.containerStyleDisplayName',
     defaultMessage: 'Container Style',
   }),
   help: intl.formatMessage({
-    id: 'xpack.canvas.expressionTypes.containerStyle.containerStyleHelpText',
+    id: 'xpack.canvas.expressionTypes.containerStyleHelpText',
     defaultMessage: 'Tweak the appearance of the element container',
   }),
   default: '{containerStyle}',

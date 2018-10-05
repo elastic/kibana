@@ -16,7 +16,7 @@ const defaultTemplate = () => (
   <div>
     <p>
       <FormattedMessage
-        id="xpack.canvas.expressionTypes.dataSourceHasNoInterfaceErrorMessage"
+        id="xpack.canvas.expressionTypes.datasource.noInterfaceErrorMessage"
         defaultMessage="This datasource has no interface. Use the expression editor to make changes."
       />
     </p>

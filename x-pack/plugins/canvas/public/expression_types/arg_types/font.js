@@ -55,11 +55,11 @@ FontArgInput.displayName = 'FontArgInput';
 const fontUI = intl => ({
   name: 'font',
   displayName: intl.formatMessage({
-    id: 'xpack.canvas.expressionTypes.textSettingsLabel',
+    id: 'xpack.canvas.expressionTypes.fontDisplayName',
     defaultMessage: 'Text Settings',
   }),
   help: intl.formatMessage({
-    id: 'xpack.canvas.expressionTypes.textSettingsHelpText',
+    id: 'xpack.canvas.expressionTypes.fontHelpText',
     defaultMessage: 'Set the font, size and color',
   }),
   template: templateFromReactComponent(FontArgInput),

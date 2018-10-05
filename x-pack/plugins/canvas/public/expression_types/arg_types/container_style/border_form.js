@@ -42,7 +42,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.canvas.expressionTypes.containerStyle.border.FormRowWidthLabel"
+              id="xpack.canvas.expressionTypes.containerStyle.borderForm.formRowWidthLabel"
               defaultMessage="Width"
             />
           }
@@ -56,7 +56,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.canvas.expressionTypes.containerStyle.border.formRowStyleLabel"
+              id="xpack.canvas.expressionTypes.containerStyle.borderForm.formRowStyleLabel"
               defaultMessage="Style"
             />
           }
@@ -74,7 +74,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.canvas.expressionTypes.containerStyle.border.formRowRadiusLabel"
+              id="xpack.canvas.expressionTypes.containerStyle.borderForm.formRowRadiusLabel"
               defaultMessage="Radius"
             />
           }
@@ -88,7 +88,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.canvas.expressionTypes.containerStyle.border.formRowColorLabel"
+              id="xpack.canvas.expressionTypes.containerStyle.borderForm.formRowColorLabel"
               defaultMessage="Color"
             />
           }
