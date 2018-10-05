@@ -28,7 +28,7 @@ export const rate = (id: string, fields: Fields): InfraNodeMetricFn => (
       },
       [id]: {
         bucket_script: {
-          buckets_path: { value: `${id}_deriv` },
+          buckets_path: { value: `${id}_deriv[normalized_value]` },
           script: {
             source: 'params.value > 0.0 ? params.value : 0.0',
             lang: 'painless',
