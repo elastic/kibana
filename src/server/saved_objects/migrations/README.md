@@ -208,3 +208,10 @@ Run integration tests:
 node scripts/functional_tests_server
 node scripts/functional_test_runner --config test/api_integration/config.js --grep migration
 ```
+
+Run UI tests:
+
+```
+node scripts/functional_tests_server.js --config test/plugin_functional/config.js
+node scripts/functional_test_runner --config test/plugin_functional/config.js --grep migration_ui
+```

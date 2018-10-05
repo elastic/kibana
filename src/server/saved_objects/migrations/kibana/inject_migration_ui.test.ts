@@ -63,7 +63,7 @@ describe('injectMigrationUI', () => {
     const result = await testRequest({
       progress: 1,
       accept: 'application/json',
-      path: '/api/migration_progress',
+      path: '/api/shenanigans',
     });
     expect(result.returnValue).toEqual(result.continueResult);
     sinon.assert.calledOnce(result.continue);
@@ -75,6 +75,21 @@ describe('injectMigrationUI', () => {
 
   it('serves progress JSON when enabled', async () => {
     const progress = Math.random();
+    const result = await testRequest({
+      progress,
+      accept: 'application/json',
+      path: '/api/migration_progress',
+    });
+    expect(result.returnValue).toEqual(result.responseResult);
+    sinon.assert.notCalled(result.continue);
+    sinon.assert.notCalled(result.view);
+    sinon.assert.calledWith(result.response, { progress });
+    sinon.assert.calledOnce(result.takeover);
+    sinon.assert.calledWith(result.type, 'application/json');
+  });
+
+  it('serves progress JSON when disabled', async () => {
+    const progress = 1;
     const result = await testRequest({
       progress,
       accept: 'application/json',

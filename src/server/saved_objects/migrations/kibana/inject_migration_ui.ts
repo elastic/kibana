@@ -38,31 +38,7 @@ export async function injectMigrationUI(server: any) {
 
   server.kibanaMigrator.awaitMigration().then(() => (isEnabled = false));
 
-  server.ext('onRequest', async (request: any, h: any) => {
-    if (isEnabled) {
-      return interceptRequest(server, request, h);
-    }
-
-    return h.continue();
-  });
-}
-
-function interceptRequest(server: any, request: any, h: any) {
-  // Hijack our own API endpoint so that it bypasses any
-  // security shenanigans and properly serves to any UI.
-  if (request.url.path === API_PATH) {
-    return migrationProgressJSON(server.kibanaMigrator, h);
-  }
-
-  // If we're enabled, and someone's making an API request other
-  // than our migration progress API, we'll disallow it.
-  if ((request.headers.accept || '').includes('json')) {
-    throw Boom.serverUnavailable('Kibana is migrating and should be back online in a few minutes.');
-  }
-
-  // Hopefully, this is a plain ol' HTML request, because that's what
-  // we're serving up.
-  return migrationSplashScreen(server, h);
+  server.ext('onRequest', (request: any, h: any) => handleRequest(isEnabled, server, request, h));
 }
 
 function registerRoutes(server: any) {
@@ -80,6 +56,37 @@ function registerRoutes(server: any) {
   });
 }
 
+/**
+ * This is exported simply for integration testing purposes. See migration_ui tests
+ * in plugin_functional for more detail.
+ *
+ * @param isEnabled - A boolean indicating whether or not HTTP hijacking is enabled
+ * @param server - The Kibana server object
+ * @param request - The incoming request
+ * @param h - The HAPI response helper
+ */
+export async function handleRequest(isEnabled: boolean, server: any, request: any, h: any) {
+  // Always hijack our own API endpoint so that it bypasses any
+  // security shenanigans and properly serves to the polling UI.
+  if (request.url.path === API_PATH) {
+    return await migrationProgressJSON(server.kibanaMigrator, h);
+  }
+
+  if (!isEnabled) {
+    return h.continue();
+  }
+
+  // If we're enabled, and someone's making an API request other
+  // than our migration progress API, we'll disallow it.
+  if ((request.headers.accept || '').includes('json')) {
+    throw Boom.serverUnavailable('Kibana is migrating and should be back online in a few minutes.');
+  }
+
+  // Hopefully, this is a plain ol' HTML request, because that's what
+  // we're serving up.
+  return migrationSplashScreen(server, h);
+}
+
 function migrationSplashScreen(server: any, h: any) {
   const config = server.config() as any;
   const basePath = config.get('server.rewriteBasePath') ? config.get('server.basePath') : '';
@@ -94,10 +101,14 @@ function migrationSplashScreen(server: any, h: any) {
 }
 
 async function migrationProgressJSON(migrator: any, h: any) {
-  const response = h.response({
-    progress: await migrator.fetchMigrationProgress(),
-  });
-  response.takeover();
-  response.type('application/json');
-  return response;
+  try {
+    const response = h.response({
+      progress: await migrator.fetchMigrationProgress(),
+    });
+    response.takeover();
+    response.type('application/json');
+    return response;
+  } catch (err) {
+    return h(Boom.boomify(err));
+  }
 }
