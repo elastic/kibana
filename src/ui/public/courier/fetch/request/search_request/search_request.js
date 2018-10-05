@@ -123,7 +123,8 @@ export function SearchRequestProvider(Promise) {
 
     handleFailure(error) {
       this.success = false;
-      this.resp = error && error.resp;
+      this.resp = error;
+      this.resp = (error && error.resp) || error;
       return this.errorHandler(this, error);
     }
 

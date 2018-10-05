@@ -25,6 +25,7 @@ import { memoizeLast } from '../../utils/memoize';
 import { Vis } from '../../vis';
 import { VisualizationChart } from './visualization_chart';
 import { VisualizationNoResults } from './visualization_noresults';
+import { VisualizationRequestError } from './visualization_requesterror';
 
 import './visualization.less';
 
@@ -35,6 +36,12 @@ function shouldShowNoResultsMessage(vis: Vis, visData: any): boolean {
   const shouldShowMessage = !get(vis, 'type.useCustomNoDataScreen');
 
   return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
+}
+
+function shouldShowRequestErrorMessage(vis: Vis, visData: any): boolean {
+  const requestError = get(vis, 'requestError');
+  const showRequestError = get(vis, 'showRequestError');
+  return Boolean(!visData && requestError && showRequestError);
 }
 
 interface VisualizationProps {
@@ -63,10 +70,13 @@ export class Visualization extends React.Component<VisualizationProps> {
     const { vis, visData, onInit, uiState } = this.props;
 
     const noResults = this.showNoResultsMessage(vis, visData);
+    const requestError = shouldShowRequestErrorMessage(vis, visData);
 
     return (
       <div className="visualization">
-        {noResults ? (
+        {requestError ? (
+          <VisualizationRequestError onInit={onInit} error={vis.requestError} />
+        ) : noResults ? (
           <VisualizationNoResults onInit={onInit} />
         ) : (
           <VisualizationChart vis={vis} visData={visData} onInit={onInit} uiState={uiState} />
