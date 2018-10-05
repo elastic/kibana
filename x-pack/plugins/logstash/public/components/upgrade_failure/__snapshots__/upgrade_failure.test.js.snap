@@ -190,15 +190,15 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                         </p>
                       </div>
                     </EuiText>
-                    <EuiSpacer
-                      size="l"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--l"
-                      />
-                    </EuiSpacer>
                   </span>
                 </EuiTextColor>
+                <EuiSpacer
+                  size="l"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiSpacer
                   size="s"
                 >
@@ -489,15 +489,15 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                         </p>
                       </div>
                     </EuiText>
-                    <EuiSpacer
-                      size="l"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--l"
-                      />
-                    </EuiSpacer>
                   </span>
                 </EuiTextColor>
+                <EuiSpacer
+                  size="l"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiSpacer
                   size="s"
                 >
@@ -788,15 +788,15 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                         </p>
                       </div>
                     </EuiText>
-                    <EuiSpacer
-                      size="l"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--l"
-                      />
-                    </EuiSpacer>
                   </span>
                 </EuiTextColor>
+                <EuiSpacer
+                  size="l"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiSpacer
                   size="s"
                 >

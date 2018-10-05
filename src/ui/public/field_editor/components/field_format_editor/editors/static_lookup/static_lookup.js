@@ -144,8 +144,7 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
         </EuiButton>
         <EuiSpacer size="l" />
         <EuiFormRow
-          label={intl.formatMessage(
-            { id: 'common.ui.fieldEditor.staticLookup.unknownKeyLabel', defaultMessage: 'Value for unknown key' })}
+          label={<FormattedMessage id="common.ui.fieldEditor.staticLookup.unknownKeyLabel" defaultMessage="Value for unknown key" />}
         >
           <EuiFieldText
             value={formatParams.unknownKeyValue || ''}
