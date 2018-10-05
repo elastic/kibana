@@ -18,6 +18,7 @@ export function indexManagement(kibana)  {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
+      styleSheetPaths: `${__dirname}/public/index.scss`,
       managementSections: [
         'plugins/index_management',
       ]
