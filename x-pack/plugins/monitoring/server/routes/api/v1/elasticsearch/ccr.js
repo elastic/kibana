@@ -185,7 +185,7 @@ export function ccrRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const esIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.elasticsearch.index_pattern', ccs);
@@ -195,8 +195,7 @@ export function ccrRoute(server) {
         const response = await callWithRequest(req, 'search', buildRequest(req, config, esIndexPattern));
 
         if (!response || Object.keys(response).length === 0) {
-          reply({ data: [] });
-          return;
+          return { data: [] };
         }
 
         const fullStats = get(response, 'hits.hits').reduce((accum, hit) => {
@@ -249,9 +248,9 @@ export function ccrRoute(server) {
           return accum;
         }, []);
 
-        reply({ data });
+        return { data };
       } catch(err) {
-        reply(handleError(err, req));
+        return handleError(err, req);
       }
     }
   });
