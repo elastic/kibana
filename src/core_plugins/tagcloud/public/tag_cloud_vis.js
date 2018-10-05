@@ -32,9 +32,9 @@ VisTypesRegistryProvider.register(function (Private, i18n) {
 
   return VisFactory.createBaseVisualization({
     name: 'tagcloud',
-    title: i18n('tagCloud.tagCloud.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
+    title: i18n('tagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
     icon: 'visTagCloud',
-    description: i18n('tagCloud.tagCloud.tagCloudDescription', {
+    description: i18n('tagCloud.vis.tagCloudDescription', {
       defaultMessage: 'A group of words, sized according to their importance'
     }),
     category: CATEGORY.OTHER,
@@ -59,7 +59,7 @@ VisTypesRegistryProvider.register(function (Private, i18n) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('tagCloud.tagCloud.schemas.tagSizeTitle', { defaultMessage: 'Tag Size' }),
+          title: i18n('tagCloud.vis.schemas.tagSizeTitle', { defaultMessage: 'Tag Size' }),
           min: 1,
           max: 1,
           aggFilter: ['!std_dev', '!percentiles', '!percentile_ranks', '!derivative', '!geo_bounds', '!geo_centroid'],
@@ -71,7 +71,7 @@ VisTypesRegistryProvider.register(function (Private, i18n) {
           group: 'buckets',
           name: 'segment',
           icon: 'fa fa-cloud',
-          title: i18n('tagCloud.tagCloud.schemas.tagsTitle', { defaultMessage: 'Tags' }),
+          title: i18n('tagCloud.vis.schemas.tagsTitle', { defaultMessage: 'Tags' }),
           min: 1,
           max: 1,
           aggFilter: ['terms', 'significant_terms']
