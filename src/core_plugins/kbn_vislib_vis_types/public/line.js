@@ -141,7 +141,7 @@ export default function PointSeriesVisType(Private, i18n) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('kbnVislibVisTypes.line.yAxisTitle', { defaultMessage: 'Y-Axis' }),
+          title: i18n('kbnVislibVisTypes.line.metricTitle', { defaultMessage: 'Y-Axis' }),
           min: 1,
           aggFilter: ['!geo_centroid', '!geo_bounds'],
           defaults: [
@@ -151,7 +151,7 @@ export default function PointSeriesVisType(Private, i18n) {
         {
           group: 'metrics',
           name: 'radius',
-          title: i18n('kbnVislibVisTypes.line.dotSizeTitle', { defaultMessage: 'Dot Size' }),
+          title: i18n('kbnVislibVisTypes.line.radiusTitle', { defaultMessage: 'Dot Size' }),
           min: 0,
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits']
@@ -159,7 +159,7 @@ export default function PointSeriesVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'segment',
-          title: i18n('kbnVislibVisTypes.line.xAxisTitle', { defaultMessage: 'X-Axis' }),
+          title: i18n('kbnVislibVisTypes.line.segmentTitle', { defaultMessage: 'X-Axis' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!filter']
@@ -167,7 +167,7 @@ export default function PointSeriesVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'group',
-          title: i18n('kbnVislibVisTypes.line.splitSeriesTitle', { defaultMessage: 'Split Series' }),
+          title: i18n('kbnVislibVisTypes.line.groupTitle', { defaultMessage: 'Split Series' }),
           min: 0,
           max: 3,
           aggFilter: ['!geohash_grid', '!filter']
