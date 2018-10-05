@@ -162,12 +162,4 @@ declare module '@elastic/eui' {
   export const EuiHideFor: React.SFC<EuiResponsiveProps>;
 
   export const EuiShowFor: React.SFC<EuiResponsiveProps>;
-
-  export const EuiKeyPadMenu: React.SFC;
-
-  type EuiKeyPadMenuItemProps = CommonProps & {
-    label?: string;
-    onClick?: (arg: any) => void;
-  };
-  export const EuiKeyPadMenuItem: React.SFC<EuiKeyPadMenuItemProps>;
 }
