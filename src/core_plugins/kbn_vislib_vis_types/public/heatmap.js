@@ -86,7 +86,7 @@ export default function HeatmapVisType(Private, i18n) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('kbnVislibVisTypes.heatmap.valueTitle', { defaultMessage: 'Value' }),
+          title: i18n('kbnVislibVisTypes.heatmap.metricTitle', { defaultMessage: 'Value' }),
           min: 1,
           max: 1,
           aggFilter: ['count', 'avg', 'median', 'sum', 'min', 'max', 'cardinality', 'std_dev', 'top_hits'],
@@ -97,7 +97,7 @@ export default function HeatmapVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'segment',
-          title: i18n('kbnVislibVisTypes.heatmap.xAxisTitle', { defaultMessage: 'X-Axis' }),
+          title: i18n('kbnVislibVisTypes.heatmap.segmentTitle', { defaultMessage: 'X-Axis' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!filter']
@@ -105,7 +105,7 @@ export default function HeatmapVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'group',
-          title: i18n('kbnVislibVisTypes.heatmap.yAxisTitle', { defaultMessage: 'Y-Axis' }),
+          title: i18n('kbnVislibVisTypes.heatmap.groupTitle', { defaultMessage: 'Y-Axis' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!filter']

@@ -191,26 +191,27 @@
         </table>
 
         <div class="hintbox" ng-show="!editorState.params.colorsRange.length">
-          <p>
-            <span class="kuiIcon fa-danger text-danger"></span>
-            <span 
-              i18n-id="kbnVislibVisTypes.controls.heatmapOptions.requiredTitle"
-              i18n-default-message="<strong>Required:</strong> You must specify at least one range."
-            ></span>
-          </p>
+          <p
+            i18n-id="kbnVislibVisTypes.controls.heatmapOptions.requiredTitle"
+            i18n-default-message="{icon} {required} You must specify at least one range."
+            i18n-values="{
+              icon: '<span class=&quot;kuiIcon fa-danger text-danger&quot;></span>',
+              required: '<strong>' + editorState.requiredDescription + '</strong>'
+            }"
+          ></p>
         </div>
 
         <button
           ng-click="addRange()"
           class="kuiButton kuiButton--primary kuiButton--fullWidth"
           data-test-subj="heatmapAddRangeButton"
-          i18n-id="kbnVislibVisTypes.controls.heatmapOptions.addRangeButton"
+          i18n-id="kbnVislibVisTypes.controls.heatmapOptions.addRangeButtonLabel"
           i18n-default-message="Add Range"
         ></button>
         <div class="euiSpacer euiSpacer--s"></div>
         <div
           class="text text-center text-info"
-          i18n-id="kbnVislibVisTypes.controls.heatmapOptions.noteTitle"
+          i18n-id="kbnVislibVisTypes.controls.heatmapOptions.howToChangeColorsDescription"
           i18n-default-message="Note: colors can be changed in the legend"
         ></div>
       </div>
