@@ -285,8 +285,8 @@ class IndexActionsContextMenuUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeDescription"
-                defaultMessage="You are about to force merge {mergedKeyword}"
-                values={{ mergedKeyword: oneIndexSelected ? 'this' : 'these' }}
+                defaultMessage="You are about to force merge {oneIndexSelected, plural, one {this} other {these}}"
+                values={{ oneIndexSelected: oneIndexSelected ? 1 : 0 }}
               />
               {' '}
               {entity}:
@@ -377,8 +377,8 @@ class IndexActionsContextMenuUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.indexActionsMenu.deleteEntity.deleteDescription"
-                defaultMessage="You are about to delete {mergedKeyword}"
-                values={{ mergedKeyword: oneIndexSelected ? 'this' : 'these' }}
+                defaultMessage="You are about to delete  {oneIndexSelected, plural, one {this} other {these}"
+                values={{ oneIndexSelected: oneIndexSelected ? 1 : 0 }}
               />
               {' '}
               {entity}:
