@@ -23,14 +23,12 @@ import { EuiSpacer } from '@elastic/eui';
 function TooltipDefinitionList({ toolTipData }) {
   return (
     <dl className="mlDescriptionList">
-      {toolTipData.map(({ title, description }) => {
-        return (
-          <React.Fragment key={`${title} ${description}`}>
-            <dt className="mlDescriptionList__title">{title}</dt>
-            <dd className="mlDescriptionList__description">{description}</dd>
-          </React.Fragment>
-        );
-      })}
+      {toolTipData.map(({ title, description }) => (
+        <React.Fragment key={`${title} ${description}`}>
+          <dt className="mlDescriptionList__title">{title}</dt>
+          <dd className="mlDescriptionList__description">{description}</dd>
+        </React.Fragment>
+      ))}
     </dl>
   );
 }

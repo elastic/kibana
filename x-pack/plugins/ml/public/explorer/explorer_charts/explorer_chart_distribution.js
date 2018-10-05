@@ -428,7 +428,7 @@ export class ExplorerChartDistribution extends React.Component {
   }
 
   shouldComponentUpdate() {
-    // Prevents component re-rendering
+    // Always return true, d3 will take care of appropriate re-rendering.
     return true;
   }
 
