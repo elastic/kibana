@@ -386,6 +386,10 @@ export class ExplorerChartDistribution extends React.Component {
       const formattedDate = moment(marker.date).format('MMMM Do YYYY, HH:mm');
       let contents = `${formattedDate}<br/><hr/>`;
 
+      if (_.has(marker, 'entity')) {
+        contents += `<div>${marker.entity}</div>`;
+      }
+
       if (_.has(marker, 'anomalyScore')) {
         const score = parseInt(marker.anomalyScore);
         const displayScore = (score > 0 ? score : '< 1');
@@ -410,10 +414,6 @@ export class ExplorerChartDistribution extends React.Component {
         }
       } else if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
         contents += `value: ${formatValue(marker.value, config.functionDescription, fieldFormat)}`;
-      }
-
-      if (_.has(marker, 'entity')) {
-        contents += `<div>${marker.entity}</div>`;
       }
 
       if (_.has(marker, 'scheduledEvents')) {
