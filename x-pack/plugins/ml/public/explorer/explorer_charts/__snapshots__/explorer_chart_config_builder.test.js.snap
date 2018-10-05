@@ -27,6 +27,7 @@ Object {
   "entityFields": Array [
     Object {
       "fieldName": "airline",
+      "fieldType": "partition",
       "fieldValue": "JAL",
     },
   ],

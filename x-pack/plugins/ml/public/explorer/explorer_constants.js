@@ -20,3 +20,9 @@ export const SWIMLANE_TYPE = {
   OVERALL: 'overall',
   VIEW_BY: 'viewBy'
 };
+
+export const CHART_TYPE = {
+  EVENT_DISTRIBUTION: 'event_distribution',
+  POPULATION_DISTRIBUTION: 'population_distribution',
+  SINGLE_METRIC: 'single_metric',
+};

@@ -8,7 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { ExplorerChartTooltip } from './explorer_chart_tooltip';
+import { ExplorerChartInfoTooltip } from './explorer_chart_info_tooltip';
 
 describe('ExplorerChartTooltip', () => {
   test('Render tooltip based on infoTooltip data.', () => {
@@ -22,7 +22,7 @@ describe('ExplorerChartTooltip', () => {
       jobId: 'mock-job-id'
     };
 
-    const wrapper = shallow(<ExplorerChartTooltip {...infoTooltip} />);
+    const wrapper = shallow(<ExplorerChartInfoTooltip {...infoTooltip} />);
     expect(wrapper).toMatchSnapshot();
   });
 });
