@@ -10,6 +10,7 @@ import moment from 'moment-timezone';
 import { mount } from 'enzyme';
 import React from 'react';
 
+import { mlExplorerDashboardService } from './explorer_dashboard_service';
 import { ExplorerSwimlane } from './explorer_swimlane';
 
 jest.mock('ui/chrome', () => ({
@@ -19,8 +20,8 @@ jest.mock('ui/chrome', () => ({
   }),
 }));
 
-function getExplorerSwimlaneMocks() {
-  const mlExplorerDashboardService = {
+jest.mock('./explorer_dashboard_service', () => ({
+  mlExplorerDashboardService: {
     allowCellRangeSelection: false,
     dragSelect: {
       watch: jest.fn(),
@@ -32,8 +33,10 @@ function getExplorerSwimlaneMocks() {
     swimlaneRenderDone: {
       changed: jest.fn()
     }
-  };
+  }
+}));
 
+function getExplorerSwimlaneMocks() {
   const MlTimeBucketsMethods = {
     setInterval: jest.fn(),
     getScaledDateFormat: jest.fn()
@@ -44,7 +47,6 @@ function getExplorerSwimlaneMocks() {
   const swimlaneData = { laneLabels: [] };
 
   return {
-    mlExplorerDashboardService,
     MlTimeBuckets,
     swimlaneData
   };
@@ -72,7 +74,6 @@ describe('ExplorerSwimlane', () => {
       MlTimeBuckets={mocks.MlTimeBuckets}
       swimlaneData={mocks.swimlaneData}
       swimlaneType="overall"
-      mlExplorerDashboardService={mocks.mlExplorerDashboardService}
     />);
 
     expect(wrapper.html()).toBe(
@@ -81,12 +82,12 @@ describe('ExplorerSwimlane', () => {
     );
 
     // test calls to mock functions
-    expect(mocks.mlExplorerDashboardService.swimlaneRenderDone.changed.mock.calls).toHaveLength(1);
-    expect(mocks.mlExplorerDashboardService.dragSelect.watch.mock.calls).toHaveLength(1);
-    expect(mocks.mlExplorerDashboardService.dragSelect.unwatch.mock.calls).toHaveLength(0);
-    expect(mocks.mlExplorerDashboardService.swimlaneCellClick.changed.mock.calls).toHaveLength(0);
-    expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls).toHaveLength(1);
-    expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls).toHaveLength(1);
+    expect(mlExplorerDashboardService.swimlaneRenderDone.changed.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(mlExplorerDashboardService.dragSelect.watch.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(mlExplorerDashboardService.dragSelect.unwatch.mock.calls).toHaveLength(0);
+    expect(mlExplorerDashboardService.swimlaneCellClick.changed.mock.calls).toHaveLength(0);
+    expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 
   test('Overall swimlane', () => {
@@ -97,17 +98,16 @@ describe('ExplorerSwimlane', () => {
       MlTimeBuckets={mocks.MlTimeBuckets}
       swimlaneData={mockOverallSwimlaneData}
       swimlaneType="overall"
-      mlExplorerDashboardService={mocks.mlExplorerDashboardService}
     />);
 
     expect(wrapper.html()).toMatchSnapshot();
 
     // test calls to mock functions
-    expect(mocks.mlExplorerDashboardService.swimlaneRenderDone.changed.mock.calls).toHaveLength(1);
-    expect(mocks.mlExplorerDashboardService.dragSelect.watch.mock.calls).toHaveLength(1);
-    expect(mocks.mlExplorerDashboardService.dragSelect.unwatch.mock.calls).toHaveLength(0);
-    expect(mocks.mlExplorerDashboardService.swimlaneCellClick.changed.mock.calls).toHaveLength(0);
-    expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls).toHaveLength(1);
-    expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls).toHaveLength(1);
+    expect(mlExplorerDashboardService.swimlaneRenderDone.changed.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(mlExplorerDashboardService.dragSelect.watch.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(mlExplorerDashboardService.dragSelect.unwatch.mock.calls).toHaveLength(0);
+    expect(mlExplorerDashboardService.swimlaneCellClick.changed.mock.calls).toHaveLength(0);
+    expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 });
