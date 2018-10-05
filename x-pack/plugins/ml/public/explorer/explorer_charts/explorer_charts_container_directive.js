@@ -52,8 +52,8 @@ module.directive('mlExplorerChartsContainer', function (
 
     function updateComponent(data) {
       const props = {
+        chartsPerRow: data.chartsPerRow,
         seriesToPlot: data.seriesToPlot,
-        layoutCellsPerChart: data.layoutCellsPerChart,
         // convert truthy/falsy value to Boolean
         tooManyBuckets: !!data.tooManyBuckets,
         mlSelectSeverityService,
