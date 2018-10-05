@@ -28,7 +28,7 @@ interface WithWaffleNodesArgs {
 interface WithWaffleNodesProps {
   children: (args: WithWaffleNodesArgs) => React.ReactNode;
   filterQuery: string | null | undefined;
-  metrics: InfraMetricInput[];
+  metric: InfraMetricInput;
   groupBy: InfraPathInput[];
   nodeType: InfraNodeType;
   sourceId: string;
@@ -44,7 +44,7 @@ const NODE_TYPE_TO_PATH_TYPE = {
 export const WithWaffleNodes = ({
   children,
   filterQuery,
-  metrics,
+  metric,
   groupBy,
   nodeType,
   sourceId,
@@ -56,7 +56,7 @@ export const WithWaffleNodes = ({
     notifyOnNetworkStatusChange
     variables={{
       sourceId,
-      metrics,
+      metric,
       path: [...groupBy, { type: NODE_TYPE_TO_PATH_TYPE[nodeType] }],
       timerange,
       filterQuery,

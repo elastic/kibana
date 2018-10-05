@@ -1481,28 +1481,16 @@
             "deprecationReason": null
           },
           {
-            "name": "metrics",
+            "name": "metric",
             "description": "",
             "args": [
               {
-                "name": "metrics",
+                "name": "metric",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "INPUT_OBJECT",
-                        "name": "InfraMetricInput",
-                        "ofType": null
-                      }
-                    }
-                  }
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "InfraMetricInput", "ofType": null }
                 },
                 "defaultValue": null
               }
@@ -1510,15 +1498,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "InfraNodeMetric", "ofType": null }
-                }
-              }
+              "ofType": { "kind": "OBJECT", "name": "InfraNodeMetric", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null

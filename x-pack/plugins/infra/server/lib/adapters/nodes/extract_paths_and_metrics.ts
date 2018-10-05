@@ -18,22 +18,22 @@ import {
 
 interface InfraPathsAndMetricOptions {
   path: InfraPathInput[];
-  metrics: InfraMetricInput[];
+  metric: InfraMetricInput | null;
 }
 
-export function extractPathsAndMetrics(info: GraphQLResolveInfo): InfraPathsAndMetricOptions {
-  if (info.variableValues.metrics && info.variableValues.path) {
+export function extractPathsAndMetric(info: GraphQLResolveInfo): InfraPathsAndMetricOptions {
+  if (info.variableValues.metric && info.variableValues.path) {
     return {
-      metrics: info.variableValues.metrics as InfraMetricInput[],
+      metric: info.variableValues.metric as InfraMetricInput,
       path: info.variableValues.path as InfraPathInput[],
     };
   }
 
-  const { path, metrics }: InfraPathsAndMetricOptions = info.fieldNodes.reduce(parseFieldNodes, {
+  const { path, metric }: InfraPathsAndMetricOptions = info.fieldNodes.reduce(parseFieldNodes, {
     path: [],
-    metrics: [],
+    metric: null,
   });
-  return { path, metrics };
+  return { path, metric };
 }
 
 function isFieldNode(subject: any): subject is FieldNode {
@@ -77,8 +77,18 @@ function extractArgument<ReturnType>(selection: FieldNode, name: string): Return
 function extractPathArgument(selection: FieldNode): InfraPathInput[] {
   return extractArgument<InfraPathInput>(selection, 'path') as InfraPathInput[];
 }
-function extractMetricsArgument(selection: FieldNode): InfraMetricInput[] {
-  return extractArgument<InfraMetricInput>(selection, 'metrics') as InfraMetricInput[];
+
+function extractMetricArgument(selection: FieldNode): InfraMetricInput | null {
+  if (!selection.arguments) {
+    return null;
+  }
+  return selection.arguments
+    .filter(isArgumentNode)
+    .filter(subject => subject.name.value === 'metric')
+    .reduce((prev: InfraMetricInput[], argument: ArgumentNode) => {
+      return valueFromASTUntyped(argument.value);
+    }, [])
+    .pop();
 }
 
 function parseFieldNodes(
@@ -90,8 +100,8 @@ function parseFieldNodes(
     selections.forEach(
       (selection: SelectionNode): void => {
         if (isMetricSelection(selection) && selection.arguments) {
-          const metrics = extractMetricsArgument(selection);
-          ctx.metrics = metrics || [];
+          const metric = extractMetricArgument(selection);
+          ctx.metric = metric;
         }
         parseFieldNodes(ctx, selection);
       }

@@ -5,7 +5,6 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
-import { last } from 'lodash';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
@@ -35,7 +34,7 @@ export class Node extends React.PureComponent<Props, State> {
   public render() {
     const { nodeType, node, options, squareSize, bounds, formatter } = this.props;
     const { isPopoverOpen } = this.state;
-    const metric = last(node.metrics);
+    const { metric } = node;
     const valueMode = squareSize > 110;
     const rawValue = (metric && metric.value) || 0;
     const color = colorFromValue(options.legend, rawValue, bounds);

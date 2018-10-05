@@ -117,7 +117,7 @@ export interface InfraResponse {
 
 export interface InfraNode {
   path: InfraNodePath[];
-  metrics: InfraNodeMetric[];
+  metric: InfraNodeMetric;
 }
 
 export interface InfraNodePath {
@@ -404,13 +404,13 @@ export namespace InfraResponseResolvers {
 export namespace InfraNodeResolvers {
   export interface Resolvers {
     path?: PathResolver;
-    metrics?: MetricsResolver;
+    metric?: MetricResolver;
   }
 
   export type PathResolver = Resolver<InfraNodePath[]>;
-  export type MetricsResolver = Resolver<InfraNodeMetric[], MetricsArgs>;
-  export interface MetricsArgs {
-    metrics: InfraMetricInput[];
+  export type MetricResolver = Resolver<InfraNodeMetric, MetricArgs>;
+  export interface MetricArgs {
+    metric: InfraMetricInput;
   }
 }
 
@@ -534,8 +534,8 @@ export interface IndexFieldsInfraSourceStatusArgs {
 export interface NodesInfraResponseArgs {
   path?: InfraPathInput[] | null;
 }
-export interface MetricsInfraNodeArgs {
-  metrics: InfraMetricInput[];
+export interface MetricInfraNodeArgs {
+  metric: InfraMetricInput;
 }
 
 export enum InfraIndexType {
@@ -653,7 +653,7 @@ export namespace WaffleNodesQuery {
     sourceId: string;
     timerange: InfraTimerangeInput;
     filterQuery?: string | null;
-    metrics: InfraMetricInput[];
+    metric: InfraMetricInput;
     path: InfraPathInput[];
   };
 
@@ -676,7 +676,7 @@ export namespace WaffleNodesQuery {
   export type Nodes = {
     __typename?: 'InfraNode';
     path: Path[];
-    metrics: Metrics[];
+    metric: Metric;
   };
 
   export type Path = {
@@ -684,7 +684,7 @@ export namespace WaffleNodesQuery {
     value: string;
   };
 
-  export type Metrics = {
+  export type Metric = {
     __typename?: 'InfraNodeMetric';
     name: InfraMetricType;
     value: number;

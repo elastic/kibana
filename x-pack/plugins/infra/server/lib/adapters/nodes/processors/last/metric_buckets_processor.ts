@@ -12,19 +12,10 @@ import { metricAggregationCreators } from '../../metric_aggregation_creators';
 export const metricBucketsProcessor = (options: InfraProcesorRequestOptions) => {
   return (doc: InfraESSearchBody) => {
     const result = cloneDeep(doc);
-    const { metrics, groupBy } = options.nodeOptions;
+    const { metric, groupBy } = options.nodeOptions;
     const path = createBasePath(groupBy).concat(['timeseries', 'aggs']);
-    const aggs = metrics.reduce((acc, metric) => {
-      const aggregationCreator = metricAggregationCreators[metric.type];
-      const metricAgg = aggregationCreator(options.nodeType);
-      if (!metricAgg) {
-        return acc;
-      }
-      return {
-        ...acc,
-        ...metricAgg,
-      };
-    }, {});
+    const aggregationCreator = metricAggregationCreators[metric.type];
+    const aggs = aggregationCreator(options.nodeType);
     set(result, path, aggs);
     return result;
   };

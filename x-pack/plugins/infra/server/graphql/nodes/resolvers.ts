@@ -8,7 +8,7 @@ import { InfraSourceResolvers } from '../../../common/graphql/types';
 import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
 import { InfraNodeRequestOptions } from '../../lib/adapters/nodes';
 import { extractGroupByAndNodeFromPath } from '../../lib/adapters/nodes/extract_group_by_and_node_from_path';
-import { extractPathsAndMetrics } from '../../lib/adapters/nodes/extract_paths_and_metrics';
+import { extractPathsAndMetric } from '../../lib/adapters/nodes/extract_paths_and_metrics';
 import { InfraNodesDomain } from '../../lib/domains/nodes_domain';
 import { InfraContext } from '../../lib/infra_types';
 import { parseFilterQuery } from '../../utils/serialized_query';
@@ -33,15 +33,19 @@ export const createNodeResolvers = (
 } => ({
   InfraSource: {
     async map(source, args, { req }, info) {
-      const { metrics, path } = extractPathsAndMetrics(info);
+      const { metric, path } = extractPathsAndMetric(info);
       const { groupBy, nodeType } = extractGroupByAndNodeFromPath(path);
+
+      if (!metric) {
+        throw new Error('The metric argument is not optional');
+      }
 
       const options: InfraNodeRequestOptions = {
         filterQuery: parseFilterQuery(args.filterQuery),
         nodeType,
         groupBy,
         sourceConfiguration: source.configuration,
-        metrics,
+        metric,
         timerange: args.timerange,
       };
 

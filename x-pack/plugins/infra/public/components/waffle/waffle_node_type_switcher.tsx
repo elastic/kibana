@@ -17,7 +17,7 @@ interface Props {
   nodeType: InfraNodeType;
   changeNodeType: (nodeType: InfraNodeType) => void;
   changeGroupBy: (groupBy: InfraPathInput[]) => void;
-  changeMetrics: (metric: InfraMetricInput[]) => void;
+  changeMetric: (metric: InfraMetricInput) => void;
 }
 
 export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
@@ -40,6 +40,6 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
   private handleClick = (nodeType: InfraNodeType) => () => {
     this.props.changeNodeType(nodeType);
     this.props.changeGroupBy([]);
-    this.props.changeMetrics([{ type: InfraMetricType.cpu }]);
+    this.props.changeMetric({ type: InfraMetricType.cpu });
   };
 }

@@ -90,7 +90,7 @@ export interface InfraNodeRequestOptions {
   sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerangeInput;
   groupBy: InfraPathInput[];
-  metrics: InfraMetricInput[];
+  metric: InfraMetricInput;
   filterQuery: InfraESQuery | undefined;
 }
 

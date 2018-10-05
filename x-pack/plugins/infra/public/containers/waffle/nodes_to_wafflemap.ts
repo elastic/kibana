@@ -76,7 +76,7 @@ function createWaffleMapNode(node: InfraNode): InfraWaffleMapNode {
     id: node.path.map(p => p.value).join('/'),
     path: node.path,
     name: last(node.path).value,
-    metrics: node.metrics,
+    metric: node.metric,
   };
 }
 

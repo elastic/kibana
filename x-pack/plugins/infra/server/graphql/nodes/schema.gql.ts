@@ -18,7 +18,7 @@ export const nodesSchema: any = gql`
 
   type InfraNode {
     path: [InfraNodePath!]!
-    metrics(metrics: [InfraMetricInput!]!): [InfraNodeMetric!]!
+    metric(metric: InfraMetricInput!): InfraNodeMetric!
   }
 
   input InfraTimerangeInput {
