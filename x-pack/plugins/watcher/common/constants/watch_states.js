@@ -24,4 +24,5 @@ export const WATCH_STATES = {
     defaultMessage: 'Error!'
   }),
 
+  CONFIG_ERROR: 'Config Error!',
 };

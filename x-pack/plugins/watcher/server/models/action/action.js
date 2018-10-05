@@ -26,7 +26,18 @@ export class Action {
   }
 
   // From Elasticsearch
-  static fromUpstreamJson(json) {
+  static fromUpstreamJson(json, options = { throwExceptions: {} }) {
+    if (!json.id) {
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.actionStatus.absenceOfIdPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {id} property',
+          values: {
+            id: 'id'
+          }
+        }),
+      );
+    }
+
     if (!json.actionJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.action.absenceOfActionJsonPropertyBadRequestMessage', {
@@ -40,13 +51,38 @@ export class Action {
 
     const type = getActionType(json.actionJson);
     const ActionType = ActionTypes[type] || UnknownAction;
-    return ActionType.fromUpstreamJson(json);
+
+    const { action, errors } = ActionType.fromUpstreamJson(json, options);
+    const doThrowException = options.throwExceptions.Action !== false;
+
+    if (errors && doThrowException) {
+      this.throwErrors(errors);
+    }
+
+    return action;
   }
 
   // From Kibana
-  static fromDownstreamJson(json) {
+  static fromDownstreamJson(json, options = { throwExceptions: {} }) {
     const ActionType = ActionTypes[json.type] || UnknownAction;
 
-    return ActionType.fromDownstreamJson(json);
+    const { action, errors } = ActionType.fromDownstreamJson(json);
+    const doThrowException = options.throwExceptions.Action !== false;
+
+    if (errors && doThrowException) {
+      this.throwErrors(errors);
+    }
+
+    return action;
+  }
+
+  static throwErrors(errors) {
+    const allMessages = errors.reduce((message, error) => {
+      if (message) {
+        return `${message}, ${error.message}`;
+      }
+      return error.message;
+    }, '');
+    throw badRequest(allMessages);
   }
 }

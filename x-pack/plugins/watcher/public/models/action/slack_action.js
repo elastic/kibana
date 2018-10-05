@@ -17,12 +17,36 @@ export class SlackAction extends BaseAction {
     this.text = props.text;
   }
 
+  validate() {
+    const errors = [];
+
+    if (!this.to.length) {
+      errors.push({
+        message: i18n.translate('xpack.watcher.sections.watchEdit.json.warningPossibleInvalidSlackAction.description', {
+          defaultMessage: `You are saving a watch with a "Slack" Action but you haven't defined a "to" field.
+          Unless you have specified a Slack message_default "to" property in your Elasticsearch settings,
+          this will result in an invalid watch.`
+        })
+      });
+    }
+
+    return { errors: errors.length ? errors : null };
+  }
+
   get upstreamJson() {
     const result = super.upstreamJson;
-
+    const message = this.text || this.to.length
+      ? {
+        text: this.text,
+        to: this.to.length ? this.to : undefined
+      }
+      : undefined;
     Object.assign(result, {
       to: this.to,
-      text: this.text
+      text: this.text,
+      slack: {
+        message
+      }
     });
 
     return result;

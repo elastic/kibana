@@ -11,6 +11,8 @@ import sinon from 'sinon';
 const actionFromUpstreamJSONMock = sinon.stub();
 const actionFromDownstreamJSONMock = sinon.stub();
 const watchStatusFromUpstreamJSONMock = sinon.stub();
+const watchErrorsFromUpstreamJSONMock = sinon.stub();
+
 class ActionStub {
   static fromUpstreamJson(...args) {
     actionFromUpstreamJSONMock(...args);
@@ -30,9 +32,17 @@ class WatchStatusStub {
   }
 }
 
+class WatchErrorsStub {
+  static fromUpstreamJson(...args) {
+    watchErrorsFromUpstreamJSONMock(...args);
+    return { foo: 'bar' };
+  }
+}
+
 const { BaseWatch } = proxyquire('../base_watch', {
   '../action': { Action: ActionStub },
-  '../watch_status': { WatchStatus: WatchStatusStub }
+  '../watch_status': { WatchStatus: WatchStatusStub },
+  '../watch_errors': { WatchErrors: WatchErrorsStub },
 });
 
 describe('BaseWatch', () => {
@@ -57,6 +67,7 @@ describe('BaseWatch', () => {
         'type',
         'isSystemWatch',
         'watchStatus',
+        'watchErrors',
         'actions'
       ];
 
@@ -72,6 +83,7 @@ describe('BaseWatch', () => {
     it('populates all expected fields', () => {
       props.watchStatus = 'bar';
       props.actions = 'baz';
+      props.watchErrors = { actions: 'email' };
 
       const actual = new BaseWatch(props);
       const expected = {
@@ -80,6 +92,7 @@ describe('BaseWatch', () => {
         type: 'logging',
         isSystemWatch: false,
         watchStatus: 'bar',
+        watchErrors: { actions: 'email' },
         actions: 'baz'
       };
 
@@ -169,6 +182,12 @@ describe('BaseWatch', () => {
             prop2: 'prop2'
           }
         },
+        watchErrors: {
+          downstreamJson: {
+            prop1: 'prop1',
+            prop2: 'prop2'
+          }
+        },
         actions: [{
           downstreamJson: {
             prop1: 'prop3',
@@ -188,14 +207,16 @@ describe('BaseWatch', () => {
         type: props.type,
         isSystemWatch: false,
         watchStatus: props.watchStatus.downstreamJson,
+        watchErrors: props.watchErrors.downstreamJson,
         actions: props.actions.map(a => a.downstreamJson)
       };
 
       expect(actual).to.eql(expected);
     });
 
-    it('should respect an undefined watchStatus prop', () => {
+    it('should respect an undefined watchStatus & watchErrors prop', () => {
       delete props.watchStatus;
+      delete props.watchErrors;
 
       const watch = new BaseWatch(props);
       const actual = watch.downstreamJson;
@@ -206,6 +227,7 @@ describe('BaseWatch', () => {
         type: props.type,
         isSystemWatch: false,
         watchStatus: undefined,
+        watchErrors: undefined,
         actions: props.actions.map(a => a.downstreamJson)
       };
 
@@ -397,6 +419,7 @@ describe('BaseWatch', () => {
         'name',
         'watchJson',
         'watchStatus',
+        'watchErrors',
         'actions'
       ];
 
@@ -456,6 +479,9 @@ describe('BaseWatch', () => {
           state: {
             active: true
           }
+        },
+        watchErrors: {
+          foo: 'bar'
         }
       })).to.be(true);
     });

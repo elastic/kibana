@@ -44,11 +44,18 @@ export function registerListRoute(server) {
             const watchJson = get(hit, '_source');
             const watchStatusJson = get(hit, '_source.status');
 
-            return Watch.fromUpstreamJson({
-              id,
-              watchJson,
-              watchStatusJson
-            });
+            return Watch.fromUpstreamJson(
+              {
+                id,
+                watchJson,
+                watchStatusJson,
+              },
+              {
+                throwExceptions: {
+                  Action: false,
+                },
+              }
+            );
           });
 
           reply({

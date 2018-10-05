@@ -16,13 +16,27 @@ app.directive('actionStatusTable', function () {
     template: template,
     scope: {
       actionStatuses: '=',
+      actionErrors: '=',
       sortField: '=',
       sortReverse: '=',
       onSortChange: '=',
       onActionAcknowledge: '=',
+      showErrors: '='
     },
     bindToController: true,
     controllerAs: 'actionStatusTable',
-    controller: class ActionStatusTableController {}
+    controller: class ActionStatusTableController {
+      getLabelErrors(actionId) {
+        const errors = this.actionErrors[actionId];
+        const total = errors.length;
+
+        let label = `${total} error`;
+        if (total > 1) {
+          label += 's';
+        }
+
+        return label;
+      }
+    }
   };
 });

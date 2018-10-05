@@ -8,9 +8,10 @@ import { badRequest } from 'boom';
 import { i18n } from '@kbn/i18n';
 
 export class BaseAction {
-  constructor(props) {
+  constructor(props, errors) {
     this.id = props.id;
     this.type = props.type;
+    this.errors = errors;
   }
 
   get downstreamJson() {
