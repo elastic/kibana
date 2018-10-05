@@ -27,7 +27,7 @@ export const assetsReducer = handleActions(
       const asset = get(assetState, [id]);
       if (!asset) {
         throw new Error(
-          i18n.translate('xpack.canvas.state.idNotFoundToSetAssetDataErrorMessage', {
+          i18n.translate('xpack.canvas.state.assets.idNotFoundErrorMessage', {
             defaultMessage: 'Can not set asset data, id not found: {id}',
             values: { id },
           })

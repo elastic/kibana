@@ -45,7 +45,7 @@ function moveElementLayer(workpadState, pageId, elementId, movement) {
     if (movement === Infinity) return elements.length - 1;
     if (movement === -Infinity) return 0;
     throw new Error(
-      i18n.translate('xpack.canvas.state.invalidElementLayerMovementErrorMessage', {
+      i18n.translate('xpack.canvas.state.elements.invalidElementLayerMovementErrorMessage', {
         defaultMessage: 'Invalid element layer movement',
       })
     );

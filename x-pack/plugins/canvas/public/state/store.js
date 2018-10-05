@@ -15,7 +15,7 @@ let store;
 export function createStore(initialState) {
   if (typeof store !== 'undefined') {
     throw new Error(
-      i18n.translate('xpack.canvas.state.reduxStoreCanBeInitializedOnceErrorMessage', {
+      i18n.translate('xpack.canvas.state.reduxStoreMultipleInitializationErrorMessage', {
         defaultMessage: 'Redux store can only be initialized once',
       })
     );
@@ -23,7 +23,7 @@ export function createStore(initialState) {
 
   if (!isPlainObject(initialState)) {
     throw new Error(
-      i18n.translate('xpack.canvas.state.initialStateMustBePlainObjectErrorMessage', {
+      i18n.translate('xpack.canvas.state.stateTypeErrorMessage', {
         defaultMessage: 'Initial state must be a plain object',
       })
     );

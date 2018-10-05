@@ -55,7 +55,7 @@ function getFullPath(path) {
   const isString = typeof path === 'string';
   if (!isArray && !isString) {
     throw new Error(
-      i18n.translate('xpack.canvas.state.resolvedArgumentPathIsInvalidErrorMessage', {
+      i18n.translate('xpack.canvas.state.resolvedArgs.pathIsInvalidErrorMessage', {
         defaultMessage: 'Resolved argument path is invalid: {path}',
         values: { path },
       })
