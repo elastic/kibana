@@ -123,10 +123,6 @@ async function runSingleConfig(configPath, options) {
     } catch (error) {
       // do nothing
     }
-    try {
-      await es.cleanup();
-    } catch (error) {
-      // do nothing
-    }
+    await es.cleanup();
   });
 }
