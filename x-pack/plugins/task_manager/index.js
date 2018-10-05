@@ -32,10 +32,10 @@ export function taskManager(kibana) {
           .default({})
       }).default();
     },
-    init(server) {
+    preInit(server) {
       const config = server.config();
       const taskManager = new TaskManager(this.kbnServer, server, config);
       server.decorate('server', 'taskManager', taskManager);
-    }
+    },
   });
 }
