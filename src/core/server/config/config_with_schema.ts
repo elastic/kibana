@@ -18,8 +18,8 @@
  */
 
 // TODO inline all of these
+import { Type, TypeOf } from '@kbn/config-schema';
 import { Env } from './env';
-import { Type, TypeOf } from './schema';
 
 /**
  * Interface that defines the static side of a config class.

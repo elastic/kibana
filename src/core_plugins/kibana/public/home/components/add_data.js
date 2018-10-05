@@ -61,7 +61,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
       defaultMessage: 'Collect metrics from the operating system and services running on your servers.'
     });
     const securityTitle = intl.formatMessage({
-      id: 'kbn.home.addData.security.nameTitle', defaultMessage: 'Security Analytics'
+      id: 'kbn.home.addData.security.nameTitle', defaultMessage: 'Security analytics'
     });
     const securityDescription = intl.formatMessage({
       id: 'kbn.home.addData.security.nameDescription',

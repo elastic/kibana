@@ -17,13 +17,13 @@
  * under the License.
  */
 
+import { Type } from '@kbn/config-schema';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
 import { Config, ConfigPath, ConfigWithSchema, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
-import { Type } from './schema';
 
 export class ConfigService {
   private readonly log: Logger;

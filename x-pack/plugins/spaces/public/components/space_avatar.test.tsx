@@ -12,3 +12,8 @@ test('renders without crashing', () => {
   const wrapper = shallow(<SpaceAvatar space={{ name: '', id: '' }} />);
   expect(wrapper).toMatchSnapshot();
 });
+
+test('renders with a space name entirely made of whitespace', () => {
+  const wrapper = shallow(<SpaceAvatar space={{ name: '      ', id: '' }} />);
+  expect(wrapper).toMatchSnapshot();
+});
