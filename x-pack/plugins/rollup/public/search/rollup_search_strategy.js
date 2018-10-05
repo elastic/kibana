@@ -5,7 +5,7 @@
 */
 
 import { kfetchAbortable } from 'ui/kfetch';
-import { SearchError } from 'ui/courier';
+import { SearchError, getSearchErrorType } from 'ui/courier';
 
 function getAllFetchParams(searchRequests, Promise) {
   return Promise.map(searchRequests, (searchRequest) => {
@@ -118,8 +118,9 @@ export const rollupSearchStrategy = {
           const searchError = new SearchError({
             status: statusText,
             title,
-            message,
+            message: `Rollup search error: ${message}`,
             path: url,
+            type: getSearchErrorType({ message }),
           });
 
           reject(searchError);
