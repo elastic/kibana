@@ -7,6 +7,8 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiTextArea } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
@@ -48,7 +50,15 @@ class EssqlDatasource extends PureComponent {
   render() {
     const { isInvalid } = this.props;
     return (
-      <EuiFormRow isInvalid={isInvalid} label="Elasticsearch SQL query">
+      <EuiFormRow
+        isInvalid={isInvalid}
+        label={
+          <FormattedMessage
+            id="xpack.canvas.uis.datasource.essqlFormRowQueryLabel"
+            defaultMessage="Elasticsearch SQL query"
+          />
+        }
+      >
         <EuiTextArea
           placeholder={this.defaultQuery}
           isInvalid={isInvalid}
@@ -70,8 +80,12 @@ EssqlDatasource.propTypes = {
 
 export const essql = () => ({
   name: 'essql',
-  displayName: 'Elasticsearch SQL',
-  help: 'Use Elasticsearch SQL to get a datatable',
+  displayName: i18n.translate('xpack.canvas.uis.datasource.essqlDisplayName', {
+    defaultMessage: 'Elasticsearch SQL',
+  }),
+  help: i18n.translate('xpack.canvas.uis.datasource.essqlHelpText', {
+    defaultMessage: 'Use Elasticsearch SQL to get a datatable',
+  }),
   // Replace this with a SQL logo when we have one in EUI
   image: 'logoElasticsearch',
   template: templateFromReactComponent(EssqlDatasource),

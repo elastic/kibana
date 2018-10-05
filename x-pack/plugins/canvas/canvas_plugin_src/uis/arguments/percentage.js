@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { EuiRange } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
@@ -35,7 +36,11 @@ PercentageArgInput.propTypes = {
 
 export const percentage = () => ({
   name: 'percentage',
-  displayName: 'Percentage',
-  help: 'Slider for percentage ',
+  displayName: i18n.translate('xpack.canvas.uis.arguments.percentageDisplayName', {
+    defaultMessage: 'Percentage',
+  }),
+  help: i18n.translate('xpack.canvas.uis.arguments.percentageHelpText', {
+    defaultMessage: 'Slider for percentage ',
+  }),
   simpleTemplate: templateFromReactComponent(PercentageArgInput),
 });

@@ -15,6 +15,8 @@ import {
   EuiButton,
   EuiFieldText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { injectI18n } from '@kbn/i18n/react';
 import { Loading } from '../../../../public/components/loading';
 import { FileUpload } from '../../../../public/components/file_upload';
 import { elasticOutline } from '../../../lib/elastic_outline';
@@ -24,7 +26,7 @@ import { encode, isValid as isValidDataUrl } from '../../../../common/lib/dataur
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import './image_upload.scss';
 
-class ImageUpload extends React.Component {
+class ImageUploadUI extends React.Component {
   static propTypes = {
     onAssetAdd: PropTypes.func.isRequired,
     onValueChange: PropTypes.func.isRequired,
@@ -101,6 +103,7 @@ class ImageUpload extends React.Component {
     const { loading, url, urlType } = this.state;
     const urlTypeInline = urlType === 'inline';
     const urlTypeSrc = urlType === 'src';
+    const { intl } = this.props;
 
     const selectUrlType = (
       <EuiSelect
@@ -114,7 +117,13 @@ class ImageUpload extends React.Component {
     let uploadImage = null;
     if (urlTypeInline) {
       uploadImage = loading ? (
-        <Loading animated text="Image uploading" />
+        <Loading
+          animated
+          text={intl.formatMessage({
+            id: 'xpack.canvas.uis.arguments.imageUpload,imageLoadingText',
+            defaultMessage: 'Image uploading',
+          })}
+        />
       ) : (
         <FileUpload onUpload={this.handleUpload} />
       );
@@ -126,11 +135,20 @@ class ImageUpload extends React.Component {
           compressed
           defaultValue={this.state.url}
           inputRef={ref => (this.inputRefs.srcUrlText = ref)}
-          placeholder="Image URL"
-          aria-label="Image URL"
+          placeholder={intl.formatMessage({
+            id: 'xpack.canvas.uis.arguments.imageUpload.inputPlaceholder',
+            defaultMessage: 'Image URL',
+          })}
+          aria-label={intl.formatMessage({
+            id: 'xpack.canvas.uis.arguments.imageUpload.inputAriaLabel',
+            defaultMessage: 'Image URL',
+          })}
         />
         <EuiButton type="submit" size="s" onClick={this.setSrcUrl}>
-          Set
+          <formattedMessage
+            id="xpack.canvas.uis.arguments.imageUpload.setButtonLabel"
+            defaultMessage="Set"
+          />
         </EuiButton>
       </form>
     ) : null;
@@ -152,7 +170,10 @@ class ImageUpload extends React.Component {
               <EuiImage
                 size="s"
                 hasShadow
-                alt="Image Preview"
+                alt={intl.formatMessage({
+                  id: 'xpack.canvas.uis.arguments.imageUpload.imagePreviewAltText',
+                  defaultMessage: 'Image Preview',
+                })}
                 url={this.state.url}
                 className="canvasCheckered"
               />
@@ -164,10 +185,16 @@ class ImageUpload extends React.Component {
   }
 }
 
+const ImageUpload = injectI18n(ImageUploadUI);
+
 export const imageUpload = () => ({
   name: 'imageUpload',
-  displayName: 'Image Upload',
-  help: 'Select or upload an image',
+  displayName: i18n.translate('xpack.canvas.uis.arguments.imageUploadDisplayName', {
+    defaultMessage: 'Image Upload',
+  }),
+  help: i18n.translate('xpack.canvas.uis.arguments.imageUploadHelpText', {
+    defaultMessage: 'Select or upload an image',
+  }),
   resolveArgValue: true,
   template: templateFromReactComponent(ImageUpload),
   resolve({ args }) {

@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFormRow, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { set } from 'object-path-immutable';
 import { get } from 'lodash';
 
@@ -51,7 +52,16 @@ export class ExtendedTemplate extends React.PureComponent {
   render() {
     const isDisabled = typeof this.props.argValue === 'boolean' && this.props.argValue === false;
 
-    if (isDisabled) return <EuiText color="subdued">The axis is disabled</EuiText>;
+    if (isDisabled) {
+      return (
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.canvas.uis.arguments.extendedTemplate.axisIsDisabledText"
+            defaultMessage="The axis is disabled"
+          />
+        </EuiText>
+      );
+    }
 
     const positions = {
       xaxis: ['bottom', 'top'],
@@ -64,7 +74,15 @@ export class ExtendedTemplate extends React.PureComponent {
 
     return (
       <Fragment>
-        <EuiFormRow label="Position" compressed>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.canvas.uis.arguments.extendedTemplate.formRowPositionLabel"
+              defaultMessage="Position"
+            />
+          }
+          compressed
+        >
           <EuiSelect
             defaultValue={position}
             options={options}

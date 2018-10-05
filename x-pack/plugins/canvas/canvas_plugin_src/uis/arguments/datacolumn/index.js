@@ -7,6 +7,7 @@
 import React, { Component } from 'react';
 import { compose, withPropsOnChange, withHandlers } from 'recompose';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { createStatefulPropHoc } from '../../../../public/components/enhance/stateful_prop';
@@ -128,8 +129,12 @@ EnhancedDatacolumnArgInput.propTypes = {
 
 export const datacolumn = () => ({
   name: 'datacolumn',
-  displayName: 'Column',
-  help: 'Select the data column',
+  displayName: i18n.translate('xpack.canvas.uis.arguments.datacolumnDisplayName', {
+    defaultMessage: 'Column',
+  }),
+  help: i18n.translate('xpack.canvas.uis.arguments.datacolumnHelpText', {
+    defaultMessage: 'Select the data column',
+  }),
   default: '""',
   simpleTemplate: templateFromReactComponent(EnhancedDatacolumnArgInput),
 });

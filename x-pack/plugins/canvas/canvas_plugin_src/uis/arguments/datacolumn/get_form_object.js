@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { parse } from 'tinymath';
 import { unquoteString } from '../../../../common/lib/unquote_string';
 
@@ -40,5 +41,12 @@ export function getFormObject(argValue) {
   }
 
   // Screw it, textarea for you my fancy.
-  throw new Error(`Cannot render scalar values or complex math expressions`);
+  throw new Error(
+    i18n.translate(
+      'xpack.canvas.uis.arguments.datacolumn.renderScalarValuesOrComplexMathExpressionsErrorMessage',
+      {
+        defaultMessage: 'Cannot render scalar values or complex math expressions',
+      }
+    )
+  );
 }

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { EuiRange } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
@@ -44,7 +45,11 @@ RangeArgInput.propTypes = {
 
 export const range = () => ({
   name: 'range',
-  displayName: 'Range',
-  help: 'Slider for values within a range',
+  displayName: i18n.translate('xpack.canvas.uis.arguments.rangeDisplayName', {
+    defaultMessage: 'Range',
+  }),
+  help: i18n.translate('xpack.canvas.uis.arguments.rangeHelpText', {
+    defaultMessage: 'Slider for values within a range',
+  }),
   simpleTemplate: templateFromReactComponent(RangeArgInput),
 });

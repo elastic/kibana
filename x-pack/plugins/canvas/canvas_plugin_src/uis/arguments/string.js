@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { compose, withProps } from 'recompose';
 import { EuiFlexItem, EuiFlexGroup, EuiFieldText, EuiButton } from '@elastic/eui';
 import { get } from 'lodash';
@@ -57,7 +58,11 @@ EnhancedStringArgInput.propTypes = {
 
 export const string = () => ({
   name: 'string',
-  displayName: 'string',
-  help: 'Input short strings',
+  displayName: i18n.translate('xpack.canvas.uis.arguments.stringDisplayName', {
+    defaultMessage: 'string',
+  }),
+  help: i18n.translate('xpack.canvas.uis.arguments.stringHelpText', {
+    defaultMessage: 'Input short strings',
+  }),
   simpleTemplate: templateFromReactComponent(EnhancedStringArgInput),
 });

@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps } from 'recompose';
+import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../../public/components/enhance/stateful_prop';
@@ -62,8 +63,12 @@ EnhancedNumberArgInput.propTypes = {
 
 export const number = () => ({
   name: 'number',
-  displayName: 'number',
-  help: 'Input a number',
+  displayName: i18n.translate('xpack.canvas.uis.arguments.numberDisplayName', {
+    defaultMessage: 'number',
+  }),
+  help: i18n.translate('xpack.canvas.uis.arguments.numberHelpText', {
+    defaultMessage: 'Input a number',
+  }),
   simpleTemplate: templateFromReactComponent(EnhancedNumberArgInput),
   default: '0',
 });

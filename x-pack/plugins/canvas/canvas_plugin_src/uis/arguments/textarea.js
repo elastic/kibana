@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { compose, withProps } from 'recompose';
 import { EuiForm, EuiTextArea, EuiSpacer, EuiButton } from '@elastic/eui';
 import { get } from 'lodash';
@@ -63,7 +64,11 @@ EnhancedTextAreaArgInput.propTypes = {
 
 export const textarea = () => ({
   name: 'textarea',
-  displayName: 'textarea',
-  help: 'Input long strings',
+  displayName: i18n.translate('xpack.canvas.uis.arguments.textareaDisplayName', {
+    defaultMessage: 'textarea',
+  }),
+  help: i18n.translate('xpack.canvas.uis.arguments.textareaHelpText', {
+    defaultMessage: 'Input long strings',
+  }),
   template: templateFromReactComponent(EnhancedTextAreaArgInput),
 });

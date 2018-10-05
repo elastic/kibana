@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ShapePickerMini } from '../../../public/components/shape_picker_mini/';
@@ -32,8 +33,12 @@ ShapeArgInput.propTypes = {
 
 export const shape = () => ({
   name: 'shape',
-  displayName: 'Shape',
-  help: 'Shape picker',
+  displayName: i18n.translate('xpack.canvas.uis.arguments.shapeDisplayName', {
+    defaultMessage: 'Shape',
+  }),
+  help: i18n.translate('xpack.canvas.uis.arguments.shapeHelpText', {
+    defaultMessage: 'Shape picker',
+  }),
   simpleTemplate: templateFromReactComponent(ShapeArgInput),
   default: '"square"',
 });

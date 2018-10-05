@@ -15,6 +15,8 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
@@ -48,16 +50,36 @@ const TimelionDatasource = ({ args, updateArgs }) => {
   return (
     <div>
       <EuiText size="xs">
-        <h3>Timelion</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.canvas.uis.datasource.timelionTitle"
+            defaultMessage="Timelion"
+          />
+        </h3>
         <p>
-          Canvas integrates with Kibana's Timelion application to allow you to use Timelion queries
-          to pull back timeseries data in a tabular format that can be used with Canvas elements.
+          <FormattedMessage
+            id="xpack.canvas.uis.datasource.timelionDescription"
+            defaultMessage="Canvas integrates with Kibana's Timelion application to allow you to use Timelion queries to pull back timeseries data in a tabular format that can be used with Canvas elements."
+          />
         </p>
       </EuiText>
 
       <EuiSpacer />
 
-      <EuiFormRow label="Query" helpText="Lucene Query String syntax">
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.canvas.uis.datasource.timelionFormRowQueryLabel"
+            defaultMessage="Query"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.canvas.uis.datasource.timelionFormRowQueryHelpText"
+            defaultMessage="Lucene Query String syntax"
+          />
+        }
+      >
         <EuiTextArea
           className="canvasTextArea--code"
           value={getQuery()}
@@ -68,22 +90,48 @@ const TimelionDatasource = ({ args, updateArgs }) => {
         // TODO: Time timelion interval picker should be a drop down
       }
       <EuiFormRow
-        label="Interval"
-        helpText="Accepts Elasticsearch date math: 1w, 5d, 10s, or auto"
+        label={
+          <FormattedMessage
+            id="xpack.canvas.uis.datasource.timelionFormRowIntervalLabel"
+            defaultMessage="Interval"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.canvas.uis.datasource.timelionFormRowIntervalHelpText"
+            defaultMessage="Accepts Elasticsearch date math: 1w, 5d, 10s, or auto"
+          />
+        }
         compressed
       >
         <EuiFieldText value={getInterval()} onChange={e => setArg('interval', e.target.value)} />
       </EuiFormRow>
 
-      <EuiCallOut color="warning" title="Some tips" size="s">
+      <EuiCallOut
+        color="warning"
+        title={
+          <FormattedMessage
+            id="xpack.canvas.uis.datasource.timelionTipsTitle"
+            defaultMessage="Some tips"
+          />
+        }
+        size="s"
+      >
         <ul>
           <li>
-            Timelion requires a time range, you should add a time filter element to your page
-            somewhere, or use the code editor to pass in a time filter.
+            <FormattedMessage
+              id="xpack.canvas.uis.datasource.timelionFirstTipDescription"
+              defaultMessage="Timelion requires a time range, you should add a time filter element to your page somewhere, or use the code editor to pass in a time filter."
+            />
           </li>
           <li>
-            Some Timelion functions, such as <EuiCode>.color()</EuiCode>, don't translate to a
-            Canvas data table. Anything todo with data manipulation should work grand.
+            <FormattedMessage
+              id="xpack.canvas.uis.datasource.timelionSecondTipDescription"
+              defaultMessage="TSome Timelion functions, such as {color}, don't translate to a Canvas data table. Anything todo with data manipulation should work grand."
+              values={{
+                color: <EuiCode>.color()</EuiCode>,
+              }}
+            />
           </li>
         </ul>
       </EuiCallOut>
@@ -98,8 +146,12 @@ TimelionDatasource.propTypes = {
 
 export const timelion = () => ({
   name: 'timelion',
-  displayName: 'Timelion',
-  help: 'Use timelion syntax to retrieve a timeseries',
+  displayName: i18n.translate('xpack.canvas.uis.datasource.timelionDisplayName', {
+    defaultMessage: 'Timelion',
+  }),
+  help: i18n.translate('xpack.canvas.uis.datasource.timelionHelpText', {
+    defaultMessage: 'Use timelion syntax to retrieve a timeseries',
+  }),
   image: 'timelionApp',
   template: templateFromReactComponent(TimelionDatasource),
 });

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { EuiSelect } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
@@ -49,7 +50,11 @@ SelectArgInput.propTypes = {
 
 export const select = () => ({
   name: 'select',
-  displayName: 'Select',
-  help: 'Select from multiple options in a drop down',
+  displayName: i18n.translate('xpack.canvas.uis.arguments.selectDisplayName', {
+    defaultMessage: 'Select',
+  }),
+  help: i18n.translate('xpack.canvas.uis.arguments.selectHelpText', {
+    defaultMessage: 'Select from multiple options in a drop down',
+  }),
   simpleTemplate: templateFromReactComponent(SelectArgInput),
 });

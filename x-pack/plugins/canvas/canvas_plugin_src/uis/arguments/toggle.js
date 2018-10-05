@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
@@ -24,8 +25,12 @@ ToggleArgInput.propTypes = {
 
 export const toggle = () => ({
   name: 'toggle',
-  displayName: 'Toggle',
-  help: 'A true/false toggle switch',
+  displayName: i18n.translate('xpack.canvas.uis.arguments.toggleDisplayName', {
+    defaultMessage: 'Toggle',
+  }),
+  help: i18n.translate('xpack.canvas.uis.arguments.toggleHelpText', {
+    defaultMessage: 'A true/false toggle switch',
+  }),
   simpleTemplate: templateFromReactComponent(ToggleArgInput),
   default: 'false',
 });

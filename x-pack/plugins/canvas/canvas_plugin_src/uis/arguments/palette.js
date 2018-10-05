@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { PalettePicker } from '../../../public/components/palette_picker';
 import { getType } from '../../../common/lib/get_type';
@@ -65,8 +66,12 @@ PaletteArgInput.propTypes = {
 
 export const palette = () => ({
   name: 'palette',
-  displayName: 'Color Palette',
-  help: 'Choose a color palette',
+  displayName: i18n.translate('xpack.canvas.uis.arguments.paletteDisplayName', {
+    defaultMessage: 'Color Palette',
+  }),
+  help: i18n.translate('xpack.canvas.uis.arguments.paletteHelpText', {
+    defaultMessage: 'Choose a color palette',
+  }),
   default:
     '{palette #882E72 #B178A6 #D6C1DE #1965B0 #5289C7 #7BAFDE #4EB265 #90C987 #CAE0AB #F7EE55 #F6C141 #F1932D #E8601C #DC050C}',
   simpleTemplate: templateFromReactComponent(PaletteArgInput),
