@@ -21,6 +21,7 @@ import { ManagementSection } from './section';
 
 export {
   PAGE_TITLE_COMPONENT,
+  PAGE_SUBTITLE_COMPONENT,
   PAGE_FOOTER_COMPONENT,
 } from '../../../core_plugins/kibana/public/management/sections/settings/components/default_component_registry';
 

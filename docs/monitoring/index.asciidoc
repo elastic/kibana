@@ -19,9 +19,10 @@ metrics. Each node and instance is considered unique based on its persistent
 UUID, which is written to the <<settings,`path.data`>> directory when the node
 or instance starts.
 
-* <<monitoring-xpack-kibana>>
+* <<monitoring-kibana>>
 * <<monitoring-data>>
 
 --
 
 include::viewing-metrics.asciidoc[]
+include::monitoring-troubleshooting.asciidoc[]

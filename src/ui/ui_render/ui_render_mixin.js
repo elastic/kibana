@@ -63,11 +63,18 @@ export function uiRenderMixin(kbnServer, server, config) {
         }
 
         const basePath = config.get('server.basePath');
+        const bundlePath = `${basePath}/bundles`;
+        const styleSheetPaths = [
+          `${bundlePath}/vendors.style.css`,
+          `${bundlePath}/commons.style.css`,
+          `${bundlePath}/${app.getId()}.style.css`,
+        ].concat(kbnServer.uiExports.styleSheetPaths.map(path => `${basePath}/${path.publicPath}`).reverse());
+
         const bootstrap = new AppBootstrap({
           templateData: {
             appId: app.getId(),
-            bundlePath: `${basePath}/bundles`,
-            styleSheetPath: app.getStyleSheetUrlPath() ? `${basePath}/${app.getStyleSheetUrlPath()}` : null,
+            bundlePath,
+            styleSheetPaths,
           },
           translations: await server.getUiTranslations()
         });
@@ -105,7 +112,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     }
   });
 
-  async function getLegacyKibanaPayload({ app, translations, request, includeUserProvidedConfig, injectedVarsOverrides }) {
+  async function getLegacyKibanaPayload({ app, translations, request, includeUserProvidedConfig }) {
     const uiSettings = request.getUiSettingsService();
 
     return {
@@ -117,21 +124,13 @@ export function uiRenderMixin(kbnServer, server, config) {
       branch: config.get('pkg.branch'),
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
-      basePath: config.get('server.basePath'),
+      basePath: request.getBasePath(),
       serverName: config.get('server.name'),
       devMode: config.get('env.dev'),
       uiSettings: await props({
         defaults: uiSettings.getDefaults(),
         user: includeUserProvidedConfig && uiSettings.getUserProvided()
-      }),
-      vars: await replaceInjectedVars(
-        request,
-        defaults(
-          injectedVarsOverrides,
-          await server.getInjectedUiAppVars(app.getId()),
-          defaultInjectedVars,
-        ),
-      )
+      })
     };
   }
 
@@ -139,7 +138,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     try {
       const request = reply.request;
       const translations = await server.getUiTranslations();
-      const basePath = config.get('server.basePath');
+      const basePath = request.getBasePath();
 
       return reply.view('ui_app', {
         uiPublicUrl: `${basePath}/ui`,
@@ -150,6 +149,14 @@ export function uiRenderMixin(kbnServer, server, config) {
           version: kbnServer.version,
           buildNumber: config.get('pkg.buildNum'),
           basePath,
+          vars: await replaceInjectedVars(
+            request,
+            defaults(
+              injectedVarsOverrides,
+              await server.getInjectedUiAppVars(app.getId()),
+              defaultInjectedVars,
+            ),
+          ),
           legacyMetadata: await getLegacyKibanaPayload({
             app,
             translations,
