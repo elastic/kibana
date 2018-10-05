@@ -11,7 +11,7 @@ declare module '@elastic/eui' {
 }
 
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
 import { KFetchError } from 'ui/kfetch/kfetch_error';
 import { toastNotifications } from 'ui/notify';
@@ -26,6 +26,7 @@ interface Props {
   options?: ReactElement<any>;
   isDirty: boolean;
   onClose: () => void;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -33,7 +34,7 @@ interface State {
   absoluteUrl: string;
 }
 
-export class ReportingPanelContent extends Component<Props, State> {
+class ReportingPanelContentUi extends Component<Props, State> {
   private mounted?: boolean;
 
   constructor(props: Props) {
@@ -82,14 +83,12 @@ export class ReportingPanelContent extends Component<Props, State> {
       <FormattedMessage
         id="xpack.reporting.panelContent.generationTimeDescription"
         defaultMessage="{reportingType}s can take a minute or two to generate based upon the size of your {objectType}."
-        context="Here 'reportingType' can be 'PDF' or 'CSV'"
+        description="Here 'reportingType' can be 'PDF' or 'CSV'"
         values={{
           reportingType: this.prettyPrintReportingType(),
           objectType: this.props.objectType,
         }}
-      >
-        {(text: string) => text}
-      </FormattedMessage>
+      />
     );
 
     return (
@@ -182,16 +181,18 @@ export class ReportingPanelContent extends Component<Props, State> {
   };
 
   private createReportingJob = () => {
+    const { intl } = this.props;
+
     return reportingClient
       .createReportingJob(this.props.reportType, this.props.getJobParams())
       .then(() => {
         toastNotifications.addSuccess({
-          title: (
-            <FormattedMessage
-              id="xpack.reporting.panelContent.notification.successTitle"
-              defaultMessage="Queued report for {objectType}"
-              values={{ objectType: this.props.objectType }}
-            />
+          title: intl.formatMessage(
+            {
+              id: 'xpack.reporting.panelContent.notification.successTitle',
+              defaultMessage: 'Queued report for {objectType}',
+            },
+            { objectType: this.props.objectType }
           ),
           text: (
             <FormattedMessage
@@ -206,12 +207,12 @@ export class ReportingPanelContent extends Component<Props, State> {
       .catch((kfetchError: KFetchError) => {
         if (kfetchError.message === 'not exportable') {
           return toastNotifications.addWarning({
-            title: (
-              <FormattedMessage
-                id="xpack.reporting.panelContent.notification.notExportableTitle"
-                defaultMessage="Only saved {objectType} can be exported"
-                values={{ objectType: this.props.objectType }}
-              />
+            title: intl.formatMessage(
+              {
+                id: 'xpack.reporting.panelContent.notification.notExportableTitle',
+                defaultMessage: 'Only saved {objectType} can be exported',
+              },
+              { objectType: this.props.objectType }
             ),
             text: (
               <FormattedMessage
@@ -236,15 +237,15 @@ export class ReportingPanelContent extends Component<Props, State> {
           );
 
         toastNotifications.addDanger({
-          title: (
-            <FormattedMessage
-              id="xpack.reporting.panelContent.notification.reportingErrorTitle"
-              defaultMessage="Reporting error"
-            />
-          ),
+          title: intl.formatMessage({
+            id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
+            defaultMessage: 'Reporting error',
+          }),
           text: kfetchError.message || defaultMessage,
           'data-test-subj': 'queueReportError',
         });
       });
   };
 }
+
+export const ReportingPanelContent = injectI18n(ReportingPanelContentUi);

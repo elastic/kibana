@@ -75,7 +75,7 @@ uiModules.get('kibana')
                     defaultMessage="Management > Kibana > Reporting"
                   />
                 </a>
-                ) 
+              )
               }}
             />
           </p>

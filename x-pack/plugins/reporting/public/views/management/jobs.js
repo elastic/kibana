@@ -13,6 +13,7 @@ import routes from 'ui/routes';
 import template from 'plugins/reporting/views/management/jobs.html';
 
 import { ReportListing } from '../../components/report_listing';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'reportListingAnchor';
 
@@ -29,12 +30,14 @@ routes.when('/management/kibana/reporting', {
       }
 
       render(
-        <ReportListing
-          badLicenseMessage={xpackInfo.get('features.reporting.management.message')}
-          showLinks={xpackInfo.get('features.reporting.management.showLinks')}
-          enableLinks={xpackInfo.get('features.reporting.management.enableLinks')}
-          redirect={kbnUrl.redirect}
-        />,
+        <I18nProvider>
+          <ReportListing
+            badLicenseMessage={xpackInfo.get('features.reporting.management.message')}
+            showLinks={xpackInfo.get('features.reporting.management.showLinks')}
+            enableLinks={xpackInfo.get('features.reporting.management.enableLinks')}
+            redirect={kbnUrl.redirect}
+          />
+        </I18nProvider>,
         node,
       );
     });
