@@ -30,7 +30,7 @@ export const routes = [
             router.redirectTo('loadWorkpad', { id: newWorkpad.id, page: 1 });
           } catch (err) {
             notify.error(err, {
-              title: i18n.translate('xpack.canvas.apps.workpad.createWorkpadErrorMessage', {
+              title: i18n.translate('xpack.canvas.workpad.createWorkpadErrorMessage', {
                 defaultMessage: "Couldn't create workpad",
               }),
             });
@@ -55,7 +55,7 @@ export const routes = [
               dispatch(setAssets(assets));
             } catch (err) {
               notify.error(err, {
-                title: i18n.translate('xpack.canvas.apps.workpad.loadWorkpadErrorMessage', {
+                title: i18n.translate('xpack.canvas.workpad.loadWorkpadErrorMessage', {
                   defaultMessage: "Couldn't load workpad with ID",
                 }),
               });

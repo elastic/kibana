@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const LoadWorkpad = () => (
   <div>
     <FormattedMessage
-      id="xpack.canvas.apps.workpad.loadWorkpadTitle"
+      id="xpack.canvas.workpad.loadWorkpadTitle"
       defaultMessage="Load a workpad..."
     />
   </div>

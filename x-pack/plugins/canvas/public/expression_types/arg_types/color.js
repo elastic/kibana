@@ -30,11 +30,11 @@ ColorArgInput.propTypes = {
 const colorUI = intl => ({
   name: 'color',
   displayName: intl.formatMessage({
-    id: 'xpack.canvas.expressionTypes.colorPickerLabel',
+    id: 'xpack.canvas.expressionTypes.colorDisplayName',
     defaultMessage: 'Color',
   }),
   help: intl.formatMessage({
-    id: 'xpack.canvas.expressionTypes.colorPickerHelpText',
+    id: 'xpack.canvas.expressionTypes.colorHelpText',
     defaultMessage: 'Color picker',
   }),
   simpleTemplate: templateFromReactComponent(ColorArgInput),
