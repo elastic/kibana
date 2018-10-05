@@ -18,7 +18,9 @@ import { ExplorerSwimlane } from './explorer_swimlane';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlExplorerSwimlane', function (mlExplorerDashboardService) {
+import { mlExplorerDashboardService } from './explorer_dashboard_service';
+
+module.directive('mlExplorerSwimlane', function () {
 
   function link(scope, element) {
     function swimlaneDataChangeListener(props) {

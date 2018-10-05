@@ -4,7 +4,8 @@
     "declaration": true,
     "declarationDir": "./target/types",
     "outDir": "./target/out",
-    "stripInternal": true
+    "stripInternal": true,
+    "declarationMap": true
   },
   "include": [
     "./types/joi.d.ts",

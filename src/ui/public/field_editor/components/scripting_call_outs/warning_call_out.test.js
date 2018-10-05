@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
-import { ScriptingWarningCallOutComponent } from './warning_call_out';
+import { ScriptingWarningCallOut } from './warning_call_out';
 
 jest.mock('ui/documentation_links', () => ({
   getDocLink: (doc) => `(docLink for ${doc})`,
@@ -28,8 +28,8 @@ jest.mock('ui/documentation_links', () => ({
 
 describe('ScriptingWarningCallOut', () => {
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <ScriptingWarningCallOutComponent
+    const component = shallow(
+      <ScriptingWarningCallOut
         isVisible={true}
       />
     );
@@ -38,8 +38,8 @@ describe('ScriptingWarningCallOut', () => {
   });
 
   it('should render nothing if not visible', async () => {
-    const component = shallowWithIntl(
-      <ScriptingWarningCallOutComponent />
+    const component = shallow(
+      <ScriptingWarningCallOut />
     );
 
     expect(component).toMatchSnapshot();
