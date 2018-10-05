@@ -42,7 +42,7 @@ module.controller('MlNewEventModal', function (
       start: moment().startOf('day'),
       end: moment().startOf('day').add(1, 'days')
     },
-    setRangeType(i, event = undefined) {
+    setRangeType(i, event) {
       if (event && event.preventDefault) {
         event.preventDefault();
       }
