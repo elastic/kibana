@@ -62,6 +62,12 @@ export const LICENSE_WHITELIST = [
   'WTFPL',
 ];
 
+// The following whitelist and overrides only applies
+// when we are
+export const DEV_ONLY_LICENSE_WHITELIST = [
+  'MPL-2.0'
+];
+
 export const LICENSE_OVERRIDES = {
   'scriptjs@2.5.8': ['MIT'], // license header appended in the dist
   'react-lib-adler32@1.0.1': ['BSD'], // adler32 extracted from react source
@@ -88,6 +94,9 @@ export const LICENSE_OVERRIDES = {
   // TODO can be removed once we upgrade past or equal pdf-image@2.0.1
   'pdf-image@1.1.0': ['MIT'],
 
-  // TODO can be removed once twig upgrade the use of walk dependency past or equal to v2.3.14
-  'walk@2.3.9': ['MIT']
+  // TODO can be removed once we upgrade the use of walk dependency past or equal to v2.3.14
+  'walk@2.3.9': ['MIT'],
+
+  // TODO remove this once we upgrade past or equal to v1.0.2
+  'babel-plugin-mock-imports@0.0.5': ['MIT']
 };

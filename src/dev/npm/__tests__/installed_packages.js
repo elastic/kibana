@@ -39,7 +39,8 @@ describe('src/dev/npm/installed_packages', () => {
           directory: KIBANA_ROOT
         }),
         getInstalledPackages({
-          directory: FIXTURE1_ROOT
+          directory: FIXTURE1_ROOT,
+          dev: true
         }),
       ]);
     });
@@ -62,6 +63,7 @@ describe('src/dev/npm/installed_packages', () => {
           repository: 'https://github.com/mycorp/dep1',
           directory: resolve(FIXTURE1_ROOT, 'node_modules/dep1'),
           relative: 'node_modules/dep1',
+          isDevOnly: false,
         },
         {
           name: 'privatedep',
@@ -69,8 +71,18 @@ describe('src/dev/npm/installed_packages', () => {
           repository: 'https://github.com/mycorp/privatedep',
           licenses: [ 'Apache-2.0' ],
           directory: resolve(FIXTURE1_ROOT, 'node_modules/privatedep'),
-          relative: 'node_modules/privatedep'
-        }
+          relative: 'node_modules/privatedep',
+          isDevOnly: false,
+        },
+        {
+          name: 'dep2',
+          version: '0.0.2',
+          licenses: [ 'Apache-2.0' ],
+          repository: 'https://github.com/mycorp/dep2',
+          directory: resolve(FIXTURE1_ROOT, 'node_modules/dep2'),
+          relative: 'node_modules/dep2',
+          isDevOnly: true,
+        },
       ]);
     });
 
