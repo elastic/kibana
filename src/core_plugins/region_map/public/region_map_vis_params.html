@@ -27,20 +27,20 @@
     </div>
 
     <div class="form-group clearfix" ng-hide="!editorState.params.emsHotLink">
-        <a
-          class="ems-hotlink pull-right"
-          target="_blank"
-          rel="noopener noreferrer"
-          ng-href="{{editorState.params.emsHotLink}}"
-          target="_blank"
-          title="{{::'regionMap.visParams.previewOnEMSLinkTitle' | i18n: {
-            defaultMessage: 'Preview {selectedLayerName} on the Elastic Maps Service',
-            values: { selectedLayerName: '{{editorState.params.selectedLayer.name}}' }
-          }}}"
-          i18n-id="regionMap.visParams.previewOnEMSLinkText"
-          i18n-default-message="{icon} Preview on EMS"
-          i18n-values="{ icon: '<icon aria-hidden size=&quot;&apos;s&apos;&quot; type=&quot;&apos;link&apos;&quot; />'}"
-        ></a>
+      <a
+        class="ems-hotlink pull-right"
+        target="_blank"
+        rel="noopener noreferrer"
+        ng-href="{{editorState.params.emsHotLink}}"
+        target="_blank"
+        title="{{'regionMap.visParams.previewOnEMSLinkTitle' | i18n: {
+          defaultMessage: 'Preview {selectedLayerName} on the Elastic Maps Service',
+          values: { selectedLayerName: editorState.params.selectedLayer.name }
+        } }}"
+        i18n-id="regionMap.visParams.previewOnEMSLinkText"
+        i18n-default-message="{icon} Preview on EMS"
+        i18n-values="{ icon: '<icon aria-hidden size=&quot;\'s\'&quot; type=&quot;\'link\'&quot;></icon>' }"
+      ></a>
     </div>
 
     <div class="kuiSideBarFormRow">
@@ -77,9 +77,9 @@
         &nbsp;
         <icon-tip
           content="{{::'regionMap.visParams.switchWarningsTipText' | i18n: {
-            defaultMessage: '&apos;Turns on/off warnings. When turned on,
-              warning will be shown for each term that cannot be matched to a shape in the vector layer based on the join field. When turned off, these warnings will be turned off.&apos;'
-          }}"
+            defaultMessage: '\'Turns on/off warnings. When turned on,
+              warning will be shown for each term that cannot be matched to a shape in the vector layer based on the join field. When turned off, these warnings will be turned off.\''
+          } }}"
           position="'right'"
         ></icon-tip>
       </div>
@@ -96,8 +96,8 @@
         &nbsp;
         <icon-tip
           content="{{::'regionMap.visParams.turnOffShowingAllShapesTipText' | i18n: {
-            defaultMessage: '&apos;Turning this off only shows the shapes that were matched with a corresponding term&apos;'
-          }}"
+            defaultMessage: '\'Turning this off only shows the shapes that were matched with a corresponding term\''
+          } }}"
           position="'right'"
         ></icon-tip>
       </div>
