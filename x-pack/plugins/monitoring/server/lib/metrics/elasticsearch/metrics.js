@@ -15,7 +15,9 @@ import {
   ThreadPoolQueueMetric,
   ThreadPoolRejectedMetric,
   WriteThreadPoolQueueMetric,
-  WriteThreadPoolRejectedMetric
+  WriteThreadPoolRejectedMetric,
+  DifferenceMetric,
+  MillisecondsToSecondsMetric,
 } from './classes';
 import {
   LARGE_FLOAT,
@@ -944,5 +946,29 @@ export const metrics = {
     units: '',
     type: 'index',
     derivative: true
-  })
+  }),
+
+  // CCR
+  ccr_sync_lag_time: new MillisecondsToSecondsMetric({
+    title: 'Fetch delay', // title to use for the chart
+    type: 'ccr',
+    field: 'ccr_stats.time_since_last_fetch_millis',
+    label: 'Fetch delay',
+    description: 'The amount of time the follower index is lagging behind the leader.',
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: 'ms'
+  }),
+  ccr_sync_lag_ops: new DifferenceMetric({
+    title: 'Ops delay', // title to use for the chart
+    type: 'ccr',
+    fieldSource: 'ccr_stats',
+    metric: 'leader_max_seq_no',
+    metric2: 'follower_global_checkpoint',
+    label: 'Ops delay',
+    description: 'The number of operations the follower index is lagging behind the leader.',
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: ''
+  }),
 };
