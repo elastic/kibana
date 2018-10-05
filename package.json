@@ -75,7 +75,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "3.0.6",
+    "@elastic/eui": "3.0.7",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
@@ -325,6 +325,7 @@
     "mocha": "3.3.0",
     "mock-fs": "^4.4.2",
     "murmurhash3js": "3.0.1",
+    "mutation-observer": "^1.0.3",
     "ncp": "2.0.0",
     "nock": "8.0.0",
     "node-sass": "^4.9.0",

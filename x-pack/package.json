@@ -57,6 +57,7 @@
     "jest-styled-components": "^5.0.1",
     "mocha": "3.3.0",
     "mustache": "^2.3.0",
+    "mutation-observer": "^1.0.3",
     "node-fetch": "^2.1.2",
     "pdf-image": "1.1.0",
     "pixelmatch": "4.0.2",
@@ -78,7 +79,7 @@
     "yargs": "4.7.1"
   },
   "dependencies": {
-    "@elastic/eui": "3.0.6",
+    "@elastic/eui": "3.0.7",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
