@@ -1,40 +1,89 @@
 [role="xpack"]
 [[monitoring-data]]
-== Viewing Monitoring Data in {kib}
+== Viewing monitoring data in {kib}
 ++++
-<titleabbrev>Viewing Monitoring Data</titleabbrev>
+<titleabbrev>Viewing monitoring data</titleabbrev>
 ++++
 
-You can enable {monitoring} in {es}, Logstash, {kib}, and Beats. By default, the
-monitoring agents on {es} index data within the same cluster.
+You can use {kib} to monitor the health and performance of {es}, {ls}, {kib}, 
+and Beats. 
 
 TIP: If you have a dedicated monitoring cluster, the information is accessible
 even if the {es} cluster you're monitoring is not. You can send data from
 multiple clusters to the same monitoring cluster and view them all through the
-same instance of {kib}. For  more information, see
+same instance of {kib}. To learn more about typical monitoring architectures 
+with separate production and monitoring clusters, see
+{xpack-ref}/how-monitoring-works.html[How monitoring works].
 
-To view and analyze the health and performance of {es}, Logstash, {kib}, and
-Beats:
-
-. {ref}/configuring-monitoring.html[Configure monitoring in {es}]. If you want
+. Optional: {ref}/configuring-monitoring.html[Configure monitoring in {es}]. If you want
 to use a separate monitoring cluster, see
-{xpack-ref}/monitoring-production.html[Monitoring in a Production Environment].
+{xpack-ref}/monitoring-production.html[Monitoring in a production environment].
 
-. <<monitoring-xpack-kibana,Configure monitoring in {kib}>>.
+. Optional: <<monitoring-kibana,Configure monitoring in {kib}>>.
 
-. {logstash-ref}/configuring-logstash.html[Configure monitoring in Logstash].
+. Optional: {logstash-ref}/configuring-logstash.html[Configure monitoring in Logstash].
 
-. Configure monitoring in {auditbeat-ref}/monitoring.html[Auditbeat],
+. Optional: Configure monitoring in {auditbeat-ref}/monitoring.html[Auditbeat],
 {filebeat-ref}/monitoring.html[Filebeat],
 {heartbeat-ref}/monitoring.html[Heartbeat],
 {metricbeat-ref}/monitoring.html[Metricbeat],
 {packetbeat-ref}/monitoring.html[Packetbeat], and
 {winlogbeat-ref}/monitoring.html[Winlogbeat].
 
-. Open {kib} in your web browser and log in. If you are running {kib}
-locally, go to `http://localhost:5601/`. To access {kib} and view the
-monitoring dashboards, you must log in as a user who has the `kibana_user`
-and `monitoring_user` roles.
+. Configure {kib} to visualize monitoring data:
+
+.. Verify that `xpack.monitoring.ui.enabled` is set to `true`, which is the
+default value. For more information, see <<monitoring-settings-kb>>.
+
+.. Identify where to retrieve monitoring data from. If you want to use a
+separate _monitoring cluster_, set `xpack.monitoring.elasticsearch.url` in the
+`kibana.yml` file. Otherwise, the monitoring data is stored in the production
+cluster.
++
+--
+TIP: If {security} is enabled on the monitoring cluster, use an HTTPS URL such
+as `https://<your_monitoring_cluster>:9200` in this setting.
+
+--
+
+.. If {security} is enabled on the monitoring cluster, identify a user ID and 
+password that {kib} can use to retrieve monitoring data. Specify these values in 
+the `xpack.monitoring.elasticsearch.username` and 
+`xpack.monitoring.elasticsearch.password` settings in the `kibana.yml` file.
+If these settings are omitted, {kib} uses the `elasticsearch.username` and
+`elasticsearch.password` setting values.
+
+.. If {security} is enabled on the monitoring cluster, configure {kib} to 
+encrypt communications between the {kib} server and the monitoring cluster. 
+Specify the `xpack.monitoring.elasticsearch.ssl.*` settings in the `kibana.yml` 
+file on the {kib} server.
++
+--
+For example, if you are using your own certificate authority to sign
+certificates, specify the location of the PEM file in the `kibana.yml` file:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.monitoring.elasticsearch.ssl.certificateAuthorities: /path/to/your/cacert.pem
+--------------------------------------------------------------------------------
+
+--
+
+. Open {kib} in your web browser and log in. 
++
+--
+If you are running {kib} locally, go to `http://localhost:5601/`. 
+
+If {security} is enabled on the {kib} server, to access {kib} and view the 
+monitoring dashboards, you must log in as a user who has the `kibana_user` and 
+`monitoring_user` roles. These roles have the necessary privileges to view the 
+monitoring dashboards. For more information, see 
+{stack-ov}/built-in-roles.html[Built-in roles].
+
+If you are accessing a remote monitoring cluster, you must log in to {kib}
+with credentials that are valid on both the {kib} server and the monitoring 
+cluster.
+--
 
 . In the side navigation, click *Monitoring*. The first time you open {kib}
 monitoring, data collection is

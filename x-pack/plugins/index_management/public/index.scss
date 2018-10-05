@@ -1,0 +1,13 @@
+// Import the EUI global scope so we can use EUI constants
+@import 'ui/public/styles/_styling_constants';
+
+// Index management plugin styles
+
+// Prefix all styles with "ind" to avoid conflicts.
+// Examples
+//   indChart
+//   indChart__legend
+//   indChart__legend--small
+//   indChart__legend-isLoading
+
+@import 'index_management';
