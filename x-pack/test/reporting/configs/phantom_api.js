@@ -23,6 +23,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...reportingApiConfig.kbnTestServer.serverArgs,
         `--xpack.reporting.capture.browser.type=phantom`,
+        `--xpack.spaces.enabled=false`,
       ],
     },
   };
