@@ -5,18 +5,18 @@
  */
 
 import template from 'plugins/security/views/logged_out/logged_out.html';
-import 'plugins/security/views/logged_out/logged_out.less';
 import React from 'react';
 import { render } from 'react-dom';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
+import './logged_out.less';
 
 import { LoggedOutPage } from './components';
 
 chrome
   .setVisible(false)
   .setRootTemplate(template)
-  .setRootController('logout', ($scope: AnyObject) => {
+  .setRootController('logout', ($scope: any) => {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById('reactLoggedOutRoot');
       render(<LoggedOutPage />, domNode);
