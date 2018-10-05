@@ -252,15 +252,18 @@ describe('ElasticIndex', () => {
             expect(arg.index).toEqual('.ze-index');
             return true;
           case 'reindex':
-            expect(arg).toEqual({
+            expect(arg).toMatchObject({
               body: {
                 dest: { index: '.ze-index' },
                 source: { index: '.muchacha' },
               },
               refresh: true,
-              waitForCompletion: true,
+              waitForCompletion: false,
             });
-            return true;
+            return { task: 'abc' };
+          case 'tasks.get':
+            expect(arg.taskId).toEqual('abc');
+            return { completed: true };
           case 'indices.getAlias':
             return { '.my-fanci-index': '.muchacha' };
           case 'indices.updateAliases':
@@ -291,11 +294,12 @@ describe('ElasticIndex', () => {
           },
         },
       };
-      await Index.convertToAlias(callCluster, info, '.muchacha');
+      await Index.convertToAlias(callCluster, info, '.muchacha', 10);
 
       expect(callCluster.args.map(([path]) => path)).toEqual([
         'indices.create',
         'reindex',
+        'tasks.get',
         'indices.getAlias',
         'indices.updateAliases',
         'indices.refresh',

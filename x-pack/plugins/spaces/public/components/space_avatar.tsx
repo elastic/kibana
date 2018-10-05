@@ -18,11 +18,13 @@ interface Props {
 export const SpaceAvatar = (props: Props) => {
   const { space, size, ...rest } = props;
 
+  const spaceName = space.name ? space.name.trim() : '';
+
   return (
     <EuiAvatar
       type="space"
       data-test-subj={`space-avatar-${space.id}`}
-      name={space.name || ''}
+      name={spaceName}
       size={size || 'm'}
       initialsLength={MAX_SPACE_INITIALS}
       initials={getSpaceInitials(space)}
