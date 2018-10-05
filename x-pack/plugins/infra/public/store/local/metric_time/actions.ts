@@ -11,10 +11,11 @@ const actionCreator = actionCreatorFactory('x-pack/infra/local/waffle_time');
 export interface MetricRangeTimeState {
   to: number;
   from: number;
+  interval: string;
 }
 
 export const setRangeTime = actionCreator<MetricRangeTimeState>('SET_RANGE_TIME');
 
-export const startAutoReload = actionCreator('START_AUTO_RELOAD');
+export const startMetricsAutoReload = actionCreator('START_METRICS_AUTO_RELOAD');
 
-export const stopAutoReload = actionCreator('STOP_AUTO_RELOAD');
+export const stopMetricsAutoReload = actionCreator('STOP_METRICS_AUTO_RELOAD');

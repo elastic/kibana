@@ -7,7 +7,12 @@ import moment from 'moment';
 import { combineReducers } from 'redux';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 
-import { MetricRangeTimeState, setRangeTime, startAutoReload, stopAutoReload } from './actions';
+import {
+  MetricRangeTimeState,
+  setRangeTime,
+  startMetricsAutoReload,
+  stopMetricsAutoReload,
+} from './actions';
 
 interface ManualTimeUpdatePolicy {
   policy: 'manual';
@@ -27,10 +32,11 @@ export interface MetricTimeState {
 
 export const initialMetricTimeState: MetricTimeState = {
   timeRange: {
-    to: moment()
+    from: moment()
       .subtract(1, 'hour')
-      .millisecond(),
-    from: moment().millisecond(),
+      .valueOf(),
+    to: moment().valueOf(),
+    interval: '1m',
   },
   updatePolicy: {
     policy: 'manual',
@@ -39,15 +45,15 @@ export const initialMetricTimeState: MetricTimeState = {
 
 const timeRangeReducer = reducerWithInitialState(initialMetricTimeState.timeRange).case(
   setRangeTime,
-  (state, { to, from }) => ({ to, from })
+  (state, { to, from }) => ({ ...state, to, from })
 );
 
 const updatePolicyReducer = reducerWithInitialState(initialMetricTimeState.updatePolicy)
-  .case(startAutoReload, () => ({
+  .case(startMetricsAutoReload, () => ({
     policy: 'interval',
     interval: 5000,
   }))
-  .case(stopAutoReload, () => ({
+  .case(stopMetricsAutoReload, () => ({
     policy: 'manual',
   }));
 

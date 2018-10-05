@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFormControlLayout } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import moment, { Moment } from 'moment';
 import React from 'react';
+import styled from 'styled-components';
 
 import { RangeDatePicker } from '../range_date_picker';
 
@@ -22,8 +23,8 @@ interface MetricsTimeControlsProps {
 
 interface MetricsTimeControlsState {
   showGoButton: boolean;
-  to: moment.Moment;
-  from: moment.Moment;
+  to: moment.Moment | undefined;
+  from: moment.Moment | undefined;
 }
 
 export class MetricsTimeControls extends React.Component<
@@ -37,7 +38,7 @@ export class MetricsTimeControls extends React.Component<
   };
   public render() {
     const { currentTimeRange, isLiveStreaming } = this.props;
-    const { showGoButton } = this.state;
+    const { showGoButton, to, from } = this.state;
 
     const liveStreamingButton = isLiveStreaming ? (
       <EuiButtonEmpty
@@ -54,38 +55,48 @@ export class MetricsTimeControls extends React.Component<
       </EuiButtonEmpty>
     );
 
+    const goColor = from && to && from > to ? 'danger' : 'primary';
     const appendButton = showGoButton ? (
-      <EuiButton color="primary" fill onClick={this.searchRangeTime} />
+      <EuiButton color={goColor} fill onClick={this.searchRangeTime}>
+        Go
+      </EuiButton>
     ) : (
       liveStreamingButton
     );
 
     return (
-      <EuiFormControlLayout append={appendButton}>
+      <MetricsTimeControlsContainer>
         <RangeDatePicker
-          startDate={moment().millisecond(currentTimeRange.to)}
-          endDate={moment().millisecond(currentTimeRange.from)}
+          startDate={moment(currentTimeRange.from)}
+          endDate={moment(currentTimeRange.to)}
           onChangeRangeTime={this.handleChangeDate}
+          isLoading={isLiveStreaming}
+          disabled={isLiveStreaming}
         />
-      </EuiFormControlLayout>
+        {appendButton}
+      </MetricsTimeControlsContainer>
     );
   }
 
-  private handleChangeDate = (to: Moment, from: Moment, search: boolean) => {
+  private handleChangeDate = (
+    from: Moment | undefined,
+    to: Moment | undefined,
+    search: boolean
+  ) => {
     const { onChangeRangeTime } = this.props;
-    const duration = moment.duration(to.diff(from));
+    const duration = moment.duration(from && to ? from.diff(to) : 0);
     const milliseconds = duration.asMilliseconds();
-    if (onChangeRangeTime && search) {
+    if (to && from && onChangeRangeTime && search && to > from) {
       this.setState({
         showGoButton: false,
         to,
         from,
       });
       onChangeRangeTime({
-        to: to.valueOf(),
-        from: from.valueOf(),
+        to: to && to.valueOf(),
+        from: from && from.valueOf(),
       } as metricTimeActions.MetricRangeTimeState);
-    } else if (milliseconds > 0) {
+    } else if (milliseconds !== 0) {
       this.setState({
         showGoButton: true,
         to,
@@ -96,14 +107,15 @@ export class MetricsTimeControls extends React.Component<
 
   private searchRangeTime = () => {
     const { onChangeRangeTime } = this.props;
-    if (onChangeRangeTime) {
+    const { to, from } = this.state;
+    if (to && from && onChangeRangeTime && to > from) {
       this.setState({
         ...this.state,
         showGoButton: false,
       });
       onChangeRangeTime({
-        to: this.state.to.valueOf(),
-        from: this.state.from.valueOf(),
+        to: to.valueOf(),
+        from: from.valueOf(),
       } as metricTimeActions.MetricRangeTimeState);
     }
   };
@@ -124,3 +136,9 @@ export class MetricsTimeControls extends React.Component<
     }
   };
 }
+const MetricsTimeControlsContainer = styled.div`
+  display: flex;
+  justify-content: right;
+  flex-flow: row wrap;
+  margin-right: 107px;
+`;

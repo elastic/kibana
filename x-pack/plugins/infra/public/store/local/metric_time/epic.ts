@@ -9,10 +9,11 @@ import { Epic } from 'redux-observable';
 import { timer } from 'rxjs';
 import { exhaustMap, filter, map, takeUntil, withLatestFrom } from 'rxjs/operators';
 
-import { setRangeTime, startAutoReload, stopAutoReload } from './actions';
+import { setRangeTime, startMetricsAutoReload, stopMetricsAutoReload } from './actions';
 
 interface MetricTimeEpicDependencies<State> {
   selectMetricTimeUpdatePolicyInterval: (state: State) => number | null;
+  selectMetricRangeFromTimeRange: (state: State) => number | null;
 }
 
 export const createMetricTimeEpic = <State>(): Epic<
@@ -20,26 +21,36 @@ export const createMetricTimeEpic = <State>(): Epic<
   Action,
   State,
   MetricTimeEpicDependencies<State>
-> => (action$, state$, { selectMetricTimeUpdatePolicyInterval }) => {
+> => (
+  action$,
+  state$,
+  { selectMetricTimeUpdatePolicyInterval, selectMetricRangeFromTimeRange }
+) => {
   const updateInterval$ = state$.pipe(
     map(selectMetricTimeUpdatePolicyInterval),
     filter(isNotNull)
   );
 
+  const range$ = state$.pipe(
+    map(selectMetricRangeFromTimeRange),
+    filter(isNotNull)
+  );
+
   return action$.pipe(
-    filter(startAutoReload.match),
-    withLatestFrom(updateInterval$),
-    exhaustMap(([action, updateInterval]) =>
+    filter(startMetricsAutoReload.match),
+    withLatestFrom(updateInterval$, range$),
+    exhaustMap(([action, updateInterval, range]) =>
       timer(0, updateInterval).pipe(
         map(() =>
           setRangeTime({
-            to: moment()
-              .subtract(1, 'hour')
-              .millisecond(),
-            from: moment().millisecond(),
+            from: moment()
+              .subtract(range, 'ms')
+              .valueOf(),
+            to: moment().valueOf(),
+            interval: '1m',
           })
         ),
-        takeUntil(action$.pipe(filter(stopAutoReload.match)))
+        takeUntil(action$.pipe(filter(stopMetricsAutoReload.match)))
       )
     )
   );

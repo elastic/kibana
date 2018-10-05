@@ -21,13 +21,13 @@ export const withMetricsTime = connect(
   }),
   bindPlainActionCreators({
     setRangeTime: metricTimeActions.setRangeTime,
-    startAutoReload: metricTimeActions.startAutoReload,
-    stopAutoReload: metricTimeActions.stopAutoReload,
+    startMetricsAutoReload: metricTimeActions.startMetricsAutoReload,
+    stopMetricsAutoReload: metricTimeActions.stopMetricsAutoReload,
   })
 );
 
 export const WithMetricsTime = asChildFunctionRenderer(withMetricsTime, {
-  onCleanup: ({ stopAutoReload }) => stopAutoReload(),
+  onCleanup: ({ stopMetricsAutoReload }) => stopMetricsAutoReload(),
 });
 
 /**
@@ -41,7 +41,7 @@ interface MetricTimeUrlState {
 
 export const WithMetricsTimeUrlState = () => (
   <WithMetricsTime>
-    {({ setRangeTime, startAutoReload, stopAutoReload, urlState }) => (
+    {({ setRangeTime, startMetricsAutoReload, stopMetricsAutoReload, urlState }) => (
       <UrlStateContainer
         urlState={urlState}
         urlStateKey="metricTime"
@@ -51,13 +51,13 @@ export const WithMetricsTimeUrlState = () => (
             setRangeTime(newUrlState.timeRange);
           }
           if (newUrlState && newUrlState.autoReload) {
-            startAutoReload();
+            startMetricsAutoReload();
           } else if (
             newUrlState &&
             typeof newUrlState.autoReload !== 'undefined' &&
             !newUrlState.autoReload
           ) {
-            stopAutoReload();
+            stopMetricsAutoReload();
           }
         }}
         onInitialize={initialUrlState => {
@@ -65,7 +65,7 @@ export const WithMetricsTimeUrlState = () => (
             setRangeTime(initialUrlState.timeRange);
           }
           if (initialUrlState && initialUrlState.autoReload) {
-            startAutoReload();
+            startMetricsAutoReload();
           }
         }}
       />

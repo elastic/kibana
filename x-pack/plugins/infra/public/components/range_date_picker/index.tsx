@@ -40,9 +40,15 @@ const commonDates = [
 ];
 
 interface RangeDatePickerProps {
-  startDate: moment.Moment;
-  endDate: moment.Moment;
-  onChangeRangeTime: (to: moment.Moment, from: moment.Moment, search: boolean) => void;
+  startDate: moment.Moment | undefined;
+  endDate: moment.Moment | undefined;
+  onChangeRangeTime: (
+    from: moment.Moment | undefined,
+    to: moment.Moment | undefined,
+    search: boolean
+  ) => void;
+  disabled?: boolean;
+  isLoading?: boolean;
 }
 
 interface RecentlyUsed {
@@ -51,8 +57,8 @@ interface RecentlyUsed {
 }
 
 interface RangeDatePickerState {
-  startDate: moment.Moment;
-  endDate: moment.Moment;
+  startDate: moment.Moment | undefined;
+  endDate: moment.Moment | undefined;
   isPopoverOpen: boolean;
   recentlyUsed: RecentlyUsed[];
   quickSelectTime: number;
@@ -73,11 +79,13 @@ export class RangeDatePicker extends React.PureComponent<
   };
 
   public render() {
+    const { isLoading, disabled } = this.props;
     const quickSelectButton = (
       <EuiButtonEmpty
         className="euiFormControlLayout__prepend"
         style={{ borderRight: 'none' }}
         onClick={this.onButtonClick}
+        disabled={disabled}
         aria-label="Date quick select"
         size="xs"
         iconType="arrowDown"
@@ -112,26 +120,39 @@ export class RangeDatePicker extends React.PureComponent<
     return (
       <EuiFormControlLayout prepend={quickSelectPopover}>
         <EuiDatePickerRange
+          className="euiDatePickerRange--inGroup"
           iconType={false}
+          disabled={disabled}
           startDateControl={
             <EuiDatePicker
+              dateFormat="L LTS"
               selected={this.state.startDate}
               onChange={this.handleChangeStart}
-              startDate={this.state.startDate}
-              endDate={this.state.endDate}
-              isInvalid={this.state.startDate > this.state.endDate}
+              isInvalid={
+                this.state.startDate && this.state.endDate
+                  ? this.state.startDate > this.state.endDate
+                  : false
+              }
               aria-label="Start date"
+              disabled={disabled}
+              shouldCloseOnSelect
               showTimeSelect
             />
           }
           endDateControl={
             <EuiDatePicker
+              dateFormat="L LTS"
               selected={this.state.endDate}
               onChange={this.handleChangeEnd}
-              startDate={this.state.startDate}
-              endDate={this.state.endDate}
-              isInvalid={this.state.startDate > this.state.endDate}
+              isInvalid={
+                this.state.startDate && this.state.endDate
+                  ? this.state.startDate > this.state.endDate
+                  : false
+              }
+              disabled={disabled}
+              isLoading={isLoading}
               aria-label="End date"
+              shouldCloseOnSelect
               showTimeSelect
             />
           }
@@ -140,18 +161,26 @@ export class RangeDatePicker extends React.PureComponent<
     );
   }
 
-  private handleChangeStart = (date: moment.Moment) => {
-    this.setState({
-      startDate: date,
-    });
-    this.props.onChangeRangeTime(date, this.state.endDate, false);
+  private handleChangeStart = (date: moment.Moment | null) => {
+    if (date && this.state.startDate !== date) {
+      this.props.onChangeRangeTime(date, this.state.endDate, false);
+    }
+    if (date) {
+      this.setState({
+        startDate: date,
+      });
+    }
   };
 
-  private handleChangeEnd = (date: moment.Moment) => {
-    this.setState({
-      endDate: date,
-    });
-    this.props.onChangeRangeTime(this.state.startDate, date, false);
+  private handleChangeEnd = (date: moment.Moment | null) => {
+    if (date && this.state.endDate !== date) {
+      this.props.onChangeRangeTime(this.state.startDate, date, false);
+    }
+    if (date) {
+      this.setState({
+        endDate: date,
+      });
+    }
   };
 
   private onButtonClick = () => {
@@ -171,7 +200,9 @@ export class RangeDatePicker extends React.PureComponent<
         recentlyUsed,
       },
       () => {
-        this.props.onChangeRangeTime(startDate, endDate, true);
+        if (type) {
+          this.props.onChangeRangeTime(startDate, endDate, true);
+        }
       }
     );
   };
