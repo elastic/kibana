@@ -18,6 +18,8 @@ const createMockConfig = (settings) => {
   return mockConfig;
 };
 
+const createMockLogger = () => jest.fn();
+
 const createMockXpackInfoFeature = (allowRbac) => {
   return {
     getLicenseCheckResults() {
@@ -31,36 +33,43 @@ const createMockXpackInfoFeature = (allowRbac) => {
 describe(`#initialize`, () => {
   test(`can't be initialized twice for the same request`, async () => {
     const mockConfig = createMockConfig();
+    const mockLogger = createMockLogger();
     const mockXpackInfoFeature = createMockXpackInfoFeature();
-    const mode = authorizationModeFactory({}, {}, mockConfig, {}, {}, mockXpackInfoFeature);
+    const mode = authorizationModeFactory({}, {}, mockConfig, mockLogger, {}, {}, mockXpackInfoFeature);
     const request = {};
 
     await mode.initialize(request);
-    expect(mode.initialize(request)).rejects.toThrowErrorMatchingSnapshot();
+    expect(mockLogger).not.toHaveBeenCalled();
+    await mode.initialize(request);
+    expect(mockLogger).toHaveBeenCalledWith(['security', 'debug'], `Authorization mode is already initialized`);
   });
 });
 
 describe(`#useRbacForRequest`, () => {
   test(`return false if not initialized for request`, async () => {
     const mockConfig = createMockConfig();
+    const mockLogger = createMockLogger();
     const mockXpackInfoFeature = createMockXpackInfoFeature();
-    const mode = authorizationModeFactory({}, {}, mockConfig, {}, {}, mockXpackInfoFeature);
+    const mode = authorizationModeFactory({}, {}, mockConfig, mockLogger, {}, {}, mockXpackInfoFeature);
     const request = {};
 
     const result = mode.useRbacForRequest(request);
     expect(result).toBe(false);
+    expect(mockLogger).not.toHaveBeenCalled();
   });
 
   test(`returns true if legacy fallback is disabled`, async () => {
     const mockConfig = createMockConfig({
       'xpack.security.authorization.legacyFallback.enabled': false,
     });
+    const mockLogger = createMockLogger();
     const mockXpackInfoFeature = createMockXpackInfoFeature();
-    const mode = authorizationModeFactory({}, {}, mockConfig, {}, {}, mockXpackInfoFeature);
+    const mode = authorizationModeFactory({}, {}, mockConfig, mockLogger, {}, {}, mockXpackInfoFeature);
     const request = {};
 
     await mode.initialize(request);
     const result = mode.useRbacForRequest(request);
     expect(result).toBe(true);
+    expect(mockLogger).not.toHaveBeenCalled();
   });
 });

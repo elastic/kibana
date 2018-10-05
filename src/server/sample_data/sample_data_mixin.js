@@ -27,6 +27,7 @@ import {
 import {
   flightsSpecProvider,
   logsSpecProvider,
+  ecommerceSpecProvider
 } from './data_sets';
 
 export function sampleDataMixin(kbnServer, server) {
@@ -68,4 +69,5 @@ export function sampleDataMixin(kbnServer, server) {
 
   server.registerSampleDataset(flightsSpecProvider);
   server.registerSampleDataset(logsSpecProvider);
+  server.registerSampleDataset(ecommerceSpecProvider);
 }

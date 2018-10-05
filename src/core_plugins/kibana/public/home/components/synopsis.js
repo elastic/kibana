@@ -46,6 +46,7 @@ export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPan
       <EuiFlexItem grow={false}>
         <EuiIcon
           type={iconType}
+          color="primary"
           size="xl"
         />
       </EuiFlexItem>
