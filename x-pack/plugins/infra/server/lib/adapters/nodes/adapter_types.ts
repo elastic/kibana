@@ -160,7 +160,7 @@ export interface InfraBucketWithAggs {
 }
 
 export interface InfraBucketWithValues {
-  [name: string]: { value: number };
+  [name: string]: { value: number; normalized_value?: number };
 }
 
 export type InfraBucket = InfraBucketWithAggs & InfraBucketWithKey & InfraBucketWithValues;

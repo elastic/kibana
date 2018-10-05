@@ -45,7 +45,11 @@ function createNodeMetrics(
   }
   return metrics.filter(metric => lastBucket[metric.type]).map(metric => {
     const metricObj = lastBucket[metric.type];
-    return { name: metric.type, value: (metricObj && metricObj.value) || 0 };
+    const value = (metricObj && (metricObj.normalized_value || metricObj.value)) || 0;
+    return {
+      name: metric.type,
+      value,
+    };
   });
 }
 
