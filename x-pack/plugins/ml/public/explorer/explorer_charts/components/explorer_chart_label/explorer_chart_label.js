@@ -32,13 +32,9 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
     (entityFields.length === 0 || detectorLabel.length === 0)
   ) ? (<React.Fragment>&nbsp;</React.Fragment>) : (<React.Fragment>&nbsp;&ndash;&nbsp;</React.Fragment>);
 
-  const entityFieldBadges = entityFields.map((entity) => {
-    return (
-      <React.Fragment key={`${entity.fieldName} ${entity.fieldValue}`}>
-        <ExplorerChartLabelBadge entity={entity} />
-      </React.Fragment>
-    );
-  });
+  const entityFieldBadges = entityFields.map((entity) => (
+    <ExplorerChartLabelBadge entity={entity} key={`${entity.fieldName} ${entity.fieldValue}`} />
+  ));
 
   const infoIcon = (
     <span className="ml-explorer-chart-info-icon">
