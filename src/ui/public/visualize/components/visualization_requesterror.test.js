@@ -17,22 +17,23 @@
  * under the License.
  */
 
-import './courier';
+import React from 'react';
+import { render } from 'enzyme';
+import { VisualizationRequestError } from './visualization_requesterror';
 
-export { SavedObjectProvider } from './saved_object';
+describe('VisualizationRequestError', () => {
+  it('should render according to snapshot', () => {
+    const wrapper = render(<VisualizationRequestError error="Request error" />);
+    expect(wrapper).toMatchSnapshot();
+  });
 
-export {
-  SearchSourceProvider,
-  migrateFilter,
-  decorateQuery,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-} from './search_source';
+  it('should set html when error is an object', () => {
+    const wrapper = render(<VisualizationRequestError error={{ message: 'Request error' }} />);
+    expect(wrapper.text()).toBe('Request error');
+  });
 
-export {
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
-  isDefaultTypeIndexPattern,
-  SearchError,
-  getSearchErrorType,
-} from './search_strategy';
+  it('should set html when error is a string', () => {
+    const wrapper = render(<VisualizationRequestError error="Request error" />);
+    expect(wrapper.text()).toBe('Request error');
+  });
+});

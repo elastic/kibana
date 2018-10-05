@@ -67,8 +67,10 @@ export class VisualizeDataLoader {
     this.responseHandler = getHandler(responseHandlers, responseHandler);
   }
 
-  public async fetch(params: RequestHandlerParams): Promise<any> {
+  public fetch = async (params: RequestHandlerParams): Promise<any> => {
     this.vis.filters = { timeRange: params.timeRange };
+    this.vis.requestError = undefined;
+    this.vis.showRequestError = false;
 
     try {
       // searchSource is only there for courier request handler
@@ -95,6 +97,7 @@ export class VisualizeDataLoader {
     } catch (e) {
       params.searchSource.cancelQueued();
       this.vis.requestError = e;
+      this.vis.showRequestError = e.type && e.type === 'UNSUPPORTED_QUERY';
       if (isTermSizeZeroError(e)) {
         return toastNotifications.addDanger(
           `Your visualization ('${this.vis.title}') has an error: it has a term ` +
@@ -107,5 +110,5 @@ export class VisualizeDataLoader {
         text: e.message,
       });
     }
-  }
+  };
 }
