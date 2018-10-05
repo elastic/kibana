@@ -133,7 +133,7 @@ Object {
   "messages": Object {},
   "now": [Function],
   "onError": [Function],
-  "textComponent": "span",
+  "textComponent": Symbol(react.fragment),
   "timeZone": null,
 }
 `;
