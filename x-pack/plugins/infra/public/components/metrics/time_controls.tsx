@@ -32,6 +32,7 @@ export class MetricsTimeControls extends React.Component<
   MetricsTimeControlsProps,
   MetricsTimeControlsState
 > {
+  public dateRangeRef: React.RefObject<any> = React.createRef();
   public readonly state = {
     showGoButton: false,
     to: moment().millisecond(this.props.currentTimeRange.to),
@@ -91,6 +92,7 @@ export class MetricsTimeControls extends React.Component<
           isLoading={isLiveStreaming}
           disabled={isLiveStreaming}
           recentlyUsed={recentlyUsed}
+          ref={this.dateRangeRef}
         />
         {appendButton}
       </MetricsTimeControlsContainer>
@@ -166,8 +168,8 @@ export class MetricsTimeControls extends React.Component<
 
   private cancelSearch = () => {
     const { onChangeRangeTime } = this.props;
-    const to = moment().millisecond(this.props.currentTimeRange.to);
-    const from = moment().millisecond(this.props.currentTimeRange.from);
+    const to = moment(this.props.currentTimeRange.to);
+    const from = moment(this.props.currentTimeRange.from);
 
     this.setState({
       ...this.state,
@@ -175,6 +177,7 @@ export class MetricsTimeControls extends React.Component<
       to,
       from,
     });
+    this.dateRangeRef.current.resetRangeDate(from, to);
     if (onChangeRangeTime) {
       onChangeRangeTime({
         to: to && to.valueOf(),
@@ -185,12 +188,18 @@ export class MetricsTimeControls extends React.Component<
 
   private resetSearch = () => {
     const { onChangeRangeTime } = this.props;
+    const to = moment();
+    const from = moment().subtract(1, 'hour');
+    this.dateRangeRef.current.resetRangeDate(from, to);
+    this.setState({
+      ...this.state,
+      to,
+      from,
+    });
     if (onChangeRangeTime) {
       onChangeRangeTime({
-        to: moment().valueOf(),
-        from: moment()
-          .subtract(1, 'hour')
-          .valueOf(),
+        to: to.valueOf(),
+        from: from.valueOf(),
       } as metricTimeActions.MetricRangeTimeState);
     }
   };

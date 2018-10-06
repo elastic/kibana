@@ -50,6 +50,7 @@ interface RangeDatePickerProps {
   recentlyUsed: RecentlyUsed[];
   disabled?: boolean;
   isLoading?: boolean;
+  ref?: React.RefObject<any>;
 }
 
 export interface RecentlyUsed {
@@ -75,12 +76,13 @@ export class RangeDatePicker extends React.PureComponent<
     endDate: this.props.endDate,
     isPopoverOpen: false,
     recentlyUsed: [],
-    quickSelectTime: 256,
-    quickSelectUnit: 'seconds',
+    quickSelectTime: 1,
+    quickSelectUnit: 'hours',
   };
 
   public render() {
     const { isLoading, disabled } = this.props;
+    const { startDate, endDate } = this.state;
     const quickSelectButton = (
       <EuiButtonEmpty
         className="euiFormControlLayout__prepend"
@@ -131,13 +133,9 @@ export class RangeDatePicker extends React.PureComponent<
           startDateControl={
             <EuiDatePicker
               dateFormat="L LTS"
-              selected={this.state.startDate}
+              selected={startDate}
               onChange={this.handleChangeStart}
-              isInvalid={
-                this.state.startDate && this.state.endDate
-                  ? this.state.startDate > this.state.endDate
-                  : false
-              }
+              isInvalid={startDate && endDate ? startDate > endDate : false}
               fullWidth
               aria-label="Start date"
               disabled={disabled}
@@ -148,13 +146,9 @@ export class RangeDatePicker extends React.PureComponent<
           endDateControl={
             <EuiDatePicker
               dateFormat="L LTS"
-              selected={this.state.endDate}
+              selected={endDate}
               onChange={this.handleChangeEnd}
-              isInvalid={
-                this.state.startDate && this.state.endDate
-                  ? this.state.startDate > this.state.endDate
-                  : false
-              }
+              isInvalid={startDate && endDate ? startDate > endDate : false}
               fullWidth
               disabled={disabled}
               isLoading={isLoading}
@@ -169,11 +163,17 @@ export class RangeDatePicker extends React.PureComponent<
     );
   }
 
+  public resetRangeDate(startDate: moment.Moment, endDate: moment.Moment) {
+    this.setState({
+      ...this.state,
+      startDate,
+      endDate,
+    });
+  }
+
   private handleChangeStart = (date: moment.Moment | null) => {
     if (date && this.state.startDate !== date) {
       this.props.onChangeRangeTime(date, this.state.endDate, false);
-    }
-    if (date) {
       this.setState({
         startDate: date,
       });
@@ -183,8 +183,6 @@ export class RangeDatePicker extends React.PureComponent<
   private handleChangeEnd = (date: moment.Moment | null) => {
     if (date && this.state.endDate !== date) {
       this.props.onChangeRangeTime(this.state.startDate, date, false);
-    }
-    if (date) {
       this.setState({
         endDate: date,
       });
@@ -216,13 +214,15 @@ export class RangeDatePicker extends React.PureComponent<
   };
 
   private managedStartEndDateFromType(type: string, from?: string, to?: string) {
-    let startDate = this.state.startDate;
-    let endDate = this.state.endDate;
+    let { startDate, endDate } = this.state;
     let recentlyUsed: RecentlyUsed[] = this.state.recentlyUsed;
     let textJustUsed = type;
 
     if (type === 'quick-select') {
-      textJustUsed = `Last ${this.state.quickSelectTime} ${this.state.quickSelectUnit}`;
+      textJustUsed = `Last ${this.state.quickSelectTime} ${singularize(
+        this.state.quickSelectUnit,
+        this.state.quickSelectTime
+      )}`;
       startDate = moment().subtract(this.state.quickSelectTime, this.state
         .quickSelectUnit as moment.unitOfTime.DurationConstructor);
       endDate = moment();
@@ -282,13 +282,13 @@ export class RangeDatePicker extends React.PureComponent<
 
   private renderQuickSelect = () => {
     const lastOptions = [
-      { value: 'seconds', text: 'seconds' },
-      { value: 'minutes', text: 'minutes' },
-      { value: 'hours', text: 'hours' },
-      { value: 'days', text: 'days' },
-      { value: 'weeks', text: 'weeks' },
-      { value: 'months', text: 'months' },
-      { value: 'years', text: 'years' },
+      { value: 'seconds', text: singularize('seconds', this.state.quickSelectTime) },
+      { value: 'minutes', text: singularize('minutes', this.state.quickSelectTime) },
+      { value: 'hours', text: singularize('hours', this.state.quickSelectTime) },
+      { value: 'days', text: singularize('days', this.state.quickSelectTime) },
+      { value: 'weeks', text: singularize('weeks', this.state.quickSelectTime) },
+      { value: 'months', text: singularize('months', this.state.quickSelectTime) },
+      { value: 'years', text: singularize('years', this.state.quickSelectTime) },
     ];
 
     return (
@@ -307,9 +307,11 @@ export class RangeDatePicker extends React.PureComponent<
             <EuiFormRow>
               <EuiFieldNumber
                 aria-label="Count of"
-                defaultValue="256"
+                defaultValue="1"
+                value={this.state.quickSelectTime}
+                step={0}
                 onChange={arg => {
-                  this.onChange('quickSelectOrder', arg);
+                  this.onChange('quickSelectTime', arg);
                 }}
               />
             </EuiFormRow>
@@ -338,7 +340,11 @@ export class RangeDatePicker extends React.PureComponent<
   };
 
   private onChange = (stateType: string, args: any) => {
-    const value = args.currentTarget.value;
+    let value = args.currentTarget.value;
+
+    if (stateType === 'quickSelectTime' && value !== '') {
+      value = parseInt(args.currentTarget.value, 10);
+    }
     this.setState({
       ...this.state,
       [stateType]: value,
@@ -373,7 +379,7 @@ export class RangeDatePicker extends React.PureComponent<
     const links = recentDates.map((date: RecentlyUsed) => {
       let dateRange;
       let dateLink = (
-        <EuiLink onClick={() => this.closePopover(date.type)}>{dateRange || date.type}</EuiLink>
+        <EuiLink onClick={() => this.closePopover(date.type)}>{dateRange || date.text}</EuiLink>
       );
       if (typeof date.text !== 'string') {
         dateRange = `${date.text[0]} – ${date.text[1]}`;
@@ -406,3 +412,5 @@ export class RangeDatePicker extends React.PureComponent<
     );
   };
 }
+
+const singularize = (str: string, qty: number) => (qty === 1 ? str.slice(0, -1) : str);

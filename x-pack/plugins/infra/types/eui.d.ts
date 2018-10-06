@@ -181,7 +181,9 @@ declare module '@elastic/eui' {
 
   type EuiFieldNumberProps = CommonProps & {
     defaultValue: string;
+    value?: number;
     onChange?: (arg: any) => void;
+    step?: number;
   };
 
   export const EuiFieldNumber: React.SFC<EuiFieldNumberProps>;
