@@ -19,7 +19,7 @@ export const WorkpadTemplates = compose(
     // Clone workpad given an id
     cloneWorkpad: props => workpad => {
       workpad.id = getId('workpad');
-      workpadService
+      return workpadService
         .create(workpad)
         .then(() => props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 }))
         .catch(err => notify.error(err, { title: `Couldn't clone workpad template` }));

@@ -36,7 +36,7 @@ const uniqueTags = templates
 const { colors } = palettes.euiPaletteColorBlind;
 
 const tagColorMapping = uniqueTags.reduce((acc, tag, i) => {
-  acc[tag] = colors[i % colors.length];
+  acc[tag] = colors[i % Object.keys(colors).length];
   return acc;
 }, {});
 
@@ -46,8 +46,8 @@ export class WorkpadTemplates extends React.PureComponent {
   };
 
   state = {
-    sortField: '@timestamp',
-    sortDirection: 'desc',
+    sortField: 'name',
+    sortDirection: 'asc',
     pageSize: 10,
     searchTerm: '',
     filterTags: [],
@@ -61,29 +61,36 @@ export class WorkpadTemplates extends React.PureComponent {
     });
   };
 
-  onSearch = ({ query, queryText: searchTerm }) => {
-    // extracts tags from the query AST
-    const filterTags = get(query, 'ast._clauses', []).reduce((acc, clause) => {
-      const { field, value } = clause;
-      if (field === 'tags') acc.push(value);
-      return acc;
-    }, []);
+  onSearch = ({ query }) => {
+    const clauses = get(query, 'ast._clauses', []);
 
-    this.setState({ searchTerm, filterTags });
+    const filterTags = [];
+    const searchTerms = [];
+
+    clauses.forEach(clause => {
+      const { type, field, value } = clause;
+      // extract terms from the query AST
+      if (type === 'term') searchTerms.push(value);
+      // extracts tags from the query AST
+      else if (field === 'tags') filterTags.push(value);
+    });
+
+    this.setState({ searchTerm: searchTerms.join(' '), filterTags });
   };
 
+  cloneTemplate = template => this.props.cloneWorkpad(template).then(() => this.props.onClose());
+
   renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
-    const { cloneWorkpad } = this.props;
     const { sortField, sortDirection } = this.state;
 
     const actions = [
       {
-        render: workpad => (
+        render: template => (
           <EuiToolTip content="Clone">
             <EuiButtonIcon
               iconType="copy"
-              onClick={() => cloneWorkpad(workpad)}
-              aria-label="Clone Workpad"
+              onClick={() => this.cloneTemplate(template)}
+              aria-label={`Clone Template "${template.name}"`}
             />
           </EuiToolTip>
         ),
@@ -93,27 +100,27 @@ export class WorkpadTemplates extends React.PureComponent {
     const columns = [
       {
         field: 'name',
-        name: 'Workpad Name',
+        name: 'Template Name',
         sortable: true,
         width: '30%',
         dataType: 'string',
-        render: (name, workpad) => {
-          const workpadName = workpad.name.length ? workpad.name : <em>{workpad.id}</em>;
+        render: (name, template) => {
+          const templateName = template.name.length ? template.name : <em>{template.id}</em>;
 
           return (
             <EuiButtonEmpty
-              onClick={() => cloneWorkpad(workpad)}
-              aria-label={`Clone workpad template ${workpadName}`}
+              onClick={() => this.cloneTemplate(template)}
+              aria-label={`Clone workpad template "${templateName}"`}
               type="link"
             >
-              {workpadName}
+              {templateName}
             </EuiButtonEmpty>
           );
         },
       },
       {
         field: 'description',
-        name: 'description',
+        name: 'Description',
         sortable: false,
         dataType: 'string',
         width: '30%',
@@ -224,24 +231,16 @@ export class WorkpadTemplates extends React.PureComponent {
   render() {
     const { sortField, sortDirection, searchTerm, filterTags } = this.state;
 
-    const sortedTemplates = sortByOrder(
-      templates,
-      [sortField, '@timestamp'],
-      [sortDirection, 'desc']
-    );
+    const sortedTemplates = sortByOrder(templates, [sortField, 'name'], [sortDirection, 'asc']);
 
     const filteredTemplates = sortedTemplates.filter(({ name, description, tags }) => {
       const tagMatch = filterTags.length
         ? filterTags.some(filterTag => tags.indexOf(filterTag) > -1)
         : true;
+
       const textMatch = searchTerm
         ? name.indexOf(searchTerm) > -1 || description.indexOf(searchTerm) > -1
         : true;
-
-      const nameMatch = name.indexOf(searchTerm) > -1;
-      const descriptionMatch = description.indexOf(searchTerm) > -1;
-
-      console.log({ nameMatch, descriptionMatch });
 
       return tagMatch && textMatch;
     });

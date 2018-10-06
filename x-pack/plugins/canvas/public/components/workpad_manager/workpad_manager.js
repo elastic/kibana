@@ -34,7 +34,7 @@ export const WorkpadManager = ({ onClose }) => {
       content: (
         <Fragment>
           <EuiSpacer />
-          <WorkpadTemplates />
+          <WorkpadTemplates onClose={onClose} />
         </Fragment>
       ),
     },
@@ -45,7 +45,7 @@ export const WorkpadManager = ({ onClose }) => {
         <EuiModalHeaderTitle>Canvas workpads</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[1]} /> {/* CHANGE THIS BACK TO 0 */}
+        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
       </EuiModalBody>
     </Fragment>
   );
