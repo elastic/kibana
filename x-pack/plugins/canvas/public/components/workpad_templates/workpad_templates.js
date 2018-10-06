@@ -18,7 +18,7 @@ import {
   EuiButtonEmpty,
   EuiSearchBar,
 } from '@elastic/eui';
-import { sortByOrder } from 'lodash';
+import { get, sortByOrder } from 'lodash';
 import { palettes } from '@elastic/eui/lib/services';
 import { getId } from '../../lib/get_id';
 import { Paginate } from '../paginate';
@@ -61,9 +61,9 @@ export class WorkpadTemplates extends React.PureComponent {
     });
   };
 
-  onSearch = ({ query, searchTerm = '' }) => {
+  onSearch = ({ query, queryText: searchTerm }) => {
     // extracts tags from the query AST
-    const filterTags = query.ast._clauses.reduce((acc, clause) => {
+    const filterTags = get(query, 'ast._clauses', []).reduce((acc, clause) => {
       const { field, value } = clause;
       if (field === 'tags') acc.push(value);
       return acc;
@@ -209,7 +209,7 @@ export class WorkpadTemplates extends React.PureComponent {
 
     return (
       <EuiSearchBar
-        query={searchTerm}
+        defaultQuery={searchTerm}
         box={{
           placeholder: 'Find template',
           incremental: true,
@@ -235,8 +235,13 @@ export class WorkpadTemplates extends React.PureComponent {
         ? filterTags.some(filterTag => tags.indexOf(filterTag) > -1)
         : true;
       const textMatch = searchTerm
-        ? name.includes(searchTerm) || description.includes(searchTerm)
+        ? name.indexOf(searchTerm) > -1 || description.indexOf(searchTerm) > -1
         : true;
+
+      const nameMatch = name.indexOf(searchTerm) > -1;
+      const descriptionMatch = description.indexOf(searchTerm) > -1;
+
+      console.log({ nameMatch, descriptionMatch });
 
       return tagMatch && textMatch;
     });
