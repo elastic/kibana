@@ -36,7 +36,7 @@ export const initialMetricTimeState: MetricTimeState = {
       .subtract(1, 'hour')
       .valueOf(),
     to: moment().valueOf(),
-    interval: '1m',
+    interval: '>=1m',
   },
   updatePolicy: {
     policy: 'manual',
