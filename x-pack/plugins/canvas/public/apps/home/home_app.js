@@ -6,13 +6,13 @@
 
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
-import { WorkpadLoader } from '../../components/workpad_loader';
+import { WorkpadManager } from '../../components/workpad_manager';
 
 export const HomeApp = () => (
   <EuiPage restrictWidth style={{ width: '100%' }}>
     <EuiPageBody>
       <EuiPageContent panelPaddingSize="none" horizontalPosition="center">
-        <WorkpadLoader onClose={() => {}} />
+        <WorkpadManager onClose={() => {}} />
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>

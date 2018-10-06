@@ -17,7 +17,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { Navbar } from '../navbar';
-import { WorkpadLoader } from '../workpad_loader';
+import { WorkpadManager } from '../workpad_manager';
 import { PageManager } from '../page_manager';
 import { Expression } from '../expression';
 import { Tray } from './tray';
@@ -44,10 +44,10 @@ export const Toolbar = props => {
     setTray(exp);
   };
 
-  const workpadLoader = (
+  const workpadManager = (
     <EuiOverlayMask>
       <EuiModal onClose={done} className="canvasModal--fixedSize" maxWidth="1000px">
-        <WorkpadLoader onClose={done} />
+        <WorkpadManager onClose={done} />
         <EuiModalFooter>
           <EuiButton size="s" onClick={done}>
             Dismiss
@@ -59,7 +59,7 @@ export const Toolbar = props => {
 
   const trays = {
     pageManager: <PageManager previousPage={previousPage} />,
-    workpadloader: workpadLoader,
+    workpadManager,
     expression: !elementIsSelected ? null : <Expression done={done} />,
   };
 
@@ -72,7 +72,7 @@ export const Toolbar = props => {
             <EuiButtonEmpty
               color="text"
               iconType="grid"
-              onClick={() => showHideTray('workpadloader')}
+              onClick={() => showHideTray('workpadManager')}
             >
               {workpadName}
             </EuiButtonEmpty>

@@ -15,9 +15,6 @@ import {
   EuiSpacer,
   EuiButton,
   EuiToolTip,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
@@ -25,9 +22,9 @@ import moment from 'moment';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { Paginate } from '../paginate';
+import { WorkpadSearch } from './workpad_search';
 import { WorkpadDropzone } from './workpad_dropzone';
 import { WorkpadCreate } from './workpad_create';
-import { WorkpadSearch } from './workpad_search';
 import { WorkpadUpload } from './workpad_upload';
 
 const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
@@ -287,75 +284,64 @@ export class WorkpadLoader extends React.PureComponent {
       <Paginate rows={sortedWorkpads}>
         {pagination => (
           <Fragment>
-            <EuiModalHeader className="canvasHomeApp__modalHeader">
-              <div style={{ width: '100%' }}>
-                <EuiModalHeaderTitle>Canvas workpads</EuiModalHeaderTitle>
-                <EuiSpacer size="l" />
-                <EuiFlexGroup justifyContent="spaceBetween">
-                  <EuiFlexItem grow={2}>
-                    <EuiFlexGroup gutterSize="s">
-                      {selectedWorkpads.length > 0 && (
-                        <Fragment>
-                          <EuiFlexItem grow={false}>
-                            <EuiButton
-                              size="s"
-                              color="secondary"
-                              onClick={this.downloadWorkpads}
-                              iconType="sortDown"
-                            >
-                              {`Download (${selectedWorkpads.length})`}
-                            </EuiButton>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiButton
-                              size="s"
-                              color="danger"
-                              iconType="trash"
-                              onClick={this.openRemoveConfirm}
-                            >
-                              {`Delete (${selectedWorkpads.length})`}
-                            </EuiButton>
-                          </EuiFlexItem>
-                        </Fragment>
-                      )}
-                      <EuiFlexItem grow={1}>
-                        <WorkpadSearch
-                          onChange={text => {
-                            pagination.setPage(0);
-                            this.props.findWorkpads(text);
-                          }}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={2}>
-                    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" wrap>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={2}>
+                <EuiFlexGroup gutterSize="s">
+                  {selectedWorkpads.length > 0 && (
+                    <Fragment>
                       <EuiFlexItem grow={false}>
-                        <WorkpadUpload
-                          createPending={createPending}
-                          onUpload={this.uploadWorkpad}
-                        />
+                        <EuiButton
+                          size="s"
+                          color="secondary"
+                          onClick={this.downloadWorkpads}
+                          iconType="sortDown"
+                        >
+                          {`Download (${selectedWorkpads.length})`}
+                        </EuiButton>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <WorkpadCreate
-                          createPending={createPending}
-                          onCreate={this.createWorkpad}
-                        />
+                        <EuiButton
+                          size="s"
+                          color="danger"
+                          iconType="trash"
+                          onClick={this.openRemoveConfirm}
+                        >
+                          {`Delete (${selectedWorkpads.length})`}
+                        </EuiButton>
                       </EuiFlexItem>
-                    </EuiFlexGroup>
+                    </Fragment>
+                  )}
+                  <EuiFlexItem grow={1}>
+                    <WorkpadSearch
+                      onChange={text => {
+                        pagination.setPage(0);
+                        this.props.findWorkpads(text);
+                      }}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </div>
-            </EuiModalHeader>
-            <EuiModalBody>
-              {createPending && <div>Creating Workpad...</div>}
+              </EuiFlexItem>
+              <EuiFlexItem grow={2}>
+                <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" wrap>
+                  <EuiFlexItem grow={false}>
+                    <WorkpadUpload createPending={createPending} onUpload={this.uploadWorkpad} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <WorkpadCreate createPending={createPending} onCreate={this.createWorkpad} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-              {!createPending && isLoading && <div>Fetching Workpads...</div>}
+            <EuiSpacer />
 
-              {!createPending && !isLoading && this.renderWorkpadTable(pagination)}
+            {createPending && <div>Creating Workpad...</div>}
 
-              {confirmModal}
-            </EuiModalBody>
+            {!createPending && isLoading && <div>Fetching Workpads...</div>}
+
+            {!createPending && !isLoading && this.renderWorkpadTable(pagination)}
+
+            {confirmModal}
           </Fragment>
         )}
       </Paginate>
