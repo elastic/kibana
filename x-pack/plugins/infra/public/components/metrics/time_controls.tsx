@@ -9,7 +9,7 @@ import moment, { Moment } from 'moment';
 import React from 'react';
 import styled from 'styled-components';
 
-import { RangeDatePicker } from '../range_date_picker';
+import { RangeDatePicker, RecentlyUsed } from '../range_date_picker';
 
 import { metricTimeActions } from '../../store';
 
@@ -25,6 +25,7 @@ interface MetricsTimeControlsState {
   showGoButton: boolean;
   to: moment.Moment | undefined;
   from: moment.Moment | undefined;
+  recentlyUsed: RecentlyUsed[];
 }
 
 export class MetricsTimeControls extends React.Component<
@@ -35,10 +36,11 @@ export class MetricsTimeControls extends React.Component<
     showGoButton: false,
     to: moment().millisecond(this.props.currentTimeRange.to),
     from: moment().millisecond(this.props.currentTimeRange.from),
+    recentlyUsed: [],
   };
   public render() {
     const { currentTimeRange, isLiveStreaming } = this.props;
-    const { showGoButton, to, from } = this.state;
+    const { showGoButton, to, from, recentlyUsed } = this.state;
 
     const liveStreamingButton = isLiveStreaming ? (
       <EuiButtonEmpty
@@ -72,6 +74,7 @@ export class MetricsTimeControls extends React.Component<
           onChangeRangeTime={this.handleChangeDate}
           isLoading={isLiveStreaming}
           disabled={isLiveStreaming}
+          recentlyUsed={recentlyUsed}
         />
         {appendButton}
       </MetricsTimeControlsContainer>
@@ -107,11 +110,20 @@ export class MetricsTimeControls extends React.Component<
 
   private searchRangeTime = () => {
     const { onChangeRangeTime } = this.props;
-    const { to, from } = this.state;
+    const { to, from, recentlyUsed } = this.state;
     if (to && from && onChangeRangeTime && to > from) {
       this.setState({
         ...this.state,
         showGoButton: false,
+        recentlyUsed: [
+          ...recentlyUsed,
+          ...[
+            {
+              type: 'date-range',
+              text: [from.format('L LTS'), to.format('L LTS')],
+            },
+          ],
+        ],
       });
       onChangeRangeTime({
         to: to.valueOf(),
@@ -140,5 +152,4 @@ const MetricsTimeControlsContainer = styled.div`
   display: flex;
   justify-content: right;
   flex-flow: row wrap;
-  margin-right: 107px;
 `;

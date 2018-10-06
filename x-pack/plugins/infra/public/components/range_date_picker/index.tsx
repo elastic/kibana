@@ -47,11 +47,12 @@ interface RangeDatePickerProps {
     to: moment.Moment | undefined,
     search: boolean
   ) => void;
+  recentlyUsed: RecentlyUsed[];
   disabled?: boolean;
   isLoading?: boolean;
 }
 
-interface RecentlyUsed {
+export interface RecentlyUsed {
   type: string;
   text: string | string[];
 }
@@ -96,7 +97,10 @@ export class RangeDatePicker extends React.PureComponent<
     );
 
     const commonlyUsed = this.renderCommonlyUsed(commonDates);
-    const recentlyUsed = this.renderRecentlyUsed(this.state.recentlyUsed);
+    const recentlyUsed = this.renderRecentlyUsed([
+      ...this.state.recentlyUsed,
+      ...this.props.recentlyUsed,
+    ]);
 
     const quickSelectPopover = (
       <EuiPopover
@@ -154,6 +158,7 @@ export class RangeDatePicker extends React.PureComponent<
               aria-label="End date"
               shouldCloseOnSelect
               showTimeSelect
+              popperPlacement="top-end"
             />
           }
         />
@@ -189,8 +194,8 @@ export class RangeDatePicker extends React.PureComponent<
     });
   };
 
-  private closePopover = (type: string) => {
-    const { startDate, endDate, recentlyUsed } = this.managedStartEndDateFromType(type);
+  private closePopover = (type: string, from?: string, to?: string) => {
+    const { startDate, endDate, recentlyUsed } = this.managedStartEndDateFromType(type, from, to);
     this.setState(
       {
         ...this.state,
@@ -207,7 +212,7 @@ export class RangeDatePicker extends React.PureComponent<
     );
   };
 
-  private managedStartEndDateFromType(type: string) {
+  private managedStartEndDateFromType(type: string, from?: string, to?: string) {
     let startDate = this.state.startDate;
     let endDate = this.state.endDate;
     let recentlyUsed: RecentlyUsed[] = this.state.recentlyUsed;
@@ -255,6 +260,9 @@ export class RangeDatePicker extends React.PureComponent<
     } else if (type === 'Year to date') {
       startDate = moment().subtract(1, 'year');
       endDate = moment();
+    } else if (type === 'date-range' && to && from) {
+      startDate = moment(from);
+      endDate = moment(to);
     }
 
     if (textJustUsed !== undefined && !find(recentlyUsed, ['text', textJustUsed])) {
@@ -361,13 +369,21 @@ export class RangeDatePicker extends React.PureComponent<
   private renderRecentlyUsed = (recentDates: RecentlyUsed[]) => {
     const links = recentDates.map((date: RecentlyUsed) => {
       let dateRange;
+      let dateLink = (
+        <EuiLink onClick={() => this.closePopover(date.type)}>{dateRange || date.type}</EuiLink>
+      );
       if (typeof date.text !== 'string') {
         dateRange = `${date.text[0]} – ${date.text[1]}`;
+        dateLink = (
+          <EuiLink onClick={() => this.closePopover(date.type, date.text[0], date.text[1])}>
+            {dateRange || date.type}
+          </EuiLink>
+        );
       }
 
       return (
         <EuiFlexItem grow={false} key={`${dateRange || date.type}`}>
-          <EuiLink onClick={() => this.closePopover(date.type)}>{dateRange || date.type}</EuiLink>
+          {dateLink}
         </EuiFlexItem>
       );
     });
