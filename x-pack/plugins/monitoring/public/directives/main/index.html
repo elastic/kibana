@@ -35,6 +35,7 @@
           <a ng-if="!monitoringMain.instance" kbn-href="#/elasticsearch/nodes" class="kuiLocalTab" ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('nodes')}">Nodes</a>
           <a ng-if="!monitoringMain.instance" kbn-href="#/elasticsearch/indices" class="kuiLocalTab" ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('indices')}">Indices</a>
           <a ng-if="!monitoringMain.instance && monitoringMain.isMlSupported()" kbn-href="#/elasticsearch/ml_jobs" class="kuiLocalTab" ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('ml')}">Jobs</a>
+          <a ng-if="!monitoringMain.instance" kbn-href="#/elasticsearch/ccr" class="kuiLocalTab" ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('ccr')}">CCR</a>
           <a
             ng-if="monitoringMain.instance && (monitoringMain.name === 'nodes' || monitoringMain.name === 'indices')"
             kbn-href="#/elasticsearch/{{ monitoringMain.name }}/{{ monitoringMain.resolver }}"
