@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import styled from 'styled-components';
@@ -42,26 +42,42 @@ export class MetricsTimeControls extends React.Component<
     const { currentTimeRange, isLiveStreaming } = this.props;
     const { showGoButton, to, from, recentlyUsed } = this.state;
 
-    const liveStreamingButton = isLiveStreaming ? (
-      <EuiButtonEmpty
-        color="primary"
-        iconSide="left"
-        iconType="pause"
-        onClick={this.stopLiveStreaming}
-      >
-        Stop refreshing
-      </EuiButtonEmpty>
-    ) : (
-      <EuiButtonEmpty iconSide="left" iconType="play" onClick={this.startLiveStreaming}>
-        Auto-refresh
-      </EuiButtonEmpty>
+    const liveStreamingButton = (
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
+        <EuiFlexItem grow={false}>
+          {isLiveStreaming ? (
+            <EuiButton
+              color="primary"
+              iconSide="left"
+              iconType="pause"
+              onClick={this.stopLiveStreaming}
+            >
+              Stop refreshing
+            </EuiButton>
+          ) : (
+            <EuiButton iconSide="left" iconType="play" onClick={this.startLiveStreaming}>
+              Auto-refresh
+            </EuiButton>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={this.resetSearch}>Reset</EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
 
     const goColor = from && to && from > to ? 'danger' : 'primary';
     const appendButton = showGoButton ? (
-      <EuiButton color={goColor} fill onClick={this.searchRangeTime}>
-        Go
-      </EuiButton>
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
+        <EuiFlexItem grow={false}>
+          <EuiButton color={goColor} fill onClick={this.searchRangeTime}>
+            Go
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={this.cancelSearch}>Cancel</EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ) : (
       liveStreamingButton
     );
@@ -147,9 +163,43 @@ export class MetricsTimeControls extends React.Component<
       stopLiveStreaming();
     }
   };
+
+  private cancelSearch = () => {
+    const { onChangeRangeTime } = this.props;
+    const to = moment().millisecond(this.props.currentTimeRange.to);
+    const from = moment().millisecond(this.props.currentTimeRange.from);
+
+    this.setState({
+      ...this.state,
+      showGoButton: false,
+      to,
+      from,
+    });
+    if (onChangeRangeTime) {
+      onChangeRangeTime({
+        to: to && to.valueOf(),
+        from: from && from.valueOf(),
+      } as metricTimeActions.MetricRangeTimeState);
+    }
+  };
+
+  private resetSearch = () => {
+    const { onChangeRangeTime } = this.props;
+    if (onChangeRangeTime) {
+      onChangeRangeTime({
+        to: moment().valueOf(),
+        from: moment()
+          .subtract(1, 'hour')
+          .valueOf(),
+      } as metricTimeActions.MetricRangeTimeState);
+    }
+  };
 }
 const MetricsTimeControlsContainer = styled.div`
   display: flex;
   justify-content: right;
   flex-flow: row wrap;
+  & > div:first-child {
+    margin-right: 0.5rem;
+  }
 `;

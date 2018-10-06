@@ -127,6 +127,7 @@ export class RangeDatePicker extends React.PureComponent<
           className="euiDatePickerRange--inGroup"
           iconType={false}
           disabled={disabled}
+          fullWidth
           startDateControl={
             <EuiDatePicker
               dateFormat="L LTS"
@@ -137,6 +138,7 @@ export class RangeDatePicker extends React.PureComponent<
                   ? this.state.startDate > this.state.endDate
                   : false
               }
+              fullWidth
               aria-label="Start date"
               disabled={disabled}
               shouldCloseOnSelect
@@ -153,6 +155,7 @@ export class RangeDatePicker extends React.PureComponent<
                   ? this.state.startDate > this.state.endDate
                   : false
               }
+              fullWidth
               disabled={disabled}
               isLoading={isLoading}
               aria-label="End date"
