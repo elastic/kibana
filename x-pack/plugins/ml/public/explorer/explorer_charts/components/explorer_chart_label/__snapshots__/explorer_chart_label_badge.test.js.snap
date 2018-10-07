@@ -5,6 +5,7 @@ exports[`ExplorerChartLabelBadge Render entity label badge. 1`] = `
   className="ml-explorer-chart-label-badge"
 >
   <EuiBadge
+    className="ml-reset-font-weight"
     color="hollow"
     iconSide="left"
   >
