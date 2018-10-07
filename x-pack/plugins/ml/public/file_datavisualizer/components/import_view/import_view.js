@@ -16,9 +16,13 @@ import {
   EuiSteps,
   EuiProgress,
   EuiSpacer,
+  EuiFormRow,
+  EuiCheckbox,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { CsvImporter } from './csv_importer';
+import { ResultsLinks } from './results_links';
 
 export class ImportView extends Component {
   constructor(props) {
@@ -35,6 +39,9 @@ export class ImportView extends Component {
       indexPatternCreatedStatus: 'incomplete',
       uploadProgress: 0,
       uploadStatus: 'incomplete',
+      createIndexPattern: true,
+      indexPattern: '',
+      indexPatternId: '',
     };
   }
 
@@ -45,7 +52,11 @@ export class ImportView extends Component {
   async import() {
     const { format, timestamp_field: timeStampField } = this.props.results;
     const { fileContents, results } = this.props;
-    const { index } = this.state;
+    const {
+      index,
+      indexPattern,
+      createIndexPattern,
+    } = this.state;
 
     if (format === 'delimited' && index !== '') {
       this.setState({
@@ -67,8 +78,16 @@ export class ImportView extends Component {
             this.setState({ uploadStatus: 'complete' });
           }
 
-          await this.createIndexPattern(index, timeStampField);
-          this.setState({ indexPatternCreatedStatus: 'complete' });
+          if (createIndexPattern) {
+            const indexPatternName = (indexPattern === '') ? index : indexPattern;
+            const indexPatternId = await this.createIndexPattern(indexPatternName, timeStampField);
+            console.log(indexPatternId);
+            this.setState({
+              indexPatternCreatedStatus: 'complete',
+              indexPatternId,
+            });
+
+          }
           // console.timeEnd('importer');
 
           this.setState({
@@ -83,6 +102,18 @@ export class ImportView extends Component {
   onIndexChange = (e) => {
     this.setState({
       index: e.target.value,
+    });
+  }
+
+  onIndexPatternChange = (e) => {
+    this.setState({
+      indexPattern: e.target.value,
+    });
+  }
+
+  onCreateIndexPatternChange = (e) => {
+    this.setState({
+      createIndexPattern: e.target.checked,
     });
   }
 
@@ -123,13 +154,17 @@ export class ImportView extends Component {
   render() {
     const {
       index,
+      indexPattern,
+      indexPatternId,
       importing,
+      imported,
       reading,
       readStatus,
       indexCreatedStatus,
       indexPatternCreatedStatus,
       uploadProgress,
       uploadStatus,
+      createIndexPattern,
     } = this.state;
 
     let processFileTitle = 'Process file';
@@ -181,47 +216,92 @@ export class ImportView extends Component {
           </React.Fragment>
         ),
         status: uploadStatus,
-      },
-      {
+      }
+    ];
+
+    if (createIndexPattern === true) {
+      firstSetOfSteps.push({
         title: createIndexPatternTitle,
         children: (<p>Creating index pattern</p>),
         status: indexPatternCreatedStatus,
-      },
-    ];
+      });
+    }
 
     return (
       <React.Fragment>
 
-        <EuiFieldText
-          placeholder="index name"
-          value={index}
-          onChange={this.onIndexChange}
-          aria-label="Use aria labels when no actual label is in use"
-        />
+        <EuiPanel>
+
+          <EuiFormRow
+            label="Index name"
+          >
+            <EuiFieldText
+              placeholder="index name"
+              value={index}
+              disabled={importing === true}
+              onChange={this.onIndexChange}
+              aria-label="Use aria labels when no actual label is in use"
+            />
+          </EuiFormRow>
+
+          <EuiCheckbox
+            id="createIndexPattern"
+            label="Create index pattern"
+            checked={createIndexPattern === true}
+            disabled={importing === true}
+            onChange={this.onCreateIndexPatternChange}
+          />
+
+          <EuiSpacer size="s" />
+
+          <EuiFormRow
+            label="Index pattern name"
+            disabled={(createIndexPattern === false || importing === true)}
+          >
+            <EuiFieldText
+              disabled={(createIndexPattern === false || importing === true)}
+              placeholder={(createIndexPattern === true) ? index : ''}
+              value={indexPattern}
+              onChange={this.onIndexPatternChange}
+              aria-label="Use aria labels when no actual label is in use"
+            />
+          </EuiFormRow>
+
+          <EuiSpacer size="m" />
+
+          <EuiButton
+            isDisabled={importing}
+            onClick={() => this.clickImport()}
+          >
+            Import
+          </EuiButton>
+
+
+          {(importing === true) &&
+            <React.Fragment>
+              <EuiLoadingSpinner size="m"/>
+            </React.Fragment>
+          }
+        </EuiPanel>
 
         <EuiSpacer size="m" />
 
-        <EuiButton
-          isDisabled={importing}
-          onClick={() => this.clickImport()}
-        >
-          Import
-        </EuiButton>
-
-        {(importing === true) &&
-          <React.Fragment>
-            <EuiLoadingSpinner size="m"/>
-          </React.Fragment>
+        {(importing === true || imported === true) &&
+          <EuiPanel>
+            <EuiSteps
+              steps={firstSetOfSteps}
+            />
+          </EuiPanel>
         }
 
         <EuiSpacer size="m" />
 
-        <div>
-          <EuiSteps
-            steps={firstSetOfSteps}
-          />
+        {(imported === true) &&
+          <EuiPanel>
+            <ResultsLinks indexPatternId={(indexPatternId)} />
+          </EuiPanel>
+        }
 
-        </div>
       </React.Fragment>
     );
   }

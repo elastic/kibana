@@ -8,10 +8,11 @@
 import React from 'react';
 
 import {
-  EuiHorizontalRule,
+  // EuiHorizontalRule,
   EuiTabbedContent,
   EuiButton,
   EuiSpacer,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { FileContents } from '../file_contents';
@@ -32,31 +33,41 @@ export function ResultsView({ data, results, showEditFlyout }) {
 
   return (
     <div className="results">
-      <FileContents
-        data={data}
-        format={results.format}
-        numberOfLines={results.num_lines_analyzed}
-      />
+      <EuiPanel>
+        <FileContents
+          data={data}
+          format={results.format}
+          numberOfLines={results.num_lines_analyzed}
+        />
+      </EuiPanel>
 
-      <EuiHorizontalRule margin="l" />
-
-      <Summary
-        results={results}
-      />
+      {/* <EuiHorizontalRule margin="l" /> */}
 
       <EuiSpacer size="m" />
 
-      <EuiButton onClick={() => showEditFlyout()}>
-        Override settings
-      </EuiButton>
+      <EuiPanel>
+        <Summary
+          results={results}
+        />
 
-      <EuiHorizontalRule margin="l" />
+        <EuiSpacer size="m" />
 
-      <EuiTabbedContent
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-        onTabClick={() => { }}
-      />
+        <EuiButton onClick={() => showEditFlyout()}>
+          Override settings
+        </EuiButton>
+      </EuiPanel>
+
+      {/* <EuiHorizontalRule margin="l" /> */}
+
+      <EuiSpacer size="m" />
+
+      <EuiPanel>
+        <EuiTabbedContent
+          tabs={tabs}
+          initialSelectedTab={tabs[0]}
+          onTabClick={() => { }}
+        />
+      </EuiPanel>
 
     </div>
   );

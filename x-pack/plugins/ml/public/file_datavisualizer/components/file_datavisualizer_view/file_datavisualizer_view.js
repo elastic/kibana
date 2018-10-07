@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
   EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { isEqual } from 'lodash';
@@ -230,8 +231,6 @@ export class FileDataVisualizerView extends Component {
 
             {(loaded) &&
               <React.Fragment>
-
-
                 <ResultsView
                   results={results}
                   data={fileContents}
@@ -248,11 +247,16 @@ export class FileDataVisualizerView extends Component {
             />
 
             {(loaded) &&
-              <EuiButton
-                onClick={() => this.changeMode(MODE.IMPORT)}
-              >
-                Import
-              </EuiButton>
+              <React.Fragment>
+                <EuiSpacer size="m" />
+                <EuiPanel>
+                  <EuiButton
+                    onClick={() => this.changeMode(MODE.IMPORT)}
+                  >
+                    Import
+                  </EuiButton>
+                </EuiPanel>
+              </React.Fragment>
             }
           </React.Fragment>
         }
@@ -267,11 +271,13 @@ export class FileDataVisualizerView extends Component {
 
             <EuiSpacer size="m" />
 
-            <EuiButton
-              onClick={() => this.changeMode(MODE.READ)}
-            >
-              Back
-            </EuiButton>
+            <EuiPanel>
+              <EuiButton
+                onClick={() => this.changeMode(MODE.READ)}
+              >
+                Back
+              </EuiButton>
+            </EuiPanel>
           </React.Fragment>
         }
       </React.Fragment>
