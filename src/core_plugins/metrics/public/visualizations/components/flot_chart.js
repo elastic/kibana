@@ -160,7 +160,8 @@ class FlotChart extends Component {
       yaxis: {
         color: lineColor,
         font: { color: textColor },
-        tickFormatter: props.tickFormatter
+        tickFormatter: props.tickFormatter,
+        min: 0
       },
       xaxis: {
         tickLength: props.showGrid ? null : 0,
