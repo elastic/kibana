@@ -1,7 +1,5 @@
-ml-explorer-chart,
 .ml-explorer-chart-container {
-  display: block;
-  padding-bottom: 10px;
+  overflow: hidden;
 
   .ml-explorer-chart-svg {
     font-size: 12px;
@@ -54,9 +52,14 @@ ml-explorer-chart,
     stroke-width: 2;
   }
 
-  .values-dots circle {
+  .values-dots circle,
+  .values-dots-circle {
     fill: #32a7c2;
     stroke-width: 0;
+  }
+
+  .values-dots circle.values-dots-circle-blur {
+    fill: #aaa;
   }
 
   .metric-value {
@@ -105,6 +108,10 @@ ml-explorer-chart,
     stroke-width: 6px;
     stroke-opacity: 0.65;
   }
+}
+
+.ml-explorer-chart {
+  overflow: hidden;
 }
 
 .ml-explorer-chart-content-wrapper {
