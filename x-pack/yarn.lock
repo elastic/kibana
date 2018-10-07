@@ -1999,6 +1999,10 @@ cssstyle@^1.0.0:
   dependencies:
     cssom "0.3.x"
 
+csv-parse@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/csv-parse/-/csv-parse-3.1.2.tgz#51bfd2d39b13e66f6da8656360b8ec82ca159494"
+
 currently-unhandled@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/currently-unhandled/-/currently-unhandled-0.4.1.tgz#988df33feab191ef799a61369dd76c17adf957ea"

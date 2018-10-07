@@ -38,6 +38,7 @@ import { FileDataVisualizerPage } from './file_datavisualizer';
 
 module.directive('fileDatavisualizerPage', function ($injector) {
   const reactDirective = $injector.get('reactDirective');
+  const indexPatterns = $injector.get('indexPatterns');
 
-  return reactDirective(FileDataVisualizerPage, undefined, { restrict: 'E' }, { });
+  return reactDirective(FileDataVisualizerPage, undefined, { restrict: 'E' }, { indexPatterns });
 });

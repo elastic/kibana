@@ -65,6 +65,7 @@ export class CreateIndexPatternWizard extends Component {
   }
 
   createIndexPattern = async (timeFieldName, indexPatternId) => {
+    debugger
     const { services } = this.props;
     const { indexPattern } = this.state;
 
