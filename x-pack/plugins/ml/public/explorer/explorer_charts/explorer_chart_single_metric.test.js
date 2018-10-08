@@ -31,7 +31,7 @@ jest.mock('ui/chrome', () => ({
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { ExplorerChart } from './explorer_chart';
+import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { chartLimits } from '../../util/chart_utils';
 
 describe('ExplorerChart', () => {
@@ -49,7 +49,7 @@ describe('ExplorerChart', () => {
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   test('Initialize', () => {
-    const wrapper = mount(<ExplorerChart mlSelectSeverityService={mlSelectSeverityServiceMock} />);
+    const wrapper = mount(<ExplorerChartSingleMetric mlSelectSeverityService={mlSelectSeverityServiceMock} />);
 
     // without setting any attributes and corresponding data
     // the directive just ends up being empty.
@@ -63,7 +63,7 @@ describe('ExplorerChart', () => {
       loading: true
     };
 
-    const wrapper = mount(<ExplorerChart seriesConfig={config} mlSelectSeverityService={mlSelectSeverityServiceMock} />);
+    const wrapper = mount(<ExplorerChartSingleMetric seriesConfig={config} mlSelectSeverityService={mlSelectSeverityServiceMock} />);
 
     // test if the loading indicator is shown
     expect(wrapper.find('.ml-loading-indicator .loading-spinner')).toHaveLength(1);
@@ -85,7 +85,7 @@ describe('ExplorerChart', () => {
     // We create the element including a wrapper which sets the width:
     return mount(
       <div style={{ width: '500px' }}>
-        <ExplorerChart seriesConfig={config} mlSelectSeverityService={mlSelectSeverityServiceMock} />
+        <ExplorerChartSingleMetric seriesConfig={config} mlSelectSeverityService={mlSelectSeverityServiceMock} />
       </div>
     );
   }

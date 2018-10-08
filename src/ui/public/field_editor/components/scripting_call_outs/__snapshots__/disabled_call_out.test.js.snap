@@ -6,7 +6,13 @@ exports[`ScriptingDisabledCallOut should render normally 1`] = `
     color="danger"
     iconType="alert"
     size="m"
-    title="Scripting disabled"
+    title={
+      <FormattedMessage
+        defaultMessage="Scripting disabled"
+        id="common.ui.fieldEditor.disabledCallOutHeader"
+        values={Object {}}
+      />
+    }
   >
     <p>
       <FormattedMessage

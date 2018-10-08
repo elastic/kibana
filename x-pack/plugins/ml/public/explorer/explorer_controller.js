@@ -34,6 +34,7 @@ import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
 import { IntervalHelperProvider, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { mlExplorerDashboardService } from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
@@ -76,7 +77,6 @@ module.controller('MlExplorerController', function (
   AppState,
   Private,
   mlCheckboxShowChartsService,
-  mlExplorerDashboardService,
   mlSelectLimitService,
   mlSelectIntervalService,
   mlSelectSeverityService) {
@@ -360,7 +360,6 @@ module.controller('MlExplorerController', function (
       MlTimeBuckets: TimeBuckets,
       swimlaneData: getSwimlaneData(swimlaneType),
       swimlaneType,
-      mlExplorerDashboardService,
       selection: $scope.appState.mlExplorerSwimlane
     };
   }
