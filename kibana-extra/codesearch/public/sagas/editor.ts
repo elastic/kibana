@@ -14,6 +14,7 @@ import {
   closeReferences,
   CodeAndLocation,
   findReferences,
+  findReferencesFailed,
   findReferencesSuccess,
 } from '../actions';
 import { history } from '../utils/url';
@@ -31,7 +32,7 @@ function* handleReferences(action: Action<TextDocumentPositionParams>) {
     const locationWithCodes = yield call(requestAllCodes, locations);
     yield put(findReferencesSuccess(locationWithCodes));
   } catch (error) {
-    yield put(findReferencesSuccess(error));
+    yield put(findReferencesFailed(error));
   }
 }
 
