@@ -25,7 +25,7 @@ import {
 import { socketRoute } from './server/routes/socket';
 import { userRoute } from './server/routes/user';
 import { workspaceRoute } from './server/routes/workspace';
-import { UpdateScheduler } from './server/scheduler';
+import { IndexScheduler, UpdateScheduler } from './server/scheduler';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from './server/search';
 import { ServerOptions } from './server/server_options';
 import { SocketService } from './server/socket_service';
@@ -58,8 +58,9 @@ export default (kibana: any) =>
         indexFrequencyMs: Joi.number().default(24 * 60 * 60 * 1000), // 1 day by default
         lspRequestTimeout: Joi.number().default(5 * 60), // timeout a request over 30s
         repos: Joi.array().default([]),
-        maxWorkspace: Joi.number().default(5), // max workspace folder for each language server,
+        maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         isAdmin: Joi.boolean().default(true), // If we show the admin buttons
+        disableScheduler: Joi.boolean().default(true), // Temp option to disable all schedulers.
       }).default();
     },
 
@@ -126,16 +127,18 @@ export default (kibana: any) =>
         adminCluster.getClient(),
         log
       );
-      // const indexScheduler = new IndexScheduler(
-      //   indexWorker,
-      //   serverOptions,
-      //   objectsClient,
-      //   adminCluster.getClient(),
-      //   log
-      // );
-      updateScheduler.start();
-      // Disable index scheduling before having the scheduling state persisted.
-      // indexScheduler.start();
+      const indexScheduler = new IndexScheduler(
+        indexWorker,
+        serverOptions,
+        objectsClient,
+        adminCluster.getClient(),
+        log
+      );
+      if (!serverOptions.disableScheduler) {
+        updateScheduler.start();
+        // Disable index scheduling before having the scheduling state persisted.
+        // indexScheduler.start();
+      }
 
       // Add server routes and initialize the plugin here
       repositoryRoute(

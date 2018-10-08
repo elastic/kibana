@@ -52,13 +52,13 @@ export class CloneWorker extends AbstractGitWorker {
     }
 
     // Throw out a repository index request.
-    const { dataPath } = job.payload;
-    const payload = {
-      uri: res.repo.uri,
-      revision: res.repo.revision,
-      dataPath,
-    };
-    await this.indexWorker.enqueueJob(payload, {});
+    // const { dataPath } = job.payload;
+    // const payload = {
+    //   uri: res.repo.uri,
+    //   revision: res.repo.revision,
+    //   dataPath,
+    // };
+    // await this.indexWorker.enqueueJob(payload, {});
 
     return await super.onJobCompleted(job, res);
   }

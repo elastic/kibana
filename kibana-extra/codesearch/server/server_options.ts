@@ -22,6 +22,7 @@ export class ServerOptions {
 
   // This is a temporary config item.
   public readonly isAdmin: boolean = this.options.isAdmin;
+  public readonly disableScheduler: boolean = this.options.disableScheduler;
 
   public readonly repoConfigs: RepoConfigs = (this.options.repos as RepoConfig[]).reduce(
     (previous, current) => {
