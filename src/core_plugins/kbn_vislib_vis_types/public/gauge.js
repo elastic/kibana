@@ -104,7 +104,7 @@ export default function GaugeVisType(Private, i18n) {
         {
           group: 'buckets',
           name: 'group',
-          title: i18n('kbnVislibVisTypes.gauge.splitGroupTitle', { defaultMessage: 'Split Group' }),
+          title: i18n('kbnVislibVisTypes.gauge.groupTitle', { defaultMessage: 'Split Group' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!filter']

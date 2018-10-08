@@ -206,8 +206,9 @@
           <p>
             <i class="fa fa-danger text-danger"></i>
             <span 
-              i18n-id="kbnVislibVisTypes.controls.gaugeOptions.requiredTitle"
-              i18n-default-message="<strong>Required:</strong> You must specify at least one range."
+              i18n-id="kbnVislibVisTypes.controls.gaugeOptions.specifiedRangeNumberWarningMessage"
+              i18n-default-message="{required} You must specify at least one range."
+              i18n-values="{ required: '<strong>Required:</strong>' }"
             ></span>
           </p>
         </div>
@@ -215,13 +216,13 @@
         <div
           ng-click="addRange()"
           class="kuiButton kuiButton--primary kuiButton--fullWidth"
-          i18n-id="kbnVislibVisTypes.controls.gaugeOptions.addRangeButton"
+          i18n-id="kbnVislibVisTypes.controls.gaugeOptions.addRangeTitle"
           i18n-default-message="Add Range"
         ></div>
         <div class="euiSpacer euiSpacer--s"></div>
         <div
           class="text text-center text-info"
-          i18n-id="kbnVislibVisTypes.controls.gaugeOptions.noteTitle"
+          i18n-id="kbnVislibVisTypes.controls.gaugeOptions.howToChangeColorsDescription"
           i18n-default-message="Note: colors can be changed in the legend"
         ></div>
       </div>
@@ -269,7 +270,13 @@
               ng-options="mode for mode in collections.colorSchemas"
             ></select>
           </div>
-          <div class="text-info text-center" ng-show="customColors" ng-click="resetColors()">reset colors</div>
+          <div
+            class="text-info text-center"
+            ng-show="customColors"
+            ng-click="resetColors()"
+            i18n-id="kbnVislibVisTypes.controls.gaugeOptions.resetColorsTitle"
+            i18n-default-message="reset colors"
+          ></div>
         </div>
 
         <div class="kuiSideBarFormRow">
@@ -372,9 +379,13 @@
             </div>
           </div>
           <div class="kuiSideBarFormRow">
-            <label class="kuiSideBarFormRow__label" for="showScale">
-              Font Size (<span ng-bind="editorState.params.gauge.style.fontSize"></span>pt)
-            </label>
+            <label
+              class="kuiSideBarFormRow__label"
+              for="showScale"
+              i18n-id="kbnVislibVisTypes.controls.gaugeOptions.fontSizeLabel"
+              i18n-default-message="Font Size ({fontSizeSpan}pt)"
+              i18n-values="{ fontSizeSpan: '<span ng-bind=&quot;editorState.params.gauge.style.fontSize&quot;></span>' }"
+            ></label>
             <div class="kuiSideBarFormRow__control">
               <input type="range" ng-model="editorState.params.gauge.style.fontSize" class="form-control" min="12" max="120" />
             </div>
