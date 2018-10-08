@@ -22,6 +22,22 @@ import url from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 import getUrl from '../../../../src/test_utils/get_url';
 
+/**
+ * This is more of a smokescreen test than an integration test. The migraiton UI
+ * is particularly difficult to properly integration test. There is a corresponding
+ * test plugin (migration_ui_plugin). The plugin exposes an API that turns it on / off.
+ * When on, it hijacks all HTTP requests the same way the migration UI logic does.
+ * It exposes a phony migration progress API endpoing that moves progress like so:
+ *
+ * 50% -> error -> 75% -> 100%,
+ *
+ * The idea is to verify:
+ *
+ * - The migration screen displays
+ * - It polls progress
+ * - It doesn't totally bork when it gets error responses
+ * - It goes away automatically when migrations complete
+ */
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const remote = getService('remote');
@@ -38,8 +54,6 @@ export default function ({ getService, getPageObjects }) {
       .then(() => remote.get(home))
       .then(() => remote.refresh()));
 
-    // The plugin goes 50% -> error -> 75% -> 100%, so we test that A) the progress
-    // bar moves forward, and B) the loading screen goes away properly.
     it('should poll, updating progress, then refresh', async () => {
       await retry.try(async () => expect(await currentProgress()).to.match(/(50|75)%/));
       await retry.try(() => PageObjects.header.waitUntilLoadingHasFinished());

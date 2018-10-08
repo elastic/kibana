@@ -21,6 +21,10 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { injectMigrationUI } from './inject_migration_ui';
 
+/**
+ * This tests the server-side of the migration UI logic. The client-side
+ * is tested independently (see plugin_functional/test_suites/migration_ui).
+ */
 describe('injectMigrationUI', () => {
   it('registers the migration progress API endpoint', async () => {
     const route = sinon.spy();
