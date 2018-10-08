@@ -56,7 +56,7 @@ class ConcreteIndexMigrator implements IndexMigrator {
   }
 
   /**
-   * Fetches the migration progress. which is a function of how many docs we
+   * Migration progress is a function of how many docs we
    * expect to be in the destination index (or indices, if our migration also
    * includes a reindex of the original). The value is from 0-1, and once it
    * hits 1, all docs are in the destination index (but aliasing, etc may not

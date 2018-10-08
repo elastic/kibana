@@ -44,8 +44,9 @@ import { KbnServer } from './kbn_server';
  */
 export class KibanaMigrator {
   /**
-   * Migrates the mappings and documents in the Kibana index. This will run only
-   * once and subsequent calls will return the result of the original call.
+   * Migrates the mappings and documents in the Kibana index. It's important that this only runs
+   * once, and subsequent calls return the value of the original call, so that various parts of
+   * the codebase can call await without serious / negative consequences.
    *
    * @returns
    * @memberof KibanaMigrator
@@ -56,10 +57,9 @@ export class KibanaMigrator {
     async (): Promise<IndexMigrator> => {
       const { server } = this.kbnServer;
 
-      // Wait until the plugins have been found an initialized...
       await this.kbnServer.ready();
 
-      // We can't do anything if the elasticsearch plugin has been disabled.
+      // We can't do anything if the elasticsearch plugin has been disabled...
       if (!server.plugins.elasticsearch) {
         server.log(
           ['warning', 'migration'],
@@ -71,7 +71,6 @@ export class KibanaMigrator {
         };
       }
 
-      // Wait until elasticsearch is green...
       await server.plugins.elasticsearch.waitUntilReady();
 
       const config = server.config();

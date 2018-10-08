@@ -141,8 +141,9 @@ export default class KbnServer {
 
     const { server, config } = this;
 
-    // Shows the migration progress UI until migrations
-    // have completed, hijacks all incoming HTTP requests
+    // Intercepts all incoming HTTP requests and
+    // shows the migration progress UI until migrations
+    // complete.
     await injectMigrationUI(server);
 
     if (isWorker) {
