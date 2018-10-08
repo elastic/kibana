@@ -51,6 +51,24 @@ function reportingProvider(Private: any, dashboardConfig: any) {
       };
     };
 
+    const getPngJobParams = () => {
+      // Replace hashes with original RISON values.
+      const unhashedUrl = unhashUrl(window.location.href, getUnhashableStates());
+      const relativeUrl = unhashedUrl.replace(window.location.origin + chrome.getBasePath(), '');
+
+      const browserTimezone =
+        chrome.getUiSettingsClient().get('dateFormat:tz') === 'Browser'
+          ? moment.tz.guess()
+          : chrome.getUiSettingsClient().get('dateFormat:tz');
+
+      return {
+        ...sharingData,
+        objectType,
+        browserTimezone,
+        relativeUrl,
+      };
+    };
+
     const shareActions = [];
     if (xpackInfo.get('features.reporting.printablePdf.showLinks', false)) {
       const panelTitle = 'PDF Reports';
@@ -100,7 +118,7 @@ function reportingProvider(Private: any, dashboardConfig: any) {
               reportType="png"
               objectType={objectType}
               objectId={objectId}
-              getJobParams={getReportingJobParams}
+              getJobParams={getPngJobParams}
               isDirty={isDirty}
               onClose={onClose}
             />
