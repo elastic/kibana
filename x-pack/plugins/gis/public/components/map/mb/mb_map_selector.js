@@ -54,16 +54,12 @@ function syncLayerOrder(mbMap, layerList) {
     const movedLayer = (netPos >= netNeg) && movementArr.find(l => l.movement < 0).id ||
       (netPos < netNeg) && movementArr.find(l => l.movement > 0).id;
     const nextLayerIdx = newLayerOrder.findIndex(layerId => layerId === movedLayer) + 1;
-    const nextLayer = nextLayerIdx === newLayerOrder.length ? null :
-      mbLayers.find(({ id }) => id.startsWith(newLayerOrder[nextLayerIdx]));
+    const nextLayerId = nextLayerIdx === newLayerOrder.length ? null :
+      mbLayers.find(({ id }) => id.startsWith(newLayerOrder[nextLayerIdx])).id;
 
     mbLayers.forEach(({ id }) => {
       if (id.startsWith(movedLayer)) {
-        if (nextLayer) {
-          mbMap.moveLayer(id, nextLayer.id);
-        } else {
-          mbMap.moveLayer(id);
-        }
+        mbMap.moveLayer(id, nextLayerId);
       }
     });
   }
