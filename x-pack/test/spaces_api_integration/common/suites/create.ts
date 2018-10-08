@@ -27,13 +27,13 @@ interface CreateTestDefinition {
 }
 
 export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbiddenResponse = (username: string) => (resp: {
+  const createExpectLegacyForbiddenResponse = (username: string, action = 'write/index') => (resp: {
     [key: string]: any;
   }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `action [indices:data/write/index] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/index] is unauthorized for user [${username}]`,
+      message: `action [indices:data/${action}] is unauthorized for user [${username}]: [security_exception] action [indices:data/${action}] is unauthorized for user [${username}]`,
     });
   };
 

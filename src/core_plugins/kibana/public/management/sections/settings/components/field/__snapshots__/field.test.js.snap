@@ -3,7 +3,7 @@
 exports[`Field for array setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -16,7 +16,7 @@ exports[`Field for array setting should render as read only with help text if ov
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -99,7 +99,7 @@ exports[`Field for array setting should render as read only with help text if ov
 exports[`Field for array setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -112,7 +112,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -177,7 +177,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
 exports[`Field for array setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -190,7 +190,7 @@ exports[`Field for array setting should render default value if there is no user
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -250,7 +250,7 @@ exports[`Field for array setting should render default value if there is no user
 exports[`Field for array setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -263,7 +263,7 @@ exports[`Field for array setting should render user value if there is user value
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -354,7 +354,7 @@ exports[`Field for array setting should render user value if there is user value
 exports[`Field for boolean setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -367,7 +367,7 @@ exports[`Field for boolean setting should render as read only with help text if 
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -448,7 +448,7 @@ exports[`Field for boolean setting should render as read only with help text if 
 exports[`Field for boolean setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -461,7 +461,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -524,7 +524,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
 exports[`Field for boolean setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -537,7 +537,7 @@ exports[`Field for boolean setting should render default value if there is no us
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -595,7 +595,7 @@ exports[`Field for boolean setting should render default value if there is no us
 exports[`Field for boolean setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -608,7 +608,7 @@ exports[`Field for boolean setting should render user value if there is user val
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -697,7 +697,7 @@ exports[`Field for boolean setting should render user value if there is user val
 exports[`Field for image setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -710,7 +710,7 @@ exports[`Field for image setting should render as read only with help text if ov
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -790,7 +790,7 @@ exports[`Field for image setting should render as read only with help text if ov
 exports[`Field for image setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -803,7 +803,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -866,7 +866,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
 exports[`Field for image setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -879,7 +879,7 @@ exports[`Field for image setting should render default value if there is no user
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -937,7 +937,7 @@ exports[`Field for image setting should render default value if there is no user
 exports[`Field for image setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -950,7 +950,7 @@ exports[`Field for image setting should render user value if there is user value
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1049,7 +1049,7 @@ exports[`Field for image setting should render user value if there is user value
 exports[`Field for json setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1062,7 +1062,7 @@ exports[`Field for json setting should render as read only with help text if ove
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1165,7 +1165,7 @@ exports[`Field for json setting should render as read only with help text if ove
 exports[`Field for json setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1178,7 +1178,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1259,7 +1259,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
 exports[`Field for json setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1272,7 +1272,7 @@ exports[`Field for json setting should render default value if there is no user 
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1383,7 +1383,7 @@ exports[`Field for json setting should render default value if there is no user 
 exports[`Field for json setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1396,7 +1396,7 @@ exports[`Field for json setting should render user value if there is user value 
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1507,7 +1507,7 @@ exports[`Field for json setting should render user value if there is user value 
 exports[`Field for markdown setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1520,7 +1520,7 @@ exports[`Field for markdown setting should render as read only with help text if
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1619,7 +1619,7 @@ exports[`Field for markdown setting should render as read only with help text if
 exports[`Field for markdown setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1632,7 +1632,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1713,7 +1713,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
 exports[`Field for markdown setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1726,7 +1726,7 @@ exports[`Field for markdown setting should render default value if there is no u
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1802,7 +1802,7 @@ exports[`Field for markdown setting should render default value if there is no u
 exports[`Field for markdown setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1815,7 +1815,7 @@ exports[`Field for markdown setting should render user value if there is user va
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1922,7 +1922,7 @@ exports[`Field for markdown setting should render user value if there is user va
 exports[`Field for number setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1935,7 +1935,7 @@ exports[`Field for number setting should render as read only with help text if o
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2018,7 +2018,7 @@ exports[`Field for number setting should render as read only with help text if o
 exports[`Field for number setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2031,7 +2031,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2096,7 +2096,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
 exports[`Field for number setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2109,7 +2109,7 @@ exports[`Field for number setting should render default value if there is no use
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2169,7 +2169,7 @@ exports[`Field for number setting should render default value if there is no use
 exports[`Field for number setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2182,7 +2182,7 @@ exports[`Field for number setting should render user value if there is user valu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2273,7 +2273,7 @@ exports[`Field for number setting should render user value if there is user valu
 exports[`Field for select setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2286,7 +2286,7 @@ exports[`Field for select setting should render as read only with help text if o
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2386,7 +2386,7 @@ exports[`Field for select setting should render as read only with help text if o
 exports[`Field for select setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2399,7 +2399,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2481,7 +2481,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
 exports[`Field for select setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2494,7 +2494,7 @@ exports[`Field for select setting should render default value if there is no use
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2571,7 +2571,7 @@ exports[`Field for select setting should render default value if there is no use
 exports[`Field for select setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2584,7 +2584,7 @@ exports[`Field for select setting should render user value if there is user valu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2692,7 +2692,7 @@ exports[`Field for select setting should render user value if there is user valu
 exports[`Field for string setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2705,7 +2705,7 @@ exports[`Field for string setting should render as read only with help text if o
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2788,7 +2788,7 @@ exports[`Field for string setting should render as read only with help text if o
 exports[`Field for string setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2801,7 +2801,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2866,7 +2866,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
 exports[`Field for string setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2879,7 +2879,7 @@ exports[`Field for string setting should render default value if there is no use
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2939,7 +2939,7 @@ exports[`Field for string setting should render default value if there is no use
 exports[`Field for string setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2952,7 +2952,7 @@ exports[`Field for string setting should render user value if there is user valu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div

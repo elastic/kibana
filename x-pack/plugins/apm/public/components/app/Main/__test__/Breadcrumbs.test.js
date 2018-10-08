@@ -36,7 +36,7 @@ jest.mock(
 function expectBreadcrumbToMatchSnapshot(route) {
   const wrapper = mount(
     <MemoryRouter initialEntries={[`${route}?_g=myG&kuery=myKuery`]}>
-      <Breadcrumbs />
+      <Breadcrumbs showPluginBreadcrumbs={true} />
     </MemoryRouter>
   );
   expect(
@@ -73,5 +73,14 @@ describe('Breadcrumbs', () => {
     expectBreadcrumbToMatchSnapshot(
       '/:serviceName/transactions/request/my-transaction-name'
     );
+  });
+
+  it('does not render breadcrumbs when showPluginBreadcrumbs = false', () => {
+    const wrapper = mount(
+      <MemoryRouter initialEntries={[`/?_g=myG&kuery=myKuery`]}>
+        <Breadcrumbs showPluginBreadcrumbs={false} />
+      </MemoryRouter>
+    );
+    expect(wrapper.find('.kuiLocalBreadcrumbs').exists()).toEqual(false);
   });
 });
