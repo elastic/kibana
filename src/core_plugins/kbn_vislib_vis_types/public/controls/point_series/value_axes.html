@@ -158,8 +158,8 @@
             i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.toggleAdvancedOptionsVisibilityLabel"
             i18n-default-message="{showText} {hideText} Advanced Options"
             i18n-values="{
-              showText: '<span ng-show=&quot;!isValueAxisAdvancedOptionsOpen&quot;>Show</span>',
-              hideText: '<span ng-show=&quot;isValueAxisAdvancedOptionsOpen&quot;>Hide</span>'
+              showText: '<span ng-show=\'!isValueAxisAdvancedOptionsOpen\'>' + editorState.showTitle + '</span>',
+              hideText: '<span ng-show=\'isValueAxisAdvancedOptionsOpen\'>' + editorState.hideTitle + '</span>'
             }"
           ></span>
         </a>

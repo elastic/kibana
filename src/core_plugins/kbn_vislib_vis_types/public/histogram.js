@@ -143,7 +143,7 @@ export default function PointSeriesVisType(Private, i18n) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('kbnVislibVisTypes.histogram.metricsTitle', { defaultMessage: 'Y-Axis' }),
+          title: i18n('kbnVislibVisTypes.histogram.metricTitle', { defaultMessage: 'Y-Axis' }),
           min: 1,
           aggFilter: ['!geo_centroid', '!geo_bounds'],
           defaults: [

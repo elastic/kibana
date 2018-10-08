@@ -21,7 +21,7 @@ import { uiModules } from 'ui/modules';
 import vislibValueAxesTemplate from './category_axis.html';
 const module = uiModules.get('kibana');
 
-module.directive('vislibCategoryAxis', function () {
+module.directive('vislibCategoryAxis', function (i18n) {
   return {
     restrict: 'E',
     template: vislibValueAxesTemplate,
@@ -32,6 +32,10 @@ module.directive('vislibCategoryAxis', function () {
         { name: 'vertical', value: 90 },
         { name: 'angled', value: 75 },
       ];
+
+      $scope.editorState.showTitle = i18n('kbnVislibVisTypes.controls.pointSeries.categoryAxis.showTitle', { defaultMessage: 'Show' });
+
+      $scope.editorState.hideTitle = i18n('kbnVislibVisTypes.controls.pointSeries.categoryAxis.hideTitle', { defaultMessage: 'Hide' });
     }
   };
 });

@@ -22,7 +22,7 @@ import { uiModules } from 'ui/modules';
 import vislibValueAxesTemplate from './value_axes.html';
 const module = uiModules.get('kibana');
 
-module.directive('vislibValueAxes', function () {
+module.directive('vislibValueAxes', function (i18n) {
   return {
     restrict: 'E',
     template: vislibValueAxesTemplate,
@@ -171,6 +171,11 @@ module.directive('vislibValueAxes', function () {
       }, () => {
         $scope.updateAxisTitle();
       });
+
+      $scope.editorState.showTitle = i18n('kbnVislibVisTypes.controls.pointSeries.valueAxis.showTitle', { defaultMessage: 'Show' });
+
+      $scope.editorState.hideTitle = i18n('kbnVislibVisTypes.controls.pointSeries.valueAxis.hideTitle', { defaultMessage: 'Hide' });
+
     }
   };
 });
