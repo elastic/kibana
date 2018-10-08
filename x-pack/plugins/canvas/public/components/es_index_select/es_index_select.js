@@ -27,7 +27,7 @@ export const ESIndexSelect = ({ value, loading, indices, onChange, onFocus, onBl
       onFocus={onFocus}
       disabled={loading}
       options={options}
-      singleSelection
+      singleSelection={{ asPlainText: true }}
       isClearable={false}
       onCreateOption={input => onChange(input || defaultIndex)}
     />

@@ -16,11 +16,15 @@
 import _ from 'lodash';
 
 import { buildConfig } from './explorer_chart_config_builder';
-import { chartLimits } from '../../util/chart_utils';
+import {
+  chartLimits,
+  getChartType
+} from '../../util/chart_utils';
 import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
 
+import { CHART_TYPE } from '../explorer_constants';
 
 export function explorerChartsContainerServiceFactory(
   mlSelectSeverityService,
@@ -33,14 +37,12 @@ export function explorerChartsContainerServiceFactory(
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const ML_TIME_FIELD_NAME = 'timestamp';
   const USE_OVERALL_CHART_LIMITS = false;
-  const DEFAULT_LAYOUT_CELLS_PER_CHART = 12;
   const MAX_CHARTS_PER_ROW = 4;
 
   function getDefaultData() {
     return {
       seriesToPlot: [],
       // default values, will update on every re-render
-      layoutCellsPerChart: DEFAULT_LAYOUT_CELLS_PER_CHART,
       tooManyBuckets: false,
       timeFieldName: 'timestamp'
     };
@@ -67,7 +69,7 @@ export function explorerChartsContainerServiceFactory(
       chartsPerRow = 1;
     }
 
-    data.layoutCellsPerChart = DEFAULT_LAYOUT_CELLS_PER_CHART / chartsPerRow;
+    data.chartsPerRow = chartsPerRow;
 
     // Build the data configs of the anomalies to be displayed.
     // TODO - implement paging?
@@ -144,6 +146,38 @@ export function explorerChartsContainerServiceFactory(
       );
     }
 
+    // Query 4 - load context data distribution
+    function getEventDistribution(config, range) {
+      const chartType = getChartType(config);
+
+      let splitField;
+      let filterField = null;
+
+      // Define splitField and filterField based on chartType
+      if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
+        splitField = config.entityFields.find(f => f.fieldType === 'by');
+        filterField = config.entityFields.find(f => f.fieldType === 'partition');
+      } else if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
+        splitField = config.entityFields.find(f => f.fieldType === 'over');
+        filterField = config.entityFields.find(f => f.fieldType === 'partition');
+      }
+
+      const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
+      return mlResultsService.getEventDistributionData(
+        config.datafeedConfig.indices,
+        config.datafeedConfig.types,
+        splitField,
+        filterField,
+        datafeedQuery,
+        config.metricFunction,
+        config.metricFieldName,
+        config.timeField,
+        range.min,
+        range.max,
+        config.interval
+      );
+    }
+
     // first load and wait for required data,
     // only after that trigger data processing and page render.
     // TODO - if query returns no results e.g. source data has been deleted,
@@ -151,7 +185,8 @@ export function explorerChartsContainerServiceFactory(
     const seriesPromises = seriesConfigs.map(seriesConfig => Promise.all([
       getMetricData(seriesConfig, chartRange),
       getRecordsForCriteria(seriesConfig, chartRange),
-      getScheduledEvents(seriesConfig, chartRange)
+      getScheduledEvents(seriesConfig, chartRange),
+      getEventDistribution(seriesConfig, chartRange)
     ]));
 
     function processChartData(response, seriesIndex) {
@@ -159,6 +194,8 @@ export function explorerChartsContainerServiceFactory(
       const records = response[1].records;
       const jobId = seriesConfigs[seriesIndex].jobId;
       const scheduledEvents = response[2].events[jobId];
+      const eventDistribution = response[3];
+      const chartType = getChartType(seriesConfigs[seriesIndex]);
 
       // Return dataset in format used by the chart.
       // i.e. array of Objects with keys date (timestamp), value,
@@ -167,18 +204,34 @@ export function explorerChartsContainerServiceFactory(
         return [];
       }
 
-      const chartData = _.map(metricData, (value, time) => ({
-        date: +time,
-        value: value
-      }));
+      let chartData;
+      if (eventDistribution.length > 0 && records.length > 0) {
+        const filterField = records[0].by_field_value || records[0].over_field_value;
+        chartData = eventDistribution.filter(d => (d.entity !== filterField));
+        _.map(metricData, (value, time) => {
+          if (value > 0) {
+            chartData.push({
+              date: +time,
+              value: value,
+              entity: filterField
+            });
+          }
+        });
+      } else {
+        chartData = _.map(metricData, (value, time) => ({
+          date: +time,
+          value: value
+        }));
+      }
+
       // Iterate through the anomaly records, adding anomalyScore properties
       // to the chartData entries for anomalous buckets.
+      const chartDataForPointSearch = getChartDataForPointSearch(chartData, records[0], chartType);
       _.each(records, (record) => {
-
         // Look for a chart point with the same time as the record.
         // If none found, find closest time in chartData set.
         const recordTime = record[ML_TIME_FIELD_NAME];
-        let chartPoint = findNearestChartPointToTime(chartData, recordTime);
+        let chartPoint = findNearestChartPointToTime(chartDataForPointSearch, recordTime);
 
         if (chartPoint === undefined) {
           // In case there is a record with a time after that of the last chart point, set the score
@@ -220,12 +273,25 @@ export function explorerChartsContainerServiceFactory(
       // which correspond to times of scheduled events for the job.
       if (scheduledEvents !== undefined) {
         _.each(scheduledEvents, (events, time) => {
-          const chartPoint = findNearestChartPointToTime(chartData, time);
+          const chartPoint = findNearestChartPointToTime(chartDataForPointSearch, Number(time));
           if (chartPoint !== undefined) {
             // Note if the scheduled event coincides with an absence of the underlying metric data,
             // we don't worry about plotting the event.
             chartPoint.scheduledEvents = events;
           }
+        });
+      }
+
+      return chartData;
+    }
+
+    function getChartDataForPointSearch(chartData, record, chartType) {
+      if (
+        chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
+        chartType === CHART_TYPE.POPULATION_DISTRIBUTION
+      ) {
+        return chartData.filter((d) => {
+          return d.entity === (record && (record.by_field_value || record.over_field_value));
         });
       }
 
@@ -492,8 +558,8 @@ export function explorerChartsContainerServiceFactory(
 
       if ((maxMs - minMs) < maxTimeSpan) {
         // Expand out to cover as much as the requested time span as possible.
-        minMs = Math.max(earliestMs, maxMs - maxTimeSpan);
-        maxMs = Math.min(latestMs, minMs + maxTimeSpan);
+        minMs = Math.max(earliestMs, minMs - maxTimeSpan);
+        maxMs = Math.min(latestMs, maxMs + maxTimeSpan);
       }
 
       chartRange = { min: minMs, max: maxMs };
