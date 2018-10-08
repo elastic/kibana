@@ -6,7 +6,7 @@
 import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
 
-import { Location, SymbolInformation, SymbolKind } from 'vscode-languageserver-types/lib/esm/main';
+import { Location, SymbolInformation } from 'vscode-languageserver-types/lib/esm/main';
 import { loadStructure, loadStructureFailed, loadStructureSuccess } from '../actions';
 
 export interface SymbolWithMembers extends SymbolInformation {
@@ -29,46 +29,36 @@ const initialState: SymbolState = {
 const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => {
   const structureTree: SymbolWithMembers[] = [];
 
-  function isOneLocationInAnotherLocation(oneLocation: Location, anotherLocation: Location) {
+  function isOneLocationAfterAnotherLocation(oneLocation: Location, anotherLocation: Location) {
     const {
       line: oneLocationStartLine,
       character: oneLocationStartCharacter,
     } = oneLocation.range.start;
-    const { line: oneLocationEndLine, character: oneLocationEndCharacter } = oneLocation.range.end;
-    const {
-      line: anotherLocationStartLine,
-      character: anotherLocationStartCharacter,
-    } = anotherLocation.range.start;
     const {
       line: anotherLocationEndLine,
       character: anotherLocationEndCharacter,
     } = anotherLocation.range.end;
     return (
-      (oneLocationStartLine > anotherLocationStartLine ||
-        (oneLocationStartLine === anotherLocationStartLine &&
-          oneLocationStartCharacter >= anotherLocationStartCharacter)) &&
-      (oneLocationEndLine < anotherLocationEndLine ||
-        (oneLocationEndLine === anotherLocationEndLine &&
-          oneLocationEndCharacter <= anotherLocationEndCharacter))
+      oneLocationStartLine > anotherLocationEndLine ||
+      (oneLocationStartLine === anotherLocationEndLine &&
+        oneLocationStartCharacter >= anotherLocationEndCharacter)
     );
   }
 
   function findContainer(containerName: string, location: Location): SymbolInformation | undefined {
     return symbols.find(
       (s: SymbolInformation) =>
-        s.name === containerName && isOneLocationInAnotherLocation(location, s.location)
+        s.name === containerName && isOneLocationAfterAnotherLocation(location, s.location)
     );
   }
 
   symbols.forEach((s: SymbolInformation) => {
-    if (s.containerName && s.kind !== SymbolKind.Class) {
-      const container = findContainer(s.containerName, s.location);
-      if (container) {
-        if (container.members) {
-          container.members.add(s);
-        } else {
-          container.members = new Set([s]);
-        }
+    const container = findContainer(s.containerName, s.location);
+    if (container) {
+      if (container.members) {
+        container.members.add(s);
+      } else {
+        container.members = new Set([s]);
       }
     } else {
       structureTree.push(s);
