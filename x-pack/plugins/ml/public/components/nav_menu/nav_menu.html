@@ -11,15 +11,15 @@
     <div data-transclude-slot="bottomRow">
       <div ng-if="showTabs" class="kuiLocalTabs" role="tablist">
         <a kbn-href="#/jobs" class="kuiLocalTab" role="tab"
-        ng-class="{'kuiLocalTab-isSelected': isActiveTab('jobs')}">
+        ng-class="{'kuiLocalTab-isSelected': isActiveTab('jobs'), 'disabled-nav-link': disableLinks}">
          Job Management
         </a>
         <a kbn-href="#/explorer" class="kuiLocalTab" role="tab"
-        ng-class="{'kuiLocalTab-isSelected': isActiveTab('explorer')}">
+        ng-class="{'kuiLocalTab-isSelected': isActiveTab('explorer'), 'disabled-nav-link': disableLinks}">
           Anomaly Explorer
         </a>
         <a kbn-href="#/timeseriesexplorer" class="kuiLocalTab" role="tab"
-        ng-class="{'kuiLocalTab-isSelected': isActiveTab('timeseriesexplorer')}">
+        ng-class="{'kuiLocalTab-isSelected': isActiveTab('timeseriesexplorer'), 'disabled-nav-link': disableLinks}">
           Single Metric Viewer
         </a>
         <a kbn-href="#/datavisualizer" class="kuiLocalTab" role="tab"
@@ -27,7 +27,7 @@
           Data Visualizer
         </a>
         <a kbn-href="#/settings" class="kuiLocalTab" role="tab"
-        ng-class="{'kuiLocalTab-isSelected': isActiveTab('settings')}">
+        ng-class="{'kuiLocalTab-isSelected': isActiveTab('settings'), 'disabled-nav-link': disableLinks}">
           Settings
         </a>
       </div>

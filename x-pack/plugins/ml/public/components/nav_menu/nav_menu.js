@@ -10,6 +10,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import template from './nav_menu.html';
 import uiRouter from 'ui/routes';
+import { isFullLicense } from '../../license/check_license';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -21,6 +22,8 @@ module.directive('mlNavMenu', function () {
     template,
     link: function (scope, el, attrs) {
 
+
+
       // Tabs
       scope.name = attrs.name;
 
@@ -28,6 +31,7 @@ module.directive('mlNavMenu', function () {
       if (scope.name === 'jobs' ||
         scope.name === 'settings' ||
         scope.name === 'datavisualizer' ||
+        scope.name === 'filedatavisualizer' ||
         scope.name === 'timeseriesexplorer' ||
         scope.name === 'explorer') {
         scope.showTabs = true;
@@ -35,6 +39,8 @@ module.directive('mlNavMenu', function () {
       scope.isActiveTab = function (path) {
         return scope.name === path;
       };
+
+      scope.disableLinks = (isFullLicense() === false);
 
       // Breadcrumbs
       const crumbNames = {

@@ -18,7 +18,7 @@ import { initPromise } from 'plugins/ml/util/promise';
 
 import uiRoutes from 'ui/routes';
 
-const template = '<ml-nav-menu name="lcc" /><file-datavisualizer-page />';
+const template = '<ml-nav-menu name="filedatavisualizer" /><file-datavisualizer-page />';
 
 uiRoutes
   .when('/filedatavisualizer/?', {

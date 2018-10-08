@@ -246,7 +246,7 @@ export class FileDataVisualizerView extends Component {
               fields={fields}
             />
 
-            {(loaded) &&
+            {(loaded && results.format === 'delimited') &&
               <React.Fragment>
                 <EuiSpacer size="m" />
                 <EuiPanel>

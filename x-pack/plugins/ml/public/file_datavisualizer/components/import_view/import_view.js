@@ -284,22 +284,28 @@ export class ImportView extends Component {
           }
         </EuiPanel>
 
-        <EuiSpacer size="m" />
 
         {(importing === true || imported === true) &&
-          <EuiPanel>
-            <EuiSteps
-              steps={firstSetOfSteps}
-            />
-          </EuiPanel>
+          <React.Fragment>
+            <EuiSpacer size="m" />
+
+            <EuiPanel>
+              <EuiSteps
+                steps={firstSetOfSteps}
+              />
+            </EuiPanel>
+          </React.Fragment>
         }
 
-        <EuiSpacer size="m" />
 
         {(imported === true) &&
-          <EuiPanel>
-            <ResultsLinks indexPatternId={(indexPatternId)} />
-          </EuiPanel>
+          <React.Fragment>
+            <EuiSpacer size="m" />
+
+            <EuiPanel>
+              <ResultsLinks indexPatternId={(indexPatternId)} />
+            </EuiPanel>
+          </React.Fragment>
         }
 
       </React.Fragment>
