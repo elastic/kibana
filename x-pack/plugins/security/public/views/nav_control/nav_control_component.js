@@ -65,6 +65,7 @@ export class SecurityNavControl extends Component {
         button={button}
         isOpen={this.state.isOpen}
         anchorPosition="downRight"
+        repositionOnScroll
         closePopover={this.closeMenu}
         panelPaddingSize="none"
       >

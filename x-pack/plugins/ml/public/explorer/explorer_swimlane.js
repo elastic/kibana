@@ -23,6 +23,7 @@ import { numTicksForDateFormat } from '../util/chart_utils';
 import { getSeverityColor } from '../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';
 import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
+import { mlExplorerDashboardService } from './explorer_dashboard_service';
 import { DRAG_SELECT_ACTION } from './explorer_constants';
 
 export class ExplorerSwimlane extends React.Component {
@@ -33,7 +34,6 @@ export class ExplorerSwimlane extends React.Component {
       laneLabels: PropTypes.array.isRequired
     }).isRequired,
     swimlaneType: PropTypes.string.isRequired,
-    mlExplorerDashboardService: PropTypes.object.isRequired,
     selection: PropTypes.object
   }
 
@@ -43,7 +43,6 @@ export class ExplorerSwimlane extends React.Component {
   cellMouseoverActive = true;
 
   componentWillUnmount() {
-    const { mlExplorerDashboardService } = this.props;
     mlExplorerDashboardService.dragSelect.unwatch(this.boundDragSelectListener);
     const element = d3.select(this.rootNode);
     element.html('');
@@ -51,7 +50,6 @@ export class ExplorerSwimlane extends React.Component {
 
   componentDidMount() {
     const element = d3.select(this.rootNode.parentNode);
-    const { mlExplorerDashboardService } = this.props;
 
     // Consider the setting to support to select a range of cells
     if (!mlExplorerDashboardService.allowCellRangeSelection) {
@@ -124,7 +122,6 @@ export class ExplorerSwimlane extends React.Component {
   selectCell(cellsToSelect, { laneLabels, bucketScore, times }) {
     const {
       selection,
-      mlExplorerDashboardService,
       swimlaneData,
       swimlaneType
     } = this.props;
@@ -222,7 +219,6 @@ export class ExplorerSwimlane extends React.Component {
       MlTimeBuckets,
       swimlaneData,
       swimlaneType,
-      mlExplorerDashboardService,
       selection
     } = this.props;
 
