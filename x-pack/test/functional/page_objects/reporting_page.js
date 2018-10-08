@@ -134,6 +134,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async checkUsePrintLayout() {
+      await new Promise(r => setTimeout(r, 1000));
       await retry.try(() => testSubjects.click('usePrintLayout'));
     }
 
