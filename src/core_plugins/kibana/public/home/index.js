@@ -43,12 +43,6 @@ function getRoute() {
         item.link = chrome.addBasePath(item.link);
         return item;
       });
-      $scope.getConfig = (...args) => config.get(...args);
-      $scope.setConfig = (...args) => config.set(...args);
-      $scope.clearIndexPatternsCache = () => {
-        const getter = indexPatterns.getIds;
-        getter.clearCache();
-      };
     }
   };
 }

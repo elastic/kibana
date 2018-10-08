@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 
 import { ExplorerChartLabelBadge } from './explorer_chart_label_badge';
-import { ExplorerChartTooltip } from '../../explorer_chart_tooltip';
+import { ExplorerChartInfoTooltip } from '../../explorer_chart_info_tooltip';
 
 export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, wrapLabel = false }) {
   // Depending on whether we wrap the entityField badges to a new line, we render this differently:
@@ -32,18 +32,15 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
     (entityFields.length === 0 || detectorLabel.length === 0)
   ) ? (<React.Fragment>&nbsp;</React.Fragment>) : (<React.Fragment>&nbsp;&ndash;&nbsp;</React.Fragment>);
 
-  const entityFieldBadges = entityFields.map((entity) => {
-    return (
-      <React.Fragment key={`${entity.fieldName} ${entity.fieldValue}`}>
-        <ExplorerChartLabelBadge entity={entity} />&nbsp;
-      </React.Fragment>
-    );
-  });
+  const entityFieldBadges = entityFields.map((entity) => (
+    <ExplorerChartLabelBadge entity={entity} key={`${entity.fieldName} ${entity.fieldValue}`} />
+  ));
 
   const infoIcon = (
     <span className="ml-explorer-chart-info-icon">
       <EuiIconTip
-        content={<ExplorerChartTooltip {...infoTooltip} />}
+        className="ml-explorer-chart-eui-icon-tip"
+        content={<ExplorerChartInfoTooltip {...infoTooltip} />}
         position="top"
         size="s"
       />
@@ -62,7 +59,7 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
         )}
       </span>
       {wrapLabel && (
-        <div className="ml-explorer-chart-label-fields">{entityFieldBadges}</div>
+        <span className="ml-explorer-chart-label-badges">{entityFieldBadges}</span>
       )}
     </React.Fragment>
   );

@@ -27,16 +27,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export const ScriptingWarningCallOutComponent = ({
+export const ScriptingWarningCallOut = ({
   isVisible = false,
-  intl,
 }) => {
   return isVisible ? (
     <Fragment>
       <EuiCallOut
-        title={intl.formatMessage({ id: 'common.ui.fieldEditor.warningCallOutHeader', defaultMessage: 'Proceed with caution' })}
+        title={<FormattedMessage id="common.ui.fieldEditor.warningCallOutHeader" defaultMessage="Proceed with caution" />}
         color="warning"
         iconType="alert"
       >
@@ -77,6 +76,4 @@ export const ScriptingWarningCallOutComponent = ({
   ) : null;
 };
 
-ScriptingWarningCallOutComponent.displayName = 'ScriptingWarningCallOut';
-
-export const ScriptingWarningCallOut = injectI18n(ScriptingWarningCallOutComponent);
+ScriptingWarningCallOut.displayName = 'ScriptingWarningCallOut';

@@ -18,9 +18,10 @@ export function authorizationModeFactory(
   actions,
   checkPrivilegesWithRequest,
   config,
+  log,
   plugins,
   savedObjects,
-  xpackInfoFeature
+  xpackInfoFeature,
 ) {
   const useRbacForRequestCache = new WeakMap();
 
@@ -56,7 +57,8 @@ export function authorizationModeFactory(
   return {
     async initialize(request) {
       if (useRbacForRequestCache.has(request)) {
-        throw new Error('Authorization mode is already intitialized');
+        log(['security', 'debug'], `Authorization mode is already initialized`);
+        return;
       }
 
       if (!isRbacEnabled()) {

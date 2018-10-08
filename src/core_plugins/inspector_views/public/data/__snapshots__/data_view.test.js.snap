@@ -79,13 +79,6 @@ exports[`Inspector Data View component should render empty state 1`] = `
                     </p>
                   </div>
                 </EuiText>
-                <EuiSpacer
-                  size="l"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--l"
-                  />
-                </EuiSpacer>
               </span>
             </EuiTextColor>
           </div>

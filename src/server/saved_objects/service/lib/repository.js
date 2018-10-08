@@ -35,7 +35,7 @@ export class SavedObjectsRepository {
       callCluster,
       schema,
       serializer,
-      migrator = { migrateDocument: (doc) => doc },
+      migrator,
       onBeforeWrite = () => { },
     } = options;
 
@@ -52,7 +52,10 @@ export class SavedObjectsRepository {
     this._schema = schema;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
-    this._unwrappedCallCluster = callCluster;
+    this._unwrappedCallCluster = async (...args) => {
+      await migrator.awaitMigration();
+      return callCluster(...args);
+    };
     this._schema = schema;
     this._serializer = serializer;
   }
