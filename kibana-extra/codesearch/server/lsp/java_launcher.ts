@@ -66,7 +66,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
             '-Declipse.product=org.elastic.jdt.ls.core.product',
             '-Dlog.level=ALL',
             '-noverify',
-            '-Xmx1G',
+            '-Xmx4G',
             '-jar',
             path.resolve(javaLangserverPath, launchersFound[0]),
             '-configuration',
