@@ -1,17 +1,13 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "./tsconfig",
   "compilerOptions": {
     "declaration": true,
     "declarationDir": "./target/types",
-    "outDir": "./target/out",
     "stripInternal": true,
+    "emitDeclarationOnly": true,
     "declarationMap": true
   },
   "include": [
-    "./types/joi.d.ts",
-    "./src/**/*.ts"
-  ],
-  "exclude": [
-    "target"
+    "./src/type_exports.ts"
   ]
 }
