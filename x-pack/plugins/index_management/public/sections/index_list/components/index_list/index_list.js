@@ -29,7 +29,7 @@ export class IndexList extends React.PureComponent {
 
   render() {
     return (
-      <div className="indexTableHorizontalScroll im-snapshotTestSubject">
+      <div className="indTable__horizontalScroll im-snapshotTestSubject">
         <IndexTable />
         <DetailPanel />
       </div>

@@ -40,7 +40,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
               Read more
             </EuiLink>
           }
-          className="licenseManagement__baseline"
+          className="eui-AlignBaseline"
           closePopover={[Function]}
           hasArrow={true}
           id="readMorePopover"
@@ -49,7 +49,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
           panelPaddingSize="m"
         >
           <EuiText
-            className="licenseManagement__narrowText"
+            className="licManagement__narrowText"
             grow={true}
           >
             <p>
@@ -111,7 +111,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                 Read more
               </EuiLink>
             }
-            className="licenseManagement__baseline"
+            className="eui-AlignBaseline"
             closePopover={[Function]}
             hasArrow={true}
             id="readMorePopover"
@@ -123,7 +123,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
               onOutsideClick={[Function]}
             >
               <div
-                className="euiPopover euiPopover--anchorDownCenter licenseManagement__baseline"
+                className="euiPopover euiPopover--anchorDownCenter eui-AlignBaseline"
                 id="readMorePopover"
                 onClick={[Function]}
                 onKeyDown={[Function]}

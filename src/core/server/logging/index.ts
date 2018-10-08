@@ -19,5 +19,7 @@
 
 export { Logger } from './logger';
 export { LoggerFactory } from './logger_factory';
+/** @internal */
 export { LoggingConfig } from './logging_config';
+/** @internal */
 export { LoggingService } from './logging_service';
