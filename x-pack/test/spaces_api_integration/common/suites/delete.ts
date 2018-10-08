@@ -48,6 +48,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       error: 'Not Found',
       statusCode: 404,
+      message: 'Not Found',
     });
   };
 
