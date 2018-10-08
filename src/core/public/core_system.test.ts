@@ -19,6 +19,7 @@
 
 import { BasePathService } from './base_path';
 import { FatalErrorsService } from './fatal_errors';
+import { I18nService } from './i18n';
 import { InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformService } from './legacy_platform';
 import { LoadingCountService } from './loading_count';
@@ -54,6 +55,13 @@ const MockFatalErrorsService = jest.fn<FatalErrorsService>(function _MockFatalEr
 });
 jest.mock('./fatal_errors', () => ({
   FatalErrorsService: MockFatalErrorsService,
+}));
+
+const MockI18nService = jest.fn<I18nService>(function _MockI18nService(this: any) {
+  this.init = jest.fn();
+});
+jest.mock('./i18n', () => ({
+  I18nService: MockI18nService,
 }));
 
 const mockNotificationStartContract = {};
@@ -120,6 +128,7 @@ describe('constructor', () => {
     expect(MockInjectedMetadataService).toHaveBeenCalledTimes(1);
     expect(MockLegacyPlatformService).toHaveBeenCalledTimes(1);
     expect(MockFatalErrorsService).toHaveBeenCalledTimes(1);
+    expect(MockI18nService).toHaveBeenCalledTimes(1);
     expect(MockNotificationsService).toHaveBeenCalledTimes(1);
     expect(MockLoadingCountService).toHaveBeenCalledTimes(1);
     expect(MockBasePathService).toHaveBeenCalledTimes(1);
@@ -311,6 +320,15 @@ describe('#start()', () => {
     const [mockInstance] = MockNotificationsService.mock.instances;
     expect(mockInstance.start).toHaveBeenCalledTimes(1);
     expect(mockInstance.start).toHaveBeenCalledWith();
+  });
+
+  it('calls i18nService#init()', () => {
+    startCore();
+    const [mockInstance] = MockI18nService.mock.instances;
+    expect(mockInstance.init).toHaveBeenCalledTimes(1);
+    expect(mockInstance.init).toHaveBeenCalledWith({
+      injectedMetadata: mockInjectedMetadataStartContract,
+    });
   });
 });
 
