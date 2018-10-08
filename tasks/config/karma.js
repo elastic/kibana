@@ -71,11 +71,9 @@ module.exports = function (grunt) {
       // list of files / patterns to load in the browser
       files: [
         'http://localhost:5610/bundles/vendors.bundle.js',
-        'http://localhost:5610/bundles/commons.bundle.js',
         'http://localhost:5610/bundles/tests.bundle.js',
 
         'http://localhost:5610/bundles/vendors.style.css',
-        'http://localhost:5610/bundles/commons.style.css',
         'http://localhost:5610/bundles/tests.style.css'
       ],
 

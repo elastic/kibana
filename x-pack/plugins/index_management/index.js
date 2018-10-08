@@ -12,13 +12,16 @@ import { registerStatsRoute } from './server/routes/api/stats';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
 
-export function indexManagement(kibana) {
+export function indexManagement(kibana)  {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
-      managementSections: ['plugins/index_management'],
+      styleSheetPaths: `${__dirname}/public/index.scss`,
+      managementSections: [
+        'plugins/index_management',
+      ]
     },
     init: function (server) {
       registerLicenseChecker(server);
@@ -26,6 +29,6 @@ export function indexManagement(kibana) {
       registerSettingsRoutes(server);
       registerStatsRoute(server);
       registerMappingRoute(server);
-    },
+    }
   });
 }
