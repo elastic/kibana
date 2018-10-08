@@ -127,10 +127,6 @@ export class LayoutPage extends React.Component<Props, State> {
     };
   }
 
-  public componentDidMount() {
-    this.fetchTree(this.props.match.params.path);
-  }
-
   public onClick = (node: Tree) => {
     const { resource, org, repo, revision } = this.props.match.params;
     const pathType = node.type === FileTreeItemType.File ? 'blob' : 'tree';
