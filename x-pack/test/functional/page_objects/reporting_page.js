@@ -134,8 +134,11 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async checkUsePrintLayout() {
-      await this.waitForAnimation();
-      await retry.try(() => testSubjects.click('usePrintLayout'));
+      // The print layout checkbox slides in as part of an animation, and tests can
+      // attempt to click it too quickly, leading to flaky tests. The 500ms wait allows
+      // the animation to complete before we attempt a click.
+      const menuAnimationDelay = 500;
+      await retry.tryForTime(menuAnimationDelay, () => testSubjects.click('usePrintLayout'));
     }
 
     async clickGenerateReportButton() {
@@ -162,10 +165,6 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       const fromTime = '1999-09-19 06:31:44.000';
       const toTime = '1999-09-23 18:31:44.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-    }
-
-    async waitForAnimation(ms = 250) {
-      await new Promise(r => setTimeout(r, ms));
     }
   }
 
