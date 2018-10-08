@@ -5,4 +5,4 @@
  */
 
 require('@kbn/plugin-helpers').babelRegister();
-// require('../dev-tools/jest').runJest();
+require('../dev-tools/jest').runJest();
