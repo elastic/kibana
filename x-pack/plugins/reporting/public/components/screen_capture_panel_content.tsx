@@ -77,13 +77,23 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
 
     const el = document.querySelector('[data-shared-items-container]');
     const bounds = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-    return {
-      id: 'preserve_layout',
-      dimensions: {
-        height: bounds.height,
-        width: bounds.width,
-      },
-    };
+
+    if (this.props.reportType === 'png') {
+      return {
+        dimensions: {
+          height: bounds.height,
+          width: bounds.width,
+        },
+      };
+    } else {
+      return {
+        id: 'preserve_layout',
+        dimensions: {
+          height: bounds.height,
+          width: bounds.width,
+        },
+      };
+    }
   };
 
   private getJobParams = () => {

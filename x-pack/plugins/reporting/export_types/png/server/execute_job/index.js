@@ -40,49 +40,41 @@ function executeJobFn(server) {
     return { job, filteredHeaders };
   };
 
-  const getSavedObjectAbsoluteUrl = (job, savedObject) => {
-    if (savedObject.urlHash) {
-      return getAbsoluteUrl({ hash: savedObject.urlHash });
-    }
+  const getSavedObjectAbsoluteUrl = (job, relativeUrl) => {
 
-    if (savedObject.relativeUrl) {
-      const { pathname: path, hash, search } = url.parse(savedObject.relativeUrl);
+    if (relativeUrl) {
+      const { pathname: path, hash, search } = url.parse(relativeUrl);
       return getAbsoluteUrl({ basePath: job.basePath, path, hash, search });
     }
 
-    if (savedObject.url.startsWith(getAbsoluteUrl())) {
-      return savedObject.url;
-    }
-
-    throw new Error(`Unable to generate report for url ${savedObject.url}, it's not a Kibana URL`);
+    throw new Error(`Unable to generate report. Url is not defined.`);
   };
 
   const addForceNowQuerystring = async ({ job, filteredHeaders }) => {
 
-    const urls = job.objects.map(savedObject => getSavedObjectAbsoluteUrl(job, savedObject));
+    const jobUrl = getSavedObjectAbsoluteUrl(job, job.relativeUrl);
 
-    urls.map(jobUrl => {
-      if (!job.forceNow) {
-        return jobUrl;
+    if (!job.forceNow) {
+      return jobUrl;
+    }
+
+    const parsed = url.parse(jobUrl, true);
+    const hash = url.parse(parsed.hash.replace(/^#/, ''), true);
+
+    const transformedHash = url.format({
+      pathname: hash.pathname,
+      query: {
+        ...hash.query,
+        forceNow: job.forceNow
       }
-
-      const parsed = url.parse(jobUrl, true);
-      const hash = url.parse(parsed.hash.replace(/^#/, ''), true);
-
-      const transformedHash = url.format({
-        pathname: hash.pathname,
-        query: {
-          ...hash.query,
-          forceNow: job.forceNow
-        }
-      });
-
-      return url.format({
-        ...parsed,
-        hash: transformedHash
-      });
     });
-    return { job, filteredHeaders, urls };
+
+    const hashUrl = url.format({
+      ...parsed,
+      hash: transformedHash
+    });
+    //});
+    return { job, filteredHeaders, hashUrl };
   };
 
   return function executeJob(jobToExecute, cancellationToken) {
@@ -91,8 +83,8 @@ function executeJobFn(server) {
       catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
       map(omitBlacklistedHeaders),
       mergeMap(addForceNowQuerystring),
-      mergeMap(({ job, filteredHeaders, urls }) => {
-        return generatePngObservable(urls, filteredHeaders, job.layout);
+      mergeMap(({ job, filteredHeaders, hashUrl }) => {
+        return generatePngObservable(hashUrl, filteredHeaders, job.layout);
       }),
       map(buffer => ({
         content_type: 'image/png',

@@ -8,14 +8,14 @@ import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
-import { createLayout } from '../../../common/layouts';
+import { PreserveLayout } from '../../../common/layouts/preserve_layout';
 
 function generatePngObservableFn(server) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
 
-  const urlScreenshotsObservable = (urls, headers, layout) => {
-    return Rx.from(urls).pipe(
+  const urlScreenshotsObservable = (url, headers, layout) => {
+    return Rx.of(url).pipe(
       mergeMap(url => screenshotsObservable(url, headers, layout),
         (outer, inner) => inner,
         captureConcurrency
@@ -36,11 +36,15 @@ function generatePngObservableFn(server) {
 
   };
 
-  return function generatePngObservable(urls, headers, layoutParams) {
+  return function generatePngObservable(url, headers, layoutParams) {
 
-    const layout = createLayout(server, layoutParams);
+    if (!layoutParams || !layoutParams.dimensions) {
+      throw new Error(`LayoutParams.Dimensions is undefined.`);
+    }
 
-    const screenshots$ = urlScreenshotsObservable(urls, headers, layout);
+    const layout =  new PreserveLayout(layoutParams.dimensions);
+
+    const screenshots$ = urlScreenshotsObservable(url, headers, layout);
 
     return screenshots$.pipe(
       toArray(),
