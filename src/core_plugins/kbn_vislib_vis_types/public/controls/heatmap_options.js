@@ -89,7 +89,7 @@ module.directive('heatmapOptions', function (i18n) {
         $scope.customColors = true;
       });
 
-      $scope.editorState.requiredDescription = i18n('kbnVislibVisTypes.params.ranges.warning.requiredDescription', {
+      $scope.editorState.requiredText = i18n('kbnVislibVisTypes.params.ranges.warning.requiredText', {
         defaultMessage: 'Required:'
       });
     }
