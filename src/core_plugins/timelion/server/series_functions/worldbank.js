@@ -28,7 +28,7 @@ export default new Datasource ('worldbank', {
     {
       name: 'code', // countries/all/indicators/SP.POP.TOTL
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.worldbank.description', {
+      help: i18n.translate('timelion.help.functions.worldbank.codeArg', {
         defaultMessage:
           'Worldbank API path. This is usually everything after the domain, before the querystring. E.g.: {apiPathExample}.',
         values: {

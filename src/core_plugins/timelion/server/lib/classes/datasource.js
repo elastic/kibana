@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import loadFunctions from '../load_functions.js';
 const fitFunctions  = loadFunctions('fit_functions');
 import TimelionFunction from './timelion_function';
@@ -40,16 +41,25 @@ export default class Datasource extends TimelionFunction {
     config.args.push({
       name: 'offset',
       types: ['string', 'null'],
-      help: 'Offset the series retrieval by a date expression, ' +
-        'e.g., -1M to make events from one month ago appear as if they are happening now. ' +
-        'Offset the series relative to the charts overall time range, by using the value "timerange", ' +
-        'e.g. "timerange:-2" will specify an offset that is twice the overall chart time range to the past.'
+      help: i18n.translate('timelion.help.functions.common.offsetArg', {
+        defaultMessage:
+          'Offset the series retrieval by a date expression, e.g., -1M to make events from \
+one month ago appear as if they are happening now. Offset the series relative to the charts \
+overall time range, by using the value "timerange", e.g. "timerange:-2" will specify an offset \
+that is twice the overall chart time range to the past.',
+      })
     });
 
     config.args.push({
       name: 'fit',
       types: ['string', 'null'],
-      help: 'Algorithm to use for fitting series to the target time span and interval. Available: ' + _.keys(fitFunctions).join(', ')
+      help: i18n.translate('timelion.help.functions.common.fitArg', {
+        defaultMessage:
+          'Algorithm to use for fitting series to the target time span and interval. Available: {fitFunctions}',
+        values: {
+          fitFunctions: _.keys(fitFunctions).join(', '),
+        },
+      })
     });
 
     // Wrap the original function so we can modify inputs/outputs with offset & fit
