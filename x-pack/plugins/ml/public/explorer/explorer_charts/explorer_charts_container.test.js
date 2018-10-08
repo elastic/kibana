@@ -61,7 +61,7 @@ timefilter.setTime({
   to: moment(seriesConfig.selectedLatest).toISOString()
 });
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
 
 import { chartLimits } from '../../util/chart_utils';
@@ -86,23 +86,23 @@ describe('ExplorerChartsContainer', () => {
   test('Minimal Initialization', () => {
     const wrapper = shallow(<ExplorerChartsContainer
       seriesToPlot={[]}
-      layoutCellsPerChart={12}
+      chartsPerRow={1}
       tooManyBuckets={false}
       mlSelectSeverityService={mlSelectSeverityServiceMock}
       mlChartTooltipService={mlChartTooltipService}
     />);
 
-    expect(wrapper.html()).toBe('<div class="explorer-charts"></div>');
+    expect(wrapper.html()).toBe('<div class=\"euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--wrap euiFlexGrid--responsive\"></div>');
   });
 
   test('Initialization with chart data', () => {
-    const wrapper = shallow(<ExplorerChartsContainer
+    const wrapper = mount(<ExplorerChartsContainer
       seriesToPlot={[{
         ...seriesConfig,
         chartData,
         chartLimits: chartLimits(chartData)
       }]}
-      layoutCellsPerChart={12}
+      chartsPerRow={1}
       tooManyBuckets={false}
       mlSelectSeverityService={mlSelectSeverityServiceMock}
       mlChartTooltipService={mlChartTooltipService}
@@ -110,6 +110,6 @@ describe('ExplorerChartsContainer', () => {
 
     // We test child components with snapshots separately
     // so we just do some high level sanity check here.
-    expect(wrapper.find('.ml-explorer-chart-container').children()).toHaveLength(3);
+    expect(wrapper.find('.ml-explorer-chart-container').children()).toHaveLength(2);
   });
 });

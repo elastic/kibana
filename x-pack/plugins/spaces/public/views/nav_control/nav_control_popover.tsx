@@ -79,6 +79,8 @@ export class NavControlPopover extends Component<Props, State> {
         closePopover={this.closeSpaceSelector}
         anchorPosition={'rightCenter'}
         panelPaddingSize="none"
+        // @ts-ignore
+        repositionOnScroll={true}
         ownFocus
       >
         {element}

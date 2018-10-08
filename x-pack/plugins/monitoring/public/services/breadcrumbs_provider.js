@@ -27,6 +27,8 @@ function getElasticsearchBreadcrumbs(mainInstance) {
     } else if (mainInstance.name === 'ml') {
       // ML Instance (for user later)
       breadcrumbs.push(createCrumb('#/elasticsearch/ml_jobs', 'Jobs'));
+    } else if (mainInstance.name === 'ccr_shard') {
+      breadcrumbs.push(createCrumb('#/elasticsearch/ccr', 'CCR'));
     }
     breadcrumbs.push(createCrumb(null, mainInstance.instance));
   } else {
