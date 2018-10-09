@@ -44,8 +44,9 @@ IntlRelativeFormat.defaultLocale = defaultLocale;
  * Returns message by the given message id.
  * @param id - path to the message
  */
-function getMessageById(id: string): string {
-  return getMessages()[id];
+function getMessageById(id: string): string | undefined {
+  const plainMessages = getMessages();
+  return plainMessages.messages ? plainMessages.messages[id] : undefined;
 }
 
 /**
@@ -77,6 +78,10 @@ export function addMessages(newMessages: PlainMessages = {}, locale = newMessage
   messages[normalizedLocale] = {
     ...messages[normalizedLocale],
     ...newMessages,
+    messages: {
+      ...(messages[normalizedLocale] ? messages[normalizedLocale].messages || {} : {}),
+      ...(newMessages.messages || {}),
+    },
   };
 }
 

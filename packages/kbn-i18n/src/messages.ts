@@ -27,7 +27,9 @@ export interface Messages {
 }
 
 export interface PlainMessages {
-  [key: string]: any;
+  messages?: {
+    [key: string]: string;
+  };
   /**
    * locale of the messages
    */
