@@ -13,7 +13,8 @@ import { DatabaseKbnESPlugin } from '../adapter_types';
 import { KibanaDatabaseAdapter } from '../kibana_database_adapter';
 import { contractTests } from './test_contract';
 
-const kbnServer = kbnTestServer.createServerWithCorePlugins();
+const kbnServer = kbnTestServer.getKbnServer(kbnTestServer.createRootWithCorePlugins());
+
 const es = createEsTestCluster({});
 
 contractTests('Kibana Database Adapter', {
