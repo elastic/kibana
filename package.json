@@ -95,7 +95,7 @@
     "@types/core-js": "^2.5.0",
     "@types/find-up": "^2.1.1",
     "@types/inquirer": "^0.0.42",
-    "@types/jest": "^23.3.0",
+    "@types/jest": "^23.3.4",
     "@types/joi": "^13.4.0",
     "@types/lodash.flatten": "^4.4.3",
     "@types/lodash.get": "^4.4.3",

@@ -49,9 +49,9 @@
     "@types/rx" "*"
     "@types/through" "*"
 
-"@types/jest@^23.3.0":
-  version "23.3.2"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.2.tgz#07b90f6adf75d42c34230c026a2529e56c249dbb"
+"@types/jest@^23.3.4":
+  version "23.3.4"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.4.tgz#cc43ae176a91dcb1504839b0b9d6659386cf0af5"
 
 "@types/joi@^13.4.0":
   version "13.4.5"
