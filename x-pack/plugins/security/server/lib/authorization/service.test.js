@@ -46,6 +46,7 @@ test(`calls server.expose with exposed services`, () => {
     config: jest.fn().mockReturnValue(mockConfig),
     plugins: Symbol(),
     savedObjects: Symbol(),
+    log: Symbol(),
   };
   const mockShieldClient = Symbol();
   getClient.mockReturnValue(mockShieldClient);
@@ -66,6 +67,7 @@ test(`calls server.expose with exposed services`, () => {
     mockActions,
     mockCheckPrivilegesWithRequest,
     mockConfig,
+    expect.any(Function),
     mockServer.plugins,
     mockServer.savedObjects,
     mockXpackInfoFeature,

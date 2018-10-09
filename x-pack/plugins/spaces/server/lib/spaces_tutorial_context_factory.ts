@@ -10,6 +10,7 @@ export function createSpacesTutorialContextFactory(spacesService: SpacesService)
   return function spacesTutorialContextFactory(request: any) {
     return {
       spaceId: spacesService.getSpaceId(request),
+      isInDefaultSpace: spacesService.isInDefaultSpace(request),
     };
   };
 }

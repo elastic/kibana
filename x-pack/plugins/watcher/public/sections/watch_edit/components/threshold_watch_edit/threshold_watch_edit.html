@@ -6,95 +6,87 @@
 >
   <div class="thresholdWatchEditContent">
 
-    <div class="kuiPanel kuiVerticalRhythm thresholdWatchEditSectionPanel">
-      <div class="kuiPanelBody">
-        <watch-edit-title-panel
-          fields="thresholdWatchEdit.fields"
-          xpack-watch="thresholdWatchEdit.watch"
-          on-change="thresholdWatchEdit.onChange"
-          on-valid="thresholdWatchEdit.onTitlePanelValid"
-          on-invalid="thresholdWatchEdit.onTitlePanelInvalid"
-        ></watch-edit-title-panel>
-      </div>
+    <div class="euiPanel euiPanel--paddingLarge kuiVerticalRhythm">
+      <watch-edit-title-panel
+        fields="thresholdWatchEdit.fields"
+        xpack-watch="thresholdWatchEdit.watch"
+        on-change="thresholdWatchEdit.onChange"
+        on-valid="thresholdWatchEdit.onTitlePanelValid"
+        on-invalid="thresholdWatchEdit.onTitlePanelInvalid"
+      ></watch-edit-title-panel>
     </div>
 
     <div
-      class="kuiPanel kuiVerticalRhythm thresholdWatchEditSectionPanel"
+      class="kuiPanel kuiVerticalRhythm euiPanel euiPanel--paddingLarge"
       ng-show="thresholdWatchEdit.titlePanelValid"
     >
-      <div class="kuiPanelBody">
-        <section class="kuiVerticalRhythm">
-          <header>
-            <h2 class="kuiSubTitle">
-              Matching the following condition
-            </h2>
-          </header>
-        </section>
+      <section class="kuiVerticalRhythm">
+        <header>
+          <h2 class="kuiSubTitle">
+            Matching the following condition
+          </h2>
+        </header>
+      </section>
 
-        <div class="kuiVerticalRhythm" style="margin-bottom:30px;">
-          <threshold-watch-expression
-            threshold-watch="thresholdWatchEdit.watch"
-            fields="thresholdWatchEdit.fields"
-            on-change="thresholdWatchEdit.onChange"
-            on-valid="thresholdWatchEdit.onConditionPanelValid"
-            on-invalid="thresholdWatchEdit.onConditionPanelInvalid"
-          ></threshold-watch-expression>
+      <div class="kuiVerticalRhythm" style="margin-bottom:30px;">
+        <threshold-watch-expression
+          threshold-watch="thresholdWatchEdit.watch"
+          fields="thresholdWatchEdit.fields"
+          on-change="thresholdWatchEdit.onChange"
+          on-valid="thresholdWatchEdit.onConditionPanelValid"
+          on-invalid="thresholdWatchEdit.onConditionPanelInvalid"
+        ></threshold-watch-expression>
+      </div>
+
+
+      <div class="kuiPanel kuiVerticalRhythm">
+        <div
+          class="kuiPanelHeader"
+          ng-show="thresholdWatchEdit.visualizeDataPageCount > 1"
+        >
+          <div class="kuiPanelHeaderSection">
+            <div class="kuiPanelHeader__title">
+              {{ thresholdWatchEdit.visualizeDataTitle }}
+            </div>
+          </div>
         </div>
 
-
-        <div class="kuiPanel kuiVerticalRhythm">
+        <div class="kuiPanelBody">
           <div
-            class="kuiPanelHeader"
-            ng-show="thresholdWatchEdit.visualizeDataPageCount > 1"
-          >
-            <div class="kuiPanelHeaderSection">
-              <div class="kuiPanelHeader__title">
-                {{ thresholdWatchEdit.visualizeDataTitle }}
-              </div>
-            </div>
+            class="kuiVerticalRhythm kuiWatchVisualization"
+            ng-class="{ kuiWatchVisualizationMulti: thresholdWatchEdit.visualizeDataPageCount > 1 }">
+            <threshold-preview-chart
+              series="thresholdWatchEdit.chartSeries"
+              threshold-value="thresholdWatchEdit.watch.threshold"
+              start-date="thresholdWatchEdit.visualizeTimeWindowFrom"
+              end-date="thresholdWatchEdit.visualizeTimeWindowTo"
+            ></threshold-preview-chart>
           </div>
-
-          <div class="kuiPanelBody">
-            <div
-              class="kuiVerticalRhythm kuiWatchVisualization"
-              ng-class="{ kuiWatchVisualizationMulti: thresholdWatchEdit.visualizeDataPageCount > 1 }">
-              <threshold-preview-chart
-                series="thresholdWatchEdit.chartSeries"
-                threshold-value="thresholdWatchEdit.watch.threshold"
-                start-date="thresholdWatchEdit.visualizeTimeWindowFrom"
-                end-date="thresholdWatchEdit.visualizeTimeWindowTo"
-              ></threshold-preview-chart>
-            </div>
-          </div>
-          <panel-pager
-            on-next-page="thresholdWatchEdit.onVisualizationNextPage"
-            on-previous-page="thresholdWatchEdit.onVisualizationPreviousPage"
-            ng-show="thresholdWatchEdit.visualizeDataPageCount > 1"
-          ></panel-pager>
         </div>
+        <panel-pager
+          on-next-page="thresholdWatchEdit.onVisualizationNextPage"
+          on-previous-page="thresholdWatchEdit.onVisualizationPreviousPage"
+          ng-show="thresholdWatchEdit.visualizeDataPageCount > 1"
+        ></panel-pager>
       </div>
     </div>
 
     <div
-      class="kuiPanel kuiVerticalRhythm thresholdWatchEditSectionPanel"
+      class="kuiPanel kuiVerticalRhythm euiPanel euiPanel--paddingLarge"
       ng-show="thresholdWatchEdit.titlePanelValid && thresholdWatchEdit.conditionPanelValid"
     >
-      <div class="kuiPanelBody">
-
-        <watch-actions
-          actions="thresholdWatchEdit.watch.actions"
-          on-action-add="thresholdWatchEdit.onActionAdd"
-          on-action-change="thresholdWatchEdit.onActionChange"
-          on-action-simulate="thresholdWatchEdit.onActionSimulate"
-          on-action-delete="thresholdWatchEdit.onActionDelete"
-          on-valid="thresholdWatchEdit.onActionsValid"
-          on-invalid="thresholdWatchEdit.onActionsInvalid"
-        ></watch-actions>
-
-      </div>
+      <watch-actions
+        actions="thresholdWatchEdit.watch.actions"
+        on-action-add="thresholdWatchEdit.onActionAdd"
+        on-action-change="thresholdWatchEdit.onActionChange"
+        on-action-simulate="thresholdWatchEdit.onActionSimulate"
+        on-action-delete="thresholdWatchEdit.onActionDelete"
+        on-valid="thresholdWatchEdit.onActionsValid"
+        on-invalid="thresholdWatchEdit.onActionsInvalid"
+      ></watch-actions>
     </div>
 
-    <div class="kuiButtonGroup kuiVerticalRhythm thresholdWatchEditSectionPanel thresholdWatchEditButtons">
+    <div class="kuiButtonGroup kuiVerticalRhythm euiPanel euiPanel--paddingLarge thresholdWatchEditButtons">
 
       <button
         class="kuiButton kuiButton--primary"
