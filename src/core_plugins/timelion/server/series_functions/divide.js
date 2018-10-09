@@ -30,13 +30,13 @@ export default new Chainable('divide', {
     {
       name: 'divisor',
       types: ['seriesList', 'number'],
-      help: i18n.translate('timelion.help.functions.divide.divisorArg', {
+      help: i18n.translate('timelion.help.functions.divide.args.divisorHelpText', {
         defaultMessage:
           'Number or series to divide by. SeriesList with multiple series will be applied label-wise.',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.divide.description', {
+  help: i18n.translate('timelion.help.functions.divideHelpText', {
     defaultMessage:
       'Divides the values of one or more series in a seriesList to each position, \
 in each series, of the input seriesList',

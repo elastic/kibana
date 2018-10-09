@@ -29,7 +29,7 @@ export default new Chainable('abs', {
       types: ['seriesList']
     }
   ],
-  help: i18n.translate('timelion.help.functions.abs.description', {
+  help: i18n.translate('timelion.help.functions.absHelpText', {
     defaultMessage: 'Return the absolute value of each value in the series list',
   }),
   fn: function absFn(args) {

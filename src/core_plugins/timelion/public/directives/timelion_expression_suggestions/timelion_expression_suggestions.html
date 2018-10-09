@@ -28,13 +28,13 @@
           <small id="timelionSuggestionDescription{{$index}}">
             <span
               ng-if="suggestion.chainable"
-              i18n-id="timelion.expressionSuggestions.func.description.chainable"
+              i18n-id="timelion.expressionSuggestions.func.description.chainableText"
               i18n-default-message="{help} (Chainable)"
               i18n-values="{ help: suggestion.help }"
             ></span>
             <span
               ng-if="!suggestion.chainable"
-              i18n-id="timelion.expressionSuggestions.func.description.dataSource"
+              i18n-id="timelion.expressionSuggestions.func.description.dataSourceText"
               i18n-default-message="{help} (Data Source)"
               i18n-values="{ help: suggestion.help }"
             ></span>
@@ -44,7 +44,7 @@
         <div ng-show="suggestion.args.length > (suggestion.chainable ? 1: 0)">
           <div ng-show="suggestions.length > 1">
             <strong
-              i18n-id="timelion.expressionSuggestions.arg.list"
+              i18n-id="timelion.expressionSuggestions.arg.listTitle"
               i18n-default-message="Arguments:"
             ></strong>
             <span ng-repeat="arg in suggestion.args" ng-hide="$index < 1 && suggestion.chainable">
@@ -58,17 +58,17 @@
             <thead>
               <th
                 scope="col"
-                i18n-id="timelion.expressionSuggestions.arg.name"
+                i18n-id="timelion.expressionSuggestions.arg.nameTitle"
                 i18n-default-message="Argument Name"
               ></th>
               <th
                 scope="col"
-                i18n-id="timelion.expressionSuggestions.arg.types"
+                i18n-id="timelion.expressionSuggestions.arg.typesTitle"
                 i18n-default-message="Accepted Types"
               ></th>
               <th
                 scope="col"
-                i18n-id="timelion.expressionSuggestions.arg.info"
+                i18n-id="timelion.expressionSuggestions.arg.infoTitle"
                 i18n-default-message="Information"
               ></th>
             </thead>

@@ -29,7 +29,7 @@ export default function des(points, alpha, beta) {
 
   if (points.length < 2) {
     throw new Error(
-      i18n.translate('timelion.serverSideErrors.holtFunction.notEnoughPoints', {
+      i18n.translate('timelion.serverSideErrors.holtFunction.notEnoughPointsErrorMessage', {
         defaultMessage: 'You need at least 2 points to use double exponential smoothing',
       }),
     );

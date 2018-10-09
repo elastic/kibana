@@ -30,7 +30,7 @@ export default new Chainable('min', {
     {
       name: 'value',
       types: ['seriesList', 'number'],
-      help: i18n.translate('timelion.help.functions.min.valueArg', {
+      help: i18n.translate('timelion.help.functions.min.args.valueHelpText', {
         defaultMessage:
           'Sets the point to whichever is lower, the existing value, or the one passed. \
 If passing a seriesList it must contain exactly 1 series.',
@@ -38,7 +38,7 @@ If passing a seriesList it must contain exactly 1 series.',
     }
 
   ],
-  help: i18n.translate('timelion.help.functions.min.description', {
+  help: i18n.translate('timelion.help.functions.minHelpText', {
     defaultMessage:
       'Minimum values of one or more series in a seriesList to each position, in each series, of the input seriesList',
   }),

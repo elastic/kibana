@@ -34,14 +34,14 @@ export default new Chainable('movingstd', {
     {
       name: 'window',
       types: ['number'],
-      help: i18n.translate('timelion.help.functions.movingstd.windowArg', {
+      help: i18n.translate('timelion.help.functions.movingstd.args.windowHelpText', {
         defaultMessage: 'Number of points to compute the standard deviation over.',
       }),
     },
     {
       name: 'position',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.movingstd.positionArg', {
+      help: i18n.translate('timelion.help.functions.movingstd.args.positionHelpText', {
         defaultMessage:
           'Position of the window slice relative to the result time. Options are {positions}. Default: {defaultPosition}',
         values: {
@@ -52,7 +52,7 @@ export default new Chainable('movingstd', {
     }
   ],
   aliases: ['mvstd'],
-  help: i18n.translate('timelion.help.functions.movingstd.description', {
+  help: i18n.translate('timelion.help.functions.movingstdHelpText', {
     defaultMessage:
       'Calculate the moving standard deviation over a given window. Uses naive two-pass algorithm. \
 Rounding errors may become more noticeable with very long series, or series with very large numbers.',
@@ -64,7 +64,7 @@ Rounding errors may become more noticeable with very long series, or series with
 
       if (!_.contains(positions, _position)) {
         throw new Error(
-          i18n.translate('timelion.serverSideErrors.movingstdFunction.notValidPosition', {
+          i18n.translate('timelion.serverSideErrors.movingstdFunction.notValidPositionErrorMessage', {
             defaultMessage: 'Valid positions are: {validPositions}',
             values: {
               validPositions: positions.join(', '),

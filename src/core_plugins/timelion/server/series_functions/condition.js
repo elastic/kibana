@@ -32,7 +32,7 @@ export default new Chainable('condition', {
     {
       name: 'operator', // <, <=, >, >=, ==, !=
       types: ['string'],
-      help: i18n.translate('timelion.help.functions.condition.operatorArg.description', {
+      help: i18n.translate('timelion.help.functions.condition.args.operatorHelpText', {
         defaultMessage:
           'comparison operator to use for comparison, valid operators are eq (equal), \
 ne (not equal), lt (less than), lte (less than equal), gt (greater than), gte (greater than equal)',
@@ -40,37 +40,37 @@ ne (not equal), lt (less than), lte (less than equal), gt (greater than), gte (g
       suggestions: [
         {
           name: 'eq',
-          help: i18n.translate('timelion.help.functions.condition.operatorArg.eqSuggestion', {
+          help: i18n.translate('timelion.help.functions.condition.args.operator.suggestions.eqHelpText', {
             defaultMessage: 'equal',
           }),
         },
         {
           name: 'ne',
-          help: i18n.translate('timelion.help.functions.condition.operatorArg.neSuggestion', {
+          help: i18n.translate('timelion.help.functions.condition.args.operator.suggestions.neHelpText', {
             defaultMessage: 'not equal',
           }),
         },
         {
           name: 'lt',
-          help: i18n.translate('timelion.help.functions.condition.operatorArg.ltSuggestion', {
+          help: i18n.translate('timelion.help.functions.condition.args.operator.suggestions.ltHelpText', {
             defaultMessage: 'less than',
           }),
         },
         {
           name: 'lte',
-          help: i18n.translate('timelion.help.functions.condition.operatorArg.lteSuggestion', {
+          help: i18n.translate('timelion.help.functions.condition.args.operator.suggestions.lteHelpText', {
             defaultMessage: 'less than equal',
           }),
         },
         {
           name: 'gt',
-          help: i18n.translate('timelion.help.functions.condition.operatorArg.gtSuggestion', {
+          help: i18n.translate('timelion.help.functions.condition.args.operator.suggestions.gtHelpText', {
             defaultMessage: 'greater than',
           }),
         },
         {
           name: 'gte',
-          help: i18n.translate('timelion.help.functions.condition.operatorArg.gteSuggestion', {
+          help: i18n.translate('timelion.help.functions.condition.args.operator.suggestions.gteHelpText', {
             defaultMessage: 'greater than equal',
           }),
         },
@@ -79,7 +79,7 @@ ne (not equal), lt (less than), lte (less than equal), gt (greater than), gte (g
     {
       name: 'if',
       types: ['number', 'seriesList', 'null'],
-      help: i18n.translate('timelion.help.functions.condition.ifArg', {
+      help: i18n.translate('timelion.help.functions.condition.args.ifHelpText', {
         defaultMessage:
           'The value to which the point will be compared. \
 If you pass a seriesList here the first series will be used',
@@ -88,7 +88,7 @@ If you pass a seriesList here the first series will be used',
     {
       name: 'then',
       types: ['number', 'seriesList', 'null'],
-      help: i18n.translate('timelion.help.functions.condition.thenArg', {
+      help: i18n.translate('timelion.help.functions.condition.args.thenHelpText', {
         defaultMessage:
           'The value the point will be set to if the comparison is true. \
 If you pass a seriesList here the first series will be used',
@@ -97,14 +97,14 @@ If you pass a seriesList here the first series will be used',
     {
       name: 'else',
       types: ['number', 'seriesList', 'null'],
-      help: i18n.translate('timelion.help.functions.condition.elseArg', {
+      help: i18n.translate('timelion.help.functions.condition.args.elseHelpText', {
         defaultMessage:
           'The value the point will be set to if the comparison is false. \
 If you pass a seriesList here the first series will be used',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.condition.description', {
+  help: i18n.translate('timelion.help.functions.conditionHelpText', {
     defaultMessage:
       'Compares each point to a number, or the same point in another series using an operator, \
 then sets its value to the result if the condition proves true, with an optional else.',
@@ -119,7 +119,7 @@ then sets its value to the result if the condition proves true, with an optional
           if (argType(source) === 'null') return null;
           if (argType(source) === 'seriesList') return source.list[0].data[i][1];
           throw new Error(
-            i18n.translate('timelion.serverSideErrors.conditionFunction.wrongArgType', {
+            i18n.translate('timelion.serverSideErrors.conditionFunction.wrongArgTypeErrorMessage', {
               defaultMessage: 'must be a number or a seriesList',
             })
           );
@@ -145,7 +145,7 @@ then sets its value to the result if the condition proves true, with an optional
               return point[1] !== ifVal ? thenVal : elseVal;
             default:
               throw new Error(
-                i18n.translate('timelion.serverSideErrors.conditionFunction.unknownOperator', {
+                i18n.translate('timelion.serverSideErrors.conditionFunction.unknownOperatorErrorMessage', {
                   defaultMessage: 'Unknown operator',
                 })
               );

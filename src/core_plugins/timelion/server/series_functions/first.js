@@ -28,7 +28,7 @@ export default new Chainable('first', {
       types: ['seriesList']
     }
   ],
-  help: i18n.translate('timelion.help.functions.first.description', {
+  help: i18n.translate('timelion.help.functions.firstHelpText', {
     defaultMessage:
       'This is an internal function that simply returns the input seriesList. Don\'t use this',
   }),

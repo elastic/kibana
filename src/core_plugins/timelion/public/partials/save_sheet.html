@@ -2,12 +2,12 @@
   <button class="list-group-item" ng-click="section = 'sheet'" type="button">
     <h4
       class="list-group-item-heading"
-      i18n-id="timelion.topNavMenu.save.saveEntireSheet.title"
+      i18n-id="timelion.topNavMenu.save.saveEntireSheetTitle"
       i18n-default-message="Save entire Timelion sheet"
     ></h4>
     <p
       class="list-group-item-text"
-      i18n-id="timelion.topNavMenu.save.saveEntireSheet.description"
+      i18n-id="timelion.topNavMenu.save.saveEntireSheetDescription"
       i18n-default-message="You want this option if you mostly use Timelion expressions from within
                             the Timelion app and don't need to add Timelion charts to Kibana
                             dashboards. You may also want this if you make use of references to
@@ -20,7 +20,7 @@
       <label
         for="savedSheet"
         class="kuiLabel kuiVerticalRhythmSmall"
-        i18n-id="timelion.topNavMenu.save.saveEntireSheet.label"
+        i18n-id="timelion.topNavMenu.save.saveEntireSheetLabel"
         i18n-default-message="Save sheet as"
       ></label>
 
@@ -42,7 +42,7 @@
         ng-disabled="!opts.savedSheet.title"
         type="submit"
         class="kuiButton kuiButton--primary kuiVerticalRhythmSmall"
-        i18n-id="timelion.topNavMenu.save.saveEntireSheet.submitButton"
+        i18n-id="timelion.topNavMenu.save.saveEntireSheet.submitButtonLabel"
         i18n-default-message="Save"
       ></button>
     </form>
@@ -51,12 +51,12 @@
   <button class="list-group-item" ng-click="section = 'expression'" type="button">
     <h4
       class="list-group-item-heading"
-      i18n-id="timelion.topNavMenu.save.saveAsDashboardPanel.title"
+      i18n-id="timelion.topNavMenu.save.saveAsDashboardPanelTitle"
       i18n-default-message="Save current expression as Kibana dashboard panel"
     ></h4>
     <p
       class="list-group-item-text"
-      i18n-id="timelion.topNavMenu.save.saveAsDashboardPanel.description"
+      i18n-id="timelion.topNavMenu.save.saveAsDashboardPanelDescription"
       i18n-default-message="Need to add a chart to a Kibana dashboard? We can do that! This option
                             will save your currently selected expression as a panel that can be
                             added to Kibana dashboards as you would add anything else. Note, if you
@@ -71,7 +71,7 @@
       <div class="form-group">
         <label
           class="control-label"
-          i18n-id="timelion.topNavMenu.save.saveAsDashboardPanel.selectedExpression"
+          i18n-id="timelion.topNavMenu.save.saveAsDashboardPanel.selectedExpressionLabel"
           i18n-default-message="Currently selected expression"
         ></label>
         <code>{{opts.state.sheet[opts.state.selected]}}</code>
@@ -80,7 +80,7 @@
         <label
           for="savedExpression"
           class="control-label"
-          i18n-id="timelion.topNavMenu.save.saveAsDashboardPanel.label"
+          i18n-id="timelion.topNavMenu.save.saveAsDashboardPanelLabel"
           i18n-default-message="Save expression as"
         ></label>
         <input
@@ -96,7 +96,7 @@
           ng-disabled="!panelTitle"
           type="submit"
           class="kuiButton kuiButton--primary"
-          i18n-id="timelion.topNavMenu.save.saveAsDashboardPanel.submitButton"
+          i18n-id="timelion.topNavMenu.save.saveAsDashboardPanel.submitButtonLabel"
           i18n-default-message="Save"
         ></button>
       </div>

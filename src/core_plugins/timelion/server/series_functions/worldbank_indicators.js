@@ -28,14 +28,14 @@ export default new Datasource ('worldbank_indicators', {
     {
       name: 'country', // countries/all/indicators/SP.POP.TOTL
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.worldbankIndicators.countryArg', {
+      help: i18n.translate('timelion.help.functions.worldbankIndicators.args.countryHelpText', {
         defaultMessage: 'Worldbank country identifier. Usually the country\'s 2 letter code',
       }),
     },
     {
       name: 'indicator',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.worldbankIndicators.indicatorArg', {
+      help: i18n.translate('timelion.help.functions.worldbankIndicators.args.indicatorHelpText', {
         defaultMessage:
           'The indicator code to use. You\'ll have to look this up on {worldbankUrl}. \
 Often pretty obtuse. E.g., {indicatorExample} is population',
@@ -47,7 +47,7 @@ Often pretty obtuse. E.g., {indicatorExample} is population',
     }
   ],
   aliases: ['wbi'],
-  help: i18n.translate('timelion.help.functions.worldbankIndicators.description', {
+  help: i18n.translate('timelion.help.functions.worldbankIndicatorsHelpText', {
     defaultMessage:
       '\n\
     [experimental]\n\

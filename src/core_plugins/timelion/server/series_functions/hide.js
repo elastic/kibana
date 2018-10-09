@@ -30,12 +30,12 @@ export default new Chainable('hide', {
     {
       name: 'hide',
       types: ['boolean', 'null'],
-      help: i18n.translate('timelion.help.functions.hide.hideArg', {
+      help: i18n.translate('timelion.help.functions.hide.args.hideHelpText', {
         defaultMessage: 'Hide or unhide the series',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.hide.description', {
+  help: i18n.translate('timelion.help.functions.hideHelpText', {
     defaultMessage: 'Hide the series by default',
   }),
   fn: function hideFn(args) {

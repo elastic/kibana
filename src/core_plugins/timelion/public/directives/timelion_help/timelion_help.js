@@ -40,79 +40,49 @@ app.directive('timelionHelp', function ($http, i18n) {
         };
 
         $scope.translations = {
-          firstTimeConfigurationLink:
-            '<a ng-click="es.valid = false">' +
-            i18n('timelion.help.configuration.firstTimeConfigurationLink', {
+          firstTimeConfigurationLinkText: i18n(
+            'timelion.help.configuration.firstTimeConfigurationLinkText',
+            {
               defaultMessage: 'First time configuration',
-            }) +
-            '</a>',
-          welcomeFunctionReferenceLink:
-            '<a ng-click="setPage(0)">' +
-            i18n('timelion.help.welcome.functionReferenceLink', {
-              defaultMessage: 'Jump to the function reference',
-            }) +
-            '</a>',
-          nextButtonText: i18n('timelion.help.nextPageButton', {
+            }
+          ),
+          welcomeFunctionReferenceLinkText: i18n('timelion.help.welcome.functionReferenceLinkText', {
+            defaultMessage: 'Jump to the function reference',
+          }),
+          nextButtonLabel: i18n('timelion.help.nextPageButtonLabel', {
             defaultMessage: 'Next',
           }),
-          previousButtonText: i18n('timelion.help.previousPageButton', {
+          previousButtonLabel: i18n('timelion.help.previousPageButtonLabel', {
             defaultMessage: 'Previous',
           }),
-          dontShowHelpButtonText: i18n('timelion.help.dontShowHelpButton', {
+          dontShowHelpButtonLabel: i18n('timelion.help.dontShowHelpButtonLabel', {
             defaultMessage: 'Don\'t show this again',
           }),
-          intervalIsAutoMessage:
-            '<span ng-show="state.interval == \'auto\'"><strong>' +
-            i18n('timelion.help.configuration.valid.intervals.content.intervalIsAuto', {
+          intervalIsAutoMessage: i18n(
+            'timelion.help.configuration.valid.intervals.content.intervalIsAutoText',
+            {
               defaultMessage: 'You\'re all set!',
-            }) +
-            '</strong></span>',
-          intervalIsNotAutoMessage:
-            '<span ng-show="state.interval != \'auto\'">' +
-            i18n(
-              'timelion.help.configuration.valid.intervals.content.intervalIsNotAuto',
-              {
-                defaultMessage: 'Set it to {auto} to let Timelion choose an appropriate interval.',
-                values: { auto: '<code>auto </code>' },
-              }
-            ) +
-            '</span>',
-          luceneQueryLinkMessage:
-            `<a
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/5.1/query-dsl-query-string-query.html#query-string-syntax"
-              target="_blank"
-              rel="noopener noreferrer"
-            >` +
-            i18n('timelion.help.querying.luceneQueryLink', {
-              defaultMessage: 'Lucene query string',
-            }) +
-            '</a>',
-          metricAggregationLinkMessage:
-            `<a
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics.html"
-              target="_blank"
-              rel="noopener noreferrer"
-            >` +
-            i18n('timelion.help.querying.count.metricAggregationLink', {
-              defaultMessage: 'Elasticsearch metric aggregation',
-            }) +
-            '</a>',
-          functionReferenceLink:
-            '<a ng-click="setPage(0)">' +
-            i18n('timelion.help.functionReferenceLink', {
-              defaultMessage: 'Function reference',
-            }) +
-            '</a>',
-          welcomePageLink:
-            `<a
-              class="kuiLink"
-              ng-click="setPage(1)"
-              kbn-accessible-click
-            >` +
-            i18n('timelion.help.mainPage.functionReference.welcomePageLink', {
-              defaultMessage: 'Check out the tutorial',
-            }) +
-            '</a>',
+            }
+          ),
+          intervalIsNotAutoMessage: i18n(
+            'timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText',
+            {
+              defaultMessage: 'Set it to {auto} to let Timelion choose an appropriate interval.',
+              values: { auto: '<code>auto </code>' },
+            }
+          ),
+          luceneQueryLinkText: i18n('timelion.help.querying.luceneQueryLinkText', {
+            defaultMessage: 'Lucene query string',
+          }),
+          metricAggregationLinkText: i18n('timelion.help.querying.count.metricAggregationLinkText', {
+            defaultMessage: 'Elasticsearch metric aggregation',
+          }),
+          functionReferenceLinkText: i18n('timelion.help.functionReferenceLinkText', {
+            defaultMessage: 'Function reference',
+          }),
+          welcomePageLinkText: i18n('timelion.help.mainPage.functionReference.welcomePageLinkText', {
+            defaultMessage: 'Check out the tutorial',
+          }),
         };
 
         getFunctions();

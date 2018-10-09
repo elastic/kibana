@@ -28,7 +28,7 @@ export default new Datasource ('graphite', {
     {
       name: 'metric', // _test-data.users.*.data
       types: ['string'],
-      help: i18n.translate('timelion.help.functions.graphite.metricArg', {
+      help: i18n.translate('timelion.help.functions.graphite.args.metricHelpText', {
         defaultMessage: 'Graphite metric to pull, e.g., {metricExample}',
         values: {
           metricExample: '_test-data.users.*.data',
@@ -36,7 +36,7 @@ export default new Datasource ('graphite', {
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.graphite.description', {
+  help: i18n.translate('timelion.help.functions.graphiteHelpText', {
     defaultMessage:
       '[experimental] Pull data from graphite. Configure your graphite server in \
 Kibana\'s Advanced Settings',

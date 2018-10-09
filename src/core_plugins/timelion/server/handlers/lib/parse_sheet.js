@@ -32,7 +32,7 @@ export default function parseSheet(sheet) {
     } catch (e) {
       if (e.expected) {
         throw new Error(
-          i18n.translate('timelion.serverSideErrors.sheetParseError', {
+          i18n.translate('timelion.serverSideErrors.sheetParseErrorMessage', {
             defaultMessage: 'Expected: {expectedDescription} @ character {column}',
             values: {
               expectedDescription: e.expected[0].description,

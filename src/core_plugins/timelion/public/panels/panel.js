@@ -27,7 +27,7 @@ export default function Panel(name, config, i18n) {
 
   if (!config.render) {
     throw new Error (
-      i18n('timelion.panels.noRenderFunctionError', {
+      i18n('timelion.panels.noRenderFunctionErrorMessage', {
         defaultMessage: 'Panel must have a rendering function'
       })
     );

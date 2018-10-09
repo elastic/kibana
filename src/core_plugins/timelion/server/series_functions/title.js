@@ -30,12 +30,12 @@ export default new Chainable('title', {
     {
       name: 'title',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.title.titleArg', {
+      help: i18n.translate('timelion.help.functions.title.args.titleHelpText', {
         defaultMessage: 'Title for the plot.',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.title.description', {
+  help: i18n.translate('timelion.help.functions.titleHelpText', {
     defaultMessage:
       'Adds a title to the top of the plot. If called on more than 1 seriesList the last call will be used.',
   }),

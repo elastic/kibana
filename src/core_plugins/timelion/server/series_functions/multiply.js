@@ -30,13 +30,13 @@ export default new Chainable('multiply', {
     {
       name: 'multiplier',
       types: ['seriesList', 'number'],
-      help: i18n.translate('timelion.help.functions.multiply.multiplierArg', {
+      help: i18n.translate('timelion.help.functions.multiply.args.multiplierHelpText', {
         defaultMessage:
           'Number or series by which to multiply. SeriesList with multiple series will be applied label-wise.',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.multiply.description', {
+  help: i18n.translate('timelion.help.functions.multiplyHelpText', {
     defaultMessage:
       'Multiply the values of one or more series in a seriesList to each position, in each series, of the input seriesList',
   }),

@@ -26,7 +26,7 @@ export default function xaxisFormatterProvider(config, i18n) {
 
     if (parts == null || parts[1] == null || parts[2] == null) {
       throw new Error (
-        i18n('timelion.panels.timechart.unknownIntervalError', {
+        i18n('timelion.panels.timechart.unknownIntervalErrorMessage', {
           defaultMessage: 'Unknown interval',
         })
       );

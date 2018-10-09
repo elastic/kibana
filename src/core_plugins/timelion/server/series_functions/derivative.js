@@ -29,7 +29,7 @@ export default new Chainable('derivative', {
       types: ['seriesList']
     }
   ],
-  help: i18n.translate('timelion.help.functions.derivative.description', {
+  help: i18n.translate('timelion.help.functions.derivativeHelpText', {
     defaultMessage: 'Plot the change in values over time.',
   }),
   fn: function derivativeFn(args) {

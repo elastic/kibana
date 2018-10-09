@@ -31,19 +31,19 @@ export default new Chainable('range', {
     {
       name: 'min',
       types: ['number'],
-      help: i18n.translate('timelion.help.functions.range.minArg', {
+      help: i18n.translate('timelion.help.functions.range.args.minHelpText', {
         defaultMessage: 'New minimum value',
       }),
     },
     {
       name: 'max',
       types: ['number'],
-      help: i18n.translate('timelion.help.functions.range.maxArg', {
+      help: i18n.translate('timelion.help.functions.range.args.maxHelpText', {
         defaultMessage: 'New maximum value',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.range.description', {
+  help: i18n.translate('timelion.help.functions.rangeHelpText', {
     defaultMessage: 'Changes the max and min of a series while keeping the same shape',
   }),
   fn: function range(args) {

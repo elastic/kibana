@@ -35,7 +35,7 @@ export default new Chainable('movingaverage', {
     {
       name: 'window',
       types: ['number', 'string'],
-      help: i18n.translate('timelion.help.functions.movingaverage.windowArg', {
+      help: i18n.translate('timelion.help.functions.movingaverage.args.windowHelpText', {
         defaultMessage:
           'Number of points, or a date math expression (eg 1d, 1M) to average over. If a date math expression \
 is specified, the function will get as close as possible given the currently select interval. \
@@ -45,7 +45,7 @@ If the date math expression is not evenly divisible by the interval the results 
     {
       name: 'position',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.movingaverage.positionArg', {
+      help: i18n.translate('timelion.help.functions.movingaverage.args.positionHelpText', {
         defaultMessage:
           'Position of the averaged points relative to the result time. One of: {validPositions}',
         values: {
@@ -62,7 +62,7 @@ If the date math expression is not evenly divisible by the interval the results 
     }
   ],
   aliases: ['mvavg'],
-  help: i18n.translate('timelion.help.functions.movingaverage.description', {
+  help: i18n.translate('timelion.help.functions.movingaverageHelpText', {
     defaultMessage:
       'Calculate the moving average over a given window. Nice for smoothing noisy series',
   }),
@@ -84,7 +84,7 @@ If the date math expression is not evenly divisible by the interval the results 
       _position = _position || defaultPosition;
       if (!_.contains(validPositions, _position)) {
         throw new Error(
-          i18n.translate('timelion.serverSideErrors.movingaverageFunction.notValidPosition', {
+          i18n.translate('timelion.serverSideErrors.movingaverageFunction.notValidPositionErrorMessage', {
             defaultMessage: 'Valid positions are: {validPositions}',
             values: {
               validPositions: validPositions.join(', '),

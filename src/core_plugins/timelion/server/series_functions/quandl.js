@@ -33,25 +33,28 @@ export default new Datasource ('quandl', {
     {
       name: 'code',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.quandl.codeArg', {
+      help: i18n.translate('timelion.help.functions.quandl.args.codeHelpText', {
         defaultMessage: 'The quandl code to plot. You can find these on quandl.com.',
       }),
     },
     {
       name: 'position',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.quandl.positionArg', {
+      help: i18n.translate('timelion.help.functions.quandl.args.positionHelpText', {
         defaultMessage:
           'Some quandl sources return multiple series, which one should I use? 1 based index.',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.quandl.description', {
+  help: i18n.translate('timelion.help.functions.quandlHelpText', {
     defaultMessage:
       '\n\
     [experimental]\n\
-    Pull data from quandl.com using the quandl code. Set "timelion:quandl.key" to your free API key in Kibana\'s\n\
+    Pull data from quandl.com using the quandl code. Set {quandlKeyField} to your free API key in Kibana\'s\n\
     Advanced Settings. The API has a really low rate limit without a key.',
+    values: {
+      quandlKeyField: '"timelion:quandl.key"',
+    },
   }),
   fn: function quandlFn(args, tlConfig) {
     const intervalMap = {
@@ -70,7 +73,7 @@ export default new Datasource ('quandl', {
 
     if (!config.interval) {
       throw new Error(
-        i18n.translate('timelion.serverSideErrors.quandlFunction.unsupportedInterval', {
+        i18n.translate('timelion.serverSideErrors.quandlFunction.unsupportedIntervalErrorMessage', {
           defaultMessage: 'quandl() unsupported interval: {interval}. quandl() supports: {intervals}',
           values: {
             interval: tlConfig.time.interval,

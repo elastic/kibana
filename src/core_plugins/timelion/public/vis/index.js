@@ -43,7 +43,7 @@ export default function TimelionVisProvider(Private, i18n) {
     name: 'timelion',
     title: 'Timelion',
     icon: 'visTimelion',
-    description: i18n('timelion.vis.description', {
+    description: i18n('timelion.timelionDescription', {
       defaultMessage: 'Build time-series using functional expressions',
     }),
     category: CATEGORY.TIME,

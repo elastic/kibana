@@ -31,12 +31,12 @@ export default new Chainable('log', {
     {
       name: 'base',
       types: ['number'],
-      help: i18n.translate('timelion.help.functions.log.baseArg', {
+      help: i18n.translate('timelion.help.functions.log.args.baseHelpText', {
         defaultMessage: 'Set logarithmic base, 10 by default',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.log.description', {
+  help: i18n.translate('timelion.help.functions.logHelpText', {
     defaultMessage:
       'Return the logarithm value of each value in the series list (default base: 10)',
   }),

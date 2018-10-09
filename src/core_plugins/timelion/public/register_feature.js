@@ -22,7 +22,7 @@ FeatureCatalogueRegistryProvider.register((i18n) => {
   return {
     id: 'timelion',
     title: 'Timelion',
-    description: i18n('timelion.registerFeature.description', {
+    description: i18n('timelion.registerFeatureDescription', {
       defaultMessage:
         'Use an expression language to analyze time series data and visualize the results.',
     }),

@@ -50,7 +50,7 @@ export default new Chainable('props', {
     {
       name: 'global',
       types: ['boolean', 'null'],
-      help: i18n.translate('timelion.help.functions.props.globalArg', {
+      help: i18n.translate('timelion.help.functions.props.args.globalHelpText', {
         defaultMessage: 'Set props on the seriesList vs on each series',
       }),
     }
@@ -63,7 +63,7 @@ export default new Chainable('props', {
   },
   // extended means you can pass arguments that aren't listed. They just won't be in the ordered array
   // They will be passed as args._extended:{}
-  help: i18n.translate('timelion.help.functions.props.description', {
+  help: i18n.translate('timelion.help.functions.propsHelpText', {
     defaultMessage:
       'Use at your own risk, sets arbitrary properties on the series. For example {example}',
     values: {

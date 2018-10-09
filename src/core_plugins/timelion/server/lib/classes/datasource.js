@@ -41,7 +41,7 @@ export default class Datasource extends TimelionFunction {
     config.args.push({
       name: 'offset',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.common.offsetArg', {
+      help: i18n.translate('timelion.help.functions.common.args.offsetHelpText', {
         defaultMessage:
           'Offset the series retrieval by a date expression, e.g., -1M to make events from \
 one month ago appear as if they are happening now. Offset the series relative to the charts \
@@ -53,7 +53,7 @@ that is twice the overall chart time range to the past.',
     config.args.push({
       name: 'fit',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.common.fitArg', {
+      help: i18n.translate('timelion.help.functions.common.args.fitHelpText', {
         defaultMessage:
           'Algorithm to use for fitting series to the target time span and interval. Available: {fitFunctions}',
         values: {

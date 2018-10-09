@@ -36,7 +36,7 @@ export default new Chainable('trend', {
     {
       name: 'mode',
       types: ['string'],
-      help: i18n.translate('timelion.help.function.trend.modeArg', {
+      help: i18n.translate('timelion.help.functions.trend.args.modeHelpText', {
         defaultMessage:
           'The algorithm to use for generating the trend line. One of: {validRegressions}',
         values: {
@@ -50,7 +50,7 @@ export default new Chainable('trend', {
     {
       name: 'start',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.function.trend.startArg', {
+      help: i18n.translate('timelion.help.functions.trend.args.startHelpText', {
         defaultMessage:
           'Where to start calculating from the beginning or end. For example -10 would start \
 calculating 10 points from the end, +15 would start 15 points from the beginning. Default: 0',
@@ -59,14 +59,14 @@ calculating 10 points from the end, +15 would start 15 points from the beginning
     {
       name: 'end',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.function.trend.endArg', {
+      help: i18n.translate('timelion.help.functions.trend.args.endHelpText', {
         defaultMessage:
           'Where to stop calculating from the beginning or end. For example -10 would stop \
 calculating 10 points from the end, +15 would stop 15 points from the beginning. Default: 0',
       }),
     },
   ],
-  help: i18n.translate('timelion.help.function.trend.description', {
+  help: i18n.translate('timelion.help.functions.trendHelpText', {
     defaultMessage: 'Draws a trend line using a specified regression algorithm',
   }),
   fn: function absFn(args) {

@@ -29,7 +29,7 @@ export default new Datasource('es', {
       name: 'q',
       types: ['string', 'null'],
       multi: true,
-      help: i18n.translate('timelion.help.functions.es.qArg', {
+      help: i18n.translate('timelion.help.functions.es.args.qHelpText', {
         defaultMessage: 'Query in lucene query string syntax',
       }),
     },
@@ -37,7 +37,7 @@ export default new Datasource('es', {
       name: 'metric',
       types: ['string', 'null'],
       multi: true,
-      help: i18n.translate('timelion.help.functions.es.metricArg', {
+      help: i18n.translate('timelion.help.functions.es.args.metricHelpText', {
         defaultMessage:
           'An elasticsearch metric agg: avg, sum, min, max, percentiles or cardinality, followed by a field. \
 E.g., "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"',
@@ -47,7 +47,7 @@ E.g., "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"',
       name: 'split',
       types: ['string', 'null'],
       multi: true,
-      help: i18n.translate('timelion.help.functions.es.splitArg', {
+      help: i18n.translate('timelion.help.functions.es.args.splitHelpText', {
         defaultMessage:
           'An elasticsearch field to split the series on and a limit. E.g., "hostname:10" to get the top 10 hostnames',
       }),
@@ -55,7 +55,7 @@ E.g., "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"',
     {
       name: 'index',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.es.indexArg', {
+      help: i18n.translate('timelion.help.functions.es.args.indexHelpText', {
         defaultMessage:
           'Index to query, wildcards accepted. Provide Index Pattern name for scripted fields and \
 field name type ahead suggestions for metrics, split, and timefield arguments.',
@@ -64,14 +64,14 @@ field name type ahead suggestions for metrics, split, and timefield arguments.',
     {
       name: 'timefield',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.es.timefieldArg', {
+      help: i18n.translate('timelion.help.functions.es.args.timefieldHelpText', {
         defaultMessage: 'Field of type "date" to use for x-axis',
       }),
     },
     {
       name: 'kibana',
       types: ['boolean', 'null'],
-      help: i18n.translate('timelion.help.functions.es.kibanaArg', {
+      help: i18n.translate('timelion.help.functions.es.args.kibanaHelpText', {
         defaultMessage:
           'Respect filters on Kibana dashboards. Only has an effect when using on Kibana dashboards',
       }),
@@ -79,13 +79,13 @@ field name type ahead suggestions for metrics, split, and timefield arguments.',
     {
       name: 'interval', // You really shouldn't use this, use the interval picker instead
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.es.intervalArg', {
+      help: i18n.translate('timelion.help.functions.es.args.intervalHelpText', {
         defaultMessage:
           '**DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.es.description', {
+  help: i18n.translate('timelion.help.functions.esHelpText', {
     defaultMessage: 'Pull data from an elasticsearch instance',
   }),
   aliases: ['elasticsearch'],
@@ -124,7 +124,7 @@ field name type ahead suggestions for metrics, split, and timefield arguments.',
     const resp = await callWithRequest(tlConfig.request, 'search', body);
     if (!resp._shards.total) {
       throw new Error(
-        i18n.translate('timelion.serverSideErrors.esFunction.indexNotFound', {
+        i18n.translate('timelion.serverSideErrors.esFunction.indexNotFoundErrorMessage', {
           defaultMessage: 'Elasticsearch index not found: {index}',
           values: {
             index: config.index,

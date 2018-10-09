@@ -31,19 +31,19 @@ export default new Chainable('trim', {
     {
       name: 'start',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.trim.startArg', {
+      help: i18n.translate('timelion.help.functions.trim.args.startHelpText', {
         defaultMessage: 'Buckets to trim from the beginning of the series. Default: 1',
       }),
     },
     {
       name: 'end',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.trim.endArg', {
+      help: i18n.translate('timelion.help.functions.trim.args.endHelpText', {
         defaultMessage: 'Buckets to trim from the end of the series. Default: 1',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.trim.description', {
+  help: i18n.translate('timelion.help.functions.trimHelpText', {
     defaultMessage:
       'Set N buckets at the start or end of a series to null to fit the "partial bucket issue"',
   }),

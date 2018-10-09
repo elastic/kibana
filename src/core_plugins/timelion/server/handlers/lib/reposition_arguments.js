@@ -61,7 +61,7 @@ export default function repositionArguments(functionDef, unorderedArgs) {
 
     if (!argDef) {
       throw new Error(
-        i18n.translate('timelion.serverSideErrors.unknownArgument', {
+        i18n.translate('timelion.serverSideErrors.unknownArgumentErrorMessage', {
           defaultMessage: 'Unknown argument to {functionName}: {argumentName}',
           values: {
             functionName: functionDef.name,

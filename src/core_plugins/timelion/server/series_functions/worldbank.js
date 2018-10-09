@@ -28,7 +28,7 @@ export default new Datasource ('worldbank', {
     {
       name: 'code', // countries/all/indicators/SP.POP.TOTL
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.worldbank.codeArg', {
+      help: i18n.translate('timelion.help.functions.worldbank.args.codeHelpText', {
         defaultMessage:
           'Worldbank API path. This is usually everything after the domain, before the querystring. E.g.: {apiPathExample}.',
         values: {
@@ -38,7 +38,7 @@ export default new Datasource ('worldbank', {
     }
   ],
   aliases: ['wb'],
-  help: i18n.translate('timelion.help.functions.worldbank.description', {
+  help: i18n.translate('timelion.help.functions.worldbankHelpText', {
     defaultMessage:
       '\n\
     [experimental]\n\
@@ -88,7 +88,7 @@ export default new Datasource ('worldbank', {
 
       if (!hasData) {
         throw new Error(
-          i18n.translate('timelion.serverSideErrors.worldbankFunction.noData', {
+          i18n.translate('timelion.serverSideErrors.worldbankFunction.noDataErrorMessage', {
             defaultMessage: 'Worldbank request succeeded, but there was no data for {code}',
             values: {
               code: config.code,

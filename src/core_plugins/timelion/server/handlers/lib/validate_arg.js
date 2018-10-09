@@ -38,7 +38,7 @@ export default function validateArgFn(functionDef) {
 
     if (!isCorrectType) {
       throw new Error(
-        i18n.translate('timelion.serverSideErrors.wrongFunctionArgumentType', {
+        i18n.translate('timelion.serverSideErrors.wrongFunctionArgumentTypeErrorMessage', {
           defaultMessage: '{functionName}({argumentName}) must be one of {requiredTypes}. Got: {actualType}',
           values: {
             functionName: functionDef.name,

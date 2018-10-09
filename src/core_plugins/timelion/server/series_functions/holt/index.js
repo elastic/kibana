@@ -34,7 +34,7 @@ export default new Chainable('holt', {
     {
       name: 'alpha',
       types: ['number'],
-      help: i18n.translate('timelion.help.functions.holt.alphaArg', {
+      help: i18n.translate('timelion.help.functions.holt.args.alphaHelpText', {
         defaultMessage:
           '\n\
         Smoothing weight from 0 to 1.\n\
@@ -45,7 +45,7 @@ export default new Chainable('holt', {
     {
       name: 'beta',
       types: ['number'],
-      help: i18n.translate('timelion.help.functions.holt.betaArg', {
+      help: i18n.translate('timelion.help.functions.holt.args.betaHelpText', {
         defaultMessage:
           '\n\
         Trending weight from 0 to 1.\n\
@@ -56,7 +56,7 @@ export default new Chainable('holt', {
     {
       name: 'gamma',
       types: ['number'],
-      help: i18n.translate('timelion.help.functions.holt.gammaArg', {
+      help: i18n.translate('timelion.help.functions.holt.args.gammaHelpText', {
         defaultMessage:
           '\n\
         Seasonal weight from 0 to 1. Does your data look like a wave?\n\
@@ -68,7 +68,7 @@ export default new Chainable('holt', {
     {
       name: 'season',
       types: ['string'],
-      help: i18n.translate('timelion.help.functions.holt.seasonArg', {
+      help: i18n.translate('timelion.help.functions.holt.args.seasonHelpText', {
         defaultMessage:
           'How long is the season, e.g., 1w if you pattern repeats weekly. (Only useful with gamma)',
       }),
@@ -76,7 +76,7 @@ export default new Chainable('holt', {
     {
       name: 'sample',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.holt.sampleArg', {
+      help: i18n.translate('timelion.help.functions.holt.args.sampleHelpText', {
         defaultMessage:
           '\n\
       The number of seasons to sample before starting to "predict" in a seasonal series.\n\
@@ -84,7 +84,7 @@ export default new Chainable('holt', {
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.holt.description', {
+  help: i18n.translate('timelion.help.functions.holtHelpText', {
     defaultMessage:
       '\n\
     Sample the beginning of a series and use it to forecast what should happen\n\
@@ -123,7 +123,7 @@ export default new Chainable('holt', {
       if (alpha != null && beta != null && gamma != null) {
         if (!sample || !args.byName.season || sample < 2) {
           throw new Error(
-            i18n.translate('timelion.serverSideErrors.holtFunction.missingParams', {
+            i18n.translate('timelion.serverSideErrors.holtFunction.missingParamsErrorMessage', {
               defaultMessage: 'Must specify a season length and a sample size >= 2',
             })
           );

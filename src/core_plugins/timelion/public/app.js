@@ -115,28 +115,28 @@ app.controller('timelion', function (
 
   $scope.topNavMenu = [{
     key: 'new',
-    description: i18n('timelion.topNavMenu.new', {
+    description: i18n('timelion.topNavMenu.newDescription', {
       defaultMessage: 'New Sheet',
     }),
     run: function () { kbnUrl.change('/'); },
     testId: 'timelionNewButton',
   }, {
     key: 'add',
-    description: i18n('timelion.topNavMenu.add', {
+    description: i18n('timelion.topNavMenu.addDescription', {
       defaultMessage: 'Add a chart',
     }),
     run: function () { $scope.newCell(); },
     testId: 'timelionAddChartButton',
   }, {
     key: 'save',
-    description: i18n('timelion.topNavMenu.save', {
+    description: i18n('timelion.topNavMenu.saveDescription', {
       defaultMessage: 'Save Sheet',
     }),
     template: require('plugins/timelion/partials/save_sheet.html'),
     testId: 'timelionSaveButton',
   }, {
     key: 'delete',
-    description: i18n('timelion.topNavMenu.delete.description', {
+    description: i18n('timelion.topNavMenu.deleteDescription', {
       defaultMessage: 'Delete current sheet',
     }),
     disableButton: function () {
@@ -147,7 +147,7 @@ app.controller('timelion', function (
       function doDelete() {
         savedSheet.delete().then(() => {
           toastNotifications.addSuccess(i18n(
-            'timelion.topNavMenu.delete.modal.successNotification',
+            'timelion.topNavMenu.delete.modal.successNotificationText',
             {
               defaultMessage: 'Deleted \'{title}\'',
               values: { title },
@@ -159,17 +159,17 @@ app.controller('timelion', function (
 
       const confirmModalOptions = {
         onConfirm: doDelete,
-        confirmButtonText: i18n('timelion.topNavMenu.delete.modal.confirmButtonText', {
+        confirmButtonText: i18n('timelion.topNavMenu.delete.modal.confirmButtonLabel', {
           defaultMessage: 'Delete',
         }),
-        title: i18n('timelion.topNavMenu.delete.modal.title', {
+        title: i18n('timelion.topNavMenu.delete.modalTitle', {
           defaultMessage: 'Delete Timelion sheet \'{title}\'?',
           values: { title }
         }),
       };
 
       confirmModal(
-        i18n('timelion.topNavMenu.delete.modal.warning', {
+        i18n('timelion.topNavMenu.delete.modal.warningText', {
           defaultMessage: 'You can\'t recover deleted sheets.',
         }),
         confirmModalOptions
@@ -178,21 +178,21 @@ app.controller('timelion', function (
     testId: 'timelionDeleteButton',
   }, {
     key: 'open',
-    description: i18n('timelion.topNavMenu.open', {
+    description: i18n('timelion.topNavMenu.openDescription', {
       defaultMessage: 'Open Sheet',
     }),
     template: require('plugins/timelion/partials/load_sheet.html'),
     testId: 'timelionOpenButton',
   }, {
     key: 'options',
-    description: i18n('timelion.topNavMenu.options', {
+    description: i18n('timelion.topNavMenu.optionsDescription', {
       defaultMessage: 'Options',
     }),
     template: require('plugins/timelion/partials/sheet_options.html'),
     testId: 'timelionOptionsButton',
   }, {
     key: 'help',
-    description: i18n('timelion.topNavMenu.help', {
+    description: i18n('timelion.topNavMenu.helpDescription', {
       defaultMessage: 'Help',
     }),
     template: '<timelion-help></timelion-help>',
@@ -322,7 +322,7 @@ app.controller('timelion', function (
     savedSheet.save().then(function (id) {
       if (id) {
         toastNotifications.addSuccess(
-          i18n('timelion.saveSheet.successNotification', {
+          i18n('timelion.saveSheet.successNotificationText', {
             defaultMessage: 'Saved sheet \'{title}\'',
             values: { title: savedSheet.title },
           })
@@ -346,7 +346,7 @@ app.controller('timelion', function (
       savedExpression.save().then(function (id) {
         if (id) {
           toastNotifications.addSuccess(
-            i18n('timelion.saveExpression.successNotification', {
+            i18n('timelion.saveExpression.successNotificationText', {
               defaultMessage: 'Saved expression \'{title}\'',
               values: { title: savedExpression.title },
             }),

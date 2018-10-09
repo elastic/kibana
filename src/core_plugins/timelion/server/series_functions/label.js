@@ -30,7 +30,7 @@ export default new Chainable('label', {
     {
       name: 'label',
       types: ['string'],
-      help: i18n.translate('timelion.help.functions.label.labelArg', {
+      help: i18n.translate('timelion.help.functions.label.args.labelHelpText', {
         defaultMessage:
           'Legend value for series. You can use $1, $2, etc, in the string to match up with the \
 regex capture groups',
@@ -39,12 +39,12 @@ regex capture groups',
     {
       name: 'regex',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.label.regexArg', {
+      help: i18n.translate('timelion.help.functions.label.args.regexHelpText', {
         defaultMessage: 'A regex with capture group support',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.label.description', {
+  help: i18n.translate('timelion.help.functions.labelHelpText', {
     defaultMessage: 'Change the label of the series. Use %s reference the existing label',
   }),
   fn: function labelFn(args) {

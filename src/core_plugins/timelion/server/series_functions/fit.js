@@ -33,7 +33,7 @@ export default new Chainable('fit', {
     {
       name: 'mode',
       types: ['string'],
-      help: i18n.translate('timelion.help.functions.fit.modeArg', {
+      help: i18n.translate('timelion.help.functions.fit.args.modeHelpText', {
         defaultMessage:
           'The algorithm to use for fitting the series to the target. One of: {fitFunctions}',
         values: {
@@ -45,7 +45,7 @@ export default new Chainable('fit', {
       })
     }
   ],
-  help: i18n.translate('timelion.help.functions.fit.description', {
+  help: i18n.translate('timelion.help.functions.fitHelpText', {
     defaultMessage: 'Fills null values using a defined fit function',
   }),
   fn: function absFn(args) {

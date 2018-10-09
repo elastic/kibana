@@ -30,13 +30,13 @@ export default new Chainable('sum', {
     {
       name: 'term',
       types: ['seriesList', 'number'],
-      help: i18n.translate('timelion.help.functions.sum.termArg', {
+      help: i18n.translate('timelion.help.functions.sum.args.termHelpText', {
         defaultMessage:
           'Number or series to sum with the input series. SeriesList with multiple series will be applied label-wise.',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.sum.description', {
+  help: i18n.translate('timelion.help.functions.sumHelpText', {
     defaultMessage:
       'Adds the values of one or more series in a seriesList to each position, in each series, of the input seriesList',
   }),

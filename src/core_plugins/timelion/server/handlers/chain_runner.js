@@ -82,10 +82,10 @@ export default function chainRunner(tlConfig) {
             return item;
         }
         throw new Error(
-          i18n.translate('timelion.serverSideErrors.unknownArgumentType', {
+          i18n.translate('timelion.serverSideErrors.unknownArgumentTypeErrorMessage', {
             defaultMessage: 'Argument type not supported: {argument}',
             values: {
-              argument: item,
+              argument: JSON.stringify(item),
             },
           })
         );

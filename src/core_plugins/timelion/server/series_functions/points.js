@@ -34,34 +34,34 @@ export default new Chainable('points', {
     {
       name: 'radius',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.points.radiusArg', {
+      help: i18n.translate('timelion.help.functions.points.args.radiusHelpText', {
         defaultMessage: 'Size of points',
       }),
     },
     {
       name: 'weight',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.points.weightArg', {
+      help: i18n.translate('timelion.help.functions.points.args.weightHelpText', {
         defaultMessage: 'Thickness of line around point',
       }),
     },
     {
       name: 'fill',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.points.fillArg', {
+      help: i18n.translate('timelion.help.functions.points.args.fillHelpText', {
         defaultMessage: 'Number between 0 and 10 representing opacity of fill',
       }),
     },
     {
       name: 'fillColor',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.points.fillColorArg', {
+      help: i18n.translate('timelion.help.functions.points.args.fillColorHelpText', {
         defaultMessage: 'Color with which to fill point',
       }),
     },
     {
       name: 'symbol',
-      help: i18n.translate('timelion.help.functions.points.symbolArg', {
+      help: i18n.translate('timelion.help.functions.points.args.symbolHelpText', {
         defaultMessage: 'point symbol. One of: {validSymbols}',
         values: {
           validSymbols: validSymbols.join(', '),
@@ -79,12 +79,12 @@ export default new Chainable('points', {
     {
       name: 'show',
       types: ['boolean', 'null'],
-      help: i18n.translate('timelion.help.functions.points.showArg', {
+      help: i18n.translate('timelion.help.functions.points.args.showHelpText', {
         defaultMessage: 'Show points or not',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.points.description', {
+  help: i18n.translate('timelion.help.functions.pointsHelpText', {
     defaultMessage: 'Show the series as points',
   }),
   fn: function pointsFn(args) {
@@ -107,7 +107,7 @@ export default new Chainable('points', {
       symbol = symbol || defaultSymbol;
       if (!_.contains(validSymbols, symbol)) {
         throw new Error(
-          i18n.translate('timelion.serverSideErrors.pointsFunction.notValidSymbol', {
+          i18n.translate('timelion.serverSideErrors.pointsFunction.notValidSymbolErrorMessage', {
             defaultMessage: 'Valid symbols are: {validSymbols}',
             values: {
               validSymbols: validSymbols.join(', '),

@@ -29,7 +29,7 @@ export default function indexArguments(functionDef, orderedArgs) {
   const allowedLength = functionDef.extended ? functionDef.args.length + 2 : functionDef.args.length;
   if (orderedArgs.length > allowedLength) {
     throw new Error (
-      i18n.translate('timelion.serverSideErrors.argumentsOverflow', {
+      i18n.translate('timelion.serverSideErrors.argumentsOverflowErrorMessage', {
         defaultMessage: 'Too many arguments passed to: {functionName}',
         values: {
           functionName: functionDef.name,

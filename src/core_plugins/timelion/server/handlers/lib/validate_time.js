@@ -29,7 +29,7 @@ export default function validateTime(time, tlConfig) {
   const maxBuckets = tlConfig.settings['timelion:max_buckets'];
   if (bucketCount > maxBuckets) {
     throw new Error(
-      i18n.translate('timelion.serverSideErrors.bucketsOverflow', {
+      i18n.translate('timelion.serverSideErrors.bucketsOverflowErrorMessage', {
         defaultMessage:
           'Max buckets exceeded: {bucketCount} of {maxBuckets} allowed. \
 Choose a larger interval or a shorter time span',

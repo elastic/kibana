@@ -30,40 +30,40 @@ export default new Chainable('lines', {
     {
       name: 'width',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.lines.widthArg', {
+      help: i18n.translate('timelion.help.functions.lines.args.widthHelpText', {
         defaultMessage: 'Line thickness',
       }),
     },
     {
       name: 'fill',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.lines.fillArg', {
+      help: i18n.translate('timelion.help.functions.lines.args.fillHelpText', {
         defaultMessage: 'Number between 0 and 10. Use for making area charts',
       }),
     },
     {
       name: 'stack',
       types: ['boolean', 'null'],
-      help: i18n.translate('timelion.help.functions.lines.stackArg', {
+      help: i18n.translate('timelion.help.functions.lines.args.stackHelpText', {
         defaultMessage: 'Stack lines, often misleading. At least use some fill if you use this.',
       }),
     },
     {
       name: 'show',
       types: ['number', 'boolean', 'null'],
-      help: i18n.translate('timelion.help.functions.lines.showArg', {
+      help: i18n.translate('timelion.help.functions.lines.args.showHelpText', {
         defaultMessage: 'Show or hide lines',
       }),
     },
     {
       name: 'steps',
       types: ['number', 'boolean', 'null'],
-      help: i18n.translate('timelion.help.functions.lines.stepsArg', {
+      help: i18n.translate('timelion.help.functions.lines.args.stepsHelpText', {
         defaultMessage: 'Show line as step, e.g., do not interpolate between points',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.lines.description', {
+  help: i18n.translate('timelion.help.functions.linesHelpText', {
     defaultMessage: 'Show the seriesList as lines',
   }),
   fn: function linesFn(args) {

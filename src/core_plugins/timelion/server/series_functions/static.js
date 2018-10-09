@@ -28,7 +28,7 @@ export default new Datasource ('static', {
     {
       name: 'value', // _test-data.users.*.data
       types: ['number', 'string'],
-      help: i18n.translate('timelion.help.functions.static.valueArg', {
+      help: i18n.translate('timelion.help.functions.static.args.valueHelpText', {
         defaultMessage:
           'The single value to to display, you can also pass several values and I will interpolate \
 them evenly across your time range.',
@@ -37,13 +37,13 @@ them evenly across your time range.',
     {
       name: 'label',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.static.labelArg', {
+      help: i18n.translate('timelion.help.functions.static.args.labelHelpText', {
         defaultMessage:
           'A quick way to set the label for the series. You could also use the .label() function',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.static.description', {
+  help: i18n.translate('timelion.help.functions.staticHelpText', {
     defaultMessage: 'Draws a single value across the chart',
   }),
   fn: function staticFn(args, tlConfig) {

@@ -30,19 +30,19 @@ export default new Chainable('bars', {
     {
       name: 'width',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.bars.widthArg', {
+      help: i18n.translate('timelion.help.functions.bars.args.widthHelpText', {
         defaultMessage: 'Width of bars in pixels',
       }),
     },
     {
       name: 'stack',
       types: ['boolean', 'null'],
-      help: i18n.translate('timelion.help.functions.bars.stackArg', {
+      help: i18n.translate('timelion.help.functions.bars.args.stackHelpText', {
         defaultMessage: 'Should bars be stacked, true by default',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.bars.description', {
+  help: i18n.translate('timelion.help.functions.barsHelpText', {
     defaultMessage: 'Show the seriesList as bars',
   }),
   fn: function barsFn(args) {

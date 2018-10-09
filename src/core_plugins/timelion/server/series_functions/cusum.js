@@ -31,12 +31,12 @@ export default new Chainable('cusum', {
     {
       name: 'base',
       types: ['number'],
-      help: i18n.translate('timelion.help.functions.cusum.baseArg', {
+      help: i18n.translate('timelion.help.functions.cusum.args.baseHelpText', {
         defaultMessage: 'Number to start at. Basically just adds this to the beginning of the series',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.cusum.description', {
+  help: i18n.translate('timelion.help.functions.cusumHelpText', {
     defaultMessage: 'Return the cumulative sum of a series, starting at a base.',
   }),
   fn: function cusumFn(args) {

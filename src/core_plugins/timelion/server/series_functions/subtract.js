@@ -30,13 +30,13 @@ export default new Chainable('subtract', {
     {
       name: 'term',
       types: ['seriesList', 'number'],
-      help: i18n.translate('timelion.help.functions.subtract.termArg', {
+      help: i18n.translate('timelion.help.functions.subtract.args.termHelpText', {
         defaultMessage:
           'Number or series to subtract from input. SeriesList with multiple series will be applied label-wise.',
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.subtract.description', {
+  help: i18n.translate('timelion.help.functions.subtractHelpText', {
     defaultMessage:
       'Subtract the values of one or more series in a seriesList to each position, in each series, of the input seriesList',
   }),

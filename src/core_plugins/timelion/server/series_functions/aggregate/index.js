@@ -41,7 +41,7 @@ export default new Chainable('aggregate', {
     {
       name: 'function',
       types: ['string'],
-      help: i18n.translate('timelion.help.functions.aggregate.functionArg', {
+      help: i18n.translate('timelion.help.functions.aggregate.args.functionHelpText', {
         defaultMessage: 'One of {functions}',
         values: {
           functions: _.keys(functions).join(', '),
@@ -49,7 +49,7 @@ export default new Chainable('aggregate', {
       }),
     }
   ],
-  help: i18n.translate('timelion.help.functions.aggregate.description', {
+  help: i18n.translate('timelion.help.functions.aggregateHelpText', {
     defaultMessage:
       'Creates a static line based on result of processing all points in the series. Available functions: {functions}',
     values: {

@@ -40,7 +40,7 @@ export default new Chainable('yaxis', {
     {
       name: 'yaxis',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.yaxis.yaxisArg', {
+      help: i18n.translate('timelion.help.functions.yaxis.args.yaxisHelpText', {
         defaultMessage:
           'The numbered y-axis to plot this series on, e.g., .yaxis(2) for a 2nd y-axis.',
       }),
@@ -48,42 +48,42 @@ export default new Chainable('yaxis', {
     {
       name: 'min',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.yaxis.minArg', {
+      help: i18n.translate('timelion.help.functions.yaxis.args.minHelpText', {
         defaultMessage: 'Min value',
       }),
     },
     {
       name: 'max',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.yaxis.maxArg', {
+      help: i18n.translate('timelion.help.functions.yaxis.args.maxHelpText', {
         defaultMessage: 'Max value',
       }),
     },
     {
       name: 'position',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.yaxis.positionArg', {
+      help: i18n.translate('timelion.help.functions.yaxis.args.positionHelpText', {
         defaultMessage: 'left or right',
       }),
     },
     {
       name: 'label',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.yaxis.labelArg', {
+      help: i18n.translate('timelion.help.functions.yaxis.args.labelHelpText', {
         defaultMessage: 'Label for axis',
       }),
     },
     {
       name: 'color',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.yaxis.colorArg', {
+      help: i18n.translate('timelion.help.functions.yaxis.args.colorHelpText', {
         defaultMessage: 'Color of axis label',
       }),
     },
     {
       name: 'units',
       types: ['string', 'null'],
-      help: i18n.translate('timelion.help.functions.yaxis.unitsArg', {
+      help: i18n.translate('timelion.help.functions.yaxis.args.unitsHelpText', {
         defaultMessage: 'The function to use for formatting y-axis labels. One of: {formatters}',
         values: {
           formatters: _.values(tickFormatters).join(', '),
@@ -96,12 +96,12 @@ export default new Chainable('yaxis', {
     {
       name: 'tickDecimals',
       types: ['number', 'null'],
-      help: i18n.translate('timelion.help.functions.yaxis.tickDecimalsArg', {
+      help: i18n.translate('timelion.help.functions.yaxis.args.tickDecimalsHelpText', {
         defaultMessage: 'tick decimal precision',
       }),
     },
   ],
-  help: i18n.translate('timelion.help.functions.yaxis.description', {
+  help: i18n.translate('timelion.help.functions.yaxisHelpText', {
     defaultMessage:
       'Configures a variety of y-axis options, the most important likely being the ability to add an Nth (eg 2nd) y-axis',
   }),
@@ -133,7 +133,7 @@ export default new Chainable('yaxis', {
         const unitType = unitTokens[0];
         if (!tickFormatters[unitType]) {
           throw new Error (
-            i18n.translate('timelion.serverSideErrors.yaxisFunction.notSupportedUnitType', {
+            i18n.translate('timelion.serverSideErrors.yaxisFunction.notSupportedUnitTypeErrorMessage', {
               defaultMessage: '{units} is not a supported unit type.',
               values: {
                 type: units,
@@ -146,7 +146,7 @@ export default new Chainable('yaxis', {
           const currency = unitTokens[1];
           if (currency && !threeLetterCode.test(currency)) {
             throw new Error(
-              i18n.translate('timelion.serverSideErrors.yaxisFunction.notValidCurrencyFormat', {
+              i18n.translate('timelion.serverSideErrors.yaxisFunction.notValidCurrencyFormatErrorMessage', {
                 defaultMessage: 'Currency must be a three letter code',
               })
             );

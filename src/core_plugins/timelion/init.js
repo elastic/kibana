@@ -36,7 +36,7 @@ export default function (server) {
   function getFunction(name) {
     if (!functions[name]) {
       throw new Error(
-        i18n.translate('timelion.noFunctionError', {
+        i18n.translate('timelion.noFunctionErrorMessage', {
           defaultMessage: 'No such function: {name}',
           values: { name },
         })
