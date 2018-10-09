@@ -15,7 +15,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
-import { SingleFieldSelect } from './single_field_select';
+import { SingleFieldSelect } from '../../components/single_field_select';
 import { MultiFieldSelect } from './multi_field_select';
 import {
   indexPatternService,
@@ -46,14 +46,14 @@ export class ESSearchSource extends VectorSource {
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
       limit: descriptor.limit,
-      filterByMapBounds: descriptor.filterByMapBounds,
+      filterByMapBounds: descriptor.isFilterByMapBounds,
       showTooltip: _.get(descriptor, 'showTooltip', false),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     });
     window._ess = this;
   }
 
-  async getNumberFieldNames() {
+  async getNumberFields() {
     const indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
     const numberFields = indexPattern.fields.byType.number;
     return numberFields.map(f => f.name);
@@ -78,7 +78,7 @@ export class ESSearchSource extends VectorSource {
     );
   }
 
-  async _getIndexPatternService() {
+  async _getIndexPattern() {
     let indexPattern;
     try {
       indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
@@ -89,7 +89,7 @@ export class ESSearchSource extends VectorSource {
   }
 
   async getGeoJson({ layerId, layerName }, searchFilters) {
-    const indexPattern = await this._getIndexPatternService();
+    const indexPattern = await this._getIndexPattern();
 
     const geoField = indexPattern.fields.byName[this._descriptor.geoField];
     if (!geoField) {
@@ -106,9 +106,12 @@ export class ESSearchSource extends VectorSource {
       const isTimeAware = await this.isTimeAware();
       searchSource.setField('filter', () => {
         const filters = [];
-        if (this.filterByMapBounds()) {
+        //todo: this seems somewhat redundant. Have this be passed in as arguments in the getGeoJson.
+        //no need to submit time and extent filters in the method if they are not supposed to be applied anyway
+        if (this.isFilterByMapBounds()) {
           filters.push(createExtentFilter(searchFilters.extent, geoField.name, geoField.type));
         }
+
         if (isTimeAware) {
           filters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
         }
@@ -148,7 +151,7 @@ export class ESSearchSource extends VectorSource {
 
     let indexPattern;
     try {
-      indexPattern = await this._getIndexPatternService();
+      indexPattern = await this._getIndexPattern();
     } catch(error) {
       console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
       return filteredProperties;
@@ -170,8 +173,15 @@ export class ESSearchSource extends VectorSource {
     return this._descriptor.indexPatternId;
   }
 
+  async getStringFields() {
+    const fields = this._descriptor.tooltipProperties ? this._descriptor.tooltipProperties : [];
+    return fields.map(name => {
+      return { name: name, label: name };
+    });
+  }
+
   async isTimeAware() {
-    const indexPattern = await this._getIndexPatternService();
+    const indexPattern = await this._getIndexPattern();
     const timeField = indexPattern.timeFieldName;
     return !!timeField;
   }

@@ -20,6 +20,10 @@ export class VectorStyle {
   static DEFAULT_COLOR_HEX = '#ffffff';
   static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
 
+  static getComputedFieldName(fieldName) {
+    return `__kbn__scaled(${fieldName})`;
+  }
+
   constructor(descriptor) {
     this._descriptor = descriptor;
   }
@@ -91,14 +95,46 @@ export class VectorStyle {
     return this._descriptor.properties[colorProperty].options.color;
   }
 
-  isPropertyDynamic(property) {
+  _isPropertyDynamic(property) {
     if (!this._descriptor.properties[property]) {
       return false;
     }
     return this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.DYNAMIC;
   }
 
-  enrichFeatureCollectionWithScaledProps(featureCollection) {
+  static computeScaledValues(featureCollection, field) {
+    const fieldName = field.label;
+    if (featureCollection.computed.find(f => f === fieldName)) {
+      return false;
+    }
+
+    const features = featureCollection.features;
+    if (!features.length) {
+      return false;
+    }
+
+    let min = features[0].properties[fieldName];
+    let max = features[0].properties[fieldName];
+    for (let i = 1; i < features.length; i++) {
+      min = Math.min(min, features[i].properties[fieldName]);
+      max = Math.max(max, features[i].properties[fieldName]);
+    }
+
+    //scale to [0,1]
+    const propName = VectorStyle.getComputedFieldName(fieldName);
+    for (let i = 0; i < features.length; i++) {
+      features[i].properties[propName] = (features[i].properties[fieldName] - min) / (max - min);
+    }
+    featureCollection.computed.push(fieldName);
+    return true;
+  }
+
+  addScaledPropertiesBasedOnStyle(featureCollection) {
+
+
+    if (!this._isPropertyDynamic('fillColor') && !this._isPropertyDynamic('lineColor')) {
+      return false;
+    }
 
     if (!featureCollection) {
       return false;
@@ -108,41 +144,18 @@ export class VectorStyle {
       featureCollection.computed = [];
     }
 
-    const dynamicFieldNames = [];
-    if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options.field) {
-      dynamicFieldNames.push(this._descriptor.properties.fillColor.options.field);
+    const dynamicFields = [];
+    if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options.fieldValue) {
+      dynamicFields.push(this._descriptor.properties.fillColor.options.fieldValue);
     }
-    if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options.field) {
-      dynamicFieldNames.push(this._descriptor.properties.lineColor.options.field);
+    if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options.fieldValue) {
+      dynamicFields.push(this._descriptor.properties.lineColor.options.fieldValue);
     }
 
-    const returns = dynamicFieldNames.map((fieldName) => {
-      if (featureCollection.computed.find(f => f === fieldName)) {
-        return false;
-      }
-
-      const features = featureCollection.features;
-      if (!features.length) {
-        return false;
-      }
-
-      let min = features[0].properties[fieldName];
-      let max = features[0].properties[fieldName];
-      for (let i = 1; i < features.length; i++) {
-        min = Math.min(min, features[i].properties[fieldName]);
-        max = Math.max(max, features[i].properties[fieldName]);
-      }
-
-      //scale to 0 -1
-      const propName = `__kbn__${fieldName}__`;
-      for (let i = 0; i < features.length; i++) {
-        features[i].properties[propName] = (features[i].properties[fieldName] - min) / (max - min);
-      }
-      featureCollection.computed.push(fieldName);
-      return true;
+    const updateStatuses = dynamicFields.map((field) => {
+      return VectorStyle.computeScaledValues(featureCollection, field);
     });
-
-    return returns.some(r => r === true);
+    return updateStatuses.some(r => r === true);
 
   }
 
@@ -152,8 +165,9 @@ export class VectorStyle {
       return null;
     }
 
-    if (this._descriptor.properties[property].options.field) {
-      const targetName = `__kbn__${this._descriptor.properties[property].options.field}__`;
+    if (this._descriptor.properties[property].options.fieldValue) {
+      const originalFieldName = this._descriptor.properties[property].options.fieldValue.label;
+      const targetName = VectorStyle.getComputedFieldName(originalFieldName);
       return [
         'interpolate',
         ['linear'],

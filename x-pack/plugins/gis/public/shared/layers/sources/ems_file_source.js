@@ -88,6 +88,15 @@ export class EMSFileSource extends VectorSource {
     return this._descriptor.name;
   }
 
+  async getStringFields() {
+    const fileSource = this._emsFiles.find((source => source.name === this._descriptor.name));
+
+    return fileSource.fields.map(f => {
+      return { name: f.name, label: f.description };
+    });
+
+  }
+
   async isTimeAware() {
     return false;
   }

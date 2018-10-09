@@ -22,7 +22,7 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
   PROMOTE_TEMPORARY_STYLES,
-  CLEAR_TEMPORARY_STYLES,
+  CLEAR_TEMPORARY_STYLES, SET_JOINS,
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -92,6 +92,17 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
+    case SET_JOINS:
+      console.warn('when setting joins, must remove all corresponding datarequests as well');
+      const layerDescriptor = state.layerList.find(descriptor => descriptor.id === action.layer.getId());
+      if (layerDescriptor) {
+        const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };
+        const index = state.layerList.findIndex(descriptor => descriptor.id === action.layer.getId());
+        const newLayerList = state.layerList.slice();
+        newLayerList[index] = newLayerDescriptor;
+        return { ...state, layerList: newLayerList };
+      }
+      return state;
     case ADD_LAYER:
       // Remove temporary layers (if any)
       const preAddLayerList = action.layer.temporary ? state.layerList.filter(
@@ -150,6 +161,17 @@ export function map(state = INITIAL_STATE, action) {
   }
 }
 
+function findDataRequest(layerDescriptor, dataRequestAction) {
+
+  if (!layerDescriptor.dataRequests) {
+    return;
+  }
+
+  return layerDescriptor.dataRequests.find(dataRequest => {
+    return dataRequest.dataId === dataRequestAction.dataId;
+  });
+}
+
 
 function updateWithDataRequest(state, action) {
   const layerRequestingData = findLayerById(state, action.layerId);
@@ -157,11 +179,21 @@ function updateWithDataRequest(state, action) {
     return state;
   }
 
-  layerRequestingData.hasLoadError = false;
-  layerRequestingData.loadError = null;
-  layerRequestingData.dataDirty = true; // needs to be synced to MB
-  layerRequestingData.dataMetaAtStart = action.meta;
-  layerRequestingData.dataRequestToken = action.requestToken;
+  if (!layerRequestingData.dataRequests) {
+    layerRequestingData.dataRequests = [];
+  }
+
+  let dataRequest = findDataRequest(layerRequestingData, action);
+  if (!dataRequest) {
+    dataRequest = {
+      dataId: action.dataId
+    };
+    layerRequestingData.dataRequests.push(dataRequest);
+  }
+  dataRequest.dataHasLoadError = false;
+  dataRequest.dataLoadError = null;
+  dataRequest.dataMetaAtStart = action.meta;
+  dataRequest.dataRequestToken = action.requestToken;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
@@ -172,19 +204,25 @@ function updateWithDataResponse(state, action) {
     return state;
   }
 
+
+  const dataRequest = findDataRequest(layerReceivingData, action);
+  if (!dataRequest) {
+    throw new Error('Data request should be initialized. Cannot call stopLoading before startLoading');
+  }
+
   if (
-    layerReceivingData.dataRequestToken &&
-    layerReceivingData.dataRequestToken !== action.requestToken
+    dataRequest.dataRequestToken &&
+    dataRequest.dataRequestToken !== action.requestToken
   ) {
     // ignore responses to outdated requests
     return { ...state };
   }
 
-  layerReceivingData.data = action.data;
-  layerReceivingData.dataMeta = layerReceivingData.dataMetaAtStart;
-  layerReceivingData.dataMetaAtStart = null;
-  layerReceivingData.dataDirty = false;
-  layerReceivingData.dataRequestToken = null;
+  dataRequest.data = action.data;
+  dataRequest.dataMeta = layerReceivingData.dataMetaAtStart;
+  dataRequest.dataMetaAtStart = null;
+  dataRequest.dataRequestToken = null;
+  dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
@@ -195,18 +233,23 @@ function updateWithDataLoadError(state, action) {
     return state;
   }
 
+  const dataRequest = findDataRequest(layer, action);
+  if (!dataRequest) {
+    throw new Error('Data request should be initialized. Cannot call loadError before startLoading');
+  }
+
   if (
-    layer.dataRequestToken &&
-    layer.dataRequestToken !== action.requestToken
+    dataRequest.dataRequestToken &&
+    dataRequest.dataRequestToken !== action.requestToken
   ) {
     // ignore responses to outdated requests
     return state;
   }
 
-  layer.hasLoadError = true;
-  layer.loadError = action.errorMessage;
-  layer.dataDirty = false;
-  layer.dataRequestToken = null;
+  dataRequest.dataHasLoadError = true;
+  dataRequest.dataLoadError = action.errorMessage;
+  dataRequest.dataRequestToken = null;
+  dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }

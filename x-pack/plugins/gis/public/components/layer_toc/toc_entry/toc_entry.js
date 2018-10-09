@@ -18,14 +18,14 @@ import {
 export function TOCEntry({ layer, openLayerPanel, toggleVisible, zoom }) {
 
   let visibilityIndicator;
-  if (layer.hasLoadError()) {
+  if (layer.dataHasLoadError()) {
     visibilityIndicator = (
       <EuiIconTip
         aria-label="Load warning"
         size="m"
         type="alert"
         color="warning"
-        content={layer.getLoadError()}
+        content={layer.getDataLoadError()}
       />
     );
   } else if (layer.isLayerLoading()) {
@@ -65,7 +65,7 @@ export function TOCEntry({ layer, openLayerPanel, toggleVisible, zoom }) {
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
-        className={layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.hasLoadError() ? 'visible' : 'notvisible'}
+        className={layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.dataHasLoadError() ? 'visible' : 'notvisible'}
       >
         <EuiFlexItem grow={false} className="layerEntry--visibility">
           {visibilityIndicator}

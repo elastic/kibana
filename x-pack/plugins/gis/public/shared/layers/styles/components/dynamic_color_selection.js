@@ -20,15 +20,15 @@ export class DynamicColorSelection extends React.Component {
   }
 
   render() {
-    const options = this.props.fields.map(fieldName => {
-      return { label: fieldName };
+    const options = this.props.fields.map(field => {
+      return { label: field.label, value: field };
     });
     const onChange = (selectedOptions) => {
       this.setState({
         selectedOptions: selectedOptions
       });
       if (selectedOptions.length) {
-        this.props.onChange(selectedOptions[0].label);
+        this.props.onChange(selectedOptions[0]);
       } else {
         this.props.onChange(null);
       }

@@ -41,7 +41,7 @@ export class ASource {
     return '';
   }
 
-  filterByMapBounds() {
+  isFilterByMapBounds() {
     return _.get(this._descriptor, 'filterByMapBounds', false);
   }
 }
@@ -97,8 +97,13 @@ export class VectorSource extends ASource {
     });
   }
 
-  async getNumberFieldNames() {
+  async getNumberFields() {
     console.warn('Should implement VectorSource#getNumberFields');
+    return [];
+  }
+
+  async getStringFields() {
+    console.warn('Should implement VectorSource@getStringFields');
     return [];
   }
 

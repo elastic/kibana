@@ -8,6 +8,7 @@ import React, { Fragment } from 'react';
 import { VectorStyle } from '../vector_style';
 import { DynamicColorSelection } from './dynamic_color_selection';
 import { StaticColorSelection } from './static_color_selection';
+import _ from 'lodash';
 
 import {
   EuiFlexGroup,
@@ -33,16 +34,19 @@ export class VectorStyleColorEditor extends React.Component {
 
   async _loadOrdinalFields() {
     const ordinalFields = await this.props.layer.getOrdinalFields();
-    this.setState({
-      ordinalFields: ordinalFields
-    });
+
+    //check if fields are the same..
+    const eqls = _.isEqual(ordinalFields, this.state.ordinalFields);
+    if (!eqls) {
+      this.setState({
+        ordinalFields: ordinalFields
+      });
+    }
   }
 
   _renderFillAndOutlineStyle(vectorStyle) {
 
-    if (this.state.ordinalFields === null) {
-      this._loadOrdinalFields();
-    }
+    this._loadOrdinalFields();
 
     const changeToStaticColor = (color) => {
       const property = {
@@ -58,7 +62,8 @@ export class VectorStyleColorEditor extends React.Component {
       const property = {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
-          field: field
+          // field: field ? field.label : undefined,
+          fieldValue: field ? field.value : undefined
         }
       };
       this.props.handlePropertyChange(this.props.property, property);
@@ -82,7 +87,7 @@ export class VectorStyleColorEditor extends React.Component {
     let colorSelector;
     if (this._isDynamic()) {
       if (this.state.ordinalFields !== null) {
-        colorSelector = (<DynamicColorSelection fields={this.state.ordinalFields} onChange={changeToDynamicColor} />);
+        colorSelector = (<DynamicColorSelection fields={this.state.ordinalFields} onChange={changeToDynamicColor}/>);
       } else {
         colorSelector = null;
       }

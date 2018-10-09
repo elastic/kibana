@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { StyleTabs } from './style_tabs';
+import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 
 import {
@@ -21,10 +22,20 @@ import {
 
 export function LayerPanel({ selectedLayer, cancelLayerPanel }) {
 
+
   if (!selectedLayer) {
     //todo: temp placeholder to bypass state-bug
     return (<div />);
   }
+
+  const joinSection = selectedLayer.isJoinable() ? (<EuiFlyoutBody style={{ paddingTop: 0 }}>
+    <EuiTitle size="s"><h2><strong>Joins</strong></h2></EuiTitle>
+    <EuiSpacer size="l"/>
+    <JoinEditor layer={selectedLayer}/>
+    <EuiSpacer size="l"/>
+  </EuiFlyoutBody>) : null;
+
+
 
   return (
     <EuiFlyout
@@ -45,6 +56,8 @@ export function LayerPanel({ selectedLayer, cancelLayerPanel }) {
 
         <EuiHorizontalRule margin="none"/>
       </EuiFlyoutHeader>
+
+      {joinSection}
 
       <EuiFlyoutBody style={{ paddingTop: 0 }}>
         <EuiSpacer size="l"/>

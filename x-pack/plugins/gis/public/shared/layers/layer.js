@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
+import { DataRequest } from './util/data_request';
 
 export class ALayer {
 
@@ -12,13 +13,18 @@ export class ALayer {
     this._source = source;
     this._style = style;
     this._listenersMap = new Map(); // key is mbLayerId, value eventHandlers map
+
+    if (this._descriptor.dataRequests) {
+      this._dataRequests = this._descriptor.dataRequests.map(dataRequest => new DataRequest(dataRequest));
+    } else {
+      this._dataRequests = [];
+    }
   }
 
   static createDescriptor(options) {
     const layerDescriptor = {};
-    layerDescriptor.data = options.data || null;
-    layerDescriptor.dataMeta = options.dataMeta || {};
-    layerDescriptor.dataDirty = typeof options.dataDirty === 'boolean' ? options.dataDirty : false;
+
+    layerDescriptor.dataRequests = [];
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.showAtAllZoomLevels = _.get(options, 'showAtAllZoomLevels', true);
@@ -69,6 +75,10 @@ export class ALayer {
       : this._listenersMap.get(mbLayerId);
     eventHandlersMap.set(eventType, handler);
     this._listenersMap.set(mbLayerId, eventHandlersMap);
+  }
+
+  isJoinable() {
+    return false;
   }
 
   getDisplayName() {
@@ -128,15 +138,16 @@ export class ALayer {
   }
 
   isLayerLoading() {
-    return false;
+    return this._dataRequests.some(dataRequest => dataRequest.isLoading());
   }
 
-  hasLoadError() {
-    return this._descriptor.hasLoadError;
+  dataHasLoadError() {
+    return this._dataRequests.some(dataRequest => dataRequest.hasLoadError());
   }
 
-  getLoadError() {
-    return this._descriptor.loadError;
+  getDataLoadError() {
+    const loadErrors =  this._dataRequests.filter(dataRequest => dataRequest.hasLoadError());
+    return loadErrors.join(',');//todo
   }
 
   toLayerDescriptor() {
@@ -149,6 +160,10 @@ export class ALayer {
 
   renderStyleEditor(style, options) {
     return style.renderEditor(options);
+  }
+
+  getSourceDataRequest() {
+    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
   }
 
 }

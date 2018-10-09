@@ -132,10 +132,7 @@ export const getDataFilters = createSelector(
   }
 );
 
-export const getDataSources = createSelector(
-  getMetadata,
-  metadata => metadata ? metadata.data_sources : null
-);
+export const getDataSources = createSelector(getMetadata, metadata => metadata ? metadata.data_sources : null);
 
 export const getSelectedLayer = createSelector(
   getSelectedLayerId,

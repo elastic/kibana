@@ -21,6 +21,7 @@ export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
 export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const LAYER_DATA_LOAD_ERROR = 'LAYER_DATA_LOAD_ERROR';
 export const REPLACE_LAYERLIST = 'REPLACE_LAYERLIST';
+export const SET_JOINS = 'SET_JOINS';
 export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
@@ -29,18 +30,15 @@ export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
-function getLayerLoadingFunctions(dispatch, layerId, tokenString) {
-  const requestToken = Symbol(tokenString);
+function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
-    startLoading: initData => dispatch(startDataLoad(layerId, requestToken, initData)),
-    stopLoading: returnData => dispatch(endDataLoad(layerId, requestToken, returnData)),
-    onLoadError: errorMessage => dispatch(onDataLoadError(layerId, requestToken, errorMessage)),
+    startLoading: (dataId, requestToken, initData) => dispatch(startDataLoad(layerId, dataId, requestToken, initData)),
+    stopLoading: (dataId, requestToken, returnData) => dispatch(endDataLoad(layerId, dataId, requestToken, returnData)),
+    onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage))
   };
 }
 
 export function replaceLayerList(newLayerList) {
-  const tokenString = 'data_request_sync_layerreplacement';
-
   return async (dispatch, getState) => {
     await dispatch({
       type: REPLACE_LAYERLIST,
@@ -52,7 +50,7 @@ export function replaceLayerList(newLayerList) {
     const dataFilters = getDataFilters(state);
 
     layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
       layer.syncData({ ...loadingFunctions, dataFilters });
     });
   };
@@ -109,7 +107,6 @@ export function mapReady() {
 }
 
 export function mapExtentChanged(newMapConstants) {
-  const tokenString = 'data_request_sync_extentchange';
   return async (dispatch, getState) => {
     const state = getState();
     const dataFilters = getDataFilters(state);
@@ -124,7 +121,7 @@ export function mapExtentChanged(newMapConstants) {
 
     const layerList = getLayerList(state);
     layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
       layer.syncData({
         ...loadingFunctions,
         dataFilters: { ...dataFilters, ...newMapConstants }
@@ -133,41 +130,44 @@ export function mapExtentChanged(newMapConstants) {
   };
 }
 
-export function startDataLoad(layerId, requestToken, meta = {}) {
+export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
   return ({
     meta,
     type: LAYER_DATA_LOAD_STARTED,
     layerId,
+    dataId,
     requestToken
   });
 }
 
-export function endDataLoad(layerId, requestToken, data) {
+export function endDataLoad(layerId, dataId, requestToken, data) {
   return ({
     type: LAYER_DATA_LOAD_ENDED,
     layerId,
+    dataId,
     data,
     requestToken
   });
 }
 
-export function onDataLoadError(layerId, requestToken, errorMessage) {
+export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
   return ({
     type: LAYER_DATA_LOAD_ERROR,
     layerId,
+    dataId,
     requestToken,
     errorMessage
   });
 }
 
 export function addPreviewLayer(layer, position) {
-  const tokenString = 'data_request';
+
   const layerDescriptor = layer.toLayerDescriptor();
 
   return async (dispatch, getState) => {
     await dispatch(addLayer(layerDescriptor, position));
     const dataFilters = getDataFilters(getState());
-    const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
     layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
@@ -225,7 +225,6 @@ export function setMeta(metaJson) {
 }
 
 export function setTimeFilters(timeFilters) {
-  const tokenString = 'data_request_sync_timechange';
   return async (dispatch, getState) => {
     dispatch({
       type: SET_TIME_FILTERS,
@@ -235,7 +234,7 @@ export function setTimeFilters(timeFilters) {
     const dataFilters = getDataFilters(state);
     const layerList = getLayerList(getState());
     layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
       layer.syncData({
         ...loadingFunctions,
         dataFilters: { ...dataFilters, timeFilters: { ...timeFilters } }
@@ -245,7 +244,6 @@ export function setTimeFilters(timeFilters) {
 }
 
 export function updateLayerStyle(style, temporary = true) {
-  const tokenString = 'data_request_sync_style_change';
   return async (dispatch, getState) => {
     await dispatch({
       type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
@@ -257,7 +255,7 @@ export function updateLayerStyle(style, temporary = true) {
     const state = getState();
     const dataFilters = getDataFilters(state);
     const layer = getSelectedLayer(state);
-    const loadingFunctions = getLayerLoadingFunctions(dispatch, layer.getId(), tokenString);
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
     layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
@@ -274,6 +272,22 @@ export function clearTemporaryStyles() {
   };
 }
 
+
+export function setJoinsForLayer(layer, joins) {
+  return async (dispatch, getState) => {
+    await dispatch({
+      type: SET_JOINS,
+      layer: layer,
+      joins: joins
+    });
+    const dataFilters = getDataFilters(getState());
+    const layersWithJoin = getLayerList(getState());
+    const layerWithJoin = layersWithJoin.find(lwj => lwj.getId() === layer.getId());
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
+    layerWithJoin.syncData({ ...loadingFunctions, dataFilters });
+  };
+}
+
 export async function loadMetaResources(dispatch) {
   const meta = await fetch(`${GIS_API_RELATIVE}/meta`);
   const metaJson = await meta.json();
@@ -284,7 +298,6 @@ export async function loadMapResources(dispatch) {
   await dispatch(replaceLayerList(
     [
       {
-        dataDirty: false,
         id: "0hmz5",
         label: 'light theme tiles',
         sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
@@ -312,78 +325,20 @@ export async function loadMapResources(dispatch) {
         maxZoom: 24,
       },
       {
-        "id": "heatmap_demo",
-        "label": "logs* heatmap",
-        "showAtAllZoomLevels": false,
+        "id": "giflh",
+        "label": null,
+        "showAtAllZoomLevels": true,
         "minZoom": 0,
-        "maxZoom": 8,
-        "sourceDescriptor": {
-          "type": "ES_GEOHASH_GRID",
-          "indexPatternId": "90943e30-9a47-11e8-b64d-95841ca0b247",
-          "geoField": "geo.coordinates",
-        },
-        "visible": true,
-        "temporary": false,
-        "style": {
-          refinement: 'most_fine',
-          type: 'HEATMAP',
-        },
-        "type": "GEOHASH_GRID"
-      },
-      {
-        "id": "doc_demo",
-        "label": "logs* documents",
-        "showAtAllZoomLevels": false,
-        "minZoom": 6,
         "maxZoom": 24,
-        "sourceDescriptor": {
-          "type": "ES_SEARCH",
-          "indexPatternId": "90943e30-9a47-11e8-b64d-95841ca0b247",
-          "geoField": "geo.coordinates",
-          "limit": 1000,
-          "filterByMapBounds": true,
-          "showTooltip": true,
-          "tooltipProperties": ["timestamp", "clientip", "response"],
-        },
+        "sourceDescriptor": { "type": "EMS_FILE", "name": "World Countries" },
         "visible": true,
         "temporary": false,
         "style": {
           "type": "VECTOR",
-          "properties": {
-            "fillColor": {
-              "type": "STATIC",
-              "options": {
-                "color": "#e6194b"
-              }
-            }
-          }
+          "properties": { "fillColor": { "type": "STATIC", "options": { "color": "#e6194b" } } }
         },
         "type": "VECTOR"
-      },
-      // {
-      //   "id": "1pnwt",
-      //   "label": null,
-      //   "sourceDescriptor": {
-      //     "type": "ES_SEARCH",
-      //     "indexPatternId": "6e853b20-bbb5-11e8-88aa-9d8656848e00",
-      //     "geoField": "geometry",
-      //     "limit": 256
-      //   },
-      //   "visible": true,
-      //   "temporary": false,
-      //   "style": {
-      //     "type": "VECTOR",
-      //     "properties": {
-      //       fillAndOutline: {
-      //         type: 'STATIC',
-      //         options: {
-      //           color: "#e6194b"
-      //         }
-      //       }
-      //     }
-      //   },
-      //   "type": "VECTOR"
-      // }
+      }
     ]
   ));
 

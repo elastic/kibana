@@ -67,6 +67,7 @@ export class GeohashGridLayer extends ALayer {
     return [HeatmapStyle];
   }
 
+
   syncLayerWithMB(mbMap) {
 
     const mbSource = mbMap.getSource(this.getId());
@@ -89,22 +90,24 @@ export class GeohashGridLayer extends ALayer {
 
     //todo: similar problem as OL here. keeping track of data via MB source directly
     const mbSourceAfter = mbMap.getSource(this.getId());
-    if (!this._descriptor.data) {
+    const sourceDataRequest = this.getSourceDataRequest();
+    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
+    if (!featureCollection) {
       mbSourceAfter.setData({ 'type': 'FeatureCollection', 'features': [] });
       return;
     }
 
     const scaledPropertyName = '__kbn_heatmap_weight__';
     const propertyName = 'value';
-    if (this._descriptor.data !== mbSourceAfter._data) {
+    if (featureCollection !== mbSourceAfter._data) {
       let max = 0;
-      for (let i = 0; i < this._descriptor.data.features.length; i++) {
-        max = Math.max(this._descriptor.data.features[i].properties[propertyName], max);
+      for (let i = 0; i < featureCollection.features.length; i++) {
+        max = Math.max(featureCollection.features[i].properties[propertyName], max);
       }
-      for (let i = 0; i < this._descriptor.data.features.length; i++) {
-        this._descriptor.data.features[i].properties[scaledPropertyName] = this._descriptor.data.features[i].properties[propertyName] / max;
+      for (let i = 0; i < featureCollection.features.length; i++) {
+        featureCollection.features[i].properties[scaledPropertyName] = featureCollection.features[i].properties[propertyName] / max;
       }
-      mbSourceAfter.setData(this._descriptor.data);
+      mbSourceAfter.setData(featureCollection);
     }
 
     mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
@@ -114,10 +117,6 @@ export class GeohashGridLayer extends ALayer {
     }
   }
 
-
-  isLayerLoading() {
-    return !!this._descriptor.dataDirty;
-  }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
@@ -133,13 +132,15 @@ export class GeohashGridLayer extends ALayer {
     let samePrecision = false;
     let isContained = false;
     let sameTime = false;
-    if (this._descriptor.dataMeta) {
-      if (this._descriptor.dataMeta.extent) {
+    const sourceDataRequest = this.getSourceDataRequest();
+    const dataMeta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
+    if (dataMeta) {
+      if (dataMeta.extent) {
         const dataExtent = turf.bboxPolygon([
-          this._descriptor.dataMeta.extent.min_lon,
-          this._descriptor.dataMeta.extent.min_lat,
-          this._descriptor.dataMeta.extent.max_lon,
-          this._descriptor.dataMeta.extent.max_lat,
+          dataMeta.extent.min_lon,
+          dataMeta.extent.min_lat,
+          dataMeta.extent.max_lon,
+          dataMeta.extent.max_lat
         ]);
         const mapStateExtent = turf.bboxPolygon([
           dataFilters.extent.min_lon,
@@ -149,10 +150,10 @@ export class GeohashGridLayer extends ALayer {
         ]);
 
         isContained = turfBooleanContains(dataExtent, mapStateExtent);
-        samePrecision = this._descriptor.dataMeta.precision === targetPrecision;
+        samePrecision = dataMeta.precision === targetPrecision;
       }
-      if (this._descriptor.dataMeta.timeFilters) {
-        sameTime = dataFilters.timeFilters === this._descriptor.dataMeta.timeFilters;
+      if (dataMeta.timeFilters) {
+        sameTime = dataFilters.timeFilters === dataMeta.timeFilters;
       }
     }
     if (samePrecision && isContained && sameTime) {
@@ -170,17 +171,18 @@ export class GeohashGridLayer extends ALayer {
       max_lat: extent.max_lat + height * scaleFactor
     };
 
-    const dataMeta = {
+    const newDataMeta = {
       ...dataFilters,
       extent: expandExtent,
       precision: targetPrecision
     };
-    return this._fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta });
+    return this._fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta: newDataMeta });
   }
 
   async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
     const { precision, timeFilters, extent } = dataMeta;
-    startLoading(dataMeta);
+    const requestToken = Symbol(`layer-source-refresh: this.getId()`);
+    startLoading('source', requestToken, dataMeta);
     try {
       const data = await this._source.getGeoJsonPointsWithTotalCount({
         precision,
@@ -189,9 +191,9 @@ export class GeohashGridLayer extends ALayer {
         layerId: this.getId(),
         layerName: this.getDisplayName(),
       });
-      stopLoading(data);
+      stopLoading('source', requestToken, data);
     } catch(error) {
-      onLoadError(error.message);
+      onLoadError('source', requestToken, error.message);
     }
   }
 }
