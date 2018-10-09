@@ -21,5 +21,6 @@ export const TUTORIAL_CATEGORY = {
   LOGGING: 'logging',
   SECURITY: 'security',
   METRICS: 'metrics',
+  UPTIME: 'uptime',
   OTHER: 'other',
 };
