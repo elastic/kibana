@@ -1,6 +1,6 @@
 <div ng-if="aggIsTooLow" class="form-group">
   <p class="visEditorAggParam__error"
-    i18n-id="common.ui.vis.editors.aggParams.errors.aggIsTooLowErrorMessage"
+    i18n-id="common.ui.vis.editors.aggParams.errors.aggWrongRunOrderErrorMessage"
     i18n-default-message="&quot;{schema}&quot; aggs must run before all other buckets!"
     i18n-values="{ schema: agg.schema.title }"
   >
@@ -19,14 +19,14 @@
   </p>
 </div>
 
-<div ng-if="!agg.schema.deprecate" class="form-group">
-  <p ng-show="agg.schema.deprecateMessage" class="visEditorAggParam__error">
+<div ng-if="agg.schema.deprecate" class="form-group">
+  <p ng-show="!agg.schema.deprecateMessage" class="visEditorAggParam__error">
     {{ agg.schema.deprecateMessage }}
   </p>
   <p
     ng-show="agg.schema.deprecateMessage"
     class="visEditorAggParam__error"
-    i18n-id="common.ui.vis.editors.aggParams.errors.deprecateErrorMessage"
+    i18n-id="common.ui.vis.editors.aggParams.errors.schemaIsDeprecatedErrorMessage"
     i18n-default-message="&quot;{schema}&quot; has been deprecated."
     i18n-values="{ schema: agg.schema.title }"
   >

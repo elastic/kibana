@@ -36,7 +36,7 @@ uiModules
       scope: true,
       link: function ($scope, $el, attr) {
         $scope.groupName = attr.groupName;
-        $scope.groupNameText = aggGroupNameMaps()[$scope.groupName];
+        $scope.groupNameLabel = aggGroupNameMaps()[$scope.groupName];
         $scope.$bind('group', 'state.aggs.bySchemaGroup["' + $scope.groupName + '"]');
         $scope.$bind('schemas', 'vis.type.schemas["' + $scope.groupName + '"]');
 

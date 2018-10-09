@@ -1,8 +1,8 @@
 <div ng-show="add.form">
   <label
     i18n-id="common.ui.vis.editors.aggAdd.selectGroupTypeLabel"
-    i18n-default-message="Select {groupNameText} type"
-    i18n-values="{ groupNameText }"
+    i18n-default-message="Select {groupNameLabel} type"
+    i18n-values="{ groupNameLabel }"
   >
   </label>
   <ul class="form-group list-group list-group-menu">
@@ -34,8 +34,8 @@
       class="kuiButton kuiButton--secondary kuiButton--small"
       ng-if="groupName !== 'buckets' || !stats.count && !stats.deprecate"
       i18n-id="common.ui.vis.editors.aggAdd.addGroupButtonLabel"
-      i18n-default-message="Add {groupNameText}"
-      i18n-values="{ groupNameText }"
+      i18n-default-message="Add {groupNameLabel}"
+      i18n-values="{ groupNameLabel }"
     >
     </button>
 
@@ -44,8 +44,8 @@
       class="kuiButton kuiButton--secondary kuiButton--small"
       ng-if="groupName === 'buckets' && stats.count > 0 && !stats.deprecate"
       i18n-id="common.ui.vis.editors.aggAdd.addSubGroupButtonLabel"
-      i18n-default-message="Add sub-{groupNameText}"
-      i18n-values="{ groupNameText }"
+      i18n-default-message="Add sub-{groupNameLabel}"
+      i18n-values="{ groupNameLabel }"
     >
     </button>
   </div>

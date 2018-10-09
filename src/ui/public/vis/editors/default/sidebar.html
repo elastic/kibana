@@ -85,7 +85,7 @@
           </li>
 
           <li
-            tooltip="{{'common.ui.vis.editors.sidebar.autoApplyTooltip' | i18n: { defaultMessage: 'Auto apply changes' } }}"
+            tooltip="{{'common.ui.vis.editors.sidebar.autoApplyChangesTooltip' | i18n: { defaultMessage: 'Auto apply changes' } }}"
             tooltip-placement="bottom"
             tooltip-popup-delay="400"
             tooltip-append-to-body="1"
@@ -94,7 +94,7 @@
             <button
               data-test-subj="visualizeEditorAutoButton"
               class="kuiButton kuiButton--basic navbar-btn-link visEditorSidebar__navButtonLink"
-              aria-label="{{'common.ui.vis.editors.sidebar.autoApplyAriaLabel' | i18n: { defaultMessage: 'Auto update the visualization on every change' } }}"
+              aria-label="{{'common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel' | i18n: { defaultMessage: 'Auto update the visualization on every change' } }}"
               ng-click="toggleAutoApply()"
               ng-class="{
                 'kuiButton--primary': autoApplyEnabled,
@@ -105,7 +105,7 @@
             </button>
           </li>
               <span ng-show="autoApplyEnabled"
-                i18n-id="common.ui.vis.editors.sidebar.autoApplyLabel"
+                i18n-id="common.ui.vis.editors.sidebar.autoApplyChangesLabel"
                 i18n-default-message="Auto Apply"
               >
             </span>
