@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function postgresqlLogsSpecProvider() {
+export function postgresqlLogsSpecProvider(server, context) {
   const moduleName = 'postgresql';
   const geoipRequired = false;
   const uaRequired = false;
@@ -59,7 +59,7 @@ export function postgresqlLogsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/postgresql_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };
