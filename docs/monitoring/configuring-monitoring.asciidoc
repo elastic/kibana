@@ -1,4 +1,0 @@
-[[configuring-monitoring]]
-== Configuring Monitoring
-
-See {ref}/configuring-monitoring.html[Configuring Monitoring in {es}]. 
