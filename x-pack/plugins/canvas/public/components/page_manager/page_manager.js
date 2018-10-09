@@ -31,16 +31,23 @@ export class PageManager extends React.PureComponent {
   };
 
   componentDidMount() {
+    // keep track of whether or not the component is mounted, to prevent rogue setState calls
+    this._isMounted = true;
+
     // gives the tray pop animation time to finish
     setTimeout(() => {
       this.scrollToActivePage();
-      this.setState({ showTrayPop: false });
+      this._isMounted && this.setState({ showTrayPop: false });
     }, 1000);
   }
 
   componentDidUpdate(prevProps) {
     // scrolls to the active page on the next tick, otherwise new pages don't scroll completely into view
     if (prevProps.selectedPage !== this.props.selectedPage) setTimeout(this.scrollToActivePage, 0);
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   scrollToActivePage = () => {
@@ -73,10 +80,10 @@ export class PageManager extends React.PureComponent {
   };
 
   confirmDelete = pageId => {
-    this.props.setDeleteId(pageId);
+    this._isMounted && this.props.setDeleteId(pageId);
   };
 
-  resetDelete = () => this.props.setDeleteId(null);
+  resetDelete = () => this._isMounted && this.props.setDeleteId(null);
 
   doDelete = () => {
     const { previousPage, removePage, deleteId, selectedPage } = this.props;

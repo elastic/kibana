@@ -17,7 +17,6 @@ export const AddLicense = ({ uploadPath = `#${BASE_PATH}upload_license` }) => {
       footer={
         <EuiButton
           data-test-subj="updateLicenseButton"
-          className="licenseManagement__marginTop"
           href={uploadPath}
         >
           Update license
