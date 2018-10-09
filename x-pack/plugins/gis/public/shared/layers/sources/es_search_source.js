@@ -78,7 +78,7 @@ export class ESSearchSource extends VectorSource {
     );
   }
 
-  async _getIndexPatternService() {
+  async _getIndexPattern() {
     let indexPattern;
     try {
       indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
@@ -89,7 +89,7 @@ export class ESSearchSource extends VectorSource {
   }
 
   async getGeoJson({ layerId, layerName }, searchFilters) {
-    const indexPattern = await this._getIndexPatternService();
+    const indexPattern = await this._getIndexPattern();
 
     const geoField = indexPattern.fields.byName[this._descriptor.geoField];
     if (!geoField) {
@@ -151,7 +151,7 @@ export class ESSearchSource extends VectorSource {
 
     let indexPattern;
     try {
-      indexPattern = await this._getIndexPatternService();
+      indexPattern = await this._getIndexPattern();
     } catch(error) {
       console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
       return filteredProperties;
@@ -173,8 +173,15 @@ export class ESSearchSource extends VectorSource {
     return this._descriptor.indexPatternId;
   }
 
+  async getStringFields() {
+    const fields = this._descriptor.tooltipProperties ? this._descriptor.tooltipProperties : [];
+    return fields.map(name => {
+      return { name: name, label: name };
+    });
+  }
+
   async isTimeAware() {
-    const indexPattern = await this._getIndexPatternService();
+    const indexPattern = await this._getIndexPattern();
     const timeField = indexPattern.timeFieldName;
     return !!timeField;
   }
