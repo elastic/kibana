@@ -36,6 +36,7 @@ export function savedObjectsMixin(kbnServer, server) {
   const migrator = new KibanaMigrator({ kbnServer });
 
   server.decorate('server', 'getKibanaIndexMappingsDsl', () => migrator.getActiveMappings());
+  server.decorate('server', 'kibanaMigrator', migrator);
 
   // we use kibana.index which is technically defined in the kibana plugin, so if
   // we don't have the plugin (mainly tests) we can't initialize the saved objects

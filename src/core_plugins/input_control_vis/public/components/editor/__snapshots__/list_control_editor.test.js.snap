@@ -19,14 +19,26 @@ exports[`renders dynamic options should display disabled dynamic options with to
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    helpText="Allow multiple selection"
+    helpText={
+      <FormattedMessage
+        defaultMessage="Allow multiple selection"
+        id="inputControl.editor.listControl.multiselectDescription"
+        values={Object {}}
+      />
+    }
     id="multiselect-0"
     key="multiselect"
   >
     <EuiSwitch
       checked={true}
       data-test-subj="listControlMultiselectInput"
-      label="Multiselect"
+      label={
+        <FormattedMessage
+          defaultMessage="Multiselect"
+          id="inputControl.editor.listControl.multiselectLabel"
+          values={Object {}}
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -34,7 +46,13 @@ exports[`renders dynamic options should display disabled dynamic options with to
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    helpText="Only available for \\"string\\" fields"
+    helpText={
+      <FormattedMessage
+        defaultMessage="Only available for \\"string\\" fields"
+        id="inputControl.editor.listControl.dynamicOptions.stringFieldDescription"
+        values={Object {}}
+      />
+    }
     id="dynamicOptions-0"
     key="dynamicOptions"
   >
@@ -42,7 +60,13 @@ exports[`renders dynamic options should display disabled dynamic options with to
       checked={true}
       data-test-subj="listControlDynamicOptionsSwitch"
       disabled={true}
-      label="Dynamic Options"
+      label={
+        <FormattedMessage
+          defaultMessage="Dynamic Options"
+          id="inputControl.editor.listControl.dynamicOptionsLabel"
+          values={Object {}}
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -50,10 +74,22 @@ exports[`renders dynamic options should display disabled dynamic options with to
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    helpText="Number of options"
+    helpText={
+      <FormattedMessage
+        defaultMessage="Number of options"
+        id="inputControl.editor.listControl.sizeDescription"
+        values={Object {}}
+      />
+    }
     id="size-0"
     key="size"
-    label="Size"
+    label={
+      <FormattedMessage
+        defaultMessage="Size"
+        id="inputControl.editor.listControl.sizeLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldNumber
       compressed={false}
@@ -87,14 +123,26 @@ exports[`renders dynamic options should display dynamic options for string field
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    helpText="Allow multiple selection"
+    helpText={
+      <FormattedMessage
+        defaultMessage="Allow multiple selection"
+        id="inputControl.editor.listControl.multiselectDescription"
+        values={Object {}}
+      />
+    }
     id="multiselect-0"
     key="multiselect"
   >
     <EuiSwitch
       checked={true}
       data-test-subj="listControlMultiselectInput"
-      label="Multiselect"
+      label={
+        <FormattedMessage
+          defaultMessage="Multiselect"
+          id="inputControl.editor.listControl.multiselectLabel"
+          values={Object {}}
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -102,7 +150,13 @@ exports[`renders dynamic options should display dynamic options for string field
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    helpText="Update options in response to user input"
+    helpText={
+      <FormattedMessage
+        defaultMessage="Update options in response to user input"
+        id="inputControl.editor.listControl.dynamicOptions.updateDescription"
+        values={Object {}}
+      />
+    }
     id="dynamicOptions-0"
     key="dynamicOptions"
   >
@@ -110,7 +164,13 @@ exports[`renders dynamic options should display dynamic options for string field
       checked={true}
       data-test-subj="listControlDynamicOptionsSwitch"
       disabled={false}
-      label="Dynamic Options"
+      label={
+        <FormattedMessage
+          defaultMessage="Dynamic Options"
+          id="inputControl.editor.listControl.dynamicOptionsLabel"
+          values={Object {}}
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -136,14 +196,26 @@ exports[`renders dynamic options should display size field when dynamic options 
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    helpText="Allow multiple selection"
+    helpText={
+      <FormattedMessage
+        defaultMessage="Allow multiple selection"
+        id="inputControl.editor.listControl.multiselectDescription"
+        values={Object {}}
+      />
+    }
     id="multiselect-0"
     key="multiselect"
   >
     <EuiSwitch
       checked={true}
       data-test-subj="listControlMultiselectInput"
-      label="Multiselect"
+      label={
+        <FormattedMessage
+          defaultMessage="Multiselect"
+          id="inputControl.editor.listControl.multiselectLabel"
+          values={Object {}}
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -151,7 +223,13 @@ exports[`renders dynamic options should display size field when dynamic options 
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    helpText="Update options in response to user input"
+    helpText={
+      <FormattedMessage
+        defaultMessage="Update options in response to user input"
+        id="inputControl.editor.listControl.dynamicOptions.updateDescription"
+        values={Object {}}
+      />
+    }
     id="dynamicOptions-0"
     key="dynamicOptions"
   >
@@ -159,7 +237,13 @@ exports[`renders dynamic options should display size field when dynamic options 
       checked={false}
       data-test-subj="listControlDynamicOptionsSwitch"
       disabled={false}
-      label="Dynamic Options"
+      label={
+        <FormattedMessage
+          defaultMessage="Dynamic Options"
+          id="inputControl.editor.listControl.dynamicOptionsLabel"
+          values={Object {}}
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -167,10 +251,22 @@ exports[`renders dynamic options should display size field when dynamic options 
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    helpText="Number of options"
+    helpText={
+      <FormattedMessage
+        defaultMessage="Number of options"
+        id="inputControl.editor.listControl.sizeDescription"
+        values={Object {}}
+      />
+    }
     id="size-0"
     key="size"
-    label="Size"
+    label={
+      <FormattedMessage
+        defaultMessage="Size"
+        id="inputControl.editor.listControl.sizeLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldNumber
       compressed={false}
@@ -204,10 +300,22 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    helpText="Options are based on the value of parent control. Disabled if parent is not set."
+    helpText={
+      <FormattedMessage
+        defaultMessage="Options are based on the value of parent control. Disabled if parent is not set."
+        id="inputControl.editor.listControl.parentDescription"
+        values={Object {}}
+      />
+    }
     id="parentSelect-0"
     key="parentSelect"
-    label="Parent control"
+    label={
+      <FormattedMessage
+        defaultMessage="Parent control"
+        id="inputControl.editor.listControl.parentLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiSelect
       compressed={false}
@@ -237,14 +345,26 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    helpText="Allow multiple selection"
+    helpText={
+      <FormattedMessage
+        defaultMessage="Allow multiple selection"
+        id="inputControl.editor.listControl.multiselectDescription"
+        values={Object {}}
+      />
+    }
     id="multiselect-0"
     key="multiselect"
   >
     <EuiSwitch
       checked={true}
       data-test-subj="listControlMultiselectInput"
-      label="Multiselect"
+      label={
+        <FormattedMessage
+          defaultMessage="Multiselect"
+          id="inputControl.editor.listControl.multiselectLabel"
+          values={Object {}}
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -252,7 +372,13 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    helpText="Update options in response to user input"
+    helpText={
+      <FormattedMessage
+        defaultMessage="Update options in response to user input"
+        id="inputControl.editor.listControl.dynamicOptions.updateDescription"
+        values={Object {}}
+      />
+    }
     id="dynamicOptions-0"
     key="dynamicOptions"
   >
@@ -260,7 +386,13 @@ exports[`renders should display chaining input when parents are provided 1`] = `
       checked={false}
       data-test-subj="listControlDynamicOptionsSwitch"
       disabled={false}
-      label="Dynamic Options"
+      label={
+        <FormattedMessage
+          defaultMessage="Dynamic Options"
+          id="inputControl.editor.listControl.dynamicOptionsLabel"
+          values={Object {}}
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -268,10 +400,22 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    helpText="Number of options"
+    helpText={
+      <FormattedMessage
+        defaultMessage="Number of options"
+        id="inputControl.editor.listControl.sizeDescription"
+        values={Object {}}
+      />
+    }
     id="size-0"
     key="size"
-    label="Size"
+    label={
+      <FormattedMessage
+        defaultMessage="Size"
+        id="inputControl.editor.listControl.sizeLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldNumber
       compressed={false}
