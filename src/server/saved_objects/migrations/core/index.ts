@@ -22,3 +22,4 @@ export { IndexMigrator } from './index_migrator';
 export { buildActiveMappings } from './build_active_mappings';
 export { CallCluster, MappingProperties } from './call_cluster';
 export { LogFn } from './migration_logger';
+export { MigrationResult } from './migration_coordinator';

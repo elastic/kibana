@@ -28,6 +28,7 @@ const matrix2d = require('./matrix2d');
 const config = require('./config');
 
 const {
+  applyTolerance,
   disjunctiveUnion,
   identity,
   flatten,
@@ -904,19 +905,31 @@ function resizeAnnotation(shapes, selectedShapes, shape) {
   // fixme left active: snap wobble. right active: opposite side wobble.
   const a = snappedA(properShape);
   const b = snappedB(properShape);
-  const resizeVertices =
-    config.groupResize || properShape.type !== 'group' // todo remove the limitation of no group resize
-      ? [
-          [-1, -1, 315],
-          [1, -1, 45],
-          [1, 1, 135],
-          [-1, 1, 225], // corners
-          [0, -1, 0],
-          [1, 0, 90],
-          [0, 1, 180],
-          [-1, 0, 270], // edge midpoints
-        ]
-      : [];
+  const groupedShape = shape =>
+    shape.parent === properShape.id &&
+    shape.type !== 'annotation' &&
+    shape.subtype !== config.adHocGroupName;
+  // fixme broaden resizableChild to other multiples of 90 degrees
+  const resizableChild = shape =>
+    shallowEqual(
+      matrix.compositeComponent(shape.localTransformMatrix).map(applyTolerance),
+      matrix.UNITMATRIX
+    );
+  const allowResize =
+    properShape.type !== 'group' ||
+    (config.groupResize && shapes.filter(groupedShape).every(resizableChild));
+  const resizeVertices = allowResize
+    ? [
+        [-1, -1, 315],
+        [1, -1, 45],
+        [1, 1, 135],
+        [-1, 1, 225], // corners
+        [0, -1, 0],
+        [1, 0, 90],
+        [0, 1, 180],
+        [-1, 0, 270], // edge midpoints
+      ]
+    : [];
   const resizePoints = resizeVertices.map(resizePointAnnotations(shape.id, a, b));
   const connectors = connectorVertices.map(resizeEdgeAnnotations(shape.id, a, b));
   return [...resizePoints, ...connectors];
@@ -1160,43 +1173,47 @@ const axisAlignedBoundingBoxShape = shapesToBox => {
   return aabbShape;
 };
 
-const resizeGroup = (shapes, selectedShapes) => {
-  const extending = shape => {
-    const children = shapes.filter(s => s.parent === shape.id && s.type !== 'annotation');
-    const axisAlignedBoundingBox = getAABB(children);
-    const { a, b, localTransformMatrix, rigTransform } = projectAABB(axisAlignedBoundingBox);
+const resizeGroup = (shapes, selectedShapes, elements) => {
+  if (!elements.length) return { shapes, selectedShapes };
+  const e = elements[0];
+  if (e.subtype !== 'adHocGroup') return { shapes, selectedShapes };
+  if (!e.baseAB) {
     return {
-      ...shape,
-      localTransformMatrix,
-      a,
-      b,
-      rigTransform,
-      deltaLocalTransformMatrix: matrix.multiply(
-        shape.localTransformMatrix,
-        matrix.invert(localTransformMatrix)
-      ),
+      shapes: shapes.map(s => ({ ...s, childBaseAB: null, baseLocalTransformMatrix: null })),
+      selectedShapes,
     };
-  };
-  const extender = (shapes, shape) => {
-    if (!shape.parent) return shape;
-    const parent = shapes.find(s => s.id === shape.parent);
-    return {
-      ...shape,
-      localTransformMatrix: matrix.multiply(
-        shape.localTransformMatrix,
-        parent.deltaLocalTransformMatrix
-      ),
-    };
-  };
-  const extendingIfNeeded = shape => (isAdHocGroup(shape) ? extending(shape) : shape);
-  const extenderIfNeeded = (shape, i, shapes) =>
-    isAdHocGroup(shape) || shape.type === 'annotation' ? shape : extender(shapes, shape);
-  const extendingShapes = shapes.map(extendingIfNeeded);
+  }
+  const groupScaleX = e.a / e.baseAB[0];
+  const groupScaleY = e.b / e.baseAB[1];
+  const groupScale = matrix.scale(groupScaleX, groupScaleY, 1);
   return {
-    shapes: extendingShapes.map(extenderIfNeeded),
-    selectedShapes: selectedShapes
-      .map(extendingIfNeeded)
-      .map(d => extenderIfNeeded(d, undefined, extendingShapes)),
+    shapes: shapes.map(s => {
+      if (s.parent !== e.id || s.type === 'annotation') return s;
+      const childBaseAB = s.childBaseAB || [s.a, s.b];
+      const impliedScale = matrix.scale(...childBaseAB, 1);
+      const inverseImpliedScale = matrix.invert(impliedScale);
+      const baseLocalTransformMatrix = s.baseLocalTransformMatrix || s.localTransformMatrix;
+      const normalizedBaseLocalTransformMatrix = matrix.multiply(
+        baseLocalTransformMatrix,
+        impliedScale
+      );
+      const T = matrix.multiply(groupScale, normalizedBaseLocalTransformMatrix);
+      const backScaler = groupScale.map(d => Math.abs(d));
+      const transformShit = matrix.invert(backScaler);
+      const abTuple = matrix.mvMultiply(matrix.multiply(backScaler, impliedScale), [1, 1, 1, 1]);
+      return {
+        ...s,
+        localTransformMatrix: matrix.multiply(
+          T,
+          matrix.multiply(inverseImpliedScale, transformShit)
+        ),
+        a: abTuple[0],
+        b: abTuple[1],
+        childBaseAB,
+        baseLocalTransformMatrix,
+      };
+    }),
+    selectedShapes,
   };
 };
 
@@ -1212,8 +1229,10 @@ const getLeafs = (descendCondition, allShapes, shapes) =>
 
 const grouping = select((shapes, selectedShapes) => {
   const preexistingAdHocGroups = shapes.filter(isAdHocGroup);
-  const freshSelectedShapes = shapes.filter(idsMatch(selectedShapes));
-  const freshNonSelectedShapes = shapes.filter(not(idsMatch(selectedShapes)));
+  const matcher = idsMatch(selectedShapes);
+  const selectedFn = shape => matcher(shape) && shape.type !== 'annotation';
+  const freshSelectedShapes = shapes.filter(selectedFn);
+  const freshNonSelectedShapes = shapes.filter(not(selectedFn));
   const someSelectedShapesAreGrouped = selectedShapes.some(isOrBelongsToAdHocGroup);
   const selectionOutsideGroup = !someSelectedShapesAreGrouped;
 
@@ -1228,16 +1247,16 @@ const grouping = select((shapes, selectedShapes) => {
   }
 
   // preserve the current selection if the sole ad hoc group is being manipulated
-  if (
-    selectedShapes.length === 1 &&
-    contentShapes(shapes, selectedShapes)[0].subtype === 'adHocGroup'
-  )
-    return { shapes, selectedShapes };
-
+  const elements = contentShapes(shapes, selectedShapes);
+  if (selectedShapes.length === 1 && elements[0].subtype === 'adHocGroup') {
+    return config.groupResize
+      ? resizeGroup(shapes, selectedShapes, elements)
+      : { shapes, selectedShapes };
+  }
   // group items or extend group bounding box (if enabled)
   if (selectedShapes.length < 2) {
     // resize the group if needed (ad-hoc group resize is manipulated)
-    return config.groupResize ? resizeGroup(shapes, selectedShapes) : { shapes, selectedShapes };
+    return { shapes, selectedShapes };
   } else {
     // group together the multiple items
     const group = axisAlignedBoundingBoxShape(freshSelectedShapes);
@@ -1351,9 +1370,9 @@ const nextScene = select(
     const selectedLeafShapes = getLeafs(
       shape => shape.subtype === config.adHocGroupName,
       shapes,
-      selectionState.shapes.map(
-        s => (s.type === 'annotation' ? shapes.find(ss => ss.id === s.parent) : s)
-      )
+      selectionState.shapes
+        .map(s => (s.type === 'annotation' ? shapes.find(ss => ss.id === s.parent) : s))
+        .filter(identity)
     )
       .filter(shape => shape.type !== 'annotation')
       .map(s => s.id);
