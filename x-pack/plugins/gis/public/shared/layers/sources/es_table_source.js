@@ -13,7 +13,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import {IndexPatternSelect} from 'ui/index_patterns/components/index_pattern_select';
-import {SingleFieldSelect} from './single_field_select';
+
 
 import {ASource} from './source';
 import {GeohashGridLayer} from '../geohashgrid_layer';
@@ -76,15 +76,7 @@ export class ESTableSource extends ASource {
       throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
     }
 
-    console.log('ip', indexPattern);
-
-    // const geoField = indexPattern.fields.byName[this._descriptor.geoField];
-    // if (!geoField) {
-    //   throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
-    // }
-    //
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(), aggSchemas.all);
-    console.log('ac', aggConfigs);
     //
     // let inspectorRequest;
     let resp;
@@ -94,7 +86,6 @@ export class ESTableSource extends ASource {
       searchSource.setField('size', 0);
 
       const dsl = aggConfigs.toDsl();
-      console.log('dsk', dsl)
       searchSource.setField('aggs', dsl);
       // searchSource.setField('filter', () => {
       //   const filters = [];
@@ -108,7 +99,6 @@ export class ESTableSource extends ASource {
       searchSource.getSearchRequestBody().then(body => {
         // inspectorRequest.json(body);
       });
-      console.log('go fetch');
       resp = await searchSource.fetch();
       // inspectorRequest
       //   .stats(getResponseInspectorStats(searchSource, resp))
@@ -172,7 +162,7 @@ export class ESTableSource extends ASource {
     return false;
   }
 
-  _makeAggConfigs() {
+    _makeAggConfigs() {
     return [
       {
         id: '1',
@@ -188,7 +178,7 @@ export class ESTableSource extends ASource {
         schema: 'segment',
         params: {
           "field": "geo.dest",
-          "size": 5
+          "size": 10000
           //,
           // "order": {
           //   "_count": "desc"

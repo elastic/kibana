@@ -13,7 +13,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
-import { SingleFieldSelect } from './single_field_select';
+import { SingleFieldSelect } from '../../components/single_field_select';
 
 import { ASource } from './source';
 import { GeohashGridLayer } from '../geohashgrid_layer';

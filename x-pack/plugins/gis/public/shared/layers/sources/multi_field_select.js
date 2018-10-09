@@ -11,7 +11,7 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 
-import { getGroupedFieldOptions } from './single_field_select';
+import { getGroupedFieldOptions } from '../../components/single_field_select';
 
 // TODO create better component that allows for changing field order
 

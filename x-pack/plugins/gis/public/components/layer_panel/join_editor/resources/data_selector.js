@@ -11,7 +11,7 @@ import {
   EuiFlexGroup
 } from '@elastic/eui';
 
-import _ from 'lodash';
+import { SingleFieldSelect } from '../../../../shared/components/single_field_select';
 
 import {
   indexPatternService,
@@ -27,59 +27,62 @@ export class DataSelector extends React.Component {
     this.state = {
       isLoadingIndexPattern: false,
       indexPatternId: '',
-      stringField: '',
-      selectedFields: []
+      selectedStringField: '',
+      term: '',
+      stringFields: []
     };
   }
 
-  _onIndexPatternSelect = (indexPatternId) => {
+  _onIndexPatternSelect = async (indexPatternId) => {
+
     this.setState({
-      indexPatternId,
-    }, this._loadIndexPattern(indexPatternId));
-    this.props.onSelection({
       indexPatternId: indexPatternId
     });
-  };
 
-  _loadIndexPattern = (indexPatternId) => {
+    const indexPattern = await indexPatternService.get(indexPatternId);
+
+    const stringFields = indexPattern.fields.byType.string;
     this.setState({
-      isLoadingIndexPattern: true,
-      indexPattern: undefined,
-      stringField: undefined,
-    }, this._debouncedLoad.bind(null, indexPatternId));
-  };
-
-  _debouncedLoad = _.debounce(async (indexPatternId) => {
-    if (!indexPatternId || indexPatternId.length === 0) {
-      return;
-    }
-
-    let indexPattern;
-    try {
-      indexPattern = await indexPatternService.get(indexPatternId);
-    } catch (err) {
-      // index pattern no longer exists
-      return;
-    }
-
-    if (!this._isMounted) {
-      return;
-    }
-
-    // props.indexPatternId may be updated before getIndexPattern returns
-    // ignore response when fetched index pattern does not match active index pattern
-    if (indexPattern.id !== indexPatternId) {
-      return;
-    }
-
-    this.setState({
-      isLoadingIndexPattern: false,
+      indexPatternId: indexPatternId,
       indexPattern: indexPattern,
-      indexPatternId: indexPatternId
+      stringFields: stringFields
     });
-  }, 300);
+
+    this.props.onSelection({
+      indexPatternId: indexPatternId,
+    });
+  };
+
+  filterStringField = (field) => {
+    return ['string'].includes(field.type);
+  };
+
+  _renderSingleFieldSelect() {
+
+    if (!this.state.indexPattern) {
+      return null;
+    }
+
+    const onFieldChange = (fieldName) => {
+      this.setState({
+        selectedStringField: fieldName
+      });
+    };
+
+    return (<SingleFieldSelect
+      placeholder="Select geo field"
+      value={this.state.selectedStringField}
+      onChange={onFieldChange}
+      filterField={this.filterStringField}
+      fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
+    />);
+  }
 
   render() {
+
+
+    const termFieldSelect = this._renderSingleFieldSelect();
+
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -89,7 +92,9 @@ export class DataSelector extends React.Component {
             placeholder="Select index pattern"
           />
         </EuiFlexItem>
-        <EuiFlexItem/>
+        <EuiFlexItem>
+          {termFieldSelect}
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }

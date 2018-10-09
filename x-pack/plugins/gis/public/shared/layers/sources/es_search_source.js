@@ -15,7 +15,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
-import { SingleFieldSelect } from './single_field_select';
+import { SingleFieldSelect } from '../../components/single_field_select';
 import { MultiFieldSelect } from './multi_field_select';
 import {
   indexPatternService,
@@ -109,11 +109,9 @@ export class ESSearchSource extends VectorSource {
         //todo: this seems somewhat redundant. Have this be passed in as arguments in the getGeoJson.
         //no need to submit time and extent filters in the method if they are not supposed to be applied anyway
         if (this.isFilterByMapBounds()) {
-          console.log('filtered by map bounds');
           filters.push(createExtentFilter(searchFilters.extent, geoField.name, geoField.type));
-        } else {
-          console.log('not filttered by map bounds');
         }
+
         if (isTimeAware) {
           filters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
         }

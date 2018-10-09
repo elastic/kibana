@@ -95,7 +95,6 @@ export class VectorLayer extends ALayer {
     if (!timeAware && !extentAware) {
       const sourceDataRequest = this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
-        console.log('can skip update', sourceDataRequest);
         return true;
       }
     }
@@ -183,7 +182,6 @@ export class VectorLayer extends ALayer {
   }
 
   _joinToFeatureCollection(sourceResult, joinState) {
-    console.log('data', sourceResult, joinState);
     if (!sourceResult.refreshed && !joinState.shouldJoin) {
       return;
     }

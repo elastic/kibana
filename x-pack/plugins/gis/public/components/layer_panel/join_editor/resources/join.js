@@ -9,7 +9,8 @@ import React, {  } from 'react';
 import {
   EuiSuperSelect,
   EuiFlexItem,
-  EuiFlexGroup
+  EuiFlexGroup,
+  EuiIcon
 } from '@elastic/eui';
 import { DataSelector } from './data_selector';
 
@@ -102,6 +103,11 @@ export class Join extends React.Component {
       <EuiFlexGroup>
         <EuiFlexItem>
           {this._renderJoinFields()}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiIcon
+            type="editorLink"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           {this._renderDataSelector()}
