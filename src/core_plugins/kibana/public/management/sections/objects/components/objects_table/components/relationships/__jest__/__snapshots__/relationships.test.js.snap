@@ -52,12 +52,21 @@ exports[`Relationships should render dashboards normally 1`] = `
           <EuiCallOut
             color="success"
             size="m"
-            title="Dashboard"
+            title={
+              <FormattedMessage
+                defaultMessage="Dashboard"
+                id="kbn.management.objects.relationships.dashboardCalloutTitle"
+                values={Object {}}
+              />
+            }
           >
             <p>
-              Here are some visualizations used on this dashboard. You can
-            safely delete this dashboard and the visualizations will still
-            work properly.
+              <FormattedMessage
+                defaultMessage="Here are some visualizations used on this dashboard.
+ You can safely delete this dashboard and the visualizations will still work properly."
+                id="kbn.management.objects.relationships.dashboardCalloutText"
+                values={Object {}}
+              />
             </p>
           </EuiCallOut>
         </EuiDescriptionListTitle>
@@ -142,7 +151,13 @@ exports[`Relationships should render errors 1`] = `
     <EuiCallOut
       color="danger"
       size="m"
-      title="Error"
+      title={
+        <FormattedMessage
+          defaultMessage="Error"
+          id="kbn.management.objects.relationships.renderErrorMessage"
+          values={Object {}}
+        />
+      }
     >
       foo
     </EuiCallOut>
@@ -242,10 +257,20 @@ exports[`Relationships should render searches normally 1`] = `
           <EuiCallOut
             color="success"
             size="m"
-            title="Saved Search"
+            title={
+              <FormattedMessage
+                defaultMessage="Saved Search"
+                id="kbn.management.objects.relationships.searchCalloutTitle"
+                values={Object {}}
+              />
+            }
           >
             <p>
-              Here is the index pattern tied to this saved search.
+              <FormattedMessage
+                defaultMessage="Here is the index pattern tied to this saved search."
+                id="kbn.management.objects.relationships.searchCalloutText"
+                values={Object {}}
+              />
             </p>
           </EuiCallOut>
         </EuiDescriptionListTitle>
@@ -299,12 +324,22 @@ exports[`Relationships should render searches normally 1`] = `
           <EuiCallOut
             color="warning"
             size="m"
-            title="Warning"
+            title={
+              <FormattedMessage
+                defaultMessage="Warning"
+                id="kbn.management.objects.relationships.warningCalloutTitle"
+                values={Object {}}
+              />
+            }
           >
             <p>
-              Here are some visualizations that use this saved search. If
-              you delete this saved search, these visualizations will not
-              longer work properly.
+              <FormattedMessage
+                defaultMessage="Here are some visualizations that use this saved search. If
+ you delete this saved search, these visualizations will not
+ longer work properly."
+                id="kbn.management.objects.relationships.searchWarningCalloutText"
+                values={Object {}}
+              />
             </p>
           </EuiCallOut>
         </EuiDescriptionListTitle>
@@ -402,12 +437,22 @@ exports[`Relationships should render visualizations normally 1`] = `
           <EuiCallOut
             color="warning"
             size="m"
-            title="Warning"
+            title={
+              <FormattedMessage
+                defaultMessage="Warning"
+                id="kbn.management.objects.relationships.warningCalloutTitle"
+                values={Object {}}
+              />
+            }
           >
             <p>
-              Here are some dashboards which contain this visualization. If
-            you delete this visualization, these dashboards will no longer
-            show them.
+              <FormattedMessage
+                defaultMessage="Here are some dashboards which contain this visualization. If
+ you delete this visualization, these dashboards will no longer
+ show them."
+                id="kbn.management.objects.relationships.visualizationWarningCalloutText"
+                values={Object {}}
+              />
             </p>
           </EuiCallOut>
         </EuiDescriptionListTitle>

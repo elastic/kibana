@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import rison from 'rison-node';
+import { i18n } from '@kbn/i18n';
 import { savedObjectManagementRegistry } from '../../saved_object_registry';
 import objectViewHTML from './_view.html';
 import uiRoutes from 'ui/routes';
@@ -199,11 +200,17 @@ uiModules.get('apps/management')
           }
           const confirmModalOptions = {
             onConfirm: doDelete,
-            confirmButtonText: 'Delete',
-            title: 'Delete saved Kibana object?'
+            confirmButtonText: i18n.translate('kbn.management.objects.confirmModalOptions.DeleteButtonLabel', {
+              defaultMessage: 'Delete',
+            }),
+            title: i18n.translate('kbn.management.objects.confirmModalOptions.DeleteButtonTitle', {
+              defaultMessage: 'Delete saved Kibana object?'
+            }),
           };
           confirmModal(
-            `You can't recover deleted objects`,
+            i18n.translate('kbn.management.objects.confirmModalOptions.warningTextMessage', {
+              defaultMessage: 'You can\'t recover deleted objects',
+            }),
             confirmModalOptions
           );
         };

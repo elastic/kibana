@@ -16,7 +16,11 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       size="m"
     >
       <h2>
-        Import saved objects
+        <FormattedMessage
+          defaultMessage="Import saved objects"
+          id="kbn.management.objects.flyoutTitle"
+          values={Object {}}
+        />
       </h2>
     </EuiTitle>
     <React.Fragment>
@@ -27,20 +31,36 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         color="warning"
         iconType="help"
         size="m"
-        title="Index Pattern Conflicts"
+        title={
+          <FormattedMessage
+            defaultMessage="Index Pattern Conflicts"
+            id="kbn.management.objects.flyout.indexPatternConflictsCalloutTitle"
+            values={Object {}}
+          />
+        }
       >
         <p>
-          The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can
-           
-          <EuiLink
-            color="primary"
-            href=""
-            type="button"
-          >
-            create a new index pattern
-          </EuiLink>
-           
-          if necessary.
+          <FormattedMessage
+            defaultMessage="The following saved objects use index patterns that do not exist.
+ Please select the index patterns you'd like re-associated with
+ them. You can {indexPatternLink} if necessary."
+            id="kbn.management.objects.flyout.indexPatternConflictsCalloutDescription"
+            values={
+              Object {
+                "indexPatternLink": <EuiLink
+                  color="primary"
+                  href=""
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="create a new index pattern"
+                    id="kbn.management.objects.flyout.indexPatternConflictsCalloutLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
+            }
+          />
         </p>
       </EuiCallOut>
     </React.Fragment>
@@ -123,7 +143,11 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           size="s"
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="kbn.management.objects.flyout.import.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -140,7 +164,11 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           size="s"
           type="button"
         >
-          Confirm all changes
+          <FormattedMessage
+            defaultMessage="Confirm all changes"
+            id="kbn.management.objects.flyout.importSuccessful.confirmAllChangesButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -153,7 +181,13 @@ exports[`Flyout conflicts should handle errors 1`] = `
   color="danger"
   iconType="cross"
   size="m"
-  title="Sorry, there was an error"
+  title={
+    <FormattedMessage
+      defaultMessage="Sorry, there was an error"
+      id="kbn.management.objects.flyout.errorCalloutTitle"
+      values={Object {}}
+    />
+  }
 >
   <p>
     foobar
@@ -177,7 +211,11 @@ exports[`Flyout should render import step 1`] = `
       size="m"
     >
       <h2>
-        Import saved objects
+        <FormattedMessage
+          defaultMessage="Import saved objects"
+          id="kbn.management.objects.flyoutTitle"
+          values={Object {}}
+        />
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>
@@ -187,11 +225,23 @@ exports[`Flyout should render import step 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        label="Please select a JSON file to import"
+        label={
+          <FormattedMessage
+            defaultMessage="Please select a JSON file to import"
+            id="kbn.management.objects.flyout.formRowSelectFileToImportLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiFilePicker
           compressed={false}
-          initialPromptText="Import"
+          initialPromptText={
+            <FormattedMessage
+              defaultMessage="Import"
+              id="kbn.management.objects.flyout.formRowSelectFileToImportPromptText"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
         />
       </EuiFormRow>
@@ -203,7 +253,13 @@ exports[`Flyout should render import step 1`] = `
         <EuiSwitch
           checked={true}
           data-test-subj="importSavedObjectsOverwriteToggle"
-          label="Automatically overwrite all saved objects?"
+          label={
+            <FormattedMessage
+              defaultMessage="Automatically overwrite all saved objects?"
+              id="kbn.management.objects.flyout.formRowOverwriteSavedObjectsLabel"
+              values={Object {}}
+            />
+          }
           name="overwriteAll"
           onChange={[Function]}
         />
@@ -231,7 +287,11 @@ exports[`Flyout should render import step 1`] = `
           size="s"
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="kbn.management.objects.flyout.import.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -248,7 +308,11 @@ exports[`Flyout should render import step 1`] = `
           size="s"
           type="button"
         >
-          Import
+          <FormattedMessage
+            defaultMessage="Import"
+            id="kbn.management.objects.flyout.import.confirmButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

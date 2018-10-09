@@ -25,6 +25,7 @@ import { Flyout } from './components/flyout';
 import { Relationships } from './components/relationships';
 import { Table } from './components/table';
 
+
 import {
   EuiSpacer,
   Query,
@@ -51,6 +52,7 @@ import {
   getSavedObjectLabel,
 } from '../../lib';
 import { ensureMinimumTime } from '../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 export const INCLUDED_TYPES = [
   'index-pattern',
@@ -59,7 +61,7 @@ export const INCLUDED_TYPES = [
   'search',
 ];
 
-export class ObjectsTable extends Component {
+class ObjectsTableUI extends Component {
   static propTypes = {
     savedObjectsClient: PropTypes.object.isRequired,
     indexPatterns: PropTypes.object.isRequired,
@@ -383,6 +385,7 @@ export class ObjectsTable extends Component {
       isDeleting,
       selectedSavedObjects,
     } = this.state;
+    const { intl } = this.props;
 
     if (!isShowingDeleteConfirmModal) {
       return null;
@@ -406,20 +409,33 @@ export class ObjectsTable extends Component {
 
       modal = (
         <EuiConfirmModal
-          title="Delete saved objects"
+          title={
+            <FormattedMessage id="kbn.management.objects.deleteConfirmModalTitle" defaultMessage="Delete saved objects"/>
+          }
           onCancel={onCancel}
           onConfirm={onConfirm}
-          cancelButtonText="Cancel"
-          confirmButtonText={isDeleting ? 'Deleting...' : 'Delete'}
+          cancelButtonText={(
+            <FormattedMessage id="kbn.management.objects.deleteConfirmModal.cancelButtonLabel" defaultMessage="Cancel"/>
+          )}
+          confirmButtonText={
+            isDeleting
+              ? (<FormattedMessage id="kbn.management.objects.deleteConfirmModal.deleteProcessButtonLabel" defaultMessage="Deleting..."/>)
+              :  (<FormattedMessage id="kbn.management.objects.deleteConfirmModal.deleteButtonLabel" defaultMessage="Delete"/>)
+          }
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
-          <p>This action will delete the following saved objects:</p>
+          <p>
+            <FormattedMessage
+              id="kbn.management.objects.deleteConfirmModalDescription"
+              defaultMessage="This action will delete the following saved objects:"
+            />
+          </p>
           <EuiInMemoryTable
             items={selectedSavedObjects}
             columns={[
               {
                 field: 'type',
-                name: 'Type',
+                name: intl.formatMessage({ id: 'kbn.management.objects.deleteConfirmModal.columnTypeName', defaultMessage: 'Type' }),
                 width: '50px',
                 render: type => (
                   <EuiToolTip
@@ -432,7 +448,7 @@ export class ObjectsTable extends Component {
               },
               {
                 field: 'id',
-                name: 'Id/Name',
+                name: intl.formatMessage({ id: 'kbn.management.objects.deleteConfirmModal.columnIdName', defaultMessage: 'Id/Name' }),
               },
             ]}
             pagination={true}
@@ -464,18 +480,34 @@ export class ObjectsTable extends Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={`Export ${filteredItemCount} ${filteredItemCount === 1 ? 'object' : 'objects'}`}
+          title={(<FormattedMessage
+            id="kbn.management.objects.exportConfirmModalTitle"
+            defaultMessage="Export {filteredItemCount} {filteredItemCountDescription}"
+            values={{
+              filteredItemCount,
+              filteredItemCountDescription: (
+                filteredItemCount === 1 ? 'object' : 'objects'
+              ),
+            }}
+          />)}
           onCancel={() =>
             this.setState({ isShowingExportAllOptionsModal: false })
           }
           onConfirm={this.onExportAll}
-          cancelButtonText="Cancel"
-          confirmButtonText="Export All"
+          cancelButtonText={(
+            <FormattedMessage id="kbn.management.objects.exportConfirmModal.cancelButtonLabel" defaultMessage="Cancel"/>
+          )}
+          confirmButtonText={(
+            <FormattedMessage id="kbn.management.objects.exportConfirmModal.exportButtonLabel" defaultMessage="Export All"/>
+          )}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
           <p>
-            Select which types to export. The number in parentheses indicates
-            how many of this type are available to export.
+            <FormattedMessage
+              id="kbn.management.objects.exportConfirmModalDescription"
+              defaultMessage="Select which types to export. The number in parentheses indicates
+              how many of this type are available to export."
+            />
           </p>
           <EuiCheckboxGroup
             options={exportAllOptions}
@@ -522,7 +554,11 @@ export class ObjectsTable extends Component {
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" style={{ maxWidth: 1000, marginTop: 16, marginBottom: 16 }}>
+          <EuiPageContent
+            verticalPosition="center"
+            horizontalPosition="center"
+            style={{ maxWidth: 1000, marginTop: 16, marginBottom: 16 }}
+          >
             {this.renderFlyout()}
             {this.renderRelationships()}
             {this.renderDeleteConfirmModal()}
@@ -560,3 +596,5 @@ export class ObjectsTable extends Component {
     );
   }
 }
+
+export const ObjectsTable = injectI18n(ObjectsTableUI);
