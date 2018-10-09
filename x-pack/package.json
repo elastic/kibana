@@ -20,6 +20,9 @@
       "intermediateBuildDirectory": "build/plugin/kibana/x-pack"
     }
   },
+  "resolutions": {
+    "**/@types/node": "8.10.20"
+  },
   "devDependencies": {
     "@kbn/dev-utils": "link:../packages/kbn-dev-utils",
     "@kbn/es": "link:../packages/kbn-es",

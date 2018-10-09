@@ -61,6 +61,9 @@
     "type": "git",
     "url": "https://github.com/elastic/kibana.git"
   },
+  "resolutions": {
+    "**/@types/node": "8.10.20"
+  },
   "dependencies": {
     "@elastic/eui": "4.4.1",
     "@elastic/filesaver": "1.1.2",
@@ -235,7 +238,7 @@
     "@types/joi": "^10.4.4",
     "@types/jquery": "^3.3.6",
     "@types/js-yaml": "^3.11.1",
-    "@types/jsonwebtoken": "^7.2.8",
+    "@types/jsonwebtoken": "^7.2.7",
     "@types/listr": "^0.13.0",
     "@types/lodash": "^3.10.1",
     "@types/minimatch": "^2.0.29",
