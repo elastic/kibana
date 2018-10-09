@@ -14,7 +14,7 @@ export function monacoRoute(server: Server) {
     path: '/monaco/{param*}',
     handler: {
       directory: {
-        path: Path.join(__dirname, '../../node_modules/monaco-editor/dev'),
+        path: Path.join(__dirname, '../../node_modules/monaco-editor/min'),
       },
     },
   });

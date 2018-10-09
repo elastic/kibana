@@ -24,7 +24,12 @@ if (document) {
 
 function handleNow(callback) {
   const r = window['require'];
-  r.config({ paths: { 'vs': '../monaco/vs' } });
+  r.config({
+      paths: {
+        'vs': '../monaco/vs',
+        'vs/language/typescript/languageFeatures': '../monaco/vs/language/typescript/tsMode.js'
+      },
+  });
   r(['vs/editor/editor.main'], () => {
     r(['vs/language/typescript/languageFeatures',
       'vs/base/browser/htmlContentRenderer',
