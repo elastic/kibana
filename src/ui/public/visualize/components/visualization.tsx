@@ -20,7 +20,6 @@
 import { get } from 'lodash';
 import React from 'react';
 
-import { I18nProvider } from '@kbn/i18n/react';
 import { PersistedState } from '../../persisted_state';
 import { memoizeLast } from '../../utils/memoize';
 import { Vis } from '../../vis';
@@ -66,15 +65,13 @@ export class Visualization extends React.Component<VisualizationProps> {
     const noResults = this.showNoResultsMessage(vis, visData);
 
     return (
-      <I18nProvider>
-        <div className="visualization">
-          {noResults ? (
-            <VisualizationNoResults onInit={onInit} />
-          ) : (
-            <VisualizationChart vis={vis} visData={visData} onInit={onInit} uiState={uiState} />
-          )}
-        </div>
-      </I18nProvider>
+      <div className="visualization">
+        {noResults ? (
+          <VisualizationNoResults onInit={onInit} />
+        ) : (
+          <VisualizationChart vis={vis} visData={visData} onInit={onInit} uiState={uiState} />
+        )}
+      </div>
     );
   }
 
