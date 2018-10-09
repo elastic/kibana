@@ -71,7 +71,7 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
             filterQueryDraft={'false'} // todo
             actionHandler={this.handleTagsAction}
             items={this.state.tags || []}
-            renderAssignmentOptions={item => item}
+            renderAssignmentOptions={(item: any) => item}
             ref={this.tableRef}
             showAssignmentOptions={true}
             type={TagsTableType}
