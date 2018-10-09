@@ -60,7 +60,7 @@ VisTypesRegistryProvider.register(function (Private) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('tagCloud.vis.schemas.tagSizeTitle', { defaultMessage: 'Tag Size' }),
+          title: i18n.translate('tagCloud.vis.schemas.metricTitle', { defaultMessage: 'Tag Size' }),
           min: 1,
           max: 1,
           aggFilter: ['!std_dev', '!percentiles', '!percentile_ranks', '!derivative', '!geo_bounds', '!geo_centroid'],
@@ -72,7 +72,7 @@ VisTypesRegistryProvider.register(function (Private) {
           group: 'buckets',
           name: 'segment',
           icon: 'fa fa-cloud',
-          title: i18n.translate('tagCloud.vis.schemas.tagsTitle', { defaultMessage: 'Tags' }),
+          title: i18n.translate('tagCloud.vis.schemas.segmentTitle', { defaultMessage: 'Tags' }),
           min: 1,
           max: 1,
           aggFilter: ['terms', 'significant_terms']
