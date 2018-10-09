@@ -25,7 +25,7 @@ import { first } from 'rxjs/operators';
 const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
 jest.mock('../../../utils/package_json', () => ({ pkg: mockPackage }));
 
-import { schema, Type, TypeOf } from './schema';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
 
 import { ConfigService, Env, ObjectToConfigAdapter } from '.';
 import { logger } from '../logging/__mocks__';

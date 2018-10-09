@@ -21,6 +21,13 @@ export async function getTelemetryOptIn(request) {
     if (savedObjectsClient.errors.isNotFoundError(error)) {
       return null;
     }
+
+    // if we aren't allowed to get the telemetry document, we can assume that we won't
+    // be able to opt into telemetry either, so we're returning `false` here instead of null
+    if (savedObjectsClient.errors.isForbiddenError(error)) {
+      return false;
+    }
+
     throw error;
   }
 }
