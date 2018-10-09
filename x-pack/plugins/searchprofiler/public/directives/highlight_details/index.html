@@ -11,14 +11,14 @@
   <b><span tooltip="The time spent by this query component alone, exclusive of children" tooltip-placement="left">Self Time</span></b>
   <p>{{detailRow.selfTime | msToPretty:3 }}</p>
   <b>Timing Breakdown</b>
-  <table class="breakdown">
+  <table class="prfDevTool__breakdown">
     <tr style="background-color:{{breakdown.color}}" ng-repeat="breakdown in detailRow.breakdown">
       <td><span tooltip="{{breakdown.tip}}" tooltip-placement="left">{{breakdown.key}}</span></td>
       <td>{{breakdown.time | nsToPretty: 1}}</td>
       <td style="width:33%; background-color:white;">
-        <div class="graph progress">
-          <div class="bar" style="width:{{breakdown.relative}}%"></div>
-          <p>{{breakdown.relative}}%</p>
+        <div class="prfDevTool__graph progress">
+          <div class="prfDevTool__bar" style="width:{{breakdown.relative}}%"></div>
+          <p class="prfDevTool__graphLabel">{{breakdown.relative}}%</p>
         </div>
       </td>
     </tr>

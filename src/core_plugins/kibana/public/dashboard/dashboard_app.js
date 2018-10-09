@@ -81,7 +81,17 @@ app.directive('dashboardApp', function ($injector) {
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, dashboardConfig, localStorage) {
+    controller: function (
+      $scope,
+      $rootScope,
+      $route,
+      $routeParams,
+      $location,
+      getAppState,
+      dashboardConfig,
+      localStorage,
+      breadcrumbState
+    ) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
@@ -169,6 +179,18 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.getTitle(),
         dashboardStateManager.getViewMode(),
         dashboardStateManager.getIsDirty(timefilter));
+
+      // Push breadcrumbs to new header navigation
+      const updateBreadcrumbs = () => {
+        breadcrumbState.set([
+          { text: 'Dashboard', href: $scope.landingPageUrl() },
+          { text: $scope.getDashTitle() }
+        ]);
+      };
+      updateBreadcrumbs();
+      dashboardStateManager.registerChangeListener(updateBreadcrumbs);
+      config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
+
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardStateManager.saveState();
       $scope.getShouldShowEditHelp = () => (
