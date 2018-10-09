@@ -18,5 +18,5 @@ export function wrapEsError(err: any) {
   if (statusCode === 403) {
     return Boom.forbidden('Insufficient user permissions for managing Beats configuration');
   }
-  return Boom.wrap(err, err.statusCode);
+  return Boom.boomify(err, { statusCode: err.statusCode });
 }
