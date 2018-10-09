@@ -13,6 +13,7 @@
 
 import _ from 'lodash';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
+import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
 
 // List of function descriptions for which actual values from record level results should be displayed.
 const DISPLAY_ACTUAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean', 'max', 'min', 'sum',
@@ -72,6 +73,21 @@ export function getSeverityColor(normalizedScore) {
     return '#d2e9f7';
   } else {
     return '#ffffff';
+  }
+}
+
+// Returns a label to use for the multi-bucket impact of an anomaly
+// according to the value of the multi_bucket_impact field of a record,
+// which ranges from -5 to +5.
+export function getMultiBucketImpactLabel(multiBucketImpact) {
+  if (multiBucketImpact >= MULTI_BUCKET_IMPACT.HIGH) {
+    return 'high';
+  } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM) {
+    return 'medium';
+  } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.LOW) {
+    return 'low';
+  } else {
+    return 'none';
   }
 }
 

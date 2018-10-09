@@ -47,8 +47,8 @@ export function License(props) {
   const { status, type, isExpired, expiryDate } = props;
   return (
     <EuiPage className="licenseManagement">
-      <EuiPageBody className="licenseManagement__pageBody">
-        <div className="licenseManagement__contain">
+      <EuiPageBody className="licManagement__pageBody">
+        <div className="licManagement__contain">
           <LicenseStatus
             isExpired={isExpired}
             status={status}

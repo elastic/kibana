@@ -169,7 +169,7 @@ export class Relationships extends Component {
               items={list}
               columns={[
                 {
-                  name: 'Type',
+                  width: 24,
                   render: () => (
                     <EuiToolTip
                       position="top"

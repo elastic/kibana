@@ -1777,6 +1777,48 @@ Object {
     "units": "",
     "uuidField": "beats_stats.beat.uuid",
   },
+  "ccr_sync_lag_ops": DifferenceMetric {
+    "aggs": Object {
+      "metric2_max": Object {
+        "max": Object {
+          "field": "ccr_stats.follower_global_checkpoint",
+        },
+      },
+      "metric_max": Object {
+        "max": Object {
+          "field": "ccr_stats.leader_max_seq_no",
+        },
+      },
+    },
+    "app": "elasticsearch",
+    "calculation": [Function],
+    "derivative": false,
+    "description": "The number of operations the follower index is lagging behind the leader.",
+    "field": "",
+    "format": "0,0.[00]",
+    "label": "Ops delay",
+    "metricAgg": "sum",
+    "timestampField": "timestamp",
+    "title": "Ops delay",
+    "type": "ccr",
+    "units": "",
+    "uuidField": "source_node.uuid",
+  },
+  "ccr_sync_lag_time": MillisecondsToSecondsMetric {
+    "app": "elasticsearch",
+    "calculation": [Function],
+    "derivative": false,
+    "description": "The amount of time the follower index is lagging behind the leader.",
+    "field": "ccr_stats.time_since_last_fetch_millis",
+    "format": "0.[00]",
+    "label": "Fetch delay",
+    "metricAgg": "max",
+    "timestampField": "timestamp",
+    "title": "Fetch delay",
+    "type": "ccr",
+    "units": "s",
+    "uuidField": "source_node.uuid",
+  },
   "cluster_index_latency": LatencyMetric {
     "aggs": Object {
       "event_time_in_millis": Object {

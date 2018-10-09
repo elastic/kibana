@@ -36,6 +36,7 @@ export const spaces = (kibana: any) =>
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        maxSpaces: Joi.number().default(1000),
       }).default();
     },
 
@@ -123,6 +124,7 @@ export const spaces = (kibana: any) =>
             spacesAuditLogger,
             authorization,
             callWithRequestRepository,
+            server.config(),
             internalRepository,
             request
           );
