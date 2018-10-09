@@ -33,13 +33,13 @@ describe('I18n engine', () => {
 
   describe('addMessages', () => {
     test('should throw error if locale is not specified or empty', () => {
-      expect(() => i18n.addMessages({ foo: 'bar' })).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.addMessages({ messages: { foo: 'bar' } })).toThrowErrorMatchingSnapshot();
       expect(() => i18n.addMessages({ locale: '' })).toThrowErrorMatchingSnapshot();
     });
 
     test('should throw error if locale specified in messages is different from one provided as second argument', () => {
       expect(() =>
-        i18n.addMessages({ foo: 'bar', locale: 'en' }, 'ru')
+        i18n.addMessages({ messages: { foo: 'bar' }, locale: 'en' }, 'ru')
       ).toThrowErrorMatchingSnapshot();
     });
 
@@ -48,13 +48,13 @@ describe('I18n engine', () => {
 
       expect(i18n.getMessages()).toEqual({});
 
-      i18n.addMessages({ foo: 'bar' }, locale);
+      i18n.addMessages({ messages: { foo: 'bar' } }, locale);
 
       expect(i18n.getMessages()).toEqual({});
 
       i18n.setLocale(locale);
 
-      expect(i18n.getMessages()).toEqual({ foo: 'bar' });
+      expect(i18n.getMessages()).toEqual({ messages: { foo: 'bar' } });
     });
 
     test('should add messages if locale prop is passed as messages property', () => {
@@ -64,7 +64,9 @@ describe('I18n engine', () => {
 
       i18n.addMessages({
         locale,
-        foo: 'bar',
+        messages: {
+          foo: 'bar',
+        },
       });
 
       expect(i18n.getMessages()).toEqual({});
@@ -72,7 +74,9 @@ describe('I18n engine', () => {
       i18n.setLocale(locale);
 
       expect(i18n.getMessages()).toEqual({
-        foo: 'bar',
+        messages: {
+          foo: 'bar',
+        },
         locale: 'ru',
       });
     });
@@ -83,23 +87,31 @@ describe('I18n engine', () => {
       i18n.setLocale(locale);
       i18n.addMessages({
         locale,
-        ['a.b.c']: 'foo',
+        messages: {
+          ['a.b.c']: 'foo',
+        },
       });
 
       expect(i18n.getMessages()).toEqual({
         locale: 'ru',
-        ['a.b.c']: 'foo',
+        messages: {
+          ['a.b.c']: 'foo',
+        },
       });
 
       i18n.addMessages({
         locale,
-        ['d.e.f']: 'bar',
+        messages: {
+          ['d.e.f']: 'bar',
+        },
       });
 
       expect(i18n.getMessages()).toEqual({
         locale: 'ru',
-        ['a.b.c']: 'foo',
-        ['d.e.f']: 'bar',
+        messages: {
+          ['a.b.c']: 'foo',
+          ['d.e.f']: 'bar',
+        },
       });
     });
 
@@ -109,22 +121,30 @@ describe('I18n engine', () => {
       i18n.setLocale(locale);
       i18n.addMessages({
         locale,
-        ['a.b.c']: 'foo',
+        messages: {
+          ['a.b.c']: 'foo',
+        },
       });
 
       expect(i18n.getMessages()).toEqual({
         locale: 'ru',
-        ['a.b.c']: 'foo',
+        messages: {
+          ['a.b.c']: 'foo',
+        },
       });
 
       i18n.addMessages({
         locale,
-        ['a.b.c']: 'bar',
+        messages: {
+          ['a.b.c']: 'bar',
+        },
       });
 
       expect(i18n.getMessages()).toEqual({
         locale: 'ru',
-        ['a.b.c']: 'bar',
+        messages: {
+          ['a.b.c']: 'bar',
+        },
       });
     });
 
@@ -134,14 +154,18 @@ describe('I18n engine', () => {
 
       i18n.addMessages(
         {
-          ['a.b.c']: 'bar',
+          messages: {
+            ['a.b.c']: 'bar',
+          },
         },
         'en_US'
       );
 
       expect(i18n.getLocale()).toBe(locale);
       expect(i18n.getMessages()).toEqual({
-        ['a.b.c']: 'bar',
+        messages: {
+          ['a.b.c']: 'bar',
+        },
       });
     });
   });
@@ -150,23 +174,31 @@ describe('I18n engine', () => {
     test('should return messages for the current language', () => {
       i18n.addMessages({
         locale: 'ru',
-        foo: 'bar',
+        messages: {
+          foo: 'bar',
+        },
       });
       i18n.addMessages({
         locale: 'en',
-        bar: 'foo',
+        messages: {
+          bar: 'foo',
+        },
       });
 
       i18n.setLocale('ru');
       expect(i18n.getMessages()).toEqual({
         locale: 'ru',
-        foo: 'bar',
+        messages: {
+          foo: 'bar',
+        },
       });
 
       i18n.setLocale('en');
       expect(i18n.getMessages()).toEqual({
         locale: 'en',
-        bar: 'foo',
+        messages: {
+          bar: 'foo',
+        },
       });
     });
 
@@ -394,7 +426,9 @@ describe('I18n engine', () => {
     test('should return message as is if values are not provided', () => {
       i18n.init({
         locale: 'en',
-        ['a.b.c']: 'foo',
+        messages: {
+          ['a.b.c']: 'foo',
+        },
       });
 
       expect(i18n.translate('a.b.c')).toBe('foo');
@@ -407,7 +441,9 @@ describe('I18n engine', () => {
     test('should not return defaultMessage as is if values are provided', () => {
       i18n.init({
         locale: 'en',
-        ['a.b.c']: 'foo',
+        messages: {
+          ['a.b.c']: 'foo',
+        },
       });
       expect(i18n.translate('a.b.c', { defaultMessage: 'bar' })).toBe('foo');
     });
@@ -415,8 +451,10 @@ describe('I18n engine', () => {
     test('should interpolate variables', () => {
       i18n.init({
         locale: 'en',
-        ['a.b.c']: 'foo {a}, {b}, {c} bar',
-        ['d.e.f']: '{foo}',
+        messages: {
+          ['a.b.c']: 'foo {a}, {b}, {c} bar',
+          ['d.e.f']: '{foo}',
+        },
       });
 
       expect(
@@ -440,11 +478,13 @@ describe('I18n engine', () => {
     test('should format pluralized messages', () => {
       i18n.init({
         locale: 'en',
-        ['a.b.c']: `You have {numPhotos, plural,
+        messages: {
+          ['a.b.c']: `You have {numPhotos, plural,
                       =0 {no photos.}
                       =1 {one photo.}
                       other {# photos.}
                    }`,
+        },
       });
 
       expect(i18n.translate('a.b.c', { values: { numPhotos: 0 } })).toBe('You have no photos.');
@@ -494,11 +534,13 @@ describe('I18n engine', () => {
     test('should throw error if wrong context is provided to the translation string', () => {
       i18n.init({
         locale: 'en',
-        ['a.b.c']: `You have {numPhotos, plural,
+        messages: {
+          ['a.b.c']: `You have {numPhotos, plural,
                       =0 {no photos.}
                       =1 {one photo.}
                       other {# photos.}
                    }`,
+        },
       });
       i18n.setDefaultLocale('en');
 
@@ -519,7 +561,9 @@ describe('I18n engine', () => {
     test('should format messages with percent formatter', () => {
       i18n.init({
         locale: 'en',
-        ['a.b.c']: 'Result: {result, number, percent}',
+        messages: {
+          ['a.b.c']: 'Result: {result, number, percent}',
+        },
       });
       i18n.setDefaultLocale('en');
 
@@ -536,10 +580,12 @@ describe('I18n engine', () => {
     test('should format messages with date formatter', () => {
       i18n.init({
         locale: 'en',
-        ['a.short']: 'Sale begins {start, date, short}',
-        ['a.medium']: 'Sale begins {start, date, medium}',
-        ['a.long']: 'Sale begins {start, date, long}',
-        ['a.full']: 'Sale begins {start, date, full}',
+        messages: {
+          ['a.short']: 'Sale begins {start, date, short}',
+          ['a.medium']: 'Sale begins {start, date, medium}',
+          ['a.long']: 'Sale begins {start, date, long}',
+          ['a.full']: 'Sale begins {start, date, full}',
+        },
       });
 
       expect(
@@ -602,8 +648,10 @@ describe('I18n engine', () => {
     test('should format messages with time formatter', () => {
       i18n.init({
         locale: 'en',
-        ['a.short']: 'Coupon expires at {expires, time, short}',
-        ['a.medium']: 'Coupon expires at {expires, time, medium}',
+        messages: {
+          ['a.short']: 'Coupon expires at {expires, time, short}',
+          ['a.medium']: 'Coupon expires at {expires, time, medium}',
+        },
       });
 
       expect(
@@ -645,8 +693,10 @@ describe('I18n engine', () => {
             usd: { style: 'currency', currency: 'USD' },
           },
         },
-        ['a.b.c']: 'Your total is {total, number, usd}',
-        ['d.e.f']: 'Your total is {total, number, eur}',
+        messages: {
+          ['a.b.c']: 'Your total is {total, number, usd}',
+          ['d.e.f']: 'Your total is {total, number, eur}',
+        },
       });
 
       expect(i18n.translate('a.b.c', { values: { total: 1000 } })).toBe('Your total is $1,000.00');
@@ -704,7 +754,9 @@ describe('I18n engine', () => {
     test('should use default format if passed format option is not specified', () => {
       i18n.init({
         locale: 'en',
-        ['a.b.c']: 'Your total is {total, number, usd}',
+        messages: {
+          ['a.b.c']: 'Your total is {total, number, usd}',
+        },
       });
       i18n.setDefaultLocale('en');
 
@@ -721,7 +773,9 @@ describe('I18n engine', () => {
     test('should throw error if used format is not specified', () => {
       i18n.init({
         locale: 'en',
-        ['a.b.c']: 'Your total is {total, foo}',
+        messages: {
+          ['a.b.c']: 'Your total is {total, foo}',
+        },
       });
       i18n.setDefaultLocale('en');
 
@@ -752,12 +806,16 @@ describe('I18n engine', () => {
     test('should add messages if locale is specified', () => {
       i18n.init({
         locale: 'en',
-        foo: 'bar',
+        messages: {
+          foo: 'bar',
+        },
       });
 
       expect(i18n.getMessages()).toEqual({
         locale: 'en',
-        foo: 'bar',
+        messages: {
+          foo: 'bar',
+        },
       });
     });
 
