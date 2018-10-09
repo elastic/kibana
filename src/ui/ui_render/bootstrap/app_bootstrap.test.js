@@ -132,7 +132,9 @@ describe('ui_render/AppBootstrap', () => {
         ...mockConfig(),
         translations: {
           locale: 'en',
-          foo: 'not translated foo'
+          messages: {
+            foo: 'not translated foo',
+          },
         }
       };
       const bootstrap2 = new AppBootstrap(config2);
@@ -149,7 +151,9 @@ function mockConfig() {
   return {
     translations: {
       locale: 'en',
-      foo: 'translated foo'
+      messages: {
+        foo: 'translated foo'
+      },
     },
     templateData: {
       appId: 123,
