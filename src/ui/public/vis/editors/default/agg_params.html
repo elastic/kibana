@@ -24,7 +24,7 @@
     {{ agg.schema.deprecateMessage }}
   </p>
   <p
-    ng-show="agg.schema.deprecateMessage"
+    ng-show="!agg.schema.deprecateMessage"
     class="visEditorAggParam__error"
     i18n-id="common.ui.vis.editors.aggParams.errors.schemaIsDeprecatedErrorMessage"
     i18n-default-message="&quot;{schema}&quot; has been deprecated."
