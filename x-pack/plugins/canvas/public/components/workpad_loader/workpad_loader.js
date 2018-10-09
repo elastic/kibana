@@ -46,8 +46,8 @@ class WorkpadLoaderUI extends React.PureComponent {
   };
 
   state = {
-    deletingWorkpad: false,
     createPending: false,
+    deletingWorkpad: false,
     sortField: '@timestamp',
     sortDirection: 'desc',
     selectedWorkpads: [],
@@ -57,6 +57,9 @@ class WorkpadLoaderUI extends React.PureComponent {
   async componentDidMount() {
     // on component load, kick off the workpad search
     this.props.findWorkpads();
+
+    // keep track of whether or not the component is mounted, to prevent rogue setState calls
+    this._isMounted = true;
   }
 
   componentWillReceiveProps(newProps) {
@@ -65,25 +68,29 @@ class WorkpadLoaderUI extends React.PureComponent {
     if (workpadId !== newProps.workpadId) onClose();
   }
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   // create new empty workpad
   createWorkpad = async () => {
     this.setState({ createPending: true });
     await this.props.createWorkpad();
-    this.setState({ createPending: false });
+    this._isMounted && this.setState({ createPending: false });
   };
 
   // create new workpad from uploaded JSON
   uploadWorkpad = async workpad => {
     this.setState({ createPending: true });
     await this.props.createWorkpad(workpad);
-    this.setState({ createPending: false });
+    this._isMounted && this.setState({ createPending: false });
   };
 
   // clone existing workpad
   cloneWorkpad = async workpad => {
     this.setState({ createPending: true });
     await this.props.cloneWorkpad(workpad.id);
-    this.setState({ createPending: false });
+    this._isMounted && this.setState({ createPending: false });
   };
 
   // Workpad remove methods
@@ -93,16 +100,18 @@ class WorkpadLoaderUI extends React.PureComponent {
 
   removeWorkpads = () => {
     const { selectedWorkpads } = this.state;
+
     this.props.removeWorkpads(selectedWorkpads.map(({ id }) => id)).then(remainingIds => {
       const remainingWorkpads =
         remainingIds.length > 0
           ? selectedWorkpads.filter(({ id }) => remainingIds.includes(id))
           : [];
 
-      this.setState({
-        deletingWorkpad: false,
-        selectedWorkpads: remainingWorkpads,
-      });
+      this._isMounted &&
+        this.setState({
+          deletingWorkpad: false,
+          selectedWorkpads: remainingWorkpads,
+        });
     });
   };
 
@@ -405,7 +414,7 @@ class WorkpadLoaderUI extends React.PureComponent {
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={2}>
-                    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" wrap>
                       <EuiFlexItem grow={false}>
                         <WorkpadUpload
                           createPending={createPending}

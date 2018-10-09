@@ -35,6 +35,7 @@ const ElementTypesUI = ({ elements, onClick, search, setSearch, intl }) => {
           title={displayName}
           description={help}
           onClick={whenClicked}
+          className="canvasCard"
         />
       </EuiFlexItem>
     );

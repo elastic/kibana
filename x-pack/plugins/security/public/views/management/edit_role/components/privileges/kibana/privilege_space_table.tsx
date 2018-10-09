@@ -6,8 +6,6 @@
 
 import {
   EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   // @ts-ignore
   EuiInMemoryTable,
   EuiText,
@@ -93,31 +91,26 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
     const columns: any[] = [
       {
         field: 'space',
+        name: '',
+        width: '50px',
+        sortable: true,
+        render: (space: Space | DeletedSpace) => {
+          if ('deleted' in space) {
+            return null;
+          }
+          return <SpaceAvatar space={space} size="s" />;
+        },
+      },
+      {
+        field: 'space',
         name: 'Space',
         width: this.props.readonly ? '75%' : '50%',
         render: (space: Space | DeletedSpace) => {
-          let content;
           if ('deleted' in space) {
-            content = [
-              <EuiFlexItem key={1}>
-                <EuiText color={'subdued'}>{space.id} (deleted)</EuiText>
-              </EuiFlexItem>,
-            ];
+            return <EuiText color={'subdued'}>{space.id} (deleted)</EuiText>;
           } else {
-            content = [
-              <EuiFlexItem key={1} grow={false}>
-                <SpaceAvatar space={space} size="s" />
-              </EuiFlexItem>,
-              <EuiFlexItem key={2}>
-                <EuiText>{space.name}</EuiText>
-              </EuiFlexItem>,
-            ];
+            return <EuiText>{space.name}</EuiText>;
           }
-          return (
-            <EuiFlexGroup gutterSize="s" responsive={false} alignItems={'center'}>
-              {content}
-            </EuiFlexGroup>
-          );
         },
       },
       {

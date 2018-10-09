@@ -348,10 +348,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickSave() {
-      await retry.try(async () => {
-        log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveSavedObjectButton');
-      });
+      log.debug('DashboardPage.clickSave');
+      await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
     /**
