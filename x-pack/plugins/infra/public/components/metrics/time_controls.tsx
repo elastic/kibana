@@ -86,6 +86,7 @@ export class MetricsTimeControls extends React.Component<
     return (
       <MetricsTimeControlsContainer>
         <RangeDatePicker
+          key={`${currentTimeRange.from}-${currentTimeRange.to}`}
           startDate={moment(currentTimeRange.from)}
           endDate={moment(currentTimeRange.to)}
           onChangeRangeTime={this.handleChangeDate}
@@ -190,12 +191,6 @@ export class MetricsTimeControls extends React.Component<
     const { onChangeRangeTime } = this.props;
     const to = moment();
     const from = moment().subtract(1, 'hour');
-    this.dateRangeRef.current.resetRangeDate(from, to);
-    this.setState({
-      ...this.state,
-      to,
-      from,
-    });
     if (onChangeRangeTime) {
       onChangeRangeTime({
         to: to.valueOf(),

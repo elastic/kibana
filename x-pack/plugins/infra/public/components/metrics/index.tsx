@@ -9,6 +9,7 @@ import React from 'react';
 
 import { InfraMetricData } from '../../../common/graphql/types';
 import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
+import { metricTimeActions } from '../../store';
 import { InfraLoadingPanel } from '../loading';
 import { Section } from './section';
 
@@ -17,6 +18,7 @@ interface Props {
   layout: InfraMetricLayout[];
   loading: boolean;
   nodeName: string;
+  onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
 }
 
 export class Metrics extends React.PureComponent<Props> {
@@ -47,8 +49,17 @@ export class Metrics extends React.PureComponent<Props> {
   };
 
   private renderSection = (layout: InfraMetricLayout) => (section: InfraMetricLayoutSection) => {
+    let sectionProps = {};
+    if (section.type === 'chart') {
+      sectionProps = { onChangeRangeTime: this.props.onChangeRangeTime };
+    }
     return (
-      <Section section={section} metrics={this.props.metrics} key={`${layout.id}-${section.id}`} />
+      <Section
+        section={section}
+        metrics={this.props.metrics}
+        key={`${layout.id}-${section.id}`}
+        {...sectionProps}
+      />
     );
   };
 }

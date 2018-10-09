@@ -26,6 +26,7 @@ import {
   InfraMetricLayoutSection,
   InfraMetricLayoutVisualizationType,
 } from '../../../pages/metrics/layouts/types';
+import { metricTimeActions } from '../../../store';
 import { createFormatter } from '../../../utils/formatters';
 
 const MARGIN_LEFT = 60;
@@ -38,6 +39,7 @@ const chartComponentsByType = {
 interface Props {
   section: InfraMetricLayoutSection;
   metric: InfraMetricData;
+  onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
 }
 
 const isInfraMetricLayoutVisualizationType = (
@@ -115,6 +117,8 @@ export class ChartSection extends React.PureComponent<Props> {
       xType: 'time',
       showCrosshair: false,
       showDefaultAxis: false,
+      enableSelectionBrush: true,
+      onSelectionBrushEnd: this.handleSelectionBrushEnd,
     };
     const stacked = visConfig && visConfig.stacked;
     if (stacked) {
@@ -184,4 +188,34 @@ export class ChartSection extends React.PureComponent<Props> {
       </EuiPageContentBody>
     );
   }
+
+  private handleSelectionBrushEnd = (area: Area) => {
+    const { onChangeRangeTime } = this.props;
+    const { startX, endX } = area.domainArea;
+    if (onChangeRangeTime) {
+      onChangeRangeTime({
+        to: endX.valueOf(),
+        from: startX.valueOf(),
+      } as metricTimeActions.MetricRangeTimeState);
+    }
+  };
+}
+
+interface DomainArea {
+  startX: moment.Moment;
+  endX: moment.Moment;
+  startY: number;
+  endY: number;
+}
+
+interface DrawArea {
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+}
+
+interface Area {
+  domainArea: DomainArea;
+  drawArea: DrawArea;
 }

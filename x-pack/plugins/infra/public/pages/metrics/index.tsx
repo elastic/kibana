@@ -153,6 +153,7 @@ class MetricDetailPage extends React.PureComponent<Props> {
                                         loading={
                                           metrics.length > 0 && isAutoReloading ? false : loading
                                         }
+                                        onChangeRangeTime={setRangeTime}
                                       />
                                     </EuiPageContentWithRelative>
                                   </EuiPageBody>

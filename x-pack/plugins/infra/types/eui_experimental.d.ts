@@ -13,6 +13,8 @@ declare module '@elastic/eui/lib/experimental' {
     yDomain?: number[];
     showCrosshair?: boolean;
     showDefaultAxis?: boolean;
+    enableSelectionBrush?: boolean;
+    onSelectionBrushEnd?: (args: any) => void;
   };
   export const EuiSeriesChart: React.SFC<EuiSeriesChartProps>;
 
