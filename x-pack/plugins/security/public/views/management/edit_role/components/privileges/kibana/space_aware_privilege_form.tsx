@@ -295,11 +295,11 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
 
     const role = copyRole(this.props.role);
 
-    if (!form.spaces.length || !form.privilege) {
-      existingPrivilegeForm.spaces.forEach(spaceId => {
-        role.kibana.space[spaceId] = [];
-      });
-    } else {
+    existingPrivilegeForm.spaces.forEach(spaceId => {
+      role.kibana.space[spaceId] = [];
+    });
+
+    if (form.spaces.length) {
       const privilege = form.privilege;
       if (privilege) {
         form.spaces.forEach(spaceId => {
@@ -326,13 +326,26 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
       delete role.kibana.space[spaceId];
     });
 
+    this.props.validator.setInProgressSpacePrivileges(updatedPrivileges);
     this.props.onChange(role);
   };
 
   public onExistingSpacePrivilegesChange = (assignedPrivileges: SpacePrivileges) => {
     const role = copyRole(this.props.role);
 
-    role.kibana.space = assignedPrivileges;
+    role.kibana.space = {
+      ...assignedPrivileges,
+    };
+
+    // Merge in-progress forms
+    this.state.privilegeForms.forEach(inProgressForm => {
+      const { privilege } = inProgressForm;
+      if (privilege) {
+        inProgressForm.spaces.forEach(spaceId => {
+          role.kibana.space[spaceId] = [privilege];
+        });
+      }
+    });
 
     this.setState({
       spacePrivileges: assignedPrivileges,
