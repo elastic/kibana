@@ -51,6 +51,7 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
           showAssignmentOptions={false}
           type={BeatDetailTagsTable}
         />
+
         <EuiGlobalToastList
           toasts={this.state.notifications}
           dismissToast={() => this.setState({ notifications: [] })}

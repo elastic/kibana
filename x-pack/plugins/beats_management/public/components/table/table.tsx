@@ -13,26 +13,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { TABLE_CONFIG } from '../../../common/constants';
 import { ControlBar } from './controls';
-import { TableType } from './table_type_configs';
-
-interface TableProps {
-  assignmentOptions?: any[] | null;
-  assignmentTitle?: string | null;
-  items: any[];
-  renderAssignmentOptions?: (item: any, key: string) => any;
-  showAssignmentOptions: boolean;
-  type: TableType;
-
-  isLoadingSuggestions: boolean;
-  loadSuggestions: any;
-  onKueryBarSubmit: any;
-  isKueryValid: any;
-  kueryValue: any;
-  onKueryBarChange: any;
-  suggestions: any;
-  filterQueryDraft: any;
-  actionHandler(action: string, payload?: any): void;
-}
 
 interface TableState {
   selection: any[];
@@ -42,8 +22,8 @@ const TableContainer = styled.div`
   padding: 16px;
 `;
 
-export class Table extends React.Component<TableProps, TableState> {
-  constructor(props: TableProps) {
+export class Table extends React.Component<any, TableState> {
+  constructor(props: any) {
     super(props);
 
     this.state = {
