@@ -159,7 +159,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               <h3>Attached Beats</h3>
             </EuiTitle>
             <Table
-              actionHandler={(a, b) => {
+              actionHandler={() => {
                 /* TODO: this prop should be optional */
               }}
               assignmentOptions={[]}

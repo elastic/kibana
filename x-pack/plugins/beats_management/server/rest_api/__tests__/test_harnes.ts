@@ -6,6 +6,7 @@
 
 import { badRequest } from 'boom';
 import { readFile } from 'fs';
+// @ts-ignore
 import Hapi from 'hapi';
 import { resolve } from 'path';
 import { promisify } from 'util';
@@ -82,7 +83,7 @@ export const testHarnes = {
       const versionHeader = 'kbn-version';
       const xsrfHeader = 'kbn-xsrf';
 
-      server.ext('onPostAuth', (req, reply) => {
+      server.ext('onPostAuth', (req: any, reply: any) => {
         const isSafeMethod = req.method === 'get' || req.method === 'head';
         const hasVersionHeader = versionHeader in req.headers;
         const hasXsrfHeader = xsrfHeader in req.headers;

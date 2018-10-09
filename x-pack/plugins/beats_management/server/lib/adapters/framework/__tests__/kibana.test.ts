@@ -13,7 +13,7 @@ import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_serve
 import { KibanaBackendFrameworkAdapter } from '../kibana_framework_adapter';
 import { contractTests } from './test_contract';
 
-const kbnServer = kbnTestServer.createServerWithCorePlugins();
+const kbnServer = kbnTestServer.getKbnServer(kbnTestServer.createRootWithCorePlugins());
 
 contractTests('Kibana  Framework Adapter', {
   before: async () => {
