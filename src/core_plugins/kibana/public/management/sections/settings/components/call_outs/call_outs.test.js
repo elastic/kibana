@@ -18,13 +18,13 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { CallOuts } from './call_outs';
 
 describe('CallOuts', () => {
   it('should render normally', async () => {
-    const component = shallow(
+    const component = shallowWithIntl(
       <CallOuts />
     );
 
