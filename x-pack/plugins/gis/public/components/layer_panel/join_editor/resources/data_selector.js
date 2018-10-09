@@ -28,8 +28,7 @@ export class DataSelector extends React.Component {
       isLoadingIndexPattern: false,
       indexPatternId: '',
       selectedStringField: '',
-      term: '',
-      stringFields: []
+      term: ''
     };
   }
 
@@ -41,16 +40,11 @@ export class DataSelector extends React.Component {
 
     const indexPattern = await indexPatternService.get(indexPatternId);
 
-    const stringFields = indexPattern.fields.byType.string;
     this.setState({
       indexPatternId: indexPatternId,
-      indexPattern: indexPattern,
-      stringFields: stringFields
+      indexPattern: indexPattern
     });
 
-    this.props.onSelection({
-      indexPatternId: indexPatternId,
-    });
   };
 
   filterStringField = (field) => {
@@ -66,6 +60,11 @@ export class DataSelector extends React.Component {
     const onFieldChange = (fieldName) => {
       this.setState({
         selectedStringField: fieldName
+      });
+
+      this.props.onSelection({
+        indexPatternId: this.state.indexPatternId,
+        term: fieldName
       });
     };
 

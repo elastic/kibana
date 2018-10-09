@@ -163,6 +163,8 @@ export class ESTableSource extends ASource {
   }
 
     _makeAggConfigs() {
+
+    console.log('make aggs configs', this._descriptor);
     return [
       {
         id: '1',

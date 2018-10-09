@@ -24,12 +24,10 @@ export class DynamicColorSelection extends React.Component {
       return { label: field.label, value: field };
     });
     const onChange = (selectedOptions) => {
-      console.log('selected option', selectedOptions);
       this.setState({
         selectedOptions: selectedOptions
       });
       if (selectedOptions.length) {
-        console.log('set selected options', selectedOptions);
         this.props.onChange(selectedOptions[0]);
       } else {
         this.props.onChange(null);

@@ -152,15 +152,9 @@ export class VectorStyle {
       dynamicFields.push(this._descriptor.properties.lineColor.options.fieldValue);
     }
 
-    console.log('dyn fie;s', dynamicFields);
-
     const updateStatuses = dynamicFields.map((field) => {
       return VectorStyle.computeScaledValues(featureCollection, field);
     });
-
-    console.log('fc', featureCollection);
-    console.log('us', updateStatuses);
-
     return updateStatuses.some(r => r === true);
 
   }
