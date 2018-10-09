@@ -34,6 +34,7 @@ export class Join extends React.Component {
     }
 
     const stringFields = await this.props.layer.getStringFields();
+    console.log('string fields', stringFields);
 
     this.setState({
       stringFields: stringFields,

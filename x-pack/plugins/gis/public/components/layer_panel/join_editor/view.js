@@ -27,7 +27,6 @@ export class JoinEditor extends React.Component {
   _renderJoins() {
     const joins = this.state.joins.map((joinDescriptor, index) => {
       const onJoinSelection = (joinDescriptor) => {
-        console.log('joindescriptor', joinDescriptor);
         if (this.state.joins[index]) {
           const updatedJoins = this.state.joins.slice();
           updatedJoins[index] = joinDescriptor;

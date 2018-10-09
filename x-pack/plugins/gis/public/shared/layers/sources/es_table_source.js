@@ -15,20 +15,18 @@ import {
 import {IndexPatternSelect} from 'ui/index_patterns/components/index_pattern_select';
 
 
-import {ASource} from './source';
-import {GeohashGridLayer} from '../geohashgrid_layer';
-import {Schemas} from 'ui/vis/editors/default/schemas';
+import { ASource } from './source';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   indexPatternService,
   inspectorAdapters,
   SearchSource,
   timeService,
 } from '../../../kibana_services';
-import {createExtentFilter} from '../../../elasticsearch_geo_utils';
-import {AggConfigs} from 'ui/vis/agg_configs';
-import {tabifyAggResponse} from 'ui/agg_response/tabify';
-import {convertToGeoJson} from 'ui/vis/map/convert_to_geojson';
-import {getRequestInspectorStats, getResponseInspectorStats} from 'ui/courier/utils/courier_inspector_utils';
+import { createExtentFilter } from '../../../elasticsearch_geo_utils';
+import { AggConfigs } from 'ui/vis/agg_configs';
+import { tabifyAggResponse } from 'ui/agg_response/tabify';
+import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
 const aggSchemas = new Schemas([
   {
@@ -69,6 +67,11 @@ export class ESTableSource extends ASource {
 
     // inspectorAdapters.requests.resetRequest(layerId);
 
+    if (!this._descriptor.indexPatternId && !this._descriptor.term) {
+      console.warn('Table source incorrectly configured');
+      return [];
+    }
+
     let indexPattern;
     try {
       indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
@@ -87,66 +90,22 @@ export class ESTableSource extends ASource {
 
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
-      // searchSource.setField('filter', () => {
-      //   const filters = [];
-      //   filters.push(createExtentFilter(extent, geoField.name, geoField.type));
-      //   filters.push(timeService.createFilter(indexPattern, timeFilters));
-      //   return filters;
-      // });
-
-      // inspectorRequest = inspectorAdapters.requests.start(layerId, layerName);
-      // inspectorRequest.stats(getRequestInspectorStats(searchSource));
-      searchSource.getSearchRequestBody().then(body => {
-        // inspectorRequest.json(body);
-      });
       resp = await searchSource.fetch();
-      // inspectorRequest
-      //   .stats(getResponseInspectorStats(searchSource, resp))
-      //   .ok({ json: resp });
     } catch (error) {
-      // inspectorRequest.error({ error });
       throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
     }
 
-    console.log('response', resp);
-    //
-    // const tabifiedResp = tabifyAggResponse(aggConfigs, resp);
-    // const { featureCollection } = convertToGeoJson(tabifiedResp);
-    //
-    // return featureCollection;
-
-
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            key: 'CA',
-            value: 1000,
-          },
-          {
-            key: 'CN',
-            value: 5000,
-          },
-          {
-            key: 'US',
-            value: 2000,
-          },
-          {
-            key: 'IN',
-            value: 4000,
-          },
-          {
-            key: 'BE',
-            value: 1000,
-          },
-          {
-            key: 'MC',
-            value: 1000,
-          }
-        ]);
-      }, 500);
+    const tabifiedResp = tabifyAggResponse(aggConfigs, resp);
+    const colName1 = tabifiedResp.columns[0].id;
+    const colName2 = tabifiedResp.columns[1].id;
+    const table = tabifiedResp.rows.map((row) => {
+      return {
+        key: row[colName1],
+        value: row[colName2]
+      };
     });
 
+    return table;
 
   }
 
@@ -162,9 +121,8 @@ export class ESTableSource extends ASource {
     return false;
   }
 
-    _makeAggConfigs() {
+  _makeAggConfigs() {
 
-    console.log('make aggs configs', this._descriptor);
     return [
       {
         id: '1',
@@ -179,12 +137,8 @@ export class ESTableSource extends ASource {
         type: 'terms',
         schema: 'segment',
         params: {
-          "field": "geo.dest",
+          "field": this._descriptor.term,
           "size": 10000
-          //,
-          // "order": {
-          //   "_count": "desc"
-          // }
         }
       }
     ];
