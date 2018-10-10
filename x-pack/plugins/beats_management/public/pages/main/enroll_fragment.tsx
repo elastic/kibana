@@ -103,7 +103,7 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                 <br />
                 <div className="euiFormControlLayout euiFormControlLayout--fullWidth">
                   <div className="euiFieldText euiFieldText--fullWidth" style={{ textAlign: 'left' }}>
-                    $ beats enroll {window.location.protocol}//{window.location.host} {this.props.urlState.enrollmentToken}
+                    $ beats enroll {window.location.protocol}//{window.location.host}{this.props.libs.framework.baseURLPath ? `/${this.props.libs.framework.baseURLPath}` : ''} {this.props.urlState.enrollmentToken}
                   </div>
                 </div>
                 <br />

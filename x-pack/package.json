@@ -129,6 +129,7 @@
     "extract-zip": "1.5.0",
     "file-saver": "^1.3.8",
     "font-awesome": "4.4.0",
+    "formsy-react": "^1.1.5",
     "get-port": "2.1.0",
     "getos": "^3.1.0",
     "glob": "6.0.4",

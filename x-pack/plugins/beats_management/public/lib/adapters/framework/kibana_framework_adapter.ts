@@ -47,6 +47,10 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     this.notifier = new Notifier({ location: 'Beats' });
   }
 
+  public get baseURLPath(): string {
+    return this.chrome.getBasePath();
+  }
+
   public setUISettings = (key: string, value: any) => {
     this.adapterService.callOrBuffer(({ config }) => {
       config.set(key, value);

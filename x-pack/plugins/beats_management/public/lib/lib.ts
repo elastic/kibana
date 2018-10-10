@@ -42,8 +42,8 @@ export interface FrameworkAdapter {
   // Instance vars
   appState?: object;
   kbnVersion?: string;
+  baseURLPath: string;
   registerManagementSection(pluginId: string, displayName: string, basePath: string): void;
-
   // Methods
   setUISettings(key: string, value: any): void;
   render(component: React.ReactElement<any>): void;
