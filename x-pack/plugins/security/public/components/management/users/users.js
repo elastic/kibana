@@ -21,8 +21,9 @@ import {
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { ConfirmDelete } from './confirm_delete';
+import { injectI18n, FormattedMessage } from "@kbn/i18n/react";
 
-export class Users extends Component {
+export class UsersUI extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -53,7 +54,12 @@ export class Users extends Component {
       if (e.status === 403) {
         this.setState({ permissionDenied: true });
       } else {
-        toastNotifications.addDanger(`Error fetching users: ${e.data.message}`);
+        toastNotifications.addDanger(
+          this.props.intl.formatMessage({
+            id: "xpack.security.components.management.user.user.errorFetchingUserTitle",
+            defaultMessage: "Error fetching users: {message}"
+          }, { message: e.data.message })
+        );
       }
     }
   }
@@ -69,7 +75,13 @@ export class Users extends Component {
         color="danger"
         onClick={() => this.setState({ showDeleteConfirmation: true })}
       >
-        Delete {numSelected} user{numSelected > 1 ? 's' : ''}
+        <FormattedMessage
+          id="xpack.security.components.management.user.user.deleteUsersButton"
+          defaultMessage="Delete {numSelected} user{numSelected, plural, one { } other {s}}"
+          values={{
+            numSelected: numSelected,
+          }}
+        />
       </EuiButton>
     );
   }
@@ -78,7 +90,7 @@ export class Users extends Component {
   }
   render() {
     const { users, filter, permissionDenied, showDeleteConfirmation, selection } = this.state;
-    const { apiClient } = this.props;
+    const { apiClient, intl } = this.props;
     if (permissionDenied) {
       return (
         <EuiPage className="mgtUsersListingPage">
@@ -87,8 +99,20 @@ export class Users extends Component {
               <EuiEmptyPrompt
                 iconType="securityApp"
                 iconColor={null}
-                title={<h2>Permission denied</h2>}
-                body={<p data-test-subj="permissionDeniedMessage">You do not have permission to manage users.</p>}
+                title={
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.security.components.management.user.user.deniedPermissionTitle"
+                      defaultMessage="Permission denied"
+                    />
+                  </h2>}
+                body={
+                  <p data-test-subj="permissionDeniedMessage">
+                    <FormattedMessage
+                      id="xpack.security.components.management.user.user.deniedPermissionDescriptionTitle"
+                      defaultMessage="You do not have permission to manage users."
+                    />
+                  </p>}
               />
             </EuiPageContent>
           </EuiPageBody>
@@ -99,7 +123,7 @@ export class Users extends Component {
     const columns = [
       {
         field: 'full_name',
-        name: 'Full Name',
+        name: intl.formatMessage({ id: "xpack.security.components.management.user.user.fullNameTitle", defaultMessage: "Full Name" }),
         sortable: true,
         truncateText: true,
         render: fullName => {
@@ -108,7 +132,7 @@ export class Users extends Component {
       },
       {
         field: 'username',
-        name: 'User Name',
+        name: intl.formatMessage({ id: "xpack.security.components.management.user.user.userNameTitle", defaultMessage: "User Name" }),
         sortable: true,
         truncateText: true,
         render: username => (
@@ -119,13 +143,16 @@ export class Users extends Component {
       },
       {
         field: 'email',
-        name: 'Email Address',
+        name: intl.formatMessage({
+          id: "xpack.security.components.management.user.user.emailAddressTitle",
+          defaultMessage: "Email Address"
+        }),
         sortable: true,
         truncateText: true,
       },
       {
         field: 'roles',
-        name: 'Roles',
+        name: intl.formatMessage({ id: "xpack.security.components.management.user.user.rolesTitle", defaultMessage: "Roles" }),
         render: rolenames => {
           const roleLinks = rolenames.map((rolename, index) => {
             return (
@@ -140,12 +167,15 @@ export class Users extends Component {
       },
       {
         field: 'metadata._reserved',
-        name: 'Reserved',
+        name: intl.formatMessage({ id: "xpack.security.components.management.user.user.reservedTitle", defaultMessage: "Reserved" }),
         sortable: false,
         width: '100px',
         align: 'right',
         description:
-          'Reserved users are built-in and cannot be removed. Only the password can be changed.',
+          intl.formatMessage({
+            id: "xpack.security.components.management.user.user.reservedDescription",
+            defaultMessage: "Reserved users are built-in and cannot be removed. Only the password can be changed."
+          }),
         render: reserved =>
           reserved ? (
             <EuiIcon aria-label="Reserved user" data-test-subj="reservedUser" type="check" />
@@ -198,7 +228,12 @@ export class Users extends Component {
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
                 <EuiTitle>
-                  <h2>Users</h2>
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.security.components.management.user.user.h2UsersTitle"
+                      defaultMessage="Users"
+                    />
+                  </h2>
                 </EuiTitle>
               </EuiPageContentHeaderSection>
               <EuiPageContentHeaderSection>
@@ -206,7 +241,10 @@ export class Users extends Component {
                   data-test-subj="createUserButton"
                   href="#/management/security/users/edit"
                 >
-                  Create new user
+                  <FormattedMessage
+                    id="xpack.security.components.management.user.user.newUserCreationButton"
+                    defaultMessage="Create new user"
+                  />
                 </EuiButton>
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
@@ -241,3 +279,5 @@ export class Users extends Component {
     );
   }
 }
+
+export const Users = injectI18n(UsersUI);
