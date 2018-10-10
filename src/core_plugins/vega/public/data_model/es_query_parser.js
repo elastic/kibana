@@ -102,10 +102,9 @@ or it can be the name of the time field, e.g. "@timestamp"',
       result += '}';
 
       this._onWarning(i18n.translate('vega.esQueryParser.legacyUrlShouldChangeToWarningMessage', {
-        defaultMessage: 'Legacy {legacyContext} should change to {result}',
+        defaultMessage: 'Legacy "url": {legacyUrl} should change to {result}',
         values: {
-          legacyContext: `"url": {"${LEGACY_CONTEXT}": {legacyContextValue}}`,
-          legacyContextValue: JSON.stringify(legacyContext),
+          legacyUrl: `"${LEGACY_CONTEXT}": ${JSON.stringify(legacyContext)}`,
           result,
         },
       }));

@@ -45,7 +45,7 @@ export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, 
       if (index) {
         idxObj = await findObjectByTitle(savedObjectsClient, 'index-pattern', index);
         if (!idxObj) {
-          throw new Error(i18n.translate('vega.type.visualization.indexNotFoundErrorMessage', {
+          throw new Error(i18n.translate('vega.visualization.indexNotFoundErrorMessage', {
             defaultMessage: 'Index "{index}" not found',
             values: { index },
           }));
@@ -53,7 +53,7 @@ export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, 
       } else {
         idxObj = await this._vis.API.indexPatterns.getDefault();
         if (!idxObj) {
-          throw new Error(i18n.translate('vega.type.visualization.unableToFindDefaultIndexErrorMessage', {
+          throw new Error(i18n.translate('vega.visualization.unableToFindDefaultIndexErrorMessage', {
             defaultMessage: 'Unable to find default index',
           }));
         }
@@ -69,7 +69,7 @@ export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, 
      */
     async render(visData, status) {
       if (!visData && !this._vegaView) {
-        toastNotifications.addWarning(i18n.translate('vega.type.visualization.unableToRenderWithoutDataWarningMessage', {
+        toastNotifications.addWarning(i18n.translate('vega.visualization.unableToRenderWithoutDataWarningMessage', {
           defaultMessage: 'Unable to render without data',
         }));
         return;

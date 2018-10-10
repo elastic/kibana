@@ -332,7 +332,12 @@ export class VegaParser {
     res.mapStyle = this._config.mapStyle === undefined ? `default` : this._config.mapStyle;
     if (res.mapStyle !== `default` && res.mapStyle !== false) {
       this._onWarning(i18n.translate('vega.vegaParser.mapStyleValueTypeWarningMessage', {
-        defaultMessage: 'config.kibana.mapStyle may either be false or "default"',
+        defaultMessage: '{mapStyleConfigName} may either be {mapStyleConfigFirstAllowedValue} or {mapStyleConfigSecondAllowedValue}',
+        values: {
+          mapStyleConfigName: 'config.kibana.mapStyle',
+          mapStyleConfigFirstAllowedValue: 'false',
+          mapStyleConfigSecondAllowedValue: '"default"',
+        },
       }));
       res.mapStyle = `default`;
     }
@@ -346,7 +351,10 @@ export class VegaParser {
         !maxBounds.every(v => typeof v === 'number' && Number.isFinite(v))
       ) {
         this._onWarning(i18n.translate('vega.vegaParser.maxBoundsValueTypeWarningMessage', {
-          defaultMessage: 'config.kibana.maxBounds must be an array with four numbers',
+          defaultMessage: '{maxBoundsConfigName} must be an array with four numbers',
+          values: {
+            maxBoundsConfigName: 'config.kibana.maxBounds',
+          },
         }));
       } else {
         res.maxBounds = maxBounds;
@@ -362,8 +370,10 @@ export class VegaParser {
       dstObj[paramName] = dflt;
     } else if (typeof val !== 'boolean') {
       this._onWarning(i18n.translate('vega.vegaParser.someKibanaParamValueTypeWarningMessage', {
-        defaultMessage: 'config.kibana.{paramName} must be a boolean value',
-        values: { paramName },
+        defaultMessage: '{configName} must be a boolean value',
+        values: {
+          configName: `config.kibana.${paramName}`
+        },
       }));
       dstObj[paramName] = dflt;
     } else {
@@ -424,7 +434,10 @@ current version of {schemaLibrary} is {libraryVersion}.',
       const parser = this._urlParsers[type];
       if (parser === undefined) {
         throw new Error(i18n.translate('vega.vegaParser.notSupportedUrlTypeErrorMessage', {
-          defaultMessage: 'url: {"%type%": "${type}"} is not supported',
+          defaultMessage: '{urlObject} is not supported',
+          values: {
+            urlObject: 'url: {"%type%": "${type}"}',
+          },
         }));
       }
 
