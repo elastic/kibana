@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { getHighlightHtml } from '../../highlight/highlight_html';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
-const whitelistUrlSchemes = ['http://', 'https://'];
+const whitelistUrlSchemes = ['http://', 'https://', 'file://'];
 
 const URL_TYPES = [
   { kind: 'a', text: 'Link' },
