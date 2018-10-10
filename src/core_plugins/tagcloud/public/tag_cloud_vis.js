@@ -25,17 +25,16 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { TagCloudVisualization } from './tag_cloud_visualization';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
-import { i18n } from '@kbn/i18n';
 
-VisTypesRegistryProvider.register(function (Private) {
+VisTypesRegistryProvider.register(function (Private, i18n) {
 
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createBaseVisualization({
     name: 'tagcloud',
-    title: i18n.translate('tagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
+    title: i18n('tagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
     icon: 'visTagCloud',
-    description: i18n.translate('tagCloud.vis.tagCloudDescription', {
+    description: i18n('tagCloud.vis.tagCloudDescription', {
       defaultMessage: 'A group of words, sized according to their importance'
     }),
     category: CATEGORY.OTHER,
@@ -60,7 +59,7 @@ VisTypesRegistryProvider.register(function (Private) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('tagCloud.vis.schemas.metricTitle', { defaultMessage: 'Tag Size' }),
+          title: i18n('tagCloud.vis.schemas.metricTitle', { defaultMessage: 'Tag Size' }),
           min: 1,
           max: 1,
           aggFilter: ['!std_dev', '!percentiles', '!percentile_ranks', '!derivative', '!geo_bounds', '!geo_centroid'],
@@ -72,7 +71,7 @@ VisTypesRegistryProvider.register(function (Private) {
           group: 'buckets',
           name: 'segment',
           icon: 'fa fa-cloud',
-          title: i18n.translate('tagCloud.vis.schemas.segmentTitle', { defaultMessage: 'Tags' }),
+          title: i18n('tagCloud.vis.schemas.segmentTitle', { defaultMessage: 'Tags' }),
           min: 1,
           max: 1,
           aggFilter: ['terms', 'significant_terms']

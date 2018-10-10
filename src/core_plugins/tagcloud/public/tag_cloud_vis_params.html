@@ -19,10 +19,10 @@
             max="{{editorState.params.maxFontSize}}"
             class="kuiTextInput tag-cloud-fontsize-slider__input"
             ng-model="editorState.params.minFontSize"
-            aria-label="{{ 'tagCloud.visParams.minFontSizeAriaLabel' | i18n: { defaultMessage: 'Minimum tag font size' } }}"
+            aria-label="{{ ::'tagCloud.visParams.minFontSizeAriaLabel' | i18n: { defaultMessage: 'Minimum tag font size' } }}"
             aria-describedby="tagCloudFontSliderMinUnit"
           >
-          <span id="tagCloudFontSliderMinUnit" aria-label="{{ 'tagCloud.visParams.minPixelsAriaLabel' | i18n: { defaultMessage: 'pixels' } }}">px</span>
+          <span id="tagCloudFontSliderMinUnit" aria-label="{{ ::'tagCloud.visParams.minPixelsAriaLabel' | i18n: { defaultMessage: 'pixels' } }}">px</span>
         </div>
         <div class="kuiBarSection">
           <input
@@ -31,10 +31,10 @@
             max="100"
             class="kuiTextInput tag-cloud-fontsize-slider__input"
             ng-model="editorState.params.maxFontSize"
-            aria-label="{{ 'tagCloud.visParams.maxFontSizeAriaLabel' | i18n: { defaultMessage: 'Maximum tag font size' } }}"
+            aria-label="{{ ::'tagCloud.visParams.maxFontSizeAriaLabel' | i18n: { defaultMessage: 'Maximum tag font size' } }}"
             aria-describedby="tagCloudFontSliderMaxUnit"
           >
-          <span id="tagCloudFontSliderMaxUnit" aria-label="{{ 'tagCloud.visParams.maxPixelsAriaLabel' | i18n: { defaultMessage: 'pixels' } }}">px</span>
+          <span id="tagCloudFontSliderMaxUnit" aria-label="{{ ::'tagCloud.visParams.maxPixelsAriaLabel' | i18n: { defaultMessage: 'pixels' } }}">px</span>
         </div>
       </div>
     </div>
