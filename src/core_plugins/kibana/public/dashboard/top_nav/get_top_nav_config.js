@@ -34,13 +34,15 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
       return (
         hideWriteControls ?
           [
-            getFullScreenConfig(actions[TopNavIds.FULL_SCREEN])
+            getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
+            getRefreshConfig(actions[TopNavIds.REFRESH])
           ]
           : [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
             getShareConfig(actions[TopNavIds.SHARE]),
             getCloneConfig(actions[TopNavIds.CLONE]),
-            getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])
+            getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
+            getRefreshConfig(actions[TopNavIds.REFRESH])
           ]
       );
     case DashboardViewMode.EDIT:
@@ -60,6 +62,15 @@ function getFullScreenConfig(action) {
     key: 'full screen',
     description: 'Full Screen Mode',
     testId: 'dashboardFullScreenMode',
+    run: action
+  };
+}
+
+function getRefreshConfig(action) {
+  return {
+    key: 'refresh',
+    description: 'Refresh Dashboard',
+    testId: 'dashboardRefresh',
     run: action
   };
 }
