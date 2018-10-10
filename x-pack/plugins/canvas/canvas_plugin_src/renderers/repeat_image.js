@@ -47,7 +47,7 @@ export const repeatImage = () => ({
       if (isValid(settings.emptyImage)) {
         if (settings.max == null) {
           throw new Error(
-            i18n.translate('xpack.canvas.renderers.repeatImage.useEmptyImageErrorMessage', {
+            i18n.translate('xpack.canvas.renderers.repeatImage.maxIsNotSetErrorMessage', {
               defaultMessage: 'max must be set if using an emptyImage',
             })
           );

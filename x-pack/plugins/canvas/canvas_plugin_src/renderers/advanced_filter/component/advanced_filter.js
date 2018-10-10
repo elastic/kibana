@@ -24,7 +24,7 @@ const AdvancedFilterUI = ({ value, onChange, commit, intl }) => (
           type="text"
           className="canvasAdvancedFilter__input"
           placeholder={intl.formatMessage({
-            id: 'xpack.canvas.renderers.advancedFilter.inputPlaceholder',
+            id: 'xpack.canvas.renderers.advancedFilter.filterExpressionInputPlaceholder',
             defaultMessage: 'Enter filter expression',
           })}
           value={value}
