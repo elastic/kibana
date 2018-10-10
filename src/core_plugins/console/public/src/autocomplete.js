@@ -29,6 +29,7 @@ import { URL_PATH_END_MARKER } from './autocomplete/components';
 import _ from 'lodash';
 import ace from 'brace';
 import 'brace/ext/language_tools';
+import { i18n } from '@kbn/i18n';
 
 const AceRange = ace.acequire('ace/range').Range;
 
@@ -738,7 +739,7 @@ export default function (editor) {
     context.autoCompleteSet = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'].map((m, i) => ({
       name: m,
       score: -i,
-      meta: 'method'
+      meta: i18n.translate('kbn.devTools.console.autocomplete.addMethodMetaText', { defaultMessage: 'method' }),
     }));
   }
 

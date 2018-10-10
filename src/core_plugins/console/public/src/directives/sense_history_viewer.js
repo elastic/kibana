@@ -20,6 +20,7 @@
 const SenseEditor = require('../sense_editor/editor');
 
 import { useResizeChecker } from '../sense_editor_resize';
+import { i18n } from '@kbn/i18n';
 
 require('ui/modules')
   .get('app/sense')
@@ -42,7 +43,9 @@ require('ui/modules')
             viewer.setValue(s);
             viewer.clearSelection();
           } else {
-            viewer.getSession().setValue('No history available');
+            viewer.getSession().setValue(
+              i18n.translate('kbn.devTools.console.historyPage.noHistoryTextMessage', { defaultMessage: 'No history available' })
+            );
           }
         });
 
