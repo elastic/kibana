@@ -12,7 +12,7 @@ interface ContractConfig {
 }
 
 export const contractTests = (testName: string, config: ContractConfig) => {
-  describe(testName, () => {
+  describe.skip(testName, () => {
     // let frameworkAdapter: BackendFrameworkAdapter;
     beforeAll(async () => {
       jest.setTimeout(100000); // 1 second
@@ -24,9 +24,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     afterAll(async () => config.after && (await config.after()));
     beforeEach(async () => {
       // FIXME: one of these always should exist, type ContractConfig as such
-      // frameworkAdapter = (config.adapterSetup
-      //   ? config.adapterSetup()
-      //   : config.adapter) as BackendFrameworkAdapter;
+      // const frameworkAdapter = config.adapterSetup();
     });
 
     it('Should have tests here', () => {

@@ -13,7 +13,7 @@ interface ContractConfig {
 }
 
 export const contractTests = (testName: string, config: ContractConfig) => {
-  describe(testName, () => {
+  describe.skip(testName, () => {
     let database: DatabaseAdapter;
     beforeAll(async () => {
       jest.setTimeout(100000); // 1 second

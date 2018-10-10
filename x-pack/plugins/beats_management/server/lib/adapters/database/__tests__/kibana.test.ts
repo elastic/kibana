@@ -7,28 +7,33 @@
 
 // @ts-ignore
 import { createEsTestCluster } from '@kbn/test';
+import { Root } from 'src/core/server/root';
 // @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
 import { DatabaseKbnESPlugin } from '../adapter_types';
 import { KibanaDatabaseAdapter } from '../kibana_database_adapter';
 import { contractTests } from './test_contract';
-
-const kbnServer = kbnTestServer.getKbnServer(kbnTestServer.createRootWithCorePlugins());
-
 const es = createEsTestCluster({});
 
+let legacyServer: any;
+let rootServer: Root;
 contractTests('Kibana Database Adapter', {
   before: async () => {
     await es.start();
-    await kbnServer.ready();
 
-    return await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+    rootServer = kbnTestServer.createRootWithCorePlugins({
+      server: { maxPayloadBytes: 100 },
+    });
+
+    await rootServer.start();
+    legacyServer = kbnTestServer.getKbnServer(rootServer);
+    return await legacyServer.plugins.elasticsearch.waitUntilReady();
   },
   after: async () => {
-    await kbnServer.close();
+    await rootServer.shutdown();
     return await es.cleanup();
   },
   adapterSetup: () => {
-    return new KibanaDatabaseAdapter(kbnServer.server.plugins.elasticsearch as DatabaseKbnESPlugin);
+    return new KibanaDatabaseAdapter(legacyServer.plugins.elasticsearch as DatabaseKbnESPlugin);
   },
 });

@@ -13,21 +13,22 @@ import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_serve
 import { KibanaBackendFrameworkAdapter } from '../kibana_framework_adapter';
 import { contractTests } from './test_contract';
 
-const kbnServer = kbnTestServer.getKbnServer(kbnTestServer.createRootWithCorePlugins());
+const kbnServer = kbnTestServer.createRootWithCorePlugins({ server: { maxPayloadBytes: 100 } });
+const legacyServer = kbnTestServer.getKbnServer(kbnServer);
 
 contractTests('Kibana  Framework Adapter', {
   before: async () => {
-    await kbnServer.ready();
+    await kbnServer.start();
 
-    const config = kbnServer.server.config();
+    const config = legacyServer.server.config();
     config.extendSchema(beatsPluginConfig, {}, configPrefix);
 
     config.set('xpack.beats.encryptionKey', 'foo');
   },
   after: async () => {
-    await kbnServer.close();
+    await kbnServer.shutdown();
   },
   adapterSetup: () => {
-    return new KibanaBackendFrameworkAdapter(kbnServer.server);
+    return new KibanaBackendFrameworkAdapter(legacyServer.server);
   },
 });

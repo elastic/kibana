@@ -18,5 +18,13 @@ export function wrapEsError(err: any) {
   if (statusCode === 403) {
     return Boom.forbidden('Insufficient user permissions for managing Beats configuration');
   }
+
+  // This is due to a typings error in the Boom typedef.
+  // @ts-ignore
+  if (Boom.wrap) {
+    // @ts-ignore
+    return Boom.wrap(err, err.statusCode);
+  }
+
   return Boom.boomify(err, { statusCode: err.statusCode });
 }
