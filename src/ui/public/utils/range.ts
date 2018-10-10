@@ -44,41 +44,60 @@ const _RE_NUMBER = '(\\-?(?:\\d+(?:\\.\\d+)?|Infinity))';
  *
  * @type {RegExp}
  */
-const RANGE_RE = new RegExp('^\\s*([\\[|\\(])\\s*' + _RE_NUMBER + '\\s*,\\s*' + _RE_NUMBER + '\\s*([\\]|\\)])\\s*$');
+const RANGE_RE = new RegExp(
+  '^\\s*([\\[|\\(])\\s*' + _RE_NUMBER + '\\s*,\\s*' + _RE_NUMBER + '\\s*([\\]|\\)])\\s*$'
+);
 
-export function parseRange(input) {
-
+export function parseRange(input: string) {
   const match = String(input).match(RANGE_RE);
   if (!match) {
     throw new TypeError('expected input to be in interval notation e.g., (100, 200]');
   }
 
-  return new Range(
-    match[1] === '[',
-    parseFloat(match[2]),
-    parseFloat(match[3]),
-    match[4] === ']'
-  );
+  const props = {
+    minIncl: match[1] === '[',
+    maxIncl: match[4] === ']',
+    min: parseFloat(match[2]),
+    max: parseFloat(match[3]),
+  };
+  return new Range(props);
 }
 
-function Range(/* minIncl, min, max, maxIncl */) {
-  const args = _.toArray(arguments);
-  if (args[1] > args[2]) args.reverse();
+class Range {
+  private min: number;
+  private max: number;
+  private minInclusive: boolean;
+  private maxInclusive: boolean;
 
-  this.minInclusive = args[0];
-  this.min = args[1];
-  this.max = args[2];
-  this.maxInclusive = args[3];
+  constructor(props: { minIncl: boolean; maxIncl: boolean; min: number; max: number }) {
+    const { minIncl, min, max, maxIncl } = props;
+    if (min > max) {
+      this.min = max;
+      this.max = min;
+    } else {
+      this.min = min;
+      this.max = max;
+    }
+
+    this.minInclusive = minIncl;
+    this.maxInclusive = maxIncl;
+  }
+
+  public within(n: number) {
+    if (this.min === n && !this.minInclusive) {
+      return false;
+    }
+    if (this.min > n) {
+      return false;
+    }
+
+    if (this.max === n && !this.maxInclusive) {
+      return false;
+    }
+    if (this.max < n) {
+      return false;
+    }
+
+    return true;
+  }
 }
-
-Range.prototype.within = function (n) {
-  if (this.min === n && !this.minInclusive) return false;
-  if (this.min > n) return false;
-
-  if (this.max === n && !this.maxInclusive) return false;
-  if (this.max < n) return false;
-
-  return true;
-};
-
-

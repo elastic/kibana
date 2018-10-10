@@ -17,30 +17,29 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import expect from 'expect.js';
+import _ from 'lodash';
 import { parseRange } from '../range';
 
-describe('Range parsing utility', function () {
-
-  it('throws an error for inputs that are not formatted properly', function () {
-    expect(function () {
+describe('Range parsing utility', () => {
+  it('throws an error for inputs that are not formatted properly', () => {
+    expect(() => {
       parseRange('');
     }).to.throwException(TypeError);
 
-    expect(function () {
+    expect(() => {
       parseRange('p10202');
     }).to.throwException(TypeError);
 
-    expect(function () {
+    expect(() => {
       parseRange('{0,100}');
     }).to.throwException(TypeError);
 
-    expect(function () {
+    expect(() => {
       parseRange('[0,100');
     }).to.throwException(TypeError);
 
-    expect(function () {
+    expect(() => {
       parseRange(')0,100(');
     }).to.throwException(TypeError);
   });
@@ -51,52 +50,34 @@ describe('Range parsing utility', function () {
         min: 0,
         max: 100,
         minInclusive: true,
-        maxInclusive: true
+        maxInclusive: true,
       },
-      within: [
-        [0, true],
-        [0.0000001, true],
-        [1, true],
-        [99.99999, true],
-        [100, true]
-      ]
+      within: [[0, true], [0.0000001, true], [1, true], [99.99999, true], [100, true]],
     },
     '(26.3   ,   42]': {
       props: {
         min: 26.3,
         max: 42,
         minInclusive: false,
-        maxInclusive: true
+        maxInclusive: true,
       },
-      within: [
-        [26.2999999, false],
-        [26.3000001, true],
-        [30, true],
-        [41, true],
-        [42, true]
-      ]
+      within: [[26.2999999, false], [26.3000001, true], [30, true], [41, true], [42, true]],
     },
     '(-50,50)': {
       props: {
         min: -50,
         max: 50,
         minInclusive: false,
-        maxInclusive: false
+        maxInclusive: false,
       },
-      within: [
-        [-50, false],
-        [-49.99999, true],
-        [0, true],
-        [49.99999, true],
-        [50, false]
-      ]
+      within: [[-50, false], [-49.99999, true], [0, true], [49.99999, true], [50, false]],
     },
     '(Infinity, -Infinity)': {
       props: {
         min: -Infinity,
         max: Infinity,
         minInclusive: false,
-        maxInclusive: false
+        maxInclusive: false,
       },
       within: [
         [0, true],
@@ -105,25 +86,24 @@ describe('Range parsing utility', function () {
         [-10000000000, true],
         [-Infinity, false],
         [Infinity, false],
-      ]
-    }
+      ],
+    },
   };
 
-  _.forOwn(tests, function (spec, str) {
+  _.forOwn(tests, (spec, str) => {
+    const testRange = String(str);
+    describe(testRange, () => {
+      const range = parseRange(testRange);
 
-    describe(str, function () {
-      const range = parseRange(str);
-
-      it('creation', function () {
+      it('creation', () => {
         expect(range).to.eql(spec.props);
       });
 
-      spec.within.forEach(function (tup) {
-        it('#within(' + tup[0] + ')', function () {
+      spec.within.forEach(tup => {
+        it('#within(' + tup[0] + ')', () => {
           expect(range.within(tup[0])).to.be(tup[1]);
         });
       });
     });
-
   });
 });
