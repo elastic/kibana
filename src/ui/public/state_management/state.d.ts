@@ -17,4 +17,10 @@
  * under the License.
  */
 
-export type State = Record<string, any>;
+export interface State {
+  [key: string]: any;
+  translateHashToRison: (
+    stateHashOrRison: string | string[] | undefined
+  ) => string | string[] | undefined;
+  getQueryParamName: () => string;
+}

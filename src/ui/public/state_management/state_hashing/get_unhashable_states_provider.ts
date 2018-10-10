@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { mapValues } from 'lodash';
+import { AppState } from '../app_state';
+import { GlobalState } from '../global_state';
+import { State } from '../state';
 
-export function unhashQueryString(parsedQueryString, states) {
-  return mapValues(parsedQueryString, (val, key) => {
-    const state = states.find(s => key === s.getQueryParamName());
-    return state ? state.translateHashToRison(val) : val;
-  });
+export function getUnhashableStatesProvider(getAppState: () => AppState, globalState: GlobalState) {
+  return function getUnhashableStates(): State[] {
+    return [getAppState(), globalState].filter(Boolean);
+  };
 }
