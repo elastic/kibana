@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import { initTransactionsApi } from './server/routes/transactions';
 import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
-import { initStatusApi } from './server/routes/status_check';
+
 
 export function apm(kibana) {
   return new kibana.Plugin({
