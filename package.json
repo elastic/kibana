@@ -53,7 +53,6 @@
     "uiFramework:createComponent": "cd packages/kbn-ui-framework && yarn createComponent",
     "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent",
     "kbn:watch": "node scripts/kibana --dev --logging.json=false",
-    "build:plugins": "node src/core_plugins/interpreter/tasks/build"
   },
   "repository": {
     "type": "git",

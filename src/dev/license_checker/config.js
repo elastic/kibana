@@ -76,6 +76,6 @@ export const LICENSE_OVERRIDES = {
   'png-js@0.1.1': ['MIT'],
   'sha.js@2.4.11': ['BSD-3-Clause AND MIT'],
 
-  // TODO: remove or check with author, only temporarly to make the CI run
+  // TODO: can be removed once a new version is published
   'babel-plugin-mock-imports@0.0.5': ['MIT'],
 };
