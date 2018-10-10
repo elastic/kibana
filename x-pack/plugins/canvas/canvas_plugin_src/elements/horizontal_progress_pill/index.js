@@ -9,7 +9,7 @@ import header from './header.png';
 
 export const horizontalProgressPill = () => ({
   name: 'horizontalProgressPill',
-  displayName: 'Horizontal Progress Pill',
+  displayName: 'Horizontal progress pill',
   help: 'Displays progress as a portion of a horizontal pill',
   width: 400,
   height: 30,

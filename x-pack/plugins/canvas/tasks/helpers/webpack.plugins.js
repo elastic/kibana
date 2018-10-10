@@ -5,6 +5,7 @@
  */
 
 const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const sourceDir = path.resolve(__dirname, '../../canvas_plugin_src');
 const buildDir = path.resolve(__dirname, '../../canvas_plugin');
@@ -52,6 +53,13 @@ module.exports = {
         }
       });
     },
+    new CopyWebpackPlugin([
+      {
+        from: `${sourceDir}/functions/server/`,
+        to: `${buildDir}/functions/server/`,
+        ignore: '**/__tests__/**',
+      },
+    ]),
   ],
 
   module: {

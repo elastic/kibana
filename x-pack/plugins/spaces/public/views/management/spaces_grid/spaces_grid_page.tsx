@@ -206,6 +206,23 @@ export class SpacesGridPage extends Component<Props, State> {
     return [
       {
         field: 'name',
+        name: '',
+        width: '50px',
+        sortable: true,
+        render: (value: string, record: Space) => {
+          return (
+            <EuiLink
+              onClick={() => {
+                this.onEditSpaceClick(record);
+              }}
+            >
+              <SpaceAvatar space={record} size="s" />
+            </EuiLink>
+          );
+        },
+      },
+      {
+        field: 'name',
         name: 'Space',
         sortable: true,
         render: (value: string, record: Space) => {
@@ -215,14 +232,7 @@ export class SpacesGridPage extends Component<Props, State> {
                 this.onEditSpaceClick(record);
               }}
             >
-              <EuiFlexGroup gutterSize="s" responsive={false} alignItems={'center'}>
-                <EuiFlexItem grow={false}>
-                  <SpaceAvatar space={record} size="s" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText>{record.name}</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              {value}
             </EuiLink>
           );
         },
