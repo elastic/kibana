@@ -35,7 +35,7 @@ export const ScriptingSyntax = () => (
     <EuiSpacer />
     <EuiText>
       <h3>
-        <FormattedMessage id="common.ui.fieldEditor.syntaxHeader" defaultMessage="Syntax"/>
+        <FormattedMessage id="common.ui.fieldEditor.syntaxHeader" defaultMessage="Syntax" />
       </h3>
       <p>
         <FormattedMessage
@@ -48,7 +48,8 @@ export const ScriptingSyntax = () => (
                 target="_window"
                 href={getDocLink('scriptedFields.painless')}
               >
-                Painless <EuiIcon type="link" />
+                <FormattedMessage id="common.ui.fieldEditor.syntax.defaultLabel.painlessLink" defaultMessage="Painless" />
+                {' '}<EuiIcon type="link" />
               </EuiLink>
             )
           }}
@@ -56,7 +57,7 @@ export const ScriptingSyntax = () => (
       </p>
       <p>
         <EuiCode>
-          <FormattedMessage id="common.ui.fieldEditor.syntax.default.formatLabel" defaultMessage="doc['some_field'].value"/>
+          <FormattedMessage id="common.ui.fieldEditor.syntax.default.formatLabel" defaultMessage="doc['some_field'].value" />
         </EuiCode>
       </p>
       <p>
