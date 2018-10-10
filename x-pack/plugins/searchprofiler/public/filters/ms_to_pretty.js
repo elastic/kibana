@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+// do we need translate this?
 export function msToPretty(ms, precision) {
   if (!precision) {
     precision = 1;

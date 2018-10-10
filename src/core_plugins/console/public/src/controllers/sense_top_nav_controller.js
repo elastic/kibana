@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 export function SenseTopNavController(Private) {
   const KbnTopNavController = Private(KbnTopNavControllerProvider);
 
+  //do we need translate key in this file, or add label?
   const controller = new KbnTopNavController([
     {
       key: 'welcome',

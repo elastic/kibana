@@ -15,6 +15,7 @@ const comparator = (v1, v2) => {
   return (v1 > v2) ? -1 : 0;
 };
 
+//do we need translate this ?
 function getToolTip(key) {
   switch (key) {
     case 'build_scorer':
