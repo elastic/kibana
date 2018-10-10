@@ -25,7 +25,7 @@ import { has } from 'lodash';
  * @param query - a legacy query, what used to be stored in SearchSource's query property
  * @return Object
  */
-export function migrateLegacyQuery(query: object): object {
+export function migrateLegacyQuery(query: object | string): object {
   // Lucene was the only option before, so language-less queries are all lucene
   if (!has(query, 'language')) {
     return { query, language: 'lucene' };
