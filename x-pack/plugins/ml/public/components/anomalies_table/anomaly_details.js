@@ -25,11 +25,13 @@ import { formatDate } from '@elastic/eui/lib/services/format';
 
 import { EntityCell } from './entity_cell';
 import {
+  getMultiBucketImpactLabel,
   getSeverity,
   showActualForFunction,
-  showTypicalForFunction
-} from 'plugins/ml/../common/util/anomaly_utils';
-import { formatValue } from 'plugins/ml/formatters/format_value';
+  showTypicalForFunction,
+} from '../../../common/util/anomaly_utils';
+import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
+import { formatValue } from '../../formatters/format_value';
 
 const TIME_FIELD_NAME = 'timestamp';
 
@@ -151,6 +153,14 @@ function getDetailsItems(anomaly, examples, filter) {
     title: 'job ID',
     description: anomaly.jobId
   });
+
+  if (source.multi_bucket_impact !== undefined &&
+    source.multi_bucket_impact >= MULTI_BUCKET_IMPACT.LOW) {
+    items.push({
+      title: 'multi-bucket impact',
+      description: getMultiBucketImpactLabel(source.multi_bucket_impact)
+    });
+  }
 
   items.push({
     title: 'probability',
