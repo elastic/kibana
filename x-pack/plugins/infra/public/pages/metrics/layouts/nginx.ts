@@ -27,7 +27,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
           formatter: InfraFormatterType.abvNumber,
           stacked: true,
           seriesOverrides: {
-            '200s': { color: theme.eui.euiColorVis0, type: InfraMetricLayoutVisualizationType.bar },
+            '200s': { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.bar },
             '300s': { color: theme.eui.euiColorVis5, type: InfraMetricLayoutVisualizationType.bar },
             '400s': { color: theme.eui.euiColorVis2, type: InfraMetricLayoutVisualizationType.bar },
             '500s': { color: theme.eui.euiColorVis9, type: InfraMetricLayoutVisualizationType.bar },
@@ -43,7 +43,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
           formatter: InfraFormatterType.abvNumber,
           formatterTemplate: '{{value}}/s',
           seriesOverrides: {
-            rate: { color: theme.eui.euiColorVis0, type: InfraMetricLayoutVisualizationType.area },
+            rate: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },
           },
         },
       },
@@ -56,7 +56,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
           formatter: InfraFormatterType.abvNumber,
           seriesOverrides: {
             connections: {
-              color: theme.eui.euiColorVis0,
+              color: theme.eui.euiColorVis1,
               type: InfraMetricLayoutVisualizationType.bar,
             },
           },
@@ -71,7 +71,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
           formatter: InfraFormatterType.abvNumber,
           seriesOverrides: {
             reqPerConns: {
-              color: theme.eui.euiColorVis0,
+              color: theme.eui.euiColorVis1,
               type: InfraMetricLayoutVisualizationType.bar,
               name: 'reqs per conn',
             },
