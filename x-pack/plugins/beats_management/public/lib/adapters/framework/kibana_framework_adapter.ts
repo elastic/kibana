@@ -83,7 +83,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       if (this.hadValidLicense() && this.securityEnabled()) {
         const registerSection = () =>
           this.management.register(pluginId, {
-            display: displayName,
+            display: 'Beats', // TODO these need to be config options not hard coded in the adapter
             icon: 'logoBeats',
             order: 30,
           });
