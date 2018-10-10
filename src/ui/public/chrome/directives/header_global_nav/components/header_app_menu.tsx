@@ -72,6 +72,8 @@ export class HeaderAppMenu extends Component<Props, State> {
         button={button}
         isOpen={this.state.isOpen}
         anchorPosition="downRight"
+        // @ts-ignore
+        repositionOnScroll
         closePopover={this.closeMenu}
       >
         <EuiKeyPadMenu id="keyPadMenu" style={{ width: 288 }}>
