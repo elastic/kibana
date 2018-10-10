@@ -27,7 +27,7 @@ export function SenseTopNavController(Private) {
   const controller = new KbnTopNavController([
     {
       key: 'welcome',
-      hideButton: false,
+      hideButton: true,
       template: `<sense-welcome></sense-welcome>`,
       testId: 'consoleWelcomeButton',
     },
