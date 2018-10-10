@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "node tasks/build.js"
+    "build": "node tasks/build.js",
+    "canvas:peg": "pegjs common/lib/grammar.peg",
   }
 }
