@@ -51,11 +51,11 @@ function TableVisTypeProvider(Private) {
   return VisFactory.createAngularVisualization({
     type: 'table',
     name: 'table',
-    title: i18n.translate('tableVis.vis.tableVisTitle', {
+    title: i18n.translate('tableVis.tableVisTitle', {
       defaultMessage: 'Data Table',
     }),
     icon: 'visTable',
-    description: i18n.translate('tableVis.vis.tableVisDescription', {
+    description: i18n.translate('tableVis.tableVisDescription', {
       defaultMessage: 'Display values in a table',
     }),
     category: CATEGORY.DATA,
@@ -79,7 +79,7 @@ function TableVisTypeProvider(Private) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('tableVis.vis.tableVisEditorConfig.schemas.metricTitle', {
+          title: i18n.translate('tableVis.tableVisEditorConfig.schemas.metricTitle', {
             defaultMessage: 'Metric',
           }),
           aggFilter: ['!geo_centroid', '!geo_bounds'],
@@ -91,7 +91,7 @@ function TableVisTypeProvider(Private) {
         {
           group: 'buckets',
           name: 'bucket',
-          title: i18n.translate('tableVis.vis.tableVisEditorConfig.schemas.bucketTitle', {
+          title: i18n.translate('tableVis.tableVisEditorConfig.schemas.bucketTitle', {
             defaultMessage: 'Split Rows',
           }),
           aggFilter: ['!filter']
@@ -99,7 +99,7 @@ function TableVisTypeProvider(Private) {
         {
           group: 'buckets',
           name: 'split',
-          title: i18n.translate('tableVis.vis.tableVisEditorConfig.schemas.splitTitle', {
+          title: i18n.translate('tableVis.tableVisEditorConfig.schemas.splitTitle', {
             defaultMessage: 'Split Table',
           }),
           aggFilter: ['!filter']
