@@ -120,7 +120,7 @@ function trimCurlyBraces(string) {
 }
 
 /**
- * Removes parentheses from the start and the end of a string
+ * Removes parentheses from the start and the end of a string.
  *
  * Example: `('id' | i18n: { defaultMessage: 'Message' })`
  * @param {string} string string to trim
