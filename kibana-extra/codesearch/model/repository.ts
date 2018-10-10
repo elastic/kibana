@@ -29,6 +29,10 @@ export interface FileTree {
    */
   children?: FileTree[];
   sha1?: string;
+  /**
+   *  current repo uri
+   */
+  repoUri?: string;
 }
 
 export enum FileTreeItemType {

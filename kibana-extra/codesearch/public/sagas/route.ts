@@ -19,15 +19,17 @@ import {
   loadStructure,
   loadUserConfig,
   Match,
+  resetRepoTree,
   revealPosition,
   routeChange,
 } from '../actions';
 
 import { Action } from 'redux-actions';
 import { kfetch } from 'ui/kfetch';
+import { FileTree } from '../../model';
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import * as ROUTES from '../components/routes';
-import { fileSelector, lastRequestPathSelector, refUrlSelector } from '../selectors';
+import { fileSelector, getTree, lastRequestPathSelector, refUrlSelector } from '../selectors';
 
 function* handleReference(url: string) {
   const refUrl = yield select(refUrlSelector);
@@ -113,6 +115,11 @@ function* handleLocationChange(action: Action<Match>) {
       }
     }
     const lastRequestPath = yield select(lastRequestPathSelector);
+    const currentTree: FileTree = yield select(getTree);
+    // repo changed
+    if (currentTree.repoUri !== repoUri) {
+      yield put(resetRepoTree());
+    }
     yield put(
       fetchRepoTree({
         uri: repoUri,

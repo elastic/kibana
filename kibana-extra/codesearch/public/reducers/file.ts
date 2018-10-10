@@ -23,6 +23,7 @@ import {
   fetchRepoTreeFailed,
   fetchRepoTreeSuccess,
   openTreePath,
+  resetRepoTree,
   routeChange,
   setNotFound,
 } from '../actions';
@@ -92,6 +93,11 @@ export const file = handleActions(
         if (draft.openedPaths.indexOf(path) < 0) {
           draft.openedPaths.push(path);
         }
+      }),
+    [String(resetRepoTree)]: (state: FileState) =>
+      produce<FileState>(state, draft => {
+        draft.tree = initialState.tree;
+        draft.openedPaths = initialState.openedPaths;
       }),
     [String(fetchRepoTreeFailed)]: (state: FileState) =>
       produce(state, draft => {

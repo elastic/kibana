@@ -77,6 +77,7 @@ function* fetchPath(payload: FetchRepoTreePayload) {
       return -typeDiff;
     }
   });
+  update.repoUri = payload.uri;
   yield put(fetchRepoTreeSuccess(update));
   return update;
 }
