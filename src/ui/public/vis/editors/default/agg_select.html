@@ -34,7 +34,7 @@
     data-test-subj="visEditorAggSelect"
     ng-model="agg.type"
   >
-    <ui-select-match placeholder="{{ 'common.ui.vis.editors.aggSelect.selectAggPlaceholder' | i18n: { defaultMessage: 'Select an aggregation' } }}">
+    <ui-select-match placeholder="{{ ::'common.ui.vis.editors.aggSelect.selectAggPlaceholder' | i18n: { defaultMessage: 'Select an aggregation' } }}">
       {{$select.selected.title}}
     </ui-select-match>
     <ui-select-choices

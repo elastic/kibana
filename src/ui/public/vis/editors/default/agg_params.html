@@ -20,7 +20,7 @@
 </div>
 
 <div ng-if="agg.schema.deprecate" class="form-group">
-  <p ng-show="!agg.schema.deprecateMessage" class="visEditorAggParam__error">
+  <p ng-show="agg.schema.deprecateMessage" class="visEditorAggParam__error">
     {{ agg.schema.deprecateMessage }}
   </p>
   <p
