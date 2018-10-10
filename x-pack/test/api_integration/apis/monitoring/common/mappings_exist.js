@@ -10,6 +10,7 @@ import * as esMetrics from '../../../../../plugins/monitoring/server/lib/metrics
 import * as kibanaMetrics from '../../../../../plugins/monitoring/server/lib/metrics/kibana/metrics';
 import * as logstashMetrics from '../../../../../plugins/monitoring/server/lib/metrics/logstash/metrics';
 import * as beatsMetrics from '../../../../../plugins/monitoring/server/lib/metrics/beats/metrics';
+import * as apmMetrics from '../../../../../plugins/monitoring/server/lib/metrics/apm/metrics';
 
 export default function ({ getService }) {
   const es = getService('es');
@@ -34,6 +35,11 @@ export default function ({ getService }) {
       metrics: beatsMetrics.metrics,
       name: 'beats metrics',
       indexTemplate: '.monitoring-beats'
+    },
+    {
+      metrics: apmMetrics.metrics,
+      name: 'apm metrics',
+      indexTemplate: '.monitoring-beats' // apm uses the same as beats
     },
   ];
 
@@ -63,7 +69,5 @@ export default function ({ getService }) {
         }
       });
     }
-
-
   });
 }
