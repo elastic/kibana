@@ -323,7 +323,6 @@ module.exports = {
       rules: {
         'jsx-a11y/no-static-element-interactions': 'off',
         //'jsx-a11y/anchor-has-content': 'off',
-
       },
     },
 
