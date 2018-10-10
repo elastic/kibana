@@ -41,7 +41,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
       defaultMessage: 'Coordinate Map',
     }),
     icon: 'visMapCoordinate',
-    description: i18n.translate('tileMap.vis.mapTitle', {
+    description: i18n.translate('tileMap.vis.mapDescription', {
       defaultMessage: 'Plot latitude and longitude coordinates on a map',
     }),
     category: CATEGORY.MAP,
