@@ -48,6 +48,8 @@ reporting_user:
 
 [role="xpack"]
 [[securing-reporting]]
+*The user generating reports also has to have read access privilege on the indexes underlying any
+visualizations they reference in their reports or watches. 
 === Securing the Reporting Endpoints
 
 In a production environment, you should restrict access to
