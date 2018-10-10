@@ -27,6 +27,7 @@ export class UiNavLink {
       subUrlBase,
       description,
       icon,
+      euiIconType,
       linkToLastSubUrl = true,
       hidden = false,
       disabled = false,
@@ -40,6 +41,7 @@ export class UiNavLink {
     this._subUrlBase = subUrlBase || url;
     this._description = description;
     this._icon = icon;
+    this._euiIconType = euiIconType;
     this._linkToLastSubUrl = linkToLastSubUrl;
     this._hidden = hidden;
     this._disabled = disabled;
@@ -59,6 +61,7 @@ export class UiNavLink {
       subUrlBase: this._subUrlBase,
       description: this._description,
       icon: this._icon,
+      euiIconType: this._euiIconType,
       linkToLastSubUrl: this._linkToLastSubUrl,
       hidden: this._hidden,
       disabled: this._disabled,

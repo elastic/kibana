@@ -32,7 +32,6 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
         footer={
           <EuiButton
             data-test-subj="extendTrialButton"
-            className="licenseManagement__marginTop"
             target="_blank"
             href="https://www.elastic.co/trialextension"
           >

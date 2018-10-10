@@ -9,7 +9,7 @@ import header from './header.png';
 
 export const progressWheel = () => ({
   name: 'progressWheel',
-  displayName: 'Progress Wheel',
+  displayName: 'Progress wheel',
   help: 'Displays progress as a portion of a wheel',
   width: 200,
   height: 200,

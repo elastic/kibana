@@ -9,7 +9,7 @@ import header from './header.png';
 
 export const horizontalProgressBar = () => ({
   name: 'horizontalProgressBar',
-  displayName: 'Horizontal Progress Bar',
+  displayName: 'Horizontal progress bar',
   help: 'Displays progress as a portion of a horizontal bar',
   width: 400,
   height: 30,
