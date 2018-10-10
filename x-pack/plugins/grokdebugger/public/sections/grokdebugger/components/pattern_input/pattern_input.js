@@ -12,11 +12,17 @@ import {
 } from '@elastic/eui';
 import { EDITOR } from '../../../../../common/constants';
 import { GrokMode } from '../../../../lib/ace';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function PatternInput({ value, onChange }) {
   return (
     <EuiFormRow
-      label="Grok Pattern"
+      label={(
+        <FormattedMessage
+          id="kbn.devTools.grokDebugger.formRowPatternInputLabel"
+          defaultMessage="Grok Pattern"
+        />
+      )}
       fullWidth
       data-test-subj="acePatternInput"
     >

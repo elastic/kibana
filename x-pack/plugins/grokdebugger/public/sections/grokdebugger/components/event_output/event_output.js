@@ -10,11 +10,17 @@ import {
   EuiPanel,
   EuiCodeEditor
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function EventOutput({ value }) {
   return (
     <EuiFormRow
-      label="Structured Data"
+      label={(
+        <FormattedMessage
+          id="kbn.devTools.grokDebugger.formRowEventOutput.abel"
+          defaultMessage="Structured Data"
+        />
+      )}
       fullWidth
       data-test-subj="aceEventOutput"
     >

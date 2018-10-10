@@ -34,7 +34,7 @@ export function checkLicense(xpackLicenseInfo) {
     };
   }
 
-  message = i18n.translate('kbn.devTools.searchProfiler.licenseHasExpiredMessage', {
+  message = i18n.translate('kbn.devTools.searchProfiler.upgradeLicenseMessage', {
     defaultMessage:
       'Search Profiler is unavailable for the current {licenseInfo} license. Please upgrade your license.',
     values: { licenseInfo: xpackLicenseInfo.license.getType() }

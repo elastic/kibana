@@ -7,12 +7,17 @@
 
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { i18n } from '@kbn/i18n';
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'grokdebugger',
-    title: 'Grok Debugger',
-    description: 'Simulate and debug grok patterns for data transformation on ingestion.',
+    title: i18n.translate('kbn.devTools.grokDebugger.registryProviderTitle', {
+      defaultMessage: 'Grok Debugger',
+    }),
+    description: i18n.translate('kbn.devTools.grokDebugger.registryProviderDescription', {
+      defaultMessage: 'Simulate and debug grok patterns for data transformation on ingestion.',
+    }),
     icon: 'grokApp',
     path: '/app/kibana#/dev_tools/grokdebugger',
     showOnHomePage: false,

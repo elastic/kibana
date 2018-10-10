@@ -20,6 +20,7 @@ import { CustomPatternsInput } from '../custom_patterns_input';
 import { EventOutput } from '../event_output';
 import { GrokdebuggerRequest } from '../../../../models/grokdebugger_request';
 import { toastNotifications } from 'ui/notify';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class GrokDebugger extends React.Component {
   constructor(props) {
@@ -123,7 +124,10 @@ export class GrokDebugger extends React.Component {
                   isDisabled={this.isSimulateDisabled()}
                   data-test-subj="btnSimulate"
                 >
-                  Simulate
+                  <FormattedMessage
+                    id="kbn.devTools.grokDebugger.simulateButtonLabel"
+                    defaultMessage="Simulate"
+                  />
                 </EuiButton>
                 <EuiSpacer />
                 <EventOutput value={this.state.structuredEvent} />

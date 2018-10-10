@@ -7,7 +7,9 @@
     "metricVis": "src/core_plugins/metric_vis",
     "statusPage": "src/core_plugins/status_page",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
-    "kbn.devTools.console": "src/core_plugins/console"
+    "kbn.devTools.console": "src/core_plugins/console",
+    "kbn.devTools.searchProfiler": "x-pack/plugins/searchprofiler",
+    "kbn.devTools.grokDebugger": "x-pack/plugins/grokdebugger"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",
