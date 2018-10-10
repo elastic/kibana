@@ -20,6 +20,7 @@ bower_components
 /packages/eslint-config-kibana
 /packages/eslint-plugin-kibana-custom
 /packages/kbn-pm/dist
+/packages/kbn-pm/vendor
 /packages/kbn-plugin-generator/sao_template/template
 /packages/kbn-ui-framework/dist
 /packages/kbn-ui-framework/doc_site/build
