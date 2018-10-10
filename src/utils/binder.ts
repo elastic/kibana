@@ -17,9 +17,27 @@
  * under the License.
  */
 
-import { pkg } from './package_json';
-import { resolve } from 'path';
+export interface Emitter {
+  on: (args: any[]) => void;
+  off: (args: any[]) => void;
+  addListener: Emitter['on'];
+  removeListener: Emitter['off'];
+}
 
-export function fromRoot(...args) {
-  return resolve(pkg.__dirname, ...args);
+export class BinderBase {
+  private disposal: Array<() => void> = [];
+
+  public on(emitter: Emitter, ...args: any[]) {
+    const on = emitter.on || emitter.addListener;
+    const off = emitter.off || emitter.removeListener;
+
+    on.apply(emitter, args);
+    this.disposal.push(() => off.apply(emitter, args));
+  }
+
+  public destroy() {
+    const destroyers = this.disposal;
+    this.disposal = [];
+    destroyers.forEach(fn => fn());
+  }
 }
