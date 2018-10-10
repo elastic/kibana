@@ -24,7 +24,7 @@ function throwError(ipAddress: string | number) {
   throw Error('Invalid IPv4 address: ' + ipAddress);
 }
 
-function isIntegerInRange(integer: string | number, min: number, max: number) {
+function isIntegerInRange(integer: number, min: number, max: number) {
   return (
     !isNaN(integer as number) && integer >= min && integer < max && (integer as number) % 1 === 0
   );
@@ -33,10 +33,9 @@ function isIntegerInRange(integer: string | number, min: number, max: number) {
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 // tslint:disable:no-default-export
 export default class Ipv4Address {
-  private value: string | number;
+  private value: number;
 
   constructor(ipAddress: string | number) {
-    this.value = ipAddress;
     if (typeof ipAddress === 'string') {
       this.value = 0;
 
@@ -52,6 +51,8 @@ export default class Ipv4Address {
         }
         this.value += Math.pow(BYTE_SIZE, NUM_BYTES - 1 - i) * byte;
       }
+    } else {
+      this.value = ipAddress;
     }
 
     if (!isIntegerInRange(this.value, 0, Math.pow(BYTE_SIZE, NUM_BYTES))) {
@@ -60,7 +61,7 @@ export default class Ipv4Address {
   }
 
   public toString() {
-    let value: number = this.value as number;
+    let value = this.value;
     const bytes = [];
     for (let i = 0; i < NUM_BYTES; i++) {
       bytes.unshift(value % 256);
@@ -70,6 +71,6 @@ export default class Ipv4Address {
   }
 
   public valueOf() {
-    return this.value as number;
+    return this.value;
   }
 }
