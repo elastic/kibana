@@ -3,14 +3,14 @@
     <div class="prfDevTool__wrapper">
       <div class="prfDevTool__main">
         <tabset ng-show="profileResponse.length > 0">
-          <tab heading="Query Profile"
+          <tab
+            heading="{{ 'kbn.devTools.searchProfiler.queryProfileTabTitle' | i18n: { defaultMessage: 'Query Profile' } }}"
             active="activeTab.search"
             ng-click="activateTab('search')"
             disabled="!hasSearch">
               <profileTree data="profileResponse" target="searches"></profileTree>
           </tab>
-          <tab heading="Aggregation Profile"
-            active="activeTab.aggregations"
+          <tab heading="{{ 'kbn.devTools.searchProfiler.aggregationProfileTabTitle' | i18n: { defaultMessage: 'Aggregation Profile' } }}"
             ng-click="activateTab('aggregations')"
             disabled="!hasAggregations">
               <profileTree data="profileResponse" target="aggregations"></profileTree>
@@ -19,20 +19,27 @@
 
         <!-- License error notice -->
         <div class="kuiNotice" ng-hide="licenseEnabled">
-          <h2 class="kuiTitle kuiVerticalRhythmSmall">
-            <span class="kuiIcon fa-warning kuiIcon--error"></span>
-            License error
-          </h1>
+          <h2
+            class="kuiTitle kuiVerticalRhythmSmall"
+            i18n-id="kbn.devTools.searchProfiler.licenseErrorMessageTitle"
+            i18n-default-message="{warningIcon} License error"
+            i18n-values="{ warningIcon: '<span class=\'kuiIcon fa-warning kuiIcon--error\'></span>' }"
+          ></h2>
 
-          <p class="kuiText kuiVerticalRhythmSmall">
-            The Profiler Visualization requires an active license (<code>Trial</code>,
-            <code>Basic</code>, <code>Gold</code> or <code>Platinum</code>), but none were found in your cluster.
-          </p>
+          <p
+            class="kuiText kuiVerticalRhythmSmall"
+            i18n-id="kbn.devTools.searchProfiler.licenseErrorMessageDescription"
+            i18n-default-message="The Profiler Visualization requires an active license ({openWrapTag}Trial{closeWrapTag},
+            {openWrapTag}Basic{closeWrapTag}, {openWrapTag}Gold{closeWrapTag} or {openWrapTag}Platinum{closeWrapTag}), but none were found in your cluster."
+            i18n-values="{ openWrapTag: '<code>', closeWrapTag: '</code>' }"
+          ></p>
 
-          <p class="kuiText kuiVerticalRhythmSmall">
-            Please <a class="kuiLink" href="https://www.elastic.co/subscriptions" rel="noopener noreferrer">register a license</a>
-            to continue using the Search Profiler.
-          </p>
+          <p
+            class="kuiText kuiVerticalRhythmSmall"
+            i18n-id="kbn.devTools.searchProfiler.registerlicenseLinkText"
+            i18n-default-message="Please {openWrapTag}register a license{closeWrapTag} to continue using the Search Profiler"
+            i18n-values="{ openWrapTag: '<a class=\'kuiLink\' href=\'https://www.elastic.co/subscriptions\' rel=\'noopener noreferrer\'>', closeWrapTag: '</a>' }"
+          ></p>
         </div>
       </div>
 
@@ -44,9 +51,9 @@
               <label
                 class="kuiLabel"
                 for="searchProfilerIndexInput"
-              >
-                Index
-              </label>
+                i18n-id="kbn.devTools.searchProfiler.formIndexLabel"
+                i18n-default-message="Index"
+              ></label>
             </div>
 
             <div class="kuiVerticalRhythmSmall">
@@ -66,9 +73,9 @@
               <label
                 class="kuiLabel"
                 for="searchProfilerTypeInput"
-              >
-                Type
-              </label>
+                i18n-id="kbn.devTools.searchProfiler.formTypeLabel"
+                i18n-default-message="Type"
+              ></label>
             </div>
 
             <div class="kuiVerticalRhythmSmall">
@@ -94,8 +101,9 @@
           style="float:right;"
           ng-click="profile()"
           ng-disabled="!licenseEnabled || !query"
+          i18n-id="kbn.devTools.searchProfiler.formProfileButtonLabel"
+          i18n-default-message="Profile"
         >
-          Profile
         </button>
       </div>
       <aside class="prfDevTool__details">

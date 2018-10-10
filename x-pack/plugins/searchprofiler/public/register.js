@@ -5,10 +5,13 @@
  */
 
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
+import { i18n } from '@kbn/i18n';
 
 DevToolsRegistryProvider.register(() => ({
   order: 5,
   name: 'searchprofiler',
-  display: 'Search Profiler',
+  display: i18n.translate('kbn.devTools.searchProfiler.pageDisplayName', {
+    defaultMessage: 'Search Profiler',
+  }),
   url: '#/dev_tools/searchprofiler'
 }));
