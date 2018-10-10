@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { dateRange } from '../../utils/date_range';
+import { dateRangeToString } from '../../utils/date_range';
 import '../../directives/validate_date_math';
 import '../../directives/documentation_href';
 import { BucketAggType } from './_bucket_agg_type';
@@ -31,7 +31,7 @@ export const dateRangeBucketAgg = new BucketAggType({
   createFilter: createFilterDateRange,
   getKey: function (bucket, key, agg) {
     const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
-    return dateRange.toString(bucket, formatter);
+    return dateRangeToString(bucket, formatter);
   },
   getFormat: function () {
     return fieldFormats.getDefaultInstance('string');

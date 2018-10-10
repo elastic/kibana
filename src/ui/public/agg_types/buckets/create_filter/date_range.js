@@ -18,13 +18,13 @@
  */
 
 import chrome from '../../../chrome';
-import { dateRange } from '../../../utils/date_range';
+import { parseDateRange } from '../../../utils/date_range';
 import { buildRangeFilter } from '../../../filter_manager/lib/range';
 
 const config = chrome.getUiSettingsClient();
 
 export function createFilterDateRange(agg, key) {
-  const range = dateRange.parse(key, config.get('dateFormat'));
+  const range = parseDateRange(key, config.get('dateFormat'));
 
   const filter = {};
   if (range.from) filter.gte = +range.from;
