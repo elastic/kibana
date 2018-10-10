@@ -49,7 +49,8 @@ export function parse(command, options, kbnPackage) {
     optimize: options.optimize,
     plugin: command,
     version: kbnPackage.version,
-    pluginDir: options.pluginDir || ''
+    pluginDir: options.pluginDir || '',
+    skipOptimize: options.skipOptimize || false
   };
 
   settings.urls = generateUrls(settings);

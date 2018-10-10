@@ -22,6 +22,7 @@ import { pkg } from '../utils';
 import Command from '../cli/command';
 import listCommand from './list';
 import installCommand from './install';
+import optimizeCommand from './optimize';
 import removeCommand from './remove';
 
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
@@ -36,6 +37,7 @@ program
 
 listCommand(program);
 installCommand(program);
+optimizeCommand(program);
 removeCommand(program);
 
 program
