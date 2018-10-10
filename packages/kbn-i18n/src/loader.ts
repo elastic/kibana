@@ -137,9 +137,13 @@ export async function getTranslationsByLocale(locale: string): Promise<PlainMess
 
   return files.length
     ? files.reduce(
-        (messages, file) => ({
+        (messages: { locale: string; messages?: PlainMessages['messages'] }, file) => ({
           ...messages,
           ...loadedFiles[file],
+          messages: {
+            ...(loadedFiles[file].messages || {}),
+            ...(messages.messages || {}),
+          },
         }),
         { locale }
       )
