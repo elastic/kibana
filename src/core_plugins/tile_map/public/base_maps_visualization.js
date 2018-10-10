@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
@@ -195,7 +196,9 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
     }
 
     async _updateData() {
-      throw new Error('Child should implement this method to respond to data-update');
+      throw new Error(i18n.translate('tileMap.baseMapsVisualization.childShouldImplementMethodErrorMessage', {
+        defaultMessage: 'Child should implement this method to respond to data-update',
+      }));
     }
 
     _hasESResponseChanged(data) {
