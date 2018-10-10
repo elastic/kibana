@@ -108,7 +108,12 @@ export class PhraseFilterManager extends FilterManager {
 
     // single phrase filter
     if (_.has(kbnFilter, ['query', 'match', this.fieldName])) {
-      return _.get(kbnFilter, ['query', 'match', this.fieldName, 'query']);
+      const val = _.get(kbnFilter, ['query', 'match', this.fieldName, 'query'], this.getUnsetValue());
+      if (typeof val === 'boolean') {
+        return val ? '1' : '0';
+      } else {
+        return val;
+      }
     }
 
     // single phrase filter from bool filter
