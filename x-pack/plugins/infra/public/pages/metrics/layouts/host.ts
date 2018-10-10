@@ -216,4 +216,71 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
     ],
   },
+  {
+    id: 'nginxOverview',
+    label: 'Nginx',
+    requires: ['nginx'],
+    sections: [
+      {
+        id: InfraMetric.nginxHits,
+        label: 'Hits',
+        requires: ['nginx.access'],
+        type: InfraMetricLayoutSectionType.chart,
+        visConfig: {
+          formatter: InfraFormatterType.abvNumber,
+          stacked: true,
+          seriesOverrides: {
+            '200s': { color: theme.eui.euiColorVis0, type: InfraMetricLayoutVisualizationType.bar },
+            '300s': { color: theme.eui.euiColorVis5, type: InfraMetricLayoutVisualizationType.bar },
+            '400s': { color: theme.eui.euiColorVis2, type: InfraMetricLayoutVisualizationType.bar },
+            '500s': { color: theme.eui.euiColorVis9, type: InfraMetricLayoutVisualizationType.bar },
+          },
+        },
+      },
+      {
+        id: InfraMetric.nginxRequestRate,
+        label: 'Request Rate',
+        requires: ['nginx.statusstub'],
+        type: InfraMetricLayoutSectionType.chart,
+        visConfig: {
+          formatter: InfraFormatterType.abvNumber,
+          formatterTemplate: '{{value}}/s',
+          seriesOverrides: {
+            rate: { color: theme.eui.euiColorVis0, type: InfraMetricLayoutVisualizationType.area },
+          },
+        },
+      },
+      {
+        id: InfraMetric.nginxActiveConnections,
+        label: 'Active Connections',
+        requires: ['nginx.statusstub'],
+        type: InfraMetricLayoutSectionType.chart,
+        visConfig: {
+          formatter: InfraFormatterType.abvNumber,
+          seriesOverrides: {
+            connections: {
+              color: theme.eui.euiColorVis0,
+              type: InfraMetricLayoutVisualizationType.bar,
+            },
+          },
+        },
+      },
+      {
+        id: InfraMetric.nginxRequestsPerConnection,
+        label: 'Requests per Connections',
+        requires: ['nginx.statusstub'],
+        type: InfraMetricLayoutSectionType.chart,
+        visConfig: {
+          formatter: InfraFormatterType.abvNumber,
+          seriesOverrides: {
+            reqPerConns: {
+              color: theme.eui.euiColorVis0,
+              type: InfraMetricLayoutVisualizationType.bar,
+              name: 'reqs per conn',
+            },
+          },
+        },
+      },
+    ],
+  },
 ];
