@@ -20,7 +20,7 @@
 import { ordinalSuffix } from './ordinal_suffix';
 
 describe('ordinal suffix util', () => {
-  const checks = {
+  const checks: { [key: number]: string } = {
     1: 'st',
     2: 'nd',
     3: 'rd',
@@ -53,8 +53,9 @@ describe('ordinal suffix util', () => {
     30: 'th',
   };
 
-  Object.keys(checks).forEach((key: string) => {
-    const expected = checks[key];
+  Object.entries(checks).forEach(check => {
+    const key = check[0];
+    const expected = check[1];
     const int = parseInt(key, 10);
     const float = int + Math.random();
 

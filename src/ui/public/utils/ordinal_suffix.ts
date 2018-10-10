@@ -23,7 +23,7 @@ export function ordinalSuffix(num: number): string {
 }
 
 function suffix(num: number): string {
-  const int = Math.floor(parseFloat(num as string));
+  const int = Math.floor(parseFloat(num.toString()));
   const hunth = int % 100;
   const tenth = int % 10;
 
