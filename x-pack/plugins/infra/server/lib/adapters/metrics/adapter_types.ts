@@ -7,7 +7,6 @@
 import {
   InfraMetric,
   InfraMetricData,
-  InfraMetricType,
   InfraNodeType,
   InfraTimerangeInput,
 } from '../../../../common/graphql/types';
