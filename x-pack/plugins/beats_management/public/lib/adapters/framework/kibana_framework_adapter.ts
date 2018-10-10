@@ -84,6 +84,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         const registerSection = () =>
           this.management.register(pluginId, {
             display: displayName,
+            icon: 'logoBeats',
             order: 30,
           });
         const getSection = () => this.management.getSection(pluginId);
