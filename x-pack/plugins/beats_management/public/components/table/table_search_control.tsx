@@ -13,7 +13,7 @@ import { FilterDefinition } from '../table';
 import { AssignmentActionType } from './table';
 
 interface TableSearchControlProps {
-  filters: FilterDefinition[] | null;
+  filters?: FilterDefinition[];
   actionHandler(action: AssignmentActionType, payload?: any): void;
 }
 

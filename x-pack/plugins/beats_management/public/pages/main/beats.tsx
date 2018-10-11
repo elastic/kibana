@@ -108,20 +108,22 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="beat">
           {autocompleteProps => (
             <Table
-              {...autocompleteProps}
+              kueryBarProps={{
+                ...autocompleteProps,
+                filterQueryDraft: 'false', // todo
+                isValid: this.props.libs.elasticsearch.isKueryValid(
+                  this.props.urlState.beatsKBar || ''
+                ), // todo check if query converts to es query correctly
+                onChange: (value: any) => this.props.setUrlState({ beatsKBar: value }), // todo
+                onSubmit: () => null, // todo
+                value: this.props.urlState.beatsKBar || '',
+              }}
               assignmentOptions={{
                 items: this.state.tags || [],
                 schema: beatsListAssignmentOptions,
                 type: 'assignment',
                 actionHandler: this.handleBeatsActions,
               }}
-              isKueryValid={this.props.libs.elasticsearch.isKueryValid(
-                this.props.urlState.beatsKBar || ''
-              )} // todo check if query converts to es query correctly
-              kueryValue={this.props.urlState.beatsKBar}
-              onKueryBarChange={(value: any) => this.props.setUrlState({ beatsKBar: value })} // todo
-              onKueryBarSubmit={() => null} // todo
-              filterQueryDraft={'false'} // todo
               items={sortBy(this.props.beats, 'id') || []}
               ref={this.state.tableRef}
               type={BeatsTableType}

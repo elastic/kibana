@@ -62,7 +62,10 @@ export class ActionControl extends React.PureComponent<ActionControlProps, Actio
               buttonColor={danger ? 'danger' : 'primary'}
               cancelButtonText="Cancel"
               confirmButtonText="Confirm"
-              onConfirm={() => actionHandler(action)}
+              onConfirm={() => {
+                actionHandler(action);
+                this.setState({ showModal: false });
+              }}
               onCancel={() => this.setState({ showModal: false })}
               title={warningHeading ? warningHeading : 'Confirm'}
             >

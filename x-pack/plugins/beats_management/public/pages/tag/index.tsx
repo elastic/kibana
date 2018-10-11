@@ -58,6 +58,14 @@ export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageS
           <TagEdit
             tag={this.state.tag}
             mode={this.mode}
+            onDetachBeat={async (beatIds: string[]) => {
+              await this.props.libs.beats.removeTagsFromBeats(
+                beatIds.map(id => {
+                  return { beatId: id, tag: this.state.tag.id };
+                })
+              );
+              await this.loadAttachedBeats();
+            }}
             onTagChange={(field: string, value: string | number) =>
               this.setState(oldState => ({
                 tag: { ...oldState.tag, [field]: value },

@@ -11,6 +11,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import { TABLE_CONFIG } from '../../../common/constants';
 import { AssignmentControlSchema } from './assignment_schema';
 import { ControlBar } from './controls';
@@ -32,9 +33,21 @@ export interface AssignmentOptions {
   actionHandler(action: AssignmentActionType, payload?: any): void;
 }
 
+export interface KueryBarProps {
+  filterQueryDraft: string;
+  isLoadingSuggestions: boolean;
+  isValid: boolean;
+  loadSuggestions: (value: string, cursorPosition: number, maxCount?: number) => void;
+  onChange?: (value: string) => void;
+  onSubmit?: (value: string) => void;
+  suggestions: AutocompleteSuggestion[];
+  value: string;
+}
+
 interface TableProps {
   assignmentOptions?: AssignmentOptions;
   hideTableControls?: boolean;
+  kueryBarProps?: KueryBarProps;
   items: any[];
   type: TableType;
 }
@@ -47,7 +60,7 @@ const TableContainer = styled.div`
   padding: 16px;
 `;
 
-export class Table extends React.Component<any, TableState> {
+export class Table extends React.Component<TableProps, TableState> {
   constructor(props: any) {
     super(props);
 
@@ -67,20 +80,7 @@ export class Table extends React.Component<any, TableState> {
   };
 
   public render() {
-    const {
-      assignmentOptions,
-      hideTableControls,
-      items,
-      type,
-      isLoadingSuggestions,
-      loadSuggestions,
-      onKueryBarSubmit,
-      isKueryValid,
-      kueryValue,
-      onKueryBarChange,
-      suggestions,
-      filterQueryDraft,
-    } = this.props;
+    const { assignmentOptions, hideTableControls, items, kueryBarProps, type } = this.props;
 
     const pagination = {
       initialPageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
@@ -102,15 +102,8 @@ export class Table extends React.Component<any, TableState> {
           assignmentOptions && (
             <ControlBar
               assignmentOptions={assignmentOptions}
+              kueryBarProps={kueryBarProps}
               selectionCount={this.state.selection.length}
-              isLoadingSuggestions={isLoadingSuggestions}
-              kueryValue={kueryValue}
-              isKueryValid={isKueryValid}
-              loadSuggestions={loadSuggestions}
-              onKueryBarChange={onKueryBarChange}
-              onKueryBarSubmit={onKueryBarSubmit}
-              suggestions={suggestions}
-              filterQueryDraft={filterQueryDraft}
             />
           )}
         <EuiSpacer size="m" />

@@ -49,15 +49,17 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
       <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="tag">
         {autocompleteProps => (
           <Table
-            {...autocompleteProps}
+            kueryBarProps={{
+              ...autocompleteProps,
+              filterQueryDraft: 'false', // todo
+              isValid: this.props.libs.elasticsearch.isKueryValid(
+                this.props.urlState.tagsKBar || ''
+              ),
+              onChange: (value: any) => this.props.setUrlState({ tagsKBar: value }),
+              onSubmit: () => null, // todo
+              value: this.props.urlState.tagsKBar || '',
+            }}
             hideTableControls={true}
-            isKueryValid={this.props.libs.elasticsearch.isKueryValid(
-              this.props.urlState.tagsKBar || ''
-            )}
-            kueryValue={this.props.urlState.tagsKBar}
-            onKueryBarChange={(value: any) => this.props.setUrlState({ tagsKBar: value })}
-            onKueryBarSubmit={() => null} // todo
-            filterQueryDraft={'false'} // todo
             items={this.state.tags}
             type={TagsTableType}
           />

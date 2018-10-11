@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AssignmentActionType, AssignmentOptions, Table } from './table';
+export { AssignmentActionType, AssignmentOptions, KueryBarProps, Table } from './table';
 export {
   AssignmentComponentType,
   AssignmentControlSchema,

@@ -8,33 +8,20 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { AutocompleteField } from '../autocomplete_field/index';
 import { OptionControl } from '../table_controls';
-import { AssignmentOptions as AssignmentOptionsType } from './table';
+import { AssignmentOptions as AssignmentOptionsType, KueryBarProps } from './table';
+import { TableSearchControl } from './table_search_control';
 
 interface ControlBarProps {
   assignmentOptions: AssignmentOptionsType;
+  kueryBarProps?: KueryBarProps;
   selectionCount: number;
-  isLoadingSuggestions: any;
-  onKueryBarSubmit: any;
-  kueryValue: any;
-  isKueryValid: any;
-  onKueryBarChange: any;
-  loadSuggestions: any;
-  suggestions: any;
-  filterQueryDraft: any;
 }
 
 export function ControlBar(props: ControlBarProps) {
   const {
     assignmentOptions: { actionHandler, items, schema, type },
+    kueryBarProps,
     selectionCount,
-    isLoadingSuggestions,
-    isKueryValid,
-    kueryValue,
-    loadSuggestions,
-    onKueryBarChange,
-    onKueryBarSubmit,
-    suggestions,
-    filterQueryDraft,
   } = props;
 
   if (type === 'none') {
@@ -60,16 +47,11 @@ export function ControlBar(props: ControlBarProps) {
         ))}
       {showSearch && (
         <EuiFlexItem>
-          <AutocompleteField
-            value={kueryValue}
-            isLoadingSuggestions={isLoadingSuggestions}
-            isValid={isKueryValid}
-            loadSuggestions={loadSuggestions}
-            onChange={onKueryBarChange}
-            onSubmit={onKueryBarSubmit}
-            placeholder="Filter results"
-            suggestions={suggestions}
-          />
+          {kueryBarProps ? (
+            <AutocompleteField {...kueryBarProps} placeholder="Filter results" />
+          ) : (
+            <TableSearchControl actionHandler={actionHandler} />
+          )}
         </EuiFlexItem>
       )}
       {showAssignmentOptions &&
