@@ -51,14 +51,16 @@ export function buildConfig(record) {
   if (_.has(record, 'partition_field_name')) {
     config.entityFields.push({
       fieldName: record.partition_field_name,
-      fieldValue: record.partition_field_value
+      fieldValue: record.partition_field_value,
+      fieldType: 'partition'
     });
   }
 
   if (_.has(record, 'over_field_name')) {
     config.entityFields.push({
       fieldName: record.over_field_name,
-      fieldValue: record.over_field_value
+      fieldValue: record.over_field_value,
+      fieldType: 'over'
     });
   }
 
@@ -68,7 +70,8 @@ export function buildConfig(record) {
   if (_.has(record, 'by_field_name') && !(_.has(record, 'over_field_name'))) {
     config.entityFields.push({
       fieldName: record.by_field_name,
-      fieldValue: record.by_field_value
+      fieldValue: record.by_field_value,
+      fieldType: 'by'
     });
   }
 
