@@ -5,8 +5,6 @@
  */
 
 import {
-  // @ts-ignore
-  EuiBadge,
   EuiButton,
   // @ts-ignore
   EuiColorPicker,
@@ -27,14 +25,16 @@ import { isEqual } from 'lodash';
 import React from 'react';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { ConfigList } from '../config_list';
-import { Table } from '../table';
+import { AssignmentActionType, Table } from '../table';
 import { BeatsTableType } from '../table';
+import { tagConfigAssignmentOptions } from '../table';
 import { ConfigView } from './config_view';
 import { TagBadge } from './tag_badge';
 
 interface TagEditProps {
   mode: 'edit' | 'create';
   tag: Pick<BeatTag, Exclude<keyof BeatTag, 'last_updated'>>;
+  onDetachBeat: (beatIds: string[]) => void;
   onTagChange: (field: keyof BeatTag, value: string) => any;
   attachedBeats: CMBeat[] | null;
 }
@@ -159,14 +159,14 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               <h3>Attached Beats</h3>
             </EuiTitle>
             <Table
-              actionHandler={() => {
-                /* TODO: this prop should be optional */
+              assignmentOptions={{
+                schema: tagConfigAssignmentOptions,
+                items: [],
+                type: 'primary',
+                actionHandler: this.handleAssignmentActions,
               }}
-              assignmentOptions={[]}
-              assignmentTitle={null}
               items={attachedBeats}
               ref={this.state.tableRef}
-              showAssignmentOptions={false}
               type={BeatsTableType}
             />
           </div>
@@ -204,6 +204,14 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
       return 'Tag name must consist of letters, numbers, and dashes only';
     } else {
       return false;
+    }
+  };
+
+  private handleAssignmentActions = (action: AssignmentActionType) => {
+    switch (action) {
+      case AssignmentActionType.Delete:
+        const { selection } = this.state.tableRef.current.state;
+        this.props.onDetachBeat(selection.map((beat: any) => beat.id));
     }
   };
 

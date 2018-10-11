@@ -4,20 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { AssignmentOptions } from './assignment_options';
-import { PrimaryOptions } from './primary_options';
-import { ControlDefinitions } from './table_type_configs';
+import { AutocompleteField } from '../autocomplete_field/index';
+import { OptionControl } from '../table_controls';
+import { AssignmentOptions as AssignmentOptionsType } from './table';
 
 interface ControlBarProps {
-  assignmentOptions: any[] | null;
-  assignmentTitle: string | null;
-  renderAssignmentOptions?: (item: any, key: string) => any;
-
-  showAssignmentOptions: boolean;
-  controlDefinitions: ControlDefinitions;
+  assignmentOptions: AssignmentOptionsType;
   selectionCount: number;
-
   isLoadingSuggestions: any;
   onKueryBarSubmit: any;
   kueryValue: any;
@@ -26,18 +21,12 @@ interface ControlBarProps {
   loadSuggestions: any;
   suggestions: any;
   filterQueryDraft: any;
-  actionHandler(actionType: string, payload?: any): void;
 }
 
 export function ControlBar(props: ControlBarProps) {
   const {
-    actionHandler,
-    assignmentOptions,
-    renderAssignmentOptions,
-    assignmentTitle,
-    controlDefinitions,
+    assignmentOptions: { actionHandler, items, schema, type },
     selectionCount,
-    showAssignmentOptions,
     isLoadingSuggestions,
     isKueryValid,
     kueryValue,
@@ -48,30 +37,52 @@ export function ControlBar(props: ControlBarProps) {
     filterQueryDraft,
   } = props;
 
-  const filters = controlDefinitions.filters.length === 0 ? null : controlDefinitions.filters;
-  return selectionCount !== 0 && showAssignmentOptions ? (
-    <AssignmentOptions
-      actionHandler={actionHandler}
-      assignmentOptions={assignmentOptions}
-      renderAssignmentOptions={renderAssignmentOptions}
-      assignmentTitle={assignmentTitle}
-      controlDefinitions={controlDefinitions}
-      selectionCount={selectionCount}
-    />
-  ) : (
-    <PrimaryOptions
-      onKueryBarSubmit={onKueryBarSubmit}
-      kueryValue={kueryValue}
-      isKueryValid={isKueryValid}
-      onKueryBarChange={onKueryBarChange}
-      isLoadingSuggestions={isLoadingSuggestions}
-      loadSuggestions={loadSuggestions}
-      suggestions={suggestions}
-      filterQueryDraft={filterQueryDraft}
-      actionHandler={actionHandler}
-      filters={filters}
-      onSearchQueryChange={(query: any) => actionHandler('search', query)}
-      primaryActions={controlDefinitions.primaryActions || []}
-    />
+  if (type === 'none') {
+    return null;
+  }
+
+  const showSearch = type !== 'assignment' || selectionCount === 0;
+  const showAssignmentOptions = type === 'assignment' && selectionCount > 0;
+  const showPrimaryOptions = type === 'primary' && selectionCount > 0;
+
+  return (
+    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+      {showPrimaryOptions &&
+        schema.map(def => (
+          <EuiFlexItem key={def.name} grow={def.grow}>
+            <OptionControl
+              schema={def}
+              selectionCount={selectionCount}
+              actionHandler={actionHandler}
+              items={items}
+            />
+          </EuiFlexItem>
+        ))}
+      {showSearch && (
+        <EuiFlexItem>
+          <AutocompleteField
+            value={kueryValue}
+            isLoadingSuggestions={isLoadingSuggestions}
+            isValid={isKueryValid}
+            loadSuggestions={loadSuggestions}
+            onChange={onKueryBarChange}
+            onSubmit={onKueryBarSubmit}
+            placeholder="Filter results"
+            suggestions={suggestions}
+          />
+        </EuiFlexItem>
+      )}
+      {showAssignmentOptions &&
+        schema.map(def => (
+          <EuiFlexItem key={def.name} grow={def.grow}>
+            <OptionControl
+              schema={def}
+              selectionCount={selectionCount}
+              actionHandler={actionHandler}
+              items={items}
+            />
+          </EuiFlexItem>
+        ))}
+    </EuiFlexGroup>
   );
 }
