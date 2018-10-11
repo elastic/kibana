@@ -34,7 +34,7 @@ import { createFailError } from '../../run';
 /**
  * Find all substrings of "{{ any text }}" pattern
  */
-const ANGULAR_EXPRESSION_REGEX = /\{\{+([\s\S]*?)\}\}+/g;
+const ANGULAR_EXPRESSION_REGEX = /{{([^{}]|({([^']|('([^']|(\\'))*'))*?}))*}}+/g;
 
 const I18N_FILTER_MARKER = '| i18n: ';
 
@@ -112,7 +112,7 @@ function parseIdExpression(expression) {
     }
   }
 
-  return null;
+  throw createFailError(`Message id should be a string literal: \n${expression}`);
 }
 
 function trimCurlyBraces(string) {
@@ -147,7 +147,33 @@ function trimOneTimeBindingOperator(string) {
   return string;
 }
 
+/**
+ * Remove interpolation expressions from angular and throw on `| i18n:` substring.
+ *
+ * @param {string} string html content
+ */
+function validateI18nFilterUsage(string) {
+  const stringWithoutExpressions = string.replace(ANGULAR_EXPRESSION_REGEX, '');
+  const i18nMarkerPosition = stringWithoutExpressions.indexOf(I18N_FILTER_MARKER);
+
+  if (i18nMarkerPosition !== -1) {
+    const linesCount = (stringWithoutExpressions.slice(0, i18nMarkerPosition).match(/\n/g) || [])
+      .length;
+
+    const errorWithContext = createParserErrorMessage(string, {
+      loc: {
+        line: linesCount + 1,
+        column: 0,
+      },
+      message: 'I18n filter can be used only in interpolation expressions',
+    });
+    throw createFailError(errorWithContext);
+  }
+}
+
 function* getFilterMessages(htmlContent) {
+  validateI18nFilterUsage(htmlContent);
+
   const expressions = (htmlContent.match(ANGULAR_EXPRESSION_REGEX) || [])
     .filter(expression => expression.includes(I18N_FILTER_MARKER))
     .map(trimCurlyBraces);
@@ -185,14 +211,16 @@ function* getFilterMessages(htmlContent) {
 function* getDirectiveMessages(htmlContent) {
   const $ = cheerio.load(htmlContent);
 
-  const elements = $('[i18n-id]').map(function (idx, el) {
-    const $el = $(el);
-    return {
-      id: $el.attr('i18n-id'),
-      defaultMessage: $el.attr('i18n-default-message'),
-      context: $el.attr('i18n-context'),
-    };
-  }).toArray();
+  const elements = $('[i18n-id]')
+    .map(function (idx, el) {
+      const $el = $(el);
+      return {
+        id: $el.attr('i18n-id'),
+        defaultMessage: $el.attr('i18n-default-message'),
+        context: $el.attr('i18n-context'),
+      };
+    })
+    .toArray();
 
   for (const element of elements) {
     const messageId = formatHTMLString(element.id);
