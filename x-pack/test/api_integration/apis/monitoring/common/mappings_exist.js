@@ -47,7 +47,7 @@ export default function ({ getService }) {
     for (const { indexTemplate, metrics, name } of metricSets) {
       let mappings;
 
-      before('load mappings', async () => { // eslint-disable-line no-loop-func
+      before('load mappings', async () => {
         const template = await es.indices.getTemplate({ name: indexTemplate });
         mappings = get(template, [indexTemplate, 'mappings', 'doc', 'properties']);
       });
