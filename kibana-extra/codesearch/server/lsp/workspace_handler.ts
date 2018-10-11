@@ -21,6 +21,8 @@ import { CloneWorkerProgress, LspRequest } from '../../model';
 import { getDefaultBranch, GitOperations } from '../git_operations';
 import { Log } from '../log';
 
+export const MAX_RESULT_COUNT = 20;
+
 export class WorkspaceHandler {
   private git: GitOperations;
   private revisionMap: { [uri: string]: string } = {};
@@ -149,9 +151,11 @@ export class WorkspaceHandler {
       }
       case 'textDocument/references': {
         if (response.result) {
-          for (const location of response.result as Location[]) {
+          const locations = (response.result as Location[]).slice(0, MAX_RESULT_COUNT);
+          for (const location of locations) {
             this.convertLocation(location);
           }
+          response.result = locations;
         }
         return response;
       }
