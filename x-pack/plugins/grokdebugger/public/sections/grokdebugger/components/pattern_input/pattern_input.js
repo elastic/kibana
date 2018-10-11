@@ -19,7 +19,7 @@ export function PatternInput({ value, onChange }) {
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="kbn.devTools.grokDebugger.formRowPatternInputLabel"
+          id="xpack.grokDebugger.formRowPatternInputLabel"
           defaultMessage="Grok Pattern"
         />
       )}

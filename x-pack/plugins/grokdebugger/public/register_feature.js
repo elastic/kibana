@@ -12,10 +12,10 @@ import { i18n } from '@kbn/i18n';
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'grokdebugger',
-    title: i18n.translate('kbn.devTools.grokDebugger.registryProviderTitle', {
+    title: i18n.translate('xpack.grokDebugger.registryProviderTitle', {
       defaultMessage: 'Grok Debugger',
     }),
-    description: i18n.translate('kbn.devTools.grokDebugger.registryProviderDescription', {
+    description: i18n.translate('xpack.grokDebugger.registryProviderDescription', {
       defaultMessage: 'Simulate and debug grok patterns for data transformation on ingestion.',
     }),
     icon: 'grokApp',

@@ -23,7 +23,7 @@ export class GrokdebuggerResponse {
     const error = docs[0].error;
     if (!isEmpty(error)) {
       const opts = { 'error': i18n.translate(
-        'kbn.devTools.grokDebugger.patternsErrorMessage', { defaultMessage: 'Provided Grok patterns do not match data in the input' }
+        'xpack.grokDebugger.patternsErrorMessage', { defaultMessage: 'Provided Grok patterns do not match data in the input' }
       ), };
       return new GrokdebuggerResponse(opts);
     }

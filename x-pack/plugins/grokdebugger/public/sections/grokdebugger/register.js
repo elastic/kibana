@@ -13,7 +13,7 @@ DevToolsRegistryProvider.register((Private) => {
   return {
     order: 6,
     name: 'grokdebugger',
-    display: i18n.translate('kbn.devTools.grokDebugger.displayName', {
+    display: i18n.translate('xpack.grokDebugger.displayName', {
       defaultMessage: 'Grok Debugger',
     }),
     url: '#/dev_tools/grokdebugger',

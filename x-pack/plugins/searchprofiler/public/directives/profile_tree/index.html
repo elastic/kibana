@@ -2,14 +2,14 @@
   <div class="prfDevTool__shardDetails--dim">
     <span
       tooltip-placement="bottom"
-      tooltip="{{ 'kbn.devTools.searchProfiler.profileTree.cumulativeTimeTooltip' | i18n: { defaultMessage: 'The cumulative time of all shards in the index. Note: this is not wall-clock time, as shards can execute in parallel.' } }}">
-      <h3>{{'kbn.devTools.searchProfiler.profileTree.cumulativeTimeTitle' | i18n: { defaultMessage: "Cumulative Time:" } }} {{ index.time[target] | msToPretty: 3 }}</h3>
+      tooltip="{{ 'xpack.searchProfiler.profileTree.cumulativeTimeTooltip' | i18n: { defaultMessage: 'The cumulative time of all shards in the index. Note: this is not wall-clock time, as shards can execute in parallel.' } }}">
+      <h3>{{'xpack.searchProfiler.profileTree.cumulativeTimeTitle' | i18n: { defaultMessage: "Cumulative Time:" } }} {{ index.time[target] | msToPretty: 3 }}</h3>
     </span><br/>
   </div>
   <div class="prfDevTool__shardDetails" style="margin-left:5px">
     <h3>
       <b
-        i18n-id="kbn.devTools.searchProfiler.profileTree.indexTitle"
+        i18n-id="xpack.searchProfiler.profileTree.indexTitle"
         i18n-default-message="Index: "
       ></b>{{index.name}}
     </h3>
@@ -39,22 +39,22 @@
           <div class="prfDevTool__tvHeader">
             <div
               class="prfDevTool__cell prfDevTool__description"
-              i18n-id="kbn.devTools.searchProfiler.profileTree.header.typeTitle"
+              i18n-id="xpack.searchProfiler.profileTree.header.typeTitle"
               i18n-default-message="Type"
             ></div>
             <div
               class="prfDevTool__cell prfDevTool__time"
-              i18n-id="kbn.devTools.searchProfiler.profileTree.header.selfTimeTitle"
+              i18n-id="xpack.searchProfiler.profileTree.header.selfTimeTitle"
               i18n-default-message="Self Time"
             ></div>
             <div
               class="prfDevTool__cell prfDevTool__totalTime"
-              i18n-id="kbn.devTools.searchProfiler.profileTree.header.totalTimeTitle"
+              i18n-id="xpack.searchProfiler.profileTree.header.totalTimeTitle"
               i18n-default-message="Total Time"
             ></div>
             <div
               class="prfDevTool__cell prfDevTool__percentage"
-              i18n-id="kbn.devTools.searchProfiler.profileTree.header.percentageTimeTitle"
+              i18n-id="xpack.searchProfiler.profileTree.header.percentageTimeTitle"
               i18n-default-message="% Time"
             ></div>
           </div>

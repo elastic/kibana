@@ -739,7 +739,7 @@ export default function (editor) {
     context.autoCompleteSet = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'].map((m, i) => ({
       name: m,
       score: -i,
-      meta: i18n.translate('kbn.devTools.console.autocomplete.addMethodMetaText', { defaultMessage: 'method' }),
+      meta: i18n.translate('console.autocomplete.addMethodMetaText', { defaultMessage: 'method' }),
     }));
   }
 

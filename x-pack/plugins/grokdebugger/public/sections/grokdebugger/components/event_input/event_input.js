@@ -18,7 +18,7 @@ export function EventInput({ value, onChange }) {
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="kbn.devTools.grokDebugger.formRowEventInputLabel"
+          id="xpack.grokDebugger.formRowEventInputLabel"
           defaultMessage="Sample Data"
         />
       )}

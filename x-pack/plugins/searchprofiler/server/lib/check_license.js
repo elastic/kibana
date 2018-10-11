@@ -12,7 +12,7 @@ export function checkLicense(xpackLicenseInfo) {
     return {
       showAppLink: true,
       enableAppLink: false,
-      message: i18n.translate('kbn.devTools.searchProfiler.unavailableLicenseInformationMessage', {
+      message: i18n.translate('xpack.searchProfiler.unavailableLicenseInformationMessage', {
         defaultMessage: 'Search Profiler is unavailable - license information is not available at this time.',
       }),
     };
@@ -21,7 +21,7 @@ export function checkLicense(xpackLicenseInfo) {
   const isLicenseActive = xpackLicenseInfo.license.isActive();
   let message;
   if (!isLicenseActive) {
-    message = i18n.translate('kbn.devTools.searchProfiler.licenseHasExpiredMessage', {
+    message = i18n.translate('xpack.searchProfiler.licenseHasExpiredMessage', {
       defaultMessage: 'Search Profiler is unavailable - license has expired.',
     });
   }
@@ -34,7 +34,7 @@ export function checkLicense(xpackLicenseInfo) {
     };
   }
 
-  message = i18n.translate('kbn.devTools.searchProfiler.upgradeLicenseMessage', {
+  message = i18n.translate('xpack.searchProfiler.upgradeLicenseMessage', {
     defaultMessage:
       'Search Profiler is unavailable for the current {licenseInfo} license. Please upgrade your license.',
     values: { licenseInfo: xpackLicenseInfo.license.getType() }

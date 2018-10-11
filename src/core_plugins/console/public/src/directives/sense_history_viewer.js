@@ -44,7 +44,7 @@ require('ui/modules')
             viewer.clearSelection();
           } else {
             viewer.getSession().setValue(
-              i18n.translate('kbn.devTools.console.historyPage.noHistoryTextMessage', { defaultMessage: 'No history available' })
+              i18n.translate('console.historyPage.noHistoryTextMessage', { defaultMessage: 'No history available' })
             );
           }
         });

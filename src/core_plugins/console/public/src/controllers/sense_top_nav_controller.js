@@ -34,7 +34,7 @@ export function SenseTopNavController(Private) {
     },
     {
       key: 'history',
-      description: i18n.translate('kbn.devTools.console.topNav.historyTabDescription', {
+      description: i18n.translate('console.topNav.historyTabDescription', {
         defaultMessage: 'History',
       }),
       template: `<sense-history></sense-history>`,
@@ -42,7 +42,7 @@ export function SenseTopNavController(Private) {
     },
     {
       key: 'settings',
-      description: i18n.translate('kbn.devTools.console.topNav.settingsTabDescription', {
+      description: i18n.translate('console.topNav.settingsTabDescription', {
         defaultMessage: 'Settings',
       }),
       template: `<sense-settings></sense-settings>`,
@@ -50,7 +50,7 @@ export function SenseTopNavController(Private) {
     },
     {
       key: 'help',
-      description: i18n.translate('kbn.devTools.console.topNav.helpTabDescription', {
+      description: i18n.translate('console.topNav.helpTabDescription', {
         defaultMessage: 'Help',
       }),
       template: `<sense-help></sense-help>`,

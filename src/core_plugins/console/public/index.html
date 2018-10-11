@@ -3,7 +3,7 @@
     <div class="conApp__editor">
       <ul class="conApp__autoComplete" id="autocomplete"></ul>
       <div class="conApp__editorActions" id="ConAppEditorActions">
-        <kbn-tooltip text="{{ 'kbn.devTools.console.sendRequestButtonTooltip' | i18n: { defaultMessage: 'click to send request' } }}">
+        <kbn-tooltip text="{{ 'console.sendRequestButtonTooltip' | i18n: { defaultMessage: 'click to send request' } }}">
           <button
             class="conApp__editorActionButton conApp__editorActionButton--success"
             ng-click="sendSelected()"
@@ -17,7 +17,7 @@
             class="conApp__editorActionButton"
             dropdown-toggle
             ng-click="getDocumentation()"
-            aria-label="{{ 'kbn.devTools.console.requestOptionsButtonAriaLabel' | i18n: { defaultMessage: 'Request options' } }}"
+            aria-label="{{ 'console.requestOptionsButtonAriaLabel' | i18n: { defaultMessage: 'Request options' } }}"
           >
             <span class="kuiIcon fa-wrench"></span>
           </button>
@@ -30,19 +30,19 @@
             <li role="menuitem">
               <button
                 id="ConCopyAsCurl"
-                i18n-id="kbn.devTools.console.requestOptions.copyAsUrlButtonLabel"
+                i18n-id="console.requestOptions.copyAsUrlButtonLabel"
                 i18n-default-message="Copy as cURL"></button>
             </li>
             <li role="menuitem" ng-if="documentation">
               <button
                 ng-click="openDocumentation(documentation)"
-                i18n-id="kbn.devTools.console.requestOptions.openDocumentationButtonLabel"
+                i18n-id="console.requestOptions.openDocumentationButtonLabel"
                 i18n-default-message="Open documentation"></button>
             </li>
             <li role="menuitem">
               <button
                 ng-click="autoIndent($event)"
-                i18n-id="kbn.devTools.console.requestOptions.autoIndentButtonLabel"
+                i18n-id="console.requestOptions.autoIndentButtonLabel"
                 i18n-default-message="Auto indent"></button>
             </li>
           </ul>

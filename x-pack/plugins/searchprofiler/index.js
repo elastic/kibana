@@ -17,7 +17,7 @@ export const searchprofiler = (kibana) => {
   return new kibana.Plugin({
     require: ['elasticsearch', 'xpack_main'],
     id: 'searchprofiler',
-    configPrefix: 'xpack.searchprofiler',
+    configPrefix: 'xpack.searchProfiler.',
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {

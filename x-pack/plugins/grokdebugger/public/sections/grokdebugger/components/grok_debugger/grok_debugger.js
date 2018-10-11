@@ -125,7 +125,7 @@ export class GrokDebugger extends React.Component {
                   data-test-subj="btnSimulate"
                 >
                   <FormattedMessage
-                    id="kbn.devTools.grokDebugger.simulateButtonLabel"
+                    id="xpack.grokDebugger.simulateButtonLabel"
                     defaultMessage="Simulate"
                   />
                 </EuiButton>

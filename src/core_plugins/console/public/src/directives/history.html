@@ -1,6 +1,6 @@
 <h2
   class="kuiLocalDropdownTitle"
-  i18n-id="kbn.devTools.console.historyPage.pageTitle"
+  i18n-id="console.historyPage.pageTitle"
   i18n-default-message="History"
 ></h2>
 
@@ -12,7 +12,7 @@
     aria-activedescendant="historyReq{{ history.selectedIndex }}"
     scrollto-activedescendant
     ng-keydown="history.onKeyDown($event)"
-    aria-label="{{ 'kbn.devTools.console.historyPage.requestListAriaLabel' | i18n: { defaultMessage: 'History of sent requests' } }}"
+    aria-label="{{ 'console.historyPage.requestListAriaLabel' | i18n: { defaultMessage: 'History of sent requests' } }}"
   >
     <li
       class="list-group-item conHistory__req"
@@ -24,7 +24,7 @@
       ng-mouseenter="history.viewingReq = req"
       ng-mouseleave="history.viewingReq = history.selectedReq"
       ng-dblclick="history.restore(req)"
-      aria-label="{{ 'kbn.devTools.console.historyPage.itemOfRequestListAriaLabel' | i18n: { defaultMessage: ':: Request: {historyItem}', values: { historyItem: history.describeReq(req) },} }}"
+      aria-label="{{ 'console.historyPage.itemOfRequestListAriaLabel' | i18n: { defaultMessage: ':: Request: {historyItem}', values: { historyItem: history.describeReq(req) },} }}"
       aria-selected="{{ history.selectedReq === req }}"
     >
       {{ history.describeReq(req) }}
@@ -39,14 +39,14 @@
   <button
     class="kuiButton kuiButton--danger"
     ng-click="history.clear()"
-    i18n-id="kbn.devTools.console.historyPage.clearHistoryButtonLabel"
+    i18n-id="console.historyPage.clearHistoryButtonLabel"
     i18n-default-message="Clear"
   ></button>
   <button
     class="kuiButton kuiButton--primary"
     ng-disabled="!history.selectedReq"
     ng-click="history.restore()"
-    i18n-id="kbn.devTools.console.historyPage.ApplyHistoryButtonLabel"
+    i18n-id="console.historyPage.ApplyHistoryButtonLabel"
     i18n-default-message="Apply"
   >
   </button>

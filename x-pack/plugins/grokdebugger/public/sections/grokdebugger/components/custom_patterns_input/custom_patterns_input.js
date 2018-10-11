@@ -26,7 +26,7 @@ MSG message-id=<%{GREEDYDATA}>`;
       id="customPatternsInput"
       buttonContent={(
         <FormattedMessage
-          id="kbn.devTools.grokDebugger.customPatternsButtonLabel"
+          id="xpack.grokDebugger.customPatternsButtonLabel"
           defaultMessage="Custom Patterns"
         />
       )}
@@ -38,7 +38,7 @@ MSG message-id=<%{GREEDYDATA}>`;
       <EuiCallOut
         title={(
           <FormattedMessage
-            id="kbn.devTools.grokDebugger.customPatterns.callOutTitle"
+            id="xpack.grokDebugger.customPatterns.callOutTitle"
             defaultMessage="Enter one custom pattern per line. For example:"
           />
         )}

@@ -17,7 +17,7 @@ export function EventOutput({ value }) {
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="kbn.devTools.grokDebugger.formRowEventOutput.abel"
+          id="xpack.grokDebugger.formRowEventOutput.abel"
           defaultMessage="Structured Data"
         />
       )}
