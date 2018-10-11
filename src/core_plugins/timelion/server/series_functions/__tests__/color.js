@@ -69,7 +69,7 @@ describe(filename, () => {
 
     const r = await invoke(fn, [oneLongList, colorsArg]);
     const seriesColors = _.map(r.output.list, 'color');
-    expect(seriesColors).to.eql(['#000000']);
+    expect(seriesColors).to.eql(['#000']);
   });
 
   it('throws if you do not pass a color', () => {
