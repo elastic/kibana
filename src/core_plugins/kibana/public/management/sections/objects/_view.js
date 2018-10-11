@@ -200,15 +200,15 @@ uiModules.get('apps/management')
           }
           const confirmModalOptions = {
             onConfirm: doDelete,
-            confirmButtonText: i18n.translate('kbn.management.objects.confirmModalOptions.DeleteButtonLabel', {
+            confirmButtonText: i18n.translate('kbn.management.objects.confirmModalOptions.deleteButtonLabel', {
               defaultMessage: 'Delete',
             }),
-            title: i18n.translate('kbn.management.objects.confirmModalOptions.DeleteButtonTitle', {
+            title: i18n.translate('kbn.management.objects.confirmModalOptions.modalTitle', {
               defaultMessage: 'Delete saved Kibana object?'
             }),
           };
           confirmModal(
-            i18n.translate('kbn.management.objects.confirmModalOptions.warningTextMessage', {
+            i18n.translate('kbn.management.objects.confirmModalOptions.modalDescription', {
               defaultMessage: 'You can\'t recover deleted objects',
             }),
             confirmModalOptions

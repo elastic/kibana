@@ -43,7 +43,7 @@ export const Header = ({
         <EuiTitle>
           <h1>
             <FormattedMessage
-              id="kbn.management.objects.headerTitle"
+              id="kbn.management.objects.objectsTable.header.savedObjectsTitle"
               defaultMessage="Saved Objects"
             />
           </h1>
@@ -60,7 +60,7 @@ export const Header = ({
               onClick={onExportAll}
             >
               <FormattedMessage
-                id="kbn.management.objects.header.exportButtonLabel"
+                id="kbn.management.objects.objectsTable.header.exportButtonLabel"
                 defaultMessage="Export {filteredCount} {filteredCountDescription}"
                 values={{
                   filteredCount,
@@ -79,7 +79,7 @@ export const Header = ({
               onClick={onImport}
             >
               <FormattedMessage
-                id="kbn.management.objects.header.importButtonLabel"
+                id="kbn.management.objects.objectsTable.header.importButtonLabel"
                 defaultMessage="Import"
               />
             </EuiButtonEmpty>
@@ -91,7 +91,7 @@ export const Header = ({
               onClick={onRefresh}
             >
               <FormattedMessage
-                id="kbn.management.objects.header.refreshButtonLabel"
+                id="kbn.management.objects.objectsTable.header.refreshButtonLabel"
                 defaultMessage="Refresh"
               />
             </EuiButtonEmpty>
@@ -104,7 +104,7 @@ export const Header = ({
       <p>
         <EuiTextColor color="subdued">
           <FormattedMessage
-            id="kbn.management.objects.headerDescription"
+            id="kbn.management.objects.objectsTable.howToDeleteSavedObjectsDescription"
             defaultMessage="From here you can delete saved objects, such as saved searches.
             You can also edit the raw data of saved objects.
             Typically objects are only modified via their associated application,

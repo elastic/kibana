@@ -6,7 +6,8 @@
     "markdownVis": "src/core_plugins/markdown_vis",
     "metricVis": "src/core_plugins/metric_vis",
     "statusPage": "src/core_plugins/status_page",
-    "xpack.idxMgmt": "x-pack/plugins/index_management"
+    "xpack.idxMgmt": "x-pack/plugins/index_management",
+    "kbn.management.objects": "src/core_plugins/kibana/public/management"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",

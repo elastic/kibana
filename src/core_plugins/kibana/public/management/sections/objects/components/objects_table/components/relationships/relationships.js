@@ -91,7 +91,7 @@ class RelationshipsUI extends Component {
     return (
       <EuiCallOut
         title={(
-          <FormattedMessage id="kbn.management.objects.relationships.renderErrorMessage" defaultMessage="Error"/>
+          <FormattedMessage id="kbn.management.objects.objectsTable.relationships.renderErrorMessage" defaultMessage="Error"/>
         )}
         color="danger"
       >
@@ -119,7 +119,7 @@ class RelationshipsUI extends Component {
         items.push(
           <EuiDescriptionListTitle key={`${type}_not_found`}>
             <FormattedMessage
-              id="kbn.management.objects.relationships.itemNotFoundText"
+              id="kbn.management.objects.objectsTable.relationships.itemNotFoundText"
               defaultMessage="No {type} found."
               values={{ type }}
             />
@@ -127,16 +127,22 @@ class RelationshipsUI extends Component {
         );
       } else {
         // let node;
-        let calloutTitle = (<FormattedMessage id="kbn.management.objects.relationships.warningCalloutTitle" defaultMessage="Warning"/>);
+        let calloutTitle = (<FormattedMessage
+          id="kbn.management.objects.objectsTable.relationships.warningTitle"
+          defaultMessage="Warning"
+        />);
         let calloutColor = 'warning';
         let calloutText;
 
         switch (this.props.type) {
           case 'dashboard':
             calloutColor = 'success';
-            calloutTitle = (<FormattedMessage id="kbn.management.objects.relationships.dashboardCalloutTitle" defaultMessage="Dashboard"/>);
+            calloutTitle = (<FormattedMessage
+              id="kbn.management.objects.objectsTable.relationships.dashboard.calloutTitle"
+              defaultMessage="Dashboard"
+            />);
             calloutText = (<FormattedMessage
-              id="kbn.management.objects.relationships.dashboardCalloutText"
+              id="kbn.management.objects.objectsTable.relationships.dashboard.calloutText"
               defaultMessage="Here are some visualizations used on this dashboard.
               You can safely delete this dashboard and the visualizations will still work properly."
             />);
@@ -144,7 +150,7 @@ class RelationshipsUI extends Component {
           case 'search':
             if (type === 'visualizations') {
               calloutText = (<FormattedMessage
-                id="kbn.management.objects.relationships.searchWarningCalloutText"
+                id="kbn.management.objects.objectsTable.relationships.search.visualizations.calloutText"
                 defaultMessage="Here are some visualizations that use this saved search. If
                 you delete this saved search, these visualizations will not
                 longer work properly."
@@ -152,18 +158,18 @@ class RelationshipsUI extends Component {
             } else {
               calloutColor = 'success';
               calloutTitle = (<FormattedMessage
-                id="kbn.management.objects.relationships.searchCalloutTitle"
+                id="kbn.management.objects.objectsTable.relationships.search.calloutTitle"
                 defaultMessage="Saved Search"
               />);
               calloutText = (<FormattedMessage
-                id="kbn.management.objects.relationships.searchCalloutText"
+                id="kbn.management.objects.objectsTable.relationships.search.calloutText"
                 defaultMessage="Here is the index pattern tied to this saved search."
               />);
             }
             break;
           case 'visualization':
             calloutText = (<FormattedMessage
-              id="kbn.management.objects.relationships.visualizationWarningCalloutText"
+              id="kbn.management.objects.objectsTable.relationships.visualization.calloutText"
               defaultMessage="Here are some dashboards which contain this visualization. If
               you delete this visualization, these dashboards will no longer
               show them."
@@ -172,14 +178,14 @@ class RelationshipsUI extends Component {
           case 'index-pattern':
             if (type === 'visualizations') {
               calloutText = (<FormattedMessage
-                id="kbn.management.objects.relationships.indexPattern.visualizationsWarningCalloutText"
+                id="kbn.management.objects.objectsTable.relationships.indexPattern.visualizations.calloutText"
                 defaultMessage="Here are some visualizations that use this index pattern. If
                 you delete this index pattern, these visualizations will not
                 longer work properly."
               />);
             } else if (type === 'searches') {
               calloutText = (<FormattedMessage
-                id="kbn.management.objects.relationships.indexPattern.searchesWarningCalloutText"
+                id="kbn.management.objects.objectsTable.relationships.indexPattern.searches.calloutText"
                 defaultMessage="Here are some saved searches that use this index pattern. If
                 you delete this index pattern, these saved searches will not
                 longer work properly."
@@ -214,7 +220,9 @@ class RelationshipsUI extends Component {
                   ),
                 },
                 {
-                  name: intl.formatMessage({ id: 'kbn.management.objects.relationships.columnTitleName', defaultMessage: 'Title' }),
+                  name: intl.formatMessage({
+                    id: 'kbn.management.objects.objectsTable.relationships.columnTitleName', defaultMessage: 'Title'
+                  }),
                   field: 'title',
                   render: (title, item) => (
                     <EuiLink href={`${getEditUrl(item.id, type)}`}>
@@ -223,15 +231,17 @@ class RelationshipsUI extends Component {
                   ),
                 },
                 {
-                  name: intl.formatMessage({ id: 'kbn.management.objects.relationships.columnActionsName', defaultMessage: 'Actions' }),
+                  name: intl.formatMessage({
+                    id: 'kbn.management.objects.objectsTable.relationships.columnActionsName', defaultMessage: 'Actions'
+                  }),
                   actions: [
                     {
                       name: intl.formatMessage({
-                        id: 'kbn.management.objects.relationships.columnActions.inAppName',
+                        id: 'kbn.management.objects.objectsTable.relationships.columnActions.inAppName',
                         defaultMessage: 'In app'
                       }),
                       description: intl.formatMessage({
-                        id: 'kbn.management.objects.relationships.columnActions.inAppDescription',
+                        id: 'kbn.management.objects.objectsTable.relationships.columnActions.inAppDescription',
                         defaultMessage: 'View this saved object within Kibana'
                       }),
                       icon: 'eye',

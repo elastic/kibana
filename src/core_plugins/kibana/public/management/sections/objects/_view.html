@@ -52,7 +52,7 @@
           <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
           <span
             class="kuiInfoPanelHeader__title"
-            i18n-id="kbn.management.objects.view.savedObjectErrorMessage"
+            i18n-id="kbn.management.objects.view.savedObjectProblemErrorMessage"
             i18n-default-message="There is a problem with this saved object"
             ></span>
         </div>
@@ -61,27 +61,27 @@
           <div
             class="kuiInfoPanelBody__message"
             ng-if="notFound === 'search'"
-            i18n-id="kbn.management.objects.view.savedSearchErrorMessage"
+            i18n-id="kbn.management.objects.view.savedSearchDoesNotExistErrorMessage"
             i18n-default-message="The saved search associated with this object no longer exists."
           ></div>
 
           <div
             class="kuiInfoPanelBody__message"
             ng-if="notFound === 'index-pattern'"
-            i18n-id="kbn.management.objects.view.indexPatternErrorMessage"
+            i18n-id="kbn.management.objects.view.indexPatternDoesNotExistErrorMessage"
             i18n-default-message="The index pattern associated with this object no longer exists."
           ></div>
 
           <div
             class="kuiInfoPanelBody__message"
             ng-if="notFound === 'index-pattern-field'"
-            i18n-id="kbn.management.objects.view.indexPatternFieldErrorMessage"
+            i18n-id="kbn.management.objects.view.fieldDoesNotExistErrorMessage"
             i18n-default-message="A field associated with this object no longer exists in the index pattern.."
           ></div>
 
           <div
             class="kuiInfoPanelBody__message"
-            i18n-id="kbn.management.objects.view.errorMessageDescription"
+            i18n-id="kbn.management.objects.view.howToFixErrorDescription"
             i18n-default-message="If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above."
           ></div>
         </div>
@@ -95,7 +95,7 @@
           <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
           <span
             class="kuiInfoPanelHeader__title"
-            i18n-id="kbn.management.objects.view.cautionMessageTitle"
+            i18n-id="kbn.management.objects.view.howToModifyObjectTitle"
             i18n-default-message="Proceed with caution!"
           ></span>
         </div>
@@ -103,7 +103,7 @@
         <div class="kuiInfoPanelBody">
           <div
             class="kuiInfoPanelBody__message"
-            i18n-id="kbn.management.objects.view.cautionMessageDescription"
+            i18n-id="kbn.management.objects.view.howToModifyObjectDescription"
             i18n-default-message=" Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn&rsquo;t be."
           >
           </div>

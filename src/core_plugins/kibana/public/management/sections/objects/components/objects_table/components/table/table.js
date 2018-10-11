@@ -93,7 +93,7 @@ class TableUI extends PureComponent {
       {
         type: 'field_value_selection',
         field: 'type',
-        name: intl.formatMessage({ id: 'kbn.management.objects.table.dropdownFilterByTypeName', defaultMessage: 'Type' }),
+        name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.table.typeFilterName', defaultMessage: 'Type' }),
         multiSelect: 'or',
         options: filterOptions,
       },
@@ -110,11 +110,13 @@ class TableUI extends PureComponent {
     const columns = [
       {
         field: 'type',
-        name: intl.formatMessage({ id: 'kbn.management.objects.table.columnTypeName', defaultMessage: 'Type' }),
+        name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.table.columnTypeName', defaultMessage: 'Type' }),
         width: '50px',
         align: 'center',
         description:
-          intl.formatMessage({ id: 'kbn.management.objects.table.columnTypeDescription', defaultMessage: 'Type of the saved object' }),
+          intl.formatMessage({
+            id: 'kbn.management.objects.objectsTable.table.columnTypeDescription', defaultMessage: 'Type of the saved object'
+          }),
         sortable: false,
         render: type => {
           return (
@@ -133,9 +135,11 @@ class TableUI extends PureComponent {
       },
       {
         field: 'title',
-        name: intl.formatMessage({ id: 'kbn.management.objects.table.columnTitleName', defaultMessage: 'Title' }),
+        name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.table.columnTitleName', defaultMessage: 'Title' }),
         description:
-        intl.formatMessage({ id: 'kbn.management.objects.table.columnTitleDescription', defaultMessage: 'Title of the saved object' }),
+        intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.table.columnTitleDescription', defaultMessage: 'Title of the saved object'
+        }),
         dataType: 'string',
         sortable: false,
         render: (title, object) => (
@@ -143,13 +147,15 @@ class TableUI extends PureComponent {
         ),
       },
       {
-        name: intl.formatMessage({ id: 'kbn.management.objects.table.columnActionsName', defaultMessage: 'Actions' }),
+        name: intl.formatMessage({ id: 'kbn.management.objects.objectsTable.table.columnActionsName', defaultMessage: 'Actions' }),
         actions: [
           {
-            name: intl.formatMessage({ id: 'kbn.management.objects.table.columnActions.viewInAppName', defaultMessage: 'In app' }),
+            name: intl.formatMessage({
+              id: 'kbn.management.objects.objectsTable.table.columnActions.viewInAppActionName', defaultMessage: 'In app'
+            }),
             description:
               intl.formatMessage({
-                id: 'kbn.management.objects.table.columnActions.viewInAppDescription',
+                id: 'kbn.management.objects.objectsTable.table.columnActions.viewInAppActionDescription',
                 defaultMessage: 'View this saved object within Kibana'
               }),
             type: 'icon',
@@ -159,12 +165,12 @@ class TableUI extends PureComponent {
           {
             name:
               intl.formatMessage({
-                id: 'kbn.management.objects.table.columnActions.viewRelationshipsName',
+                id: 'kbn.management.objects.objectsTable.table.columnActions.viewRelationshipsActionName',
                 defaultMessage: 'Relationships'
               }),
             description:
               intl.formatMessage({
-                id: 'kbn.management.objects.table.columnActions.viewRelationshipsDescription',
+                id: 'kbn.management.objects.objectsTable.table.columnActions.viewRelationshipsActionDescription',
                 defaultMessage: 'View the relationships this saved object has to other saved objects'
               }),
             type: 'icon',
@@ -190,7 +196,7 @@ class TableUI extends PureComponent {
               isDisabled={selectedSavedObjects.length === 0}
             >
               <FormattedMessage
-                id="kbn.management.objects.table.deleteButtonLabel"
+                id="kbn.management.objects.objectsTable.table.deleteButtonLabel"
                 defaultMessage="Delete"
               />
             </EuiButton>,
@@ -201,7 +207,7 @@ class TableUI extends PureComponent {
               isDisabled={selectedSavedObjects.length === 0}
             >
               <FormattedMessage
-                id="kbn.management.objects.table.exportButtonLabel"
+                id="kbn.management.objects.objectsTable.table.exportButtonLabel"
                 defaultMessage="Export"
               />
             </EuiButton>,

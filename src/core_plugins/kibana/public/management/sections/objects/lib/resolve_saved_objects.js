@@ -38,7 +38,7 @@ function addJsonFieldToIndexPattern(target, sourceString, fieldName, indexName) 
       target[fieldName] = JSON.parse(sourceString);
     } catch (error) {
       throw new Error(
-        i18n.translate('kbn.management.objects.resolveSavedObjectsParsingErrorMessage', {
+        i18n.translate('kbn.management.objects.parsingFieldErrorMessage', {
           defaultMessage: 'Error encountered parsing {fieldName} for index pattern {indexName}: {errorMessage}',
           values: {
             fieldName,
