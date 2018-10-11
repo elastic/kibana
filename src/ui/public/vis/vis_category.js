@@ -23,6 +23,8 @@
  * in the vis creation wizard.
  */
 
+import { i18n } from '@kbn/i18n';
+
 const CATEGORY = {
   BASIC: 'basic',
   DATA: 'data',
@@ -35,12 +37,12 @@ const CATEGORY = {
 };
 
 const CATEGORY_DISPLAY_NAMES = {
-  [CATEGORY.BASIC]: 'Basic Charts',
-  [CATEGORY.DATA]: 'Data',
-  [CATEGORY.GRAPHIC]: 'Graphic',
-  [CATEGORY.MAP]: 'Maps',
-  [CATEGORY.OTHER]: 'Other',
-  [CATEGORY.TIME]: 'Time Series'
+  [CATEGORY.BASIC]: i18n.translate('common.ui.vis.visCategory.basicChartsLabel', { defaultMessage: 'Basic Charts' }),
+  [CATEGORY.DATA]: i18n.translate('common.ui.vis.visCategory.DataLabel', { defaultMessage: 'Data' }),
+  [CATEGORY.GRAPHIC]: i18n.translate('common.ui.vis.visCategory.graphicLabel', { defaultMessage: 'Graphic' }),
+  [CATEGORY.MAP]: i18n.translate('common.ui.vis.visCategory.mapsLabel', { defaultMessage: 'Maps' }),
+  [CATEGORY.OTHER]: i18n.translate('common.ui.vis.visCategory.otherLabel', { defaultMessage: 'Other' }),
+  [CATEGORY.TIME]: i18n.translate('common.ui.vis.visCategory.timeSeriesLabel', { defaultMessage: 'Time Series' })
 };
 
 export { CATEGORY, CATEGORY_DISPLAY_NAMES };

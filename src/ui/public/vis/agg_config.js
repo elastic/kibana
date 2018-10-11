@@ -26,6 +26,7 @@
 
 import _ from 'lodash';
 import { fieldFormats } from '../registry/field_formats';
+import { i18n } from '@kbn/i18n';
 
 class AggConfig {
 
@@ -78,6 +79,8 @@ class AggConfig {
 
     // set the params to the values from opts, or just to the defaults
     this.setParams(opts.params || {});
+
+    this._percentageOfLabel = i18n.translate('common.ui.vis.aggConfig.percentageOfLabel', { defaultMessage: 'Percentage of ' });
   }
 
   /**
@@ -134,15 +137,21 @@ class AggConfig {
 
   createFilter(key, params = {}) {
     if (!this.isFilterable()) {
-      throw new TypeError(`The "${this.type.title}" aggregation does not support filtering.`);
+      throw new TypeError(i18n.translate('common.ui.vis.aggConfig.noFilteringSupportErrorMessage', {
+        defaultMessage: 'The "{typeTitle}" aggregation does not support filtering.', values: { typeTitle: this.type.title } }
+      ));
     }
 
     const field = this.getField();
     const label = this.getFieldDisplayName();
     if (field && !field.filterable) {
-      let message = `The "${label}" field can not be used for filtering.`;
+      let message = i18n.translate('common.ui.vis.aggConfig.fieldCanNotBeUsedForFilteringErrorMessage', {
+        defaultMessage: 'The "{label}" field can not be used for filtering.', values: { label } }
+      );
       if (field.scripted) {
-        message = `The "${label}" field is scripted and can not be used for filtering.`;
+        message = i18n.translate('common.ui.vis.aggConfig.scriptedFieldCanNotBeUsedForFilteringErrorMessage', {
+          defaultMessage: 'The "{label}" field is scripted and can not be used for filtering.', values: { label } }
+        );
       }
       throw new TypeError(message);
     }
@@ -265,7 +274,7 @@ class AggConfig {
     }
 
     if (!this.type) return '';
-    let pre = percentageMode ? 'Percentage of ' : '';
+    let pre = percentageMode ? this._percentageOfLabel : '';
     return pre += this.type.makeLabel(this);
   }
 
