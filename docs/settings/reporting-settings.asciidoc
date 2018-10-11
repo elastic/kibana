@@ -122,5 +122,10 @@ content. The index is automatically created if it does not already exist.
 Defaults to `.reporting`
 
 `xpack.reporting.roles.allow`::
-Specifies the roles in addition to superusers that are allowed to access reporting.
+Specifies the roles in addition to superusers that can use reporting.
 Defaults to `[ "reporting_user" ]`
++ 
+--
+NOTE: Each user has access to only their own reports. 
+
+--
