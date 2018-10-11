@@ -4,6 +4,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "node tasks/build.js",
-    "canvas:peg": "pegjs common/lib/grammar.peg"
+    "canvas:peg": "pegjs common/lib/grammar.peg",
+    "kbn:bootstrap": "yarn build"
   }
 }
