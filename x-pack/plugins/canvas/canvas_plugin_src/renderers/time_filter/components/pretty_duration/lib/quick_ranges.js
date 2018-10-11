@@ -6,13 +6,13 @@
 
 export const quickRanges = [
   { from: 'now/d', to: 'now/d', display: 'Today', section: 0 },
+  { from: 'now/d', to: 'now', display: 'Today so far', section: 0 },
   { from: 'now/w', to: 'now/w', display: 'This week', section: 0 },
+  { from: 'now/w', to: 'now', display: 'This week so far', section: 0 },
   { from: 'now/M', to: 'now/M', display: 'This month', section: 0 },
+  { from: 'now/M', to: 'now', display: 'This month so far', section: 0 },
   { from: 'now/y', to: 'now/y', display: 'This year', section: 0 },
-  { from: 'now/d', to: 'now', display: 'The day so far', section: 0 },
-  { from: 'now/w', to: 'now', display: 'Week to date', section: 0 },
-  { from: 'now/M', to: 'now', display: 'Month to date', section: 0 },
-  { from: 'now/y', to: 'now', display: 'Year to date', section: 0 },
+  { from: 'now/y', to: 'now', display: 'This year so far', section: 0 },
 
   { from: 'now-1d/d', to: 'now-1d/d', display: 'Yesterday', section: 1 },
   { from: 'now-2d/d', to: 'now-2d/d', display: 'Day before yesterday', section: 1 },
