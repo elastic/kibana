@@ -5,14 +5,25 @@
     <div data-transclude-slots>
       <!-- Title. -->
       <div data-transclude-slot="topLeftCorner" class="kuiLocalTitle">
-        <strong>{{ savedWorkspace.lastSavedTitle || 'New Graph Workspace' }}</strong>
+        <strong
+          ng-if="savedWorkspace.lastSavedTitle"
+        >{{ savedWorkspace.lastSavedTitle }}</strong>
+        <strong
+          ng-if="!savedWorkspace.lastSavedTitle"
+          i18n-id="xpack.graph.topNavMenu.defaultNewWorkspaceTitle"
+          i18n-default-message="New Graph Workspace"
+        ></strong>
       </div>
 
       <div data-transclude-slot="bottomRow" class="flexGroup">
         <!-- Select index pattern. -->
         <select class="form-control gphIndexSelect" name="mySelect" ng-change="uiSelectIndex()" ng-class="{'gphIndexSelect-unselected':selectedIndex === null}"
           ng-options="option.attributes.title for option in indices" ng-model="grr.proposedIndex">
-          <option value="">Select index pattern...</option>
+          <option
+            value=""
+            i18n-id="xpack.graph.topNavMenu.selectIndexPatternPlaceholder"
+            i18n-default-message="Select index pattern..."
+          ></option>
         </select>
 
         <!-- Added fields. -->
@@ -39,7 +50,12 @@
           <div class="kuiLocalSearch">
             <input name="searchTerm" type="text" class="kuiLocalSearchInput" ng-model="grr.searchTerm" ng-disabled="liveResponseFields.length === 0"
               ng-focus="kbnTopNav.close()" placeholder="foo AND bar NOT baz" autocomplete="off">
-            <button class="kuiLocalSearchButton" type="submit" ng-disabled="liveResponseFields.length === 0" aria-label="Search">
+            <button
+              class="kuiLocalSearchButton"
+              type="submit"
+              ng-disabled="liveResponseFields.length === 0"
+              aria-label="{{ ::'xpack.graph.topNavMenu.searchButtonAriaLabel' | i18n: { defaultMessage: 'Search' } }}"
+            >
               <span aria-hidden="true" class="kuiIcon fa-search"></span>
             </button>
           </div>
@@ -51,14 +67,23 @@
   <div class="config" ng-show="kbnTopNav.currentKey === 'fields'" data-test-subj="fieldSelectionList">
     <div class="config">
       <div class="container-fluid">
-        <label>Add a field source for vertices</label>
+        <label
+          i18n-id="xpack.graph.queryConfig.addFieldTitle"
+          i18n-default-message="Add a field source for vertices"
+        ></label>
         <form>
           <div class="input-group form-group" style="width:100%">
             <span class="input-group-addon">
               <span class="kuiIcon fa-search"></span>
             </span>
-            <input input-focus ng-model="fieldNamesFilterString" placeholder="Filter..."
-              ng-change="filterFieldsKeyDown()" class="form-control" name="filter" type="text" autocomplete="off" />
+            <input
+              input-focus ng-model="fieldNamesFilterString"
+              placeholder="{{ ::'xpack.graph.queryConfig.filterPlaceholder' | i18n: { defaultMessage: 'Filter...' } }}"
+              ng-change="filterFieldsKeyDown()"
+              class="form-control"
+              name="filter"
+              type="text"
+              autocomplete="off" />
           </div>
         </form>
 
@@ -68,13 +93,21 @@
         <div class="kuiVerticalRhythm">
           <!-- TODO look at the field chooser directive in Discover to give type icons etc to
               field types. This may filter out indexed-only fields though? -->
-          <button ng-disabled="!selectedField" ng-click="addFieldToSelection()" class="kuiButton kuiButton--primary">
-            Add
-          </button>
+          <button
+            ng-disabled="!selectedField"
+            ng-click="addFieldToSelection()"
+            class="kuiButton kuiButton--primary"
+            i18n-id="xpack.graph.queryConfig.addFieldButtonLabel"
+            i18n-default-message="Add"
+          ></button>
         </div>
       </div>
 
-      <button class="kuiLocalDropdownCloseButton" ng-click="kbnTopNav.close()" aria-label="Close">
+      <button
+        class="kuiLocalDropdownCloseButton"
+        ng-click="kbnTopNav.close()"
+        aria-label="{{ ::'xpack.graph.queryConfig.closeConfigButtonAriaLabel' | i18n: { defaultMessage: 'Close' } }}"
+      >
         <span class="kuiIcon fa-chevron-circle-up"></span>
       </button>
     </div>
@@ -94,7 +127,12 @@
             </div>
 
             <div class="form-group form-group-sm gphFormGroup--small">
-              <label for="colorPicker" class="col-sm-4 control-label"> Color</label>
+              <label
+                for="colorPicker"
+                class="col-sm-4 control-label"
+                i18n-id="xpack.graph.queryConfig.colorPickerLabel"
+                i18n-default-message="Color"
+              ></label>
               <div class="col-sm-6">
                 <span id="colorPicker">
                   <span ng-repeat="c in colors" ng-click="applyColor(selectedFieldConfig,c)" ng-class="c === selectedFieldConfig.color ? 'fa-circle-o' : 'fa-circle'"
@@ -105,7 +143,12 @@
             </div>
 
             <div class="form-group form-group-sm gphFormGroup--small">
-              <label for="iconPicker" class="col-sm-4 control-label"> Icon</label>
+              <label
+                for="iconPicker"
+                class="col-sm-4 control-label"
+                i18n-id="xpack.graph.queryConfig.iconPickerLabel"
+                i18n-default-message="Icon"
+              ></label>
               <div class="col-sm-6">
                 <span class="gphIconPicker">
                   <span ng-repeat="i in iconChoices" ng-click="applyIcon(selectedFieldConfig,i)" ng-class="{selectedNode:i==selectedFieldConfig.icon}"
@@ -116,18 +159,30 @@
             </div>
 
             <div class="form-group form-group-sm gphFormGroup--small">
-              <label for="qHopSize" class="col-sm-4 control-label">Max terms per hop</label>
+              <label
+                for="qHopSize"
+                class="col-sm-4 control-label"
+                i18n-id="xpack.graph.queryConfig.maxTermsInputLabel"
+                i18n-default-message="Max terms per hop"
+              ></label>
               <div class="col-sm-6">
                 <input ng-change="selectedFieldConfigHopSizeChanged()" type="number" class="input-sm" min="0" max="100"
                   step="1" id="qHopSize" ng-model="selectedFieldConfig.hopSize">
                 <div class="help-block">
                   <div class="euiText">
-                    <p>Controls the number of terms returned each search step.</p>
+                    <p
+                      i18n-id="xpack.graph.queryConfig.maxTermsInputDescription"
+                      i18n-default-message="Controls the number of terms returned each search step."
+                    ></p>
                   </div>
 
                   <div class="hintbox">
-                    <span class="kuiIcon fa-info text-info"></span> Shift-clicking the field icons in the menu bar
-                    provides a quick way to toggle this number to zero and back
+                    <span class="kuiIcon fa-info text-info"></span>
+                    {{
+                      ::'xpack.graph.queryConfig.maxTermsHelpText' | i18n: {
+                        defaultMessage: 'Shift-clicking the field icons in the menu bar provides a quick way to toggle this number to zero and back'
+                      }
+                    }}
                   </div>
 
                 </div>
@@ -137,9 +192,12 @@
             <div class="form-group">
               <div class="col-sm-offset-4 col-sm-8">
                 <div>
-                  <button ng-click="removeVertexFieldSelection()" class="kuiButton kuiButton--danger">
-                    Remove
-                  </button>
+                  <button
+                    ng-click="removeVertexFieldSelection()"
+                    class="kuiButton kuiButton--danger"
+                    i18n-id="xpack.graph.queryConfig.removeFieldButtonLabel"
+                    i18n-default-message="Remove"
+                  ></button>
                 </div>
               </div>
             </div>
@@ -233,75 +291,101 @@
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||liveResponseFields.length === 0||workspace.nodes.length === 0"
-          tooltip="Expand selection" ng-click="setDetail(null);workspace.expandSelecteds({toFields:liveResponseFields});">
+          tooltip="{{ ::'xpack.graph.sidebar.topMenu.expandSelectionButtonTooltip' | i18n: { defaultMessage: 'Expand selection' } }}"
+          ng-click="setDetail(null);workspace.expandSelecteds({toFields:liveResponseFields});">
           <span class="kuiIcon fa-plus"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.nodes.length === 0"
-          tooltip="Add links between existing terms" ng-click="workspace.fillInGraph();">
+          tooltip="{{ ::'xpack.graph.sidebar.topMenu.addLinksButtonTooltip' | i18n: { defaultMessage: 'Add links between existing terms' } }}"
+          ng-click="workspace.fillInGraph();">
           <span class="kuiIcon fa-link"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.nodes.length === 0"
-          tooltip="Remove vertices from workspace" ng-click="setDetail(null);workspace.deleteSelection();">
+          tooltip="{{ ::'xpack.graph.sidebar.topMenu.removeVerticesButtonTooltip' | i18n: { defaultMessage: 'Remove vertices from workspace' } }}"
+          ng-click="setDetail(null);workspace.deleteSelection();">
           <span class="kuiIcon fa-trash"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.selectedNodes.length === 0"
-          tooltip="Blacklist selection from return to workspace" ng-click="workspace.blacklistSelection();">
+          tooltip="{{ ::'xpack.graph.sidebar.topMenu.blacklistButtonTooltip' | i18n: { defaultMessage: 'Blacklist selection from return to workspace' } }}"
+          ng-click="workspace.blacklistSelection();">
           <span class="kuiIcon fa-ban"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.selectedNodes.length === 0"
-          tooltip="Custom style selected vertices" ng-click="setDetail({showStyle:true})">
+          tooltip="{{ ::'xpack.graph.sidebar.topMenu.customStyleButtonTooltip' | i18n: { defaultMessage: 'Custom style selected vertices' } }}"
+          ng-click="setDetail({showStyle:true})">
           <span class="kuiIcon fa-paint-brush"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null||workspace.nodes.length === 0"
-          tooltip="Drill down" ng-click="setDetail({showDrillDowns:true})">
+          tooltip="{{ ::'xpack.graph.sidebar.topMenu.drillDownButtonTooltip' | i18n: { defaultMessage: 'Drill down' } }}"
+          ng-click="setDetail({showDrillDowns:true})">
           <span class="kuiIcon fa-info"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace.nodes.length === 0" ng-if="workspace.nodes.length === 0||workspace.force === null"
-          tooltip="Run layout" ng-click="workspace.runLayout()">
+          tooltip="{{ ::'xpack.graph.sidebar.topMenu.runLayoutButtonTooltip' | i18n: { defaultMessage: 'Run layout' } }}"
+          ng-click="workspace.runLayout()">
           <span class="kuiIcon fa-play"></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-if="workspace.force !== null&&workspace.nodes.length>0"
-          tooltip="Pause layout" ng-click="workspace.stopLayout()">
+          tooltip="{{ ::'xpack.graph.sidebar.topMenu.pauseLayoutButtonTooltip' | i18n: { defaultMessage: 'Pause layout' } }}"
+          ng-click="workspace.stopLayout()">
           <span class="kuiIcon fa-pause"></span>
         </button>
       </div>
 
       <div>
         <div class="gphSidebar__header">
-          <span class="kuiIcon fa-shopping-cart"></span> Selections
+          <span class="kuiIcon fa-shopping-cart"></span>
+          {{ ::'xpack.graph.sidebar.selectionsTitle' | i18n: { defaultMessage: 'Selections' } }}
         </div>
 
         <div id="vertexSelectionTypesBar">
-          <button tooltip="Select all" type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
-            ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectAll()">
-            all
-          </button>
+          <button
+            tooltip="{{ ::'xpack.graph.sidebar.selections.selectAllButtonTooltip' | i18n: { defaultMessage: 'Select all' } }}"
+            type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
+            ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectAll()"
+            i18n-id="xpack.graph.sidebar.selections..selectAllButtonLabel"
+            i18n-default-message="all"
+          ></button>
 
-          <button tooltip="Select none" type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
-            ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectNone()">
-            none
-          </button>
+          <button
+            tooltip="{{ ::'xpack.graph.sidebar.selections.selectNoneButtonTooltip' | i18n: { defaultMessage: 'Select none' } }}"
+            type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
+            ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectNone()"
+            i18n-id="xpack.graph.sidebar.selections.selectNoneButtonLabel"
+            i18n-default-message="none"
+          ></button>
 
-          <button tooltip="Invert selection" type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
-            ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectInvert()">
-            invert
-          </button>
+          <button
+            tooltip="{{ ::'xpack.graph.sidebar.selections.invertSelectionButtonTooltip' | i18n: { defaultMessage: 'Invert selection' } }}"
+            type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
+            ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectInvert()"
+            i18n-id="xpack.graph.sidebar.selections.invertSelectionButtonLabel"
+            i18n-default-message="invert"
+          ></button>
 
-          <button tooltip="Select neighbours" type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
-            ng-disabled="workspace.selectedNodes.length === 0" ng-click="setDetail(null);workspace.selectNeighbours()">
-            linked
-          </button>
+          <button
+            tooltip="{{ ::'xpack.graph.sidebar.selections.selectNeighboursButtonTooltip' | i18n: { defaultMessage: 'Select neighbours' } }}"
+            type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
+            ng-disabled="workspace.selectedNodes.length === 0" ng-click="setDetail(null);workspace.selectNeighbours()"
+            i18n-id="xpack.graph.sidebar.selections.selectNeighboursButtonLabel"
+            i18n-default-message="linked"
+          ></button>
         </div>
 
         <div class="gphSelectionList">
-          <p ng-if="workspace.selectedNodes.length === 0" class="help-block">No selections. Click on vertices to add</p>
+          <p
+            ng-if="workspace.selectedNodes.length === 0"
+            class="help-block"
+            i18n-id="xpack.graph.sidebar.selections.noSelectionsHelpText"
+            i18n-default-message="No selections. Click on vertices to add"
+          ></p>
 
           <div ng-repeat="n in workspace.selectedNodes" class="gphSelectionList__field" ng-class="{'gphSelectionList__field--selected': isSelectedSelected(n)}"
             ng-click="selectSelected(n)">
@@ -329,13 +413,17 @@
 
       <div ng-if="detail.showDrillDowns">
         <div class="gphSidebar__header">
-          <span class="kuiIcon fa-info"></span> Drill-downs
+          <span class="kuiIcon fa-info"></span>
+          {{ ::'xpack.graph.sidebar.drillDownsTitle' | i18n: { defaultMessage: 'Drill-downs' } }}
         </div>
 
         <div class="gphSidebar__panel">
-          <p ng-if="urlTemplates.length === 0" class="help-block">
-            Configure drill-downs from the settings menu
-          </p>
+          <p
+            ng-if="urlTemplates.length === 0"
+            class="help-block"
+            i18n-id="xpack.graph.sidebar.drillDowns.noDrillDownsHelpText"
+            i18n-default-message="Configure drill-downs from the settings menu"
+          ></p>
 
           <ul class="list-group">
             <li class="list-group-item" ng-repeat="urlTemplate in urlTemplates">
@@ -349,7 +437,8 @@
 
       <div class="gphSidebar__panel" ng-if="(detail.showStyle)&&(workspace.selectedNodes.length>0)">
         <div class="gphSidebar__header">
-          <span class="kuiIcon fa-paint-brush"></span> Style selected vertices
+          <span class="kuiIcon fa-paint-brush"></span>
+          {{ ::'xpack.graph.sidebar.styleVerticesTitle' | i18n: { defaultMessage: 'Style selected vertices' } }}
         </div>
 
         <div class="form-group form-group-sm gphFormGroup--small">
@@ -368,21 +457,36 @@
         <button class="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small" ng-if="workspace.selectedNodes.length>1||(workspace.selectedNodes.length>0&&workspace.selectedNodes[0] !== detail.latestNodeSelection)"
           tooltip="group the currently selected items into {{detail.latestNodeSelection.label}}" ng-click="workspace.groupSelections(detail.latestNodeSelection)">
           <span class="kuiButton__icon kuiIcon fa-object-group"></span>
-          <span>group</span>
+          <span
+            i18n-id="xpack.graph.sidebar.groupButtonLabel"
+            i18n-default-message="group"
+          ></span>
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small" ng-if="detail.latestNodeSelection.numChildren>0"
           tooltip="ungroup {{detail.latestNodeSelection.label}}" ng-click="workspace.ungroup(detail.latestNodeSelection)">
           <span class="kuiIcon fa-object-ungroup"></span>
-          <span>ungroup</span>
+          <span
+            i18n-id="xpack.graph.sidebar.ungroupButtonLabel"
+            i18n-default-message="ungroup"
+          ></span>
         </button>
 
         <form class="form-horizontal">
           <div class="form-group form-group-sm gphFormGroup--small">
-            <label for="labelEdit" class="col-sm-3 control-label">Display label</label>
+            <label
+              for="labelEdit"
+              class="col-sm-3 control-label"
+              i18n-id="xpack.graph.sidebar.displayLabelLabel"
+              i18n-default-message="Display label"
+            ></label>
             <div class="col-sm-9">
               <input type="text" id="labelEdit" class="form-control input-sm" ng-model="detail.latestNodeSelection.label">
-              <div class="help-block">Change the label for this vertex</div>
+              <div
+                class="help-block"
+                i18n-id="xpack.graph.sidebar.displayLabelHelpText"
+                i18n-default-message="Change the label for this vertex"
+              ></div>
             </div>
           </div>
         </form>
@@ -390,11 +494,17 @@
 
       <div ng-if="detail.mergeCandidates.length>0" class="gphSidebar__panel">
         <div class="gphSidebar__header">
-          <span class="kuiIcon fa-link"></span> Link summary
+          <span class="kuiIcon fa-link"></span>
+          {{ ::'xpack.graph.sidebar.linkSummaryTitle' | i18n: { defaultMessage: 'Link summary' } }}
         </div>
         <div ng-repeat="mc in detail.mergeCandidates">
           <span>
-            <button tooltip="Merge {{mc.term1}} into {{mc.term2}}" type="button" ng-attr-style="opacity:{{0.2+(mc.overlap/mc.v1)}};"
+            <button
+              tooltip="{{ ::'xpack.graph.sidebar.linkSummary.mergeTerm1ToTerm2ButtonTooltip' | i18n: {
+                  defaultMessage: 'Merge {term1} into {term2}',
+                  values: { term1: mc.term1, term2: mc.term2 },
+                } }}"
+              type="button" ng-attr-style="opacity:{{0.2+(mc.overlap/mc.v1)}};"
               class="kuiButton kuiButton--basic kuiButton--small" ng-click="performMerge(mc.id2, mc.id1)">
               <span class="kuiIcon fa-chevron-circle-right"></span>
             </button>
@@ -402,7 +512,12 @@
             <span class="gphLinkSummary__term--1">{{mc.term1}}</span>
             <span class="gphLinkSummary__term--2">{{mc.term2}}</span>
 
-            <button tooltip="Merge {{mc.term2}} into {{mc.term1}}" type="button" class="kuiButton kuiButton--basic kuiButton--small"
+            <button
+              tooltip="{{ ::'xpack.graph.sidebar.linkSummary.mergeTerm2ToTerm1ButtonTooltip' | i18n: {
+                defaultMessage: 'Merge {term2} into {term1}',
+                values: { term1: mc.term1, term2: mc.term2 },
+              } }}"
+              type="button" class="kuiButton kuiButton--basic kuiButton--small"
               ng-attr-style="opacity:{{0.2+(mc.overlap/mc.v2)}};" ng-click="performMerge(mc.id1, mc.id2)">
               <span class="kuiIcon fa-chevron-circle-left"></span>
             </button>
@@ -411,21 +526,44 @@
           <!-- Venn diagram of term/shared doc intersections -->
           <div class="gphLinkSummary__venn" venn="mc"></div>
 
-          <small class="gphLinkSummary__term--1" tooltip="{{mc.v1}} documents have term {{mc.term1}}">{{mc.v1}}</small>
-          <small class="gphLinkSummary__term--1-2" tooltip="{{mc.overlap}} documents have both terms">&nbsp;({{mc.overlap}})&nbsp;</small>
-          <small class="gphLinkSummary__term--2" tooltip="{{mc.v2}} documents have term {{mc.term2}}">{{mc.v2}}</small>
+          <small
+            class="gphLinkSummary__term--1"
+            tooltip="{{ ::'xpack.graph.sidebar.linkSummary.leftTermCountTooltip' | i18n: {
+              defaultMessage: '{count} documents have term {term}',
+              values: { count: mc.v1, term: mc.term1 },
+            } }}"
+          >{{mc.v1}}</small>
+          <small
+            class="gphLinkSummary__term--1-2"
+            tooltip="{{ ::'xpack.graph.sidebar.linkSummary.bothTermsCountTooltip' | i18n: {
+              defaultMessage: '{count} documents have both terms',
+              values: { count: mc.overlap },
+            } }}"
+          >&nbsp;({{mc.overlap}})&nbsp;</small>
+          <small
+            class="gphLinkSummary__term--2"
+            tooltip="{{ ::'xpack.graph.sidebar.linkSummary.rightTermCountTooltip' | i18n: {
+              defaultMessage: '{count} documents have term {term}',
+              values: { count: mc.v2, term: mc.term2 },
+            } }}"
+          >{{mc.v2}}</small>
         </div>
 
 
 
         <div class="gphSidebar__panel" ng-if="(detail.inferredEdge)">
           <div class="gphSidebar__header">
-            <span class="kuiIcon fa-cog"></span> Similar labels
+            <span class="kuiIcon fa-cog"></span>
+            {{ ::'xpack.graph.sidebar.similarLabelsTitle' | i18n: { defaultMessage: 'Similar labels' } }}
           </div>
 
           <div class="form-group form-group-sm gphFormGroup--small">
             <div style="line-height: 24px;">
-              <button tooltip="Merge {{detail.inferredEdge.topTarget.label}} into {{detail.inferredEdge.topSrc.label}}"
+              <button
+                tooltip="{{ ::'xpack.graph.sidebar.similarLabels.mergeTargetToSrcButtonTooltip' | i18n: {
+                  defaultMessage: 'Merge {targetLabel} into {srcLabel}'
+                  values: { targetLabel: detail.inferredEdge.topTarget.label, srcLabel: detail.inferredEdge.topSrc.label },
+                } }}"
                 type="button" style="vertical-align: top;" class="kuiButton kuiButton--basic kuiButton--small"
                 ng-click="performMerge(detail.inferredEdge.topTarget.id, detail.inferredEdge.topSrc.id)">
                 <span class="kui fa-chevron-circle-down"></span>
@@ -438,7 +576,11 @@
               <span style="vertical-align: top;">{{detail.inferredEdge.topSrc.label}}</span>
             </div>
             <div style="line-height: 24px;">
-              <button tooltip="Merge {{detail.inferredEdge.topSrc.label}} into {{detail.inferredEdge.topTarget.label}}"
+              <button
+                tooltip="{{ ::'xpack.graph.sidebar.similarLabels.mergeSrcToTargetButtonTooltip' | i18n: {
+                  defaultMessage: 'Merge {srcLabel} into {targetLabel}'
+                  values: { targetLabel: detail.inferredEdge.topTarget.label, srcLabel: detail.inferredEdge.topSrc.label },
+                } }}"
                 type="button" style="vertical-align: top;" class="kuiButton kuiButton--basic kuiButton--small"
                 ng-click="performMerge(detail.inferredEdge.topSrc.id, detail.inferredEdge.topTarget.id)">
                 <span class="kuiIcon fa-chevron-circle-up"></span>
@@ -453,9 +595,12 @@
 
             </div>
 
-            <div class="col-sm-10">
-              Key terms: <small> {{detail.inferredEdge.label}}
-            </div>
+            <div
+              class="col-sm-10"
+              i18n-id="xpack.graph.sidebar.similarLabels.keyTermsText"
+              i18n-default-message="Key terms: {inferredEdgeLabel}"
+              i18n-values="{ inferredEdgeLabel: '<small>' + detail.inferredEdge.label + '</small>' }"
+            ></div>
           </div>
         </div>
       </div>

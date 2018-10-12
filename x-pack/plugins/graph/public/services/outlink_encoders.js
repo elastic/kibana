@@ -6,38 +6,58 @@
 
 import rison from 'rison-node';
 
-export const outlinkEncoders = [{
+export const getOutlinkEncoders = i18n => [{
   id: 'esq-rison-loose',
-  title: 'elasticsearch OR query (rison encoded)',
-  description: 'rison-encoded JSON, minimum_should_match=1, compatible with most Kibana URLs',
+  title: i18n('xpack.graph.outlinkEncoders.esqRisonLooseTitle', {
+    defaultMessage: 'elasticsearch OR query (rison encoded)',
+  }),
+  description: i18n('xpack.graph.outlinkEncoders.esqRisonLooseDescription', {
+    defaultMessage: 'rison-encoded JSON, minimum_should_match=1, compatible with most Kibana URLs',
+  }),
   encode: function (workspace) {
     return encodeURIComponent(rison.encode(workspace.getQuery(workspace.getSelectedOrAllNodes(), true)));
   }
 }, {
   id: 'esq-rison',
-  title: 'elasticsearch AND query (rison encoded)',
-  description: 'rison-encoded JSON, minimum_should_match=2, compatible with most Kibana URLs',
+  title: i18n('xpack.graph.outlinkEncoders.esqRisonTitle', {
+    defaultMessage: 'elasticsearch AND query (rison encoded)',
+  }),
+  description: i18n('xpack.graph.outlinkEncoders.esqRisonDescription', {
+    defaultMessage: 'rison-encoded JSON, minimum_should_match=2, compatible with most Kibana URLs',
+  }),
   encode: function (workspace) {
     return encodeURIComponent(rison.encode(workspace.getQuery(workspace.getSelectedOrAllNodes())));
   }
 }, {
   id: 'esq-similar-rison',
-  title: 'elasticsearch more like this query (rison encoded)',
-  description: 'rison-encoded JSON, "like this but not this" type query to find missing docs',
+  title: i18n('xpack.graph.outlinkEncoders.esqSimilarRisonTitle', {
+    defaultMessage: 'elasticsearch more like this query (rison encoded)',
+  }),
+  description: i18n('xpack.graph.outlinkEncoders.esqSimilarRisonDescription', {
+    defaultMessage: 'rison-encoded JSON, "like this but not this" type query to find missing docs',
+  }),
   encode: function (workspace) {
     return encodeURIComponent(rison.encode(workspace.getLikeThisButNotThisQuery(workspace.getSelectedOrAllNodes())));
   }
 }, {
   id: 'esq-plain',
-  title: 'elasticsearch query (plain encoding)',
-  description: 'JSON encoded using standard url encoding',
+  title: i18n('xpack.graph.outlinkEncoders.esqPlainTitle', {
+    defaultMessage: 'elasticsearch query (plain encoding)',
+  }),
+  description: i18n('xpack.graph.outlinkEncoders.esqPlainDescription', {
+    defaultMessage: 'JSON encoded using standard url encoding',
+  }),
   encode: function (workspace) {
     return encodeURIComponent(JSON.stringify(workspace.getQuery(workspace.getSelectedOrAllNodes())));
   }
 }, {
   id: 'text-plain',
-  title: 'plain text',
-  description: 'Text of selected vertex labels as a plain url-encoded string',
+  title: i18n('xpack.graph.outlinkEncoders.textPlainTitle', {
+    defaultMessage: 'plain text',
+  }),
+  description: i18n('xpack.graph.outlinkEncoders.textPlainDescription', {
+    defaultMessage: 'Text of selected vertex labels as a plain url-encoded string',
+  }),
   encode: function (workspace) {
     let q = '';
     const nodes = workspace.getSelectedOrAllNodes();
@@ -52,8 +72,12 @@ export const outlinkEncoders = [{
   }
 }, {
   id: 'text-lucene',
-  title: 'Lucene-escaped text',
-  description: 'Text of selected vertex labels with any Lucene special characters encoded',
+  title: i18n('xpack.graph.outlinkEncoders.textLuceneTitle', {
+    defaultMessage: 'Lucene-escaped text',
+  }),
+  description: i18n('xpack.graph.outlinkEncoders.textLuceneDescription', {
+    defaultMessage: 'Text of selected vertex labels with any Lucene special characters encoded',
+  }),
   encode: function (workspace) {
     let q = '';
     const nodes = workspace.getSelectedOrAllNodes();

@@ -13,7 +13,8 @@
     "tagCloud": "src/core_plugins/tagcloud",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
     "xpack.watcher": "x-pack/plugins/watcher",
-    "xpack.security": "x-pack/plugins/security"
+    "xpack.security": "x-pack/plugins/security",
+    "xpack.graph": "x-pack/plugins/graph"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",

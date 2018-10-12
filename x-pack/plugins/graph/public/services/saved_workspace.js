@@ -9,7 +9,7 @@ import { SavedObjectProvider } from 'ui/courier';
 
 const module = uiModules.get('app/dashboard');
 
-export function SavedWorkspaceProvider(Private) {
+export function SavedWorkspaceProvider(Private, i18n) {
   // SavedWorkspace constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
   const SavedObject = Private(SavedObjectProvider);

@@ -1,30 +1,46 @@
-<div class="kuiLocalDropdownTitle">Settings</div>
+<div
+  class="kuiLocalDropdownTitle"
+  i18n-id="xpack.graph.topNavMenu.settingsTitle"
+  i18n-default-message="Settings"
+></div>
 
 
 <!-- ====== start tabs ====== -->
 <ul class="nav nav-tabs" ng-show="selectedIndex !== null">
   <li ng-show="workspace" ng-class="{active: configPanel === 'lastRequest'}" >
-    <a ng-click="configPanel='lastRequest'" class="navbar-link">
-      Last request
-    </a>
+    <a
+      ng-click="configPanel='lastRequest'"
+      class="navbar-link"
+      i18n-id="xpack.graph.settings.lastRequestTitle"
+      i18n-default-message="Last request"
+    ></a>
   </li>
 
   <li ng-show="workspace" ng-class="{active: configPanel ==='blacklist'}">
-    <a ng-click="configPanel='blacklist'" class="navbar-link">
-      Blacklist
-    </a>
+    <a
+      ng-click="configPanel='blacklist'"
+      class="navbar-link"
+      i18n-id="xpack.graph.settings.blacklistTitle"
+      i18n-default-message="Blacklist"
+    ></a>
   </li>
 
   <li ng-class="{active: configPanel === 'settings'}">
-    <a ng-click="configPanel='settings'" class="navbar-link" >
-      Advanced settings
-    </a>
+    <a
+      ng-click="configPanel='settings'"
+      class="navbar-link"
+      i18n-id="xpack.graph.settings.advancedSettingsTitle"
+      i18n-default-message="Advanced settings"
+    ></a>
   </li>
 
   <li ng-show="canEditDrillDownUrls" ng-class="{active: configPanel === 'drillDowns'}" >
-    <a ng-click="configPanel='drillDowns'" class="navbar-link">
-      Drill-downs
-    </a>
+    <a
+      ng-click="configPanel='drillDowns'"
+      class="navbar-link"
+      i18n-id="xpack.graph.settings.drillDownsTitle"
+      i18n-default-message="Drill-downs"
+    ></a>
   </li>
 </ul>
 <!-- ====== stop tabs ====== -->
@@ -38,10 +54,18 @@
   <small class="help-block">http://host:port/{{selectedIndex.name}}/_xpack/graph/_explore</small>
   <ul class="nav nav-tabs">
     <li ng-class="{active: spymode === 'request'}">
-      <a ng-click="spymode='request'">Request</a>
+      <a
+        ng-click="spymode='request'"
+        i18n-id="xpack.graph.settings.lastRequest.requestTabTitle"
+        i18n-default-message="Request"
+      ></a>
     </li>
     <li ng-class="{active: spymode === 'response'}">
-      <a ng-click="spymode='response'">Response</a>
+      <a
+        ng-click="spymode='response'"
+        i18n-id="xpack.graph.settings.lastRequest.responseTabTitle"
+        i18n-default-message="Response"
+      ></a>
     </li>
   </ul>
 
@@ -66,9 +90,11 @@
   class="list-group-item list-group-item--noBorder"
   ng-if="(workspace!==null) && (configPanel==='blacklist')"
 >
-  <p class="help-block">
-    These terms are currently blacklisted from re-appearing in the workspace
-  </p>
+  <p
+    class="help-block"
+    i18n-id="xpack.graph.settings.blacklist.blacklistHelpText"
+    i18n-default-message="These terms are currently blacklisted from re-appearing in the workspace"
+  ></p>
 
   <div class="gphSelectionList kuiVerticalRhythm">
     <!-- ====== start terms ====== -->
@@ -101,7 +127,10 @@
     ng-disabled="workspace.blacklistedNodes.length === 0"
   >
     <span class="kuiButton__icon kuiIcon fa-trash"></span>
-    <span>Clear</span>
+    <span
+      i18n-id="xpack.graph.settings.blacklist.clearButtonLabel"
+      i18n-default-message="Clear"    
+    ></span>
   </button>
 </div>
 <!-- ====== end term blacklist tab content ====== -->
@@ -119,7 +148,11 @@
     <!-- ====== start url ====== -->
     <div class="form-group">
       <div class="col-sm-1 control-label">
-        <label for="urlTemplateUrl">URL</label>
+        <label
+          for="urlTemplateUrl"
+          i18n-id="xpack.graph.settings.drillDowns.urlInputLabel"
+          i18n-default-message="URL"
+        ></label>
       </div>
       <div class="col-sm-11">
         <input
@@ -134,14 +167,29 @@
         >
 
         <span ng-if="suggestTemplateFix">
-          <i tooltip="Kibana URL pasted" class="text-color-warning fa fa-warning"></i>
-          This looks like a Kibana URL. Would you like us to convert it to a template for you?
-          <a ng-click="replaceKibanaUrlParam()">yes</a> / <a ng-click="rejectKibanaUrlSuggestion()">no</a>
+          <i
+            tooltip="{{ ::'xpack.graph.settings.drillDowns.kibanaUrlWarningTitle' | i18n: { defaultMessage: 'Kibana URL pasted' } }}"
+            class="text-color-warning fa fa-warning"
+          ></i>
+          {{ ::'xpack.graph.settings.drillDowns.kibanaUrlWarningText' | i18n: { defaultMessage: 'This looks like a Kibana URL. Would you like us to convert it to a template for you?' } }}
+          <a
+            ng-click="replaceKibanaUrlParam()"
+            i18n-id="xpack.graph.settings.drillDowns.kibanaUrlWarningYesOption"
+            i18n-default-message="yes"
+          ></a> / <a
+            ng-click="rejectKibanaUrlSuggestion()"
+            i18n-id="xpack.graph.settings.drillDowns.kibanaUrlWarningNoOption"
+            i18n-default-message="no"
+          ></a>
         </span>
 
-        <p class="help-block" ng-non-bindable>
-          Define template URLs using {{gquery}} where the selected vertex terms are inserted
-        </p>
+        <p
+          class="help-block"
+          ng-non-bindable
+          i18n-id="xpack.graph.settings.drillDowns.urlInputHelpText"
+          i18n-default-message="Define template URLs using {gquery} where the selected vertex terms are inserted"
+          i18n-values="{ gquery: '{{gquery}}' }"
+        ></p>
       </div>
     </div>
     <!-- ====== stop url ====== -->
@@ -149,7 +197,11 @@
     <!-- ====== start title ====== -->
     <div class="form-group">
       <div class="col-sm-1 control-label">
-        <label for="urlDescription">Title</label>
+        <label
+          for="urlDescription"
+          i18n-id="xpack.graph.settings.drillDowns.urlDescriptionInputLabel"
+          i18n-default-message="Title"
+        ></label>
       </div>
       <div class="col-sm-5">
         <input
@@ -157,12 +209,16 @@
           type="text"
           autocomplete="off"
           ng-model="newUrlTemplate.description"
-          placeholder="Search on Google"
+          placeholder="{{ :: 'xpack.graph.settings.drillDowns.urlDescriptionInputPlaceholder' | i18n: { defaultMessage: 'Search on Google' } }}"
           class="form-control"
         >
       </div>
       <div class="col-sm-2 control-label">
-        <label for="encoder">URL parameter type</label>
+        <label
+          for="encoder"
+          i18n-id="xpack.graph.settings.drillDowns.urlEncoderInputLabel"
+          i18n-default-message="URL parameter type"
+        ></label>
       </div>
       <div class="col-sm-4">
         <select
@@ -179,7 +235,11 @@
     <!-- ====== start icon ====== -->
     <div class="form-group">
       <div class="col-sm-1 control-label">
-        <label for="encoder">Toolbar icon</label>
+        <label
+          for="encoder"
+          i18n-id="xpack.graph.settings.drillDowns.toolbarIconPickerLabel"
+          i18n-default-message="Toolbar icon"
+        ></label>
       </div>
 
       <div class="col-sm-9">
@@ -201,18 +261,18 @@
             ng-disabled="!newUrlTemplate.url&&!newUrlTemplate.description&&!newUrlTemplate.icon"
             class="kuiButton kuiButton--basic"
             ng-click="resetNewUrlTemplate()"
-          >
-            Reset
-          </button>
+            i18n-id="xpack.graph.settings.drillDowns.resetButtonLabel"
+            i18n-default-message="Reset"
+          ></button>
 
           <button
             type="submit"
             ng-disabled="!newUrlTemplate.url||!newUrlTemplate.description"
             class="kuiButton kuiButton--primary"
-            aria-label="Save drill-down"
-          >
-            Save
-          </button>
+            aria-label="{{ ::'xpack.graph.settings.drillDowns.resetButtonAriaLabel' | i18n: { defaultMessage: 'Save drill-down' } }}"
+            i18n-id="xpack.graph.settings.drillDowns.saveButtonLabel"
+            i18n-default-message="Save"
+          ></button>
         </div>
       </div>
     </div>
@@ -238,7 +298,7 @@
           <button
             ng-click="editUrlTemplate(urlTemplate)"
             class="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small"
-            aria-label="Edit"
+            aria-label="{{ ::'xpack.graph.settings.drillDowns.editButtonAriaLabel' | i18n: { defaultMessage: 'Edit' } }}"
           >
             <span aria-hidden="true" class="kuiIcon fa-pencil"></span>
           </button>
@@ -246,7 +306,7 @@
           <button
             ng-click="removeUrlTemplate(urlTemplate)"
             class="kuiButton kuiButton--danger kuiButton--iconText kuiButton--small"
-            aria-label="Remove"
+            aria-label="{{ ::'xpack.graph.settings.drillDowns.removeButtonAriaLabel' | i18n: { defaultMessage: 'Remove' } }}"
           >
             <span aria-hidden="true" class="kuiIcon fa-trash"></span>
           </button>
@@ -267,9 +327,12 @@
 >
   <form class="form-horizontal">
     <div class="form-group form-group-sm gphFormGroup--small">
-      <label for="qIndexSampleSize" class="col-sm-4 control-label">
-        Sample size
-      </label>
+      <label
+        for="qIndexSampleSize"
+        class="col-sm-4 control-label"
+        i18n-id="xpack.graph.settings.advancedSettings.sampleSizeInputLabel"
+        i18n-default-message="Sample size"
+      ></label>
 
       <div class="col-sm-6">
         <input
@@ -281,9 +344,11 @@
           ng-model="exploreControls.sampleSize"
         >
 
-        <div class="help-block">
-          Terms are identified from samples of the most relevant documents. Bigger is not necessarily better - can be slower and less relevant.
-        </div>
+        <div
+          class="help-block"
+          i18n-id="xpack.graph.settings.advancedSettings.sampleSizeInputHelpText"
+          i18n-default-message="Terms are identified from samples of the most relevant documents. Bigger is not necessarily better - can be slower and less relevant."
+        ></div>
       </div>
     </div>
 
@@ -296,18 +361,25 @@
               id="isSignifChk2"
               ng-model="exploreControls.useSignificance"
             >
-            Significant links
+            {{ ::'xpack.graph.settings.advancedSettings.significantLinksCheckboxLabel' | i18n: { defaultMessage: 'Significant links' } }}
           </label>
         </div>
 
-        <span class="help-block">
-          Identify terms that are "significant" rather than simply popular
-        </span>
+        <span
+          class="help-block"
+          i18n-id="xpack.graph.settings.advancedSettings.significantLinksCheckboxHelpText"
+          i18n-default-message="Identify terms that are &quot;significant&quot; rather than simply popular"
+        ></span>
       </div>
     </div>
 
     <div class="form-group form-group-sm gphFormGroup--small">
-      <label for="minDocCount" class="col-sm-4 control-label">Certainty</label>
+      <label
+        for="minDocCount"
+        class="col-sm-4 control-label"
+        i18n-id="xpack.graph.settings.advancedSettings.certaintyInputLabel"
+        i18n-default-message="Certainty"
+      ></label>
       <div class="col-sm-6">
         <input
           type="number"
@@ -319,16 +391,21 @@
           ng-model="exploreControls.minDocCount"
         >
 
-        <div class="help-block">
-          The min number of documents that are required as evidence before introducing a related term
-        </div>
+        <div
+          class="help-block"
+          i18n-id="xpack.graph.settings.advancedSettings.certaintyInputHelpText"
+          i18n-default-message="The min number of documents that are required as evidence before introducing a related term"
+        ></div>
       </div>
     </div>
 
     <div class="form-group form-group-sm gphFormGroup--small">
-      <label for="qDiversityField" class="col-sm-4 control-label">
-        Diversity field
-      </label>
+      <label
+        for="qDiversityField"
+        class="col-sm-4 control-label"
+        i18n-id="xpack.graph.settings.advancedSettings.diversityFieldInputLabel"
+        i18n-default-message="Diversity field"
+      ></label>
 
       <div class="col-sm-6">
         <select
@@ -337,12 +414,16 @@
           ng-options="field.name for field in allFields"
           ng-model="exploreControls.sampleDiversityField"
         >
-          <option value="">[No diversification]</option>
+          <option
+            value=""
+            i18n-id="xpack.graph.settings.advancedSettings.diversityFieldInputPlaceholder"
+            i18n-default-message="[No diversification]"
+          ></option>
         </select>
 
         <span class="help-block">
-          To avoid document samples being dominated by a single voice, pick the field that helps identify the source of bias.
-          <em>This must be a single-term field or searches will be rejected with an error</em>
+          {{ ::'xpack.graph.settings.advancedSettings.diversityFieldInputHelpText1' | i18n: { defaultMessage: 'To avoid document samples being dominated by a single voice, pick the field that helps identify the source of bias.' } }}
+          <em>{{ ::'xpack.graph.settings.advancedSettings.diversityFieldInputHelpText2' | i18n: { defaultMessage: 'This must be a single-term field or searches will be rejected with an error' } }}</em>
         </span>
       </div>
     </div>
@@ -354,9 +435,9 @@
       <label
         for="qMaxValuesPerDoc"
         class="col-sm-4 control-label"
-      >
-        Max docs per field
-      </label>
+        i18n-id="xpack.graph.settings.advancedSettings.maxValuesInputLabel"
+        i18n-default-message="Max docs per field"
+      ></label>
 
       <div class="col-sm-6">
         <input
@@ -370,8 +451,8 @@
         >
 
         <span class="help-block">
-          Max number of documents in a sample that can contain the same value for the
-          <em>{{selectedDiversityField.name}}</em> field
+          {{ ::'xpack.graph.settings.advancedSettings.maxValuesInputHelpText' | i18n: { defaultMessage: 'Max number of documents in a sample that can contain the same value for the' } }}
+          <em>{{selectedDiversityField.name}}</em> {{ ::'xpack.graph.settings.advancedSettings.maxValuesInputHelpText.fieldText' | i18n: { defaultMessage: 'field' } }}
         </span>
       </div>
     </div>
@@ -380,9 +461,9 @@
       <label
         for="qTimeoutMillis"
         class="col-sm-4 control-label"
-      >
-        Timeout (ms)
-      </label>
+        i18n-id="xpack.graph.settings.advancedSettings.timeoutInputLabel"
+        i18n-default-message="Timeout (ms)"
+      ></label>
 
       <div class="col-sm-6">
         <input
@@ -395,9 +476,11 @@
           ng-model="exploreControls.timeoutMillis"
         >
 
-        <span class="help-block">
-          Max time in milliseconds a request can run
-        </span>
+        <span
+          class="help-block"
+          i18n-id="xpack.graph.settings.advancedSettings.timeoutInputHelpText"
+          i18n-default-message="Max time in milliseconds a request can run"
+        ></span>
       </div>
     </div>
   </form>
