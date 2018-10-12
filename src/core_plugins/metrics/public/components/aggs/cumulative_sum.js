@@ -24,6 +24,7 @@ import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function CumulativeSumAgg(props) {
   const { model, siblings } = props;
@@ -38,7 +39,12 @@ function CumulativeSumAgg(props) {
       siblings={props.siblings}
     >
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.cumulativeSum.aggregationLabel"
+            defaultMessage="Aggregation"
+          />
+        </div>
         <AggSelect
           panelType={props.panel.type}
           siblings={props.siblings}
@@ -47,7 +53,12 @@ function CumulativeSumAgg(props) {
         />
       </div>
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Metric</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.cumulativeSum.metricLabel"
+            defaultMessage="Metric"
+          />
+        </div>
         <MetricSelect
           onChange={handleSelectChange('field')}
           metrics={siblings}

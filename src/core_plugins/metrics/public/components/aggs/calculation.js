@@ -28,6 +28,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import Vars from './vars';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { htmlIdGenerator } from '@elastic/eui';
 
@@ -63,7 +64,12 @@ class CalculationAgg extends Component {
       >
         <div className="vis_editor__row_item">
           <div>
-            <div className="vis_editor__label">Aggregation</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.calculation.aggregationLabel"
+                defaultMessage="Aggregation"
+              />
+            </div>
             <AggSelect
               panelType={this.props.panel.type}
               siblings={this.props.siblings}
@@ -71,7 +77,12 @@ class CalculationAgg extends Component {
               onChange={handleSelectChange('type')}
             />
             <div className="vis_editor__variables">
-              <div className="vis_editor__label">Variables</div>
+              <div className="vis_editor__label">
+                <FormattedMessage
+                  id="metrics.calculation.variablesLabel"
+                  defaultMessage="Variables"
+                />
+              </div>
               <Vars
                 metrics={siblings}
                 onChange={handleChange}
@@ -81,9 +92,16 @@ class CalculationAgg extends Component {
             </div>
             <div className="vis_editor__row_item">
               <label className="vis_editor__label" htmlFor={htmlId('painless')}>
-                Painless Script - Variables are keys on the <code>params</code>
-                object, i.e. <code>params.&lt;name&gt;</code>.
-                To access the bucket interval (in milliseconds) use <code>params._interval</code>.
+                <FormattedMessage
+                  id="metrics.calculation.pinlessScriptsDescription"
+                  defaultMessage="Painless Script - Variables are keys on the {params} object, i.e. {paramsName}. To access the bucket
+                  interval (in milliseconds) use {paramsInterval}."
+                  values={{
+                    params: (<code>params</code>),
+                    paramsName: (<code>params.&lt;name&gt;</code>),
+                    paramsInterval: (<code>params._interval</code>)
+                  }}
+                />
               </label>
               <input
                 id={htmlId('painless')}

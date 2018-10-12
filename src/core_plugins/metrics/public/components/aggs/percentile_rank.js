@@ -26,6 +26,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import { htmlIdGenerator } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;
@@ -48,7 +49,12 @@ export const PercentileRankAgg = props => {
       siblings={props.siblings}
     >
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.percentileRank.aggregationLabel"
+            defaultMessage="Aggregation"
+          />
+        </div>
         <AggSelect
           panelType={props.panel.type}
           siblings={props.siblings}
@@ -57,7 +63,12 @@ export const PercentileRankAgg = props => {
         />
       </div>
       <div className="vis_editor__row_item">
-        <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
+        <label className="vis_editor__label" htmlFor={htmlId('field')}>
+          <FormattedMessage
+            id="metrics.percentileRank.fieldLabel"
+            defaultMessage="Field"
+          />
+        </label>
         <FieldSelect
           id={htmlId('field')}
           fields={fields}
@@ -69,7 +80,12 @@ export const PercentileRankAgg = props => {
         />
       </div>
       <div className="vis_editor__percentile_rank_value">
-        <label className="vis_editor__label" htmlFor={htmlId('value')}>Value</label>
+        <label className="vis_editor__label" htmlFor={htmlId('value')}>
+          <FormattedMessage
+            id="metrics.percentileRank.valueLabel"
+            defaultMessage="Value"
+          />
+        </label>
         <input
           id={htmlId('value')}
           className="vis_editor__input-grows"

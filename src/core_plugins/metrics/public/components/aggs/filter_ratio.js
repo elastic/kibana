@@ -26,6 +26,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import { htmlIdGenerator } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const FilterRatioAgg = props => {
   const {
@@ -61,7 +62,12 @@ export const FilterRatioAgg = props => {
       <div style={{ flex: '1 0 auto' }}>
         <div style={{ flex: '1 0 auto', display: 'flex' }}>
           <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Aggregation</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.filterRatio.aggregationLabel"
+                defaultMessage="Aggregation"
+              />
+            </div>
             <AggSelect
               panelType={props.panel.type}
               siblings={props.siblings}
@@ -71,7 +77,10 @@ export const FilterRatioAgg = props => {
           </div>
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('numerator')}>
-              Numerator
+              <FormattedMessage
+                id="metrics.filterRatio.numeratorLabel"
+                defaultMessage="Numerator"
+              />
             </label>
             <input
               id={htmlId('numerator')}
@@ -83,7 +92,10 @@ export const FilterRatioAgg = props => {
           </div>
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('denominator')}>
-              Denominator
+              <FormattedMessage
+                id="metrics.filterRatio.denominatorLabel"
+                defaultMessage="Denominator"
+              />
             </label>
             <input
               id={htmlId('denominator')}
@@ -96,7 +108,12 @@ export const FilterRatioAgg = props => {
         </div>
         <div style={{ flex: '1 0 auto', display: 'flex', marginTop: '10px' }}>
           <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Metric Aggregation</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.filterRatio.metricAggregationLabel"
+                defaultMessage="Metric Aggregation"
+              />
+            </div>
             <AggSelect
               siblings={props.siblings}
               panelType="metrics"
@@ -107,7 +124,10 @@ export const FilterRatioAgg = props => {
           { model.metric_agg !== 'count' ? (
             <div className="vis_editor__row_item">
               <label className="vis_editor__label" htmlFor={htmlId('aggField')}>
-                Field
+                <FormattedMessage
+                  id="metrics.filterRatio.fieldLabel"
+                  defaultMessage="Field"
+                />
               </label>
               <FieldSelect
                 id={htmlId('aggField')}

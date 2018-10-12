@@ -30,9 +30,10 @@ import {
   htmlIdGenerator,
   EuiComboBox,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const MovingAverageAgg = props => {
-  const { siblings } = props;
+const MovingAverageAggUi = props => {
+  const { siblings, intl } = props;
   const defaults = {
     settings: '',
     minimize: 0,
@@ -45,11 +46,27 @@ export const MovingAverageAgg = props => {
   const handleTextChange = createTextHandler(handleChange);
   const handleNumberChange = createNumberHandler(handleChange);
   const modelOptions = [
-    { label: 'Simple', value: 'simple' },
-    { label: 'Linear', value: 'linear' },
-    { label: 'Exponentially Weighted', value: 'ewma' },
-    { label: 'Holt-Linear', value: 'holt' },
-    { label: 'Holt-Winters', value: 'holt_winters' }
+    {
+      label: intl.formatMessage({ id: 'metrics.movingAverage.modelOptions.simpleLabel', defaultMessage: 'Simple' }),
+      value: 'simple'
+    },
+    {
+      label: intl.formatMessage({ id: 'metrics.movingAverage.modelOptions.linearLabel', defaultMessage: 'Linear' }),
+      value: 'linear'
+    },
+    {
+      label: intl.formatMessage({
+        id: 'metrics.movingAverage.modelOptions.exponentiallyWeightedLabel', defaultMessage: 'Exponentially Weighted' }),
+      value: 'ewma'
+    },
+    {
+      label: intl.formatMessage({ id: 'metrics.movingAverage.modelOptions.holtLinearLabel', defaultMessage: 'Holt-Linear' }),
+      value: 'holt'
+    },
+    {
+      label: intl.formatMessage({ id: 'metrics.movingAverage.modelOptions.holtWintersLabel', defaultMessage: 'Holt-Winters' }),
+      value: 'holt_winters'
+    }
   ];
   const minimizeOptions = [
     { label: 'True', value: 1 },
@@ -74,7 +91,12 @@ export const MovingAverageAgg = props => {
       <div className="vis_editor__row_item">
         <div className="vis_editor__agg_row-item">
           <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Aggregation</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.movingAverage.aggregationLabel"
+                defaultMessage="Aggregation"
+              />
+            </div>
             <AggSelect
               panelType={props.panel.type}
               siblings={props.siblings}
@@ -83,7 +105,12 @@ export const MovingAverageAgg = props => {
             />
           </div>
           <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Metric</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.movingAverage.metricLabel"
+                defaultMessage="Metric"
+              />
+            </div>
             <MetricSelect
               onChange={handleSelectChange('field')}
               metrics={siblings}
@@ -94,11 +121,16 @@ export const MovingAverageAgg = props => {
         </div>
         <div className="vis_editor__agg_row-item">
           <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('model')}>Model</label>
+            <label className="vis_editor__label" htmlFor={htmlId('model')}>
+              <FormattedMessage
+                id="metrics.movingAverage.modelLabel"
+                defaultMessage="Model"
+              />
+            </label>
             <EuiComboBox
               isClearable={false}
               id={htmlId('model')}
-              placeholder="Select..."
+              placeholder={intl.formatMessage({ id: 'metrics.movingAverage.model.selectPlaceholder', defaultMessage: 'Select...' })}
               options={modelOptions}
               selectedOptions={selectedModelOption ? [selectedModelOption] : []}
               onChange={handleSelectChange('model')}
@@ -107,7 +139,10 @@ export const MovingAverageAgg = props => {
           </div>
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('windowSize')}>
-              Window Size
+              <FormattedMessage
+                id="metrics.movingAverage.windowSizeLabel"
+                defaultMessage="Window Size"
+              />
             </label>
             <input
               id={htmlId('windowSize')}
@@ -118,10 +153,15 @@ export const MovingAverageAgg = props => {
             />
           </div>
           <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('minimize')}>Minimize</label>
+            <label className="vis_editor__label" htmlFor={htmlId('minimize')}>
+              <FormattedMessage
+                id="metrics.movingAverage.minimizeLabel"
+                defaultMessage="Minimize"
+              />
+            </label>
             <EuiComboBox
               id={htmlId('minimize')}
-              placeholder="Select..."
+              placeholder={intl.formatMessage({ id: 'metrics.movingAverage.minimize.selectPlaceholder', defaultMessage: 'Select...' })}
               options={minimizeOptions}
               selectedOptions={selectedMinimizeOption ? [selectedMinimizeOption] : []}
               onChange={handleSelectChange('minimize')}
@@ -130,7 +170,10 @@ export const MovingAverageAgg = props => {
           </div>
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('windowSize')}>
-              Predict
+              <FormattedMessage
+                id="metrics.movingAverage.predictLabel"
+                defaultMessage="Predict"
+              />
             </label>
             <input
               id={htmlId('predict')}
@@ -144,7 +187,11 @@ export const MovingAverageAgg = props => {
         <div className="vis_editor__agg_row-item">
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('settings')}>
-              Settings (<code>Key=Value</code> space-delimited)
+              <FormattedMessage
+                id="metrics.movingAverage.settingsLabel"
+                defaultMessage="Settings ({keyValue} space-delimited)"
+                values={{ keyValue: (<code>Key=Value</code>) }}
+              />
             </label>
             <input
               id={htmlId('settings')}
@@ -160,7 +207,7 @@ export const MovingAverageAgg = props => {
   );
 };
 
-MovingAverageAgg.propTypes = {
+MovingAverageAggUi.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
   model: PropTypes.object,
@@ -171,3 +218,5 @@ MovingAverageAgg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
+
+export const MovingAverageAgg = injectI18n(MovingAverageAggUi);

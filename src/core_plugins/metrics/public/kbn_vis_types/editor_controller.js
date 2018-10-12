@@ -22,6 +22,7 @@ import chrome from 'ui/chrome';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FetchFieldsProvider } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
+import { I18nProvider } from '@kbn/i18n/react';
 
 function ReactEditorControllerProvider(Private, config) {
   const fetchFields = Private(FetchFieldsProvider);
@@ -48,15 +49,19 @@ function ReactEditorControllerProvider(Private, config) {
           fetchFields(indexPatterns).then(fields => {
             this.vis.fields = { ...fields, ...this.vis.fields };
             const Component = this.vis.type.editorConfig.component;
-            render(<Component
-              config={config}
-              vis={this.vis}
-              savedObj={this.savedObj}
-              timeRange={params.timeRange}
-              renderComplete={resolve}
-              isEditorMode={true}
-              appState={params.appState}
-            />, this.el);
+            render(
+              <I18nProvider>
+                <Component
+                  config={config}
+                  vis={this.vis}
+                  savedObj={this.savedObj}
+                  timeRange={params.timeRange}
+                  renderComplete={resolve}
+                  isEditorMode={true}
+                  appState={params.appState}
+                />
+              </I18nProvider>,
+              this.el);
           });
         });
       });

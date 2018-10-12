@@ -28,9 +28,10 @@ import {
   htmlIdGenerator,
   EuiComboBox,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const TopHitAgg = props => {
-  const { fields, series, panel } = props;
+const TopHitAggUi = props => {
+  const { fields, series, panel, intl } = props;
   const defaults = {
     agg_with: 'avg',
     size: 1,
@@ -46,15 +47,33 @@ export const TopHitAgg = props => {
   const handleTextChange = createTextHandler(handleChange);
 
   const aggWithOptions = [
-    { label: 'Avg', value: 'avg' },
-    { label: 'Max', value: 'max' },
-    { label: 'Min', value: 'min' },
-    { label: 'Sum', value: 'sum' },
+    {
+      label: intl.formatMessage({ id: 'metrics.topHit.aggWithOptions.averageLabel', defaultMessage: 'Avg' }),
+      value: 'avg',
+    },
+    {
+      label: intl.formatMessage({ id: 'metrics.topHit.aggWithOptions.maxLabel', defaultMessage: 'Max' }),
+      value: 'max'
+    },
+    {
+      label: intl.formatMessage({ id: 'metrics.topHit.aggWithOptions.minLabel', defaultMessage: 'Min' }),
+      value: 'min'
+    },
+    {
+      label: intl.formatMessage({ id: 'metrics.topHit.aggWithOptions.sumLabel', defaultMessage: 'Sum' }),
+      value: 'sum'
+    },
   ];
 
   const orderOptions = [
-    { label: 'Asc', value: 'asc' },
-    { label: 'Desc', value: 'desc' },
+    {
+      label: intl.formatMessage({ id: 'metrics.topHit.orderOptions.ascLabel', defaultMessage: 'Asc' }),
+      value: 'asc'
+    },
+    {
+      label: intl.formatMessage({ id: 'metrics.topHit.orderOptions.descLabel', defaultMessage: 'Desc' }),
+      value: 'desc'
+    },
   ];
 
   const htmlId = htmlIdGenerator();
@@ -75,7 +94,12 @@ export const TopHitAgg = props => {
       <div className="vis_editor__row_item">
         <div className="vis_editor__agg_row-item">
           <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Aggregation</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.topHit.aggregationLabel"
+                defaultMessage="Aggregation"
+              />
+            </div>
             <AggSelect
               panelType={props.panel.type}
               siblings={props.siblings}
@@ -85,7 +109,10 @@ export const TopHitAgg = props => {
           </div>
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('field')}>
-              Field
+              <FormattedMessage
+                id="metrics.topHit.fieldLabel"
+                defaultMessage="Field"
+              />
             </label>
             <FieldSelect
               id={htmlId('field')}
@@ -101,7 +128,10 @@ export const TopHitAgg = props => {
         <div className="vis_editor__agg_row-item">
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('size')}>
-              Size
+              <FormattedMessage
+                id="metrics.topHit.sizeLabel"
+                defaultMessage="Size"
+              />
             </label>
             <input
               id={htmlId('size')}
@@ -112,12 +142,15 @@ export const TopHitAgg = props => {
           </div>
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('agg_with')}>
-              Aggregate with
+              <FormattedMessage
+                id="metrics.topHit.aggregateWithLabel"
+                defaultMessage="Aggregate with"
+              />
             </label>
             <EuiComboBox
               isClearable={false}
               id={htmlId('agg_with')}
-              placeholder="Select..."
+              placeholder={intl.formatMessage({ id: 'metrics.topHit.aggregateWith.selectPlaceholder', defaultMessage: 'Select...' })}
               options={aggWithOptions}
               selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
               onChange={handleSelectChange('agg_with')}
@@ -126,7 +159,10 @@ export const TopHitAgg = props => {
           </div>
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('order_by')}>
-              Order by
+              <FormattedMessage
+                id="metrics.topHit.orderByLabel"
+                defaultMessage="Order by"
+              />
             </label>
             <FieldSelect
               id={htmlId('order_by')}
@@ -139,12 +175,15 @@ export const TopHitAgg = props => {
           </div>
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('order')}>
-              Order
+              <FormattedMessage
+                id="metrics.topHit.orderLabel"
+                defaultMessage="Order"
+              />
             </label>
             <EuiComboBox
               isClearable={false}
               id={htmlId('order')}
-              placeholder="Select..."
+              placeholder={intl.formatMessage({ id: 'metrics.topHit.order.selectPlaceholder', defaultMessage: 'Select...' })}
               options={orderOptions}
               selectedOptions={selectedOrderOption ? [selectedOrderOption] : []}
               onChange={handleSelectChange('order')}
@@ -156,3 +195,5 @@ export const TopHitAgg = props => {
     </AggRow>
   );
 };
+
+export const TopHitAgg = injectI18n(TopHitAggUi);

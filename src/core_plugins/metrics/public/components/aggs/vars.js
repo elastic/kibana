@@ -23,8 +23,9 @@ import _ from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
 import * as collectionActions from '../lib/collection_actions';
 import MetricSelect from './metric_select';
+import { injectI18n } from '@kbn/i18n/react';
 
-class CalculationVars extends Component {
+class CalculationVarsUi extends Component {
 
   constructor(props) {
     super(props);
@@ -43,12 +44,13 @@ class CalculationVars extends Component {
   renderRow(row, i, items) {
     const handleAdd = collectionActions.handleAdd.bind(null, this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, row);
+    const { intl } = this.props;
     return  (
       <div className="vis_editor__calc_vars-row" key={row.id} data-test-subj="varRow">
         <div className="vis_editor__calc_vars-name">
           <input
-            aria-label="Variable name"
-            placeholder="Variable Name"
+            aria-label={intl.formatMessage({ id: 'metrics.vars.variableNameAriaLabel', defaultMessage: 'Variable name' })}
+            placeholder={intl.formatMessage({ id: 'metrics.vars.variableNamePlaceholder', defaultMessage: 'Variable name' })}
             className="vis_editor__input-grows-100"
             type="text"
             onChange={this.handleChange(row, 'name')}
@@ -88,12 +90,12 @@ class CalculationVars extends Component {
 
 }
 
-CalculationVars.defaultProps = {
+CalculationVarsUi.defaultProps = {
   name: 'variables',
   includeSiblings: false
 };
 
-CalculationVars.propTypes = {
+CalculationVarsUi.propTypes = {
   metrics: PropTypes.array,
   model: PropTypes.object,
   name: PropTypes.string,
@@ -101,4 +103,5 @@ CalculationVars.propTypes = {
   includeSiblings: PropTypes.bool
 };
 
+const CalculationVars = injectI18n(CalculationVarsUi);
 export default CalculationVars;

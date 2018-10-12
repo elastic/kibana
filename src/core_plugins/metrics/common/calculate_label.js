@@ -19,6 +19,8 @@
 
 import { includes, startsWith } from 'lodash';
 import lookup from './agg_lookup';
+import { i18n } from '@kbn/i18n';
+
 const paths = [
   'cumulative_sum',
   'derivative',
@@ -34,18 +36,31 @@ const paths = [
   'positive_only',
 ];
 export default function calculateLabel(metric, metrics) {
-  if (!metric) return 'Unknown';
+  if (!metric) return i18n.translate('metrics.calculateLabel.unknownLabel', { defaultMessage: 'Unknown' });
   if (metric.alias) return metric.alias;
 
-  if (metric.type === 'count') return 'Count';
-  if (metric.type === 'calculation') return 'Bucket Script';
-  if (metric.type === 'math') return 'Math';
-  if (metric.type === 'series_agg') return `Series Agg (${metric.function})`;
-  if (metric.type === 'filter_ratio') return 'Filter Ratio';
-  if (metric.type === 'static') return `Static Value of ${metric.value}`;
+  if (metric.type === 'count') return i18n.translate('metrics.calculateLabel.countLabel', { defaultMessage: 'Count' });
+  if (metric.type === 'calculation') {
+    return i18n.translate('metrics.calculateLabel.bucketScriptsLabel', { defaultMessage: 'Bucket Script' });
+  }
+  if (metric.type === 'math') return i18n.translate('metrics.calculateLabel.mathLabel', { defaultMessage: 'Math' });
+  if (metric.type === 'series_agg') {
+    return i18n.translate('metrics.calculateLabel.seriesAggLabel',
+      { defaultMessage: 'Series Agg ({metricFunction})', values: { metricFunction: metric.function } }
+    );
+  }
+  if (metric.type === 'filter_ratio') return i18n.translate('metrics.calculateLabel.filterRatioLabel', { defaultMessage: 'Filter Ratio' });
+  if (metric.type === 'static') {
+    return i18n.translate('metrics.calculateLabel.staticValueLabel',
+      { defaultMessage: 'Static Value of {metricValue}', values: { metricValue: metric.value } }
+    );
+  }
 
   if (metric.type === 'percentile_rank') {
-    return `${lookup[metric.type]} (${metric.value}) of ${metric.field}`;
+    return i18n.translate('metrics.calculateLabel.percentileRankLabel', {
+      defaultMessage: '{lookupMetricType} ({metricValue}) of {metricField}',
+      values: { lookupMetricType: lookup[metric.type], metricValue: metric.value, metricField: metric.field }
+    });
   }
 
   if (includes(paths, metric.type)) {
@@ -62,8 +77,14 @@ export default function calculateLabel(metric, metrics) {
         additionalLabel += ` (${matches[1]})`;
       }
     }
-    return `${lookup[metric.type]} of ${targetLabel}${additionalLabel}`;
+    return i18n.translate('metrics.calculateLabel.lookupMetricTypeOfTargetAndAdditionalLabel', {
+      defaultMessage: '{lookupMetricType} of {targetLabel}{additionalLabel}',
+      values: { lookupMetricType: lookup[metric.type], targetLabel, additionalLabel }
+    });
   }
 
-  return `${lookup[metric.type]} of ${metric.field}`;
+  return i18n.translate('metrics.calculateLabel.lookupMetricTypeOfMetricFieldRankLabel', {
+    defaultMessage: '{lookupMetricType} of {metricField}',
+    values: { lookupMetricType: lookup[metric.type], metricField: metric.field }
+  });
 }

@@ -26,6 +26,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import { htmlIdGenerator } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const DerivativeAgg = props => {
   const { siblings } = props;
@@ -48,7 +49,12 @@ export const DerivativeAgg = props => {
       siblings={props.siblings}
     >
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.derivative.aggregationLabel"
+            defaultMessage="Aggregation"
+          />
+        </div>
         <AggSelect
           panelType={props.panel.type}
           siblings={props.siblings}
@@ -57,7 +63,12 @@ export const DerivativeAgg = props => {
         />
       </div>
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Metric</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.derivative.metricLabel"
+            defaultMessage="Metric"
+          />
+        </div>
         <MetricSelect
           onChange={handleSelectChange('field')}
           metrics={siblings}
@@ -67,7 +78,10 @@ export const DerivativeAgg = props => {
       </div>
       <div>
         <label className="vis_editor__label" htmlFor={htmlId('units')}>
-          Units (1s, 1m, etc)
+          <FormattedMessage
+            id="metrics.derivative.unitsLabel"
+            defaultMessage="Units (1s, 1m, etc)"
+          />
         </label>
         <input
           id={htmlId('units')}

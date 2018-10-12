@@ -28,6 +28,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import Vars from './vars';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class MathAgg extends Component {
   componentWillMount() {
@@ -60,14 +61,24 @@ class MathAgg extends Component {
       >
         <div className="vis_editor__row_item">
           <div>
-            <div className="vis_editor__label">Aggregation</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.math.aggregationLabel"
+                defaultMessage="Aggregation"
+              />
+            </div>
             <AggSelect
               siblings={this.props.siblings}
               value={model.type}
               onChange={handleSelectChange('type')}
             />
             <div className="vis_editor__variables">
-              <div className="vis_editor__label">Variables</div>
+              <div className="vis_editor__label">
+                <FormattedMessage
+                  id="metrics.math.variablesLabel"
+                  defaultMessage="Variables"
+                />
+              </div>
               <Vars
                 metrics={siblings}
                 onChange={handleChange}
@@ -81,7 +92,10 @@ class MathAgg extends Component {
                 className="vis_editor__label"
                 htmlFor="mathExpressionInput"
               >
-                Expression
+                <FormattedMessage
+                  id="metrics.math.expressionLabel"
+                  defaultMessage="Expression"
+                />
               </label>
               <textarea
                 data-test-subj="mathExpression"
@@ -93,21 +107,30 @@ class MathAgg extends Component {
                 {model.script}
               </textarea>
               <div className="vis_editor__note" id="mathExpressionDescription">
-                This field uses basic math expressions (see{' '}
-                <a
-                  href="https://github.com/elastic/tinymath/blob/master/docs/functions.md"
-                  target="_blank"
-                >
-                  TinyMath
-                </a>) - Variables are keys on the <code>params</code> object,
-                i.e. <code>params.&lt;name&gt;</code> To access all the data use
-                <code>params._all.&lt;name&gt;.values</code> for an array of the
-                values and <code>params._all.&lt;name&gt;.timestamps</code>
-                for an array of the timestamps. <code>params._timestamp</code>
-                is available for the current bucket&apos;s timestamp,
-                <code>params._index</code> is available for the current
-                bucket&apos;s index, and <code>params._interval</code>s
-                available for the interval in milliseconds.
+                <FormattedMessage
+                  id="metrics.math.expressionDescription"
+                  defaultMessage="This field uses basic math expressions (see {link}) - Variables are keys on the {params} object,
+                  i.e. {paramsName} To access all the data use {paramsValues} for an array of the values and {paramsTimestamps} for
+                  an array of the timestamps. {paramsTimestamp} is available for the current bucket&apos;s timestamp,
+                  {paramsIndex} is available for the current bucket&apos;s index, and {paramsInterval}s available for
+                  the interval in milliseconds."
+                  values={{
+                    link: (
+                      <a
+                        href="https://github.com/elastic/tinymath/blob/master/docs/functions.md"
+                        target="_blank"
+                      >
+                        TinyMath
+                      </a>),
+                    params: (<code>params</code>),
+                    paramsName: (<code>params.&lt;name&gt;</code>),
+                    paramsValues: (<code>params._all.&lt;name&gt;.values</code>),
+                    paramsTimestamps: (<code>params._all.&lt;name&gt;.timestamps</code>),
+                    paramsTimestamp: (<code>params._timestamp</code>),
+                    paramsIndex: (<code>params._index</code>),
+                    paramsInterval: (<code>params._interval</code>)
+                  }}
+                />
               </div>
             </div>
           </div>

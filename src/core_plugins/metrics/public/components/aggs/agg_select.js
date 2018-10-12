@@ -19,50 +19,139 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import {
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { injectI18n } from '@kbn/i18n/react';
 
 const metricAggs = [
-  { label: 'Average', value: 'avg' },
-  { label: 'Cardinality', value: 'cardinality' },
-  { label: 'Count', value: 'count' },
-  { label: 'Filter Ratio', value: 'filter_ratio' },
-  { label: 'Max', value: 'max' },
-  { label: 'Min', value: 'min' },
-  { label: 'Percentile', value: 'percentile' },
-  { label: 'Percentile Rank', value: 'percentile_rank' },
-  { label: 'Static Value', value: 'static' },
-  { label: 'Std. Deviation', value: 'std_deviation' },
-  { label: 'Sum', value: 'sum' },
-  { label: 'Sum of Squares', value: 'sum_of_squares' },
-  { label: 'Top Hit', value: 'top_hit' },
-  { label: 'Value Count', value: 'value_count' },
-  { label: 'Variance', value: 'variance' },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.averageLabel', { defaultMessage: 'Average' }),
+    value: 'avg',
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.cardinalityLabel', { defaultMessage: 'Cardinality' }),
+    value: 'cardinality',
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.countLabel', { defaultMessage: 'Count' }),
+    value: 'count'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.filterRatioLabel', { defaultMessage: 'Filter Ratio' }),
+    value: 'filter_ratio'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.maxLabel', { defaultMessage: 'Max' }),
+    value: 'max'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.minLabel', { defaultMessage: 'Min' }),
+    value: 'min'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.percentileLabel', { defaultMessage: 'Percentile' }),
+    value: 'percentile'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.percentileRankLabel', { defaultMessage: 'Percentile Rank' }),
+    value: 'percentile_rank'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.staticValueLabel', { defaultMessage: 'Static Value' }),
+    value: 'static'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.stdDeviationLabel', { defaultMessage: 'Std. Deviation' }),
+    value: 'std_deviation'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.sumLabel', { defaultMessage: 'Sum' }),
+    value: 'sum'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.sumOfSquaresLabel', { defaultMessage: 'Sum of Squares' }),
+    value: 'sum_of_squares'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.topHitLabel', { defaultMessage: 'Top Hit' }),
+    value: 'top_hit'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.valueCountLabel', { defaultMessage: 'Value Count' }),
+    value: 'value_count'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.metricsAggs.varianceLabel', { defaultMessage: 'Variance' }),
+    value: 'variance'
+  },
 ];
 
 const pipelineAggs = [
-  { label: 'Bucket Script', value: 'calculation' },
-  { label: 'Cumulative Sum', value: 'cumulative_sum' },
-  { label: 'Derivative', value: 'derivative' },
-  { label: 'Moving Average', value: 'moving_average' },
-  { label: 'Positive Only', value: 'positive_only' },
-  { label: 'Serial Difference', value: 'serial_diff' },
+  {
+    label: i18n.translate('metrics.aggSelect.pipelineAggs.bucketScriptLabel', { defaultMessage: 'Bucket Script' }),
+    value: 'calculation'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.pipelineAggs.cumulativeSumLabel', { defaultMessage: 'Cumulative Sum' }),
+    value: 'cumulative_sum'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.pipelineAggs.derivativeLabel', { defaultMessage: 'Derivative' }),
+    value: 'derivative'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.pipelineAggs.movingAverageLabel', { defaultMessage: 'Moving Average' }),
+    value: 'moving_average'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.pipelineAggs.positiveOnlyLabel', { defaultMessage: 'Positive Only' }),
+    value: 'positive_only'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.pipelineAggs.serialDifferenceLabel', { defaultMessage: 'Serial Difference' }),
+    value: 'serial_diff'
+  },
 ];
 
 const siblingAggs = [
-  { label: 'Overall Average', value: 'avg_bucket' },
-  { label: 'Overall Max', value: 'max_bucket' },
-  { label: 'Overall Min', value: 'min_bucket' },
-  { label: 'Overall Std. Deviation', value: 'std_deviation_bucket' },
-  { label: 'Overall Sum', value: 'sum_bucket' },
-  { label: 'Overall Sum of Squares', value: 'sum_of_squares_bucket' },
-  { label: 'Overall Variance', value: 'variance_bucket' },
+  {
+    label: i18n.translate('metrics.aggSelect.siblingAggs.overallAverageLabel', { defaultMessage: 'Overall Average' }),
+    value: 'avg_bucket' },
+  {
+    label: i18n.translate('metrics.aggSelect.siblingAggs.overallMaxLabel', { defaultMessage: 'Overall Max' }),
+    value: 'max_bucket'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.siblingAggs.overallMinLabel', { defaultMessage: 'Overall Min' }),
+    value: 'min_bucket'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.siblingAggs.overallStdDeviationLabel', { defaultMessage: 'Overall Std. Deviation' }),
+    value: 'std_deviation_bucket'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.siblingAggs.overallSumLabel', { defaultMessage: 'Overall Sum' }),
+    value: 'sum_bucket'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.siblingAggs.overallSumOfSquaresLabel', { defaultMessage: 'Overall Sum of Squares' }),
+    value: 'sum_of_squares_bucket'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.siblingAggs.overallVarianceLabel', { defaultMessage: 'Overall Variance' }),
+    value: 'variance_bucket'
+  },
 ];
 
 const specialAggs = [
-  { label: 'Series Agg', value: 'series_agg' },
-  { label: 'Math', value: 'math' },
+  {
+    label: i18n.translate('metrics.aggSelect.specialAggs.seriesAggLabel', { defaultMessage: 'Series Agg' }),
+    value: 'series_agg'
+  },
+  {
+    label: i18n.translate('metrics.aggSelect.specialAggs.mathLabel', { defaultMessage: 'Math' }),
+    value: 'math'
+  },
 ];
 
 const allAggOptions = [
@@ -79,8 +168,8 @@ function filterByPanelType(panelType) {
   };
 }
 
-function AggSelect(props) {
-  const { siblings, panelType, value } = props;
+function AggSelectUi(props) {
+  const { siblings, panelType, value, intl } = props;
 
   const selectedOption = allAggOptions.find(option => {
     return value === option.value;
@@ -98,21 +187,23 @@ function AggSelect(props) {
   } else {
     options = [
       {
-        label: 'Metric Aggregations',
+        label: intl.formatMessage({ id: 'metrics.aggSelect.aggGroups.metricAggLabel', defaultMessage: 'Metric Aggregations' }),
         options: metricAggs,
       },
       {
-        label: 'Parent Pipeline Aggregations',
+        label: intl.formatMessage({
+          id: 'metrics.aggSelect.aggGroups.parentPipelineAggLabel', defaultMessage: 'Parent Pipeline Aggregations' }),
         options: pipelineAggs
           .filter(filterByPanelType(panelType))
-          .map(agg => ({ ...agg, disabled: !enablePipelines }))
+          .map(agg => ({ ...agg, disabled: !enablePipelines })),
       },
       {
-        label: 'Sibling Pipeline Aggregations',
+        label: intl.formatMessage({
+          id: 'metrics.aggSelect.aggGroups.siblingPipelineAggLabel', defaultMessage: 'Sibling Pipeline Aggregations' }),
         options: siblingAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
       },
       {
-        label: 'Special Aggregations',
+        label: intl.formatMessage({ id: 'metrics.aggSelect.aggGroups.specialAggLabel', defaultMessage: 'Special Aggregations' }),
         options: specialAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
       },
     ];
@@ -127,7 +218,7 @@ function AggSelect(props) {
     <div data-test-subj="aggSelector" className="vis_editor__row_item">
       <EuiComboBox
         isClearable={false}
-        placeholder="Select aggregation"
+        placeholder={intl.formatMessage({ id: 'metrics.aggSelect.selectAggPlaceholder', defaultMessage: 'Select aggregation' })}
         options={options}
         selectedOptions={selectedOptions}
         onChange={handleChange}
@@ -137,11 +228,12 @@ function AggSelect(props) {
   );
 }
 
-AggSelect.propTypes = {
+AggSelectUi.propTypes = {
   onChange: PropTypes.func,
   panelType: PropTypes.string,
   siblings: PropTypes.array,
   value: PropTypes.string,
 };
 
+const AggSelect = injectI18n(AggSelectUi);
 export default AggSelect;

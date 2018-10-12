@@ -26,6 +26,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createNumberHandler from '../lib/create_number_handler';
 import { htmlIdGenerator } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SerialDiffAgg = props => {
   const { siblings } = props;
@@ -47,7 +48,12 @@ export const SerialDiffAgg = props => {
       siblings={props.siblings}
     >
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.serialDiff.aggregationLabel"
+            defaultMessage="Aggregation"
+          />
+        </div>
         <AggSelect
           panelType={props.panel.type}
           siblings={props.siblings}
@@ -56,7 +62,12 @@ export const SerialDiffAgg = props => {
         />
       </div>
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Metric</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.serialDiff.metricLabel"
+            defaultMessage="Metric"
+          />
+        </div>
         <MetricSelect
           onChange={handleSelectChange('field')}
           metrics={siblings}
@@ -65,7 +76,12 @@ export const SerialDiffAgg = props => {
         />
       </div>
       <div>
-        <label className="vis_editor__label" htmlFor={htmlId('lag')}>Lag</label>
+        <label className="vis_editor__label" htmlFor={htmlId('lag')}>
+          <FormattedMessage
+            id="metrics.serialDiff.lagLabel"
+            defaultMessage="Lag"
+          />
+        </label>
         <input
           id={htmlId('lag')}
           className="vis_editor__input"

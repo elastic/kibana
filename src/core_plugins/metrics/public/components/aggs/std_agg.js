@@ -25,6 +25,7 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import { htmlIdGenerator } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function StandardAgg(props) {
   const { model, panel, series, fields } = props;
@@ -48,7 +49,12 @@ function StandardAgg(props) {
       siblings={props.siblings}
     >
       <div className="vis_editor__item">
-        <div className="vis_editor__label">Aggregation</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.stdAgg.aggregationLabel"
+            defaultMessage="Aggregation"
+          />
+        </div>
         <AggSelect
           panelType={props.panel.type}
           siblings={props.siblings}
@@ -60,7 +66,12 @@ function StandardAgg(props) {
         model.type !== 'count'
           ? (
             <div className="vis_editor__item">
-              <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
+              <label className="vis_editor__label" htmlFor={htmlId('field')}>
+                <FormattedMessage
+                  id="metrics.stdAgg.fieldLabel"
+                  defaultMessage="Field"
+                />
+              </label>
               <FieldSelect
                 id={htmlId('field')}
                 fields={fields}

@@ -19,6 +19,8 @@
 
 import AggRow from './agg_row';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export function UnsupportedAgg(props) {
   return (
     <AggRow
@@ -30,8 +32,11 @@ export function UnsupportedAgg(props) {
     >
       <div className="vis_editor__row_item">
         <p>
-          The <code>{props.model.type}</code> aggregation is no longer
-          supported.
+          <FormattedMessage
+            id="metrics.unsupportedAgg.aggIsNotSupportedDescription"
+            defaultMessage="The {modelType} aggregation is no longer supported."
+            values={{ modelType: (<code>{props.model.type}</code>) }}
+          />
         </p>
       </div>
     </AggRow>

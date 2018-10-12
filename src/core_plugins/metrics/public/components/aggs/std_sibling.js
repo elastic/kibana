@@ -29,9 +29,10 @@ import {
   htmlIdGenerator,
   EuiComboBox,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const StandardSiblingAgg = props => {
-  const { siblings } = props;
+const StandardSiblingAggUi = props => {
+  const { siblings, intl } = props;
   const defaults = { sigma: '' };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
@@ -44,7 +45,12 @@ export const StandardSiblingAgg = props => {
   if (model.type === 'std_deviation_bucket') {
     stdDev.sigma = (
       <div className="vis_editor__std_deviation-sigma_item">
-        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>Sigma</label>
+        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>
+          <FormattedMessage
+            id="metrics.stdSibling.sigmaLabel"
+            defaultMessage="Sigma"
+          />
+        </label>
         <input
           id={htmlId('sigma')}
           className="vis_editor__std_deviation-sigma"
@@ -55,10 +61,22 @@ export const StandardSiblingAgg = props => {
     );
 
     const modeOptions = [
-      { label: 'Raw', value: 'raw' },
-      { label: 'Upper Bound', value: 'upper' },
-      { label: 'Lower Bound', value: 'lower' },
-      { label: 'Bounds Band', value: 'band' }
+      {
+        label: intl.formatMessage({ id: 'metrics.stdSibling.modeOptions.rawLabel', defaultMessage: 'Raw' }),
+        value: 'raw'
+      },
+      {
+        label: intl.formatMessage({ id: 'metrics.stdSibling.modeOptions.upperBoundLabel', defaultMessage: 'Upper Bound' }),
+        value: 'upper'
+      },
+      {
+        label: intl.formatMessage({ id: 'metrics.stdSibling.modeOptions.lowerBoundLabel', defaultMessage: 'Lower Bound' }),
+        value: 'lower'
+      },
+      {
+        label: intl.formatMessage({ id: 'metrics.stdSibling.modeOptions.boundsBandLabel', defaultMessage: 'Bounds Band' }),
+        value: 'band'
+      }
     ];
     const selectedModeOption = modeOptions.find(option => {
       return model.mode === option.value;
@@ -66,7 +84,12 @@ export const StandardSiblingAgg = props => {
 
     stdDev.mode = (
       <div className="vis_editor__row_item">
-        <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
+        <label className="vis_editor__label" htmlFor={htmlId('mode')}>
+          <FormattedMessage
+            id="metrics.stdSibling.modeLabel"
+            defaultMessage="Mode"
+          />
+        </label>
         <EuiComboBox
           id={htmlId('mode')}
           options={modeOptions}
@@ -87,7 +110,12 @@ export const StandardSiblingAgg = props => {
       siblings={props.siblings}
     >
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.stdSibling.aggregationLabel"
+            defaultMessage="Aggregation"
+          />
+        </div>
         <AggSelect
           panelType={props.panel.type}
           siblings={props.siblings}
@@ -96,7 +124,12 @@ export const StandardSiblingAgg = props => {
         />
       </div>
       <div className="vis_editor__std_sibling-metric">
-        <div className="vis_editor__label">Metric</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.stdSibling.metricLabel"
+            defaultMessage="Metric"
+          />
+        </div>
         <MetricSelect
           onChange={handleSelectChange('field')}
           exclude={['percentile']}
@@ -111,7 +144,7 @@ export const StandardSiblingAgg = props => {
   );
 };
 
-StandardSiblingAgg.propTypes = {
+StandardSiblingAggUi.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
   model: PropTypes.object,
@@ -122,3 +155,5 @@ StandardSiblingAgg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
+
+export const StandardSiblingAgg = injectI18n(StandardSiblingAggUi);

@@ -24,6 +24,7 @@ import MetricSelect from './metric_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const PositiveOnlyAgg = props => {
   const { siblings } = props;
@@ -43,7 +44,12 @@ export const PositiveOnlyAgg = props => {
       siblings={props.siblings}
     >
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.positiveOnly.aggregationLabel"
+            defaultMessage="Aggregation"
+          />
+        </div>
         <AggSelect
           panelType={props.panel.type}
           siblings={props.siblings}
@@ -52,7 +58,12 @@ export const PositiveOnlyAgg = props => {
         />
       </div>
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Metric</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.positiveOnly.metricLabel"
+            defaultMessage="Metric"
+          />
+        </div>
         <MetricSelect
           onChange={handleSelectChange('field')}
           metrics={siblings}

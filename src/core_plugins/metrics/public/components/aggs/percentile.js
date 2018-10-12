@@ -32,11 +32,13 @@ import {
   htmlIdGenerator,
   EuiComboBox,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
 const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
 
-class Percentiles extends Component {
+class PercentilesUi extends Component {
 
   constructor(props) {
     super(props);
@@ -57,9 +59,16 @@ class Percentiles extends Component {
     const model = { ...defaults, ...row };
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newPercentile);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
+    const { intl } = this.props;
     const modeOptions = [
-      { label: 'Line', value: 'line' },
-      { label: 'Band', value: 'band' }
+      {
+        label: intl.formatMessage({ id: 'metrics.percentile.modeOptions.lineLabel', defaultMessage: 'Line' }),
+        value: 'line'
+      },
+      {
+        label: intl.formatMessage({ id: 'metrics.percentile.modeOptions.bandLabel', defaultMessage: 'Band' }),
+        value: 'band'
+      }
     ];
     const optionsStyle = {};
     if (model.mode === 'line') {
@@ -73,15 +82,20 @@ class Percentiles extends Component {
       <div className="vis_editor__percentiles-row" key={model.id}>
         <div className="vis_editor__percentiles-content">
           <input
-            aria-label="Percentile"
-            placeholder="Percentile"
+            aria-label={intl.formatMessage({ id: 'metrics.percentile.percentileAriaLabel', defaultMessage: 'Percentile' })}
+            placeholder={intl.formatMessage({ id: 'metrics.percentile.percentilePlaceholder', defaultMessage: 'Percentile' })}
             className="vis_editor__input-grows"
             type="number"
             step="1"
             onChange={this.handleTextChange(model, 'value')}
             value={model.value}
           />
-          <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
+          <label className="vis_editor__label" htmlFor={htmlId('mode')}>
+            <FormattedMessage
+              id="metrics.percentile.modeLabel"
+              defaultMessage="Mode"
+            />
+          </label>
           <div className="vis_editor__row_item">
             <EuiComboBox
               isClearable={false}
@@ -93,7 +107,10 @@ class Percentiles extends Component {
             />
           </div>
           <label style={optionsStyle} className="vis_editor__label" htmlFor={htmlId('fillTo')}>
-            Fill To
+            <FormattedMessage
+              id="metrics.percentile.fillToLabel"
+              defaultMessage="Fill To"
+            />
           </label>
           <input
             id={htmlId('fillTo')}
@@ -105,7 +122,10 @@ class Percentiles extends Component {
             value={model.percentile}
           />
           <label style={optionsStyle} className="vis_editor__label" htmlFor={htmlId('shade')}>
-            Shade (0 to 1)
+            <FormattedMessage
+              id="metrics.percentile.shadeLabel"
+              defaultMessage="Shade (0 to 1)"
+            />
           </label>
           <input
             id={htmlId('shade')}
@@ -139,16 +159,17 @@ class Percentiles extends Component {
   }
 }
 
-Percentiles.defaultProps = {
+PercentilesUi.defaultProps = {
   name: 'percentile'
 };
 
-Percentiles.propTypes = {
+PercentilesUi.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
   onChange: PropTypes.func
 };
 
+const Percentiles = injectI18n(PercentilesUi);
 
 class PercentileAgg extends Component { // eslint-disable-line react/no-multi-comp
 
@@ -178,7 +199,12 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
         <div className="vis_editor__row_item">
           <div className="vis_editor__agg_row-item">
             <div className="vis_editor__row_item">
-              <div className="vis_editor__label">Aggregation</div>
+              <div className="vis_editor__label">
+                <FormattedMessage
+                  id="metrics.percentile.aggregationLabel"
+                  defaultMessage="Aggregation"
+                />
+              </div>
               <AggSelect
                 panelType={this.props.panel.type}
                 siblings={this.props.siblings}
@@ -187,7 +213,12 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
               />
             </div>
             <div className="vis_editor__row_item">
-              <div className="vis_editor__label">Field</div>
+              <div className="vis_editor__label">
+                <FormattedMessage
+                  id="metrics.percentile.fieldLabel"
+                  defaultMessage="Field"
+                />
+              </div>
               <FieldSelect
                 fields={fields}
                 type={model.type}

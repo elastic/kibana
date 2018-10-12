@@ -22,11 +22,14 @@ import React from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
 import { EuiToolTip } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-function AggRow(props) {
+function AggRowUi(props) {
   let iconClassName = 'fa fa-eye-slash';
   let iconRowClassName = 'vis_editor__agg_row-icon';
   const last = _.last(props.siblings);
+  const { intl } = props;
+
   if (last.id === props.model.id) {
     iconClassName = 'fa fa-eye';
     iconRowClassName += ' last';
@@ -36,7 +39,14 @@ function AggRow(props) {
   if (!props.disableDelete) {
     dragHandle = (
       <div>
-        <EuiToolTip content="Sort">
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="metrics.aggRow.sortTooltip"
+              defaultMessage="Sort"
+            />
+          }
+        >
           <div className="vis_editor__agg_sort thor__button-outlined-default sm">
             <i className="fa fa-sort" />
           </div>
@@ -55,8 +65,8 @@ function AggRow(props) {
         { dragHandle }
         <AddDeleteButtons
           testSubj="addMetric"
-          addTooltip="Add Metric"
-          deleteTooltip="Delete Metric"
+          addTooltip={intl.formatMessage({ id: 'metrics.aggRow.addMetricButtonTooltip', defaultMessage: 'Add Metric' })}
+          deleteTooltip={intl.formatMessage({ id: 'metrics.aggRow.deleteMetricButtonTooltip', defaultMessage: 'Delete Metric' })}
           onAdd={props.onAdd}
           onDelete={props.onDelete}
           disableDelete={props.disableDelete}
@@ -66,7 +76,7 @@ function AggRow(props) {
   );
 }
 
-AggRow.propTypes = {
+AggRowUi.propTypes = {
   disableDelete: PropTypes.bool,
   model: PropTypes.object,
   onAdd: PropTypes.func,
@@ -74,4 +84,5 @@ AggRow.propTypes = {
   siblings: PropTypes.array,
 };
 
+const AggRow = injectI18n(AggRowUi);
 export default AggRow;

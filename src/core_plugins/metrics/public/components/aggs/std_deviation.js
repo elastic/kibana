@@ -29,20 +29,33 @@ import {
   htmlIdGenerator,
   EuiComboBox,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const StandardDeviationAgg = props => {
-  const { series, panel, fields } = props;
+const StandardDeviationAggUi = props => {
+  const { series, panel, fields, intl } = props;
   const defaults = { sigma: '' };
   const model = { ...defaults, ...props.model };
 
   const modeOptions = [
-    { label: 'Raw', value: 'raw' },
-    { label: 'Upper Bound', value: 'upper' },
-    { label: 'Lower Bound', value: 'lower' },
+    {
+      label: intl.formatMessage({ id: 'metrics.stdDeviation.modeOptions.rawLabel', defaultMessage: 'Raw' }),
+      value: 'raw'
+    },
+    {
+      label: intl.formatMessage({ id: 'metrics.stdDeviation.modeOptions.upperBoundLabel', defaultMessage: 'Upper Bound' }),
+      value: 'upper'
+    },
+    {
+      дabel: intl.formatMessage({ id: 'metrics.stdDeviation.modeOptions.lowerBoundLabel', defaultMessage: 'Lower Bound' }),
+      value: 'lower'
+    },
   ];
 
   if (panel.type !== 'table') {
-    modeOptions.push({ label: 'Bounds Band', value: 'band' });
+    modeOptions.push({
+      label: intl.formatMessage({ id: 'metrics.stdDeviation.modeOptions.boundsBandLabel', defaultMessage: 'Bounds Band' }),
+      value: 'band'
+    });
   }
 
   const handleChange = createChangeHandler(props.onChange, model);
@@ -64,7 +77,12 @@ export const StandardDeviationAgg = props => {
       siblings={props.siblings}
     >
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.stdDeviation.aggregationLabel"
+            defaultMessage="Aggregation"
+          />
+        </div>
         <AggSelect
           panelType={props.panel.type}
           siblings={props.siblings}
@@ -73,7 +91,12 @@ export const StandardDeviationAgg = props => {
         />
       </div>
       <div className="vis_editor__std_deviation-field">
-        <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
+        <label className="vis_editor__label" htmlFor={htmlId('field')}>
+          <FormattedMessage
+            id="metrics.stdDeviation.fieldLabel"
+            defaultMessage="Field"
+          />
+        </label>
         <FieldSelect
           id={htmlId('field')}
           fields={fields}
@@ -85,7 +108,12 @@ export const StandardDeviationAgg = props => {
         />
       </div>
       <div className="vis_editor__std_deviation-sigma_item">
-        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>Sigma</label>
+        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>
+          <FormattedMessage
+            id="metrics.stdDeviation.sigmaLabel"
+            defaultMessage="Sigma"
+          />
+        </label>
         <input
           id={htmlId('sigma')}
           className="vis_editor__std_deviation-sigma"
@@ -94,7 +122,12 @@ export const StandardDeviationAgg = props => {
         />
       </div>
       <div className="vis_editor__row_item">
-        <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
+        <label className="vis_editor__label" htmlFor={htmlId('mode')}>
+          <FormattedMessage
+            id="metrics.stdDeviation.modeLabel"
+            defaultMessage="Mode"
+          />
+        </label>
         <EuiComboBox
           id={htmlId('mode')}
           options={modeOptions}
@@ -107,7 +140,7 @@ export const StandardDeviationAgg = props => {
   );
 };
 
-StandardDeviationAgg.propTypes = {
+StandardDeviationAggUi.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
   model: PropTypes.object,
@@ -118,3 +151,5 @@ StandardDeviationAgg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
+
+export const StandardDeviationAgg = injectI18n(StandardDeviationAggUi);
