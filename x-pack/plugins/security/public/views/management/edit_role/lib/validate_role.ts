@@ -10,6 +10,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
 import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../common/model/role';
@@ -52,14 +53,34 @@ export class RoleValidator {
     }
 
     if (!role.name) {
-      return invalid(`Please provide a role name`);
+      return invalid(
+        i18n.translate(
+          'xpack.security.views.management.editRoles.lib.validateRole.provideRoleNameTitle',
+          {
+            defaultMessage: 'Please provide a role name',
+          }
+        )
+      );
     }
     if (role.name.length > 1024) {
-      return invalid(`Name must not exceed 1024 characters`);
+      return invalid(
+        i18n.translate(
+          'xpack.security.views.management.editRoles.lib.validateRole.nameCharactersTitle',
+          {
+            defaultMessage: 'Name must not exceed 1024 characters',
+          }
+        )
+      );
     }
     if (!role.name.match(/^[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*$/)) {
       return invalid(
-        `Name must begin with a letter or underscore and contain only letters, underscores, and numbers.`
+        i18n.translate(
+          'xpack.security.views.management.editRoles.lib.validateRole.notLetterNameStartTitle',
+          {
+            defaultMessage:
+              'Name must begin with a letter or underscore and contain only letters, underscores, and numbers.',
+          }
+        )
       );
     }
     return valid();
@@ -71,7 +92,14 @@ export class RoleValidator {
     }
 
     if (!Array.isArray(role.elasticsearch.indices)) {
-      throw new TypeError(`Expected role.elasticsearch.indices to be an array`);
+      throw new TypeError(
+        i18n.translate(
+          'xpack.security.views.management.editRoles.lib.validateRole.expextedRoleTitle',
+          {
+            defaultMessage: 'Expected role.elasticsearch.indices to be an array',
+          }
+        )
+      );
     }
 
     const areIndicesValid =
@@ -91,7 +119,14 @@ export class RoleValidator {
     }
 
     if (indexPrivilege.names.length && !indexPrivilege.privileges.length) {
-      return invalid(`At least one privilege is required`);
+      return invalid(
+        i18n.translate(
+          'xpack.security.views.management.editRoles.lib.validateRole.onePrivilegeRequiredTitle',
+          {
+            defaultMessage: 'At least one privilege is required',
+          }
+        )
+      );
     }
     return valid();
   }
@@ -112,7 +147,14 @@ export class RoleValidator {
     if (Array.isArray(spaceIds) && spaceIds.length > 0) {
       return valid();
     }
-    return invalid('At least one space is required');
+    return invalid(
+      i18n.translate(
+        'xpack.security.views.management.editRoles.lib.validateRole.oneSpaceRequiredTitle',
+        {
+          defaultMessage: 'At least one space is required',
+        }
+      )
+    );
   }
 
   public validateSelectedPrivilege(
@@ -131,7 +173,15 @@ export class RoleValidator {
     if (privilege) {
       return valid();
     }
-    return invalid('Privilege is required');
+    // return invalid('Privilege is required');
+    return invalid(
+      i18n.translate(
+        'xpack.security.views.management.editRoles.lib.validateRole.privilegeRequiredTitle',
+        {
+          defaultMessage: 'Privilege is required',
+        }
+      )
+    );
   }
 
   public setInProgressSpacePrivileges(inProgressSpacePrivileges: any[]) {

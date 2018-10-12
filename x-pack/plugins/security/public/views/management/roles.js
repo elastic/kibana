@@ -24,7 +24,7 @@ routes.when(ROLES_PATH, {
         .catch(_.identity); // Return the error if there is one
     }
   },
-  controller($scope, $route, $q, confirmModal) {
+  controller($scope, $route, $q, confirmModal, i18n) {
     $scope.roles = $route.current.locals.roles;
     $scope.forbidden = !_.isArray($scope.roles);
     $scope.selectedRoles = [];
@@ -35,7 +35,17 @@ routes.when(ROLES_PATH, {
     $scope.deleteRoles = () => {
       const doDelete = () => {
         $q.all($scope.selectedRoles.map((role) => role.$delete()))
-          .then(() => toastNotifications.addSuccess(`Deleted ${$scope.selectedRoles.length > 1 ? 'roles' : 'role'}`))
+          .then(() => toastNotifications.addSuccess(
+            i18n('xpack.security.views.management.roles.deleteRoleTitle', {
+              values: {
+                valueText: $scope.selectedRoles.length > 1 ?
+                  i18n('xpack.security.views.management.roles.deleteRoleRolesTitle', { defaultMessage: 'roles' })
+                  : i18n('xpack.security.views.management.roles.deleteRoleRoleTitle', { defaultMessage: 'role' }),
+                value: $scope.selectedRoles.length
+              },
+              defaultMessage: 'Deleted {value} {valueText}'
+            })
+          ))
           .then(() => {
             $scope.selectedRoles.map((role) => {
               const i = $scope.roles.indexOf(role);
@@ -45,12 +55,14 @@ routes.when(ROLES_PATH, {
           });
       };
       const confirmModalOptions = {
-        confirmButtonText: 'Delete role(s)',
+        confirmButtonText: i18n('xpack.security.views.management.roles.deleteRoleButton', { defaultMessage: 'Delete role(s)' }),
         onConfirm: doDelete
       };
-      confirmModal(`
-        Are you sure you want to delete the selected role(s)? This action is irreversible!`,
-      confirmModalOptions
+      confirmModal(
+        i18n('xpack.security.views.management.roles.sureToDeleteRoleTitle', {
+          defaultMessage: 'Are you sure you want to delete the selected role(s)? This action is irreversible!'
+        }),
+        confirmModalOptions
       );
     };
 
@@ -85,5 +97,9 @@ routes.when(ROLES_PATH, {
     function getActionableRoles() {
       return $scope.roles.filter((role) => !role.metadata._reserved);
     }
+
+    $scope.noFoundMatches = i18n('xpack.security.views.management.roles.noMatches', {
+      defaultMessage: 'matching'
+    });
   }
 });

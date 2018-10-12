@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 import { Role } from '../../../../../common/model/role';
 import { isReservedRole } from '../../../../lib/role';
 
@@ -14,15 +15,23 @@ interface Props {
   role: Role;
 }
 
-export const ReservedRoleBadge = (props: Props) => {
-  const { role } = props;
+export const ReservedRoleBadgeUI = (props: Props) => {
+  const { role, intl } = props;
 
   if (isReservedRole(role)) {
     return (
-      <EuiToolTip content={'Reserved roles are built-in and cannot be removed or modified.'}>
+      <EuiToolTip
+        content={intl.formatMessage({
+          id:
+            'xpack.security.views.management.editRoles.components.reversedRoleBadget.reversedRolesTitle',
+          defaultMessage: 'Reserved roles are built-in and cannot be removed or modified.',
+        })}
+      >
         <EuiIcon style={{ verticalAlign: 'super' }} type={'lock'} />
       </EuiToolTip>
     );
   }
   return null;
 };
+
+export const ReservedRoleBadge = injectI18n(ReservedRoleBadgeUI);

@@ -12,6 +12,7 @@ import {
   EuiLink,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 
@@ -33,7 +34,7 @@ interface State {
   showImpactedSpaces: boolean;
 }
 
-export class ImpactedSpacesFlyout extends Component<Props, State> {
+export class ImpactedSpacesFlyoutUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -47,7 +48,10 @@ export class ImpactedSpacesFlyout extends Component<Props, State> {
       <Fragment>
         <div className="showImpactedSpaces">
           <EuiLink onClick={this.toggleShowImpactedSpaces}>
-            View summary of spaces privileges
+            <FormattedMessage
+              id="xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.summarySpacePrivilegesTitle"
+              defaultMessage="View summary of spaces privileges"
+            />
           </EuiLink>
         </div>
         {flyout}
@@ -62,13 +66,26 @@ export class ImpactedSpacesFlyout extends Component<Props, State> {
   };
 
   public getHighestPrivilege(...privileges: KibanaPrivilege[]): KibanaPrivilege {
+    const { intl } = this.props;
     if (privileges.indexOf('all') >= 0) {
-      return 'all';
+      return intl.formatMessage({
+        id:
+          'xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.allLabel',
+        defaultMessage: 'all',
+      });
     }
     if (privileges.indexOf('read') >= 0) {
-      return 'read';
+      return intl.formatMessage({
+        id:
+          'xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.readLabel',
+        defaultMessage: 'read',
+      });
     }
-    return 'none';
+    return intl.formatMessage({
+      id:
+        'xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.noneLabel',
+      defaultMessage: 'none',
+    });
   }
 
   public getFlyout = () => {
@@ -107,7 +124,12 @@ export class ImpactedSpacesFlyout extends Component<Props, State> {
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h1 id="showImpactedSpacesTitle">Summary of space privileges</h1>
+            <h1 id="showImpactedSpacesTitle">
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.summarySpaceTitle"
+                defaultMessage="Summary of space privileges"
+              />
+            </h1>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -126,3 +148,5 @@ export class ImpactedSpacesFlyout extends Component<Props, State> {
     );
   };
 }
+
+export const ImpactedSpacesFlyout = injectI18n(ImpactedSpacesFlyoutUI);

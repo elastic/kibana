@@ -9,6 +9,7 @@ import {
   EuiDescribedFormGroup,
   EuiFormRow,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
@@ -35,11 +36,28 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
         ? (assignedPrivileges.global[0] as KibanaPrivilege)
         : NO_PRIVILEGE_VALUE;
 
-    const description = <p>Specifies the Kibana privilege for this role.</p>;
+    const description = (
+      <p>
+        <FormattedMessage
+          id="xpack.security.views.management.editRoles.components.privileges.kibana.simplePrivilegeForm.specifyTitle"
+          defaultMessage="Specifies the Kibana privilege for this role."
+        />
+      </p>
+    );
 
     return (
       <Fragment>
-        <EuiDescribedFormGroup title={<h3>Kibana privileges</h3>} description={description}>
+        <EuiDescribedFormGroup
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.simplePrivilegeForm.kibanaPrivilegesTitle"
+                defaultMessage="Kibana privileges"
+              />
+            </h3>
+          }
+          description={description}
+        >
           <EuiFormRow hasEmptyLabelSpace>
             <PrivilegeSelector
               data-test-subj={'kibanaPrivilege'}

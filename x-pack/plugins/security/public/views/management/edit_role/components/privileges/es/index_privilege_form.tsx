@@ -15,6 +15,7 @@ import {
   EuiSwitch,
   EuiTextArea,
 } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { IndexPrivilege } from '../../../../../../../common/model/index_privilege';
 // @ts-ignore
@@ -43,7 +44,7 @@ interface State {
   documentQuery?: string;
 }
 
-export class IndexPrivilegeForm extends Component<Props, State> {
+export class IndexPrivilegeFormUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -76,12 +77,17 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   }
 
   public getPrivilegeForm = () => {
+    const { intl } = this.props;
     return (
       <Fragment>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
-              label={'Indices'}
+              label={intl.formatMessage({
+                id:
+                  'xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.indicesLabel',
+                defaultMessage: 'Indices',
+              })}
               fullWidth={true}
               {...this.props.validator.validateIndexPrivilege(this.props.indexPrivilege)}
             >
@@ -96,7 +102,14 @@ export class IndexPrivilegeForm extends Component<Props, State> {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow label={'Privileges'} fullWidth={true}>
+            <EuiFormRow
+              label={intl.formatMessage({
+                id:
+                  'xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.privilegesLabel',
+                defaultMessage: 'Privileges',
+              })}
+              fullWidth={true}
+            >
               <EuiComboBox
                 data-test-subj={`privilegesInput${this.props.formIndex}`}
                 options={getIndexPrivileges().map(toOption)}
@@ -117,7 +130,13 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   };
 
   public getGrantedFieldsControl = () => {
-    const { allowFieldLevelSecurity, availableFields, indexPrivilege, isReservedRole } = this.props;
+    const {
+      allowFieldLevelSecurity,
+      availableFields,
+      indexPrivilege,
+      isReservedRole,
+      intl,
+    } = this.props;
 
     if (!allowFieldLevelSecurity) {
       return null;
@@ -129,12 +148,21 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       return (
         <EuiFlexItem>
           <EuiFormRow
-            label={'Granted fields (optional)'}
+            label={intl.formatMessage({
+              id:
+                'xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.grantedFieldsLabel',
+              defaultMessage: 'Granted fields (optional)',
+            })}
             fullWidth={true}
             className="indexPrivilegeForm__grantedFieldsRow"
             helpText={
               !isReservedRole && grant.length === 0
-                ? 'If no fields are granted, then users assigned to this role will not be able to see any data for this index.'
+                ? intl.formatMessage({
+                    id:
+                      'xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.noAbleSeeAnyDataTitle',
+                    defaultMessage:
+                      'If no fields are granted, then users assigned to this role will not be able to see any data for this index.',
+                  })
                 : undefined
             }
           >
@@ -157,7 +185,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   };
 
   public getGrantedDocumentsControl = () => {
-    const { allowDocumentLevelSecurity, indexPrivilege } = this.props;
+    const { allowDocumentLevelSecurity, indexPrivilege, intl } = this.props;
 
     if (!allowDocumentLevelSecurity) {
       return null;
@@ -170,7 +198,11 @@ export class IndexPrivilegeForm extends Component<Props, State> {
           <EuiFlexItem>
             <EuiSwitch
               data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
-              label={'Grant read privileges to specific documents'}
+              label={intl.formatMessage({
+                id:
+                  'xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.grantReadPrivilegesLabel',
+                defaultMessage: 'Grant read privileges to specific documents',
+              })}
               // @ts-ignore
               compressed={true}
               // @ts-ignore
@@ -181,7 +213,14 @@ export class IndexPrivilegeForm extends Component<Props, State> {
         )}
         {this.state.queryExpanded && (
           <EuiFlexItem>
-            <EuiFormRow label={'Granted documents query'} fullWidth={true}>
+            <EuiFormRow
+              label={intl.formatMessage({
+                id:
+                  'xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.grantedDocumentsQueryLabel',
+                defaultMessage: 'Granted documents query',
+              })}
+              fullWidth={true}
+            >
               <EuiTextArea
                 data-test-subj={`queryInput${this.props.formIndex}`}
                 style={{ resize: 'none' }}
@@ -283,3 +322,5 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 }
+
+export const IndexPrivilegeForm = injectI18n(IndexPrivilegeFormUI);

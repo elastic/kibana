@@ -29,6 +29,7 @@ import { EditRolePage } from './components';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { KibanaAppPrivileges } from '../../../../common/model/kibana_privilege';
+import { I18nProvider } from '@kbn/i18n/react';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
@@ -127,20 +128,23 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById('editRoleReactRoot');
 
-      render(<EditRolePage
-        runAsUsers={users}
-        role={role}
-        kibanaAppPrivileges={KibanaAppPrivileges}
-        indexPatterns={indexPatterns}
-        rbacEnabled={true}
-        rbacApplication={rbacApplication}
-        httpClient={$http}
-        allowDocumentLevelSecurity={allowDocumentLevelSecurity}
-        allowFieldLevelSecurity={allowFieldLevelSecurity}
-        spaces={spaces}
-        spacesEnabled={enableSpaceAwarePrivileges}
-        userProfile={userProfile}
-      />, domNode);
+      render(
+        <I18nProvider>
+          <EditRolePage
+            runAsUsers={users}
+            role={role}
+            kibanaAppPrivileges={KibanaAppPrivileges}
+            indexPatterns={indexPatterns}
+            rbacEnabled={true}
+            rbacApplication={rbacApplication}
+            httpClient={$http}
+            allowDocumentLevelSecurity={allowDocumentLevelSecurity}
+            allowFieldLevelSecurity={allowFieldLevelSecurity}
+            spaces={spaces}
+            spacesEnabled={enableSpaceAwarePrivileges}
+            userProfile={userProfile}
+          />
+        </I18nProvider>, domNode);
 
       // unmount react on controller destroy
       $scope.$on('$destroy', () => {

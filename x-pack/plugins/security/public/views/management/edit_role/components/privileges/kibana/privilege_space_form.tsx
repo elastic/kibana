@@ -5,6 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
@@ -27,7 +28,7 @@ interface Props {
   validator: RoleValidator;
 }
 
-export class PrivilegeSpaceForm extends Component<Props, {}> {
+export class PrivilegeSpaceFormUI extends Component<Props, {}> {
   public render() {
     const {
       availableSpaces,
@@ -35,13 +36,18 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
       availablePrivileges,
       selectedPrivilege,
       validator,
+      intl,
     } = this.props;
 
     return (
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiFormRow
-            label={'Spaces'}
+            label={intl.formatMessage({
+              id:
+                'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceForm.spacesTitle',
+              defaultMessage: 'Spaces',
+            })}
             {...validator.validateSelectedSpaces(selectedSpaceIds, selectedPrivilege)}
           >
             <SpaceSelector
@@ -53,7 +59,11 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
-            label={'Privilege'}
+            label={intl.formatMessage({
+              id:
+                'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceForm.privilegeTitle',
+              defaultMessage: 'Privilege',
+            })}
             {...validator.validateSelectedPrivilege(selectedSpaceIds, selectedPrivilege)}
           >
             <PrivilegeSelector
@@ -92,3 +102,5 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
     });
   };
 }
+
+export const PrivilegeSpaceForm = injectI18n(PrivilegeSpaceFormUI);

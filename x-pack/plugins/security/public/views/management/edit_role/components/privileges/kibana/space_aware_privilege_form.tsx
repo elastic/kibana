@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { UserProfile } from '../../../../../../../../xpack_main/public/services/user_profile';
@@ -56,7 +57,7 @@ interface State {
   privilegeForms: PrivilegeForm[];
 }
 
-export class SpaceAwarePrivilegeForm extends Component<Props, State> {
+export class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const { role } = props;
@@ -73,15 +74,44 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
   }
 
   public render() {
-    const { kibanaAppPrivileges, role, userProfile } = this.props;
+    const { kibanaAppPrivileges, role, userProfile, intl } = this.props;
 
     if (!userProfile.hasCapability('manageSpaces')) {
       return (
-        <EuiCallOut title={<p>Insufficient Privileges</p>} iconType="alert" color="danger">
-          <p>You are not authorized to view all available spaces.</p>
+        <EuiCallOut
+          title={
+            <p>
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.insufficientPrivilegesTitle"
+                defaultMessage="Insufficient Privileges"
+              />
+            </p>
+          }
+          iconType="alert"
+          color="danger"
+        >
           <p>
-            Please ensure your account has all privileges granted by the{' '}
-            <strong>kibana_user</strong> role, and try again.
+            <FormattedMessage
+              id="xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.notAuthorizedTitle"
+              defaultMessage="You are not authorized to view all available spaces."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.ensureAccountGrantedTitle"
+              defaultMessage="Please ensure your account has all privileges granted by the 
+              {strongMessage} role, and try again."
+              values={{
+                strongMessage: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.kibanaUserTitle"
+                      defaultMessage="kibana_user"
+                    />
+                  </strong>
+                ),
+              }}
+            />
           </p>
         </EuiCallOut>
       );
@@ -92,21 +122,47 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
     const basePrivilege =
       assignedPrivileges.global.length > 0 ? assignedPrivileges.global[0] : NO_PRIVILEGE_VALUE;
 
-    const description = <p>Specify the minimum actions users can perform in your spaces.</p>;
+    const description = (
+      <p>
+        <FormattedMessage
+          id="xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.minActionsTitle"
+          defaultMessage="Specify the minimum actions users can perform in your spaces."
+        />
+      </p>
+    );
 
     let helptext;
     if (basePrivilege === NO_PRIVILEGE_VALUE) {
-      helptext = 'No access to spaces';
+      helptext = intl.formatMessage({
+        id:
+          'xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.noAccessTitle',
+        defaultMessage: 'No access to spaces',
+      });
     } else if (basePrivilege === 'all') {
-      helptext = 'View, edit, and share objects and apps within all spaces';
+      helptext = intl.formatMessage({
+        id:
+          'xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.viewEditShareTitle',
+        defaultMessage: 'View, edit, and share objects and apps within all spaces',
+      });
     } else if (basePrivilege === 'read') {
-      helptext = 'View objects and apps within all spaces';
+      helptext = intl.formatMessage({
+        id:
+          'xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.viewObjectsAppsTitle',
+        defaultMessage: 'View objects and apps within all spaces',
+      });
     }
 
     return (
       <Fragment>
         <EuiDescribedFormGroup
-          title={<h3>Minimum privileges for all spaces</h3>}
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.minPrivilegesTitle"
+                defaultMessage="Minimum privileges for all spaces"
+              />
+            </h3>
+          }
           description={description}
         >
           <EuiFormRow hasEmptyLabelSpace helpText={helptext}>
@@ -147,7 +203,12 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
     return (
       <Fragment>
         <EuiTitle size={'xs'}>
-          <h3>Higher privileges for individual spaces</h3>
+          <h3>
+            <FormattedMessage
+              id="xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.higherPrivilegesTitle"
+              defaultMessage="Higher privileges for individual spaces"
+            />
+          </h3>
         </EuiTitle>
         <EuiSpacer size={'s'} />
         <EuiText
@@ -157,9 +218,30 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
           color={'subdued'}
         >
           <p>
-            Grant more privileges on a per space basis. For example, if the privileges are{' '}
-            <strong>read</strong> for all spaces, you can set the privileges to <strong>all</strong>{' '}
-            for an individual space.
+            <FormattedMessage
+              id="xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.grantMorePrivilegesTitle"
+              defaultMessage="Grant more privileges on a per space basis. For example, if the privileges are 
+              {read} for all spaces, you can set the privileges to {all} 
+              for an individual space."
+              values={{
+                read: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.readTitle"
+                      defaultMessage="read"
+                    />
+                  </strong>
+                ),
+                all: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.allTitle"
+                      defaultMessage="all"
+                    />
+                  </strong>
+                ),
+              }}
+            />
           </p>
         </EuiText>
         <EuiSpacer size={'s'} />
@@ -200,7 +282,10 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
                 iconType={'plusInCircle'}
                 onClick={this.addSpacePrivilege}
               >
-                Add space privilege
+                <FormattedMessage
+                  id="xpack.security.views.management.editRoles.components.privileges.kibana.spaceAwarePrivilegeForm.addSpacePrivilegeTitle"
+                  defaultMessage="Add space privilege"
+                />
               </EuiButton>
             </EuiFlexItem>
           )}
@@ -367,3 +452,5 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
     this.props.onChange(role);
   };
 }
+
+export const SpaceAwarePrivilegeForm = injectI18n(SpaceAwarePrivilegeFormUI);
