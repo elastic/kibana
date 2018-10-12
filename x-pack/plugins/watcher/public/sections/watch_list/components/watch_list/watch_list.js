@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import pluralize from 'pluralize';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { toastNotifications } from 'ui/notify';
@@ -19,6 +18,7 @@ import 'plugins/watcher/components/tool_bar_selected_count';
 import 'plugins/watcher/components/forbidden_message';
 import 'plugins/watcher/services/watches';
 import 'plugins/watcher/services/license';
+import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('xpack/watcher');
 
@@ -137,10 +137,15 @@ app.directive('watchList', function ($injector) {
       onSelectedWatchesDelete = () => {
         const watchesBeingDeleted = this.selectedWatches;
         const numWatchesToDelete = watchesBeingDeleted.length;
-        const watchesStr = pluralize('Watch', numWatchesToDelete);
 
-        const confirmModalText = `This will permanently delete ${numWatchesToDelete} ${watchesStr}. Are you sure?`;
-        const confirmButtonText = `Delete ${numWatchesToDelete} ${watchesStr}`;
+        const confirmModalText = i18n.translate('xpack.watcher.sections.watchList.deleteSelectedWatchesConfirmModal.descriptionText', {
+          defaultMessage: 'This will permanently delete {numWatchesToDelete, plural, one {# watch} other {# watches}}. Are you sure?',
+          values: { numWatchesToDelete }
+        });
+        const confirmButtonText = i18n.translate('xpack.watcher.sections.watchList.deleteSelectedWatchesConfirmModal.deleteButtonLabel', {
+          defaultMessage: 'Delete {numWatchesToDelete, plural, one {# watch} other {# watches}} ',
+          values: { numWatchesToDelete }
+        });
 
         const confirmModalOptions = {
           confirmButtonText,
@@ -154,7 +159,6 @@ app.directive('watchList', function ($injector) {
         this.watchesBeingDeleted = watchesBeingDeleted;
 
         const numWatchesToDelete = this.watchesBeingDeleted.length;
-        const watchesStr = pluralize('Watch', numWatchesToDelete);
 
         const watchIds = this.watchesBeingDeleted.map(watch => watch.id);
         return watchesService.deleteWatches(watchIds)
@@ -164,11 +168,23 @@ app.directive('watchList', function ($injector) {
             const numTotal = numWatchesToDelete;
 
             if (numSuccesses > 0) {
-              toastNotifications.addSuccess(`Deleted ${numSuccesses} out of ${numTotal} selected ${watchesStr}`);
+              toastNotifications.addSuccess(
+                i18n.translate('xpack.watcher.sections.watchList.deleteSelectedWatchesSuccessNotification.descriptionText', {
+                  defaultMessage:
+                    'Deleted {numSuccesses} out of {numTotal} selected {numWatchesToDelete, plural, one {# watch} other {# watches}}',
+                  values: { numSuccesses, numTotal, numWatchesToDelete }
+                })
+              );
             }
 
             if (numErrors > 0) {
-              toastNotifications.addError(`Couldn't delete ${numErrors} out of ${numTotal} selected ${watchesStr}`);
+              toastNotifications.addError(
+                i18n.translate('xpack.watcher.sections.watchList.deleteSelectedWatchesErrorNotification.descriptionText', {
+                  defaultMessage:
+                    'Couldn\'t delete {numErrors} out of {numTotal} selected {numWatchesToDelete, plural, one {# watch} other {# watches}}',
+                  values: { numErrors, numTotal, numWatchesToDelete }
+                })
+              );
             }
 
             this.loadWatches();

@@ -26,6 +26,7 @@ import dateMath from '@kbn/datemath';
 import { toastNotifications } from 'ui/notify';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
+import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('xpack/watcher');
 
@@ -261,11 +262,25 @@ app.directive('thresholdWatchEdit', function ($injector) {
 
             const confirmModalOptions = {
               onConfirm: this.saveWatch,
-              confirmButtonText: 'Overwrite Watch'
+              confirmButtonText: i18n.translate('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.overwriteWatchButtonLabel', {
+                defaultMessage: 'Overwrite Watch',
+              }),
             };
 
-            const watchNameMessageFragment = existingWatch.name ? ` (name: "${existingWatch.name}")` : '';
-            const message = `Watch with ID "${this.watch.id}"${watchNameMessageFragment} already exists. Do you want to overwrite it?`;
+            const message = i18n.translate('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.description', {
+              defaultMessage: 'Watch with ID "{watchId}"{watchNameMessageFragment} already exists. Do you want to overwrite it?',
+              values: {
+                watchId: this.watch.id,
+                watchNameMessageFragment: existingWatch.name
+                  ? i18n.translate('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.descriptionFragmentText', {
+                    defaultMessage: '(name: "{existingWatchName}")',
+                    values: {
+                      existingWatchName: existingWatch.name
+                    }
+                  })
+                  : ''
+              }
+            });
             return confirmModal(message, confirmModalOptions);
           })
           .catch(err => toastNotifications.addDanger(err));
@@ -291,7 +306,14 @@ app.directive('thresholdWatchEdit', function ($injector) {
         return watchService.saveWatch(this.watch)
           .then(() => {
             this.watch.isNew = false; // without this, the message displays 'New Watch'
-            toastNotifications.addSuccess(`Saved '${this.watch.displayName}'`);
+            toastNotifications.addSuccess(
+              i18n.translate('xpack.watcher.sections.watchEdit.threshold.saveSuccessNotificationText', {
+                defaultMessage: 'Saved \'{watchDisplayName}\'',
+                values: {
+                  watchDisplayName: this.watch.displayName
+                }
+              }),
+            );
             this.onClose();
           })
           .catch(err => {

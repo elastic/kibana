@@ -3,9 +3,9 @@
     <label
       for="id"
       class="kuiFormLabel"
-    >
-      ID
-    </label>
+      i18n-id="xpack.watcher.sections.watchEdit.detail.idInputLabel"
+      i18n-default-message="ID"
+    ></label>
     <input
       type="text"
       id="id"
@@ -21,24 +21,24 @@
     <div
       class="kuiInputNote kuiInputNote--danger"
       ng-show="watchEditDetail.form.id.$error.pattern"
-    >
-      ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers.
-    </div>
+      i18n-id="xpack.watcher.sections.watchEdit.detail.idInputDescription"
+      i18n-default-message="ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers."
+    ></div>
     <div
       class="kuiInputNote kuiInputNote--danger"
       ng-show="watchEditDetail.form.id.$touched && watchEditDetail.form.id.$error.required"
-    >
-      ID is required.
-    </div>
+      i18n-id="xpack.watcher.sections.watchEdit.detail.idIsRequiredValidationMessage"
+      i18n-default-message="ID is required."
+    ></div>
   </div>
 
   <div class="kuiFormSection">
     <label
       for="name"
       class="kuiFormLabel"
-    >
-      Name
-    </label>
+      i18n-id="xpack.watcher.sections.watchEdit.detail.nameInputLabel"
+      i18n-default-message="Name"
+    ></label>
     <input
       type="text"
       id="name"
@@ -50,17 +50,13 @@
 </form>
 
 <div class="kuiFormSection">
-  <label class="kuiFormLabel">
-    Watch JSON
-    (<a
-      href="{{ watchEditDetail.documentationLinks.watcher.putWatchApi }}"
-      target="_blank"
-      rel="noopener noreferrer"
-      data-test-subj="lnkPutWatchApiDoc"
-    >
-    Syntax
-    </a>)
-  </label>
+  <label
+    class="kuiFormLabel"
+    i18n-id="xpack.watcher.sections.watchEdit.detail.watchJsonLinkText"
+    i18n-default-message="Watch JSON({linkOpenTag}Syntax{linkCloseTag})"
+    i18n-values="{ linkOpenTag: '<a href=\'{{ watchEditDetail.documentationLinks.watcher.putWatchApi }}\' target=\'_blank\' rel=\'noopener noreferrer\' data-test-subj=\'lnkPutWatchApiDoc\'>',
+        linkCloseTag: '</a>' }"
+    ></label>
   <json-editor
     json="watchEditDetail.watch.watch"
     on-change="watchEditDetail.onJsonChange"
@@ -70,7 +66,7 @@
   <div
     class="kuiInputNote kuiInputNote--danger"
     ng-show="!watchEditDetail.isJsonValid"
-  >
-    Invalid JSON
-  </div>
+    i18n-id="xpack.watcher.sections.watchEdit.detail.invalidJasonErrorMessage"
+    i18n-default-message="Invalid JSON"
+  ></div>
 </div>

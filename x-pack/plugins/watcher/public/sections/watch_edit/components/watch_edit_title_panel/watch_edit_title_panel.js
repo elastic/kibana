@@ -9,6 +9,7 @@ import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import template from './watch_edit_title_panel.html';
 import { TIME_UNITS } from 'plugins/watcher/../common/constants';
+import { i18n } from '@kbn/i18n';
 
 import 'plugins/watcher/components/index_select';
 import 'plugins/watcher/components/duration_select';
@@ -90,7 +91,10 @@ app.directive('watchEditTitlePanel', function ($injector) {
       get title() {
         if (this.watch.isNew) {
           const typeName = this.watch.typeName.toLowerCase();
-          return `Create a new ${typeName}`;
+          return i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.createNewTypeOfWatchTitle', {
+            defaultMessage: 'Create a new {typeName}',
+            values: { typeName },
+          });
         } else {
           return this.watch.name;
         }
