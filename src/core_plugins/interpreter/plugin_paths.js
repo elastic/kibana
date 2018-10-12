@@ -22,8 +22,8 @@ import { resolve } from 'path';
 const dir = resolve(__dirname, '..', '..', '..');
 
 export const pluginPaths = {
-  serverFunctions: resolve(dir, 'packages/kbn-interpreter/plugin/functions/server'),
-  browserFunctions: resolve(dir, 'packages/kbn-interpreter/plugin/functions/browser'),
-  commonFunctions: resolve(dir, 'packages/kbn-interpreter/plugin/functions/common'),
-  types: resolve(dir, 'packages/kbn-interpreter/plugin/types'),
+  serverFunctions: resolve(dir, 'node_modules/@kbn/interpreter/plugin/functions/server'),
+  browserFunctions: resolve(dir, 'node_modules/@kbn/interpreter/plugin/functions/browser'),
+  commonFunctions: resolve(dir, 'node_modules/@kbn/interpreter/plugin/functions/common'),
+  types: resolve(dir, 'node_modules/@kbn/interpreter/plugin/types'),
 };
