@@ -5,7 +5,7 @@
  */
 
 
-import { ml } from '../../../services/ml_api_service';
+import { ml } from '../../../../services/ml_api_service';
 import { chunk } from 'lodash';
 
 const CHUNK_SIZE = 10000;
@@ -50,3 +50,5 @@ export class Importer {
     return success;
   }
 }
+
+

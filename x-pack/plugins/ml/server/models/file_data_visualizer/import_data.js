@@ -10,6 +10,7 @@ export function importDataProvider(callWithRequest) {
     // console.log(id, index, mappings, data);
     try {
 
+      // first chunk of data, create the index and id to return
       if (id === undefined) {
         id = generateId();
         await createIndex(index, mappings);
@@ -59,10 +60,7 @@ export function importDataProvider(callWithRequest) {
       body.push({ index: {} });
       body.push(d);
     });
-    // console.log(body);
-    const gg = await callWithRequest('bulk', { index, type, body });
-    console.log(gg);
-    // { index:  { _index: 'myindex', _type: 'mytype', _id: 1 } },
+    await callWithRequest('bulk', { index, type, body });
   }
 
   async function indexExits(index) {

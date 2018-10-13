@@ -21,7 +21,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { CsvImporter } from './csv_importer';
+import { importerFactory } from './importer';
 import { ResultsLinks } from './results_links';
 
 export class ImportView extends Component {
@@ -58,7 +58,7 @@ export class ImportView extends Component {
       createIndexPattern,
     } = this.state;
 
-    if (format === 'delimited' && index !== '') {
+    if (/*format === 'delimited' && */index !== '') {
       this.setState({
         importing: true,
         imported: false,
@@ -66,34 +66,37 @@ export class ImportView extends Component {
       }, () => {
         setTimeout(async () => {
           // console.time('importer');
-          const importer = new CsvImporter(results);
 
-          console.log('read start');
-          let imported = await importer.read(fileContents, this.setReadProgress);
-          console.log('read end');
-          this.setState({ readStatus: 'complete', reading: false, });
+          const importer = importerFactory(format, results);
+          if (importer !== undefined) {
 
-          if (imported) {
-            imported = await importer.import(index, this.setImportProgress);
-            this.setState({ uploadStatus: 'complete' });
-          }
+            console.log('read start');
+            let success = await importer.read(fileContents, this.setReadProgress);
+            console.log('read end');
+            this.setState({ readStatus: 'complete', reading: false, });
 
-          if (createIndexPattern) {
-            const indexPatternName = (indexPattern === '') ? index : indexPattern;
-            const indexPatternId = await this.createIndexPattern(indexPatternName, timeStampField);
-            console.log(indexPatternId);
+            if (success) {
+              success = await importer.import(index, this.setImportProgress);
+              this.setState({ uploadStatus: 'complete' });
+
+
+              if (createIndexPattern) {
+                const indexPatternName = (indexPattern === '') ? index : indexPattern;
+                const indexPatternId = await this.createIndexPattern(indexPatternName, timeStampField);
+                console.log(indexPatternId);
+                this.setState({
+                  indexPatternCreatedStatus: 'complete',
+                  indexPatternId,
+                });
+              }
+            }
+            // console.timeEnd('importer');
+
             this.setState({
-              indexPatternCreatedStatus: 'complete',
-              indexPatternId,
+              importing: false,
+              imported: success,
             });
-
           }
-          // console.timeEnd('importer');
-
-          this.setState({
-            importing: false,
-            imported,
-          });
         }, 500);
       });
     }
@@ -312,3 +315,5 @@ export class ImportView extends Component {
     );
   }
 }
+
+

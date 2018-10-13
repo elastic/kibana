@@ -46,6 +46,7 @@ function createFields(results) {
   const {
     mappings,
     field_stats: fieldStats,
+    column_names: columnNames,
     num_messages_analyzed: numMessagesAnalyzed,
     timestamp_field: timestampField,
   } = results;
@@ -53,31 +54,43 @@ function createFields(results) {
   let fields = [];
 
   if (mappings && fieldStats) {
-    fields = Object.keys(fieldStats).map((fName) => {
-      const field = { name: fName };
-      const f  = fieldStats[fName];
-      const m  = mappings[fName];
+    const tempFields = (columnNames !== undefined) ? columnNames : Object.keys(fieldStats);
 
-      // sometimes the timestamp field is not in the mappings, and so our
-      // collection of fields will be missing a time field with a type of date
-      if (fName === timestampField && field.type === undefined) {
-        field.type = 'date';
-      }
+    fields = tempFields.map((fName) => {
+      if (fieldStats[fName] !== undefined) {
+        const field = { name: fName };
+        const f  = fieldStats[fName];
+        const m  = mappings[fName];
 
-      if (f !== undefined) {
-        Object.assign(field, f);
-      }
-
-      if (m !== undefined) {
-        field.type = m.type;
-        if (m.format !== undefined) {
-          field.format = m.format;
+        // sometimes the timestamp field is not in the mappings, and so our
+        // collection of fields will be missing a time field with a type of date
+        if (fName === timestampField && field.type === undefined) {
+          field.type = 'date';
         }
+
+        if (f !== undefined) {
+          Object.assign(field, f);
+        }
+
+        if (m !== undefined) {
+          field.type = m.type;
+          if (m.format !== undefined) {
+            field.format = m.format;
+          }
+        }
+
+        field.percent = ((field.count / numMessagesAnalyzed) * 100);
+
+        return field;
+      } else {
+        return {
+          name: '',
+          mean_value: 0,
+          count: 0,
+          cardinality: 0,
+          percent: 0,
+        };
       }
-
-      field.percent = ((field.count / numMessagesAnalyzed) * 100);
-
-      return field;
     });
   }
   return fields;

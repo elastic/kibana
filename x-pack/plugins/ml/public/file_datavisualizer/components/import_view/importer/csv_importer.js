@@ -21,8 +21,8 @@ export class CsvImporter extends Importer {
   }
 
   async read(csv) {
-    console.log('read file');
-    console.time('read file');
+    console.log('read delimited file');
+    console.time('read delimited file');
 
     try {
       const settings = {
@@ -56,19 +56,18 @@ export class CsvImporter extends Importer {
       }
 
       this.docArray = formatToJson(this.data, this.columnNames);
-      console.timeEnd('read file');
+      console.timeEnd('read delimited file');
 
       return true;
     } catch (error) {
       console.error(error);
-      console.timeEnd('read file');
+      console.timeEnd('read delimited file');
       return false;
     }
   }
 }
 
 function formatToJson(data, columnNames) {
-  console.log('formatToJson');
   const docArray = [];
   for (let i = 0; i < data.length; i++) {
     const line = {};
