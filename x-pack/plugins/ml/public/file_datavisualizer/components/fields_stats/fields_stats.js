@@ -54,6 +54,8 @@ function createFields(results) {
   let fields = [];
 
   if (mappings && fieldStats) {
+    // if columnNames exists (i.e delimited) use it for the field list
+    // so we get the same order
     const tempFields = (columnNames !== undefined) ? columnNames : Object.keys(fieldStats);
 
     fields = tempFields.map((fName) => {

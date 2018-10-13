@@ -15,9 +15,9 @@ function analyzeFiles(callWithRequest, data, overrides) {
   return analyzeFile(data, overrides);
 }
 
-function importData(callWithRequest, id, index, mappings, data) {
+function importData(callWithRequest, id, index, mappings, ingestPipeline, data) {
   const { importData: importDataFunc } = importDataProvider(callWithRequest);
-  return importDataFunc(id, index, mappings, data);
+  return importDataFunc(id, index, mappings, ingestPipeline, data);
 }
 
 export function fileDataVisualizerRoutes(server, commonRouteConfig) {
@@ -44,9 +44,9 @@ export function fileDataVisualizerRoutes(server, commonRouteConfig) {
     handler(request, reply) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.query;
-      const { index, data, mappings } = request.payload;
+      const { index, data, mappings, ingestPipeline } = request.payload;
 
-      return importData(callWithRequest, id, index, mappings, data)
+      return importData(callWithRequest, id, index, mappings, ingestPipeline, data)
         .then(resp => reply(resp))
         .catch(resp => reply(wrapError(resp)));
     },

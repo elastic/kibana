@@ -29,7 +29,7 @@ export class SstImporter extends Importer {
         const char = text[i];
         if (char === '\n') {
           if (tempLine.match(this.multilineStartPattern) !== null) {
-            data.push(line);
+            data.push({ message: line });
             line = '';
           } else {
             line += char;
@@ -41,13 +41,14 @@ export class SstImporter extends Importer {
         }
       }
 
-      if (data[0] === '') {
+      if (data[0] && data[0].message === '') {
         data.shift();
       }
+      this.data = data;
+      this.docArray = this.data;
+      // this.docArray = formatToJson(this.data);
 
-      this.docArray = formatToJson(this.data);
-
-      console.log(data);
+      // console.log(data);
       console.timeEnd('read sst file');
       return true;
     } catch (error) {
@@ -57,11 +58,11 @@ export class SstImporter extends Importer {
   }
 }
 
-function formatToJson(data) {
-  const docArray = [];
-  for (let i = 0; i < data.length; i++) {
-    docArray.push({ message: data[i] });
-  }
-  return docArray;
-}
+// function formatToJson(data) {
+//   const docArray = [];
+//   for (let i = 0; i < data.length; i++) {
+//     docArray.push({ message: data[i] });
+//   }
+//   return docArray;
+// }
 

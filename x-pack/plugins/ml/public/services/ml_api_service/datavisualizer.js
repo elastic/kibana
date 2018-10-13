@@ -28,7 +28,7 @@ export const fileDatavisualizer = {
 
   import(obj) {
     const paramString = (obj.id !== undefined) ? `?id=${obj.id}` : '';
-    const { index, data, mappings } = obj;
+    const { index, data, mappings, ingestPipeline } = obj;
 
     return http({
       url: `${basePath}/file_data_visualizer/import${paramString}`,
@@ -36,7 +36,8 @@ export const fileDatavisualizer = {
       data: {
         index,
         data,
-        mappings
+        mappings,
+        ingestPipeline,
       }
     });
   }

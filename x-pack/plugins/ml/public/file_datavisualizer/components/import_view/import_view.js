@@ -50,7 +50,7 @@ export class ImportView extends Component {
   }
 
   async import() {
-    const { format, timestamp_field: timeStampField } = this.props.results;
+    const { format } = this.props.results;
     const { fileContents, results } = this.props;
     const {
       index,
@@ -80,9 +80,9 @@ export class ImportView extends Component {
               this.setState({ uploadStatus: 'complete' });
 
 
-              if (createIndexPattern) {
+              if (success && createIndexPattern) {
                 const indexPatternName = (indexPattern === '') ? index : indexPattern;
-                const indexPatternId = await this.createIndexPattern(indexPatternName, timeStampField);
+                const indexPatternId = await this.createIndexPattern(indexPatternName);
                 console.log(indexPatternId);
                 this.setState({
                   indexPatternCreatedStatus: 'complete',
@@ -133,7 +133,7 @@ export class ImportView extends Component {
     });
   }
 
-  async createIndexPattern(indexPatternName, timeFieldName) {
+  async createIndexPattern(indexPatternName, timeFieldName = '@timestamp') {
     let createdId;
     try {
       const emptyPattern = await this.props.indexPatterns.get();

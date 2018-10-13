@@ -26,14 +26,17 @@ export class CsvImporter extends Importer {
 
     try {
       const settings = {
+        skip_empty_lines: true,
         delimiter: this.delimiter,
         quote: this.quote,
+        columns: this.columnNames,
       };
       // const parser = csvParse(settings);
       // parser.write(csv);
       // parser.end();
 
       this.data = await parse(csv, settings);
+
       // const output = [];
       // parser.on('readable', () => {
       //   let record;
@@ -55,7 +58,8 @@ export class CsvImporter extends Importer {
         this.data.shift();
       }
 
-      this.docArray = formatToJson(this.data, this.columnNames);
+      this.docArray = this.data;
+      // this.docArray = formatToJson(this.data, this.columnNames);
       console.timeEnd('read delimited file');
 
       return true;
@@ -67,15 +71,15 @@ export class CsvImporter extends Importer {
   }
 }
 
-function formatToJson(data, columnNames) {
-  const docArray = [];
-  for (let i = 0; i < data.length; i++) {
-    const line = {};
-    for (let c = 0; c < columnNames.length; c++) {
-      const col = columnNames[c];
-      line[col] = data[i][c];
-    }
-    docArray.push(line);
-  }
-  return docArray;
-}
+// function formatToJson(data, columnNames) {
+//   const docArray = [];
+//   for (let i = 0; i < data.length; i++) {
+//     const line = {};
+//     for (let c = 0; c < columnNames.length; c++) {
+//       const col = columnNames[c];
+//       line[col] = data[i][c];
+//     }
+//     docArray.push(line);
+//   }
+//   return docArray;
+// }
