@@ -86,7 +86,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
       // },
       {
         id: '/overview/tags',
-        name: 'Tags',
+        name: 'Configuration Tags',
         disabled: false,
       },
     ];

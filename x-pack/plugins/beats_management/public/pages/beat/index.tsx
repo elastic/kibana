@@ -85,7 +85,7 @@ class BeatDetailsPageComponent extends React.PureComponent<
       // },
       {
         id: `/beat/${id}/tags`,
-        name: 'Tags',
+        name: 'Configuration Tags',
         disabled: false,
       },
     ];
