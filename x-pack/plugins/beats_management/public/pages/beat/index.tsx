@@ -71,7 +71,10 @@ class BeatDetailsPageComponent extends React.PureComponent<
       id = beat.id;
       name = beat.name;
     }
-    const title = this.state.isLoading ? 'Loading' : `Beat: ${name || id}`;
+    const title = this.state.isLoading
+      ? 'Loading'
+      : `Beat: ${name || 'No name receved from beat'} (id: ${id})`;
+
     const tabs = [
       {
         id: `/beat/${id}`,

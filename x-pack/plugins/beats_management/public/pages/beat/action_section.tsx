@@ -20,6 +20,12 @@ export const BeatDetailsActionSection = ({ beat }: BeatDetailsActionSectionProps
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
+            Type:&nbsp;
+            <strong>{beat.type}</strong>.
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
             Version:&nbsp;
             <strong>{beat.version}</strong>.
           </EuiText>
