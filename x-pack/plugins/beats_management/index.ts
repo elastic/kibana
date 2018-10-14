@@ -5,6 +5,7 @@
  */
 import Joi from 'joi';
 import { resolve } from 'path';
+import { max } from 'rxjs/operators';
 import { PLUGIN } from './common/constants';
 import { initServerWithKibana } from './server/kibana.index';
 
@@ -16,6 +17,7 @@ export const config = Joi.object({
   enrollmentTokensTtlInSeconds: Joi.number()
     .integer()
     .min(1)
+    .max(10 * 60 * 14) // No more then 2 weeks for security reasons
     .default(DEFAULT_ENROLLMENT_TOKENS_TTL_S),
 }).default();
 export const configPrefix = 'xpack.beats';
