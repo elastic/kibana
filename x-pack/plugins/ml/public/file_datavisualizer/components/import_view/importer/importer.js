@@ -32,12 +32,20 @@ export class Importer {
 
     let id = undefined;
     let success = true;
-    let failures = 0;
+    const failures = [];
 
     for (let i = 0; i < chunks.length; i++) {
-      const data = chunks[i];
-      const resp = await ml.fileDatavisualizer.import({ id, index, data, mappings, ingestPipeline });
-      if (resp.success || (resp.success === false && (resp.failures < resp.docs))) {
+      const aggs = {
+        id,
+        index,
+        data: chunks[i],
+        mappings,
+        ingestPipeline
+      };
+      const resp = await ml.fileDatavisualizer.import(aggs);
+
+      if (resp.success || (resp.success === false && (resp.failures.length < resp.docCount))) {
+        // allow some failures. however it must be less than the total number of docs sent
         id = resp.id;
         setImportProgress((i / chunks.length) * 100);
       } else {
@@ -45,8 +53,17 @@ export class Importer {
         success = false;
         break;
       }
-      failures += resp.failures;
-      console.log(i, resp);
+
+      if (resp.failures.length) {
+        // update the item value to include the chunk count
+        // e.g. item 3 in chunk 2 is actually item 20003
+        for (let f = 0; f < resp.failures.length; f++) {
+          const failure = resp.failures[f];
+          failure.item = failure.item + (CHUNK_SIZE * i);
+        }
+        failures.push(...resp.failures);
+      }
+      // console.log(i, resp);
     }
 
     console.log('total failures', failures);
@@ -60,10 +77,10 @@ export class Importer {
 
 function updatePipelineTimezone(ingestPipeline) {
   if (ingestPipeline !== undefined && ingestPipeline.processors && ingestPipeline.processors) {
-    ingestPipeline.processors.find((p) => {
-      if (p.date !== undefined && p.date.timezone === '{{ beat.timezone }}') {
-        p.date.timezone = moment.tz.guess();
-      }
-    });
+    const dateProcessor = ingestPipeline.processors.find(p => (p.date !== undefined && p.date.timezone === '{{ beat.timezone }}'));
+
+    if (dateProcessor) {
+      dateProcessor.date.timezone = moment.tz.guess();
+    }
   }
 }

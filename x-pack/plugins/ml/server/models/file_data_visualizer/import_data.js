@@ -8,10 +8,11 @@
 export function importDataProvider(callWithRequest) {
   async function importData(id, index, mappings, ingestPipeline, data) {
     // console.log(id, index, mappings, data);
-    try {
+    let pipelineId;
+    const docCount = data.length;
 
+    try {
       // first chunk of data, create the index and id to return
-      let pipelineId;
       if (id === undefined) {
         id = generateId();
         await createIndex(index, mappings);
@@ -23,6 +24,7 @@ export function importDataProvider(callWithRequest) {
             pipelineId = pid;
           } else {
             console.error(success);
+            throw success;
           }
           console.log('creating pipeline', pipelineId);
         }
@@ -40,20 +42,20 @@ export function importDataProvider(callWithRequest) {
       }
 
       return {
-        id,
         success: true,
-        docs: data.length,
-        failures: 0,
+        id,
+        pipelineId,
+        docCount,
+        failures: [],
       };
     } catch (error) {
-      // console.error(error);
-
       return {
-        id,
         success: false,
+        id,
+        pipelineId,
         error,
-        docs: data.length,
-        failures: (error.failures ? error.failures : data.length)
+        docCount,
+        failures: (error.failures ? error.failures : [])
       };
     }
   }
@@ -91,20 +93,20 @@ export function importDataProvider(callWithRequest) {
 
     const resp = await callWithRequest('bulk', settings);
     if (resp.errors) {
+      const failures = getFailures(resp.items);
       return {
         success: false,
         error: resp,
         docs: data.length,
-        failures: countErrors(resp.items),
+        failures,
       };
     } else {
       return {
         success: true,
         docs: data.length,
-        failures: 0,
+        failures: [],
       };
     }
-    // console.log(resp);
   }
 
   async function indexExits(index) {
@@ -115,15 +117,18 @@ export function importDataProvider(callWithRequest) {
     return await callWithRequest('ingest.putPipeline', { id, body: pipeline });
   }
 
-  function countErrors(items) {
-    let count = 0;
+  function getFailures(items) {
+    const failures = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item.index && item.index.error) {
-        count++;
+        failures.push({
+          item: i,
+          reason: item.index.error.reason,
+        });
       }
     }
-    return count;
+    return failures;
   }
 
   return {
