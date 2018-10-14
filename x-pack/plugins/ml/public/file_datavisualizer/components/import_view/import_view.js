@@ -13,7 +13,7 @@ import {
   EuiFieldText,
   EuiButton,
   EuiLoadingSpinner,
-  EuiSteps,
+  EuiStepsHorizontal,
   EuiProgress,
   EuiSpacer,
   EuiFormRow,
@@ -170,9 +170,12 @@ export class ImportView extends Component {
       createIndexPattern,
     } = this.state;
 
+    let statusInfo = null;
+
     let processFileTitle = 'Process file';
     if (reading === true && readStatus === 'incomplete') {
       processFileTitle = 'Processing file';
+      statusInfo = (<p>Converting file for import</p>);
     } else if (reading === false && readStatus === 'complete') {
       processFileTitle = 'File processed';
     }
@@ -185,48 +188,49 @@ export class ImportView extends Component {
     let uploadingDataTitle = 'Upload data';
     if (uploadProgress > 0 && uploadStatus === 'incomplete') {
       uploadingDataTitle = 'Uploading data';
+
+      statusInfo = (<UploadFunctionProgress progress={uploadProgress} />);
     } else if (uploadStatus === 'complete') {
       uploadingDataTitle = 'Data uploaded';
     }
 
     let createIndexPatternTitle = 'Create index pattern';
-    if (indexCreatedStatus === 'complete') {
+    if (indexPatternCreatedStatus === 'danger') {
       createIndexPatternTitle = 'Index pattern created';
+      statusInfo = null;
     }
 
     const firstSetOfSteps = [
       {
         title: processFileTitle,
-        children: (<p>Converting file for import</p>),
+        isSelected: true,
+        isComplete: (readStatus === 'complete'),
         status: readStatus,
+        onClick: () => {},
       },
       {
         title: createIndexTitle,
-        children: (<p>Creating index</p>),
+        isSelected: (readStatus === 'complete'),
+        isComplete: (indexCreatedStatus === 'complete'),
         status: indexCreatedStatus,
+        onClick: () => {},
       },
       {
         title: uploadingDataTitle,
-        children: (
-          <React.Fragment>
-            <p>Uploading data</p>
-            {(uploadProgress > 0 && uploadProgress < 100) &&
-              <React.Fragment>
-                <EuiSpacer size="s" />
-                <EuiProgress value={uploadProgress} max={100} color="primary" size="s" />
-              </React.Fragment>
-            }
-          </React.Fragment>
-        ),
+        isSelected: (indexCreatedStatus === 'complete'),
+        isComplete: (uploadStatus === 'complete'),
         status: uploadStatus,
+        onClick: () => {},
       }
     ];
 
     if (createIndexPattern === true) {
       firstSetOfSteps.push({
         title: createIndexPatternTitle,
-        children: (<p>Creating index pattern</p>),
+        isSelected: (uploadStatus === 'complete'),
+        isComplete: (indexPatternCreatedStatus === 'complete'),
         status: indexPatternCreatedStatus,
+        onClick: () => {},
       });
     }
 
@@ -293,9 +297,10 @@ export class ImportView extends Component {
             <EuiSpacer size="m" />
 
             <EuiPanel>
-              <EuiSteps
+              <EuiStepsHorizontal
                 steps={firstSetOfSteps}
               />
+              { statusInfo }
             </EuiPanel>
           </React.Fragment>
         }
@@ -316,4 +321,16 @@ export class ImportView extends Component {
   }
 }
 
-
+function UploadFunctionProgress({ progress }) {
+  return (
+    <React.Fragment>
+      <p>Uploading data</p>
+      {(progress > 0 && progress < 100) &&
+        <React.Fragment>
+          <EuiSpacer size="s" />
+          <EuiProgress value={progress} max={100} color="primary" size="s" />
+        </React.Fragment>
+      }
+    </React.Fragment>
+  );
+}
