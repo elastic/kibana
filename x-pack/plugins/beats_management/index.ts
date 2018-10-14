@@ -5,7 +5,6 @@
  */
 import Joi from 'joi';
 import { resolve } from 'path';
-import { max } from 'rxjs/operators';
 import { PLUGIN } from './common/constants';
 import { initServerWithKibana } from './server/kibana.index';
 
