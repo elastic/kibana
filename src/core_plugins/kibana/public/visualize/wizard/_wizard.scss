@@ -30,19 +30,3 @@
 .visWizard__savedObjectFinder {
   padding: $euiSizeS; /* 1 */
 }
-
-/**
- * This preserves backwards-compatibility with any plugins that are still specifying an `icon`
- * class.
- *
- * 1. Size icon correctly to match xxLarge EuiIcon
- */
- .visWizard__visTypeIcon {
-  color: $euiColorFullShade;
-  font-size: $euiSizeXXL; /* 1 */
-}
-
-// SASSTODO: Remove img element selector when `.kuiGalleryItem__image img` selector is removed
-img.visWizard__visTypeImage { // Use element selector to override base .kuiGalleryItem__image styles
-  @include size($euiSizeXXL); /* 1 */
-}
