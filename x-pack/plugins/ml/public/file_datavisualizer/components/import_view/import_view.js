@@ -13,8 +13,6 @@ import {
   EuiFieldText,
   EuiButton,
   EuiLoadingSpinner,
-  EuiStepsHorizontal,
-  EuiProgress,
   EuiSpacer,
   EuiFormRow,
   EuiCheckbox,
@@ -23,6 +21,7 @@ import {
 
 import { importerFactory } from './importer';
 import { ResultsLinks } from './results_links';
+import { ImportProgress } from './import_progress';
 
 export class ImportView extends Component {
   constructor(props) {
@@ -37,6 +36,7 @@ export class ImportView extends Component {
       readStatus: 'incomplete',
       indexCreatedStatus: 'incomplete',
       indexPatternCreatedStatus: 'incomplete',
+      ingestPipelineCreatedStatus: 'incomplete',
       uploadProgress: 0,
       uploadStatus: 'incomplete',
       createIndexPattern: true,
@@ -58,26 +58,29 @@ export class ImportView extends Component {
       createIndexPattern,
     } = this.state;
 
-    if (/*format === 'delimited' && */index !== '') {
+    if (index !== '') {
       this.setState({
         importing: true,
         imported: false,
         reading: true,
       }, () => {
         setTimeout(async () => {
-          // console.time('importer');
-
           const importer = importerFactory(format, results);
           if (importer !== undefined) {
 
             console.log('read start');
             let success = await importer.read(fileContents, this.setReadProgress);
             console.log('read end');
-            this.setState({ readStatus: 'complete', reading: false, });
+            this.setState({
+              readStatus: 'complete',
+              reading: false,
+            });
 
             if (success) {
-              success = await importer.import(index, this.setImportProgress);
-              this.setState({ uploadStatus: 'complete' });
+              const resp = await importer.import(index, this.setImportProgress);
+              success = resp.success;
+              const uploadStatus = success ? 'complete' : 'danger';
+              this.setState({ uploadStatus });
 
 
               if (success && createIndexPattern) {
@@ -90,7 +93,6 @@ export class ImportView extends Component {
                 });
               }
             }
-            // console.timeEnd('importer');
 
             this.setState({
               importing: false,
@@ -123,6 +125,7 @@ export class ImportView extends Component {
   setImportProgress = (progress) => {
     this.setState({
       indexCreatedStatus: (progress > 0) ? 'complete' : 'incomplete',
+      ingestPipelineCreatedStatus: (progress > 0) ? 'complete' : 'incomplete',
       uploadProgress: progress,
     });
   }
@@ -164,75 +167,23 @@ export class ImportView extends Component {
       reading,
       readStatus,
       indexCreatedStatus,
+      ingestPipelineCreatedStatus,
       indexPatternCreatedStatus,
       uploadProgress,
       uploadStatus,
       createIndexPattern,
     } = this.state;
 
-    let statusInfo = null;
-
-    let processFileTitle = 'Process file';
-    if (reading === true && readStatus === 'incomplete') {
-      processFileTitle = 'Processing file';
-      statusInfo = (<p>Converting file for import</p>);
-    } else if (reading === false && readStatus === 'complete') {
-      processFileTitle = 'File processed';
-    }
-
-    let createIndexTitle = 'Create index';
-    if (indexCreatedStatus === 'complete') {
-      createIndexTitle = 'Index created';
-    }
-
-    let uploadingDataTitle = 'Upload data';
-    if (uploadProgress > 0 && uploadStatus === 'incomplete') {
-      uploadingDataTitle = 'Uploading data';
-
-      statusInfo = (<UploadFunctionProgress progress={uploadProgress} />);
-    } else if (uploadStatus === 'complete') {
-      uploadingDataTitle = 'Data uploaded';
-    }
-
-    let createIndexPatternTitle = 'Create index pattern';
-    if (indexPatternCreatedStatus === 'danger') {
-      createIndexPatternTitle = 'Index pattern created';
-      statusInfo = null;
-    }
-
-    const firstSetOfSteps = [
-      {
-        title: processFileTitle,
-        isSelected: true,
-        isComplete: (readStatus === 'complete'),
-        status: readStatus,
-        onClick: () => {},
-      },
-      {
-        title: createIndexTitle,
-        isSelected: (readStatus === 'complete'),
-        isComplete: (indexCreatedStatus === 'complete'),
-        status: indexCreatedStatus,
-        onClick: () => {},
-      },
-      {
-        title: uploadingDataTitle,
-        isSelected: (indexCreatedStatus === 'complete'),
-        isComplete: (uploadStatus === 'complete'),
-        status: uploadStatus,
-        onClick: () => {},
-      }
-    ];
-
-    if (createIndexPattern === true) {
-      firstSetOfSteps.push({
-        title: createIndexPatternTitle,
-        isSelected: (uploadStatus === 'complete'),
-        isComplete: (indexPatternCreatedStatus === 'complete'),
-        status: indexPatternCreatedStatus,
-        onClick: () => {},
-      });
-    }
+    const statuses = {
+      reading,
+      readStatus,
+      indexCreatedStatus,
+      ingestPipelineCreatedStatus,
+      indexPatternCreatedStatus,
+      uploadProgress,
+      uploadStatus,
+      createIndexPattern,
+    };
 
     return (
       <React.Fragment>
@@ -297,10 +248,9 @@ export class ImportView extends Component {
             <EuiSpacer size="m" />
 
             <EuiPanel>
-              <EuiStepsHorizontal
-                steps={firstSetOfSteps}
-              />
-              { statusInfo }
+
+              <ImportProgress statuses={statuses} />
+
             </EuiPanel>
           </React.Fragment>
         }
@@ -311,7 +261,13 @@ export class ImportView extends Component {
             <EuiSpacer size="m" />
 
             <EuiPanel>
-              <ResultsLinks indexPatternId={(indexPatternId)} />
+
+              <ResultsLinks
+                indexPattern={(indexPattern)}
+                indexPatternId={(indexPatternId)}
+                timeFieldName={this.props.results.timestamp_field}
+              />
+
             </EuiPanel>
           </React.Fragment>
         }
@@ -321,16 +277,4 @@ export class ImportView extends Component {
   }
 }
 
-function UploadFunctionProgress({ progress }) {
-  return (
-    <React.Fragment>
-      <p>Uploading data</p>
-      {(progress > 0 && progress < 100) &&
-        <React.Fragment>
-          <EuiSpacer size="s" />
-          <EuiProgress value={progress} max={100} color="primary" size="s" />
-        </React.Fragment>
-      }
-    </React.Fragment>
-  );
-}
+

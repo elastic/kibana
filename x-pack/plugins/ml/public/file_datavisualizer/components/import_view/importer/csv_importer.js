@@ -30,7 +30,12 @@ export class CsvImporter extends Importer {
         delimiter: this.delimiter,
         quote: this.quote,
         columns: this.columnNames,
+        relax_column_count: true,
       };
+
+      // commented out code left in for future work to optimise
+      // csv parsing
+
       // const parser = csvParse(settings);
       // parser.write(csv);
       // parser.end();

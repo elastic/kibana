@@ -71,7 +71,7 @@ export class Importer {
       setImportProgress(100);
     }
     console.timeEnd('create index and ingest');
-    return success;
+    return { success, failures };
   }
 }
 
