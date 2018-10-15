@@ -15,6 +15,8 @@ import { Transaction } from '../../../../../../../../typings/Transaction';
 
 // @ts-ignore
 import DiscoverButton from '../../../../../../shared/DiscoverButton';
+// @ts-ignore
+import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 
 function getDiscoverQuery(id: string) {
   return {
@@ -38,6 +40,8 @@ export function TransactionFlyout({ transaction, onClose }: Props) {
     return null;
   }
 
+  // TODO in this PR: connect to or pass in location and urlParams values
+  // to be passed to the new property table component instead of dummy values
   return (
     <EuiFlyout onClose={onClose} size="l">
       <EuiFlyoutHeader>
@@ -49,7 +53,13 @@ export function TransactionFlyout({ transaction, onClose }: Props) {
           {`Open in Discover`}
         </DiscoverButton>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>test</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        <TransactionPropertiesTableForFlyout
+          transaction={transaction}
+          location={{ search: [] }}
+          urlParams={{}}
+        />
+      </EuiFlyoutBody>
     </EuiFlyout>
   );
 }
