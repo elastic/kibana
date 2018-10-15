@@ -13,7 +13,7 @@ function getIndexNamesFromPayload(payload) {
   return payload.indexNames || [];
 }
 
-function formatHits(hits) {
+function formatHits(hits, aliases) {
   return hits.map(hit => {
     return {
       health: hit.health,
@@ -26,6 +26,7 @@ function formatHits(hits) {
       documents_deleted: hit["docs.deleted"],
       size: hit["store.size"],
       primary_size: hit["pri.store.size"],
+      aliases: aliases.hasOwnProperty(hit.index) ? aliases[hit.index] : 'none',
     };
   });
 }
@@ -37,6 +38,15 @@ async function fetchIndices(callWithRequest, indexNames) {
   };
 
   return await callWithRequest('cat.indices', params);
+}
+
+async function fetchAliases(callWithRequest, indexNames, aliases) {
+  const onlyIndexNames = {};
+  for(let i = 0; i < indexNames; ++i) {
+    const index = indexNames[i].index;
+    onlyIndexNames[index] = (aliases[index] === undefined ? "N/A" : aliases[index]);
+  }
+  return onlyIndexNames;
 }
 
 export function registerReloadRoute(server) {
@@ -51,8 +61,10 @@ export function registerReloadRoute(server) {
       const indexNames = getIndexNamesFromPayload(request.payload);
 
       try {
-        const hits = await fetchIndices(callWithRequest, indexNames);
-        const response = formatHits(hits);
+        const indices = await fetchIndices(callWithRequest, indexNames);
+        const aliases = await fetchAliases(callWithRequest, indexNames, indices);
+        indices.aliases = Object.values(aliases);
+        const response = formatHits(indices, aliases);
         reply(response);
       } catch (err) {
         if (isEsError(err)) {

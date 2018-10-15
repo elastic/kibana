@@ -9,7 +9,8 @@ import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 
-function formatHits(hits) {
+function formatHits(hits, aliases) {
+  console.log(aliases);
   return hits.map(hit => {
     return {
       health: hit.health,
@@ -22,6 +23,7 @@ function formatHits(hits) {
       documents_deleted: hit["docs.deleted"],
       size: hit["store.size"],
       primary_size: hit["pri.store.size"],
+      aliases: aliases.hasOwnProperty(hit.index) ? aliases[hit.index] : 'none',
     };
   });
 }
@@ -32,6 +34,19 @@ async function fetchIndices(callWithRequest) {
   };
 
   return await callWithRequest('cat.indices', params);
+}
+
+async function fetchAliases(callWithRequest) {
+  const params = {
+    format: 'json'
+  };
+  const catAliases = await callWithRequest('cat.aliases', params);
+  const aliases = {};
+  for(let i = 0; i < catAliases.length; ++i) {
+    aliases[catAliases[i].index] = catAliases[i].alias;
+  }
+
+  return aliases;
 }
 
 export function registerListRoute(server) {
@@ -45,8 +60,9 @@ export function registerListRoute(server) {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
+        const aliases = await fetchAliases(callWithRequest);
         const hits = await fetchIndices(callWithRequest);
-        const response = formatHits(hits);
+        const response = formatHits(hits, aliases);
         reply(response);
       } catch (err) {
         if (isEsError(err)) {
