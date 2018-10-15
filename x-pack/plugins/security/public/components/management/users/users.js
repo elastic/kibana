@@ -186,8 +186,8 @@ export class Users extends Component {
       };
     };
     const usersToShow = filter
-      ? users.filter(({ username, roles }) => {
-        const normalized = `${username} ${roles.join(' ')}`.toLowerCase();
+      ? users.filter(({ username, roles, full_name: fullName = '', email = '' }) => {
+        const normalized = `${username} ${roles.join(' ')} ${fullName} ${email}`.toLowerCase();
         const normalizedQuery = filter.toLowerCase();
         return normalized.indexOf(normalizedQuery) !== -1;
       }) : users;

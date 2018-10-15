@@ -293,7 +293,7 @@ module.controller('MlJobsList',
           job.job_id.match(filterRegexp) ||
           jobDescription.match(filterRegexp)) {
 
-        // long string moved to separate variable to allow it to be broken in two
+          // long string moved to separate variable to allow it to be broken in two
           let iconTxt = '<i ng-show="tab.jobWarningClass !== \'\'" ';
           iconTxt += 'tooltip="{{jobAudit.jobWarningText}}" class="{{jobAudit.jobWarningClass}}"></i>';
 
@@ -594,7 +594,7 @@ module.controller('MlJobsList',
     // apply the text entered in the filter field and reload the jobs list
     $scope.applyFilter = function () {
 
-    // clear the previous filter timeout
+      // clear the previous filter timeout
       $timeout.cancel(jobFilterTimeout);
 
       // create a timeout to redraw the jobs list based on the filter

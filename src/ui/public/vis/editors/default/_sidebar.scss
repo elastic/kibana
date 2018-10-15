@@ -1,3 +1,7 @@
+//
+// LAYOUT
+//
+
 .visEditorSidebar__container {
   @include flex-parent(1, 1, auto);
   background-color: $euiColorLightestShade;
@@ -5,11 +9,20 @@
 
 .visEditorSidebar__form {
   @include flex-parent(1, 1, auto);
+}
 
-  > .vis-edit-sidebar-buttons {
-    flex: 0 0 auto;
+.visEditorSidebar__config {
+  padding: $euiSizeS;
+
+  @include euiBreakpoint('l', 'xl') {
+    @include flex-parent(1, 1, 1px);
+    overflow: auto;
   }
 }
+
+//
+// NAVIGATION
+//
 
 .visEditorSidebar__indexPattern,
 .visEditorSidebar__nav {
@@ -44,7 +57,6 @@
   }
 }
 
-
 /**
  * 1. TODO: Override bootstrap styles. Remove !important once we're rid of bootstrap.
  */
@@ -62,41 +74,3 @@
   line-height: $euiSize;
 }
 
-.visEditorSidebar__config {
-  @include flex-parent(1, 1, auto);
-  padding: 10px;
-
-  @include euiBreakpoint('l', 'xl') {
-    @include flex-parent(1, 1, 1px);
-    overflow: auto;
-  }
-
-  .ems-hotlink {
-    font-size: $euiFontSizeXS;
-  }
-}
-
-vis-editor-agg-group {
-  @include flex-parent(0, 1, auto);
-
-  .sidebar-item {
-    border-top: 0 !important;
-    padding: $euiSizeM;
-    border-radius: $euiBorderRadius;
-    margin-bottom: $vis-editor-agg-editor-spacing;
-    background: $euiColorEmptyShade;
-  }
-
-  .sidebar-item-title {
-    font-size: $euiFontSizeL;
-    border: inherit !important;
-    margin-bottom: $vis-editor-agg-editor-spacing !important;
-    padding: 0px !important;
-    text-transform: capitalize;
-  }
-}
-
-vis-editor-vis-options,
-vis-editor-vis-options > * {
-  @include flex-parent();
-}

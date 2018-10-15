@@ -158,10 +158,10 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         ) : null}
 
         <EuiFormRow
-          label={<FormattedMessage id="common.ui.fieldEditor.url.urlTemplateLabel" defaultMessage="URL template"/>}
+          label={<FormattedMessage id="common.ui.fieldEditor.url.urlTemplateLabel" defaultMessage="URL template" />}
           helpText={(
             <EuiLink onClick={this.showUrlTemplateHelp}>
-              <FormattedMessage id="common.ui.fieldEditor.url.template.helpButton" defaultMessage="URL template help" />
+              <FormattedMessage id="common.ui.fieldEditor.url.template.helpLinkText" defaultMessage="URL template help" />
             </EuiLink>)}
           isInvalid={!!error}
           error={error}
@@ -176,8 +176,15 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         </EuiFormRow>
 
         <EuiFormRow
-          label={<FormattedMessage id="common.ui.fieldEditor.url.labelTemplateLabel" defaultMessage="Label template"/>}
-          helpText={(<EuiLink onClick={this.showLabelTemplateHelp}>Label template help</EuiLink>)}
+          label={<FormattedMessage id="common.ui.fieldEditor.url.labelTemplateLabel" defaultMessage="Label template" />}
+          helpText={(
+            <EuiLink onClick={this.showLabelTemplateHelp}>
+              <FormattedMessage
+                id="common.ui.fieldEditor.url.labelTemplateHelpText"
+                defaultMessage="Label template help"
+              />
+            </EuiLink>
+          )}
           isInvalid={!!error}
           error={error}
         >

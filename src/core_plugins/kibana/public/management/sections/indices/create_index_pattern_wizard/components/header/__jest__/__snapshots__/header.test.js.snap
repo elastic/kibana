@@ -1,0 +1,141 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should render normally 1`] = `
+<div>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiTitle
+    size="m"
+  >
+    <h1>
+      <FormattedMessage
+        defaultMessage="Create index pattern"
+        id="kbn.management.createIndexPatternHeader"
+        values={Object {}}
+      />
+    </h1>
+  </EuiTitle>
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiText
+        grow={true}
+      >
+        <p>
+          <EuiTextColor
+            color="subdued"
+            component="span"
+          >
+            <FormattedMessage
+              defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
+              id="kbn.management.createIndexPatternLabel"
+              values={Object {}}
+            />
+          </EuiTextColor>
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiSwitch
+        checked={true}
+        id="checkboxShowSystemIndices"
+        label={
+          <FormattedMessage
+            defaultMessage="Include system indices"
+            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
+            values={Object {}}
+          />
+        }
+        onChange={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+</div>
+`;
+
+exports[`Header should render without including system indices 1`] = `
+<div>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiTitle
+    size="m"
+  >
+    <h1>
+      <FormattedMessage
+        defaultMessage="Create index pattern"
+        id="kbn.management.createIndexPatternHeader"
+        values={Object {}}
+      />
+    </h1>
+  </EuiTitle>
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiText
+        grow={true}
+      >
+        <p>
+          <EuiTextColor
+            color="subdued"
+            component="span"
+          >
+            <FormattedMessage
+              defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
+              id="kbn.management.createIndexPatternLabel"
+              values={Object {}}
+            />
+          </EuiTextColor>
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiSwitch
+        checked={false}
+        id="checkboxShowSystemIndices"
+        label={
+          <FormattedMessage
+            defaultMessage="Include system indices"
+            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
+            values={Object {}}
+          />
+        }
+        onChange={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+</div>
+`;

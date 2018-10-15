@@ -11,10 +11,10 @@ import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker/';
 import { ShapePreview } from '../shape_preview';
 
-export const ShapePickerMini = ({ onChange, value, anchorPosition }) => {
+export const ShapePickerMini = ({ shapes, onChange, value, anchorPosition }) => {
   const button = handleClick => (
     <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
-      <ShapePreview value={value} />
+      <ShapePreview shape={shapes[value]} />
     </EuiLink>
   );
 
@@ -24,12 +24,13 @@ export const ShapePickerMini = ({ onChange, value, anchorPosition }) => {
       button={button}
       anchorPosition={anchorPosition}
     >
-      {() => <ShapePicker onChange={onChange} value={value} />}
+      {() => <ShapePicker onChange={onChange} shapes={shapes} />}
     </Popover>
   );
 };
 
 ShapePickerMini.propTypes = {
+  shapes: PropTypes.object.isRequired,
   value: PropTypes.string,
   onChange: PropTypes.func,
   anchorPosition: PropTypes.string,

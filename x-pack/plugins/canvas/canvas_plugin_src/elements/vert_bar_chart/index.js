@@ -8,7 +8,7 @@ import header from './header.png';
 
 export const verticalBarChart = () => ({
   name: 'verticalBarChart',
-  displayName: 'Vertical Bar Chart',
+  displayName: 'Vertical bar chart',
   help: 'A customizable vertical bar chart',
   image: header,
   expression: `filters

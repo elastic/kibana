@@ -11,6 +11,6 @@ export const image = () => ({
   displayName: 'Image',
   help: 'A static image.',
   image: header,
-  expression: `image mode="contain"
+  expression: `image dataurl=null mode="contain"
 | render`,
 });

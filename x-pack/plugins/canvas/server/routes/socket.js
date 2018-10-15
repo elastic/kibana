@@ -18,8 +18,6 @@ export function socketApi(server) {
   const io = socket(server.listener, { path: '/socket.io' });
 
   io.on('connection', socket => {
-    console.log('User connected, attaching handlers');
-
     // This is the HAPI request object
 
     const types = typesRegistry.toJS();
@@ -57,7 +55,6 @@ export function socketApi(server) {
 
     socket.on('run', handler);
     socket.on('disconnect', () => {
-      console.log('User disconnected, removing handlers.');
       socket.removeListener('run', handler);
     });
   });

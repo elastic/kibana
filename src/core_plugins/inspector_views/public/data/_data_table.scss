@@ -1,0 +1,8 @@
+.insDataTableFormat__filter {
+  opacity: 0;
+}
+
+.insDataTableFormat__table tr:hover .insDataTableFormat__filter,
+.insDataTableFormat__filter:focus {
+  opacity: 1;
+}

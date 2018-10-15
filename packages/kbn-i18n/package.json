@@ -2,30 +2,39 @@
   "name": "@kbn/i18n",
   "browser": "./target/web/browser.js",
   "main": "./target/node/index.js",
-  "module": "./src/index.js",
+  "types": "./target/types/index.d.ts",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "yarn build:web && yarn build:node",
-    "build:web": "cross-env BABEL_ENV=web babel src --out-dir target/web",
-    "build:node": "cross-env BABEL_ENV=node babel src --out-dir target/node",
+    "build": "yarn build:web && yarn build:node && yarn build:types",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:web": "cross-env BABEL_ENV=web babel src --config-file ./babel.config.js --out-dir target/web --extensions \".ts,.js,.tsx\"",
+    "build:node": "cross-env BABEL_ENV=node babel src --config-file ./babel.config.js --out-dir target/node --extensions \".ts,.js,.tsx\"",
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
-    "@kbn/babel-preset": "link:../kbn-babel-preset",
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "babel-cli": "^6.26.0",
-    "cross-env": "^5.2.0"
+    "@babel/cli": "^7.1.0",
+    "@babel/core": "^7.1.0",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/preset-typescript": "^7.1.0",
+    "@types/intl-relativeformat": "^2.1.0",
+    "@types/json5": "^0.0.30",
+    "@types/react-intl": "^2.3.11",
+    "cross-env": "^5.2.0",
+    "typescript": "^3.0.3"
   },
   "dependencies": {
     "intl-format-cache": "^2.1.0",
     "intl-messageformat": "^2.2.0",
     "intl-relativeformat": "^2.1.0",
-    "json5": "^1.0.1",
-    "prop-types": "^15.5.8",
+    "json5": "^2.0.1",
+    "prop-types": "^15.6.2",
     "react": "^16.3.0",
-    "react-intl": "^2.4.0"
+    "react-intl": "^2.7.0"
   }
 }

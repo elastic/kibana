@@ -65,12 +65,6 @@ describe('process options for start servers CLI', () => {
     expect(options).toMatchSnapshot();
   });
 
-  it('rejects non-enum value for esFrom', () => {
-    expect(() => {
-      processOptions({ esFrom: 'butter' }, ['foo']);
-    }).toThrow('functional_tests_server: invalid argument [butter] to option [esFrom]');
-  });
-
   it('accepts debug option', () => {
     const options = processOptions({ debug: true }, ['foo']);
     expect(options).toMatchSnapshot();

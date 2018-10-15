@@ -8,7 +8,7 @@ import header from './header.png';
 
 export const dropdownFilter = () => ({
   name: 'dropdown_filter',
-  displayName: 'Dropdown Filter',
+  displayName: 'Dropdown filter',
   help: 'A dropdown from which you can select values for an "exactly" filter',
   image: header,
   height: 50,

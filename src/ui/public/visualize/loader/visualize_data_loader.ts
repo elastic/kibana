@@ -72,7 +72,10 @@ export class VisualizeDataLoader {
 
     try {
       // searchSource is only there for courier request handler
-      const requestHandlerResponse = await this.requestHandler(this.vis, params);
+      const requestHandlerResponse = await this.requestHandler(this.vis, {
+        partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
+        ...params,
+      });
 
       // No need to call the response handler when there have been no data nor has been there changes
       // in the vis-state (response handler does not depend on uiStat
@@ -86,9 +89,7 @@ export class VisualizeDataLoader {
       this.previousRequestHandlerResponse = requestHandlerResponse;
 
       if (!canSkipResponseHandler) {
-        this.visData = await Promise.resolve(
-          this.responseHandler(this.vis, requestHandlerResponse)
-        );
+        this.visData = await Promise.resolve(this.responseHandler(requestHandlerResponse));
       }
       return this.visData;
     } catch (e) {
