@@ -33,7 +33,7 @@ export async function getTopTransactions({
   const params = {
     index: config.get('apm_oss.transactionIndices'),
     body: {
-      size: 'banana',
+      size: 0,
       query: {
         bool: {
           filter: [
