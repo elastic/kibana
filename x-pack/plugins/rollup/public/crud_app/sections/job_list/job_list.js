@@ -102,9 +102,7 @@ export class JobListUi extends Component {
     );
   }
   renderNoPermission() {
-
-    const { intl, jobLoadError } = this.props;
-    console.log(jobLoadError);
+    const { intl } = this.props;
     const title = intl.formatMessage({
       id: 'xpack.rollupJobs.jobList.noPermissionTitle',
       defaultMessage: 'Permission error',
