@@ -11,6 +11,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
+import { IUrlParams } from '..';
 import { Transaction } from '../../../../../../../../typings/Transaction';
 
 // @ts-ignore
@@ -33,15 +34,20 @@ function getDiscoverQuery(id: string) {
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
+  location: any;
+  urlParams: IUrlParams;
 }
 
-export function TransactionFlyout({ transaction, onClose }: Props) {
+export function TransactionFlyout({
+  transaction,
+  onClose,
+  location,
+  urlParams
+}: Props) {
   if (!transaction) {
     return null;
   }
 
-  // TODO in this PR: connect to or pass in location and urlParams values
-  // to be passed to the new property table component instead of dummy values
   return (
     <EuiFlyout onClose={onClose} size="l">
       <EuiFlyoutHeader>
@@ -56,8 +62,8 @@ export function TransactionFlyout({ transaction, onClose }: Props) {
       <EuiFlyoutBody>
         <TransactionPropertiesTableForFlyout
           transaction={transaction}
-          location={{ search: [] }}
-          urlParams={{}}
+          location={location}
+          urlParams={urlParams}
         />
       </EuiFlyoutBody>
     </EuiFlyout>

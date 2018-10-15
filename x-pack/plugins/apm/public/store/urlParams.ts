@@ -42,6 +42,7 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
         traceId,
         transactionId,
         detailTab,
+        flyoutDetailTab,
         spanId,
         page,
         sortDirection,
@@ -59,6 +60,7 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
         transactionId: toString(transactionId),
         traceId: toString(traceId),
         detailTab,
+        flyoutDetailTab,
         spanId: toNumber(spanId),
         kuery: legacyDecodeURIComponent(kuery),
 

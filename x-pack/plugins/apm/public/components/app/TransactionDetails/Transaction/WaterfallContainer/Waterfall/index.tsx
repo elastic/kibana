@@ -51,6 +51,9 @@ export class Waterfall extends Component<Props, State> {
     currentItem: null
   };
 
+  // TODO: Implement query param state management here in open/close methods, for
+  // linking into flyouts, clearing tab state within flyouts, etc?
+
   public onOpenFlyout = (currentItem: IWaterfallItem) => {
     this.setState({ currentItem });
   };
@@ -84,7 +87,7 @@ export class Waterfall extends Component<Props, State> {
 
   public getFlyOut = () => {
     const { currentItem } = this.state;
-    const { waterfall } = this.props;
+    const { waterfall, location, urlParams } = this.props;
     if (!currentItem) {
       return null;
     }
@@ -104,6 +107,8 @@ export class Waterfall extends Component<Props, State> {
           <TransactionFlyout
             transaction={currentItem.transaction}
             onClose={this.onCloseFlyout}
+            location={location}
+            urlParams={urlParams}
           />
         );
       default:
