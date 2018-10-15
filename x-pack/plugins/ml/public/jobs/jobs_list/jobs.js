@@ -16,6 +16,9 @@ import React, {
 } from 'react';
 
 import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -27,6 +30,8 @@ export class JobsPage extends Component {
       jobsSummaryList: [],
       updateJobStats: () => {},
     };
+
+    this.refreshJobs = () => {};
   }
 
   setUpdateJobStats = (updateJobStats) => {
@@ -35,6 +40,14 @@ export class JobsPage extends Component {
 
   unsetUpdateJobStats = () => {
     this.setUpdateJobStats(() => {});
+  }
+
+  setRefreshJobs = (refreshJobs) => {
+    this.refreshJobs = refreshJobs;
+  }
+
+  unsetRefreshJobs = () => {
+    this.setRefreshJobs(() => {});
   }
 
   render() {
@@ -47,8 +60,17 @@ export class JobsPage extends Component {
         <div className="job-management">
           <NodeAvailableWarning />
           <header>
-            <div className="new-job-button-container">
-              <NewJobButton />
+            <div className="job-buttons-container">
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={this.refreshJobs}>
+                    Refresh
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <NewJobButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </div>
           </header>
 
@@ -56,7 +78,11 @@ export class JobsPage extends Component {
 
           <EuiSpacer size="s" />
 
-          <JobsListView updateJobStats={this.state.updateJobStats} />
+          <JobsListView
+            updateJobStats={this.state.updateJobStats}
+            setRefreshJobs={this.setRefreshJobs}
+            unsetRefreshJobs={this.unsetRefreshJobs}
+          />
         </div>
       </React.Fragment>
     );

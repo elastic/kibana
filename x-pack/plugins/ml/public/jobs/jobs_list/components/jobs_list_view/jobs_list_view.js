@@ -57,11 +57,13 @@ export class JobsListView extends Component {
 
     this.initAutoRefresh();
     this.initAutoRefreshUpdate();
+    this.props.setRefreshJobs(() => this.refreshJobSummaryList(true));
   }
 
   componentWillUnmount() {
     timefilter.off('refreshIntervalUpdate');
     this.clearRefreshInterval();
+    this.props.unsetRefreshJobs();
   }
 
   initAutoRefresh() {
