@@ -13,7 +13,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-const STATUS = {
+export const IMPORT_STATUS = {
   INCOMPLETE: 'incomplete',
   COMPLETE: 'complete',
   FAILED: 'danger',
@@ -35,34 +35,34 @@ export function ImportProgress({ statuses }) {
   let statusInfo = null;
 
   let processFileTitle = 'Process file';
-  if (reading === true && readStatus === STATUS.INCOMPLETE) {
+  if (reading === true && readStatus === IMPORT_STATUS.INCOMPLETE) {
     processFileTitle = 'Processing file';
     statusInfo = (<p>Converting file for import</p>);
-  } else if (reading === false && readStatus === STATUS.COMPLETE) {
+  } else if (reading === false && readStatus === IMPORT_STATUS.COMPLETE) {
     processFileTitle = 'File processed';
   }
 
   let createIndexTitle = 'Create index';
-  if (indexCreatedStatus === STATUS.COMPLETE) {
+  if (indexCreatedStatus === IMPORT_STATUS.COMPLETE) {
     createIndexTitle = 'Index created';
   }
 
   let createIngestPipelineTitle = 'Create ingest pipeline';
-  if (ingestPipelineCreatedStatus === STATUS.COMPLETE) {
+  if (ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE) {
     createIngestPipelineTitle = 'Ingest pipeline created';
   }
 
   let uploadingDataTitle = 'Upload data';
-  if (uploadProgress > 0 && uploadStatus === STATUS.INCOMPLETE) {
+  if (uploadProgress > 0 && uploadStatus === IMPORT_STATUS.INCOMPLETE) {
     uploadingDataTitle = 'Uploading data';
 
     statusInfo = (<UploadFunctionProgress progress={uploadProgress} />);
-  } else if (uploadStatus === STATUS.COMPLETE) {
+  } else if (uploadStatus === IMPORT_STATUS.COMPLETE) {
     uploadingDataTitle = 'Data uploaded';
   }
 
   let createIndexPatternTitle = 'Create index pattern';
-  if (indexPatternCreatedStatus === STATUS.FAILED) {
+  if (indexPatternCreatedStatus === IMPORT_STATUS.FAILED) {
     createIndexPatternTitle = 'Index pattern created';
     statusInfo = null;
   }
@@ -71,28 +71,28 @@ export function ImportProgress({ statuses }) {
     {
       title: processFileTitle,
       isSelected: true,
-      isComplete: (readStatus === STATUS.COMPLETE),
+      isComplete: (readStatus === IMPORT_STATUS.COMPLETE),
       status: readStatus,
       onClick: () => {},
     },
     {
       title: createIndexTitle,
-      isSelected: (readStatus === STATUS.COMPLETE),
-      isComplete: (indexCreatedStatus === STATUS.COMPLETE),
+      isSelected: (readStatus === IMPORT_STATUS.COMPLETE),
+      isComplete: (indexCreatedStatus === IMPORT_STATUS.COMPLETE),
       status: indexCreatedStatus,
       onClick: () => {},
     },
     {
       title: createIngestPipelineTitle,
-      isSelected: (indexCreatedStatus === STATUS.COMPLETE),
-      isComplete: (ingestPipelineCreatedStatus === STATUS.COMPLETE),
+      isSelected: (indexCreatedStatus === IMPORT_STATUS.COMPLETE),
+      isComplete: (ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE),
       status: ingestPipelineCreatedStatus,
       onClick: () => {},
     },
     {
       title: uploadingDataTitle,
-      isSelected: (indexCreatedStatus === STATUS.COMPLETE),
-      isComplete: (uploadStatus === STATUS.COMPLETE),
+      isSelected: (indexCreatedStatus === IMPORT_STATUS.COMPLETE),
+      isComplete: (uploadStatus === IMPORT_STATUS.COMPLETE),
       status: uploadStatus,
       onClick: () => {},
     }
@@ -101,8 +101,8 @@ export function ImportProgress({ statuses }) {
   if (createIndexPattern === true) {
     firstSetOfSteps.push({
       title: createIndexPatternTitle,
-      isSelected: (uploadStatus === STATUS.COMPLETE),
-      isComplete: (indexPatternCreatedStatus === STATUS.COMPLETE),
+      isSelected: (uploadStatus === IMPORT_STATUS.COMPLETE),
+      isComplete: (indexPatternCreatedStatus === IMPORT_STATUS.COMPLETE),
       status: indexPatternCreatedStatus,
       onClick: () => {},
     });

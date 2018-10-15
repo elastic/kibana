@@ -21,7 +21,7 @@ import {
 
 import { importerFactory } from './importer';
 import { ResultsLinks } from './results_links';
-import { ImportProgress } from './import_progress';
+import { ImportProgress, IMPORT_STATUS } from './import_progress';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 
@@ -35,12 +35,12 @@ export class ImportView extends Component {
       imported: false,
       reading: false,
       readProgress: 0,
-      readStatus: 'incomplete',
-      indexCreatedStatus: 'incomplete',
-      indexPatternCreatedStatus: 'incomplete',
-      ingestPipelineCreatedStatus: 'incomplete',
+      readStatus: IMPORT_STATUS.INCOMPLETE,
+      indexCreatedStatus: IMPORT_STATUS.INCOMPLETE,
+      indexPatternCreatedStatus: IMPORT_STATUS.INCOMPLETE,
+      ingestPipelineCreatedStatus: IMPORT_STATUS.INCOMPLETE,
       uploadProgress: 0,
-      uploadStatus: 'incomplete',
+      uploadStatus: IMPORT_STATUS.INCOMPLETE,
       createIndexPattern: true,
       indexPattern: '',
       indexPatternId: '',
@@ -74,14 +74,14 @@ export class ImportView extends Component {
             let success = await importer.read(fileContents, this.setReadProgress);
             console.log('read end');
             this.setState({
-              readStatus: 'complete',
+              readStatus: IMPORT_STATUS.COMPLETE,
               reading: false,
             });
 
             if (success) {
               const resp = await importer.import(index, this.setImportProgress);
               success = resp.success;
-              const uploadStatus = success ? 'complete' : 'danger';
+              const uploadStatus = success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED;
               this.setState({ uploadStatus });
 
 
@@ -90,7 +90,7 @@ export class ImportView extends Component {
                 const indexPatternId = await this.createIndexPattern(indexPatternName);
                 console.log(indexPatternId);
                 this.setState({
-                  indexPatternCreatedStatus: 'complete',
+                  indexPatternCreatedStatus: IMPORT_STATUS.COMPLETE,
                   indexPatternId,
                 });
               }
@@ -126,8 +126,8 @@ export class ImportView extends Component {
 
   setImportProgress = (progress) => {
     this.setState({
-      indexCreatedStatus: (progress > 0) ? 'complete' : 'incomplete',
-      ingestPipelineCreatedStatus: (progress > 0) ? 'complete' : 'incomplete',
+      indexCreatedStatus: (progress > 0) ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.INCOMPLETE,
+      ingestPipelineCreatedStatus: (progress > 0) ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.INCOMPLETE,
       uploadProgress: progress,
     });
   }
