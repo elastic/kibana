@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { routes } from './server/routes';
-import { functionsRegistry } from './common/lib/functions_registry';
+import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
+import { loadServerPlugins } from '@kbn/interpreter/server/load_server_plugins';
 import { commonFunctions } from './common/functions';
-import { loadServerPlugins } from './server/lib/load_server_plugins';
+import { routes } from './server/routes';
 import { registerCanvasUsageCollector } from './server/usage';
 
 export default function(server /*options*/) {

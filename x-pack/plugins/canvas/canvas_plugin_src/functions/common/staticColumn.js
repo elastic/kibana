@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getType } from '../../../common/lib/get_type';
+import { getType } from '@kbn/interpreter/common/lib/get_type';
 
 export const staticColumn = () => ({
   name: 'staticColumn',
