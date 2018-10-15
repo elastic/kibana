@@ -10,7 +10,7 @@
  */
 
 import { CommonProps, EuiToolTipPosition } from '@elastic/eui';
-import { Moment } from 'moment';
+import moment from 'moment';
 import { MouseEventHandler, ReactType, Ref } from 'react';
 import { ReactDatePickerProps } from 'react-datepicker';
 import { JsonObject } from '../common/typed_json';
@@ -62,12 +62,16 @@ declare module '@elastic/eui' {
     > & {
       fullWidth?: boolean;
       inputRef?: Ref<Element | ReactType>;
-      injectTimes?: Moment[];
+      injectTimes?: moment.Moment[];
       isInvalid?: boolean;
       isLoading?: boolean;
-      selected?: Moment | null | undefined;
+      selected?: moment.Moment | null | undefined;
       placeholder?: string;
       shadow?: boolean;
+      calendarContainer?: React.ReactNode;
+      onChange?: (date: moment.Moment | null) => void;
+      startDate?: moment.Moment | undefined;
+      endDate?: moment.Moment | undefined;
     };
   export const EuiDatePicker: React.SFC<EuiDatePickerProps>;
 
@@ -162,4 +166,25 @@ declare module '@elastic/eui' {
   export const EuiHideFor: React.SFC<EuiResponsiveProps>;
 
   export const EuiShowFor: React.SFC<EuiResponsiveProps>;
+
+  type EuiDatePickerRangeProps = CommonProps & {
+    startDateControl: React.ReactNode;
+    endDateControl: React.ReactNode;
+    iconType?: IconType | boolean;
+    fullWidth?: boolean;
+    disabled?: boolean;
+    isLoading?: boolean;
+    dateFormat?: string;
+  };
+
+  export const EuiDatePickerRange: React.SFC<EuiDatePickerRangeProps>;
+
+  type EuiFieldNumberProps = CommonProps & {
+    defaultValue: string;
+    value?: number;
+    onChange?: (arg: any) => void;
+    step?: number;
+  };
+
+  export const EuiFieldNumber: React.SFC<EuiFieldNumberProps>;
 }

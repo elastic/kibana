@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import React from 'react';
 
 import {
@@ -19,12 +18,17 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import styled, { withTheme } from 'styled-components';
-import { InfraNodeType } from '../../../common/graphql/types';
+import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
 import { AutoSizer } from '../../components/auto_sizer';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
+import { MetricsTimeControls } from '../../components/metrics/time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
+import {
+  WithMetricsTime,
+  WithMetricsTimeUrlState,
+} from '../../containers/metrics/with_metrics_time';
 import { WithOptions } from '../../containers/with_options';
 import { Error, ErrorPageBody } from '../error';
 import { layoutCreators } from './layouts';
@@ -77,68 +81,92 @@ class MetricDetailPage extends React.PureComponent<Props> {
     return (
       <ColumnarPage>
         <Header breadcrumbs={breadcrumbs} />
+        <WithMetricsTimeUrlState />
         <DetailPageContent>
           <WithOptions>
-            {({ sourceId, timerange }) => (
-              <WithMetrics
-                layout={layout}
-                sourceId={sourceId}
-                timerange={timerange}
-                nodeType={nodeType}
-                nodeId={nodeName}
-              >
-                {({ metrics, error, loading }) => {
-                  if (error) {
-                    return <ErrorPageBody message={error} />;
-                  }
-                  return (
-                    <EuiPage style={{ flex: '1 0 auto' }}>
-                      <EuiPageSideBar>
-                        <EuiHideFor sizes={['xs', 's']}>
-                          <EuiSideNavContainer>
-                            <EuiSideNav items={sideNav} />
-                          </EuiSideNavContainer>
-                        </EuiHideFor>
-                        <EuiShowFor sizes={['xs', 's']}>
-                          <EuiSideNav
-                            items={sideNav}
-                            mobileTitle={nodeName}
-                            toggleOpenOnMobile={this.toggleOpenOnMobile}
-                            isOpenOnMobile={this.state.isSideNavOpenOnMobile}
-                          />
-                        </EuiShowFor>
-                      </EuiPageSideBar>
-                      <AutoSizer content={false} bounds detectAnyWindowResize>
-                        {({ measureRef, bounds: { width = 0 } }) => {
-                          return (
-                            <MetricsDetailsPageColumn innerRef={measureRef}>
-                              <EuiPageBody style={{ width: `${width}px` }}>
-                                <EuiHideFor sizes={['xs', 's']}>
-                                  <EuiPageHeader style={{ flex: '0 0 auto' }}>
-                                    <EuiPageHeaderSection>
-                                      <EuiTitle size="m">
-                                        <h1>{nodeName}</h1>
-                                      </EuiTitle>
-                                    </EuiPageHeaderSection>
-                                  </EuiPageHeader>
-                                </EuiHideFor>
-                                <EuiPageContentWithRelative>
-                                  <Metrics
-                                    nodeName={nodeName}
-                                    layout={layout}
-                                    metrics={metrics}
-                                    loading={loading}
-                                  />
-                                </EuiPageContentWithRelative>
-                              </EuiPageBody>
-                            </MetricsDetailsPageColumn>
-                          );
-                        }}
-                      </AutoSizer>
-                    </EuiPage>
-                  );
-                }}
-              </WithMetrics>
+            {({ sourceId }) => (
+              <WithMetricsTime resetOnUnmount>
+                {({
+                  currentTimeRange,
+                  isAutoReloading,
+                  setRangeTime,
+                  startMetricsAutoReload,
+                  stopMetricsAutoReload,
+                }) => (
+                  <WithMetrics
+                    layout={layout}
+                    sourceId={sourceId}
+                    timerange={currentTimeRange as InfraTimerangeInput}
+                    nodeType={nodeType}
+                    nodeId={nodeName}
+                  >
+                    {({ metrics, error, loading }) => {
+                      if (error) {
+                        return <ErrorPageBody message={error} />;
+                      }
+                      return (
+                        <EuiPage style={{ flex: '1 0 auto' }}>
+                          <EuiPageSideBar>
+                            <EuiHideFor sizes={['xs', 's']}>
+                              <EuiSideNavContainer>
+                                <EuiSideNav items={sideNav} />
+                              </EuiSideNavContainer>
+                            </EuiHideFor>
+                            <EuiShowFor sizes={['xs', 's']}>
+                              <EuiSideNav
+                                items={sideNav}
+                                mobileTitle={nodeName}
+                                toggleOpenOnMobile={this.toggleOpenOnMobile}
+                                isOpenOnMobile={this.state.isSideNavOpenOnMobile}
+                              />
+                            </EuiShowFor>
+                          </EuiPageSideBar>
+                          <AutoSizer content={false} bounds detectAnyWindowResize>
+                            {({ measureRef, bounds: { width = 0 } }) => {
+                              return (
+                                <MetricsDetailsPageColumn innerRef={measureRef}>
+                                  <EuiPageBody style={{ width: `${width}px` }}>
+                                    <EuiPageHeader style={{ flex: '0 0 auto' }}>
+                                      <EuiPageHeaderSection style={{ width: '100%' }}>
+                                        <MetricsTitleTimeRangeContainer>
+                                          <EuiHideFor sizes={['xs', 's']}>
+                                            <EuiTitle size="m">
+                                              <h1>{nodeName}</h1>
+                                            </EuiTitle>
+                                          </EuiHideFor>
+                                          <MetricsTimeControls
+                                            currentTimeRange={currentTimeRange}
+                                            isLiveStreaming={isAutoReloading}
+                                            onChangeRangeTime={setRangeTime}
+                                            startLiveStreaming={startMetricsAutoReload}
+                                            stopLiveStreaming={stopMetricsAutoReload}
+                                          />
+                                        </MetricsTitleTimeRangeContainer>
+                                      </EuiPageHeaderSection>
+                                    </EuiPageHeader>
+
+                                    <EuiPageContentWithRelative>
+                                      <Metrics
+                                        nodeName={nodeName}
+                                        layout={layout}
+                                        metrics={metrics}
+                                        loading={
+                                          metrics.length > 0 && isAutoReloading ? false : loading
+                                        }
+                                        onChangeRangeTime={setRangeTime}
+                                      />
+                                    </EuiPageContentWithRelative>
+                                  </EuiPageBody>
+                                </MetricsDetailsPageColumn>
+                              );
+                            }}
+                          </AutoSizer>
+                        </EuiPage>
+                      );
+                    }}
+                  </WithMetrics>
+                )}
+              </WithMetricsTime>
             )}
           </WithOptions>
         </DetailPageContent>
@@ -178,4 +206,10 @@ const MetricsDetailsPageColumn = styled.div`
   flex: 1 0 0;
   display: flex;
   flex-direction: column;
+`;
+
+const MetricsTitleTimeRangeContainer = styled.div`
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
 `;

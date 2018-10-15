@@ -7,11 +7,15 @@
 import React from 'react';
 import { InfraMetricData } from '../../../common/graphql/types';
 import { InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
+import { metricTimeActions } from '../../store';
 import { sections } from './sections';
 
 interface Props {
   section: InfraMetricLayoutSection;
   metrics: InfraMetricData[];
+  onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
+  crosshairValue?: number;
+  onCrosshairUpdate?: (crosshairValue: number) => void;
 }
 
 export class Section extends React.PureComponent<Props> {
@@ -20,7 +24,15 @@ export class Section extends React.PureComponent<Props> {
     if (!metric) {
       return null;
     }
+    let sectionProps = {};
+    if (this.props.section.type === 'chart') {
+      sectionProps = {
+        onChangeRangeTime: this.props.onChangeRangeTime,
+        crosshairValue: this.props.crosshairValue,
+        onCrosshairUpdate: this.props.onCrosshairUpdate,
+      };
+    }
     const Component = sections[this.props.section.type];
-    return <Component section={this.props.section} metric={metric} />;
+    return <Component section={this.props.section} metric={metric} {...sectionProps} />;
   }
 }

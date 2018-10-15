@@ -92,13 +92,14 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
       throw new Error('Failed to access indexPatternsService for the request');
     }
     return this.server.indexPatternsServiceFactory({
-      callCluster: async (method: string, args: object, ...rest: any[]) => {
-        return await this.callWithRequest(
+      callCluster: async (method: string, args: [object], ...rest: any[]) => {
+        const fieldCaps = await this.callWithRequest(
           request,
           method,
           { ...args, allowNoIndices: true },
           ...rest
         );
+        return fieldCaps;
       },
     });
   }
