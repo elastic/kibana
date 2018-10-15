@@ -36,11 +36,11 @@ export class ResultsLinks extends Component {
 
   async updateTimeValues() {
     const {
-      indexPattern,
+      index,
       timeFieldName,
     } = this.props;
 
-    const { from, to, } = await getFullTimeRange(indexPattern, timeFieldName);
+    const { from, to, } = await getFullTimeRange(index, timeFieldName);
     this.setState({ from, to });
   }
 

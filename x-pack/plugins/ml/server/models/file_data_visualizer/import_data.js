@@ -34,7 +34,7 @@ export function importDataProvider(callWithRequest) {
         }
       }
 
-      if (indexExits(index)) {
+      if (data.length && indexExits(index)) {
         const resp = await indexData(index, pipelineId, data);
         if (resp.success === false) {
           throw resp;

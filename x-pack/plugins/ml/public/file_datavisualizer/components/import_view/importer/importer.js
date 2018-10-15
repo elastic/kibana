@@ -26,6 +26,11 @@ export class Importer {
     }
 
     const chunks = chunk(this.docArray, CHUNK_SIZE);
+    // add an empty chunk to the beginning so the first
+    // import request only creates the index and pipeline
+    // and returns quickly
+    chunks.unshift([]);
+
     const mappings = this.results.mappings;
     const ingestPipeline = this.results.ingest_pipeline;
     updatePipelineTimezone(ingestPipeline);

@@ -23,6 +23,8 @@ import { importerFactory } from './importer';
 import { ResultsLinks } from './results_links';
 import { ImportProgress } from './import_progress';
 
+const DEFAULT_TIME_FIELD = '@timestamp';
+
 export class ImportView extends Component {
   constructor(props) {
     super(props);
@@ -136,7 +138,7 @@ export class ImportView extends Component {
     });
   }
 
-  async createIndexPattern(indexPatternName, timeFieldName = '@timestamp') {
+  async createIndexPattern(indexPatternName, timeFieldName = DEFAULT_TIME_FIELD) {
     let createdId;
     try {
       const emptyPattern = await this.props.indexPatterns.get();
@@ -263,9 +265,9 @@ export class ImportView extends Component {
             <EuiPanel>
 
               <ResultsLinks
-                indexPattern={(indexPattern)}
+                index={(index)}
                 indexPatternId={(indexPatternId)}
-                timeFieldName={this.props.results.timestamp_field}
+                timeFieldName={DEFAULT_TIME_FIELD}
               />
 
             </EuiPanel>
