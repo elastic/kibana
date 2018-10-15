@@ -96,7 +96,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
-                id="visualize.newVisWizard.title"
+                id="kbn.visualize.newVisWizard.title"
                 defaultMessage="New Visualizations"
               />
             </EuiModalHeaderTitle>
@@ -113,7 +113,10 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={true}>
-                    <EuiKeyPadMenu className="visNewVisDialog__types">
+                    <EuiKeyPadMenu
+                      className="visNewVisDialog__types"
+                      data-test-subj="visNewDialogTypes"
+                    >
                       {visTypes.map(this.renderVisType)}
                     </EuiKeyPadMenu>
                   </EuiFlexItem>
@@ -127,7 +130,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
                   <EuiTitle size="s">
                     <h2>
                       <FormattedMessage
-                        id="visualize.newVisWizard.selectVisType"
+                        id="kbn.visualize.newVisWizard.selectVisType"
                         defaultMessage="Select a visualization type"
                       />
                     </h2>
