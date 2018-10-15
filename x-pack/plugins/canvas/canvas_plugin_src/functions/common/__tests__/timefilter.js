@@ -6,8 +6,8 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 import { timefilter } from '../timefilter';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { emptyFilter } from './fixtures/test_filters';
 
 let clock = null;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildESRequest } from '../../../../server/lib/build_es_request';
+import { buildESRequest } from '@kbn/interpreter/server';
 
 export const escount = () => ({
   name: 'escount',

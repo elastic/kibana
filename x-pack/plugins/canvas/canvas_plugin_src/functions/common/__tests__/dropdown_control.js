@@ -5,9 +5,8 @@
  */
 
 import expect from 'expect.js';
+import { functionWrapper, testTable } from '@kbn/interpreter/test_utils';
 import { dropdownControl } from '../dropdownControl';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { testTable } from './fixtures/test_tables';
 
 describe('dropdownControl', () => {
   const fn = functionWrapper(dropdownControl);

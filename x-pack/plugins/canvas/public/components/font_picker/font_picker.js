@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSuperSelect } from '@elastic/eui';
-import { fonts } from '../../../common/lib/fonts';
+import { fonts } from '@kbn/interpreter/common/lib/fonts';
 
 export const FontPicker = ({ onSelect, value }) => (
   <EuiSuperSelect
