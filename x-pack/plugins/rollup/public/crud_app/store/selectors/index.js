@@ -21,6 +21,7 @@ export const getDetailPanelJob = (state) => getJobByJobId(state, state.detailPan
 export const getDetailPanelJobId = (state) => state.detailPanel.jobId;
 
 export const isLoading = (state) => state.jobs.isLoading;
+export const jobLoadError = (state) => state.jobs.jobLoadError;
 export const isSaving = (state) => state.createJob.isSaving;
 export const getCreateJobError = (state) => state.createJob.error;
 

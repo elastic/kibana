@@ -23,6 +23,7 @@ export const loadJobs = () => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: LOAD_JOBS_FAILURE,
+      payload: { error }
     });
 
     return toastNotifications.addDanger(error.data.message);
