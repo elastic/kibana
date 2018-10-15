@@ -5,11 +5,8 @@
  */
 
 import expect from 'expect.js';
+import { grayscalePalette, gradientPalette } from '@kbn/interpreter/test_utils';
 import { getColorsFromPalette } from '../../lib/get_colors_from_palette';
-import {
-  grayscalePalette,
-  gradientPalette,
-} from '../../../canvas_plugin_src/functions/common/__tests__/fixtures/test_styles';
 
 describe('getColorsFromPalette', () => {
   it('returns the array of colors from a palette object when gradient is false', () => {

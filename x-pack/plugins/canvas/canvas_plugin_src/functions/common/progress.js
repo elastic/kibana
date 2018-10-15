@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { openSans } from '../../../common/lib/fonts';
+import { openSans } from '@kbn/interpreter/common/lib/fonts';
 import { shapes } from '../../renderers/progress/shapes';
 
 export const progress = () => ({

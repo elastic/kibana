@@ -5,8 +5,8 @@
  */
 
 import expect from 'expect.js';
+import { fontStyle } from '@kbn/interpreter/test_utils';
 import { defaultSpec, getFontSpec } from '../plot/get_font_spec';
-import { fontStyle } from './fixtures/test_styles';
 
 describe('getFontSpec', () => {
   describe('default output', () => {
