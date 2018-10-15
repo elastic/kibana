@@ -25,6 +25,7 @@ import {
   isObjectExpression,
   isObjectProperty,
   isStringLiteral,
+  isTemplateLiteral,
 } from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
@@ -197,20 +198,40 @@ export function extractMessageIdFromNode(node) {
   return node.value;
 }
 
-export function extractMessageValueFromNode(node, messageId) {
-  if (!isStringLiteral(node)) {
-    throw createFailError(`defaultMessage value should be a string literal ("${messageId}").`);
+function parseTemplateLiteral(node, messageId) {
+  if (node.quasis.length > 1) {
+    throw createFailError(`expressions are not allowed in template literals ("${messageId}").`);
   }
 
-  return node.value;
+  return node.quasis[0].value.cooked;
+}
+
+export function extractMessageValueFromNode(node, messageId) {
+  if (isStringLiteral(node)) {
+    return node.value;
+  }
+
+  if (isTemplateLiteral(node)) {
+    return parseTemplateLiteral(node, messageId);
+  }
+
+  throw createFailError(
+    `defaultMessage value should be a string literal or a template literal ("${messageId}").`
+  );
 }
 
 export function extractContextValueFromNode(node, messageId) {
-  if (!isStringLiteral(node)) {
-    throw createFailError(`context value should be a string literal ("${messageId}").`);
+  if (isStringLiteral(node)) {
+    return node.value;
   }
 
-  return node.value;
+  if (isTemplateLiteral(node)) {
+    return parseTemplateLiteral(node, messageId);
+  }
+
+  throw createFailError(
+    `context value should be a string literal or a template literal ("${messageId}").`
+  );
 }
 
 export function extractValuesKeysFromNode(node, messageId) {

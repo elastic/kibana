@@ -20,7 +20,19 @@ Array [
 ]
 `;
 
-exports[`dev/i18n/extractors/i18n_call throws if defaultMessage is not a string literal 1`] = `"defaultMessage value should be a string literal (\\"message-id\\")."`;
+exports[`dev/i18n/extractors/i18n_call extracts "i18n" and "i18n.translate" functions call message 3`] = `
+Array [
+  "message-id-3",
+  Object {
+    "context": "Message
+context 3",
+    "message": "Default
+message 3",
+  },
+]
+`;
+
+exports[`dev/i18n/extractors/i18n_call throws if defaultMessage is not a string literal 1`] = `"defaultMessage value should be a string literal or a template literal (\\"message-id\\")."`;
 
 exports[`dev/i18n/extractors/i18n_call throws if message id value is not a string literal 1`] = `"Message id should be a string literal."`;
 
