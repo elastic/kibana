@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import 'plugins/reporting/less/main.less';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import routes from 'ui/routes';
