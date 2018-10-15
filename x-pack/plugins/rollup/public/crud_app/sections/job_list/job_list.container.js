@@ -10,6 +10,7 @@ import { JobList as JobListView } from './job_list';
 import {
   getPageOfJobs,
   isLoading,
+  jobLoadError
 } from '../../store/selectors';
 
 import {
@@ -23,6 +24,7 @@ const mapStateToProps = (state) => {
   return {
     jobs: getPageOfJobs(state),
     isLoading: isLoading(state),
+    jobLoadError: jobLoadError(state),
   };
 };
 

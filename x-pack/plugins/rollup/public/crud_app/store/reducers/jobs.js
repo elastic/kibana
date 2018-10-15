@@ -57,6 +57,7 @@ export function jobs(state = initialState, action) {
       return {
         ...state,
         isLoading: false,
+        jobLoadError: payload.error
       };
 
     case CREATE_JOB_SUCCESS:
