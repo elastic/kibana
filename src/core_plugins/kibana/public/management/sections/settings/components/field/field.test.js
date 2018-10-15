@@ -248,7 +248,6 @@ describe('Field', () => {
 
         it('should be able to change value from existing value and save', async () => {
           const newUserValue = `${userValue}=`;
-          findTestSubject(component, `advancedSetting-changeImage-${setting.name}`).simulate('click');
           await component.instance().onImageChange([newUserValue]);
           component.update();
           findTestSubject(component, `advancedSetting-saveEditField-${setting.name}`).simulate('click');

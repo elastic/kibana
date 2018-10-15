@@ -24,11 +24,7 @@ import { join, relative, resolve } from 'path';
 import { getProjectPaths } from '../config';
 import { isDirectory, isFile } from '../utils/fs';
 import { log } from '../utils/log';
-import {
-  createProductionPackageJson,
-  readPackageJson,
-  writePackageJson,
-} from '../utils/package_json';
+import { readPackageJson, writePackageJson } from '../utils/package_json';
 import { Project } from '../utils/project';
 import {
   buildProjectGraph,
@@ -128,6 +124,5 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
     ? await readPackageJson(buildProjectPath)
     : project.json;
 
-  const preparedPackageJson = createProductionPackageJson(packageJson);
-  await writePackageJson(buildProjectPath, preparedPackageJson);
+  await writePackageJson(buildProjectPath, packageJson);
 }
