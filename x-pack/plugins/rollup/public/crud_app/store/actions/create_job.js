@@ -40,26 +40,34 @@ export const createJob = (jobConfig) => async (dispatch) => {
     // Some errors have statusCode directly available but some are under a data property.
     switch (statusCode || data.statusCode) {
       case 409:
+        let message = `A job with ID '${jobConfig.id}' already exists.`;
         dispatch({
           type: CREATE_JOB_FAILURE,
           payload: {
             error: {
-              message: `A job with ID '${jobConfig.id}' already exists.`,
+              message,
             },
           },
         });
+        toastNotifications.addDanger(message);
         break;
 
       default:
+        let serverErrorMessage = data.message;
+        if (data.cause && data.cause.length) {
+          serverErrorMessage = `${data.cause.join(' ')}`;
+        }
+        message = `Request failed with a ${statusCode || data.statusCode} error. ${serverErrorMessage}`;
         dispatch({
           type: CREATE_JOB_FAILURE,
           payload: {
             error: {
-              message: `Request failed with a ${statusCode} error. ${data.message}`,
+              message,
               cause: data.cause,
             },
           },
         });
+        toastNotifications.addDanger(message);
     }
 
     return;
