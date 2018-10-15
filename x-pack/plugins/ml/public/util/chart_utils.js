@@ -142,7 +142,7 @@ export function getChartType(config) {
     return CHART_TYPE.EVENT_DISTRIBUTION;
   } else if (
     POPULATION_DISTRIBUTION_ENABLED &&
-    config.functionDescription === 'count' &&
+    config.functionDescription !== 'rare' &&
     config.entityFields.some(f => f.fieldType === 'over')
   ) {
     return CHART_TYPE.POPULATION_DISTRIBUTION;
