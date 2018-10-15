@@ -17,6 +17,10 @@
  * under the License.
  */
 
-export { QueryBar } from './components';
+import { uiModules } from '../modules';
+import { PersistedLog } from './persisted_log';
 
-
+uiModules.get('kibana/persisted_log')
+  .factory('PersistedLog', function () {
+    return PersistedLog;
+  });

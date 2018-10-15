@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
+import React, { SFC } from 'react';
+import { Suggestion } from 'ui/autocomplete_providers';
 
-function getEuiIconType(type) {
+function getEuiIconType(type: string) {
   switch (type) {
     case 'field':
       return 'kqlField';
@@ -35,11 +35,20 @@ function getEuiIconType(type) {
     case 'operator':
       return 'kqlOperand';
     default:
-      throw new Error('Unknown type', type);
+      throw new Error(`Unknown type: ${type}`);
   }
 }
 
-export function Suggestion(props) {
+interface Props {
+  onClick: (suggestion: Suggestion) => void;
+  onMouseEnter: () => void;
+  selected: boolean;
+  suggestion: Suggestion;
+  innerRef: (node: HTMLDivElement) => void;
+  ariaId: string;
+}
+
+export const SuggestionComponent: SFC<Props> = props => {
   return (
     <div
       className={classNames({
@@ -53,8 +62,8 @@ export function Suggestion(props) {
       id={props.ariaId}
     >
       <div className={'suggestionItem suggestionItem--' + props.suggestion.type}>
-        <div className="suggestionItem__type" type={props.suggestion.type}>
-          <EuiIcon type={getEuiIconType(props.suggestion.type)}/>
+        <div className="suggestionItem__type">
+          <EuiIcon type={getEuiIconType(props.suggestion.type)} />
         </div>
         <div className="suggestionItem__text">{props.suggestion.text}</div>
         <div
@@ -67,15 +76,4 @@ export function Suggestion(props) {
       </div>
     </div>
   );
-}
-
-
-Suggestion.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  onMouseEnter: PropTypes.func.isRequired,
-  selected: PropTypes.bool,
-  suggestion: PropTypes.object.isRequired,
-  innerRef: PropTypes.func.isRequired,
-  ariaId: PropTypes.string.isRequired,
 };
-

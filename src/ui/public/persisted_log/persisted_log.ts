@@ -17,35 +17,46 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
 import _ from 'lodash';
-import { Storage } from '../storage';
+import { Storage } from 'ui/storage';
 
 const localStorage = new Storage(window.localStorage);
 
-const defaultIsDuplicate = (oldItem, newItem) => {
+const defaultIsDuplicate = (oldItem: string, newItem: string) => {
   return _.isEqual(oldItem, newItem);
 };
 
 export class PersistedLog {
-  constructor(name, options = {}, storage = localStorage) {
+  public name: string;
+  public maxLength?: number;
+  public filterDuplicates?: boolean;
+  public isDuplicate: (oldItem: any, newItem: any) => boolean;
+  public storage: Storage;
+  public items: any[];
+
+  constructor(name: string, options: PersistedLogOptions, storage = localStorage) {
     this.name = name;
-    this.maxLength = parseInt(options.maxLength, 10);
+    this.maxLength =
+      typeof options.maxLength === 'string'
+        ? (this.maxLength = parseInt(options.maxLength, 10))
+        : options.maxLength;
     this.filterDuplicates = options.filterDuplicates || false;
     this.isDuplicate = options.isDuplicate || defaultIsDuplicate;
     this.storage = storage;
     this.items = this.storage.get(this.name) || [];
-    if (!isNaN(this.maxLength)) this.items = _.take(this.items, this.maxLength);
+    if (this.maxLength && !isNaN(this.maxLength)) {
+      this.items = _.take(this.items, this.maxLength);
+    }
   }
 
-  add(val) {
+  public add(val: any) {
     if (val == null) {
       return this.items;
     }
 
     // remove any matching items from the stack if option is set
     if (this.filterDuplicates) {
-      _.remove(this.items, (item) => {
+      _.remove(this.items, item => {
         return this.isDuplicate(item, val);
       });
     }
@@ -53,19 +64,22 @@ export class PersistedLog {
     this.items.unshift(val);
 
     // if maxLength is set, truncate the stack
-    if (!isNaN(this.maxLength)) this.items = _.take(this.items, this.maxLength);
+    if (this.maxLength && !isNaN(this.maxLength)) {
+      this.items = _.take(this.items, this.maxLength);
+    }
 
     // persist the stack
     this.storage.set(this.name, this.items);
     return this.items;
   }
 
-  get() {
+  public get() {
     return _.cloneDeep(this.items);
   }
 }
 
-uiModules.get('kibana/persisted_log')
-  .factory('PersistedLog', function () {
-    return PersistedLog;
-  });
+interface PersistedLogOptions {
+  maxLength?: number | string;
+  filterDuplicates?: boolean;
+  isDuplicate?: (oldItem: string, newItem: string) => boolean;
+}

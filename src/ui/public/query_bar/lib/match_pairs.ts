@@ -34,6 +34,16 @@ const pairs = ['()', '[]', '{}', `''`, '""'];
 const openers = pairs.map(pair => pair[0]);
 const closers = pairs.map(pair => pair[1]);
 
+interface MatchPairsOptions {
+  value: string;
+  selectionStart: number;
+  selectionEnd: number;
+  key: string;
+  metaKey: boolean;
+  updateQuery: (query: string, selectionStart: number, selectionEnd: number) => void;
+  preventDefault: () => void;
+}
+
 export function matchPairs({
   value,
   selectionStart,
@@ -42,7 +52,7 @@ export function matchPairs({
   metaKey,
   updateQuery,
   preventDefault,
-}) {
+}: MatchPairsOptions) {
   if (shouldMoveCursorForward(key, value, selectionStart, selectionEnd)) {
     preventDefault();
     updateQuery(value, selectionStart + 1, selectionEnd + 1);
@@ -62,38 +72,70 @@ export function matchPairs({
   }
 }
 
-
-function shouldMoveCursorForward(key, value, selectionStart, selectionEnd) {
-  if (!closers.includes(key)) return false;
+function shouldMoveCursorForward(
+  key: string,
+  value: string,
+  selectionStart: number,
+  selectionEnd: number
+) {
+  if (!closers.includes(key)) {
+    return false;
+  }
 
   // Never move selection forward for multi-character selections
-  if (selectionStart !== selectionEnd) return false;
+  if (selectionStart !== selectionEnd) {
+    return false;
+  }
 
   // Move selection forward if the key is the same as the closer in front of the selection
   return value.charAt(selectionEnd) === key;
 }
 
-function shouldInsertMatchingCloser(key, value, selectionStart, selectionEnd) {
-  if (!openers.includes(key)) return false;
+function shouldInsertMatchingCloser(
+  key: string,
+  value: string,
+  selectionStart: number,
+  selectionEnd: number
+) {
+  if (!openers.includes(key)) {
+    return false;
+  }
 
   // Always insert for multi-character selections
-  if (selectionStart !== selectionEnd) return true;
+  if (selectionStart !== selectionEnd) {
+    return true;
+  }
 
   const precedingCharacter = value.charAt(selectionStart - 1);
   const followingCharacter = value.charAt(selectionStart + 1);
 
   // Don't insert if the preceding character is a backslash
-  if (precedingCharacter === '\\') return false;
+  if (precedingCharacter === '\\') {
+    return false;
+  }
 
   // Don't insert if it's a quote and the either of the preceding/following characters is alphanumeric
-  return !(['"', `'`].includes(key) && (isAlphanumeric(precedingCharacter) || isAlphanumeric(followingCharacter)));
+  return !(
+    ['"', `'`].includes(key) &&
+    (isAlphanumeric(precedingCharacter) || isAlphanumeric(followingCharacter))
+  );
 }
 
-function shouldRemovePair(key, metaKey, value, selectionStart, selectionEnd) {
-  if (key !== 'Backspace' || metaKey) return false;
+function shouldRemovePair(
+  key: string,
+  metaKey: boolean,
+  value: string,
+  selectionStart: number,
+  selectionEnd: number
+) {
+  if (key !== 'Backspace' || metaKey) {
+    return false;
+  }
 
   // Never remove for multi-character selections
-  if (selectionStart !== selectionEnd) return false;
+  if (selectionStart !== selectionEnd) {
+    return false;
+  }
 
   // Remove if the preceding/following characters are a pair
   return pairs.includes(value.substr(selectionEnd - 1, 2));

@@ -17,4 +17,16 @@
  * under the License.
  */
 
-export { Storage } from './storage';
+
+import { uiModules } from '../modules';
+import { Storage } from './storage';
+
+const createService = function (type) {
+  return function ($window) {
+    return new Storage($window[type]);
+  };
+};
+
+uiModules.get('kibana/storage')
+  .service('localStorage', createService('localStorage'))
+  .service('sessionStorage', createService('sessionStorage'));

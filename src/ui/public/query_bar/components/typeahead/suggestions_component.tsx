@@ -17,61 +17,33 @@
  * under the License.
  */
 
-
-
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
-import { Suggestion } from './suggestion';
+import React, { Component } from 'react';
+import { Suggestion } from 'ui/autocomplete_providers';
 import './suggestion.less';
+import { SuggestionComponent } from './suggestion_component';
 
-export class Suggestions extends Component {
-  childNodes = [];
+interface Props {
+  index: number;
+  onClick: (suggestion: Suggestion) => void;
+  onMouseEnter: (index: number) => void;
+  show: boolean;
+  suggestions: Suggestion[];
+  loadMore: () => void;
+}
 
-  scrollIntoView = () => {
-    const parent = this.parentNode;
-    const child = this.childNodes[this.props.index];
+export class SuggestionsComponent extends Component<Props> {
+  private childNodes: HTMLDivElement[] = [];
+  private parentNode: HTMLDivElement | null = null;
 
-    if (this.props.index == null || !parent || !child) {
-      return;
-    }
-
-    const scrollTop = Math.max(
-      Math.min(parent.scrollTop, child.offsetTop),
-      child.offsetTop + child.offsetHeight - parent.offsetHeight
-    );
-
-    parent.scrollTop = scrollTop;
-  };
-
-  handleScroll = () => {
-    if (!this.props.loadMore) return;
-
-    const position = this.parentNode.scrollTop + this.parentNode.offsetHeight;
-    const height = this.parentNode.scrollHeight;
-    const remaining = height - position;
-    const margin = 50;
-
-    if (!height || !position) return;
-    if (remaining <= margin) {
-      this.props.loadMore();
-    }
-  };
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.index !== this.props.index) {
-      this.scrollIntoView();
-    }
-  }
-
-  render() {
+  public render() {
     if (!this.props.show || isEmpty(this.props.suggestions)) {
       return null;
     }
 
     const suggestions = this.props.suggestions.map((suggestion, index) => {
       return (
-        <Suggestion
+        <SuggestionComponent
           innerRef={node => (this.childNodes[index] = node)}
           selected={index === this.props.index}
           suggestion={suggestion}
@@ -101,13 +73,44 @@ export class Suggestions extends Component {
       </div>
     );
   }
-}
 
-Suggestions.propTypes = {
-  index: PropTypes.number,
-  onClick: PropTypes.func.isRequired,
-  onMouseEnter: PropTypes.func.isRequired,
-  show: PropTypes.bool,
-  suggestions: PropTypes.array.isRequired,
-  loadMore: PropTypes.func,
-};
+  public componentDidUpdate(prevProps: Props) {
+    if (prevProps.index !== this.props.index) {
+      this.scrollIntoView();
+    }
+  }
+
+  private scrollIntoView = () => {
+    const parent = this.parentNode;
+    const child = this.childNodes[this.props.index];
+
+    if (this.props.index == null || !parent || !child) {
+      return;
+    }
+
+    const scrollTop = Math.max(
+      Math.min(parent.scrollTop, child.offsetTop),
+      child.offsetTop + child.offsetHeight - parent.offsetHeight
+    );
+
+    parent.scrollTop = scrollTop;
+  };
+
+  private handleScroll = () => {
+    if (!this.props.loadMore || !this.parentNode) {
+      return;
+    }
+
+    const position = this.parentNode.scrollTop + this.parentNode.offsetHeight;
+    const height = this.parentNode.scrollHeight;
+    const remaining = height - position;
+    const margin = 50;
+
+    if (!height || !position) {
+      return;
+    }
+    if (remaining <= margin) {
+      this.props.loadMore();
+    }
+  };
+}

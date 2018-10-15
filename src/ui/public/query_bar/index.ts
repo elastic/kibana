@@ -17,8 +17,4 @@
  * under the License.
  */
 
-
-
-export { QueryBar } from './query_bar';
-
-
+export { QueryBar } from './components';
