@@ -27,6 +27,7 @@ export function infra(kibana: any) {
         listed: false,
         url: `/app/${APP_ID}#/home`,
       },
+      home: ['plugins/infra/register_feature'],
       links: [
         {
           description: 'Explore your infrastructure',
