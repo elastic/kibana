@@ -11,16 +11,14 @@ import { serializeProvider } from '../../common/lib/serialize';
 import { functionsRegistry } from '../../common/lib/functions_registry';
 import { typesRegistry } from '../../common/lib/types_registry';
 import { loadServerPlugins } from '../lib/load_server_plugins';
-import { getAuthHeader } from './get_auth/get_auth_header';
+import { getRequest } from './get_request';
 
 export function socketApi(server) {
   const io = socket(server.listener, { path: '/socket.io' });
 
   io.on('connection', socket => {
     // This is the HAPI request object
-    const request = socket.handshake;
-
-    const authHeader = getAuthHeader(request, server);
+    const getRequestPromise = getRequest(socket.handshake, server);
 
     // Create the function list
     socket.emit('getFunctionList');
@@ -31,9 +29,8 @@ export function socketApi(server) {
     });
 
     const handler = ({ ast, context, id }) => {
-      Promise.all([getClientFunctions, authHeader]).then(([clientFunctions, authHeader]) => {
-        if (server.plugins.security) request.headers.authorization = authHeader;
-
+      Promise.all([getClientFunctions, getRequestPromise]).then(([clientFunctions, request]) => {
+        console.log('after', request.headers);
         const types = typesRegistry.toJS();
         const interpret = socketInterpreterProvider({
           types,
