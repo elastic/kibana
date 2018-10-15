@@ -254,6 +254,8 @@ export class JobsListView extends Component {
           Object.keys(this.updateFunctions).forEach((j) => {
             this.updateFunctions[j].setState({ job: fullJobsList[j] });
           });
+
+          this.props.setRefreshDone();
         })
         .catch((error) => {
           console.error(error);

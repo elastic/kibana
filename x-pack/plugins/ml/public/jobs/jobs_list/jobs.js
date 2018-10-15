@@ -27,6 +27,7 @@ export class JobsPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isRefreshing: false,
       jobsSummaryList: [],
       updateJobStats: () => {},
     };
@@ -50,7 +51,17 @@ export class JobsPage extends Component {
     this.setRefreshJobs(() => {});
   }
 
+  onRefreshClick = () => {
+    this.setState({ isRefreshing: true });
+    this.refreshJobs();
+  }
+
+  isDoneRefreshing = () => {
+    this.setState({ isRefreshing: false });
+  }
+
   render() {
+    const { isRefreshing } = this.state;
     return (
       <React.Fragment>
         <JobStatsBar
@@ -63,7 +74,10 @@ export class JobsPage extends Component {
             <div className="job-buttons-container">
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={this.refreshJobs}>
+                  <EuiButtonEmpty
+                    onClick={this.onRefreshClick}
+                    isLoading={isRefreshing}
+                  >
                     Refresh
                   </EuiButtonEmpty>
                 </EuiFlexItem>
@@ -82,6 +96,7 @@ export class JobsPage extends Component {
             updateJobStats={this.state.updateJobStats}
             setRefreshJobs={this.setRefreshJobs}
             unsetRefreshJobs={this.unsetRefreshJobs}
+            setRefreshDone={this.isDoneRefreshing}
           />
         </div>
       </React.Fragment>
