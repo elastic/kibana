@@ -127,6 +127,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       delete: jest.fn((type: string, id: string) => {
         return {};
       }),
+      deleteByNamespace: jest.fn(),
     };
 
     server.savedObjects = {

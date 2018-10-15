@@ -138,7 +138,7 @@
     "joi": "^13.5.2",
     "jquery": "^3.3.1",
     "jstimezonedetect": "1.0.5",
-    "lodash": "3.10.1",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lodash.clone": "^4.5.0",
     "lodash.keyby": "^4.6.0",
     "lodash.lowercase": "^4.3.0",

@@ -135,7 +135,7 @@
     "leaflet.heat": "0.2.0",
     "less": "2.7.1",
     "less-loader": "4.0.5",
-    "lodash": "3.10.1",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lru-cache": "4.1.1",
     "markdown-it": "^8.4.1",
     "minimatch": "^3.0.4",
@@ -348,6 +348,6 @@
   },
   "engines": {
     "node": "8.11.4",
-    "yarn": "^1.6.0"
+    "yarn": "^1.10.1"
   }
 }
