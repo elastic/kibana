@@ -27,31 +27,55 @@ const TableContainer = styled.div`
   padding: ${px(units.plus)} ${px(units.plus)} 0;
 `;
 
-// Ensure the selected tab exists or use the first
-function getCurrentTab(tabs = [], selectedTab) {
-  return tabs.includes(selectedTab) ? selectedTab : first(tabs);
+// Ensure the selected group exists or use the first
+function getCurrentPropertyGroup(groups = [], selectedGroup) {
+  return groups.includes(selectedGroup) ? selectedGroup : first(groups);
 }
 
-const TIMELINE_TAB = 'timeline';
+const TIMELINE_GROUP = 'timeline';
 
-function getTabs(transactionData) {
-  const dynamicProps = Object.keys(transactionData.context || {});
-  return [TIMELINE_TAB, ...getPropertyTabNames(dynamicProps)];
+function getPropertyGroups(transactionData, { includeTimeline }) {
+  const defaultGroups = getPropertyTabNames(
+    Object.keys(transactionData.context || {})
+  );
+  return includeTimeline ? [TIMELINE_GROUP, ...defaultGroups] : defaultGroups;
 }
 
-export function TransactionPropertiesTable({
-  location,
-  transaction,
-  urlParams
-}) {
-  const tabs = getTabs(transaction);
-  const currentTab = getCurrentTab(tabs, urlParams.detailTab);
+function CurrentView({ currentGroup, location, transaction, urlParams }) {
   const agentName = get(transaction, SERVICE_AGENT_NAME);
+  if (currentGroup === TIMELINE_GROUP) {
+    return (
+      <WaterfallContainer
+        transaction={transaction}
+        location={location}
+        urlParams={urlParams}
+      />
+    );
+  } else {
+    return (
+      <TableContainer>
+        <PropertiesTable
+          propData={get(transaction.context, currentGroup)}
+          propKey={currentGroup}
+          agentName={agentName}
+        />
+      </TableContainer>
+    );
+  }
+}
+
+export function TransactionPropertiesTable(props) {
+  const { location, transaction, urlParams, includeTimeline = true } = props;
+  const propertyGroups = getPropertyGroups(transaction, { includeTimeline });
+  const currentGroup = getCurrentPropertyGroup(
+    propertyGroups,
+    urlParams.detailTab
+  );
 
   return (
     <div>
       <TabContainer>
-        {tabs.map(key => {
+        {propertyGroups.map(key => {
           return (
             <Tab
               onClick={() => {
@@ -63,7 +87,7 @@ export function TransactionPropertiesTable({
                   })
                 });
               }}
-              selected={currentTab === key}
+              selected={currentGroup === key}
               key={key}
             >
               {capitalize(key)}
@@ -71,24 +95,7 @@ export function TransactionPropertiesTable({
           );
         })}
       </TabContainer>
-
-      {currentTab === TIMELINE_TAB && (
-        <WaterfallContainer
-          transaction={transaction}
-          location={location}
-          urlParams={urlParams}
-        />
-      )}
-
-      {currentTab !== TIMELINE_TAB && (
-        <TableContainer>
-          <PropertiesTable
-            propData={get(transaction.context, currentTab)}
-            propKey={currentTab}
-            agentName={agentName}
-          />
-        </TableContainer>
-      )}
+      <CurrentView currentGroup={currentGroup} {...props} />
     </div>
   );
 }
