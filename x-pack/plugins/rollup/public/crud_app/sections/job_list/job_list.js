@@ -19,9 +19,11 @@ import {
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
@@ -85,7 +87,45 @@ export class JobListUi extends Component {
     // this page.
     this.props.closeDetailPanel();
   }
+  getHeaderSection() {
+    return (
+      <EuiPageContentHeaderSection>
+        <EuiTitle size="l">
+          <h1>
+            <FormattedMessage
+              id="xpack.rollupJobs.jobListTitle"
+              defaultMessage="Rollup jobs"
+            />
+          </h1>
+        </EuiTitle>
+      </EuiPageContentHeaderSection>
+    );
+  }
+  renderNoPermission() {
 
+    const { intl, jobLoadError } = this.props;
+    console.log(jobLoadError);
+    const title = intl.formatMessage({
+      id: 'xpack.rollupJobs.jobList.noPermissionTitle',
+      defaultMessage: 'Permission error',
+    });
+    return (
+      <Fragment>
+        {this.getHeaderSection()}
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={title}
+          color="warning"
+          iconType="help"
+        >
+          <FormattedMessage
+            id="xpack.rollupJobs.jobList.noPermissionText"
+            defaultMessage="You do not have permission to view or add rollup jobs."
+          />
+        </EuiCallOut>
+      </Fragment>
+    );
+  }
   renderEmpty() {
     return (
       <EuiEmptyPrompt
@@ -161,16 +201,7 @@ export class JobListUi extends Component {
     return (
       <Fragment>
         <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle size="l">
-              <h1>
-                <FormattedMessage
-                  id="xpack.rollupJobs.jobListTitle"
-                  defaultMessage="Rollup jobs"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiPageContentHeaderSection>
+          {this.getHeaderSection()}
 
           <EuiPageContentHeaderSection>
             <EuiButton fill {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}>
@@ -190,11 +221,12 @@ export class JobListUi extends Component {
   }
 
   render() {
-    const { isLoading, jobs } = this.props;
+    const { isLoading, jobs, jobLoadError } = this.props;
 
     let content;
-
-    if (!isLoading && !jobs.length) {
+    if (jobLoadError && jobLoadError.status === 403) {
+      content = this.renderNoPermission();
+    } else if (!isLoading && !jobs.length) {
       content = this.renderEmpty();
     } else {
       content = this.renderList();
