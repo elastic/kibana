@@ -14,6 +14,8 @@ interface Props {
   section: InfraMetricLayoutSection;
   metrics: InfraMetricData[];
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
+  crosshairValue?: number;
+  onCrosshairUpdate?: (crosshairValue: number) => void;
 }
 
 export class Section extends React.PureComponent<Props> {
@@ -24,7 +26,11 @@ export class Section extends React.PureComponent<Props> {
     }
     let sectionProps = {};
     if (this.props.section.type === 'chart') {
-      sectionProps = { onChangeRangeTime: this.props.onChangeRangeTime };
+      sectionProps = {
+        onChangeRangeTime: this.props.onChangeRangeTime,
+        crosshairValue: this.props.crosshairValue,
+        onCrosshairUpdate: this.props.onCrosshairUpdate,
+      };
     }
     const Component = sections[this.props.section.type];
     return <Component section={this.props.section} metric={metric} {...sectionProps} />;

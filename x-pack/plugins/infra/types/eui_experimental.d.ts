@@ -14,7 +14,9 @@ declare module '@elastic/eui/lib/experimental' {
     showCrosshair?: boolean;
     showDefaultAxis?: boolean;
     enableSelectionBrush?: boolean;
+    crosshairValue?: number;
     onSelectionBrushEnd?: (args: any) => void;
+    onCrosshairUpdate?: (crosshairValue: number) => void;
   };
   export const EuiSeriesChart: React.SFC<EuiSeriesChartProps>;
 
