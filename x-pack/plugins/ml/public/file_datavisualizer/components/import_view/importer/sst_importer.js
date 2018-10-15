@@ -16,6 +16,12 @@ export class SstImporter extends Importer {
     this.grokPattern = results.grok_pattern;
   }
 
+  // convert the semi structured text string into an array of lines
+  // by looking over each char, looking for newlines.
+  // if one is found, check the next line to see if it starts with the
+  // multiline_start_pattern regex
+  // if it does, it is a legitimate end of line and can be pushed into the list,
+  // if not, it must be a new line char inside a field value, so keep looking.
   async read(text) {
     console.log('read sst file');
     console.time('read sst file');
