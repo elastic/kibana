@@ -23,12 +23,7 @@ export class UsageCollector {
     return collectorSet.makeUsageCollector({
       type: KIBANA_REPORTING_TYPE,
       fetch: async () => {
-        const report = this.getReport();
-        // tslint:disable:no-console
-        console.log('counters: ', this.counters);
-        console.log('number of buckets: ', Object.keys(this.counters).length);
-        console.log('report:', report);
-        return report;
+        return this.getReport();
       },
     });
   }
@@ -58,8 +53,6 @@ export class UsageCollector {
   private static counters: any = {};
   private static BUCKET_SIZE = 3600; // seconds in an hour
   private static BUCKET_NUMBER = 24; // report the last 24 hours
-  // private static BUCKET_SIZE = 20; // a real small bucket size for testing
-  // private static BUCKET_NUMBER = 3; // report the last minute
 
   private static getBucket() {
     const now = Math.floor(Date.now() / 1000);
