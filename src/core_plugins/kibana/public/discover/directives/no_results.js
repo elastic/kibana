@@ -18,6 +18,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 
 import {
@@ -61,7 +62,24 @@ export class DiscoverNoResults extends Component {
       const failures = shardFailures.map((failure, index) => (
         <div key={`${failure.index}${failure.shard}${failure.reason}`}>
           <EuiText size="xs">
-            <strong>Index &lsquo;{failure.index}&rsquo;</strong>, shard &lsquo;{failure.shard}&rsquo;
+            <FormattedMessage
+              id="kbn.discover.noResults.indexFailureShardText"
+              defaultMessage="{index}, shard &lsquo;{failureShard}&rsquo;"
+              values={{
+                index: (
+                  <strong>
+                    <FormattedMessage
+                      id="kbn.discover.noResults.indexFailureIndexText"
+                      defaultMessage="Index &lsquo;{failure.index}&rsquo;"
+                      values={{
+                        failureIndex: failure.index,
+                      }}
+                    />
+                  </strong>
+                ),
+                failureShard: failure.shard,
+              }}
+            />
           </EuiText>
 
           <EuiSpacer size="s" />
@@ -80,11 +98,14 @@ export class DiscoverNoResults extends Component {
 
           <EuiText>
             <h3>
-              Address shard failures
+              <FormattedMessage id="kbn.discover.noResults.addressShardFailures" defaultMessage="Address shard failures" />
             </h3>
 
             <p>
-              The following shard failures occurred:
+              <FormattedMessage
+                id="kbn.discover.noResults.shardFailuresDescription"
+                defaultMessage="The following shard failures occurred:"
+              />
             </p>
 
             {failures}
@@ -102,21 +123,31 @@ export class DiscoverNoResults extends Component {
 
           <EuiText>
             <h3>
-              Expand your time range
+              <FormattedMessage id="kbn.discover.noResults.expandYourTimeRangeTitle" defaultMessage="Expand your time range" />
             </h3>
 
             <p>
-              One or more of the indices you&rsquo;re looking at contains a date field. Your query may
-              not match anything in the current time range, or there may not be any data at all in
-              the currently selected time range. You can try {(
-                <EuiLink
-                  data-test-subj="discoverNoResultsTimefilter"
-                  onClick={this.onClickTimePickerButton}
-                  aria-expanded={isTimePickerOpen}
-                >
-                  opening the time picker
-                </EuiLink>
-              )} and changing the time range to one which contains data.
+              <FormattedMessage
+                id="kbn.discover.noResults.expandYourTimeRangeTitle"
+                defaultMessage="One or more of the indices you&rsquo;re looking at contains a date field. Your query may
+                  not match anything in the current time range, or there may not be any data at all in
+                  the currently selected time range. You can try {timepickerLink} and changing the time range to one which contains data.
+                "
+                values={{
+                  timepickerLink: (
+                    <EuiLink
+                      data-test-subj="discoverNoResultsTimefilter"
+                      onClick={this.onClickTimePickerButton}
+                      aria-expanded={isTimePickerOpen}
+                    >
+                      <FormattedMessage
+                        id="kbn.discover.noResults.openingTimepickerLinkText"
+                        defaultMessage="opening the time picker"
+                      />
+                    </EuiLink>
+                  )
+                }}
+              />
             </p>
 
           </EuiText>
@@ -129,19 +160,64 @@ export class DiscoverNoResults extends Component {
     if (queryLanguage === 'lucene') {
       const searchExamples = [{
         description: <EuiCode>200</EuiCode>,
-        title: <EuiText><strong>Find requests that contain the number 200, in any field</strong></EuiText>,
+        title: (
+          <EuiText>
+            <strong>
+              <FormattedMessage
+                id="kbn.discover.noResults.searchExamples.anyField200StatusCodeExampleTitle"
+                defaultMessage="Find requests that contain the number 200, in any field"
+              />
+            </strong>
+          </EuiText>
+        ),
       }, {
         description: <EuiCode>status:200</EuiCode>,
-        title: <EuiText><strong>Find 200 in the status field</strong></EuiText>,
+        title: (
+          <EuiText>
+            <strong>
+              <FormattedMessage
+                id="kbn.discover.noResults.searchExamples.statusField200StatusCodeExampleTitle"
+                defaultMessage="Find 200 in the status field"
+              />
+            </strong>
+          </EuiText>
+        ),
       }, {
         description: <EuiCode>status:[400 TO 499]</EuiCode>,
-        title: <EuiText><strong>Find all status codes between 400-499</strong></EuiText>,
+        title: (
+          <EuiText>
+            <strong>
+              <FormattedMessage
+                id="kbn.discover.noResults.searchExamples.400to499StatusCodeExampleTitle"
+                defaultMessage="Find all status codes between 400-499"
+              />
+            </strong>
+          </EuiText>
+        ),
       }, {
         description: <EuiCode>status:[400 TO 499] AND extension:PHP</EuiCode>,
-        title: <EuiText><strong>Find status codes 400-499 with the extension php</strong></EuiText>,
+        title: (
+          <EuiText>
+            <strong>
+              <FormattedMessage
+                id="kbn.discover.noResults.searchExamples.400to499StatusCodeWithPhpExtensionExampleTitle"
+                defaultMessage="Find status codes 400-499 with the extension php"
+              />
+            </strong>
+          </EuiText>
+        ),
       }, {
         description: <EuiCode>status:[400 TO 499] AND (extension:php OR extension:html)</EuiCode>,
-        title: <EuiText><strong>Find status codes 400-499 with the extension php or html</strong></EuiText>,
+        title: (
+          <EuiText>
+            <strong>
+              <FormattedMessage
+                id="kbn.discover.noResults.searchExamples.400to499StatusCodeWithPhpOrHtmlExtensionExampleTitle"
+                defaultMessage="Find status codes 400-499 with the extension php or html"
+              />
+            </strong>
+          </EuiText>
+        ),
       }];
 
       luceneQueryMessage = (
@@ -150,19 +226,28 @@ export class DiscoverNoResults extends Component {
 
           <EuiText>
             <h3>
-              Refine your query
+              <FormattedMessage id="kbn.discover.noResults.searchExamples.refineYourQueryTitle" defaultMessage="Refine your query" />
             </h3>
 
             <p>
-              The search bar at the top uses Elasticsearch&rsquo;s support for Lucene {(
-                <EuiLink
-                  target="_blank"
-                  href={getDocLink('query.luceneQuerySyntax')}
-                >
-                  Query String syntax
-                </EuiLink>
-              )}. Here are some examples of how you can search for web server logs that have been
-              parsed into a few fields.
+              <FormattedMessage
+                id="kbn.discover.noResults.searchExamples.howTosearchForWebServerLogsDescription"
+                defaultMessage="The search bar at the top uses Elasticsearch&rsquo;s support for Lucene {queryStringSyntaxLink}.
+                Here are some examples of how you can search for web server logs that have been parsed into a few fields."
+                values={{
+                  queryStringSyntaxLink: (
+                    <EuiLink
+                      target="_blank"
+                      href={getDocLink('query.luceneQuerySyntax')}
+                    >
+                      <FormattedMessage
+                        id="kbn.discover.noResults.searchExamples.queryStringSyntaxLinkText"
+                        defaultMessage="Query String syntax"
+                      />
+                    </EuiLink>
+                  )
+                }}
+              />
             </p>
           </EuiText>
 
@@ -185,7 +270,10 @@ export class DiscoverNoResults extends Component {
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false} className="dscNoResults">
             <EuiCallOut
-              title="No results match your search criteria"
+              title={<FormattedMessage
+                id="kbn.discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
+                defaultMessage="No results match your search criteria"
+              />}
               color="warning"
               iconType="help"
               data-test-subj="discoverNoResults"

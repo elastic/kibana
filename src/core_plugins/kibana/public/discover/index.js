@@ -25,11 +25,15 @@ import './controllers/discover';
 import 'ui/doc_table/components/table_row';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register((i18n) => {
   return {
     id: 'discover',
-    title: 'Discover',
-    description: 'Interactively explore your data by querying and filtering raw documents.',
+    title: i18n('kbn.discover.discoverTitle', {
+      defaultMessage: 'Discover',
+    }),
+    description: i18n('kbn.discover.discoverDescription', {
+      defaultMessage: 'Interactively explore your data by querying and filtering raw documents.',
+    }),
     icon: 'discoverApp',
     path: '/app/kibana#/discover',
     showOnHomePage: true,

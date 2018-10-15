@@ -10,8 +10,8 @@
             <span data-test-subj="discoverCurrentQuery" ng-bind="opts.savedSearch.lastSavedTitle"></span>
             <span
               id="reload_saved_search"
-              aria-label="Reload Saved Search"
-              tooltip="Reload Saved Search"
+              aria-label="{{::'kbn.discover.reloadSavedSearchAriaLabel' | i18n: {defaultMessage: 'Reload Saved Search'} }}"
+              tooltip="{{::'kbn.discover.reloadSavedSearchTooltip' | i18n: {defaultMessage: 'Reload Saved Search'} }}"
               ng-click="resetQuery()"
               kbn-accessible-click
               class="kuiIcon fa-undo small"
@@ -88,7 +88,10 @@
               class="dscOverlay"
             >
               <div class="euiTitle" >
-                <h2>Searching</h2>
+                <h2
+                  i18n-id="kbn.discover.searchingTitle"
+                  i18n-default-message="Searching"
+                ></h2>
               </div>
               <div class="euiSpacer euiSpacer--m"></div>
               <div ng-show="fetchStatus">{{fetchStatus.complete}}/{{fetchStatus.total}}</div>
@@ -103,7 +106,10 @@
             >
               <span class="kuiButton__inner">
                 <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-down"></span>
-                <span>Skip to bottom</span>
+                <span
+                  i18n-id="kbn.discover.skipToBottomButtonLabel"
+                  i18n-default-message="Skip to bottom"
+                ></span>
               </span>
             </button>
 
@@ -123,13 +129,18 @@
                       data-test-subj="discoverIntervalSelect"
                       >
                     </select>
-                    <span ng-if="bucketInterval.scaled">
-                      <icon-tip
-                        content="getBucketIntervalToolTipText()"
-                        position="'top'"
-                      ></icon-tip>
-                      Scaled to {{ bucketInterval.description }}
-                    </span>
+                    <span
+                      ng-if="bucketInterval.scaled"
+                      i18n-id="kbn.discover.scaledToDescription "
+                      i18n-default-message="{iconTip} Scaled to {bucketIntervalDescription}"
+                      i18n-values="{
+                        iconTip: '<icon-tip
+                          content=\'getBucketIntervalToolTipText()\'
+                          position=&quot;\'top\'&quot;
+                        ></icon-tip>',
+                        bucketIntervalDescription: bucketInterval.description
+                      }"
+                    ></span>
                   </span>
                 </div>
 
@@ -164,11 +175,17 @@
 
               <a tabindex="0" id="discoverBottomMarker"></a>
 
-              <div ng-if="rows.length == opts.sampleSize" class="dscTable__footer">
-                These are the first {{opts.sampleSize}} documents matching
-                your search, refine your search to see others.
-                <a kbn-accessible-click ng-click="scrollToTop()">Back to top.</a>
-              </div>
+              <div
+                ng-if="rows.length == opts.sampleSize"
+                class="dscTable__footer"
+                i18n-id="kbn.discover.scaledToDescription "
+                i18n-default-message="These are the first {sampleSize} documents matching
+                your search, refine your search to see others. {scrollToTopLink}"
+                i18n-values="{
+                  sampleSize: opts.sampleSize,
+                  scrollToTopLink: '<a kbn-accessible-click ng-click=\'scrollToTop()\'>Back to top.</a>'
+                }"
+              ></div>
             </section>
           </div>
         </div>

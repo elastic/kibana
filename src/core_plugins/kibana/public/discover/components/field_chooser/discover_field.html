@@ -17,7 +17,7 @@
       ng-if="field.name !== '_source'"
       ng-click="toggleDisplay(field)"
       ng-class="::field.display ? 'kuiButton--danger' : 'kuiButton--primary'"
-      ng-bind="::field.display ? 'remove' : 'add'"
+      ng-bind="::addRemoveButtonLabel"
       class="dscSidebarItem__action kuiButton kuiButton--small"
       data-test-subj="fieldToggle-{{::field.name}}"
     ></button>
