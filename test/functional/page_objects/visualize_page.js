@@ -44,44 +44,44 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async navigateToNewVisualization() {
-      log.debug('navigateToApp visualize new');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      log.debug('navigateToApp visualize');
+      await PageObjects.common.navigateToApp('visualize');
+      await testSubjects.click('createNewVis');
       await this.waitForVisualizationSelectPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async waitForVisualizationSelectPage() {
       await retry.try(async () => {
-        const visualizeSelectTypePage = await testSubjects.find('visualizeSelectTypePage');
+        const visualizeSelectTypePage = await testSubjects.find('visNewDialogTypes');
         if (!visualizeSelectTypePage.isDisplayed()) {
           throw new Error('wait for visualization select page');
         }
       });
     }
 
-    async clickAreaChart() {
-      await find.clickByPartialLinkText('Area');
+    async clickVisType(type) {
+      await testSubjects.click(`visType-${type}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickAreaChart() {
+      await this.clickVisType('area');
     }
 
     async clickDataTable() {
-      await find.clickByPartialLinkText('Data Table');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('table');
     }
 
     async clickLineChart() {
-      await find.clickByPartialLinkText('Line');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('line');
     }
 
     async clickRegionMap() {
-      await find.clickByPartialLinkText('Region Map');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisEditorTab('region_map');
     }
 
     async clickMarkdownWidget() {
-      await find.clickByPartialLinkText('Markdown');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('markdown');
     }
 
     async clickAddMetric() {
@@ -93,38 +93,31 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickMetric() {
-      await find.clickByPartialLinkText('Metric');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('metric');
     }
 
     async clickGauge() {
-      await find.clickByPartialLinkText('Gauge');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('gauge');
     }
 
     async clickPieChart() {
-      await find.clickByPartialLinkText('Pie');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('pie');
     }
 
     async clickTileMap() {
-      await find.clickByPartialLinkText('Coordinate Map');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('tile_map');
     }
 
     async clickTagCloud() {
-      await find.clickByPartialLinkText('Tag Cloud');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('tagcloud');
     }
 
     async clickVega() {
-      await find.clickByPartialLinkText('Vega');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('vega');
     }
 
     async clickVisualBuilder() {
-      await find.clickByPartialLinkText('Visual Builder');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('metrics');
     }
 
     async clickEditorSidebarCollapse() {
@@ -151,29 +144,23 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickVerticalBarChart() {
-      await find.clickByPartialLinkText('Vertical Bar');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('histogram');
     }
 
     async clickHeatmapChart() {
-      await find.clickByPartialLinkText('Heat Map');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('heatmap');
     }
 
     async clickInputControlVis() {
-      await find.clickByPartialLinkText('Controls');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
-    async getChartTypeCount() {
-      const tags = await find.allByCssSelector('a.wizard-vis-type');
-      return tags.length;
+      await this.clickVisType('input_control_vis');
     }
 
     async getChartTypes() {
-      const chartTypes = await testSubjects.findAll('visualizeWizardChartTypeTitle');
+      const chartTypeField = await testSubjects.find('visNewDialogTypes');
+      const chartTypes = await chartTypeField.findAllByTagName('button');
       async function getChartType(chart) {
-        return await chart.getVisibleText();
+        const label = await testSubjects.findDescendant('visTypeTitle', chart);
+        return await label.getVisibleText();
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
@@ -189,11 +176,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getLabTypeLinks() {
-      return await remote.findAllByPartialLinkText('(Lab)');
+      return await remote.findAllByCssSelector('[data-vis-stage="lab"]');
     }
 
     async getExperimentalTypeLinks() {
-      return await remote.findAllByPartialLinkText('(Experimental)');
+      return await remote.findAllByCssSelector('[data-vis-stage="experimental"]');
     }
 
     async isExperimentalInfoShown() {

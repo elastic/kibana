@@ -168,7 +168,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     return (
       <EuiKeyPadMenuItemButton
         key={visType.name}
-        label={visType.title}
+        label={<span data-test-subj="visTypeTitle">{visType.title}</span>}
         onClick={() => this.onSelectVisType(visType)}
         onFocus={() => this.highlightType(visType)}
         onMouseEnter={() => this.highlightType(visType)}
@@ -176,6 +176,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
         onBlur={() => this.highlightType(null)}
         className="visNewVisDialog__type"
         data-test-subj={`visType-${visType.name}`}
+        data-vis-stage={visType.stage}
         disabled={isDisabled}
         {...stage}
       >

@@ -266,7 +266,7 @@ export class VisualizeListingTable extends Component {
   renderToolBarActions() {
     return this.state.selectedRowIds.length > 0 ?
       <KuiListingTableDeleteButton onDelete={this.onDelete} aria-label="Delete selected visualizations"/> :
-      <KuiListingTableCreateButton onCreate={this.onCreate} aria-label="Create new visualization"/>;
+      <KuiListingTableCreateButton onCreate={this.onCreate} data-test-subj="createNewVis" aria-label="Create new visualization"/>;
   }
 
   renderPager() {
