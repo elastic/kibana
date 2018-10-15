@@ -19,7 +19,6 @@
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { CATEGORY } from 'ui/vis/vis_category';
 import pieTemplate from './editors/pie.html';
 
 export default function HistogramVisType(Private) {
@@ -30,7 +29,6 @@ export default function HistogramVisType(Private) {
     title: 'Pie',
     icon: 'visPie',
     description: 'Compare parts of a whole',
-    category: CATEGORY.BASIC,
     visConfig: {
       defaults: {
         type: 'pie',

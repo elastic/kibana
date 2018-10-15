@@ -20,7 +20,6 @@
 import './tag_cloud.less';
 import './tag_cloud_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { TagCloudVisualization } from './tag_cloud_visualization';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -35,7 +34,6 @@ VisTypesRegistryProvider.register(function (Private) {
     title: 'Tag Cloud',
     icon: 'visTagCloud',
     description: 'A group of words, sized according to their importance',
-    category: CATEGORY.OTHER,
     visConfig: {
       defaults: {
         scale: 'linear',

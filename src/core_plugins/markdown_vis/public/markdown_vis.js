@@ -20,7 +20,6 @@
 import './markdown_vis.less';
 import { MarkdownVisWrapper } from './markdown_vis_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { CATEGORY } from 'ui/vis/vis_category';
 import markdownVisParamsTemplate from './markdown_vis_params.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
@@ -42,7 +41,6 @@ function MarkdownVisProvider(Private, i18n) {
     isAccessible: true,
     icon: 'visText',
     description: i18n('markdownVis.markdownDescription', { defaultMessage: 'Create a document using markdown syntax' }),
-    category: CATEGORY.OTHER,
     visConfig: {
       component: MarkdownVisWrapper,
       defaults: {

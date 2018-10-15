@@ -20,7 +20,6 @@
 import { IconType } from '@elastic/eui';
 import { RequestHandler, ResponseHandler, Vis } from '..';
 import { Status } from '../update_status';
-import { CATEGORY } from '../vis_category';
 
 export class VisualizationController {
   constructor(element: HTMLElement, vis: Vis);
@@ -40,8 +39,8 @@ export interface VisType {
   icon?: IconType;
   image?: string;
   stage: 'experimental' | 'production' | 'lab';
-  category?: CATEGORY;
   requiresSearch: boolean;
+  hidden: boolean;
 
   // Since we haven't typed everything here yet, we basically "any" the rest
   // of that interface. This should be removed as soon as this type definition

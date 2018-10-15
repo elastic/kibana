@@ -20,7 +20,6 @@
 import './metric_vis.less';
 import './metric_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
@@ -42,7 +41,6 @@ function MetricVisProvider(Private, i18n) {
     title: i18n('metricVis.metricTitle', { defaultMessage: 'Metric' }),
     icon: 'visMetric',
     description: i18n('metricVis.metricDescription', { defaultMessage: 'Display a calculation as a single number' }),
-    category: CATEGORY.DATA,
     visConfig: {
       component: MetricVisComponent,
       defaults: {

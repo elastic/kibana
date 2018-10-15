@@ -19,7 +19,6 @@
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { CATEGORY } from 'ui/vis/vis_category';
 import gaugeTemplate from './editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
@@ -32,7 +31,6 @@ export default function GaugeVisType(Private) {
     icon: 'visGauge',
     description: `Gauges indicate the status of a metric. Use it to show how a metric's value relates
       to reference threshold values.`,
-    category: CATEGORY.DATA,
     visConfig: {
       defaults: {
         type: 'gauge',

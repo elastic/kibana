@@ -19,7 +19,6 @@
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { CATEGORY } from 'ui/vis/vis_category';
 import pointSeriesTemplate from './editors/point_series.html';
 
 export default function PointSeriesVisType(Private) {
@@ -30,7 +29,6 @@ export default function PointSeriesVisType(Private) {
     title: 'Horizontal Bar',
     icon: 'visBarHorizontal',
     description: 'Assign a continuous variable to each axis',
-    category: CATEGORY.BASIC,
     visConfig: {
       defaults: {
         type: 'histogram',

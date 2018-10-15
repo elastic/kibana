@@ -20,7 +20,6 @@
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import './editors/tile_map_vis_params';
 import { supports } from 'ui/utils/supports';
-import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CoordinateMapsVisualizationProvider } from './coordinate_maps_visualization';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -39,7 +38,6 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     title: 'Coordinate Map',
     icon: 'visMapCoordinate',
     description: 'Plot latitude and longitude coordinates on a map',
-    category: CATEGORY.MAP,
     visConfig: {
       canDesaturate: !!supports.cssFilters,
       defaults: {

@@ -19,7 +19,6 @@
 
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { CATEGORY } from 'ui/vis/vis_category';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { Status } from 'ui/vis/update_status';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
@@ -47,7 +46,6 @@ VisTypesRegistryProvider.register((Private) => {
     title: 'Vega',
     description: 'Create custom visualizations using Vega and VegaLite',
     icon: 'visVega',
-    category: CATEGORY.OTHER,
     visConfig: { defaults: { spec: defaultSpec } },
     editorConfig: {
       optionsTemplate: vegaEditorTemplate,

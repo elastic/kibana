@@ -46,7 +46,6 @@ import React, { ChangeEvent } from 'react';
 import chrome from 'ui/chrome';
 import { memoizeLast } from 'ui/utils/memoize';
 import { VisType } from 'ui/vis';
-import { CATEGORY } from 'ui/vis/vis_category';
 
 interface VisTypeListEntry extends VisType {
   highlighted: boolean;
@@ -219,7 +218,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       }
 
       // Filter out visualizations in the hidden category
-      if (type.category === CATEGORY.HIDDEN) {
+      if (type.hidden) {
         return false;
       }
 
