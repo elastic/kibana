@@ -19,36 +19,34 @@
 
 import chrome from 'ui/chrome';
 import $script from 'scriptjs';
-import { typesRegistry } from '../common/lib/types_registry';
-import {
-  argTypeRegistry,
-  datasourceRegistry,
-  transformRegistry,
-  modelRegistry,
-  viewRegistry,
-} from '../expression_types';
-import { elementsRegistry } from './elements_registry';
-import { renderFunctionsRegistry } from './render_functions_registry';
-import { functionsRegistry as browserFunctions } from '../common/lib/functions_registry';
-import { loadPrivateBrowserFunctions } from './load_private_browser_functions';
+import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
+import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
 
-const types = {
-  browserFunctions: browserFunctions,
-  commonFunctions: browserFunctions,
-  elements: elementsRegistry,
-  types: typesRegistry,
-  renderers: renderFunctionsRegistry,
-  transformUIs: transformRegistry,
-  datasourceUIs: datasourceRegistry,
-  modelUIs: modelRegistry,
-  viewUIs: viewRegistry,
-  argumentUIs: argTypeRegistry,
-};
+let loading;
+export const loadBrowserPlugins = (additionalTypes) => {
 
-export const loadBrowserPlugins = () =>
-  new Promise(resolve => {
-    loadPrivateBrowserFunctions();
+  const types = {
+    commonFunctions: functionsRegistry,
+    types: typesRegistry,
+  };
+
+  // if we are already loading, we need to wait till its done before starting again
+  if (loading) {
+    return loading.then(() => {
+      loading = null;
+      return loadBrowserPlugins(additionalTypes);
+    });
+  }
+
+  loading = new Promise(resolve => {
+    if (additionalTypes) {
+      Object.keys(additionalTypes).forEach(key => {
+        types[key] = additionalTypes[key];
+      });
+    }
+
     const remainingTypes = Object.keys(types);
+
     function loadType() {
       const type = remainingTypes.pop();
       window.canvas = window.canvas || {};
@@ -64,3 +62,6 @@ export const loadBrowserPlugins = () =>
 
     loadType();
   });
+
+  return loading;
+};

@@ -20,13 +20,13 @@
 import chrome from 'ui/chrome';
 import io from 'socket.io-client';
 import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
-import { loadBrowserPlugins } from '@kbn/interpreter/public/load_browser_plugins';
+import { pluginsLoadingState } from './plugins_loading_state';
 
 const basePath = chrome.getBasePath();
 export const socket = io(undefined, { path: `${basePath}/socket.io` });
 
 socket.on('getFunctionList', () => {
-  const pluginsLoaded = loadBrowserPlugins();
-
-  pluginsLoaded.then(() => socket.emit('functionList', functionsRegistry.toJS()));
+  pluginsLoadingState.loadingComplete().then(() => {
+    socket.emit('functionList', functionsRegistry.toJS());
+  });
 });

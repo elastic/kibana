@@ -17,24 +17,36 @@
  * under the License.
  */
 
-import fs from 'fs';
-import { resolve } from 'path';
-import { promisify } from 'util';
-import { flatten } from 'lodash';
-import { pathsRegistry } from '../common/lib/paths_registry';
+import uuid from 'uuid/v4';
 
-const readdir = promisify(fs.readdir);
+class PluginsLoadingState {
+  constructor() {
+    this.states = {};
+    this.promises = [];
+  }
 
-export const getPluginPaths = type => {
-  const typePaths = pathsRegistry.get(type);
-  if (!typePaths) throw new Error(`Unknown type: ${type}`);
+  setLoading() {
+    const id = uuid();
+    this.states[id] = true;
+    return id;
+  }
 
-  return Promise.all(typePaths.map(path => {
+  setComplete(id) {
+    delete this.states[id];
+    if (!Object.keys(this.states).length) {
+      this.promises.forEach(resolve => (resolve()));
+    }
+  }
 
-    // Get the full path of all files in the directory
-    return readdir(path).then(files => files.map(file => {
-      if (!file.endsWith('.js')) return;
-      return resolve(path, file);
-    }).filter(path => path)).catch();
-  })).then(flatten);
-};
+  loadingComplete() {
+    return new Promise(resolve => {
+      if (Object.keys(this.states).length) {
+        this.promises.push(resolve);
+      } else {
+        resolve();
+      }
+    });
+  }
+}
+
+export const pluginsLoadingState = new PluginsLoadingState();

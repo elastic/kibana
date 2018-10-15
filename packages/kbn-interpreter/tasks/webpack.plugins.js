@@ -25,9 +25,7 @@ const buildDir = path.resolve(__dirname, '../plugin');
 module.exports = {
   entry: {
     'types/all': path.join(sourceDir, 'types/register.js'),
-    'functions/browser/all': path.join(sourceDir, 'functions/browser/register.js'),
     'functions/common/all': path.join(sourceDir, 'functions/common/register.js'),
-    'functions/server/all': path.join(sourceDir, 'functions/server/register.js'),
   },
   target: 'webworker',
 

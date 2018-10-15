@@ -19,10 +19,10 @@
 
 import { socketInterpreterProvider } from '../common/socket_interpret';
 import { serializeProvider } from '@kbn/interpreter/common/lib/serialize';
-import { socket } from './socket';
 import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
-import { createHandlers } from './create_handlers';
 import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
+import { socket } from './socket';
+import { createHandlers } from './create_handlers';
 import { loadBrowserPlugins } from '@kbn/interpreter/public/load_browser_plugins';
 
 // Create the function list
