@@ -83,6 +83,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/interpreter@link:../packages/kbn-interpreter":
+  version "0.0.0"
+  uid ""
+
 "@kbn/plugin-helpers@link:../packages/kbn-plugin-helpers":
   version "0.0.0"
   uid ""

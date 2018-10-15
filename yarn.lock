@@ -220,6 +220,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/interpreter@link:packages/kbn-interpreter":
+  version "0.0.0"
+  uid ""
+
 "@kbn/plugin-generator@link:packages/kbn-plugin-generator":
   version "0.0.0"
   uid ""
