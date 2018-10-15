@@ -20,12 +20,12 @@ import $ from 'jquery';
 import { ExplorerChartsContainer } from './explorer_charts_container';
 import { explorerChartsContainerServiceFactory } from './explorer_charts_container_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
+import { mlExplorerDashboardService } from '../explorer_dashboard_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.directive('mlExplorerChartsContainer', function (
-  mlExplorerDashboardService,
   mlSelectSeverityService
 ) {
 
