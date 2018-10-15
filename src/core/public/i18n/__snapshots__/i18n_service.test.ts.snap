@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#init() should call init method with translations 1`] = `
+exports[`#start() should call start method with translations 1`] = `
 Array [
   Array [
     Object {

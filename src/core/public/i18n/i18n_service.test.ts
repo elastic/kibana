@@ -23,7 +23,7 @@ jest.mock('@kbn/i18n', () => ({
   },
 }));
 import { I18nService } from './i18n_service';
-describe('#init()', () => {
+describe('#start()', () => {
   let injectedMetadata: any;
   const translations = {
     locale: 'ch',
@@ -34,10 +34,10 @@ describe('#init()', () => {
       getLegacyMetadata: jest.fn().mockReturnValue({ translations }),
     } as any;
   });
-  it('should call init method with translations', async () => {
+  it('should call start method with translations', async () => {
     const i18nService = new I18nService();
     expect(mockI18n).not.toHaveBeenCalled();
-    i18nService.init({ injectedMetadata });
+    i18nService.start({ injectedMetadata });
     expect(mockI18n.mock.calls).toMatchSnapshot();
   });
 });

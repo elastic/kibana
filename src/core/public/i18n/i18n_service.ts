@@ -22,7 +22,7 @@ interface Deps {
   injectedMetadata: InjectedMetadataStartContract;
 }
 export class I18nService {
-  public init({ injectedMetadata }: Deps) {
+  public start({ injectedMetadata }: Deps) {
     i18n.init(injectedMetadata.getLegacyMetadata().translations);
   }
 }
