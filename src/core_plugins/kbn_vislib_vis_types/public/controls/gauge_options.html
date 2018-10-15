@@ -208,7 +208,7 @@
             <span 
               i18n-id="kbnVislibVisTypes.controls.gaugeOptions.specifiedRangeNumberWarningMessage"
               i18n-default-message="{required} You must specify at least one range."
-              i18n-values="{ required: '<strong>' + editorState.requiredText + '</strong>' }"
+              i18n-values="{ required: '<strong>' + requiredText + '</strong>' }"
             ></span>
           </p>
         </div>
@@ -383,8 +383,8 @@
               class="kuiSideBarFormRow__label"
               for="showScale"
               i18n-id="kbnVislibVisTypes.controls.gaugeOptions.fontSizeLabel"
-              i18n-default-message="Font Size ({fontSizeSpan}pt)"
-              i18n-values="{ fontSizeSpan: '<span ng-bind=\'editorState.params.gauge.style.fontSize\'></span>' }"
+              i18n-default-message="Font Size ({fontSize}pt)"
+              i18n-values="{ fontSize: editorState.params.gauge.style.fontSize }"
             ></label>
             <div class="kuiSideBarFormRow__control">
               <input type="range" ng-model="editorState.params.gauge.style.fontSize" class="form-control" min="12" max="120" />

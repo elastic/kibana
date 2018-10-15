@@ -107,8 +107,8 @@ module.directive('gaugeOptions', function (i18n) {
         $scope.customColors = true;
       });
 
-      $scope.editorState.requiredText = i18n('kbnVislibVisTypes.params.gauge.requiredText', {
-        defaultMessage: 'Requred:'
+      $scope.requiredText = i18n('kbnVislibVisTypes.controls.gaugeOptions.requiredText', {
+        defaultMessage: 'Required:'
       });
 
     }
