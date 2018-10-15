@@ -31,7 +31,8 @@ routes.defaults(/\/management/, {
       function ensureSecurityRegistered() {
         const registerSecurity = () => management.register('security', {
           display: 'Security',
-          order: 10
+          order: 10,
+          icon: 'securityApp',
         });
         const getSecurity = () => management.getSection('security');
 

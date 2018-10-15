@@ -3,8 +3,9 @@
   omit-breadcrumb-pages="{{ jsonWatchEdit.omitBreadcrumbPages }}"
   page-title="jsonWatchEdit.breadcrumb"
 >
-  <div class="kuiViewContent kuiViewContent--constrainedWidth">
-    <div class="kuiViewContentItem kuiVerticalRhythm">
+  <div class="euiSpacer euiSpacer--l"></div>
+  <div class="kuiViewContent euiPanel euiPanel--paddingLarge kuiViewContent--constrainedWidth">
+    <div class="kuiVerticalRhythm">
       <watch-edit-title-bar
         xpack-watch="jsonWatchEdit.watch"
         is-watch-valid="jsonWatchEdit.isValid"
@@ -14,7 +15,7 @@
       ></watch-edit-title-bar>
     </div>
 
-    <div class="kuiViewContentItem kuiVerticalRhythm">
+    <div class="kuiVerticalRhythm">
       <kbn-tabs
         selected-tab-id="jsonWatchEdit.selectedTabId"
         on-tab-select="jsonWatchEdit.onTabSelect"
@@ -42,7 +43,7 @@
     </div>
 
     <div
-      class="kuiViewContentItem kuiVerticalRhythm"
+      class="kuiVerticalRhythm"
       ng-show="jsonWatchEdit.selectedTabId === 'edit-watch'"
     >
       <watch-edit-detail
@@ -54,7 +55,7 @@
     </div>
 
     <div
-      class="kuiViewContentItem kuiVerticalRhythm"
+      class="kuiVerticalRhythm"
       ng-show="jsonWatchEdit.selectedTabId === 'watch-simulate'"
     >
       <div class="kuiVerticalRhythm">
@@ -85,7 +86,7 @@
     </div>
 
     <div
-      class="kuiViewContentItem kuiVerticalRhythm"
+      class="kuiVerticalRhythm"
       ng-show="jsonWatchEdit.selectedTabId === 'simulate-results'"
     >
       <div class="kuiVerticalRhythm">
