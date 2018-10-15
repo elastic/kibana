@@ -156,6 +156,7 @@ export class ExpressionInput extends React.Component {
               value={value}
               onChange={this.onChange}
               inputRef={ref => (this.ref = ref)}
+              spellcheck="false"
             />
           </Autocomplete>
         </EuiFormRow>

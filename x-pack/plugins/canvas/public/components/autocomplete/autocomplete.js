@@ -131,6 +131,8 @@ export class Autocomplete extends React.Component {
     } else if (keyCode === DOWN && items.length > 0 && isOpen) {
       e.preventDefault();
       this.selectNext();
+    } else if (e.key === 'Backspace') {
+      this.setState({ isOpen: true });
     } else if (!['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) {
       this.setState({ selectedIndex: -1 });
     }

@@ -21,8 +21,9 @@ export const progress = () => ({
       type: ['string'],
       alias: ['_'],
       help: `Select ${Object.keys(shapes)
-        .map((key, i, src) => (i === src.length - 1 ? `or ${shapes[key].name}` : shapes[key].name))
+        .map((key, i, src) => (i === src.length - 1 ? `or ${key}` : key))
         .join(', ')}`,
+      options: Object.keys(shapes),
       default: 'gauge',
     },
     max: {

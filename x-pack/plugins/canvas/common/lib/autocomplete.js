@@ -61,7 +61,7 @@ export function getAutocompleteSuggestions(specs, expression, position) {
 /**
  * Get the function and argument (if there is one) at the given position.
  */
-export function getFnArgAtPosition(ast, position) {
+function getFnArgAtPosition(ast, position) {
   const fnIndex = ast.node.chain.findIndex(fn => fn.start <= position && position <= fn.end);
   const fn = ast.node.chain[fnIndex];
   for (const [argName, argValues] of Object.entries(fn.node.arguments)) {
@@ -91,7 +91,7 @@ function getFnNameSuggestions(specs, ast, fnIndex) {
   const comparator = combinedComparator(
     prevFnTypeComparator(prevFnType),
     invokeWithProp(startsWithComparator(query), 'name'),
-    alphanumericalComparator
+    invokeWithProp(alphanumericalComparator, 'name')
   );
   const fnDefs = matchingFnDefs.sort(comparator);
 
@@ -129,7 +129,7 @@ function getArgNameSuggestions(specs, ast, fnIndex, argName, argIndex) {
   const comparator = combinedComparator(
     unnamedArgComparator,
     invokeWithProp(startsWithComparator(query), 'name'),
-    alphanumericalComparator
+    invokeWithProp(alphanumericalComparator, 'name')
   );
   const argDefs = unusedArgDefs.sort(comparator);
 
