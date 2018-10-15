@@ -61,8 +61,15 @@ export function VislibVisualizationsPieChartProvider(Private) {
      * If so, an error is thrown.
      */
     _validatePieData(charts) {
-      const isAllZeros = charts.every(function (chart) {
-        return chart.slices.children.length === 0;
+      const isAllZeros = charts.every((chart) => {
+        if (chart.slices.children.length === 0) {
+          return true;
+        }
+        // checking also if the first tree level has size 0
+        // This because of current mutation of data that happen because of
+        // Data.pieNames and subsequent call to _removeZeroSlices request
+        // for the visualization legend.
+        return chart.slices.children.every((child) => child.size === 0);
       });
 
       if (isAllZeros) {
