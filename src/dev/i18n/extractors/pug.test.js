@@ -31,7 +31,7 @@ describe('dev/i18n/extractors/pug', () => {
 
   test('throws on empty id', () => {
     const source = Buffer.from(`\
-#{i18n('', { defaultMessage: 'Default message', context: 'Message context' })}
+h1= i18n('', { defaultMessage: 'Default message', context: 'Message context' })
 `);
 
     expect(() => extractPugMessages(source).next()).toThrowErrorMatchingSnapshot();
