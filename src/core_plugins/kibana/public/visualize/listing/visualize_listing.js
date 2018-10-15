@@ -27,9 +27,11 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 
+import { injectI18nProvider } from '@kbn/i18n/react';
+
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
 app.directive('visualizeListingTable', reactDirective => reactDirective(VisualizeListingTable));
-app.directive('newVisModal', reactDirective => reactDirective(NewVisModal));
+app.directive('newVisModal', reactDirective => reactDirective(injectI18nProvider(NewVisModal)));
 
 export function VisualizeListingController($injector, createNewVis) {
   const Notifier = $injector.get('Notifier');

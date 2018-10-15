@@ -30,11 +30,14 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { VisualizeConstants } from '../visualize_constants';
+import { NewVisHelp } from './components/new_vis_help';
+import { VisHelpText } from './components/vis_help_text';
 
 import classnames from 'classnames';
 import { sortByOrder } from 'lodash';
@@ -92,7 +95,12 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       <EuiOverlayMask>
         <EuiModal onClose={this.props.onClose} maxWidth={false} className="visNewVisDialog">
           <EuiModalHeader>
-            <EuiModalHeaderTitle>New visualization</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="visualize.newVisWizard.title"
+                defaultMessage="New Visualizations"
+              />
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem grow={false}>
@@ -114,36 +122,25 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
               </EuiModalBody>
             </EuiFlexItem>
             <EuiFlexItem className="visNewVisDialog__description">
-              {highlightedType && this.renderDescription(highlightedType)}
+              {highlightedType && <VisHelpText visType={highlightedType} />}
               {!highlightedType && (
                 <React.Fragment>
                   <EuiTitle size="s">
-                    <h2>Select a visualization type</h2>
+                    <h2>
+                      <FormattedMessage
+                        id="visualize.newVisWizard.selectVisType"
+                        defaultMessage="Select a visualization type"
+                      />
+                    </h2>
                   </EuiTitle>
                   <EuiSpacer size="m" />
-                  <EuiText>
-                    <p>
-                      Start creating your visualization by selecting a type for that visualization.
-                    </p>
-                  </EuiText>
+                  <NewVisHelp />
                 </React.Fragment>
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModal>
       </EuiOverlayMask>
-    );
-  }
-
-  private renderDescription(visType: VisType) {
-    return (
-      <React.Fragment>
-        <EuiTitle size="s">
-          <h2>{visType.title}</h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText>{visType.description}</EuiText>
-      </React.Fragment>
     );
   }
 

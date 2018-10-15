@@ -18,36 +18,24 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+
 import { VisType } from 'ui/vis';
-import { NewVisModal } from './new_vis_modal';
 
-interface ShowNewVisModalParams {
-  editorParams?: string[];
+interface VisHelpTextProps {
+  visType: VisType;
 }
 
-export function showNewVisModal(
-  visTypeRegistry: VisType[],
-  { editorParams = [] }: ShowNewVisModalParams = {}
-) {
-  const container = document.createElement('div');
-  const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-  };
-
-  document.body.appendChild(container);
-  const element = (
-    <I18nProvider>
-      <NewVisModal
-        isOpen={true}
-        onClose={onClose}
-        visTypesRegistry={visTypeRegistry}
-        editorParams={editorParams}
-      />
-    </I18nProvider>
+export const VisHelpText = (props: VisHelpTextProps) => {
+  const { visType } = props;
+  return (
+    <React.Fragment>
+      <EuiTitle size="s">
+        <h2>{visType.title}</h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText>{visType.description}</EuiText>
+    </React.Fragment>
   );
-  ReactDOM.render(element, container);
-}
+};
