@@ -25,7 +25,7 @@ import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
 import YesNo from '../yes_no';
 import uuid from 'uuid';
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, EuiTabs, EuiTab } from '@elastic/eui';
 
 class MetricPanelConfig extends Component {
 
@@ -106,22 +106,20 @@ class MetricPanelConfig extends Component {
     }
     return (
       <div>
-        <div className="kbnTabs" role="tablist">
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'data'}
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+        <EuiTabs>
+          <EuiTab
+            isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
-          >Data
-          </button>
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'options'}
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+          >
+            Data
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
-          >Panel Options
-          </button>
-        </div>
+          >
+            Panel options
+          </EuiTab>
+        </EuiTabs>
         {view}
       </div>
     );

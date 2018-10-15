@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from './config';
 import Sortable from 'react-anything-sortable';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiTabs, EuiTab } from '@elastic/eui';
 import createTextHandler from '../../lib/create_text_handler';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import { createUpDownHandler } from '../../lib/sort_keyhandler';
@@ -47,10 +47,6 @@ function TopNSeries(props) {
 
   let body = null;
   if (visible) {
-    let metricsClassName = 'kbnTabs__tab';
-    let optionsClassname = 'kbnTabs__tab';
-    if (selectedTab === 'metrics') metricsClassName += '-active';
-    if (selectedTab === 'options') optionsClassname += '-active';
     let seriesBody;
     if (selectedTab === 'metrics') {
       const handleSort = (data) => {
@@ -82,21 +78,21 @@ function TopNSeries(props) {
     }
     body = (
       <div className="vis_editor__series-row">
-        <div className="kbnTabs sm">
-          <div
-            className={metricsClassName}
+        <EuiTabs size="s">
+          <EuiTab
+            isSelected={selectedTab === 'metrics'}
             onClick={() => props.switchTab('metrics')}
           >
             Metrics
-          </div>
-          <div
+          </EuiTab>
+          <EuiTab
             data-test-subj="seriesOptions"
-            className={optionsClassname}
+            isSelected={selectedTab === 'options'}
             onClick={() => props.switchTab('options')}
           >
             Options
-          </div>
-        </div>
+          </EuiTab>
+        </EuiTabs>
         {seriesBody}
       </div>
     );

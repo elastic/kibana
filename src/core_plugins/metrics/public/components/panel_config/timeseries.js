@@ -29,6 +29,8 @@ import YesNo from '../yes_no';
 import {
   htmlIdGenerator,
   EuiComboBox,
+  EuiTabs,
+  EuiTab,
 } from '@elastic/eui';
 
 class TimeseriesPanelConfig extends Component {
@@ -197,29 +199,26 @@ class TimeseriesPanelConfig extends Component {
     }
     return (
       <div>
-        <div className="kbnTabs" role="tablist">
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'data'}
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+        <EuiTabs>
+          <EuiTab
+            isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
-          >Data
-          </button>
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'options'}
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+          >
+            Data
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
-          >Panel Options
-          </button>
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'annotations'}
-            className={`kbnTabs__tab${selectedTab === 'annotations' && '-active' || ''}`}
+          >
+            Panel options
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'annotations'}
             onClick={() => this.switchTab('annotations')}
-          >Annotations
-          </button>
-        </div>
+          >
+            Annotations
+          </EuiTab>
+        </EuiTabs>
         {view}
       </div>
     );

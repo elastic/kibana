@@ -26,7 +26,7 @@ import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, EuiTabs, EuiTab } from '@elastic/eui';
 
 class TablePanelConfig extends Component {
 
@@ -147,20 +147,20 @@ class TablePanelConfig extends Component {
     }
     return (
       <div>
-        <div className="kbnTabs">
-          <div
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+        <EuiTabs>
+          <EuiTab
+            isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
             Columns
-          </div>
-          <div
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
           >
-            Panel Options
-          </div>
-        </div>
+            Panel options
+          </EuiTab>
+        </EuiTabs>
         {view}
       </div>
     );

@@ -25,6 +25,7 @@ import Sortable from 'react-anything-sortable';
 import Split from '../../split';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
+import { EuiTabs, EuiTab } from '@elastic/eui';
 
 function MarkdownSeries(props) {
   const {
@@ -50,10 +51,6 @@ function MarkdownSeries(props) {
 
   let body = null;
   if (visible) {
-    let metricsClassName = 'kbnTabs__tab';
-    let optionsClassname = 'kbnTabs__tab';
-    if (selectedTab === 'metrics') metricsClassName += '-active';
-    if (selectedTab === 'options') optionsClassname += '-active';
     let seriesBody;
     if (selectedTab === 'metrics') {
       const handleSort = (data) => {
@@ -94,23 +91,21 @@ function MarkdownSeries(props) {
     }
     body = (
       <div className="vis_editor__series-row">
-        <div className="kbnTabs sm" role="tablist">
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'metrics'}
-            className={metricsClassName}
+        <EuiTabs size="s">
+          <EuiTab
+            isSelected={selectedTab === 'metrics'}
             onClick={() => props.switchTab('metrics')}
-          >Metrics
-          </button>
-          <button
-            role="tab"
+          >
+            Metrics
+          </EuiTab>
+          <EuiTab
             data-test-subj="seriesOptions"
-            aria-selected={selectedTab === 'metrics'}
-            className={optionsClassname}
+            isSelected={selectedTab === 'options'}
             onClick={() => props.switchTab('options')}
-          >Options
-          </button>
-        </div>
+          >
+            Options
+          </EuiTab>
+        </EuiTabs>
         {seriesBody}
       </div>
     );

@@ -26,7 +26,7 @@ import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, EuiTabs, EuiTab } from '@elastic/eui';
 
 class TopNPanelConfig extends Component {
 
@@ -127,22 +127,20 @@ class TopNPanelConfig extends Component {
     }
     return (
       <div>
-        <div className="kbnTabs" role="tablist">
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'data'}
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+        <EuiTabs>
+          <EuiTab
+            isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
-          >Data
-          </button>
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'options'}
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+          >
+            Data
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
-          >Panel Options
-          </button>
-        </div>
+          >
+            Panel options
+          </EuiTab>
+        </EuiTabs>
         {view}
       </div>
     );

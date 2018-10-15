@@ -32,6 +32,8 @@ import { KuiCodeEditor } from '@kbn/ui-framework/components';
 import {
   htmlIdGenerator,
   EuiComboBox,
+  EuiTabs,
+  EuiTab,
 } from '@elastic/eui';
 const lessC = less(window, { env: 'production' });
 
@@ -163,30 +165,26 @@ class MarkdownPanelConfig extends Component {
     }
     return (
       <div>
-        <div className="kbnTabs" role="tablist">
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'markdown'}
-            className={`kbnTabs__tab${selectedTab === 'markdown' && '-active' || ''}`}
+        <EuiTabs>
+          <EuiTab
+            isSelected={selectedTab === 'markdown'}
             onClick={() => this.switchTab('markdown')}
-          >Markdown
-          </button>
-          <button
-            data-test-subj="markdownDataBtn"
-            role="tab"
-            aria-selected={selectedTab === 'data'}
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+          >
+            Markdown
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
-          >Data
-          </button>
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'options'}
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+          >
+            Data
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
-          >Panel Options
-          </button>
-        </div>
+          >
+            Panel options
+          </EuiTab>
+        </EuiTabs>
         {view}
       </div>
     );

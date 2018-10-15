@@ -31,6 +31,8 @@ import YesNo from './yes_no';
 import {
   htmlIdGenerator,
   EuiText,
+  EuiTabs,
+  EuiTab,
 } from '@elastic/eui';
 
 function newAnnotation() {
@@ -212,15 +214,9 @@ class AnnotationsEditor extends Component {
       const annotations = model.annotations.map(this.renderRow);
       content = (
         <div className="vis_editor__annotations">
-          <div className="kbnTabs sm" role="tablist">
-            <button
-              role="tab"
-              aria-selected={true}
-              className="kbnTabs__tab-active"
-            >
-              Data Sources
-            </button>
-          </div>
+          <EuiTabs size="s">
+            <EuiTab isSelected>Data Sources</EuiTab>
+          </EuiTabs>
           { annotations }
         </div>
       );
