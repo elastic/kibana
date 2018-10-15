@@ -47,7 +47,9 @@ export const loadServerPlugins = () => {
           require(path);
         });
 
-        global.canvas = undefined;
+        delete global.canvas;
+        delete global._;
+
         if (remainingTypes.length) loadType();
         else resolve(true);
       });
