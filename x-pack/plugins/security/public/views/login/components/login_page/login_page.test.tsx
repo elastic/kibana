@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiCallOut } from '@elastic/eui';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
 import { LoginLayout, LoginState } from '../../../../../common/login_state';
-import { BasicLoginForm } from './basic_login_form';
 import { LoginPage } from './login_page';
 
 const createMockHttp = ({ simulateError = false } = {}) => {
@@ -45,11 +43,7 @@ describe('LoginPage', () => {
         http: createMockHttp(),
         window: {},
         next: '',
-        loginState: {
-          layout: 'form' as LoginLayout,
-          allowLogin: true,
-          loginMessage: '',
-        },
+        loginState: createLoginState(),
         isSecureConnection: false,
         requiresSecureConnection: true,
       };
@@ -62,11 +56,9 @@ describe('LoginPage', () => {
         http: createMockHttp(),
         window: {},
         next: '',
-        loginState: {
-          layout: 'error-es-unavailable' as LoginLayout,
-          allowLogin: true,
-          loginMessage: '',
-        },
+        loginState: createLoginState({
+          layout: 'error-es-unavailable',
+        }),
         isSecureConnection: false,
         requiresSecureConnection: false,
       };
@@ -79,11 +71,9 @@ describe('LoginPage', () => {
         http: createMockHttp(),
         window: {},
         next: '',
-        loginState: {
-          layout: 'error-xpack-unavailable' as LoginLayout,
-          allowLogin: true,
-          loginMessage: '',
-        },
+        loginState: createLoginState({
+          layout: 'error-xpack-unavailable',
+        }),
         isSecureConnection: false,
         requiresSecureConnection: false,
       };
@@ -96,11 +86,9 @@ describe('LoginPage', () => {
         http: createMockHttp(),
         window: {},
         next: '',
-        loginState: {
-          layout: 'error-asdfasdf-unknown' as LoginLayout,
-          allowLogin: true,
-          loginMessage: '',
-        },
+        loginState: createLoginState({
+          layout: 'error-asdf-asdf-unknown' as LoginLayout,
+        }),
         isSecureConnection: false,
         requiresSecureConnection: false,
       };
@@ -115,11 +103,7 @@ describe('LoginPage', () => {
         http: createMockHttp(),
         window: {},
         next: '',
-        loginState: {
-          layout: 'form' as LoginLayout,
-          allowLogin: true,
-          loginMessage: '',
-        },
+        loginState: createLoginState(),
         isSecureConnection: false,
         requiresSecureConnection: false,
       };
