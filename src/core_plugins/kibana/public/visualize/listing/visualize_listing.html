@@ -5,11 +5,14 @@
     <!-- Title. -->
     <div
       data-transclude-slot="topLeftCorner"
-      class="kuiLocalTitle"
-      role="heading"
-      aria-level="1"
     >
-      Visualize
+      <div
+        class="kuiLocalTitle"
+        role="heading"
+        aria-level="1"
+        ng-if="listingController.showPluginBreadcrumbs">
+        Visualize
+      </div>
     </div>
   </div>
 </kbn-top-nav>
