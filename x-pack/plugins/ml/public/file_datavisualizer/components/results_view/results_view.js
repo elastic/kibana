@@ -8,7 +8,6 @@
 import React from 'react';
 
 import {
-  // EuiHorizontalRule,
   EuiTabbedContent,
   EuiButton,
   EuiSpacer,
@@ -41,8 +40,6 @@ export function ResultsView({ data, results, showEditFlyout }) {
         />
       </EuiPanel>
 
-      {/* <EuiHorizontalRule margin="l" /> */}
-
       <EuiSpacer size="m" />
 
       <EuiPanel>
@@ -56,8 +53,6 @@ export function ResultsView({ data, results, showEditFlyout }) {
           Override settings
         </EuiButton>
       </EuiPanel>
-
-      {/* <EuiHorizontalRule margin="l" /> */}
 
       <EuiSpacer size="m" />
 

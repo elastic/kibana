@@ -46,9 +46,7 @@ export class SstImporter extends Importer {
       }
       this.data = data;
       this.docArray = this.data;
-      // this.docArray = formatToJson(this.data);
 
-      // console.log(data);
       console.timeEnd('read sst file');
       return true;
     } catch (error) {
@@ -57,12 +55,3 @@ export class SstImporter extends Importer {
     }
   }
 }
-
-// function formatToJson(data) {
-//   const docArray = [];
-//   for (let i = 0; i < data.length; i++) {
-//     docArray.push({ message: data[i] });
-//   }
-//   return docArray;
-// }
-

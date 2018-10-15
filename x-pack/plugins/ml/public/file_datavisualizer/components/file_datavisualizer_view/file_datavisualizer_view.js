@@ -48,7 +48,7 @@ export class FileDataVisualizerView extends Component {
       results: undefined,
       mode: MODE.READ,
     };
-    // console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
+
     this.overrides = {};
     this.originalSettings = {};
     this.showEditFlyout = () => {};

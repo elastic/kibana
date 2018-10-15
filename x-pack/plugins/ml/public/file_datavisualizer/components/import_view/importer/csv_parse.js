@@ -5,6 +5,8 @@
  */
 
 
+// promisifying the csv-parse parse function
+
 import csvParse from 'csv-parse';
 
 export function parse(data, settings) {

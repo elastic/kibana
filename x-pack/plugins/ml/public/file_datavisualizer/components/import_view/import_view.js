@@ -200,7 +200,6 @@ export class ImportView extends Component {
               value={index}
               disabled={importing === true}
               onChange={this.onIndexChange}
-              aria-label="Use aria labels when no actual label is in use"
             />
           </EuiFormRow>
 
@@ -223,7 +222,6 @@ export class ImportView extends Component {
               placeholder={(createIndexPattern === true) ? index : ''}
               value={indexPattern}
               onChange={this.onIndexPatternChange}
-              aria-label="Use aria labels when no actual label is in use"
             />
           </EuiFormRow>
 
