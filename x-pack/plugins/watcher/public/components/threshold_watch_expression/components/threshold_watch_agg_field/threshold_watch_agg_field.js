@@ -9,6 +9,7 @@ import template from './threshold_watch_agg_field.html';
 import { ThresholdWatchBaseController } from '../threshold_watch_base';
 import 'plugins/watcher/services/html_id_generator';
 import 'plugins/watcher/components/xpack_aria_describes';
+import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('xpack/watcher');
 
@@ -51,11 +52,16 @@ app.directive('thresholdWatchAggField', function ($injector) {
           }
         });
 
-        this.itemDescription = 'Of';
+        this.itemDescription = i18n.translate('xpack.watcher.thresholdWatchExpression.aggField.itemDescription', {
+          defaultMessage: 'Of',
+        });
       }
 
       get itemValue() {
-        return this.aggField ? this.aggField.name : 'select a field';
+        return this.aggField ? this.aggField.name : i18n.translate(
+          'xpack.watcher.thresholdWatchExpression.aggField.selectFieldTextMessage', {
+            defaultMessage: 'select a field',
+          });
       }
     }
   };

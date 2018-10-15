@@ -12,6 +12,7 @@ import { ThresholdWatchBaseController } from '../threshold_watch_base';
 import 'plugins/watcher/components/duration_select';
 import 'plugins/watcher/services/html_id_generator';
 import 'plugins/watcher/components/xpack_aria_describes';
+import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('xpack/watcher');
 
@@ -55,7 +56,9 @@ app.directive('thresholdWatchTimeWindow', function ($injector) {
       }
 
       get itemDescription() {
-        return 'For the last';
+        return i18n.translate('xpack.watcher.thresholdWatchExpression.timeWindow.itemDescription', {
+          defaultMessage: 'For the last',
+        });
       }
 
       get itemValue() {
