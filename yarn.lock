@@ -101,9 +101,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-4.0.1.tgz#6543d397fb31836508fa4323564b02da11c642db"
+"@elastic/eui@4.4.1":
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-4.4.1.tgz#a1a4ab5bb209da8ea6d48c065476e74b1f48249b"
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
@@ -111,7 +111,7 @@
     highlight.js "^9.12.0"
     html "^1.0.0"
     keymirror "^0.1.1"
-    lodash "^3.10.1"
+    lodash "npm:@elastic/lodash@3.10.1-kibana1"
     numeral "^2.0.6"
     prop-types "^15.6.0"
     react-ace "^5.5.0"
@@ -154,6 +154,10 @@
     prettier "^1.13.7"
 
 "@kbn/babel-preset@link:packages/kbn-babel-preset":
+  version "0.0.0"
+  uid ""
+
+"@kbn/config-schema@link:packages/kbn-config-schema":
   version "0.0.0"
   uid ""
 
@@ -8793,6 +8797,14 @@ lodash@^4.0.0, lodash@^4.0.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lo
   version "4.17.10"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.10.tgz#1b7793cf7259ea38fb3661d4d38b3260af8ae4e7"
 
+lodash@^4.0.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@^4.8.2, lodash@~4.17.4, lodash@~4.17.5:
+  version "4.17.5"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.5.tgz#99a92d65c0272debe8c96b6057bc8fbfa3bed511"
+
+"lodash@npm:@elastic/lodash@3.10.1-kibana1":
+  version "3.10.1-kibana1"
+  resolved "https://registry.yarnpkg.com/@elastic/lodash/-/lodash-3.10.1-kibana1.tgz#9baa52c296ec06a52461f8516bb94172ef53a7fe"
+
 lodash@~4.3.0:
   version "4.3.0"
   resolved "http://registry.npmjs.org/lodash/-/lodash-4.3.0.tgz#efd9c4a6ec53f3b05412429915c3e4824e4d25a4"
@@ -12886,6 +12898,10 @@ split@~0.2.10:
 sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
+
+squel@^5.12.2:
+  version "5.12.2"
+  resolved "https://registry.yarnpkg.com/squel/-/squel-5.12.2.tgz#8c7b54fd5462d95fe2432663c8762b65d29efe4c"
 
 sshpk@^1.7.0:
   version "1.14.2"
