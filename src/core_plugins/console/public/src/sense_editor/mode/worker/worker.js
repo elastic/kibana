@@ -1817,7 +1817,6 @@ ace.define('ace/lib/es5-shim', ['require', 'exports', 'module'], function () {
     return Object(o);
   };
 });
-//do we need translate this syntax Error and how?
 ace.define(
   'sense_editor/mode/worker_parser',
   ['require', 'exports', 'module'],

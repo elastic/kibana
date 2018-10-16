@@ -2,8 +2,8 @@
   <div class="prfDevTool__shardDetails--dim">
     <span
       tooltip-placement="bottom"
-      tooltip="{{ 'xpack.searchProfiler.profileTree.cumulativeTimeTooltip' | i18n: { defaultMessage: 'The cumulative time of all shards in the index. Note: this is not wall-clock time, as shards can execute in parallel.' } }}">
-      <h3>{{'xpack.searchProfiler.profileTree.cumulativeTimeTitle' | i18n: { defaultMessage: "Cumulative Time:" } }} {{ index.time[target] | msToPretty: 3 }}</h3>
+      tooltip="{{:: 'xpack.searchProfiler.profileTree.cumulativeTimeTooltip' | i18n: { defaultMessage: 'The cumulative time of all shards in the index. Note: this is not wall-clock time, as shards can execute in parallel.' } }}">
+      <h3>{{:: 'xpack.searchProfiler.profileTree.cumulativeTimeTitle' | i18n: { defaultMessage: "Cumulative Time:" } }} {{ index.time[target] | msToPretty: 3 }}</h3>
     </span><br/>
   </div>
   <div class="prfDevTool__shardDetails" style="margin-left:5px">

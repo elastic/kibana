@@ -3,7 +3,7 @@
     <div class="conApp__editor">
       <ul class="conApp__autoComplete" id="autocomplete"></ul>
       <div class="conApp__editorActions" id="ConAppEditorActions">
-        <kbn-tooltip text="{{ 'console.sendRequestButtonTooltip' | i18n: { defaultMessage: 'click to send request' } }}">
+        <kbn-tooltip text="{{:: 'console.sendRequestButtonTooltip' | i18n: { defaultMessage: 'click to send request' } }}">
           <button
             class="conApp__editorActionButton conApp__editorActionButton--success"
             ng-click="sendSelected()"
@@ -17,7 +17,7 @@
             class="conApp__editorActionButton"
             dropdown-toggle
             ng-click="getDocumentation()"
-            aria-label="{{ 'console.requestOptionsButtonAriaLabel' | i18n: { defaultMessage: 'Request options' } }}"
+            aria-label="{{:: 'console.requestOptionsButtonAriaLabel' | i18n: { defaultMessage: 'Request options' } }}"
           >
             <span class="kuiIcon fa-wrench"></span>
           </button>
