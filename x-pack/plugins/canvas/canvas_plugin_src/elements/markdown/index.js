@@ -13,18 +13,18 @@ export const markdown = () => ({
   image: header,
   expression: `filters
 | demodata
-| markdown "### Welcome to the Markdown Element.
+| markdown "### Welcome to the Markdown element
 
 Good news! You're already connected to some demo data!
 
-The datatable contains
+The data table contains
 **{{rows.length}} rows**, each containing
  the following columns:
 {{#each columns}}
  **{{name}}**
 {{/each}}
 
-You can use standard Markdown in here, but you can also access your piped-in data using Handlebars. If you want to know more, check out the [Handlebars Documentation](http://handlebarsjs.com/expressions.html)
+You can use standard Markdown in here, but you can also access your piped-in data using Handlebars. If you want to know more, check out the [Handlebars documentation](http://handlebarsjs.com/expressions.html).
 
 #### Enjoy!" | render`,
 });
