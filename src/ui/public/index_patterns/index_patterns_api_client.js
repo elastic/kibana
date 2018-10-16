@@ -89,13 +89,28 @@ export function createIndexPatternsApiClient($http, basePath) {
         params,
       } = options;
 
-      const url = getUrl([type, '_fields_for_wildcard'], {
+      const url = getUrl(['_fields_for_wildcard'], {
         pattern,
         meta_fields: metaFields,
-        params: JSON.stringify(params),
       });
 
-      return request('GET', url).then(resp => resp.fields);
+      // Fetch fields normally, and then if the index pattern is a specific type,
+      // pass the retrieved field information to the type-specific fields API for
+      // further processing
+      return request('GET', url).then(resp => {
+        if(type) {
+          const typeUrl = type ? getUrl([type, '_fields_for_wildcard'], {
+            pattern,
+            fields: resp.fields,
+            meta_fields: metaFields,
+            params: JSON.stringify(params),
+          }) : null;
+
+          return request('GET', typeUrl).then(typeResp => typeResp.fields);
+        } else {
+          return resp.fields;
+        }
+      });
     }
   }
 
