@@ -204,7 +204,6 @@ function updateWithDataResponse(state, action) {
     return state;
   }
 
-
   const dataRequest = findDataRequest(layerReceivingData, action);
   if (!dataRequest) {
     throw new Error('Data request should be initialized. Cannot call stopLoading before startLoading');

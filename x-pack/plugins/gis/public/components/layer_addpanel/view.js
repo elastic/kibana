@@ -28,6 +28,7 @@ import {
   EuiSwitch,
   EuiRange,
 } from '@elastic/eui';
+import { toastNotifications } from 'ui/notify';
 
 export class AddLayerPanel extends React.Component {
 
@@ -41,6 +42,19 @@ export class AddLayerPanel extends React.Component {
       minZoom: 0,
       maxZoom: 24,
     };
+  }
+
+  shouldComponentUpdate(nextProps) {
+    const { layerLoadToast } = nextProps;
+    if (layerLoadToast === 'success') {
+      toastNotifications.addSuccess('Layer added');
+    } else if (layerLoadToast === 'error') {
+      toastNotifications.addDanger('Error adding layer');
+    } else {
+      // Do nothing
+      return false;
+    }
+    return true;
   }
 
   _previewLayer = (source) => {
@@ -297,13 +311,9 @@ export class AddLayerPanel extends React.Component {
             onChange={this._onShowAtAllZoomLevelsChange}
           />
         </EuiFormRow>
-
         {this._renderZoomSliders()}
-
         {this._renderSourceSelect()}
-
         {this._renderSourceEditor()}
-
       </EuiForm>
     );
   }
