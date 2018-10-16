@@ -66,7 +66,7 @@ export const config = (Joi) => {
       index_pattern: string().default('.monitoring-es-2-*,.monitoring-es-6-*'),
       logQueries: boolean().default(false),
       requestHeadersWhitelist: array().items().single().default(DEFAULT_REQUEST_HEADERS),
-      hosts: array().items(string().uri({ scheme: ['http', 'https'] })).single().default('http://localhost:9200'),
+      hosts: array().items(string().uri({ scheme: ['http', 'https'] })).single(), // if empty, use Kibana's connection config
       username: string(),
       password: string(),
       requestTimeout: number().default(30000),
