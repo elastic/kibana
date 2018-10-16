@@ -103,6 +103,7 @@ export function getWaterfallRoot(
     items,
     item => (item.parentId ? item.parentId : 'root')
   );
+  const index: IWaterfallIndex = {};
 
   const itemsByTransactionId = indexBy(
     items.filter(item => item.docType === 'transaction'),
@@ -126,6 +127,7 @@ export function getWaterfallRoot(
       };
     }
 
+    index[parent.id] = parent;
     return {
       ...item,
       offset: item.timestamp - entryTransactionItem.timestamp,
@@ -133,14 +135,10 @@ export function getWaterfallRoot(
     };
   }
 
-  return getWithChildren(entryTransactionItem);
-}
-
-export interface IWaterfall {
-  duration: number;
-  services: string[];
-  childrenCount: number;
-  root: IWaterfallItem;
+  return {
+    root: getWithChildren(entryTransactionItem),
+    index
+  };
 }
 
 export function getWaterfall(
@@ -166,11 +164,12 @@ export function getWaterfall(
     });
 
   const entryTransactionItem = getTransactionItem(entryTransaction);
-  const root = getWaterfallRoot(items, entryTransactionItem);
+  const { root, index } = getWaterfallRoot(items, entryTransactionItem);
   return {
     duration: root.duration,
     services,
     childrenCount: hits.length,
-    root
+    root,
+    index
   };
 }

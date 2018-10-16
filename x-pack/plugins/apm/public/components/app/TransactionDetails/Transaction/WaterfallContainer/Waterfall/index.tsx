@@ -11,6 +11,8 @@ import styled from 'styled-components';
 
 import { IUrlParams } from '../../../../../../store/urlParams';
 // @ts-ignore
+import { fromQuery, history, toQuery } from '../../../../../../utils/url';
+// @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
 import { SpanFlyout } from './SpanFlyout';
 import { TransactionFlyout } from './TransactionFlyout';
@@ -46,20 +48,24 @@ interface State {
   currentItem: IWaterfallItem | null;
 }
 
+// function getCurrentTimelineItem(id: string, root: IWaterfall): IWaterfallItem {
+
+// }
+
 export class Waterfall extends Component<Props, State> {
   public state: Readonly<State> = {
     currentItem: null
   };
 
-  // TODO: Implement query param state management here in open/close methods, for
-  // linking into flyouts, clearing tab state within flyouts, etc?
-
-  public onOpenFlyout = (currentItem: IWaterfallItem) => {
-    this.setState({ currentItem });
+  public onOpenFlyout = ({ id }: IWaterfallItem) => {
+    this.setQueryParams({
+      flyoutDetailTab: null,
+      activeTimelineId: id
+    });
   };
 
   public onCloseFlyout = () => {
-    this.setState({ currentItem: null });
+    this.setQueryParams({ flyoutDetailTab: null, activeTimelineId: null });
   };
 
   public renderWaterfall = (item?: IWaterfallItem) => {
@@ -86,8 +92,10 @@ export class Waterfall extends Component<Props, State> {
   };
 
   public getFlyOut = () => {
-    const { currentItem } = this.state;
     const { waterfall, location, urlParams } = this.props;
+    const currentItem =
+      urlParams.activeTimelineId && waterfall.index[urlParams.activeTimelineId];
+
     if (!currentItem) {
       return null;
     }
@@ -141,6 +149,23 @@ export class Waterfall extends Component<Props, State> {
         {this.getFlyOut()}
       </Container>
     );
+  }
+
+  // TODO: Implement query param state management here in open/close methods, for
+  // linking into flyouts, clearing tab state within flyouts, etc?
+
+  private setQueryParams(params: {
+    activeTimelineId?: string | null;
+    flyoutDetailTab?: string | null;
+  }) {
+    const { location } = this.props;
+    history.replace({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        ...params
+      })
+    });
   }
 }
 

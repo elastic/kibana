@@ -43,6 +43,7 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
         transactionId,
         detailTab,
         flyoutDetailTab,
+        activeTimelineId,
         spanId,
         page,
         sortDirection,
@@ -59,8 +60,9 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
         page: toNumber(page) || 0,
         transactionId: toString(transactionId),
         traceId: toString(traceId),
+        activeTimelineId: toString(activeTimelineId),
         detailTab,
-        flyoutDetailTab,
+        flyoutDetailTab: toString(flyoutDetailTab),
         spanId: toNumber(spanId),
         kuery: legacyDecodeURIComponent(kuery),
 
@@ -150,8 +152,10 @@ export const getUrlParams = createSelector(
 );
 
 export interface IUrlParams {
+  activeTimelineId: string | null;
   end?: string;
   errorGroupId?: string;
+  flyoutDetailTab: string | null;
   kuery?: string;
   serviceName?: string;
   start?: string;
