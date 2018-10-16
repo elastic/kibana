@@ -51,7 +51,6 @@ export interface InfraMetricLayoutSection {
 export interface InfraMetricLayout {
   id: string;
   label: string;
-  requires: string[];
   sections: InfraMetricLayoutSection[];
 }
 
