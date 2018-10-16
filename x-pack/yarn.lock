@@ -2272,6 +2272,7 @@ create-react-class@^15.5.2:
 cronstrue@^1.51.0:
   version "1.51.0"
   resolved "https://registry.yarnpkg.com/cronstrue/-/cronstrue-1.51.0.tgz#7a63153d61d940344049037628da38a60784c8e2"
+  integrity sha512-fSRAz/MV0TRjeNZKAsovmH/MSsly7+8np4XsfsrjOOz7sjxLrE9SmedRYAs3nPAtLLC5UsMpvenjXYRz463bMA==
 
 cross-spawn@^3.0.0:
   version "3.0.1"
