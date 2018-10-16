@@ -13,6 +13,7 @@ import {
 import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
 import { InfraLogEntriesDomain } from '../../lib/domains/log_entries_domain';
 import { InfraContext } from '../../lib/infra_types';
+import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
@@ -102,6 +103,7 @@ export const createLogEntriesResolvers = (libs: {
       };
     },
     async logSummaryBetween(source, args, { req }) {
+      UsageCollector.countLogs();
       const buckets = await libs.logEntries.getLogSummaryBucketsBetween(
         req,
         source.id,
