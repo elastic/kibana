@@ -24,7 +24,7 @@ interface WithMetricsArgs {
 
 interface WithMetricsProps {
   children: (args: WithMetricsArgs) => React.ReactNode;
-  layout: InfraMetricLayout[];
+  layouts: InfraMetricLayout[];
   nodeType: InfraNodeType;
   nodeId: string;
   sourceId: string;
@@ -33,18 +33,19 @@ interface WithMetricsProps {
 
 export const WithMetrics = ({
   children,
-  layout,
+  layouts,
   sourceId,
   timerange,
   nodeType,
   nodeId,
 }: WithMetricsProps) => {
-  const metrics = layout.reduce(
+  const metrics = layouts.reduce(
     (acc, item) => {
       return acc.concat(item.sections.map(s => s.id));
     },
     [] as InfraMetric[]
   );
+
   return (
     <Query<MetricsQuery.Query, MetricsQuery.Variables>
       query={metricsQuery}

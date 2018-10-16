@@ -15,7 +15,7 @@ import { Section } from './section';
 
 interface Props {
   metrics: InfraMetricData[];
-  layout: InfraMetricLayout[];
+  layouts: InfraMetricLayout[];
   loading: boolean;
   nodeName: string;
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
@@ -40,7 +40,7 @@ export class Metrics extends React.PureComponent<Props, State> {
         />
       );
     }
-    return <React.Fragment>{this.props.layout.map(this.renderLayout)}</React.Fragment>;
+    return <React.Fragment>{this.props.layouts.map(this.renderLayout)}</React.Fragment>;
   }
 
   private renderLayout = (layout: InfraMetricLayout) => {
