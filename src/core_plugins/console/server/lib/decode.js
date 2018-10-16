@@ -21,7 +21,7 @@ export function unicodeBytesToString(unicodeByteArray) {
   if (!unicodeByteArray) {
     return unicodeByteArray;
   }
-  const encoded = String.fromCharCode.apply(null, unicodeByteArray);
+  const encoded = unicodeByteArray.map((byte) => String.fromCharCode(byte)).join('');
   const decoded = decodeURIComponent(escape(encoded));
   return decoded;
 }

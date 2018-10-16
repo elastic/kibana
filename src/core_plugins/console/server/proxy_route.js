@@ -126,7 +126,8 @@ export const createProxyRoute = ({
         }
         Wreck.read(esResponse, null, (err, body) => {
           if (method.toUpperCase() !== 'HEAD') {
-            const responseString = unicodeBytesToString(body);
+            //[...body] converts buffer into proper array
+            const responseString = unicodeBytesToString([...body]);
             reply(responseString)
               .code(esResponse.statusCode)
               .header('warning', esResponse.headers.warning);
