@@ -21,7 +21,7 @@
     }
   },
   "resolutions": {
-    "**/@types/node": "8.10.20"
+    "**/@types/node": "8.10.21"
   },
   "devDependencies": {
     "@kbn/dev-utils": "link:../packages/kbn-dev-utils",
@@ -31,6 +31,7 @@
     "@types/expect.js": "^0.3.29",
     "@types/jest": "^23.3.1",
     "@types/joi": "^10.4.4",
+    "@types/jsonwebtoken": "^7.2.7",
     "@types/mocha": "^5.2.5",
     "@types/pngjs": "^3.3.1",
     "@types/supertest": "^2.0.5",
