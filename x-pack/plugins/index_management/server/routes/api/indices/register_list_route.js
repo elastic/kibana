@@ -11,7 +11,6 @@ import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factor
 import fetchAliases from './fetch_aliases';
 
 function formatHits(hits, aliases) {
-  console.log(aliases);
   return hits.map(hit => {
     return {
       health: hit.health,
