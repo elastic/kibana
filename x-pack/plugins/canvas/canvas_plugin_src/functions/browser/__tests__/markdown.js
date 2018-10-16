@@ -5,10 +5,8 @@
  */
 
 import expect from 'expect.js';
+import { functionWrapper, testTable, fontStyle } from '@kbn/interpreter/test_utils';
 import { markdown } from '../markdown';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { testTable } from '../../common/__tests__/fixtures/test_tables';
-import { fontStyle } from '../../common/__tests__/fixtures/test_styles';
 
 describe('markdown', () => {
   const fn = functionWrapper(markdown);

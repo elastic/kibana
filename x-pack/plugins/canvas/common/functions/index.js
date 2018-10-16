@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { to } from './to';
-
-export const commonFunctions = [to];
+export const commonFunctions = [];

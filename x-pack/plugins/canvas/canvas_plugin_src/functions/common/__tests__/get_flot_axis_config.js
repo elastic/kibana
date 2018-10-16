@@ -5,8 +5,8 @@
  */
 
 import expect from 'expect.js';
+import { xAxisConfig, yAxisConfig, hideAxis } from '@kbn/interpreter/test_utils';
 import { getFlotAxisConfig } from '../plot/get_flot_axis_config';
-import { xAxisConfig, yAxisConfig, hideAxis } from './fixtures/test_styles';
 
 describe('getFlotAxisConfig', () => {
   const columns = {

@@ -5,10 +5,8 @@
  */
 
 import expect from 'expect.js';
-import { plot } from '../plot';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { testPlot } from './fixtures/test_pointseries';
 import {
+  functionWrapper,
   fontStyle,
   grayscalePalette,
   gradientPalette,
@@ -16,7 +14,9 @@ import {
   xAxisConfig,
   seriesStyle,
   defaultStyle,
-} from './fixtures/test_styles';
+} from '@kbn/interpreter/test_utils';
+import { plot } from '../plot';
+import { testPlot } from './fixtures/test_pointseries';
 
 describe('plot', () => {
   const fn = functionWrapper(plot);

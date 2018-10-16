@@ -220,6 +220,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/interpreter@link:packages/kbn-interpreter":
+  version "0.0.0"
+  uid ""
+
 "@kbn/plugin-generator@link:packages/kbn-plugin-generator":
   version "0.0.0"
   uid ""
@@ -14756,6 +14760,10 @@ squel@^5.12.2:
   version "5.12.2"
   resolved "https://registry.yarnpkg.com/squel/-/squel-5.12.2.tgz#8c7b54fd5462d95fe2432663c8762b65d29efe4c"
   integrity sha512-pIM8SjlUJlN2G6xz3we+lCp2aNQgxauGqKXJDi8y2n0hqJlSot0IUEdHh7/zGFFuRYnypbDiOhSWLZzT1BXnlQ==
+
+squel@^5.12.2:
+  version "5.12.2"
+  resolved "https://registry.yarnpkg.com/squel/-/squel-5.12.2.tgz#8c7b54fd5462d95fe2432663c8762b65d29efe4c"
 
 sshpk@^1.7.0:
   version "1.14.1"

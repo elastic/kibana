@@ -5,8 +5,8 @@
  */
 
 import chrome from 'ui/chrome';
+import { fetch } from '@kbn/interpreter/common/lib/fetch';
 import { API_ROUTE } from '../../common/lib/constants';
-import { fetch } from '../../common/lib/fetch';
 import { notify } from './notify';
 
 const basePath = chrome.getBasePath();

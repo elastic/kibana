@@ -5,10 +5,10 @@
  */
 
 import expect from 'expect.js';
-import { image } from '../image';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
+import { functionWrapper } from '@kbn/interpreter/test_utils';
 import { elasticLogo } from '../../../lib/elastic_logo';
 import { elasticOutline } from '../../../lib/elastic_outline';
+import { image } from '../image';
 
 describe('image', () => {
   const fn = functionWrapper(image);
