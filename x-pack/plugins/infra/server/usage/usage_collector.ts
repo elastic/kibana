@@ -99,7 +99,7 @@ export class UsageCollector {
     );
 
     return {
-      last_24hours: {
+      last_24_hours: {
         hits: {
           infraops_hosts: sums.infraopsHosts,
           infraops_docker: sums.infraopsDocker,
