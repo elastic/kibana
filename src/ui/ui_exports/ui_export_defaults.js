@@ -37,6 +37,8 @@ export const UI_EXPORT_DEFAULTS = {
 
   translationPaths: [],
 
+  styleSheetPaths: [],
+
   appExtensions: {
     fieldFormatEditors: [
       'ui/field_editor/components/field_format_editor/register'

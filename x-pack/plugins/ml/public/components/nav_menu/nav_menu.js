@@ -14,7 +14,7 @@ import uiRouter from 'ui/routes';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlNavMenu', function () {
+module.directive('mlNavMenu', function (breadcrumbState, config) {
   return {
     restrict: 'E',
     transclude: true,
@@ -63,6 +63,9 @@ module.directive('mlNavMenu', function () {
         breadcrumbs.push(crumbNames[crumb.id]);
       });
       scope.breadcrumbs = breadcrumbs.filter(Boolean);
+
+      config.watch('k7design', (val) => scope.showPluginBreadcrumbs = !val);
+      breadcrumbState.set(scope.breadcrumbs.map(b => ({ text: b.label, href: b.url })));
 
       // when the page loads, focus on the first breadcrumb
       el.ready(() => {

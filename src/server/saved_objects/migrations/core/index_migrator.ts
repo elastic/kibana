@@ -149,7 +149,7 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
  */
 async function migrateSourceToDest(context: Context) {
   const { callCluster, alias, dest, source, batchSize } = context;
-  const { scrollDuration, documentMigrator, log } = context;
+  const { scrollDuration, documentMigrator, log, serializer } = context;
 
   if (!source.exists) {
     return;
@@ -158,7 +158,7 @@ async function migrateSourceToDest(context: Context) {
   if (!source.aliases[alias]) {
     log.info(`Reindexing ${alias} to ${source.indexName}`);
 
-    await Index.convertToAlias(callCluster, source, alias);
+    await Index.convertToAlias(callCluster, source, alias, batchSize);
   }
 
   const read = Index.reader(callCluster, source.indexName, { batchSize, scrollDuration });
@@ -174,6 +174,10 @@ async function migrateSourceToDest(context: Context) {
 
     log.debug(`Migrating saved objects ${docs.map(d => d._id).join(', ')}`);
 
-    await Index.write(callCluster, dest.indexName, migrateRawDocs(documentMigrator.migrate, docs));
+    await Index.write(
+      callCluster,
+      dest.indexName,
+      migrateRawDocs(serializer, documentMigrator.migrate, docs)
+    );
   }
 }

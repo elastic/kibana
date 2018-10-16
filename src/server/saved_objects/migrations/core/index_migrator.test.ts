@@ -19,7 +19,8 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { ROOT_TYPE, SavedObjectDoc } from '../../serialization';
+import { SavedObjectsSchema } from '../../schema';
+import { ROOT_TYPE, SavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { CallCluster } from './call_cluster';
 import { IndexMigrator } from './index_migrator';
 
@@ -46,6 +47,7 @@ describe('IndexMigrator', () => {
           },
           foo: { type: 'text' },
           migrationVersion: { dynamic: 'true', type: 'object' },
+          namespace: { type: 'keyword' },
           type: { type: 'keyword' },
           updated_at: { type: 'date' },
         },
@@ -78,6 +80,7 @@ describe('IndexMigrator', () => {
               },
               foo: { type: 'long' },
               migrationVersion: { dynamic: 'true', type: 'object' },
+              namespace: { type: 'keyword' },
               type: { type: 'keyword' },
               updated_at: { type: 'date' },
             },
@@ -188,6 +191,7 @@ describe('IndexMigrator', () => {
               },
               foo: { type: 'text' },
               migrationVersion: { dynamic: 'true', type: 'object' },
+              namespace: { type: 'keyword' },
               type: { type: 'keyword' },
               updated_at: { type: 'date' },
             },
@@ -301,6 +305,7 @@ function defaultOpts() {
       migrationVersion: {},
       migrate: _.identity,
     },
+    serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),
   };
 }
 
@@ -334,7 +339,8 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
     });
   callCluster.withArgs('indices.get').returns(Promise.resolve(index));
   callCluster.withArgs('indices.getAlias').returns(Promise.resolve(alias));
-
+  callCluster.withArgs('reindex').returns(Promise.resolve({ task: 'zeid' }));
+  callCluster.withArgs('tasks.get').returns(Promise.resolve({ completed: true }));
   callCluster.withArgs('search').returns(searchResult(0));
 
   _.range(1, docs.length).forEach(i => {

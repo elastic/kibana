@@ -27,6 +27,8 @@ import {
   DocumentMigrator,
   IndexMigrator,
 } from '../../../../src/server/saved_objects/migrations/core';
+import { SavedObjectsSerializer } from '../../../../src/server/saved_objects/serialization';
+import { SavedObjectsSchema } from '../../../../src/server/saved_objects/schema';
 
 export default ({ getService }) => {
   const es = getService('es');
@@ -181,7 +183,7 @@ export default ({ getService }) => {
       // The polling instance and the migrating instance should both
       // return a similar migraiton result.
       assert.deepEqual(
-        result.map(({ status, destIndex }) => ({ status, destIndex })),
+        result.map(({ status, destIndex }) => ({ status, destIndex })).sort((a) => a.destIndex ? 0 : 1),
         [
           { status: 'migrated', destIndex: '.migration-c_2' },
           { status: 'skipped', destIndex: undefined },
@@ -248,6 +250,7 @@ async function migrateIndex({ callCluster, index, migrations, mappingProperties,
     mappingProperties,
     pollInterval: 50,
     scrollDuration: '5m',
+    serializer: new SavedObjectsSerializer(new SavedObjectsSchema())
   });
 
   return await migrator.migrate();

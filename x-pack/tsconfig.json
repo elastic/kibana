@@ -3,6 +3,26 @@
   "include": [
     "common/**/*",
     "server/**/*",
-    "plugins/**/*"
-  ]
+    "plugins/**/*",
+  ],
+  "exclude": [
+    "test/**/*"
+  ],
+  "compilerOptions": {
+    "paths": {
+      "ui/*": [
+        "src/ui/public/*"
+      ],
+      "plugins/xpack_main/*": [
+        "x-pack/plugins/xpack_main/public/*"
+      ],
+      "plugins/spaces/*": [
+        "x-pack/plugins/spaces/public/*"
+      ]
+    },
+    "types": [
+      "node",
+      "jest"
+    ]
+  }
 }

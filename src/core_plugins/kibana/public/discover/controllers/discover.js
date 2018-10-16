@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import React from 'react';
 import angular from 'angular';
 import { getSort } from 'ui/doc_table/lib/get_sort';
 import * as columnActions from 'ui/doc_table/actions/columns';
@@ -58,7 +59,10 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { Inspector } from 'ui/inspector';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
+import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -151,8 +155,8 @@ function discoverController(
   courier,
   kbnUrl,
   localStorage,
+  breadcrumbState
 ) {
-
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
@@ -193,13 +197,47 @@ function discoverController(
   }, {
     key: 'save',
     description: 'Save Search',
-    template: require('plugins/kibana/discover/partials/save_search.html'),
     testId: 'discoverSaveButton',
+    run: async () => {
+      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+        const currentTitle = savedSearch.title;
+        savedSearch.title = newTitle;
+        savedSearch.copyOnSave = newCopyOnSave;
+        const saveOptions = {
+          confirmOverwrite: false,
+          isTitleDuplicateConfirmed,
+          onTitleDuplicate,
+        };
+        return saveDataSource(saveOptions).then(({ id, error }) => {
+          // If the save wasn't successful, put the original values back.
+          if (!id || error) {
+            savedSearch.title = currentTitle;
+          }
+          return { id, error };
+        });
+      };
+
+      const saveModal = (
+        <SavedObjectSaveModal
+          onSave={onSave}
+          onClose={() => {}}
+          title={savedSearch.title}
+          showCopyOnSave={savedSearch.id ? true : false}
+          objectType="search"
+        />);
+      showSaveModal(saveModal);
+    }
   }, {
     key: 'open',
     description: 'Open Saved Search',
-    template: require('plugins/kibana/discover/partials/load_search.html'),
     testId: 'discoverOpenButton',
+    run: () => {
+      showOpenSearchPanel({
+        makeUrl: (searchId) => {
+          return kbnUrl.eval('#/discover/{{id}}', { id: searchId });
+        }
+      });
+    }
   }, {
     key: 'share',
     description: 'Share Search',
@@ -250,6 +288,12 @@ function discoverController(
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   docTitle.change(`Discover${pageTitleSuffix}`);
+
+  if (savedSearch.id && savedSearch.title) {
+    breadcrumbState.set([{ text: 'Discover', href: '#/discover' }, { text: savedSearch.title }]);
+  } else {
+    breadcrumbState.set([{ text: 'Discover' }]);
+  }
 
   let stateMonitor;
 
@@ -422,45 +466,45 @@ function discoverController(
           'rows',
           'fetchStatus'
         ], (function updateResultState() {
-            let prev = {};
-            const status = {
-              LOADING: 'loading', // initial data load
-              READY: 'ready', // results came back
-              NO_RESULTS: 'none' // no results came back
+          let prev = {};
+          const status = {
+            LOADING: 'loading', // initial data load
+            READY: 'ready', // results came back
+            NO_RESULTS: 'none' // no results came back
+          };
+
+          function pick(rows, oldRows, fetchStatus) {
+            // initial state, pretend we are loading
+            if (rows == null && oldRows == null) return status.LOADING;
+
+            const rowsEmpty = _.isEmpty(rows);
+            // An undefined fetchStatus means the requests are still being
+            // prepared to be sent. When all requests are completed,
+            // fetchStatus is set to null, so it's important that we
+            // specifically check for undefined to determine a loading status.
+            const preparingForFetch = _.isUndefined(fetchStatus);
+            if (preparingForFetch) return status.LOADING;
+            else if (rowsEmpty && fetchStatus) return status.LOADING;
+            else if (!rowsEmpty) return status.READY;
+            else return status.NO_RESULTS;
+          }
+
+          return function () {
+            const current = {
+              rows: $scope.rows,
+              fetchStatus: $scope.fetchStatus
             };
 
-            function pick(rows, oldRows, fetchStatus) {
-              // initial state, pretend we are loading
-              if (rows == null && oldRows == null) return status.LOADING;
+            $scope.resultState = pick(
+              current.rows,
+              prev.rows,
+              current.fetchStatus,
+              prev.fetchStatus
+            );
 
-              const rowsEmpty = _.isEmpty(rows);
-              // An undefined fetchStatus means the requests are still being
-              // prepared to be sent. When all requests are completed,
-              // fetchStatus is set to null, so it's important that we
-              // specifically check for undefined to determine a loading status.
-              const preparingForFetch = _.isUndefined(fetchStatus);
-              if (preparingForFetch) return status.LOADING;
-              else if (rowsEmpty && fetchStatus) return status.LOADING;
-              else if (!rowsEmpty) return status.READY;
-              else return status.NO_RESULTS;
-            }
-
-            return function () {
-              const current = {
-                rows: $scope.rows,
-                fetchStatus: $scope.fetchStatus
-              };
-
-              $scope.resultState = pick(
-                current.rows,
-                prev.rows,
-                current.fetchStatus,
-                prev.fetchStatus
-              );
-
-              prev = current;
-            };
-          }()));
+            prev = current;
+          };
+        }()));
 
         if ($scope.opts.timefield) {
           setupVisualization();
@@ -472,35 +516,40 @@ function discoverController(
       });
   });
 
-  $scope.opts.saveDataSource = function () {
-    return $scope.updateDataSource()
-      .then(function () {
-        savedSearch.columns = $scope.state.columns;
-        savedSearch.sort = $scope.state.sort;
+  async function saveDataSource(saveOptions) {
+    await $scope.updateDataSource();
 
-        return savedSearch.save()
-          .then(function (id) {
-            stateMonitor.setInitialState($state.toJSON());
-            $scope.kbnTopNav.close('save');
+    savedSearch.columns = $scope.state.columns;
+    savedSearch.sort = $scope.state.sort;
 
-            if (id) {
-              toastNotifications.addSuccess({
-                title: `Search '${savedSearch.title}' was saved`,
-                'data-test-subj': 'saveSearchSuccess',
-              });
-
-              if (savedSearch.id !== $route.current.params.id) {
-                kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
-              } else {
-                // Update defaults so that "reload saved query" functions correctly
-                $state.setDefaults(getStateDefaults());
-                docTitle.change(savedSearch.lastSavedTitle);
-              }
-            }
+    try {
+      const id = await savedSearch.save(saveOptions);
+      $scope.$evalAsync(() => {
+        stateMonitor.setInitialState($state.toJSON());
+        if (id) {
+          toastNotifications.addSuccess({
+            title: `Search '${savedSearch.title}' was saved`,
+            'data-test-subj': 'saveSearchSuccess',
           });
-      })
-      .catch(notify.error);
-  };
+
+          if (savedSearch.id !== $route.current.params.id) {
+            kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
+          } else {
+            // Update defaults so that "reload saved query" functions correctly
+            $state.setDefaults(getStateDefaults());
+            docTitle.change(savedSearch.lastSavedTitle);
+          }
+        }
+      });
+      return { id };
+    } catch(saveError) {
+      toastNotifications.addDanger({
+        title: `Search '${savedSearch.title}' was not saved.`,
+        text: saveError.message
+      });
+      return { error: saveError };
+    }
+  }
 
   $scope.opts.fetch = $scope.fetch = function () {
     // ignore requests to fetch before the app inits

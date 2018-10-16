@@ -74,7 +74,11 @@ function diffSubProperty(actual: any, expected: any): MigrationAction {
   // We have a leaf property, so we do a comparison. A change (e.g. 'text' -> 'keyword')
   // should result in a migration.
   if (typeof actual !== 'object') {
-    return _.isEqual(actual, expected) ? MigrationAction.None : MigrationAction.Migrate;
+    // We perform a string comparison here, because Elasticsearch coerces some primitives
+    // to string (such as dynamic: true and dynamic: 'true'), so we report a mapping
+    // equivalency if the string comparison checks out. This does mean that {} === '[object Object]'
+    // by this logic, but that is an edge case which should not occur in mapping definitions.
+    return `${actual}` === `${expected}` ? MigrationAction.None : MigrationAction.Migrate;
   }
 
   // Recursively compare the sub properties
@@ -87,5 +91,5 @@ function diffSubProperty(actual: any, expected: any): MigrationAction {
 }
 
 function isDynamic(prop: any) {
-  return prop.dynamic === true || prop.dynamic === 'true';
+  return prop && `${prop.dynamic}` === 'true';
 }
