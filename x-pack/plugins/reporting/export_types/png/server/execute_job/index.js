@@ -5,11 +5,9 @@
  */
 
 import url from 'url';
-import * as Rx from 'rxjs';
-import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { omit } from 'lodash';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { generatePngObservableFactory } from '../lib/generate_png';
+import { generatePngPromiseFactory } from '../lib/generate_png';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { getAbsoluteUrlFactory } from '../../../common/execute_job/get_absolute_url';
 
@@ -26,18 +24,18 @@ const KBN_SCREENSHOT_HEADER_BLACKLIST = [
 ];
 
 function executeJobFn(server) {
-  const generatePngObservable = generatePngObservableFactory(server);
+  const generatePngPromise = generatePngPromiseFactory(server);
   const crypto = cryptoFactory(server);
   const getAbsoluteUrl = getAbsoluteUrlFactory(server);
 
   const decryptJobHeaders = async (job) => {
     const decryptedHeaders = await crypto.decrypt(job.headers);
-    return { job, decryptedHeaders };
+    return decryptedHeaders;
   };
 
-  const omitBlacklistedHeaders = ({ job, decryptedHeaders }) => {
+  const omitBlacklistedHeaders = (decryptedHeaders) => {
     const filteredHeaders = omit(decryptedHeaders, KBN_SCREENSHOT_HEADER_BLACKLIST);
-    return { job, filteredHeaders };
+    return filteredHeaders;
   };
 
   const getSavedObjectAbsoluteUrl = (job, relativeUrl) => {
@@ -50,7 +48,7 @@ function executeJobFn(server) {
     throw new Error(`Unable to generate report. Url is not defined.`);
   };
 
-  const addForceNowQuerystring = async ({ job, filteredHeaders }) => {
+  const addForceNowQuerystring = (job) => {
 
     const jobUrl = getSavedObjectAbsoluteUrl(job, job.relativeUrl);
 
@@ -73,30 +71,28 @@ function executeJobFn(server) {
       ...parsed,
       hash: transformedHash
     });
-    //});
-    return { job, filteredHeaders, hashUrl };
+
+    return hashUrl;
   };
 
-  return function executeJob(jobToExecute, cancellationToken) {
-    const process$ = Rx.of(jobToExecute).pipe(
-      mergeMap(decryptJobHeaders),
-      catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
-      map(omitBlacklistedHeaders),
-      mergeMap(addForceNowQuerystring),
-      mergeMap(({ job, filteredHeaders, hashUrl }) => {
-        return generatePngObservable(hashUrl, filteredHeaders, job.layout);
-      }),
-      map(buffer => ({
-        content_type: 'image/png',
-        content: buffer.toString('base64')
-      }))
-    );
+  return async function executeJob(jobToExecute) {
 
-    const stop$ = Rx.fromEventPattern(cancellationToken.on);
+    let decryptedHeaders;
+    try {
+      decryptedHeaders = await decryptJobHeaders(jobToExecute);
+    } catch (e) {
+      throw new Error(
+        'Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report.'
+      );
+    }
 
-    return process$.pipe(
-      takeUntil(stop$)
-    ).toPromise();
+    const filteredHeaders = omitBlacklistedHeaders(decryptedHeaders);
+
+    const url = addForceNowQuerystring(jobToExecute);
+
+    const pngPromise =  generatePngPromise(url, filteredHeaders, jobToExecute.layout);
+
+    return pngPromise;
   };
 }
 

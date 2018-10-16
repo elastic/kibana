@@ -4,39 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
-import { toArray, mergeMap } from 'rxjs/operators';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';
+import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 
-function generatePngObservableFn(server) {
+function generatePngPromiseFn(server) {
   const screenshotsObservable = screenshotsObservableFactory(server);
-  const captureConcurrency = 1;
 
-  const urlScreenshotsObservable = (url, headers, layout) => {
-    return Rx.of(url).pipe(
-      mergeMap(url => screenshotsObservable(url, headers, layout),
-        (outer, inner) => inner,
-        captureConcurrency
-      )
-    );
-  };
+  const urlScreenshot = async (url, headers, layout) => {
 
-  const createPngWithScreenshots = async ({ urlScreenshots }) => {
+    const screenShots = await screenshotsObservable(url, headers, layout);
 
-    if (urlScreenshots.length !== 1) {
-      throw new Error(`Expected there to be 1 URL screenshot, but there are ${urlScreenshots.length}`);
-    }
-    if (urlScreenshots[0].screenshots.length !== 1) {
-      throw new Error(`Expected there to be 1 screenshot, but there are ${urlScreenshots[0].screenshots.length}`);
+    if (screenShots.length !== 1) {
+      throw new Error(`Expected there to be 1 screenshot, but there are ${screenShots.length}`);
     }
 
-    return urlScreenshots[0].screenshots[0].base64EncodedData;
+    return screenShots[0];
 
   };
 
-  return function generatePngObservable(url, headers, layoutParams) {
+  return async function generatePngPromise(url, headers, layoutParams) {
 
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
@@ -44,13 +31,15 @@ function generatePngObservableFn(server) {
 
     const layout =  new PreserveLayout(layoutParams.dimensions);
 
-    const screenshots$ = urlScreenshotsObservable(url, headers, layout);
+    const screenshot = await urlScreenshot(url, headers, layout);
 
-    return screenshots$.pipe(
-      toArray(),
-      mergeMap(urlScreenshots => createPngWithScreenshots({ urlScreenshots }))
-    );
+    return {
+      content_type: 'image/png',
+      content: screenshot.base64EncodedData
+    };
+
   };
+
 }
 
-export const generatePngObservableFactory = oncePerServer(generatePngObservableFn);
+export const generatePngPromiseFactory = oncePerServer(generatePngPromiseFn);

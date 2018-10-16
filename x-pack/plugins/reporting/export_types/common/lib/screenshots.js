@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
-import { first, tap, mergeMap } from 'rxjs/operators';
+//import * as Rx from 'rxjs';
+//import { first, tap, mergeMap } from 'rxjs/operators';
 import fs from 'fs';
 import getPort from 'get-port';
 import { promisify } from 'bluebird';
@@ -206,10 +206,11 @@ export function screenshotsObservableFactory(server) {
       args: [layout.selectors.screenshot, { title: 'data-title', description: 'data-description' }],
       returnByValue: true,
     });
+
     return elementsPositionAndAttributes;
   };
 
-  const getScreenshots = async ({ browser, elementsPositionAndAttributes }) => {
+  const getScreenshots = async (browser, elementsPositionAndAttributes) => {
     const screenshots = [];
     for (const item of elementsPositionAndAttributes) {
       const base64EncodedData = await asyncDurationLogger('screenshot', browser.screenshot(item.position));
@@ -223,97 +224,57 @@ export function screenshotsObservableFactory(server) {
     return screenshots;
   };
 
-  return function screenshotsObservable(url, headers, layout, browserTimezone) {
+  return async function screenshotsObservable(url, headers, layout, browserTimezone) {
 
-    return Rx.defer(async () => await getPort()).pipe(
-      mergeMap(bridgePort => {
-        logger.debug(`Creating browser driver factory`);
-        return browserDriverFactory.create({
-          bridgePort,
-          viewport: layout.getBrowserViewport(),
-          zoom: layout.getBrowserZoom(),
-          logger,
-          browserTimezone,
-        });
-      }),
-      tap(() => logger.debug('Driver factory created')),
-      mergeMap(({ driver$, exit$, message$, consoleMessage$ }) => {
+    const bridgePort = await getPort();
 
-        message$.subscribe(line => {
-          logger.debug(line, ['browser']);
-        });
+    logger.debug(`Creating browser driver factory`);
 
-        consoleMessage$.subscribe(line => {
-          logger.debug(line, ['browserConsole']);
-        });
+    const browser = await browserDriverFactory.create({
+      bridgePort,
+      viewport: layout.getBrowserViewport(),
+      zoom: layout.getBrowserZoom(),
+      logger,
+      browserTimezone
+    });
 
+    logger.debug('Driver factory created');
 
-        const screenshot$ = driver$.pipe(
-          tap(() => logger.debug(`opening ${url}`)),
-          mergeMap(
-            browser => openUrl(browser, url, headers),
-            browser => browser
-          ),
-          tap(() => logger.debug('injecting custom css')),
-          mergeMap(
-            browser => injectCustomCss(browser, layout),
-            browser => browser
-          ),
-          tap(() => logger.debug('waiting for elements or items count attribute; or not found to interrupt')),
-          mergeMap(
-            browser => Rx.race(
-              Rx.from(waitForElementOrItemsCountAttribute(browser, layout)),
-              Rx.from(waitForNotFoundError(browser))
-            ),
-            browser => browser
-          ),
-          tap(() => logger.debug('determining how many items we have')),
-          mergeMap(
-            browser => getNumberOfItems(browser, layout),
-            (browser, itemsCount) => ({ browser, itemsCount })
-          ),
-          tap(() => logger.debug('setting viewport')),
-          mergeMap(
-            ({ browser, itemsCount }) => setViewport(browser, itemsCount, layout),
-            ({ browser, itemsCount }) => ({ browser, itemsCount }),
-          ),
-          tap(({ itemsCount }) => logger.debug(`waiting for ${itemsCount} to be in the DOM`)),
-          mergeMap(
-            ({ browser, itemsCount }) => waitForElementsToBeInDOM(browser, itemsCount, layout),
-            ({ browser, itemsCount }) => ({ browser, itemsCount })
-          ),
-          tap(() => logger.debug('positioning elements')),
-          mergeMap(
-            ({ browser }) => positionElements(browser, layout),
-            ({ browser }) => browser
-          ),
-          tap(() => logger.debug('waiting for rendering to complete')),
-          mergeMap(
-            browser => waitForRenderComplete(browser, layout),
-            browser => browser
-          ),
-          tap(() => logger.debug('rendering is complete')),
-          mergeMap(
-            browser => getTimeRange(browser, layout),
-            (browser, timeRange) => ({ browser, timeRange })
-          ),
-          tap(({ timeRange }) => logger.debug(timeRange ? `timeRange from ${timeRange.from} to ${timeRange.to}` : 'no timeRange')),
-          mergeMap(
-            ({ browser }) => getElementPositionAndAttributes(browser, layout),
-            ({ browser, timeRange }, elementsPositionAndAttributes) => {
-              return { browser, timeRange, elementsPositionAndAttributes };
-            }
-          ),
-          tap(() => logger.debug(`taking screenshots`)),
-          mergeMap(
-            ({ browser, elementsPositionAndAttributes }) => getScreenshots({ browser, elementsPositionAndAttributes }),
-            ({ timeRange }, screenshots) => ({ timeRange, screenshots })
-          )
-        );
+    logger.debug(`opening ${url}`);
+    await openUrl(browser, url, headers);
 
-        return Rx.race(screenshot$, exit$);
-      }),
-      first()
-    );
+    logger.debug('injecting custom css');
+    await injectCustomCss(browser, layout);
+
+    logger.debug('waiting for elements or items count attribute; or not found to interrupt');
+    Promise.race([waitForElementOrItemsCountAttribute(browser, layout), waitForNotFoundError(browser)])
+      .then(function () {
+      });
+
+    logger.debug('determining how many items we have');
+    const itemsCount = await getNumberOfItems(browser, layout);
+
+    logger.debug('setting viewport');
+    await setViewport(browser, itemsCount, layout);
+
+    logger.debug(`waiting for ${itemsCount} to be in the DOM`);
+    await waitForElementsToBeInDOM(browser, itemsCount, layout);
+
+    logger.debug('positioning elements');
+    await positionElements(browser, layout);
+
+    logger.debug('waiting for rendering to complete');
+    await  waitForRenderComplete(browser, layout);
+
+    logger.debug('rendering is complete');
+    const timeRange = await getTimeRange(browser, layout);
+
+    logger.debug(timeRange ? `timeRange from ${timeRange.from} to ${timeRange.to}` : 'no timeRange');
+    const elementsPositionAndAttributes = await getElementPositionAndAttributes(browser, layout);
+
+    logger.debug(`taking screenshots`);
+    const screenshots = await getScreenshots(browser, elementsPositionAndAttributes);
+
+    return screenshots;
   };
 }

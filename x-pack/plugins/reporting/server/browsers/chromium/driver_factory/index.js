@@ -8,15 +8,11 @@ import os from 'os';
 import path from 'path';
 import puppeteer from 'puppeteer-core';
 import rimraf from 'rimraf';
-import * as Rx from 'rxjs';
-import { map, share, mergeMap, filter, partition } from 'rxjs/operators';
+//import * as Rx from 'rxjs';
+//import { map, share, mergeMap, filter, partition } from 'rxjs/operators';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { safeChildProcess } from '../../safe_child_process';
-
-const compactWhitespace = (str) => {
-  return str.replace(/\s+/, ' ');
-};
 
 export class HeadlessChromiumDriverFactory {
   constructor(binaryPath, logger, browserConfig) {
@@ -27,57 +23,97 @@ export class HeadlessChromiumDriverFactory {
 
   type = 'chromium';
 
-  create({ viewport, browserTimezone }) {
-    return Rx.Observable.create(async observer => {
-      const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
-      const chromiumArgs = args({
+  async create({ viewport, browserTimezone }) {
+    const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
+    const chromiumArgs = args({
+      userDataDir,
+      viewport,
+      verboseLogging: this.logger.isVerbose,
+      disableSandbox: this.browserConfig.disableSandbox,
+      proxyConfig: this.browserConfig.proxy,
+    });
+
+    let chromium;
+    let page;
+
+    try {
+      chromium = await puppeteer.launch({
         userDataDir,
-        viewport,
-        verboseLogging: this.logger.isVerbose,
-        disableSandbox: this.browserConfig.disableSandbox,
-        proxyConfig: this.browserConfig.proxy,
+        executablePath: this.binaryPath,
+        ignoreHTTPSErrors: true,
+        args: chromiumArgs,
+        env: {
+          TZ: browserTimezone
+        },
       });
 
-      let chromium;
-      let page;
-      try {
-        chromium = await puppeteer.launch({
-          userDataDir,
-          executablePath: this.binaryPath,
-          ignoreHTTPSErrors: true,
-          args: chromiumArgs,
-          env: {
-            TZ: browserTimezone
-          },
-        });
 
-        page = await chromium.newPage();
-      } catch (err) {
-        observer.error(new Error(`Caught error spawning Chromium`));
-        return;
-      }
+      page = await chromium.newPage();
+    } catch (err) {
+      throw new Error(`Caught error spawning Chromium` + err);
+      return;
+    }
 
-      safeChildProcess({
-        async kill() {
-          await chromium.close();
+    page.on('console', line => {
+      if (line._type === 'error') {
+        if (line._text.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/)) {
+          if (line._text.includes('error while loading shared libraries: libnss3.so')) {
+            throw new Error(`You must install nss for Reporting to work`);}
+          if (line._text.includes('Check failed: InitDefaultFont(). Could not find the default font')) {
+            throw new Error('You must install freetype and ttf-font for Reporting to work');}
+          if (line._text.includes('No usable sandbox! Update your kernel')) {
+            let errText = 'Unable to use Chromium sandbox. ';
+            errText += 'This can be disabled at your own risk with xpack.reporting.capture.browser.chromium.disableSandbox';
+            throw new Error(errText);}
+          if (line._text.includes('error while loading shared libraries: libnss3.so')) {
+            throw new Error(`You must install nss for Reporting to work`);}
+          this.logger.debug(line._text, ['browserConsole']);
         }
-      }, observer);
+        else {
+          this.logger.debug(line._text, ['browser']);}
+      }});
 
+    process.on('SIGTERM', () => {
+      this.logger.debug('SIGTERM received from process. Process is terminating.');
+    });
+    process.on('SIGINT', () => {
+      this.logger.debug('SIGINT received from process. Process is terminating.');
+    });
+    process.on('SIGBREAK', () => {
+      this.logger.debug('SIGBREAK received from process. Process is terminating.');
+    });
+
+    safeChildProcess({
+      async kill() {
+        await chromium.close();
+      }
+    });
+    /*
       const stderr$ = Rx.fromEvent(page, 'console').pipe(
         filter(line => line._type === 'error'),
         map(line => line._text),
         share()
       );
+      */
+    /*
+    const [consoleMessage$, message$] = stderr$.pipe(
+      partition(msg => msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/))
+    );*/
 
-      const [consoleMessage$, message$] = stderr$.pipe(
-        partition(msg => msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/))
-      );
+    const browser = new HeadlessChromiumDriver(page, {
+      maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
+      logger: this.logger
+    });
 
-      const driver$ = Rx.of(new HeadlessChromiumDriver(page, {
-        maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
-        logger: this.logger
-      }));
+    page.on('error', msg => {
+      this.logger.error(msg);
+      throw new Error(`Unable to spawn Chromium`);
+    });
 
+    chromium.on('disconnected', err => {
+      throw new Error(`Chromium exited with code: ${err}. ${JSON.stringify(err)}`);
+    });
+    /*
       const processError$ = Rx.fromEvent(page, 'error').pipe(
         map((err) => this.logger.error(err)),
         mergeMap(() => Rx.throwError(new Error(`Unable to spawn Chromium`))),
@@ -113,18 +149,18 @@ export class HeadlessChromiumDriverFactory {
         message$,
         exit$
       });
-
-      // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
-      return () => {
-        this.logger.debug(`deleting chromium user data directory at ${userDataDir}`);
-        // the unsubscribe function isn't `async` so we're going to make our best effort at
-        // deleting the userDataDir and if it fails log an error.
-        rimraf(userDataDir, (err) => {
-          if (err) {
-            return this.logger.error(`error deleting user data directory at ${userDataDir}: ${err}`);
-          }
-        });
-      };
+*/
+    // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
+    this.logger.debug(`deleting chromium user data directory at ${userDataDir}`);
+    // the unsubscribe function isn't `async` so we're going to make our best effort at
+    // deleting the userDataDir and if it fails log an error.
+    rimraf(userDataDir, (err) => {
+      if (err) {
+        this.logger.error(`error deleting user data directory at ${userDataDir}: ${err}`);
+      }
     });
+
+
+    return browser;
   }
 }

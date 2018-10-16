@@ -51,7 +51,7 @@ function generatePdfObservableFn(server) {
       pdfOutput.setTitle(title);
     }
 
-    urlScreenshots.forEach(({ screenshots }) => {
+    urlScreenshots.forEach((screenshots) => {
       screenshots.forEach(screenshot => {
         pdfOutput.addImage(screenshot.base64EncodedData, {
           title: screenshot.title,
