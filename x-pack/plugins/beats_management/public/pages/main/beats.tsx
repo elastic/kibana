@@ -9,6 +9,7 @@ import {
   EuiButtonEmpty,
   EuiGlobalToastList,
   EuiModal,
+  EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
@@ -80,7 +81,9 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
             <EuiModalHeader>
               <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
             </EuiModalHeader>
-            <EnrollBeatPage {...props} />
+            <EuiModalBody>
+              <EnrollBeatPage {...props} />
+            </EuiModalBody>
           </EuiModal>
         </EuiOverlayMask>
       )}
