@@ -67,11 +67,11 @@ export function createProxy(server) {
       }
     },
     async handler(req, reply) {
-      const { body } = req;
+      const { payload } = req;
       try {
         const response = await callWithRequest(req, 'search', {
           index: req.params.index,
-          body
+          body: payload
         });
         reply(response);
       } catch(e) {
