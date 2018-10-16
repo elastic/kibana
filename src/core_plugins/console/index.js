@@ -131,12 +131,6 @@ export default function (kibana) {
       devTools: ['plugins/console/console'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
 
-      injectDefaultVars(server) {
-        return {
-          elasticsearchUrl: head(server.config().get('elasticsearch.hosts'))
-        };
-      },
-
       noParse: [
         join(modules, 'ace' + sep),
         join(modules, 'moment_src/moment' + sep),

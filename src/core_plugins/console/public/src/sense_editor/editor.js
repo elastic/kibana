@@ -25,7 +25,6 @@ const RowParser = require('./row_parser');
 const InputMode = require('./mode/input');
 const utils = require('../utils');
 const es = require('../es');
-import chrome from 'ui/chrome';
 
 const smartResize = require('../smart_resize');
 
@@ -564,7 +563,8 @@ export default function SenseEditor($el) {
         const  esMethod = req.method;
         const  esData = req.data;
 
-        const elasticsearchBaseUrl = chrome.getInjected('elasticsearchUrl');
+        // TODO: set url from ui settings
+        const elasticsearchBaseUrl = 'http://localhost:9200';
         const url = es.constructESUrl(elasticsearchBaseUrl, esPath);
 
         let ret = 'curl -X' + esMethod + ' "' + url + '"';

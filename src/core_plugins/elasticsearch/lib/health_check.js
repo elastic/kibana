@@ -30,11 +30,11 @@ export default function (plugin, server) {
   const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
 
   plugin.status.yellow('Waiting for Elasticsearch');
-  function waitForPong(callWithInternalUser, elasticsearchUrl) {
+  function waitForPong(callWithInternalUser) {
     return callWithInternalUser('ping').catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
       plugin.status.red(`Unable to connect to Elasticsearch.`);
-      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, elasticsearchUrl));
+      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser));
     });
   }
 
