@@ -309,10 +309,10 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private selectedBeatsContainOutput = () =>
     // union beat tags
-    flatten(this.getSelectedBeats().map(beat => beat.full_tags))
+    flatten(this.getSelectedBeats().map(({ full_tags }) => full_tags))
       // map tag list to bool
-      .map(tag =>
-        tag.configuration_blocks.some(config => config.type === ConfigurationBlockTypes.Output)
+      .map(({ configuration_blocks }) =>
+        configuration_blocks.some(config => config.type === ConfigurationBlockTypes.Output)
       )
       // reduce to result
       .reduce((acc, cur) => acc || cur, false);
