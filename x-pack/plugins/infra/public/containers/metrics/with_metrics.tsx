@@ -45,6 +45,7 @@ export const WithMetrics = ({
     },
     [] as InfraMetric[]
   );
+
   return (
     <Query<MetricsQuery.Query, MetricsQuery.Variables>
       query={metricsQuery}

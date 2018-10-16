@@ -13,15 +13,8 @@ export const capabilitiesSchema = gql`
     source: String!
   }
 
-  enum NodeType {
-    "Fixed set of possible node types"
-    host
-    container
-    pod
-  }
-
   extend type InfraSource {
     "A hierarchy of capabilities available on nodes"
-    capabilitiesByNode(nodeName: String!, nodeType: NodeType!): [InfraNodeCapability]!
+    capabilitiesByNode(nodeName: String!, nodeType: InfraNodeType!): [InfraNodeCapability]!
   }
 `;
