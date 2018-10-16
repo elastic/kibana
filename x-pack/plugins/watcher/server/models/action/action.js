@@ -12,6 +12,7 @@ import { LoggingAction } from './logging_action';
 import { EmailAction } from './email_action';
 import { SlackAction } from './slack_action';
 import { UnknownAction } from './unknown_action';
+import { i18n } from '@kbn/i18n';
 
 const ActionTypes = {};
 set(ActionTypes, ACTION_TYPES.LOGGING, LoggingAction);
@@ -27,7 +28,11 @@ export class Action {
   // From Elasticsearch
   static fromUpstreamJson(json) {
     if (!json.actionJson) {
-      throw badRequest('json argument must contain an actionJson property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.action.absenceOfActionJsonPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain an actionJson property',
+        }),
+      );
     }
 
     const type = getActionType(json.actionJson);

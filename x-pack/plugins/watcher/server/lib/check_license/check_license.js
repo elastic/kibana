@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export function checkLicense(xpackLicenseInfo) {
   // If, for some reason, we cannot get the license information
   // from Elasticsearch, assume worst case and disable the Watcher UI
@@ -12,7 +14,9 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: true,
       enableLinks: false,
-      message: 'You cannot use Watcher because license information is not available at this time.'
+      message: i18n.translate('xpack.watcher.checkLicense.licenseInformationNotAvailableMessageText', {
+        defaultMessage: 'You cannot use Watcher because license information is not available at this time.',
+      }),
     };
   }
 
@@ -32,7 +36,10 @@ export function checkLicense(xpackLicenseInfo) {
     return {
       isAvailable: false,
       showLinks: false,
-      message: `Your ${licenseType} license does not support Watcher. Please upgrade your license.`
+      message: i18n.translate('xpack.watcher.checkLicense.licenseDoesNotSupportMessageText', {
+        defaultMessage: 'Your {licenseType} license does not support Watcher. Please upgrade your license.',
+        values: { licenseType },
+      }),
     };
   }
 
@@ -42,7 +49,10 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: true,
       enableLinks: false,
-      message: `You cannot use Watcher because your ${licenseType} license has expired.`
+      message: i18n.translate('xpack.watcher.server.checkLicense.licenseExpiredMessageText', {
+        defaultMessage: 'You cannot use Watcher because your {licenseType} license has expired',
+        values: { licenseType },
+      }),
     };
   }
 

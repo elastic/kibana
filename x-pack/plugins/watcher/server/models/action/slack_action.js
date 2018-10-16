@@ -7,6 +7,7 @@
 import { badRequest } from 'boom';
 import { BaseAction } from './base_action';
 import { ACTION_TYPES } from '../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 export class SlackAction extends BaseAction {
   constructor(props) {
@@ -61,13 +62,25 @@ export class SlackAction extends BaseAction {
     const props = super.getPropsFromUpstreamJson(json);
 
     if (!json.actionJson.slack) {
-      throw badRequest('json argument must contain an actionJson.slack property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.slackAction.absenceOfActionJsonSlackPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain an actionJson.slack property',
+        }),
+      );
     }
     if (!json.actionJson.slack.message) {
-      throw badRequest('json argument must contain an actionJson.slack.message property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.slackAction.absenceOfActionJsonSlackMessagePropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain an actionJson.slack.message property',
+        }),
+      );
     }
     if (!json.actionJson.slack.message.to) {
-      throw badRequest('json argument must contain an actionJson.slack.message.to property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.slackAction.absenceOfActionJsonSlackMessageToPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain an actionJson.slack.message property',
+        }),
+      );
     }
 
     Object.assign(props, {
