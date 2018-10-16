@@ -6,6 +6,7 @@
   "kibana": {
     "version": "kibana"
   },
+  "private": true,
   "scripts": {
     "kbn": "node ../../../scripts/kbn",
     "start": "../../node_modules/.bin/gulp canvas:dev",
