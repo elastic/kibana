@@ -5,5 +5,4 @@
  */
 
 
-export { fileDataVisualizerProvider } from './file_data_visualizer';
-export { importDataProvider } from './import_data';
+export { importerFactory } from './importer_factory';

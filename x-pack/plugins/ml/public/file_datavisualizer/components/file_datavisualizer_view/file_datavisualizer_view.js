@@ -13,6 +13,8 @@ import {
   EuiFilePicker,
   EuiSpacer,
   EuiLoadingSpinner,
+  EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { isEqual } from 'lodash';
@@ -21,8 +23,14 @@ import { ml } from '../../../services/ml_api_service';
 import { ResultsView } from '../results_view';
 import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { EditFlyout } from '../edit_flyout';
-import { overrideDefaults } from './overrides';
+import { ImportView } from '../import_view';
 import { MAX_BYTES } from '../../../../common/constants/file_datavisualizer';
+import { readFile, createUrlOverrides, processResults } from './utils';
+
+const MODE = {
+  READ: 0,
+  IMPORT: 1,
+};
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -38,6 +46,7 @@ export class FileDataVisualizerView extends Component {
       loading: false,
       loaded: false,
       results: undefined,
+      mode: MODE.READ,
     };
 
     this.overrides = {};
@@ -100,11 +109,18 @@ export class FileDataVisualizerView extends Component {
   async loadSettings(data, overrides) {
     try {
       console.log('overrides', overrides);
-      const resp = await  ml.analyzeFile(data, overrides);
+      const { analyzeFile } = ml.fileDatavisualizer;
+      const resp = await analyzeFile(data, overrides);
       const serverSettings = processResults(resp.results);
       const serverOverrides = resp.overrides;
 
       this.overrides = {};
+
+      if (serverSettings.format === 'xml') {
+        throw {
+          message: 'XML not currently supported'
+        };
+      }
 
       if (serverOverrides === undefined) {
         this.originalSettings = serverSettings;
@@ -169,6 +185,10 @@ export class FileDataVisualizerView extends Component {
     });
   }
 
+  changeMode = (mode) => {
+    this.setState({ mode });
+  }
+
   render() {
     const {
       loading,
@@ -179,145 +199,94 @@ export class FileDataVisualizerView extends Component {
       fileTooLarge,
       fileCouldNotBeRead,
       serverErrorMessage,
+      mode,
     } = this.state;
 
     const fields = (results !== undefined && results.field_stats !== undefined) ? Object.keys(results.field_stats) : [];
 
     return (
       <React.Fragment>
-        <div style={{ textAlign: 'center' }} >
-          <EuiFilePicker
-            id="filePicker"
-            initialPromptText="Select or drag and drop a file"
-            onChange={files => this.onChange(files)}
-          />
-        </div>
+        {(mode === MODE.READ) &&
+          <React.Fragment>
+            <div style={{ textAlign: 'center' }} >
+              <EuiFilePicker
+                id="filePicker"
+                initialPromptText="Select or drag and drop a file"
+                onChange={files => this.onChange(files)}
+              />
+            </div>
 
-        <EuiSpacer size="l" />
+            <EuiSpacer size="l" />
 
-        {(loading) &&
-          <div style={{ textAlign: 'center' }} >
-            <EuiLoadingSpinner size="xl"/>
-          </div>
+            {(loading) &&
+              <div style={{ textAlign: 'center' }} >
+                <EuiLoadingSpinner size="xl"/>
+              </div>
+            }
+
+            {(fileTooLarge) &&
+              <FileTooLarge
+                fileSize={fileSize}
+                maxFileSize={MAX_BYTES}
+              />
+            }
+
+            {(fileCouldNotBeRead) &&
+              <FileCouldNotBeRead error={serverErrorMessage} />
+            }
+
+            {(loaded) &&
+              <React.Fragment>
+                <ResultsView
+                  results={results}
+                  data={fileContents}
+                  showEditFlyout={() => this.showEditFlyout()}
+                />
+              </React.Fragment>
+            }
+            <EditFlyout
+              setShowFunction={this.setShowEditFlyoutFunction}
+              setOverrides={this.setOverrides}
+              originalSettings={this.originalSettings}
+              overrides={this.overrides}
+              fields={fields}
+            />
+
+            {(loaded) &&
+              <React.Fragment>
+                <EuiSpacer size="m" />
+                <EuiPanel>
+                  <EuiButton
+                    onClick={() => this.changeMode(MODE.IMPORT)}
+                  >
+                    Import
+                  </EuiButton>
+                </EuiPanel>
+              </React.Fragment>
+            }
+          </React.Fragment>
         }
+        {(mode === MODE.IMPORT) &&
+          <React.Fragment>
+            <ImportView
+              results={results}
+              fileContents={fileContents}
+              fileSize={fileSize}
+              indexPatterns={this.props.indexPatterns}
+            />
 
-        {(fileTooLarge) &&
-          <FileTooLarge
-            fileSize={fileSize}
-            maxFileSize={MAX_BYTES}
-          />
-        }
+            <EuiSpacer size="m" />
 
-        {(fileCouldNotBeRead) &&
-          <FileCouldNotBeRead error={serverErrorMessage} />
+            <EuiPanel>
+              <EuiButton
+                onClick={() => this.changeMode(MODE.READ)}
+              >
+                Back
+              </EuiButton>
+            </EuiPanel>
+          </React.Fragment>
         }
-
-        {(loaded) &&
-          <ResultsView
-            results={results}
-            data={fileContents}
-            showEditFlyout={() => this.showEditFlyout()}
-          />
-        }
-        <EditFlyout
-          setShowFunction={this.setShowEditFlyoutFunction}
-          setOverrides={this.setOverrides}
-          originalSettings={this.originalSettings}
-          overrides={this.overrides}
-          fields={fields}
-        />
       </React.Fragment>
     );
   }
-}
-
-function readFile(file) {
-  return new Promise((resolve, reject) => {
-
-    if (file && file.size) {
-      const reader = new FileReader();
-      reader.readAsText(file);
-
-      reader.onload = (() => {
-        return () => {
-          const data = reader.result;
-          if (data === '') {
-            reject();
-          } else {
-            resolve({ data });
-          }
-        };
-      })(file);
-    } else {
-      reject();
-    }
-  });
-}
-
-function createUrlOverrides(overrides, originalSettings) {
-  const formattedOverrides = {};
-  for (const o in overrideDefaults) {
-    if (overrideDefaults.hasOwnProperty(o)) {
-      let value = overrides[o];
-      if (
-        (Array.isArray(value) && isEqual(value, originalSettings[o]) ||
-        (value === undefined || value === originalSettings[o]))
-      ) {
-        value = '';
-      }
-
-      const snakeCaseO = o.replace(/([A-Z])/g, $1 => `_${$1.toLowerCase()}`);
-      formattedOverrides[snakeCaseO] = value;
-    }
-  }
-
-  if (formattedOverrides.format === '' && originalSettings.format === 'delimited') {
-    if (
-      formattedOverrides.should_trim_fields !== '' ||
-      formattedOverrides.has_header_row !== '' ||
-      formattedOverrides.delimiter !== '' ||
-      formattedOverrides.quote !== '' ||
-      formattedOverrides.column_names !== ''
-    ) {
-      formattedOverrides.format = originalSettings.format;
-    }
-  }
-
-  if (formattedOverrides.format === '' && originalSettings.format === 'semi_structured_text') {
-    if (formattedOverrides.grok_pattern !== '') {
-      formattedOverrides.format = originalSettings.format;
-    }
-  }
-
-  if (formattedOverrides.format === 'json' || originalSettings.format === 'json') {
-    formattedOverrides.should_trim_fields = '';
-    formattedOverrides.has_header_row = '';
-    formattedOverrides.delimiter = '';
-    formattedOverrides.quote = '';
-    formattedOverrides.column_names = '';
-  }
-
-  // escape grok pattern as it can contain bad characters
-  if (formattedOverrides.grok_pattern !== '') {
-    formattedOverrides.grok_pattern  = encodeURIComponent(formattedOverrides.grok_pattern);
-  }
-  return formattedOverrides;
-}
-
-function processResults(results) {
-  const timestampFormat = (results.joda_timestamp_formats !== undefined && results.joda_timestamp_formats.length) ?
-    results.joda_timestamp_formats[0] : undefined;
-
-  return {
-    format: results.format,
-    delimiter: results.delimiter,
-    timestampField: results.timestamp_field,
-    timestampFormat,
-    quote: results.quote,
-    hasHeaderRow: results.has_header_row,
-    shouldTrimFields: results.should_trim_fields,
-    charset: results.charset,
-    columnNames: results.column_names,
-    grokPattern: results.grok_pattern,
-  };
 }

@@ -14,6 +14,7 @@ import { http } from '../../services/http_service';
 import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
+import { fileDatavisualizer } from './datavisualizer';
 
 const basePath = chrome.addBasePath('/api/ml');
 
@@ -408,21 +409,8 @@ export const ml = {
     });
   },
 
-  analyzeFile(obj, params) {
-    let paramString = '?';
-    for (const p in params) {
-      if (params.hasOwnProperty(p)) {
-        paramString += `&${p}=${params[p]}`;
-      }
-    }
-    return http({
-      url: `${basePath}/file_data_visualizer/analyze_file${paramString}`,
-      method: 'POST',
-      data: obj
-    });
-  },
-
   filters,
   results,
   jobs,
+  fileDatavisualizer,
 };

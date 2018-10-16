@@ -18,7 +18,7 @@ import { initPromise } from 'plugins/ml/util/promise';
 
 import uiRoutes from 'ui/routes';
 
-const template = '<ml-nav-menu name="lcc" /><file-datavisualizer-page />';
+const template = '<ml-nav-menu name="filedatavisualizer" /><file-datavisualizer-page />';
 
 uiRoutes
   .when('/filedatavisualizer/?', {
@@ -38,6 +38,7 @@ import { FileDataVisualizerPage } from './file_datavisualizer';
 
 module.directive('fileDatavisualizerPage', function ($injector) {
   const reactDirective = $injector.get('reactDirective');
+  const indexPatterns = $injector.get('indexPatterns');
 
-  return reactDirective(FileDataVisualizerPage, undefined, { restrict: 'E' }, { });
+  return reactDirective(FileDataVisualizerPage, undefined, { restrict: 'E' }, { indexPatterns });
 });

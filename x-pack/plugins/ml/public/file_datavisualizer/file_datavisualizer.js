@@ -9,10 +9,10 @@ import { FileDataVisualizerView } from './components/file_datavisualizer_view';
 
 import React from 'react';
 
-export function FileDataVisualizerPage({ }) {
+export function FileDataVisualizerPage({ indexPatterns }) {
   return (
     <div className="file-datavisualizer-container">
-      <FileDataVisualizerView />
+      <FileDataVisualizerView indexPatterns={indexPatterns} />
     </div>
   );
 }
