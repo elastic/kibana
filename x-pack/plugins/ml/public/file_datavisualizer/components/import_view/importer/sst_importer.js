@@ -29,21 +29,21 @@ export class SstImporter extends Importer {
     try {
       const data = [];
 
+      let message = '';
       let line = '';
-      let tempLine = '';
       for (let i = 0; i < text.length; i++) {
         const char = text[i];
         if (char === '\n') {
-          if (tempLine.match(this.multilineStartPattern) !== null) {
-            data.push({ message: line });
-            line = '';
+          if (line.match(this.multilineStartPattern) !== null) {
+            data.push({ message });
+            message = '';
           } else {
-            line += char;
+            message += char;
           }
-          line += tempLine;
-          tempLine = '';
+          message += line;
+          line = '';
         } else {
-          tempLine += char;
+          line += char;
         }
       }
 

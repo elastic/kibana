@@ -11,19 +11,14 @@ import { JsonImporter } from './json_importer';
 
 export function importerFactory(format, results) {
 
-  let importer;
   switch (format) {
     case 'delimited':
-      importer = new CsvImporter(results);
-      break;
+      return new CsvImporter(results);
     case 'semi_structured_text':
-      importer = new SstImporter(results);
-      break;
+      return new SstImporter(results);
     case 'json':
-      importer = new JsonImporter(results);
-      break;
+      return new JsonImporter(results);
     default:
-      break;
+      return;
   }
-  return importer;
 }

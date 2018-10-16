@@ -11,13 +11,12 @@ import csvParse from 'csv-parse';
 
 export function parse(data, settings) {
   return new Promise((resolve, reject) => {
-    csvParse(data, settings
-      , (err, out) => {
-        if (err !== null) {
-          reject(err);
-        } else {
-          resolve(out);
-        }
-      });
+    csvParse(data, settings, (err, out) => {
+      if (err !== null) {
+        reject(err);
+      } else {
+        resolve(out);
+      }
+    });
   });
 }

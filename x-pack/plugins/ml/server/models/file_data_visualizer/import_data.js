@@ -7,7 +7,6 @@
 
 export function importDataProvider(callWithRequest) {
   async function importData(id, index, mappings, ingestPipeline, data) {
-    // console.log(id, index, mappings, data);
     let pipelineId;
     const docCount = data.length;
 
@@ -79,34 +78,39 @@ export function importDataProvider(callWithRequest) {
   }
 
   async function indexData(index, pipelineId, data) {
-    const type = '_doc';
-    const body = [];
-    data.forEach((d) => {
-      body.push({ index: {} });
-      body.push(d);
-    });
+    try {
+      const type = '_doc';
+      const body = [];
+      for (let i = 0; i < data.length; i++) {
+        body.push({ index: {} });
+        body.push(data[i]);
+      }
 
-    const settings = { index, type, body };
-    if (pipelineId !== undefined) {
-      settings.pipeline = pipelineId;
-    }
+      const settings = { index, type, body };
+      if (pipelineId !== undefined) {
+        settings.pipeline = pipelineId;
+      }
 
-    const resp = await callWithRequest('bulk', settings);
-    if (resp.errors) {
-      const failures = getFailures(resp.items);
+      const resp = await callWithRequest('bulk', settings);
+      if (resp.errors) {
+        throw resp;
+      } else {
+        return {
+          success: true,
+          docs: data.length,
+          failures: [],
+        };
+      }
+    } catch (error) {
+      const failures = getFailures(error.items || []);
       return {
         success: false,
-        error: resp,
+        error,
         docs: data.length,
         failures,
       };
-    } else {
-      return {
-        success: true,
-        docs: data.length,
-        failures: [],
-      };
     }
+
   }
 
   async function indexExits(index) {

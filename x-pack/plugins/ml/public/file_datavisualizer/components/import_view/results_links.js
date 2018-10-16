@@ -41,7 +41,10 @@ export class ResultsLinks extends Component {
     } = this.props;
 
     const { from, to, } = await getFullTimeRange(index, timeFieldName);
-    this.setState({ from, to });
+    this.setState({
+      from: (from === null) ? this.state.from : from,
+      to: (to === null) ? this.state.to : to,
+    });
   }
 
   render() {

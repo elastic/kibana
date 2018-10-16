@@ -110,11 +110,17 @@ export class FileDataVisualizerView extends Component {
     try {
       console.log('overrides', overrides);
       const { analyzeFile } = ml.fileDatavisualizer;
-      const resp = await  analyzeFile(data, overrides);
+      const resp = await analyzeFile(data, overrides);
       const serverSettings = processResults(resp.results);
       const serverOverrides = resp.overrides;
 
       this.overrides = {};
+
+      if (serverSettings.format === 'xml') {
+        throw {
+          message: 'XML not currently supported'
+        };
+      }
 
       if (serverOverrides === undefined) {
         this.originalSettings = serverSettings;
@@ -246,7 +252,7 @@ export class FileDataVisualizerView extends Component {
               fields={fields}
             />
 
-            {(loaded /*&& results.format === 'delimited'*/) &&
+            {(loaded) &&
               <React.Fragment>
                 <EuiSpacer size="m" />
                 <EuiPanel>

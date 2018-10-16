@@ -100,6 +100,8 @@ export class ImportView extends Component {
               importing: false,
               imported: success,
             });
+          } else {
+            console.error('Unsupported file format');
           }
         }, 500);
       });
@@ -150,7 +152,6 @@ export class ImportView extends Component {
       });
 
       createdId = await emptyPattern.create();
-      console.log(createdId);
       return createdId;
     } catch (error) {
       console.error(error);
