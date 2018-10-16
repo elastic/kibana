@@ -96,6 +96,9 @@ class FlotChart extends Component {
       const options = this.plot.getOptions();
       _.set(options, 'series.bars.barWidth', calculateBarWidth(series));
       _.set(options, 'xaxes[0].ticks', this.calculateTicks());
+      if (!this.anyValuesBelowZero(series)) {
+        _.set(options, 'yaxes[0].min', 0);
+      }
       this.plot.setData(this.calculateData(series, newProps.show));
       this.plot.setupGrid();
       this.plot.draw();
@@ -160,8 +163,7 @@ class FlotChart extends Component {
       yaxis: {
         color: lineColor,
         font: { color: textColor },
-        tickFormatter: props.tickFormatter,
-        min: 0
+        tickFormatter: props.tickFormatter
       },
       xaxis: {
         tickLength: props.showGrid ? null : 0,
@@ -199,6 +201,10 @@ class FlotChart extends Component {
       _.set(opts, 'xaxis.tickFormatter', props.xAxisFormatter);
     }
 
+    if (!this.anyValuesBelowZero(props.series)) {
+      _.set(opts, 'yaxis.min', 0);
+    }
+
     _.set(opts, 'series.bars.barWidth', calculateBarWidth(props.series));
     return _.assign(opts, props.options);
   }
@@ -209,6 +215,15 @@ class FlotChart extends Component {
     const tickPadding = 45;
     const ticks = Math.floor(this.target.clientWidth / ((sample.length * tickLetterWidth) + tickPadding));
     return ticks;
+  }
+
+  anyValuesBelowZero(series) {
+    return series.reduce((anyBelowZero, { data }) => {
+      if (anyBelowZero) {
+        return true;
+      }
+      return !!data.find(item => item[1] < 0);
+    }, false);
   }
 
   handleResize() {
