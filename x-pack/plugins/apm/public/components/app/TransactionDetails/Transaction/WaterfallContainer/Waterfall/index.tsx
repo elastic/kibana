@@ -9,6 +9,7 @@ import React, { Component, Fragment } from 'react';
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
 
+import { IUrlParams } from '../../../../../../store/urlParams';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
 import { SpanFlyout } from './SpanFlyout';
@@ -31,16 +32,6 @@ const TIMELINE_MARGINS = {
   right: 50,
   bottom: 0
 };
-
-// TODO: moved to shared
-export interface IUrlParams {
-  serviceName: string;
-  transactionType: string;
-  transactionName: string;
-  errorGroupId: string;
-  start: string;
-  end: string;
-}
 
 interface Props {
   urlParams: IUrlParams;
@@ -98,7 +89,7 @@ export class Waterfall extends Component<Props, State> {
       return null;
     }
 
-    switch (currentItem.eventType) {
+    switch (currentItem.docType) {
       case 'span':
         return (
           <SpanFlyout

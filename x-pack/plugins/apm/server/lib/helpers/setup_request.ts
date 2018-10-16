@@ -10,7 +10,7 @@ import moment from 'moment';
 import { Url } from 'url';
 import { StringMap } from '../../../typings/common';
 
-function decodeEsQuery(esQuery?: string) {
+function decodeEsQuery(esQuery?: string): object {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
 }
 
@@ -23,7 +23,7 @@ interface Request {
 }
 
 interface ServerConfig {
-  get: (key: string) => string;
+  get: (key: string) => any;
 }
 
 type Client<T> = (type: string, params: SearchParams) => SearchResponse<T>;
@@ -31,7 +31,7 @@ type Client<T> = (type: string, params: SearchParams) => SearchResponse<T>;
 export interface Setup<T = any> {
   start: number;
   end: number;
-  esFilterQuery: string;
+  esFilterQuery: object;
   client: Client<T>;
   config: ServerConfig;
 }

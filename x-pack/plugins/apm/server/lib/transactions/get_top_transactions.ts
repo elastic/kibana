@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import { SearchParams, SearchResponse } from 'elasticsearch';
 import { get } from 'lodash';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE
 } from '../../../common/constants';
-import { StringMap } from '../../../typings/common';
 import { Transaction } from '../../../typings/Transaction';
 import { ITransactionGroup } from '../../../typings/TransactionGroup';
+import { Setup } from '../helpers/setup_request';
 import {
   prepareTransactionGroups,
   TRANSACTION_GROUP_AGGREGATES
@@ -24,13 +24,13 @@ export async function getTopTransactions({
   transactionType,
   serviceName
 }: {
-  setup: StringMap<any>;
+  setup: Setup;
   transactionType: string;
   serviceName: string;
 }): Promise<ITransactionGroup[]> {
   const { start, end, esFilterQuery, client, config } = setup;
 
-  const params = {
+  const params: SearchParams = {
     index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 0,
