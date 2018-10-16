@@ -19,23 +19,17 @@
 
 import { Formats } from './core/formats';
 
-/**
- * Messages tree, where leafs are translated strings
- */
-export interface Messages {
-  [key: string]: PlainMessages;
-}
-
-export interface PlainMessages {
-  messages?: {
-    [key: string]: string;
-  };
+export interface Translation {
   /**
-   * locale of the messages
+   * Actual translated messages.
+   */
+  messages?: Record<string, string>;
+  /**
+   * Locale of the translated messages.
    */
   locale?: string;
   /**
-   * set of options to the underlying formatter
+   * Set of options to the underlying formatter.
    */
   formats?: Formats;
 }

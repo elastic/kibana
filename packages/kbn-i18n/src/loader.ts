@@ -23,7 +23,7 @@ import * as path from 'path';
 import { promisify } from 'util';
 
 import { unique } from './core/helper';
-import { Messages, PlainMessages } from './messages';
+import { Translation } from './translation';
 
 const asyncReadFile = promisify(readFile);
 
@@ -39,7 +39,7 @@ const translationsRegistry: { [key: string]: string[] } = {};
  * Internal property for caching loaded translations files.
  * Key is path to translation file, value is object with translation messages
  */
-const loadedFiles: { [key: string]: PlainMessages } = {};
+const loadedFiles: { [key: string]: Translation } = {};
 
 /**
  * Returns locale by the given translation file name
@@ -69,7 +69,7 @@ function getLocaleFromFileName(fullFileName: string) {
  * @param pathToFile
  * @returns
  */
-async function loadFile(pathToFile: string): Promise<PlainMessages> {
+async function loadFile(pathToFile: string): Promise<Translation> {
   return JSON5.parse(await asyncReadFile(pathToFile, 'utf8'));
 }
 
@@ -127,7 +127,7 @@ export function getRegisteredLocales() {
  * @param locale
  * @returns translation messages
  */
-export async function getTranslationsByLocale(locale: string): Promise<PlainMessages> {
+export async function getTranslationsByLocale(locale: string): Promise<Translation> {
   const files = translationsRegistry[locale] || [];
   const notLoadedFiles = files.filter(file => !loadedFiles[file]);
 
@@ -137,7 +137,7 @@ export async function getTranslationsByLocale(locale: string): Promise<PlainMess
 
   return files.length
     ? files.reduce(
-        (messages: { locale: string; messages?: PlainMessages['messages'] }, file) => ({
+        (messages: { locale: string; messages?: Translation['messages'] }, file) => ({
           ...messages,
           ...loadedFiles[file],
           messages: {
@@ -155,7 +155,7 @@ export async function getTranslationsByLocale(locale: string): Promise<PlainMess
  * @returns A Promise object
  * where keys are the locale and values are objects of translation messages
  */
-export async function getAllTranslations(): Promise<{ [key: string]: Messages }> {
+export async function getAllTranslations(): Promise<{ [key: string]: Translation }> {
   const locales = getRegisteredLocales();
   const translations = await Promise.all(locales.map(getTranslationsByLocale));
 

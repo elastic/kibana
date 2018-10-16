@@ -46,21 +46,21 @@ describe('I18n engine', () => {
     test('should add messages if locale prop is passed as second argument', () => {
       const locale = 'ru';
 
-      expect(i18n.getMessages()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({});
 
       i18n.addMessages({ messages: { foo: 'bar' } }, locale);
 
-      expect(i18n.getMessages()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({});
 
       i18n.setLocale(locale);
 
-      expect(i18n.getMessages()).toEqual({ messages: { foo: 'bar' } });
+      expect(i18n.getTranslation()).toEqual({ messages: { foo: 'bar' } });
     });
 
     test('should add messages if locale prop is passed as messages property', () => {
       const locale = 'ru';
 
-      expect(i18n.getMessages()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({});
 
       i18n.addMessages({
         locale,
@@ -69,11 +69,11 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.getMessages()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({});
 
       i18n.setLocale(locale);
 
-      expect(i18n.getMessages()).toEqual({
+      expect(i18n.getTranslation()).toEqual({
         messages: {
           foo: 'bar',
         },
@@ -92,7 +92,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.getMessages()).toEqual({
+      expect(i18n.getTranslation()).toEqual({
         locale: 'ru',
         messages: {
           ['a.b.c']: 'foo',
@@ -106,7 +106,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.getMessages()).toEqual({
+      expect(i18n.getTranslation()).toEqual({
         locale: 'ru',
         messages: {
           ['a.b.c']: 'foo',
@@ -126,7 +126,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.getMessages()).toEqual({
+      expect(i18n.getTranslation()).toEqual({
         locale: 'ru',
         messages: {
           ['a.b.c']: 'foo',
@@ -140,7 +140,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.getMessages()).toEqual({
+      expect(i18n.getTranslation()).toEqual({
         locale: 'ru',
         messages: {
           ['a.b.c']: 'bar',
@@ -162,7 +162,7 @@ describe('I18n engine', () => {
       );
 
       expect(i18n.getLocale()).toBe(locale);
-      expect(i18n.getMessages()).toEqual({
+      expect(i18n.getTranslation()).toEqual({
         messages: {
           ['a.b.c']: 'bar',
         },
@@ -170,7 +170,7 @@ describe('I18n engine', () => {
     });
   });
 
-  describe('getMessages', () => {
+  describe('getTranslation', () => {
     test('should return messages for the current language', () => {
       i18n.addMessages({
         locale: 'ru',
@@ -186,7 +186,7 @@ describe('I18n engine', () => {
       });
 
       i18n.setLocale('ru');
-      expect(i18n.getMessages()).toEqual({
+      expect(i18n.getTranslation()).toEqual({
         locale: 'ru',
         messages: {
           foo: 'bar',
@@ -194,7 +194,7 @@ describe('I18n engine', () => {
       });
 
       i18n.setLocale('en');
-      expect(i18n.getMessages()).toEqual({
+      expect(i18n.getTranslation()).toEqual({
         locale: 'en',
         messages: {
           bar: 'foo',
@@ -203,13 +203,13 @@ describe('I18n engine', () => {
     });
 
     test('should return an empty object if messages for current locale are not specified', () => {
-      expect(i18n.getMessages()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({});
 
       i18n.setLocale('fr');
-      expect(i18n.getMessages()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({});
 
       i18n.setLocale('en');
-      expect(i18n.getMessages()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({});
     });
   });
 
@@ -795,12 +795,12 @@ describe('I18n engine', () => {
   describe('init', () => {
     test('should not initialize the engine if messages are not specified', () => {
       i18n.init();
-      expect(i18n.getMessages()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({});
     });
 
     test('should throw error if messages are empty', () => {
       expect(() => i18n.init({})).toThrow();
-      expect(i18n.getMessages()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({});
     });
 
     test('should add messages if locale is specified', () => {
@@ -811,7 +811,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.getMessages()).toEqual({
+      expect(i18n.getTranslation()).toEqual({
         locale: 'en',
         messages: {
           foo: 'bar',

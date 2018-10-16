@@ -21,7 +21,7 @@ import memoizeIntlConstructor from 'intl-format-cache';
 import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
 
-import { Messages, PlainMessages } from '../messages';
+import { Translation } from '../translation';
 import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
 
@@ -30,7 +30,7 @@ import './locales.js';
 
 const EN_LOCALE = 'en';
 const LOCALE_DELIMITER = '-';
-const messages: Messages = {};
+const messages: { [key: string]: Translation } = {};
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
 let defaultLocale = EN_LOCALE;
@@ -45,8 +45,8 @@ IntlRelativeFormat.defaultLocale = defaultLocale;
  * @param id - path to the message
  */
 function getMessageById(id: string): string | undefined {
-  const plainMessages = getMessages();
-  return plainMessages.messages ? plainMessages.messages[id] : undefined;
+  const translation = getTranslation();
+  return translation.messages ? translation.messages[id] : undefined;
 }
 
 /**
@@ -62,7 +62,7 @@ function normalizeLocale(locale: string) {
  * @param newMessages
  * @param [locale = messages.locale]
  */
-export function addMessages(newMessages: PlainMessages = {}, locale = newMessages.locale) {
+export function addMessages(newMessages: Translation = {}, locale = newMessages.locale) {
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string to add messages.');
   }
@@ -88,7 +88,7 @@ export function addMessages(newMessages: PlainMessages = {}, locale = newMessage
 /**
  * Returns messages for the current language
  */
-export function getMessages(): PlainMessages {
+export function getTranslation(): Translation {
   return messages[currentLocale] || {};
 }
 
@@ -221,7 +221,7 @@ export function translate(
  * Initializes the engine
  * @param newMessages
  */
-export function init(newMessages?: PlainMessages) {
+export function init(newMessages?: Translation) {
   if (!newMessages) {
     return;
   }
