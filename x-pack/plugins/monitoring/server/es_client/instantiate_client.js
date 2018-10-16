@@ -44,7 +44,7 @@ export function exposeClient(server) {
   const cluster = esPlugin.createCluster('monitoring', config);
   server.on('close', bindKey(cluster, 'close'));
 
-  server.log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster.`);
+  server.log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster`);
 }
 
 
