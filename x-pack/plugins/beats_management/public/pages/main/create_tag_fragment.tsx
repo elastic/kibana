@@ -51,6 +51,13 @@ export class CreateTagFragment extends React.PureComponent<TagPageProps, TagPage
         <TagEdit
           tag={this.state.tag}
           mode={this.mode}
+          onDetachBeat={(beatIds: string[]) => {
+            this.props.libs.beats.removeTagsFromBeats(
+              beatIds.map(id => {
+                return { beatId: id, tag: this.state.tag.id };
+              })
+            );
+          }}
           onTagChange={(field: string, value: string | number) =>
             this.setState(oldState => ({
               tag: { ...oldState.tag, [field]: value },

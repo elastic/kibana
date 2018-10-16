@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { first, flatten, sortBy, sortByOrder, uniq } from 'lodash';
+import { first, sortBy, sortByOrder, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
@@ -114,17 +114,6 @@ export const BeatsTableType: TableType = {
         field: 'type',
         name: 'Type',
         options: uniq(data.map(({ type }: { type: any }) => ({ value: type })), 'value'),
-      },
-      {
-        type: 'field_value_selection',
-        field: 'full_tags',
-        name: 'Tags',
-        options: uniq(
-          flatten(data.map((item: any) => item.full_tags || [])).map((tag: any) => ({
-            value: tag.id,
-          })),
-          'value'
-        ),
       },
     ],
   }),
