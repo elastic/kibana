@@ -301,7 +301,9 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
   };
 
   private mapTagToDisabled = (tag: BeatTag) =>
-    tag.configuration_blocks.some(config => config.type === ConfigurationBlockTypes.Output)
+    tag.configuration_blocks.some(config => config.type === ConfigurationBlockTypes.Output) &&
+    // if > 0 beats are associated with the tag, it will result in disassociation, so do not disable it
+    !this.getSelectedBeats().some(beat => beat.full_tags.some(({ id }) => id === tag.id))
       ? { ...tag, disabled: true }
       : tag;
 

@@ -18,8 +18,8 @@ export const DisabledTagBadge = (props: TagBadgeProps) => {
   const idRenderSize = maxIdRenderSize || TABLE_CONFIG.TRUNCATE_TAG_LENGTH;
   const idToRender = id.length > idRenderSize ? `${id.substring(0, idRenderSize)}...` : id;
   return (
-    <EuiToolTip content={'Only one output tag may be assigned to a beat'}>
-      <EuiBadge color={'#F0F0F0'}>{idToRender}</EuiBadge>
-    </EuiToolTip>
+    <EuiBadge color="default" iconType="cross">
+      {idToRender}
+    </EuiBadge>
   );
 };
