@@ -19,6 +19,7 @@ import {
   updateLayerMinZoom,
   updateLayerMaxZoom,
 } from "../../actions/store_actions";
+import { resetLayerLoad } from '../../actions/ui_actions';
 import _ from 'lodash';
 
 const layerLoadStatus = ({ ui }) => {
@@ -26,9 +27,9 @@ const layerLoadStatus = ({ ui }) => {
     error: 'error',
     success: 'success'
   };
-  const { layerLoadStatus } = ui;
-  return layerLoadStatus === LAYER_LOAD_STATE.complete && toastStatuses.success ||
-    layerLoadStatus === LAYER_LOAD_STATE.error && toastStatuses.error;
+  const { layerLoad } = ui;
+  return layerLoad.status === LAYER_LOAD_STATE.complete && toastStatuses.success ||
+    layerLoad.status === LAYER_LOAD_STATE.error && toastStatuses.error;
 };
 
 function mapStateToProps(state = {}) {
@@ -62,6 +63,7 @@ function mapDispatchToProps(dispatch) {
     updateShowAtAllZoomLevels: (id, showAtAllZoomLevels) => dispatch(updateLayerShowAtAllZoomLevels(id, showAtAllZoomLevels)),
     updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
     updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
+    clearLayerLoadToast: () => dispatch(resetLayerLoad())
   };
 }
 

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { LAYER_DATA_LOAD_STARTED, LAYER_DATA_LOAD_ENDED, LAYER_DATA_LOAD_ERROR }
+import { PROMOTE_TEMPORARY_LAYERS, LAYER_DATA_LOAD_ERROR }
   from '../actions/store_actions';
+import { RESET_LAYER_LOAD } from '../actions/ui_actions';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const UPDATE_IS_DARK_THEME = 'UPDATE_IS_DARK_THEME';
@@ -15,7 +16,6 @@ export const FLYOUT_STATE = {
   ADD_LAYER_WIZARD: 'ADD_LAYER_WIZARD'
 };
 export const LAYER_LOAD_STATE = {
-  loading: 'loading',
   complete: 'complete',
   error: 'error',
   inactive: 'inactive'
@@ -24,18 +24,24 @@ export const LAYER_LOAD_STATE = {
 const INITIAL_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   isDarkTheme: true,
-  layerLoadStatus: LAYER_LOAD_STATE.inactive
+  layerLoad: {
+    status: LAYER_LOAD_STATE.inactive,
+    time: Date()
+  }
 };
 
 // Reducer
 function ui(state = INITIAL_STATE, action) {
   switch (action.type) {
-    case LAYER_DATA_LOAD_STARTED:
-      return { ...state, layerLoadStatus: LAYER_LOAD_STATE.loading };
-    case LAYER_DATA_LOAD_ENDED:
-      return { ...state, layerLoadStatus: LAYER_LOAD_STATE.complete };
+    case PROMOTE_TEMPORARY_LAYERS:
+      return { ...state, layerLoad: { status: LAYER_LOAD_STATE.complete,
+        time: Date() } };
     case LAYER_DATA_LOAD_ERROR:
-      return { ...state, layerLoadStatus: LAYER_LOAD_STATE.error };
+      return { ...state, layerLoad: { status: LAYER_LOAD_STATE.error,
+        time: Date() } };
+    case RESET_LAYER_LOAD:
+      return { ...state, layerLoad: { status: LAYER_LOAD_STATE.inactive,
+        time: Date() } };
     case UPDATE_FLYOUT:
       return { ...state, flyoutDisplay: action.display };
     case UPDATE_IS_DARK_THEME:

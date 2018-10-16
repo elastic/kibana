@@ -29,7 +29,6 @@ import {
   EuiRange,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
-
 export class AddLayerPanel extends React.Component {
 
   constructor() {
@@ -45,16 +44,24 @@ export class AddLayerPanel extends React.Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    const { layerLoadToast } = nextProps;
+    this._triggerToasts(nextProps);
+    return true;
+  }
+
+  _triggerToasts({ layerLoadToast, clearLayerLoadToast }) {
     if (layerLoadToast === 'success') {
-      toastNotifications.addSuccess('Layer added');
+      toastNotifications.add({
+        title: 'Layer added',
+        className: 'layerToast'
+      }) && clearLayerLoadToast();
     } else if (layerLoadToast === 'error') {
-      toastNotifications.addDanger('Error adding layer');
+      toastNotifications.addDanger({
+        title: 'Error adding layer',
+        className: 'layerToast'
+      }) && clearLayerLoadToast();
     } else {
       // Do nothing
-      return false;
     }
-    return true;
   }
 
   _previewLayer = (source) => {
