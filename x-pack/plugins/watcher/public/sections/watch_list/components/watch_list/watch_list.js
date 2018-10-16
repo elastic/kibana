@@ -18,11 +18,10 @@ import 'plugins/watcher/components/tool_bar_selected_count';
 import 'plugins/watcher/components/forbidden_message';
 import 'plugins/watcher/services/watches';
 import 'plugins/watcher/services/license';
-import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('watchList', function ($injector) {
+app.directive('watchList', function ($injector, i18n) {
   const pagerFactory = $injector.get('pagerFactory');
   const watchesService = $injector.get('xpackWatcherWatchesService');
   const licenseService = $injector.get('xpackWatcherLicenseService');
@@ -138,11 +137,11 @@ app.directive('watchList', function ($injector) {
         const watchesBeingDeleted = this.selectedWatches;
         const numWatchesToDelete = watchesBeingDeleted.length;
 
-        const confirmModalText = i18n.translate('xpack.watcher.sections.watchList.deleteSelectedWatchesConfirmModal.descriptionText', {
+        const confirmModalText = i18n('xpack.watcher.sections.watchList.deleteSelectedWatchesConfirmModal.descriptionText', {
           defaultMessage: 'This will permanently delete {numWatchesToDelete, plural, one {# watch} other {# watches}}. Are you sure?',
           values: { numWatchesToDelete }
         });
-        const confirmButtonText = i18n.translate('xpack.watcher.sections.watchList.deleteSelectedWatchesConfirmModal.deleteButtonLabel', {
+        const confirmButtonText = i18n('xpack.watcher.sections.watchList.deleteSelectedWatchesConfirmModal.deleteButtonLabel', {
           defaultMessage: 'Delete {numWatchesToDelete, plural, one {# watch} other {# watches}} ',
           values: { numWatchesToDelete }
         });
@@ -169,7 +168,7 @@ app.directive('watchList', function ($injector) {
 
             if (numSuccesses > 0) {
               toastNotifications.addSuccess(
-                i18n.translate('xpack.watcher.sections.watchList.deleteSelectedWatchesSuccessNotification.descriptionText', {
+                i18n('xpack.watcher.sections.watchList.deleteSelectedWatchesSuccessNotification.descriptionText', {
                   defaultMessage:
                     'Deleted {numSuccesses} out of {numTotal} selected {numWatchesToDelete, plural, one {# watch} other {# watches}}',
                   values: { numSuccesses, numTotal, numWatchesToDelete }
@@ -179,7 +178,7 @@ app.directive('watchList', function ($injector) {
 
             if (numErrors > 0) {
               toastNotifications.addError(
-                i18n.translate('xpack.watcher.sections.watchList.deleteSelectedWatchesErrorNotification.descriptionText', {
+                i18n('xpack.watcher.sections.watchList.deleteSelectedWatchesErrorNotification.descriptionText', {
                   defaultMessage:
                     'Couldn\'t delete {numErrors} out of {numTotal} selected {numWatchesToDelete, plural, one {# watch} other {# watches}}',
                   values: { numErrors, numTotal, numWatchesToDelete }

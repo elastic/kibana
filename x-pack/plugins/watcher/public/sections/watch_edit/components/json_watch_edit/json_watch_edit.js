@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { toastNotifications } from 'ui/notify';
@@ -22,7 +21,7 @@ import 'plugins/watcher/services/license';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('jsonWatchEdit', function ($injector) {
+app.directive('jsonWatchEdit', function ($injector, i18n) {
   const watchService = $injector.get('xpackWatcherWatchService');
   const licenseService = $injector.get('xpackWatcherLicenseService');
   const kbnUrl = $injector.get('kbnUrl');
@@ -113,17 +112,17 @@ app.directive('jsonWatchEdit', function ($injector) {
 
             const confirmModalOptions = {
               onConfirm: this.saveWatch,
-              confirmButtonText: i18n.translate('xpack.watcher.sections.watchEdit.json.saveConfirmModal.overwriteWatchButtonLabel', {
+              confirmButtonText: i18n('xpack.watcher.sections.watchEdit.json.saveConfirmModal.overwriteWatchButtonLabel', {
                 defaultMessage: 'Overwrite Watch',
               }),
             };
 
-            const message = i18n.translate('xpack.watcher.sections.watchEdit.json.saveConfirmModal.description', {
+            const message = i18n('xpack.watcher.sections.watchEdit.json.saveConfirmModal.description', {
               defaultMessage: 'Watch with ID "{watchId}" {watchNameMessageFragment} already exists. Do you want to overwrite it?',
               values: {
                 watchId: this.watch.id,
                 watchNameMessageFragment: existingWatch.name
-                  ? i18n.translate('xpack.watcher.sections.watchEdit.json.saveConfirmModal.descriptionFragmentText', {
+                  ? i18n('xpack.watcher.sections.watchEdit.json.saveConfirmModal.descriptionFragmentText', {
                     defaultMessage: '(name: "{existingWatchName}")',
                     values: {
                       existingWatchName: existingWatch.name
@@ -158,7 +157,7 @@ app.directive('jsonWatchEdit', function ($injector) {
           .then(() => {
             this.watch.isNew = false; // without this, the message displays 'New Watch'
             toastNotifications.addSuccess(
-              i18n.translate('xpack.watcher.sections.watchEdit.json.saveSuccessNotificationText', {
+              i18n('xpack.watcher.sections.watchEdit.json.saveSuccessNotificationText', {
                 defaultMessage: 'Saved \'{watchDisplayName}\'',
                 values: {
                   watchDisplayName: this.watch.displayName
@@ -176,13 +175,13 @@ app.directive('jsonWatchEdit', function ($injector) {
       onWatchDelete = () => {
         const confirmModalOptions = {
           onConfirm: this.deleteWatch,
-          confirmButtonText: i18n.translate('xpack.watcher.sections.watchEdit.json.deleteConfirmModal.overwriteWatchButtonLabel', {
+          confirmButtonText: i18n('xpack.watcher.sections.watchEdit.json.deleteConfirmModal.overwriteWatchButtonLabel', {
             defaultMessage: 'Delete Watch',
           }),
         };
 
         return confirmModal(
-          i18n.translate('xpack.watcher.sections.watchEdit.json.deleteConfirmModal.description', {
+          i18n('xpack.watcher.sections.watchEdit.json.deleteConfirmModal.description', {
             defaultMessage: 'This will permanently delete the watch. Are you sure?',
           }),
           confirmModalOptions
@@ -193,7 +192,7 @@ app.directive('jsonWatchEdit', function ($injector) {
         return watchService.deleteWatch(this.watch.id)
           .then(() => {
             toastNotifications.addSuccess(
-              i18n.translate('xpack.watcher.sections.watchEdit.json.deleteSuccessNotificationText', {
+              i18n('xpack.watcher.sections.watchEdit.json.deleteSuccessNotificationText', {
                 defaultMessage: 'Deleted \'{watchDisplayName}\'',
                 values: {
                   watchDisplayName: this.watch.displayName

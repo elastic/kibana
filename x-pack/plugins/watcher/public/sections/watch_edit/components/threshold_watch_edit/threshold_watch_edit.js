@@ -26,11 +26,10 @@ import dateMath from '@kbn/datemath';
 import { toastNotifications } from 'ui/notify';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
-import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('thresholdWatchEdit', function ($injector) {
+app.directive('thresholdWatchEdit', function ($injector, i18n) {
   const watchService = $injector.get('xpackWatcherWatchService');
   const fieldsService = $injector.get('xpackWatcherFieldsService');
   const timezoneService = $injector.get('xpackWatcherTimezoneService');
@@ -262,17 +261,17 @@ app.directive('thresholdWatchEdit', function ($injector) {
 
             const confirmModalOptions = {
               onConfirm: this.saveWatch,
-              confirmButtonText: i18n.translate('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.overwriteWatchButtonLabel', {
+              confirmButtonText: i18n('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.overwriteWatchButtonLabel', {
                 defaultMessage: 'Overwrite Watch',
               }),
             };
 
-            const message = i18n.translate('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.description', {
+            const message = i18n('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.description', {
               defaultMessage: 'Watch with ID "{watchId}" {watchNameMessageFragment} already exists. Do you want to overwrite it?',
               values: {
                 watchId: this.watch.id,
                 watchNameMessageFragment: existingWatch.name
-                  ? i18n.translate('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.descriptionFragmentText', {
+                  ? i18n('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.descriptionFragmentText', {
                     defaultMessage: '(name: "{existingWatchName}")',
                     values: {
                       existingWatchName: existingWatch.name
@@ -307,7 +306,7 @@ app.directive('thresholdWatchEdit', function ($injector) {
           .then(() => {
             this.watch.isNew = false; // without this, the message displays 'New Watch'
             toastNotifications.addSuccess(
-              i18n.translate('xpack.watcher.sections.watchEdit.threshold.saveSuccessNotificationText', {
+              i18n('xpack.watcher.sections.watchEdit.threshold.saveSuccessNotificationText', {
                 defaultMessage: 'Saved \'{watchDisplayName}\'',
                 values: {
                   watchDisplayName: this.watch.displayName

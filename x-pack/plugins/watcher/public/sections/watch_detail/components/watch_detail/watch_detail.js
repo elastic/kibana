@@ -19,11 +19,11 @@ import template from './watch_detail.html';
 import '../watch_history';
 import '../action_status_table';
 import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
-import { i18n } from '@kbn/i18n';
+// import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('watchDetail', function ($injector) {
+app.directive('watchDetail', function ($injector, i18n) {
   const watchService = $injector.get('xpackWatcherWatchService');
   const licenseService = $injector.get('xpackWatcherLicenseService');
 
@@ -153,15 +153,15 @@ app.directive('watchDetail', function ($injector) {
 
       onWatchDelete = () => {
         const confirmModalOptions = {
-          confirmButtonText: i18n.translate('xpack.watcher.sections.watchDetail.deleteConfirmModal.deleteWatchButtonLabel', {
-            defaultMessage: 'Delete Watch' }
+          confirmButtonText: i18n('xpack.watcher.sections.watchDetail.deleteConfirmModal.deleteWatchButtonLabel', {
+            defaultMessage: 'Delete Watch1' }
           ),
           onConfirm: this.deleteWatch
         };
 
         return confirmModal(
-          i18n.translate('xpack.watcher.sections.watchDetail.deleteConfirmModal.description', {
-            defaultMessage: 'This will permanently delete the watch. Are you sure?' }
+          i18n('xpack.watcher.sections.watchDetail.deleteConfirmModal.description', {
+            defaultMessage: '1This will permanently delete the watch. Are you sure?' }
           ),
           confirmModalOptions);
       }
@@ -170,7 +170,7 @@ app.directive('watchDetail', function ($injector) {
         return watchService.deleteWatch(this.watch.id)
           .then(() => {
             toastNotifications.addSuccess(
-              i18n.translate('xpack.watcher.sections.watchDetail.deleteWatchSuccessNotificationText', {
+              i18n('xpack.watcher.sections.watchDetail.deleteWatchSuccessNotificationText', {
                 defaultMessage: 'Deleted {watchName}',
                 values: { watchName: this.watch.displayName } }
               ),

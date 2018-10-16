@@ -13,7 +13,7 @@
         <label
           for="{{watchEditTitlePanel.makeId('watchName')}}"
           class="kuiLabel kuiVerticalRhythmSmall"
-          i18n-id="xpack.watcher.sections.watchEdit.titlePanel.watchNameInputLabel"
+          i18n-id="xpack.watcher.sections.watchEdit.titlePanel.watchNameLabel"
           i18n-default-message="Name"
           >
 
@@ -27,7 +27,7 @@
             input-focus
             required
             ng-model="watchEditTitlePanel.watch.name"
-            placeholder="{{'xpack.watcher.sections.watchEdit.titlePanel.watchNameInputPlaceholder' | i18n: { defaultMessage: 'My Threshold Watch' } }}"
+            placeholder="{{'xpack.watcher.sections.watchEdit.titlePanel.watchNamePlaceholder' | i18n: { defaultMessage: 'My Threshold Watch' } }}"
           >
         </div>
         <div class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
@@ -48,7 +48,7 @@
         <label
           for="indexSelectSearchBox"
           class="kuiLabel kuiVerticalRhythmSmall"
-          i18n-id="xpack.watcher.sections.watchEdit.titlePanel.indicesToQueryInputLabel"
+          i18n-id="xpack.watcher.sections.watchEdit.titlePanel.indicesToQueryLabel"
           i18n-default-message="Indices to query"
           >
         </label>
@@ -91,7 +91,7 @@
             i18n-default-message="Your index query does not have an associated time field"
           ></div>
           <span
-            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.broadenSearchQueryText"
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.howToBroadenSearchQueryDescription"
             i18n-default-message="Use * to broaden your search query"
           ></span>
         </div>
@@ -101,7 +101,7 @@
         <label
           for="{{watchEditTitlePanel.makeId('timeField')}}"
           class="kuiLabel kuiVerticalRhythmSmall"
-          i18n-id="xpack.watcher.sections.watchEdit.titlePanel.timeFieldDropdownLabel"
+          i18n-id="xpack.watcher.sections.watchEdit.titlePanel.timeFieldLabel"
           i18n-default-message="Time field"
           ></label>
         <div class="kuiVerticalRhythmSmall">
@@ -115,7 +115,7 @@
           >
             <option
               value=""
-              i18n-id="xpack.watcher.sections.watchEdit.titlePanel.timeFieldDropdownHelpText"
+              i18n-id="xpack.watcher.sections.watchEdit.titlePanel.timeFieldOptionLabel"
               i18n-default-message="Select a field"
             ></option>
           </select>
@@ -126,7 +126,7 @@
             xpack-aria-describes="{{watchEditTitlePanel.makeId('timeField')}}"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('timeField', 'required')"
-            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.timeFieldDropdownIsRequiredValidationText"
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.timeFieldIsRequiredValidationText"
             i18n-default-message="A time field is required"
           ></div>
           &nbsp;
@@ -158,7 +158,7 @@
             xpack-aria-describes="durationSelectTriggerIntervalSize"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'required')"
-            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.watchIntervalIsRequiredValidationMessage"
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.intervalSizeIsRequiredValidationMessage"
             i18n-default-message="Interval size is required"
           ></div>
           <div
@@ -166,7 +166,7 @@
             xpack-aria-describes="durationSelectTriggerIntervalSize"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'min')"
-            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.watchIntervalIsNegativeNumberValidationMessage"
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.intervalSizeNegativeNumberValidationMessage"
             i18n-default-message="Interval size cannot be a negative number"
           ></div>
           <div
@@ -174,7 +174,7 @@
             xpack-aria-describes="durationSelectTriggerIntervalSize"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'number')"
-            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.watchIntervalIsUnvalidNumberValidationMessage"
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.intervalSizeValidNumberValidationMessage"
             i18n-default-message="Interval size must be a valid number"
           ></div>
           <div
@@ -182,7 +182,7 @@
             xpack-aria-describes="durationSelectTriggerIntervalUnit"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalUnit', 'required')"
-            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.watchIntervalSizeIsRequiredValidationMessage"
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.intervalSizeIsRequiredValidationMessage"
             i18n-default-message="An interval size is required"
           ></div>
           <div
@@ -190,7 +190,7 @@
             xpack-aria-describes="durationSelectTriggerIntervalSize durationSelectTriggerIntervalUnit"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'minimumDuration', false)"
-            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.watchIntervalMinDurationValidationMessage"
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.intervalSizeMinimumDurationValidationMessage"
             i18n-default-message=" The minimum duration is {minSize}{minUnit}"
             i18n-values="{ minSize: watchEditTitlePanel.triggerIntervalMinimumSize, minUnit: watchEditTitlePanel.triggerIntervalMinimumUnit }"
           ></div>
