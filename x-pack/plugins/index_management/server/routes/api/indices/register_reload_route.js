@@ -8,6 +8,7 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import fetchAliases from './fetch_aliases';
 
 function getIndexNamesFromPayload(payload) {
   return payload.indexNames || [];
@@ -38,23 +39,6 @@ async function fetchIndices(callWithRequest, indexNames) {
   };
 
   return await callWithRequest('cat.indices', params);
-}
-
-async function fetchAliases(callWithRequest) {
-  const params = {
-    format: 'json'
-  };
-  const catAliases = await callWithRequest('cat.aliases', params);
-  const aliases = {};
-  for(let i = 0; i < catAliases.length; ++i) {
-    if(aliases[catAliases[i].index] === undefined) {
-      aliases[catAliases[i].index] = [catAliases[i].alias];
-    }else{
-      aliases[catAliases[i].index].push(catAliases[i].alias);
-    }
-  }
-
-  return aliases;
 }
 
 export function registerReloadRoute(server) {
