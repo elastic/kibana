@@ -42,7 +42,7 @@ export function iisLogsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iis.html',
       },
     }),
-    //euiIconType: 'logoIIS',
+    // euiIconType: 'logoIIS',
     artifacts: {
       dashboards: [
         {
