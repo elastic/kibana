@@ -69,6 +69,7 @@ export class CreateButton extends Component {
     if(options.length === 1) {
       return (
         <EuiButton
+          data-test-subj="createIndexPatternButton"
           fill={true}
           size={'s'}
           onClick={options[0].onClick}
@@ -80,6 +81,7 @@ export class CreateButton extends Component {
 
     const button = (
       <EuiButton
+        data-test-subj="createIndexPatternButton"
         fill={true}
         size="s"
         iconType="arrowDown"
@@ -106,6 +108,7 @@ export class CreateButton extends Component {
                 <EuiContextMenuItem
                   key={option.text}
                   onClick={option.onClick}
+                  data-test-subj={option.testSubj}
                 >
                   <EuiDescriptionList style={{ whiteSpace: 'nowrap' }}>
                     <EuiDescriptionListTitle>

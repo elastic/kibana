@@ -39,6 +39,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
     return this.rollupIndices && this.rollupIndices.length ? {
       text: `Rollup index pattern`,
       description: `Can perform limited aggregations against summarized data`,
+      testSubj: `createRollupIndexPatternButton`,
       onClick: () => {
         urlHandler('/management/kibana/index?type=rollup');
       },

@@ -28,7 +28,7 @@ export const IndexPatternList = ({
   indexPatterns
 }) => (
   <Fragment>
-    <div className="indexPatternList__headerWrapper">
+    <div className="indexPatternList__headerWrapper" data-test-subj="createIndexPatternParent">
       <Header indexPatternCreationOptions={indexPatternCreationOptions} />
     </div>
     <List indexPatterns={indexPatterns} defaultIndex={defaultIndex} />
