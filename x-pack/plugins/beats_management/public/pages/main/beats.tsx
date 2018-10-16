@@ -166,20 +166,11 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private handleBeatTagAssignment = async (tagId: string) => {
     const selected = this.getSelectedBeats();
-    const removals: CMPopulatedBeat[] = [];
-    const additions: CMPopulatedBeat[] = [];
-    selected.forEach(beat => {
-      if (beat.full_tags.some(tag => tag.id === tagId)) {
-        removals.push(beat);
-      } else {
-        additions.push(beat);
-      }
-    });
-
-    await Promise.all([
-      this.removeTagsFromBeats(removals, tagId),
-      this.assignTagsToBeats(additions, tagId),
-    ]);
+    if (selected.some(beat => beat.full_tags.some(({ id }) => id === tagId))) {
+      await this.removeTagsFromBeats(selected, tagId);
+    } else {
+      await this.assignTagsToBeats(selected, tagId);
+    }
   };
 
   private deleteSelected = async () => {
