@@ -4,18 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { capitalize, first, get } from 'lodash';
 import PropTypes from 'prop-types';
+import React from 'react';
 import styled from 'styled-components';
-import { capitalize, get, first } from 'lodash';
 import { SERVICE_AGENT_NAME } from '../../../../../common/constants';
-import { units, colors, px } from '../../../../style/variables';
+import { Transaction } from '../../../../../typings/Transaction';
+import { colors, px, units } from '../../../../style/variables';
+// @ts-ignore
+import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
   getPropertyTabNames,
   PropertiesTable
 } from '../../../shared/PropertiesTable';
-import { history, toQuery, fromQuery } from '../../../../utils/url';
+// @ts-ignore
 import { Tab } from '../../../shared/UIComponents';
+import { IUrlParams } from './WaterfallContainer/Waterfall';
 
 const TabContainer = styled.div`
   padding: 0 ${px(units.plus)};
@@ -27,23 +31,29 @@ const TableContainer = styled.div`
 `;
 
 // Ensure the selected tab exists or use the first
-function getCurrentTab(tabs = [], selectedTab) {
+function getCurrentTab(tabs: string[] = [], selectedTab: string) {
   return tabs.includes(selectedTab) ? selectedTab : first(tabs);
 }
 
-function getTabs(transactionData) {
-  const dynamicProps = Object.keys(transactionData.context || {});
+function getTabs(transactionData: Transaction) {
+  const dynamicProps = Object.keys(transactionData.context);
   return getPropertyTabNames(dynamicProps);
 }
 
-export function TransactionPropertiesTableForFlyout({
+interface Props {
+  location: Location;
+  transaction: Transaction;
+  urlParams: IUrlParams;
+}
+
+export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
   location,
   transaction,
   urlParams
-}) {
+}) => {
   const tabs = getTabs(transaction);
   const currentTab = getCurrentTab(tabs, urlParams.flyoutDetailTab);
-  const agentName = get(transaction, SERVICE_AGENT_NAME);
+  const agentName = get(transaction, SERVICE_AGENT_NAME, 'n/a');
 
   return (
     <div>
@@ -78,7 +88,7 @@ export function TransactionPropertiesTableForFlyout({
       </TableContainer>
     </div>
   );
-}
+};
 
 TransactionPropertiesTableForFlyout.propTypes = {
   location: PropTypes.object.isRequired,
