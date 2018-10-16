@@ -40,7 +40,7 @@ export class MonitoringWatch extends BaseWatch {
   formatVisualizeData() {
     throw badRequest(
       i18n.translate('xpack.watcher.models.monitoringWatch.formatVisualizeDataCalledBadRequestMessage', {
-        defaultMessage: 'getVisualizeQuery called for monitoring watch',
+        defaultMessage: 'formatVisualizeQuery called for monitoring watch',
       }),
     );
   }
