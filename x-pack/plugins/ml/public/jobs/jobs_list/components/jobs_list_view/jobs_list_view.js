@@ -18,11 +18,20 @@ import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
 import { CreateWatchFlyout } from '../create_watch_flyout';
 import { MultiJobActions } from '../multi_job_actions';
+import { NewJobButton } from '../new_job_button';
+import { JobStatsBar } from '../jobs_stats_bar';
+import { NodeAvailableWarning } from '../node_available_warning';
 
-import PropTypes from 'prop-types';
 import React, {
   Component
 } from 'react';
+
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 const MINIMUM_REFRESH_INTERVAL_MS = 5000;
@@ -33,12 +42,14 @@ export class JobsListView extends Component {
     super(props);
 
     this.state = {
+      isRefreshing: false,
       jobsSummaryList: [],
       filteredJobsSummaryList: [],
       fullJobsList: {},
       selectedJobs: [],
       itemIdToExpandedRowMap: {},
       filterClauses: [],
+      updateJobStats: () => { },
     };
 
     this.updateFunctions = {};
@@ -57,13 +68,11 @@ export class JobsListView extends Component {
 
     this.initAutoRefresh();
     this.initAutoRefreshUpdate();
-    this.props.setRefreshJobs(() => this.refreshJobSummaryList(true));
   }
 
   componentWillUnmount() {
     timefilter.off('refreshIntervalUpdate');
     this.clearRefreshInterval();
-    this.props.unsetRefreshJobs();
   }
 
   initAutoRefresh() {
@@ -206,6 +215,12 @@ export class JobsListView extends Component {
     return this.showCreateWatchFlyout;
   }
 
+  setUpdateJobStats = (updateJobStats) => {
+    this.setState({ updateJobStats });
+  }
+  unsetUpdateJobStats = () => {
+    this.setUpdateJobStats(() => { });
+  }
 
   selectJobChange = (selectedJobs) => {
     this.setState({ selectedJobs });
@@ -231,6 +246,14 @@ export class JobsListView extends Component {
     });
   }
 
+  onRefreshClick = () => {
+    this.setState({ isRefreshing: true });
+    this.refreshJobSummaryList(true);
+  }
+  isDoneRefreshing = () => {
+    this.setState({ isRefreshing: false });
+  }
+
   refreshJobSummaryList(forceRefresh = false) {
     if (forceRefresh === true || this.blockRefresh === false) {
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
@@ -248,14 +271,14 @@ export class JobsListView extends Component {
           const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
           this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList }, () => {
             this.refreshSelectedJobs();
-            this.props.updateJobStats(jobsSummaryList);
+            this.state.updateJobStats(jobsSummaryList);
           });
 
           Object.keys(this.updateFunctions).forEach((j) => {
             this.updateFunctions[j].setState({ job: fullJobsList[j] });
           });
 
-          this.props.setRefreshDone();
+          this.isDoneRefreshing();
         })
         .catch((error) => {
           console.error(error);
@@ -263,7 +286,7 @@ export class JobsListView extends Component {
     }
   }
 
-  render() {
+  renderJobsListComponents() {
     const jobIds = this.state.jobsSummaryList.map(j => j.id);
     return (
       <div>
@@ -314,7 +337,44 @@ export class JobsListView extends Component {
       </div>
     );
   }
+
+  render() {
+    const { isRefreshing } = this.state;
+
+    return (
+      <React.Fragment>
+        <JobStatsBar
+          setUpdateJobStats={this.setUpdateJobStats}
+          unsetUpdateJobStats={this.unsetUpdateJobStats}
+        />
+        <div className="job-management">
+          <NodeAvailableWarning />
+          <header>
+            <div className="job-buttons-container">
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={this.onRefreshClick}
+                    isLoading={isRefreshing}
+                  >
+                    Refresh
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <NewJobButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          </header>
+
+          <div className="clear" />
+
+          <EuiSpacer size="s" />
+
+          { this.renderJobsListComponents() }
+        </ div>
+      </React.Fragment>
+    );
+  }
 }
-JobsListView.propTypes = {
-  updateJobStats: PropTypes.func.isRequired,
-};
+
