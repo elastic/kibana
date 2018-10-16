@@ -18,40 +18,31 @@
  */
 
 import Joi from 'joi';
-import Boom from 'boom';
-import { isString } from 'lodash';
 
 export function createProxy(server) {
   const { callWithRequest } =  server.plugins.elasticsearch.getCluster('data');
 
-  server.ext('onRequest', (req, reply) => {
-    try {
-      const contentType = req.headers['content-type'];
-      const applicationNDJSON = 'application/x-ndjson';
-      const textPlain = 'text/plain';
-      const isNDJSON = () => contentType.includes(applicationNDJSON);
-      if (isString(contentType) && isNDJSON()) {
-        req.headers['content-type'] = contentType.replace(applicationNDJSON, textPlain);
-      }
-    } finally {
-      reply.continue();
-    }
-
-  });
-
   server.route({
     method: 'POST',
     path: '/elasticsearch/_msearch',
+    config: {
+      payload: {
+        parse: 'gunzip'
+      }
+    },
     async handler(req, reply) {
       const { payload } = req;
       try {
-        const body = payload.split('\n').filter(Boolean).map(JSON.parse);
+        const body = payload
+          .toString('utf8').split('\n')
+          .filter(Boolean)
+          .map(JSON.parse);
         const response = await callWithRequest(req, 'msearch', {
           body
         });
         reply(response);
       } catch(e) {
-        reply(Boom.badRequest(e));
+        reply(e);
       }
     },
   });
@@ -75,7 +66,7 @@ export function createProxy(server) {
         });
         reply(response);
       } catch(e) {
-        reply(Boom.badRequest(e));
+        reply(e);
       }
     }
   });
