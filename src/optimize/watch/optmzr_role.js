@@ -35,7 +35,7 @@ export default async (kbnServer, kibanaHapiServer, config) => {
       unsafeCache: config.get('optimize.unsafeCache'),
       cacheState: new CacheState({
         directory: kbnServer.uiBundles.getCacheDirectory(),
-        checkYarnLock: config.get('optimize.cache.checkYarnLock'),
+        checkYarnLockFiles: config.get('optimize.cache.checkYarnLock'),
         checkIncompleteCompile: config.get('optimize.cache.checkIncompleteCompile'),
       })
     })

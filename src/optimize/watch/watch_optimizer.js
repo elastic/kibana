@@ -47,7 +47,7 @@ export default class WatchOptimizer extends BaseOptimizer {
     // log status changes
     this.status$.subscribe(this.onStatusChangeHandler);
     await this.uiBundles.resetBundleDir();
-    await this.cacheState.maybeResetCache();
+    await this.cacheState.tryResetCache();
     await this.initCompiler();
 
     this.compiler.plugin('watch-run', this.compilerRunStartHandler);

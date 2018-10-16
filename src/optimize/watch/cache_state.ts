@@ -29,47 +29,60 @@ const mkdirpAsync = promisify(mkdirp);
 
 interface Params {
   directory: string;
-  checkYarnLock: boolean;
+  checkYarnLockFiles: boolean;
   checkIncompleteCompile: boolean;
 }
 
 interface StateContent {
   readonly inUseByProc?: number;
-  readonly yarnLockSha?: string;
+  readonly yarnLockFilesSha?: string;
 }
 
 export class CacheState {
-  private directory: Params['directory'];
-  private checkYarnLock: Params['checkYarnLock'];
-  private checkIncompleteCompile: Params['checkIncompleteCompile'];
-  private yarnLockSha?: string;
-  private statePath: string;
+  private readonly directory: Params['directory'];
+  private readonly checkYarnLockFiles: Params['checkYarnLockFiles'];
+  private readonly checkIncompleteCompile: Params['checkIncompleteCompile'];
+  private readonly yarnLockFilesSha?: string;
+  private readonly statePath: string;
 
   constructor(params: Params) {
     this.directory = params.directory;
-    this.checkYarnLock = params.checkYarnLock;
+    this.checkYarnLockFiles = params.checkYarnLockFiles;
     this.checkIncompleteCompile = params.checkIncompleteCompile;
 
-    this.statePath = resolve(this.directory, 'state.json');
+    this.statePath = resolve(this.directory, 'optimizer_cache_state.json');
 
-    if (this.checkYarnLock) {
-      this.yarnLockSha = createHash('sha1')
+    if (this.checkYarnLockFiles) {
+      this.yarnLockFilesSha = createHash('sha1')
         .update(readFileSync(resolve(__dirname, '../../../yarn.lock'), 'utf8'))
+        .update(readFileSync(resolve(__dirname, '../../../x-pack/yarn.lock'), 'utf8'))
         .digest('hex');
     }
   }
 
-  public async maybeResetCache() {
+  public async tryResetCache() {
     if (!this.isResetNeeded()) {
       return;
     }
 
+    await this.resetCache();
+  }
+
+  public async resetCache() {
     // start by deleting the state file to lower the
     // amount of time that another process might be able to
     // successfully read it once we decide to delete it
     del.sync(this.statePath);
+
+    // delete cache directory
     await del(this.directory);
     await mkdirpAsync(this.directory);
+
+    // delete dlls folder
+    await del('../../../dlls');
+    await mkdirpAsync('../../../dlls');
+
+    // re-write new cache state file
     this.write();
   }
 
@@ -92,16 +105,11 @@ export class CacheState {
 
   private isResetNeeded() {
     const state = this.read();
+    const hasYarnLockFilesChanged =
+      this.checkYarnLockFiles && state.yarnLockFilesSha !== this.yarnLockFilesSha;
+    const hasIncompleteCompilation = this.checkIncompleteCompile && state.inUseByProc;
 
-    if (this.checkYarnLock && state.yarnLockSha !== this.yarnLockSha) {
-      return true;
-    }
-
-    if (this.checkIncompleteCompile && state.inUseByProc) {
-      return true;
-    }
-
-    return false;
+    return hasYarnLockFilesChanged || hasIncompleteCompilation;
   }
 
   private write(state: StateContent = {}) {
@@ -110,7 +118,7 @@ export class CacheState {
       JSON.stringify(
         {
           ...state,
-          yarnLockSha: this.yarnLockSha,
+          yarnLockFilesSha: this.yarnLockFilesSha,
         },
         null,
         2
