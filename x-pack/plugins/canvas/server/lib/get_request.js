@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getRequest(handshake, server) {
+export function getRequest(server, { headers }) {
   const basePath = server.config().get('server.basePath') || '/';
 
   return server
     .inject({
       method: 'GET',
       url: basePath,
-      headers: handshake.headers,
+      headers,
     })
     .then(res => res.request);
 }

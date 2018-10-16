@@ -11,15 +11,12 @@ import { serializeProvider } from '../../common/lib/serialize';
 import { functionsRegistry } from '../../common/lib/functions_registry';
 import { typesRegistry } from '../../common/lib/types_registry';
 import { loadServerPlugins } from '../lib/load_server_plugins';
-import { getRequest } from './get_request';
+import { getRequest } from '../lib/get_request';
 
 export function socketApi(server) {
   const io = socket(server.listener, { path: '/socket.io' });
 
   io.on('connection', socket => {
-    // This is the HAPI request object
-    const getRequestPromise = getRequest(socket.handshake, server);
-
     // Create the function list
     socket.emit('getFunctionList');
     const getClientFunctions = new Promise(resolve => socket.once('functionList', resolve));
@@ -29,29 +26,31 @@ export function socketApi(server) {
     });
 
     const handler = ({ ast, context, id }) => {
-      Promise.all([getClientFunctions, getRequestPromise]).then(([clientFunctions, request]) => {
-        console.log('after', request.headers);
-        const types = typesRegistry.toJS();
-        const interpret = socketInterpreterProvider({
-          types,
-          functions: functionsRegistry.toJS(),
-          handlers: createHandlers(request, server),
-          referableFunctions: clientFunctions,
-          socket: socket,
-        });
-
-        const { serialize, deserialize } = serializeProvider(types);
-        return interpret(ast, deserialize(context))
-          .then(value => {
-            socket.emit(`resp:${id}`, { value: serialize(value) });
-          })
-          .catch(e => {
-            socket.emit(`resp:${id}`, {
-              error: e.message,
-              stack: e.stack,
-            });
+      Promise.all([getClientFunctions, getRequest(server, socket.handshake)]).then(
+        ([clientFunctions, request]) => {
+          // request is the modified hapi request object
+          const types = typesRegistry.toJS();
+          const interpret = socketInterpreterProvider({
+            types,
+            functions: functionsRegistry.toJS(),
+            handlers: createHandlers(request, server),
+            referableFunctions: clientFunctions,
+            socket: socket,
           });
-      });
+
+          const { serialize, deserialize } = serializeProvider(types);
+          return interpret(ast, deserialize(context))
+            .then(value => {
+              socket.emit(`resp:${id}`, { value: serialize(value) });
+            })
+            .catch(e => {
+              socket.emit(`resp:${id}`, {
+                error: e.message,
+                stack: e.stack,
+              });
+            });
+        }
+      );
     };
 
     socket.on('run', handler);
