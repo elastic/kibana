@@ -37,7 +37,11 @@ export const WorkpadHeader = ({
 
   const elementAdd = (
     <EuiOverlayMask>
-      <EuiModal onClose={() => setShowElementModal(false)} className="canvasModal--fixedSize">
+      <EuiModal
+        onClose={() => setShowElementModal(false)}
+        className="canvasModal--fixedSize"
+        maxWidth="1000px"
+      >
         <ElementTypes
           onClick={element => {
             addElement(element);

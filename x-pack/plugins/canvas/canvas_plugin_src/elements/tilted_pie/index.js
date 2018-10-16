@@ -8,7 +8,7 @@ import header from './header.png';
 
 export const tiltedPie = () => ({
   name: 'tiltedPie',
-  displayName: 'Tilted Pie Chart',
+  displayName: 'Tilted pie chart',
   width: 500,
   height: 250,
   help: 'A customizable tilted pie chart',

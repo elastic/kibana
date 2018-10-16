@@ -21,7 +21,6 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import pointSeriesTemplate from './editors/point_series.html';
-import image from './images/icon-line.svg';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -29,7 +28,7 @@ export default function PointSeriesVisType(Private) {
   return VisFactory.createVislibVisualization({
     name: 'line',
     title: 'Line',
-    image,
+    icon: 'visLine',
     description: 'Emphasize trends',
     category: CATEGORY.BASIC,
     visConfig: {

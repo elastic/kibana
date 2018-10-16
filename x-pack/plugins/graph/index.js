@@ -21,9 +21,11 @@ export function graph(kibana) {
         title: 'Graph',
         order: 9000,
         icon: 'plugins/graph/icon.png',
+        euiIconType: 'graphApp',
         description: 'Graph exploration',
         main: 'plugins/graph/app',
       },
+      styleSheetPaths: `${__dirname}/public/index.scss`,
       hacks: ['plugins/graph/hacks/toggle_app_link_in_nav'],
       home: ['plugins/graph/register_feature'],
       mappings

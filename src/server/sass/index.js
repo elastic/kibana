@@ -24,7 +24,6 @@ export async function sassMixin(kbnServer, server, config) {
     return;
   }
 
-
   /**
    * Build assets
    *
@@ -40,7 +39,7 @@ export async function sassMixin(kbnServer, server, config) {
   let trackedFiles = new Set();
 
   try {
-    scssBundles = await buildAll(kbnServer.pluginSpecs);
+    scssBundles = await buildAll(kbnServer.uiExports.styleSheetPaths);
 
     scssBundles.forEach(bundle => {
       bundle.includedFiles.forEach(file => trackedFiles.add(file));

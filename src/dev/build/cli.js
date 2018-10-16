@@ -48,6 +48,9 @@ const flags = getopts(process.argv.slice(0), {
     v: 'verbose',
     d: 'debug',
   },
+  default: {
+    debug: true
+  },
   unknown: (flag) => {
     unknownFlags.push(flag);
   }
@@ -76,14 +79,16 @@ if (flags.help) {
         --release               {dim Produce a release-ready distributable}
         --skip-node-download    {dim Reuse existing downloads of node.js}
         --verbose,-v            {dim Turn on verbose logging}
-        --debug,-d              {dim Turn on debug logging}
+        --no-debug              {dim Turn off debug logging}
     `) + '\n'
   );
   process.exit(1);
 }
 
 const log = new ToolingLog({
-  level: pickLevelFromFlags(flags),
+  level: pickLevelFromFlags(flags, {
+    default: flags.debug === false ? 'info' : 'debug'
+  }),
   writeTo: process.stdout
 });
 

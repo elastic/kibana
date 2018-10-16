@@ -27,7 +27,6 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import tableVisTemplate from './table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import image from './images/icon-table.svg';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
@@ -52,7 +51,7 @@ function TableVisTypeProvider(Private) {
     type: 'table',
     name: 'table',
     title: 'Data Table',
-    image,
+    icon: 'visTable',
     description: 'Display values in a table',
     category: CATEGORY.DATA,
     visConfig: {

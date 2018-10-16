@@ -1,5 +1,5 @@
 <!-- header -->
-<div class="vis-editor-agg-header">
+<div class="visEditorAggHeader">
 
   <!-- open/close editor -->
   <button
@@ -9,27 +9,27 @@
     aria-controls="visAggEditorParams{{agg.id}}"
     type="button"
     data-test-subj="toggleEditor"
-    class="kuiButton kuiButton--primary kuiButton--small vis-editor-agg-header-toggle">
+    class="visEditorAggHeader__toggle kuiButton kuiButton--primary kuiButton--small">
     <i aria-hidden="true" ng-class="{ 'fa-caret-down': editorOpen, 'fa-caret-right': !editorOpen }" class="fa"></i>
   </button>
 
   <!-- title -->
-  <span class="vis-editor-agg-header-title" ng-class="{'vis-editor-agg-header-title--grow': editorOpen}">
+  <span class="visEditorAggHeader__title" ng-class="{'visEditorAggHeader__title--grow': editorOpen}">
     {{ agg.schema.title }}
   </span>
 
   <!-- description -->
-  <span ng-if="!editorOpen && aggForm.$valid" class="vis-editor-agg-header-description" title="{{describe()}}">
+  <span ng-if="!editorOpen && aggForm.$valid" class="visEditorAggHeader__description" title="{{describe()}}">
     {{ describe() }}
   </span>
 
   <!-- error -->
-  <span ng-if="!editorOpen && aggForm.$invalid" class="vis-editor-agg-header-description danger" title="{{aggForm.describeErrors()}}">
+  <span ng-if="!editorOpen && aggForm.$invalid" class="visEditorAggHeader__description visEditorAggHeader__description--danger" title="{{aggForm.describeErrors()}}">
     {{ aggForm.describeErrors() }}
   </span>
 
   <!-- controls !!!actually disabling buttons will break tooltips¡¡¡ -->
-  <div class="vis-editor-agg-header-controls kuiButtonGroup kuiButtonGroup--united">
+  <div class="visEditorAggHeader__controls kuiButtonGroup kuiButtonGroup--united">
     <!-- disable aggregation -->
     <button
       ng-if="agg.enabled && canRemove(agg)"
@@ -94,12 +94,10 @@
   agg="agg"
   group-name="groupName"
   ng-show="editorOpen"
-  index-pattern="vis.indexPattern"
-  class="vis-editor-agg-editor">
+  index-pattern="vis.indexPattern">
 </vis-editor-agg-params>
 
 <vis-editor-agg-add
   ng-if="$index + 1 === stats.count"
-  ng-hide="dragging"
-  class="vis-editor-agg-add vis-editor-agg-add-subagg">
+  ng-hide="dragging">
 </vis-editor-agg-add>

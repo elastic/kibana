@@ -203,6 +203,12 @@ export default () => Joi.object({
     data: Joi.string().default(getData())
   }).default(),
 
+  migrations: Joi.object({
+    batchSize: Joi.number().default(100),
+    scrollDuration: Joi.string().default('15m'),
+    pollInterval: Joi.number().default(1500),
+  }).default(),
+
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
     bundleFilter: Joi.string().default('!tests'),

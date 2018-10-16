@@ -1,6 +1,6 @@
-<div class="sidebar-container">
+<div class="sidebar-container visEditorSidebar__container">
   <form
-    class="sidebar-list"
+    class="sidebar-list visEditorSidebar__form"
     ng-submit="visualizeEditor.$invalid ? stageEditableVis(false) : stageEditableVis()"
     name="visualizeEditor"
     novalidate
@@ -11,14 +11,14 @@
       css-truncate
       aria-label="{{:: 'Index pattern: ' + vis.indexPattern.title}}"
       ng-if="vis.type.requiresSearch && vis.type.options.showIndexSelection"
-      class="index-pattern"
+      class="index-pattern visEditorSidebar__indexPattern"
       tabindex="0"
       id="sidebarIndexPatternTitle"
     >
       {{ vis.indexPattern.title }}
     </div>
 
-    <nav class="navbar navbar-default subnav">
+    <nav class="navbar navbar-default subnav visEditorSidebar__nav">
       <div class="container-fluid">
 
         <!-- tabs -->
@@ -30,8 +30,8 @@
             ng-show="sidebar.showData"
           >
             <a
-              class="vis-editor-subnav-link"
-              ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'data'}"
+              class="visEditorSidebar__navLink"
+              ng-class="{'visEditorSidebar__navLink-isSelected': sidebar.section == 'data'}"
               ng-click="sidebar.section='data'"
               kbn-accessible-click
               data-test-subj="visualizeEditDataLink"
@@ -48,8 +48,8 @@
             ng-if="vis.type.editorConfig.optionTabs.length > 1 || sidebar.showData"
           >
             <a
-              class="vis-editor-subnav-link"
-              ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == tab.name}"
+              class="visEditorSidebar__navLink"
+              ng-class="{'visEditorSidebar__navLink-isSelected': sidebar.section == tab.name}"
               ng-click="sidebar.section=tab.name"
               kbn-accessible-click
               data-test-subj="{{ 'visEditorTab' + tab.name }}"
@@ -70,10 +70,10 @@
             tooltip-append-to-body="1"
           >
             <div
-              class="kuiButton kuiButton--danger navbar-btn-link sidebar-controls-error"
+              class="kuiButton kuiButton--danger navbar-btn-link visEditorSidebar__navButtonLink"
               aria-label="{{ visualizeEditor.describeErrors() }}"
             >
-              <span aria-hidden="true" class="kuiIcon kuiIcon--error fa-warning"></span>
+              <icon aria-hidden="true" type="'alert'" color="'danger'"></icon>
             </div>
           </li>
 
@@ -86,7 +86,7 @@
           >
             <button
               data-test-subj="visualizeEditorAutoButton"
-              class="kuiButton kuiButton--basic navbar-btn-link"
+              class="kuiButton kuiButton--basic navbar-btn-link visEditorSidebar__navButtonLink"
               aria-label="Auto update the visualization on every change"
               ng-click="toggleAutoApply()"
               ng-class="{
@@ -94,10 +94,10 @@
                 'kuiButton--basic': !autoApplyEnabled
               }"
             >
-              <span aria-hidden="true" class="kuiIcon fa-repeat"></span>
-              <span ng-show="autoApplyEnabled">Auto Apply</span>
+              <icon aria-hidden="true" type="'refresh'"></icon>
             </button>
           </li>
+              <span ng-show="autoApplyEnabled">Auto Apply</span>
 
           <li
             tooltip="Apply changes"
@@ -107,12 +107,12 @@
           >
             <button
               data-test-subj="visualizeEditorRenderButton"
-              class="kuiButton kuiButton--primary navbar-btn-link"
+              class="kuiButton kuiButton--primary navbar-btn-link visEditorSidebar__navButtonLink"
               type="submit"
               ng-disabled="!vis.dirty || visualizeEditor.errorCount() > 0 || autoApplyEnabled"
               aria-label="Update the visualization with your changes"
             >
-              <span aria-hidden="true" class="kuiIcon fa-play"></span>
+              <icon aria-hidden="true" type="'play'"></icon>
             </button>
           </li>
 
@@ -125,19 +125,19 @@
           >
             <button
               data-test-subj="visualizeEditorResetButton"
-              class="kuiButton kuiButton--basic navbar-btn-link"
+              class="kuiButton kuiButton--basic navbar-btn-link visEditorSidebar__navButtonLink"
               ng-disabled="!vis.dirty"
               ng-click="resetEditableVis()"
               aria-label="Reset the visualization"
             >
-              <span class="kuiIcon fa-close"></span>
+              <icon type="'cross'"></icon>
             </button>
           </li>
         </ul>
       </div>
     </nav>
 
-    <div class="vis-editor-config" ng-show="sidebar.section == 'data'">
+    <div class="visEditorSidebar__config" ng-show="sidebar.section == 'data'">
       <!-- metrics -->
       <vis-editor-agg-group ng-if="vis.type.schemas.metrics" data-test-subj="metricsAggGroup" group-name="metrics"></vis-editor-agg-group>
 
@@ -145,7 +145,7 @@
       <vis-editor-agg-group ng-if="vis.type.schemas.buckets" data-test-subj="bucketsAggGroup" group-name="buckets"></vis-editor-agg-group>
     </div>
 
-    <div class="vis-editor-config" ng-repeat="tab in vis.type.editorConfig.optionTabs" ng-show="sidebar.section == tab.name">
+    <div class="visEditorSidebar__config" ng-repeat="tab in vis.type.editorConfig.optionTabs" ng-show="sidebar.section == tab.name">
       <vis-editor-vis-options
         editor-state="state"
         vis="vis"

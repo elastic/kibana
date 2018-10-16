@@ -108,7 +108,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
   class VislibVisType extends BaseVisType {
     constructor(opts) {
       if (!opts.responseHandler) {
-        opts.responseHandler = 'vislib';
+        opts.responseHandler = 'vislib_series';
         opts.responseHandlerConfig = { asAggConfigResults: true };
       }
       if (!opts.responseConverter) {
