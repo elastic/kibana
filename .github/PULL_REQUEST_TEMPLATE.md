@@ -1,13 +1,19 @@
-<!--
-Thank you for your interest in and contributing to Kibana! There
-are a few simple things to check before submitting your pull request
-that can help with the review process. You should delete these items
-from your submission, but they are here to help bring them to your
-attention.
+## Summary
 
-- Have you signed the [contributor license agreement](https://www.elastic.co/contributor-agreement)?
-- Have you followed the [contributor guidelines](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md)?
-- If submitting code, have you included unit tests that cover the changes?
-- If submitting code, have you tested and built your code locally prior to submission with `yarn test && yarn build`?
-- If submitting code, is your pull request against master? Unless there is a good reason otherwise, we prefer pull requests against master and will backport as needed.
--->
+Summarize your PR. If it involves visual changes include a screenshot or gif.
+
+### Checklist
+
+Use ~~strikethroughs~~ to remove checklist items you don't feel are applicable to this PR.
+
+- [ ] This was checked for cross-browser compatability, [including a check against IE11](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility)
+- [ ] Any text added follows [EUI's writing guidelines](https://elastic.github.io/eui/#/guidelines/writing), uses sentence case text and includes [i18n support](https://github.com/elastic/kibana/blob/master/packages/kbn-i18n/README.md)
+- [ ] [Documentation](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#writing-documentation) was added for features that require explanation or tutorials
+- [ ] [Unit or functional tests](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#cross-browser-compatibility) were updated or added to match the most common scenarios
+- [ ] This was checked for [keyboard-only and screenreader accessibility](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Accessibility#Accessibility_testing_checklist)
+
+### For maintainers
+
+- [ ] This was checked for breaking API changes and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
+- [ ] This includes a feature additition or change that requires a release note and was [labeled appropriately](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#release-notes-process)
+

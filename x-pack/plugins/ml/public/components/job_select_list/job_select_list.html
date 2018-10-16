@@ -14,7 +14,7 @@
           ng-if="singleSelection !== true"
           type="checkbox"
           ng-checked="allGroupsSelected"
-          aria-label="Select all groups checkbox"
+          aria-label="Select all groups checkbox. Total count {{selected.groups.length}}."
           ng-click="toggleAllGroupsSelection()" />
         Groups
       </div>
@@ -25,6 +25,7 @@
               <label class="kuiFormLabel">
                 <div >
                   <input
+                    aria-label="Group ID {{group.id}}"
                     ng-if="singleSelection !== true && group.selectable === true" type="checkbox"
                     ng-model="group.selected"
                     ng-click="toggleGroupSelection()" />
@@ -53,7 +54,7 @@
     <div class="list-section-title" ng-if="singleSelection !== true">
       <input type="checkbox"
         ng-checked="allJobsSelected"
-        aria-label="Select all jobs checkbox"
+        aria-label="Select all jobs checkbox. Total count {{selected.jobs.length}}."
         ng-click="toggleAllJobsSelection()" />
       Jobs
     </div>
@@ -72,7 +73,7 @@
                   value="{{job.id}}"
                   ng-model="$parent.$parent.selectedJobRadio"
                   ng-disabled='job.disabled' />
-                <span ng-class="{'disabled-job': job.disabled}">{{job.id}}</span>
+                <span ng-class="{'disabled-job': job.disabled}" aria-label="Job ID {{job.id}}">{{job.id}}</span>
               </span>
             </div>
             <div>
@@ -81,6 +82,7 @@
               </div>
               <div
                 class='gant-bar'
+                aria-label="time range {{job.timeRange.label}}"
                 ng-class="{'disabled-job': job.disabled, 'gant-bar-running': job.running}"
                 tooltip='{{job.timeRange.label}}'
                 tooltip-placement="bottom"

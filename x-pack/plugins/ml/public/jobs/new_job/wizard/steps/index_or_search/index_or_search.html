@@ -2,25 +2,25 @@
 <ml-new-job class="index-or-saved-search-selection">
   <ml-message-bar></ml-message-bar>
   <div class='kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem' >
-    <div ng-controller="MlNewJobStepIndexOrSearch" class="wizard">
-      <div class="wizard-column wizard-column--small">
+    <div ng-controller="MlNewJobStepIndexOrSearch" class="visWizard">
+      <div class="visWizard__column visWizard__column--small">
         <h3 class="kuiTitle kuiVerticalRhythm">From a New Search, Select Index</h3>
         <paginated-selectable-list
           per-page="20"
           list="indexPatterns"
           list-property="attributes.title"
           user-make-url="withIndexPatternUrl"
-          class="wizard-row visualizeWizardPaginatedSelectableList kuiVerticalRhythm"
+          class="visWizard__row visWizard__list--paginated--selectable kuiVerticalRhythm"
           disable-auto-focus="true"
         ></paginated-selectable-list>
       </div>
-      <div class="wizard-column wizard-column--large">
+      <div class="visWizard__column visWizard__column--large">
 
         <h3 class="kuiTitle kuiVerticalRhythm">Or, From a Saved Search</h3>
         <saved-object-finder
           title="Saved Searches"
           type="searches"
-          class="wizard-row visualizeWizardSavedObjectFinder kuiVerticalRhythm"
+          class="visWizard__row visWizard__savedObjectFinder kuiVerticalRhythm"
           make-url="withSavedSearchUrl"
           disable-auto-focus="true"
         ></saved-object-finder>

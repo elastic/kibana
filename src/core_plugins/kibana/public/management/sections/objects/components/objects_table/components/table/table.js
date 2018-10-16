@@ -145,6 +145,7 @@ export class Table extends PureComponent {
             name: 'In app',
             description:
               'View this saved object within Kibana',
+            type: 'icon',
             icon: 'eye',
             onClick: object => goInApp(object.id, object.type),
           },
@@ -152,6 +153,7 @@ export class Table extends PureComponent {
             name: 'Relationships',
             description:
               'View the relationships this saved object has to other saved objects',
+            type: 'icon',
             icon: 'kqlSelector',
             onClick: object =>
               onShowRelationships(object.id, object.type, object.title),

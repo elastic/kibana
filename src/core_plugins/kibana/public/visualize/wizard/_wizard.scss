@@ -1,0 +1,48 @@
+@include euiBreakpoint('xl') {
+  .visWizard {
+    display: flex;
+  }
+
+  .visWizard__column {
+    display: flex;
+    flex-direction: column;
+    padding: 0px $euiSizeXS;
+  }
+
+  .visWizard__row {
+    flex: 1;
+    background-color: $euiColorLightestShade;
+  }
+
+  .visWizard__column--small {
+    flex: 2;
+  }
+
+  .visWizard__column--large {
+    flex: 3;
+  }
+}
+
+/**
+ * 1. Hack in some padding for these panels.
+ */
+.visWizard__list--paginated--selectable,
+.visWizard__savedObjectFinder {
+  padding: $euiSizeS; /* 1 */
+}
+
+/**
+ * This preserves backwards-compatibility with any plugins that are still specifying an `icon`
+ * class.
+ *
+ * 1. Size icon correctly to match xxLarge EuiIcon
+ */
+ .visWizard__visTypeIcon {
+  color: $euiColorFullShade;
+  font-size: $euiSizeXXL; /* 1 */
+}
+
+// SASSTODO: Remove img element selector when `.kuiGalleryItem__image img` selector is removed
+img.visWizard__visTypeImage { // Use element selector to override base .kuiGalleryItem__image styles
+  @include size($euiSizeXXL); /* 1 */
+}

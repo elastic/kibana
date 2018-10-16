@@ -25,10 +25,12 @@ import { RuleActionPanel } from './rule_action_panel';
 export function SelectRuleAction({
   job,
   anomaly,
-  detectorIndex,
   setEditRuleIndex,
-  deleteRuleAtIndex }) {
+  updateRuleAtIndex,
+  deleteRuleAtIndex,
+  addItemToFilterList }) {
 
+  const detectorIndex = anomaly.detectorIndex;
   const detector = job.analysis_config.detectors[detectorIndex];
   const rules = detector.custom_rules || [];
   let ruleActionPanels;
@@ -38,11 +40,12 @@ export function SelectRuleAction({
         <React.Fragment key={`rule_panel_${index}`}>
           <RuleActionPanel
             job={job}
-            detectorIndex={detectorIndex}
             ruleIndex={index}
             anomaly={anomaly}
             setEditRuleIndex={setEditRuleIndex}
+            updateRuleAtIndex={updateRuleAtIndex}
             deleteRuleAtIndex={deleteRuleAtIndex}
+            addItemToFilterList={addItemToFilterList}
           />
           <EuiSpacer size="l"/>
         </React.Fragment>
@@ -57,6 +60,7 @@ export function SelectRuleAction({
           <DetectorDescriptionList
             job={job}
             detector={detector}
+            anomaly={anomaly}
           />
           <EuiSpacer size="m" />
           {ruleActionPanels}
@@ -78,7 +82,8 @@ export function SelectRuleAction({
 SelectRuleAction.propTypes = {
   job: PropTypes.object.isRequired,
   anomaly: PropTypes.object.isRequired,
-  detectorIndex: PropTypes.number.isRequired,
   setEditRuleIndex: PropTypes.func.isRequired,
+  updateRuleAtIndex: PropTypes.func.isRequired,
   deleteRuleAtIndex: PropTypes.func.isRequired,
+  addItemToFilterList: PropTypes.func.isRequired,
 };

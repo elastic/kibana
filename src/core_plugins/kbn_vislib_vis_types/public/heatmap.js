@@ -22,7 +22,6 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import heatmapTemplate from './editors/heatmap.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import image from './images/icon-heatmap.svg';
 
 export default function HeatmapVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -30,7 +29,7 @@ export default function HeatmapVisType(Private) {
   return VisFactory.createVislibVisualization({
     name: 'heatmap',
     title: 'Heat Map',
-    image,
+    icon: 'visHeatmap',
     description: 'Shade cells within a matrix',
     category: CATEGORY.BASIC,
     visConfig: {

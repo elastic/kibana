@@ -14,10 +14,12 @@ jest.mock('./privileges', () => ({
   buildPrivilegeMap: jest.fn(),
 }));
 
+const application = 'default-application';
+
 const registerPrivilegesWithClusterTest = (description, {
   settings = {},
   savedObjectTypes,
-  expectedPrivileges,
+  privilegeMap,
   existingPrivileges,
   throwErrorWhenGettingPrivileges,
   throwErrorWhenPuttingPrivileges,
@@ -32,7 +34,6 @@ const registerPrivilegesWithClusterTest = (description, {
   };
 
   const defaultVersion = 'default-version';
-  const application = 'default-application';
 
   const createMockServer = () => {
     const mockServer = {
@@ -65,8 +66,8 @@ const registerPrivilegesWithClusterTest = (description, {
     return mockServer;
   };
 
-  const createExpectUpdatedPrivileges = (mockServer, mockCallWithInternalUser, privileges, error) => {
-    return () => {
+  const createExpectUpdatedPrivileges = (mockServer, mockCallWithInternalUser, error) => {
+    return (postPrivilegesBody) => {
       expect(error).toBeUndefined();
       expect(mockCallWithInternalUser).toHaveBeenCalledTimes(2);
       expect(mockCallWithInternalUser).toHaveBeenCalledWith('shield.getPrivilege', {
@@ -75,9 +76,7 @@ const registerPrivilegesWithClusterTest = (description, {
       expect(mockCallWithInternalUser).toHaveBeenCalledWith(
         'shield.postPrivileges',
         {
-          body: {
-            [application]: privileges
-          },
+          body: postPrivilegesBody,
         }
       );
 
@@ -137,9 +136,7 @@ const registerPrivilegesWithClusterTest = (description, {
           return {};
         }
 
-        return {
-          [application]: existingPrivileges
-        };
+        return existingPrivileges;
       })
       .mockImplementationOnce(async () => {
         if (throwErrorWhenPuttingPrivileges) {
@@ -147,7 +144,7 @@ const registerPrivilegesWithClusterTest = (description, {
         }
       });
 
-    buildPrivilegeMap.mockReturnValue(expectedPrivileges);
+    buildPrivilegeMap.mockReturnValue(privilegeMap);
 
     let error;
     try {
@@ -157,7 +154,7 @@ const registerPrivilegesWithClusterTest = (description, {
     }
 
     assert({
-      expectUpdatedPrivileges: createExpectUpdatedPrivileges(mockServer, mockCallWithInternalUser, expectedPrivileges, error),
+      expectUpdatedPrivileges: createExpectUpdatedPrivileges(mockServer, mockCallWithInternalUser, error),
       expectDidntUpdatePrivileges: createExpectDidntUpdatePrivileges(mockServer, mockCallWithInternalUser, error),
       expectErrorThrown: createExpectErrorThrown(mockServer, error),
       mocks: {
@@ -168,10 +165,7 @@ const registerPrivilegesWithClusterTest = (description, {
   });
 };
 
-registerPrivilegesWithClusterTest(`passes saved object types, application and actions to buildPrivilegeMap`, {
-  settings: {
-    'pkg.version': 'foo-version'
-  },
+registerPrivilegesWithClusterTest(`passes saved object types, and actions to buildPrivilegeMap`, {
   savedObjectTypes: [
     'foo-type',
     'bar-type',
@@ -179,146 +173,249 @@ registerPrivilegesWithClusterTest(`passes saved object types, application and ac
   assert: ({ mocks }) => {
     expect(mocks.buildPrivilegeMap).toHaveBeenCalledWith(
       ['foo-type', 'bar-type'],
-      mocks.server.plugins.security.authorization.application,
       mocks.server.plugins.security.authorization.actions,
     );
   },
 });
 
 registerPrivilegesWithClusterTest(`inserts privileges when we don't have any existing privileges`, {
-  expectedPrivileges: {
-    expected: true
+  privilegeMap: {
+    global: {
+      foo: ['action:foo']
+    },
+    space: {
+      bar: ['action:bar']
+    }
   },
   existingPrivileges: null,
   assert: ({ expectUpdatedPrivileges }) => {
-    expectUpdatedPrivileges();
+    expectUpdatedPrivileges({
+      [application]: {
+        foo: {
+          application,
+          name: 'foo',
+          actions: ['action:foo'],
+          metadata: {},
+        },
+        space_bar: {
+          application,
+          name: 'space_bar',
+          actions: ['action:bar'],
+          metadata: {},
+        }
+      }
+    });
   }
 });
 
-registerPrivilegesWithClusterTest(`updates privileges when simple top-level privileges values don't match`, {
-  expectedPrivileges: {
-    expected: true
+registerPrivilegesWithClusterTest(`throws error when we should be removing privilege`, {
+  privilegeMap: {
+    global: {
+      foo: ['action:foo'],
+    },
+    space: {
+      bar: ['action:bar']
+    }
   },
   existingPrivileges: {
-    expected: false
-  },
-  assert: ({ expectUpdatedPrivileges }) => {
-    expectUpdatedPrivileges();
-  }
-});
-
-registerPrivilegesWithClusterTest(`throws error when we have two different top-level privileges`, {
-  expectedPrivileges: {
-    notExpected: true
-  },
-  existingPrivileges: {
-    expected: true
+    [application]: {
+      foo: {
+        application,
+        name: 'foo',
+        actions: ['action:not-foo'],
+        metadata: {},
+      },
+      quz: {
+        application,
+        name: 'quz',
+        actions: ['action:not-quz'],
+        metadata: {},
+      },
+      space_bar: {
+        application,
+        name: 'space_bar',
+        actions: ['action:not-bar'],
+        metadata: {},
+      }
+    }
   },
   assert: ({ expectErrorThrown }) => {
     expectErrorThrown(`Privileges are missing and can't be removed, currently.`);
   }
 });
 
-registerPrivilegesWithClusterTest(`updates privileges when we want to add a top-level privilege`, {
-  expectedPrivileges: {
-    expected: true,
-    new: false,
-  },
-  existingPrivileges: {
-    expected: true,
-  },
-  assert: ({ expectUpdatedPrivileges }) => {
-    expectUpdatedPrivileges();
-  }
-});
-
-registerPrivilegesWithClusterTest(`updates privileges when nested privileges values don't match`, {
-  expectedPrivileges: {
-    kibana: {
-      expected: true
+registerPrivilegesWithClusterTest(`updates privileges when actions don't match`, {
+  privilegeMap: {
+    global: {
+      foo: ['action:foo']
+    },
+    space: {
+      bar: ['action:bar']
     }
   },
   existingPrivileges: {
-    kibana: {
-      expected: false
-    }
-  },
-  assert: ({ expectUpdatedPrivileges }) => {
-    expectUpdatedPrivileges();
-  }
-});
-
-registerPrivilegesWithClusterTest(`updates privileges when we have two different nested privileges`, {
-  expectedPrivileges: {
-    kibana: {
-      notExpected: true
-    }
-  },
-  existingPrivileges: {
-    kibana: {
-      expected: false
+    [application]: {
+      foo: {
+        application,
+        name: 'foo',
+        actions: ['action:not-foo'],
+        metadata: {},
+      },
+      space_bar: {
+        application,
+        name: 'space_bar',
+        actions: ['action:not-bar'],
+        metadata: {},
+      }
     }
   },
   assert: ({ expectUpdatedPrivileges }) => {
-    expectUpdatedPrivileges();
+    expectUpdatedPrivileges({
+      [application]: {
+        foo: {
+          application,
+          name: 'foo',
+          actions: ['action:foo'],
+          metadata: {},
+        },
+        space_bar: {
+          application,
+          name: 'space_bar',
+          actions: ['action:bar'],
+          metadata: {},
+        }
+      }
+    });
   }
 });
 
-registerPrivilegesWithClusterTest(`updates privileges when nested privileges arrays don't match`, {
-  expectedPrivileges: {
-    kibana: {
-      expected: ['one', 'two']
+registerPrivilegesWithClusterTest(`updates privileges when global privilege added`, {
+  privilegeMap: {
+    global: {
+      foo: ['action:foo'],
+      quz: ['action:quz']
+    },
+    space: {
+      bar: ['action:bar']
     }
   },
   existingPrivileges: {
-    kibana: {
-      expected: ['one']
+    [application]: {
+      foo: {
+        application,
+        name: 'foo',
+        actions: ['action:not-foo'],
+        metadata: {},
+      },
+      space_bar: {
+        application,
+        name: 'space_bar',
+        actions: ['action:not-bar'],
+        metadata: {},
+      }
     }
   },
   assert: ({ expectUpdatedPrivileges }) => {
-    expectUpdatedPrivileges();
+    expectUpdatedPrivileges({
+      [application]: {
+        foo: {
+          application,
+          name: 'foo',
+          actions: ['action:foo'],
+          metadata: {},
+        },
+        quz: {
+          application,
+          name: 'quz',
+          actions: ['action:quz'],
+          metadata: {},
+        },
+        space_bar: {
+          application,
+          name: 'space_bar',
+          actions: ['action:bar'],
+          metadata: {},
+        }
+      }
+    });
   }
 });
 
-registerPrivilegesWithClusterTest(`updates privileges when nested property array values are reordered`, {
-  expectedPrivileges: {
-    kibana: {
-      foo: ['one', 'two']
+registerPrivilegesWithClusterTest(`updates privileges when space privilege added`, {
+  privilegeMap: {
+    global: {
+      foo: ['action:foo'],
+    },
+    space: {
+      bar: ['action:bar'],
+      quz: ['action:quz']
     }
   },
   existingPrivileges: {
-    kibana: {
-      foo: ['two', 'one']
+    [application]: {
+      foo: {
+        application,
+        name: 'foo',
+        actions: ['action:not-foo'],
+        metadata: {},
+      },
+      space_bar: {
+        application,
+        name: 'space_bar',
+        actions: ['action:not-bar'],
+        metadata: {},
+      }
     }
   },
   assert: ({ expectUpdatedPrivileges }) => {
-    expectUpdatedPrivileges();
+    expectUpdatedPrivileges({
+      [application]: {
+        foo: {
+          application,
+          name: 'foo',
+          actions: ['action:foo'],
+          metadata: {},
+        },
+        space_bar: {
+          application,
+          name: 'space_bar',
+          actions: ['action:bar'],
+          metadata: {},
+        },
+        space_quz: {
+          application,
+          name: 'space_quz',
+          actions: ['action:quz'],
+          metadata: {},
+        },
+      }
+    });
   }
 });
 
-registerPrivilegesWithClusterTest(`doesn't update privileges when simple top-level privileges match`, {
-  expectedPrivileges: {
-    expected: true
-  },
-  existingPrivileges: {
-    expected: true
-  },
-  assert: ({ expectDidntUpdatePrivileges }) => {
-    expectDidntUpdatePrivileges();
-  }
-});
-
-registerPrivilegesWithClusterTest(`doesn't update privileges when nested properties are reordered`, {
-  expectedPrivileges: {
-    kibana: {
-      foo: true,
-      bar: false
+registerPrivilegesWithClusterTest(`doesn't update privileges when order of actions differ`, {
+  privilegeMap: {
+    global: {
+      foo: ['action:foo', 'action:quz']
+    },
+    space: {
+      bar: ['action:bar']
     }
   },
   existingPrivileges: {
-    kibana: {
-      bar: false,
-      foo: true
+    [application]: {
+      foo: {
+        application,
+        name: 'foo',
+        actions: ['action:quz', 'action:foo'],
+        metadata: {},
+      },
+      space_bar: {
+        application,
+        name: 'space_bar',
+        actions: ['action:bar'],
+        metadata: {},
+      }
     }
   },
   assert: ({ expectDidntUpdatePrivileges }) => {
@@ -327,6 +424,10 @@ registerPrivilegesWithClusterTest(`doesn't update privileges when nested propert
 });
 
 registerPrivilegesWithClusterTest(`throws and logs error when errors getting privileges`, {
+  privilegeMap: {
+    global: {},
+    space: {}
+  },
   throwErrorWhenGettingPrivileges: new Error('Error getting privileges'),
   assert: ({ expectErrorThrown }) => {
     expectErrorThrown('Error getting privileges');
@@ -334,18 +435,15 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors getting pri
 });
 
 registerPrivilegesWithClusterTest(`throws and logs error when errors putting privileges`, {
-  expectedPrivileges: {
-    kibana: {
-      foo: false,
-      bar: false
+  privilegeMap: {
+    global: {
+      foo: []
+    },
+    space: {
+      bar: []
     }
   },
-  existingPrivileges: {
-    kibana: {
-      foo: true,
-      bar: true
-    }
-  },
+  existingPrivileges: null,
   throwErrorWhenPuttingPrivileges: new Error('Error putting privileges'),
   assert: ({ expectErrorThrown }) => {
     expectErrorThrown('Error putting privileges');

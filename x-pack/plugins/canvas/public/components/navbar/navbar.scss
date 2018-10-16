@@ -1,0 +1,7 @@
+.canvasNavbar {
+  width: 100%;
+  height: $euiSizeXL * 2;
+  background-color: darken($euiColorLightestShade, 5%);
+  position: relative;
+  z-index: 200;
+}

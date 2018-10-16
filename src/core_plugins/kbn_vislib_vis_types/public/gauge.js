@@ -22,7 +22,6 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import gaugeTemplate from './editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import image from './images/icon-gauge.svg';
 
 export default function GaugeVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -30,8 +29,8 @@ export default function GaugeVisType(Private) {
   return VisFactory.createVislibVisualization({
     name: 'gauge',
     title: 'Gauge',
-    image,
-    description: `Gauges indicate the status of a metric. Use it to show how a metric's value relates 
+    icon: 'visGauge',
+    description: `Gauges indicate the status of a metric. Use it to show how a metric's value relates
       to reference threshold values.`,
     category: CATEGORY.DATA,
     visConfig: {

@@ -24,7 +24,10 @@ export {
 
 export {
   mappings,
-} from './saved_object_mappings';
+  migrations,
+  savedObjectSchemas,
+  validations,
+} from './saved_object';
 
 export {
   app,
@@ -65,6 +68,10 @@ export {
   link,
   links,
 } from './ui_nav_links';
+
+export {
+  styleSheetPaths
+} from './style_sheet_paths';
 
 export {
   uiSettingDefaults,

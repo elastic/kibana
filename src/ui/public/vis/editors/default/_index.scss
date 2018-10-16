@@ -1,0 +1,14 @@
+$vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
+$vis-editor-sidebar-min-width: 350px;
+$vis-editor-agg-editor-spacing: $euiSizeS;
+$vis-editor-resizer-width: $euiSizeM;
+
+// Main layout
+@import './default';
+@import './sidebar';
+
+// Components
+@import './agg';
+@import './agg_group';
+@import './agg_params';
+@import './agg_select';

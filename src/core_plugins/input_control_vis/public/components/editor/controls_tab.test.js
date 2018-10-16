@@ -26,27 +26,12 @@ import {
   ControlsTab,
 } from './controls_tab';
 
-const savedObjectsClientMock = {
-  find: () => {
-    return Promise.resolve({
-      savedObjects: [
-        {
-          id: 'indexPattern1',
-          attributes: {
-            title: 'title1'
-          }
-        }
-      ]
-    });
-  }
-};
 const indexPatternsMock = {
   get: getIndexPatternMock
 };
 const scopeMock = {
   vis: {
     API: {
-      savedObjectsClient: savedObjectsClientMock,
       indexPatterns: indexPatternsMock
     },
   },

@@ -18,7 +18,7 @@ describe('check_license', function () {
       isXpackUnavailable: sinon.stub(),
       feature: sinon.stub(),
       license: sinon.stub({
-        isOneOf() {},
+        isOneOf() { },
       })
     };
 

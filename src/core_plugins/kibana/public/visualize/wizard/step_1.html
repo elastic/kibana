@@ -23,7 +23,7 @@
 
     <!-- Search -->
     <div class="kuiSearchInput kuiVerticalRhythm kuiVerticalRhythm--medium fullWidth" role="search">
-      <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
+      <icon class="kuiSearchInput__icon kuiIcon fa-search"></icon>
       <input
         class="kuiSearchInput__input"
         type="text"
@@ -53,18 +53,28 @@
         >
           <div class="kuiGalleryItem__image">
             <img
+              class="visWizard__visTypeImage"
               ng-if="type.image"
               aria-hidden="true"
               ng-src="{{ type.image }}"
             />
 
-            <!-- If there's no image, default to an icon, for BWC. -->
+            <!-- Allowing legacyIcon to hold a CSS name, will be removed in 7.0 -->
             <span
-              ng-if="!type.image"
+              ng-if="!type.image && !type.icon"
               aria-hidden="true"
-              class="kuiIcon visualizeWizardVisTypeIcon"
-              ng-class="type.icon"
+              class="kuiIcon visWizard__visTypeIcon"
+              ng-class="type.legacyIcon"
             ></span>
+
+            <!-- If there's no image, default to an icon, for BWC. -->
+            <icon
+              ng-if="!type.image && type.icon"
+              aria-hidden="true"
+              class="kuiIcon visWizard__visTypeIcon"
+              type="type.icon"
+              size="'xxl'"
+            ></icon>
           </div>
 
           <div

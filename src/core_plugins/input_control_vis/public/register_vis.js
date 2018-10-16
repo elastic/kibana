@@ -25,7 +25,6 @@ import { VisController } from './vis_controller';
 import { ControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
-import image from './images/icon-input-control.svg';
 import { Status } from 'ui/vis/update_status';
 import { i18n } from '@kbn/i18n';
 
@@ -38,7 +37,7 @@ function InputControlVisProvider(Private) {
     title: i18n.translate('inputControl.register.controlsTitle', {
       defaultMessage: 'Controls'
     }),
-    image,
+    icon: 'visControls',
     description: i18n.translate('inputControl.register.controlsDescription', {
       defaultMessage: 'Create interactive controls for easy dashboard manipulation.'
     }),

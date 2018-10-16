@@ -20,7 +20,7 @@
 type Freezable = { [k: string]: any } | any[];
 
 // if we define this inside RecursiveReadonly TypeScript complains
-interface RecursiveReadonlyArray<T> extends ReadonlyArray<RecursiveReadonly<T>> {}
+interface RecursiveReadonlyArray<T> extends Array<RecursiveReadonly<T>> {}
 
 type RecursiveReadonly<T> = T extends any[]
   ? RecursiveReadonlyArray<T[number]>

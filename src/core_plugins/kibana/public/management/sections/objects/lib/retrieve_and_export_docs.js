@@ -25,7 +25,8 @@ export async function retrieveAndExportDocs(objs, savedObjectsClient) {
     return {
       _id: obj.id,
       _type: obj.type,
-      _source: obj.attributes
+      _source: obj.attributes,
+      _migrationVersion: obj.migrationVersion,
     };
   });
 

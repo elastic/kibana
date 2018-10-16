@@ -6,7 +6,6 @@
 
 import { management } from 'ui/management';
 import 'plugins/watcher/services/license';
-import 'plugins/watcher/styles/watcher_ui.less';
 
 management.getSection('elasticsearch').register('watcher', {
   display: 'Watcher',

@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function mongodbMetricsSpecProvider() {
+export function mongodbMetricsSpecProvider(server, context) {
   const moduleName = 'mongodb';
   return {
     id: 'mongodbMetrics',
@@ -56,7 +56,7 @@ export function mongodbMetricsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/mongodb_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };
