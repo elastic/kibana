@@ -1,0 +1,16 @@
+.tvbSeriesEditor__container {
+  background-color: $euiColorEmptyShade;
+  margin-bottom: $euiSize;
+}
+
+.tvbSeriesEditor {
+  // Background color necessary for when re-ordering
+  background-color: $euiColorEmptyShade;
+  padding: $euiSizeS;
+  border-bottom: 2px solid $euiBorderColor;
+}
+
+.tvbSeries__body {
+  margin-left: $euiSizeXL;
+  margin-top: $euiSizeS;
+}

@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from './config';
 import Sortable from 'react-anything-sortable';
-import { EuiToolTip, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiToolTip, EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import createTextHandler from '../../lib/create_text_handler';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import { createUpDownHandler } from '../../lib/sort_keyhandler';
@@ -42,8 +42,8 @@ function TopNSeries(props) {
   const handleChange = createTextHandler(onChange);
   const aggs = model.metrics.map(createAggRowRender(props));
 
-  let caretClassName = 'fa fa-caret-down';
-  if (!visible) caretClassName = 'fa fa-caret-right';
+  let caretIcon = 'arrowDown';
+  if (!visible) caretIcon = 'arrowRight';
 
   let body = null;
   if (visible) {
@@ -60,7 +60,7 @@ function TopNSeries(props) {
             dynamic={true}
             direction="vertical"
             onSort={handleSort}
-            sortHandle="vis_editor__agg_sort"
+            sortHandle="tvbAggRow__sortHandle"
           >
             { aggs }
           </Sortable>
@@ -77,7 +77,7 @@ function TopNSeries(props) {
       );
     }
     body = (
-      <div className="vis_editor__series-row">
+      <div className="tvbSeries__body">
         <EuiTabs size="s">
           <EuiTab
             isSelected={selectedTab === 'metrics'}
@@ -101,40 +101,50 @@ function TopNSeries(props) {
   let dragHandle;
   if (!props.disableDelete) {
     dragHandle = (
-      <EuiToolTip content="Sort">
-        <button
-          className="vis_editor__sort thor__button-outlined-default sm"
-          aria-label="Sort series by pressing up/down"
-          onKeyDown={createUpDownHandler(props.onShouldSortItem)}
-        >
-          <i className="fa fa-sort" />
-        </button>
-      </EuiToolTip>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content="Drag to sort">
+          <EuiButtonIcon
+            className="tvbSeries__sortHandle"
+            iconType="grab"
+            aria-label="Sort series by pressing up/down"
+            onKeyDown={createUpDownHandler(props.onShouldSortItem)}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
     );
   }
 
   return (
     <div
-      className={`${props.className} vis_editor__series`}
+      className={`${props.className}`}
       style={props.style}
       onMouseDown={props.onMouseDown}
       onTouchStart={props.onTouchStart}
     >
-      <div className="vis_editor__container">
-        <div className="vis_editor__series-details">
-          <button className="vis_editor__series-visibility-toggle" onClick={props.toggleVisible}>
-            <i className={caretClassName}/>
-          </button>
-          <div className="vis_editor__row vis_editor__row_item">
-            <input
-              aria-label="Label"
-              className="vis_editor__input-grows"
-              onChange={handleChange('label')}
-              placeholder="Label"
-              value={model.label}
-            />
-          </div>
-          { dragHandle }
+      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={caretIcon}
+            color="text"
+            onClick={props.toggleVisible}
+            aria-label="Toggle series editor"
+            aria-expanded={props.visible}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFieldText
+            fullWidth
+            aria-label="Label"
+            onChange={handleChange('label')}
+            placeholder="Label"
+            value={model.label}
+          />
+        </EuiFlexItem>
+
+        { dragHandle }
+
+        <EuiFlexItem grow={false}>
           <AddDeleteButtons
             addTooltip="Add Series"
             deleteTooltip="Delete Series"
@@ -144,9 +154,11 @@ function TopNSeries(props) {
             onAdd={onAdd}
             disableDelete={disableDelete}
             disableAdd={disableAdd}
+            responsive={false}
           />
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       { body }
     </div>
   );

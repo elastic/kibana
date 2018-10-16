@@ -35,9 +35,11 @@ function AggRow(props) {
   let dragHandle;
   if (!props.disableDelete) {
     dragHandle = (
-      <EuiToolTip content="Drag to sort">
-        <EuiButtonIcon className="tvbAggRow__sortHandle" aria-label="Drag to sort" iconType="grab" />
-      </EuiToolTip>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content="Drag to sort">
+          <EuiButtonIcon className="tvbAggRow__sortHandle" aria-label="Drag to sort" iconType="grab" />
+        </EuiToolTip>
+      </EuiFlexItem>
     );
   }
 
@@ -50,9 +52,7 @@ function AggRow(props) {
         <EuiFlexItem>
           {props.children}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {dragHandle}
-        </EuiFlexItem>
+        {dragHandle}
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
             testSubj="addMetric"
