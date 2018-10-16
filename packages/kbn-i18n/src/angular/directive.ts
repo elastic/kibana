@@ -58,9 +58,22 @@ function setHtmlContent(
   $sanitize: (html: string) => string,
   i18n: I18nServiceType
 ) {
+  const values = Object.entries($scope.values || {}).reduce(
+    (result, [key, value]) => {
+      if (key.startsWith('unsafe_')) {
+        result[key] = value;
+      } else {
+        result[key] = $sanitize(value);
+      }
+
+      return result;
+    },
+    {} as Record<string, any>
+  );
+
   $element.html(
     i18n($scope.id, {
-      values: $scope.values,
+      values,
       defaultMessage: $sanitize($scope.defaultMessage),
     })
   );

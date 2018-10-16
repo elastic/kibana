@@ -62,8 +62,23 @@ describe('i18nDirective', () => {
     const element = angular.element(
       `<div
         i18n-id="id"
-        i18n-default-message="Dangerous default message, {value}"
-        i18n-values="{ value: '<div i18n-id=&quot;id2&quot; i18n-default-message=&quot;<script></script>inner message&quot; />' }"
+        i18n-default-message="Dangerous default message, {unsafe_value}"
+        i18n-values="{ unsafe_value: '<div i18n-id=&quot;id2&quot; i18n-default-message=&quot;<script></script>inner message&quot; />' }"
+      />`
+    );
+
+    compile(element)(scope);
+    scope.$digest();
+
+    expect(element[0]).toMatchSnapshot();
+  });
+
+  test('sanitizes safe value', () => {
+    const element = angular.element(
+      `<div
+        i18n-id="id"
+        i18n-default-message="Default message, {value}"
+        i18n-values="{ value: '<div ng-click=&quot;dangerousAction()&quot;></div>' }"
       />`
     );
 

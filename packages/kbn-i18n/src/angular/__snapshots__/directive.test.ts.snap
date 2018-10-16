@@ -17,9 +17,9 @@ exports[`i18nDirective inserts correct translation html content with values 2`] 
 exports[`i18nDirective sanitizes defaultMessage 1`] = `
 <div
   class="ng-scope ng-isolate-scope"
-  i18n-default-message="Dangerous default message, {value}"
+  i18n-default-message="Dangerous default message, {unsafe_value}"
   i18n-id="id"
-  i18n-values="{ value: '<div i18n-id=\\"id2\\" i18n-default-message=\\"<script></script>inner message\\" />' }"
+  i18n-values="{ unsafe_value: '<div i18n-id=\\"id2\\" i18n-default-message=\\"<script></script>inner message\\" />' }"
 >
   Dangerous default message, 
   <div
@@ -29,5 +29,19 @@ exports[`i18nDirective sanitizes defaultMessage 1`] = `
   >
     inner message
   </div>
+</div>
+`;
+
+exports[`i18nDirective sanitizes safe value 1`] = `
+<div
+  class="ng-scope ng-isolate-scope"
+  i18n-default-message="Default message, {value}"
+  i18n-id="id"
+  i18n-values="{ value: '<div ng-click=\\"dangerousAction()\\"></div>' }"
+>
+  Default message, 
+  <div
+    class="ng-scope"
+  />
 </div>
 `;
