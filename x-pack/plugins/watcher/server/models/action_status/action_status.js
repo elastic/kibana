@@ -99,14 +99,20 @@ export class ActionStatus {
     if (!json.id) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.actionStatus.absenceOfIdPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an id property',
+          defaultMessage: 'json argument must contain an {id} property',
+          values: {
+            id: 'id'
+          }
         }),
       );
     }
     if (!json.actionStatusJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.actionStatus.absenceOfActionStatusJsonPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an actionStatusJson property',
+          defaultMessage: 'json argument must contain an {actionStatusJson} property',
+          values: {
+            actionStatusJson: 'actionStatusJson'
+          }
         }),
       );
     }

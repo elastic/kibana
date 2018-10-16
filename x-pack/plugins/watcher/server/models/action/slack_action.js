@@ -64,21 +64,31 @@ export class SlackAction extends BaseAction {
     if (!json.actionJson.slack) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.slackAction.absenceOfActionJsonSlackPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an actionJson.slack property',
+          defaultMessage: 'json argument must contain an {actionJsonSlack} property',
+          values: {
+            actionJsonSlack: 'actionJson.slack'
+          }
         }),
       );
     }
     if (!json.actionJson.slack.message) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.slackAction.absenceOfActionJsonSlackMessagePropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an actionJson.slack.message property',
+          defaultMessage: 'json argument must contain an {actionJsonSlackMessage} property',
+          values: {
+            actionJsonSlackMessage: 'actionJson.slack.message'
+          }
+
         }),
       );
     }
     if (!json.actionJson.slack.message.to) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.slackAction.absenceOfActionJsonSlackMessageToPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an actionJson.slack.message property',
+          defaultMessage: 'json argument must contain an {actionJsonSlackMessageTo} property',
+          values: {
+            actionJsonSlackMessageTo: 'actionJson.slack.message.to'
+          }
         }),
       );
     }

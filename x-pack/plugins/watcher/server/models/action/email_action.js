@@ -74,14 +74,20 @@ export class EmailAction extends BaseAction {
     if (!json.actionJson.email) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.emailAction.absenceOfActionJsonEmailPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an actionJson.email property',
+          defaultMessage: 'json argument must contain an {actionJsonEmail} property',
+          values: {
+            actionJsonEmail: 'actionJson.email'
+          }
         }),
       );
     }
     if (!json.actionJson.email.to) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.emailAction.absenceOfActionJsonEmailToPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an actionJson.email.to property',
+          defaultMessage: 'json argument must contain an {actionJsonEmailTo} property',
+          values: {
+            actionJsonEmailTo: 'actionJson.email.to'
+          }
         }),
       );
     }

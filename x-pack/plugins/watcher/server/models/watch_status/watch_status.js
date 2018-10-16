@@ -132,14 +132,20 @@ export class WatchStatus {
     if (!json.id) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.watchStatus.absenceOfIdPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an id property',
+          defaultMessage: 'json argument must contain an {id} property',
+          values: {
+            id: 'id'
+          }
         }),
       );
     }
     if (!json.watchStatusJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.watchStatus.absenceOfWatchStatusJsonPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain a watchStatusJson property',
+          defaultMessage: 'json argument must contain a {watchStatusJson} property',
+          values: {
+            watchStatusJson: 'watchStatusJson'
+          }
         }),
       );
     }

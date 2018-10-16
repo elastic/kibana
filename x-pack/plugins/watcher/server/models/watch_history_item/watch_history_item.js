@@ -40,21 +40,30 @@ export class WatchHistoryItem {
     if (!json.id) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.watchHistoryItem.absenceOfIdPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an id property',
+          defaultMessage: 'json argument must contain an {id} property',
+          values: {
+            id: 'id'
+          }
         }),
       );
     }
     if (!json.watchId) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.watchHistoryItem.absenceOfWatchIdPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain a watchId property',
+          defaultMessage: 'json argument must contain a {watchId} property',
+          values: {
+            watchId: 'watchId'
+          }
         }),
       );
     }
     if (!json.watchHistoryItemJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.watchHistoryItem.absenceOfWatchHistoryItemJsonPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain a watchHistoryItemJson property',
+          defaultMessage: 'json argument must contain a {watchHistoryItemJson} property',
+          values: {
+            watchHistoryItemJson: 'watchHistoryItemJson'
+          }
         }),
       );
     }

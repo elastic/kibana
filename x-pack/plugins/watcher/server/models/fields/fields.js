@@ -55,7 +55,10 @@ export class Fields {
     if (!json.fields) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.fields.absenceOfFieldsPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain a fields property',
+          defaultMessage: 'json argument must contain a {fields} property',
+          values: {
+            fields: 'fields'
+          }
         }),
       );
     }

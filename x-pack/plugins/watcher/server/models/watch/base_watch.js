@@ -91,21 +91,30 @@ export class BaseWatch {
     if (!json.id) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.baseWatch.absenceOfIdPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an id property',
+          defaultMessage: 'json argument must contain an {id} property',
+          values: {
+            id: 'id'
+          }
         }),
       );
     }
     if (!json.watchJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.baseWatch.absenceOfWatchJsonPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain a watchJson property',
+          defaultMessage: 'json argument must contain a {watchJson} property',
+          values: {
+            watchJson: 'watchJson'
+          }
         }),
       );
     }
     if (!json.watchStatusJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.baseWatch.absenceOfWatchStatusJsonPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain a watchStatusJson property',
+          defaultMessage: 'json argument must contain a {watchStatusJson} property',
+          values: {
+            watchStatusJson: 'watchStatusJson'
+          }
         }),
       );
     }

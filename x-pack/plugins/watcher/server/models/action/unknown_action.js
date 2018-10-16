@@ -55,7 +55,10 @@ export class UnknownAction extends BaseAction {
     if (!json.actionJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.unknownAction.absenceOfActionJsonPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an actionJson property',
+          defaultMessage: 'json argument must contain an {actionJson} property',
+          values: {
+            actionJson: 'actionJson'
+          }
         }),
       );
     }

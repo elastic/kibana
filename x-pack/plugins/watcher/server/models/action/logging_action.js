@@ -58,14 +58,20 @@ export class LoggingAction extends BaseAction {
     if (!json.actionJson.logging) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.loggingAction.absenceOfActionJsonLoggingPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an actionJson.logging property',
+          defaultMessage: 'json argument must contain an {actionJsonLogging} property',
+          values: {
+            actionJsonLogging: 'actionJson.logging'
+          }
         }),
       );
     }
     if (!json.actionJson.logging.text) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.loggingAction.absenceOfActionJsonLoggingTextPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an actionJson.logging.text property',
+          defaultMessage: 'json argument must contain an {actionJsonLoggingText} property',
+          values: {
+            actionJsonLoggingText: 'actionJson.logging.text'
+          }
         }),
       );
     }

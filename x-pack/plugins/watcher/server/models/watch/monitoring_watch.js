@@ -32,7 +32,10 @@ export class MonitoringWatch extends BaseWatch {
   getVisualizeQuery() {
     throw badRequest(
       i18n.translate('xpack.watcher.models.monitoringWatch.getVisualizeQueryCalledBadRequestMessage', {
-        defaultMessage: 'getVisualizeQuery called for monitoring watch',
+        defaultMessage: '{getVisualizeQuery} called for monitoring watch',
+        values: {
+          getVisualizeQuery: 'getVisualizeQuery'
+        }
       }),
     );
   }
@@ -40,7 +43,10 @@ export class MonitoringWatch extends BaseWatch {
   formatVisualizeData() {
     throw badRequest(
       i18n.translate('xpack.watcher.models.monitoringWatch.formatVisualizeDataCalledBadRequestMessage', {
-        defaultMessage: 'formatVisualizeQuery called for monitoring watch',
+        defaultMessage: '{formatVisualizeData} called for monitoring watch',
+        values: {
+          formatVisualizeData: 'formatVisualizeData'
+        }
       }),
     );
   }
@@ -49,7 +55,10 @@ export class MonitoringWatch extends BaseWatch {
   get upstreamJson() {
     throw badRequest(
       i18n.translate('xpack.watcher.models.monitoringWatch.upstreamJsonCalledBadRequestMessage', {
-        defaultMessage: 'upstreamJson called for monitoring watch',
+        defaultMessage: '{upstreamJson} called for monitoring watch',
+        values: {
+          upstreamJson: 'upstreamJson'
+        }
       }),
     );
   }
@@ -81,7 +90,10 @@ export class MonitoringWatch extends BaseWatch {
   static fromDownstreamJson() {
     throw badRequest(
       i18n.translate('xpack.watcher.models.monitoringWatch.fromDownstreamJsonCalledBadRequestMessage', {
-        defaultMessage: 'fromDownstreamJson called for monitoring watch',
+        defaultMessage: '{fromDownstreamJson} called for monitoring watch',
+        values: {
+          fromDownstreamJson: 'fromDownstreamJson'
+        }
       }),
     );
   }
