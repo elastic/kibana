@@ -24,7 +24,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
         requires: ['nginx.access'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
-          formatter: InfraFormatterType.abvNumber,
+          formatter: InfraFormatterType.abbreviatedNumber,
           stacked: true,
           seriesOverrides: {
             '200s': { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.bar },
@@ -40,7 +40,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
         requires: ['nginx.statusstub'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
-          formatter: InfraFormatterType.abvNumber,
+          formatter: InfraFormatterType.abbreviatedNumber,
           formatterTemplate: '{{value}}/s',
           seriesOverrides: {
             rate: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },
@@ -53,7 +53,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
         requires: ['nginx.statusstub'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
-          formatter: InfraFormatterType.abvNumber,
+          formatter: InfraFormatterType.abbreviatedNumber,
           seriesOverrides: {
             connections: {
               color: theme.eui.euiColorVis1,
@@ -68,7 +68,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
         requires: ['nginx.statusstub'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
-          formatter: InfraFormatterType.abvNumber,
+          formatter: InfraFormatterType.abbreviatedNumber,
           seriesOverrides: {
             reqPerConns: {
               color: theme.eui.euiColorVis1,
