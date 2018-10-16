@@ -21,13 +21,13 @@ import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
 import { NodeAvailableWarning } from '../node_available_warning';
+import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 
 import React, {
   Component
 } from 'react';
 
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -353,12 +353,10 @@ export class JobsListView extends Component {
             <div className="job-buttons-container">
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={this.onRefreshClick}
-                    isLoading={isRefreshing}
-                  >
-                    Refresh
-                  </EuiButtonEmpty>
+                  <RefreshJobsListButton
+                    onRefreshClick={this.onRefreshClick}
+                    isRefreshing={isRefreshing}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NewJobButton />
