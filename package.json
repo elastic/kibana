@@ -13,6 +13,7 @@
   "private": true,
   "version": "7.0.0-alpha1",
   "branch": "master",
+  "types": "./target/types/type_exports.d.ts",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
@@ -52,7 +53,9 @@
     "uiFramework:build": "cd packages/kbn-ui-framework && yarn docSiteBuild",
     "uiFramework:createComponent": "cd packages/kbn-ui-framework && yarn createComponent",
     "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent",
-    "kbn:watch": "node scripts/kibana --dev --logging.json=false"
+    "kbn:watch": "node scripts/kibana --dev --logging.json=false",
+    "build:types": "tsc --p tsconfig.types.json",
+    "kbn:bootstrap": "yarn build:types"
   },
   "repository": {
     "type": "git",
@@ -131,7 +134,7 @@
     "leaflet.heat": "0.2.0",
     "less": "2.7.1",
     "less-loader": "^4.1.0",
-    "lodash": "3.10.1",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lru-cache": "4.1.1",
     "markdown-it": "^8.4.1",
     "mini-css-extract-plugin": "^0.4.3",
@@ -349,6 +352,6 @@
   },
   "engines": {
     "node": "8.11.4",
-    "yarn": "^1.6.0"
+    "yarn": "^1.10.1"
   }
 }

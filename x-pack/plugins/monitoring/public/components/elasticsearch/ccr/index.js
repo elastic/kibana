@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-import { FauxSelect as Component } from './faux_select';
-
-export const FauxSelect = pure(Component);
+export { Ccr } from './ccr';

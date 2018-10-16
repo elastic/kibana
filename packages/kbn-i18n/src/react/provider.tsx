@@ -43,6 +43,7 @@ export class I18nProvider extends React.PureComponent {
         defaultLocale={i18n.getDefaultLocale()}
         formats={i18n.getFormats()}
         defaultFormats={i18n.getFormats()}
+        textComponent={React.Fragment}
       >
         {children}
       </IntlProvider>

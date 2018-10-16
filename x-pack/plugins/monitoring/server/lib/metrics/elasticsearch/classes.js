@@ -33,6 +33,35 @@ export class ElasticsearchMetric extends Metric {
   }
 }
 
+export class DifferenceMetric extends ElasticsearchMetric {
+  constructor({ fieldSource, metric, metric2, ...opts }) {
+    super({
+      ...opts,
+      field: '', // NOTE: this is not used for this
+      format: LARGE_FLOAT,
+      metricAgg: 'sum', // NOTE: this is used for a pointless aggregation
+    });
+
+    this.checkRequiredParams({
+      metric,
+      metric2
+    });
+
+    this.aggs = {
+      metric_max: {
+        max: { field: `${fieldSource}.${metric}` }
+      },
+      metric2_max: {
+        max: { field: `${fieldSource}.${metric2}` }
+      },
+    };
+
+    this.calculation = (bucket) => {
+      return _.get(bucket, 'metric_max.value') - _.get(bucket, 'metric2_max.value');
+    };
+  }
+}
+
 export class LatencyMetric extends ElasticsearchMetric {
   constructor({ metric, fieldSource, ...opts }) {
     super({
@@ -290,6 +319,19 @@ export class WriteThreadPoolRejectedMetric extends ElasticsearchMetric {
 
       // ignore the data if none of them exist
       return null;
+    };
+  }
+}
+
+export class MillisecondsToSecondsMetric extends ElasticsearchMetric {
+  constructor(opts) {
+    super({
+      ...opts,
+      units: 's',
+    });
+
+    this.calculation = bucket => {
+      return _.get(bucket, 'metric.value') / 1000;
     };
   }
 }
