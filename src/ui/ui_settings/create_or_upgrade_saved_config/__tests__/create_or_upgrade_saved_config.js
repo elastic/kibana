@@ -18,6 +18,7 @@
  */
 
 import sinon from 'sinon';
+import expect from 'expect.js';
 import Chance from 'chance';
 
 import * as getUpgradeableConfigNS from '../get_upgradeable_config';
@@ -37,7 +38,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
     const log = sinon.stub();
     const getUpgradeableConfig = sandbox.stub(getUpgradeableConfigNS, 'getUpgradeableConfig');
     const savedObjectsClient = {
-      create: sinon.spy(async (type, attributes, options = {}) => ({
+      create: sinon.stub().callsFake(async (type, attributes, options = {}) => ({
         type,
         id: options.id,
         version: 1,
@@ -133,6 +134,26 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
           newVersion: version,
         })
       );
+    });
+
+    it('does not log when upgrade fails', async () => {
+      const { getUpgradeableConfig, log, run, savedObjectsClient } = setup();
+
+      getUpgradeableConfig
+        .returns({ id: prevVersion, attributes: { buildNum: buildNum - 100 } });
+
+      savedObjectsClient.create.callsFake(async () => {
+        throw new Error('foo');
+      });
+
+      try {
+        await run();
+        throw new Error('Expected run() to throw an error');
+      } catch (error) {
+        expect(error.message).to.be('foo');
+      }
+
+      sinon.assert.notCalled(log);
     });
   });
 });

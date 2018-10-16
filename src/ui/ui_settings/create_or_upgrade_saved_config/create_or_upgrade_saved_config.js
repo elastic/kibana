@@ -35,14 +35,6 @@ export async function createOrUpgradeSavedConfig(options) {
     version
   });
 
-  if (upgradeableConfig) {
-    log(['plugin', 'elasticsearch'], {
-      tmpl: 'Upgrade config from <%= prevVersion %> to <%= newVersion %>',
-      prevVersion: upgradeableConfig.id,
-      newVersion: version
-    });
-  }
-
   // default to the attributes of the upgradeableConfig if available
   const attributes = defaults(
     { buildNum },
@@ -55,4 +47,12 @@ export async function createOrUpgradeSavedConfig(options) {
     attributes,
     { id: version }
   );
+
+  if (upgradeableConfig) {
+    log(['plugin', 'elasticsearch'], {
+      tmpl: 'Upgrade config from <%= prevVersion %> to <%= newVersion %>',
+      prevVersion: upgradeableConfig.id,
+      newVersion: version
+    });
+  }
 }
