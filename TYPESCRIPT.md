@@ -24,7 +24,29 @@ declare module '@elastic/eui' {
 import { EuiPopoverTitle } from '@elastic/eui';
 ```
 
-Note: I think this has the possibility to cause a conflict if you import another file which also declares the `@elastic/eui` module.  TODO: document what the best thing is to do if you hit this situation.
+Some background on the differences between module declaration and augmentation:
+
+In TypeScript module declarations can not be merged, which means each module can only be declared once. But it is possible to augment previously declared modules. The documentation about the distinction between module declaration and augmentation is sparse. The observed rules for `declare module '...' {}` in a `.d.ts` file seem to be:
+
+* it is treated as a module declaration when the file itself is not a module
+* it is treated as a module augmentation when the file itself is module
+
+A `.d.ts` file is treated as a module if it contains any top-level `import` or `export` statements. That means that in order to write a module declaration the `import`s must be contained within the `declare` block and none must be located on the topmost level. Conversely, to write a module augmentation there must be at least one top-level `import` or `export` and the `declare` block must not contain any `import` statements.
+
+Since `@elastic/eui` already ships with a module declaration, any local additions must be performed using module augmentation, e.g.
+
+```typescript
+// file `my_plugin/types/eui.d.ts`
+import { CommonProps } from '@elastic/eui';
+import { SFC } from 'react';
+
+declare module '@elastic/eui' {
+  export type EuiNewComponentProps = CommonProps & {
+    additionalProp: string;
+  };
+  export const EuiNewComponent: SFC<EuiNewComponentProps>;
+}
+```
 
 #### Internal dependency is missing types.
 
@@ -55,7 +77,7 @@ To TypeScript `documentation_links.js` you'll need to add a type definition for 
 
 metadata.d.ts
 ```
-declare class Metadata {
+declare interface Metadata {
   public branch: string;
 }
 
@@ -76,9 +98,11 @@ Use the version number that we have installed in package.json. This may not alwa
 
 If that happens, just pick the closest one.
 
-If yarn doesn't find the module it may not have types.  For example, our `rison_node` package doesn't have types.
+If yarn doesn't find the module it may not have types.  For example, our `rison_node` package doesn't have types. In this case you have a few options:
 
-In this case the best thing to do is create a top level `types` folder and point to that in the tsconfig.  This is something we should set up for rison_node.  Infra team already handled this and added: `x-pack/plugins/infra/types/rison_node.d.ts` but other code uses it too and we need to pull it up.
+1. Contribute types into the DefinitelyTyped repo itself, or
+2. Create a top level `types` folder and point to that in the tsconfig. For example, Infra team already handled this for `rison_node` and added: `x-pack/plugins/infra/types/rison_node.d.ts`. Other code uses it too so we will need to pull it up. Or,
+3. Add a `// @ts-ignore` line above the import. This should be used minimally, the above options are better. However, sometimes you have to resort to this method. For example, the `expect.js` module will require this line. We don't have type definitions installed for this library. Installing these types would conflict with the jest typedefs for expect, and since they aren't API compatible with each other, it's not possible to make both test frameworks happy. Since we are moving from mocha => jest, we don't see this is a big issue.
 
 ### TypeScripting react files
 
@@ -130,7 +154,7 @@ Note that the name of `Props` and `State` doesn't matter, the order does.  If yo
 
 ### Typing functions
 
-In react proptypes, we often will just to `PropTypes.func`.  In TypeScript, a function is `() => void`, or you can more fully flesh it out, for example:
+In react proptypes, we often will use `PropTypes.func`.  In TypeScript, a function is `() => void`, or you can more fully flesh it out, for example:
 
 - `(inputParamName: string) => string`
 - `(newLanguage: string) => void`
@@ -167,7 +191,7 @@ function ({ title, description }: Options) {
  
 ## Use `any` as little as possible
 
-Using any is sometimes valid, but should rarely be used, even if to make quicker progress. Even `Object` is better than `any` if you aren't sure of an input parameter.
+Using any is sometimes valid, but should rarely be used, even if to make quicker progress. Even `Unknown` is better than using `any` if you aren't sure of an input parameter.
 
 If you use a variable that isn't initially defined, you should give it a type or it will be `any` by default (and strangely this isn't a warning, even though I think it should be)
 
@@ -193,4 +217,27 @@ if (danger) {
 }
 ```
 
+Another quirk, default `Map\WeakMap\Set` constructors use any-based type signature like `Map<any, any>\WeakMap<any, any>\Set<any>`. That means that TS won't complain about the piece of code below:
 
+```ts
+const anyMap = new Map();
+anyMap.set('1', 2);
+anyMap.set('2', '3');
+anyMap.set(3, '4');
+
+const anySet = new Set();
+anySet.add(1);
+anySet.add('2');
+```
+
+So we should explicitly define types for default constructors whenever possible:
+```ts
+const typedMap = new Map<string, number>();
+typedMap.set('1', 2);
+typedMap.set('2', '3'); // TS error
+typedMap.set(3, '4'); // TS error
+
+const typedSet = new Set<number>();
+typedSet.add(1);
+typedSet.add('2'); // TS error
+```
