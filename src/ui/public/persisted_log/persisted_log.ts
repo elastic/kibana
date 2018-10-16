@@ -34,7 +34,7 @@ export class PersistedLog {
   public storage: Storage;
   public items: any[];
 
-  constructor(name: string, options: PersistedLogOptions, storage = localStorage) {
+  constructor(name: string, options: PersistedLogOptions = {}, storage = localStorage) {
     this.name = name;
     this.maxLength =
       typeof options.maxLength === 'string'
@@ -44,7 +44,7 @@ export class PersistedLog {
     this.isDuplicate = options.isDuplicate || defaultIsDuplicate;
     this.storage = storage;
     this.items = this.storage.get(this.name) || [];
-    if (this.maxLength && !isNaN(this.maxLength)) {
+    if (this.maxLength !== undefined && !isNaN(this.maxLength)) {
       this.items = _.take(this.items, this.maxLength);
     }
   }
