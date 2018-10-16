@@ -190,18 +190,27 @@ export class UiSettingsService {
       return resp.attributes;
     } catch (error) {
       if (isNotFoundError(error)) {
-        try {
-          await createOrUpgradeSavedConfig({
-            savedObjectsClient: this._savedObjectsClient,
-            version: this._id,
-            buildNum: this._buildNum,
-            log: this._log,
-          });
-        } catch (e) {
-          return {};
+        const failedUpgradeAttributes = await createOrUpgradeSavedConfig({
+          savedObjectsClient: this._savedObjectsClient,
+          version: this._id,
+          buildNum: this._buildNum,
+          log: this._log,
+          onWriteError: (error, failedUpgradeAttributes) => {
+            if (isNotAuthorizedError(error) || isForbiddenError(error)) {
+              return failedUpgradeAttributes;
+            }
+
+            throw error;
+          }
+        });
+
+        if (!failedUpgradeAttributes) {
+          return await this._read(options);
         }
-        return await this._read(options);
+
+        return failedUpgradeAttributes;
       }
+
       if (isIgnorableError(error)) {
         return {};
       }
