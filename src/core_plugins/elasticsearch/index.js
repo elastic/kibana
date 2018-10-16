@@ -48,7 +48,7 @@ export default function (kibana) {
       return object({
         enabled: boolean().default(true),
         sniffOnStart: boolean().default(false),
-        sniffInterval: number().default(0),
+        sniffInterval: number().allow(false).default(false),
         sniffOnConnectionFault: boolean().default(false),
         hosts: array().items(string().uri({ scheme: ['http', 'https'] })).single().default('http://localhost:9200'),
         preserveHost: boolean().default(true),
