@@ -39,11 +39,11 @@
       </div>
     </div>
     <div>
-      <label
-        i18n-id="tagCloud.visParams.showLabelToggleLabel"
-        i18n-default-message="{input} Show Label"
-        i18n-values="{ input: '<input type=\'checkbox\' value=\'{{hideLabel}}\' ng-model=\'editorState.params.showLabel\' name=\'showLabel\' ng-checked=\'editorState.params.showLabel\'>'}"
-      ></label>
+      <label>
+        <input type="checkbox" value="{{hideLabel}}" ng-model="editorState.params.showLabel" name="showLabel"
+               ng-checked="editorState.params.showLabel">
+        <span i18n-id="tagCloud.visParams.showLabelToggleLabel" i18n-default-message="Show Label"></span>
+      </label>
     </div>
   </div>
 </div>
