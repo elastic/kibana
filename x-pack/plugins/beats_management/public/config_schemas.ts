@@ -354,7 +354,7 @@ const outputConfig: YamlConfigSchema[] = [
     id: 'password',
     ui: {
       label: 'Password',
-      type: 'input',
+      type: 'password',
     },
     validations: 'isString',
     error: 'Unprocessable password',

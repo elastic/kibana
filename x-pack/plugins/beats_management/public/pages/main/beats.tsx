@@ -14,11 +14,12 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
 } from '@elastic/eui';
-import { sortBy } from 'lodash';
+import { flatten, sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { RouteComponentProps } from 'react-router';
-import { CMPopulatedBeat } from '../../../common/domain_types';
+import { ConfigurationBlockTypes } from 'x-pack/plugins/beats_management/common/constants';
+import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { AppURLState } from '../../app';
 import { BeatsTableType, Table } from '../../components/table';
@@ -122,7 +123,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
                 value: this.props.urlState.beatsKBar || '',
               }}
               assignmentOptions={{
-                items: this.state.tags || [],
+                items: this.filterSelectedBeatTags(),
                 schema: beatsListAssignmentOptions,
                 type: 'assignment',
                 actionHandler: this.handleBeatsActions,
@@ -289,4 +290,28 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     });
     return beats;
   };
+
+  private filterSelectedBeatTags = () => {
+    if (!this.state.tags) {
+      return [];
+    }
+    return this.selectedBeatsContainOutput()
+      ? this.state.tags.map(this.mapTagToDisabled)
+      : this.state.tags;
+  };
+
+  private mapTagToDisabled = (tag: BeatTag) =>
+    tag.configuration_blocks.some(config => config.type === ConfigurationBlockTypes.Output)
+      ? { ...tag, disabled: true }
+      : tag;
+
+  private selectedBeatsContainOutput = () =>
+    // union beat tags
+    flatten(this.getSelectedBeats().map(beat => beat.full_tags))
+      // map tag list to bool
+      .map(tag =>
+        tag.configuration_blocks.some(config => config.type === ConfigurationBlockTypes.Output)
+      )
+      // reduce to result
+      .reduce((acc, cur) => acc || cur, false);
 }
