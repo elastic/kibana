@@ -11,8 +11,46 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import { TABLE_CONFIG } from '../../../common/constants';
+import { AssignmentControlSchema } from './assignment_schema';
 import { ControlBar } from './controls';
+import { TableType } from './table_type_configs';
+
+export enum AssignmentActionType {
+  Add,
+  Assign,
+  Delete,
+  Edit,
+  Reload,
+  Search,
+}
+
+export interface AssignmentOptions {
+  schema: AssignmentControlSchema[];
+  items: any[];
+  type?: 'none' | 'primary' | 'assignment';
+  actionHandler(action: AssignmentActionType, payload?: any): void;
+}
+
+export interface KueryBarProps {
+  filterQueryDraft: string;
+  isLoadingSuggestions: boolean;
+  isValid: boolean;
+  loadSuggestions: (value: string, cursorPosition: number, maxCount?: number) => void;
+  onChange?: (value: string) => void;
+  onSubmit?: (value: string) => void;
+  suggestions: AutocompleteSuggestion[];
+  value: string;
+}
+
+interface TableProps {
+  assignmentOptions?: AssignmentOptions;
+  hideTableControls?: boolean;
+  kueryBarProps?: KueryBarProps;
+  items: any[];
+  type: TableType;
+}
 
 interface TableState {
   selection: any[];
@@ -22,7 +60,7 @@ const TableContainer = styled.div`
   padding: 16px;
 `;
 
-export class Table extends React.Component<any, TableState> {
+export class Table extends React.Component<TableProps, TableState> {
   constructor(props: any) {
     super(props);
 
@@ -42,55 +80,32 @@ export class Table extends React.Component<any, TableState> {
   };
 
   public render() {
-    const {
-      actionHandler,
-      assignmentOptions,
-      renderAssignmentOptions,
-      assignmentTitle,
-      items,
-      showAssignmentOptions,
-      type,
-      isLoadingSuggestions,
-      loadSuggestions,
-      onKueryBarSubmit,
-      isKueryValid,
-      kueryValue,
-      onKueryBarChange,
-      suggestions,
-      filterQueryDraft,
-    } = this.props;
+    const { assignmentOptions, hideTableControls, items, kueryBarProps, type } = this.props;
 
     const pagination = {
       initialPageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
       pageSizeOptions: TABLE_CONFIG.PAGE_SIZE_OPTIONS,
     };
 
-    const selectionOptions = {
-      onSelectionChange: this.setSelection,
-      selectable: () => true,
-      selectableMessage: () => 'Select this beat',
-      selection: this.state.selection,
-    };
+    const selectionOptions = hideTableControls
+      ? null
+      : {
+          onSelectionChange: this.setSelection,
+          selectable: () => true,
+          selectableMessage: () => 'Select this beat',
+          selection: this.state.selection,
+        };
 
     return (
       <TableContainer>
-        <ControlBar
-          isLoadingSuggestions={isLoadingSuggestions}
-          kueryValue={kueryValue}
-          isKueryValid={isKueryValid}
-          loadSuggestions={loadSuggestions}
-          onKueryBarChange={onKueryBarChange}
-          onKueryBarSubmit={onKueryBarSubmit}
-          suggestions={suggestions}
-          filterQueryDraft={filterQueryDraft}
-          actionHandler={actionHandler}
-          assignmentOptions={assignmentOptions || null}
-          renderAssignmentOptions={renderAssignmentOptions}
-          assignmentTitle={assignmentTitle || null}
-          controlDefinitions={type.controlDefinitions(items)}
-          selectionCount={this.state.selection.length}
-          showAssignmentOptions={showAssignmentOptions}
-        />
+        {!hideTableControls &&
+          assignmentOptions && (
+            <ControlBar
+              assignmentOptions={assignmentOptions}
+              kueryBarProps={kueryBarProps}
+              selectionCount={this.state.selection.length}
+            />
+          )}
         <EuiSpacer size="m" />
         <EuiInMemoryTable
           columns={type.columnDefinitions}

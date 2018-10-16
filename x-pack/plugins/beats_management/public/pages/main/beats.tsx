@@ -17,11 +17,12 @@ import { sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { RouteComponentProps } from 'react-router';
-import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
+import { CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { AppURLState } from '../../app';
 import { BeatsTableType, Table } from '../../components/table';
-import { TagAssignment } from '../../components/tag';
+import { beatsListAssignmentOptions } from '../../components/table/assignment_schema';
+import { AssignmentActionType } from '../../components/table/table';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { URLStateProps } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
@@ -107,26 +108,28 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="beat">
           {autocompleteProps => (
             <Table
-              {...autocompleteProps}
-              isKueryValid={this.props.libs.elasticsearch.isKueryValid(
-                this.props.urlState.beatsKBar || ''
-              )} // todo check if query converts to es query correctly
-              kueryValue={this.props.urlState.beatsKBar}
-              onKueryBarChange={(value: any) => this.props.setUrlState({ beatsKBar: value })} // todo
-              onKueryBarSubmit={() => null} // todo
-              filterQueryDraft={'false'} // todo
-              actionHandler={this.handleBeatsActions}
-              assignmentOptions={this.state.tags}
-              assignmentTitle="Set tags"
-              items={sortBy(this.props.beats || [], 'id') || []}
+              kueryBarProps={{
+                ...autocompleteProps,
+                filterQueryDraft: 'false', // todo
+                isValid: this.props.libs.elasticsearch.isKueryValid(
+                  this.props.urlState.beatsKBar || ''
+                ), // todo check if query converts to es query correctly
+                onChange: (value: any) => this.props.setUrlState({ beatsKBar: value }), // todo
+                onSubmit: () => null, // todo
+                value: this.props.urlState.beatsKBar || '',
+              }}
+              assignmentOptions={{
+                items: this.state.tags || [],
+                schema: beatsListAssignmentOptions,
+                type: 'assignment',
+                actionHandler: this.handleBeatsActions,
+              }}
+              items={sortBy(this.props.beats, 'id') || []}
               ref={this.state.tableRef}
-              showAssignmentOptions={true}
-              renderAssignmentOptions={this.renderTagAssignment}
               type={BeatsTableType}
             />
           )}
         </WithKueryAutocompletion>
-
         <EuiGlobalToastList
           toasts={this.state.notifications}
           dismissToast={() => this.setState({ notifications: [] })}
@@ -136,28 +139,21 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     );
   }
 
-  private renderTagAssignment = (tag: BeatTag, key: string) => (
-    <TagAssignment
-      assignTagsToBeats={this.assignTagsToBeats}
-      key={key}
-      removeTagsFromBeats={this.removeTagsFromBeats}
-      selectedBeats={this.getSelectedBeats()}
-      tag={tag}
-    />
-  );
-
-  private handleBeatsActions = (action: string, payload: any) => {
+  private handleBeatsActions = (action: AssignmentActionType, payload: any) => {
     switch (action) {
-      case 'edit':
+      case AssignmentActionType.Assign:
+        this.handleBeatTagAssignment(payload);
+        break;
+      case AssignmentActionType.Edit:
         // TODO: navigate to edit page
         break;
-      case 'delete':
+      case AssignmentActionType.Delete:
         this.deleteSelected();
         break;
-      case 'search':
+      case AssignmentActionType.Search:
         this.handleSearchQuery(payload);
         break;
-      case 'loadAssignmentOptions':
+      case AssignmentActionType.Reload:
         this.loadTags();
         break;
     }
@@ -165,11 +161,32 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     this.props.loadBeats();
   };
 
+  private handleBeatTagAssignment = async (tagId: string) => {
+    const selected = this.getSelectedBeats();
+    const removals: CMPopulatedBeat[] = [];
+    const additions: CMPopulatedBeat[] = [];
+    selected.forEach(beat => {
+      if (beat.full_tags.some(tag => tag.id === tagId)) {
+        removals.push(beat);
+      } else {
+        additions.push(beat);
+      }
+    });
+
+    await Promise.all([
+      this.removeTagsFromBeats(removals, tagId),
+      this.assignTagsToBeats(additions, tagId),
+    ]);
+  };
+
   private deleteSelected = async () => {
     const selected = this.getSelectedBeats();
     for (const beat of selected) {
       await this.props.libs.beats.update(beat.id, { active: false });
     }
+
+    this.notifyBeatDisenrolled(selected);
+
     // because the compile code above has a very minor race condition, we wait,
     // the max race condition time is really 10ms but doing 100 to be safe
     setTimeout(async () => {
@@ -191,21 +208,45 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
 
   private createBeatTagAssignments = (
     beats: CMPopulatedBeat[],
-    tag: BeatTag
-  ): BeatsTagAssignment[] => beats.map(({ id }) => ({ beatId: id, tag: tag.id }));
+    tagId: string
+  ): BeatsTagAssignment[] => beats.map(({ id }) => ({ beatId: id, tag: tagId }));
 
-  private removeTagsFromBeats = async (beats: CMPopulatedBeat[], tag: BeatTag) => {
-    const assignments = this.createBeatTagAssignments(beats, tag);
-    await this.props.libs.beats.removeTagsFromBeats(assignments);
-    await this.refreshData();
-    this.notifyUpdatedTagAssociation('remove', assignments, tag.id);
+  private removeTagsFromBeats = async (beats: CMPopulatedBeat[], tagId: string) => {
+    if (beats.length) {
+      const assignments = this.createBeatTagAssignments(beats, tagId);
+      await this.props.libs.beats.removeTagsFromBeats(assignments);
+      await this.refreshData();
+      this.notifyUpdatedTagAssociation('remove', assignments, tagId);
+    }
   };
 
-  private assignTagsToBeats = async (beats: CMPopulatedBeat[], tag: BeatTag) => {
-    const assignments = this.createBeatTagAssignments(beats, tag);
-    await this.props.libs.beats.assignTagsToBeats(assignments);
-    await this.refreshData();
-    this.notifyUpdatedTagAssociation('add', assignments, tag.id);
+  private assignTagsToBeats = async (beats: CMPopulatedBeat[], tagId: string) => {
+    if (beats.length) {
+      const assignments = this.createBeatTagAssignments(beats, tagId);
+      await this.props.libs.beats.assignTagsToBeats(assignments);
+      await this.refreshData();
+      this.notifyUpdatedTagAssociation('add', assignments, tagId);
+    }
+  };
+
+  private notifyBeatDisenrolled = async (beats: CMPopulatedBeat[]) => {
+    let title;
+    let text;
+    if (beats.length === 1) {
+      title = `"${beats[0].name || beats[0].id}" disenrolled`;
+      text = `Beat with ID "${beats[0].id}" was disenrolled.`;
+    } else {
+      title = `${beats.length} beats disenrolled`;
+    }
+
+    this.setState({
+      notifications: this.state.notifications.concat({
+        color: 'warning',
+        id: `disenroll_${new Date()}`,
+        title,
+        text,
+      }),
+    });
   };
 
   private notifyUpdatedTagAssociation = (
@@ -217,7 +258,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     const preposition = action === 'remove' ? 'from' : 'to';
     const beatMessage =
       assignments.length && assignments.length === 1
-        ? `beat "${assignments[0].beatId}"`
+        ? `beat "${this.getNameForBeatId(assignments[0].beatId)}"`
         : `${assignments.length} beats`;
     this.setState({
       notifications: this.state.notifications.concat({
@@ -227,6 +268,14 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         title: `Tag ${actionName}`,
       }),
     });
+  };
+
+  private getNameForBeatId = (beatId: string) => {
+    const beat = this.props.beats.find(b => b.id === beatId);
+    if (beat) {
+      return beat.name;
+    }
+    return null;
   };
 
   private refreshData = async () => {

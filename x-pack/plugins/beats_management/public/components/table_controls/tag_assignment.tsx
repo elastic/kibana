@@ -7,14 +7,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import { TABLE_CONFIG } from '../../../common/constants';
-import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
-import { TagBadge } from './tag_badge';
+import { TagBadge } from '../tag/tag_badge';
 
 interface TagAssignmentProps {
-  selectedBeats: CMPopulatedBeat[];
-  tag: BeatTag;
-  assignTagsToBeats(selectedBeats: any, tag: any): void;
-  removeTagsFromBeats(selectedBeats: any, tag: any): void;
+  tag: any;
+  assignTag(id: string): void;
 }
 
 interface TagAssignmentState {
@@ -32,19 +29,13 @@ export class TagAssignment extends React.PureComponent<TagAssignmentProps, TagAs
 
   public render() {
     const {
-      assignTagsToBeats,
-      removeTagsFromBeats,
-      selectedBeats,
+      assignTag,
       tag,
       tag: { id },
     } = this.props;
 
-    const hasMatches = selectedBeats.some(({ tags }: CMPopulatedBeat) =>
-      (tags || []).some((t: string) => t === id)
-    );
-
     return (
-      <EuiFlexGroup gutterSize="xs" key={`${id}-${hasMatches ? 'matched' : 'unmatched'}`}>
+      <EuiFlexGroup gutterSize="xs" key={id}>
         {this.state.isFetchingTags && (
           <EuiFlexItem>
             <EuiLoadingSpinner size="m" />
@@ -52,15 +43,8 @@ export class TagAssignment extends React.PureComponent<TagAssignmentProps, TagAs
         )}
         <EuiFlexItem>
           <TagBadge
-            iconType={hasMatches ? 'cross' : undefined}
             maxIdRenderSize={TABLE_CONFIG.TRUNCATE_TAG_LENGTH_SMALL}
-            onClick={() => {
-              this.setState({ isFetchingTags: true });
-              hasMatches
-                ? removeTagsFromBeats(selectedBeats, tag)
-                : assignTagsToBeats(selectedBeats, tag);
-              this.setState({ isFetchingTags: false });
-            }}
+            onClick={() => assignTag(id)}
             onClickAriaLabel={id}
             tag={tag}
           />

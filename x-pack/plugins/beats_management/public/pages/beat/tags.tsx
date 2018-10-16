@@ -5,8 +5,6 @@
  */
 
 import { EuiGlobalToastList } from '@elastic/eui';
-import { get } from 'lodash';
-import moment from 'moment';
 import React from 'react';
 import { CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatDetailTagsTable, Table } from '../../components/table';
@@ -43,12 +41,9 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
     return (
       <div>
         <Table
-          actionHandler={this.handleTableAction}
-          assignmentOptions={null}
-          assignmentTitle={null}
+          hideTableControls={true}
           items={beat ? beat.full_tags : []}
           ref={this.tableRef}
-          showAssignmentOptions={false}
           type={BeatDetailTagsTable}
         />
 
@@ -60,90 +55,6 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
       </div>
     );
   }
-
-  private getSelectedTags = () => {
-    return get(this.tableRef, 'current.state.selection', []);
-  };
-
-  private setUpdatedTagNotification = (
-    numRemoved: number,
-    totalTags: number,
-    action: 'remove' | 'add'
-  ) => {
-    const { beat } = this.state;
-    const actionName = action === 'remove' ? 'Removed' : 'Added';
-    const preposition = action === 'remove' ? 'from' : 'to';
-    this.setState({
-      notifications: this.state.notifications.concat({
-        title: `Tags ${actionName} ${preposition} Beat`,
-        color: 'success',
-        id: moment.now(),
-        text: (
-          <p>{`${actionName} ${numRemoved} of ${totalTags} tags ${preposition} ${
-            beat ? beat.name || beat.id : 'beat'
-          }`}</p>
-        ),
-      }),
-    });
-  };
-
-  private handleTableAction = async (action: string, payload: any) => {
-    switch (action) {
-      case 'add':
-        await this.associateTagsToBeat();
-        break;
-      case 'remove':
-        await this.disassociateTagsFromBeat();
-        break;
-      case 'search':
-        // TODO: add search filtering for tag names
-        // awaiting an ES filter endpoint
-        break;
-    }
-    this.getBeat();
-  };
-
-  private associateTagsToBeat = async () => {
-    const { beat } = this.state;
-
-    if (!beat) {
-      throw new Error('Beat cannot be undefined');
-    }
-
-    const tagsToAssign = this.getSelectedTags().filter(
-      (tag: any) => !beat.full_tags.some(({ id }) => tag.id === id)
-    );
-    const assignments = tagsToAssign.map((tag: any) => {
-      return {
-        beatId: beat.id,
-        tag: tag.id,
-      };
-    });
-
-    await this.props.libs.beats.assignTagsToBeats(assignments);
-    this.setUpdatedTagNotification(assignments.length, tagsToAssign.length, 'add');
-  };
-
-  private disassociateTagsFromBeat = async () => {
-    const { beat } = this.state;
-
-    if (!beat) {
-      throw new Error('Beat cannot be undefined');
-    }
-
-    const tagsToDisassociate = this.getSelectedTags().filter((tag: any) =>
-      beat.full_tags.some(({ id }) => tag.id === id)
-    );
-    const assignments = tagsToDisassociate.map((tag: any) => {
-      return {
-        beatId: beat.id,
-        tag: tag.id,
-      };
-    });
-
-    await this.props.libs.beats.removeTagsFromBeats(assignments);
-    this.setUpdatedTagNotification(assignments.length, tagsToDisassociate.length, 'remove');
-  };
 
   private getBeat = async () => {
     try {
