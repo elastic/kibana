@@ -6,7 +6,6 @@
 
 import { uiModules } from 'ui/modules';
 import template from './expression_popover.html';
-import './expression_popover.less';
 
 const app = uiModules.get('xpack/watcher');
 

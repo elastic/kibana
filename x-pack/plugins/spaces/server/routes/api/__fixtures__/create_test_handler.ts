@@ -39,6 +39,7 @@ export const defaultPreCheckLicenseImpl = (request: any, reply: any) => reply();
 
 const baseConfig: TestConfig = {
   'server.basePath': '',
+  'xpack.spaces.maxSpaces': 1000,
 };
 
 export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: any) => void) {
@@ -77,15 +78,11 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
 
     await setupFn(server);
 
-    server.decorate(
-      'server',
-      'config',
-      jest.fn(() => {
-        return {
-          get: (key: string) => config[key],
-        };
-      })
-    );
+    const mockConfig = {
+      get: (key: string) => config[key],
+    };
+
+    server.decorate('server', 'config', jest.fn(() => mockConfig));
 
     initApiFn(server, pre);
 
@@ -121,6 +118,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       delete: jest.fn((type: string, id: string) => {
         return {};
       }),
+      deleteByNamespace: jest.fn(),
     };
 
     server.savedObjects = {
@@ -139,6 +137,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
             null as any,
             null,
             mockSavedObjectsRepository,
+            mockConfig,
             mockSavedObjectsRepository,
             req
           );

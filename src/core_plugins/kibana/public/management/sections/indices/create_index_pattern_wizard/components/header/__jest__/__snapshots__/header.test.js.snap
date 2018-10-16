@@ -56,7 +56,7 @@ exports[`Header should render normally 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Include system indices"
-            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch"
+            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
             values={Object {}}
           />
         }
@@ -126,7 +126,7 @@ exports[`Header should render without including system indices 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Include system indices"
-            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch"
+            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
             values={Object {}}
           />
         }

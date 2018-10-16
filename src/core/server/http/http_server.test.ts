@@ -26,8 +26,8 @@ jest.mock('fs', () => ({
 import Chance from 'chance';
 import supertest from 'supertest';
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { HttpConfig, Router } from '.';
-import { ByteSizeValue } from '../config/schema';
 import { logger } from '../logging/__mocks__';
 import { HttpServer } from './http_server';
 

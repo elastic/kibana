@@ -65,8 +65,8 @@ exports[`Relationships should render dashboards normally 1`] = `
           columns={
             Array [
               Object {
-                "name": "Type",
                 "render": [Function],
+                "width": 24,
               },
               Object {
                 "field": "title",
@@ -183,131 +183,9 @@ exports[`Relationships should render index patterns normally 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiDescriptionList
-      align="left"
-      compressed={false}
-      textStyle="normal"
-      type="row"
-    >
-      <React.Fragment
-        key="searches"
-      >
-        <EuiDescriptionListTitle
-          style={
-            Object {
-              "marginBottom": "1rem",
-            }
-          }
-        >
-          <EuiCallOut
-            color="warning"
-            size="m"
-            title="Warning"
-          >
-            <p>
-              Here are some saved searches that use this index pattern. If
-              you delete this index pattern, these saved searches will not
-              longer work properly.
-            </p>
-          </EuiCallOut>
-        </EuiDescriptionListTitle>
-        <EuiInMemoryTable
-          columns={
-            Array [
-              Object {
-                "name": "Type",
-                "render": [Function],
-              },
-              Object {
-                "field": "title",
-                "name": "Title",
-                "render": [Function],
-              },
-              Object {
-                "actions": Array [
-                  Object {
-                    "description": "View this saved object within Kibana",
-                    "icon": "eye",
-                    "name": "In app",
-                    "onClick": [Function],
-                  },
-                ],
-                "name": "Actions",
-              },
-            ]
-          }
-          items={
-            Array [
-              Object {
-                "id": "1",
-              },
-            ]
-          }
-          pagination={true}
-          responsive={true}
-          sorting={false}
-        />
-      </React.Fragment>
-      <React.Fragment
-        key="visualizations"
-      >
-        <EuiDescriptionListTitle
-          style={
-            Object {
-              "marginBottom": "1rem",
-            }
-          }
-        >
-          <EuiCallOut
-            color="warning"
-            size="m"
-            title="Warning"
-          >
-            <p>
-              Here are some visualizations that use this index pattern. If
-              you delete this index pattern, these visualizations will not
-              longer work properly.
-            </p>
-          </EuiCallOut>
-        </EuiDescriptionListTitle>
-        <EuiInMemoryTable
-          columns={
-            Array [
-              Object {
-                "name": "Type",
-                "render": [Function],
-              },
-              Object {
-                "field": "title",
-                "name": "Title",
-                "render": [Function],
-              },
-              Object {
-                "actions": Array [
-                  Object {
-                    "description": "View this saved object within Kibana",
-                    "icon": "eye",
-                    "name": "In app",
-                    "onClick": [Function],
-                  },
-                ],
-                "name": "Actions",
-              },
-            ]
-          }
-          items={
-            Array [
-              Object {
-                "id": "2",
-              },
-            ]
-          }
-          pagination={true}
-          responsive={true}
-          sorting={false}
-        />
-      </React.Fragment>
-    </EuiDescriptionList>
+    <EuiLoadingKibana
+      size="xl"
+    />
   </EuiFlyoutBody>
 </EuiFlyout>
 `;
@@ -375,8 +253,8 @@ exports[`Relationships should render searches normally 1`] = `
           columns={
             Array [
               Object {
-                "name": "Type",
                 "render": [Function],
+                "width": 24,
               },
               Object {
                 "field": "title",
@@ -434,8 +312,8 @@ exports[`Relationships should render searches normally 1`] = `
           columns={
             Array [
               Object {
-                "name": "Type",
                 "render": [Function],
+                "width": 24,
               },
               Object {
                 "field": "title",
@@ -537,8 +415,8 @@ exports[`Relationships should render visualizations normally 1`] = `
           columns={
             Array [
               Object {
-                "name": "Type",
                 "render": [Function],
+                "width": 24,
               },
               Object {
                 "field": "title",

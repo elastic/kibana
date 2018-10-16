@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import { KbnServer, KibanaMigrator } from './kibana_migrator';
 
 describe('KibanaMigrator', () => {
-  describe('migratorOptsFromKbnServer', () => {
+  describe('getActiveMappings', () => {
     it('returns full index mappings w/ core properties', () => {
       const { kbnServer } = mockKbnServer();
       kbnServer.uiExports.savedObjectMappings = [
@@ -55,27 +55,36 @@ describe('KibanaMigrator', () => {
         /Plugin bbb is attempting to redefine mapping "amap"/
       );
     });
+  });
 
-    it('exposes callCluster as a function that waits for elasticsearch before running', async () => {
+  describe('awaitMigration', () => {
+    it('changes isMigrated to true if migrations were skipped', async () => {
+      const { kbnServer } = mockKbnServer();
+      kbnServer.server.plugins.elasticsearch = undefined;
+      const result = await new KibanaMigrator({ kbnServer }).awaitMigration();
+      expect(result).toEqual({ status: 'skipped' });
+    });
+
+    it('waits for kbnServer.ready and elasticsearch.ready before attempting migrations', async () => {
       const { kbnServer } = mockKbnServer();
       const clusterStub = sinon.stub();
+      const waitUntilReady = sinon.spy(async () => undefined);
 
       clusterStub.throws(new Error('Doh!'));
 
-      let count = 0;
       kbnServer.server.plugins.elasticsearch = {
+        waitUntilReady,
         getCluster() {
-          expect(count).toEqual(1);
+          sinon.assert.calledOnce(kbnServer.ready as any);
+          sinon.assert.calledOnce(waitUntilReady);
+
           return {
             callWithInternalUser: clusterStub,
           };
         },
-        waitUntilReady() {
-          return Promise.resolve().then(() => ++count);
-        },
       };
-      await expect(new KibanaMigrator({ kbnServer }).migrateIndex()).rejects.toThrow(/Doh!/);
-      expect(count).toEqual(1);
+
+      await expect(new KibanaMigrator({ kbnServer }).awaitMigration()).rejects.toThrow(/Doh!/);
     });
   });
 });
@@ -84,6 +93,7 @@ function mockKbnServer({ configValues }: { configValues?: any } = {}) {
   const callCluster = sinon.stub();
   const kbnServer: KbnServer = {
     version: '8.2.3',
+    ready: sinon.spy(async () => undefined),
     uiExports: {
       savedObjectValidations: {},
       savedObjectMigrations: {},
@@ -116,7 +126,7 @@ function mockKbnServer({ configValues }: { configValues?: any } = {}) {
           getCluster: () => ({
             callWithInternalUser: callCluster,
           }),
-          waitUntilReady: sinon.spy(() => Promise.resolve()),
+          waitUntilReady: async () => undefined,
         },
       },
     },
