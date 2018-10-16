@@ -4,21 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-import { API_ROUTE_KIBANA } from '../../common/lib/constants';
-import { fetch } from '../../common/lib/fetch';
+import { getVisualizeLoader } from 'ui/visualize/loader';
 
-const basePath = chrome.getBasePath();
-const apiPath = `${basePath}${API_ROUTE_KIBANA}`;
-
-export function getSavedVisualizations(searchTerm, { page = 1, perPage = 10000 } = {}) {
-  const validSearchTerm = typeof searchTerm === 'string' && searchTerm.length > 0;
-
-  return fetch
-    .get(
-      `${apiPath}/savedVisualizations?name=${
-        validSearchTerm ? searchTerm : ''
-      }&page=${page}&perPage=${perPage}`
-    )
-    .then(({ data: objects }) => objects);
+// TODO: getVisualizationList doesn't yet support any pagination or search...
+export async function getSavedVisualizations() {
+  const loader = await getVisualizeLoader();
+  return loader.getVisualizationList();
 }

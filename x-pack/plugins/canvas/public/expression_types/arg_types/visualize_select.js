@@ -23,7 +23,7 @@ class SavedVisSelect extends React.PureComponent {
   };
 
   componentWillMount = async () => {
-    const { visualizations } = await getSavedVisualizations();
+    const visualizations = await getSavedVisualizations();
     const visOptions = [{ text: 'Select a Saved Vis', disabled: true }].concat(
       visualizations.map(vis => ({ text: vis.title, value: vis.id }))
     );
