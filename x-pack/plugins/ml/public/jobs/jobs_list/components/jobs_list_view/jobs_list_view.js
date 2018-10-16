@@ -351,7 +351,7 @@ export class JobsListView extends Component {
           <NodeAvailableWarning />
           <header>
             <div className="job-buttons-container">
-              <EuiFlexGroup>
+              <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     onClick={this.onRefreshClick}
