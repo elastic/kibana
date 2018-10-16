@@ -597,6 +597,10 @@ export enum InfraMetric {
   containerDiskIOBytes = 'containerDiskIOBytes',
   containerMemory = 'containerMemory',
   containerNetworkTraffic = 'containerNetworkTraffic',
+  nginxHits = 'nginxHits',
+  nginxRequestRate = 'nginxRequestRate',
+  nginxActiveConnections = 'nginxActiveConnections',
+  nginxRequestsPerConnection = 'nginxRequestsPerConnection',
 }
 
 export enum InfraOperator {

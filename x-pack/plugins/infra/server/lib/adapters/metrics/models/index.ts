@@ -32,6 +32,10 @@ import { containerDiskIOOps } from './container/container_diskio_ops';
 import { containerMemory } from './container/container_memory';
 import { containerNetworkTraffic } from './container/container_network_traffic';
 import { containerOverview } from './container/container_overview';
+import { nginxActiveConnections } from './nginx/nginx_active_connections';
+import { nginxHits } from './nginx/nginx_hits';
+import { nginxRequestRate } from './nginx/nginx_request_rate';
+import { nginxRequestsPerConnection } from './nginx/nginx_requests_per_connection';
 
 interface InfraMetricModels {
   [key: string]: InfraMetricModelCreator;
@@ -63,4 +67,8 @@ export const metricModels: InfraMetricModels = {
   [InfraMetric.containerNetworkTraffic]: containerNetworkTraffic,
   [InfraMetric.containerMemory]: containerMemory,
   [InfraMetric.containerOverview]: containerOverview,
+  [InfraMetric.nginxHits]: nginxHits,
+  [InfraMetric.nginxRequestRate]: nginxRequestRate,
+  [InfraMetric.nginxActiveConnections]: nginxActiveConnections,
+  [InfraMetric.nginxRequestsPerConnection]: nginxRequestsPerConnection,
 };

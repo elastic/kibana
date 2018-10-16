@@ -8,7 +8,7 @@ import { InfraDatabaseSearchResponse } from '../../framework';
 
 export const checkValidNode = async (
   search: <Aggregation>(options: object) => Promise<InfraDatabaseSearchResponse<{}, Aggregation>>,
-  indexPattern: string,
+  indexPattern: string | string[],
   field: string,
   id: string
 ): Promise<boolean> => {
