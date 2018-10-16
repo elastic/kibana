@@ -15,3 +15,4 @@ esSection.register('index_management', {
   order: 1,
   url: `#${BASE_PATH}home`
 });
+
