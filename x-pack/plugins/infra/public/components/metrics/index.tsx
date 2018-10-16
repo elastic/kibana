@@ -14,7 +14,7 @@ import { Section } from './section';
 
 interface Props {
   metrics: InfraMetricData[];
-  layout: InfraMetricLayout[];
+  layouts: InfraMetricLayout[];
   loading: boolean;
   nodeName: string;
 }
@@ -30,7 +30,7 @@ export class Metrics extends React.PureComponent<Props> {
         />
       );
     }
-    return <React.Fragment>{this.props.layout.map(this.renderLayout)}</React.Fragment>;
+    return <React.Fragment>{this.props.layouts.map(this.renderLayout)}</React.Fragment>;
   }
 
   private renderLayout = (layout: InfraMetricLayout) => {

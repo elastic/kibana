@@ -135,7 +135,7 @@ class MetricDetailPage extends React.PureComponent<Props> {
                                       <EuiPageContentWithRelative>
                                         <Metrics
                                           nodeName={nodeName}
-                                          layout={filteredLayouts}
+                                          layouts={filteredLayouts}
                                           metrics={metrics}
                                           loading={loading}
                                         />
