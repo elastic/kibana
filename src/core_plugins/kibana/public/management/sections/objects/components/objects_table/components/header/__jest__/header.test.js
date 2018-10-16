@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
 import { Header } from '../header';
 
@@ -32,8 +32,8 @@ describe('Header', () => {
       filteredCount: 2,
     };
 
-    const component = shallowWithIntl(
-      <Header.WrappedComponent
+    const component = shallow(
+      <Header
         {...props}
       />
     );

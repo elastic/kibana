@@ -32,7 +32,7 @@ exports[`Table should render normally 1`] = `
         >
           <FormattedMessage
             defaultMessage="Delete"
-            id="kbn.management.objects.table.deleteButtonLabel"
+            id="kbn.management.objects.objectsTable.table.deleteButtonLabel"
             values={Object {}}
           />
         </EuiButton>,
@@ -47,7 +47,7 @@ exports[`Table should render normally 1`] = `
         >
           <FormattedMessage
             defaultMessage="Export"
-            id="kbn.management.objects.table.exportButtonLabel"
+            id="kbn.management.objects.objectsTable.table.exportButtonLabel"
             values={Object {}}
           />
         </EuiButton>,

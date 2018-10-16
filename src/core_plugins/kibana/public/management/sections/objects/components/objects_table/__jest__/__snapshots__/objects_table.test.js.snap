@@ -6,14 +6,14 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
   cancelButtonText={
     <FormattedMessage
       defaultMessage="Cancel"
-      id="kbn.management.objects.deleteConfirmModal.cancelButtonLabel"
+      id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
       values={Object {}}
     />
   }
   confirmButtonText={
     <FormattedMessage
       defaultMessage="Delete"
-      id="kbn.management.objects.deleteConfirmModal.deleteButtonLabel"
+      id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
       values={Object {}}
     />
   }
@@ -23,7 +23,7 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
   title={
     <FormattedMessage
       defaultMessage="Delete saved objects"
-      id="kbn.management.objects.deleteConfirmModalTitle"
+      id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModalTitle"
       values={Object {}}
     />
   }
@@ -31,7 +31,7 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
   <p>
     <FormattedMessage
       defaultMessage="This action will delete the following saved objects:"
-      id="kbn.management.objects.deleteConfirmModalDescription"
+      id="kbn.management.objects.deleteSavedObjectsConfirmModalDescription"
       values={Object {}}
     />
   </p>
@@ -75,14 +75,14 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
   cancelButtonText={
     <FormattedMessage
       defaultMessage="Cancel"
-      id="kbn.management.objects.exportConfirmModal.cancelButtonLabel"
+      id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
       values={Object {}}
     />
   }
   confirmButtonText={
     <FormattedMessage
       defaultMessage="Export All"
-      id="kbn.management.objects.exportConfirmModal.exportButtonLabel"
+      id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
       values={Object {}}
     />
   }
@@ -92,7 +92,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
   title={
     <FormattedMessage
       defaultMessage="Export {filteredItemCount} {filteredItemCountDescription}"
-      id="kbn.management.objects.exportConfirmModalTitle"
+      id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
       values={
         Object {
           "filteredItemCount": 4,
@@ -106,7 +106,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
     <FormattedMessage
       defaultMessage="Select which types to export. The number in parentheses indicates
  how many of this type are available to export."
-      id="kbn.management.objects.exportConfirmModalDescription"
+      id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
       values={Object {}}
     />
   </p>
