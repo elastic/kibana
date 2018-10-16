@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
 export function getPainlessError(error: Error) {
@@ -38,7 +39,10 @@ export function getPainlessError(error: Error) {
   return {
     lang,
     script,
-    message: `Error with Painless scripted field '${script}'`,
+    message: i18n.translate('kbn.discover.painlessError.painlessScriptedFieldErrorMessage', {
+      defaultMessage: "Error with Painless scripted field '{script}'.",
+      values: { script },
+    }),
     error: error.message,
   };
 }

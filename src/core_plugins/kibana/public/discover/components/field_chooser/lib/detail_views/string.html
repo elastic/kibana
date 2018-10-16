@@ -1,7 +1,10 @@
 <div class="dscFieldDetails">
   <div class="kuiVerticalRhythmSmall">
     <p class="euiText euiText--extraSmall euiTextColor--subdued" ng-show="!field.details.error">
-      Top 5 values in
+      <span
+        i18n-id="kbn.discover.fieldChooser.detailViews.topValuesInRecordsDescription"
+        i18n-default-message="Top 5 values in"
+      ></span>
       <span ng-if="!field.details.error">
         <a
           class="kuiLink"
@@ -14,7 +17,11 @@
           ng-show="field.indexPattern.metaFields.includes(field.name) || field.scripted">
           {{::field.details.exists}}
         </span>
-        / {{::field.details.total}} records
+        / {{::field.details.total}}
+        <span
+          i18n-id="kbn.discover.fieldChooser.detailViews.recordsText"
+          i18n-default-message="records"
+        ></span>
       </span>
     </p>
 
@@ -30,9 +37,14 @@
             css-truncate
             css-truncate-expandable="true"
             class="dscFieldDetails__value"
-            aria-label="Value: {{:: bucket.display === '' ? 'Empty string' : bucket.display }}"
+            aria-label="{{bucketAriaLabel}}"
           >
-            {{::bucket.display}} <em ng-show="bucket.display === ''">Empty string</em>
+            {{::bucket.display}}
+            <em
+              ng-show="bucket.display === ''"
+              i18n-id="kbn.discover.fieldChooser.detailViews.emptyStringText"
+              i18n-default-message="Empty string"
+            ></em>
           </div>
 
           <!-- Add/remove filter buttons -->
@@ -43,7 +55,7 @@
             <button
               class="dscFieldDetailsItem__button"
               ng-click="onAddFilter(field, bucket.value, '+')"
-              aria-label="Filter for this value"
+              aria-label="{{::'kbn.discover.fieldChooser.detailViews.filterValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter for this value'} }}"
               data-test-subj="plus-{{::field.name}}-{{::bucket.display}}"
             >
               <span
@@ -55,7 +67,7 @@
             <button
               class="dscFieldDetailsItem__button"
               ng-click="onAddFilter(field, bucket.value, '-')"
-              aria-label="Filter out this value"
+              aria-label="{{::'kbn.discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter out this value'} }}"
               data-test-subj="minus-{{::field.name}}-{{::bucket.display}}"
             >
               <span
@@ -84,9 +96,16 @@
     class="kuiButton kuiButton--secondary kuiButton--small kuiButton--fullWidth kuiVerticalRhythmSmall"
     data-test-subj="fieldVisualize-{{::field.name}}"
   >
-    Visualize
+    <span
+      i18n-id="kbn.discover.fieldChooser.detailViews.visualizeLinkText"
+      i18n-default-message="Visualize"
+    ></span>
     <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">
-    ( {{::warnings.length}} <ng-pluralize count="warnings.length" when="{'1':'warning', 'other':'warnings'}"></ng-pluralize> <i aria-hidden="true" class="fa fa-warning"></i> )
+    ( {{::warnings.length}} <span
+      i18n-id="kbn.discover.fieldChooser.detailViews.warningsText"
+      i18n-default-message="{warningsLength, plural, one {warning} other {warnings}}"
+      i18n-values="{ warningsLength: warnings.length }"
+    ></span> <i aria-hidden="true" class="fa fa-warning"></i> )
     </span>
   </a>
 </div>

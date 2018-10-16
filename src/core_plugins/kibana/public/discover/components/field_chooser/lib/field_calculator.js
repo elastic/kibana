@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 function getFieldValues(hits, field) {
   const name = field.name;
@@ -38,7 +39,9 @@ function getFieldValueCounts(params) {
     || params.field.type === 'geo_shape'
     || params.field.type === 'attachment'
   ) {
-    return { error: 'Analysis is not available for geo fields.' };
+    return { error: i18n.translate('kbn.discover.fieldChooser.fieldCalculator.analysisIsNotAvailableForGeoFieldsErrorMessage', {
+      defaultMessage: 'Analysis is not available for geo fields.',
+    }) };
   }
 
   const allValues = getFieldValues(params.hits, params.field);
@@ -59,9 +62,13 @@ function getFieldValueCounts(params) {
 
     if (params.hits.length - missing === 0) {
       return {
-        error: 'This field is present in your Elasticsearch mapping' +
-          ' but not in the ' + params.hits.length + ' documents shown in the doc table.' +
-          ' You may still be able to visualize or search on it.'
+        error: i18n.translate('kbn.discover.fieldChooser.fieldCalculator.fieldIsNorPresentInDocumentsErrorMessage', {
+          defaultMessage: 'This field is present in your Elasticsearch mapping \
+but not in the {hitsLength} documents shown in the doc table. You may still be able to visualize or search on it.',
+          values: {
+            hitsLength: params.hits.length,
+          },
+        })
       };
     }
 
@@ -89,7 +96,9 @@ function _groupValues(allValues, params) {
 
   allValues.forEach(function (value) {
     if (_.isObject(value) && !Array.isArray(value)) {
-      throw new Error('Analysis is not available for object fields');
+      throw new Error(i18n.translate('kbn.discover.fieldChooser.fieldCalculator.analysisIsNotAvailableForObjectFieldsErrorMessage', {
+        defaultMessage: 'Analysis is not available for object fields.',
+      }));
     }
 
     if (Array.isArray(value) && !params.grouped) {

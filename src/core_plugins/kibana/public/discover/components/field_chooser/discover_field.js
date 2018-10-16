@@ -26,7 +26,7 @@ import detailsHtml from './lib/detail_views/string.html';
 import { uiModules } from 'ui/modules';
 const app = uiModules.get('apps/discover');
 
-app.directive('discoverField', function ($compile) {
+app.directive('discoverField', function ($compile, i18n) {
   return {
     restrict: 'E',
     template: html,
@@ -42,11 +42,18 @@ app.directive('discoverField', function ($compile) {
       let detailsElem;
       let detailScope;
 
-
       const init = function () {
         if ($scope.field.details) {
           $scope.toggleDetails($scope.field, true);
         }
+
+        $scope.addRemoveButtonLabel = $scope.field.display
+          ? i18n('kbn.discover.fieldChooser.discoverField.removeButtonLabel', {
+            defaultMessage: 'remove',
+          })
+          : i18n('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
+            defaultMessage: 'add',
+          });
       };
 
       const getWarnings = function (field) {
@@ -92,6 +99,16 @@ app.directive('discoverField', function ($compile) {
           $scope.onShowDetails(field, recompute);
           detailScope = $scope.$new();
           detailScope.warnings = getWarnings(field);
+          detailScope.bucketAriaLabel = i18n('kbn.discover.fieldChooser.discoverField.bucketAriaLabel', {
+            defaultMessage: 'Value: {value}',
+            values: {
+              value: detailScope.bucket.display === ''
+                ? i18n('kbn.discover.fieldChooser.discoverField.emptyStringText', {
+                  defaultMessage: 'Empty string',
+                })
+                : detailScope.bucket.display,
+            },
+          });
 
           detailsElem = $(detailsHtml);
           $compile(detailsElem)(detailScope);
