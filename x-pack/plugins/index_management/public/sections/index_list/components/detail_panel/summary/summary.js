@@ -39,7 +39,7 @@ const HEADERS = {
   primary_size: i18n.translate('xpack.idxMgmt.summary.headers.primaryStorageSizeHeader', {
     defaultMessage: 'Primary Storage Size',
   }),
-  aliases: i18n.translate('xpack.kdxMgm.summary.headers.aliases', {
+  aliases: i18n.translate('xpack.idxMgm.summary.headers.aliases', {
     defaultMessage: 'Aliases'
   })
 };
