@@ -37,6 +37,7 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   SortableProperties,
+  EuiIcon,
 } from '@elastic/eui';
 
 export class VisualizeListingTable extends Component {
@@ -141,15 +142,35 @@ export class VisualizeListingTable extends Component {
   }
 
   renderItemTypeIcon(item) {
-    return item.type.image ?
-      <img
-        className="kuiStatusText__icon kuiIcon"
-        aria-hidden="true"
-        src={item.type.image}
-      /> :
-      <span
-        className={`kuiStatusText__icon kuiIcon ${item.icon}`}
-      />;
+    let icon;
+    if (item.type.image) {
+      icon = (
+        <img
+          className="visListingTable__typeImage"
+          aria-hidden="true"
+          src={item.type.image}
+        />
+      );
+    } else if (!item.type.image && !item.type.icon) {
+      icon = (
+        // Allowing legacyIcon to hold a CSS name, will be removed in 7.0
+        <span
+          aria-hidden="true"
+          className={`kuiStatusText__icon kuiIcon ${item.type.legacyIcon}`}
+        />
+      );
+    } else {
+      icon = (
+        <EuiIcon
+          className="visListingTable__typeIcon"
+          aria-hidden="true"
+          type={item.icon}
+          size="m"
+        />
+      );
+    }
+
+    return icon;
   }
 
   sortByTitle = () => this.sortOn('title');

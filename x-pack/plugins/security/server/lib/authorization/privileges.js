@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function buildPrivilegeMap(savedObjectTypes, application, actions) {
+import { IGNORED_TYPES } from '../../../common/constants';
+
+export function buildPrivilegeMap(savedObjectTypes, actions) {
   const buildSavedObjectsActions = (savedObjectActions) => {
     return savedObjectTypes
+      .filter(type => !IGNORED_TYPES.includes(type))
       .map(type => savedObjectActions.map(savedObjectAction => actions.getSavedObjectAction(type, savedObjectAction)))
       .reduce((acc, types) => [...acc, ...types], []);
   };
@@ -14,21 +17,43 @@ export function buildPrivilegeMap(savedObjectTypes, application, actions) {
   // the following list of privileges should only be added to, you can safely remove actions, but not privileges as
   // it's a backwards compatibility issue and we'll have to at least adjust registerPrivilegesWithCluster to support it
   return {
-    all: {
-      application,
-      name: 'all',
-      actions: [actions.version, 'action:*'],
-      metadata: {}
+    global: {
+      all: [
+        actions.version,
+        'action:*'
+      ],
+      read: [
+        actions.version,
+        actions.login,
+        ...buildSavedObjectsActions([
+          'get',
+          'bulk_get',
+          'find'
+        ])
+      ],
     },
-    read: {
-      application,
-      name: 'read',
-      actions: [actions.version, actions.login, ...buildSavedObjectsActions(['get', 'bulk_get', 'find'])],
-      metadata: {}
-    }
+    space: {
+      all: [
+        actions.version,
+        actions.login,
+        ...buildSavedObjectsActions([
+          'create',
+          'bulk_create',
+          'delete',
+          'get',
+          'bulk_get',
+          'find',
+          'update'
+        ])
+      ],
+      read: [
+        actions.version,
+        actions.login,
+        ...buildSavedObjectsActions([
+          'get',
+          'bulk_get',
+          'find'])
+      ],
+    },
   };
-}
-
-export function buildLegacyIndexPrivileges() {
-  return ['create', 'delete', 'read', 'view_index_metadata'];
 }

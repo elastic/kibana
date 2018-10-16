@@ -540,6 +540,8 @@ exports[`Timeline should render with data 1`] = `
             >
               <span
                 className="euiToolTipAnchor"
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
               >
                 <div
                   aria-describedby="timeToFirstByte"
@@ -548,8 +550,6 @@ exports[`Timeline should render with data 1`] = `
                   fontSize="12px"
                   onBlur={[Function]}
                   onFocus={[Function]}
-                  onMouseOut={[Function]}
-                  onMouseOver={[Function]}
                 >
                   <span
                     className="c1"
@@ -569,6 +569,8 @@ exports[`Timeline should render with data 1`] = `
             >
               <span
                 className="euiToolTipAnchor"
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
               >
                 <div
                   aria-describedby="domInteractive"
@@ -577,8 +579,6 @@ exports[`Timeline should render with data 1`] = `
                   fontSize="12px"
                   onBlur={[Function]}
                   onFocus={[Function]}
-                  onMouseOut={[Function]}
-                  onMouseOver={[Function]}
                 >
                   <span
                     className="c1"
@@ -598,6 +598,8 @@ exports[`Timeline should render with data 1`] = `
             >
               <span
                 className="euiToolTipAnchor"
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
               >
                 <div
                   aria-describedby="domComplete"
@@ -606,8 +608,6 @@ exports[`Timeline should render with data 1`] = `
                   fontSize="12px"
                   onBlur={[Function]}
                   onFocus={[Function]}
-                  onMouseOut={[Function]}
-                  onMouseOver={[Function]}
                 >
                   <span
                     className="c1"

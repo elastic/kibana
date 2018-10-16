@@ -2,10 +2,13 @@
 [[xpack-security-authorization]]
 === Authorization
 
-Authorizing users to use {kib} in most configurations is as simple as assigning the user
+Authorizing users to use {kib} in simple configurations is as easy as assigning the user
 either the `kibana_user` or `kibana_dashboard_only_user` reserved role. If you're running 
-a single tenant of {kib} against your {es} cluster, this is sufficient and no other 
-action is required.
+a single tenant of {kib} against your {es} cluster, and you're not controlling access to individual spaces, then this is sufficient and no other action is required.
+
+==== Spaces
+
+If you want to control individual spaces in {kib}, do **not** use the `kibana_user` or `kibana_dashboard_only_user` roles. Users with these roles are able to access all spaces in Kibana. Instead, create your own roles that grant access to specific spaces.
 
 ==== Multi-tenant {kib}
 
@@ -14,6 +17,8 @@ must create custom roles that authorize the user for that specific tenant. You c
 either the *Management / Security / Roles* page in {kib} or the <<role-management-api>>
 to assign a specific <<kibana-privileges, Kibana privilege>> at that tenant. After creating the
 custom role, you should assign this role to the user(s) that you wish to have access.
+
+While multi-tenant installations are supported, the recommended approach to securing access to segments of {kib} is to grant users access to specific spaces.
 
 ==== Legacy roles
 

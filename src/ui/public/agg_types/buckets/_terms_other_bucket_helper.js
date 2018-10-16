@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import { AggConfig } from '../../vis/agg_config';
 import { buildExistsFilter } from '../../filter_manager/lib/exists';
 import { buildPhrasesFilter } from '../../filter_manager/lib/phrases';
 import { buildQueryFromFilters } from '../../courier';
@@ -110,7 +109,7 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   const indexPattern = aggWithOtherBucket.params.field.indexPattern;
 
   // create filters aggregation
-  const filterAgg = new AggConfig(aggConfigs[index].vis, {
+  const filterAgg = aggConfigs.createAggConfig({
     type: 'filters',
     id: 'other',
   });

@@ -70,7 +70,6 @@ function checkout_sibling {
 
       cloneBranch="$PR_TARGET_BRANCH"
       if clone_target_is_valid ; then
-        export TEST_ES_FROM=snapshot
         return 0
       fi
 
@@ -81,6 +80,9 @@ function checkout_sibling {
 
     function checkout_clone_target {
       pick_clone_target
+      if [[ $cloneBranch = "master"  && $cloneAuthor = "elastic" ]]; then
+        export TEST_ES_FROM=snapshot
+      fi
 
       echo " -> checking out '${cloneBranch}' branch from ${cloneAuthor}/${project}..."
       git clone -b "$cloneBranch" "git@github.com:${cloneAuthor}/${project}.git" "$targetDir" --depth=1

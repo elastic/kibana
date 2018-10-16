@@ -31,7 +31,8 @@ export const cardinalityMetricAgg = new MetricAggType({
   },
   params: [
     {
-      name: 'field'
+      name: 'field',
+      type: 'field'
     }
   ]
 });

@@ -46,6 +46,7 @@ export function parse(command, options, kbnPackage) {
     quiet: options.quiet || false,
     silent: options.silent || false,
     config: options.config || '',
+    optimize: options.optimize,
     plugin: command,
     version: kbnPackage.version,
     pluginDir: options.pluginDir || ''

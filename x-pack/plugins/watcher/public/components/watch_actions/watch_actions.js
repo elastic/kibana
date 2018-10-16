@@ -8,7 +8,6 @@ import { find, remove, map, difference, forEach } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './watch_actions.html';
 import './components/watch_action';
-import './watch_actions.less';
 import 'plugins/watcher/components/action_type_select';
 
 const app = uiModules.get('xpack/watcher');

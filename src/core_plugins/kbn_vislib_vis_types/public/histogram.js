@@ -21,7 +21,6 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import pointSeriesTemplate from './editors/point_series.html';
-import image from './images/icon-vertical.svg';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -29,7 +28,7 @@ export default function PointSeriesVisType(Private) {
   return VisFactory.createVislibVisualization({
     name: 'histogram',
     title: 'Vertical Bar',
-    image,
+    icon: 'visBarVertical',
     description: 'Assign a continuous variable to each axis',
     category: CATEGORY.BASIC,
     visConfig: {

@@ -23,6 +23,8 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 
+import './styles/main.less';
+
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';

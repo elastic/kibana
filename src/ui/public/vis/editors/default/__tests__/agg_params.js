@@ -76,7 +76,7 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
       ]
     });
 
-    $parentScope.agg = new AggConfig(vis, state);
+    $parentScope.agg = new AggConfig(vis.aggs, state);
     $parentScope.vis = vis;
 
     // make the element

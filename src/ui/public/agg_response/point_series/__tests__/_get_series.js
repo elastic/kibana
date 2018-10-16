@@ -19,18 +19,10 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { PointSeriesGetSeriesProvider } from '../_get_series';
+import { getSeries } from '../_get_series';
 
 describe('getSeries', function () {
-  let getSeries;
-
   const agg = { fieldFormatter: _.constant(_.identity) };
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    getSeries = Private(PointSeriesGetSeriesProvider);
-  }));
 
   function wrapRows(row) {
     return row.map(function (v) {

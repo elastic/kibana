@@ -44,10 +44,10 @@ module.controller('SenseController', function SenseController(Private, $scope, $
   let input;
   let output;
   $timeout(async () => {
-    output = initializeOutput($('#output'));
-    input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output, $scope.openDocumentation);
+    output = initializeOutput($('#ConAppOutput'));
+    input = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'), $('#ConCopyAsCurl'), output, $scope.openDocumentation);
     init(input, output, $location.search().load_from);
-    kbnUiAceKeyboardModeService.initialize($scope, $('#editor'));
+    kbnUiAceKeyboardModeService.initialize($scope, $('#ConAppEditor'));
     const session = input.getSession();
     session.getSelection().on('changeCursor', () => {
       $scope.getDocumentation();

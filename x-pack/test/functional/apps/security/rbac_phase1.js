@@ -25,20 +25,28 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_all', {
-        "kibana": ["all"],
-        "indices": [{
-          "names": ["logstash-*"],
-          "privileges": ["read", "view_index_metadata"]
-        }]
+        kibana: {
+          global: ['all']
+        },
+        elasticsearch: {
+          "indices": [{
+            "names": ["logstash-*"],
+            "privileges": ["read", "view_index_metadata"]
+          }]
+        }
       });
 
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_read', {
-        "kibana": ["read"],
-        "indices": [{
-          "names": ["logstash-*"],
-          "privileges": ["read", "view_index_metadata"]
-        }]
+        kibana: {
+          global: ['read']
+        },
+        elasticsearch: {
+          "indices": [{
+            "names": ["logstash-*"],
+            "privileges": ["read", "view_index_metadata"]
+          }]
+        }
       });
       await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
@@ -81,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2015-09-23 18:31:44.000';
       const vizName1 = 'Visualization VerticalBarChart';
 
-      log.debug('navigateToApp visualize');
+      log.debug('log in as kibanauser with rbac_all role');
       await PageObjects.security.login('kibanauser', 'changeme');
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
@@ -103,7 +111,7 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2015-09-23 18:31:44.000';
       const vizName1 = 'Viz VerticalBarChart';
 
-      log.debug('navigateToApp visualize');
+      log.debug('log in as kibanareadonly with rbac_read role');
       await PageObjects.security.login('kibanareadonly', 'changeme');
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();

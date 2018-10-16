@@ -470,10 +470,10 @@ export class DashboardStateManager {
    * @returns {boolean} True if the dashboard has changed since the last save (or, is new).
    */
   getIsDirty(timeFilter) {
-    return this.isDirty ||
-      // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
-      // changes are not tracked by the state monitor.
-      this.getFiltersChanged(timeFilter);
+    // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
+    // changes are not tracked by the state monitor.
+    const hasTimeFilterChanged = timeFilter ? this.getFiltersChanged(timeFilter) : false;
+    return this.isDirty || hasTimeFilterChanged;
   }
 
   getPanels() {

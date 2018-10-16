@@ -23,4 +23,10 @@ window.URL = {
   createObjectURL: () => { return ''; }
 };
 jest.mock('../../src/storage');
+
 document.queryCommandSupported = () => true;
+
+import jQuery from 'jquery';
+jest.spyOn(jQuery, 'ajax').mockImplementation(() => new Promise(() => {
+  // never resolve
+}));
