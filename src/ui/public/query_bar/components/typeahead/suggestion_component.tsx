@@ -71,6 +71,7 @@ export const SuggestionComponent: SFC<Props> = props => {
           // Description currently always comes from us and we escape any potential user input
           // at the time we're generating the description text
           // eslint-disable-next-line react/no-danger
+          // @ts-ignore
           dangerouslySetInnerHTML={{ __html: props.suggestion.description }}
         />
       </div>

@@ -147,9 +147,10 @@ export class QueryBar extends Component<Props, State> {
   public decrementIndex = (currentIndex: number) => {
     const previousIndex = currentIndex - 1;
     if (previousIndex < 0) {
-      this.setState({ index: 0 });
+      this.setState({ index: this.state.suggestions.length - 1 });
+    } else {
+      this.setState({ index: previousIndex });
     }
-    this.setState({ index: previousIndex });
   };
 
   public getSuggestions = async () => {
@@ -338,7 +339,7 @@ export class QueryBar extends Component<Props, State> {
           if (isSuggestionsVisible && this.state.suggestions[index]) {
             this.selectSuggestion(this.state.suggestions[index]);
           } else {
-            this.onSubmit(event.preventDefault);
+            this.onSubmit(() => event.preventDefault());
           }
           break;
         case KEY_CODES.ESC:
