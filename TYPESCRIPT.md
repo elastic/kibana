@@ -1,13 +1,13 @@
-## Typescriptifying Kibana Tips
+## TypeScriptifying Kibana Tips
 
 ### Converting existing code
 
-To convert existing code over to typescript:
+To convert existing code over to TypeScript:
 1. rename the file from `.js` to either `.ts` (if there is no html or jsx in the file) or `.tsx` (if there is).
 2. Ensure tslint is running and installed in the IDE of your choice.  There will usually be some linter errors after the file rename.
 3. Auto-fix what you can. This will save you a lot of time! VSCode can be set to auto fix tslint errors when files are saved.
 
-### How to fix common typescript errors
+### How to fix common TypeScript errors
 
 The first thing that will probably happen when you convert a `.js` file in our system to `.ts` is that some imports will be lacking types. 
 
@@ -28,7 +28,7 @@ Note: I think this has the possibility to cause a conflict if you import another
 
 #### Internal dependency is missing types.
 
-1. Open up the file and see how easy it would be to convert to typescript. 
+1. Open up the file and see how easy it would be to convert to TypeScript. 
 2. If it's very straightforward, go for it.
 3. If it's not and you wish to stay focused on your own PR, get around the error by adding a type definition file in the same folder as the dependency, with the same name.
 4. Minimally you will need to type what you are using in your PR.  No need to go crazy to fully type the thing or you might be there for awhile depending on what's available.
@@ -51,7 +51,7 @@ import { metadata } from './metadata';
 export const DOC_LINK_VERSION = metadata.branch;
 ```
 
-To typescript `documentation_links.js` you'll need to add a type definition for `metadata.js`
+To TypeScript `documentation_links.js` you'll need to add a type definition for `metadata.js`
 
 metadata.d.ts
 ```
@@ -80,9 +80,9 @@ If yarn doesn't find the module it may not have types.  For example, our `rison_
 
 In this case the best thing to do is create a top level `types` folder and point to that in the tsconfig.  This is something we should set up for rison_node.  Infra team already handled this and added: `x-pack/plugins/infra/types/rison_node.d.ts` but other code uses it too and we need to pull it up.
 
-### Typescripting react files
+### TypeScripting react files
 
-React has it's own concept of runtime types via `proptypes`. Typescript gives you compile time types so I prefer those.  
+React has it's own concept of runtime types via `proptypes`. TypeScript gives you compile time types so I prefer those.  
 
 Before:
 ```jsx
@@ -130,7 +130,7 @@ Note that the name of `Props` and `State` doesn't matter, the order does.  If yo
 
 ### Typing functions
 
-In react proptypes, we often will just to `PropTypes.func`.  In typescript, a function is `() => void`, or you can more fully flesh it out, for example:
+In react proptypes, we often will just to `PropTypes.func`.  In TypeScript, a function is `() => void`, or you can more fully flesh it out, for example:
 
 - `(inputParamName: string) => string`
 - `(newLanguage: string) => void`
