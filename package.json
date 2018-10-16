@@ -114,7 +114,6 @@
     "glob-all": "^3.1.0",
     "good-squeeze": "2.1.0",
     "h2o2": "^8.1.2",
-    "h2o2-latest": "npm:h2o2@8.1.2",
     "handlebars": "4.0.5",
     "hapi": "^17.5.3",
     "hjson": "3.1.0",

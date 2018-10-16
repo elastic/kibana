@@ -6994,7 +6994,7 @@ gulp-sourcemaps@1.7.3:
     through2 "2.X"
     vinyl "1.X"
 
-"h2o2-latest@npm:h2o2@8.1.2", h2o2@^8.1.2:
+h2o2@^8.1.2:
   version "8.1.2"
   resolved "https://registry.yarnpkg.com/h2o2/-/h2o2-8.1.2.tgz#25e6f69f453175c9ca1e3618741c5ebe1b5000c1"
   integrity sha1-Jeb2n0UxdcnKHjYYdBxevhtQAME=
