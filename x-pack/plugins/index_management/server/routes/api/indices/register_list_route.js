@@ -43,7 +43,11 @@ async function fetchAliases(callWithRequest) {
   const catAliases = await callWithRequest('cat.aliases', params);
   const aliases = {};
   for(let i = 0; i < catAliases.length; ++i) {
-    aliases[catAliases[i].index] = catAliases[i].alias;
+    if(aliases[catAliases[i].index] === undefined) {
+      aliases[catAliases[i].index] = [catAliases[i].alias];
+    }else{
+      aliases[catAliases[i].index].push(catAliases[i].alias);
+    }
   }
 
   return aliases;

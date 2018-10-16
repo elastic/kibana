@@ -40,13 +40,21 @@ async function fetchIndices(callWithRequest, indexNames) {
   return await callWithRequest('cat.indices', params);
 }
 
-async function fetchAliases(callWithRequest, indexNames, aliases) {
-  const onlyIndexNames = {};
-  for(let i = 0; i < indexNames; ++i) {
-    const index = indexNames[i].index;
-    onlyIndexNames[index] = (aliases[index] === undefined ? "N/A" : aliases[index]);
+async function fetchAliases(callWithRequest) {
+  const params = {
+    format: 'json'
+  };
+  const catAliases = await callWithRequest('cat.aliases', params);
+  const aliases = {};
+  for(let i = 0; i < catAliases.length; ++i) {
+    if(aliases[catAliases[i].index] === undefined) {
+      aliases[catAliases[i].index] = [catAliases[i].alias];
+    }else{
+      aliases[catAliases[i].index].push(catAliases[i].alias);
+    }
   }
-  return onlyIndexNames;
+
+  return aliases;
 }
 
 export function registerReloadRoute(server) {
@@ -62,8 +70,7 @@ export function registerReloadRoute(server) {
 
       try {
         const indices = await fetchIndices(callWithRequest, indexNames);
-        const aliases = await fetchAliases(callWithRequest, indexNames, indices);
-        indices.aliases = Object.values(aliases);
+        const aliases = await fetchAliases(callWithRequest);
         const response = formatHits(indices, aliases);
         reply(response);
       } catch (err) {
