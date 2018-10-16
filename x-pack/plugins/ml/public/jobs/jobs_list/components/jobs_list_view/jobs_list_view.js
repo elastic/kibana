@@ -49,7 +49,6 @@ export class JobsListView extends Component {
       selectedJobs: [],
       itemIdToExpandedRowMap: {},
       filterClauses: [],
-      updateJobStats: () => { },
     };
 
     this.updateFunctions = {};
@@ -215,13 +214,6 @@ export class JobsListView extends Component {
     return this.showCreateWatchFlyout;
   }
 
-  setUpdateJobStats = (updateJobStats) => {
-    this.setState({ updateJobStats });
-  }
-  unsetUpdateJobStats = () => {
-    this.setUpdateJobStats(() => { });
-  }
-
   selectJobChange = (selectedJobs) => {
     this.setState({ selectedJobs });
   }
@@ -271,7 +263,6 @@ export class JobsListView extends Component {
           const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
           this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList }, () => {
             this.refreshSelectedJobs();
-            this.state.updateJobStats(jobsSummaryList);
           });
 
           Object.keys(this.updateFunctions).forEach((j) => {
@@ -339,13 +330,12 @@ export class JobsListView extends Component {
   }
 
   render() {
-    const { isRefreshing } = this.state;
+    const { isRefreshing, jobsSummaryList } = this.state;
 
     return (
       <React.Fragment>
         <JobStatsBar
-          setUpdateJobStats={this.setUpdateJobStats}
-          unsetUpdateJobStats={this.unsetUpdateJobStats}
+          jobsSummaryList={jobsSummaryList}
         />
         <div className="job-management">
           <NodeAvailableWarning />
