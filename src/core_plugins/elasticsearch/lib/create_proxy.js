@@ -18,6 +18,7 @@
  */
 
 import Joi from 'joi';
+import Boom from 'boom';
 
 export function createProxy(server) {
   const { callWithRequest } =  server.plugins.elasticsearch.getCluster('data');
@@ -31,10 +32,11 @@ export function createProxy(server) {
       }
     },
     async handler(req, reply) {
-      const { payload } = req;
       try {
+        const { payload } = req;
         const body = payload
-          .toString('utf8').split('\n')
+          .toString('utf8')
+          .split('\n')
           .filter(Boolean)
           .map(JSON.parse);
         const response = await callWithRequest(req, 'msearch', {
@@ -42,7 +44,11 @@ export function createProxy(server) {
         });
         reply(response);
       } catch(e) {
-        reply(e);
+        if (e instanceof Error) {
+          reply(Boom.badRequest('unable to parse request'));
+        } else {
+          reply(e);
+        }
       }
     },
   });
