@@ -75,7 +75,7 @@ export function createUrlOverrides(overrides, originalSettings) {
 
   // escape grok pattern as it can contain bad characters
   if (formattedOverrides.grok_pattern !== '') {
-    formattedOverrides.grok_pattern  = encodeURIComponent(formattedOverrides.grok_pattern);
+    formattedOverrides.grok_pattern = encodeURIComponent(formattedOverrides.grok_pattern);
   }
   return formattedOverrides;
 }
