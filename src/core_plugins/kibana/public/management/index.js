@@ -18,7 +18,6 @@
  */
 
 import './sections';
-import './styles/main.less';
 import 'ui/filters/start_from';
 import 'ui/field_editor';
 import uiRoutes from 'ui/routes';
