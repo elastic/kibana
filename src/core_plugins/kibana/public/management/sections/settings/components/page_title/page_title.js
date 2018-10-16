@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-
 export const PageTitle = () => {
   return (
     <EuiText>

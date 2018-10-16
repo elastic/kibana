@@ -21,8 +21,6 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n } from '@kbn/i18n/react';
 
-
-
 import {
   EuiSearchBar,
 } from '@elastic/eui';
@@ -65,7 +63,7 @@ class SearchUI extends PureComponent {
         type: 'field_value_selection',
         field: 'category',
         name: intl.formatMessage({
-          id: 'kbn.management.settings.CategorySearchLabel',
+          id: 'kbn.management.settings.categorySearchLabel',
           defaultMessage: 'Category',
         }),
         multiSelect: 'or',

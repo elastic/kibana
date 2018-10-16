@@ -207,7 +207,6 @@ class FieldUI extends PureComponent {
       return;
     }
 
-
     const file = files[0];
     const { maxSize } = this.props.setting.options;
     try {
@@ -215,7 +214,13 @@ class FieldUI extends PureComponent {
       const isInvalid = !!(maxSize && maxSize.length && base64Image.length > maxSize.length);
       this.setState({
         isInvalid,
-        error: isInvalid ? `Image is too large, maximum size is ${maxSize.description}` : null,
+        error: isInvalid
+          ? this.props.intl.formattedMessage({
+            id: 'kbn.management.settings.field.imageTooLargeErrorMessage',
+            defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}'
+          }, {
+            maxSizeDescription: maxSize.description
+          }) : null,
         changeImage: true,
         unsavedValue: base64Image,
       });
