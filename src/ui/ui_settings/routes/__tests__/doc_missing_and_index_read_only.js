@@ -26,7 +26,7 @@ import {
   assertSinonMatch,
 } from './lib';
 
-export function docMissingSuite() {
+export function docMissingAndIndexReadOnlySuite() {
   // ensure the kibana index has no documents
   beforeEach(async () => {
     const { kbnServer, callCluster } = getServices();
@@ -45,10 +45,38 @@ export function docMissingSuite() {
         query: { match_all: {} }
       }
     });
+
+    // set the index to read only
+    await callCluster('indices.putSettings', {
+      index: kbnServer.config.get('kibana.index'),
+      body: {
+        index: {
+          blocks: {
+            read_only: true
+          }
+        }
+      }
+    });
+  });
+
+  afterEach(async () => {
+    const { kbnServer, callCluster } = getServices();
+
+    // disable the read only block
+    await callCluster('indices.putSettings', {
+      index: kbnServer.config.get('kibana.index'),
+      body: {
+        index: {
+          blocks: {
+            read_only: false
+          }
+        }
+      }
+    });
   });
 
   describe('get route', () => {
-    it('creates doc, returns a 200 with settings', async () => {
+    it('returns simulated doc with buildNum', async () => {
       const { kbnServer } = getServices();
 
       const { statusCode, result } = await kbnServer.inject({
@@ -60,7 +88,7 @@ export function docMissingSuite() {
       assertSinonMatch(result, {
         settings: {
           buildNum: {
-            userValue: sinon.match.number,
+            userValue: sinon.match.number
           },
           foo: {
             userValue: 'bar',
@@ -72,7 +100,7 @@ export function docMissingSuite() {
   });
 
   describe('set route', () => {
-    it('creates doc, returns a 200 with value set', async () => {
+    it('fails with 403 forbidden', async () => {
       const { kbnServer } = getServices();
 
       const defaultIndex = chance.word();
@@ -82,26 +110,17 @@ export function docMissingSuite() {
         payload: { value: defaultIndex }
       });
 
-      expect(statusCode).to.be(200);
+      expect(statusCode).to.be(403);
       assertSinonMatch(result, {
-        settings: {
-          buildNum: {
-            userValue: sinon.match.number
-          },
-          defaultIndex: {
-            userValue: defaultIndex
-          },
-          foo: {
-            userValue: 'bar',
-            isOverridden: true
-          }
-        }
+        error: 'Forbidden',
+        message: sinon.match('index read-only'),
+        statusCode: 403
       });
     });
   });
 
   describe('setMany route', () => {
-    it('creates doc, returns 200 with updated values', async () => {
+    it('fails with 403 forbidden', async () => {
       const { kbnServer } = getServices();
 
       const defaultIndex = chance.word();
@@ -113,26 +132,17 @@ export function docMissingSuite() {
         }
       });
 
-      expect(statusCode).to.be(200);
+      expect(statusCode).to.be(403);
       assertSinonMatch(result, {
-        settings: {
-          buildNum: {
-            userValue: sinon.match.number
-          },
-          defaultIndex: {
-            userValue: defaultIndex
-          },
-          foo: {
-            userValue: 'bar',
-            isOverridden: true
-          }
-        }
+        error: 'Forbidden',
+        message: sinon.match('index read-only'),
+        statusCode: 403
       });
     });
   });
 
   describe('delete route', () => {
-    it('creates doc, returns a 200 with just buildNum', async () => {
+    it('fails with 403 forbidden', async () => {
       const { kbnServer } = getServices();
 
       const { statusCode, result } = await kbnServer.inject({
@@ -140,17 +150,11 @@ export function docMissingSuite() {
         url: '/api/kibana/settings/defaultIndex'
       });
 
-      expect(statusCode).to.be(200);
+      expect(statusCode).to.be(403);
       assertSinonMatch(result, {
-        settings: {
-          buildNum: {
-            userValue: sinon.match.number
-          },
-          foo: {
-            userValue: 'bar',
-            isOverridden: true
-          }
-        }
+        error: 'Forbidden',
+        message: sinon.match('index read-only'),
+        statusCode: 403
       });
     });
   });
