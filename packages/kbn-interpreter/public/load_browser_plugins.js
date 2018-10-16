@@ -20,13 +20,14 @@
 import chrome from 'ui/chrome';
 import $script from 'scriptjs';
 import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
-import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
+import { functionsRegistry as browserFunctions } from '@kbn/interpreter/common/lib/functions_registry';
 
 let loading;
 export const loadBrowserPlugins = (additionalTypes) => {
 
   const types = {
-    commonFunctions: functionsRegistry,
+    browserFunctions: browserFunctions,
+    commonFunctions: browserFunctions,
     types: typesRegistry,
   };
 
