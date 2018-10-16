@@ -45,15 +45,12 @@ export function ControlBar(props: ControlBarProps) {
             />
           </EuiFlexItem>
         ))}
-      {showSearch && (
-        <EuiFlexItem>
-          {kueryBarProps ? (
+      {showSearch &&
+        kueryBarProps && (
+          <EuiFlexItem>
             <AutocompleteField {...kueryBarProps} placeholder="Filter results" />
-          ) : (
-            <TableSearchControl actionHandler={actionHandler} />
-          )}
-        </EuiFlexItem>
-      )}
+          </EuiFlexItem>
+        )}
       {showAssignmentOptions &&
         schema.map(def => (
           <EuiFlexItem key={def.name} grow={def.grow}>
