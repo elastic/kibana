@@ -38,7 +38,7 @@ export class DomPreview extends React.Component {
   }
 
   update = original => () => {
-    if (this.content && this.container) return;
+    if (!this.content || !this.container) return;
 
     const thumb = original.cloneNode(true);
 
