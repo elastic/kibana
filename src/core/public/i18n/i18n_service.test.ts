@@ -16,28 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-const mockI18n = jest.fn();
+
+const mockI18nInit = jest.fn();
+
 jest.mock('@kbn/i18n', () => ({
   i18n: {
-    init: mockI18n,
+    init: mockI18nInit,
   },
 }));
+
 import { I18nService } from './i18n_service';
+
 describe('#start()', () => {
   let injectedMetadata: any;
   const translations = {
     locale: 'ch',
     formats: {},
   };
+
   beforeEach(() => {
     injectedMetadata = {
       getLegacyMetadata: jest.fn().mockReturnValue({ translations }),
     } as any;
   });
+
   it('should call start method with translations', async () => {
     const i18nService = new I18nService();
-    expect(mockI18n).not.toHaveBeenCalled();
+    expect(mockI18nInit).not.toHaveBeenCalled();
     i18nService.start({ injectedMetadata });
-    expect(mockI18n.mock.calls).toMatchSnapshot();
+    expect(mockI18nInit).toHaveBeenCalledTimes(1);
+    expect(mockI18nInit).toHaveBeenCalledWith(translations);
   });
 });

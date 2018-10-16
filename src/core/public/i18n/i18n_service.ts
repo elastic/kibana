@@ -16,11 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { i18n } from '@kbn/i18n';
 import { InjectedMetadataStartContract } from '../injected_metadata';
+
 interface Deps {
   injectedMetadata: InjectedMetadataStartContract;
 }
+
 export class I18nService {
   public start({ injectedMetadata }: Deps) {
     i18n.init(injectedMetadata.getLegacyMetadata().translations);
