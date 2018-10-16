@@ -21,7 +21,6 @@ import Joi from 'joi';
 import Boom from 'boom';
 import Wreck from 'wreck';
 import { trimLeft, trimRight } from 'lodash';
-import { unicodeBytesToString } from './lib/decode';
 
 function resolveUri(base, path) {
   let pathToUse = `${trimRight(base, '/')}/${trimLeft(path, '/')}`;
@@ -124,20 +123,18 @@ export const createProxyRoute = ({
         if (err) {
           return reply(err);
         }
-        Wreck.read(esResponse, null, (err, body) => {
-          if (method.toUpperCase() !== 'HEAD') {
-            //[...body] converts buffer into proper array
-            const responseString = unicodeBytesToString([...body]);
-            reply(responseString)
-              .code(esResponse.statusCode)
-              .header('warning', esResponse.headers.warning);
-          } else {
-            reply(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
-              .code(esResponse.statusCode)
-              .type('text/plain')
-              .header('warning', esResponse.headers.warning);
-          }
-        });
+
+        if (method.toUpperCase() !== 'HEAD') {
+          reply(esResponse)
+            .code(esResponse.statusCode)
+            .header('warning', esResponse.headers.warning);
+          return;
+        }
+
+        reply(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
+          .code(esResponse.statusCode)
+          .type('text/plain')
+          .header('warning', esResponse.headers.warning);
       });
     }
   }
