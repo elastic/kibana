@@ -72,9 +72,11 @@ export class UsageCollector {
 
   private static getReport() {
     const keys = Object.keys(this.counters);
+
     // only keep the newest BUCKET_NUMBER buckets
+    const cutoff = this.getBucket() - this.BUCKET_SIZE * (this.BUCKET_NUMBER - 1);
     keys.forEach(key => {
-      if (parseInt(key, 10) < this.getBucket() - this.BUCKET_SIZE * (this.BUCKET_NUMBER - 1)) {
+      if (parseInt(key, 10) < cutoff) {
         delete this.counters[key];
       }
     });
