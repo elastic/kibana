@@ -19,14 +19,13 @@
 
 import { MetricAggType } from './metric_agg_type';
 import { fieldFormats } from '../../registry/field_formats';
-import { i18n } from '@kbn/i18n';
 
 export const countMetricAgg = new MetricAggType({
   name: 'count',
-  title: i18n.translate('common.ui.aggTypes.metrics.countLabel', { defaultMessage: 'Count' }),
+  title: 'Count',
   hasNoDsl: true,
   makeLabel: function () {
-    return i18n.translate('common.ui.aggTypes.metrics.countText', { defaultMessage: 'Count' });
+    return 'Count';
   },
   getFormat: function () {
     return fieldFormats.getDefaultInstance('number');
