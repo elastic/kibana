@@ -1725,6 +1725,7 @@ babel-plugin-check-es2015-constants@^6.22.0:
 babel-plugin-inline-react-svg@^0.5.4:
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/babel-plugin-inline-react-svg/-/babel-plugin-inline-react-svg-0.5.4.tgz#bc818f351cd9d78f5b3bfa7cc1da5f83e7b4010a"
+  integrity sha512-Pr/J5kicFEpIvwooR3mytJWXfyGXoP4gp4QzTdN0jLoa7lU2OJVyhHMm17ekA3okxwbLaQehSc0kV/UVrj343w==
   dependencies:
     babel-template "^6.26.0"
     babel-traverse "^6.26.0"
@@ -1751,10 +1752,12 @@ babel-plugin-jest-hoist@^23.2.0:
 babel-plugin-mock-imports@^0.0.5:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/babel-plugin-mock-imports/-/babel-plugin-mock-imports-0.0.5.tgz#caa865f017d8972fe47772e0fb57f2924e5ce3c5"
+  integrity sha1-yqhl8BfYly/kd3Lg+1fykk5c48U=
 
 babel-plugin-pegjs-inline-precompile@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/babel-plugin-pegjs-inline-precompile/-/babel-plugin-pegjs-inline-precompile-0.1.0.tgz#3307f2b373a844296385311a7c528c53414dc57e"
+  integrity sha1-Mwfys3OoRCljhTEafFKMU0FNxX4=
   dependencies:
     babylon "^6.18.0"
     pegjs "^0.10.0"
@@ -2085,6 +2088,7 @@ babel-plugin-transform-react-jsx@^6.24.1:
 babel-plugin-transform-react-remove-prop-types@^0.4.14:
   version "0.4.19"
   resolved "https://registry.yarnpkg.com/babel-plugin-transform-react-remove-prop-types/-/babel-plugin-transform-react-remove-prop-types-0.4.19.tgz#dc9d8fb176a407a75efe73f231550450e29a3b17"
+  integrity sha512-f49NsaohQ1ByY20nUrpc30QFdbeT4ntV4PAL2vSZe6uCB5nqAcqXS/qzU+aI6ZfYhWASx5eIsTFvFrs1B2ffGg==
 
 babel-plugin-transform-regenerator@^6.22.0, babel-plugin-transform-regenerator@^6.24.1:
   version "6.26.0"
@@ -9977,6 +9981,7 @@ lodash.isobject@^3.0.2:
 lodash.isplainobject@^4.0.6:
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/lodash.isplainobject/-/lodash.isplainobject-4.0.6.tgz#7c526a52d89b45c45cc690b88163be0497f550cb"
+  integrity sha1-fFJqUtibRcRcxpC4gWO+BJf1UMs=
 
 lodash.isstring@^4.0.1:
   version "4.0.1"
@@ -11837,6 +11842,7 @@ pegjs@0.9.0, pegjs@~0.9.0:
 pegjs@^0.10.0:
   version "0.10.0"
   resolved "http://registry.npmjs.org/pegjs/-/pegjs-0.10.0.tgz#cf8bafae6eddff4b5a7efb185269eaaf4610ddbd"
+  integrity sha1-z4uvrm7d/0tafvsYUmnqr0YQ3b0=
 
 pend@~1.2.0:
   version "1.2.0"
