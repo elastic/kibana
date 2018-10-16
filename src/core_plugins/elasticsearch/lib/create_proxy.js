@@ -45,7 +45,7 @@ export function createProxy(server) {
         reply(response);
       } catch(e) {
         if (e instanceof Error) {
-          reply(Boom.badRequest('unable to parse request'));
+          reply(Boom.badRequest('Unable to parse request'));
         } else {
           reply(e);
         }
