@@ -26,7 +26,7 @@ import '../config';
 import '../notify';
 import '../private';
 import '../promises';
-import '../storage/index';
+import '../storage';
 import '../directives/kbn_src';
 import '../watch_multi';
 import './services';
