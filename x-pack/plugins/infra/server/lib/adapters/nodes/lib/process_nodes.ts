@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
-
-import { InfraNode, InfraResponse } from '../../../../../common/graphql/types';
+import { InfraNode } from '../../../../../common/graphql/types';
 import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
 import { convertNodesResponseToGroups } from './convert_nodes_response_to_groups';
 import { createNodeItem } from './create_node_item';
 
-export function processNodes(options: InfraNodeRequestOptions, nodes: any[]): InfraResponse {
-  const response: InfraResponse = { nodes: [] };
-
+export function processNodes(options: InfraNodeRequestOptions, nodes: any[]): InfraNode[] {
   if (options.groupBy.length === 0) {
     // If there are NO group by options then we need to return a
     // nodes only response
@@ -22,12 +18,9 @@ export function processNodes(options: InfraNodeRequestOptions, nodes: any[]): In
         return createNodeItem(options, node, node);
       }
     );
-    set(response, 'nodes', nodeResults);
-    return response;
-  } else {
-    // Return a grouped response
-    response.nodes = convertNodesResponseToGroups(options, nodes);
+    return nodeResults;
   }
 
-  return response;
+  // Return a grouped response
+  return convertNodesResponseToGroups(options, nodes);
 }

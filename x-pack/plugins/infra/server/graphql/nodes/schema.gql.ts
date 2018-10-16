@@ -18,7 +18,7 @@ export const nodesSchema: any = gql`
 
   type InfraNode {
     path: [InfraNodePath!]!
-    metric(metric: InfraMetricInput!): InfraNodeMetric!
+    metric: InfraNodeMetric!
   }
 
   input InfraTimerangeInput {
@@ -81,7 +81,7 @@ export const nodesSchema: any = gql`
   }
 
   type InfraResponse {
-    nodes(path: [InfraPathInput!]): [InfraNode!]!
+    nodes(path: [InfraPathInput!]!, metric: InfraMetricInput!): [InfraNode!]!
   }
 
   extend type InfraSource {

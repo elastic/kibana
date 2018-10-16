@@ -12,7 +12,7 @@ import {
   InfraNodesAggregations,
 } from './adapter_types';
 
-import { InfraResponse } from '../../../../common/graphql/types';
+import { InfraNode } from '../../../../common/graphql/types';
 import { calculateCardinalityOfNodeField } from './lib/calculate_cardinality';
 import { createPartitionBodies } from './lib/create_partition_bodies';
 import { processNodes } from './lib/process_nodes';
@@ -26,19 +26,17 @@ export class ElasticsearchNodesAdapter implements InfraNodesAdapter {
   public async getNodes(
     req: InfraFrameworkRequest,
     options: InfraNodeRequestOptions
-  ): Promise<InfraResponse> {
+  ): Promise<InfraNode[]> {
     const search = <Aggregation>(searchOptions: object) =>
       this.framework.callWithRequest<{}, Aggregation>(req, 'search', searchOptions);
     const msearch = <Aggregation>(msearchOptions: object) =>
       this.framework.callWithRequest<{}, Aggregation>(req, 'msearch', msearchOptions);
 
     const nodeField = options.sourceConfiguration.fields[options.nodeType];
-    const infraResponse: InfraResponse = { nodes: [] };
-
     const totalNodes = await calculateCardinalityOfNodeField(search, nodeField, options);
 
     if (totalNodes === 0) {
-      return infraResponse;
+      return [];
     }
 
     const body = createPartitionBodies(totalNodes, options.nodeType, nodeField, options);
@@ -61,6 +59,6 @@ export class ElasticsearchNodesAdapter implements InfraNodesAdapter {
       return processNodes(options, nodeBuckets);
     }
 
-    return infraResponse;
+    return [];
   }
 }

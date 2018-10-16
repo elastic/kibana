@@ -10,7 +10,6 @@ import {
   InfraPathFilterInput,
   InfraPathInput,
   InfraPathType,
-  InfraResponse,
   InfraTimerangeInput,
 } from '../../../../common/graphql/types';
 import { JsonObject } from '../../../../common/typed_json';
@@ -18,7 +17,7 @@ import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';
 
 export interface InfraNodesAdapter {
-  getNodes(req: InfraFrameworkRequest, options: InfraNodeRequestOptions): Promise<InfraResponse>;
+  getNodes(req: InfraFrameworkRequest, options: InfraNodeRequestOptions): Promise<InfraNode[]>;
 }
 
 export interface InfraHostsFieldsObject {

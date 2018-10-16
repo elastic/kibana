@@ -397,7 +397,8 @@ export namespace InfraResponseResolvers {
 
   export type NodesResolver = Resolver<InfraNode[], NodesArgs>;
   export interface NodesArgs {
-    path?: InfraPathInput[] | null;
+    path: InfraPathInput[];
+    metric: InfraMetricInput;
   }
 }
 
@@ -408,10 +409,7 @@ export namespace InfraNodeResolvers {
   }
 
   export type PathResolver = Resolver<InfraNodePath[]>;
-  export type MetricResolver = Resolver<InfraNodeMetric, MetricArgs>;
-  export interface MetricArgs {
-    metric: InfraMetricInput;
-  }
+  export type MetricResolver = Resolver<InfraNodeMetric>;
 }
 
 export namespace InfraNodePathResolvers {
@@ -532,9 +530,7 @@ export interface IndexFieldsInfraSourceStatusArgs {
   indexType?: InfraIndexType | null;
 }
 export interface NodesInfraResponseArgs {
-  path?: InfraPathInput[] | null;
-}
-export interface MetricInfraNodeArgs {
+  path: InfraPathInput[];
   metric: InfraMetricInput;
 }
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraResponse } from '../../../common/graphql/types';
+import { InfraNode } from '../../../common/graphql/types';
 import { InfraFrameworkRequest } from '../adapters/framework';
 import { InfraNodeRequestOptions, InfraNodesAdapter } from '../adapters/nodes';
 
@@ -18,7 +18,7 @@ export class InfraNodesDomain {
   public async getNodes(
     req: InfraFrameworkRequest,
     options: InfraNodeRequestOptions
-  ): Promise<InfraResponse> {
+  ): Promise<InfraNode[]> {
     return await this.adapter.getNodes(req, options);
   }
 }

@@ -17,11 +17,11 @@ export const waffleNodesQuery = gql`
     source(id: $sourceId) {
       id
       map(timerange: $timerange, filterQuery: $filterQuery) {
-        nodes(path: $path) {
+        nodes(path: $path, metric: $metric) {
           path {
             value
           }
-          metric(metric: $metric) {
+          metric {
             name
             value
           }
