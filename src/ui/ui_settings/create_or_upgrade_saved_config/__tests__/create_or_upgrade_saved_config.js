@@ -45,12 +45,13 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       }))
     };
 
-    async function run() {
+    async function run(options = {}) {
       const resp = await createOrUpgradeSavedConfig({
         savedObjectsClient,
         version,
         buildNum,
         log,
+        ...options
       });
 
       sinon.assert.calledOnce(getUpgradeableConfig);
@@ -154,6 +155,90 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       }
 
       sinon.assert.notCalled(log);
+    });
+  });
+
+  describe('onWriteError()', () => {
+    it('is called with error and attributes when savedObjectsClient.create rejects', async () => {
+      const { run, savedObjectsClient } = setup();
+
+      const error = new Error('foo');
+      savedObjectsClient.create.callsFake(async () => {
+        throw error;
+      });
+
+      const onWriteError = sinon.stub();
+      await run({ onWriteError });
+      sinon.assert.calledOnce(onWriteError);
+      sinon.assert.calledWithExactly(onWriteError, error, {
+        buildNum
+      });
+    });
+
+    it('resolves with the return value of onWriteError()', async () => {
+      const { run, savedObjectsClient } = setup();
+
+      savedObjectsClient.create.callsFake(async () => {
+        throw new Error('foo');
+      });
+
+      const result = await run({ onWriteError: () => 123 });
+      expect(result).to.be(123);
+    });
+
+    it('rejects with the error from onWriteError() if it rejects', async () => {
+      const { run, savedObjectsClient } = setup();
+
+      savedObjectsClient.create.callsFake(async () => {
+        throw new Error('foo');
+      });
+
+      try {
+        await run({
+          onWriteError: (error) => (
+            Promise.reject(new Error(`${error.message} bar`))
+          )
+        });
+        throw new Error('expected run() to reject');
+      } catch (error) {
+        expect(error.message).to.be('foo bar');
+      }
+    });
+
+    it('rejects with the error from onWriteError() if it throws sync', async () => {
+      const { run, savedObjectsClient } = setup();
+
+      savedObjectsClient.create.callsFake(async () => {
+        throw new Error('foo');
+      });
+
+      try {
+        await run({
+          onWriteError: (error) => {
+            throw new Error(`${error.message} bar`);
+          }
+        });
+        throw new Error('expected run() to reject');
+      } catch (error) {
+        expect(error.message).to.be('foo bar');
+      }
+    });
+
+    it('rejects with the writeError if onWriteError() is undefined', async () => {
+      const { run, savedObjectsClient } = setup();
+
+      savedObjectsClient.create.callsFake(async () => {
+        throw new Error('foo');
+      });
+
+      try {
+        await run({
+          onWriteError: undefined
+        });
+        throw new Error('expected run() to reject');
+      } catch (error) {
+        expect(error.message).to.be('foo');
+      }
     });
   });
 });

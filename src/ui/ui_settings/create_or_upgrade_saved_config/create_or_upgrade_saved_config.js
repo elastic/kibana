@@ -27,6 +27,7 @@ export async function createOrUpgradeSavedConfig(options) {
     version,
     buildNum,
     log,
+    onWriteError,
   } = options;
 
   // try to find an older config we can upgrade
@@ -41,12 +42,20 @@ export async function createOrUpgradeSavedConfig(options) {
     upgradeableConfig ? upgradeableConfig.attributes : {}
   );
 
-  // create the new SavedConfig
-  await savedObjectsClient.create(
-    'config',
-    attributes,
-    { id: version }
-  );
+  try {
+    // create the new SavedConfig
+    await savedObjectsClient.create(
+      'config',
+      attributes,
+      { id: version }
+    );
+  } catch (error) {
+    if (onWriteError) {
+      return onWriteError(error, attributes);
+    }
+
+    throw error;
+  }
 
   if (upgradeableConfig) {
     log(['plugin', 'elasticsearch'], {
