@@ -81,6 +81,7 @@ module.controller('MlExplorerController', function (
   mlSelectIntervalService,
   mlSelectSeverityService) {
 
+  $scope.anomalyChartRecords = [];
   $scope.timeFieldName = 'timestamp';
   $scope.loading = true;
   timefilter.enableTimeRangeSelector();
