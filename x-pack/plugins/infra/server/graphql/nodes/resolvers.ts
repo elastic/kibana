@@ -14,6 +14,7 @@ import { InfraNodeRequestOptions } from '../../lib/adapters/nodes';
 import { extractGroupByAndNodeFromPath } from '../../lib/adapters/nodes/extract_group_by_and_node_from_path';
 import { InfraNodesDomain } from '../../lib/domains/nodes_domain';
 import { InfraContext } from '../../lib/infra_types';
+import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
@@ -61,7 +62,7 @@ export const createNodeResolvers = (
     async nodes(mapResponse, args, { req }) {
       const { source, timerange, filterQuery } = mapResponse;
       const { groupBy, nodeType } = extractGroupByAndNodeFromPath(args.path);
-
+      UsageCollector.countNode(nodeType);
       const options: InfraNodeRequestOptions = {
         filterQuery: parseFilterQuery(filterQuery),
         nodeType,

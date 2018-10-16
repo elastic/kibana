@@ -168,7 +168,7 @@ export class IndexTableUi extends Component {
     } else if (fieldName === 'name') {
       return (
         <EuiLink
-          className="indexTable__link"
+          className="indTable__link"
           data-test-subj="indexTableIndexNameLink"
           onClick={() => {
             openDetailPanel(value);
@@ -284,12 +284,10 @@ export class IndexTableUi extends Component {
                   id="checkboxShowSystemIndices"
                   checked={showSystemIndices}
                   onChange={event => showSystemIndicesChanged(event.target.checked)}
-                  label={
-                    intl.formatMessage({
-                      id: 'xpack.idxMgmt.indexTable.systemIndicesSwitchLabel',
-                      defaultMessage: 'Include system indices',
-                    })
-                  }
+                  label={<FormattedMessage
+                    id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
+                    defaultMessage="Include system indices"
+                  />}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -324,7 +322,12 @@ export class IndexTableUi extends Component {
                       defaultMessage: 'Search',
                     })
                   }
-                  aria-label="Search indices"
+                  aria-label={
+                    intl.formatMessage({
+                      id: 'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
+                      defaultMessage: 'Search indices',
+                    })
+                  }
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

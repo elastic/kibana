@@ -8,7 +8,14 @@ import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elas
 import React from 'react';
 import { InfraNodeType } from '../../../common/graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
-import { getContainerLogsUrl, getHostLogsUrl, getPodLogsUrl } from '../../pages/link_to';
+import {
+  getContainerDetailUrl,
+  getContainerLogsUrl,
+  getHostDetailUrl,
+  getHostLogsUrl,
+  getPodDetailUrl,
+  getPodLogsUrl,
+} from '../../pages/link_to';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -27,6 +34,7 @@ export const NodeContextMenu: React.SFC<Props> = ({
   nodeType,
 }) => {
   const nodeLogsUrl = getNodeLogsUrl(nodeType, node);
+  const nodeDetailUrl = getNodeDetailUrl(nodeType, node);
   const nodeField = options.fields ? options.fields[nodeType] : null;
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -41,10 +49,14 @@ export const NodeContextMenu: React.SFC<Props> = ({
               },
             ]
           : []),
-        {
-          name: `View metrics`,
-          href: `#/metrics/${nodeType}/${node.name}`,
-        },
+        ...(nodeDetailUrl
+          ? [
+              {
+                name: `View metrics`,
+                href: nodeDetailUrl,
+              },
+            ]
+          : []),
         ...(nodeField
           ? [
               {
@@ -87,6 +99,28 @@ const getNodeLogsUrl = (
       return getContainerLogsUrl({ containerId: lastPathSegment.value });
     case 'pod':
       return getPodLogsUrl({ podId: lastPathSegment.value });
+    default:
+      return undefined;
+  }
+};
+
+const getNodeDetailUrl = (
+  nodeType: 'host' | 'container' | 'pod',
+  { path }: InfraWaffleMapNode
+): string | undefined => {
+  if (path.length <= 0) {
+    return undefined;
+  }
+
+  const lastPathSegment = path[path.length - 1];
+
+  switch (nodeType) {
+    case 'host':
+      return getHostDetailUrl({ name: lastPathSegment.value });
+    case 'container':
+      return getContainerDetailUrl({ name: lastPathSegment.value });
+    case 'pod':
+      return getPodDetailUrl({ name: lastPathSegment.value });
     default:
       return undefined;
   }

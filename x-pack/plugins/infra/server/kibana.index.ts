@@ -8,10 +8,18 @@ import { Server } from 'hapi';
 import JoiNamespace from 'joi';
 import { initInfraServer } from './infra_server';
 import { compose } from './lib/compose/kibana';
+import { UsageCollector } from './usage/usage_collector';
 
-export const initServerWithKibana = (hapiServer: Server) => {
-  const libs = compose(hapiServer);
+export interface KbnServer extends Server {
+  usage: any;
+}
+
+export const initServerWithKibana = (kbnServer: KbnServer) => {
+  const libs = compose(kbnServer);
   initInfraServer(libs);
+
+  // Register a function with server to manage the collection of usage stats
+  kbnServer.usage.collectorSet.register(UsageCollector.getUsageCollector(kbnServer));
 };
 
 export const getConfigSchema = (Joi: typeof JoiNamespace) => {

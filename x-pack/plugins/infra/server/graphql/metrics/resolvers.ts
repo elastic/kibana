@@ -8,6 +8,7 @@ import { InfraSourceResolvers } from '../../../common/graphql/types';
 import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
 import { InfraMetricsDomain } from '../../lib/domains/metrics_domain';
 import { InfraContext } from '../../lib/infra_types';
+import { UsageCollector } from '../../usage/usage_collector';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 type InfraSourceMetricsResolver = InfraResolverOf<
@@ -29,6 +30,7 @@ export const createMetricResolvers = (
 } => ({
   InfraSource: {
     async metrics(source, args, { req }) {
+      UsageCollector.countNode(args.nodeType);
       const options = {
         nodeId: args.nodeId,
         nodeType: args.nodeType,

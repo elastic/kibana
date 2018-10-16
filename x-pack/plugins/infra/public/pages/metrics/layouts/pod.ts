@@ -6,6 +6,7 @@
 
 import { InfraMetric } from '../../../../common/graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
+import { nginxLayoutCreator } from './nginx';
 import {
   InfraMetricLayoutCreator,
   InfraMetricLayoutSectionType,
@@ -96,4 +97,5 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
     ],
   },
+  ...nginxLayoutCreator(theme),
 ];

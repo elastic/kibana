@@ -31,6 +31,10 @@ export const metricsSchema: any = gql`
     containerDiskIOBytes
     containerMemory
     containerNetworkTraffic
+    nginxHits
+    nginxRequestRate
+    nginxActiveConnections
+    nginxRequestsPerConnection
   }
 
   type InfraMetricData {

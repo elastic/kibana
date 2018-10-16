@@ -9,6 +9,7 @@ import React from 'react';
 
 import { InfraMetricData } from '../../../common/graphql/types';
 import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
+import { metricTimeActions } from '../../store';
 import { InfraLoadingPanel } from '../loading';
 import { Section } from './section';
 
@@ -17,9 +18,18 @@ interface Props {
   layout: InfraMetricLayout[];
   loading: boolean;
   nodeName: string;
+  onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
 }
 
-export class Metrics extends React.PureComponent<Props> {
+interface State {
+  crosshairValue: number | null;
+}
+
+export class Metrics extends React.PureComponent<Props, State> {
+  public readonly state = {
+    crosshairValue: null,
+  };
+
   public render() {
     if (this.props.loading) {
       return (
@@ -47,8 +57,28 @@ export class Metrics extends React.PureComponent<Props> {
   };
 
   private renderSection = (layout: InfraMetricLayout) => (section: InfraMetricLayoutSection) => {
+    let sectionProps = {};
+    if (section.type === 'chart') {
+      const { onChangeRangeTime } = this.props;
+      sectionProps = {
+        onChangeRangeTime,
+        crosshairValue: this.state.crosshairValue,
+        onCrosshairUpdate: this.onCrosshairUpdate,
+      };
+    }
     return (
-      <Section section={section} metrics={this.props.metrics} key={`${layout.id}-${section.id}`} />
+      <Section
+        section={section}
+        metrics={this.props.metrics}
+        key={`${layout.id}-${section.id}`}
+        {...sectionProps}
+      />
     );
+  };
+
+  private onCrosshairUpdate = (crosshairValue: number) => {
+    this.setState({
+      crosshairValue,
+    });
   };
 }
