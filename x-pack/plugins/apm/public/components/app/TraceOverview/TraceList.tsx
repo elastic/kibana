@@ -11,7 +11,7 @@ import { fontSizes, truncate } from '../../../style/variables';
 // @ts-ignore
 import { asMillisWithDefault } from '../../../utils/formatters';
 // @ts-ignore
-import { RelativeLink } from '../../../utils/url';
+import { legacyEncodeURIComponent, RelativeLink } from '../../../utils/url';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 // @ts-ignore
@@ -37,9 +37,16 @@ const traceListColumns: ITableColumn[] = [
     name: 'Name',
     width: '40%',
     sortable: true,
-    render: (name: string, { serviceName }: ITransactionGroup) => (
+    render: (
+      name: string,
+      { serviceName, transactionType }: ITransactionGroup
+    ) => (
       <TooltipOverlay content={formatString(name)}>
-        <AppLink path={`${serviceName}/traces/${name}`}>
+        <AppLink
+          path={`${serviceName}/transactions/${transactionType}/${legacyEncodeURIComponent(
+            name
+          )}`}
+        >
           {formatString(name)}
         </AppLink>
       </TooltipOverlay>
