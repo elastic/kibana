@@ -268,7 +268,7 @@ app.directive('thresholdWatchEdit', function ($injector) {
             };
 
             const message = i18n.translate('xpack.watcher.sections.watchEdit.threshold.saveConfirmModal.description', {
-              defaultMessage: 'Watch with ID "{watchId}"{watchNameMessageFragment} already exists. Do you want to overwrite it?',
+              defaultMessage: 'Watch with ID "{watchId}" {watchNameMessageFragment} already exists. Do you want to overwrite it?',
               values: {
                 watchId: this.watch.id,
                 watchNameMessageFragment: existingWatch.name
