@@ -1,13 +1,20 @@
+@import 'node_modules/@elastic/eui/src/components/panel/mixins';
+
+
 .tvbSeriesEditor__container {
-  background-color: $euiColorEmptyShade;
   margin-bottom: $euiSize;
 }
 
+@include euiPanel('tvbSeriesEditor');
+
 .tvbSeriesEditor {
-  // Background color necessary for when re-ordering
-  background-color: $euiColorEmptyShade;
+  margin: $euiSizeS;
   padding: $euiSizeS;
-  border-bottom: 2px solid $euiBorderColor;
+
+  // When dragging a collapsed item, make sure the contents doesn't show
+  &.ui-sortable-dragging {
+    overflow: hidden;
+  }
 }
 
 .tvbSeries__body {
