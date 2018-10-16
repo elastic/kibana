@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 import dedent from 'dedent';
 
 import { AdvancedSettings } from './advanced_settings';
@@ -151,8 +151,8 @@ const config = {
 describe('AdvancedSettings', () => {
 
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <AdvancedSettings.WrappedComponent
+    const component = shallow(
+      <AdvancedSettings
         config={config}
       />
     );
@@ -161,8 +161,8 @@ describe('AdvancedSettings', () => {
   });
 
   it('should render specific setting if given setting key', async () => {
-    const component = shallowWithIntl(
-      <AdvancedSettings.WrappedComponent
+    const component = shallow(
+      <AdvancedSettings
         config={config}
         query="test:string:setting"
       />
