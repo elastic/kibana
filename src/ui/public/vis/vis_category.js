@@ -38,7 +38,7 @@ const CATEGORY = {
 
 const CATEGORY_DISPLAY_NAMES = {
   [CATEGORY.BASIC]: i18n.translate('common.ui.vis.visCategory.basicChartsLabel', { defaultMessage: 'Basic Charts' }),
-  [CATEGORY.DATA]: i18n.translate('common.ui.vis.visCategory.DataLabel', { defaultMessage: 'Data' }),
+  [CATEGORY.DATA]: i18n.translate('common.ui.vis.visCategory.dataLabel', { defaultMessage: 'Data' }),
   [CATEGORY.GRAPHIC]: i18n.translate('common.ui.vis.visCategory.graphicLabel', { defaultMessage: 'Graphic' }),
   [CATEGORY.MAP]: i18n.translate('common.ui.vis.visCategory.mapsLabel', { defaultMessage: 'Maps' }),
   [CATEGORY.OTHER]: i18n.translate('common.ui.vis.visCategory.otherLabel', { defaultMessage: 'Other' }),
