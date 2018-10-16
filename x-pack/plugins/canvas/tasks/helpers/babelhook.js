@@ -30,6 +30,10 @@ const options = {
           location: resolve(__dirname, '..', 'mocks', 'absoluteToParsedUrl'),
         },
         {
+          pattern: 'ui/visualize/loader',
+          location: resolve(__dirname, '..', 'mocks', 'visualizeLoader'),
+        },
+        {
           pattern: 'socket.io-client',
           location: resolve(__dirname, '..', 'mocks', 'socketClient'),
         },
