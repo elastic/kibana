@@ -16,9 +16,9 @@ interface TagBadgeListProps {
 
 export const TagBadgeList = (props: TagBadgeListProps) => (
   // @ts-ignore direction prop type "column" not defined in current EUI version
-  <EuiFlexGroup direction="column">
+  <EuiFlexGroup direction="column" gutterSize="xs">
     {props.items.map((item: any) => (
-      <EuiFlexItem>
+      <EuiFlexItem key={`${item.id}`}>
         <TagAssignment
           tag={item}
           assignTag={(id: string) => props.actionHandler(AssignmentActionType.Assign, id)}
