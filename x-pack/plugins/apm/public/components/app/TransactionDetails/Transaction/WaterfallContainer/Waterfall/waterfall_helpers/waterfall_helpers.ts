@@ -11,19 +11,30 @@ import { Transaction } from '../../../../../../../../typings/Transaction';
 export interface IWaterfallItem {
   transaction?: Transaction;
   span?: Span;
-  id: string;
+  id: string | number;
   parentId?: string;
   serviceName: string;
   name: string;
   duration: number;
-  timestamp: string;
+  timestamp: number;
   offset: number;
-  eventType: string;
+  docType: string;
   children?: IWaterfallItem[];
 }
 
-export function getTransactionItem(transaction: Transaction): IWaterfallItem {
-  const timestamp = transaction['@timestamp'];
+function getTransactionItem(transaction: Transaction): IWaterfallItem {
+  if (transaction.version === 'v1') {
+    return {
+      id: transaction.transaction.id,
+      serviceName: transaction.context.service.name,
+      name: transaction.transaction.name,
+      duration: transaction.transaction.duration.us,
+      timestamp: new Date(transaction['@timestamp']).getTime() * 1000,
+      offset: 0,
+      docType: 'transaction',
+      transaction
+    };
+  }
 
   return {
     id: transaction.transaction.id,
@@ -31,53 +42,62 @@ export function getTransactionItem(transaction: Transaction): IWaterfallItem {
     serviceName: transaction.context.service.name,
     name: transaction.transaction.name,
     duration: transaction.transaction.duration.us,
-    timestamp,
+    timestamp: transaction.timestamp.us,
     offset: 0,
-    eventType: 'transaction',
+    docType: 'transaction',
     transaction
   };
 }
 
-export function getSpanItem(span: Span): IWaterfallItem {
-  const timestamp = span['@timestamp'];
+function getSpanItem(span: Span): IWaterfallItem {
+  if (span.version === 'v1') {
+    return {
+      id: span.span.id,
+      parentId: span.span.parent || span.transaction.id,
+      serviceName: span.context.service.name,
+      name: span.span.name,
+      duration: span.span.duration.us,
+      timestamp:
+        new Date(span['@timestamp']).getTime() * 1000 + span.span.start.us,
+      offset: 0,
+      docType: 'span',
+      span
+    };
+  }
 
   return {
-    id: span.span.hex_id!, // TODO: make sure this is compatible with v1
+    id: span.span.hex_id,
     parentId: span.parent && span.parent.id,
     serviceName: span.context.service.name,
     name: span.span.name,
     duration: span.span.duration.us,
-    timestamp,
+    timestamp: span.timestamp.us,
     offset: 0,
-    eventType: 'span',
+    docType: 'span',
     span
   };
-}
-
-export function getOffset(t1: string, t2: string) {
-  return (new Date(t2).getTime() - new Date(t1).getTime()) * 1000;
 }
 
 export function getWaterfallRoot(
   items: IWaterfallItem[],
   entryTransactionItem: IWaterfallItem
 ) {
-  const groupedItems = groupBy(
+  const itemsByParentId = groupBy(
     items,
     item => (item.parentId ? item.parentId : 'root')
   );
 
-  function findChildren(parent: IWaterfallItem): IWaterfallItem {
-    const children = groupedItems[parent.id] || [];
-    const nextChildren = sortBy(children, 'timestamp').map(findChildren);
+  function getWithChildren(item: IWaterfallItem): IWaterfallItem {
+    const children = itemsByParentId[item.id] || [];
+    const nextChildren = sortBy(children, 'timestamp').map(getWithChildren);
     return {
-      ...parent,
-      offset: getOffset(entryTransactionItem.timestamp, parent.timestamp),
+      ...item,
+      offset: item.timestamp - entryTransactionItem.timestamp,
       children: nextChildren
     };
   }
 
-  return findChildren(entryTransactionItem);
+  return getWithChildren(entryTransactionItem);
 }
 
 export interface IWaterfall {
@@ -93,9 +113,10 @@ export function getWaterfall(
   entryTransaction: Transaction
 ): IWaterfall {
   const items = hits
+    .map(addVersion)
     .map(hit => {
-      const eventType = hit.processor.event;
-      switch (eventType) {
+      const docType = hit.processor.event;
+      switch (docType) {
         case 'span':
           return getSpanItem(hit as Span);
         case 'transaction':
@@ -106,7 +127,7 @@ export function getWaterfall(
     })
     .filter(removeEmpty);
 
-  const entryTransactionItem = getTransactionItem(entryTransaction);
+  const entryTransactionItem = getTransactionItem(addVersion(entryTransaction));
   const root = getWaterfallRoot(items, entryTransactionItem);
   return {
     duration: root.duration,
@@ -118,4 +139,9 @@ export function getWaterfall(
 
 function removeEmpty<T>(value: T | null): value is T {
   return value !== null;
+}
+
+function addVersion<T extends Transaction | Span>(hit: T): T {
+  hit.version = hit.hasOwnProperty('trace') ? 'v2' : 'v1';
+  return hit;
 }

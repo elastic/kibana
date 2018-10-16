@@ -4,28 +4,54 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDoc, ContextService } from './APMDoc';
+import { APMDocV1, APMDocV2, ContextService } from './APMDoc';
 
-export interface Transaction extends APMDoc {
-  processor: {
-    name: 'transaction';
-    event: 'transaction';
+interface Processor {
+  name: 'transaction';
+  event: 'transaction';
+}
+
+interface Context {
+  process?: {
+    pid: number;
   };
-  context: {
-    process?: {
-      pid: number;
+  service: ContextService;
+  request: {
+    url: {
+      full: string;
     };
-    service: ContextService;
-    request: {
-      url: {
-        full: string;
+  };
+  user?: {
+    id: string;
+  };
+  [key: string]: any;
+}
+
+export interface TransactionV1 extends APMDocV1 {
+  version: 'v1';
+  processor: Processor;
+  context: Context;
+  transaction: {
+    duration: {
+      us: number;
+    };
+    id: string;
+    name: string; // name could be missing in ES but the UI will always only aggregate on transactions with a name
+    result?: string;
+    sampled: boolean;
+    span_count?: {
+      dropped?: {
+        total?: number;
       };
     };
-    user?: {
-      id: string;
-    };
-    [key: string]: any;
+    type: string;
   };
+}
+
+export interface TransactionV2 extends APMDocV2 {
+  version: 'v2';
+  processor: Processor;
+  context: Context;
   transaction: {
     duration: {
       us: number;
@@ -36,7 +62,7 @@ export interface Transaction extends APMDoc {
     sampled: boolean;
 
     span_count?: {
-      started?: number; // span_count.started not available in v1
+      started?: number; // only v2
       dropped?: {
         total?: number;
       };
@@ -44,3 +70,5 @@ export interface Transaction extends APMDoc {
     type: string;
   };
 }
+
+export type Transaction = TransactionV1 | TransactionV2;

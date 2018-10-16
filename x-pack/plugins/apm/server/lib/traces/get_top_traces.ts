@@ -5,7 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { get } from 'lodash';
+import { oc } from 'ts-optchain';
 import {
   PARENT_ID,
   PROCESSOR_EVENT,
@@ -70,7 +70,8 @@ export async function getTopTraces({
   }
 
   const response: SearchResponse<Transaction> = await client('search', params);
-  const buckets = get(response, 'aggregations.transactions.buckets', []);
+  // @ts-ignore
+  const buckets = oc(response).aggregations.transactions.buckets([]);
 
   return prepareTransactionGroups({ buckets, start, end });
 }

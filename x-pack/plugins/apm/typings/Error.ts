@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDoc, ContextService, Stackframe } from './APMDoc';
+import { APMDocV1, ContextService, Stackframe } from './APMDoc';
 
-export interface Error extends APMDoc {
+export interface Error extends APMDocV1 {
   processor: {
     name: 'error';
     event: 'error';

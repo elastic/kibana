@@ -6,23 +6,23 @@
 
 import {
   TRANSACTION_ID,
-  PROCESSOR_EVENT,
-  TRACE_ID
-} from '../../../common/constants';
-import { get } from 'lodash';
+  SPAN_START,
+  SPAN_TYPE,
+  PROCESSOR_EVENT
+} from '../../../../common/constants';
 
-async function getTransaction({ transactionId, traceId, setup }) {
-  const { start, end, esFilterQuery, client, config } = setup;
+export async function getSpans({ transactionId, setup }) {
+  const { start, end, client, config } = setup;
 
   const params = {
-    index: config.get('apm_oss.transactionIndices'),
+    index: config.get('apm_oss.spanIndices'),
     body: {
-      size: 1,
+      size: 500,
       query: {
         bool: {
           filter: [
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
             { term: { [TRANSACTION_ID]: transactionId } },
+            { term: { [PROCESSOR_EVENT]: 'span' } },
             {
               range: {
                 '@timestamp': {
@@ -34,20 +34,19 @@ async function getTransaction({ transactionId, traceId, setup }) {
             }
           ]
         }
+      },
+      sort: [{ [SPAN_START]: { order: 'asc' } }],
+      aggs: {
+        types: {
+          terms: {
+            field: SPAN_TYPE,
+            size: 100
+          }
+        }
       }
     }
   };
 
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
-
-  if (traceId) {
-    params.body.query.bool.filter.push({ term: { [TRACE_ID]: traceId } });
-  }
-
   const resp = await client('search', params);
-  return get(resp, 'hits.hits[0]._source', {});
+  return resp.hits.hits.map(hit => hit._source);
 }
-
-export default getTransaction;

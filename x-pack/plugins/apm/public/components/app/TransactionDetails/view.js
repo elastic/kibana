@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { HeaderLarge } from '../../shared/UIComponents';
-import Distribution from './Distribution';
+import { Distribution } from './Distribution';
 import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
 import TransactionCharts from '../../shared/charts/TransactionCharts';
@@ -38,7 +38,11 @@ function TransactionDetails({ urlParams, location }) {
       <TransactionDistributionRequest
         urlParams={urlParams}
         render={({ data }) => (
-          <Distribution distribution={data} urlParams={urlParams} />
+          <Distribution
+            distribution={data}
+            urlParams={urlParams}
+            location={location}
+          />
         )}
       />
 
