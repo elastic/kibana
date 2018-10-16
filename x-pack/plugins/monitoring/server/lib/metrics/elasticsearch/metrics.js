@@ -70,7 +70,7 @@ export const metrics = {
       'Average latency for indexing documents, which is time it takes to index documents divided by number that were indexed. This considers any shard located on this node, including replicas.', // eslint-disable-line max-len
     type: 'node'
   }),
-  index_latency: new LatencyMetric({
+  index_index_latency: new LatencyMetric({
     metric: 'index',
     fieldSource: 'index_stats.primaries',
     field: 'index_stats.primaries.indexing.index_total',
@@ -98,7 +98,7 @@ export const metrics = {
       'Average latency for searching, which is time it takes to execute searches divided by number of searches submitted. This considers primary and replica shards.', // eslint-disable-line max-len
     type: 'node'
   }),
-  query_latency: new LatencyMetric({
+  index_query_latency: new LatencyMetric({
     metric: 'query',
     fieldSource: 'index_stats.total',
     field: 'index_stats.total.search.query_total',
