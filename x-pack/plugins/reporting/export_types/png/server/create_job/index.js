@@ -12,6 +12,7 @@ function createJobFn(server) {
 
   return async function createJob({
     objectType,
+    title,
     relativeUrl,
     browserTimezone,
     layout
@@ -19,6 +20,7 @@ function createJobFn(server) {
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
 
     return {
+      title: title,
       type: objectType,
       relativeUrl,
       headers: serializedEncryptedHeaders,

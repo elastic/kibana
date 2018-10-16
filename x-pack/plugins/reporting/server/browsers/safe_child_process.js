@@ -49,12 +49,13 @@ export function safeChildProcess(childProcess, observer) {
 
   // this is adding unsubscribe logic to our observer
   // so that if our observer unsubscribes, we terminate our child-process
-  observer.add(() => {
-    childProcess.kill('SIGKILL');
-  });
+  if (observer) {
+    observer.add(() => {
+      childProcess.kill('SIGKILL');
+    });
 
-  observer.add(terminate$.pipe(ignoreElements()).subscribe(observer));
-}
+    observer.add(terminate$.pipe(ignoreElements()).subscribe(observer));
+  }}
 
 // If a process exits ungracefully, we can try to help the user make sense of why
 // by giving them a suggestion based on the code.
