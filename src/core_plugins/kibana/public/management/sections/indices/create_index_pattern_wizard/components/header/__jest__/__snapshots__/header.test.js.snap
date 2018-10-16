@@ -50,6 +50,23 @@ exports[`Header should render normally 1`] = `
         </p>
       </EuiText>
     </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiSwitch
+        checked={true}
+        id="checkboxShowSystemIndices"
+        label={
+          <FormattedMessage
+            defaultMessage="Include system indices"
+            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
+            values={Object {}}
+          />
+        }
+        onChange={[Function]}
+      />
+    </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
     size="m"
@@ -106,6 +123,23 @@ exports[`Header should render without including system indices 1`] = `
           </EuiTextColor>
         </p>
       </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiSwitch
+        checked={false}
+        id="checkboxShowSystemIndices"
+        label={
+          <FormattedMessage
+            defaultMessage="Include system indices"
+            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
+            values={Object {}}
+          />
+        }
+        onChange={[Function]}
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer

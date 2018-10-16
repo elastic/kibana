@@ -26,6 +26,18 @@ Array [
 ]
 `;
 
+exports[`dev/i18n/extractors/html extracts default messages from HTML with one-time binding 1`] = `
+Array [
+  Array [
+    "kbn.id",
+    Object {
+      "context": undefined,
+      "message": "Message text with {value}",
+    },
+  ],
+]
+`;
+
 exports[`dev/i18n/extractors/html throws on empty i18n-id 1`] = `"Empty \\"i18n-id\\" value in angular directive is not allowed."`;
 
 exports[`dev/i18n/extractors/html throws on missing i18n-default-message attribute 1`] = `"Empty defaultMessage in angular directive is not allowed (\\"message-id\\")."`;

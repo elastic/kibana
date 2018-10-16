@@ -50,7 +50,6 @@ export const Header = ({
           }}
         />
       </h1>
-
     </EuiTitle>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
       <EuiFlexItem grow={false}>
@@ -70,7 +69,7 @@ export const Header = ({
           <EuiFlexItem grow={false}>
             <EuiSwitch
               label={<FormattedMessage
-                id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch"
+                id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
                 defaultMessage="Include system indices"
               />}
               id="checkboxShowSystemIndices"
