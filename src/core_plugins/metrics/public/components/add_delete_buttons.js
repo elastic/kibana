@@ -76,7 +76,7 @@ function AddDeleteButtons(props) {
     );
   }
   return (
-    <EuiFlexGroup gutterSize="s" responsive={props.responsive}>
+    <EuiFlexGroup gutterSize="s" responsive={props.responsive} justifyContent="flexEnd">
       { clone }
       { addBtn }
       { deleteBtn }

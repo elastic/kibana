@@ -29,7 +29,15 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import Vars from './vars';
 
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiTextArea,
+  EuiFormRow,
+  EuiCode,
+} from '@elastic/eui';
 
 class CalculationAgg extends Component {
 
@@ -61,40 +69,50 @@ class CalculationAgg extends Component {
         onDelete={this.props.onDelete}
         siblings={this.props.siblings}
       >
-        <div className="vis_editor__row_item">
-          <div>
-            <div className="vis_editor__label">Aggregation</div>
+        <EuiFlexGroup direction="column" gutterSize="l">
+          <EuiFlexItem>
+            <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
             <AggSelect
+              id={htmlId('aggregation')}
               panelType={this.props.panel.type}
               siblings={this.props.siblings}
               value={model.type}
               onChange={handleSelectChange('type')}
             />
-            <div className="vis_editor__variables">
-              <div className="vis_editor__label">Variables</div>
-              <Vars
-                metrics={siblings}
-                onChange={handleChange}
-                name="variables"
-                model={model}
-              />
-            </div>
-            <div className="vis_editor__row_item">
-              <label className="vis_editor__label" htmlFor={htmlId('painless')}>
-                Painless Script - Variables are keys on the <code>params</code>
-                object, i.e. <code>params.&lt;name&gt;</code>.
-                To access the bucket interval (in milliseconds) use <code>params._interval</code>.
-              </label>
-              <input
-                id={htmlId('painless')}
-                className="vis_editor__input-grows-100"
-                type="text"
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiFormLabel htmlFor={htmlId('variables')}>Variables</EuiFormLabel>
+            <Vars
+              id={htmlId('variables')}
+              metrics={siblings}
+              onChange={handleChange}
+              name="variables"
+              model={model}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('painless')}
+              label="Painless Script"
+              fullWidth
+              helpText={
+                <div>
+                  Variables are keys on the <EuiCode>params</EuiCode> object, i.e. <EuiCode>params.&lt;name&gt;</EuiCode>.
+                  To access the bucket interval (in milliseconds) use <EuiCode>params._interval</EuiCode>.
+                </div>
+              }
+            >
+              <EuiTextArea
+                data-test-subj="mathExpression"
                 onChange={handleTextChange('script')}
+                fullWidth
                 value={model.script}
               />
-            </div>
-          </div>
-        </div>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </AggRow>
     );
   }

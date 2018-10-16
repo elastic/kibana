@@ -59,7 +59,7 @@ export function filterRows(includeSiblings) {
 }
 
 function MetricSelect(props) {
-  const { restrict, metric, onChange, value, exclude, includeSiblings } = props;
+  const { additionalOptions, restrict, metric, onChange, value, exclude, includeSiblings, ...rest } = props;
 
   const metrics = props.metrics.filter(createTypeFilter(restrict, exclude));
 
@@ -88,7 +88,7 @@ function MetricSelect(props) {
     const label = calculateLabel(row, metrics);
     return { value: row.id, label };
   });
-  const allOptions = [...options, ...props.additionalOptions, ...percentileOptions];
+  const allOptions = [...options, ...additionalOptions, ...percentileOptions];
 
   const selectedOption = allOptions.find(option => {
     return value === option.value;
@@ -101,7 +101,8 @@ function MetricSelect(props) {
       options={allOptions}
       selectedOptions={selectedOptions}
       onChange={onChange}
-      singleSelection={true}
+      singleSelection={{ asPlainText: true }}
+      {...rest}
     />
   );
 }

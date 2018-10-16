@@ -25,12 +25,12 @@ import {
 import generateByTypeFilter from '../lib/generate_by_type_filter';
 
 function FieldSelect(props) {
-  const { type, fields, indexPattern, value, onChange, disabled } = props;
+  const { type, fields, indexPattern, value, onChange, disabled, restrict, ...rest } = props;
   if (type === 'count') {
     return null;
   }
   const options = (fields[indexPattern] || [])
-    .filter(generateByTypeFilter(props.restrict))
+    .filter(generateByTypeFilter(restrict))
     .map(field => {
       return { label: field.name, value: field.name };
     });
@@ -47,7 +47,8 @@ function FieldSelect(props) {
       options={options}
       selectedOptions={selectedOptions}
       onChange={onChange}
-      singleSelection={true}
+      singleSelection={{ asPlainText: true }}
+      {...rest}
     />
   );
 }

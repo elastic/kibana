@@ -26,7 +26,11 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export const TopHitAgg = props => {
@@ -72,87 +76,83 @@ export const TopHitAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Aggregation</div>
-            <AggSelect
-              panelType={props.panel.type}
-              siblings={props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
-            />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('field')}>
-              Field
-            </label>
-            <FieldSelect
-              id={htmlId('field')}
-              fields={fields}
-              type={model.type}
-              restrict="numeric"
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-            />
-          </div>
-        </div>
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('size')}>
-              Size
-            </label>
-            <input
-              id={htmlId('size')}
-              className="vis_editor__input-grows-100"
-              value={model.size}
-              onChange={handleTextChange('size')}
-            />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('agg_with')}>
-              Aggregate with
-            </label>
-            <EuiComboBox
-              isClearable={false}
-              id={htmlId('agg_with')}
-              placeholder="Select..."
-              options={aggWithOptions}
-              selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
-              onChange={handleSelectChange('agg_with')}
-              singleSelection={true}
-            />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('order_by')}>
-              Order by
-            </label>
-            <FieldSelect
-              id={htmlId('order_by')}
-              restrict="date"
-              value={model.order_by}
-              onChange={handleSelectChange('order_by')}
-              indexPattern={indexPattern}
-              fields={fields}
-            />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('order')}>
-              Order
-            </label>
-            <EuiComboBox
-              isClearable={false}
-              id={htmlId('order')}
-              placeholder="Select..."
-              options={orderOptions}
-              selectedOptions={selectedOrderOption ? [selectedOrderOption] : []}
-              onChange={handleSelectChange('order')}
-              singleSelection={true}
-            />
-          </div>
-        </div>
-      </div>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('field')}>Field</EuiFormLabel>
+          <FieldSelect
+            id={htmlId('field')}
+            fields={fields}
+            type={model.type}
+            restrict="numeric"
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel htmlFor={htmlId('size')}>Size</EuiFormLabel>
+          {/*
+            EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+            Should it be text or number?
+          */}
+          <input
+            id={htmlId('size')}
+            className="tvbAgg__input"
+            value={model.size}
+            onChange={handleTextChange('size')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('agg_with')}>Aggregate with</EuiFormLabel>
+          <EuiComboBox
+            isClearable={false}
+            id={htmlId('agg_with')}
+            placeholder="Select"
+            options={aggWithOptions}
+            selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
+            onChange={handleSelectChange('agg_with')}
+            singleSelection={{ asPlainText: true }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('order_by')}>Order by</EuiFormLabel>
+          <FieldSelect
+            id={htmlId('order_by')}
+            restrict="date"
+            value={model.order_by}
+            onChange={handleSelectChange('order_by')}
+            indexPattern={indexPattern}
+            fields={fields}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('order')}>Order</EuiFormLabel>
+          <EuiComboBox
+            isClearable={false}
+            id={htmlId('order')}
+            placeholder="Select..."
+            options={orderOptions}
+            selectedOptions={selectedOrderOption ? [selectedOrderOption] : []}
+            onChange={handleSelectChange('order')}
+            singleSelection={{ asPlainText: true }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };

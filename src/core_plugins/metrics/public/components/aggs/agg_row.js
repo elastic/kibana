@@ -47,9 +47,9 @@ function AggRow(props) {
     <div className="tvbAggRow">
       <EuiFlexGroup data-test-subj="aggRow" gutterSize="s" alignItems="flexStart" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} color={iconColor} />
+          <EuiIcon className="tvbAggRow__visibilityIcon" type={iconType} color={iconColor} />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem className="tvbAggRow__children">
           {props.children}
         </EuiFlexItem>
         {dragHandle}

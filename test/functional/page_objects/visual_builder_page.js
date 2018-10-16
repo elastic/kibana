@@ -76,7 +76,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getMarkdownText() {
-      const el = await find.byCssSelector('.vis_editor__visualization');
+      const el = await find.byCssSelector('.tvbEditorVisualization');
       return await el.getVisibleText();
     }
 
@@ -170,9 +170,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async fillInVariable(name = 'test', metric = 'count', nth = 0) {
       const elements = await testSubjects.findAll('varRow');
-      const varNameInput = await elements[nth].findByCssSelector('.vis_editor__calc_vars-name input');
+      const varNameInput = await elements[nth].findByCssSelector('.tvbAggs__varName');
       await varNameInput.type(name);
-      const metricSelectWrapper = await elements[nth].findByCssSelector('.vis_editor__calc_vars-var');
+      const metricSelectWrapper = await elements[nth].findByCssSelector('.tvbAggs__varMetricWrapper');
       await comboBox.setElement(metricSelectWrapper, metric);
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }

@@ -80,7 +80,7 @@ function filterByPanelType(panelType) {
 }
 
 function AggSelect(props) {
-  const { siblings, panelType, value } = props;
+  const { siblings, panelType, value, onChange, ...rest } = props;
 
   const selectedOption = allAggOptions.find(option => {
     return value === option.value;
@@ -120,18 +120,19 @@ function AggSelect(props) {
 
   const handleChange = selectedOptions => {
     if (!selectedOptions || selectedOptions.length <= 0) return;
-    props.onChange(selectedOptions);
+    onChange(selectedOptions);
   };
 
   return (
-    <div data-test-subj="aggSelector" className="vis_editor__row_item">
+    <div data-test-subj="aggSelector">
       <EuiComboBox
         isClearable={false}
         placeholder="Select aggregation"
         options={options}
         selectedOptions={selectedOptions}
         onChange={handleChange}
-        singleSelection={true}
+        singleSelection={{ asPlainText: true }}
+        {...rest}
       />
     </div>
   );

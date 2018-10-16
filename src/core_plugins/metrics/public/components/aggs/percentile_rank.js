@@ -25,7 +25,13 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiFieldText,
+} from '@elastic/eui';
 
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;
@@ -47,36 +53,38 @@ export const PercentileRankAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__row_item">
-        <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
-        <FieldSelect
-          id={htmlId('field')}
-          fields={fields}
-          type={model.type}
-          restrict="numeric"
-          indexPattern={indexPattern}
-          value={model.field}
-          onChange={handleSelectChange('field')}
-        />
-      </div>
-      <div className="vis_editor__percentile_rank_value">
-        <label className="vis_editor__label" htmlFor={htmlId('value')}>Value</label>
-        <input
-          id={htmlId('value')}
-          className="vis_editor__input-grows"
-          value={model.value}
-          onChange={handleTextChange('value')}
-        />
-      </div>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('field')}>Field</EuiFormLabel>
+          <FieldSelect
+            id={htmlId('field')}
+            fields={fields}
+            type={model.type}
+            restrict="numeric"
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('value')}>Value</EuiFormLabel>
+          <EuiFieldText
+            id={htmlId('value')}
+            value={model.value}
+            onChange={handleTextChange('value')}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };

@@ -27,7 +27,11 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiFieldText,
 } from '@elastic/eui';
 
 export const StandardDeviationAgg = props => {
@@ -63,46 +67,48 @@ export const StandardDeviationAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__std_deviation-field">
-        <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
-        <FieldSelect
-          id={htmlId('field')}
-          fields={fields}
-          type={model.type}
-          restrict="numeric"
-          indexPattern={indexPattern}
-          value={model.field}
-          onChange={handleSelectChange('field')}
-        />
-      </div>
-      <div className="vis_editor__std_deviation-sigma_item">
-        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>Sigma</label>
-        <input
-          id={htmlId('sigma')}
-          className="vis_editor__std_deviation-sigma"
-          value={model.sigma}
-          onChange={handleTextChange('sigma')}
-        />
-      </div>
-      <div className="vis_editor__row_item">
-        <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
-        <EuiComboBox
-          id={htmlId('mode')}
-          options={modeOptions}
-          selectedOptions={selectedModeOption ? [selectedModeOption] : []}
-          onChange={handleSelectChange('mode')}
-          singleSelection={true}
-        />
-      </div>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('field')}>Field</EuiFormLabel>
+          <FieldSelect
+            id={htmlId('field')}
+            fields={fields}
+            type={model.type}
+            restrict="numeric"
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel htmlFor={htmlId('sigma')}>Sigma</EuiFormLabel>
+          <EuiFieldText
+            id={htmlId('sigma')}
+            value={model.sigma}
+            onChange={handleTextChange('sigma')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('mode')}>Mode</EuiFormLabel>
+          <EuiComboBox
+            id={htmlId('mode')}
+            options={modeOptions}
+            selectedOptions={selectedModeOption ? [selectedModeOption] : []}
+            onChange={handleSelectChange('mode')}
+            singleSelection={{ asPlainText: true }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };

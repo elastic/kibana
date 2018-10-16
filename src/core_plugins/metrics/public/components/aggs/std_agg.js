@@ -24,7 +24,7 @@ import FieldSelect from './field_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 function StandardAgg(props) {
   const { model, panel, series, fields } = props;
@@ -47,32 +47,39 @@ function StandardAgg(props) {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__item">
-        <div className="vis_editor__label">Aggregation</div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      {
-        model.type !== 'count'
-          ? (
-            <div className="vis_editor__item">
-              <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
-              <FieldSelect
-                id={htmlId('field')}
-                fields={fields}
-                type={model.type}
-                restrict={restrict}
-                indexPattern={indexPattern}
-                value={model.field}
-                onChange={handleSelectChange('field')}
-              />
-            </div>
-          ) : null
-      }
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormRow label="Aggregation" fullWidth>
+            <AggSelect
+              panelType={props.panel.type}
+              siblings={props.siblings}
+              value={model.type}
+              onChange={handleSelectChange('type')}
+              fullWidth
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        {
+          model.type !== 'count'
+            ? (
+              <EuiFlexItem>
+                <EuiFormRow id={htmlId('field')} label="Field" fullWidth>
+                  <FieldSelect
+                    fields={fields}
+                    type={model.type}
+                    restrict={restrict}
+                    indexPattern={indexPattern}
+                    value={model.field}
+                    onChange={handleSelectChange('field')}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            ) : null
+        }
+
+      </EuiFlexGroup>
     </AggRow>
   );
 

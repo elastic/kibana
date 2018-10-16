@@ -25,7 +25,11 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiTitle,
 } from '@elastic/eui';
 
 function SeriesAgg(props) {
@@ -60,11 +64,9 @@ function SeriesAgg(props) {
         onDelete={props.onDelete}
         siblings={props.siblings}
       >
-        <div className="vis_editor__item">
-          <div className="vis_editor__label">
-            Series Agg is not compatible with the table visualization.
-          </div>
-        </div>
+        <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
+          <span>Series Agg is not compatible with the table visualization.</span>
+        </EuiTitle>
       </AggRow>
     );
   }
@@ -77,25 +79,28 @@ function SeriesAgg(props) {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__item">
-        <div className="vis_editor__label">Aggregation</div>
-        <AggSelect
-          panelType={panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__item">
-        <label className="vis_editor__label" htmlFor={htmlId('function')}>Function</label>
-        <EuiComboBox
-          id={htmlId('function')}
-          options={functionOptions}
-          selectedOptions={selectedFunctionOption ? [selectedFunctionOption] : []}
-          onChange={handleSelectChange('function')}
-          singleSelection={true}
-        />
-      </div>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('function')}>Function</EuiFormLabel>
+          <EuiComboBox
+            id={htmlId('function')}
+            options={functionOptions}
+            selectedOptions={selectedFunctionOption ? [selectedFunctionOption] : []}
+            onChange={handleSelectChange('function')}
+            singleSelection={{ asPlainText: true }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 
