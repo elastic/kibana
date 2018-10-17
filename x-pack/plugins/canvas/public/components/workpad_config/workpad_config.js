@@ -17,9 +17,12 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
+  EuiTextArea,
+  EuiAccordion,
+  EuiText,
 } from '@elastic/eui';
 
-export const WorkpadConfig = ({ size, name, setSize, setName }) => {
+export const WorkpadConfig = ({ size, name, style, setSize, setName, setWorkpadStyle }) => {
   const rotate = () => setSize({ width: size.height, height: size.width });
 
   const badges = [
@@ -85,7 +88,7 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       <div>
         {badges.map((badge, i) => (
@@ -100,6 +103,33 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
           </EuiBadge>
         ))}
       </div>
+
+      <EuiSpacer size="m" />
+
+      <EuiAccordion
+        id="accordion-global-css"
+        className="canvasArg__accordion"
+        buttonContent={
+          <EuiToolTip
+            content="Apply styles to all pages in this workpad"
+            position="left"
+            className="canvasArg__tooltip"
+          >
+            <EuiText size="s" color="subdued">
+              Global CSS overrides
+            </EuiText>
+          </EuiToolTip>
+        }
+      >
+        <div className="canvasArg__content">
+          <EuiTextArea
+            aria-label="Apply styles to all pages in this workpad"
+            value={style === '' ? '.canvasPage{\n\n}' : style}
+            onChange={e => setWorkpadStyle(e.target.value)}
+            rows={10}
+          />
+        </div>
+      </EuiAccordion>
     </div>
   );
 };
@@ -107,6 +137,8 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
 WorkpadConfig.propTypes = {
   size: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
+  style: PropTypes.string,
   setSize: PropTypes.func.isRequired,
   setName: PropTypes.func.isRequired,
+  setWorkpadStyle: PropTypes.func.isRequired,
 };

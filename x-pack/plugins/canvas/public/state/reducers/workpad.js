@@ -6,7 +6,7 @@
 
 import { recentlyAccessed } from 'ui/persisted_log';
 import { handleActions } from 'redux-actions';
-import { setWorkpad, sizeWorkpad, setColors, setName, setWriteable } from '../actions/workpad';
+import { setWorkpad, sizeWorkpad, setColors, setName, setWorkpadStyle, setWriteable } from '../actions/workpad';
 import { APP_ROUTE_WORKPAD } from '../../../common/lib/constants';
 
 export const workpadReducer = handleActions(
@@ -31,6 +31,10 @@ export const workpadReducer = handleActions(
 
     [setWriteable]: (workpadState, { payload }) => {
       return { ...workpadState, isWriteable: Boolean(payload) };
+    },
+
+    [setWorkpadStyle]: (workpadState, { payload }) => {
+      return { ...workpadState, style: payload };
     },
   },
   {}

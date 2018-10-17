@@ -11,7 +11,14 @@ export const ColorDot = ({ value, children }) => {
   return (
     <div className="canvasColorDot">
       <div className="canvasColorDot__background canvasCheckered" />
-      <div className="canvasColorDot__foreground" style={{ background: value }}>
+      <div
+        className={
+          value === ''
+            ? 'canvasColorDot__foreground canvasColorEmpty'
+            : 'canvasColorDot__foreground'
+        }
+        style={{ background: value }}
+      >
         {children}
       </div>
     </div>
