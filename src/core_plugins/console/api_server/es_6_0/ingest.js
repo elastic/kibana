@@ -26,8 +26,7 @@ const appendProcessorDefinition = {
     },
     field: '',
     value: [],
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -42,8 +41,7 @@ const bytesProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -62,8 +60,7 @@ const convertProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -79,8 +76,7 @@ const dateProcessorDefinition = {
     formats: [],
     timezone: 'UTC',
     locale: 'ENGLISH',
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -99,8 +95,7 @@ const dateIndexNameProcessorDefinition = {
     timezone: 'UTC',
     locale: 'ENGLISH',
     index_name_format: 'yyyy-MM-dd',
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -117,8 +112,7 @@ const dissectProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -130,8 +124,7 @@ const dotExpanderProcessorDefinition = {
     },
     field: '',
     path: '',
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -139,8 +132,7 @@ const dotExpanderProcessorDefinition = {
 const dropProcessorDefinition = {
   drop: {
     __template: {},
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -151,8 +143,7 @@ const failProcessorDefinition = {
       message: ''
     },
     message: '',
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -167,8 +158,7 @@ const foreachProcessorDefinition = {
     processor: {
       __scope_link: '_processor'
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -188,8 +178,7 @@ const grokProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -204,8 +193,7 @@ const gsubProcessorDefinition = {
     field: '',
     pattern: '',
     replacement: '',
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -218,8 +206,7 @@ const joinProcessorDefinition = {
     },
     field: '',
     separator: '',
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -234,8 +221,7 @@ const jsonProcessorDefinition = {
     add_to_root: {
       __one_of: [ false, true ]
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -255,8 +241,7 @@ const kvProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -270,8 +255,7 @@ const lowercaseProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -282,8 +266,7 @@ const pipelineProcessorDefinition = {
       pipeline: ''
     },
     pipeline: '',
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -294,8 +277,7 @@ const removeProcessorDefinition = {
       field: ''
     },
     field: '',
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -311,8 +293,7 @@ const renameProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -325,8 +306,7 @@ const scriptProcessorDefinition = {
     id: '',
     inline: '',
     params: {},
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -342,8 +322,7 @@ const setProcessorDefinition = {
     override: {
       __one_of: [ true, false ]
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -359,8 +338,7 @@ const splitProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -372,8 +350,7 @@ const sortProcessorDefinition = {
     },
     field: '',
     order: 'asc',
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -387,8 +364,7 @@ const trimProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -402,8 +378,7 @@ const uppercaseProcessorDefinition = {
     ignore_missing: {
       __one_of: [ false, true ]
     },
-    on_failure: [],
-    if: ''
+    ...commonPipelineParams
   }
 };
 
@@ -445,6 +420,10 @@ const pipelineDefinition = {
   version: 123,
 };
 
+const commonPipelineParams = {
+    on_failure: [],
+    if: ''
+}
 
 export default function (api) {
 
