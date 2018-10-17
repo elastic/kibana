@@ -19,16 +19,16 @@
 
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
-import { Suggestion } from 'ui/autocomplete_providers';
+import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import './suggestion.less';
 import { SuggestionComponent } from './suggestion_component';
 
 interface Props {
   index: number;
-  onClick: (suggestion: Suggestion) => void;
+  onClick: (suggestion: AutocompleteSuggestion) => void;
   onMouseEnter: (index: number) => void;
   show: boolean;
-  suggestions: Suggestion[];
+  suggestions: AutocompleteSuggestion[];
   loadMore: () => void;
 }
 
