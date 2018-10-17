@@ -275,7 +275,7 @@
   resolved "https://registry.yarnpkg.com/@types/handlebars/-/handlebars-4.0.38.tgz#d0ebec1934c0bba97f99a0cb703fe2ef8c4a662f"
   integrity sha512-oMzU0D7jDp+H2go/i0XqBHfr+HEhYD/e1TvkhHi3yrhQm/7JFR8FJMdvoH76X8G1FBpgc6Pwi+QslCJBeJ1N9g==
 
-"@types/hapi@17.0.18":
+"@types/hapi@^17.0.18":
   version "17.0.18"
   resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-17.0.18.tgz#f855fe18766aa2592a3a689c3e6eabe72989ff1a"
   integrity sha512-sRoDjz1iVOCxTqq+EepzDQI773k2PjboHpvMpp524278grosStxZ5+oooVjNLJZj1iZIbiLeeR5/ZeIRgVXsCg==
