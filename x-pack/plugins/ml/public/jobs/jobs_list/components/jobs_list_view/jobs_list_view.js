@@ -260,6 +260,7 @@ export class JobsListView extends Component {
   }
 
   render() {
+    const jobIds = this.state.jobsSummaryList.map(j => j.id);
     return (
       <div>
         <div className="actions-bar">
@@ -268,6 +269,7 @@ export class JobsListView extends Component {
             showStartDatafeedModal={this.showStartDatafeedModal}
             showDeleteJobModal={this.showDeleteJobModal}
             refreshJobs={() => this.refreshJobSummaryList(true)}
+            allJobIds={jobIds}
           />
           <JobFilterBar setFilters={this.setFilters} />
         </div>
