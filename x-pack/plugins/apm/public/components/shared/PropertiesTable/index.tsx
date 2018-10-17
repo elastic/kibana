@@ -90,24 +90,22 @@ export function PropertiesTable({
   propKey: string;
   agentName?: string;
 }) {
-  if (_.isEmpty(propData)) {
-    return (
-      <TableContainer>
-        <TableInfo>
-          <EuiIcon type="iInCircle" /> No data available
-        </TableInfo>
-      </TableContainer>
-    );
-  }
+  const hasPropData = !_.isEmpty(propData);
 
   return (
     <TableContainer>
-      <NestedKeyValueTable
-        data={propData}
-        parentKey={propKey}
-        keySorter={sortKeysByConfig}
-        depth={1}
-      />
+      {hasPropData ? (
+        <NestedKeyValueTable
+          data={propData}
+          parentKey={propKey}
+          keySorter={sortKeysByConfig}
+          depth={1}
+        />
+      ) : (
+        <TableInfo>
+          <EuiIcon type="iInCircle" /> No data available
+        </TableInfo>
+      )}
       <AgentFeatureTipMessage featureName={propKey} agentName={agentName} />
     </TableContainer>
   );

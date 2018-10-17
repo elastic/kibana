@@ -27,6 +27,10 @@ exports[`PropertiesTable component should render empty when data has no keys 1`]
     />
      No data available
   </styled.div>
+  <AgentFeatureTipMessage
+    agentName="testAgentName"
+    featureName="testPropKey"
+  />
 </styled.div>
 `;
 
@@ -39,6 +43,10 @@ exports[`PropertiesTable component should render empty when data isn't present 1
     />
      No data available
   </styled.div>
+  <AgentFeatureTipMessage
+    agentName="testAgentName"
+    featureName="testPropKey"
+  />
 </styled.div>
 `;
 
