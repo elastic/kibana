@@ -19,7 +19,7 @@ const columns = [{
 }, {
   name: i18n.translate('xpack.rollupJobs.jobDetails.tabMetrics.typesColumnLabel', {
     defaultMessage: 'Types' }),
-  render: ({ types }) => types.join(', '),
+  render: ({ types }) => types.sort().join(', '),
 }];
 
 export const TabMetrics = ({ metrics }) => (
