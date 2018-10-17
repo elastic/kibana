@@ -1,0 +1,9 @@
+.tvbPanelConfig__container {
+  padding: $euiSize;
+  background-color: $euiColorLightestShade;
+}
+
+.vis_editor__vis_config-row {
+  @include tvbEditor__row;
+  margin: 10px 0;
+}

@@ -30,9 +30,16 @@ import YesNo from './yes_no';
 
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFormLabel,
+  EuiSpacer,
+  EuiFieldText,
+  EuiTitle,
+  EuiButton,
+  EuiCode,
   EuiText,
-  EuiTabs,
-  EuiTab,
 } from '@elastic/eui';
 
 function newAnnotation() {
@@ -76,118 +83,133 @@ class AnnotationsEditor extends Component {
     const handleDelete = collectionActions.handleDelete
       .bind(null, this.props, model);
     return (
-      <div className="vis_editor__annotations-row" key={model.id}>
-        <div className="vis_editor__annotations-color">
-          <ColorPicker
-            disableTrash={true}
-            onChange={handleChange}
-            name="color"
-            value={model.color}
-          />
-        </div>
-        <div className="vis_editor__annotations-content">
-          <div className="vis_editor__row">
-            <div className="vis_editor__row-item">
-              <label className="vis_editor__label" htmlFor={htmlId('indexPattern')}>
-                Index Pattern (required)
-              </label>
-              <input
-                id={htmlId('indexPattern')}
-                className="vis_editor__input-grows-100"
-                type="text"
-                onChange={this.handleChange(model, 'index_pattern')}
-                value={model.index_pattern}
-              />
-            </div>
-            <div className="vis_editor__row-item">
-              <label className="vis_editor__label" htmlFor={htmlId('timeField')}>
-                Time Field (required)
-              </label>
-              <FieldSelect
-                id={htmlId('timeField')}
-                restrict="date"
-                value={model.time_field}
-                onChange={this.handleChange(model, 'time_field')}
-                indexPattern={model.index_pattern}
-                fields={this.props.fields}
-              />
-            </div>
-          </div>
-          <div className="vis_editor__row">
-            <div className="vis_editor__row-item">
-              <label className="vis_editor__label" htmlFor={htmlId('queryString')}>
-                Query String
-              </label>
-              <input
-                id={htmlId('queryString')}
-                className="vis_editor__input-grows-100"
-                type="text"
-                onChange={this.handleChange(model, 'query_string')}
-                value={model.query_string}
-              />
-            </div>
-            <fieldset className="vis_editor__row-item-small">
-              <legend className="vis_editor__label">Ignore Global Filters</legend>
-              <YesNo
-                value={model.ignore_global_filters}
-                name="ignore_global_filters"
-                onChange={handleChange}
-              />
+      <div className="tvbAnnotationsEditor" key={model.id}>
+        <EuiFlexGroup responsive={false}>
+          <EuiFlexItem grow={false}>
+            <ColorPicker
+              disableTrash={true}
+              onChange={handleChange}
+              name="color"
+              value={model.color}
+            />
+          </EuiFlexItem>
 
-            </fieldset>
-            <fieldset className="vis_editor__row-item-small">
-              <legend className="vis_editor__label">Ignore Panel Filters</legend>
-              <YesNo
-                value={model.ignore_panel_filters}
-                name="ignore_panel_filters"
-                onChange={handleChange}
-              />
+          <EuiFlexItem className="tvbAggRow__children">
+            <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('indexPattern')}
+                  label="Index pattern (required)"
+                  fullWidth
+                >
+                  <EuiFieldText
+                    onChange={this.handleChange(model, 'index_pattern')}
+                    value={model.index_pattern}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormLabel htmlFor={htmlId('timeField')}>Time field (required)</EuiFormLabel>
+                <FieldSelect
+                  id={htmlId('timeField')}
+                  restrict="date"
+                  value={model.time_field}
+                  onChange={this.handleChange(model, 'time_field')}
+                  indexPattern={model.index_pattern}
+                  fields={this.props.fields}
+                  fullWidth
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-            </fieldset>
-          </div>
-          <div className="vis_editor__row">
-            <div className="vis_editor__row-item">
-              <label className="vis_editor__label" htmlFor={htmlId('icon')}>Icon (required)</label>
-              <div className="vis_editor__item">
+            <EuiSpacer size="m" />
+
+            <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('queryString')}
+                  label="Query string"
+                  fullWidth
+                >
+                  <EuiFieldText
+                    onChange={this.handleChange(model, 'query_string')}
+                    value={model.query_string}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>Ignore global filters?</EuiFormLabel>
+                <EuiSpacer size="s" />
+                <YesNo
+                  value={model.ignore_global_filters}
+                  name="ignore_global_filters"
+                  onChange={handleChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>Ignore panel filters?</EuiFormLabel>
+                <EuiSpacer size="s" />
+                <YesNo
+                  value={model.ignore_panel_filters}
+                  name="ignore_panel_filters"
+                  onChange={handleChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+
+            <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
+              <EuiFlexItem>
+                <EuiFormLabel htmlFor={htmlId('icon')}>Icon (required)</EuiFormLabel>
                 <IconSelect
                   id={htmlId('icon')}
                   value={model.icon}
                   onChange={this.handleChange(model, 'icon')}
                 />
-              </div>
-            </div>
-            <div className="vis_editor__row-item">
-              <label className="vis_editor__label" htmlFor={htmlId('fields')}>
-                Fields (required - comma separated paths)
-              </label>
-              <input
-                id={htmlId('fields')}
-                className="vis_editor__input-grows-100"
-                type="text"
-                onChange={this.handleChange(model, 'fields')}
-                value={model.fields}
-              />
-            </div>
-            <div className="vis_editor__row-item">
-              <label className="vis_editor__label" htmlFor={htmlId('rowTemplate')}>
-                Row Template (required - eg.<code>{'{{field}}'}</code>)
-              </label>
-              <input
-                id={htmlId('rowTemplate')}
-                className="vis_editor__input-grows-100"
-                type="text"
-                onChange={this.handleChange(model, 'template')}
-                value={model.template}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="vis_editor__annotations-controls">
-          <AddDeleteButtons
-            onAdd={handleAdd}
-            onDelete={handleDelete}
-          />
-        </div>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('fields')}
+                  label="Fields (required - comma separated paths)"
+                  fullWidth
+                >
+                  <EuiFieldText
+                    onChange={this.handleChange(model, 'fields')}
+                    value={model.fields}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('rowTemplate')}
+                  label="Row template (required)"
+                  helpText={
+                    <span>eg. <EuiCode>{'{{field}}'}</EuiCode></span>
+                  }
+                  fullWidth
+                >
+                  <EuiFieldText
+                    onChange={this.handleChange(model, 'template')}
+                    value={model.template}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <AddDeleteButtons
+              onAdd={handleAdd}
+              onDelete={handleDelete}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
     );
   }
@@ -199,30 +221,26 @@ class AnnotationsEditor extends Component {
       const handleAdd = collectionActions.handleAdd
         .bind(null, this.props, newAnnotation);
       content = (
-        <div className="vis_editor__annotations-missing">
-          <EuiText>
-            <p>Click the button below to create an annotation data source.</p>
-            <button
-              className="thor__button-outlined-default large"
-              onClick={handleAdd}
-            >Add Data Source
-            </button>
-          </EuiText>
-        </div>
+        <EuiText textAlign="center">
+          <p>Click the button below to create an annotation data source.</p>
+          <EuiButton fill onClick={handleAdd}>Add data source</EuiButton>
+        </EuiText>
       );
     } else {
       const annotations = model.annotations.map(this.renderRow);
       content = (
-        <div className="vis_editor__annotations">
-          <EuiTabs size="s">
-            <EuiTab isSelected>Data Sources</EuiTab>
-          </EuiTabs>
+        <div>
+          <EuiTitle size="s">
+            <span>Data sources</span>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+
           { annotations }
         </div>
       );
     }
     return(
-      <div className="vis_editor__container">
+      <div className="tvbAnnotationsEditor__container">
         { content }
       </div>
     );

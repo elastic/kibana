@@ -1,7 +1,5 @@
 .tvbAggRow {
-  background-color: $euiColorLightestShade;
-  margin-bottom: 2px;
-  padding: $euiSizeS;
+  @include tvbEditor__repeatingRow;
 }
 
 .tvbAggRow__visibilityIcon {

@@ -31,6 +31,15 @@ import {
   EuiComboBox,
   EuiTabs,
   EuiTab,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFormLabel,
+  EuiSpacer,
+  EuiFieldText,
+  EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 class TimeseriesPanelConfig extends Component {
@@ -101,99 +110,140 @@ class TimeseriesPanelConfig extends Component {
       );
     } else {
       view = (
-        <div className="vis_editor__container">
-          <IndexPattern
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange}
-          />
-          <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('axisMin')}>Axis Min</label>
-            <input
-              id={htmlId('axisMin')}
-              className="vis_editor__input-grows"
-              type="text"
-              onChange={handleTextChange('axis_min')}
-              value={model.axis_min}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('axisMax')}>Axis Max</label>
-            <input
-              id={htmlId('axisMax')}
-              className="vis_editor__input-grows"
-              type="text"
-              onChange={handleTextChange('axis_max')}
-              value={model.axis_max}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>Axis Position</label>
-            <div className="vis_editor__row_item">
-              <EuiComboBox
-                isClearable={false}
-                id={htmlId('axisPos')}
-                options={positionOptions}
-                selectedOptions={selectedPositionOption ? [selectedPositionOption] : []}
-                onChange={handleSelectChange('axis_position')}
-                singleSelection={true}
-              />
-            </div>
-            <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>Axis Scale</label>
-            <div className="vis_editor__row_item">
-              <EuiComboBox
-                isClearable={false}
-                id={htmlId('axisScale')}
-                options={scaleOptions}
-                selectedOptions={selectedAxisScaleOption ? [selectedAxisScaleOption] : []}
-                onChange={handleSelectChange('axis_scale')}
-                singleSelection={true}
-              />
-            </div>
-          </div>
-          <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Background Color</div>
-            <ColorPicker
-              onChange={this.props.onChange}
-              name="background_color"
-              value={model.background_color}
-            />
-            <div className="vis_editor__label">Show Legend</div>
-            <YesNo
-              value={model.show_legend}
-              name="show_legend"
+        <div className="tvbPanelConfig__container">
+          <EuiPanel>
+            <EuiTitle size="s"><span>Data</span></EuiTitle>
+            <EuiSpacer size="m" />
+
+            <IndexPattern
+              fields={this.props.fields}
+              model={this.props.model}
               onChange={this.props.onChange}
             />
-            <label className="vis_editor__label" htmlFor={htmlId('legendPos')}>Legend Position</label>
-            <div className="vis_editor__row_item">
-              <EuiComboBox
-                isClearable={false}
-                id={htmlId('legendPos')}
-                options={legendPositionOptions}
-                selectedOptions={selectedLegendPosOption ? [selectedLegendPosOption] : []}
-                onChange={handleSelectChange('legend_position')}
-                singleSelection={true}
-              />
-            </div>
-            <div className="vis_editor__label">Display Grid</div>
-            <YesNo
-              value={model.show_grid}
-              name="show_grid"
-              onChange={this.props.onChange}
-            />
-          </div>
-          <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>Panel Filter</label>
-            <input
-              id={htmlId('panelFilter')}
-              className="vis_editor__input-grows"
-              type="text"
-              onChange={handleTextChange('filter')}
-              value={model.filter}
-            />
-            <div className="vis_editor__label">Ignore Global Filter</div>
-            <YesNo
-              value={model.ignore_global_filter}
-              name="ignore_global_filter"
-              onChange={this.props.onChange}
-            />
-          </div>
+
+            <EuiHorizontalRule />
+
+            <EuiFlexGroup responsive={false} wrap={true}>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('panelFilter')}
+                  label="Panel filter"
+                  fullWidth
+                >
+                  <EuiFieldText
+                    onChange={handleTextChange('filter')}
+                    value={model.filter}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>Ignore global filter?</EuiFormLabel>
+                <EuiSpacer size="s" />
+                <YesNo
+                  value={model.ignore_global_filter}
+                  name="ignore_global_filter"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+
+          <EuiSpacer />
+
+          <EuiPanel>
+            <EuiTitle size="s"><span>Style</span></EuiTitle>
+            <EuiSpacer size="m" />
+
+            <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
+              <EuiFlexItem>
+                <EuiFormRow id={htmlId('axisMin')} label="Axis min">
+                  <EuiFieldText
+                    onChange={handleTextChange('axis_min')}
+                    value={model.axis_min}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow id={htmlId('axisMax')} label="Axis max">
+                  <EuiFieldText
+                    onChange={handleTextChange('axis_max')}
+                    value={model.axis_max}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow id={htmlId('axisPos')} label="Axis position">
+                  <EuiComboBox
+                    isClearable={false}
+                    options={positionOptions}
+                    selectedOptions={selectedPositionOption ? [selectedPositionOption] : []}
+                    onChange={handleSelectChange('axis_position')}
+                    singleSelection={{ asPlainText: true }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow id={htmlId('axisScale')} label="Axis scale">
+                  <EuiComboBox
+                    isClearable={false}
+                    options={scaleOptions}
+                    selectedOptions={selectedAxisScaleOption ? [selectedAxisScaleOption] : []}
+                    onChange={handleSelectChange('axis_scale')}
+                    singleSelection={{ asPlainText: true }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiHorizontalRule />
+
+            <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }}>Background color:</EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ColorPicker
+                  onChange={this.props.onChange}
+                  name="background_color"
+                  value={model.background_color}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }}>Show legend?</EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <YesNo
+                  value={model.show_legend}
+                  name="show_legend"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }} htmlFor={htmlId('legendPos')}>Legend position</EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiComboBox
+                  isClearable={false}
+                  id={htmlId('legendPos')}
+                  options={legendPositionOptions}
+                  selectedOptions={selectedLegendPosOption ? [selectedLegendPosOption] : []}
+                  onChange={handleSelectChange('legend_position')}
+                  singleSelection={{ asPlainText: true }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }}>Display grid</EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <YesNo
+                  value={model.show_grid}
+                  name="show_grid"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
         </div>
       );
     }
