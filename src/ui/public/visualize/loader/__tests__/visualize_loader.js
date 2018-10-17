@@ -307,7 +307,7 @@ describe('visualize loader', () => {
       });
 
       it('should allow updating the time range of the visualization', async () => {
-        const spy = sandbox.spy(VisualizeDataLoader.fetch);
+        const spy = sandbox.spy(VisualizeDataLoader.prototype, 'fetch');
 
         const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {
           timeRange: { from: 'now-7d', to: 'now' }
@@ -329,7 +329,7 @@ describe('visualize loader', () => {
       });
 
       it('should not set forceFetch on uiState change', async () => {
-        const spy = sandbox.spy(VisualizeDataLoader.fetch);
+        const spy = sandbox.spy(VisualizeDataLoader.prototype, 'fetch');
 
         const uiState = new PersistedState();
         loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {
