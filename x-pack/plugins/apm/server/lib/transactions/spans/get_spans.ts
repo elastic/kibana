@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchResponse } from 'elasticsearch';
+import { Span } from 'x-pack/plugins/apm/typings/Span';
 import {
-  TRANSACTION_ID,
+  PROCESSOR_EVENT,
   SPAN_START,
   SPAN_TYPE,
-  PROCESSOR_EVENT
+  TRANSACTION_ID
 } from '../../../../common/constants';
+import { Setup } from '../../helpers/setup_request';
 
-export async function getSpans({ transactionId, setup }) {
+export async function getSpans(transactionId: string, setup: Setup) {
   const { start, end, client, config } = setup;
 
   const params = {
@@ -47,6 +50,6 @@ export async function getSpans({ transactionId, setup }) {
     }
   };
 
-  const resp = await client('search', params);
+  const resp: SearchResponse<Span> = await client('search', params);
   return resp.hits.hits.map(hit => hit._source);
 }
