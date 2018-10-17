@@ -85,6 +85,7 @@
     "angular-route": "1.4.7",
     "angular-sanitize": "1.5.7",
     "angular-sortable-view": "0.0.15",
+    "apollo-boost": "^0.1.16",
     "autoprefixer": "^9.1.0",
     "babel-core": "6.21.0",
     "babel-loader": "7.1.2",
