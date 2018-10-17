@@ -23,6 +23,7 @@ import { resolve } from 'path';
 import { promisify } from 'util';
 
 import del from 'del';
+import deleteEmpty from 'delete-empty';
 import globby from 'globby';
 import mkdirp from 'mkdirp';
 import moment from 'moment';
@@ -31,6 +32,7 @@ import parseGitConfig from 'parse-git-config';
 const mkdirpAsync = promisify(mkdirp);
 
 interface Params {
+  log: (tags: string[], data: string) => void;
   outputPath: string;
   dllsPath: string;
   cachePath: string;
@@ -45,6 +47,7 @@ interface WatchCacheStateContent {
 }
 
 export class WatchCache {
+  private readonly log: Params['log'];
   private readonly outputPath: Params['outputPath'];
   private readonly dllsPath: Params['dllsPath'];
   private readonly cachePath: Params['cachePath'];
@@ -54,6 +57,7 @@ export class WatchCache {
   private diskCacheState: WatchCacheStateContent;
 
   constructor(params: Params) {
+    this.log = params.log;
     this.outputPath = params.outputPath;
     this.dllsPath = params.dllsPath;
     this.cachePath = params.cachePath;
@@ -76,27 +80,20 @@ export class WatchCache {
   }
 
   public async reset() {
-    // TODO: add logger when reset
+    this.log(['info', 'optimize:watch_cache'], 'The optimizer watch cache will reset');
 
     // start by deleting the state file to lower the
     // amount of time that another process might be able to
     // successfully read it once we decide to delete it
     del.sync(this.statePath);
 
+    // first delete some empty folder that left
+    // from any previous cache reset action
+    deleteEmpty.sync(`${this.cachePath}`);
+
     // delete everything in cache directory
     // except ts-node and bundles
-    await del(
-      await globby(
-        [`${this.cachePath}`, `!${this.cachePath}/bundles`, `!${this.cachePath}/*/ts-node/**`],
-        { dot: true }
-      )
-    );
-
-    // TODO: delete empty folders
-
-    // TODO: try to understand if we can delete ts-node too
-    // Maybe we can add a temp file to the ts-node folder
-    // and delete it in the next time we load
+    await del(await globby([`${this.cachePath}`], { dot: true }));
 
     // delete dlls
     await del(this.dllsPath);
@@ -107,6 +104,8 @@ export class WatchCache {
 
     // re-write new cache state file
     this.write();
+
+    this.log(['info', 'optimize:watch_cache'], 'The optimizer watch cache has reset');
   }
 
   private buildShaWithMultipleFiles(filePaths: string[]) {

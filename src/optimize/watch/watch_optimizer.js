@@ -41,13 +41,13 @@ export default class WatchOptimizer extends BaseOptimizer {
   }
 
   async init() {
+    await this.watchCache.tryReset();
     this.initializing = true;
     this.initialBuildComplete = false;
 
     // log status changes
     this.status$.subscribe(this.onStatusChangeHandler);
     await this.uiBundles.resetBundleDir();
-    await this.watchCache.tryReset();
     await this.initCompiler();
 
     this.compiler.plugin('watch-run', this.compilerRunStartHandler);
