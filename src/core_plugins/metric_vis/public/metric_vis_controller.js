@@ -180,7 +180,7 @@ export class MetricVisComponent extends Component {
       const metrics = this._processTableGroups(this.props.visData);
       metricsHtml = metrics.map(this._renderMetric);
     }
-    return (<div className="metric-vis">{metricsHtml}</div>);
+    return (<div className="mtrVis">{metricsHtml}</div>);
   }
 
   componentDidMount() {
