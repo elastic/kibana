@@ -25,6 +25,7 @@ export class CsvImporter extends Importer {
     console.time('read delimited file');
 
     try {
+      // throw 'test';
       const settings = {
         skip_empty_lines: true,
         delimiter: this.delimiter,
@@ -67,11 +68,15 @@ export class CsvImporter extends Importer {
       // this.docArray = formatToJson(this.data, this.columnNames);
       console.timeEnd('read delimited file');
 
-      return true;
+      return {
+        success: true,
+      };
     } catch (error) {
-      console.error(error);
       console.timeEnd('read delimited file');
-      return false;
+      return {
+        success: false,
+        error,
+      };
     }
   }
 }

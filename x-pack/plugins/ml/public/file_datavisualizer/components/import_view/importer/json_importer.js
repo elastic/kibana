@@ -27,11 +27,16 @@ export class JsonImporter extends Importer {
       this.docArray = ndjson;
 
       console.timeEnd('read json file');
-      return true;
+      return {
+        success: true,
+      };
     } catch (error) {
       console.error(error);
       console.timeEnd('read json file');
-      return false;
+      return {
+        success: false,
+        error,
+      };
     }
   }
 }

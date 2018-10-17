@@ -54,10 +54,15 @@ export class SstImporter extends Importer {
       this.docArray = this.data;
 
       console.timeEnd('read sst file');
-      return true;
+      return {
+        success: true,
+      };
     } catch (error) {
       console.error(error);
-      return false;
+      return {
+        success: false,
+        error,
+      };
     }
   }
 }

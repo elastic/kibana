@@ -11,26 +11,27 @@ export function importDataProvider(callWithRequest) {
     const docCount = data.length;
 
     try {
-      // first chunk of data, create the index and id to return
+
+      if (ingestPipeline === undefined || ingestPipeline.id === undefined) {
+        throw 'No ingest pipeline id specified';
+      }
+
+      pipelineId = ingestPipeline.id;
+
       if (id === undefined) {
+        // first chunk of data, create the index and id to return
         id = generateId();
         await createIndex(index, mappings);
 
-        if (ingestPipeline !== undefined) {
-          const pid = `${index}-pipeline`;
-          const success = await createPipeline(pid, ingestPipeline);
-          if (success.acknowledged === true) {
-            pipelineId = pid;
-          } else {
-            console.error(success);
-            throw success;
-          }
-          console.log('creating pipeline', pipelineId);
+        delete ingestPipeline.id;
+
+        const success = await createPipeline(pipelineId, ingestPipeline);
+        if (success.acknowledged !== true) {
+          console.error(success);
+          throw success;
         }
-      } else {
-        if (ingestPipeline !== undefined) {
-          pipelineId = `${index}-pipeline`;
-        }
+
+        console.log('created pipeline', pipelineId);
       }
 
       if (data.length && indexExits(index)) {

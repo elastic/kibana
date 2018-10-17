@@ -12,7 +12,7 @@ import React, {
 import {
   EuiFieldText,
   EuiButton,
-  EuiLoadingSpinner,
+  EuiCallOut,
   EuiSpacer,
   EuiFormRow,
   EuiCheckbox,
@@ -25,26 +25,33 @@ import { ImportProgress, IMPORT_STATUS } from './import_progress';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 
+const DEFAULT_STATE = {
+  index: '',
+  importing: false,
+  imported: false,
+  initialized: false,
+  reading: false,
+  readProgress: 0,
+  readStatus: IMPORT_STATUS.INCOMPLETE,
+  indexCreatedStatus: IMPORT_STATUS.INCOMPLETE,
+  indexPatternCreatedStatus: IMPORT_STATUS.INCOMPLETE,
+  ingestPipelineCreatedStatus: IMPORT_STATUS.INCOMPLETE,
+  uploadProgress: 0,
+  uploadStatus: IMPORT_STATUS.INCOMPLETE,
+  createIndexPattern: true,
+  indexPattern: '',
+  indexPatternId: '',
+};
+
 export class ImportView extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      index: '',
-      importing: false,
-      imported: false,
-      reading: false,
-      readProgress: 0,
-      readStatus: IMPORT_STATUS.INCOMPLETE,
-      indexCreatedStatus: IMPORT_STATUS.INCOMPLETE,
-      indexPatternCreatedStatus: IMPORT_STATUS.INCOMPLETE,
-      ingestPipelineCreatedStatus: IMPORT_STATUS.INCOMPLETE,
-      uploadProgress: 0,
-      uploadStatus: IMPORT_STATUS.INCOMPLETE,
-      createIndexPattern: true,
-      indexPattern: '',
-      indexPatternId: '',
-    };
+    this.state = DEFAULT_STATE;
+  }
+
+  clickReset = () => {
+    this.setState(DEFAULT_STATE);
   }
 
   clickImport() {
@@ -65,24 +72,33 @@ export class ImportView extends Component {
         importing: true,
         imported: false,
         reading: true,
+        initialized: true,
       }, () => {
         setTimeout(async () => {
+          let success = false;
+
           const importer = importerFactory(format, results);
           if (importer !== undefined) {
 
             console.log('read start');
-            let success = await importer.read(fileContents, this.setReadProgress);
+            const readResp = await importer.read(fileContents, this.setReadProgress);
             console.log('read end');
+            success = readResp.success;
             this.setState({
-              readStatus: IMPORT_STATUS.COMPLETE,
+              readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
               reading: false,
             });
 
+            if (readResp.success === false) {
+              console.error(readResp.error);
+            }
+
             if (success) {
-              const resp = await importer.import(index, this.setImportProgress);
-              success = resp.success;
-              const uploadStatus = success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED;
-              this.setState({ uploadStatus });
+              const importResp = await importer.import(index, this.setImportProgress);
+              success = importResp.success;
+              this.setState({
+                uploadStatus: importResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+              });
 
 
               if (success && createIndexPattern) {
@@ -168,6 +184,7 @@ export class ImportView extends Component {
       importing,
       imported,
       reading,
+      initialized,
       readStatus,
       indexCreatedStatus,
       ingestPipelineCreatedStatus,
@@ -199,7 +216,7 @@ export class ImportView extends Component {
             <EuiFieldText
               placeholder="index name"
               value={index}
-              disabled={importing === true}
+              disabled={initialized === true}
               onChange={this.onIndexChange}
             />
           </EuiFormRow>
@@ -208,7 +225,7 @@ export class ImportView extends Component {
             id="createIndexPattern"
             label="Create index pattern"
             checked={createIndexPattern === true}
-            disabled={importing === true}
+            disabled={initialized === true}
             onChange={this.onCreateIndexPatternChange}
           />
 
@@ -216,10 +233,10 @@ export class ImportView extends Component {
 
           <EuiFormRow
             label="Index pattern name"
-            disabled={(createIndexPattern === false || importing === true)}
+            disabled={(createIndexPattern === false || initialized === true)}
           >
             <EuiFieldText
-              disabled={(createIndexPattern === false || importing === true)}
+              disabled={(createIndexPattern === false || initialized === true)}
               placeholder={(createIndexPattern === true) ? index : ''}
               value={indexPattern}
               onChange={this.onIndexPatternChange}
@@ -228,23 +245,33 @@ export class ImportView extends Component {
 
           <EuiSpacer size="m" />
 
-          <EuiButton
-            isDisabled={importing}
-            onClick={() => this.clickImport()}
-          >
-            Import
-          </EuiButton>
+          {
+            (initialized === false || importing === true) &&
 
-
-          {(importing === true) &&
-            <React.Fragment>
-              <EuiLoadingSpinner size="m"/>
-            </React.Fragment>
+            <EuiButton
+              isDisabled={index === '' || initialized === true}
+              onClick={() => this.clickImport()}
+              isLoading={importing}
+              iconSide="right"
+            >
+              Import
+            </EuiButton>
           }
+
+          {
+            (initialized === true && importing === false) &&
+
+            <EuiButton
+              onClick={() => this.clickReset()}
+            >
+              Reset
+            </EuiButton>
+          }
+
         </EuiPanel>
 
 
-        {(importing === true || imported === true) &&
+        {(initialized === true) &&
           <React.Fragment>
             <EuiSpacer size="m" />
 
@@ -253,6 +280,23 @@ export class ImportView extends Component {
               <ImportProgress statuses={statuses} />
 
             </EuiPanel>
+
+            {
+              (readStatus === IMPORT_STATUS.FAILED || uploadStatus === IMPORT_STATUS.FAILED) &&
+              <React.Fragment>
+                <EuiSpacer size="m" />
+
+                <EuiCallOut
+                  title="Sorry, there was an error"
+                  color="danger"
+                  iconType="cross"
+                >
+                  <p>
+                    Now you have to fix it, but maybe
+                  </p>
+                </EuiCallOut>
+              </React.Fragment>
+            }
           </React.Fragment>
         }
 

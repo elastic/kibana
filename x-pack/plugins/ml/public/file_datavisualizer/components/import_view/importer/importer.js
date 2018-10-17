@@ -10,6 +10,7 @@ import { chunk } from 'lodash';
 import moment from 'moment';
 
 const CHUNK_SIZE = 10000;
+const IMPORT_RETRIES = 5;
 
 export class Importer {
   constructor(results) {
@@ -32,8 +33,13 @@ export class Importer {
     chunks.unshift([]);
 
     const mappings = this.results.mappings;
-    const ingestPipeline = this.results.ingest_pipeline;
-    updatePipelineTimezone(ingestPipeline);
+
+    const pipeline = this.results.ingest_pipeline;
+    updatePipelineTimezone(pipeline);
+    const ingestPipeline = {
+      id: `${index}-pipeline`,
+      pipeline,
+    };
 
     let id = undefined;
     let success = true;
@@ -47,7 +53,24 @@ export class Importer {
         mappings,
         ingestPipeline
       };
-      const resp = await ml.fileDatavisualizer.import(aggs);
+
+      let retries = IMPORT_RETRIES;
+      let resp = {
+        success: false,
+        failures: [],
+        docCount: 0,
+      };
+
+      while (resp.success === false && retries > 0) {
+        resp = await ml.fileDatavisualizer.import(aggs);
+
+        if (retries < IMPORT_RETRIES) {
+          console.log(`Retrying import ${IMPORT_RETRIES - retries}`);
+        }
+
+        retries--;
+      }
+
 
       if (resp.success || (resp.success === false && (resp.failures.length < resp.docCount))) {
         // allow some failures. however it must be less than the total number of docs sent
