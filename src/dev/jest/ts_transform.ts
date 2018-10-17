@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import TsJest from 'ts-jest';
+// @ts-ignore
+import { getCacheKey, process } from 'ts-jest';
 
 import { getTsProjectForAbsolutePath } from '../typescript';
 
@@ -59,7 +60,7 @@ module.exports = {
     transformOptions: jest.TransformOptions
   ) {
     const extendedConfig = extendJestConfig(jestConfig, filePath);
-    return TsJest.process(src, filePath, extendedConfig, transformOptions);
+    return process(src, filePath, extendedConfig, transformOptions);
   },
 
   getCacheKey(
@@ -69,6 +70,6 @@ module.exports = {
     transformOptions: jest.TransformOptions
   ) {
     const extendedConfigJSON = extendJestConfigJSON(jestConfigJSON, filePath);
-    return TsJest.getCacheKey!(src, filePath, extendedConfigJSON, transformOptions);
+    return getCacheKey!(src, filePath, extendedConfigJSON, transformOptions);
   },
 };
