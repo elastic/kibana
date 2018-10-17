@@ -27,7 +27,7 @@ export class Action {
 
   // From Elasticsearch
   static fromUpstreamJson(json) {
-    if (json.actionJson) {
+    if (!json.actionJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.action.absenceOfActionJsonPropertyBadRequestMessage', {
           defaultMessage: 'json argument must contain an {actionJson} property',
