@@ -74,7 +74,7 @@ function setHtmlContent(
   $element.html(
     i18n($scope.id, {
       values,
-      defaultMessage: $sanitize($scope.defaultMessage),
+      defaultMessage: ($scope.defaultMessage || '').replace(/\</g, '&lt;').replace(/\>/g, '&gt;'),
     })
   );
 }
