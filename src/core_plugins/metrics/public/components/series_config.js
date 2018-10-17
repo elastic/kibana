@@ -24,7 +24,17 @@ import createSelectHandler from './lib/create_select_handler';
 import createTextHandler from './lib/create_text_handler';
 import YesNo from './yes_no';
 import { IndexPattern } from './index_pattern';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiFormRow,
+  EuiCode,
+  EuiHorizontalRule,
+  EuiFormLabel,
+  EuiSpacer,
+} from '@elastic/eui';
 
 export const SeriesConfig = props => {
   const defaults = { offset_time: '', value_template: '' };
@@ -34,65 +44,81 @@ export const SeriesConfig = props => {
   const htmlId = htmlIdGenerator();
 
   return (
-    <div>
-      <div className="vis_editor__series_config-container">
-        <div className="vis_editor__series_config-row">
-          <DataFormatPicker
-            onChange={handleSelectChange('formatter')}
-            value={model.formatter}
-          />
-          <label className="vis_editor__label" htmlFor={htmlId('template')}>
-            Template (eg.<code>{'{{value}}/s'}</code>)
-          </label>
-          <input
-            style={{ width: 100 }}
+    <div className="tvbAggRow">
+
+      <DataFormatPicker
+        onChange={handleSelectChange('formatter')}
+        value={model.formatter}
+      />
+
+      <EuiHorizontalRule margin="s" />
+
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormRow
             id={htmlId('template')}
-            className="vis_editor__input-grows"
-            onChange={handleTextChange('value_template')}
-            value={model.value_template}
-          />
-          <label className="vis_editor__label" htmlFor={htmlId('offsetSeries')}>
-            Offset series time by (1m, 1h, 1w, 1d)
-          </label>
-          <input
-            data-test-subj="offsetTimeSeries"
-            style={{ width: 100 }}
-            id={htmlId('offsetSeries')}
-            className="vis_editor__input-grows"
-            type="text"
-            onChange={handleTextChange('offset_time')}
-            value={model.offset_time}
-          />
-        </div>
-        <div className="vis_editor__series_config-row">
-          <div className="vis_editor__label">Override Index Pattern</div>
+            label="Template"
+            helpText={<span>eg.<EuiCode>{'{{value}}/s'}</EuiCode></span>}
+            fullWidth
+          >
+            <EuiFieldText
+              onChange={handleTextChange('value_template')}
+              value={model.value_template}
+              fullWidth
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('offset')}
+            label="Offset series time by (1m, 1h, 1w, 1d)"
+          >
+            <EuiFieldText
+              data-test-subj="offsetTimeSeries"
+              onChange={handleTextChange('offset_time')}
+              value={model.offset_time}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule margin="s" />
+
+      <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel>Override Index Pattern?</EuiFormLabel>
+          <EuiSpacer size="s" />
           <YesNo
             value={model.override_index_pattern}
             name="override_index_pattern"
             onChange={props.onChange}
           />
+        </EuiFlexItem>
+        <EuiFlexItem>
           <IndexPattern
             onChange={props.onChange}
             model={props.model}
             fields={props.fields}
             prefix="series_"
-            className="vis_editor__row_item vis_editor__row"
             disabled={!model.override_index_pattern}
           />
-        </div>
-        <div className="vis_editor__series_config-row">
-          <label className="vis_editor__label" htmlFor={htmlId('series_filter')}>
-            Filter
-          </label>
-          <input
-            id={htmlId('series_filter')}
-            className="vis_editor__input-grows"
-            type="text"
-            onChange={handleTextChange('filter')}
-            value={model.filter}
-          />
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule margin="s" />
+
+      <EuiFormRow
+        id={htmlId('series_filter')}
+        label="Filter"
+        fullWidth
+      >
+        <EuiFieldText
+          onChange={handleTextChange('filter')}
+          value={model.filter}
+          fullWidth
+        />
+      </EuiFormRow>
+
     </div>
   );
 };

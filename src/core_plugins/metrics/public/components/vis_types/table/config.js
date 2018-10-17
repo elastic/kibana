@@ -29,6 +29,15 @@ import ColorRules from '../../color_rules';
 import {
   htmlIdGenerator,
   EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiFormRow,
+  EuiCode,
+  EuiHorizontalRule,
+  EuiFormLabel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 class TableSeriesConfig extends Component {
@@ -65,67 +74,101 @@ class TableSeriesConfig extends Component {
     });
 
     return (
-      <div>
-        <div className="vis_editor__series_config-container">
-          <div className="vis_editor__series_config-row">
+      <div className="tvbAggRow">
+
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
             <DataFormatPicker
               onChange={handleSelectChange('formatter')}
               value={model.formatter}
             />
-            <label className="vis_editor__label" htmlFor={htmlId('valueTemplateInput')}>Template (eg.<code>{'{{value}}/s'}</code>)</label>
-            <input
-              id={htmlId('valueTemplateInput')}
-              className="vis_editor__input-grows"
-              onChange={handleTextChange('value_template')}
-              value={model.value_template}
-            />
-          </div>
-          <div className="vis_editor__series_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('filterInput')}>Filter</label>
-            <input
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('template')}
+              label="Template"
+              helpText={<span>eg.<EuiCode>{'{{value}}/s'}</EuiCode></span>}
+              fullWidth
+            >
+              <EuiFieldText
+                onChange={handleTextChange('value_template')}
+                value={model.value_template}
+                fullWidth
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiHorizontalRule margin="s" />
+
+        <EuiFlexGroup responsive={false} wrap={true}>
+          <EuiFlexItem grow={true}>
+            <EuiFormRow
               id={htmlId('filterInput')}
-              className="vis_editor__input-grows"
-              onChange={handleTextChange('filter')}
-              value={model.filter}
-            />
-            <label className="vis_editor__label">Show Trend Arrows</label>
+              label="Filter"
+              fullWidth
+            >
+              <EuiFieldText
+                onChange={handleTextChange('filter')}
+                value={model.filter}
+                fullWidth
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormLabel>Show trend arrows?</EuiFormLabel>
+            <EuiSpacer size="s" />
             <YesNo
               value={model.trend_arrows}
               name="trend_arrows"
               onChange={this.props.onChange}
             />
-          </div>
-          <div className="vis_editor__series_config-row">
-            <div className="vis_editor__row_item">
-              <FieldSelect
-                fields={this.props.fields}
-                indexPattern={this.props.panel.index_pattern}
-                value={model.aggregate_by}
-                onChange={handleSelectChange('aggregate_by')}
-              />
-            </div>
-            <label className="vis_editor__label" htmlFor={htmlId('aggregateFunctionInput')}>Aggregate Function</label>
-            <div className="vis_editor__row_item">
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiHorizontalRule margin="s" />
+
+        <EuiFlexGroup responsive={false} wrap={true}>
+          <EuiFlexItem grow={true}>
+            <EuiFormLabel>Field</EuiFormLabel>
+            <FieldSelect
+              fields={this.props.fields}
+              indexPattern={this.props.panel.index_pattern}
+              value={model.aggregate_by}
+              onChange={handleSelectChange('aggregate_by')}
+              fullWidth
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <EuiFormRow
+              id={htmlId('aggregateFunctionInput')}
+              label="Aggregate function"
+              fullWidth
+            >
               <EuiComboBox
-                id={htmlId('aggregateFunctionInput')}
                 options={functionOptions}
                 selectedOptions={selectedAggFuncOption ? [selectedAggFuncOption] : []}
                 onChange={handleSelectChange('aggregate_function')}
                 singleSelection={true}
+                fullWidth
               />
-            </div>
-          </div>
-          <div className="vis_editor__series_config-row summarize__colorRules">
-            <ColorRules
-              primaryName="text"
-              primaryVarName="text"
-              hideSecondary={true}
-              model={model}
-              onChange={this.props.onChange}
-              name="color_rules"
-            />
-          </div>
-        </div>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiHorizontalRule margin="s" />
+
+        <EuiTitle size="xxs"><span>Color rules</span></EuiTitle>
+        <EuiSpacer size="s" />
+
+        <ColorRules
+          primaryName="text"
+          primaryVarName="text"
+          hideSecondary={true}
+          model={model}
+          onChange={this.props.onChange}
+          name="color_rules"
+        />
       </div>
     );
   }

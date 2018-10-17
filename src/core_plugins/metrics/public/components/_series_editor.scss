@@ -1,14 +1,18 @@
 @import 'node_modules/@elastic/eui/src/components/panel/mixins';
 
 
+.tvbAnnotationsEditor__container,
 .tvbSeriesEditor__container {
-  margin-bottom: $euiSize;
+  padding: $euiSize;
+  background-color: $euiColorLightestShade;
 }
 
+@include euiPanel('tvbAnnotationsEditor');
 @include euiPanel('tvbSeriesEditor');
 
+.tvbAnnotationsEditor,
 .tvbSeriesEditor {
-  margin: $euiSizeS;
+  margin-bottom: $euiSize;
   padding: $euiSizeS;
 
   // When dragging a collapsed item, make sure the contents doesn't show

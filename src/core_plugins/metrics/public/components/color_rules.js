@@ -18,7 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from './add_delete_buttons';
 import * as collectionActions from './lib/collection_actions';
@@ -26,6 +26,10 @@ import ColorPicker from './color_picker';
 import {
   htmlIdGenerator,
   EuiComboBox,
+  EuiFieldNumber,
+  EuiFormLabel,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 class ColorRules extends Component {
@@ -66,55 +70,73 @@ class ColorRules extends Component {
       return model.operator === option.value;
     });
 
+    const labelStyle = { marginBottom: 0 };
+
     let secondary;
     if (!this.props.hideSecondary) {
       secondary = (
-        <div className="color_rules__secondary">
-          <div className="color_rules__label">and {this.props.secondaryName} to</div>
-          <ColorPicker
-            onChange={handleColorChange}
-            name={this.props.secondaryVarName}
-            value={model[this.props.secondaryVarName]}
-          />
-        </div>
+        <Fragment>
+          <EuiFlexItem grow={false}>
+            <EuiFormLabel style={labelStyle}>and {this.props.secondaryName} to</EuiFormLabel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ColorPicker
+              onChange={handleColorChange}
+              name={this.props.secondaryVarName}
+              value={model[this.props.secondaryVarName]}
+            />
+          </EuiFlexItem>
+        </Fragment>
       );
     }
     return (
-      <div key={model.id} className="color_rules__rule">
-        <div className="color_rules__label">Set {this.props.primaryName} to</div>
-        <ColorPicker
-          onChange={handleColorChange}
-          name={this.props.primaryVarName}
-          value={model[this.props.primaryVarName]}
-        />
+      <EuiFlexGroup wrap={true} responsive={false} gutterSize="s" key={model.id} alignItems="center" className="tvbColorRules__rule">
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel style={labelStyle}>Set {this.props.primaryName} to</EuiFormLabel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ColorPicker
+            onChange={handleColorChange}
+            name={this.props.primaryVarName}
+            value={model[this.props.primaryVarName]}
+          />
+        </EuiFlexItem>
+
         { secondary }
-        <label className="color_rules__label" htmlFor={htmlId('ifMetricIs')}>
-          if metric is
-        </label>
-        <div className="color_rules__item">
+
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel style={labelStyle} htmlFor={htmlId('ifMetricIs')}>if metric is</EuiFormLabel>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <EuiComboBox
             id={htmlId('ifMetricIs')}
             options={operatorOptions}
             selectedOptions={selectedOperatorOption ? [selectedOperatorOption] : []}
             onChange={this.handleChange(model, 'operator')}
             singleSelection={true}
+            fullWidth
           />
-        </div>
-        <input
-          aria-label="Value"
-          className="color_rules__input"
-          type="number"
-          value={model.value}
-          onChange={this.handleChange(model, 'value', Number)}
-        />
-        <div className="color_rules__control">
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFieldNumber
+            aria-label="Value"
+            type="number"
+            value={model.value}
+            onChange={this.handleChange(model, 'value', Number)}
+            fullWidth
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <AddDeleteButtons
             onAdd={handleAdd}
             onDelete={handleDelete}
             disableDelete={items.length < 2}
+            responsive={false}
           />
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -123,7 +145,7 @@ class ColorRules extends Component {
     if (!model[name]) return (<div/>);
     const rows = model[name].map(this.renderRow);
     return (
-      <div className="color_rules">
+      <div>
         { rows }
       </div>
     );
