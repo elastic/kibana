@@ -83,7 +83,7 @@ function GaugeVisualization(props) {
   const style = { backgroundColor: panelBackgroundColor };
 
   return (
-    <div className="dashboard__visualization" style={style}>
+    <div className="tvbVis" style={style}>
       <Gauge {...params} />
     </div>
   );

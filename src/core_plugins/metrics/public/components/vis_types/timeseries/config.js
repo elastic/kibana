@@ -170,55 +170,59 @@ function TimeseriesConfig(props) {
   }
   if (model.chart_type === 'bar') {
     type = (
-      <div className="vis_editor__series_config-row">
-        <label className="vis_editor__label" htmlFor={htmlId('chartType')}>
-          Chart Type
-        </label>
-        <div className="vis_editor__item">
-          <EuiComboBox
-            isClearable={false}
+      <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
             id={htmlId('chartType')}
-            options={chartTypeOptions}
-            selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
-            onChange={handleSelectChange('chart_type')}
-            singleSelection={true}
-          />
-        </div>
-        <label className="vis_editor__label" htmlFor={htmlId('stacked')}>
-          Stacked
-        </label>
-        <div className="vis_editor__item">
-          <EuiComboBox
-            isClearable={false}
+            label="Chart type"
+          >
+            <EuiComboBox
+              isClearable={false}
+              options={chartTypeOptions}
+              selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
+              onChange={handleSelectChange('chart_type')}
+              singleSelection={true}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
             id={htmlId('stacked')}
-            options={stackedOptions}
-            selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
-            onChange={handleSelectChange('stacked')}
-            singleSelection={true}
-          />
-        </div>
-        <label className="vis_editor__label" htmlFor={htmlId('fill')}>
-          Fill (0 to 1)
-        </label>
-        <input
-          id={htmlId('fill')}
-          className="vis_editor__input-grows"
-          type="number"
-          step="0.5"
-          onChange={handleTextChange('fill')}
-          value={model.fill}
-        />
-        <label className="vis_editor__label" htmlFor={htmlId('lineWidth')}>
-          Line Width
-        </label>
-        <input
-          id={htmlId('lineWidth')}
-          className="vis_editor__input-grows"
-          type="number"
-          onChange={handleTextChange('line_width')}
-          value={model.line_width}
-        />
-      </div>
+            label="Stacked"
+          >
+            <EuiComboBox
+              isClearable={false}
+              options={stackedOptions}
+              selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
+              onChange={handleSelectChange('stacked')}
+              singleSelection={true}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('fill')}
+            label="Fill (0 to 1)"
+          >
+            <EuiFieldNumber
+              step={0.5}
+              onChange={handleTextChange('fill')}
+              value={Number(model.fill)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('lineWidth')}
+            label="Line width"
+          >
+            <EuiFieldNumber
+              onChange={handleTextChange('line_width')}
+              value={Number(model.line_width)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -254,7 +258,7 @@ function TimeseriesConfig(props) {
 
       { type }
 
-      <EuiHorizontalRule />
+      <EuiHorizontalRule margin="s" />
 
       <EuiFlexGroup responsive={false} wrap={true}>
         <EuiFlexItem grow={true}>

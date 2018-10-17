@@ -70,7 +70,7 @@ function GaugeSeries(props) {
           >
             { aggs }
           </Sortable>
-          <div className="tvbAggRow">
+          <div className="tvbAggRow tvbAggRow--split">
             <Split
               onChange={props.onChange}
               fields={fields}

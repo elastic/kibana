@@ -23,7 +23,7 @@ import PropTypes from 'prop-types';
 import tickFormatter from '../../lib/tick_formatter';
 import calculateLabel from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import replaceVars from '../../lib/replace_vars';
 
 function getColor(rules, colorKey, value) {
@@ -62,24 +62,24 @@ class TableVis extends Component {
       const value = formatter(item.last);
       let trend;
       if (column.trend_arrows) {
-        const trendClass = item.slope > 0 ? 'fa-long-arrow-up' : 'fa-long-arrow-down';
+        const trendIcon = item.slope > 0 ? 'sortUp' : 'sortDown';
         trend = (
-          <span className="tsvb-table__trend">
-            <i className={`fa ${trendClass}`}/>
+          <span>
+            &nbsp; <EuiIcon type={trendIcon} color="subdued" />
           </span>
         );
       }
       const style = { color: getColor(column.color_rules, 'text', item.last) };
       return (
-        <td key={`${rowId}-${item.id}`} className="tsvb-table__value" style={style}>
-          <span className="tsvb-table__value-display">{ value }</span>
+        <td key={`${rowId}-${item.id}`} className="eui-textRight" style={style}>
+          <span>{ value }</span>
           {trend}
         </td>
       );
     });
     return (
       <tr key={rowId}>
-        <td className="tsvb-table__fieldName">{rowDisplay}</td>
+        <td>{rowDisplay}</td>
         {columns}
       </tr>
     );
@@ -109,12 +109,12 @@ class TableVis extends Component {
       if (isSortable(metric)) {
         let sortIcon;
         if (sort.column === item.id) {
-          sortIcon = sort.order === 'asc' ? 'sort-asc' : 'sort-desc';
+          sortIcon = sort.order === 'asc' ? 'sortUp' : 'sortDown';
         } else {
-          sortIcon = 'sort';
+          sortIcon = 'empty';
         }
         sortComponent = (
-          <i className={`fa fa-${sortIcon}`} />
+          <EuiIcon type={sortIcon} />
         );
       }
       let headerContent = (
@@ -122,13 +122,12 @@ class TableVis extends Component {
       );
       if (!isSortable(metric)) {
         headerContent = (
-          <EuiToolTip content="This Column is Not Sortable">{headerContent}</EuiToolTip>
+          <EuiToolTip content="This column is not sortable">{headerContent}</EuiToolTip>
         );
       }
 
       return (
         <th
-          className="tsvb-table__columnName"
           onClick={handleClick}
           key={item.id}
           scope="col"
@@ -140,12 +139,12 @@ class TableVis extends Component {
     const label = model.pivot_label || model.pivot_field || model.pivot_id;
     let sortIcon;
     if (sort.column === '_default_') {
-      sortIcon = sort.order === 'asc' ? 'sort-asc' : 'sort-desc';
+      sortIcon = sort.order === 'asc' ? 'sortUp' : 'sortDown';
     } else {
-      sortIcon = 'sort';
+      sortIcon = 'empty';
     }
     const sortComponent = (
-      <i className={`fa fa-${sortIcon}`} />
+      <EuiIcon type={sortIcon} />
     );
     const handleSortClick = () => {
       let order;
@@ -158,7 +157,7 @@ class TableVis extends Component {
     };
     return (
       <tr>
-        <th scope="col" onClick={handleSortClick}>{label} {sortComponent}</th>
+        <th className="eui-textLeft" scope="col" onClick={handleSortClick}>{label} {sortComponent}</th>
         { columns }
       </tr>
     );
@@ -184,7 +183,6 @@ class TableVis extends Component {
       rows = (
         <tr>
           <td
-            className="tsvb-table__noResults"
             colSpan={model.series.length + 1}
           >
             {message}
@@ -193,7 +191,7 @@ class TableVis extends Component {
       );
     }
     return(
-      <div className={`dashboard__visualization ${reversedClass}`} data-test-subj="tableView">
+      <div className={`tvbVis ${reversedClass}`} data-test-subj="tableView">
         <table className="table">
           <thead>
             {header}

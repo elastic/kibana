@@ -201,7 +201,7 @@ class TimeseriesVisualization extends Component {
       params.reversed = color(panelBackgroundColor || backgroundColor).luminosity() < 0.45;
     }
     return (
-      <div className="dashboard__visualization" style={style}>
+      <div className="tvbVis" style={style}>
         <Timeseries {...params}/>
       </div>
     );

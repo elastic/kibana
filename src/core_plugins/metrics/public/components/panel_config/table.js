@@ -86,7 +86,7 @@ class TablePanelConfig extends Component {
 
               <EuiFlexGroup responsive={false} wrap={true}>
                 <EuiFlexItem>
-                  <EuiFormLabel htmlFor={htmlId('field')}>Group by rield</EuiFormLabel>
+                  <EuiFormLabel htmlFor={htmlId('field')}>Group by field</EuiFormLabel>
                   <FieldSelect
                     id={htmlId('field')}
                     fields={this.props.fields}
