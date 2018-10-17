@@ -44,6 +44,7 @@ export function getUsageStats(rawStats) {
       'index_pattern',
       'graph_workspace',
       'timelion_sheet',
+      'plugins.xpack', // FIXME nested omit doesn't work
     ]);
     const rolledUpStats = get(accum, clusterUuid, { indices: 0 });
     const stats = {
