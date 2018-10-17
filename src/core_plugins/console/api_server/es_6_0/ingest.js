@@ -17,6 +17,11 @@
  * under the License.
  */
 
+const commonPipelineParams = {
+    on_failure: [],
+    if: ''
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/append-processor.html
 const appendProcessorDefinition = {
   append: {
@@ -419,11 +424,6 @@ const pipelineDefinition = {
   ],
   version: 123,
 };
-
-const commonPipelineParams = {
-    on_failure: [],
-    if: ''
-}
 
 export default function (api) {
 
