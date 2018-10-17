@@ -50,52 +50,53 @@ export class StepMetricsUi extends Component {
       sortable: true,
     }];
 
-    const metricTypesConfig = [{
-      type: 'min',
-      name: '',
-      label: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxMinLabel"
-          defaultMessage="Minimum"
-        />
-      ),
-    }, {
-      type: 'max',
-      name: '',
-      label: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxMaxLabel"
-          defaultMessage="Maximum"
-        />
-      ),
-    }, {
-      type: 'sum',
-      name: '',
-      label: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxSumLabel"
-          defaultMessage="Sum"
-        />
-      ),
-    }, {
-      type: 'avg',
-      name: '',
-      label: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxAverageLabel"
-          defaultMessage="Average"
-        />
-      ),
-    }, {
-      type: 'value_count',
-      name: '',
-      label: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxValueCountLabel"
-          defaultMessage="Value count"
-        />
-      ),
-    }];
+    const metricTypesConfig = [
+      {
+        type: 'avg',
+        name: '',
+        label: (
+          <FormattedMessage
+            id="xpack.rollupJobs.create.stepMetrics.checkboxAverageLabel"
+            defaultMessage="Average"
+          />
+        ),
+      }, {
+        type: 'max',
+        name: '',
+        label: (
+          <FormattedMessage
+            id="xpack.rollupJobs.create.stepMetrics.checkboxMaxLabel"
+            defaultMessage="Maximum"
+          />
+        ),
+      }, {
+        type: 'min',
+        name: '',
+        label: (
+          <FormattedMessage
+            id="xpack.rollupJobs.create.stepMetrics.checkboxMinLabel"
+            defaultMessage="Minimum"
+          />
+        ),
+      }, {
+        type: 'sum',
+        name: '',
+        label: (
+          <FormattedMessage
+            id="xpack.rollupJobs.create.stepMetrics.checkboxSumLabel"
+            defaultMessage="Sum"
+          />
+        ),
+      }, {
+        type: 'value_count',
+        name: '',
+        label: (
+          <FormattedMessage
+            id="xpack.rollupJobs.create.stepMetrics.checkboxValueCountLabel"
+            defaultMessage="Value count"
+          />
+        ),
+      }];
 
     const metricTypeColumns = metricTypesConfig.map(({ type, name, label }) => ({
       name,
