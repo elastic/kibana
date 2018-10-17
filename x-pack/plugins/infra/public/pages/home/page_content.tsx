@@ -27,10 +27,10 @@ export const HomePageContent: React.SFC = () => (
                 <WithWaffleTime>
                   {({ currentTimeRange, isAutoReloading }) => (
                     <WithWaffleOptions>
-                      {({ metrics, groupBy, nodeType }) => (
+                      {({ metric, groupBy, nodeType }) => (
                         <WithWaffleNodes
                           filterQuery={filterQueryAsJson}
-                          metrics={metrics}
+                          metric={metric}
                           groupBy={groupBy}
                           nodeType={nodeType}
                           sourceId={sourceId}
@@ -41,7 +41,7 @@ export const HomePageContent: React.SFC = () => (
                               map={nodes}
                               loading={nodes.length > 0 && isAutoReloading ? false : loading}
                               nodeType={nodeType}
-                              options={{ ...wafflemap, metrics, fields: configuredFields }}
+                              options={{ ...wafflemap, metric, fields: configuredFields }}
                               reload={refetch}
                             />
                           )}

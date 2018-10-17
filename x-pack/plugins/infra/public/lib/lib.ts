@@ -103,7 +103,7 @@ export interface InfraWaffleMapNode {
   id: string;
   name: string;
   path: InfraNodePath[];
-  metrics: InfraNodeMetric[];
+  metric: InfraNodeMetric;
 }
 
 export type InfraWaffleMapGroup = InfraWaffleMapGroupOfNodes | InfraWaffleMapGroupOfGroups;
@@ -165,7 +165,7 @@ export interface InfraWaffleMapOptions {
   fields?: SourceQuery.Fields | null;
   formatter: InfraFormatterType;
   formatTemplate: string;
-  metrics: InfraMetricInput[];
+  metric: InfraMetricInput;
   path: InfraPathInput[];
   legend: InfraWaffleMapLegend;
 }
@@ -186,7 +186,7 @@ export interface InfraWaffleMapBounds {
 export type InfraFormatter = (value: string | number) => string;
 export enum InfraFormatterType {
   number = 'number',
-  abvNumber = 'abvNumber',
+  abbreviatedNumber = 'abbreviatedNumber',
   bytes = 'bytes',
   bits = 'bits',
   percent = 'percent',

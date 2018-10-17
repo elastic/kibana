@@ -10,7 +10,6 @@ import {
   InfraPathFilterInput,
   InfraPathInput,
   InfraPathType,
-  InfraResponse,
   InfraTimerangeInput,
 } from '../../../../common/graphql/types';
 import { JsonObject } from '../../../../common/typed_json';
@@ -18,7 +17,7 @@ import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';
 
 export interface InfraNodesAdapter {
-  getNodes(req: InfraFrameworkRequest, options: InfraNodeRequestOptions): Promise<InfraResponse>;
+  getNodes(req: InfraFrameworkRequest, options: InfraNodeRequestOptions): Promise<InfraNode[]>;
 }
 
 export interface InfraHostsFieldsObject {
@@ -90,7 +89,7 @@ export interface InfraNodeRequestOptions {
   sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerangeInput;
   groupBy: InfraPathInput[];
-  metrics: InfraMetricInput[];
+  metric: InfraMetricInput;
   filterQuery: InfraESQuery | undefined;
 }
 
@@ -160,7 +159,7 @@ export interface InfraBucketWithAggs {
 }
 
 export interface InfraBucketWithValues {
-  [name: string]: { value: number };
+  [name: string]: { value: number; normalized_value?: number };
 }
 
 export type InfraBucket = InfraBucketWithAggs & InfraBucketWithKey & InfraBucketWithValues;
@@ -207,6 +206,12 @@ export interface InfraDerivativeAgg {
   };
 }
 
+export interface InfraCumulativeSumAgg {
+  cumulative_sum: {
+    buckets_path: string;
+  };
+}
+
 export interface InfraBucketScriptAgg {
   bucket_script: {
     buckets_path: { [key: string]: string };
@@ -218,7 +223,12 @@ export interface InfraBucketScriptAgg {
   };
 }
 
-export type InfraAgg = InfraBucketScriptAgg | InfraDerivativeAgg | InfraAvgAgg | InfraMaxAgg;
+export type InfraAgg =
+  | InfraBucketScriptAgg
+  | InfraDerivativeAgg
+  | InfraAvgAgg
+  | InfraMaxAgg
+  | InfraCumulativeSumAgg;
 export interface InfraNodeMetricAgg {
   [key: string]: InfraAgg;
 }

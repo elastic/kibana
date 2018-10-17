@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { get, last, max, min } from 'lodash';
+import { get, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import { InfraMetricType, InfraNodeType } from '../../../common/graphql/types';
@@ -59,6 +59,10 @@ const METRIC_FORMATTERS: MetricFormatters = {
   },
   [InfraMetricType.rx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
   [InfraMetricType.tx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  [InfraMetricType.logRate]: {
+    formatter: InfraFormatterType.abbreviatedNumber,
+    template: '{{value}}/s',
+  },
 };
 
 const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = []): number[] => {
@@ -69,8 +73,7 @@ const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = 
     if (isWaffleMapGroupWithNodes(group)) {
       return acc.concat(
         group.nodes.map(node => {
-          const lastMetric = last(node.metrics);
-          return (lastMetric && lastMetric.value) || 0;
+          return node.metric.value || 0;
         })
       );
     }
@@ -109,7 +112,7 @@ export class Waffle extends React.Component<Props, {}> {
         />
       );
     }
-    const metric = last(this.props.options.metrics);
+    const { metric } = this.props.options;
     const metricFormatter = get(
       METRIC_FORMATTERS,
       metric.type,
@@ -139,7 +142,7 @@ export class Waffle extends React.Component<Props, {}> {
 
   // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
   private formatter = (val: string | number) => {
-    const metric = last(this.props.options.metrics);
+    const { metric } = this.props.options;
     const metricFormatter = get(
       METRIC_FORMATTERS,
       metric.type,

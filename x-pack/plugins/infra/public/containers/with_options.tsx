@@ -30,7 +30,7 @@ const initialState = {
     wafflemap: {
       formatter: InfraFormatterType.percent,
       formatTemplate: '{{value}}',
-      metrics: [{ type: InfraMetricType.cpu }],
+      metric: { type: InfraMetricType.cpu },
       path: [{ type: InfraPathType.hosts }],
       /*
       legend: {

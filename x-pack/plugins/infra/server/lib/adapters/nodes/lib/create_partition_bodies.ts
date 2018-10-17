@@ -6,6 +6,7 @@
 
 import { times } from 'lodash';
 
+import { InfraMetricType } from '../../../../../common/graphql/types';
 import {
   InfraESMSearchBody,
   InfraNodeRequestOptions,
@@ -24,6 +25,10 @@ export function createPartitionBodies(
   const { sourceConfiguration }: InfraNodeRequestOptions = nodeOptions;
   const bodies: InfraESMSearchBody[] = [];
   const numberOfPartitions: number = Math.ceil(totalNodes / NODE_REQUEST_PARTITION_SIZE);
+  const indices =
+    nodeOptions.metric.type === InfraMetricType.logRate
+      ? [sourceConfiguration.logAlias]
+      : [sourceConfiguration.logAlias, sourceConfiguration.metricAlias];
   times(
     numberOfPartitions,
     (partitionId: number): void => {
@@ -35,7 +40,7 @@ export function createPartitionBodies(
         partitionId,
       };
       bodies.push({
-        index: [sourceConfiguration.logAlias, sourceConfiguration.metricAlias],
+        index: indices,
       });
       bodies.push(createNodeRequestBody(processorOptions));
     }

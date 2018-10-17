@@ -20,6 +20,9 @@ const getNodeType = (type: InfraPathType): InfraNodeType => {
 };
 
 const isEntityType = (path: InfraPathInput) => {
+  if (!path) {
+    return false;
+  }
   switch (path.type) {
     case InfraPathType.containers:
     case InfraPathType.hosts:

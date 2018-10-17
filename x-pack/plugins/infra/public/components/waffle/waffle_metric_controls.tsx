@@ -11,13 +11,12 @@ import {
   EuiFilterGroup,
   EuiPopover,
 } from '@elastic/eui';
-import { last } from 'lodash';
 import React from 'react';
 import { InfraMetricInput, InfraMetricType, InfraNodeType } from '../../../common/graphql/types';
 interface Props {
   nodeType: InfraNodeType;
-  metrics: InfraMetricInput[];
-  onChange: (metrics: InfraMetricInput[]) => void;
+  metric: InfraMetricInput;
+  onChange: (metric: InfraMetricInput) => void;
 }
 
 const OPTIONS = {
@@ -39,6 +38,7 @@ const OPTIONS = {
     { text: 'Load', value: InfraMetricType.load },
     { text: 'Inbound Traffic', value: InfraMetricType.rx },
     { text: 'Outbound Traffic', value: InfraMetricType.tx },
+    { text: 'Log Rate', value: InfraMetricType.logRate },
   ],
 };
 
@@ -50,13 +50,13 @@ type State = Readonly<typeof initialState>;
 export class WaffleMetricControls extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
-    const currentMetric = last(this.props.metrics);
+    const { metric } = this.props;
     const options = OPTIONS[this.props.nodeType];
-    const value = currentMetric.type;
+    const value = metric.type;
     if (!options.length || !value) {
       throw Error('Unable to select options or value for metric.');
     }
-    const currentLabel = options.find(o => o.value === currentMetric.type);
+    const currentLabel = options.find(o => o.value === metric.type);
     if (!currentLabel) {
       return 'null';
     }
@@ -65,7 +65,7 @@ export class WaffleMetricControls extends React.PureComponent<Props, State> {
         id: 0,
         title: '',
         items: options.map(o => {
-          const icon = o.value === currentMetric.type ? 'check' : 'empty';
+          const icon = o.value === metric.type ? 'check' : 'empty';
           const panel = { name: o.text, onClick: this.handleClick(o.value), icon };
           return panel;
         }),
@@ -100,7 +100,7 @@ export class WaffleMetricControls extends React.PureComponent<Props, State> {
   };
 
   private handleClick = (value: InfraMetricType) => () => {
-    this.props.onChange([{ type: value }]);
+    this.props.onChange({ type: value });
     this.handleClose();
   };
 }

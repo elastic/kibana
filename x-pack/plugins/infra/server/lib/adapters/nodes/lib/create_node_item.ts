@@ -36,17 +36,19 @@ function createNodeMetrics(
   options: InfraNodeRequestOptions,
   node: InfraBucket,
   bucket: InfraBucket
-): InfraNodeMetric[] {
-  const { timerange, metrics } = options;
+): InfraNodeMetric {
+  const { timerange, metric } = options;
   const bucketSize = getBucketSizeInSeconds(timerange.interval);
   const lastBucket = findLastFullBucket(bucket, bucketSize, options);
   if (!lastBucket) {
     throw new Error('Date histogram returned an empty set of buckets.');
   }
-  return metrics.filter(metric => lastBucket[metric.type]).map(metric => {
-    const metricObj = lastBucket[metric.type];
-    return { name: metric.type, value: (metricObj && metricObj.value) || 0 };
-  });
+  const metricObj = lastBucket[metric.type];
+  const value = (metricObj && (metricObj.normalized_value || metricObj.value)) || 0;
+  return {
+    name: metric.type,
+    value,
+  };
 }
 
 export function createNodeItem(
@@ -55,7 +57,7 @@ export function createNodeItem(
   bucket: InfraBucket
 ): InfraNode {
   return {
-    metrics: createNodeMetrics(options, node, bucket),
+    metric: createNodeMetrics(options, node, bucket),
     path: [{ value: node.key }],
   } as InfraNode;
 }

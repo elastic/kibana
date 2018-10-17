@@ -12,7 +12,9 @@ import { formatPercent } from './percent';
 
 export const FORMATTERS = {
   [InfraFormatterType.number]: formatNumber,
-  [InfraFormatterType.abvNumber]: createDataFormatter(InfraWaffleMapDataFormat.abbreviatedNumber),
+  [InfraFormatterType.abbreviatedNumber]: createDataFormatter(
+    InfraWaffleMapDataFormat.abbreviatedNumber
+  ),
   [InfraFormatterType.bytes]: createDataFormatter(InfraWaffleMapDataFormat.bytesDecimal),
   [InfraFormatterType.bits]: createDataFormatter(InfraWaffleMapDataFormat.bitsDecimal),
   [InfraFormatterType.percent]: formatPercent,

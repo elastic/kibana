@@ -42,12 +42,12 @@ export const HomeToolbar: React.SFC = () => (
         </EuiText>
       </EuiFlexItem>
       <WithWaffleOptions>
-        {({ nodeType, changeNodeType, changeGroupBy, changeMetrics }) => (
+        {({ nodeType, changeNodeType, changeGroupBy, changeMetric }) => (
           <EuiFlexItem grow={false}>
             <WaffleNodeTypeSwitcher
               nodeType={nodeType}
               changeNodeType={changeNodeType}
-              changeMetrics={changeMetrics}
+              changeMetric={changeMetric}
               changeGroupBy={changeGroupBy}
             />
           </EuiFlexItem>
@@ -81,14 +81,10 @@ export const HomeToolbar: React.SFC = () => (
         </WithKueryAutocompletion>
       </EuiFlexItem>
       <WithWaffleOptions>
-        {({ changeMetrics, changeGroupBy, groupBy, metrics, nodeType }) => (
+        {({ changeMetric, changeGroupBy, groupBy, metric, nodeType }) => (
           <React.Fragment>
             <EuiFlexItem grow={false}>
-              <WaffleMetricControls
-                metrics={metrics}
-                nodeType={nodeType}
-                onChange={changeMetrics}
-              />
+              <WaffleMetricControls metric={metric} nodeType={nodeType} onChange={changeMetric} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <WaffleGroupByControls

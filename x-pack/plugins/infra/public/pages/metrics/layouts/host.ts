@@ -169,7 +169,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
-          formatter: InfraFormatterType.abvNumber,
+          formatter: InfraFormatterType.abbreviatedNumber,
           seriesOverrides: {
             capacity: { color: theme.eui.euiColorVis2 },
             used: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },

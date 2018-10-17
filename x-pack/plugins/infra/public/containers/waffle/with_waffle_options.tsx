@@ -16,7 +16,7 @@ import { bindPlainActionCreators } from '../../utils/typed_redux';
 import { UrlStateContainer } from '../../utils/url_state';
 
 const selectOptionsUrlState = createSelector(
-  waffleOptionsSelectors.selectMetrics,
+  waffleOptionsSelectors.selectMetric,
   waffleOptionsSelectors.selectGroupBy,
   waffleOptionsSelectors.selectNodeType,
   (metrics, groupBy, nodeType) => ({
@@ -28,13 +28,13 @@ const selectOptionsUrlState = createSelector(
 
 export const withWaffleOptions = connect(
   (state: State) => ({
-    metrics: waffleOptionsSelectors.selectMetrics(state),
+    metric: waffleOptionsSelectors.selectMetric(state),
     groupBy: waffleOptionsSelectors.selectGroupBy(state),
     nodeType: waffleOptionsSelectors.selectNodeType(state),
     urlState: selectOptionsUrlState(state),
   }),
   bindPlainActionCreators({
-    changeMetrics: waffleOptionsActions.changeMetrics,
+    changeMetric: waffleOptionsActions.changeMetric,
     changeGroupBy: waffleOptionsActions.changeGroupBy,
     changeNodeType: waffleOptionsActions.changeNodeType,
   })
@@ -47,21 +47,21 @@ export const WithWaffleOptions = asChildFunctionRenderer(withWaffleOptions);
  */
 
 interface WaffleOptionsUrlState {
-  metrics?: ReturnType<typeof waffleOptionsSelectors.selectMetrics>;
+  metric?: ReturnType<typeof waffleOptionsSelectors.selectMetric>;
   groupBy?: ReturnType<typeof waffleOptionsSelectors.selectGroupBy>;
   nodeType?: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
 }
 
 export const WithWaffleOptionsUrlState = () => (
   <WithWaffleOptions>
-    {({ changeMetrics, urlState, changeGroupBy, changeNodeType }) => (
+    {({ changeMetric, urlState, changeGroupBy, changeNodeType }) => (
       <UrlStateContainer
         urlState={urlState}
         urlStateKey="waffleOptions"
         mapToUrlState={mapToUrlState}
         onChange={newUrlState => {
-          if (newUrlState && newUrlState.metrics) {
-            changeMetrics(newUrlState.metrics);
+          if (newUrlState && newUrlState.metric) {
+            changeMetric(newUrlState.metric);
           }
           if (newUrlState && newUrlState.groupBy) {
             changeGroupBy(newUrlState.groupBy);
@@ -72,7 +72,7 @@ export const WithWaffleOptionsUrlState = () => (
         }}
         onInitialize={initialUrlState => {
           if (initialUrlState) {
-            changeMetrics(initialUrlState.metrics || initialWaffleOptionsState.metrics);
+            changeMetric(initialUrlState.metric || initialWaffleOptionsState.metric);
             changeGroupBy(initialUrlState.groupBy || initialWaffleOptionsState.groupBy);
             changeNodeType(initialUrlState.nodeType || initialWaffleOptionsState.nodeType);
           }
@@ -85,7 +85,7 @@ export const WithWaffleOptionsUrlState = () => (
 const mapToUrlState = (value: any): WaffleOptionsUrlState | undefined =>
   value
     ? {
-        metrics: mapToMetricsUrlState(value.metrics),
+        metric: mapToMetricUrlState(value.metric),
         groupBy: mapToGroupByUrlState(value.groupBy),
         nodeType: mapToNodeTypeUrlState(value.nodeType),
       }
@@ -99,10 +99,8 @@ const isInfraPathInput = (subject: any): subject is InfraPathType => {
   return subject != null && subject.type != null && InfraPathType[subject.type] != null;
 };
 
-const mapToMetricsUrlState = (subject: any) => {
-  return subject && Array.isArray(subject) && subject.every(isInfraMetricInput)
-    ? subject
-    : undefined;
+const mapToMetricUrlState = (subject: any) => {
+  return subject && isInfraMetricInput(subject) ? subject : undefined;
 };
 
 const mapToGroupByUrlState = (subject: any) => {
