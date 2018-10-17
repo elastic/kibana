@@ -230,20 +230,23 @@ export class WorkpadTemplates extends React.PureComponent {
 
   render() {
     const { sortField, sortDirection, searchTerm, filterTags } = this.state;
-
     const sortedTemplates = sortByOrder(templates, [sortField, 'name'], [sortDirection, 'asc']);
 
-    const filteredTemplates = sortedTemplates.filter(({ name, description, tags }) => {
-      const tagMatch = filterTags.length
-        ? filterTags.some(filterTag => tags.indexOf(filterTag) > -1)
-        : true;
+    const filteredTemplates = sortedTemplates.filter(
+      ({ name = '', description = '', tags = [] }) => {
+        const tagMatch = filterTags.length
+          ? filterTags.some(filterTag => tags.indexOf(filterTag) > -1)
+          : true;
 
-      const textMatch = searchTerm
-        ? name.indexOf(searchTerm) > -1 || description.indexOf(searchTerm) > -1
-        : true;
+        const lowercaseSearch = searchTerm.toLowerCase();
+        const textMatch = lowercaseSearch
+          ? name.toLowerCase().indexOf(lowercaseSearch) > -1 ||
+            description.toLowerCase().indexOf(lowercaseSearch) > -1
+          : true;
 
-      return tagMatch && textMatch;
-    });
+        return tagMatch && textMatch;
+      }
+    );
 
     return (
       <Paginate rows={filteredTemplates}>
