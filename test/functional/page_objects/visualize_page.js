@@ -720,12 +720,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       expect(errorToast).to.be(true);
     }
 
-    async clickLoadSavedVisButton() {
-      // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
-      // element as a child instead of building the breadcrumbs dynamically.
-      await find.clickByCssSelector('[href="#/visualize"]');
-    }
-
     async filterVisByName(vizName) {
       const input = await find.byCssSelector('input[name="filter"]');
       await input.click();
@@ -747,10 +741,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
-    // this starts by clicking the Load Saved Viz button, not from the
-    // bottom half of the "Create a new visualization      Step 1" page
     async loadSavedVisualization(vizName) {
-      await this.clickLoadSavedVisButton();
+      await PageObjects.common.navigateToApp('visualize');
       await this.openSavedVisualization(vizName);
     }
 

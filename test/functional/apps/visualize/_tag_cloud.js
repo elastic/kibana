@@ -143,7 +143,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('bytes');
         await PageObjects.settings.controlChangeSave();
-        await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.loadSavedVisualization(vizName1);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
