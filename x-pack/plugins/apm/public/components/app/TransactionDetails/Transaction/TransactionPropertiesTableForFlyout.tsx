@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { SERVICE_AGENT_NAME } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/Transaction';
+import { IUrlParams } from '../../../../store/urlParams';
 // @ts-ignore
 import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
@@ -19,7 +20,6 @@ import {
 } from '../../../shared/PropertiesTable';
 // @ts-ignore
 import { Tab } from '../../../shared/UIComponents';
-import { IUrlParams } from './WaterfallContainer/Waterfall';
 
 // Ensure the selected tab exists or use the first
 function getCurrentTab(tabs: string[] = [], selectedTab: string | null) {

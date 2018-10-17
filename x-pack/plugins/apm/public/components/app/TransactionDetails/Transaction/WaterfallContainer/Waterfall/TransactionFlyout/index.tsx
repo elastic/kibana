@@ -11,11 +11,11 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
-import { IUrlParams } from '..';
-import { Transaction } from '../../../../../../../../typings/Transaction';
+import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 
 // @ts-ignore
-import DiscoverButton from '../../../../../../shared/DiscoverButton';
+import DiscoverButton from 'x-pack/plugins/apm/public/components/shared/DiscoverButton';
 // @ts-ignore
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 

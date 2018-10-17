@@ -48,7 +48,7 @@ export class Waterfall extends Component<Props> {
   public onOpenFlyout = (item: IWaterfallItem) => {
     this.setQueryParams({
       flyoutDetailTab: null,
-      activeTimelineId: item.id
+      activeTimelineId: String(item.id)
     });
   };
 
