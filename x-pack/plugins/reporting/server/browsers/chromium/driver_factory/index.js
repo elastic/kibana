@@ -52,6 +52,37 @@ export class HeadlessChromiumDriverFactory {
         });
 
         page = await chromium.newPage();
+        await page.setRequestInterception(true);
+
+        page.on('request', req => {
+          this.logger.debug(`Request: [${req.url()}]`);
+          req.continue();
+        });
+        page.on('response', res => {
+          this.logger.debug(`Response: [${res.url()} - ${res.status()}]`); // TODO: test more this logs more than just 200 responses
+        });
+        page.on('requestfailed', async failedReq => {
+          const { errorText } = failedReq.failure();
+          this.logger.error(
+            `Request failed! [${failedReq.url()}] [${errorText}]`
+          );
+          const failedResponse = failedReq.response();
+          if (failedResponse != null) {
+            const json = await failedResponse.json();
+            this.logger.debug(`Partial response for failed request: ${json}`);
+          } else {
+            this.logger.debug(`No partial response for failed request`);
+          }
+        });
+        page.on('console', msg => {
+          const args = msg.args();
+          for (let i = 0; i < args.length; i++) {
+            this.logger.debug(`Console log ${i}: ${args[i]}`);
+          }
+        });
+        page.on('close', () => {
+          this.logger.debug('Page closed');
+        });
       } catch (err) {
         observer.error(new Error(`Caught error spawning Chromium`));
         return;
