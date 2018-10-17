@@ -1,58 +1,14 @@
 @import 'node_modules/@elastic/eui/src/components/form/variables';
 @import 'node_modules/@elastic/eui/src/components/form/mixins';
 
-@mixin tvbEditor__container {
-  // padding: $euiSizeS;
-  background-color: $euiColorEmptyShade;
-  // display: flex;
-  // flex-direction: column;
-  // flex: 1 1 auto;
-}
-
 @mixin tvbEditor__repeatingRow {
   background-color: $euiColorLightestShade;
   padding: $euiSizeS;
   margin-bottom: $euiSizeS;
 }
 
-@mixin tvbEditor__row {
-  display: flex;
-  align-items: center;
-}
-
-@mixin tvbEditor__item {
-  // flex-grow: 1;
-}
-
-@mixin tvbEditor__rowItem {
-  // flex-grow: 1;
-  // margin-right: $euiSizeS;
-}
-
-@mixin tvbEditor__label {
-  display: block;
-  font-size: $euiFontSizeXS;
-  font-weight: $euiFontWeightMedium;
-  color: $euiColorDarkShade;
-  margin: 0 $euiSizeS;
-  flex-shrink: 0;
-
-  &:first-child {
-    margin: 0 $euiSizeS 0 0;
-  }
-}
-
+// SASSTODO: These need to be converted to EUI,
+// but they have type errors
 @mixin tvbEditor__input {
   @include euiFormControlStyle($borderOnly: false, $includeStates: true, $includeSizes: false);
-
-  // padding: 8px 10px;
-  // border-radius: $euiBorderRadius;
-  // border: 1px solid $euiColorLightShade;
-  // font-size: 1.1em;
-}
-
-@mixin tvbEditor__subhead {
-  font-size: $euiFontSizeXS;
-  color: $euiColorDarkShade;
-  margin: $euiSizeXS 0;
 }
