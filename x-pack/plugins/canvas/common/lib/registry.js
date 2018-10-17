@@ -44,7 +44,7 @@ export class Registry {
           'xpack.canvas.lib.registry.functionsMustReturnObjectWithProprtyErrorMessage',
           {
             defaultMessage: 'Registered functions must return an object with a {property} property',
-            values: { property: this._props },
+            values: { property: this._prop },
           }
         )
       );
