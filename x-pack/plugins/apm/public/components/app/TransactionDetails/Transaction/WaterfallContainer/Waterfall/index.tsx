@@ -44,23 +44,11 @@ interface Props {
   };
 }
 
-interface State {
-  currentItem: IWaterfallItem | null;
-}
-
-// function getCurrentTimelineItem(id: string, root: IWaterfall): IWaterfallItem {
-
-// }
-
-export class Waterfall extends Component<Props, State> {
-  public state: Readonly<State> = {
-    currentItem: null
-  };
-
-  public onOpenFlyout = ({ id }: IWaterfallItem) => {
+export class Waterfall extends Component<Props> {
+  public onOpenFlyout = (item: IWaterfallItem) => {
     this.setQueryParams({
       flyoutDetailTab: null,
-      activeTimelineId: id
+      activeTimelineId: item.id
     });
   };
 
@@ -150,9 +138,6 @@ export class Waterfall extends Component<Props, State> {
       </Container>
     );
   }
-
-  // TODO: Implement query param state management here in open/close methods, for
-  // linking into flyouts, clearing tab state within flyouts, etc?
 
   private setQueryParams(params: {
     activeTimelineId?: string | null;

@@ -127,7 +127,7 @@ export function getWaterfallRoot(
       };
     }
 
-    index[parent.id] = parent;
+    index[item.id] = item;
     return {
       ...item,
       offset: item.timestamp - entryTransactionItem.timestamp,

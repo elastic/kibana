@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
+import { EuiTab } from '@elastic/eui';
 import { capitalize, first, get } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
-import styled from 'styled-components';
 import { SERVICE_AGENT_NAME } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/Transaction';
-import { colors, px, units } from '../../../../style/variables';
 // @ts-ignore
 import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
@@ -21,18 +21,9 @@ import {
 import { Tab } from '../../../shared/UIComponents';
 import { IUrlParams } from './WaterfallContainer/Waterfall';
 
-const TabContainer = styled.div`
-  padding: 0 ${px(units.plus)};
-  border-bottom: 1px solid ${colors.gray4};
-`;
-
-const TableContainer = styled.div`
-  padding: ${px(units.plus)} ${px(units.plus)} 0;
-`;
-
 // Ensure the selected tab exists or use the first
-function getCurrentTab(tabs: string[] = [], selectedTab: string) {
-  return tabs.includes(selectedTab) ? selectedTab : first(tabs);
+function getCurrentTab(tabs: string[] = [], selectedTab: string | null) {
+  return selectedTab && tabs.includes(selectedTab) ? selectedTab : first(tabs);
 }
 
 function getTabs(transactionData: Transaction) {
@@ -57,35 +48,30 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
 
   return (
     <div>
-      <TabContainer>
-        {tabs.map(key => {
-          return (
-            <Tab
-              onClick={() => {
-                history.replace({
-                  ...location,
-                  search: fromQuery({
-                    ...toQuery(location.search),
-                    flyoutDetailTab: key
-                  })
-                });
-              }}
-              selected={currentTab === key}
-              key={key}
-            >
-              {capitalize(key)}
-            </Tab>
-          );
-        })}
-      </TabContainer>
-
-      <TableContainer>
-        <PropertiesTable
-          propData={get(transaction.context, currentTab)}
-          propKey={currentTab}
-          agentName={agentName}
-        />
-      </TableContainer>
+      {tabs.map(key => {
+        return (
+          <EuiTab
+            onClick={() => {
+              history.replace({
+                ...location,
+                search: fromQuery({
+                  ...toQuery(location.search),
+                  flyoutDetailTab: key
+                })
+              });
+            }}
+            isSelected={currentTab === key}
+            key={key}
+          >
+            {capitalize(key)}
+          </EuiTab>
+        );
+      })}
+      <PropertiesTable
+        propData={get(transaction.context, currentTab)}
+        propKey={currentTab}
+        agentName={agentName}
+      />
     </div>
   );
 };
