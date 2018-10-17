@@ -13,6 +13,7 @@ import {
 } from 'x-pack/plugins/apm/common/constants';
 import { Span } from 'x-pack/plugins/apm/typings/Span';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
 // @ts-ignore
 import { loadSpans, loadTrace } from '../../services/rest/apm';
 import { IUrlParams } from '../urlParams';
@@ -24,7 +25,7 @@ const ID = 'waterfallV1';
 interface Props {
   urlParams: IUrlParams;
   transaction: Transaction;
-  render: RRRRender;
+  render: RRRRender<WaterfallResponse>;
 }
 
 export function WaterfallV1Request({ urlParams, transaction, render }: Props) {

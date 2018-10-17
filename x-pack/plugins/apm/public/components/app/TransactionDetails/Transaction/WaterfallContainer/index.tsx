@@ -17,7 +17,7 @@ import { RRRRender } from 'react-redux-request';
 import { WaterfallV1Request } from 'x-pack/plugins/apm/public/store/reactReduxRequest/waterfallV1';
 import { WaterfallV2Request } from 'x-pack/plugins/apm/public/store/reactReduxRequest/waterfallV2';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { Span } from 'x-pack/plugins/apm/typings/Span';
+import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
 // @ts-ignore
 import { loadSpans, loadTrace } from '../../../../../services/rest/apm';
 import { getServiceColors } from './getServiceColors';
@@ -34,7 +34,7 @@ interface Props {
 interface WaterfallRequestProps {
   urlParams: IUrlParams;
   transaction: Transaction;
-  render: RRRRender<{ hits: Array<Span | Transaction>; services: string[] }>;
+  render: RRRRender<WaterfallResponse>;
 }
 
 function WaterfallRequest({

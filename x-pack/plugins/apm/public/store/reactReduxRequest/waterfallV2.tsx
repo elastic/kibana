@@ -8,8 +8,8 @@ import { get } from 'lodash';
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
 import { TRACE_ID } from 'x-pack/plugins/apm/common/constants';
-import { TraceResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
 
 // @ts-ignore
 import { loadSpans, loadTrace } from '../../services/rest/apm';
@@ -22,7 +22,7 @@ const ID = 'waterfallV2';
 interface Props {
   urlParams: IUrlParams;
   transaction: Transaction;
-  render: RRRRender;
+  render: RRRRender<WaterfallResponse>;
 }
 
 const defaultData = { hits: [], services: [] };
@@ -35,7 +35,7 @@ export function WaterfallV2Request({ urlParams, transaction, render }: Props) {
   }
 
   return (
-    <Request<TraceResponse>
+    <Request<WaterfallResponse>
       id={ID}
       fn={loadTrace}
       args={[{ traceId, start, end }]}

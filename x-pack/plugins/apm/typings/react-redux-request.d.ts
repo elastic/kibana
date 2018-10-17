@@ -9,13 +9,13 @@
 declare module 'react-redux-request' {
   import React from 'react';
 
-  export interface RRRRenderArgs<T = any, P = any[]> {
+  export interface RRRRenderArgs<T, P = any[]> {
     status: 'SUCCESS' | 'LOADING' | 'FAILURE';
     data: T;
     args: P;
   }
 
-  export type RRRRender<T = any, P = any[]> = (
+  export type RRRRender<T, P = any[]> = (
     args: RRRRenderArgs<T, P>
   ) => JSX.Element | null;
 
@@ -29,7 +29,7 @@ declare module 'react-redux-request' {
 
   export function reducer(state: any): any;
 
-  export class Request<T = any, P = any[]> extends React.Component<
+  export class Request<T, P = any[]> extends React.Component<
     RequestProps<T, P>
   > {}
 }

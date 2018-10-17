@@ -5,21 +5,17 @@
  */
 
 import { SearchParams, SearchResponse } from 'elasticsearch';
+import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
 import { SERVICE_NAME, TRACE_ID } from '../../../common/constants';
 import { TermsAggsBucket } from '../../../typings/elasticsearch';
 import { Span } from '../../../typings/Span';
 import { Transaction } from '../../../typings/Transaction';
 import { Setup } from '../helpers/setup_request';
 
-export interface TraceResponse {
-  services: string[];
-  hits: Array<Transaction | Span>;
-}
-
 export async function getTrace(
   traceId: string,
   setup: Setup
-): Promise<TraceResponse> {
+): Promise<WaterfallResponse> {
   const { start, end, client, config } = setup;
 
   const params: SearchParams = {
