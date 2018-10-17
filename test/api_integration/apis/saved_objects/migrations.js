@@ -27,6 +27,8 @@ import {
   DocumentMigrator,
   IndexMigrator,
 } from '../../../../src/server/saved_objects/migrations/core';
+import { SavedObjectsSerializer } from '../../../../src/server/saved_objects/serialization';
+import { SavedObjectsSchema } from '../../../../src/server/saved_objects/schema';
 
 export default ({ getService }) => {
   const es = getService('es');
@@ -74,20 +76,20 @@ export default ({ getService }) => {
 
       // The docs in the original index are unchanged
       assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_1` }), [
-        { id: 'foo:a', type: 'foo', foo: { name: 'Foo A' } },
-        { id: 'foo:e', type: 'foo', foo: { name: 'Fooey' } },
         { id: 'bar:i', type: 'bar', bar: { nomnom: 33 } },
         { id: 'bar:o', type: 'bar', bar: { nomnom: 2 } },
         { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' } },
+        { id: 'foo:a', type: 'foo', foo: { name: 'Foo A' } },
+        { id: 'foo:e', type: 'foo', foo: { name: 'Fooey' } },
       ]);
 
       // The docs in the alias have been migrated
       assert.deepEqual(await fetchDocs({ callCluster, index }), [
-        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' } },
-        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' } },
         { id: 'bar:i', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 68 } },
         { id: 'bar:o', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 6 } },
         { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' } },
+        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' } },
+        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' } },
       ]);
     });
 
@@ -129,16 +131,14 @@ export default ({ getService }) => {
 
       // The index for the initial migration has not been destroyed...
       assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_2` }), [
-        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' } },
-        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' } },
         { id: 'bar:i', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 68 } },
         { id: 'bar:o', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 6 } },
+        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' } },
+        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' } },
       ]);
 
       // The docs were migrated again...
       assert.deepEqual(await fetchDocs({ callCluster, index }), [
-        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '2.0.1' }, foo: { name: 'FOO Av2' } },
-        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '2.0.1' }, foo: { name: 'FOOEYv2' } },
         {
           id: 'bar:i',
           type: 'bar',
@@ -151,6 +151,8 @@ export default ({ getService }) => {
           migrationVersion: { bar: '2.3.4' },
           bar: { mynum: 6, name: 'NAME o' },
         },
+        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '2.0.1' }, foo: { name: 'FOO Av2' } },
+        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '2.0.1' }, foo: { name: 'FOOEYv2' } },
       ]);
     });
 
@@ -181,7 +183,7 @@ export default ({ getService }) => {
       // The polling instance and the migrating instance should both
       // return a similar migraiton result.
       assert.deepEqual(
-        result.map(({ status, destIndex }) => ({ status, destIndex })),
+        result.map(({ status, destIndex }) => ({ status, destIndex })).sort((a) => a.destIndex ? 0 : 1),
         [
           { status: 'migrated', destIndex: '.migration-c_2' },
           { status: 'skipped', destIndex: undefined },
@@ -248,6 +250,7 @@ async function migrateIndex({ callCluster, index, migrations, mappingProperties,
     mappingProperties,
     pollInterval: 50,
     scrollDuration: '5m',
+    serializer: new SavedObjectsSerializer(new SavedObjectsSchema())
   });
 
   return await migrator.migrate();
@@ -260,5 +263,6 @@ async function fetchDocs({ callCluster, index }) {
   return hits.map(h => ({
     ...h._source,
     id: h._id,
-  }));
+  }))
+    .sort(((a, b) => a.id.localeCompare(b.id)));
 }

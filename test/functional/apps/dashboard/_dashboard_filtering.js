@@ -210,11 +210,11 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('tsvb top n', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['6,308.13', '6,308.13']);
+        await dashboardExpect.tsvbTopNValuesExist(['6,308.125', '6,308.125']);
       });
 
       it('tsvb markdown', async () => {
-        await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.29']);
+        await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
       });
 
       it('saved searches', async () => {

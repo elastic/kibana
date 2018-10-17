@@ -14,7 +14,7 @@ export const asset = () => ({
     types: ['null'],
   },
   type: 'string',
-  help: 'Use Canvas workpad asset objects to provide argument values. Usually images.',
+  help: 'Use Canvas workpad asset objects to provide argument values. Usually images',
   args: {
     id: {
       aliases: ['_'],

@@ -10,12 +10,16 @@ import { kfetch } from 'ui/kfetch';
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import { QueryString } from 'ui/utils/query_string';
-import { jobCompletionNotifications } from '../services/job_completion_notifications';
+import { jobCompletionNotifications } from './job_completion_notifications';
 
 const API_BASE_URL = '/api/reporting/generate';
 
+interface JobParams {
+  [paramName: string]: any;
+}
+
 class ReportingClient {
-  public getReportingJobPath = (exportType: string, jobParams: object) => {
+  public getReportingJobPath = (exportType: string, jobParams: JobParams) => {
     return `${chrome.addBasePath(API_BASE_URL)}/${exportType}?${QueryString.param(
       'jobParams',
       rison.encode(jobParams)

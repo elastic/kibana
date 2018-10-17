@@ -20,6 +20,7 @@ exports[`props iconType 1`] = `
       grow={false}
     >
       <EuiIcon
+        color="primary"
         size="xl"
         type="logoApache"
       />

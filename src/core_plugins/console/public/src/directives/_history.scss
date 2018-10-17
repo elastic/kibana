@@ -1,0 +1,33 @@
+.conHistory__body {
+  display: flex;
+  height: $euiSizeXL * 10;
+}
+
+
+.conHistory__footer {
+  text-align: right;
+  padding-top: $euiSize;
+}
+
+.conHistory__reqs,
+.conHistory__viewer {
+  flex: 0 0 50%;
+}
+
+.conHistory__reqs {
+  overflow: auto;
+  margin-right: $euiSizeL;
+}
+
+.conHistory__req {
+  display: flex;
+  justify-content: space-between;
+
+  &-selected {
+    background-color: $euiColorLightestShade;
+  }
+}
+
+.conHistory__reqIcon {
+  color: $euiColorMediumShade;
+}

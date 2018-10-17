@@ -41,6 +41,7 @@ export interface CallCluster {
   (path: 'reindex', opts: ReindexOpts): Promise<any>;
   (path: 'scroll', opts: ScrollOpts): Promise<SearchResults>;
   (path: 'search', opts: SearchOpts): Promise<SearchResults>;
+  (path: 'tasks.get', opts: { taskId: string }): Promise<{ completed: boolean }>;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -97,7 +98,7 @@ export interface IndexCreationOpts {
 export interface ReindexOpts {
   body: {
     dest: IndexOpts;
-    source: IndexOpts;
+    source: IndexOpts & { size: number };
   };
   refresh: boolean;
   waitForCompletion: boolean;
