@@ -89,9 +89,11 @@ export class FieldChooser extends Component {
         return !selectedFieldNames.includes(name);
       });
 
-      const searchedItems = searchValue ? unselectedFields.filter(item => (
-        item.name.toLowerCase().includes(searchValue.trim().toLowerCase())
-      )) : unselectedFields;
+      const searchedItems = searchValue ? unselectedFields.filter(item => {
+        const normalizedSearchValue = searchValue.trim().toLowerCase();
+        return item.name.toLowerCase().includes(normalizedSearchValue) ||
+          item.type.toLowerCase().includes(normalizedSearchValue);
+      }) : unselectedFields;
 
       flyout = (
         <EuiFlyout
