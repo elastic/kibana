@@ -59,7 +59,7 @@ export function filterRows(includeSiblings) {
 }
 
 function MetricSelect(props) {
-  const { additionalOptions, restrict, metric, onChange, value, exclude, includeSiblings, ...rest } = props;
+  const { additionalOptions, restrict, metric, onChange, value, exclude, includeSiblings, clearable, ...rest } = props;
 
   const metrics = props.metrics.filter(createTypeFilter(restrict, exclude));
 
@@ -102,6 +102,7 @@ function MetricSelect(props) {
       selectedOptions={selectedOptions}
       onChange={onChange}
       singleSelection={{ asPlainText: true }}
+      isClearable={clearable}
       {...rest}
     />
   );

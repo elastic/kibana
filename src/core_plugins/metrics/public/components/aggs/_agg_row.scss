@@ -2,6 +2,10 @@
   @include tvbEditor__repeatingRow;
 }
 
+.tvbAggRow--split {
+  padding-left: $euiSizeXL;
+}
+
 .tvbAggRow__visibilityIcon {
   margin-top: $euiSizeXS;
 }

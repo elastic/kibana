@@ -24,9 +24,7 @@ import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import FieldSelect from '../aggs/field_select';
 import MetricSelect from '../aggs/metric_select';
-import {
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSpacer } from '@elastic/eui';
 
 export const SplitByTerms = props => {
   const handleTextChange = createTextHandler(props.onChange);
@@ -47,52 +45,64 @@ export const SplitByTerms = props => {
   });
 
   return (
-    <div className="vis_editor__split-container">
-      <div className="vis_editor__label">Group By</div>
-      <div className="vis_editor__split-selects">
-        <GroupBySelect
-          value={model.split_mode}
-          onChange={handleSelectChange('split_mode')}
-        />
-      </div>
-      <div className="vis_editor__label">By</div>
-      <div className="vis_editor__item">
-        <FieldSelect
-          indexPattern={indexPattern}
-          onChange={handleSelectChange('terms_field')}
-          value={model.terms_field}
-          fields={props.fields}
-        />
-      </div>
-      <div className="vis_editor__label">Top</div>
-      <input
-        placeholder="Size..."
-        type="number"
-        value={model.terms_size}
-        className="vis_editor__split-term_count"
-        onChange={handleTextChange('terms_size')}
-      />
-      <div className="vis_editor__label">Order By</div>
-      <div className="vis_editor__split-aggs">
-        <MetricSelect
-          metrics={metrics}
-          clearable={false}
-          additionalOptions={[defaultCount, terms]}
-          onChange={handleSelectChange('terms_order_by')}
-          restrict="basic"
-          value={model.terms_order_by}
-        />
-      </div>
-      <div className="vis_editor__label">Direction</div>
-      <div className="vis_editor__split-aggs">
-        <EuiComboBox
-          isClearable={false}
-          options={dirOptions}
-          selectedOptions={selectedDirectionOption ? [selectedDirectionOption] : []}
-          onChange={handleSelectChange('terms_direction')}
-          singleSelection={true}
-        />
-      </div>
+    <div>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiFormRow label="Group by">
+            <GroupBySelect
+              value={model.split_mode}
+              onChange={handleSelectChange('split_mode')}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow label="By">
+            <FieldSelect
+              indexPattern={indexPattern}
+              onChange={handleSelectChange('terms_field')}
+              value={model.terms_field}
+              fields={props.fields}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer />
+
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiFormRow label="Top">
+            <EuiFieldNumber
+              placeholder="Size"
+              value={Number(model.terms_size)}
+              onChange={handleTextChange('terms_size')}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow label="Order by">
+            <MetricSelect
+              metrics={metrics}
+              clearable={false}
+              additionalOptions={[defaultCount, terms]}
+              onChange={handleSelectChange('terms_order_by')}
+              restrict="basic"
+              value={model.terms_order_by}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow label="Direction">
+            <EuiComboBox
+              isClearable={false}
+              options={dirOptions}
+              selectedOptions={selectedDirectionOption ? [selectedDirectionOption] : []}
+              onChange={handleSelectChange('terms_direction')}
+              singleSelection={true}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };
