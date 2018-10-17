@@ -41,6 +41,7 @@ export function prometheusMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-' + moduleName + '.html',
       },
     }),
+    euiIconType: 'logoPrometheus',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.prometheusMetrics.artifacts.application.label', {

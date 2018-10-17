@@ -57,7 +57,7 @@ EnhancedStringArgInput.propTypes = {
 
 export const string = () => ({
   name: 'string',
-  displayName: 'string',
+  displayName: 'String',
   help: 'Input short strings',
   simpleTemplate: templateFromReactComponent(EnhancedStringArgInput),
 });

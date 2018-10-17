@@ -40,6 +40,7 @@ export function memcachedMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-memcached.html',
       },
     }),
+    euiIconType: 'logoMemcached',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.memcachedMetrics.artifacts.application.label', {
