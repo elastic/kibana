@@ -76,7 +76,7 @@ export function explorerChartsContainerServiceFactory(
     // For now just take first 6 (or 8 if 4 charts per row).
     const maxSeriesToPlot = Math.max(chartsPerRow * 2, 6);
     const recordsToPlot = allSeriesRecords.slice(0, maxSeriesToPlot);
-    const seriesConfigs = buildDataConfigs(recordsToPlot);
+    const seriesConfigs = recordsToPlot.map(buildConfig);
 
     // Calculate the time range of the charts, which is a function of the chart width and max job bucket span.
     data.tooManyBuckets = false;
@@ -502,11 +502,6 @@ export function explorerChartsContainerServiceFactory(
     recordsForSeries = (_.sortBy(recordsForSeries, 'record_score')).reverse();
 
     return recordsForSeries;
-  }
-
-  function buildDataConfigs(anomalyRecords) {
-    // Build the chart configuration for each anomaly record.
-    return anomalyRecords.map(buildConfig);
   }
 
   function calculateChartRange(seriesConfigs, earliestMs, latestMs, chartWidth, recordsToPlot, timeFieldName) {
