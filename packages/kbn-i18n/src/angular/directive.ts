@@ -21,26 +21,37 @@ import { IDirective, IRootElementService, IScope } from 'angular';
 
 import { I18nServiceType } from './provider';
 
-export function i18nDirective(i18n: I18nServiceType): IDirective {
+interface I18nScope extends IScope {
+  values?: Record<string, any>;
+  defaultMessage: string;
+  id: string;
+}
+
+export function i18nDirective(i18n: I18nServiceType): IDirective<I18nScope> {
   return {
     restrict: 'A',
     scope: {
       id: '@i18nId',
       defaultMessage: '@i18nDefaultMessage',
-      values: '=i18nValues',
+      values: '<?i18nValues',
     },
-    link($scope: IScope, $element: IRootElementService) {
-      $scope.$watchGroup(
-        ['id', 'defaultMessage', 'values'],
-        ([id, defaultMessage = '', values = {}]) => {
-          $element.html(
-            i18n(id, {
-              values,
-              defaultMessage,
-            })
-          );
-        }
-      );
+    link($scope, $element) {
+      if ($scope.values) {
+        $scope.$watchCollection('values', () => {
+          setHtmlContent($element, $scope, i18n);
+        });
+      } else {
+        setHtmlContent($element, $scope, i18n);
+      }
     },
   };
+}
+
+function setHtmlContent($element: IRootElementService, $scope: I18nScope, i18n: I18nServiceType) {
+  $element.html(
+    i18n($scope.id, {
+      values: $scope.values,
+      defaultMessage: $scope.defaultMessage,
+    })
+  );
 }
