@@ -15,9 +15,8 @@ export const demodata = () => ({
   type: 'datatable',
   help: i18n.translate('xpack.canvas.functions.demodataHelpText', {
     defaultMessage:
-      'A mock data set that includes project CI times with usernames, countries and run phases.',
+      'A mock data set that includes project CI times with usernames, countries and run phases',
   }),
-
   context: {
     types: ['filter'],
   },

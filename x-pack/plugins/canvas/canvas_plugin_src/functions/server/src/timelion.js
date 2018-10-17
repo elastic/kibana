@@ -54,7 +54,7 @@ export const timelion = () => ({
   },
   type: 'datatable',
   help: i18n.translate('xpack.canvas.functions.timelionHelpText', {
-    defaultMessage: 'Use timelion to extract one or more timeseries from many sources.',
+    defaultMessage: 'Use timelion to extract one or more timeseries from many sources',
   }),
   fn: (context, args, handlers) => {
     // Timelion requires a time range. Use the time range from the timefilter element in the

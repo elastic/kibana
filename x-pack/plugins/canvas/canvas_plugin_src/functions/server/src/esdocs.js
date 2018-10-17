@@ -46,7 +46,7 @@ export const esdocs = () => ({
     },
     fields: {
       help: i18n.translate('xpack.canvas.functions.esdocs.argsFieldsHelpText', {
-        defaultMessage: 'Comma separated list of fields. Fewer fields will perform better.',
+        defaultMessage: 'Comma separated list of fields. Fewer fields will perform better',
       }),
       types: ['string', 'null'],
     },
