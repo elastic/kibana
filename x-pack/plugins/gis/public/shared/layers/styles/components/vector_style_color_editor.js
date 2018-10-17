@@ -13,7 +13,7 @@ import _ from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonToggle
+  EuiSwitch
 } from '@elastic/eui';
 
 
@@ -62,7 +62,6 @@ export class VectorStyleColorEditor extends React.Component {
       const property = {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
-          // field: field ? field.label : undefined,
           fieldValue: field ? field.value : undefined
         }
       };
@@ -101,11 +100,10 @@ export class VectorStyleColorEditor extends React.Component {
           {this.props.name}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          < EuiButtonToggle
+          <EuiSwitch
             label={this._isDynamic() ? 'Dynamic' : 'Static'}
+            checked={this._isDynamic()}
             onChange={onTypeToggle}
-            isSelected={this._isDynamic()
-            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
