@@ -80,9 +80,6 @@ export class VectorStyleColorEditor extends React.Component {
       });
     };
 
-    const selectedColor = vectorStyle ? vectorStyle.getHexColor(this.props.property) : VectorStyle.DEFAULT_COLOR_HEX;
-    this._lastStaticColor = selectedColor;
-
     let colorSelector;
     if (this._isDynamic()) {
       if (this.state.ordinalFields !== null) {
@@ -91,6 +88,8 @@ export class VectorStyleColorEditor extends React.Component {
         colorSelector = null;
       }
     } else {
+      const selectedColor = vectorStyle ? vectorStyle.getHexColor(this.props.property) : VectorStyle.DEFAULT_COLOR_HEX;
+      this._lastStaticColor = selectedColor;
       colorSelector = (<StaticColorSelection changeColor={changeToStaticColor} selectedColor={selectedColor}/>);
     }
 
@@ -114,8 +113,8 @@ export class VectorStyleColorEditor extends React.Component {
   }
 
   render() {
-    let style = this.props.seedStyle;
-    if (style === null) {
+    let seedStyle = this.props.seedStyle;
+    if (seedStyle === null) {
       const fallbackDescriptor = VectorStyle.createDescriptor(
         {
           'fillColor': {
@@ -126,11 +125,11 @@ export class VectorStyleColorEditor extends React.Component {
           }
         }
       );
-      style = new VectorStyle(fallbackDescriptor);
+      seedStyle = new VectorStyle(fallbackDescriptor);
     }
     return (
       <EuiFlexGroup alignItems="center" justifyContent="spaceEvenly">
-        {this._renderFillAndOutlineStyle(style)}
+        {this._renderFillAndOutlineStyle(seedStyle)}
       </EuiFlexGroup>
     );
   }
