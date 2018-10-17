@@ -11,13 +11,13 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 export const sort = () => ({
   name: 'sort',
   displayName: i18n.translate('xpack.canvas.uis.transforms.sortDisplayName', {
-    defaultMessage: 'Datatable Sorting',
+    defaultMessage: 'Datatable sorting',
   }),
   args: [
     {
       name: '_',
       displayName: i18n.translate('xpack.canvas.uis.transforms.sort.argsSortFieldDisplayName', {
-        defaultMessage: 'Sort Field',
+        defaultMessage: 'Sort field',
       }),
       argType: 'datacolumn',
     },

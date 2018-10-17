@@ -18,7 +18,7 @@ export const shape = () => ({
     {
       name: '_',
       displayName: i18n.translate('xpack.canvas.uis.views.shape.argsShapeDisplayName', {
-        defaultMessage: 'Select a Shape',
+        defaultMessage: 'Select a shape',
       }),
       argType: 'shape',
       options: {
@@ -48,7 +48,7 @@ export const shape = () => ({
     {
       name: 'borderWidth',
       displayName: i18n.translate('xpack.canvas.uis.views.shape.argsBorderWidthDisplayName', {
-        defaultMessage: 'Border Width',
+        defaultMessage: 'Border width',
       }),
       argType: 'number',
       help: i18n.translate('xpack.canvas.uis.views.shape.argsBorderWidthHelpText', {
@@ -58,7 +58,7 @@ export const shape = () => ({
     {
       name: 'maintainAspect',
       displayName: i18n.translate('xpack.canvas.uis.views.shape.argsMaintainAspectDisplayName', {
-        defaultMessage: 'Maintain Aspect Ratio',
+        defaultMessage: 'Maintain aspect ratio',
       }),
       argType: 'toggle',
       help: i18n.translate('xpack.canvas.uis.views.shape.argsMaintainAspectHelpText', {

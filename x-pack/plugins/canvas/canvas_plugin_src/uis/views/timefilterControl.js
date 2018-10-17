@@ -11,7 +11,7 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 export const timefilterControl = () => ({
   name: 'timefilterControl',
   displayName: i18n.translate('xpack.canvas.uis.views.timefilterControlDisplayName', {
-    defaultMessage: 'Time Filter',
+    defaultMessage: 'Time filter',
   }),
   modelArgs: [],
   args: [

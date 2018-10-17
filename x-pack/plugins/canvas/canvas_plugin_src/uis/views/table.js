@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const table = () => ({
   name: 'table',
   displayName: i18n.translate('xpack.canvas.uis.views.tableDisplayName', {
-    defaultMessage: 'Table Style',
+    defaultMessage: 'Table style',
   }),
   help: i18n.translate('xpack.canvas.uis.views.tableHelpText', {
     defaultMessage: 'Set styling for a Table element',
@@ -26,7 +26,7 @@ export const table = () => ({
         defaultMessage: 'Rows per page',
       }),
       help: i18n.translate('xpack.canvas.uis.views.table.argsPerPageHelpText', {
-        defaultMessage: 'Number of rows to display per table page.',
+        defaultMessage: 'Number of rows to display per table page',
       }),
       argType: 'select',
       default: 10,
@@ -41,7 +41,7 @@ export const table = () => ({
       }),
       help: i18n.translate('xpack.canvas.uis.views.table.argsPaginateHelpText', {
         defaultMessage:
-          'Show or hide pagination controls. If disabled only the first page will be shown.',
+          'Show or hide pagination controls. If disabled only the first page will be shown',
       }),
       argType: 'toggle',
       default: true,
@@ -52,7 +52,7 @@ export const table = () => ({
         defaultMessage: 'Header',
       }),
       help: i18n.translate('xpack.canvas.uis.views.table.argsShowHeaderHelpText', {
-        defaultMessage: 'Show or hide the header row with titles for each column.',
+        defaultMessage: 'Show or hide the header row with titles for each column',
       }),
       argType: 'toggle',
       default: true,

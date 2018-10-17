@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const revealImage = () => ({
   name: 'revealImage',
   displayName: i18n.translate('xpack.canvas.uis.views.revealImageDisplayName', {
-    defaultMessage: 'Reveal Image',
+    defaultMessage: 'Reveal image',
   }),
   help: '',
   modelArgs: [['_', { label: 'Value' }]],
@@ -27,7 +27,7 @@ export const revealImage = () => ({
     {
       name: 'emptyImage',
       displayName: i18n.translate('xpack.canvas.uis.views.revealImage.argsEmptyImageDisplayName', {
-        defaultMessage: 'Background Image',
+        defaultMessage: 'Background image',
       }),
       help: i18n.translate('xpack.canvas.uis.views.revealImage.argsEmptyImageHelpText', {
         defaultMessage: 'A background image. Eg, an empty glass',

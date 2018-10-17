@@ -41,7 +41,7 @@ export const progress = () => ({
     {
       name: 'valueColor',
       displayName: i18n.translate('xpack.canvas.uis.views.progress.argsValueColorDisplayName', {
-        defaultMessage: 'Progress Color',
+        defaultMessage: 'Progress color',
       }),
       help: i18n.translate('xpack.canvas.uis.views.progress.argsValueColorHelpText', {
         defaultMessage: 'Color of the progress bar',
@@ -52,7 +52,7 @@ export const progress = () => ({
     {
       name: 'valueWeight',
       displayName: i18n.translate('xpack.canvas.uis.views.progress.argsValueWeightDisplayName', {
-        defaultMessage: 'Progress Weight',
+        defaultMessage: 'Progress weight',
       }),
       help: i18n.translate('xpack.canvas.uis.views.progress.argsValueWeightHelpText', {
         defaultMessage: 'Thickness of the progress bar',
@@ -63,7 +63,7 @@ export const progress = () => ({
     {
       name: 'barColor',
       displayName: i18n.translate('xpack.canvas.uis.views.progress.argsBarColorDisplayName', {
-        defaultMessage: 'Background Color',
+        defaultMessage: 'Background color',
       }),
       help: i18n.translate('xpack.canvas.uis.views.progress.argsBarColorHelpText', {
         defaultMessage: 'Color of the background bar',
@@ -74,7 +74,7 @@ export const progress = () => ({
     {
       name: 'barWeight',
       displayName: i18n.translate('xpack.canvas.uis.views.progress.argsBarWeightDisplayName', {
-        defaultMessage: 'Background Weight',
+        defaultMessage: 'Background weight',
       }),
       help: i18n.translate('xpack.canvas.uis.views.progress.argsBarWeightHelpText', {
         defaultMessage: 'Thickness of the background bar',
@@ -97,11 +97,11 @@ export const progress = () => ({
     {
       name: 'font',
       displayName: i18n.translate('xpack.canvas.uis.views.progress.argsFontDisplayName', {
-        defaultMessage: 'Label Settings',
+        defaultMessage: 'Label settings',
       }),
       help: i18n.translate('xpack.canvas.uis.views.progress.argsFontHelpText', {
         defaultMessage:
-          'Font settings for the label. Technically you can stick other styles in here too!',
+          'Font settings for the label. Technically, you can add other styles as well',
       }),
       argType: 'font',
       default: `{font size=24 family="${openSans.value}" color="#000000" align=center}`,

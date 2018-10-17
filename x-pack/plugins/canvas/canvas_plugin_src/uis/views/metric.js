@@ -29,7 +29,7 @@ export const metric = () => ({
     {
       name: 'metricFont',
       displayName: i18n.translate('xpack.canvas.uis.views.metric.argsMetricFontDisplayName', {
-        defaultMessage: 'Metric Text Settings',
+        defaultMessage: 'Metric text settings',
       }),
       help: i18n.translate('xpack.canvas.uis.views.metric.argsMetricFontHelpText', {
         defaultMessage: 'Fonts, alignment and color',
@@ -40,7 +40,7 @@ export const metric = () => ({
     {
       name: 'labelFont',
       displayName: i18n.translate('xpack.canvas.uis.views.metric.argsLabelFontDisplayName', {
-        defaultMessage: 'Label Text Settings',
+        defaultMessage: 'Label text settings',
       }),
       help: i18n.translate('xpack.canvas.uis.views.metric.argsLabelFontHelpText', {
         defaultMessage: 'Fonts, alignment and color',

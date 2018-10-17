@@ -11,7 +11,7 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 export const dropdownControl = () => ({
   name: 'dropdownControl',
   displayName: i18n.translate('xpack.canvas.uis.views.dropdownControlDisplayName', {
-    defaultMessage: 'Dropdown Filter',
+    defaultMessage: 'Dropdown filter',
   }),
   modelArgs: [],
   args: [
@@ -20,7 +20,7 @@ export const dropdownControl = () => ({
       displayName: i18n.translate(
         'xpack.canvas.uis.views.dropdownControl.argsValueColumnDisplayName',
         {
-          defaultMessage: 'Values Column',
+          defaultMessage: 'Values column',
         }
       ),
       help: i18n.translate('xpack.canvas.uis.views.dropdownControl.argsValueColumnHelpText', {
@@ -36,7 +36,7 @@ export const dropdownControl = () => ({
       displayName: i18n.translate(
         'xpack.canvas.uis.views.dropdownControl.argsFilterColumnDisplayName',
         {
-          defaultMessage: 'Filter Column ',
+          defaultMessage: 'Filter column ',
         }
       ),
       help: i18n.translate('xpack.canvas.uis.views.dropdownControl.argsFilterColumnHelpText', {

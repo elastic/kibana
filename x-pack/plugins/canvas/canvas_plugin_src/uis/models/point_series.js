@@ -11,7 +11,7 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 export const pointseries = () => ({
   name: 'pointseries',
   displayName: i18n.translate('xpack.canvas.uis.models.pointseriesDisplayName', {
-    defaultMessage: 'Dimensions & Measures',
+    defaultMessage: 'Dimensions & measures',
   }),
   args: [
     {
@@ -30,7 +30,7 @@ export const pointseries = () => ({
         defaultMessage: 'Y-axis',
       }),
       help: i18n.translate('xpack.canvas.uis.models.pointseries.argsYaxisHelpText', {
-        defaultMessage: 'Data along the vertical axis. Usually a number.',
+        defaultMessage: 'Data along the vertical axis. Usually a number',
       }),
       argType: 'datacolumn',
     },

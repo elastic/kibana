@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const getCell = () => ({
   name: 'getCell',
   displayName: i18n.translate('xpack.canvas.uis.views.getCellDisplayName', {
-    defaultMessage: 'Get Cell',
+    defaultMessage: 'Get cell',
   }),
   help: i18n.translate('xpack.canvas.uis.views.getCellHelpText', {
     defaultMessage: 'Grab the first row and first column',

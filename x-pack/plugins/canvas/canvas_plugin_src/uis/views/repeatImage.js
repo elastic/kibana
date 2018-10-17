@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const repeatImage = () => ({
   name: 'repeatImage',
   displayName: i18n.translate('xpack.canvas.uis.views.repeatImageDisplayName', {
-    defaultMessage: 'Repeating Image',
+    defaultMessage: 'Repeating image',
   }),
   help: '',
   modelArgs: [['_', { label: 'Value' }]],
@@ -27,7 +27,7 @@ export const repeatImage = () => ({
     {
       name: 'emptyImage',
       displayName: i18n.translate('xpack.canvas.uis.views.repeatImage.argsEmptyImageDisplayName', {
-        defaultMessage: 'Empty Image',
+        defaultMessage: 'Empty image',
       }),
       help: i18n.translate('xpack.canvas.uis.views.repeatImage.argsEmptyImageHelpText', {
         defaultMessage: 'An image to fill up the difference between the value and the max count',

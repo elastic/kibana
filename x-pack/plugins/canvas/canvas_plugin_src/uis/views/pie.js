@@ -12,7 +12,7 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 export const pie = () => ({
   name: 'pie',
   displayName: i18n.translate('xpack.canvas.uis.views.pieDisplayName', {
-    defaultMessage: 'Chart Style',
+    defaultMessage: 'Chart style',
   }),
   modelArgs: [['color', { label: 'Slice Labels' }], ['size', { label: 'Slice Angles' }]],
   args: [
@@ -23,7 +23,7 @@ export const pie = () => ({
     {
       name: 'hole',
       displayName: i18n.translate('xpack.canvas.uis.views.pie.argsHoleDisplayName', {
-        defaultMessage: 'Inner Radius',
+        defaultMessage: 'Inner radius',
       }),
       help: i18n.translate('xpack.canvas.uis.views.pie.argsHoleHelpText', {
         defaultMessage: 'Radius of the hole',
@@ -49,7 +49,7 @@ export const pie = () => ({
     {
       name: 'labelRadius',
       displayName: i18n.translate('xpack.canvas.uis.views.pie.argsLabelRadiusDisplayName', {
-        defaultMessage: 'Label Radius',
+        defaultMessage: 'Label radius',
       }),
       help: i18n.translate('xpack.canvas.uis.views.pie.argsLabelRadiusHelpText', {
         defaultMessage: 'Distance of the labels from the center of the pie',
@@ -64,7 +64,7 @@ export const pie = () => ({
     {
       name: 'legend',
       displayName: i18n.translate('xpack.canvas.uis.views.pie.argsLegendDisplayName', {
-        defaultMessage: 'Legend Position',
+        defaultMessage: 'Legend position',
       }),
       help: i18n.translate('xpack.canvas.uis.views.pie.argsLegendHelpText', {
         defaultMessage: 'Disable or position the legend',
@@ -98,7 +98,7 @@ export const pie = () => ({
     {
       name: 'tilt',
       displayName: i18n.translate('xpack.canvas.uis.views.pie.argsTiltDisplayName', {
-        defaultMessage: 'Tilt Angle',
+        defaultMessage: 'Tilt angle',
       }),
       help: i18n.translate('xpack.canvas.uis.views.pie.argsTiltHelpText', {
         defaultMessage: 'Percentage of tilt where 1 is fully vertical and 0 is completely flat',
