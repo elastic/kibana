@@ -17,7 +17,6 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'podOverview',
     label: 'Pod Overview',
-    requires: ['kubernetes'],
     sections: [
       {
         id: InfraMetric.podOverview,

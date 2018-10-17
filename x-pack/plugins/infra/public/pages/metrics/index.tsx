@@ -24,6 +24,7 @@ import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
 import { MetricsTimeControls } from '../../components/metrics/time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
+import { WithCapabilities } from '../../containers/capabilities/with_capabilites';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
 import {
   WithMetricsTime,
@@ -65,19 +66,9 @@ class MetricDetailPage extends React.PureComponent<Props> {
     if (!layoutCreator) {
       return <Error message={`"${nodeType}" is not a valid node type`} />;
     }
-    const layout = layoutCreator(this.props.theme);
+    const layouts = layoutCreator(this.props.theme);
     const breadcrumbs = [{ text: nodeName }];
-    const sideNav = layout.map(item => {
-      return {
-        name: item.label,
-        id: item.id,
-        items: item.sections.map(section => ({
-          id: section.id as string,
-          name: section.label,
-          onClick: this.handleClick(section),
-        })),
-      };
-    });
+
     return (
       <ColumnarPage>
         <Header breadcrumbs={breadcrumbs} />
@@ -93,78 +84,102 @@ class MetricDetailPage extends React.PureComponent<Props> {
                   startMetricsAutoReload,
                   stopMetricsAutoReload,
                 }) => (
-                  <WithMetrics
-                    layout={layout}
+                  <WithCapabilities
+                    layouts={layouts}
                     sourceId={sourceId}
-                    timerange={currentTimeRange as InfraTimerangeInput}
                     nodeType={nodeType}
                     nodeId={nodeName}
                   >
-                    {({ metrics, error, loading }) => {
-                      if (error) {
-                        return <ErrorPageBody message={error} />;
-                      }
+                    {({ filteredLayouts }) => {
                       return (
-                        <EuiPage style={{ flex: '1 0 auto' }}>
-                          <EuiPageSideBar>
-                            <EuiHideFor sizes={['xs', 's']}>
-                              <EuiSideNavContainer>
-                                <EuiSideNav items={sideNav} />
-                              </EuiSideNavContainer>
-                            </EuiHideFor>
-                            <EuiShowFor sizes={['xs', 's']}>
-                              <EuiSideNav
-                                items={sideNav}
-                                mobileTitle={nodeName}
-                                toggleOpenOnMobile={this.toggleOpenOnMobile}
-                                isOpenOnMobile={this.state.isSideNavOpenOnMobile}
-                              />
-                            </EuiShowFor>
-                          </EuiPageSideBar>
-                          <AutoSizer content={false} bounds detectAnyWindowResize>
-                            {({ measureRef, bounds: { width = 0 } }) => {
-                              return (
-                                <MetricsDetailsPageColumn innerRef={measureRef}>
-                                  <EuiPageBody style={{ width: `${width}px` }}>
-                                    <EuiPageHeader style={{ flex: '0 0 auto' }}>
-                                      <EuiPageHeaderSection style={{ width: '100%' }}>
-                                        <MetricsTitleTimeRangeContainer>
-                                          <EuiHideFor sizes={['xs', 's']}>
-                                            <EuiTitle size="m">
-                                              <h1>{nodeName}</h1>
-                                            </EuiTitle>
-                                          </EuiHideFor>
-                                          <MetricsTimeControls
-                                            currentTimeRange={currentTimeRange}
-                                            isLiveStreaming={isAutoReloading}
-                                            onChangeRangeTime={setRangeTime}
-                                            startLiveStreaming={startMetricsAutoReload}
-                                            stopLiveStreaming={stopMetricsAutoReload}
-                                          />
-                                        </MetricsTitleTimeRangeContainer>
-                                      </EuiPageHeaderSection>
-                                    </EuiPageHeader>
+                        <WithMetrics
+                          layouts={filteredLayouts}
+                          sourceId={sourceId}
+                          timerange={currentTimeRange as InfraTimerangeInput}
+                          nodeType={nodeType}
+                          nodeId={nodeName}
+                        >
+                          {({ metrics, error, loading }) => {
+                            if (error) {
+                              return <ErrorPageBody message={error} />;
+                            }
+                            const sideNav = filteredLayouts.map(item => {
+                              return {
+                                name: item.label,
+                                id: item.id,
+                                items: item.sections.map(section => ({
+                                  id: section.id as string,
+                                  name: section.label,
+                                  onClick: this.handleClick(section),
+                                })),
+                              };
+                            });
+                            return (
+                              <EuiPage style={{ flex: '1 0 auto' }}>
+                                <EuiPageSideBar>
+                                  <EuiHideFor sizes={['xs', 's']}>
+                                    <EuiSideNavContainer>
+                                      <EuiSideNav items={sideNav} />
+                                    </EuiSideNavContainer>
+                                  </EuiHideFor>
+                                  <EuiShowFor sizes={['xs', 's']}>
+                                    <EuiSideNav
+                                      items={sideNav}
+                                      mobileTitle={nodeName}
+                                      toggleOpenOnMobile={this.toggleOpenOnMobile}
+                                      isOpenOnMobile={this.state.isSideNavOpenOnMobile}
+                                    />
+                                  </EuiShowFor>
+                                </EuiPageSideBar>
+                                <AutoSizer content={false} bounds detectAnyWindowResize>
+                                  {({ measureRef, bounds: { width = 0 } }) => {
+                                    return (
+                                      <MetricsDetailsPageColumn innerRef={measureRef}>
+                                        <EuiPageBody style={{ width: `${width}px` }}>
+                                          <EuiPageHeader style={{ flex: '0 0 auto' }}>
+                                            <EuiPageHeaderSection style={{ width: '100%' }}>
+                                              <MetricsTitleTimeRangeContainer>
+                                                <EuiHideFor sizes={['xs', 's']}>
+                                                  <EuiTitle size="m">
+                                                    <h1>{nodeName}</h1>
+                                                  </EuiTitle>
+                                                </EuiHideFor>
+                                                <MetricsTimeControls
+                                                  currentTimeRange={currentTimeRange}
+                                                  isLiveStreaming={isAutoReloading}
+                                                  onChangeRangeTime={setRangeTime}
+                                                  startLiveStreaming={startMetricsAutoReload}
+                                                  stopLiveStreaming={stopMetricsAutoReload}
+                                                />
+                                              </MetricsTitleTimeRangeContainer>
+                                            </EuiPageHeaderSection>
+                                          </EuiPageHeader>
 
-                                    <EuiPageContentWithRelative>
-                                      <Metrics
-                                        nodeName={nodeName}
-                                        layout={layout}
-                                        metrics={metrics}
-                                        loading={
-                                          metrics.length > 0 && isAutoReloading ? false : loading
-                                        }
-                                        onChangeRangeTime={setRangeTime}
-                                      />
-                                    </EuiPageContentWithRelative>
-                                  </EuiPageBody>
-                                </MetricsDetailsPageColumn>
-                              );
-                            }}
-                          </AutoSizer>
-                        </EuiPage>
+                                          <EuiPageContentWithRelative>
+                                            <Metrics
+                                              nodeName={nodeName}
+                                              layouts={filteredLayouts}
+                                              metrics={metrics}
+                                              loading={
+                                                metrics.length > 0 && isAutoReloading
+                                                  ? false
+                                                  : loading
+                                              }
+                                              onChangeRangeTime={setRangeTime}
+                                            />
+                                          </EuiPageContentWithRelative>
+                                        </EuiPageBody>
+                                      </MetricsDetailsPageColumn>
+                                    );
+                                  }}
+                                </AutoSizer>
+                              </EuiPage>
+                            );
+                          }}
+                        </WithMetrics>
                       );
                     }}
-                  </WithMetrics>
+                  </WithCapabilities>
                 )}
               </WithMetricsTime>
             )}

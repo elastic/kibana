@@ -17,7 +17,6 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'containerOverview',
     label: 'Container Overview',
-    requires: ['docker'],
     sections: [
       {
         id: InfraMetric.containerOverview,

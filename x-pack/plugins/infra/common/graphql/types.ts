@@ -180,7 +180,7 @@ export namespace InfraSourceResolvers {
   >;
   export interface CapabilitiesByNodeArgs {
     nodeName: string;
-    nodeType: NodeType;
+    nodeType: InfraNodeType;
   }
 
   export type LogEntriesAroundResolver = Resolver<InfraLogEntryInterval, LogEntriesAroundArgs>;
@@ -495,7 +495,7 @@ export interface SourceQueryArgs {
 }
 export interface CapabilitiesByNodeInfraSourceArgs {
   nodeName: string;
-  nodeType: NodeType;
+  nodeType: InfraNodeType;
 }
 export interface LogEntriesAroundInfraSourceArgs {
   key: InfraTimeKeyInput /** The sort key that corresponds to the point in time */;
@@ -540,10 +540,10 @@ export enum InfraIndexType {
   METRICS = 'METRICS',
 }
 
-export enum NodeType {
-  host = 'host',
-  container = 'container',
+export enum InfraNodeType {
   pod = 'pod',
+  container = 'container',
+  host = 'host',
 }
 
 export enum InfraPathType {
@@ -562,12 +562,6 @@ export enum InfraMetricType {
   tx = 'tx',
   rx = 'rx',
   logRate = 'logRate',
-}
-
-export enum InfraNodeType {
-  pod = 'pod',
-  container = 'container',
-  host = 'host',
 }
 
 export enum InfraMetric {
@@ -610,6 +604,30 @@ export enum InfraOperator {
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
 
+export namespace CapabilitiesQuery {
+  export type Variables = {
+    sourceId: string;
+    nodeId: string;
+    nodeType: InfraNodeType;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+    id: string;
+    capabilitiesByNode: (CapabilitiesByNode | null)[];
+  };
+
+  export type CapabilitiesByNode = {
+    __typename?: 'InfraNodeCapability';
+    name: string;
+    source: string;
+  };
+}
 export namespace MetricsQuery {
   export type Variables = {
     sourceId: string;

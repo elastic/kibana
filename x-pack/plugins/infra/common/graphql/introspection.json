@@ -130,7 +130,7 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "ENUM", "name": "NodeType", "ofType": null }
+                  "ofType": { "kind": "ENUM", "name": "InfraNodeType", "ofType": null }
                 },
                 "defaultValue": null
               }
@@ -762,25 +762,20 @@
       },
       {
         "kind": "ENUM",
-        "name": "NodeType",
+        "name": "InfraNodeType",
         "description": "",
         "fields": null,
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
-          {
-            "name": "host",
-            "description": "Fixed set of possible node types",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
+          { "name": "pod", "description": "", "isDeprecated": false, "deprecationReason": null },
           {
             "name": "container",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
           },
-          { "name": "pod", "description": "", "isDeprecated": false, "deprecationReason": null }
+          { "name": "host", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },
@@ -1607,25 +1602,6 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "InfraNodeType",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          { "name": "pod", "description": "", "isDeprecated": false, "deprecationReason": null },
-          {
-            "name": "container",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          { "name": "host", "description": "", "isDeprecated": false, "deprecationReason": null }
-        ],
         "possibleTypes": null
       },
       {

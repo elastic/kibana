@@ -17,7 +17,6 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'hostOverview',
     label: 'Host',
-    requires: ['system'],
     sections: [
       {
         id: InfraMetric.hostSystemOverview,
@@ -125,7 +124,6 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'k8sOverview',
     label: 'Kubernetes',
-    requires: ['kubernetes'],
     sections: [
       {
         id: InfraMetric.hostK8sOverview,
