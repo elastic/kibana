@@ -23,7 +23,7 @@ export const date = () => ({
   },
   help: i18n.translate('xpack.canvas.functions.dateHelpText', {
     defaultMessage:
-      'Returns the current time, or a time parsed from a string, as milliseconds since epoch.',
+      'Returns the current time, or a time parsed from a string, as milliseconds since epoch',
   }),
   args: {
     value: {
@@ -31,14 +31,14 @@ export const date = () => ({
       types: ['string', 'null'],
       help: i18n.translate('xpack.canvas.functions.date.argsValueHelpText', {
         defaultMessage:
-          'An optional date string to parse into milliseconds since epoch. Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format.',
+          'An optional date string to parse into milliseconds since epoch. Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format',
       }),
     },
     format: {
       types: ['string'],
       help: i18n.translate('xpack.canvas.functions.date.argsFormatHelpText', {
         defaultMessage:
-          'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/).',
+          'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/)',
       }),
     },
   },

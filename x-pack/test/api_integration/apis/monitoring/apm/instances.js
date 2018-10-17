@@ -25,7 +25,7 @@ export default function ({ getService }) {
       return esArchiver.unload(archive);
     });
 
-    it('should load multiple clusters', async () => {
+    it.skip('should load multiple clusters', async () => {
       const { body } = await supertest
         .post(
           '/api/monitoring/v1/clusters/GUtE4UwgSR-XUICRDEFKkA/apm/instances'

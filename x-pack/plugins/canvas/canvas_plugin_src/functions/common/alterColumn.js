@@ -28,14 +28,14 @@ export const alterColumn = () => ({
     type: {
       types: ['string'],
       help: i18n.translate('xpack.canvas.functions.alterColumn.argsTypeHelpText', {
-        defaultMessage: 'The type to convert the column to. Leave blank to not change type.',
+        defaultMessage: 'The type to convert the column to. Leave blank to not change type',
       }),
       default: null,
     },
     name: {
       types: ['string'],
       help: i18n.translate('xpack.canvas.functions.alterColumn.argsNameHelpText', {
-        defaultMessage: 'The resultant column name. Leave blank to not rename.',
+        defaultMessage: 'The resultant column name. Leave blank to not rename',
       }),
       default: null,
     },

@@ -10,7 +10,7 @@ export const caseFn = () => ({
   name: 'case',
   type: 'case',
   help: i18n.translate('xpack.canvas.functions.caseHelpText', {
-    defaultMessage: 'Build a case (including a condition/result) to pass to the switch function.',
+    defaultMessage: 'Build a case (including a condition/result) to pass to the switch function',
   }),
   args: {
     when: {

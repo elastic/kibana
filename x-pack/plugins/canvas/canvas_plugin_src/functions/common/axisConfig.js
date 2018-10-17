@@ -28,7 +28,7 @@ export const axisConfig = () => ({
     position: {
       types: ['string'],
       help: i18n.translate('xpack.canvas.functions.axisConfig.argsPositionHelpText', {
-        defaultMessage: 'Position of the axis labels. Eg, top, bottom, left, and right.',
+        defaultMessage: 'Position of the axis labels. Eg, top, bottom, left, and right',
       }),
       default: '',
     },

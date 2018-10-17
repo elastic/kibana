@@ -32,7 +32,7 @@ export const markdown = () => ({
     font: {
       types: ['style'],
       help: i18n.translate('xpack.canvas.functions.markdown.argsFontHelpText', {
-        defaultMessage: 'Font settings. Technically you can stick other styles in here too!',
+        defaultMessage: 'Font settings. Technically, you can add other styles in here as well',
       }),
       default: '{font}',
     },
