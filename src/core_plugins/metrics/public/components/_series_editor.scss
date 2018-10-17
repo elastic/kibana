@@ -1,16 +1,12 @@
 @import 'node_modules/@elastic/eui/src/components/panel/mixins';
 
-
-.tvbAnnotationsEditor__container,
 .tvbSeriesEditor__container {
   padding: $euiSize;
   background-color: $euiColorLightestShade;
 }
 
-@include euiPanel('tvbAnnotationsEditor');
 @include euiPanel('tvbSeriesEditor');
 
-.tvbAnnotationsEditor,
 .tvbSeriesEditor {
   margin-bottom: $euiSize;
   padding: $euiSizeS;

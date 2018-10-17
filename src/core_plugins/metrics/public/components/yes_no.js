@@ -20,7 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
-import { EuiRadio } from '@elastic/eui';
+import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
 
 function YesNo(props) {
   const { name, value } = props;
@@ -31,10 +31,12 @@ function YesNo(props) {
       props.onChange(parts);
     };
   };
+  const htmlId = htmlIdGenerator();
   const inputName = name + _.uniqueId();
   return (
     <div>
       <EuiRadio
+        id={htmlId('yes')}
         label="Yes"
         className="eui-displayInlineBlock"
         name={inputName}
@@ -46,6 +48,7 @@ function YesNo(props) {
       &emsp;
 
       <EuiRadio
+        id={htmlId('no')}
         label="No"
         className="eui-displayInlineBlock"
         name={inputName}

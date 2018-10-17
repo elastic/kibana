@@ -58,11 +58,11 @@ visualization-editor .visEditor--default > :not(.visEditor__canvas) {
   display: none;
 }
 /** THIS IS FOR TSVB UNTIL REFACTOR **/
-.vis_editor__visualization {
+.tvbEditorVisualization {
   position: static !important;
 }
 .visualize .rhythm_chart__legend-control,
-.vis-editor-hide-for-reporting {
+.tvbEditor--hideForReporting {
   /* all non-content rows in interface */
   display: none;
 }

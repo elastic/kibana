@@ -174,7 +174,7 @@ class VisEditorVisualization extends Component {
       <div>
         <div
           style={style}
-          className="vis_editor__visualization"
+          className="tvbEditorVisualization"
           data-shared-items-container
           data-shared-item
           data-title={this.props.title}
@@ -182,10 +182,10 @@ class VisEditorVisualization extends Component {
           data-render-complete="disabled"
           ref={this._visEl}
         />
-        <div className="vis-editor-hide-for-reporting">
+        <div className="tvbEditor--hideForReporting">
           {applyButton}
           <button
-            className="vis_editor__visualization-draghandle"
+            className="tvbEditorVisualization__draghandle"
             onMouseDown={this.handleMouseDown}
             onMouseUp={this.handleMouseUp}
             onKeyDown={this.onSizeHandleKeyDown}
