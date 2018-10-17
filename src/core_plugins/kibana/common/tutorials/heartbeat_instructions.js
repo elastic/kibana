@@ -359,7 +359,55 @@ export const createHeartbeatCloudInstructions = () => ({
     }
   }
 });
-
+export function heartbeatEnableInstructionsOnPrem() {  
+  const defaultTitle = i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.defaultTitle', {
+     defaultMessage: 'Edit the configuration - Add monitors',
+   });
+   const defaultCommands = [
+     '- type: http',
+     '  urls: ["<http://localhost:9200>"]',
+     '  schedule: "@every 10s"'
+   ];
+   const defaultTextPost = i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.defaultTextPost', {
+     defaultMessage: 'Where {hosttemplate} is your monitored URL, For more details on how to configure Monitors in Heartbeat, read the [Heartbeat configuration docs.]({configureLink})',
+     values: { configureLink: '{config.docs.beats.heartbeat}/heartbeat-configuration.html', hosttemplate: '`<http://localhost:9200>`' , }
+   });
+   return {
+     OSX: {
+       title: defaultTitle,
+       textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.osxTextPre', {
+         defaultMessage: 'Modify the settings in the `heartbeat.yml` file.',
+       }),
+       commands: defaultCommands,
+       textPost: defaultTextPost
+     },
+     DEB: {
+       title: defaultTitle,
+       textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.debTextPre', {
+         defaultMessage: 'Modify the monitors in the `/etc/heartbeat/heartbeat.yml` file.',
+       }),
+       commands: defaultCommands,
+       textPost: defaultTextPost
+     },
+     RPM: {
+       title: defaultTitle,
+       textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.rpmTextPre', {
+         defaultMessage: 'Modify the monitors in the `/etc/heartbeat/heartbeat.yml` file.',
+       }),
+       commands: defaultCommands,
+       textPost: defaultTextPost
+     },
+     WINDOWS: {
+       title: defaultTitle,
+       textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.windowsTextPre', {
+         defaultMessage: 'From the {path} folder, run:',
+         values: { path: `C:\\Program Files\\Heartbeat` },
+       }),
+       commands: defaultCommands,
+       textPost: defaultTextPost
+     }
+   };
+ }
 export function heartbeatEnableInstructionsCloud() {
   const defaultTitle = i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.defaultTitle', {
     defaultMessage: 'Edit the configuration - Add monitors',
@@ -370,7 +418,7 @@ export function heartbeatEnableInstructionsCloud() {
     '  schedule: "@every 10s"'
   ];
   const defaultTextPost = i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.defaultTextPost', {
-    defaultMessage: 'For more details on adding Monitors, read the [Heartbeat configuration docs.]({configureLink})',
+    defaultMessage: 'For more details on how to configure Monitors in Heartbeat, read the [Heartbeat configuration docs.]({configureLink})',
     values: { configureLink: '{config.docs.beats.heartbeat}/heartbeat-configuration.html' }
   });
   return {
@@ -451,6 +499,7 @@ export function onPremInstructions(platforms, geoipRequired, uaRequired, context
             instructions: [
               HEARTBEAT_INSTRUCTIONS.INSTALL.OSX,
               HEARTBEAT_INSTRUCTIONS.CONFIG.OSX,
+	      heartbeatEnableInstructionsOnPrem().OSX,
               HEARTBEAT_INSTRUCTIONS.START.OSX,
             ],
           },
@@ -459,6 +508,7 @@ export function onPremInstructions(platforms, geoipRequired, uaRequired, context
             instructions: [
               HEARTBEAT_INSTRUCTIONS.INSTALL.DEB,
               HEARTBEAT_INSTRUCTIONS.CONFIG.DEB,
+	      heartbeatEnableInstructionsOnPrem().DEB,
               HEARTBEAT_INSTRUCTIONS.START.DEB,
             ],
           },
@@ -467,6 +517,7 @@ export function onPremInstructions(platforms, geoipRequired, uaRequired, context
             instructions: [
               HEARTBEAT_INSTRUCTIONS.INSTALL.RPM,
               HEARTBEAT_INSTRUCTIONS.CONFIG.RPM,
+	      heartbeatEnableInstructionsOnPrem().RPM,
               HEARTBEAT_INSTRUCTIONS.START.RPM,
             ],
           },
@@ -475,6 +526,7 @@ export function onPremInstructions(platforms, geoipRequired, uaRequired, context
             instructions: [
               HEARTBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
               HEARTBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
+	      heartbeatEnableInstructionsOnPrem().WINDOWS,
               HEARTBEAT_INSTRUCTIONS.START.WINDOWS,
             ],
           },
