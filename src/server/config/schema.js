@@ -219,9 +219,6 @@ export default () => Joi.object({
     watchHost: Joi.string().hostname().default('localhost'),
     watchPrebuild: Joi.boolean().default(false),
     watchProxyTimeout: Joi.number().default(5 * 60000),
-    watchCache: Joi.object({
-      maxAge: Joi.number().min(0).max(360).default(15),
-    }).default(),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
     unsafeCache: Joi.when('$prod', {
       is: true,

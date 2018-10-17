@@ -41,9 +41,10 @@ export default class WatchOptimizer extends BaseOptimizer {
   }
 
   async init() {
-    await this.watchCache.tryReset();
     this.initializing = true;
     this.initialBuildComplete = false;
+
+    await this.watchCache.tryReset();
 
     // log status changes
     this.status$.subscribe(this.onStatusChangeHandler);

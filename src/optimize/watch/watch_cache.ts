@@ -26,8 +26,6 @@ import del from 'del';
 import deleteEmpty from 'delete-empty';
 import globby from 'globby';
 import mkdirp from 'mkdirp';
-import moment from 'moment';
-import parseGitConfig from 'parse-git-config';
 
 const mkdirpAsync = promisify(mkdirp);
 
@@ -36,12 +34,9 @@ interface Params {
   outputPath: string;
   dllsPath: string;
   cachePath: string;
-  maxAge: number;
 }
 
 interface WatchCacheStateContent {
-  gitBranch?: string;
-  lastResetTime?: number;
   optimizerConfigSha?: string;
   yarnLockSha?: string;
 }
@@ -51,7 +46,6 @@ export class WatchCache {
   private readonly outputPath: Params['outputPath'];
   private readonly dllsPath: Params['dllsPath'];
   private readonly cachePath: Params['cachePath'];
-  private readonly maxAge: Params['maxAge'];
   private readonly statePath: string;
   private readonly cacheState: WatchCacheStateContent;
   private diskCacheState: WatchCacheStateContent;
@@ -61,14 +55,12 @@ export class WatchCache {
     this.outputPath = params.outputPath;
     this.dllsPath = params.dllsPath;
     this.cachePath = params.cachePath;
-    this.maxAge = params.maxAge;
 
     this.statePath = resolve(this.outputPath, 'watch_optimizer_cache_state.json');
     this.cacheState = {};
     this.diskCacheState = this.read();
     this.cacheState.yarnLockSha = this.buildYarnLockSha();
     this.cacheState.optimizerConfigSha = this.buildOptimizerConfigSha();
-    this.cacheState.gitBranch = this.getGitBranch();
   }
 
   public async tryReset() {
@@ -91,16 +83,13 @@ export class WatchCache {
     // from any previous cache reset action
     deleteEmpty.sync(`${this.cachePath}`);
 
-    // delete everything in cache directory
-    // except ts-node and bundles
-    await del(await globby([`${this.cachePath}`], { dot: true }));
+    // delete everything in optimize/.cache directory
+    // except ts-node
+    await del(await globby([`${this.cachePath}`, `!${this.cachePath}/ts-node/**`], { dot: true }));
 
     // delete dlls
     await del(this.dllsPath);
     await mkdirpAsync(this.dllsPath);
-
-    // register new reset time
-    this.cacheState.lastResetTime = moment().valueOf();
 
     // re-write new cache state file
     this.write();
@@ -135,25 +124,8 @@ export class WatchCache {
     return this.buildShaWithMultipleFiles([baseOptimizer, dynamicDllConfigModel, dynamicDllPlugin]);
   }
 
-  private getGitBranch() {
-    const gitHeadFile = readFileSync(resolve(__dirname, '../../../.git/HEAD'), 'utf8');
-    const currentBranch = (gitHeadFile.split('ref: refs/heads/').pop() || '').trim();
-    const gitConfig = parseGitConfig.expandKeys(
-      parseGitConfig.sync({ cwd: __dirname, path: '../../../.git/config' })
-    );
-    const currentBranchRemote = gitConfig.branch[currentBranch].remote;
-    const urlForCurrentBranch = gitConfig.remote[currentBranchRemote].url;
-
-    return `${urlForCurrentBranch}:${currentBranch}`;
-  }
-
   private isResetNeeded() {
-    return (
-      this.hasYarnLockChanged() ||
-      this.hasOptimizerConfigChanged() ||
-      this.isLastResetTimeOverMaxAge() ||
-      this.hasGitBranchChanged()
-    );
+    return this.hasYarnLockChanged() || this.hasOptimizerConfigChanged();
   }
 
   private hasYarnLockChanged() {
@@ -162,25 +134,6 @@ export class WatchCache {
 
   private hasOptimizerConfigChanged() {
     return this.cacheState.optimizerConfigSha !== this.diskCacheState.optimizerConfigSha;
-  }
-
-  private isLastResetTimeOverMaxAge() {
-    // maxAge is calculated in days
-    // a value > 0 means that we want to consider
-    // the maxAge to know if we should clean
-    // the current cache
-    if (this.maxAge > 0) {
-      const currentTime = moment();
-      const lastResetTime = moment(this.cacheState.lastResetTime);
-
-      return currentTime.diff(lastResetTime, 'days') > this.maxAge;
-    }
-
-    return false;
-  }
-
-  private hasGitBranchChanged() {
-    return this.cacheState.gitBranch !== this.diskCacheState.gitBranch;
   }
 
   private write() {

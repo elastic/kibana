@@ -42,8 +42,7 @@ export default async (kbnServer, kibanaHapiServer, config) => {
         log,
         outputPath: config.get('path.data'),
         dllsPath: fromRoot('./dlls'), // TODO: replace by DllCompiler.getRawDllConfig().outputPath when merge with master
-        cachePath: resolve(kbnServer.uiBundles.getCacheDirectory(), '../../'),
-        maxAge: config.get('optimize.watchCache.maxAge')
+        cachePath: resolve(kbnServer.uiBundles.getCacheDirectory(), '../'),
       })
     })
   );
