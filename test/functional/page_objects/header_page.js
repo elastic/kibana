@@ -63,7 +63,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickVisualize() {
       log.debug('click Visualize tab');
-      await this.clickSelector('a[href*=\'visualize\']');
+      await this.clickSelector(By.css('a[href*=\'visualize\']'));
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.confirmTopNavTextContains('visualize');
       await this.awaitGlobalLoadingIndicatorHidden();
@@ -71,7 +71,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickDashboard() {
       log.debug('click Dashboard tab');
-      await this.clickSelector('a[href*=\'dashboard\']');
+      await this.clickSelector(By.css('a[href*=\'dashboard\']'));
       await retry.try(async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
         const isLandingPageVisible = await testSubjects.exists('dashboardLandingPage');
@@ -84,13 +84,13 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickManagement() {
       log.debug('click Management tab');
-      await this.clickSelector('a[href*=\'management\']');
+      await this.clickSelector(By.css('a[href*=\'management\']'));
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickSettings() {
       log.debug('click Settings tab');
-      await this.clickSelector('a[href*=\'settings\']');
+      await this.clickSelector(By.css('a[href*=\'settings\']'));
     }
 
     async clickTimepicker() {
@@ -129,7 +129,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async getFromTime() {
       log.debug('getFromTime');
       return await retry.try(async () => {
-        await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
         const absoluteFrom = await testSubjects.find('absolute-datetime-input-from');
         return await absoluteFrom.getAttribute('value');
@@ -139,7 +138,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async getToTime() {
       log.debug('getToTime');
       return await retry.try(async () => {
-        // await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
         const absoluteTo = await testSubjects.find('absolute-datetime-input-to');
         return await absoluteTo.getAttribute('value');
@@ -149,25 +147,17 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async setFromTime(timeString) {
       log.debug(`setFromTime: ${timeString}`);
       await retry.try(async () => {
-        // await this.ensureTimePickerIsOpen();
-        // await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
-        const absoluteFrom = await testSubjects.find('absolute-datetime-input-from');
-        await absoluteFrom.clear();
         log.debug('typing into the thang: ' + timeString);
-        await absoluteFrom.sendKeys(timeString);
+        await testSubjects.setValue('absolute-datetime-input-from', timeString);
       });
     }
 
     async setToTime(timeString) {
       log.debug(`setToTime: ${timeString}`);
       await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
-        const absoluteTo = await testSubjects.find('absolute-datetime-input-to');
-        await absoluteTo.clear();
-        await absoluteTo.sendKeys(timeString);
+        await testSubjects.setValue('absolute-datetime-input-to', timeString);
       });
     }
 

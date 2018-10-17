@@ -32,6 +32,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['header', 'common']);
 
   class SettingsPage {
+    async clickLinkText(text) {
+      await remote.click(By.linkText(text));
+    }
     async clickNavigation() {
       const navLink = await remote.findElement(By.css('.app-link:nth-child(5) a'));
       await navLink.click();
@@ -557,7 +560,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`Clicking importObjects`);
       await testSubjects.click('importObjects');
       log.debug(`Setting the path on the file input`);
-      await find.setValue('.euiFilePicker__input', path);
+      await find.setValue(By.css('.euiFilePicker__input'), path);
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
         await testSubjects.click('importSavedObjectsOverwriteToggle');

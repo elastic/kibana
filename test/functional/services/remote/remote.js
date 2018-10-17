@@ -47,7 +47,7 @@ export async function RemoteProvider({ getService }) {
   const loggingPref = prefs.setLevel(webdriver.logging.Type.BROWSER, webdriver.logging.Level.ALL);
   chromeOptions.addArguments('verbose');
   chromeOptions.setLoggingPrefs(loggingPref);
-  // chromeOptions.headless();
+  //chromeOptions.headless();
   // chromeOptions.windowSize({ width: 1200, height: 1100 });
 
   log.debug(chromeDriver.path);
@@ -129,7 +129,7 @@ export async function RemoteProvider({ getService }) {
       },
 
       async exists(selectorObj) {
-        const possibleElements = await this.findElements(selectorObj, 0);
+        const possibleElements = await this.findElements(selectorObj, 1000);
         return await possibleElements.length > 0;
       },
 
@@ -173,7 +173,7 @@ export async function RemoteProvider({ getService }) {
       async type(element, text) {
         const textArray = text.split('');
         for (let i = 0; i < textArray.length; i++) {
-          await driver.sleep(50);
+          await driver.sleep(25);
           await element.sendKeys(textArray[i]);
         }
       },
@@ -245,6 +245,10 @@ export async function RemoteProvider({ getService }) {
 
       async getLogsFor(logType) {
         return await driver.manage().logs().get(logType);
+      },
+
+      async goBack() {
+        await driver.navigate().back();
       }
     };
   }

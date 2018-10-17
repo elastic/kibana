@@ -842,8 +842,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       // 2). get the minimum chart Y-Axis marker value and Y position
       const minYAxisChartMarker = await
-        remote.findElement(By.css(
-          'div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'));
+      remote.findElement(By.css(
+        'div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'));
       const minYLabel = (await minYAxisChartMarker.getText()).replace(',', '');
       const minYLabelYPosition = (await minYAxisChartMarker.getRect()).y;
       return ((maxYLabel - minYLabel) / (minYLabelYPosition - maxYLabelYPosition));

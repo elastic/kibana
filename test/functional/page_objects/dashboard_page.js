@@ -396,7 +396,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getSearchFilterValue() {
       const searchFilter = await testSubjects.find('searchFilter');
-      return await searchFilter.getProperty('value');
+      return await searchFilter.getAttribute('value');
     }
 
     async searchForDashboardWithName(dashName) {
@@ -528,7 +528,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setSaveAsNewCheckBox(checked) {
       log.debug('saveAsNewCheckbox: ' + checked);
       const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
-      const isAlreadyChecked = await saveAsNewCheckbox.getProperty('checked');
+      const isAlreadyChecked = await saveAsNewCheckbox.getAttribute('checked');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping save as new checkbox');
         await retry.try(() => saveAsNewCheckbox.click());
@@ -538,7 +538,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setStoreTimeWithDashboard(checked) {
       log.debug('Storing time with dashboard: ' + checked);
       const storeTimeCheckbox = await testSubjects.find('storeTimeWithDashboard');
-      const isAlreadyChecked = await storeTimeCheckbox.getProperty('checked');
+      const isAlreadyChecked = await storeTimeCheckbox.getAttribute('checked');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping store time checkbox');
         await retry.try(() => storeTimeCheckbox.click());
