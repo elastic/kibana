@@ -16,8 +16,8 @@ aggTypeFieldFilters.addFilter(
     if(!indexPattern || indexPattern.type !== 'rollup') {
       return true;
     }
-    const aggName = aggConfig.type.name;
-    const aggFields = indexPattern.typeMeta.aggs && indexPattern.typeMeta.aggs[aggName];
+    const aggName = aggConfig.type && aggConfig.type.name;
+    const aggFields = indexPattern.typeMeta && indexPattern.typeMeta.aggs && indexPattern.typeMeta.aggs[aggName];
     return aggFields && aggFields[field.name];
   }
 );

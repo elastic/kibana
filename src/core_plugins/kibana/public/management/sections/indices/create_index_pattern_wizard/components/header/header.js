@@ -77,7 +77,7 @@ export const Header = ({
               onChange={onChangeIncludingSystemIndices}
             />
           </EuiFlexItem>
-        ) : ''
+        ) : null
       }
     </EuiFlexGroup>
     {

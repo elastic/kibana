@@ -99,12 +99,12 @@ export function createIndexPatternsApiClient($http, basePath) {
       // further processing
       return request('GET', url).then(resp => {
         if(type) {
-          const typeUrl = type ? getUrl([type, '_fields_for_wildcard'], {
+          const typeUrl = getUrl([type, '_fields_for_wildcard'], {
             pattern,
             fields: resp.fields,
             meta_fields: metaFields,
             params: JSON.stringify(params),
-          }) : null;
+          });
 
           return request('GET', typeUrl).then(typeResp => typeResp.fields);
         } else {

@@ -16,7 +16,7 @@ aggTypeFilters.addFilter(
       return true;
     }
     const aggName = aggType.name;
-    const aggs = indexPattern.typeMeta.aggs;
+    const aggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
 
     // Return doc_count (which is collected by default for rollup date histogram, histogram, and terms)
     // and the rest of the defined metrics from capabilities.
