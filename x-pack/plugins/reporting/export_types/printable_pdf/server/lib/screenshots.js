@@ -137,7 +137,9 @@ export function screenshotsObservableFactory(server) {
         // we wait for the event loop to flush before telling reporting to continue. This
         // seems to correct a timing issue that was causing reporting to occasionally
         // capture the first visualization before it was actually in the DOM.
-        const hackyWaitForVisualizations = () => new Promise(r => setTimeout(r, 100));
+        // Note: 100 proved too short, see https://github.com/elastic/kibana/issues/22581,
+        // bumping to 250.
+        const hackyWaitForVisualizations = () => new Promise(r => setTimeout(r, 250));
 
         return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
       },
