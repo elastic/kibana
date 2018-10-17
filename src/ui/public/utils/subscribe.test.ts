@@ -125,6 +125,17 @@ Array [
 `);
 });
 
+it('does not report fatal error if observer.error handles the error', () => {
+  const $scope = new Scope();
+  subscribe($scope as any, Rx.throwError(new Error('foo')), {
+    error: () => {
+      // noop, swallow error
+    },
+  });
+
+  expect(mockFatalError.mock.calls).toEqual([]);
+});
+
 it('reports fatal error if observer.complete throws', () => {
   const $scope = new Scope();
   subscribe($scope as any, Rx.EMPTY, {
