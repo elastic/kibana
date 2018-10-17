@@ -18,6 +18,7 @@
  */
 
 import React, { Component } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class FeedbackMessage extends Component {
 
@@ -30,10 +31,16 @@ export class FeedbackMessage extends Component {
     return (
       <div className="tgcVisFeedback" >
         <div className="tgcVisFeedback__message" style={{ display: this.state.shouldShowTruncate ? 'block' : 'none' }}>
-          The number of tags has been truncated to avoid long draw times.
+          <FormattedMessage
+            id="tagCloud.feedbackMessage.truncatedTagsDescription"
+            defaultMessage="The number of tags has been truncated to avoid long draw times."
+          />
         </div>
-        <div className="tgcVisFeedback__message" style={{ display: this.state.shouldShowIncomplete ? 'block' : 'none' }}>
-          The container is too small to display the entire cloud. Tags might be cropped or omitted.
+        <div className="ttgcVisFeedback__message" style={{ display: this.state.shouldShowIncomplete ? 'block' : 'none' }}>
+          <FormattedMessage
+            id="tagCloud.feedbackMessage.tooSmallContainerDescription"
+            defaultMessage="The container is too small to display the entire cloud. Tags might be cropped or omitted."
+          />
         </div>
       </div>
     );
