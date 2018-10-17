@@ -39,13 +39,17 @@ const traceListColumns: ITableColumn[] = [
     sortable: true,
     render: (
       name: string,
-      { serviceName, transactionType }: ITransactionGroup
+      { serviceName, transactionType, id, traceId }: ITransactionGroup
     ) => (
       <TooltipOverlay content={formatString(name)}>
         <AppLink
           path={`${serviceName}/transactions/${transactionType}/${legacyEncodeURIComponent(
             name
           )}`}
+          query={{
+            transactionId: id,
+            traceId
+          }}
         >
           {formatString(name)}
         </AppLink>

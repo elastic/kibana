@@ -6,11 +6,12 @@
 
 export interface ITransactionGroup {
   name: string;
-  serviceName: string;
+  serviceName?: string;
   id: string;
+  traceId?: string;
   p95: number;
   averageResponseTime: number;
   transactionsPerMinute: number;
   impact: number;
-  transactionType: string;
+  transactionType?: string;
 }
