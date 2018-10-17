@@ -249,7 +249,6 @@
     "@types/react": "^16.3.14",
     "@types/react-dom": "^16.0.5",
     "@types/react-redux": "^6.0.6",
-    "@types/react-router-dom": "^4.3.1",
     "@types/react-virtualized": "^9.18.7",
     "@types/redux": "^3.6.31",
     "@types/redux-actions": "^2.2.1",
