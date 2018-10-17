@@ -40,6 +40,7 @@ export const populateBrowserRegistries = () =>
       const type = remainingTypes.pop();
       window.canvas = window.canvas || {};
       window.canvas.register = d => types[type].register(d);
+
       // Load plugins one at a time because each needs a different loader function
       // $script will only load each of these once, we so can call this as many times as we need?
       const pluginPath = chrome.addBasePath(`/api/canvas/plugins?type=${type}`);

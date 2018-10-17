@@ -14,6 +14,8 @@ import { browser } from '../lib/route_expression/browser';
 import { thread } from '../lib/route_expression/thread';
 import { server as serverEnv } from '../lib/route_expression/server';
 
+console.log('LOADING SOCKET, IMPORTING EXPRESSION ROUTER');
+
 export function socketApi(server) {
   const io = socket(server.listener, { path: '/socket.io' });
 

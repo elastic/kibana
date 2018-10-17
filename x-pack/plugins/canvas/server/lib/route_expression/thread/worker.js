@@ -16,6 +16,8 @@ process.on('message', msg => {
   const { type, id } = msg;
   const threadId = id;
 
+  if (type === 'ping') process.send({ type: 'pong' });
+
   pluginsReady.then(({ commonFunctions, types }) => {
     const { serialize, deserialize } = serializeProvider(types.toJS());
     const interpret = interpretProvider({
