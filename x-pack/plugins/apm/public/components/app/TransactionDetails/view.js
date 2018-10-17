@@ -12,7 +12,7 @@ import { TransactionDetailsChartsRequest } from '../../../store/reactReduxReques
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
 import TransactionCharts from '../../shared/charts/TransactionCharts';
 import { KueryBar } from '../../shared/KueryBar';
-import Transaction from './Transaction';
+import { Transaction } from './Transaction';
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
 
 function TransactionDetails({ urlParams, location }) {
@@ -45,6 +45,8 @@ function TransactionDetails({ urlParams, location }) {
           />
         )}
       />
+
+      <EuiSpacer size="l" />
 
       <TransactionDetailsRequest
         urlParams={urlParams}
