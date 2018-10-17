@@ -22,28 +22,28 @@ import { i18n } from '@kbn/i18n';
 
 
 const names = {
-  general: i18n.translate('kbn.management.settings.categoryGeneralLabel', {
+  general: i18n.translate('kbn.management.settings.categoryNames.generalLabel', {
     defaultMessage: 'General',
   }),
-  timelion: i18n.translate('kbn.management.settings.categoryTimelionLabel', {
+  timelion: i18n.translate('kbn.management.settings.categoryNames.timelionLabel', {
     defaultMessage: 'Timelion',
   }),
-  notifications: i18n.translate('kbn.management.settings.categoryNotificationsLabel', {
+  notifications: i18n.translate('kbn.management.settings.categoryNames.notificationsLabel', {
     defaultMessage: 'Notifications',
   }),
-  visualizations: i18n.translate('kbn.management.settings.categoryVisualizationsLabel', {
+  visualizations: i18n.translate('kbn.management.settings.categoryNames.visualizationsLabel', {
     defaultMessage: 'Visualizations',
   }),
-  discover: i18n.translate('kbn.management.settings.categoryDiscoverLabel', {
+  discover: i18n.translate('kbn.management.settings.categoryNames.discoverLabel', {
     defaultMessage: 'Discover',
   }),
-  dashboard: i18n.translate('kbn.management.settings.categoryDashboardLabel', {
+  dashboard: i18n.translate('kbn.management.settings.categoryNames.dashboardLabel', {
     defaultMessage: 'Dashboard',
   }),
-  reporting: i18n.translate('kbn.management.settings.categoryReportingLabel', {
+  reporting: i18n.translate('kbn.management.settings.categoryNames.reportingLabel', {
     defaultMessage: 'Reporting',
   }),
-  search: i18n.translate('kbn.management.settings.categorySearchLabel', {
+  search: i18n.translate('kbn.management.settings.categoryNames.searchLabel', {
     defaultMessage: 'Search',
   }),
 };
