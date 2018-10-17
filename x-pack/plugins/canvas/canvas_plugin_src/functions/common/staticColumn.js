@@ -11,7 +11,7 @@ export const staticColumn = () => ({
   name: 'staticColumn',
   type: 'datatable',
   help: i18n.translate('xpack.canvas.functions.staticColumnHelpText', {
-    defaultMessage: 'Add a column with a static value.',
+    defaultMessage: 'Add a column with a static value',
   }),
   context: {
     types: ['datatable'],

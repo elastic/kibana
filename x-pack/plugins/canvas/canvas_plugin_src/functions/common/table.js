@@ -29,7 +29,7 @@ export const table = () => ({
       default: true,
       help: i18n.translate('xpack.canvas.functions.table.argsPaginateHelpText', {
         defaultMessage:
-          'Show pagination controls. If set to false only the first page will be displayed.',
+          'Show pagination controls. If set to false only the first page will be displayed',
       }),
     },
     perPage: {
@@ -44,7 +44,7 @@ export const table = () => ({
       types: ['boolean'],
       default: true,
       help: i18n.translate('xpack.canvas.functions.table.argsShowHeaderHelpText', {
-        defaultMessage: 'Show or hide the header row with titles for each column.',
+        defaultMessage: 'Show or hide the header row with titles for each column',
       }),
     },
   },
