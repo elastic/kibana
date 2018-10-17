@@ -82,8 +82,8 @@ export class CustomColorPicker extends Component {
     });
 
     return (
-      <div className="custom-picker color_picker">
-        <div className="color_picker__saturation">
+      <div className="tvbColorPickerPopUp">
+        <div className="tvbColorPickerPopUp__saturation">
           <Saturation
             style={styles.Saturation}
             {...this.props}
@@ -91,16 +91,16 @@ export class CustomColorPicker extends Component {
             onChange={this.handleChange}
           />
         </div>
-        <div className="color_picker__body">
-          <div className="color_picker__controls flexbox-fix">
-            <div className={this.props.disableAlpha ? 'color_picker__color-disable_alpha' : 'color_picker__color'}>
-              <div className={this.props.disableAlpha ? 'color_picker__swatch-disable_alpha' : 'color_picker__swatch'}>
-                <div className="color_picker__active" />
+        <div className="tvbColorPickerPopUp__body">
+          <div className="tvbColorPickerPopUp__controls">
+            <div className={this.props.disableAlpha ? 'tvbColorPickerPopUp__color-disableAlpha' : 'tvbColorPickerPopUp__color'}>
+              <div className={this.props.disableAlpha ? 'tvbColorPickerPopUp__swatch-disableAlpha' : 'tvbColorPickerPopUp__swatch'}>
+                <div className="tvbColorPickerPopUp__active" />
                 <Checkboard />
               </div>
             </div>
-            <div className="color_picker__toggles">
-              <div className={this.props.disableAlpha ? 'color_picker__hue-disable_alpha' : 'color_picker__hue'}>
+            <div className="tvbColorPickerPopUp__toggles">
+              <div className={this.props.disableAlpha ? 'tvbColorPickerPopUp__hue-disableAlpha' : 'tvbColorPickerPopUp__hue'}>
                 <Hue
                   style={styles.Hue}
                   {...this.props}
@@ -108,7 +108,7 @@ export class CustomColorPicker extends Component {
                   onChange={this.handleChange}
                 />
               </div>
-              <div className={this.props.disableAlpha ? 'color_picker__alpha-disable_alpha' : 'color_picker__alpha'}>
+              <div className={this.props.disableAlpha ? 'tvbColorPickerPopUp__alpha-disableAlpha' : 'tvbColorPickerPopUp__alpha'}>
                 <Alpha
                   style={styles.Alpha}
                   {...this.props}
@@ -123,7 +123,7 @@ export class CustomColorPicker extends Component {
             onChange={this.handleChange}
             disableAlpha={this.props.disableAlpha}
           />
-          <div className="color_picker__swatches flexbox-fix">
+          <div className="tvbColorPickerPopUp__swatches">
             {swatches}
           </div>
         </div>
