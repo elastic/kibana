@@ -27,8 +27,8 @@ const fse = require('fs-extra');
  */
 export function rmrfSync(path) {
   try {
-      fse.removeSync(resolve(path));
-  } catch(error) {
-      console.log('Warning! unable to remove path: ' + path);
+    fse.removeSync(resolve(path));
+  } catch (error) {
+    console.log('Warning! unable to remove path: ' + path);
   }
 }
