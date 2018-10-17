@@ -14,6 +14,7 @@ import { notify } from '../../lib/notify';
 export const WorkpadUpload = ({ onUpload }) => (
   <EuiFilePicker
     compressed
+    className="canvasWorkpad__upload--compressed"
     initialPromptText="Import workpad JSON file"
     onChange={([file]) => {
       if (get(file, 'type') !== 'application/json') {

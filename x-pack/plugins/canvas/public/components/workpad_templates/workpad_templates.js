@@ -152,7 +152,7 @@ export class WorkpadTemplates extends React.PureComponent {
           columns={columns}
           sorting={sorting}
           onChange={this.onTableChange}
-          className="canvasWorkpad__dropzoneTable"
+          className="canvasWorkpad__dropzoneTable canvasWorkpad__dropzoneTable--tags"
         />
         <EuiSpacer />
         <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
@@ -250,7 +250,6 @@ export class WorkpadTemplates extends React.PureComponent {
       <Paginate rows={filteredTemplates}>
         {pagination => (
           <Fragment>
-            <EuiSpacer />
             {this.renderSearch()}
             <EuiSpacer />
             {this.renderWorkpadTable(pagination)}
