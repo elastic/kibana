@@ -64,7 +64,7 @@ interface Query {
 interface Props {
   query: Query;
   onSubmit: (query: { query: string | object; language: string }) => void;
-  disableAutoFocus: boolean;
+  disableAutoFocus?: boolean;
   appName: string;
   indexPatterns: IndexPattern[];
   store: Storage;
