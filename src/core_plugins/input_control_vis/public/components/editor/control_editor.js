@@ -71,7 +71,6 @@ class ControlEditorUi extends Component {
             controlParams={this.props.controlParams}
             handleIndexPatternChange={this.changeIndexPattern}
             handleFieldNameChange={this.changeFieldName}
-            getIndexPatterns={this.props.getIndexPatterns}
             getIndexPattern={this.props.getIndexPattern}
             handleNumberOptionChange={this.props.handleNumberOptionChange}
             handleCheckboxOptionChange={this.props.handleCheckboxOptionChange}
@@ -87,7 +86,6 @@ class ControlEditorUi extends Component {
             controlParams={this.props.controlParams}
             handleIndexPatternChange={this.changeIndexPattern}
             handleFieldNameChange={this.changeFieldName}
-            getIndexPatterns={this.props.getIndexPatterns}
             getIndexPattern={this.props.getIndexPattern}
             handleNumberOptionChange={this.props.handleNumberOptionChange}
           />
@@ -179,7 +177,6 @@ ControlEditorUi.propTypes = {
   handleRemoveControl: PropTypes.func.isRequired,
   handleIndexPatternChange: PropTypes.func.isRequired,
   handleFieldNameChange: PropTypes.func.isRequired,
-  getIndexPatterns: PropTypes.func.isRequired,
   getIndexPattern: PropTypes.func.isRequired,
   handleCheckboxOptionChange: PropTypes.func.isRequired,
   handleNumberOptionChange: PropTypes.func.isRequired,

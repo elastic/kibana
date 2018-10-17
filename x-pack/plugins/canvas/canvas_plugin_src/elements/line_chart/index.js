@@ -8,7 +8,7 @@ import header from './header.png';
 
 export const lineChart = () => ({
   name: 'lineChart',
-  displayName: 'Line Chart',
+  displayName: 'Line chart',
   help: 'A customizable line chart',
   image: header,
   expression: `filters

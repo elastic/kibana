@@ -1,8 +1,24 @@
-[[monitoring-troubleshooting]]
-== {monitoring} Troubleshooting
+[role="xpack"]
+[[monitor-troubleshooting]]
+== Troubleshooting monitoring in {kib}
 ++++
-<titleabbrev>{monitoring}</titleabbrev>
+<titleabbrev>Troubleshooting</titleabbrev>
 ++++
 
-See
-{logstash-ref}/monitoring-troubleshooting.html[Troubleshooting {monitoring} in Logstash].
+Use the information in this section to troubleshoot common problems and find 
+answers for frequently asked questions related to {monitoring}.
+
+[float]
+=== Cannot view the cluster because the license information is invalid
+
+*Symptoms:*
+
+The following error appears in a banner at the top of the screen in {kib} on the 
+*Monitoring > Clusters* page:
+`You can't view the "<my_cluster>" cluster because the license information is invalid.`
+
+*Resolution:*
+
+You cannot monitor a version 6.3 or later cluster from {kib} version 6.2 or earlier. 
+To resolve this issue, upgrade {kib} to 6.3 or later. See 
+{stack-ref}/upgrading-elastic-stack.html[Upgrading the {stack}]. 

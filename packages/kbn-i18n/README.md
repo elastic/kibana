@@ -171,6 +171,37 @@ import memoizeIntlConstructor from 'intl-format-cache';
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 ```
 
+## Vanilla JS
+
+`Intl-messageformat` package assumes that the
+[Intl](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl)
+global object exists in the runtime. `Intl` is present in all modern
+browsers and Node.js 0.10+. In order to load i18n engine
+in Node.js we should simply `import` this module (in Node.js, the
+[data](https://github.com/yahoo/intl-messageformat/tree/master/dist/locale-data)
+for all 200+ languages is loaded along with the library) and pass the translation
+messages into `init` method:
+
+```js
+import { i18n } from '@kbn/i18n';
+
+i18n.init(messages);
+```
+
+One common use-case is that of internationalizing a string constant. Here's an
+example of how we'd do that:
+
+```js
+import { i18n } from '@kbn/i18n';
+
+export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
+  defaultMessage: 'Greetings, planet Earth!',
+}),
+```
+
+We're also able to use all methods exposed by the i18n engine
+(see [I18n engine](#i18n-engine) section above for more details).
+
 ## React
 
 [React-intl](https://github.com/yahoo/react-intl) library is used for internalization
@@ -368,31 +399,11 @@ In order to translate attributes in Angular we should use `i18nFilter`:
 ```html
 <input
   type="text"
-  placeholder="{{'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER' | i18n: {
+  placeholder="{{ ::'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER' | i18n: {
     defaultMessage: 'Search'
   } }}"
 >
 ```
-
-## Node.JS
-
-`Intl-messageformat` package assumes that the
-[Intl](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl)
-global object exists in the runtime. `Intl` is present in all modern
-browsers and Node.js 0.10+. In order to load i18n engine
-in Node.js we should simply `import` this module (in Node.js, the
-[data](https://github.com/yahoo/intl-messageformat/tree/master/dist/locale-data)
-for all 200+ languages is loaded along with the library) and pass the translation
-messages into `init` method:
-
-```js
-import { i18n } from '@kbn/i18n';
-
-i18n.init(messages);
-```
-
-After that we are able to use all methods exposed by the i18n engine
-(see [I18n engine](#i18n-engine) section above for more details).
 
 ## Build tools
 

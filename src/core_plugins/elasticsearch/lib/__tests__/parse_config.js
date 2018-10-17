@@ -123,6 +123,29 @@ describe('plugins/elasticsearch', function () {
         const config = parseConfig(serverConfig, { ignoreCertAndKey: true });
         expect(config.ssl.passphrase).to.be(undefined);
       });
+
+      describe('port', () => {
+        it('uses the specified port', () => {
+          const config1 = parseConfig(serverConfig);
+          expect(config1.host.port).to.be('9200');
+
+          serverConfig.url = 'https://localhost:555';
+          const config2 = parseConfig(serverConfig);
+          expect(config2.host.port).to.be('555');
+        });
+
+        it('uses port 80 if http and no specified port', () => {
+          serverConfig.url = 'http://localhost';
+          const config2 = parseConfig(serverConfig);
+          expect(config2.host.port).to.be('80');
+        });
+
+        it ('uses port 443 if https and no specified port', () => {
+          serverConfig.url = 'https://localhost';
+          const config2 = parseConfig(serverConfig);
+          expect(config2.host.port).to.be('443');
+        });
+      });
     });
   });
 });

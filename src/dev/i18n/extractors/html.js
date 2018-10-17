@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { jsdom } from 'jsdom';
+import cheerio from 'cheerio';
 import { parse } from '@babel/parser';
 import { isDirectiveLiteral, isObjectExpression, isStringLiteral } from '@babel/types';
 
@@ -119,6 +119,34 @@ function trimCurlyBraces(string) {
   return string.slice(2, -2).trim();
 }
 
+/**
+ * Removes parentheses from the start and the end of a string.
+ *
+ * Example: `('id' | i18n: { defaultMessage: 'Message' })`
+ * @param {string} string string to trim
+ */
+function trimParentheses(string) {
+  if (string.startsWith('(') && string.endsWith(')')) {
+    return string.slice(1, -1);
+  }
+
+  return string;
+}
+
+/**
+ * Removes one-time binding operator `::` from the start of a string.
+ *
+ * Example: `::'id' | i18n: { defaultMessage: 'Message' }`
+ * @param {string} string string to trim
+ */
+function trimOneTimeBindingOperator(string) {
+  if (string.startsWith('::')) {
+    return string.slice(2);
+  }
+
+  return string;
+}
+
 function* getFilterMessages(htmlContent) {
   const expressions = (htmlContent.match(ANGULAR_EXPRESSION_REGEX) || [])
     .filter(expression => expression.includes(I18N_FILTER_MARKER))
@@ -126,7 +154,10 @@ function* getFilterMessages(htmlContent) {
 
   for (const expression of expressions) {
     const filterStart = expression.indexOf(I18N_FILTER_MARKER);
-    const idExpression = expression.slice(0, filterStart).trim();
+    const idExpression = trimParentheses(
+      trimOneTimeBindingOperator(expression.slice(0, filterStart).trim())
+    );
+
     const filterObjectExpression = expression.slice(filterStart + I18N_FILTER_MARKER.length).trim();
 
     if (!filterObjectExpression || !idExpression) {
@@ -152,25 +183,31 @@ function* getFilterMessages(htmlContent) {
 }
 
 function* getDirectiveMessages(htmlContent) {
-  const document = jsdom(htmlContent, {
-    features: { ProcessExternalResources: false },
-  }).defaultView.document;
+  const $ = cheerio.load(htmlContent);
 
-  for (const element of document.querySelectorAll('[i18n-id]')) {
-    const messageId = formatHTMLString(element.getAttribute('i18n-id'));
+  const elements = $('[i18n-id]').map(function (idx, el) {
+    const $el = $(el);
+    return {
+      id: $el.attr('i18n-id'),
+      defaultMessage: $el.attr('i18n-default-message'),
+      context: $el.attr('i18n-context'),
+    };
+  }).toArray();
+
+  for (const element of elements) {
+    const messageId = formatHTMLString(element.id);
     if (!messageId) {
       throw createFailError(`Empty "i18n-id" value in angular directive is not allowed.`);
     }
 
-    const message = formatHTMLString(element.getAttribute('i18n-default-message'));
+    const message = formatHTMLString(element.defaultMessage);
     if (!message) {
       throw createFailError(
         `Empty defaultMessage in angular directive is not allowed ("${messageId}").`
       );
     }
 
-    const context = formatHTMLString(element.getAttribute('i18n-context')) || undefined;
-    yield [messageId, { message, context }];
+    yield [messageId, { message, context: formatHTMLString(element.context) || undefined }];
   }
 }
 

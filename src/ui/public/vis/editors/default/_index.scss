@@ -9,17 +9,6 @@ $vis-editor-resizer-width: $euiSizeM;
 
 // Components
 @import './agg';
-
-.visualization-options {
-
-  .form-group {
-    margin-bottom: $vis-editor-agg-editor-spacing;
-  }
-  .form-horizontal .control-label {
-    text-align: left;
-  }
-
-  .kuiSideBarSelect {
-    width: 100%;
-  }
-}
+@import './agg_group';
+@import './agg_params';
+@import './agg_select';

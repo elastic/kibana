@@ -11,13 +11,12 @@ saved objects by various conditions.
 `GET /api/saved_objects/_find`
 
 ==== Query Parameters
-
+`type` (required)::
+  (array|string) The saved object type(s) that the response should be limited to
 `per_page` (optional)::
   (number) The number of objects to return per page
 `page` (optional)::
   (number) The page of objects to return
-`type` (optional)::
-  (array|string) The saved object type(s) that the response should be limited to
 `search` (optional)::
   (string) A {ref}/query-dsl-simple-query-string-query.html[simple_query_string] Elasticsearch query to filter the objects in the response
 `search_fields` (optional)::

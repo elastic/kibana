@@ -23,7 +23,7 @@ import ReactDOM from 'react-dom';
 
 let isOpen = false;
 
-export function showAddPanel(savedObjectsClient, addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes) {
+export function showAddPanel(addNewPanel, addNewVis, visTypes) {
   if (isOpen) {
     return;
   }
@@ -35,26 +35,6 @@ export function showAddPanel(savedObjectsClient, addNewPanel, addNewVis, listing
     document.body.removeChild(container);
     isOpen = false;
   };
-  const find = async (type, search) => {
-    const resp = await savedObjectsClient.find({
-      type: type,
-      fields: ['title', 'visState'],
-      search: search ? `${search}*` : undefined,
-      page: 1,
-      perPage: listingLimit,
-      searchFields: ['title^3', 'description']
-    });
-
-    if (type === 'visualization' && !isLabsEnabled) {
-      resp.savedObjects = resp.savedObjects.filter(savedObject => {
-        const typeName = JSON.parse(savedObject.attributes.visState).type;
-        const visType = visTypes.byName[typeName];
-        return visType.stage !== 'lab';
-      });
-    }
-
-    return resp;
-  };
 
   const addNewVisWithCleanup = () => {
     onClose();
@@ -65,7 +45,7 @@ export function showAddPanel(savedObjectsClient, addNewPanel, addNewVis, listing
   const element = (
     <DashboardAddPanel
       onClose={onClose}
-      find={find}
+      visTypes={visTypes}
       addNewPanel={addNewPanel}
       addNewVis={addNewVisWithCleanup}
     />

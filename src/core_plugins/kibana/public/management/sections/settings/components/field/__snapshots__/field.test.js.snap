@@ -3,7 +3,7 @@
 exports[`Field for array setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -16,7 +16,7 @@ exports[`Field for array setting should render as read only with help text if ov
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -73,15 +73,10 @@ exports[`Field for array setting should render as read only with help text if ov
           </EuiText>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="array test setting"
-          >
-            array:test:setting
-          </span>
-        }
+        label="array:test:setting"
       >
         <EuiFieldText
+          aria-label="array test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={true}
@@ -104,7 +99,7 @@ exports[`Field for array setting should render as read only with help text if ov
 exports[`Field for array setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -117,7 +112,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -156,15 +151,10 @@ exports[`Field for array setting should render custom setting icon if it is cust
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="array test setting"
-          >
-            array:test:setting
-          </span>
-        }
+        label="array:test:setting"
       >
         <EuiFieldText
+          aria-label="array test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={false}
@@ -187,7 +177,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
 exports[`Field for array setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -200,7 +190,7 @@ exports[`Field for array setting should render default value if there is no user
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -234,15 +224,10 @@ exports[`Field for array setting should render default value if there is no user
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="array test setting"
-          >
-            array:test:setting
-          </span>
-        }
+        label="array:test:setting"
       >
         <EuiFieldText
+          aria-label="array test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={false}
@@ -265,7 +250,7 @@ exports[`Field for array setting should render default value if there is no user
 exports[`Field for array setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -278,7 +263,7 @@ exports[`Field for array setting should render user value if there is user value
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -343,15 +328,10 @@ exports[`Field for array setting should render user value if there is user value
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="array test setting"
-          >
-            array:test:setting
-          </span>
-        }
+        label="array:test:setting"
       >
         <EuiFieldText
+          aria-label="array test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={false}
@@ -374,7 +354,7 @@ exports[`Field for array setting should render user value if there is user value
 exports[`Field for boolean setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -387,7 +367,7 @@ exports[`Field for boolean setting should render as read only with help text if 
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -444,15 +424,10 @@ exports[`Field for boolean setting should render as read only with help text if 
           </EuiText>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="boolean test setting"
-          >
-            boolean:test:setting
-          </span>
-        }
+        label="boolean:test:setting"
       >
         <EuiSwitch
+          aria-label="boolean test setting"
           checked={false}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={true}
@@ -473,7 +448,7 @@ exports[`Field for boolean setting should render as read only with help text if 
 exports[`Field for boolean setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -486,7 +461,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -525,15 +500,10 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="boolean test setting"
-          >
-            boolean:test:setting
-          </span>
-        }
+        label="boolean:test:setting"
       >
         <EuiSwitch
+          aria-label="boolean test setting"
           checked={true}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
@@ -554,7 +524,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
 exports[`Field for boolean setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -567,7 +537,7 @@ exports[`Field for boolean setting should render default value if there is no us
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -601,15 +571,10 @@ exports[`Field for boolean setting should render default value if there is no us
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="boolean test setting"
-          >
-            boolean:test:setting
-          </span>
-        }
+        label="boolean:test:setting"
       >
         <EuiSwitch
+          aria-label="boolean test setting"
           checked={true}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
@@ -630,7 +595,7 @@ exports[`Field for boolean setting should render default value if there is no us
 exports[`Field for boolean setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -643,7 +608,7 @@ exports[`Field for boolean setting should render user value if there is user val
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -708,15 +673,10 @@ exports[`Field for boolean setting should render user value if there is user val
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="boolean test setting"
-          >
-            boolean:test:setting
-          </span>
-        }
+        label="boolean:test:setting"
       >
         <EuiSwitch
+          aria-label="boolean test setting"
           checked={false}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
@@ -737,7 +697,7 @@ exports[`Field for boolean setting should render user value if there is user val
 exports[`Field for image setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -750,7 +710,7 @@ exports[`Field for image setting should render as read only with help text if ov
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -807,17 +767,12 @@ exports[`Field for image setting should render as read only with help text if ov
           </EuiText>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="image test setting"
-          >
-            image:test:setting
-          </span>
-        }
+        label="image:test:setting"
       >
         <EuiImage
           allowFullScreen={true}
           alt="image:test:setting"
+          aria-label="image test setting"
           fullScreenIconColor="light"
           size="original"
           url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
@@ -835,7 +790,7 @@ exports[`Field for image setting should render as read only with help text if ov
 exports[`Field for image setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -848,7 +803,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -887,13 +842,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="image test setting"
-          >
-            image:test:setting
-          </span>
-        }
+        label="image:test:setting"
       >
         <EuiFilePicker
           accept=".jpg,.jpeg,.png"
@@ -917,7 +866,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
 exports[`Field for image setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -930,7 +879,7 @@ exports[`Field for image setting should render default value if there is no user
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -964,13 +913,7 @@ exports[`Field for image setting should render default value if there is no user
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="image test setting"
-          >
-            image:test:setting
-          </span>
-        }
+        label="image:test:setting"
       >
         <EuiFilePicker
           accept=".jpg,.jpeg,.png"
@@ -994,7 +937,7 @@ exports[`Field for image setting should render default value if there is no user
 exports[`Field for image setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1007,7 +950,7 @@ exports[`Field for image setting should render user value if there is user value
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1083,17 +1026,12 @@ exports[`Field for image setting should render user value if there is user value
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="image test setting"
-          >
-            image:test:setting
-          </span>
-        }
+        label="image:test:setting"
       >
         <EuiImage
           allowFullScreen={true}
           alt="image:test:setting"
+          aria-label="image test setting"
           fullScreenIconColor="light"
           size="original"
           url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
@@ -1111,7 +1049,7 @@ exports[`Field for image setting should render user value if there is user value
 exports[`Field for json setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1124,7 +1062,7 @@ exports[`Field for json setting should render as read only with help text if ove
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1185,18 +1123,13 @@ exports[`Field for json setting should render as read only with help text if ove
           </EuiText>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="json test setting"
-          >
-            json:test:setting
-          </span>
-        }
+        label="json:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-json:test:setting"
         >
           <EuiCodeEditor
+            aria-label="json test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
@@ -1232,7 +1165,7 @@ exports[`Field for json setting should render as read only with help text if ove
 exports[`Field for json setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1245,7 +1178,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1284,18 +1217,13 @@ exports[`Field for json setting should render custom setting icon if it is custo
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="json test setting"
-          >
-            json:test:setting
-          </span>
-        }
+        label="json:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-json:test:setting"
         >
           <EuiCodeEditor
+            aria-label="json test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
@@ -1331,7 +1259,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
 exports[`Field for json setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1344,7 +1272,7 @@ exports[`Field for json setting should render default value if there is no user 
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1413,18 +1341,13 @@ exports[`Field for json setting should render default value if there is no user 
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="json test setting"
-          >
-            json:test:setting
-          </span>
-        }
+        label="json:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-json:test:setting"
         >
           <EuiCodeEditor
+            aria-label="json test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
@@ -1460,7 +1383,7 @@ exports[`Field for json setting should render default value if there is no user 
 exports[`Field for json setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1473,7 +1396,7 @@ exports[`Field for json setting should render user value if there is user value 
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1542,18 +1465,13 @@ exports[`Field for json setting should render user value if there is user value 
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="json test setting"
-          >
-            json:test:setting
-          </span>
-        }
+        label="json:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-json:test:setting"
         >
           <EuiCodeEditor
+            aria-label="json test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
@@ -1589,7 +1507,7 @@ exports[`Field for json setting should render user value if there is user value 
 exports[`Field for markdown setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1602,7 +1520,7 @@ exports[`Field for markdown setting should render as read only with help text if
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1659,18 +1577,13 @@ exports[`Field for markdown setting should render as read only with help text if
           </EuiText>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="markdown test setting"
-          >
-            markdown:test:setting
-          </span>
-        }
+        label="markdown:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
         >
           <EuiCodeEditor
+            aria-label="markdown test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
@@ -1706,7 +1619,7 @@ exports[`Field for markdown setting should render as read only with help text if
 exports[`Field for markdown setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1719,7 +1632,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1758,18 +1671,13 @@ exports[`Field for markdown setting should render custom setting icon if it is c
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="markdown test setting"
-          >
-            markdown:test:setting
-          </span>
-        }
+        label="markdown:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
         >
           <EuiCodeEditor
+            aria-label="markdown test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
@@ -1805,7 +1713,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
 exports[`Field for markdown setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1818,7 +1726,7 @@ exports[`Field for markdown setting should render default value if there is no u
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1852,18 +1760,13 @@ exports[`Field for markdown setting should render default value if there is no u
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="markdown test setting"
-          >
-            markdown:test:setting
-          </span>
-        }
+        label="markdown:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
         >
           <EuiCodeEditor
+            aria-label="markdown test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
@@ -1899,7 +1802,7 @@ exports[`Field for markdown setting should render default value if there is no u
 exports[`Field for markdown setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1912,7 +1815,7 @@ exports[`Field for markdown setting should render user value if there is user va
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -1977,18 +1880,13 @@ exports[`Field for markdown setting should render user value if there is user va
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="markdown test setting"
-          >
-            markdown:test:setting
-          </span>
-        }
+        label="markdown:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
         >
           <EuiCodeEditor
+            aria-label="markdown test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
@@ -2024,7 +1922,7 @@ exports[`Field for markdown setting should render user value if there is user va
 exports[`Field for number setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2037,7 +1935,7 @@ exports[`Field for number setting should render as read only with help text if o
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2094,15 +1992,10 @@ exports[`Field for number setting should render as read only with help text if o
           </EuiText>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="number test setting"
-          >
-            number:test:setting
-          </span>
-        }
+        label="number:test:setting"
       >
         <EuiFieldNumber
+          aria-label="number test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={true}
@@ -2125,7 +2018,7 @@ exports[`Field for number setting should render as read only with help text if o
 exports[`Field for number setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2138,7 +2031,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2177,15 +2070,10 @@ exports[`Field for number setting should render custom setting icon if it is cus
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="number test setting"
-          >
-            number:test:setting
-          </span>
-        }
+        label="number:test:setting"
       >
         <EuiFieldNumber
+          aria-label="number test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={false}
@@ -2208,7 +2096,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
 exports[`Field for number setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2221,7 +2109,7 @@ exports[`Field for number setting should render default value if there is no use
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2255,15 +2143,10 @@ exports[`Field for number setting should render default value if there is no use
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="number test setting"
-          >
-            number:test:setting
-          </span>
-        }
+        label="number:test:setting"
       >
         <EuiFieldNumber
+          aria-label="number test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={false}
@@ -2286,7 +2169,7 @@ exports[`Field for number setting should render default value if there is no use
 exports[`Field for number setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2299,7 +2182,7 @@ exports[`Field for number setting should render user value if there is user valu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2364,15 +2247,10 @@ exports[`Field for number setting should render user value if there is user valu
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="number test setting"
-          >
-            number:test:setting
-          </span>
-        }
+        label="number:test:setting"
       >
         <EuiFieldNumber
+          aria-label="number test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={false}
@@ -2395,7 +2273,7 @@ exports[`Field for number setting should render user value if there is user valu
 exports[`Field for select setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2408,7 +2286,7 @@ exports[`Field for select setting should render as read only with help text if o
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2465,15 +2343,10 @@ exports[`Field for select setting should render as read only with help text if o
           </EuiText>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="select test setting"
-          >
-            select:test:setting
-          </span>
-        }
+        label="select:test:setting"
       >
         <EuiSelect
+          aria-label="select test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={true}
@@ -2513,7 +2386,7 @@ exports[`Field for select setting should render as read only with help text if o
 exports[`Field for select setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2526,7 +2399,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2565,15 +2438,10 @@ exports[`Field for select setting should render custom setting icon if it is cus
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="select test setting"
-          >
-            select:test:setting
-          </span>
-        }
+        label="select:test:setting"
       >
         <EuiSelect
+          aria-label="select test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={false}
@@ -2613,7 +2481,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
 exports[`Field for select setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2626,7 +2494,7 @@ exports[`Field for select setting should render default value if there is no use
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2660,15 +2528,10 @@ exports[`Field for select setting should render default value if there is no use
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="select test setting"
-          >
-            select:test:setting
-          </span>
-        }
+        label="select:test:setting"
       >
         <EuiSelect
+          aria-label="select test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={false}
@@ -2708,7 +2571,7 @@ exports[`Field for select setting should render default value if there is no use
 exports[`Field for select setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2721,7 +2584,7 @@ exports[`Field for select setting should render user value if there is user valu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2786,15 +2649,10 @@ exports[`Field for select setting should render user value if there is user valu
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="select test setting"
-          >
-            select:test:setting
-          </span>
-        }
+        label="select:test:setting"
       >
         <EuiSelect
+          aria-label="select test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={false}
@@ -2834,7 +2692,7 @@ exports[`Field for select setting should render user value if there is user valu
 exports[`Field for string setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2847,7 +2705,7 @@ exports[`Field for string setting should render as read only with help text if o
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2904,15 +2762,10 @@ exports[`Field for string setting should render as read only with help text if o
           </EuiText>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="string test setting"
-          >
-            string:test:setting
-          </span>
-        }
+        label="string:test:setting"
       >
         <EuiFieldText
+          aria-label="string test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={true}
@@ -2935,7 +2788,7 @@ exports[`Field for string setting should render as read only with help text if o
 exports[`Field for string setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2948,7 +2801,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -2987,15 +2840,10 @@ exports[`Field for string setting should render custom setting icon if it is cus
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="string test setting"
-          >
-            string:test:setting
-          </span>
-        }
+        label="string:test:setting"
       >
         <EuiFieldText
+          aria-label="string test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={false}
@@ -3018,7 +2866,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
 exports[`Field for string setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -3031,7 +2879,7 @@ exports[`Field for string setting should render default value if there is no use
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -3065,15 +2913,10 @@ exports[`Field for string setting should render default value if there is no use
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="string test setting"
-          >
-            string:test:setting
-          </span>
-        }
+        label="string:test:setting"
       >
         <EuiFieldText
+          aria-label="string test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={false}
@@ -3096,7 +2939,7 @@ exports[`Field for string setting should render default value if there is no use
 exports[`Field for string setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -3109,7 +2952,7 @@ exports[`Field for string setting should render user value if there is user valu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
         <React.Fragment>
           <div
@@ -3174,15 +3017,10 @@ exports[`Field for string setting should render user value if there is user valu
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="string test setting"
-          >
-            string:test:setting
-          </span>
-        }
+        label="string:test:setting"
       >
         <EuiFieldText
+          aria-label="string test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={false}

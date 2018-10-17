@@ -49,6 +49,7 @@ export interface CliArgs {
   watch: boolean;
   repl: boolean;
   basePath: boolean;
+  optimize: boolean;
 }
 
 export class Env {

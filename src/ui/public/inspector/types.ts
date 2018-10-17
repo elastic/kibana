@@ -18,7 +18,7 @@
  */
 
 /**
- * The interface that the adapters used to open spy panels have to fullfill.
+ * The interface that the adapters used to open an inspector have to fullfill.
  */
 export interface Adapters {
   [key: string]: any;
