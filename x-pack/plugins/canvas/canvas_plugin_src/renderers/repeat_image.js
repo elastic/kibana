@@ -11,7 +11,7 @@ import { isValid } from '../../common/lib/url';
 
 export const repeatImage = () => ({
   name: 'repeatImage',
-  displayName: 'Image Repeat',
+  displayName: 'Image repeat',
   help: 'Repeat an image a given number of times',
   reuseDomNode: true,
   render(domNode, config, handlers) {

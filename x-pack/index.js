@@ -25,6 +25,7 @@ import { spaces } from './plugins/spaces';
 import { notifications } from './plugins/notifications';
 import { kueryAutocomplete } from './plugins/kuery_autocomplete';
 import { canvas } from './plugins/canvas';
+import { infra } from './plugins/infra';
 
 module.exports = function (kibana) {
   return [
@@ -48,6 +49,7 @@ module.exports = function (kibana) {
     indexManagement(kibana),
     consoleExtensions(kibana),
     notifications(kibana),
-    kueryAutocomplete(kibana)
+    kueryAutocomplete(kibana),
+    infra(kibana),
   ];
 };
