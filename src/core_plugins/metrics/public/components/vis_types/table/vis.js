@@ -71,7 +71,7 @@ class TableVis extends Component {
       }
       const style = { color: getColor(column.color_rules, 'text', item.last) };
       return (
-        <td key={`${rowId}-${item.id}`} className="eui-textRight" style={style}>
+        <td key={`${rowId}-${item.id}`} data-test-subj="tvbTableVis__value" className="eui-textRight" style={style}>
           <span>{ value }</span>
           {trend}
         </td>
