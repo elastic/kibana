@@ -158,8 +158,11 @@ module.directive('vislibValueAxes', function () {
             label = matchingSeries[0].makeLabel();
           }
           if (lastAxisTitles[axis.id] !== label && label !== '') {
+            // Only overwrite the custom title with the value axis label if it hasn't been changed
+            if (lastAxisTitles[axis.id] === axis.title.text) {
+              axis.title.text = label;
+            }
             lastAxisTitles[axis.id] = label;
-            axis.title.text = label;
           }
         });
       };

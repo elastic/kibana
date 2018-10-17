@@ -136,4 +136,26 @@ describe('point series editor', function () {
     $parentScope.updateAxisTitle();
     expect($parentScope.editorState.params.valueAxes[0].title.text).to.equal('Custom Title');
   });
+
+  it('should set the custom title to match the value axis label when only one agg exists for that axis', function () {
+    $parentScope.editorState.aggs[0].params.customLabel = 'Custom Label';
+    $parentScope.updateAxisTitle();
+    expect($parentScope.editorState.params.valueAxes[0].title.text).to.equal('Custom Label');
+  });
+
+  it('should not set the custom title to match the value axis label when more than one agg exists for that axis', function () {
+    const aggConfig = new AggConfig($parentScope.vis.aggs, { type: 'avg', schema: 'metric', params: { field: 'bytes' } });
+    $parentScope.vis.aggs.push(aggConfig);
+    $parentScope.$digest();
+    $parentScope.editorState.aggs[0].params.customLabel = 'Custom Label';
+    $parentScope.updateAxisTitle();
+    expect($parentScope.editorState.params.valueAxes[0].title.text).to.equal('Count');
+  });
+
+  it('should not overwrite the custom title with the value axis label if the custom title has been changed', function () {
+    $parentScope.editorState.params.valueAxes[0].title.text = 'Custom Title';
+    $parentScope.editorState.aggs[0].params.customLabel = 'Custom Label';
+    $parentScope.updateAxisTitle();
+    expect($parentScope.editorState.params.valueAxes[0].title.text).to.equal('Custom Title');
+  });
 });
