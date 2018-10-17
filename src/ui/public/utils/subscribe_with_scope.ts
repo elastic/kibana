@@ -43,7 +43,7 @@ function callInDigest<T extends any[]>($scope: IScope, fn: (...args: T) => void,
  * Subscribe to an observable at a $scope, ensuring that the digest cycle
  * is run for subscriber hooks and routing errors to fatalError if not handled.
  */
-export function subscribe<T>(
+export function subscribeWithScope<T>(
   $scope: IScope,
   observable: Rx.Observable<T>,
   observer?: Rx.PartialObserver<T>
@@ -60,7 +60,9 @@ export function subscribe<T>(
           observer.error(error);
         } else {
           throw new Error(
-            `Uncaught error in $scope.$subscribe: ${error ? error.stack || error.message : error}`
+            `Uncaught error in subscribeWithScope(): ${
+              error ? error.stack || error.message : error
+            }`
           );
         }
       });

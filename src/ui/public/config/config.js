@@ -21,7 +21,7 @@ import angular from 'angular';
 import chrome from '../chrome';
 import { isPlainObject } from 'lodash';
 import { uiModules } from '../modules';
-import { subscribe } from '../utils/subscribe';
+import { subscribeWithScope } from '../utils/subscribe_with_scope';
 
 const module = uiModules.get('kibana/config');
 
@@ -60,7 +60,7 @@ module.service(`config`, function ($rootScope, Promise) {
   //* angular specific methods *
   //////////////////////////////
 
-  const subscription = subscribe($rootScope, uiSettings.getUpdate$(), {
+  const subscription = subscribeWithScope($rootScope, uiSettings.getUpdate$(), {
     next: ({ key, newValue, oldValue }) => {
       $rootScope.$broadcast('change:config',        newValue, oldValue, key, this);
       $rootScope.$broadcast(`change:config.${key}`, newValue, oldValue, key, this);

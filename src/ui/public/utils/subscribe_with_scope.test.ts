@@ -23,7 +23,7 @@ jest.mock('ui/notify/fatal_error', () => ({
 }));
 
 import * as Rx from 'rxjs';
-import { subscribe } from './subscribe';
+import { subscribeWithScope } from './subscribe_with_scope';
 
 let $rootScope: Scope;
 
@@ -46,7 +46,7 @@ it('subscribes to the passed observable, returns subscription', () => {
   const subSpy = jest.fn(() => unsubSpy);
   const observable = new Rx.Observable(subSpy);
 
-  const subscription = subscribe($scope as any, observable);
+  const subscription = subscribeWithScope($scope as any, observable);
   expect(subSpy).toHaveBeenCalledTimes(1);
   expect(unsubSpy).not.toHaveBeenCalled();
 
@@ -61,7 +61,7 @@ it('calls observer.next() if already in a digest cycle, wraps in $scope.$apply i
   const nextSpy = jest.fn();
   const $scope = new Scope();
 
-  subscribe($scope as any, subject, { next: nextSpy });
+  subscribeWithScope($scope as any, subject, { next: nextSpy });
 
   subject.next();
   expect($scope.$apply).toHaveBeenCalledTimes(1);
@@ -77,7 +77,7 @@ it('calls observer.next() if already in a digest cycle, wraps in $scope.$apply i
 
 it('reports fatalError if observer.next() throws', () => {
   const $scope = new Scope();
-  subscribe($scope as any, Rx.of(undefined), {
+  subscribeWithScope($scope as any, Rx.of(undefined), {
     next() {
       throw new Error('foo bar');
     },
@@ -96,12 +96,12 @@ it('reports fatal error if observer.error is not defined and observable errors',
   const $scope = new Scope();
   const error = new Error('foo');
   error.stack = `${error.message}\n---stack trace ---`;
-  subscribe($scope as any, Rx.throwError(error));
+  subscribeWithScope($scope as any, Rx.throwError(error));
 
   expect(mockFatalError.mock.calls).toMatchInlineSnapshot(`
 Array [
   Array [
-    [Error: Uncaught error in $scope.$subscribe: foo
+    [Error: Uncaught error in subscribeWithScope(): foo
 ---stack trace ---],
   ],
 ]
@@ -110,7 +110,7 @@ Array [
 
 it('reports fatal error if observer.error throws', () => {
   const $scope = new Scope();
-  subscribe($scope as any, Rx.throwError(new Error('foo')), {
+  subscribeWithScope($scope as any, Rx.throwError(new Error('foo')), {
     error: () => {
       throw new Error('foo');
     },
@@ -127,7 +127,7 @@ Array [
 
 it('does not report fatal error if observer.error handles the error', () => {
   const $scope = new Scope();
-  subscribe($scope as any, Rx.throwError(new Error('foo')), {
+  subscribeWithScope($scope as any, Rx.throwError(new Error('foo')), {
     error: () => {
       // noop, swallow error
     },
@@ -138,7 +138,7 @@ it('does not report fatal error if observer.error handles the error', () => {
 
 it('reports fatal error if observer.complete throws', () => {
   const $scope = new Scope();
-  subscribe($scope as any, Rx.EMPTY, {
+  subscribeWithScope($scope as any, Rx.EMPTY, {
     complete: () => {
       throw new Error('foo');
     },
