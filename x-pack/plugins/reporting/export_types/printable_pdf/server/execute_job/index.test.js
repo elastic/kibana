@@ -206,6 +206,28 @@ test(`gets logo from uiSettings`, async () => {
   expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, null, undefined, logo);
 });
 
+test(`doesn't pass authorization header if it doesn't exist when getting logo from uiSettings`, async () => {
+  const encryptedHeaders = await encrypt({
+    thisotherheader: 'pleasedontshowup'
+  });
+
+  const logo = 'custom-logo';
+  mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
+
+  const generatePdfObservable = generatePdfObservableFactory();
+  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+  const executeJob = executeJobFactory(mockServer);
+  await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
+
+  expect(mockServer.savedObjects.getScopedSavedObjectsClient).toBeCalledWith({
+    headers: {},
+    getBasePath: expect.anything()
+  });
+  expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
+  expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, null, undefined, logo);
+});
+
 test(`passes browserTimezone to generatePdf`, async () => {
   const encryptedHeaders = await encrypt({});
 

@@ -22,7 +22,7 @@ function executeJobFn(server) {
   const getCustomLogo = async (job) => {
     const fakeRequest = {
       headers: {
-        authorization: job.authorizationHeader,
+        ...job.authorizationHeader && { authorization: job.authorizationHeader },
       },
       // This is used by the spaces SavedObjectClientWrapper to determine the existing space.
       // We use the basePath from the saved job, which we'll have post spaces being implemented;
