@@ -31,7 +31,7 @@ const uniqueTags = templates
     });
     return acc;
   }, [])
-  .sort();
+  .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
 const { colors } = palettes.euiPaletteColorBlind;
 
