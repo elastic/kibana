@@ -34,6 +34,8 @@ import { createCliError } from './errors';
 const SECOND = 1000;
 const STOP_TIMEOUT = 30 * SECOND;
 
+const exec = require('child_process').exec;
+
 async function withTimeout(attempt, ms, onTimeout) {
   const TIMEOUT = Symbol('timeout');
   try {
@@ -47,6 +49,18 @@ async function withTimeout(attempt, ms, onTimeout) {
     } else {
       throw error;
     }
+  }
+}
+
+async function isWinTaskKilled(pid) {
+  if (process.platform === 'win32') {
+    await exec(`tasklist /fi \"pid eq ${pid}\"`, (error, stdout) => {
+      if (stdout.includes(`${pid}`) === false && !error) {
+        return true;
+      } else {
+        return false;
+      }
+    });
   }
 }
 
@@ -91,11 +105,17 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       const exit$ = Rx.fromEvent(childProcess, 'exit').pipe(
         take(1),
         map(([code]) => {
-          // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
-          if (code > 0 && !(code === 143 || code === 130)) {
-            throw createCliError(`[${name}] exited with code ${code}`);
-          }
 
+          if (process.platform === 'win32') {
+            if (!isWinTaskKilled(childProcess.pid)) {
+              throw createCliError(`[${name}] exited with code ${code}`);
+            }
+          } else {
+            // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
+            if (code > 0 && !(code === 143 || code === 130)) {
+              throw createCliError(`[${name}] exited with code ${code}`);
+            }
+          }
           return code;
         })
       );
