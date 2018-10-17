@@ -18,7 +18,7 @@ import { timefilter } from 'ui/timefilter';
 import { CHART_TYPE } from '../explorer/explorer_constants';
 
 export const LINE_CHART_ANOMALY_RADIUS = 7;
-export const MULTI_BUCKET_SYMBOL_SIZE = 144;   // In square pixels for use with d3 symbol.size
+export const MULTI_BUCKET_SYMBOL_SIZE = 100;   // In square pixels for use with d3 symbol.size
 export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
 
 const MAX_LABEL_WIDTH = 100;

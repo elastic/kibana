@@ -303,11 +303,11 @@ export class ExplorerChartSingleMetric extends React.Component {
       // Remove multi-bucket markers that are no longer needed
       multiBucketMarkers.exit().remove();
 
-      // Update markers to new positions.
+      // Append the multi-bucket markers and position on chart.
       multiBucketMarkers.enter().append('path')
         .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
         .attr('transform', d => `translate(${lineChartXScale(d.date)}, ${lineChartYScale(d.value)})`)
-        .attr('class', d => `metric-value anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`)
+        .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`)
         // Don't use an arrow function since we need access to `this`.
         .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
