@@ -21,14 +21,14 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import pieTemplate from './editors/pie.html';
 
-export default function HistogramVisType(Private) {
+export default function HistogramVisType(Private, i18n) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'pie',
-    title: 'Pie',
+    title: i18n('kbnVislibVisTypes.pie.pieTitle', { defaultMessage: 'Pie' }),
     icon: 'visPie',
-    description: 'Compare parts of a whole',
+    description: i18n('kbnVislibVisTypes.pie.pieDescription', { defaultMessage: 'Compare parts of a whole' }),
     visConfig: {
       defaults: {
         type: 'pie',
@@ -65,7 +65,7 @@ export default function HistogramVisType(Private) {
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Slice Size',
+          title: i18n('kbnVislibVisTypes.pie.metricTitle', { defaultMessage: 'Slice Size' }),
           min: 1,
           max: 1,
           aggFilter: ['sum', 'count', 'cardinality', 'top_hits'],
@@ -77,7 +77,7 @@ export default function HistogramVisType(Private) {
           group: 'buckets',
           name: 'segment',
           icon: 'fa fa-scissors',
-          title: 'Split Slices',
+          title: i18n('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split Slices' }),
           min: 0,
           max: Infinity,
           aggFilter: ['!geohash_grid', '!filter']
@@ -86,7 +86,7 @@ export default function HistogramVisType(Private) {
           group: 'buckets',
           name: 'split',
           icon: 'fa fa-th',
-          title: 'Split Chart',
+          title: i18n('kbnVislibVisTypes.pie.splitTitle', { defaultMessage: 'Split Chart' }),
           mustBeFirst: true,
           min: 0,
           max: 1,

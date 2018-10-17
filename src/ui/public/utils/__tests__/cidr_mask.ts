@@ -16,50 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+// @ts-ignore
 import expect from 'expect.js';
 import { CidrMask } from '../cidr_mask';
 
-describe('CidrMask', function () {
-  it('should throw errors with invalid CIDR masks', function () {
-    expect(function () {
-      new CidrMask();
-    }).to.throwError();
+describe('CidrMask', () => {
+  it('should throw errors with invalid CIDR masks', () => {
+    expect(
+      () =>
+        // @ts-ignore
+        new CidrMask()
+    ).to.throwError();
 
-    expect(function () {
-      new CidrMask('');
-    }).to.throwError();
+    expect(() => new CidrMask('')).to.throwError();
 
-    expect(function () {
-      new CidrMask('hello, world');
-    }).to.throwError();
+    expect(() => new CidrMask('hello, world')).to.throwError();
 
-    expect(function () {
-      new CidrMask('0.0.0.0');
-    }).to.throwError();
+    expect(() => new CidrMask('0.0.0.0')).to.throwError();
 
-    expect(function () {
-      new CidrMask('0.0.0.0/0');
-    }).to.throwError();
+    expect(() => new CidrMask('0.0.0.0/0')).to.throwError();
 
-    expect(function () {
-      new CidrMask('0.0.0.0/33');
-    }).to.throwError();
+    expect(() => new CidrMask('0.0.0.0/33')).to.throwError();
 
-    expect(function () {
-      new CidrMask('256.0.0.0/32');
-    }).to.throwError();
+    expect(() => new CidrMask('256.0.0.0/32')).to.throwError();
 
-    expect(function () {
-      new CidrMask('0.0.0.0/32/32');
-    }).to.throwError();
+    expect(() => new CidrMask('0.0.0.0/32/32')).to.throwError();
 
-    expect(function () {
-      new CidrMask('1.2.3/1');
-    }).to.throwError();
+    expect(() => new CidrMask('1.2.3/1')).to.throwError();
   });
 
-  it('should correctly grab IP address and prefix length', function () {
+  it('should correctly grab IP address and prefix length', () => {
     let mask = new CidrMask('0.0.0.0/1');
     expect(mask.initialAddress.toString()).to.be('0.0.0.0');
     expect(mask.prefixLength).to.be(1);
@@ -69,7 +55,7 @@ describe('CidrMask', function () {
     expect(mask.prefixLength).to.be(31);
   });
 
-  it('should calculate a range of IP addresses', function () {
+  it('should calculate a range of IP addresses', () => {
     let mask = new CidrMask('0.0.0.0/1');
     let range = mask.getRange();
     expect(range.from.toString()).to.be('0.0.0.0');
@@ -86,7 +72,7 @@ describe('CidrMask', function () {
     expect(range.to.toString()).to.be('67.129.65.223');
   });
 
-  it('toString()', function () {
+  it('toString()', () => {
     let mask = new CidrMask('.../1');
     expect(mask.toString()).to.be('0.0.0.0/1');
 
