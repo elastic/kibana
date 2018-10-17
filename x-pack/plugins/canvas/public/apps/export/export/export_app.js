@@ -35,7 +35,7 @@ export class ExportApp extends React.PureComponent {
           <div className="canvasLayout__stageHeader">
             <Link name="loadWorkpad" params={{ id: this.props.workpad.id }}>
               <FormattedMessage
-                id="xpack.canvas.export.editWorkpadLinkTitle"
+                id="xpack.canvas.export.editWorkpadLinkText"
                 defaultMessage="Edit Workpad"
               />
             </Link>

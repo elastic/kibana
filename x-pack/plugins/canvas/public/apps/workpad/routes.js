@@ -55,9 +55,12 @@ export const routes = [
               dispatch(setAssets(assets));
             } catch (err) {
               notify.error(err, {
-                title: i18n.translate('xpack.canvas.workpad.loadWorkpadErrorMessage', {
-                  defaultMessage: "Couldn't load workpad with ID",
-                }),
+                title: i18n.translate(
+                  'xpack.canvas.workpad.loadWorkpadWithSpecificIdErrorMessage',
+                  {
+                    defaultMessage: "Couldn't load workpad with ID",
+                  }
+                ),
               });
               return router.redirectTo('home');
             }
