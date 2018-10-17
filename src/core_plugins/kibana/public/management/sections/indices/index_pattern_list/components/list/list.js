@@ -40,7 +40,7 @@ export class List extends Component {
           indexPatterns.map(pattern => {
             return (
               <div key={pattern.id} >
-                <EuiButtonEmpty size="s" href={pattern.url}>
+                <EuiButtonEmpty size="s" href={pattern.url} data-test-subj="indexPatternLink">
                   {pattern.default ? <Fragment><i aria-label="Default index pattern" className="fa fa-star" /> </Fragment> : ''}
                   {pattern.active ? <strong>{pattern.title}</strong> : pattern.title} {pattern.tag ? (
                     <Fragment key={pattern.tag.key}>
