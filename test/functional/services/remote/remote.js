@@ -34,6 +34,9 @@ export async function RemoteProvider({ getService }) {
   const log = getService('log');
   const possibleBrowsers = ['chrome', 'firefox', 'ie'];
   const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
+  const throttleOption = process.env.TEST_THROTTLE_NETWORK;
+
+
 
   if (!possibleBrowsers.includes(browserType)) {
     throw new Error(`Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` + possibleBrowsers.join(','));
@@ -44,11 +47,12 @@ export async function RemoteProvider({ getService }) {
   const loggingPref = prefs.setLevel(webdriver.logging.Type.BROWSER, webdriver.logging.Level.ALL);
   chromeOptions.addArguments('verbose');
   chromeOptions.setLoggingPrefs(loggingPref);
-  // chromeOptions.headless();
+  //chromeOptions.headless();
   // chromeOptions.windowSize({ width: 1200, height: 1100 });
 
   log.debug(chromeDriver.path);
   log.debug(geckoDriver.path);
+
 
   const chromeService = new chrome.ServiceBuilder(chromeDriver.path)
     // .loggingTo(process.stdout)
@@ -70,7 +74,14 @@ export async function RemoteProvider({ getService }) {
     .setFirefoxService(firefoxService)
     .build();
 
-
+  if (throttleOption === 'true') {
+    driver.setNetworkConditions({
+      offline: false,
+      latency: 50, // Additional latency (ms).
+      download_throughput: 1000 * 1024, // These speeds are in bites per second, not kilobytes.
+      upload_throughput: 1000 * 1024
+    });
+  }
 
   const actions = driver.actions();
   const mouse = actions.mouse();
@@ -118,7 +129,7 @@ export async function RemoteProvider({ getService }) {
       },
 
       async exists(selectorObj) {
-        const possibleElements = await this.findElements(selectorObj, 0);
+        const possibleElements = await this.findElements(selectorObj, 1000);
         return await possibleElements.length > 0;
       },
 
@@ -162,7 +173,7 @@ export async function RemoteProvider({ getService }) {
       async type(element, text) {
         const textArray = text.split('');
         for (let i = 0; i < textArray.length; i++) {
-          await driver.sleep(50);
+          await driver.sleep(25);
           await element.sendKeys(textArray[i]);
         }
       },
@@ -234,6 +245,10 @@ export async function RemoteProvider({ getService }) {
 
       async getLogsFor(logType) {
         return await driver.manage().logs().get(logType);
+      },
+
+      async goBack() {
+        await driver.navigate().back();
       }
     };
   }

@@ -83,9 +83,10 @@ export function TestSubjectsProvider({ getService }) {
     }
 
 
-    // async descendantExists(selector, parentElement) {
-    //   return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
-    // }
+    async descendantExists(selector, parentElement) {
+      const descendants = await parentElement.findElements(By.css(testSubjSelector(selector)));
+      return descendants.length > 0;
+    }
 
     // async findDescendant(selector, parentElement) {
     //   return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
@@ -110,14 +111,14 @@ export function TestSubjectsProvider({ getService }) {
 
     async getPropertyAll(selector, property) {
       return await this._mapAll(selector, async (element) => {
-        return await element.getProperty(property);
+        return await element.getAttribute(property);
       });
     }
 
     async getProperty(selector, property) {
       return await retry.try(async () => {
         const element = await this.find(selector);
-        return await element.getProperty(property);
+        return await element.getAttribute(property);
       });
     }
 
@@ -142,11 +143,7 @@ export function TestSubjectsProvider({ getService }) {
         // clicking on the testSubject
         const input = await remote.getActiveElement();
         await input.clear();
-        const textArray = text.split('');
-        for (let i = 0; i < textArray.length; i++) {
-          remote.sleep(50);
-          await input.sendKeys(text);
-        }
+        await remote.type(input, text);
       });
     }
 

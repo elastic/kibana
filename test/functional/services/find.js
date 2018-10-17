@@ -172,7 +172,7 @@ export function FindProvider({ getService }) {
 
     async existsByCssSelector(selector) {
       log.debug(`existsByCssSelector ${selector}`);
-      return (await remote.findAllByCssSelector(selector)).length > 0;
+      return (await remote.findElements(By.css(selector))).length > 0;
     }
 
     async clickByPartialLinkText(linkText, timeout = defaultFindTimeout) {
