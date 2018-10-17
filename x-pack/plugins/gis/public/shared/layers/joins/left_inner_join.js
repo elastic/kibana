@@ -18,12 +18,12 @@ export class LeftInnerJoin {
     this._rightSource = new ESTableSource(joinDescriptor.right);
   }
 
-  displayHash() {
+  getSourceId() {
     return LeftInnerJoin.toHash(this._descriptor);
   }
 
-  getSourceId() {
-    return `${this.displayHash()}`;
+  getHumanReadableName() {
+    return `count of ${this._descriptor.right.indexPatternTitle} by ${this._descriptor.right.term}`;
   }
 
   getJoinFieldName() {
@@ -32,7 +32,6 @@ export class LeftInnerJoin {
 
   joinTableToFeatureCollection(featureCollection, table) {
     const newField = this.getJoinFieldName();
-
     //todo: poor man's join with nested loop
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];

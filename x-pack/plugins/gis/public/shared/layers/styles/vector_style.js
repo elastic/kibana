@@ -103,7 +103,7 @@ export class VectorStyle {
   }
 
   static computeScaledValues(featureCollection, field) {
-    const fieldName = field.label;
+    const fieldName = field.name;
     if (featureCollection.computed.find(f => f === fieldName)) {
       return false;
     }
@@ -166,7 +166,7 @@ export class VectorStyle {
     }
 
     if (this._descriptor.properties[property].options.fieldValue) {
-      const originalFieldName = this._descriptor.properties[property].options.fieldValue.label;
+      const originalFieldName = this._descriptor.properties[property].options.fieldValue.name;
       const targetName = VectorStyle.getComputedFieldName(originalFieldName);
       return [
         'interpolate',

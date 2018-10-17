@@ -29,10 +29,6 @@ export class VectorLayer extends ALayer {
 
   static tooltipContainer = document.createElement('div');
 
-  static getJoinFieldName(name) {
-    return `__kbn__join__${name}__`;
-  }
-
   static createDescriptor(options) {
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = VectorLayer.type;
@@ -80,7 +76,8 @@ export class VectorLayer extends ALayer {
     });
     const joinFields = this._joins.map(join => {
       return {
-        label: join.getJoinFieldName(),
+        label: join.getHumanReadableName(),
+        name: join.getJoinFieldName(),
         origin: 'join',
         join: join
       };

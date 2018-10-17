@@ -34,8 +34,6 @@ export class Join extends React.Component {
     }
 
     const stringFields = await this.props.layer.getStringFields();
-    console.log('string fields', stringFields);
-
     this.setState({
       stringFields: stringFields,
       leftField: stringFields[0] ? stringFields[0].name : null
@@ -87,8 +85,7 @@ export class Join extends React.Component {
 
     const onSelection = (rightDataSelection) => {
       this.setState({
-        right: rightDataSelection
-      });
+        right: rightDataSelection });
       this.props.onJoinSelection({
         leftField: this.state.leftField,
         right: rightDataSelection

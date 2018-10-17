@@ -64,6 +64,7 @@ export class DataSelector extends React.Component {
 
       this.props.onSelection({
         indexPatternId: this.state.indexPatternId,
+        indexPatternTitle: this.state.indexPattern.title,
         term: fieldName
       });
     };
