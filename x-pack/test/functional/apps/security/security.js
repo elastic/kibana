@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }) {
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
+        await PageObjects.security.logout();
       });
 
       after(async () => {

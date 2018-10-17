@@ -85,7 +85,8 @@ export class Join extends React.Component {
 
     const onSelection = (rightDataSelection) => {
       this.setState({
-        right: rightDataSelection });
+        right: rightDataSelection
+      });
       this.props.onJoinSelection({
         leftField: this.state.leftField,
         right: rightDataSelection

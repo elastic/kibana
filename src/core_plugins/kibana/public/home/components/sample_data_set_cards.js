@@ -115,15 +115,18 @@ export class SampleDataSetCards extends React.Component {
       return;
     }
 
-    this.setState((prevState) => ({
-      processingStatus: { ...prevState.processingStatus, [id]: false },
-      sampleDataSets: prevState.sampleDataSets.map(sampleDataSet => {
-        if (sampleDataSet.id === id) {
-          sampleDataSet.status = INSTALLED_STATUS;
-        }
-        return sampleDataSet;
-      }),
-    }));
+    if (this._isMounted) {
+      this.setState((prevState) => ({
+        processingStatus: { ...prevState.processingStatus, [id]: false },
+        sampleDataSets: prevState.sampleDataSets.map(sampleDataSet => {
+          if (sampleDataSet.id === id) {
+            sampleDataSet.status = INSTALLED_STATUS;
+          }
+          return sampleDataSet;
+        }),
+      }));
+    }
+
     toastNotifications.addSuccess({
       title: i18n.translate('kbn.home.sampleDataSet.installedLabel', {
         defaultMessage: '{name} installed', values: { name: targetSampleDataSet.name } }
@@ -158,15 +161,18 @@ export class SampleDataSetCards extends React.Component {
       return;
     }
 
-    this.setState((prevState) => ({
-      processingStatus: { ...prevState.processingStatus, [id]: false },
-      sampleDataSets: prevState.sampleDataSets.map(sampleDataSet => {
-        if (sampleDataSet.id === id) {
-          sampleDataSet.status = UNINSTALLED_STATUS;
-        }
-        return sampleDataSet;
-      }),
-    }));
+    if (this._isMounted) {
+      this.setState((prevState) => ({
+        processingStatus: { ...prevState.processingStatus, [id]: false },
+        sampleDataSets: prevState.sampleDataSets.map(sampleDataSet => {
+          if (sampleDataSet.id === id) {
+            sampleDataSet.status = UNINSTALLED_STATUS;
+          }
+          return sampleDataSet;
+        }),
+      }));
+    }
+
     toastNotifications.addSuccess({
       title: i18n.translate('kbn.home.sampleDataSet.uninstalledLabel', {
         defaultMessage: '{name} uninstalled', values: { name: targetSampleDataSet.name } }

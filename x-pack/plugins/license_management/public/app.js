@@ -14,8 +14,8 @@ import {
 } from '@elastic/eui';
 
 export default () => (
-  <EuiPage className="licenseManagement">
-    <EuiPageBody className="licenseManagement__pageBody">
+  <EuiPage restrictWidth>
+    <EuiPageBody className="licManagement__pageBody">
       <Switch>
         <Route path={`${BASE_PATH}upload_license`} component={UploadLicense}/>
         <Route path={`${BASE_PATH}`} component={LicenseDashboard}/>

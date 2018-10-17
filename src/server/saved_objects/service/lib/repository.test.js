@@ -183,6 +183,7 @@ describe('SavedObjectsRepository', () => {
     onBeforeWrite = sandbox.stub();
     migrator = {
       migrateDocument: sinon.spy((doc) => doc),
+      awaitMigration: async () => ({ status: 'skipped' }),
     };
 
     const serializer = new SavedObjectsSerializer(schema);
@@ -204,7 +205,6 @@ describe('SavedObjectsRepository', () => {
     sandbox.restore();
   });
 
-
   describe('#create', () => {
     beforeEach(() => {
       callAdminCluster.callsFake((method, params) => ({
@@ -212,6 +212,18 @@ describe('SavedObjectsRepository', () => {
         _id: params.id,
         _version: 2
       }));
+    });
+
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+
+      await expect(savedObjectsRepository.create('index-pattern', {
+        title: 'Logstash'
+      }, {
+        id: 'logstash-*',
+        namespace: 'foo-namespace',
+      })).resolves.toBeDefined();
+      sinon.assert.calledOnce(migrator.awaitMigration);
     });
 
     it('formats Elasticsearch response', async () => {
@@ -373,6 +385,18 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#bulkCreate', () => {
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+      callAdminCluster.returns({ items: [] });
+
+      await expect(savedObjectsRepository.bulkCreate([
+        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
+      ])).resolves.toBeDefined();
+
+      sinon.assert.calledOnce(migrator.awaitMigration);
+    });
+
     it('formats Elasticsearch request', async () => {
       callAdminCluster.returns({ items: [] });
 
@@ -599,6 +623,18 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#delete', () => {
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+      callAdminCluster.returns({
+        result: 'deleted'
+      });
+      await expect(savedObjectsRepository.delete('index-pattern', 'logstash-*', {
+        namespace: 'foo-namespace',
+      })).resolves.toBeDefined();
+
+      sinon.assert.calledOnce(migrator.awaitMigration);
+    });
+
     it('throws notFound when ES is unable to find the document', async () => {
       expect.assertions(1);
 
@@ -673,6 +709,14 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#find', () => {
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+
+      callAdminCluster.returns(noNamespaceSearchResults);
+      await expect(savedObjectsRepository.find({ type: 'foo' })).resolves.toBeDefined();
+
+      sinon.assert.calledOnce(migrator.awaitMigration);
+    });
 
     it('requires type to be defined', async () => {
       await expect(savedObjectsRepository.find({})).rejects.toThrow(/options\.type must be/);
@@ -834,6 +878,15 @@ describe('SavedObjectsRepository', () => {
       }
     };
 
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+
+      callAdminCluster.returns(Promise.resolve(noNamespaceResult));
+      await expect(savedObjectsRepository.get('index-pattern', 'logstash-*')).resolves.toBeDefined();
+
+      sinon.assert.calledOnce(migrator.awaitMigration);
+    });
+
     it('formats Elasticsearch response when there is no namespace', async () => {
       callAdminCluster.returns(Promise.resolve(noNamespaceResult));
       const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
@@ -906,6 +959,19 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#bulkGet', () => {
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+
+      callAdminCluster.returns({ docs: [] });
+      await expect(savedObjectsRepository.bulkGet([
+        { id: 'one', type: 'config' },
+        { id: 'two', type: 'index-pattern' },
+        { id: 'three', type: 'globaltype' },
+      ])).resolves.toBeDefined();
+
+      sinon.assert.calledOnce(migrator.awaitMigration);
+    });
+
     it('prepends type to id when getting objects when there is no namespace', async () => {
       callAdminCluster.returns({ docs: [] });
 
@@ -1017,6 +1083,16 @@ describe('SavedObjectsRepository', () => {
         _version: newVersion,
         result: 'updated'
       }));
+    });
+
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+
+      await expect(
+        savedObjectsRepository.update('index-pattern', 'logstash-*', attributes, { namespace: 'foo-namespace' })
+      ).resolves.toBeDefined();
+
+      sinon.assert.calledOnce(migrator.awaitMigration);
     });
 
     it('returns current ES document version', async () => {

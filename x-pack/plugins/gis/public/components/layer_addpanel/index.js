@@ -5,8 +5,9 @@
  */
 
 import { connect } from 'react-redux';
-import { AddLayerPanel } from './add_layer_panel';
-import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE } from '../../store/ui';
+import { AddLayerPanel } from './view';
+import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE, LAYER_LOAD_STATE }
+  from '../../store/ui';
 import { getTemporaryLayers, getDataSources } from "../../selectors/map_selectors";
 import {
   addPreviewLayer,
@@ -18,7 +19,18 @@ import {
   updateLayerMinZoom,
   updateLayerMaxZoom,
 } from "../../actions/store_actions";
+import { resetLayerLoad } from '../../actions/ui_actions';
 import _ from 'lodash';
+
+const layerLoadStatus = ({ ui }) => {
+  const toastStatuses = {
+    error: 'error',
+    success: 'success'
+  };
+  const { layerLoad } = ui;
+  return layerLoad.status === LAYER_LOAD_STATE.complete && toastStatuses.success ||
+    layerLoad.status === LAYER_LOAD_STATE.error && toastStatuses.error;
+};
 
 function mapStateToProps(state = {}) {
 
@@ -31,7 +43,8 @@ function mapStateToProps(state = {}) {
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     dataSourcesMeta: dataSourceMeta,
     layerLoading: isLoading(),
-    temporaryLayers: !_.isEmpty(getTemporaryLayers(state))
+    temporaryLayers: !_.isEmpty(getTemporaryLayers(state)),
+    layerLoadToast: layerLoadStatus(state)
   };
 }
 
@@ -50,6 +63,7 @@ function mapDispatchToProps(dispatch) {
     updateShowAtAllZoomLevels: (id, showAtAllZoomLevels) => dispatch(updateLayerShowAtAllZoomLevels(id, showAtAllZoomLevels)),
     updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
     updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
+    clearLayerLoadToast: () => dispatch(resetLayerLoad())
   };
 }
 

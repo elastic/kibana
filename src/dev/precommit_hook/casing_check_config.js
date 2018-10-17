@@ -161,7 +161,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/ui/public/assets/favicons/mstile-150x150.png',
   'src/ui/public/assets/favicons/safari-pinned-tab.svg',
   'src/ui/public/directives/__tests__/confirm-click.js',
-  'src/ui/public/dragula/gu-dragula.less',
   'src/ui/public/field_format_editor/editors/url/icons/flag-icon.LICENSE',
   'src/ui/public/icons/beats-color.svg',
   'src/ui/public/icons/beats-gray.svg',

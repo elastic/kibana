@@ -16,6 +16,9 @@
 @import './visualize/index';
 @import 'ui/public/vis/index';
 
+// Management styles
+@import './management/index';
+
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
 @import './dashboard/index';

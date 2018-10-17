@@ -29,6 +29,10 @@ export class VectorLayer extends ALayer {
 
   static tooltipContainer = document.createElement('div');
 
+  static getJoinFieldName(name) {
+    return `__kbn__join__${name}__`;
+  }
+
   static createDescriptor(options) {
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = VectorLayer.type;
