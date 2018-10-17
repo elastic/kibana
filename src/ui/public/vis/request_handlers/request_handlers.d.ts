@@ -36,9 +36,11 @@ export interface RequestHandlerParams {
   uiState: PersistedState;
   partialRows?: boolean;
   inspectorAdapters?: Adapters;
+  isHierarchical?: boolean;
+  params?: any;
 }
 
-export type RequestHandler = <T>(vis: Vis, params: RequestHandlerParams) => T;
+export type RequestHandler = <T>(params: RequestHandlerParams) => T;
 
 export interface RequestHandlerDescription {
   name: string;

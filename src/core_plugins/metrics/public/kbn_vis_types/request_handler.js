@@ -28,10 +28,10 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
 
   return {
     name: 'metrics',
-    handler: function (vis, { uiState, timeRange, filters, query }) {
+    handler: function ({ aggs, uiState, timeRange, filters, query, params }) {
       const timezone = Private(timezoneProvider)();
       return new Promise((resolve) => {
-        const panel = vis.params;
+        const panel = params;
         const uiStateObj = uiState.get(panel.type, {});
         const parsedTimeRange = timefilter.calculateBounds(timeRange);
         const scaledDataFormat = config.get('dateFormat:scaled');
@@ -39,7 +39,7 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
         if (panel && panel.id) {
           const params = {
             timerange: { timezone, ...parsedTimeRange },
-            filters: [buildEsQuery(vis.indexPattern, [query], filters)],
+            filters: [buildEsQuery(aggs.indexPattern, [query], filters)],
             panels: [panel],
             state: uiStateObj
           };
