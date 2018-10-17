@@ -83,7 +83,7 @@ export function initTransactionsApi(server) {
     handler: (req, reply) => {
       const { transactionId } = req.params;
       const { setup } = req.pre;
-      return getSpans({ transactionId, setup })
+      return getSpans(transactionId, setup)
         .then(reply)
         .catch(defaultErrorHandler(reply));
     }

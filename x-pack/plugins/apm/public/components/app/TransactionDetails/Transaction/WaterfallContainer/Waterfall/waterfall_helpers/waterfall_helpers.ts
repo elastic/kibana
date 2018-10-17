@@ -113,6 +113,10 @@ export function getWaterfall(
   entryTransaction: Transaction
 ): IWaterfall {
   const items = hits
+    .filter(hit => {
+      const docType = hit.processor.event;
+      return ['span', 'transaction'].includes(docType);
+    })
     .map(addVersion)
     .map(hit => {
       const docType = hit.processor.event;
@@ -122,10 +126,9 @@ export function getWaterfall(
         case 'transaction':
           return getTransactionItem(hit as Transaction);
         default:
-          return null;
+          throw new Error(`Unknown type ${docType}`);
       }
-    })
-    .filter(removeEmpty);
+    });
 
   const entryTransactionItem = getTransactionItem(addVersion(entryTransaction));
   const root = getWaterfallRoot(items, entryTransactionItem);
@@ -135,10 +138,6 @@ export function getWaterfall(
     childrenCount: hits.length,
     root
   };
-}
-
-function removeEmpty<T>(value: T | null): value is T {
-  return value !== null;
 }
 
 function addVersion<T extends Transaction | Span>(hit: T): T {

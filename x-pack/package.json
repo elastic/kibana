@@ -129,7 +129,6 @@
     "@samverschueren/stream-to-observable": "^0.3.0",
     "@scant/router": "^0.1.0",
     "@slack/client": "^4.2.2",
-    "@types/moment-timezone": "^0.5.8",
     "angular-resource": "1.4.9",
     "angular-sanitize": "1.4.9",
     "angular-ui-ace": "0.2.3",

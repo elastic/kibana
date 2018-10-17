@@ -62,7 +62,8 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "resolutions": {
-    "**/@types/node": "8.10.21"
+    "**/@types/node": "8.10.21",
+    "@types/react": "16.3.14"
   },
   "dependencies": {
     "@elastic/eui": "4.4.1",
@@ -210,9 +211,6 @@
     "x-pack": "link:x-pack",
     "yauzl": "2.7.0"
   },
-  "resolutions": {
-    "@types/react": "16.3.14"
-  },
   "devDependencies": {
     "@babel/parser": "^7.1.0",
     "@babel/types": "^7.0.0",
@@ -249,6 +247,7 @@
     "@types/listr": "^0.13.0",
     "@types/lodash": "^3.10.1",
     "@types/minimatch": "^2.0.29",
+    "@types/moment-timezone": "^0.5.8",
     "@types/node": "^8.10.20",
     "@types/prop-types": "^15.5.3",
     "@types/puppeteer": "^1.6.2",
@@ -262,6 +261,7 @@
     "@types/semver": "^5.5.0",
     "@types/sinon": "^5.0.1",
     "@types/strip-ansi": "^3.0.0",
+    "@types/styled-components": "^3.0.1",
     "@types/supertest": "^2.0.5",
     "@types/type-detect": "^4.0.1",
     "@types/uuid": "^3.4.4",

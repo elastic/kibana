@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-import React, { PureComponent } from 'react';
+import React from 'react';
 // @ts-ignore
 import {
   SERVICE_NAME,
@@ -14,8 +13,11 @@ import {
 } from '../../../../../../common/constants';
 import { Transaction } from '../../../../../../typings/Transaction';
 
+import { RRRRender } from 'react-redux-request';
+import { WaterfallV1Request } from 'x-pack/plugins/apm/public/store/reactReduxRequest/waterfallV1';
+import { WaterfallV2Request } from 'x-pack/plugins/apm/public/store/reactReduxRequest/waterfallV2';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { Span } from '../../../../../../typings/Span';
+import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
 // @ts-ignore
 import { loadSpans, loadTrace } from '../../../../../services/rest/apm';
 import { getServiceColors } from './getServiceColors';
@@ -29,107 +31,65 @@ interface Props {
   location: any;
 }
 
-interface State {
-  services: string[];
-  hits: Array<Span | Transaction>;
+interface WaterfallRequestProps {
+  urlParams: IUrlParams;
+  transaction: Transaction;
+  render: RRRRender<WaterfallResponse>;
 }
 
-export class WaterfallContainer extends PureComponent<Props, State> {
-  public state: Readonly<State> = {
-    services: [],
-    hits: []
-  };
-
-  public maybeFetchWaterfall = async (prevProps?: Props) => {
-    const hasTrace = this.props.transaction.hasOwnProperty('trace');
-    if (hasTrace) {
-      this.maybeFetchTrace(prevProps);
-    } else {
-      this.maybeFetchSpans(prevProps);
-    }
-  };
-
-  public maybeFetchSpans = async (prevProps = {} as Partial<Props>) => {
-    const { start, end } = this.props.urlParams;
-    const { start: prevStart, end: prevEnd } =
-      prevProps.urlParams || ({} as IUrlParams);
-
-    const serviceName: string = get(this.props.transaction, SERVICE_NAME);
-    const prevServiceName: string = get(prevProps.transaction, SERVICE_NAME);
-
-    const transactionId: string = get(this.props.transaction, TRANSACTION_ID);
-    const prevTransactionId: string = get(
-      prevProps.transaction,
-      TRANSACTION_ID
-    );
-
-    if (
-      serviceName !== prevServiceName ||
-      transactionId !== prevTransactionId ||
-      start !== prevStart ||
-      end !== prevEnd
-    ) {
-      const spans = await loadSpans({
-        serviceName,
-        transactionId,
-        start,
-        end
-      });
-
-      this.setState({
-        hits: [this.props.transaction, ...spans],
-        services: [serviceName]
-      });
-    }
-  };
-
-  public maybeFetchTrace = async (prevProps = {} as Partial<Props>) => {
-    const { start, end } = this.props.urlParams;
-    const { start: prevStart, end: prevEnd } =
-      prevProps.urlParams || ({} as IUrlParams);
-
-    const traceId = get(this.props, `transaction.${TRACE_ID}`);
-    const prevTraceId: string = get(prevProps, `transaction.${TRACE_ID}`);
-
-    if (
-      traceId &&
-      start &&
-      end &&
-      (traceId !== prevTraceId || start !== prevStart || end !== prevEnd)
-    ) {
-      const { hits, services } = await loadTrace({ traceId, start, end });
-      this.setState({ hits, services });
-    }
-  };
-
-  public componentDidMount() {
-    this.maybeFetchWaterfall();
-  }
-
-  public async componentDidUpdate(prevProps: Props) {
-    this.maybeFetchWaterfall(prevProps);
-  }
-
-  public render() {
-    const { location, urlParams, transaction } = this.props;
-    const { hits, services } = this.state;
-    const waterfall = getWaterfall(hits, services, transaction);
-
-    if (!waterfall) {
-      return null;
-    }
-    const serviceColors = getServiceColors(waterfall.services);
-
+function WaterfallRequest({
+  urlParams,
+  transaction,
+  render
+}: WaterfallRequestProps) {
+  const hasTrace = transaction.hasOwnProperty('trace');
+  if (hasTrace) {
     return (
-      <div>
-        <ServiceLegends serviceColors={serviceColors} />
-        <Waterfall
-          location={location}
-          serviceColors={serviceColors}
-          urlParams={urlParams}
-          waterfall={waterfall}
-        />
-      </div>
+      <WaterfallV2Request
+        urlParams={urlParams}
+        transaction={transaction}
+        render={render}
+      />
+    );
+  } else {
+    return (
+      <WaterfallV1Request
+        urlParams={urlParams}
+        transaction={transaction}
+        render={render}
+      />
     );
   }
+}
+
+export function WaterfallContainer({
+  location,
+  urlParams,
+  transaction
+}: Props) {
+  return (
+    <WaterfallRequest
+      urlParams={urlParams}
+      transaction={transaction}
+      render={({ data }) => {
+        const waterfall = getWaterfall(data.hits, data.services, transaction);
+        if (!waterfall) {
+          return null;
+        }
+        const serviceColors = getServiceColors(waterfall.services);
+
+        return (
+          <div>
+            <ServiceLegends serviceColors={serviceColors} />
+            <Waterfall
+              location={location}
+              serviceColors={serviceColors}
+              urlParams={urlParams}
+              waterfall={waterfall}
+            />
+          </div>
+        );
+      }}
+    />
+  );
 }

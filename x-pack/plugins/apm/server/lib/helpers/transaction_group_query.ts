@@ -31,11 +31,9 @@ interface ITransactionGroupBucket {
   };
   sample: {
     hits: {
-      hits: [
-        {
-          _source: ITransactionGroupSample;
-        }
-      ];
+      hits: Array<{
+        _source: ITransactionGroupSample;
+      }>;
     };
   };
 }

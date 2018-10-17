@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { reducer } from 'react-redux-request';
 import { combineReducers } from 'redux';
 import { StringMap } from '../../typings/common';

@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-// @ts-ignore
 import { Request } from 'react-redux-request';
 import { IDistributionResponse } from '../../../server/lib/transactions/distribution/get_distribution';
 // @ts-ignore
