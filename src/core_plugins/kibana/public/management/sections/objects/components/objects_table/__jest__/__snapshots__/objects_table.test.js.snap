@@ -104,8 +104,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
 >
   <p>
     <FormattedMessage
-      defaultMessage="Select which types to export. The number in parentheses indicates
- how many of this type are available to export."
+      defaultMessage="Select which types to export. The number in parentheses indicates how many of this type are available to export."
       id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
       values={Object {}}
     />
