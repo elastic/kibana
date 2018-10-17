@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`appends records via multiple appenders.: console logs 1`] = `
+Array [
+  Array [
+    "[2012-02-01T00:00:00.000Z][INFO ][some-context] You know, just for your info.",
+  ],
+]
+`;
+
+exports[`appends records via multiple appenders.: file logs 1`] = `
+Array [
+  Array [
+    "[2012-02-01T00:00:00.000Z][WARN ][tests] Config is not ready!
+",
+  ],
+  Array [
+    "[2012-02-01T00:00:00.000Z][ERROR][tests.child] Too bad that config is not ready :/
+",
+  ],
+]
+`;
+
+exports[`asLoggerFactory() only allows to create new loggers. 1`] = `
+Array [
+  Array [
+    "{\\"@timestamp\\":\\"2012-02-01T00:00:00.000Z\\",\\"context\\":\\"test.context\\",\\"level\\":\\"TRACE\\",\\"message\\":\\"buffered trace message\\"}",
+  ],
+  Array [
+    "{\\"@timestamp\\":\\"2012-02-01T00:00:00.000Z\\",\\"context\\":\\"test.context\\",\\"level\\":\\"INFO\\",\\"message\\":\\"buffered info message\\",\\"meta\\":{\\"some\\":\\"value\\"}}",
+  ],
+  Array [
+    "{\\"@timestamp\\":\\"2012-02-01T00:00:00.000Z\\",\\"context\\":\\"test.context\\",\\"level\\":\\"FATAL\\",\\"message\\":\\"buffered fatal message\\"}",
+  ],
+]
+`;
+
+exports[`flushes memory buffer logger and switches to real logger once config is provided: buffered messages 1`] = `
+Array [
+  Array [
+    "{\\"@timestamp\\":\\"2012-02-01T00:00:00.000Z\\",\\"context\\":\\"test.context\\",\\"level\\":\\"INFO\\",\\"message\\":\\"buffered info message\\",\\"meta\\":{\\"some\\":\\"value\\"}}",
+  ],
+  Array [
+    "{\\"@timestamp\\":\\"2012-02-01T00:00:00.000Z\\",\\"context\\":\\"test.context\\",\\"level\\":\\"FATAL\\",\\"message\\":\\"buffered fatal message\\"}",
+  ],
+]
+`;
+
+exports[`flushes memory buffer logger and switches to real logger once config is provided: new messages 1`] = `
+Array [
+  Array [
+    "{\\"@timestamp\\":\\"2012-02-01T00:00:00.000Z\\",\\"context\\":\\"test.context\\",\\"level\\":\\"INFO\\",\\"message\\":\\"some new info message\\"}",
+  ],
+]
+`;
+
+exports[`uses \`root\` logger if context is not specified. 1`] = `
+Array [
+  Array [
+    "[2012-02-01T00:00:00.000Z][INFO ][root] This message goes to a root context.",
+  ],
+]
+`;
+
+exports[`uses default memory buffer logger until config is provided 1`] = `
+Array [
+  Array [
+    Object {
+      "context": "test.context",
+      "level": LogLevel {
+        "id": "trace",
+        "value": 7,
+      },
+      "message": "trace message",
+      "meta": undefined,
+      "timestamp": 2012-02-01T00:00:00.000Z,
+    },
+  ],
+  Array [
+    Object {
+      "context": "test.context2",
+      "level": LogLevel {
+        "id": "fatal",
+        "value": 2,
+      },
+      "message": "fatal message",
+      "meta": Object {
+        "some": "value",
+      },
+      "timestamp": 2012-02-01T00:00:00.000Z,
+    },
+  ],
+]
+`;

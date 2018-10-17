@@ -19,10 +19,11 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { ILLEGAL_CHARACTERS, MAX_SEARCH_SIZE } from '../../constants';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS as ILLEGAL_CHARACTERS } from 'ui/index_patterns';
+import { MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
-  containsInvalidCharacters,
+  containsIllegalCharacters,
   getMatchedIndices,
   canAppendWildcard,
   ensureMinimumTime
@@ -240,7 +241,7 @@ export class StepIndexPatternComponent extends Component {
       // This is an error scenario but do not report an error
       containsErrors = true;
     }
-    else if (!containsInvalidCharacters(query, ILLEGAL_CHARACTERS)) {
+    else if (containsIllegalCharacters(query, ILLEGAL_CHARACTERS)) {
       const errorMessage = intl.formatMessage(
         {
           id: 'kbn.management.createIndexPattern.step.invalidCharactersErrorMessage',

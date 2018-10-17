@@ -18,9 +18,14 @@
  */
 
 import './core.css';
+
+import { BasePathService } from './base_path';
 import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
+import { LoadingCountService } from './loading_count';
+import { NotificationsService } from './notifications';
+import { UiSettingsService } from './ui_settings';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -39,8 +44,13 @@ export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
   private readonly legacyPlatform: LegacyPlatformService;
+  private readonly notifications: NotificationsService;
+  private readonly loadingCount: LoadingCountService;
+  private readonly uiSettings: UiSettingsService;
+  private readonly basePath: BasePathService;
 
   private readonly rootDomElement: HTMLElement;
+  private readonly notificationsTargetDomElement: HTMLDivElement;
   private readonly legacyPlatformTargetDomElement: HTMLDivElement;
 
   constructor(params: Params) {
@@ -60,6 +70,15 @@ export class CoreSystem {
       },
     });
 
+    this.notificationsTargetDomElement = document.createElement('div');
+    this.notifications = new NotificationsService({
+      targetDomElement: this.notificationsTargetDomElement,
+    });
+
+    this.loadingCount = new LoadingCountService();
+    this.basePath = new BasePathService();
+    this.uiSettings = new UiSettingsService();
+
     this.legacyPlatformTargetDomElement = document.createElement('div');
     this.legacyPlatform = new LegacyPlatformService({
       targetDomElement: this.legacyPlatformTargetDomElement,
@@ -73,11 +92,28 @@ export class CoreSystem {
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.classList.add('coreSystemRootDomElement');
+      this.rootDomElement.appendChild(this.notificationsTargetDomElement);
       this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
 
+      const notifications = this.notifications.start();
       const injectedMetadata = this.injectedMetadata.start();
       const fatalErrors = this.fatalErrors.start();
-      this.legacyPlatform.start({ injectedMetadata, fatalErrors });
+      const loadingCount = this.loadingCount.start({ fatalErrors });
+      const basePath = this.basePath.start({ injectedMetadata });
+      const uiSettings = this.uiSettings.start({
+        notifications,
+        loadingCount,
+        injectedMetadata,
+        basePath,
+      });
+      this.legacyPlatform.start({
+        injectedMetadata,
+        fatalErrors,
+        notifications,
+        loadingCount,
+        basePath,
+        uiSettings,
+      });
     } catch (error) {
       this.fatalErrors.add(error);
     }
@@ -85,6 +121,8 @@ export class CoreSystem {
 
   public stop() {
     this.legacyPlatform.stop();
+    this.notifications.stop();
+    this.loadingCount.stop();
     this.rootDomElement.textContent = '';
   }
 }

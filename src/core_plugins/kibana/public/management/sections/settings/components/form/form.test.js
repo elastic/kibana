@@ -69,9 +69,9 @@ const categoryCounts = {
   dashboard: 1,
   'x-pack': 10,
 };
-const save = () => {};
-const clear = () => {};
-const clearQuery = () => {};
+const save = () => { };
+const clear = () => { };
+const clearQuery = () => { };
 
 describe('Form', () => {
   it('should render normally', async () => {
@@ -83,6 +83,7 @@ describe('Form', () => {
         save={save}
         clear={clear}
         clearQuery={clearQuery}
+        showNoResultsMessage={true}
       />
     );
 
@@ -98,6 +99,23 @@ describe('Form', () => {
         save={save}
         clear={clear}
         clearQuery={clearQuery}
+        showNoResultsMessage={true}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should not render no settings message when instructed not to', async () => {
+    const component = shallow(
+      <Form
+        settings={{}}
+        categories={categories}
+        categoryCounts={categoryCounts}
+        save={save}
+        clear={clear}
+        clearQuery={clearQuery}
+        showNoResultsMessage={false}
       />
     );
 

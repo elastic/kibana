@@ -200,3 +200,95 @@ img.leaflet-tile {
 img.leaflet-tile.filters-off {
   filter: none;
 }
+
+// SASSTODO: Make sure these colors convert to theme variables
+.tab-dashboard.theme-dark {
+  @tilemap-border:                              @gray13;
+  @tilemap-legend-base-bg:                      @gray3;
+  @tilemap-legend-bg:                           fade(@tilemap-legend-base-bg, 100%);
+  @tilemap-color:                               @gray12;
+  @tilemap-legend-i-border:                     @gray9;
+  @tilemap-legend-i-bg:                         @gray10;
+  @tilemap-info-base-bg:                        @white;
+  @tilemap-info-bg:                             fade(@tilemap-info-base-bg, 92%);
+  @tilemap-info-header-color:                   @gray4;
+  @tilemap-leaflet-control-bg:                  @white;
+  @tilemap-leaflet-control-outline:             @black;
+  @tilemap-leaflet-control-color:               @black;
+  @tilemap-leaflet-control-draw-action-bg:      @gray11;
+  @tilemap-leaflet-container-bg:                @body-bg;
+  @tilemap-leaflet-popup-border:                @gray9;
+  @tilemap-leaflet-footer-bg:                   fade(@gray3, 80%);
+  @tilemap-leaflet-footer-color:                @gray12;
+  @tilemap-filter:                              invert(1) brightness(1.75) grayscale(1) contrast(1);
+
+  .tilemap {
+    border-color: @tilemap-border;
+  }
+
+  .tilemap-legend {
+    background: @tilemap-legend-base-bg;
+    background: @tilemap-legend-bg;
+    color: @tilemap-color;
+  }
+
+  .tilemap-legend i {
+    border-color: @tilemap-legend-i-border;
+    background: @tilemap-legend-i-bg;
+  }
+
+  .tilemap-info {
+    background: @tilemap-info-base-bg;
+    background: fade(@tilemap-info-bg, 92%);
+  }
+
+  .tilemap-info h2 {
+    color: @tilemap-info-header-color;
+  }
+
+  .leaflet-control-fit {
+    background: @tilemap-leaflet-control-bg;
+    outline: 1px @tilemap-leaflet-control-outline;
+  }
+
+  .leaflet-container {
+    background: @tilemap-leaflet-container-bg !important;
+  }
+
+  .leaflet-popup-content-wrapper {
+    background: fadeout(@gray4, 7%) !important;
+    color: @gray14 !important;
+  }
+
+  .leaflet-popup-content {
+    table {
+      thead tr {
+        border-bottom-color: @tilemap-leaflet-popup-border;
+      }
+
+      tbody tr {
+        border-top-color: @tilemap-leaflet-popup-border;
+      }
+    }
+  }
+
+  img.leaflet-tile {
+    filter: @tilemap-filter;
+  }
+
+  .leaflet-control-attribution {
+    background-color: @tilemap-leaflet-footer-bg !important;
+    color: @tilemap-leaflet-footer-color !important;
+  }
+
+  .leaflet-left {
+    .leaflet-control,
+    .leaflet-draw-actions {
+      a,
+      a:hover {
+        color: @white;
+        background-color: @gray7;
+      }
+    }
+  }
+}

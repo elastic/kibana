@@ -19,24 +19,57 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import { intl } from './mocks/intl';
 
 /**
- *  Creates the wrapper instance with provided intl object into context
+ *  Creates the wrapper instance using shallow with provided intl object into context
  *
  *  @param  node The React element or cheerio wrapper
  *  @param  options properties to pass into shallow wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function shallowWithIntl(node, { context, childContextTypes, ...props } = {}) {
+export function shallowWithIntl(node, { context = {}, childContextTypes = {}, ...props } = {}) {
+  const clonedNode = cloneNode(node);
+  const options = getOptions(context, childContextTypes, props);
+
+  if (React.isValidElement(node)) {
+    return shallow(clonedNode, options);
+  }
+
+  return clonedNode.shallow(options);
+}
+
+/**
+ *  Creates the wrapper instance using mount with provided intl object into context
+ *
+ *  @param  node The React element or cheerio wrapper
+ *  @param  options properties to pass into mount wrapper
+ *  @return The wrapper instance around the rendered output with intl object in context
+ */
+export function mountWithIntl(node, { context = {}, childContextTypes = {}, ...props } = {}) {
+  const clonedNode = cloneNode(node);
+  const options = getOptions(context, childContextTypes, props);
+
+  if (React.isValidElement(node)) {
+    return mount(clonedNode, options);
+  }
+
+  return clonedNode.mount(options);
+}
+
+export { intl };
+
+function cloneNode(node) {
   if (!node) {
     throw new Error(`First argument should be cheerio object or React element, not ${node}`);
   }
 
-  const clonedNode = React.cloneElement(node, { intl });
+  return React.cloneElement(node, { intl });
+}
 
-  const options = {
+function getOptions(context, childContextTypes, props) {
+  return {
     context: {
       ...context,
       intl,
@@ -47,12 +80,4 @@ export function shallowWithIntl(node, { context, childContextTypes, ...props } =
     },
     ...props,
   };
-
-  if (React.isValidElement(node)) {
-    return shallow(clonedNode, options);
-  }
-
-  return clonedNode.shallow(options);
 }
-
-export { intl };

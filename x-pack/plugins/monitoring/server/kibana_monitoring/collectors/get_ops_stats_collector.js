@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KIBANA_STATS_TYPE_MONITORING } from '../../../common/constants';
+import {
+  LOGGING_TAG,
+  KIBANA_MONITORING_LOGGING_TAG,
+  KIBANA_STATS_TYPE_MONITORING,
+} from '../../../common/constants';
 import { opsBuffer } from './ops_buffer';
-import { getKibanaInfoForStats } from '../lib';
 
 /*
  * Initialize a collector for Kibana Ops Stats
  */
-export function getOpsStatsCollector(server, kbnServer) {
+export function getOpsStatsCollector(server) {
   let monitor;
   const buffer = opsBuffer(server);
   const onOps = event => buffer.push(event);
@@ -35,11 +38,17 @@ export function getOpsStatsCollector(server, kbnServer) {
 
   // `process` is a NodeJS global, and is always available without using require/import
   process.on('SIGHUP', () => {
-    this.log.info('Re-initializing Kibana Monitoring due to SIGHUP');
+    server.log(
+      ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
+      'Re-initializing Kibana Monitoring due to SIGHUP'
+    );
     setTimeout(() => {
       stop();
       start();
-      this.log.info('Re-initialized Kibana Monitoring due to SIGHUP');
+      server.log(
+        ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
+        'Re-initialized Kibana Monitoring due to SIGHUP'
+      );
     }, 5 * 1000); // wait 5 seconds to avoid race condition with reloading logging configuration
   });
 
@@ -48,10 +57,7 @@ export function getOpsStatsCollector(server, kbnServer) {
     type: KIBANA_STATS_TYPE_MONITORING,
     init: start,
     fetch: () => {
-      return {
-        kibana: getKibanaInfoForStats(server, kbnServer),
-        ...buffer.flush()
-      };
+      return buffer.flush();
     }
   });
 }

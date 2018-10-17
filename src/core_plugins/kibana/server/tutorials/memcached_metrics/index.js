@@ -17,22 +17,35 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function memcachedMetricsSpecProvider() {
+export function memcachedMetricsSpecProvider(server, context) {
   const moduleName = 'memcached';
   return {
     id: 'memcachedMetrics',
-    name: 'Memcached metrics',
+    name: i18n.translate('kbn.server.tutorials.memcachedMetrics.nameTitle', {
+      defaultMessage: 'Memcached metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from the Memcached server.',
-    longDescription: 'The `memcached` Metricbeat module fetches internal metrics from Memcached.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-memcached.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.memcachedMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from the Memcached server.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.memcachedMetrics.longDescription', {
+      defaultMessage: 'The `memcached` Metricbeat module fetches internal metrics from Memcached. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-memcached.html',
+      },
+    }),
+    euiIconType: 'logoMemcached',
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.memcachedMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],
@@ -41,7 +54,7 @@ export function memcachedMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

@@ -19,7 +19,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { groupBy, take } from 'lodash';
+import { groupBy, take, get as getField } from 'lodash';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -129,7 +129,15 @@ export class Flyout extends Component {
 
     contents = contents.filter(content =>
       INCLUDED_TYPES.includes(content._type)
-    );
+    ).map(doc => ({
+      ...doc,
+      // The server assumes that documents with no migrationVersion are up to date.
+      // That assumption enables Kibana and other API consumers to not have to build
+      // up migrationVersion prior to creating new objects. But it means that imports
+      // need to set migrationVersion to something other than undefined, so that imported
+      // docs are not seen as automatically up-to-date.
+      _migrationVersion: doc._migrationVersion || {},
+    }));
 
     const {
       conflictedIndexPatterns,
@@ -200,6 +208,7 @@ export class Flyout extends Component {
       isOverwriteAllChecked,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
+      failedImports
     } = this.state;
 
     const { services, indexPatterns } = this.props;
@@ -237,6 +246,13 @@ export class Flyout extends Component {
           conflictedSearchDocs,
           services,
           indexPatterns,
+          isOverwriteAllChecked
+        );
+        this.setState({
+          loadingMessage: 'Retrying failed objects...',
+        });
+        importCount += await saveObjects(
+          failedImports.map(({ obj }) => obj),
           isOverwriteAllChecked
         );
       } catch (e) {
@@ -316,6 +332,7 @@ export class Flyout extends Component {
           const options = this.state.indexPatterns.map(indexPattern => ({
             text: indexPattern.get('title'),
             value: indexPattern.id,
+            ['data-test-subj']: `indexPatternOption-${indexPattern.get('title')}`,
           }));
 
           options.unshift({
@@ -325,7 +342,7 @@ export class Flyout extends Component {
 
           return (
             <EuiSelect
-              data-test-subj="managementChangeIndexSelection"
+              data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={e => this.onIndexChanged(id, e)}
               options={options}
             />
@@ -392,7 +409,7 @@ export class Flyout extends Component {
       );
     }
 
-    if (failedImports.length) {
+    if (failedImports.length && !this.hasConflicts) {
       return (
         <EuiCallOut
           title="Import failed"
@@ -403,7 +420,7 @@ export class Flyout extends Component {
             Failed to import {failedImports.length} of {importCount + failedImports.length} objects.
           </p>
           <p>
-            {failedImports.map(({ error }) => error.message || '').join(' ')}
+            {failedImports.map(({ error }) => getField(error, 'body.message', error.message || '')).join(' ')}
           </p>
         </EuiCallOut>
       );
@@ -549,7 +566,7 @@ export class Flyout extends Component {
     const { close } = this.props;
 
     return (
-      <EuiFlyout onClose={close}>
+      <EuiFlyout onClose={close} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
             <h2>Import saved objects</h2>

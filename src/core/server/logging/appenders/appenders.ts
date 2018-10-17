@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '../../config/schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { assertNever } from '../../../utils';
-import { Env } from '../../config';
 import { LegacyAppender } from '../../legacy_compat/logging/appenders/legacy_appender';
 import { Layouts } from '../layouts/layouts';
 import { LogRecord } from '../log_record';
@@ -62,10 +61,9 @@ export class Appenders {
   /**
    * Factory method that creates specific `Appender` instances based on the passed `config` parameter.
    * @param config Configuration specific to a particular `Appender` implementation.
-   * @param env Current environment that is required by some appenders.
    * @returns Fully constructed `Appender` instance.
    */
-  public static create(config: AppenderConfigType, env: Env): DisposableAppender {
+  public static create(config: AppenderConfigType): DisposableAppender {
     switch (config.kind) {
       case 'console':
         return new ConsoleAppender(Layouts.create(config.layout));
@@ -74,11 +72,7 @@ export class Appenders {
         return new FileAppender(Layouts.create(config.layout), config.path);
 
       case 'legacy-appender':
-        const legacyKbnServer = env.getLegacyKbnServer();
-        if (legacyKbnServer === undefined) {
-          throw new Error('Legacy appender requires kbnServer.');
-        }
-        return new LegacyAppender(legacyKbnServer);
+        return new LegacyAppender(config.legacyLoggingConfig);
 
       default:
         return assertNever(config);

@@ -22,6 +22,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import InputRange from 'react-input-range';
 import { FormRow } from './form_row';
+import { injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiFormRow,
@@ -49,7 +50,7 @@ const toState = ({ control }) => {
   return state;
 };
 
-export class RangeControl extends Component {
+class RangeControlUi extends Component {
   constructor(props) {
     super(props);
 
@@ -93,12 +94,18 @@ export class RangeControl extends Component {
 
     if ((!isMinValid && isMaxValid) || (isMinValid && !isMaxValid)) {
       isRangeValid = false;
-      errorMessage = 'both min and max must be set';
+      errorMessage = this.props.intl.formatMessage({
+        id: 'inputControl.vis.rangeControl.minMaxValidErrorMessage',
+        defaultMessage: 'both min and max must be set'
+      });
     }
 
     if (isMinValid && isMaxValid && max < min) {
       isRangeValid = false;
-      errorMessage = 'max must be greater or equal to min';
+      errorMessage = this.props.intl.formatMessage({
+        id: 'inputControl.vis.rangeControl.maxValidErrorMessage',
+        defaultMessage: 'max must be greater or equal to min'
+      });
     }
 
     this.setState({
@@ -196,8 +203,10 @@ export class RangeControl extends Component {
   }
 }
 
-RangeControl.propTypes = {
+RangeControlUi.propTypes = {
   control: PropTypes.object.isRequired,
   controlIndex: PropTypes.number.isRequired,
   stageFilter: PropTypes.func.isRequired
 };
+
+export const RangeControl = injectI18n(RangeControlUi);

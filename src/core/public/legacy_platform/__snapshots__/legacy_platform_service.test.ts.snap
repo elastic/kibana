@@ -1,5 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`#start() load order useLegacyTestHarness = false loads ui/modules before ui/chrome, and both before legacy files 1`] = `
+Array [
+  "ui/metadata",
+  "ui/notify/fatal_error",
+  "ui/notify/toasts",
+  "ui/chrome/api/loading_count",
+  "ui/chrome/api/base_path",
+  "ui/chrome/api/ui_settings",
+  "ui/chrome/api/injected_vars",
+  "ui/chrome",
+  "legacy files",
+]
+`;
+
+exports[`#start() load order useLegacyTestHarness = true loads ui/modules before ui/test_harness, and both before legacy files 1`] = `
+Array [
+  "ui/metadata",
+  "ui/notify/fatal_error",
+  "ui/notify/toasts",
+  "ui/chrome/api/loading_count",
+  "ui/chrome/api/base_path",
+  "ui/chrome/api/ui_settings",
+  "ui/chrome/api/injected_vars",
+  "ui/test_harness",
+  "legacy files",
+]
+`;
+
 exports[`#stop() destroys the angular scope and empties the targetDomElement if angular is bootstraped to targetDomElement 1`] = `
 <div
   class="ng-scope"

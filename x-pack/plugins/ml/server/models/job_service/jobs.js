@@ -10,10 +10,9 @@ import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
+import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
 import moment from 'moment';
 import { uniq } from 'lodash';
-
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 export function jobsProvider(callWithRequest) {
 
@@ -99,8 +98,8 @@ export function jobsProvider(callWithRequest) {
     const jobs = fullJobsList.map((job) => {
       const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length);
       const {
-        earliest: earliestTimeStamp,
-        latest: latestTimeStamp } = earliestAndLatestTimeStamps(job.data_counts);
+        earliest: earliestTimestampMs,
+        latest: latestTimestampMs } = earliestAndLatestTimeStamps(job.data_counts);
 
       const tempJob = {
         id: job.job_id,
@@ -112,8 +111,9 @@ export function jobsProvider(callWithRequest) {
         hasDatafeed,
         datafeedId: (hasDatafeed && job.datafeed_config.datafeed_id) ? job.datafeed_config.datafeed_id : '',
         datafeedState: (hasDatafeed && job.datafeed_config.state) ? job.datafeed_config.state : '',
-        latestTimeStamp,
-        earliestTimeStamp,
+        latestTimestampMs,
+        earliestTimestampMs,
+        isSingleMetricViewerJob: isTimeSeriesViewJob(job),
         nodeName: (job.node) ? job.node.name : undefined,
       };
       if (jobIds.find(j => (j === tempJob.id))) {
@@ -243,22 +243,16 @@ export function jobsProvider(callWithRequest) {
 
   function earliestAndLatestTimeStamps(dataCounts) {
     const obj = {
-      earliest: { string: '', unix: 0 },
-      latest: { string: '', unix: 0 },
+      earliest: undefined,
+      latest: undefined,
     };
 
     if (dataCounts.earliest_record_timestamp) {
-      const ts = moment(dataCounts.earliest_record_timestamp);
-      obj.earliest.string = ts.format(TIME_FORMAT);
-      obj.earliest.unix = ts.valueOf();
-      obj.earliest.moment = ts;
+      obj.earliest = moment(dataCounts.earliest_record_timestamp).valueOf();
     }
 
     if (dataCounts.latest_record_timestamp) {
-      const ts = moment(dataCounts.latest_record_timestamp);
-      obj.latest.string = ts.format(TIME_FORMAT);
-      obj.latest.unix = ts.valueOf();
-      obj.latest.moment = ts;
+      obj.latest = moment(dataCounts.latest_record_timestamp).valueOf();
     }
 
     return obj;

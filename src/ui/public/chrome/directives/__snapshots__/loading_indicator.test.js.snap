@@ -6,7 +6,7 @@ exports[`kbnLoadingIndicator is hidden by default 1`] = `
   data-test-subj="globalLoadingIndicator-hidden"
 >
   <div
-    className="loadingIndicator__bar"
+    className="loadingIndicator__bar essentialAnimation"
   />
 </div>
 `;
@@ -17,7 +17,7 @@ exports[`kbnLoadingIndicator is visible when loadingCount is > 0 1`] = `
   data-test-subj="globalLoadingIndicator"
 >
   <div
-    className="loadingIndicator__bar"
+    className="loadingIndicator__bar essentialAnimation"
   />
 </div>
 `;

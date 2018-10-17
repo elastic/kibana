@@ -74,8 +74,8 @@ describe('Status class', function () {
 
     const json = status.toJSON();
     expect(json.id).toEqual(status.id);
-    expect(json.state.id).toEqual('green');
-    expect(json.state.message).toEqual('Ready');
+    expect(json.state).toEqual('green');
+    expect(json.message).toEqual('Ready');
   });
 
   it('should call on handler if status is already matched', function (done) {

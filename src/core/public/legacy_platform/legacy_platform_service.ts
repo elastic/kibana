@@ -18,12 +18,20 @@
  */
 
 import angular from 'angular';
+import { BasePathStartContract } from '../base_path';
 import { FatalErrorsStartContract } from '../fatal_errors';
 import { InjectedMetadataStartContract } from '../injected_metadata';
+import { LoadingCountStartContract } from '../loading_count';
+import { NotificationsStartContract } from '../notifications';
+import { UiSettingsClient } from '../ui_settings';
 
 interface Deps {
   injectedMetadata: InjectedMetadataStartContract;
   fatalErrors: FatalErrorsStartContract;
+  notifications: NotificationsStartContract;
+  loadingCount: LoadingCountStartContract;
+  basePath: BasePathStartContract;
+  uiSettings: UiSettingsClient;
 }
 
 export interface LegacyPlatformParams {
@@ -42,11 +50,23 @@ export interface LegacyPlatformParams {
 export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public start({ injectedMetadata, fatalErrors }: Deps) {
+  public start({
+    injectedMetadata,
+    fatalErrors,
+    notifications,
+    loadingCount,
+    basePath,
+    uiSettings,
+  }: Deps) {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
     require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
     require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
+    require('ui/notify/toasts').__newPlatformInit__(notifications.toasts);
+    require('ui/chrome/api/loading_count').__newPlatformInit__(loadingCount);
+    require('ui/chrome/api/base_path').__newPlatformInit__(basePath);
+    require('ui/chrome/api/ui_settings').__newPlatformInit__(uiSettings);
+    require('ui/chrome/api/injected_vars').__newPlatformInit__(injectedMetadata);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first

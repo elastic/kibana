@@ -27,18 +27,6 @@ export default function ({ getService }) {
     before(() => esArchiver.load('saved_objects/basic'));
     after(() => esArchiver.unload('saved_objects/basic'));
 
-    // TODO remove deprecated '/shorten' API in master (7.0)
-    it('generates shortened urls with deprecated URL', async () => {
-      const resp = await supertest
-        .post('/shorten')
-        .set('content-type', 'application/json')
-        .send({ url: '/app/kibana#/visualize/create' })
-        .expect(200);
-
-      expect(typeof resp.text).to.be('string');
-      expect(resp.text.length > 0).to.be(true);
-    });
-
     it('generates shortened urls', async () => {
       const resp = await supertest
         .post('/api/shorten_url')

@@ -22,7 +22,7 @@ export const MONITORING_SYSTEM_API_VERSION = '6';
  * The type name used within the Monitoring index to publish Kibana ops stats.
  * @type {string}
  */
-export const KIBANA_STATS_TYPE_MONITORING = 'kibana_stats_monitoring'; // similar to KIBANA_STATS_TYPE but rolled up into 10s stats from 5s intervals through ops_buffer
+export const KIBANA_STATS_TYPE_MONITORING = 'kibana_stats'; // similar to KIBANA_STATS_TYPE but rolled up into 10s stats from 5s intervals through ops_buffer
 /**
  * The type name used within the Monitoring index to publish Kibana stats.
  * @type {string}
@@ -94,7 +94,7 @@ export const CALCULATE_DURATION_UNTIL = 'until';
 /**
  * In order to show ML Jobs tab in the Elasticsearch section / tab navigation, license must be supported
  */
-export const ML_SUPPORTED_LICENSES = [ 'trial', 'platinum' ];
+export const ML_SUPPORTED_LICENSES = ['trial', 'platinum'];
 
 /**
  * Metadata service URLs for the different cloud services that have constant URLs (e.g., unlike GCP, which is a constant prefix).
@@ -135,7 +135,12 @@ export const DEFAULT_NO_DATA_MESSAGE_WITH_FILTER = (
 );
 
 export const TABLE_ACTION_UPDATE_FILTER = 'UPDATE_FILTER';
-export const TABLE_ACTION_RESET_PAGING  = 'RESET_PAGING';
+export const TABLE_ACTION_RESET_PAGING = 'RESET_PAGING';
 
 export const DEBOUNCE_SLOW_MS = 17; // roughly how long it takes to render a frame at 60fps
 export const DEBOUNCE_FAST_MS = 10; // roughly how long it takes to render a frame at 100fps
+
+/**
+ * Configuration key for setting the email address used for cluster alert notifications.
+ */
+export const CLUSTER_ALERTS_ADDRESS_CONFIG_KEY = 'cluster_alerts.email_notifications.email_address';

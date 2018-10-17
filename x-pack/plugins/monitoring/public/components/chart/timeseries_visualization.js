@@ -116,7 +116,7 @@ export class TimeseriesVisualization extends React.Component {
   }
 
   render() {
-    const className = 'rhythm_chart';
+    const className = 'monRhythmChart';
     const style = {
       flexDirection: 'column' // for legend position = bottom
     };
@@ -134,8 +134,8 @@ export class TimeseriesVisualization extends React.Component {
 
     return (
       <div className={className}>
-        <div style={style} className="rhythm_chart__content">
-          <div className="rhythm_chart__visualization">
+        <div style={style} className="monRhythmChart__content">
+          <div className="monRhythmChart__visualization">
             <TimeseriesContainer
               seriesToShow={this.state.seriesToShow}
               updateLegend={this.debouncedUpdateLegend}

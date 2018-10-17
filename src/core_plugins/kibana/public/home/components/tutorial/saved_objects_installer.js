@@ -17,6 +17,10 @@
  * under the License.
  */
 
+/* eslint-disable no-multi-str*/
+
+import { injectI18n } from '@kbn/i18n/react';
+
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
@@ -30,14 +34,17 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-const DEFAULT_BUTTON_LABEL = 'Load Kibana objects';
+class SavedObjectsInstallerUi extends React.Component {
+  DEFAULT_BUTTON_LABEL = this.props.intl.formatMessage({
+    id: 'kbn.home.tutorial.savedObject.defaultButtonLabel',
+    defaultMessage: 'Load Kibana objects'
+  });
 
-export class SavedObjectsInstaller extends React.Component {
   state = {
     isInstalling: false,
     isInstalled: false,
     overwrite: false,
-    buttonLabel: DEFAULT_BUTTON_LABEL,
+    buttonLabel: this.DEFAULT_BUTTON_LABEL,
   };
 
   componentDidMount() {
@@ -63,10 +70,12 @@ export class SavedObjectsInstaller extends React.Component {
 
       this.setState({
         isInstalling: false,
-        installStatusMsg: `Request failed, Error: ${error.message}`,
+        installStatusMsg: this.props.intl.formatMessage(
+          { id: 'kbn.home.tutorial.savedObject.requestFailedErrorMessage', defaultMessage: 'Request failed, Error: {message}' },
+          { message: error.message }),
         isInstalled: false,
         overwrite: false,
-        buttonLabel: DEFAULT_BUTTON_LABEL
+        buttonLabel: this.DEFAULT_BUTTON_LABEL
       });
       return;
     }
@@ -85,26 +94,37 @@ export class SavedObjectsInstaller extends React.Component {
     if (overwriteErrors.length > 0) {
       this.setState({
         isInstalling: false,
-        installStatusMsg: `${overwriteErrors.length} of ${this.props.savedObjects.length} objects already exist. ` +
-          `Click 'Confirm overwrite' to import and overwrite existing objects. ` +
-          `Any changes to the objects will be lost.`,
+        installStatusMsg: this.props.intl.formatMessage(
+          { id: 'kbn.home.tutorial.savedObject.installStatusLabel',
+            defaultMessage: '{overwriteErrorsLength} of {savedObjectsLength} objects already exist. \
+Click \'Confirm overwrite\' to import and overwrite existing objects. Any changes to the objects will be lost.' },
+          { overwriteErrorsLength: overwriteErrors.length, savedObjectsLength: this.props.savedObjects.length }),
         isInstalled: false,
         overwrite: true,
-        buttonLabel: 'Confirm overwrite'
+        buttonLabel: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.savedObject.confirmButtonLabel',
+          defaultMessage: 'Confirm overwrite' })
       });
       return;
     }
 
     const hasErrors = errors.length > 0;
     const statusMsg = hasErrors
-      ? `Unable to add ${errors.length} of ${this.props.savedObjects.length} kibana objects, Error: ${errors[0].error.message}`
-      : `${this.props.savedObjects.length} saved objects successfully added`;
+      ? this.props.intl.formatMessage(
+        { id: 'kbn.home.tutorial.savedObject.unableToAddErrorMessage',
+          defaultMessage: 'Unable to add {errorsLength} of {savedObjectsLength} kibana objects, Error: ${errors[0].error.message}'
+        },
+        { errorsLength: errors.length, savedObjectsLength: this.props.savedObjects.length })
+      : this.props.intl.formatMessage(
+        { id: 'kbn.home.tutorial.savedObject.addedLabel',
+          defaultMessage: '{savedObjectsLength} saved objects successfully added'
+        },
+        { savedObjectsLength: this.props.savedObjects.length });
     this.setState({
       isInstalling: false,
       installStatusMsg: statusMsg,
       isInstalled: !hasErrors,
       overwrite: false,
-      buttonLabel: DEFAULT_BUTTON_LABEL,
+      buttonLabel: this.DEFAULT_BUTTON_LABEL,
     });
   }
 
@@ -125,7 +145,8 @@ export class SavedObjectsInstaller extends React.Component {
   renderInstallStep = () => {
     const installMsg = this.props.installMsg
       ? this.props.installMsg
-      : 'Imports index pattern, visualizations and pre-defined dashboards.';
+      : this.props.intl.formatMessage({ id: 'kbn.home.tutorial.savedObject.installLabel',
+        defaultMessage: 'Imports index pattern, visualizations and pre-defined dashboards.' });
     const installStep = (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -155,7 +176,7 @@ export class SavedObjectsInstaller extends React.Component {
     );
 
     return {
-      title: 'Load Kibana objects',
+      title: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.savedObject.loadTitle', defaultMessage: 'Load Kibana objects' }),
       status: this.state.isInstalled ? 'complete' : 'incomplete',
       children: installStep,
       key: 'installStep'
@@ -177,8 +198,10 @@ const savedObjectShape = PropTypes.shape({
   attributes: PropTypes.object.isRequired,
 });
 
-SavedObjectsInstaller.propTypes = {
+SavedObjectsInstallerUi.propTypes = {
   bulkCreate: PropTypes.func.isRequired,
   savedObjects: PropTypes.arrayOf(savedObjectShape).isRequired,
   installMsg: PropTypes.string,
 };
+
+export const SavedObjectsInstaller = injectI18n(SavedObjectsInstallerUi);

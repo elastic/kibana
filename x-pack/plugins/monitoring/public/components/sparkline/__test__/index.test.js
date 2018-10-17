@@ -59,12 +59,12 @@ describe('Sparkline component', () => {
 
   test('removes tooltip when tooltip.enabled prop is changed to false', () => {
     const wrapper = shallow(component);
-    expect(wrapper.find('.sparklineTooltipContainer')).toHaveLength(0);
+    expect(wrapper.find('.monSparklineTooltip__container')).toHaveLength(0);
 
     wrapper.setState({ tooltip: mockDataPoint });
-    expect(wrapper.find('.sparklineTooltipContainer')).toHaveLength(1);
+    expect(wrapper.find('.monSparklineTooltip__container')).toHaveLength(1);
 
     wrapper.setProps({ tooltip: { enabled: false } });
-    expect(wrapper.find('.sparklineTooltipContainer')).toHaveLength(0);
+    expect(wrapper.find('.monSparklineTooltip__container')).toHaveLength(0);
   });
 });

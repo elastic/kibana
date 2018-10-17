@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Form should not render no settings message when instructed not to 1`] = `<React.Fragment />`;
+
 exports[`Form should render no settings message when there are no settings 1`] = `
 <React.Fragment>
   <EuiPanel

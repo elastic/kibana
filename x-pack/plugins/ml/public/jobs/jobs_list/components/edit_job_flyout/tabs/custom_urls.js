@@ -12,6 +12,9 @@ import React, {
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
@@ -20,14 +23,15 @@ import { toastNotifications } from 'ui/notify';
 
 import {
   CustomUrlEditor,
-  CustomUrlList
-} from 'plugins/ml/jobs/components/custom_url_editor';
+  CustomUrlList,
+} from '../../../../components/custom_url_editor';
 import {
   getNewCustomUrlDefaults,
   getQueryEntityFieldNames,
   isValidCustomUrlSettings,
-  buildCustomUrlFromSettings
-} from 'plugins/ml/jobs/components/custom_url_editor/utils';
+  buildCustomUrlFromSettings,
+  getTestUrl,
+} from '../../../../components/custom_url_editor/utils';
 import {
   loadSavedDashboards,
   loadIndexPatterns,
@@ -113,6 +117,29 @@ export class CustomUrls extends Component {
       });
   }
 
+  onTestButtonClick = () => {
+    const job = this.props.job;
+    buildCustomUrlFromSettings(this.state.editorSettings, job)
+      .then((customUrl) => {
+        getTestUrl(job, customUrl)
+          .then((testUrl) => {
+            window.open(testUrl, '_blank');
+          })
+          .catch((resp) => {
+            console.log('Error obtaining URL for test:', resp);
+            toastNotifications.addWarning('An error occurred obtaining the URL to test the configuration');
+          });
+      })
+      .catch((resp) => {
+        console.log('Error building custom URL from settings:', resp);
+        toastNotifications.addWarning('An error occurred building the custom URL for testing from the supplied settings');
+      });
+  }
+
+  closeEditor = () => {
+    this.setState({ editorOpen: false });
+  }
+
   render() {
     const {
       customUrls,
@@ -123,42 +150,70 @@ export class CustomUrls extends Component {
       queryEntityFieldNames,
     } = this.state;
 
+    const isValidEditorSettings = (editorOpen === true) ?
+      isValidCustomUrlSettings(editorSettings, customUrls) : true;
+
     return (
       <React.Fragment>
         <EuiSpacer size="m" />
-        <CustomUrlList
-          job={this.props.job}
-          customUrls={customUrls}
-          setCustomUrls={this.setCustomUrls}
-        />
-
         {editorOpen === false ? (
-          <EuiButtonEmpty
-            onClick={() => this.editNewCustomUrl()}
-          >
-            Add custom URL
-          </EuiButtonEmpty>
+          <React.Fragment>
+            <EuiButton
+              size="s"
+              onClick={() => this.editNewCustomUrl()}
+            >
+              Add custom URL
+            </EuiButton>
+          </React.Fragment>
         ) : (
           <React.Fragment>
-            <EuiSpacer size="l" />
-            <EuiPanel className="ml-custom-url-editor">
+            <EuiPanel className="edit-custom-url-panel">
+              <EuiButtonIcon
+                color="text"
+                onClick={() => this.closeEditor()}
+                iconType="cross"
+                aria-label="Close custom URL editor"
+                className="close-editor-button"
+              />
               <CustomUrlEditor
                 customUrl={editorSettings}
                 setEditCustomUrl={this.setEditCustomUrl}
+                savedCustomUrls={customUrls}
                 dashboards={dashboards}
                 indexPatterns={indexPatterns}
                 queryEntityFieldNames={queryEntityFieldNames}
               />
               <EuiSpacer size="m" />
-              <EuiButton
-                onClick={() => this.addNewCustomUrl()}
-                isDisabled={!isValidCustomUrlSettings(editorSettings)}
-              >
-                Add
-              </EuiButton>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={() => this.addNewCustomUrl()}
+                    isDisabled={!isValidEditorSettings}
+                  >
+                    Add
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="popout"
+                    iconSide="right"
+                    onClick={() => this.onTestButtonClick()}
+                    isDisabled={!isValidEditorSettings}
+                  >
+                    Test
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+
+              </EuiFlexGroup>
             </EuiPanel>
           </React.Fragment>
         )}
+        <EuiSpacer size="l" />
+        <CustomUrlList
+          job={this.props.job}
+          customUrls={customUrls}
+          setCustomUrls={this.setCustomUrls}
+        />
 
       </React.Fragment>
     );

@@ -1,5 +1,8 @@
 [[breaking-changes-7.0]]
 == Breaking changes in 7.0
+++++
+<titleabbrev>7.0</titleabbrev>
+++++
 
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 7.0.
@@ -50,3 +53,22 @@ to Kibana's advanced setting.
 *Impact:* This setting is no longer necessary. If you enable {monitoring} across the Elastic Stack, a monitoring agent runs
 on each Elasticsearch node, Logstash node, Kibana instance, and Beat to collect and index metrics. Each node and instance is
 considered unique based on its persistent UUID, which is written to the path.data directory when the node or instance starts.
+
+[float]
+=== Deprecated API `/shorten` has been removed
+*Details:* The `/shorten` API has been deprecated since 6.5, when it was replaced by the `/api/shorten_url` API.
+
+*Impact:* The '/shorten' API has been removed. Use the '/api/shorten_url' API instead.
+
+[float]
+=== Deprecated kibana.yml setting logging.useUTC has been replaced with logging.timezone
+*Details:* Any timezone can now be specified by canonical id.
+
+*Impact:* The logging.useUTC flag will have to be replaced with a timezone id.  If set to true the id is `UTC`.
+
+[float]
+=== kibana.yml setting `elasticsearch.url` sets port based on protocol
+*Details:* In prior versions of Kibana, if no port was specified in `elasticsearch.url` a default of 9200 was chosen.
+The port is now protocol dependent: https ports will use 443, and http ports will use 80.
+
+*Impact:* If your `elasticsearch.url` was dependent on an unspecified port set to 9200, `:9200` will have to be appended to the url.

@@ -2,7 +2,7 @@
 
 exports[`StatementList renders nested elements as expected 1`] = `
 <ul
-  className="pipelineViewer__list"
+  className="monPipelineViewer__list"
 >
   <Statement
     collapse={[Function]}

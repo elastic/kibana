@@ -10,7 +10,10 @@
     "kbn:bootstrap": "yarn build"
   },
   "devDependencies": {
-    "@types/jest": "^22.2.2",
-    "typescript": "^2.9.2"
+    "@types/jest": "^23.3.1",
+    "typescript": "^3.0.3"
+  },
+  "dependencies": {
+    "tslib": "^1.9.3"
   }
 }

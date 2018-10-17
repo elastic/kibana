@@ -20,7 +20,7 @@ import { validateInfluencers } from './validate_influencers';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
 
-export async function validateJob(callWithRequest, payload, kbnVersion = 'current') {
+export async function validateJob(callWithRequest, payload, kbnVersion = 'current', server) {
   try {
     if (typeof payload !== 'object' || payload === null) {
       throw new Error('Invalid payload: Needs to be an object.');
@@ -86,7 +86,7 @@ export async function validateJob(callWithRequest, payload, kbnVersion = 'curren
         return VALIDATION_STATUS[messages[m.id].status] === VALIDATION_STATUS.ERROR;
       });
 
-      validationMessages.push(...await validateBucketSpan(callWithRequest, job, duration));
+      validationMessages.push(...await validateBucketSpan(callWithRequest, job, duration, server));
       validationMessages.push(...await validateTimeRange(callWithRequest, job, duration));
 
       // only run the influencer and model memory limit checks

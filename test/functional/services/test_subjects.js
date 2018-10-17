@@ -39,10 +39,12 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async existOrFail(selector, timeout = 1000) {
-      log.debug(`TestSubjects.existOrFail(${selector})`);
-      const doesExist = await this.exists(selector, timeout);
-      // Verify element exists, or else fail the test consuming this.
-      expect(doesExist).to.be(true);
+      await retry.try(async () => {
+        log.debug(`TestSubjects.existOrFail(${selector})`);
+        const doesExist = await this.exists(selector, timeout);
+        // Verify element exists, or else fail the test consuming this.
+        expect(doesExist).to.be(true);
+      });
     }
 
     async missingOrFail(selector, timeout = 1000) {
@@ -61,13 +63,14 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
+    async clickWhenNotDisabled(selector, { timeout } = { timeout: defaultFindTimeout }) {
+      log.debug(`TestSubjects.click(${selector})`);
+      await find.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), { timeout });
+    }
+
     async click(selector, timeout = defaultFindTimeout) {
       log.debug(`TestSubjects.click(${selector})`);
-      return await retry.try(async () => {
-        const element = await this.find(selector, timeout);
-        await remote.moveMouseTo(element);
-        await element.click();
-      });
+      await find.clickByCssSelector(testSubjSelector(selector), timeout);
     }
 
     async doubleClick(selector, timeout = defaultFindTimeout) {
@@ -78,7 +81,6 @@ export function TestSubjectsProvider({ getService }) {
         await remote.doubleClick();
       });
     }
-
 
     async descendantExists(selector, parentElement) {
       return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
@@ -189,6 +191,10 @@ export function TestSubjectsProvider({ getService }) {
         const elements = await this.findAll(selectorAll);
         return await mapAsync(elements, mapFn);
       });
+    }
+
+    async waitForDeleted(selector) {
+      await remote.waitForDeletedByCssSelector(testSubjSelector(selector));
     }
   }
 

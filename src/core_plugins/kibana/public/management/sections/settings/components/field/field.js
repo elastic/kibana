@@ -87,7 +87,7 @@ export class Field extends PureComponent {
 
   getEditableValue(type, value, defVal) {
     const val = (value === null || value === undefined) ? defVal : value;
-    switch(type) {
+    switch (type) {
       case 'array':
         return val.join(', ');
       case 'boolean':
@@ -102,10 +102,10 @@ export class Field extends PureComponent {
   }
 
   getDisplayedDefaultValue(type, defVal) {
-    if(defVal === undefined || defVal === null || defVal === '') {
+    if (defVal === undefined || defVal === null || defVal === '') {
       return 'null';
     }
-    switch(type) {
+    switch (type) {
       case 'array':
         return defVal.join(', ');
       default:
@@ -193,7 +193,7 @@ export class Field extends PureComponent {
   }
 
   onImageChange = async (files) => {
-    if(!files.length) {
+    if (!files.length) {
       this.clearError();
       this.setState({
         unsavedValue: null,
@@ -212,18 +212,18 @@ export class Field extends PureComponent {
         changeImage: true,
         unsavedValue: base64Image,
       });
-    } catch(err) {
+    } catch (err) {
       toastNotifications.addDanger('Image could not be saved');
       this.cancelChangeImage();
     }
   }
 
   getImageAsBase64(file) {
-    if(!file instanceof File) {
+    if (!file instanceof File) {
       return null;
     }
 
-    const reader  = new FileReader();
+    const reader = new FileReader();
     reader.readAsDataURL(file);
 
     return new Promise((resolve, reject) => {
@@ -245,7 +245,7 @@ export class Field extends PureComponent {
   cancelChangeImage = () => {
     const { savedValue } = this.state;
 
-    if(this.changeImageForm) {
+    if (this.changeImageForm) {
       this.changeImageForm.fileInput.value = null;
       this.changeImageForm.handleChange();
     }
@@ -268,14 +268,14 @@ export class Field extends PureComponent {
     const { name, defVal, type } = this.props.setting;
     const { changeImage, savedValue, unsavedValue, isJsonArray } = this.state;
 
-    if(savedValue === unsavedValue) {
+    if (savedValue === unsavedValue) {
       return;
     }
 
     let valueToSave = unsavedValue;
     let isSameValue = false;
 
-    switch(type) {
+    switch (type) {
       case 'array':
         valueToSave = valueToSave.split(',').map(val => val.trim());
         isSameValue = valueToSave.join(',') === defVal.join(',');
@@ -295,10 +295,10 @@ export class Field extends PureComponent {
         await this.props.save(name, valueToSave);
       }
 
-      if(changeImage) {
+      if (changeImage) {
         this.cancelChangeImage();
       }
-    } catch(e) {
+    } catch (e) {
       toastNotifications.addDanger(`Unable to save ${name}`);
     }
     this.setLoading(false);
@@ -311,7 +311,7 @@ export class Field extends PureComponent {
       await this.props.clear(name);
       this.cancelChangeImage();
       this.clearError();
-    } catch(e) {
+    } catch (e) {
       toastNotifications.addDanger(`Unable to reset ${name}`);
     }
     this.setLoading(false);
@@ -319,18 +319,19 @@ export class Field extends PureComponent {
 
   renderField(setting) {
     const { loading, changeImage, unsavedValue } = this.state;
-    const { name, value, type, options } = setting;
+    const { name, value, type, options, isOverridden, ariaName } = setting;
 
-    switch(type) {
+    switch (type) {
       case 'boolean':
         return (
           <EuiSwitch
             label={!!unsavedValue ? 'On' : 'Off'}
             checked={!!unsavedValue}
             onChange={this.onFieldChange}
-            disabled={loading}
+            disabled={loading || isOverridden}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
+            aria-label={ariaName}
           />
         );
       case 'markdown':
@@ -338,6 +339,7 @@ export class Field extends PureComponent {
         return (
           <div data-test-subj={`advancedSetting-editField-${name}`}>
             <EuiCodeEditor
+              aria-label={ariaName}
               mode={type}
               theme="textmate"
               value={unsavedValue}
@@ -346,6 +348,7 @@ export class Field extends PureComponent {
               height="auto"
               minLines={6}
               maxLines={30}
+              isReadOnly={isOverridden}
               setOptions={{
                 showLineNumbers: false,
                 tabSize: 2,
@@ -358,9 +361,10 @@ export class Field extends PureComponent {
           </div>
         );
       case 'image':
-        if(!isDefaultValue(setting) && !changeImage) {
+        if (!isDefaultValue(setting) && !changeImage) {
           return (
             <EuiImage
+              aria-label={ariaName}
               allowFullScreen
               url={value}
               alt={name}
@@ -369,7 +373,7 @@ export class Field extends PureComponent {
         } else {
           return (
             <EuiFilePicker
-              disabled={loading}
+              disabled={loading || isOverridden}
               onChange={this.onImageChange}
               accept=".jpg,.jpeg,.png"
               ref={(input) => { this.changeImageForm = input; }}
@@ -381,13 +385,14 @@ export class Field extends PureComponent {
       case 'select':
         return (
           <EuiSelect
+            aria-label={ariaName}
             value={unsavedValue}
             options={options.map((text) => {
               return { text, value: text };
             })}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading}
+            disabled={loading || isOverridden}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -395,10 +400,11 @@ export class Field extends PureComponent {
       case 'number':
         return (
           <EuiFieldNumber
+            aria-label={ariaName}
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading}
+            disabled={loading || isOverridden}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -406,10 +412,11 @@ export class Field extends PureComponent {
       default:
         return (
           <EuiFieldText
+            aria-label={ariaName}
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading}
+            disabled={loading || isOverridden}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -418,18 +425,22 @@ export class Field extends PureComponent {
   }
 
   renderLabel(setting) {
-    return(
-      <span aria-label={setting.ariaName}>
-        {setting.name}
-      </span>
-    );
+    return setting.name;
   }
 
   renderHelpText(setting) {
+    if (setting.isOverridden) {
+      return (
+        <EuiText size="xs">
+          This setting is overriden by the Kibana server and can not be changed.
+        </EuiText>
+      );
+    }
+
     const defaultLink = this.renderResetToDefaultLink(setting);
     const imageLink = this.renderChangeImageLink(setting);
 
-    if(defaultLink || imageLink) {
+    if (defaultLink || imageLink) {
       return (
         <span>
           {defaultLink}
@@ -453,8 +464,12 @@ export class Field extends PureComponent {
   }
 
   renderDescription(setting) {
-    return (
-      <Fragment>
+    let description;
+
+    if (React.isValidElement(setting.description)) {
+      description = setting.description;
+    } else {
+      description = (
         <div
           /*
            * Justification for dangerouslySetInnerHTML:
@@ -462,6 +477,12 @@ export class Field extends PureComponent {
            */
           dangerouslySetInnerHTML={{ __html: setting.description }} //eslint-disable-line react/no-danger
         />
+      );
+    }
+
+    return (
+      <Fragment>
+        {description}
         {this.renderDefaultValue(setting)}
       </Fragment>
     );
@@ -469,14 +490,14 @@ export class Field extends PureComponent {
 
   renderDefaultValue(setting) {
     const { type, defVal } = setting;
-    if(isDefaultValue(setting)) {
+    if (isDefaultValue(setting)) {
       return;
     }
     return (
       <Fragment>
         <EuiSpacer size="s" />
         <EuiText size="xs">
-          { type === 'json' ? (
+          {type === 'json' ? (
             <Fragment>
               Default:
               <EuiCodeBlock
@@ -489,9 +510,9 @@ export class Field extends PureComponent {
             </Fragment>
           ) : (
             <Fragment>
-              Default: <EuiCode>{this.getDisplayedDefaultValue(type, defVal)}</EuiCode>
+                Default: <EuiCode>{this.getDisplayedDefaultValue(type, defVal)}</EuiCode>
             </Fragment>
-          ) }
+          )}
         </EuiText>
       </Fragment>
     );
@@ -499,7 +520,7 @@ export class Field extends PureComponent {
 
   renderResetToDefaultLink(setting) {
     const { ariaName, name } = setting;
-    if(isDefaultValue(setting)) {
+    if (isDefaultValue(setting)) {
       return;
     }
     return (
@@ -519,7 +540,7 @@ export class Field extends PureComponent {
   renderChangeImageLink(setting) {
     const { changeImage } = this.state;
     const { type, value, ariaName, name } = setting;
-    if(type !== 'image' || !value || changeImage) {
+    if (type !== 'image' || !value || changeImage) {
       return;
     }
     return (
@@ -538,18 +559,21 @@ export class Field extends PureComponent {
   renderActions(setting) {
     const { ariaName, name } = setting;
     const { loading, isInvalid, changeImage, savedValue, unsavedValue } = this.state;
-    if(savedValue === unsavedValue && !changeImage) {
+    const isDisabled = loading || setting.isOverridden;
+
+    if (savedValue === unsavedValue && !changeImage) {
       return;
     }
+
     return (
-      <EuiFormRow className="advancedSettings__field__actions" hasEmptyLabelSpace>
+      <EuiFormRow className="mgtAdvancedSettings__fieldActions" hasEmptyLabelSpace>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
               aria-label={`Save ${ariaName}`}
               onClick={this.saveEdit}
-              disabled={loading || isInvalid}
+              disabled={isDisabled || isInvalid}
               data-test-subj={`advancedSetting-saveEditField-${name}`}
             >
               Save
@@ -559,7 +583,7 @@ export class Field extends PureComponent {
             <EuiButtonEmpty
               aria-label={`Cancel editing ${ariaName}`}
               onClick={() => changeImage ? this.cancelChangeImage() : this.cancelEdit()}
-              disabled={loading}
+              disabled={isDisabled}
               data-test-subj={`advancedSetting-cancelEditField-${name}`}
             >
               Cancel
@@ -575,10 +599,10 @@ export class Field extends PureComponent {
     const { error, isInvalid } = this.state;
 
     return (
-      <EuiFlexGroup className="advancedSettings__field">
+      <EuiFlexGroup className="mgtAdvancedSettings__field">
         <EuiFlexItem grow={false}>
           <EuiDescribedFormGroup
-            className="advancedSettings__field__wrapper"
+            className="mgtAdvancedSettings__fieldWrapper"
             title={this.renderTitle(setting)}
             description={this.renderDescription(setting)}
             idAria={`${setting.name}-aria`}

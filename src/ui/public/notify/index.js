@@ -20,6 +20,6 @@
 export { notify } from './notify';
 export { Notifier } from './notifier';
 export { fatalError, addFatalErrorCallback } from './fatal_error';
-export { GlobalToastList, toastNotifications } from './toasts';
+export { toastNotifications } from './toasts';
 export { GlobalBannerList, banners } from './banners';
 export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';

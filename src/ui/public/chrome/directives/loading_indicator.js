@@ -56,7 +56,7 @@ export class LoadingIndicator extends React.Component {
 
     return (
       <div className={className} data-test-subj={testSubj}>
-        <div className="loadingIndicator__bar" />
+        <div className="loadingIndicator__bar essentialAnimation" />
       </div>
     );
   }

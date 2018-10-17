@@ -21,6 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
   describe('test large number of fields @skipcloud', function () {
@@ -34,6 +35,8 @@ export default function ({ getService, getPageObjects }) {
 
     it('test_huge data should have expected number of fields', async function () {
       const tabCount = await PageObjects.settings.getFieldsTabCount();
+      //default : maxPayloadBytes is 1048576
+      log.info('if there is a failure, start the server with "node scripts/functional_tests_server -- --server.maxPayloadBytes=1648576"');
       expect(tabCount).to.be(EXPECTED_FIELD_COUNT);
     });
 

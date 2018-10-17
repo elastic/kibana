@@ -19,7 +19,6 @@
 
 import './region_map.less';
 import './region_map_vis_params';
-import image from './images/icon-vector-map.svg';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -43,7 +42,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
     description: 'Show metrics on a thematic map. Use one of the provided base maps, or add your own. ' +
     'Darker colors represent higher values.',
     category: CATEGORY.MAP,
-    image,
+    icon: 'visMapRegion',
     visConfig: {
       defaults: {
         legendPosition: 'bottomright',
@@ -104,7 +103,6 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
           aggFilter: ['terms']
         }
       ])
-    },
-    responseHandler: 'tabify'
+    }
   });
 });

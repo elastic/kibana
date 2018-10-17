@@ -57,6 +57,7 @@ export const histogramBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'number'
     },
     {

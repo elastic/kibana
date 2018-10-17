@@ -27,7 +27,6 @@ import { docMissingSuite } from './doc_missing';
 import { indexMissingSuite } from './index_missing';
 
 describe('uiSettings/routes', function () {
-
   /**
    *  The "doc missing" and "index missing" tests verify how the uiSettings
    *  API behaves in between healthChecks, so they interact with the healthCheck

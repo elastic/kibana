@@ -183,7 +183,7 @@ export class DiscoverNoResults extends Component {
         <EuiSpacer size="xl" />
 
         <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false} className="discoverNoResults">
+          <EuiFlexItem grow={false} className="dscNoResults">
             <EuiCallOut
               title="No results match your search criteria"
               color="warning"

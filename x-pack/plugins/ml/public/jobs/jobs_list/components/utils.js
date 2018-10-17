@@ -216,7 +216,10 @@ export function filterJobs(jobs, clauses) {
 }
 
 function stringMatch(str, substr) {
-  return ((str.toLowerCase().match(substr.toLowerCase()) === null) === false);
+  return (
+    (typeof str === 'string' && typeof substr === 'string') &&
+    ((str.toLowerCase().match(substr.toLowerCase()) === null) === false)
+  );
 }
 
 function jobProperty(job, prop) {

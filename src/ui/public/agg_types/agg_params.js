@@ -54,8 +54,7 @@ function AggParams(params) {
   AggParams.Super.call(this, {
     index: ['name'],
     initialSet: params.map(function (config) {
-      const type = config.name === 'field' ? config.name : config.type;
-      const Class = paramTypeMap[type] || paramTypeMap._default;
+      const Class = paramTypeMap[config.type] || paramTypeMap._default;
       return new Class(config);
     })
   });

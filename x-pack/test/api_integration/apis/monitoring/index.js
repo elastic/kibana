@@ -6,6 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('Monitoring', () => {
+    loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./beats'));
     loadTestFile(require.resolve('./cluster'));
     loadTestFile(require.resolve('./elasticsearch'));

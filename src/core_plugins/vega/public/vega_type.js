@@ -46,7 +46,7 @@ VisTypesRegistryProvider.register((Private) => {
     name: 'vega',
     title: 'Vega',
     description: 'Create custom visualizations using Vega and VegaLite',
-    icon: 'fa-code',
+    icon: 'visVega',
     category: CATEGORY.OTHER,
     visConfig: { defaults: { spec: defaultSpec } },
     editorConfig: {

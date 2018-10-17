@@ -29,7 +29,7 @@ export function CollapsibleStatement(props) {
       responsive={false}
       gutterSize="none"
       alignItems="center"
-      className="pipelineViewer__statement"
+      className="monPipelineViewer__statement"
     >
       <EuiFlexItem key={id} grow={false}>
         <EuiButtonIcon

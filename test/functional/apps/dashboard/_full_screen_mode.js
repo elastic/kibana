@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('option not available in edit mode', async () => {
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
       const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();
       expect(exists).to.be(false);
     });

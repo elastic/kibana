@@ -1,8 +1,222 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`bulkCreate should display error message when bulkCreate request fails 1`] = `
-<SavedObjectsInstaller
+<SavedObjectsInstallerUi
   bulkCreate={[Function]}
+  intl={
+    Object {
+      "formatDate": [MockFunction],
+      "formatHTMLMessage": [MockFunction],
+      "formatMessage": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.defaultButtonLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Imports index pattern, visualizations and pre-defined dashboards.",
+              "id": "kbn.home.tutorial.savedObject.installLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.loadTitle",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.defaultButtonLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Imports index pattern, visualizations and pre-defined dashboards.",
+              "id": "kbn.home.tutorial.savedObject.installLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.loadTitle",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Imports index pattern, visualizations and pre-defined dashboards.",
+              "id": "kbn.home.tutorial.savedObject.installLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.loadTitle",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "{savedObjectsLength} saved objects successfully added",
+              "id": "kbn.home.tutorial.savedObject.addedLabel",
+            },
+            Object {
+              "savedObjectsLength": 1,
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Imports index pattern, visualizations and pre-defined dashboards.",
+              "id": "kbn.home.tutorial.savedObject.installLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.loadTitle",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.defaultButtonLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Imports index pattern, visualizations and pre-defined dashboards.",
+              "id": "kbn.home.tutorial.savedObject.installLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.loadTitle",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Imports index pattern, visualizations and pre-defined dashboards.",
+              "id": "kbn.home.tutorial.savedObject.installLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.loadTitle",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Request failed, Error: {message}",
+              "id": "kbn.home.tutorial.savedObject.requestFailedErrorMessage",
+            },
+            Object {
+              "message": "simulated bulkRequest error",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Imports index pattern, visualizations and pre-defined dashboards.",
+              "id": "kbn.home.tutorial.savedObject.installLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.loadTitle",
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "{savedObjectsLength} saved objects successfully added",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Request failed, Error: {message}",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+        ],
+      },
+      "formatNumber": [MockFunction],
+      "formatPlural": [MockFunction],
+      "formatRelative": [MockFunction],
+      "formatTime": [MockFunction],
+      "now": [MockFunction],
+      "textComponent": "span",
+    }
+  }
   savedObjects={
     Array [
       Object {
@@ -19,7 +233,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
     steps={
       Array [
         Object {
-          "children": <UNDEFINED>
+          "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
               component="div"
@@ -65,9 +279,9 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
               color="warning"
               data-test-subj="loadSavedObjects_failed"
               size="m"
-              title="Request failed, Error: simulated bulkRequest error"
+              title="Request failed, Error: {message}"
             />
-          </UNDEFINED>,
+          </React.Fragment>,
           "key": "installStep",
           "status": "incomplete",
           "title": "Load Kibana objects",
@@ -92,12 +306,20 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
             <span
               className="euiScreenReaderOnly"
             >
-              Step
+              Incomplete
+               Step 
             </span>
           </EuiScreenReaderOnly>
-          <div
-            className="euiStep__circle euiStep__circle--incomplete"
-          />
+          <EuiStepNumber
+            className="euiStep__circle"
+            isHollow={true}
+            number={1}
+            status="incomplete"
+          >
+            <div
+              className="euiStepNumber euiStepNumber--incomplete euiStepNumber-isHollow euiStep__circle"
+            />
+          </EuiStepNumber>
           <EuiTitle
             className="euiStep__title"
             size="s"
@@ -191,7 +413,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
               color="warning"
               data-test-subj="loadSavedObjects_failed"
               size="m"
-              title="Request failed, Error: simulated bulkRequest error"
+              title="Request failed, Error: {message}"
             >
               <div
                 className="euiCallOut euiCallOut--warning"
@@ -203,7 +425,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   <span
                     className="euiCallOutHeader__title"
                   >
-                    Request failed, Error: simulated bulkRequest error
+                    Request failed, Error: {message}
                   </span>
                 </div>
               </div>
@@ -213,12 +435,143 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
       </EuiStep>
     </div>
   </EuiSteps>
-</SavedObjectsInstaller>
+</SavedObjectsInstallerUi>
 `;
 
 exports[`bulkCreate should display success message when bulkCreate is successful 1`] = `
-<SavedObjectsInstaller
+<SavedObjectsInstallerUi
   bulkCreate={[Function]}
+  intl={
+    Object {
+      "formatDate": [MockFunction],
+      "formatHTMLMessage": [MockFunction],
+      "formatMessage": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.defaultButtonLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Imports index pattern, visualizations and pre-defined dashboards.",
+              "id": "kbn.home.tutorial.savedObject.installLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.loadTitle",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.defaultButtonLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Imports index pattern, visualizations and pre-defined dashboards.",
+              "id": "kbn.home.tutorial.savedObject.installLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.loadTitle",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Imports index pattern, visualizations and pre-defined dashboards.",
+              "id": "kbn.home.tutorial.savedObject.installLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.loadTitle",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "{savedObjectsLength} saved objects successfully added",
+              "id": "kbn.home.tutorial.savedObject.addedLabel",
+            },
+            Object {
+              "savedObjectsLength": 1,
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Imports index pattern, visualizations and pre-defined dashboards.",
+              "id": "kbn.home.tutorial.savedObject.installLabel",
+            },
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Load Kibana objects",
+              "id": "kbn.home.tutorial.savedObject.loadTitle",
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "{savedObjectsLength} saved objects successfully added",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+        ],
+      },
+      "formatNumber": [MockFunction],
+      "formatPlural": [MockFunction],
+      "formatRelative": [MockFunction],
+      "formatTime": [MockFunction],
+      "now": [MockFunction],
+      "textComponent": "span",
+    }
+  }
   savedObjects={
     Array [
       Object {
@@ -235,7 +588,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
     steps={
       Array [
         Object {
-          "children": <UNDEFINED>
+          "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
               component="div"
@@ -281,9 +634,9 @@ exports[`bulkCreate should display success message when bulkCreate is successful
               color="success"
               data-test-subj="loadSavedObjects_success"
               size="m"
-              title="1 saved objects successfully added"
+              title="{savedObjectsLength} saved objects successfully added"
             />
-          </UNDEFINED>,
+          </React.Fragment>,
           "key": "installStep",
           "status": "complete",
           "title": "Load Kibana objects",
@@ -308,51 +661,60 @@ exports[`bulkCreate should display success message when bulkCreate is successful
             <span
               className="euiScreenReaderOnly"
             >
-              Step
+               Step 
             </span>
           </EuiScreenReaderOnly>
-          <div
-            className="euiStep__circle euiStep__circle--complete"
+          <EuiStepNumber
+            className="euiStep__circle"
+            isHollow={false}
+            number={1}
+            status="complete"
           >
-            <EuiIcon
-              className="euiStep__circleIcon"
-              color="ghost"
-              size="m"
-              type="check"
+            <div
+              className="euiStepNumber euiStepNumber--complete euiStep__circle"
             >
-              <check
-                className="euiIcon euiIcon--medium euiIcon--ghost euiStep__circleIcon"
-                focusable="false"
-                height="16"
-                style={null}
-                viewBox="0 0 16 16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
+              <EuiIcon
+                className="euiStepNumber__icon"
+                size="m"
+                title="complete"
+                type="check"
               >
-                <svg
-                  className="euiIcon euiIcon--medium euiIcon--ghost euiStep__circleIcon"
+                <check
+                  className="euiIcon euiIcon--medium euiStepNumber__icon"
                   focusable="false"
                   height="16"
-                  style={null}
+                  style={
+                    Object {
+                      "fill": undefined,
+                    }
+                  }
+                  title="complete"
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
-                  xmlnsXlink="http://www.w3.org/1999/xlink"
                 >
-                  <defs>
+                  <svg
+                    className="euiIcon euiIcon--medium euiStepNumber__icon"
+                    focusable="false"
+                    height="16"
+                    style={
+                      Object {
+                        "fill": undefined,
+                      }
+                    }
+                    title="complete"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
                     <path
                       d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-                      id="check-a"
                     />
-                  </defs>
-                  <use
-                    xlinkHref="#check-a"
-                  />
-                </svg>
-              </check>
-            </EuiIcon>
-          </div>
+                  </svg>
+                </check>
+              </EuiIcon>
+            </div>
+          </EuiStepNumber>
           <EuiTitle
             className="euiStep__title"
             size="s"
@@ -446,7 +808,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
               color="success"
               data-test-subj="loadSavedObjects_success"
               size="m"
-              title="1 saved objects successfully added"
+              title="{savedObjectsLength} saved objects successfully added"
             >
               <div
                 className="euiCallOut euiCallOut--success"
@@ -458,7 +820,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   <span
                     className="euiCallOutHeader__title"
                   >
-                    1 saved objects successfully added
+                    {savedObjectsLength} saved objects successfully added
                   </span>
                 </div>
               </div>
@@ -468,7 +830,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
       </EuiStep>
     </div>
   </EuiSteps>
-</SavedObjectsInstaller>
+</SavedObjectsInstallerUi>
 `;
 
 exports[`renders 1`] = `
@@ -478,7 +840,7 @@ exports[`renders 1`] = `
   steps={
     Array [
       Object {
-        "children": <UNDEFINED>
+        "children": <React.Fragment>
           <EuiFlexGroup
             alignItems="center"
             component="div"
@@ -520,7 +882,7 @@ exports[`renders 1`] = `
           <EuiSpacer
             size="s"
           />
-        </UNDEFINED>,
+        </React.Fragment>,
         "key": "installStep",
         "status": "incomplete",
         "title": "Load Kibana objects",

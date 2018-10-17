@@ -16,40 +16,113 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { Observable, Subscription } from '../../lib/kbn_observable';
-
-import { MutableLoggerFactory } from './logger_factory';
-import { LoggingConfig } from './logging_config';
+import { Appenders, DisposableAppender } from './appenders/appenders';
+import { BufferAppender } from './appenders/buffer/buffer_appender';
+import { LogLevel } from './log_level';
+import { BaseLogger, Logger } from './logger';
+import { LoggerAdapter } from './logger_adapter';
+import { LoggerFactory } from './logger_factory';
+import { LoggerConfigType, LoggingConfig } from './logging_config';
 
 /**
- * Service that is responsible for maintaining the log config subscription and
- * pushing updates the the logger factory.
+ * Service that is responsible for maintaining loggers and logger appenders.
+ * @internal
  */
-export class LoggingService {
-  private subscription?: Subscription;
+export class LoggingService implements LoggerFactory {
+  private config?: LoggingConfig;
+  private readonly appenders: Map<string, DisposableAppender> = new Map();
+  private readonly bufferAppender = new BufferAppender();
+  private readonly loggers: Map<string, LoggerAdapter> = new Map();
 
-  constructor(private readonly loggingFactory: MutableLoggerFactory) {}
+  public get(...contextParts: string[]): Logger {
+    const context = LoggingConfig.getLoggerContext(contextParts);
+    if (this.loggers.has(context)) {
+      return this.loggers.get(context)!;
+    }
 
-  /**
-   * Takes `LoggingConfig` observable and pushes all config updates to the
-   * internal logger factory.
-   * @param config$ Observable that tracks all updates in the logging config.
-   */
-  public upgrade(config$: Observable<LoggingConfig>) {
-    this.subscription = config$.subscribe({
-      next: config => this.loggingFactory.updateConfig(config),
-    });
+    this.loggers.set(context, new LoggerAdapter(this.createLogger(context, this.config)));
+
+    return this.loggers.get(context)!;
   }
 
   /**
-   * Asynchronous method that causes service to unsubscribe from logging config updates
-   * and close internal logger factory.
+   * Safe wrapper that allows passing logging service as immutable LoggerFactory.
+   */
+  public asLoggerFactory(): LoggerFactory {
+    return { get: (...contextParts: string[]) => this.get(...contextParts) };
+  }
+
+  /**
+   * Updates all current active loggers with the new config values.
+   * @param config New config instance.
+   */
+  public upgrade(config: LoggingConfig) {
+    // Config update is asynchronous and may require some time to complete, so we should invalidate
+    // config so that new loggers will be using BufferAppender until newly configured appenders are ready.
+    this.config = undefined;
+
+    // Appenders must be reset, so we first dispose of the current ones, then
+    // build up a new set of appenders.
+    for (const appender of this.appenders.values()) {
+      appender.dispose();
+    }
+    this.appenders.clear();
+
+    for (const [appenderKey, appenderConfig] of config.appenders) {
+      this.appenders.set(appenderKey, Appenders.create(appenderConfig));
+    }
+
+    for (const [loggerKey, loggerAdapter] of this.loggers) {
+      loggerAdapter.updateLogger(this.createLogger(loggerKey, config));
+    }
+
+    this.config = config;
+
+    // Re-log all buffered log records with newly configured appenders.
+    for (const logRecord of this.bufferAppender.flush()) {
+      this.get(logRecord.context).log(logRecord);
+    }
+  }
+
+  /**
+   * Disposes all loggers (closes log files, clears buffers etc.). Service is not usable after
+   * calling of this method until new config is provided via `upgrade` method.
+   * @returns Promise that is resolved once all loggers are successfully disposed.
    */
   public async stop() {
-    if (this.subscription !== undefined) {
-      this.subscription.unsubscribe();
+    for (const appender of this.appenders.values()) {
+      await appender.dispose();
     }
-    await this.loggingFactory.close();
+
+    await this.bufferAppender.dispose();
+
+    this.appenders.clear();
+    this.loggers.clear();
+  }
+
+  private createLogger(context: string, config: LoggingConfig | undefined) {
+    if (config === undefined) {
+      // If we don't have config yet, use `buffered` appender that will store all logged messages in the memory
+      // until the config is ready.
+      return new BaseLogger(context, LogLevel.All, [this.bufferAppender]);
+    }
+
+    const { level, appenders } = this.getLoggerConfigByContext(config, context);
+    const loggerLevel = LogLevel.fromId(level);
+    const loggerAppenders = appenders.map(appenderKey => this.appenders.get(appenderKey)!);
+
+    return new BaseLogger(context, loggerLevel, loggerAppenders);
+  }
+
+  private getLoggerConfigByContext(config: LoggingConfig, context: string): LoggerConfigType {
+    const loggerConfig = config.loggers.get(context);
+    if (loggerConfig !== undefined) {
+      return loggerConfig;
+    }
+
+    // If we don't have configuration for the specified context and it's the "nested" one (eg. `foo.bar.baz`),
+    // let's move up to the parent context (eg. `foo.bar`) and check if it has config we can rely on. Otherwise
+    // we fallback to the `root` context that should always be defined (enforced by configuration schema).
+    return this.getLoggerConfigByContext(config, LoggingConfig.getParentLoggerContext(context));
   }
 }

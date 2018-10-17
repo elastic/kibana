@@ -23,7 +23,7 @@ import getopts from 'getopts';
 import dedent from 'dedent';
 import chalk from 'chalk';
 
-import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 import { buildDistributables } from './build_distributables';
 import { isErrorLogged } from './lib';
 
@@ -50,6 +50,9 @@ const flags = getopts(process.argv.slice(0), {
   alias: {
     v: 'verbose',
     d: 'debug',
+  },
+  default: {
+    debug: true
   },
   unknown: (flag) => {
     unknownFlags.push(flag);
@@ -80,14 +83,18 @@ if (flags.help) {
         --version-qualifier     {dim Suffix version with a qualifier}
         --skip-node-download    {dim Reuse existing downloads of node.js}
         --verbose,-v            {dim Turn on verbose logging}
-        --debug,-d              {dim Turn on debug logging}
+        --no-debug              {dim Turn off debug logging}
     `) + '\n'
   );
   process.exit(1);
 }
 
-const log = createToolingLog(pickLevelFromFlags(flags));
-log.pipe(process.stdout);
+const log = new ToolingLog({
+  level: pickLevelFromFlags(flags, {
+    default: flags.debug === false ? 'info' : 'debug'
+  }),
+  writeTo: process.stdout
+});
 
 function isOsPackageDesired(name) {
   if (flags['skip-os-packages']) {

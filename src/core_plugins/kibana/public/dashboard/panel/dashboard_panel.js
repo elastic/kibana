@@ -25,6 +25,10 @@ import _ from 'lodash';
 import { PanelHeader } from './panel_header';
 import { PanelError } from './panel_error';
 
+import {
+  EuiPanel,
+} from '@elastic/eui';
+
 export class DashboardPanel extends React.Component {
   constructor(props) {
     super(props);
@@ -125,28 +129,24 @@ export class DashboardPanel extends React.Component {
 
   render() {
     const { viewOnlyMode, panel } = this.props;
-    const classes = classNames('panel panel-default', this.props.className, {
-      'panel--edit-mode': !viewOnlyMode
+    const classes = classNames('dshPanel', this.props.className, {
+      'dshPanel--editing': !viewOnlyMode
     });
     return (
-      <div
-        className="dashboard-panel"
+      <EuiPanel
+        className={classes}
+        data-test-subj="dashboardPanel"
         onFocus={this.onFocus}
         onBlur={this.onBlur}
+        paddingSize="none"
       >
-        <div
-          className={classes}
-          data-test-subj="dashboardPanel"
-        >
-          <PanelHeader
-            panelId={panel.panelIndex}
-            embeddable={this.embeddable}
-          />
+        <PanelHeader
+          panelId={panel.panelIndex}
+          embeddable={this.embeddable}
+        />
 
-          {this.renderContent()}
-
-        </div>
-      </div>
+        {this.renderContent()}
+      </EuiPanel>
     );
   }
 }

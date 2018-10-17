@@ -21,23 +21,49 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import { tabifyAggResponse } from '../../agg_response/tabify/tabify';
+import { LegacyResponseHandlerProvider } from '../../vis/response_handlers/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisProvider } from '../../vis';
+import { tabifyAggResponse } from '../../agg_response/tabify';
+
 describe('AggTableGroup Directive', function () {
 
   let $rootScope;
   let $compile;
   let Vis;
   let indexPattern;
+  let tableAggResponse;
+  const tabifiedData = {};
+
+  const init = () => {
+    const vis1 = new Vis(indexPattern, 'table');
+    tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, fixtures.metricOnly);
+
+    const vis2 = new Vis(indexPattern, {
+      type: 'pie',
+      aggs: [
+        { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+        { type: 'terms', schema: 'split', params: { field: 'extension' } },
+        { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
+        { type: 'terms', schema: 'segment', params: { field: 'machine.os' } }
+      ]
+    });
+    vis2.aggs.forEach(function (agg, i) {
+      agg.id = 'agg_' + (i + 1);
+    });
+    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets);
+  };
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
+    tableAggResponse = Private(LegacyResponseHandlerProvider).handler;
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     Vis = Private(VisProvider);
 
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
+
+    init();
   }));
 
   let $scope;
@@ -48,10 +74,8 @@ describe('AggTableGroup Directive', function () {
     $scope.$destroy();
   });
 
-
-  it('renders a simple split response properly', function () {
-    const vis = new Vis(indexPattern, 'table');
-    $scope.group = tabifyAggResponse(vis.getAggConfig(), fixtures.metricOnly);
+  it('renders a simple split response properly', async function () {
+    $scope.group = await tableAggResponse(tabifiedData.metricOnly);
     $scope.sort = {
       columnIndex: null,
       direction: null
@@ -79,21 +103,9 @@ describe('AggTableGroup Directive', function () {
     expect($subTables.length).to.be(0);
   });
 
-  it('renders a complex response properly', function () {
-    const vis = new Vis(indexPattern, {
-      type: 'pie',
-      aggs: [
-        { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-        { type: 'terms', schema: 'split', params: { field: 'extension' } },
-        { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
-        { type: 'terms', schema: 'segment', params: { field: 'machine.os' } }
-      ]
-    });
-    vis.aggs.forEach(function (agg, i) {
-      agg.id = 'agg_' + (i + 1);
-    });
+  it('renders a complex response properly', async function () {
 
-    const group = $scope.group = tabifyAggResponse(vis.getAggConfig(), fixtures.threeTermBuckets);
+    const group = $scope.group = await tableAggResponse(tabifiedData.threeTermBuckets);
     const $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
     $compile($el)($scope);
     $scope.$digest();

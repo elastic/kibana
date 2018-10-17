@@ -121,9 +121,9 @@ describe('discover field chooser directives', function () {
 
   const getSections = function (ctx) {
     return {
-      selected: $('.discover-selected-fields', ctx),
-      popular: $('.discover-popular-fields', ctx),
-      unpopular: $('.discover-unpopular-fields', ctx),
+      selected: $('.dscFieldList--selected', ctx),
+      popular: $('.dscFieldList--popular', ctx),
+      unpopular: $('.dscFieldList--unpopular', ctx),
     };
   };
 
@@ -157,7 +157,7 @@ describe('discover field chooser directives', function () {
 
       function find(popularity) {
         return section[popularity]
-          .find('.discover-field-name')
+          .find('.dscFieldName')
           .map((i, el) => $(el).text())
           .toArray();
       }

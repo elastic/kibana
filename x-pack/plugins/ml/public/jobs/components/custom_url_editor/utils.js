@@ -12,13 +12,13 @@ import {
 import chrome from 'ui/chrome';
 import rison from 'rison-node';
 
-import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
-import { getPartitioningFieldNames } from 'plugins/ml/../common/util/job_utils';
-import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
-import { replaceTokensInUrlValue } from 'plugins/ml/util/custom_url_utils';
-import { ml } from 'plugins/ml/services/ml_api_service';
-import { mlJobService } from 'plugins/ml/services/job_service';
-import { escapeForElasticsearchQuery } from 'plugins/ml/util/string_utils';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
+import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
+import { parseInterval } from '../../../../common/util/parse_interval';
+import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
+import { ml } from '../../../services/ml_api_service';
+import { mlJobService } from '../../../services/job_service';
+import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
 
 export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
@@ -96,11 +96,6 @@ export function getQueryEntityFieldNames(job) {
   return entityFieldNames;
 }
 
-export function isValidCustomUrlLabel(label) {
-  // TODO - check label is unique for the job.
-  return (label !== undefined) && (label.trim().length > 0);
-}
-
 export function isValidCustomUrlSettingsTimeRange(timeRangeSettings) {
   if (timeRangeSettings.type === TIME_RANGE_TYPE.INTERVAL) {
     const interval = parseInterval(timeRangeSettings.interval);
@@ -110,8 +105,8 @@ export function isValidCustomUrlSettingsTimeRange(timeRangeSettings) {
   return true;
 }
 
-export function isValidCustomUrlSettings(settings) {
-  let isValid = isValidCustomUrlLabel(settings.label);
+export function isValidCustomUrlSettings(settings, savedCustomUrls) {
+  let isValid = isValidLabel(settings.label, savedCustomUrls);
   if (isValid === true) {
     isValid = isValidCustomUrlSettingsTimeRange(settings.timeRange);
   }
@@ -278,7 +273,8 @@ function buildDiscoverUrlFromSettings(settings, job) {
 
   const urlToAdd = {
     url_name: settings.label,
-    url_value: urlValue
+    url_value: urlValue,
+    time_range: TIME_RANGE_TYPE.AUTO,
   };
 
   if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {

@@ -1,0 +1,17 @@
+.watcherNumberInput {
+  width: 85px;
+}
+
+.thresholdWatchExpression {
+  .kuiExpressionButton {
+    margin-right: $euiSizeM;
+  }
+
+  .kuiExpressionButton-isError {
+    border-color: $euiColorDanger;
+  }
+
+  .kuiInputNote {
+    margin-top: $euiSizeS * -1;
+  }
+}

@@ -20,8 +20,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import './data_table.less';
-
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -60,7 +58,7 @@ class DataTableFormat extends Component {
                   iconType="plusInCircle"
                   color="text"
                   aria-label="Filter for value"
-                  className="inspector-table__filter"
+                  className="insDataTableFormat__filter"
                   onClick={() => col.filter(value)}
                 />
               </EuiToolTip>
@@ -75,7 +73,7 @@ class DataTableFormat extends Component {
                     iconType="minusInCircle"
                     color="text"
                     aria-label="Filter out value"
-                    className="inspector-table__filter"
+                    className="insDataTableFormat__filter"
                     onClick={() => col.filterOut(value)}
                   />
                 </EuiToolTip>
@@ -128,6 +126,7 @@ class DataTableFormat extends Component {
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiInMemoryTable
+          className="insDataTableFormat__table"
           data-test-subj="inspectorTable"
           columns={columns}
           items={rows}

@@ -42,12 +42,13 @@ export class Form extends PureComponent {
     clearQuery: PropTypes.func.isRequired,
     save: PropTypes.func.isRequired,
     clear: PropTypes.func.isRequired,
+    showNoResultsMessage: PropTypes.bool.isRequired,
   }
 
   renderClearQueryLink(totalSettings, currentSettings) {
     const { clearQuery } = this.props;
 
-    if(totalSettings !== currentSettings) {
+    if (totalSettings !== currentSettings) {
       return (
         <EuiFlexItem grow={false}>
           <em>
@@ -95,12 +96,23 @@ export class Form extends PureComponent {
     );
   }
 
+  maybeRenderNoSettings(clearQuery) {
+    if (this.props.showNoResultsMessage) {
+      return (
+        <EuiPanel paddingSize="l">
+          No settings found <EuiLink onClick={clearQuery}>(Clear search)</EuiLink>
+        </EuiPanel>
+      );
+    }
+    return null;
+  }
+
   render() {
     const { settings, categories, categoryCounts, clearQuery } = this.props;
     const currentCategories = [];
 
     categories.forEach(category => {
-      if(settings[category] && settings[category].length) {
+      if (settings[category] && settings[category].length) {
         currentCategories.push(category);
       }
     });
@@ -112,11 +124,7 @@ export class Form extends PureComponent {
             return (
               this.renderCategory(category, settings[category], categoryCounts[category]) // fix this
             );
-          }) : (
-            <EuiPanel paddingSize="l">
-              No settings found <EuiLink onClick={clearQuery}>(Clear search)</EuiLink>
-            </EuiPanel>
-          )
+          }) : this.maybeRenderNoSettings(clearQuery)
         }
       </Fragment>
     );

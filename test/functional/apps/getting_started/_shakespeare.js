@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       log.debug('Load empty_kibana and Shakespeare Getting Started data\n'
       + 'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html');
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('empty_kibana', { skipExisting: true });
       log.debug('Load shakespeare data');
       await esArchiver.loadIfNeeded('getting_started/shakespeare');
     });
@@ -107,7 +107,6 @@ export default function ({ getService, getPageObjects }) {
     */
     it('should configure Terms aggregation on play_name', async function () {
       await PageObjects.visualize.clickBucket('X-Axis');
-      await PageObjects.common.sleep(1000);
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       aggIndex = aggIndex + 1;
@@ -139,7 +138,7 @@ export default function ({ getService, getPageObjects }) {
     */
     it('should configure Max aggregation metric on speech_number', async function () {
       await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Y-Axis');
+      await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
       log.debug('Aggregation = Max');
       await PageObjects.visualize.selectYAxisAggregation('Max', 'speech_number', 'Max Speaking Parts', aggIndex);
       await PageObjects.visualize.clickGo();

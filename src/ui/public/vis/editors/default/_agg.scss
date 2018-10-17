@@ -1,0 +1,105 @@
+// Entire container -- found in agg_group.html
+
+.visEditorAgg {
+  @include flex-parent();
+  width: 100%;
+  max-width: 100%;
+
+  //IE10/11 - prevent flex item from overflowing
+  flex-basis: 100%;
+}
+
+//
+// Header -- found in agg.html
+//
+
+.visEditorAggHeader {
+  display: flex;
+  align-items: center;
+  flex: 1 0 auto;
+  margin-bottom: $vis-editor-agg-editor-spacing;
+}
+
+.visEditorAggHeader__toggle {
+  flex: 0 0 auto;
+  margin-right: $vis-editor-agg-editor-spacing;
+  min-width: $euiSizeL;
+  min-height: $euiSizeL;
+  text-align: center;
+}
+
+.visEditorAggHeader__title {
+  flex: 0 0 auto;
+  font-weight: $euiFontWeightBold;
+  @include euiTextTruncate;
+}
+
+.visEditorAggHeader__title--grow {
+  flex-grow: 1;
+}
+
+.visEditorAggHeader__description {
+  flex: 1 1 0;
+  font-weight: $euiFontWeightRegular;
+  padding-right: $vis-editor-agg-editor-spacing;
+  padding-left: $euiSizeXS;
+  @include euiTextTruncate;
+}
+
+.visEditorAggHeader__description--danger {
+  color: $euiColorDanger;
+  font-weight: $euiFontWeightBold;
+}
+
+.visEditorAggHeader__controls {
+  flex: 0 0 auto;
+}
+
+//
+// Misc elements -- found in agg_types/controls/*.html
+//
+
+.visEditorAgg__rangesTable {
+  td {
+    padding: 0 $vis-editor-agg-editor-spacing $vis-editor-agg-editor-spacing 0;
+
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+}
+
+.visEditorAgg__formRow--flex {
+  display: flex;
+
+  > * {
+    flex: 1 1 auto;
+    margin-right: $vis-editor-agg-editor-spacing;
+
+    &:last-child {
+      margin-right: 0px;
+    }
+  }
+}
+
+/**
+  * 1. Hack to split child elements evenly.
+  */
+.visEditorAgg__formRow--split {
+  flex: 1 1 0 !important; /* 1 */
+}
+
+.visEditorAgg__sliderValue {
+  align-self: center;
+  margin: 0 0 0 $vis-editor-agg-editor-spacing;
+  @include euiFontSize;
+}
+
+.visEditorAgg__subAgg {
+  border: 2px solid;
+  border-color: $euiColorLightShade;
+  border-radius: $euiBorderRadius;
+  background-color: transparent;
+  margin: $vis-editor-agg-editor-spacing 0;
+  padding: $vis-editor-agg-editor-spacing;
+}

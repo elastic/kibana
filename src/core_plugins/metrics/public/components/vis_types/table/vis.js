@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import ticFormatter from '../../lib/tick_formatter';
+import tickFormatter from '../../lib/tick_formatter';
 import calculateLabel from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip } from '@elastic/eui';
@@ -58,7 +58,7 @@ class TableVis extends Component {
     const columns = row.series.filter(item => item).map(item => {
       const column = model.series.find(c => c.id === item.id);
       if (!column) return null;
-      const formatter = ticFormatter(column.formatter, column.value_template);
+      const formatter = tickFormatter(column.formatter, column.value_template, this.props.getConfig);
       const value = formatter(item.last);
       let trend;
       if (column.trend_arrows) {

@@ -30,10 +30,12 @@ export function uiSettingsMixin(kbnServer, server) {
   const getDefaults = () => (
     kbnServer.uiExports.uiSettingDefaults
   );
+  const overrides = kbnServer.config.get('uiSettings.overrides');
 
   server.decorate('server', 'uiSettingsServiceFactory', (options = {}) => {
     return uiSettingsServiceFactory(server, {
       getDefaults,
+      overrides,
       ...options
     });
   });
@@ -41,6 +43,7 @@ export function uiSettingsMixin(kbnServer, server) {
   server.addMemoizedFactoryToRequest('getUiSettingsService', request => {
     return getUiSettingsServiceForRequest(server, request, {
       getDefaults,
+      overrides,
     });
   });
 

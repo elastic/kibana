@@ -20,7 +20,13 @@
 import { parse } from '@babel/parser';
 import { isExpressionStatement, isObjectExpression } from '@babel/types';
 
-import { isI18nTranslateFunction, isPropertyWithKey, traverseNodes, formatJSString } from './utils';
+import {
+  isI18nTranslateFunction,
+  isPropertyWithKey,
+  traverseNodes,
+  formatJSString,
+  createParserErrorMessage,
+} from './utils';
 
 const i18nTranslateSources = ['i18n', 'i18n.translate'].map(
   callee => `
@@ -43,6 +49,14 @@ const object = {
 describe('i18n utils', () => {
   test('should remove escaped linebreak', () => {
     expect(formatJSString('Test\\\n str\\\ning')).toEqual('Test string');
+  });
+
+  test('should not escape linebreaks', () => {
+    expect(
+      formatJSString(`Text \n with
+   line-breaks
+`)
+    ).toMatchSnapshot();
   });
 
   test('should detect i18n translate function call', () => {
@@ -69,5 +83,25 @@ describe('i18n utils', () => {
 
     expect(isPropertyWithKey(objectExpresssionProperty, 'id')).toBe(true);
     expect(isPropertyWithKey(objectExpresssionProperty, 'not_id')).toBe(false);
+  });
+
+  test('should create verbose parser error message', () => {
+    expect.assertions(1);
+
+    const content = `function testFunction() {
+  const object = {
+    object: 'with',
+    semicolon: '->';
+  };
+
+  return object;
+}
+`;
+
+    try {
+      parse(content);
+    } catch (error) {
+      expect(createParserErrorMessage(content, error)).toMatchSnapshot();
+    }
   });
 });

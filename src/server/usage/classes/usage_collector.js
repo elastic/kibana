@@ -17,6 +17,35 @@
  * under the License.
  */
 
+import { KIBANA_STATS_TYPE } from '../../status/constants';
 import { Collector } from './collector';
 
-export class UsageCollector extends Collector {}
+export class UsageCollector extends Collector {
+  /*
+   * @param {Object} server - server object
+   * @param {String} options.type - property name as the key for the data
+   * @param {Function} options.init (optional) - initialization function
+   * @param {Function} options.fetch - function to query data
+   * @param {Function} options.formatForBulkUpload - optional
+   * @param {Function} options.rest - optional other properties
+   */
+  constructor(server, { type, init, fetch, formatForBulkUpload = null, ...options } = {}) {
+    super(server, { type, init, fetch, formatForBulkUpload, ...options });
+
+    /*
+     * Currently, for internal bulk uploading, usage stats are part of
+     * `kibana_stats` type, under the `usage` namespace in the document.
+     */
+    const defaultUsageFormatterForBulkUpload = result => {
+      return {
+        type: KIBANA_STATS_TYPE,
+        payload: {
+          usage: {
+            [type]: result
+          }
+        }
+      };
+    };
+    this._formatForBulkUpload = formatForBulkUpload || defaultUsageFormatterForBulkUpload;
+  }
+}

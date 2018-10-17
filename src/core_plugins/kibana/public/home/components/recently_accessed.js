@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './recently_accessed.less';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -34,6 +33,8 @@ import {
   EuiToolTip,
   EuiTitle,
 } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const NUM_LONG_LINKS = 5;
 
@@ -74,7 +75,7 @@ export class RecentlyAccessed extends Component {
             data-test-subj={`moreRecentlyAccessedItem${this.props.recentlyAccessed[i].id}`}
           >
             <EuiLink
-              className="recentlyAccessedDropwdownLink"
+              className="homRecentlyAccessed__dropdownLink"
               href={this.props.recentlyAccessed[i].link}
             >
               {this.props.recentlyAccessed[i].label}
@@ -90,7 +91,7 @@ export class RecentlyAccessed extends Component {
         data-test-subj="openMoreRecentlyAccessedPopover"
       >
         <EuiTextColor
-          className="recentlyAccessedDropdownLabel"
+          className="homRecentlyAccessed__dropdownLabel"
           color="subdued"
         >
           {`${dropdownLinks.length} more`}
@@ -127,7 +128,7 @@ export class RecentlyAccessed extends Component {
     let separator;
     if (includeSeparator) {
       separator = (
-        <EuiFlexItem grow={false} className="recentlyAccessedSeparator">
+        <EuiFlexItem grow={false} className="homRecentlyAccessed__separator">
           <EuiText>
             <EuiIcon
               type="dot"
@@ -147,16 +148,17 @@ export class RecentlyAccessed extends Component {
       <React.Fragment key={recentlyAccessedItem.id}>
         {separator}
         <EuiFlexItem
-          className="recentlyAccessedItem"
+          className="homRecentlyAccessed__item"
           style={style}
           grow={false}
         >
           <EuiToolTip
+            anchorClassName="homRecentlyAccessed__anchor"
             position="bottom"
             content={recentlyAccessedItem.label}
           >
             <EuiLink
-              className="recentlyAccessedLongLink"
+              className="homRecentlyAccessed__longLink"
               href={recentlyAccessedItem.link}
             >
               {recentlyAccessedItem.label}
@@ -197,7 +199,10 @@ export class RecentlyAccessed extends Component {
         <EuiTitle size="xs">
           <h3>
             <EuiTextColor color="subdued">
-              Recently viewed
+              <FormattedMessage
+                id="kbn.home.recentlyAccessed.recentlyViewedTitle"
+                defaultMessage="Recently viewed"
+              />
             </EuiTextColor>
           </h3>
         </EuiTitle>
@@ -205,7 +210,7 @@ export class RecentlyAccessed extends Component {
         <EuiSpacer size="s"/>
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" wrap>
-          <EuiFlexItem grow={false} className="recentlyAccessedFlexItem">
+          <EuiFlexItem grow={false} className="homRecentlyAccessed__flexItem">
             <EuiFlexGroup>
               {this.renderRecentlyAccessed()}
             </EuiFlexGroup>

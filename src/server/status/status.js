@@ -55,11 +55,10 @@ export default class Status extends EventEmitter {
   toJSON() {
     return {
       id: this.id,
-      state: {
-        id: this.state,
-        message: this.message,
-        uiColor: states.get(this.state).uiColor,
-      },
+      state: this.state,
+      icon: states.get(this.state).icon,
+      message: this.message,
+      uiColor: states.get(this.state).uiColor,
       since: this.since
     };
   }

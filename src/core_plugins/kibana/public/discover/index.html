@@ -45,6 +45,7 @@
     <div class="row">
       <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar">
         <disc-field-chooser
+          class="dscFieldChooser"
           columns="state.columns"
           hits="rows"
           field-counts="fieldCounts"
@@ -58,8 +59,8 @@
         </disc-field-chooser>
       </div>
 
-      <div class="discover-wrapper col-md-10">
-        <div class="discover-content">
+      <div class="dscWrapper col-md-10">
+        <div class="dscWrapper__content">
           <discover-unsupported-index-pattern
             ng-if="isUnsupportedIndexPattern"
             unsupported-type="unsupportedIndexPatternType"
@@ -84,7 +85,7 @@
 
             <div
               ng-hide="fetchError"
-              class="discover-overlay"
+              class="dscOverlay"
             >
               <div class="euiTitle" >
                 <h2>Searching</h2>
@@ -95,9 +96,9 @@
           </div>
 
           <!-- result -->
-          <div class="results" ng-show="resultState === 'ready'">
+          <div class="dscResults" ng-show="resultState === 'ready'">
             <button
-              class="kuiButton kuiButton--basic kuiButton--iconText discover-skip-button"
+              class="kuiButton kuiButton--basic kuiButton--iconText dscSkipButton"
               ng-click="showAllRows(); scrollToBottom()"
             >
               <span class="kuiButton__inner">
@@ -106,16 +107,16 @@
               </span>
             </button>
 
-            <section aria-label="Histogram of found documents" class="discover-timechart" ng-if="opts.timefield">
-              <header>
-                <center class="small">
+            <section aria-label="Histogram of found documents" class="dscTimechart" ng-if="opts.timefield">
+              <header class="dscTimechart__header">
+                <div class="small">
                   <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
 
                   &mdash;
 
-                  <span class="results-interval form-inline">
+                  <span class="form-inline">
                     <select
-                      class="form-control"
+                      class="dscResults__interval form-control"
                       ng-model="state.interval"
                       ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
                       ng-blur="toggleInterval()"
@@ -130,7 +131,7 @@
                       Scaled to {{ bucketInterval.description }}
                     </span>
                   </span>
-                </center>
+                </div>
 
               </header>
 
@@ -141,7 +142,7 @@
               </div>
             </section>
 
-            <section class="discover-table" fixed-scroll aria-label="Documents">
+            <section class="dscTable" fixed-scroll aria-label="Documents">
               <doc-table
                 hits="rows"
                 index-pattern="indexPattern"
@@ -163,7 +164,7 @@
 
               <a tabindex="0" id="discoverBottomMarker"></a>
 
-              <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
+              <div ng-if="rows.length == opts.sampleSize" class="dscTable__footer">
                 These are the first {{opts.sampleSize}} documents matching
                 your search, refine your search to see others.
                 <a kbn-accessible-click ng-click="scrollToTop()">Back to top.</a>
