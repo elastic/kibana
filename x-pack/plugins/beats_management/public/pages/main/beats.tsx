@@ -14,12 +14,15 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
 } from '@elastic/eui';
-import { flatten, sortBy } from 'lodash';
+import { flatten, intersection, sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { RouteComponentProps } from 'react-router';
-import { ConfigurationBlockTypes } from 'x-pack/plugins/beats_management/common/constants';
-import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
+import {
+  ConfigurationBlockTypes,
+  UNIQUENESS_ENFORCING_TYPES,
+} from 'x-pack/plugins/beats_management/common/constants';
+import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { AppURLState } from '../../app';
 import { BeatsTableType, Table } from '../../components/table';
@@ -295,25 +298,27 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     if (!this.state.tags) {
       return [];
     }
-    return this.selectedBeatsContainOutput()
-      ? this.state.tags.map(this.mapTagToDisabled)
+    return this.selectedBeatConfigsRequireUniqueness()
+      ? this.state.tags.map(this.disableTagForUniquenessEnforcement)
       : this.state.tags;
   };
 
-  private mapTagToDisabled = (tag: BeatTag) =>
-    tag.configuration_blocks.some(config => config.type === ConfigurationBlockTypes.Output) &&
+  private configBlocksRequireUniqueness = (configurationBlocks: ConfigurationBlock[]) =>
+    intersection(UNIQUENESS_ENFORCING_TYPES, configurationBlocks.map(block => block.type))
+      .length !== 0;
+
+  private disableTagForUniquenessEnforcement = (tag: BeatTag) =>
+    this.configBlocksRequireUniqueness(tag.configuration_blocks) &&
     // if > 0 beats are associated with the tag, it will result in disassociation, so do not disable it
     !this.getSelectedBeats().some(beat => beat.full_tags.some(({ id }) => id === tag.id))
       ? { ...tag, disabled: true }
       : tag;
 
-  private selectedBeatsContainOutput = () =>
+  private selectedBeatConfigsRequireUniqueness = () =>
     // union beat tags
     flatten(this.getSelectedBeats().map(({ full_tags }) => full_tags))
       // map tag list to bool
-      .map(({ configuration_blocks }) =>
-        configuration_blocks.some(config => config.type === ConfigurationBlockTypes.Output)
-      )
+      .map(({ configuration_blocks }) => this.configBlocksRequireUniqueness(configuration_blocks))
       // reduce to result
       .reduce((acc, cur) => acc || cur, false);
 }
