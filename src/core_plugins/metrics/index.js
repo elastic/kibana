@@ -27,7 +27,8 @@ export default function (kibana) {
     uiExports: {
       visTypes: [
         'plugins/metrics/kbn_vis_types'
-      ]
+      ],
+      styleSheetPaths: `${__dirname}/public/index.scss`,
     },
 
     config(Joi) {

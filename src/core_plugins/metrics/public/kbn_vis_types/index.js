@@ -18,7 +18,6 @@
  */
 
 import '../visualizations/less/main.less';
-import '../less/main.less';
 import { MetricsRequestHandlerProvider } from './request_handler';
 import { ReactEditorControllerProvider } from './editor_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';

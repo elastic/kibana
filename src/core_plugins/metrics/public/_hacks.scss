@@ -1,0 +1,128 @@
+// EUITODO: Create our own Markdown styles
+.tvbMarkdown__content {
+  color: rgba(0,0,0,1);
+
+  pre, code, tt {
+    border-radius: 0;
+    font: 1em/1.5em 'Andale Mono', 'Lucida Console', monospace;
+  }
+
+  h1 { font-size: 30px; }
+  h2 { font-size: 26px; }
+  h3 { font-size: 22px; }
+  h4 { font-size: 18px; }
+  h5 { font-size: 16px; }
+  h6 { font-size: 16px; }
+
+  h1, h2, h3, h4, h5, h6, b, strong {
+    margin:0 0 15px 0;
+    font-weight: bold;
+  }
+  em, i, dfn {
+    font-style: italic;
+  }
+  dfn {
+    font-weight:bold;
+  }
+  p, code, pre, kbd {
+    margin:0 0 15px 0;
+  }
+  blockquote {
+    margin:0 15px 15px 15px;
+  }
+  cite {
+    font-style: italic;
+  }
+  li ul, li ol {
+    margin:0 15px;
+  }
+  ul, ol {
+    margin:0 15px 15px 15px;
+  }
+  ul {
+    list-style-type:disc;
+  }
+  ol {
+    list-style-type:decimal;
+  }
+  ol ol {
+    list-style: upper-alpha;
+  }
+  ol ol ol {
+    list-style: lower-roman;
+  }
+  ol ol ol ol {
+    list-style: lower-alpha;
+  }
+  dl {
+    margin:0 0 15px 0;
+  }
+  dl dt {
+    font-weight:bold;
+  }
+  dd {
+    margin-left:1.5em;
+  }
+  table {
+    margin-bottom:1.4em;
+    width:100%;
+  }
+  th {
+    font-weight:bold;
+  }
+  th, td, caption {
+    padding:4px 15px 4px 5px;
+  }
+  tfoot {
+    font-style:italic;
+  }
+  sup, sub {
+    line-height:0;
+  }
+  abbr, acronym {
+    border-bottom: 1px dotted;
+  }
+  address {
+    margin:0 0 15px;
+    font-style:italic;
+  }
+  del {
+    text-decoration: line-through;
+  }
+  pre {
+    margin: 15px 0;
+    white-space: pre;
+  }
+  img {
+    max-width: 100%;
+  }
+  pre, code, tt {
+    background-color: rgba(0,0,0,0.1);
+    color: red;
+    code {
+      color: rgba(0,0,0,1);
+      background-color: transparent;
+    }
+    border: none;
+  }
+
+  .tvbMarkdown.reversed & {
+    .table > thead > tr > th {
+      color: rgba(255,255,255,0.5);
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+    }
+    .table > tbody > tr > td {
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+    color: rgba(255,255,255,1);
+    pre, code, tt {
+      background-color: rgba(255,255,255,0.2);
+      color: #ffa5a8;
+      code {
+        color: rgba(255,255,255,1);
+        background-color: transparent;
+      }
+      border: none;
+    }
+  }
+}
