@@ -11,7 +11,7 @@ export const to = () => ({
   name: 'to',
   aliases: [],
   help: i18n.translate('xpack.canvas.functions.toHelpText', {
-    defaultMessage: 'Explicitly cast from one type to another.',
+    defaultMessage: 'Explicitly cast from one type to another',
   }),
   context: {},
   args: {
