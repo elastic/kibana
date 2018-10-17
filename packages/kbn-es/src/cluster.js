@@ -24,6 +24,7 @@ const { ES_BIN } = require('./paths');
 const { log: defaultLog, parseEsLog, extractConfigFiles } = require('./utils');
 const { createCliError } = require('./errors');
 const exec = require('child_process').exec;
+const treekill = require('tree-kill');
 
 exports.Cluster = class Cluster {
   constructor(log = defaultLog) {
@@ -147,27 +148,12 @@ exports.Cluster = class Cluster {
     }
 
     if (process.platform === 'win32') {
-      await this._winTaskKill(this._process.pid);
+      await treekill(this._process.pid);
     } else {
       this._process.kill();
     }
 
     await this._outcome;
-  }
-
-  /**
-   * Kill windows task
-   */
-  async _winTaskKill(pid) {
-    if (process.platform !== 'win32') {
-      await exec(`taskkill /pid ${pid} /f /t`, error => {
-        if (!error) {
-          return true;
-        } else {
-          return false;
-        }
-      });
-    }
   }
 
   /**
