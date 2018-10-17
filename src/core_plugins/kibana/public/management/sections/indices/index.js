@@ -32,7 +32,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { IndexPatternList } from './index_pattern_list';
-import './index.less';
 
 const INDEX_PATTERN_LIST_DOM_ELEMENT_ID = 'indexPatternListReact';
 

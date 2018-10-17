@@ -24,6 +24,7 @@ import {
   EuiButtonEmpty,
   EuiBadge,
   EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export class List extends Component {
@@ -40,7 +41,7 @@ export class List extends Component {
           indexPatterns.map(pattern => {
             return (
               <div key={pattern.id} >
-                <EuiButtonEmpty size="s" href={pattern.url} data-test-subj="indexPatternLink">
+                <EuiButtonEmpty size="xs" href={pattern.url} data-test-subj="indexPatternLink">
                   {pattern.default ? <Fragment><i aria-label="Default index pattern" className="fa fa-star" /> </Fragment> : ''}
                   {pattern.active ? <strong>{pattern.title}</strong> : pattern.title} {pattern.tag ? (
                     <Fragment key={pattern.tag.key}>
@@ -48,6 +49,7 @@ export class List extends Component {
                     </Fragment>
                   ) : null}
                 </EuiButtonEmpty>
+                <EuiSpacer size="xs"/>
               </div>
             );
           })

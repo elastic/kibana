@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router-dom';
 
 import { CRUD_APP_BASE_PATH } from './constants';
 import { registerRouter } from './services';
@@ -37,6 +37,7 @@ export class App extends Component {
     return (
       <div>
         <Switch>
+          <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/job_list`} />
           <Route exact path={`${CRUD_APP_BASE_PATH}/job_list`} component={JobList} />
           <Route exact path={`${CRUD_APP_BASE_PATH}/create`} component={JobCreate} />
         </Switch>

@@ -74,7 +74,7 @@ export const createJob = (jobConfig) => async (dispatch) => {
 
   // This will open the new job in the detail panel.
   getRouter().history.push({
-    pathname: CRUD_APP_BASE_PATH,
+    pathname: `${CRUD_APP_BASE_PATH}/job_list`,
     search: `?job=${jobConfig.id}`,
   });
 };

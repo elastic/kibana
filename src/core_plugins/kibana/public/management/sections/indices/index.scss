@@ -1,24 +1,15 @@
-@import (reference) "~ui/styles/variables";
-
 #indexPatternListReact {
   .indexPatternList__headerWrapper {
-    padding: 8px;
-  }
-
-  .euiButtonEmpty {
-    width: 100%;
-    padding: 0 8px;
+    padding-bottom: $euiSizeS;
   }
 
   .euiButtonEmpty__content {
     justify-content: left;
+    padding: 0;
+
     span {
       text-overflow: ellipsis;
       overflow: hidden;
     }
   }
-}
-
-#indexPatternFields {
-  padding: 0 16px;
 }
