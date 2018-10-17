@@ -138,11 +138,11 @@ app.directive('watchList', function ($injector, i18n) {
         const numWatchesToDelete = watchesBeingDeleted.length;
 
         const confirmModalText = i18n('xpack.watcher.sections.watchList.deleteSelectedWatchesConfirmModal.descriptionText', {
-          defaultMessage: 'This will permanently delete {numWatchesToDelete, plural, one {# watch} other {# watches}}. Are you sure?',
+          defaultMessage: 'This will permanently delete {numWatchesToDelete, plural, one {# Watch} other {# Watches}}. Are you sure?',
           values: { numWatchesToDelete }
         });
         const confirmButtonText = i18n('xpack.watcher.sections.watchList.deleteSelectedWatchesConfirmModal.deleteButtonLabel', {
-          defaultMessage: 'Delete {numWatchesToDelete, plural, one {# watch} other {# watches}} ',
+          defaultMessage: 'Delete {numWatchesToDelete, plural, one {# Watch} other {# Watches}} ',
           values: { numWatchesToDelete }
         });
 

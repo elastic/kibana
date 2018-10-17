@@ -154,14 +154,14 @@ app.directive('watchDetail', function ($injector, i18n) {
       onWatchDelete = () => {
         const confirmModalOptions = {
           confirmButtonText: i18n('xpack.watcher.sections.watchDetail.deleteConfirmModal.deleteWatchButtonLabel', {
-            defaultMessage: 'Delete Watch1' }
+            defaultMessage: 'Delete Watch' }
           ),
           onConfirm: this.deleteWatch
         };
 
         return confirmModal(
           i18n('xpack.watcher.sections.watchDetail.deleteConfirmModal.description', {
-            defaultMessage: '1This will permanently delete the watch. Are you sure?' }
+            defaultMessage: 'This will permanently delete the watch. Are you sure?' }
           ),
           confirmModalOptions);
       }
