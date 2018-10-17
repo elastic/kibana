@@ -146,7 +146,7 @@
     "leaflet": "0.7.5",
     "less": "2.7.1",
     "less-loader": "2.2.3",
-    "lodash": "3.10.1",
+    "lodash": "elastic/lodash.git#3.10.1-npm-kibana1-5.6",
     "minimatch": "2.0.10",
     "mkdirp": "0.5.1",
     "moment": "2.13.0",
