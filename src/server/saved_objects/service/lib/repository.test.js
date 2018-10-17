@@ -162,12 +162,41 @@ describe('SavedObjectsRepository', () => {
     }
   };
 
+  const deleteByQueryResults = {
+    took: 27,
+    timed_out: false,
+    total: 23,
+    deleted: 23,
+    batches: 1,
+    version_conflicts: 0,
+    noops: 0,
+    retries: { bulk: 0, search: 0 },
+    throttled_millis: 0,
+    requests_per_second: -1,
+    throttled_until_millis: 0,
+    failures: []
+  };
+
   const mappings = {
     doc: {
       properties: {
         'index-pattern': {
           properties: {
             someField: {
+              type: 'keyword'
+            }
+          }
+        },
+        'dashboard': {
+          properties: {
+            otherField: {
+              type: 'keyword'
+            }
+          }
+        },
+        'globaltype': {
+          properties: {
+            yetAnotherField: {
               type: 'keyword'
             }
           }
@@ -183,6 +212,7 @@ describe('SavedObjectsRepository', () => {
     onBeforeWrite = sandbox.stub();
     migrator = {
       migrateDocument: sinon.spy((doc) => doc),
+      awaitMigration: async () => ({ status: 'skipped' }),
     };
 
     const serializer = new SavedObjectsSerializer(schema);
@@ -204,7 +234,6 @@ describe('SavedObjectsRepository', () => {
     sandbox.restore();
   });
 
-
   describe('#create', () => {
     beforeEach(() => {
       callAdminCluster.callsFake((method, params) => ({
@@ -212,6 +241,18 @@ describe('SavedObjectsRepository', () => {
         _id: params.id,
         _version: 2
       }));
+    });
+
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+
+      await expect(savedObjectsRepository.create('index-pattern', {
+        title: 'Logstash'
+      }, {
+        id: 'logstash-*',
+        namespace: 'foo-namespace',
+      })).resolves.toBeDefined();
+      sinon.assert.calledOnce(migrator.awaitMigration);
     });
 
     it('formats Elasticsearch response', async () => {
@@ -373,6 +414,18 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#bulkCreate', () => {
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+      callAdminCluster.returns({ items: [] });
+
+      await expect(savedObjectsRepository.bulkCreate([
+        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
+      ])).resolves.toBeDefined();
+
+      sinon.assert.calledOnce(migrator.awaitMigration);
+    });
+
     it('formats Elasticsearch request', async () => {
       callAdminCluster.returns({ items: [] });
 
@@ -599,6 +652,18 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#delete', () => {
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+      callAdminCluster.returns({
+        result: 'deleted'
+      });
+      await expect(savedObjectsRepository.delete('index-pattern', 'logstash-*', {
+        namespace: 'foo-namespace',
+      })).resolves.toBeDefined();
+
+      sinon.assert.calledOnce(migrator.awaitMigration);
+    });
+
     it('throws notFound when ES is unable to find the document', async () => {
       expect.assertions(1);
 
@@ -672,7 +737,52 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
+  describe('#deleteByNamespace', () => {
+    it('requires namespace to be defined', async () => {
+      callAdminCluster.returns(deleteByQueryResults);
+      expect(savedObjectsRepository.deleteByNamespace()).rejects.toThrowErrorMatchingSnapshot();
+      sinon.assert.notCalled(callAdminCluster);
+      sinon.assert.notCalled(onBeforeWrite);
+    });
+
+    it('requires namespace to be a string', async () => {
+      callAdminCluster.returns(deleteByQueryResults);
+      expect(savedObjectsRepository.deleteByNamespace(['namespace-1', 'namespace-2'])).rejects.toThrowErrorMatchingSnapshot();
+      sinon.assert.notCalled(callAdminCluster);
+      sinon.assert.notCalled(onBeforeWrite);
+    });
+
+    it('constructs a deleteByQuery call using all types that are namespace aware', async () => {
+      callAdminCluster.returns(deleteByQueryResults);
+      const result = await savedObjectsRepository.deleteByNamespace('my-namespace');
+
+      expect(result).toEqual(deleteByQueryResults);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledOnce(onBeforeWrite);
+
+      sinon.assert.calledWithExactly(getSearchDsl, mappings, schema, {
+        namespace: 'my-namespace',
+        type: ['index-pattern', 'dashboard']
+      });
+
+      sinon.assert.calledWithExactly(callAdminCluster, 'deleteByQuery', {
+        body: { conflicts: 'proceed' },
+        ignore: [404],
+        index: '.kibana-test',
+        refresh: 'wait_for'
+      });
+    });
+  });
+
   describe('#find', () => {
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+
+      callAdminCluster.returns(noNamespaceSearchResults);
+      await expect(savedObjectsRepository.find({ type: 'foo' })).resolves.toBeDefined();
+
+      sinon.assert.calledOnce(migrator.awaitMigration);
+    });
 
     it('requires type to be defined', async () => {
       await expect(savedObjectsRepository.find({})).rejects.toThrow(/options\.type must be/);
@@ -834,6 +944,15 @@ describe('SavedObjectsRepository', () => {
       }
     };
 
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+
+      callAdminCluster.returns(Promise.resolve(noNamespaceResult));
+      await expect(savedObjectsRepository.get('index-pattern', 'logstash-*')).resolves.toBeDefined();
+
+      sinon.assert.calledOnce(migrator.awaitMigration);
+    });
+
     it('formats Elasticsearch response when there is no namespace', async () => {
       callAdminCluster.returns(Promise.resolve(noNamespaceResult));
       const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
@@ -906,6 +1025,19 @@ describe('SavedObjectsRepository', () => {
   });
 
   describe('#bulkGet', () => {
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+
+      callAdminCluster.returns({ docs: [] });
+      await expect(savedObjectsRepository.bulkGet([
+        { id: 'one', type: 'config' },
+        { id: 'two', type: 'index-pattern' },
+        { id: 'three', type: 'globaltype' },
+      ])).resolves.toBeDefined();
+
+      sinon.assert.calledOnce(migrator.awaitMigration);
+    });
+
     it('prepends type to id when getting objects when there is no namespace', async () => {
       callAdminCluster.returns({ docs: [] });
 
@@ -1017,6 +1149,16 @@ describe('SavedObjectsRepository', () => {
         _version: newVersion,
         result: 'updated'
       }));
+    });
+
+    it('waits until migrations are complete before proceeding', async () => {
+      migrator.awaitMigration = sinon.spy(async () => sinon.assert.notCalled(callAdminCluster));
+
+      await expect(
+        savedObjectsRepository.update('index-pattern', 'logstash-*', attributes, { namespace: 'foo-namespace' })
+      ).resolves.toBeDefined();
+
+      sinon.assert.calledOnce(migrator.awaitMigration);
     });
 
     it('returns current ES document version', async () => {

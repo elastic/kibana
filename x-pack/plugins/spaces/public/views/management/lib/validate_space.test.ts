@@ -34,6 +34,18 @@ describe('validateSpaceName', () => {
     });
   });
 
+  test('it cannot be composed entirely of whitespace', () => {
+    const space = {
+      id: '',
+      name: '         ',
+    };
+
+    expect(validator.validateSpaceName(space)).toEqual({
+      isInvalid: true,
+      error: `Name is required`,
+    });
+  });
+
   test('it cannot exceed 1024 characters', () => {
     const space = {
       id: '',

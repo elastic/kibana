@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('apis SAML', () => {
+  describe.skip('apis SAML', () => {
     loadTestFile(require.resolve('./security'));
   });
 }
