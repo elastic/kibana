@@ -27,7 +27,7 @@ exports[`i18nDirective sanitizes defaultMessage 1`] = `
     i18n-default-message="<script></script>inner message"
     i18n-id="id2"
   >
-    inner message
+    &lt;script&gt;&lt;/script&gt;inner message
   </div>
 </div>
 `;
