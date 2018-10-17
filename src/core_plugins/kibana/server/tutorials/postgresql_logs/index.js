@@ -32,7 +32,7 @@ export function postgresqlLogsSpecProvider() {
     shortDescription: 'Collect and parse error and slow logs created by PostgreSQL.',
     longDescription: 'The `postgresql` Filebeat module parses error and slow logs created by PostgreSQL.' +
                      ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-postgresql.html).',
-    //euiIconType: 'logoPostgreSQL',
+    euiIconType: 'logoPostgres',
     artifacts: {
       dashboards: [
         {
