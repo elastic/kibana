@@ -105,7 +105,6 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       const exit$ = Rx.fromEvent(childProcess, 'exit').pipe(
         take(1),
         map(([code]) => {
-
           if (process.platform === 'win32') {
             if (!isWinTaskKilled(childProcess.pid)) {
               throw createCliError(`[${name}] exited with code ${code}`);
