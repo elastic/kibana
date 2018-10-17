@@ -22,3 +22,7 @@ All filenames should use `snake_case`.
 
 *Wrong:*
   - `src/kibana/IndexPatterns/IndexPattern.js`
+
+## TypeScript vs JavaScript
+
+Whenever possible, write code in TypeScript instead of javascript, especially if it's new code.  Check out [TYPESCRIPT.md](TYPESCRIPT.md) for help with this process.
