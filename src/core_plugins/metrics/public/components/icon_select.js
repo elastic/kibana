@@ -27,15 +27,10 @@ function renderOption(option) {
   const icon = option.value;
   const label = option.label;
   return (
-    <div className="Select-value">
-      <span
-        className="Select-value-label"
-        aria-label={`${label} icon`}
-      >
-        <span className={`vis_editor__icon_select-value kuiIcon ${icon}`} />
-        { label }
-      </span>
-    </div>
+    <span>
+      <span className={`kuiIcon ${icon}`} aria-hidden="true" />
+      {` ${label}`}
+    </span>
   );
 }
 

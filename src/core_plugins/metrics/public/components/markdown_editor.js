@@ -34,6 +34,8 @@ import 'brace/theme/github';
 import {
   EuiText,
   EuiCodeBlock,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 class MarkdownEditor extends Component {
@@ -114,8 +116,8 @@ class MarkdownEditor extends Component {
     walk(variables);
 
     return (
-      <div className="vis_editor__markdown">
-        <div className="vis_editor__markdown-editor">
+      <div className="tvbMarkdownEditor">
+        <div className="tvbMarkdownEditor__editor">
           <KuiCodeEditor
             onLoad={this.handleOnLoad}
             mode="markdown"
@@ -128,13 +130,15 @@ class MarkdownEditor extends Component {
             onChange={this.handleChange}
           />
         </div>
-        <div className="vis_editor__markdown-variables">
+        <div className="tvbMarkdownEditor__variables">
           <EuiText>
-            The following variables can be used in the Markdown by using the Handlebar (mustache) syntax.{' '}
-            <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
-              Click here for documentation
-            </a>{' '}
-            on the available expressions.
+            <p>
+              The following variables can be used in the Markdown by using the Handlebar (mustache) syntax.{' '}
+              <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
+                Click here for documentation
+              </a>{' '}
+              on the available expressions.
+            </p>
           </EuiText>
           <table className="table">
             <thead>
@@ -145,25 +149,30 @@ class MarkdownEditor extends Component {
             </thead>
             <tbody>{rows}</tbody>
           </table>
+
           {rows.length === 0 && (
-            <div className="vis_editor__no-markdown-variables">No variables available for the selected data metrics.</div>
+            <EuiTitle size="xxs" className="tvbMarkdownEditor__noVariables">
+              <span>No variables available for the selected data metrics.</span>
+            </EuiTitle>
           )}
 
-          <div className="vis_editor__markdown-code-desc">
-            <EuiText>
-              <p>
-                There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for
-                creating lists with data from a group by...
-              </p>
-            </EuiText>
-          </div>
+          <EuiSpacer />
+
+          <EuiText>
+            <p>
+              There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for
+              creating lists with data from a group by...
+            </p>
+          </EuiText>
+
+          <EuiSpacer />
 
           <EuiCodeBlock>
             {`# All servers:
 
-            {{#each _all}}
-            - {{ label }} {{ last.formatted }}
-            {{/each}}`}
+    {{#each _all}}
+    - {{ label }} {{ last.formatted }}
+    {{/each}}`}
           </EuiCodeBlock>
         </div>
       </div>

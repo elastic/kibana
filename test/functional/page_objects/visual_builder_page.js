@@ -60,7 +60,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async enterMarkdown(markdown) {
-      const input = await find.byCssSelector('.vis_editor__markdown-editor textarea');
+      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
