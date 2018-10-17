@@ -28,9 +28,9 @@ export const initContainedSearchResultsRoutes = (framework: InfraBackendFramewor
 
   framework.registerRoute<
     InfraWrappableRequest<ContainedSearchResultsApiPostPayload>,
-    ContainedSearchResultsApiPostResponse
+    Promise<ContainedSearchResultsApiPostResponse>
   >({
-    config: {
+    options: {
       validate: {
         payload: Joi.object().keys({
           end: logEntryTimeSchema.required(),
@@ -41,7 +41,7 @@ export const initContainedSearchResultsRoutes = (framework: InfraBackendFramewor
         }),
       },
     },
-    handler: async (request, reply) => {
+    handler: async request => {
       const timings = {
         esRequestSent: Date.now(),
         esResponseProcessed: 0,
@@ -62,12 +62,12 @@ export const initContainedSearchResultsRoutes = (framework: InfraBackendFramewor
 
         timings.esResponseProcessed = Date.now();
 
-        return reply({
+        return {
           results: searchResults,
           timings,
-        });
+        };
       } catch (requestError) {
-        return reply(Boom.wrap(requestError));
+        throw Boom.wrap(requestError);
       }
     },
     method: 'POST',
