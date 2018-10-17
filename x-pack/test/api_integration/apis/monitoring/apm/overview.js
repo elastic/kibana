@@ -26,7 +26,7 @@ export default function ({ getService }) {
       return esArchiver.unload(archive);
     });
 
-    it('should summarize apm cluster with metrics', async () => {
+    it.skip('should summarize apm cluster with metrics', async () => {
       const { body } = await supertest
         .post('/api/monitoring/v1/clusters/GUtE4UwgSR-XUICRDEFKkA/apm')
         .set('kbn-xsrf', 'xxx')
