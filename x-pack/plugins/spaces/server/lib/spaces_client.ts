@@ -10,25 +10,14 @@ import { Space } from '../../common/model/space';
 import { SpacesAuditLogger } from './audit_logger';
 
 export class SpacesClient {
-  private readonly auditLogger: SpacesAuditLogger;
-  private readonly authorization: any;
-  private readonly callWithRequestSavedObjectRepository: any;
-  private readonly internalSavedObjectRepository: any;
-  private readonly request: any;
-
   constructor(
-    auditLogger: SpacesAuditLogger,
-    authorization: any,
-    callWithRequestSavedObjectRepository: any,
-    internalSavedObjectRepository: any,
-    request: any
-  ) {
-    this.auditLogger = auditLogger;
-    this.authorization = authorization;
-    this.callWithRequestSavedObjectRepository = callWithRequestSavedObjectRepository;
-    this.internalSavedObjectRepository = internalSavedObjectRepository;
-    this.request = request;
-  }
+    private readonly auditLogger: SpacesAuditLogger,
+    private readonly authorization: any,
+    private readonly callWithRequestSavedObjectRepository: any,
+    private readonly config: any,
+    private readonly internalSavedObjectRepository: any,
+    private readonly request: any
+  ) {}
 
   public async canEnumerateSpaces(): Promise<boolean> {
     if (this.useRbac()) {
@@ -48,7 +37,7 @@ export class SpacesClient {
       const { saved_objects } = await this.internalSavedObjectRepository.find({
         type: 'space',
         page: 1,
-        perPage: 1000,
+        perPage: this.config.get('xpack.spaces.maxSpaces'),
         sortField: 'name.keyword',
       });
 
@@ -76,7 +65,7 @@ export class SpacesClient {
       const { saved_objects } = await this.callWithRequestSavedObjectRepository.find({
         type: 'space',
         page: 1,
-        perPage: 1000,
+        perPage: this.config.get('xpack.spaces.maxSpaces'),
         sortField: 'name.keyword',
       });
 
@@ -112,6 +101,17 @@ export class SpacesClient {
     const repository = this.useRbac()
       ? this.internalSavedObjectRepository
       : this.callWithRequestSavedObjectRepository;
+
+    const { total } = await repository.find({
+      type: 'space',
+      page: 1,
+      perPage: 0,
+    });
+    if (total >= this.config.get('xpack.spaces.maxSpaces')) {
+      throw Boom.badRequest(
+        'Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting'
+      );
+    }
 
     const attributes = omit(space, ['id', '_reserved']);
     const id = space.id;
@@ -156,6 +156,8 @@ export class SpacesClient {
     }
 
     await repository.delete('space', id);
+
+    await repository.deleteByNamespace(id);
   }
 
   private useRbac(): boolean {

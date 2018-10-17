@@ -9,7 +9,6 @@ import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import 'ui/dirty_prompt';
 import template from './threshold_watch_edit.html';
-import './threshold_watch_edit.less';
 import '../watch_edit_title_panel';
 import 'plugins/watcher/components/threshold_watch_expression';
 import 'plugins/watcher/components/threshold_preview_chart';

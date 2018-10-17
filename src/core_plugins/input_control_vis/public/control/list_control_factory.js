@@ -80,6 +80,7 @@ class ListControl extends Control {
           defaultMessage: 'Disabled until \'{label}\' is set.',
           values: { label: this.ancestors[0].label }
         }));
+        this.lastAncestorValues = undefined;
         return;
       }
 
