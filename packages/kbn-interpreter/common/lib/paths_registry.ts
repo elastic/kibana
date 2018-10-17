@@ -17,52 +17,50 @@
  * under the License.
  */
 
-import clone from 'lodash.clone';
-
 class PathsRegistry {
+  private paths: Map<string, string[]>;
+
   constructor() {
-    this._paths = {};
+    this.paths = new Map();
   }
 
-  register = (type, paths) => {
-    if (!type) throw new Error(`Register requires a type`);
+  public register = (type: string, paths: any) => {
+    if (!type) {
+      throw new Error(`Register requires a type`);
+    }
     const lowerCaseType = type.toLowerCase();
 
     const pathArray = Array.isArray(paths) ? paths : [paths];
-    if (!this._paths[lowerCaseType]) {
-      this._paths[lowerCaseType] = [];
+    if (!this.paths.has(lowerCaseType)) {
+      this.paths.set(lowerCaseType, []);
     }
 
     pathArray.forEach(p => {
-      this._paths[lowerCaseType].push(p);
+      // @ts-ignore
+      this.paths.get(lowerCaseType).push(p);
     });
   };
 
-  registerAll = (paths) => {
-    Object.keys(paths).forEach(key => {
-      this.register(key, paths[key]);
+  public registerAll = (paths: any) => {
+    Object.keys(paths).forEach(type => {
+      this.register(type, paths[type]);
     });
   };
 
-  toJS = () => {
-    return Object.keys(this._paths).reduce((acc, key) => {
-      acc[key] = this.get(key);
-      return acc;
-    }, {});
+  public toArray = () => {
+    return [...this.paths.values()];
   };
 
-  toArray = () => {
-    return Object.keys(this._paths).map(key => this.get(key));
-  };
-
-  get = (type) => {
-    if (type === undefined) return [];
+  public get = (type: string) => {
+    if (type === undefined) {
+      return [];
+    }
     const lowerCaseType = type.toLowerCase();
-    return this._paths[lowerCaseType] ? clone(this._paths[lowerCaseType]) : [];
+    return this.paths.has(lowerCaseType) ? this.paths.get(lowerCaseType) : [];
   };
 
-  reset = () => {
-    this._paths = {};
+  public reset = () => {
+    this.paths.clear();
   };
 }
 

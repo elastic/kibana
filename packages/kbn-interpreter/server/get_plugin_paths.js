@@ -27,13 +27,17 @@ const readdir = promisify(fs.readdir);
 
 export const getPluginPaths = type => {
   const typePaths = pathsRegistry.get(type);
-  if (!typePaths) throw new Error(`Unknown type: ${type}`);
+  if (!typePaths) {
+    throw new Error(`Unknown type: ${type}`);
+  }
 
   return Promise.all(typePaths.map(path => {
 
     // Get the full path of all files in the directory
     return readdir(path).then(files => files.map(file => {
-      if (!file.endsWith('.js')) return;
+      if (!file.endsWith('.js')) {
+        return;
+      }
       return resolve(path, file);
     }).filter(path => path)).catch();
   })).then(flatten);

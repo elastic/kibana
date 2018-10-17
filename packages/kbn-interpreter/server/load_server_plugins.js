@@ -30,7 +30,9 @@ export const loadServerPlugins = () => {
     types: typesRegistry,
   };
 
-  if (loaded) return loaded;
+  if (loaded) {
+    return loaded;
+  }
 
   loaded = new Promise(resolve => {
     const remainingTypes = Object.keys(types);
@@ -47,11 +49,15 @@ export const loadServerPlugins = () => {
           require(path);
         });
 
+        // delete the global created above (and leaked _)
         delete global.canvas;
         delete global._;
 
-        if (remainingTypes.length) loadType();
-        else resolve(true);
+        if (remainingTypes.length) {
+          loadType();
+        } else {
+          resolve(true);
+        }
       });
     };
 
