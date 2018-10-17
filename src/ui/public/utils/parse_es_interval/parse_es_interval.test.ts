@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { parseEsInterval } from './parse_es_interval';
 import { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
 import { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';
+import { parseEsInterval } from './parse_es_interval';
 
 describe('parseEsInterval', () => {
   it('should correctly parse an interval containing unit and single value', () => {

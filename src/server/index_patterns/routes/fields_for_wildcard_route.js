@@ -28,7 +28,6 @@ export const createFieldsForWildcardRoute = pre => ({
       query: Joi.object().keys({
         pattern: Joi.string().required(),
         meta_fields: Joi.array().items(Joi.string()).default([]),
-        params: Joi.object(),
       }).default()
     },
     handler(req, reply) {

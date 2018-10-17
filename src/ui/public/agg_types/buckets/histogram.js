@@ -99,9 +99,9 @@ export const histogramBucketAgg = new BucketAggType({
             });
           })
           .catch(() => {
-            toastNotifications.addWarning(i18n.translate('ui.aggTypes.histogram.missingMaxMinValuesWarning', {
-              defaultMessage: 'Unable to retrieve max and min values to auto-scale histogram buckets.'
-                + ' This may lead to poor visualization performance.'
+            toastNotifications.addWarning(i18n.translate('common.ui.aggTypes.histogram.missingMaxMinValuesWarning', {
+              // eslint-disable-next-line max-len
+              defaultMessage: 'Unable to retrieve max and min values to auto-scale histogram buckets. This may lead to poor visualization performance.'
             }));
           });
       },

@@ -10,8 +10,6 @@ import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import indexBy from 'lodash/collection/indexBy';
 import { getCapabilitiesForRollupIndices } from '../../lib/map_capabilities';
-import { getFieldCapabilities } from '../../../../../../src/server/index_patterns/service/lib/field_capabilities';
-
 
 /**
  * Get list of fields for rollup index pattern, in the format of regular index pattern fields
@@ -29,6 +27,7 @@ export function registerFieldsForWildcardRoute(server) {
         query: Joi.object().keys({
           pattern: Joi.string(),
           meta_fields: Joi.array().items(Joi.string()).default([]),
+          fields: Joi.array(),
           params: Joi.object().keys({
             rollup_index: Joi.string().required(),
           }).default({})
@@ -38,6 +37,7 @@ export function registerFieldsForWildcardRoute(server) {
     handler: async (request, reply) => {
       const {
         meta_fields: metaFields,
+        fields,
         params,
       } = request.query;
 
@@ -47,7 +47,7 @@ export function registerFieldsForWildcardRoute(server) {
       try {
         const rollupFields = [];
         const rollupFieldNames = [];
-        const fieldsFromFieldCapsApi = indexBy(await getFieldCapabilities(callWithRequest, [rollupIndex], metaFields), 'name');
+        const fieldsFromFieldCapsApi = indexBy(fields, 'name');
         const rollupIndexCapabilities = getCapabilitiesForRollupIndices(await callWithRequest('rollup.rollupIndexCapabilities', {
           indexPattern: rollupIndex
         }))[rollupIndex].aggs;

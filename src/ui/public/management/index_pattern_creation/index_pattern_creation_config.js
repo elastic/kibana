@@ -46,6 +46,7 @@ export class IndexPatternCreationConfig {
     return {
       text: indexPatternButtonText,
       description: indexPatternButtonDescription,
+      testSubj: `createStandardIndexPatternButton`,
       onClick: () => {
         urlHandler('/management/kibana/index');
       },

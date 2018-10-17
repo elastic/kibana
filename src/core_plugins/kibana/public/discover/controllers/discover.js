@@ -284,9 +284,13 @@ function discoverController(
 
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.create();
-  timeRangeSearchSource.setField('filter', () => {
-    return isDefaultTypeIndexPattern($scope.indexPattern) && timefilter.createFilter($scope.indexPattern);
-  });
+  if(isDefaultTypeIndexPattern($scope.indexPattern)) {
+    timeRangeSearchSource.setField('filter', () => {
+      return timefilter.createFilter($scope.indexPattern);
+    });
+  } else {
+    delete $scope.indexPattern.timeFieldName;
+  }
 
   $scope.searchSource.setParent(timeRangeSearchSource);
 

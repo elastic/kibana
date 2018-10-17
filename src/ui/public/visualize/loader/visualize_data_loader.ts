@@ -67,7 +67,7 @@ export class VisualizeDataLoader {
     this.responseHandler = getHandler(responseHandlers, responseHandler);
   }
 
-  public fetch = async (params: RequestHandlerParams): Promise<any> => {
+  public async fetch(params: RequestHandlerParams): Promise<any> {
     this.vis.filters = { timeRange: params.timeRange };
     this.vis.requestError = undefined;
     this.vis.showRequestError = false;
@@ -110,5 +110,5 @@ export class VisualizeDataLoader {
         text: e.message,
       });
     }
-  };
+  }
 }
