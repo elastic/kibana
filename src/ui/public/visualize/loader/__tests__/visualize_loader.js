@@ -95,7 +95,7 @@ describe('visualize loader', () => {
         }
       ]
     });
-    vis.type.requestHandler = 'none';
+    vis.type.requestHandler = 'courier';
     vis.type.responseHandler = 'none';
     vis.type.requiresSearch = false;
 

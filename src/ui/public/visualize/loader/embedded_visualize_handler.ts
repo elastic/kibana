@@ -19,6 +19,7 @@
 
 import { EventEmitter } from 'events';
 import { debounce } from 'lodash';
+import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { IPrivate } from '../../private';
 import { RenderCompleteHelper } from '../../render_complete';
@@ -68,7 +69,7 @@ export class EmbeddedVisualizeHandler {
   private readonly appState?: AppState;
   private uiState: PersistedState;
   private dataLoader: VisualizeDataLoader;
-  private inspectorAdapters = {};
+  private inspectorAdapters: Adapters = {};
 
   constructor(
     private readonly element: HTMLElement,
@@ -112,6 +113,7 @@ export class EmbeddedVisualizeHandler {
 
     this.dataLoader = new VisualizeDataLoader(vis, Private);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
+    this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
     this.vis.hasInspector = this.hasInspector;
 
@@ -246,8 +248,8 @@ export class EmbeddedVisualizeHandler {
    * since we need to read out data from the the vis type to check which
    * inspectors are available.
    */
-  private getActiveInspectorAdapters = () => {
-    const adapters = {} as any;
+  private getActiveInspectorAdapters = (): Adapters => {
+    const adapters: Adapters = {};
     const { inspectorAdapters: typeAdapters } = this.vis.type;
 
     // Add the requests inspector adapters if the vis type explicitly requested it via
@@ -307,7 +309,6 @@ export class EmbeddedVisualizeHandler {
   };
 
   private fetch = (forceFetch: boolean = false) => {
-    this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
     this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
