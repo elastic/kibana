@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const text = () => ({
   name: 'text',
   displayName: i18n.translate('xpack.canvas.renderers.textDisplayName', {
-    defaultMessage: 'Plain Text',
+    defaultMessage: 'Plain text',
   }),
   help: i18n.translate('xpack.canvas.renderers.textHelpText', {
     defaultMessage: 'Render output as plain text',

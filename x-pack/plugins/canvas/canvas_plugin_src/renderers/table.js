@@ -13,7 +13,7 @@ import { Datatable } from '../../public/components/datatable';
 export const table = () => ({
   name: 'table',
   displayName: i18n.translate('xpack.canvas.renderers.tableDisplayName', {
-    defaultMessage: 'Data Table',
+    defaultMessage: 'Data table',
   }),
   help: i18n.translate('xpack.canvas.renderers.tableHelpText', {
     defaultMessage: 'Render tabular data as HTML',

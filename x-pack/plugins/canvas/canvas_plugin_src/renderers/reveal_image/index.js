@@ -12,7 +12,7 @@ import './reveal_image.scss';
 export const revealImage = () => ({
   name: 'revealImage',
   displayName: i18n.translate('xpack.canvas.renderers.revealImageDisplayName', {
-    defaultMessage: 'Image Reveal',
+    defaultMessage: 'Image reveal',
   }),
   help: i18n.translate('xpack.canvas.renderers.revealImageHelpText', {
     defaultMessage: 'Reveal a percentage of an image to make a custom gauge-style chart',

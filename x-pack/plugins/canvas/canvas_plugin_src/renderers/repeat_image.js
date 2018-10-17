@@ -13,7 +13,7 @@ import { isValid } from '../../common/lib/url';
 export const repeatImage = () => ({
   name: 'repeatImage',
   displayName: i18n.translate('xpack.canvas.renderers.repeatImageDisplayName', {
-    defaultMessage: 'Image Repeat',
+    defaultMessage: 'Image repeat',
   }),
   help: i18n.translate('xpack.canvas.renderers.repeatImageHelpText', {
     defaultMessage: 'Repeat an image a given number of times',

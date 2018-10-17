@@ -14,7 +14,7 @@ import { TimeFilter } from './components/time_filter';
 export const timeFilter = () => ({
   name: 'time_filter',
   displayName: i18n.translate('xpack.canvas.renderers.timeFilterDisplayName', {
-    defaultMessage: 'Time Filter',
+    defaultMessage: 'Time filter',
   }),
   help: i18n.translate('xpack.canvas.renderers.timeFilterHelpText', {
     defaultMessage: 'Set a time window',

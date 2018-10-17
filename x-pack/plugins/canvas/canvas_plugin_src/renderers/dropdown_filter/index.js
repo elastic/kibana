@@ -14,7 +14,7 @@ import { DropdownFilter } from './component';
 export const dropdownFilter = () => ({
   name: 'dropdown_filter',
   displayName: i18n.translate('xpack.canvas.renderers.dropdownFilterDisplayName', {
-    defaultMessage: 'Dropdown Filter',
+    defaultMessage: 'Dropdown filter',
   }),
   help: i18n.translate('xpack.canvas.renderers.dropdownFilterHelpText', {
     defaultMessage: 'A dropdown from which you can select values for an "exactly" filter',

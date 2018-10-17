@@ -12,7 +12,7 @@ import { AdvancedFilter } from './component';
 export const advancedFilter = () => ({
   name: 'advanced_filter',
   displayName: i18n.translate('xpack.canvas.renderers.advancedFilterDisplayName', {
-    defaultMessage: 'Advanced Filter',
+    defaultMessage: 'Advanced filter',
   }),
   help: i18n.translate('xpack.canvas.renderers.advancedFilterHelpText', {
     defaultMessage: 'Render a Canvas filter expression',

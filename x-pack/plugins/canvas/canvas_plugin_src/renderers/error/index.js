@@ -14,7 +14,7 @@ import { Popover } from '../../../public/components/popover';
 export const error = () => ({
   name: 'error',
   displayName: i18n.translate('xpack.canvas.renderers.errorDisplayName', {
-    defaultMessage: 'Error Information',
+    defaultMessage: 'Error information',
   }),
   help: i18n.translate('xpack.canvas.renderers.errorHelpText', {
     defaultMessage: 'Render error data in a way that is helpful to users',
