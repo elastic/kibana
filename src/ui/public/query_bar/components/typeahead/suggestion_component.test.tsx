@@ -17,12 +17,6 @@
  * under the License.
  */
 
-// jest.mock('../../metadata', () => ({
-//   metadata: {
-//     branch: 'foo',
-//   },
-// }));
-
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
