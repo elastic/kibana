@@ -25,11 +25,15 @@ declare module '@elastic/eui' {
 
 import { debounce } from 'lodash';
 import React, { Component, SFC } from 'react';
+import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
-import { getAutocompleteProvider, Suggestion } from '../../autocomplete_providers';
+import {
+  AutocompleteSuggestion,
+  AutocompleteSuggestionType,
+  getAutocompleteProvider,
+} from '../../autocomplete_providers';
 import chrome from '../../chrome';
-import { getFromLegacyIndexPattern } from '../../index_patterns/static_utils';
 import { fromUser, toUser } from '../../parse_query';
 import { matchPairs } from '../lib/match_pairs';
 import { QueryLanguageSwitcher } from './language_switcher';
@@ -50,6 +54,7 @@ const KEY_CODES = {
 };
 
 const config = chrome.getUiSettingsClient();
+const recentSearchType: AutocompleteSuggestionType = 'recentSearch';
 
 interface Query {
   query: string;
@@ -70,7 +75,7 @@ interface State {
   inputIsPristine: boolean;
   isSuggestionsVisible: boolean;
   index: number;
-  suggestions: Suggestion[];
+  suggestions: AutocompleteSuggestion[];
   suggestionLimit: number;
 }
 
@@ -176,7 +181,7 @@ export class QueryBar extends Component<Props, State> {
       return;
     }
 
-    const suggestions: Suggestion[] = await getAutocompleteSuggestions({
+    const suggestions: AutocompleteSuggestion[] = await getAutocompleteSuggestions({
       query,
       selectionStart,
       selectionEnd,
@@ -190,7 +195,7 @@ export class QueryBar extends Component<Props, State> {
     start,
     end,
   }: {
-    type: string;
+    type: AutocompleteSuggestionType;
     text: string;
     start: number;
     end: number;
@@ -222,7 +227,7 @@ export class QueryBar extends Component<Props, State> {
 
         this.inputRef.setSelectionRange(start + text.length, start + text.length);
 
-        if (type === 'recentSearch') {
+        if (type === recentSearchType) {
           this.onSubmit();
         } else {
           this.updateSuggestions();
@@ -244,7 +249,7 @@ export class QueryBar extends Component<Props, State> {
       const text = recentSearch;
       const start = 0;
       const end = query.length;
-      return { type: 'recentSearch', text, start, end };
+      return { type: recentSearchType, text, start, end };
     });
   };
 
@@ -258,7 +263,7 @@ export class QueryBar extends Component<Props, State> {
     }
   };
 
-  public onClickSuggestion = (suggestion: Suggestion) => {
+  public onClickSuggestion = (suggestion: AutocompleteSuggestion) => {
     if (!this.inputRef) {
       return;
     }

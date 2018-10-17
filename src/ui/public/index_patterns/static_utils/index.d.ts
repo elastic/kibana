@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { StaticIndexPattern } from 'ui/index_patterns';
+
 interface SavedObject {
   attributes: {
     fields: string;
@@ -24,9 +26,4 @@ interface SavedObject {
   };
 }
 
-interface IndexPattern {
-  fields: any[];
-  title: string;
-}
-
-export function getFromLegacyIndexPattern(indexPatterns: any[]): IndexPattern[];
+export function getFromLegacyIndexPattern(indexPatterns: any[]): StaticIndexPattern[];
