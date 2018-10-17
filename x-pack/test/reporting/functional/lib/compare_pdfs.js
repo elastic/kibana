@@ -16,6 +16,28 @@ import PDFJS from 'pdfjs-dist';
 
 const mkdirAsync = promisify(mkdirp);
 
+async function convertPageToImage(pdfImage, pageNum, log) {
+  // For some reason the library seems to randomly throw "Failed to convert page to image" errors that are
+  // resolved on a retry. We've taken this code out before and just start hitting the error again in our
+  // ci.
+  let failCount = 0;
+  while (true) {
+    try {
+      return await pdfImage.convertPage(pageNum);
+    } catch (error) {
+      log.error(`Error caught while converting pdf page ${pageNum} to png: ${error.message}`);
+      if (failCount < 3) {
+        log.error(`${failCount}: Will try conversion again...`);
+        failCount++;
+        continue;
+      } else {
+        log.error(`Failed ${failCount} times, throwing error`);
+        throw error;
+      }
+    }
+  }
+}
+
 function comparePngs(actualPath, expectedPath, diffPath, log) {
   log.debug(`comparePngs: ${actualPath} vs ${expectedPath}`);
   return new Promise(resolve => {
@@ -105,9 +127,9 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
 
   for (let pageNum = 0; pageNum <= expectedPages; ++pageNum) {
     log.debug(`Converting expected pdf page ${pageNum} to png`);
-    const expectedPagePng = await expectedPdfImage.convertPage(pageNum);
+    const expectedPagePng = await convertPageToImage(expectedPdfImage, pageNum, log);
     log.debug(`Converting actual pdf page ${pageNum} to png`);
-    const actualPagePng = await actualPdfImage.convertPage(pageNum);
+    const actualPagePng = await convertPageToImage(actualPdfImage, pageNum, log);
     const diffPngPath = path.resolve(failureDirectoryPath, `${baselinePdfFileName}-${pageNum}.png`);
     diffTotal += await comparePngs(actualPagePng, expectedPagePng, diffPngPath, log);
     pageNum++;
