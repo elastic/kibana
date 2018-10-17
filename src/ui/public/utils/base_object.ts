@@ -17,39 +17,31 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import rison from 'rison-node';
 import angular from 'angular';
+import _ from 'lodash';
+// @ts-ignore -- awaiting https://github.com/w33ble/rison-node/issues/1
+import rison from 'rison-node';
 
-export function BaseObject(attributes) {
+export class BaseObject {
   // Set the attributes or default to an empty object
-  _.assign(this, attributes);
+  constructor(attributes: Record<string, any> = {}) {
+    // Set the attributes or default to an empty object
+    _.assign(this, attributes);
+  }
+
+  public toObject() {
+    // return just the data.
+    return _.omit(this, (value: any, key: string) => {
+      return key.charAt(0) === '$' || key.charAt(0) === '_' || _.isFunction(value);
+    });
+  }
+
+  public toRISON() {
+    // Use Angular to remove the private vars, and JSON.stringify to serialize
+    return rison.encode(JSON.parse(angular.toJson(this)));
+  }
+
+  public toJSON() {
+    return this.toObject();
+  }
 }
-
-/**
- * Returns the attributes for the object
- * @returns {object}
- */
-BaseObject.prototype.toObject = function () {
-  // return just the data.
-  return _.omit(this, function (value, key) {
-    return key.charAt(0) === '$' || key.charAt(0) === '_' || _.isFunction(value);
-  });
-};
-
-/**
- * Serialize the model to RISON
- * @returns {string}
- */
-BaseObject.prototype.toRISON = function () {
-  // Use Angular to remove the private vars, and JSON.stringify to serialize
-  return rison.encode(JSON.parse(angular.toJson(this)));
-};
-
-/**
- * Serialize the model to JSON
- * @returns {object}
- */
-BaseObject.prototype.toJSON = function () {
-  return this.toObject();
-};

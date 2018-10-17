@@ -13,7 +13,7 @@ export const image = () => ({
     defaultMessage: 'Image',
   }),
   help: i18n.translate('xpack.canvas.elements.imageHelpText', {
-    defaultMessage: 'A static image.',
+    defaultMessage: 'A static image',
   }),
   image: header,
   expression: `image dataurl=null mode="contain"
