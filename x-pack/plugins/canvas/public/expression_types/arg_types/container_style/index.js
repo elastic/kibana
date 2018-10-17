@@ -29,7 +29,7 @@ const containerStyleUI = intl => ({
   name: 'containerStyle',
   displayName: intl.formatMessage({
     id: 'xpack.canvas.expressionTypes.containerStyleDisplayName',
-    defaultMessage: 'Container Style',
+    defaultMessage: 'Container style',
   }),
   help: intl.formatMessage({
     id: 'xpack.canvas.expressionTypes.containerStyleHelpText',

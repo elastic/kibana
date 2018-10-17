@@ -56,7 +56,7 @@ const fontUI = intl => ({
   name: 'font',
   displayName: intl.formatMessage({
     id: 'xpack.canvas.expressionTypes.fontDisplayName',
-    defaultMessage: 'Text Settings',
+    defaultMessage: 'Text settings',
   }),
   help: intl.formatMessage({
     id: 'xpack.canvas.expressionTypes.fontHelpText',

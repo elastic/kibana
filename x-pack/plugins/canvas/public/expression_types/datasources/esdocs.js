@@ -212,7 +212,7 @@ const esdocsUI = intl => ({
   name: 'esdocs',
   displayName: intl.formatMessage({
     id: 'xpack.canvas.expressionTypes.datasource.elasticsearchRawDocumentsDisplayName',
-    defaultMessage: 'Elasticsearch Raw Documents',
+    defaultMessage: 'Elasticsearch raw documents',
   }),
   help: intl.formatMessage({
     id: 'xpack.canvas.expressionTypes.datasource.elasticsearchRawDocumentsHelpText',

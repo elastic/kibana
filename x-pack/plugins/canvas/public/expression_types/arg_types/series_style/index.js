@@ -45,7 +45,7 @@ const seriesStyleUI = intl => ({
   name: 'seriesStyle',
   displayName: intl.formatMessage({
     id: 'xpack.canvas.expressionTypes.seriesStyleDisplayName',
-    defaultMessage: 'Series Style',
+    defaultMessage: 'Series style',
   }),
   help: intl.formatMessage({
     id: 'xpack.canvas.expressionTypes.seriesStyleHelpText',

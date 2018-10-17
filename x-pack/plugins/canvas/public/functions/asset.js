@@ -17,7 +17,7 @@ const assetUI = intl => ({
   type: 'string',
   help: intl.formatMessage({
     id: 'xpack.canvas.functions.asset.useCanvasWorkpadAssetHelpText',
-    defaultMessage: 'Use Canvas workpad asset objects to provide argument values. Usually images.',
+    defaultMessage: 'Use Canvas workpad asset objects to provide argument values. Usually images',
   }),
   args: {
     id: {
