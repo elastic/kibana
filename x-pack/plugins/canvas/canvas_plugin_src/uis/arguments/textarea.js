@@ -65,7 +65,7 @@ EnhancedTextAreaArgInput.propTypes = {
 export const textarea = () => ({
   name: 'textarea',
   displayName: i18n.translate('xpack.canvas.uis.arguments.textareaDisplayName', {
-    defaultMessage: 'textarea',
+    defaultMessage: 'Textarea',
   }),
   help: i18n.translate('xpack.canvas.uis.arguments.textareaHelpText', {
     defaultMessage: 'Input long strings',

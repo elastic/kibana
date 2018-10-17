@@ -23,17 +23,18 @@ const DemodataDatasource = () => (
         id="xpack.canvas.uis.datasource.demodataDescription"
         defaultMessage="This data source is connected to every Canvas element by default. Its purpose is to give you
         some playground data to get started. The demo set contains 4 strings, 3 numbers and a date.
-        Feel free to experiment and, when you're ready, click the {changeDatasource}{' '}
+        Feel free to experiment and, when you're ready, click {changeDatasource}{whitespace}
         link below to connect to your own data.You are using demo data"
         values={{
           changeDatasource: (
             <strong>
               <FormattedMessage
-                id="xpack.canvas.uis.datasource.demodataDescrition.changeDatasourceText"
-                defaultMessage="Change Datasource"
+                id="xpack.canvas.uis.datasource.demodataDescrition.changeYourDatasourceText"
+                defaultMessage="Change your data source"
               />
             </strong>
           ),
+          whitespace: ' ',
         }}
       />
     </p>
@@ -43,10 +44,10 @@ const DemodataDatasource = () => (
 export const demodata = () => ({
   name: 'demodata',
   displayName: i18n.translate('xpack.canvas.uis.datasource.demodataDisplayName', {
-    defaultMessage: 'Demo Data',
+    defaultMessage: 'Demo data',
   }),
   help: i18n.translate('xpack.canvas.uis.datasource.demodataHelpText', {
-    defaultMessage: 'Mock data set with with usernames, prices, projects, countries and phases.',
+    defaultMessage: 'Mock data set with usernames, prices, projects, countries, and phases',
   }),
   // Replace this with a better icon when we have time.
   image: 'logoElasticStack',

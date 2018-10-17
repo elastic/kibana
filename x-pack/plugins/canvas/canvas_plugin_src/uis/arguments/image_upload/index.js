@@ -192,7 +192,7 @@ const ImageUpload = injectI18n(ImageUploadUI);
 export const imageUpload = () => ({
   name: 'imageUpload',
   displayName: i18n.translate('xpack.canvas.uis.arguments.imageUploadDisplayName', {
-    defaultMessage: 'Image Upload',
+    defaultMessage: 'Image upload',
   }),
   help: i18n.translate('xpack.canvas.uis.arguments.imageUploadHelpText', {
     defaultMessage: 'Select or upload an image',

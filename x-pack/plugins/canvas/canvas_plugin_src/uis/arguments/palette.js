@@ -67,7 +67,7 @@ PaletteArgInput.propTypes = {
 export const palette = () => ({
   name: 'palette',
   displayName: i18n.translate('xpack.canvas.uis.arguments.paletteDisplayName', {
-    defaultMessage: 'Color Palette',
+    defaultMessage: 'Color palette',
   }),
   help: i18n.translate('xpack.canvas.uis.arguments.paletteHelpText', {
     defaultMessage: 'Choose a color palette',

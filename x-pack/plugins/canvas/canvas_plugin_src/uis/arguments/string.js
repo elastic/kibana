@@ -59,7 +59,7 @@ EnhancedStringArgInput.propTypes = {
 export const string = () => ({
   name: 'string',
   displayName: i18n.translate('xpack.canvas.uis.arguments.stringDisplayName', {
-    defaultMessage: 'string',
+    defaultMessage: 'String',
   }),
   help: i18n.translate('xpack.canvas.uis.arguments.stringHelpText', {
     defaultMessage: 'Input short strings',

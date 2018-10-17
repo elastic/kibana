@@ -12,7 +12,7 @@ import { ExtendedTemplate } from './extended_template';
 export const axisConfig = () => ({
   name: 'axisConfig',
   displayName: i18n.translate('xpack.canvas.uis.arguments.axisConfigDisplayName', {
-    defaultMessage: 'Axis Config',
+    defaultMessage: 'Axis config',
   }),
   help: i18n.translate('xpack.canvas.uis.arguments.axisConfigHelpText', {
     defaultMessage: 'Visualization axis configuration',

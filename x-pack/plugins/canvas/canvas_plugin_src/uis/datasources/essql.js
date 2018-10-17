@@ -84,7 +84,7 @@ export const essql = () => ({
     defaultMessage: 'Elasticsearch SQL',
   }),
   help: i18n.translate('xpack.canvas.uis.datasource.essqlHelpText', {
-    defaultMessage: 'Use Elasticsearch SQL to get a datatable',
+    defaultMessage: 'Use Elasticsearch SQL to get a data table',
   }),
   // Replace this with a SQL logo when we have one in EUI
   image: 'logoElasticsearch',

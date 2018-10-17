@@ -150,7 +150,7 @@ export const timelion = () => ({
     defaultMessage: 'Timelion',
   }),
   help: i18n.translate('xpack.canvas.uis.datasource.timelionHelpText', {
-    defaultMessage: 'Use timelion syntax to retrieve a timeseries',
+    defaultMessage: 'Use Timelion syntax to retrieve a timeseries',
   }),
   image: 'timelionApp',
   template: templateFromReactComponent(TimelionDatasource),
