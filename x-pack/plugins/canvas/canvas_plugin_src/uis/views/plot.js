@@ -12,7 +12,7 @@ const styleProps = ['lines', 'bars', 'points', 'fill', 'stack'];
 
 export const plot = () => ({
   name: 'plot',
-  displayName: 'Chart Style',
+  displayName: 'Chart style',
   modelArgs: ['x', 'y', 'color', 'size', 'text'],
   args: [
     {
@@ -21,7 +21,7 @@ export const plot = () => ({
     },
     {
       name: 'legend',
-      displayName: 'Legend Position',
+      displayName: 'Legend position',
       help: 'Disable or position the legend',
       argType: 'select',
       default: 'ne',
@@ -31,14 +31,14 @@ export const plot = () => ({
     },
     {
       name: 'xaxis',
-      displayName: 'X-Axis',
+      displayName: 'X-axis',
       help: 'Configure or disable the x-axis',
       argType: 'axisConfig',
       default: true,
     },
     {
       name: 'yaxis',
-      displayName: 'Y-Axis',
+      displayName: 'Y-axis',
       help: 'Configure or disable the Y-axis',
       argType: 'axisConfig',
       default: true,
@@ -50,7 +50,7 @@ export const plot = () => ({
     {
       name: 'defaultStyle',
       displayName: 'Default style',
-      help: 'Set the style to be used by default by every series, unless overridden.',
+      help: 'Set the style to be used by default by every series, unless overridden',
       argType: 'seriesStyle',
       default: '{seriesStyle points=5}',
       options: {
