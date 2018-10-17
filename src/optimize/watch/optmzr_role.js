@@ -17,9 +17,13 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 import WatchServer from './watch_server';
 import WatchOptimizer from './watch_optimizer';
-import { CacheState } from './cache_state';
+// import { DllCompiler } from '../dynamic_dll_plugin';
+import { fromRoot } from '../../utils';
+import { WatchCache } from './watch_cache';
 
 export default async (kbnServer, kibanaHapiServer, config) => {
   const server = new WatchServer(
@@ -33,10 +37,11 @@ export default async (kbnServer, kibanaHapiServer, config) => {
       sourceMaps: config.get('optimize.sourceMaps'),
       prebuild: config.get('optimize.watchPrebuild'),
       unsafeCache: config.get('optimize.unsafeCache'),
-      cacheState: new CacheState({
-        directory: kbnServer.uiBundles.getCacheDirectory(),
-        checkYarnLockFiles: config.get('optimize.cache.checkYarnLock'),
-        checkIncompleteCompile: config.get('optimize.cache.checkIncompleteCompile'),
+      watchCache: new WatchCache({
+        outputPath: config.get('path.data'),
+        dllsPath: fromRoot('./dlls'), // replace by DllCompiler.getRawDllConfig().outputPath
+        cachePath: resolve(kbnServer.uiBundles.getCacheDirectory(), '../../'),
+        maxAge: config.get('optimize.watchCache.maxAge')
       })
     })
   );
