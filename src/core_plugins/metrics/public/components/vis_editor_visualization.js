@@ -19,9 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { keyCodes } from '@elastic/eui';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
 
 const MIN_CHART_HEIGHT = 250;
@@ -134,40 +132,34 @@ class VisEditorVisualization extends Component {
       style.userSelect = 'none';
     }
 
-    const applyButtonClassName = dirty ? 'thor__button-solid-default' : 'thor__button-outlined-grayLight';
     let applyMessage = 'The latest changes have been applied.';
     if (dirty) applyMessage = 'The changes to this visualization have not been applied.';
     if (autoApply) applyMessage = 'The changes will be automatically applied.';
     const applyButton = (
-      <div className="vis_editor__dirty_controls">
-        <label
-          className="vis_editor__dirty_controls-toggle-label"
-          id="tsvbAutoApply"
-          htmlFor="tsvbAutoApplyInput"
-        >
-          Auto Apply
-        </label>
-        <div className="vis_editor__dirty_controls-toggle">
-          <Toggle
+      <EuiFlexGroup className="tvbEditorVisualization__apply" alignItems="center">
+        <EuiFlexItem grow={true}>
+          <EuiSwitch
             id="tsvbAutoApplyInput"
-            defaultChecked={autoApply}
-            icons={false}
+            label="Auto apply"
+            checked={autoApply}
             onChange={this.props.onToggleAutoApply}
           />
-        </div>
-        <div className="vis_editor__dirty_controls-button">
-          <button
-            disabled={!dirty}
-            onClick={this.props.onCommit}
-            className={`${applyButtonClassName} md`}
-          >
-            <i className="fa fa-play" /> Apply Changes
-          </button>
-        </div>
-        <div className={`vis_editor__dirty_controls-message${dirty ? '-dirty' : ''}`}>
-          {applyMessage}
-        </div>
-      </div>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText color={dirty ? 'text' : 'subdued'} size="xs">
+            <p>
+              {applyMessage}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+
+        {!autoApply &&
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="play" fill size="s" onClick={this.props.onCommit} disabled={!dirty}>Apply changes</EuiButton>
+          </EuiFlexItem>
+        }
+      </EuiFlexGroup>
     );
 
     return (
