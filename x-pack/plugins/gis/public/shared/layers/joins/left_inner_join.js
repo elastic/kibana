@@ -53,5 +53,9 @@ export class LeftInnerJoin {
     return this._descriptor.id;
   }
 
+  toDescriptor() {
+    return this._descriptor;
+  }
+
 }
 

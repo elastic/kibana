@@ -64,6 +64,10 @@ export class VectorLayer extends ALayer {
     return true;
   }
 
+  getJoins() {
+    return this._joins.slice();
+  }
+
   getSupportedStyles() {
     return [VectorStyle];
   }
