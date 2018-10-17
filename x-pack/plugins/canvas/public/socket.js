@@ -9,7 +9,7 @@ import io from 'socket.io-client';
 import { functionsRegistry } from '../common/lib/functions_registry';
 import { loadBrowserPlugins } from './lib/load_browser_plugins';
 
-const basePath = chrome.getBasePath();
+const basePath = chrome.getSocketBasePath();
 export const socket = io(undefined, { path: `${basePath}/socket.io` });
 
 socket.on('getFunctionList', () => {

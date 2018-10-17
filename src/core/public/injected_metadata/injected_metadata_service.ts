@@ -26,6 +26,7 @@ export interface InjectedMetadataParams {
     version: string;
     buildNumber: number;
     basePath: string;
+    socketBasePath: string;
     vars: {
       [key: string]: unknown;
     };
@@ -64,6 +65,10 @@ export class InjectedMetadataService {
     return {
       getBasePath: () => {
         return this.state.basePath;
+      },
+
+      getSocketBasePath: () => {
+        return this.state.socketBasePath;
       },
 
       getKibanaVersion: () => {

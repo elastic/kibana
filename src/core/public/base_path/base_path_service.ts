@@ -27,6 +27,7 @@ interface Deps {
 export class BasePathService {
   public start({ injectedMetadata }: Deps) {
     const basePath = injectedMetadata.getBasePath() || '';
+    const socketBasePath = injectedMetadata.getSocketBasePath() || '';
 
     return {
       /**
@@ -34,6 +35,13 @@ export class BasePathService {
        */
       get() {
         return basePath;
+      },
+
+      /**
+       * Get the current socketBasePath as defined by the server
+       */
+      getSocketBasePath() {
+        return socketBasePath;
       },
 
       /**

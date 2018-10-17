@@ -32,4 +32,5 @@ export function initChromeBasePathApi(chrome: { [key: string]: any }) {
   chrome.getBasePath = () => newPlatformBasePath.get();
   chrome.addBasePath = (path: string) => newPlatformBasePath.addToPath(path);
   chrome.removeBasePath = (path: string) => newPlatformBasePath.removeFromPath(path);
+  chrome.getSocketBasePath = () => newPlatformBasePath.getSocketBasePath();
 }

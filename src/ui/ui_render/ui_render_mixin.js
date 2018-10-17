@@ -139,6 +139,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       const request = reply.request;
       const translations = await server.getUiTranslations();
       const basePath = request.getBasePath();
+      const socketBasePath = config.get('server.basePath') || '/';
 
       return reply.view('ui_app', {
         uiPublicUrl: `${basePath}/ui`,
@@ -149,6 +150,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           version: kbnServer.version,
           buildNumber: config.get('pkg.buildNum'),
           basePath,
+          socketBasePath,
           vars: await replaceInjectedVars(
             request,
             defaults(
