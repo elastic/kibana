@@ -95,6 +95,7 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
                 label="Turn on query features"
                 checked={this.props.language === 'kuery'}
                 onChange={this.onSwitchChange}
+                data-test-subj="languageToggle"
               />
             </EuiFormRow>
           </EuiForm>
