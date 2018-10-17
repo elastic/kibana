@@ -79,10 +79,6 @@ function Visualization(props) {
   return <div className={props.className} />;
 }
 
-Visualization.defaultProps = {
-  className: 'thor__visualization'
-};
-
 Visualization.propTypes = {
   backgroundColor: PropTypes.string,
   className: PropTypes.string,
