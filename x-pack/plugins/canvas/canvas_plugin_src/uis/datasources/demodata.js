@@ -23,8 +23,8 @@ const DemodataDatasource = () => (
         id="xpack.canvas.uis.datasource.demodataDescription"
         defaultMessage="This data source is connected to every Canvas element by default. Its purpose is to give you
         some playground data to get started. The demo set contains 4 strings, 3 numbers and a date.
-        Feel free to experiment and, when you're ready, click {changeDatasource}{whitespace}
-        link below to connect to your own data.You are using demo data"
+        Feel free to experiment and, when you're ready, click {changeDatasource} link
+        below to connect to your own data.You are using demo data"
         values={{
           changeDatasource: (
             <strong>
@@ -34,7 +34,6 @@ const DemodataDatasource = () => (
               />
             </strong>
           ),
-          whitespace: ' ',
         }}
       />
     </p>
