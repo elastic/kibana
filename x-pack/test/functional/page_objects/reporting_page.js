@@ -25,7 +25,8 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await esArchiver.load('historic');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
+        'defaultIndex': 'logstash-*',
+        'accessibility:disableAnimations': 'true',
       });
 
       await remote.setWindowSize(1600, 850);
