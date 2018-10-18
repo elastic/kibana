@@ -111,18 +111,26 @@ export async function loadTransactionDistribution({
   });
 }
 
+function addVersion(item) {
+  item.version = item.hasOwnProperty('trace') ? 'v2' : 'v1';
+  return item;
+}
+
 export async function loadSpans({ serviceName, start, end, transactionId }) {
-  return callApi({
+  const result = await callApi({
     pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}/spans`,
     query: {
       start,
       end
     }
   });
+
+  result.hits = result.hits.map(addVersion);
+  return result;
 }
 
 export async function loadTrace({ traceId, start, end }) {
-  return callApi(
+  const result = await callApi(
     {
       pathname: `/api/apm/traces/${traceId}`,
       query: {
@@ -134,6 +142,9 @@ export async function loadTrace({ traceId, start, end }) {
       camelcase: false
     }
   );
+
+  result.hits = result.hits.map(addVersion);
+  return result;
 }
 
 export async function loadTransaction({
@@ -144,7 +155,7 @@ export async function loadTransaction({
   traceId,
   kuery
 }) {
-  const res = await callApi(
+  const result = await callApi(
     {
       pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
       query: {
@@ -158,7 +169,8 @@ export async function loadTransaction({
       camelcase: false
     }
   );
-  return res;
+
+  return addVersion(result);
 }
 
 export async function loadCharts({

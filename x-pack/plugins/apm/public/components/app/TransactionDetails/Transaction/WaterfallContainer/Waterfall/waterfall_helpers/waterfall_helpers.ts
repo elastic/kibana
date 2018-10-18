@@ -153,7 +153,6 @@ export function getWaterfall(
       const docType = hit.processor.event;
       return ['span', 'transaction'].includes(docType);
     })
-    .map(addVersion)
     .map(hit => {
       const docType = hit.processor.event;
       switch (docType) {
@@ -166,7 +165,7 @@ export function getWaterfall(
       }
     });
 
-  const entryTransactionItem = getTransactionItem(addVersion(entryTransaction));
+  const entryTransactionItem = getTransactionItem(entryTransaction);
   const root = getWaterfallRoot(items, entryTransactionItem);
   return {
     duration: root.duration,
@@ -174,9 +173,4 @@ export function getWaterfall(
     childrenCount: hits.length,
     root
   };
-}
-
-function addVersion<T extends Transaction | Span>(hit: T): T {
-  hit.version = hit.hasOwnProperty('trace') ? 'v2' : 'v1';
-  return hit;
 }
