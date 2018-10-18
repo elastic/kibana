@@ -85,7 +85,7 @@ class TablePanelConfig extends Component {
               <EuiSpacer size="m" />
 
               <EuiFlexGroup responsive={false} wrap={true}>
-                <EuiFlexItem>
+                <EuiFlexItem data-test-subj="groupByField">
                   <EuiFormLabel htmlFor={htmlId('field')}>Group by field</EuiFormLabel>
                   <FieldSelect
                     id={htmlId('field')}

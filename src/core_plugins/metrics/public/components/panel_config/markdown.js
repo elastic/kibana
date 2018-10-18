@@ -212,6 +212,7 @@ class MarkdownPanelConfig extends Component {
             Markdown
           </EuiTab>
           <EuiTab
+            data-test-subj="markdownDataBtn"
             isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
