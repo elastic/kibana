@@ -27,6 +27,7 @@ function initChrome() {
 
 const newPlatformBasePath = {
   get: jest.fn().mockReturnValue('get'),
+  getSocketBasePath: jest.fn().mockReturnValue('getSocketBasePath'),
   addToPath: jest.fn().mockReturnValue('addToPath'),
   removeFromPath: jest.fn().mockReturnValue('removeFromPath'),
 };

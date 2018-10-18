@@ -113,6 +113,7 @@ const loadingCountStartContract = {
 
 const basePathStartContract = {
   get: jest.fn(),
+  getSocketBasePath: jest.fn(),
   addToPath: jest.fn(),
   removeFromPath: jest.fn(),
 };

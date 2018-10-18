@@ -27,6 +27,7 @@ function setup(options: any = {}) {
 
   const injectedMetadata = {
     getBasePath: jest.fn().mockReturnValue(injectedBasePath),
+    getSocketBasePath: jest.fn().mockReturnValue('TODO'),
   } as any;
 
   const startContract = service.start({
