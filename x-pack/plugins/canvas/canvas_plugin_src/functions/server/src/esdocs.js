@@ -36,7 +36,7 @@ export const esdocs = () => ({
       help: 'Sort directions as "field, direction". Eg "@timestamp, desc" or "bytes, asc"',
     },
     fields: {
-      help: 'Comma separated list of fields. Fewer fields will perform better.',
+      help: 'Comma separated list of fields. Fewer fields will perform better',
       types: ['string', 'null'],
     },
     metaFields: {

@@ -30,7 +30,7 @@ export class RestElasticsearchAdapter implements ElasticsearchAdapter {
     }
     const ast = fromKueryExpression(kuery);
     const indexPattern = await this.getIndexPattern();
-    return toElasticsearchQuery(ast, indexPattern);
+    return JSON.stringify(toElasticsearchQuery(ast, indexPattern));
   }
   public async getSuggestions(
     kuery: string,

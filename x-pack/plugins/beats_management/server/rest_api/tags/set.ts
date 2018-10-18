@@ -38,7 +38,9 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
     },
   },
   handler: async (request: FrameworkRequest, reply: any) => {
-    const config = get(request, 'payload', { configuration_blocks: [], color: '#DD0A73' });
+    const defaultConfig = { configuration_blocks: [], color: '#DD0A73' };
+    const config = get(request, 'payload', defaultConfig) || defaultConfig;
+
     try {
       const { isValid, result } = await libs.tags.saveTag(request.user, request.params.tag, config);
       if (!isValid) {

@@ -309,6 +309,7 @@ const outputConfig: YamlConfigSchema[] = [
     ui: {
       label: 'Output Type',
       type: 'select',
+      transform: 'removed',
     },
     options: [
       {
@@ -332,7 +333,7 @@ const outputConfig: YamlConfigSchema[] = [
     required: true,
   },
   {
-    id: 'hosts',
+    id: '{{output}}.hosts',
     ui: {
       label: 'Hosts',
       type: 'multi-input',
@@ -342,7 +343,7 @@ const outputConfig: YamlConfigSchema[] = [
     parseValidResult: v => v.split('\n'),
   },
   {
-    id: 'username',
+    id: '{{output}}.username',
     ui: {
       label: 'Username',
       type: 'input',
@@ -351,7 +352,7 @@ const outputConfig: YamlConfigSchema[] = [
     error: 'Unprocessable username',
   },
   {
-    id: 'password',
+    id: '{{output}}.password',
     ui: {
       label: 'Password',
       type: 'password',

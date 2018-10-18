@@ -147,7 +147,7 @@ export default function ({ getService }) {
         .post('/api/beats/agents_tags/removals')
         .set('kbn-xsrf', 'xxx')
         .send({
-          removals: [{ beat_id: nonExistentBeatId, tag: 'production' }],
+          removals: [{ beatId: nonExistentBeatId, tag: 'production' }],
         })
         .expect(200);
 

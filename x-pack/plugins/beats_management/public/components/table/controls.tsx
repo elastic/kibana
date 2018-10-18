@@ -9,7 +9,6 @@ import React from 'react';
 import { AutocompleteField } from '../autocomplete_field/index';
 import { OptionControl } from '../table_controls';
 import { AssignmentOptions as AssignmentOptionsType, KueryBarProps } from './table';
-import { TableSearchControl } from './table_search_control';
 
 interface ControlBarProps {
   assignmentOptions: AssignmentOptionsType;

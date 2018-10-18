@@ -3,11 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
-import { CommonProps, EuiFormRow, EuiSelect } from '@elastic/eui';
+
+import {
+  CommonProps,
+  EuiFormRow,
+  // @ts-ignore
+  EuiSelect,
+} from '@elastic/eui';
 // @ts-ignore
 import { FormsyInputProps, withFormsy } from 'formsy-react';
 import React, { Component, InputHTMLAttributes } from 'react';
+
+const FixedSelect = EuiSelect as React.SFC<any>;
 
 interface ComponentProps extends FormsyInputProps, CommonProps {
   instantValidation: boolean;
@@ -96,7 +103,7 @@ class FieldSelect extends Component<
         isInvalid={!disabled && error}
         error={!disabled && error ? getErrorMessage() : []}
       >
-        <EuiSelect
+        <FixedSelect
           id={id}
           name={name}
           value={getValue() || ''}

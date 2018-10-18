@@ -9,39 +9,10 @@
  *       package includes them.
  */
 
-import { EuiToolTipPosition } from '@elastic/eui';
+import * as eui from '@elastic/eui';
 import { Moment } from 'moment';
 import { ChangeEventHandler, MouseEventHandler, ReactType, Ref, SFC } from 'react';
 
 declare module '@elastic/eui' {
-  export interface EuiBreadcrumbDefinition {
-    text: React.ReactNode;
-    href?: string;
-    onClick?: React.MouseEventHandler<any>;
-  }
-  type EuiBreadcrumbsProps = CommonProps & {
-    responsive?: boolean;
-    truncate?: boolean;
-    max?: number;
-    breadcrumbs: EuiBreadcrumbDefinition[];
-  };
 
-  type EuiHeaderProps = CommonProps;
-  export const EuiHeader: React.SFC<EuiHeaderProps>;
-
-  export type EuiHeaderSectionSide = 'left' | 'right';
-  type EuiHeaderSectionProps = CommonProps & {
-    side?: EuiHeaderSectionSide;
-  };
-  export const EuiHeaderSection: React.SFC<EuiHeaderSectionProps>;
-
-  type EuiHeaderBreadcrumbsProps = EuiBreadcrumbsProps;
-  export const EuiHeaderBreadcrumbs: React.SFC<EuiHeaderBreadcrumbsProps>;
-
-  interface EuiOutsideClickDetectorProps {
-    children: React.ReactNode;
-    isDisabled?: boolean;
-    onOutsideClick: React.MouseEventHandler<Element>;
-  }
-  export const EuiOutsideClickDetector: React.SFC<EuiOutsideClickDetectorProps>;
 }

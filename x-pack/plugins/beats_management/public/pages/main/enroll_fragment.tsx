@@ -35,6 +35,7 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
     this.state = {
       enrolledBeat: null,
       command: 'sudo filebeat',
+      beatType: 'filebeat',
     };
   }
   public pingForBeatWithToken = async (
@@ -121,7 +122,7 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSelect
-                  placeholder="Select your Beat's type"
+                  value={this.state.beatType}
                   options={[
                     { value: 'filebeat', label: 'Filebeat' },
                     { value: 'metricbeat', label: 'Metricbeat' },
@@ -144,7 +145,7 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSelect
-                  placeholder="Select your Beat's type"
+                  value={this.state.command}
                   options={[
                     {
                       value: `sudo ${this.state.beatType}`,

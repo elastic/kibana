@@ -39,6 +39,7 @@ interface MainPagesState {
     enrollmentToken: string;
   } | null;
   beats: CMPopulatedBeat[];
+  unfilteredBeats: CMPopulatedBeat[];
   loadedBeatsAtLeastOnce: boolean;
 }
 
@@ -50,6 +51,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
     this.state = {
       loadedBeatsAtLeastOnce: false,
       beats: [],
+      unfilteredBeats: [],
     };
   }
   public onSelectedTabChanged = (id: string) => {
@@ -68,7 +70,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
   public render() {
     if (
       this.state.loadedBeatsAtLeastOnce &&
-      this.state.beats.length === 0 &&
+      this.state.unfilteredBeats.length === 0 &&
       !this.props.location.pathname.includes('/overview/initial')
     ) {
       return <Redirect to="/overview/initial/help" />;
@@ -231,15 +233,21 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
     }
 
     let beats: CMPopulatedBeat[];
+    let unfilteredBeats: CMPopulatedBeat[];
     try {
-      beats = await this.props.libs.beats.getAll(query);
+      [beats, unfilteredBeats] = await Promise.all([
+        this.props.libs.beats.getAll(query),
+        this.props.libs.beats.getAll(),
+      ]);
     } catch (e) {
       beats = [];
+      unfilteredBeats = [];
     }
     if (this.mounted) {
       this.setState({
         loadedBeatsAtLeastOnce: true,
         beats,
+        unfilteredBeats,
       });
     }
   };

@@ -39,7 +39,7 @@ addValidationRule('isHosts', (form: FormData, values: FieldValue | string[]) => 
 });
 
 addValidationRule('isString', (values: FormData, value: FieldValue) => {
-  return value && value.length > 0;
+  return true;
 });
 
 addValidationRule('isPeriod', (values: FormData, value: FieldValue) => {
@@ -68,7 +68,6 @@ addValidationRule('isYaml', (values: FormData, value: FieldValue) => {
   } catch (e) {
     return false;
   }
-  return true;
 });
 
 interface ComponentProps {
@@ -107,7 +106,22 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
     }
   };
   public onValidSubmit = <ModelType extends any>(model: ModelType) => {
-    this.props.onSubmit(model);
+    const processed = JSON.parse(JSON.stringify(model), (key, value) => {
+      return _.isObject(value) && !_.isArray(value)
+        ? _.mapKeys(value, (v, k: string) => {
+            return k.replace(/{{[^{}]+}}/g, (token: string) => {
+              return model[token.replace(/[{}]+/g, '')] || 'error';
+            });
+          })
+        : value;
+    });
+
+    this.props.schema.forEach(s => {
+      if (s.ui.transform && s.ui.transform === 'removed') {
+        delete processed[s.id];
+      }
+    });
+    this.props.onSubmit(processed);
   };
   public render() {
     return (
@@ -131,7 +145,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     label={schema.ui.label}
                     validations={schema.validations}
                     validationError={schema.error}
-                    required={schema.required}
+                    required={schema.required || false}
                   />
                 );
               case 'password':
@@ -145,7 +159,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     label={schema.ui.label}
                     validations={schema.validations}
                     validationError={schema.error}
-                    required={schema.required}
+                    required={schema.required || false}
                   />
                 );
               case 'multi-input':
