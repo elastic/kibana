@@ -8,6 +8,9 @@ import { resolve } from 'path';
 import { initRoutes } from './server/routes';
 import { kySaltTrucksSpecProvider } from './server/sample_data/ky_salt_trucks';
 import mappings from './mappings.json';
+import { checkLicense } from './check_license';
+import { watchStatusAndLicenseToInitialize } from
+  '../../server/lib/watch_status_and_license_to_initialize';
 
 export function gis(kibana) {
 
@@ -33,14 +36,27 @@ export function gis(kibana) {
     },
 
     init(server) {
-      initRoutes(server);
+      const thisPlugin = this;
+      const xpackMainPlugin = server.plugins.xpack_main;
 
-      server.registerSampleDataset(kySaltTrucksSpecProvider);
-
-      server.injectUiAppVars('gis', async () => {
-        return await server.getInjectedUiAppVars('kibana');
-      });
-
+      watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin,
+        async license => {
+          if (license) {
+            if (license.gis) {
+              initRoutes(server);
+              server.registerSampleDataset(kySaltTrucksSpecProvider);
+              server.injectUiAppVars('gis', async () => {
+                return await server.getInjectedUiAppVars('kibana');
+              });
+            } else {
+              console.log('No GIS for YOU!');
+            }
+            return license;
+          }
+        });
+      xpackMainPlugin.info
+        .feature(thisPlugin.id)
+        .registerLicenseCheckResultsGenerator(checkLicense);
     }
   });
 }
