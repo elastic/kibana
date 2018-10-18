@@ -182,6 +182,7 @@ export class ExplorerChartDistribution extends React.Component {
             return d;
           }
         })
+        // Don't use an arrow function since we need access to `this`.
         .each(function () {
           maxYAxisLabelWidth = Math.max(this.getBBox().width + yAxis.tickPadding(), maxYAxisLabelWidth);
         })
@@ -342,6 +343,7 @@ export class ExplorerChartDistribution extends React.Component {
       // Create any new dots that are needed i.e. if number of chart points has increased.
       dots.enter().append('circle')
         .attr('r', LINE_CHART_ANOMALY_RADIUS)
+        // Don't use an arrow function since we need access to `this`.
         .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
         })
@@ -349,9 +351,9 @@ export class ExplorerChartDistribution extends React.Component {
 
       // Update all dots to new positions.
       const threshold = mlSelectSeverityService.state.get('threshold');
-      dots.attr('cx', function (d) { return lineChartXScale(d.date); })
-        .attr('cy', function (d) { return lineChartYScale(d[CHART_Y_ATTRIBUTE]); })
-        .attr('class', function (d) {
+      dots.attr('cx', d => lineChartXScale(d.date))
+        .attr('cy', d => lineChartYScale(d[CHART_Y_ATTRIBUTE]))
+        .attr('class', (d) => {
           let markerClass = 'metric-value';
           if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= threshold.val) {
             markerClass += ' anomaly-marker ';

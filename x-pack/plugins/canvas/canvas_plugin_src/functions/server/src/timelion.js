@@ -42,7 +42,7 @@ export const timelion = () => ({
     },
   },
   type: 'datatable',
-  help: 'Use timelion to extract one or more timeseries from many sources.',
+  help: 'Use timelion to extract one or more timeseries from many sources',
   fn: (context, args, handlers) => {
     // Timelion requires a time range. Use the time range from the timefilter element in the
     // workpad, if it exists. Otherwise fall back on the function args.
