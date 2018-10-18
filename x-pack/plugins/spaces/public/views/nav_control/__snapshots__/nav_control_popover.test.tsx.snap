@@ -47,6 +47,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
   repositionOnScroll={true}
 >
   <Component
+    onManageSpacesClick={[Function]}
     userProfile={
       Object {
         "hasCapability": [Function],
