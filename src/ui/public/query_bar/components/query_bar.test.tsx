@@ -56,7 +56,8 @@ jest.mock('../../metadata', () => ({
   },
 }));
 
-import { shallow } from 'enzyme';
+import { EuiFieldText } from '@elastic/eui';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { QueryBar } from 'ui/query_bar';
 
@@ -184,5 +185,32 @@ describe('QueryBar', () => {
 
     component.find(QueryLanguageSwitcher).simulate('selectLanguage', 'lucene');
     expect(mockStorage.set).toHaveBeenCalledWith('kibana.userQueryLanguage', 'lucene');
+  });
+
+  it('Should call onSubmit with the current query when the user hits enter inside the query bar', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      <QueryBar
+        query={kqlQuery}
+        onSubmit={mockCallback}
+        appName={'discover'}
+        indexPatterns={[mockIndexPattern]}
+        store={createMockStorage()}
+        disableAutoFocus={true}
+      />
+    );
+
+    const instance = component.instance() as QueryBar;
+    const input = instance.inputRef;
+    const inputWrapper = component.find(EuiFieldText).find('input');
+    inputWrapper.simulate('change', { target: { value: 'extension:jpg' } });
+    inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith({
+      query: 'extension:jpg',
+      language: 'kuery',
+    });
   });
 });

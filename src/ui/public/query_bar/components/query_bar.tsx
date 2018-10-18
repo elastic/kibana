@@ -131,7 +131,8 @@ export class QueryBar extends Component<Props, State> {
     }
   }, 100);
 
-  private inputRef: HTMLInputElement | null = null;
+  public inputRef: HTMLInputElement | null = null;
+
   private componentIsUnmounting = false;
   private persistedLog: PersistedLog | null = null;
 
