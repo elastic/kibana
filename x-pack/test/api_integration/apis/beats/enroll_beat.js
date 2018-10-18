@@ -69,6 +69,7 @@ export default function ({ getService }) {
 
       expect(esResponse._source.beat).to.have.property('verified_on');
       expect(esResponse._source.beat).to.have.property('host_ip');
+      expect(esResponse._source.beat.config_status).to.eql('OK');
     });
 
     it('should contain an access token in the response', async () => {

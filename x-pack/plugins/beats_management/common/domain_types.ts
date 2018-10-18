@@ -57,6 +57,7 @@ export interface ReturnedConfigurationBlock
 
 export interface CMBeat {
   id: string;
+  config_status: 'OK' | 'REQUIRES_UPDATE' | 'WAITING_FOR_SUCCESS' | 'ERROR';
   enrollment_token: string;
   active: boolean;
   access_token: string;

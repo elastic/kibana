@@ -35,7 +35,7 @@ import { ConfigForm } from './config_form';
 interface ComponentProps {
   configBlock?: ConfigurationBlock;
   onClose(): any;
-  onSave(config: ConfigurationBlock): any;
+  onSave?(config: ConfigurationBlock): any;
 }
 
 export class ConfigView extends React.Component<ComponentProps, any> {
@@ -66,7 +66,13 @@ export class ConfigView extends React.Component<ComponentProps, any> {
       <EuiFlyout onClose={this.props.onClose}>
         <EuiFlyoutHeader>
           <EuiTitle size="m">
-            <h2>{this.editMode ? 'Edit Configuration' : 'Add Configuration'}</h2>
+            <h2>
+              {this.editMode
+                ? this.props.onSave
+                  ? 'Edit Configuration'
+                  : 'View Configuration'
+                : 'Add Configuration'}
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -81,6 +87,7 @@ export class ConfigView extends React.Component<ComponentProps, any> {
           <EuiFormRow label="Configuration description">
             <EuiFieldText
               value={this.state.configBlock.description}
+              disabled={!this.props.onSave}
               onChange={this.onValueChange('description')}
               placeholder="Description (optional)"
             />
@@ -95,14 +102,19 @@ export class ConfigView extends React.Component<ComponentProps, any> {
           <EuiHorizontalRule />
 
           <ConfigForm
-            // tslint:disable-next-line:no-console
-            onSubmit={data => {
-              this.props.onSave({
-                ...this.state.configBlock,
-                configs: [data],
-              });
-              this.props.onClose();
-            }}
+            onSubmit={
+              this.props.onSave
+                ? data => {
+                    if (this.props.onSave) {
+                      this.props.onSave({
+                        ...this.state.configBlock,
+                        configs: [data],
+                      });
+                    }
+                    this.props.onClose();
+                  }
+                : undefined
+            }
             canSubmit={canIt => this.setState({ valid: canIt })}
             ref={this.form}
             values={this.state.configBlock}
@@ -123,19 +135,21 @@ export class ConfigView extends React.Component<ComponentProps, any> {
                 Close
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                disabled={!this.state.valid}
-                fill
-                onClick={() => {
-                  if (this.form.current) {
-                    this.form.current.submit();
-                  }
-                }}
-              >
-                Save
-              </EuiButton>
-            </EuiFlexItem>
+            {this.props.onSave && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  disabled={!this.state.valid}
+                  fill
+                  onClick={() => {
+                    if (this.form.current) {
+                      this.form.current.submit();
+                    }
+                  }}
+                >
+                  Save
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>

@@ -74,8 +74,8 @@ interface ComponentProps {
   values: ConfigurationBlock;
   schema: YamlConfigSchema[];
   id: string;
+  onSubmit?: (modal: any) => any;
   canSubmit(canIt: boolean): any;
-  onSubmit(modal: any): any;
 }
 
 export class ConfigForm extends React.Component<ComponentProps, any> {
@@ -101,11 +101,14 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
     this.props.canSubmit(false);
   };
   public submit = () => {
-    if (this.form.current) {
+    if (this.form.current && this.props.onSubmit) {
       this.form.current.click();
     }
   };
   public onValidSubmit = <ModelType extends any>(model: ModelType) => {
+    if (!this.props.onSubmit) {
+      return;
+    }
     const processed = JSON.parse(JSON.stringify(model), (key, value) => {
       return _.isObject(value) && !_.isArray(value)
         ? _.mapKeys(value, (v, k: string) => {
@@ -141,6 +144,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     id={schema.id}
                     defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
                     name={schema.id}
+                    disabled={!this.props.onSubmit}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
                     validations={schema.validations}
@@ -153,6 +157,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                   <FormsyEuiPasswordText
                     key={schema.id}
                     id={schema.id}
+                    disabled={!this.props.onSubmit}
                     defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
                     name={schema.id}
                     helpText={schema.ui.helpText}
@@ -167,6 +172,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                   <FormsyEuiMultiFieldText
                     key={schema.id}
                     id={schema.id}
+                    disabled={!this.props.onSubmit}
                     defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
                     name={schema.id}
                     helpText={schema.ui.helpText}
@@ -182,6 +188,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     key={schema.id}
                     id={schema.id}
                     name={schema.id}
+                    disabled={!this.props.onSubmit}
                     defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
@@ -198,6 +205,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                   <FormsyEuiCodeEditor
                     key={`${schema.id}-${this.props.id}`}
                     mode="yaml"
+                    disabled={!this.props.onSubmit}
                     id={schema.id}
                     defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
                     name={schema.id}
@@ -211,12 +219,14 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                 );
             }
           })}
-          <button
-            type="submit"
-            style={{ display: 'none' }}
-            disabled={!this.state.canSubmit}
-            ref={this.form}
-          />
+          {this.props.onSubmit && (
+            <button
+              type="submit"
+              style={{ display: 'none' }}
+              disabled={!this.state.canSubmit}
+              ref={this.form}
+            />
+          )}
         </Formsy>
       </div>
     );

@@ -58,6 +58,9 @@
             "id": {
               "type": "keyword"
             },
+            "config_status": {
+              "type": "keyword"
+            },
             "active": {
               "type": "boolean"
             },

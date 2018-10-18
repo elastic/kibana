@@ -38,6 +38,7 @@ export default function ({ getService }) {
 
       const beat = esResponse._source.beat;
       expect(beat.tags).to.eql(['qa']);
+      expect(beat.config_status).to.eql('REQUIRES_UPDATE');
     });
 
     it('should remove a single tag from a multiple beats', async () => {
@@ -66,6 +67,7 @@ export default function ({ getService }) {
 
       beat = esResponse._source.beat;
       expect(beat.tags).to.eql(['production', 'qa']); // as beat 'foo' already had 'production' and 'qa' tags attached to it
+      expect(beat.config_status).to.eql('REQUIRES_UPDATE');
 
       // Beat bar
       esResponse = await es.get({

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, IconColor } from '@elastic/eui';
 import { first, sortBy, sortByOrder, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -83,12 +83,37 @@ export const BeatsTableType: TableType = {
     },
     {
       // TODO: update to use actual metadata field
-      field: 'event_rate',
-      name: 'Event rate',
-      sortable: true,
+      field: 'config_status',
+      name: 'Config Status',
+      render: (value: string, beat: CMPopulatedBeat) => {
+        let color: IconColor = 'success';
+        let statusText = 'OK';
+        switch (beat.config_status) {
+          case 'OK':
+            color = 'success';
+            statusText = 'OK';
+            break;
+          case 'REQUIRES_UPDATE':
+            statusText = 'Waiting for Beat checkin';
+          case 'WAITING_FOR_SUCCESS':
+            color = 'warning';
+            statusText = 'Verifying Config';
+            break;
+          case 'ERROR':
+            color = 'danger';
+            statusText = 'Error';
+            break;
+        }
+
+        return (
+          <EuiFlexGroup wrap responsive={true} gutterSize="xs">
+            <EuiHealth color={color}>{statusText}</EuiHealth>
+          </EuiFlexGroup>
+        );
+      },
+      sortable: false,
     },
     {
-      // TODO: update to use actual metadata field
       field: 'full_tags',
       name: 'Last config update',
       render: (tags: BeatTag[]) =>
