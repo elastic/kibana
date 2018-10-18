@@ -29,7 +29,11 @@ import template from './templates/index.html';
 import { defaultQuery } from './templates/default_query';
 
 uiRoutes.when('/dev_tools/searchprofiler', {
-  template: template
+  template: template,
+  controller: ($scope, i18n) => {
+    $scope.registerLicenseLinkText = i18n('xpack.searchProfiler.registerLicenseLink.FragmentText',
+      { defaultMessage: 'register a license' });
+  },
 });
 
 uiModules

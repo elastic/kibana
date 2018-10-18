@@ -18,7 +18,7 @@
         </tabset>
 
         <!-- License error notice -->
-        <div class="kuiNotice" ng-hide="licenseEnabled">
+        <div class="kuiNotice" ng-hide="!licenseEnabled">
           <h2
             class="kuiTitle kuiVerticalRhythmSmall"
             i18n-id="xpack.searchProfiler.licenseErrorMessageTitle"
@@ -29,16 +29,15 @@
           <p
             class="kuiText kuiVerticalRhythmSmall"
             i18n-id="xpack.searchProfiler.licenseErrorMessageDescription"
-            i18n-default-message="The Profiler Visualization requires an active license ({openWrapTag}Trial{closeWrapTag},
-            {openWrapTag}Basic{closeWrapTag}, {openWrapTag}Gold{closeWrapTag} or {openWrapTag}Platinum{closeWrapTag}), but none were found in your cluster."
-            i18n-values="{ openWrapTag: '<code>', closeWrapTag: '</code>' }"
+            i18n-default-message="The Profiler Visualization requires an active license ({licenseTypeList} or {platinumLicenseType}), but none were found in your cluster."
+            i18n-values="{ licenseTypeList: '<code>Trial</code>, <code>Basic</code>, <code>Gold</code>', platinumLicenseType: '<code>Platinum</code>' }"
           ></p>
 
           <p
             class="kuiText kuiVerticalRhythmSmall"
-            i18n-id="xpack.searchProfiler.registerlicenseLinkText"
-            i18n-default-message="Please {openWrapTag}register a license{closeWrapTag} to continue using the Search Profiler"
-            i18n-values="{ openWrapTag: '<a class=\'kuiLink\' href=\'https://www.elastic.co/subscriptions\' rel=\'noopener noreferrer\'>', closeWrapTag: '</a>' }"
+            i18n-id="xpack.searchProfiler.registerLicenseLinkText"
+            i18n-default-message="Please {registerLicenseLink} to continue using the Search Profiler"
+            i18n-values="{ registerLicenseLink: '<a class=\'kuiLink\' href=\'https://www.elastic.co/subscriptions\' rel=\'noopener noreferrer\'>' + registerLicenseLinkText + '</a>' }"
           ></p>
         </div>
       </div>
