@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Server } from '..';
+
 interface AlertCondition {
   name: string;
   runnable(params: any): boolean;
@@ -26,6 +28,15 @@ export class AlertService {
   private conditions: AlertCondition[] = [];
   private condMap: any = {};
   private alerts: any = {};
+
+  constructor(server: Server) {
+    // tslint:disable-next-line:no-unused-expression
+    server.router('/api/alerts',
+      handler(req, resp) => {
+        resp.reply("Hello");
+      }
+    )
+  }
 
   public registerCondition(cond: AlertCondition) {
     this.conditions.push(cond);
