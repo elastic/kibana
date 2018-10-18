@@ -110,16 +110,16 @@ class AnnotationsEditor extends Component {
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormLabel htmlFor={htmlId('timeField')}>Time field (required)</EuiFormLabel>
-                <FieldSelect
-                  id={htmlId('timeField')}
-                  restrict="date"
-                  value={model.time_field}
-                  onChange={this.handleChange(model, 'time_field')}
-                  indexPattern={model.index_pattern}
-                  fields={this.props.fields}
-                  fullWidth
-                />
+                <EuiFormRow id={htmlId('timeField')} label="Time field (required)" fullWidth>
+                  <FieldSelect
+                    restrict="date"
+                    value={model.time_field}
+                    onChange={this.handleChange(model, 'time_field')}
+                    indexPattern={model.index_pattern}
+                    fields={this.props.fields}
+                    fullWidth
+                  />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
 
@@ -163,12 +163,12 @@ class AnnotationsEditor extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <EuiFormLabel htmlFor={htmlId('icon')}>Icon (required)</EuiFormLabel>
-                <IconSelect
-                  id={htmlId('icon')}
-                  value={model.icon}
-                  onChange={this.handleChange(model, 'icon')}
-                />
+                <EuiFormRow id={htmlId('icon')} label="Icon (required)">
+                  <IconSelect
+                    value={model.icon}
+                    onChange={this.handleChange(model, 'icon')}
+                  />
+                </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow

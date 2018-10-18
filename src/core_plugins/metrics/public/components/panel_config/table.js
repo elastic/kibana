@@ -86,15 +86,15 @@ class TablePanelConfig extends Component {
 
               <EuiFlexGroup responsive={false} wrap={true}>
                 <EuiFlexItem data-test-subj="groupByField">
-                  <EuiFormLabel htmlFor={htmlId('field')}>Group by field</EuiFormLabel>
-                  <FieldSelect
-                    id={htmlId('field')}
-                    fields={this.props.fields}
-                    value={model.pivot_id}
-                    indexPattern={model.index_pattern}
-                    onChange={handleSelectChange('pivot_id')}
-                    fullWidth
-                  />
+                  <EuiFormRow id={htmlId('field')} label="Group by field">
+                    <FieldSelect
+                      fields={this.props.fields}
+                      value={model.pivot_id}
+                      indexPattern={model.index_pattern}
+                      onChange={handleSelectChange('pivot_id')}
+                      fullWidth
+                    />
+                  </EuiFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFormRow

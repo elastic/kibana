@@ -130,14 +130,15 @@ class TableSeriesConfig extends Component {
 
         <EuiFlexGroup responsive={false} wrap={true}>
           <EuiFlexItem grow={true}>
-            <EuiFormLabel>Field</EuiFormLabel>
-            <FieldSelect
-              fields={this.props.fields}
-              indexPattern={this.props.panel.index_pattern}
-              value={model.aggregate_by}
-              onChange={handleSelectChange('aggregate_by')}
-              fullWidth
-            />
+            <EuiFormRow label="Field">
+              <FieldSelect
+                fields={this.props.fields}
+                indexPattern={this.props.panel.index_pattern}
+                value={model.aggregate_by}
+                onChange={handleSelectChange('aggregate_by')}
+                fullWidth
+              />
+            </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiFormRow

@@ -32,6 +32,7 @@ import {
   EuiFormLabel,
   EuiFieldText,
   EuiSpacer,
+  EuiFormRow,
 } from '@elastic/eui';
 
 export const FilterRatioAgg = props => {
@@ -79,21 +80,21 @@ export const FilterRatioAgg = props => {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('numerator')}>Numerator</EuiFormLabel>
-          <EuiFieldText
-            id={htmlId('numerator')}
-            onChange={handleTextChange('numerator')}
-            value={model.numerator}
-          />
+          <EuiFormRow id={htmlId('numerator')} label="Numerator">
+            <EuiFieldText
+              onChange={handleTextChange('numerator')}
+              value={model.numerator}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('denominator')}>Denominator</EuiFormLabel>
-          <EuiFieldText
-            id={htmlId('denominator')}
-            onChange={handleTextChange('denominator')}
-            value={model.denominator}
-          />
+          <EuiFormRow id={htmlId('denominator')} label="Denominator">
+            <EuiFieldText
+              onChange={handleTextChange('denominator')}
+              value={model.denominator}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
 
       </EuiFlexGroup>
@@ -115,16 +116,16 @@ export const FilterRatioAgg = props => {
 
         { model.metric_agg !== 'count' ? (
           <EuiFlexItem>
-            <EuiFormLabel htmlFor={htmlId('aggField')}>Field</EuiFormLabel>
-            <FieldSelect
-              id={htmlId('aggField')}
-              fields={fields}
-              type={model.metric_agg}
-              restrict={restrictMode}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-            />
+            <EuiFormRow id={htmlId('aggField')} label="Field">
+              <FieldSelect
+                fields={fields}
+                type={model.metric_agg}
+                restrict={restrictMode}
+                indexPattern={indexPattern}
+                value={model.field}
+                onChange={handleSelectChange('field')}
+              />
+            </EuiFormRow>
           </EuiFlexItem>) : null }
 
       </EuiFlexGroup>

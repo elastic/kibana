@@ -31,6 +31,7 @@ import {
   EuiFormLabel,
   EuiComboBox,
   EuiSpacer,
+  EuiFormRow,
 } from '@elastic/eui';
 
 export const TopHitAgg = props => {
@@ -88,16 +89,16 @@ export const TopHitAgg = props => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('field')}>Field</EuiFormLabel>
-          <FieldSelect
-            id={htmlId('field')}
-            fields={fields}
-            type={model.type}
-            restrict="numeric"
-            indexPattern={indexPattern}
-            value={model.field}
-            onChange={handleSelectChange('field')}
-          />
+          <EuiFormRow id={htmlId('field')} label="Field">
+            <FieldSelect
+              fields={fields}
+              type={model.type}
+              restrict="numeric"
+              indexPattern={indexPattern}
+              value={model.field}
+              onChange={handleSelectChange('field')}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -105,52 +106,52 @@ export const TopHitAgg = props => {
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiFormLabel htmlFor={htmlId('size')}>Size</EuiFormLabel>
-          {/*
-            EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-            Should it be text or number?
-          */}
-          <input
-            id={htmlId('size')}
-            className="tvbAgg__input"
-            value={model.size}
-            onChange={handleTextChange('size')}
-          />
+          <EuiFormRow id={htmlId('size')} label="Size">
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              Should it be text or number?
+            */}
+            <input
+              className="tvbAgg__input"
+              value={model.size}
+              onChange={handleTextChange('size')}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('agg_with')}>Aggregate with</EuiFormLabel>
-          <EuiComboBox
-            isClearable={false}
-            id={htmlId('agg_with')}
-            placeholder="Select"
-            options={aggWithOptions}
-            selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
-            onChange={handleSelectChange('agg_with')}
-            singleSelection={{ asPlainText: true }}
-          />
+          <EuiFormRow id={htmlId('agg_with')} label="Aggregate with">
+            <EuiComboBox
+              isClearable={false}
+              placeholder="Select"
+              options={aggWithOptions}
+              selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
+              onChange={handleSelectChange('agg_with')}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('order_by')}>Order by</EuiFormLabel>
-          <FieldSelect
-            id={htmlId('order_by')}
-            restrict="date"
-            value={model.order_by}
-            onChange={handleSelectChange('order_by')}
-            indexPattern={indexPattern}
-            fields={fields}
-          />
+          <EuiFormRow id={htmlId('order_by')} label="Order by">
+            <FieldSelect
+              restrict="date"
+              value={model.order_by}
+              onChange={handleSelectChange('order_by')}
+              indexPattern={indexPattern}
+              fields={fields}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('order')}>Order</EuiFormLabel>
-          <EuiComboBox
-            isClearable={false}
-            id={htmlId('order')}
-            placeholder="Select..."
-            options={orderOptions}
-            selectedOptions={selectedOrderOption ? [selectedOrderOption] : []}
-            onChange={handleSelectChange('order')}
-            singleSelection={{ asPlainText: true }}
-          />
+          <EuiFormRow id={htmlId('order')} label="Order">
+            <EuiComboBox
+              isClearable={false}
+              placeholder="Select..."
+              options={orderOptions}
+              selectedOptions={selectedOrderOption ? [selectedOrderOption] : []}
+              onChange={handleSelectChange('order')}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

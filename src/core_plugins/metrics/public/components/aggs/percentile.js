@@ -36,6 +36,7 @@ import {
   EuiFormLabel,
   EuiComboBox,
   EuiFieldNumber,
+  EuiFormRow,
 } from '@elastic/eui';
 
 const newPercentile = (opts) => {
@@ -204,16 +205,16 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormLabel htmlFor={htmlId('field')}>Field</EuiFormLabel>
-            <FieldSelect
-              id={htmlId('field')}
-              fields={fields}
-              type={model.type}
-              restrict="numeric"
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-            />
+            <EuiFormRow id={htmlId('field')} label="Field">
+              <FieldSelect
+                fields={fields}
+                type={model.type}
+                restrict="numeric"
+                indexPattern={indexPattern}
+                value={model.field}
+                onChange={handleSelectChange('field')}
+              />
+            </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
 

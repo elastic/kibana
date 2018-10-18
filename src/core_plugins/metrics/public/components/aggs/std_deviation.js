@@ -32,6 +32,7 @@ import {
   EuiFormLabel,
   EuiComboBox,
   EuiFieldText,
+  EuiFormRow,
 } from '@elastic/eui';
 
 export const StandardDeviationAgg = props => {
@@ -79,34 +80,34 @@ export const StandardDeviationAgg = props => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('field')}>Field</EuiFormLabel>
-          <FieldSelect
-            id={htmlId('field')}
-            fields={fields}
-            type={model.type}
-            restrict="numeric"
-            indexPattern={indexPattern}
-            value={model.field}
-            onChange={handleSelectChange('field')}
-          />
+          <EuiFormRow id={htmlId('field')} label="Field">
+            <FieldSelect
+              fields={fields}
+              type={model.type}
+              restrict="numeric"
+              indexPattern={indexPattern}
+              value={model.field}
+              onChange={handleSelectChange('field')}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel htmlFor={htmlId('sigma')}>Sigma</EuiFormLabel>
-          <EuiFieldText
-            id={htmlId('sigma')}
-            value={model.sigma}
-            onChange={handleTextChange('sigma')}
-          />
+          <EuiFormRow id={htmlId('sigma')} label="Sigma">
+            <EuiFieldText
+              value={model.sigma}
+              onChange={handleTextChange('sigma')}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('mode')}>Mode</EuiFormLabel>
-          <EuiComboBox
-            id={htmlId('mode')}
-            options={modeOptions}
-            selectedOptions={selectedModeOption ? [selectedModeOption] : []}
-            onChange={handleSelectChange('mode')}
-            singleSelection={{ asPlainText: true }}
-          />
+          <EuiFormRow id={htmlId('mode')} label="Mode">
+            <EuiComboBox
+              options={modeOptions}
+              selectedOptions={selectedModeOption ? [selectedModeOption] : []}
+              onChange={handleSelectChange('mode')}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

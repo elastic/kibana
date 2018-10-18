@@ -31,6 +31,7 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiFieldText,
+  EuiFormRow,
 } from '@elastic/eui';
 
 export const PercentileRankAgg = props => {
@@ -65,24 +66,24 @@ export const PercentileRankAgg = props => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('field')}>Field</EuiFormLabel>
-          <FieldSelect
-            id={htmlId('field')}
-            fields={fields}
-            type={model.type}
-            restrict="numeric"
-            indexPattern={indexPattern}
-            value={model.field}
-            onChange={handleSelectChange('field')}
-          />
+          <EuiFormRow id={htmlId('field')} label="Field">
+            <FieldSelect
+              fields={fields}
+              type={model.type}
+              restrict="numeric"
+              indexPattern={indexPattern}
+              value={model.field}
+              onChange={handleSelectChange('field')}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('value')}>Value</EuiFormLabel>
-          <EuiFieldText
-            id={htmlId('value')}
-            value={model.value}
-            onChange={handleTextChange('value')}
-          />
+          <EuiFormRow id={htmlId('value')} label="Value">
+            <EuiFieldText
+              value={model.value}
+              onChange={handleTextChange('value')}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>
