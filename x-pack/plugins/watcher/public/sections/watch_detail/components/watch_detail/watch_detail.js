@@ -19,7 +19,6 @@ import template from './watch_detail.html';
 import '../watch_history';
 import '../action_status_table';
 import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
-// import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('xpack/watcher');
 
