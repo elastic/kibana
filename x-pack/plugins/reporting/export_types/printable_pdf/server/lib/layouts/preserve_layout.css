@@ -63,7 +63,7 @@ visualization-editor .visEditor--default > :not(.visEditor__canvas) {
 .tvbEditorVisualization {
   position: static !important;
 }
-.visualize .rhythm_chart__legend-control,
+.visualize .tvbVisTimeSeries__legendToggle,
 .tvbEditor--hideForReporting {
   /* all non-content rows in interface */
   display: none;

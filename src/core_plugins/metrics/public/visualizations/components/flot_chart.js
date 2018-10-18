@@ -297,11 +297,11 @@ class FlotChart extends Component {
       <Resize
         onResize={this.handleResize}
         ref={(el) => this.resize = el}
-        className="rhythm_chart__timeseries-container"
+        className="tvbVisTimeSeries__container"
       >
         <div
           ref={(el) => this.target = el}
-          className="rhythm_chart__timeseries-container"
+          className="tvbVisTimeSeries__container"
         />
       </Resize>
     );

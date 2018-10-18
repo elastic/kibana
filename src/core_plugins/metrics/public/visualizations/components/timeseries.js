@@ -125,9 +125,9 @@ class Timeseries extends Component {
   }
 
   render() {
-    let className = 'rhythm_chart';
+    let className = 'tvbVisTimeSeries';
     if (this.props.reversed) {
-      className += ' reversed';
+      className += ' tvbVisTimeSeries--reversed';
     }
     const styles = reactcss({
       bottomLegend: {
@@ -138,8 +138,8 @@ class Timeseries extends Component {
     }, { bottomLegend: this.props.legendPosition === 'bottom' });
     return (
       <div className={className} data-test-subj="timeseriesChart">
-        <div style={styles.content} className="rhythm_chart__content">
-          <div className="rhythm_chart__visualization">
+        <div style={styles.content} className="tvbVisTimeSeries__content">
+          <div className="tvbVisTimeSeries__visualization">
             <TimeseriesChart
               dateFormat={this.props.dateFormat}
               crosshair={this.props.crosshair}

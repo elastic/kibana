@@ -67,7 +67,7 @@ class Annotation extends Component {
     return(
       <div className="tvbVisAnnotation" style={style.container}>
         <div className="tvbVisAnnotation__line" style={style.line} />
-        <EuiToolTip className="tvbVisAnnotation__tooltip" content={tooltip} position="bottom">
+        <EuiToolTip className="tvbVisAnnotation__tooltip" content={tooltip} position="top">
           <i className={`tvbVisAnnotation__icon fa ${icon}`} style={style.icon} />
         </EuiToolTip>
       </div>

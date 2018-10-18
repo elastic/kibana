@@ -104,7 +104,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getRhythmChartLegendValue() {
-      const metricValue = await find.byCssSelector('.rhythm_chart__legend_value');
+      const metricValue = await find.byCssSelector('.tvbLegend__itemValue');
       await metricValue.session.moveMouseTo(metricValue);
       return await metricValue.getVisibleText();
     }

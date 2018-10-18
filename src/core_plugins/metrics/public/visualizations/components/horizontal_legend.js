@@ -21,34 +21,36 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import createLegendSeries from '../lib/create_legend_series';
 import reactcss from 'reactcss';
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, EuiButtonIcon } from '@elastic/eui';
 
 function HorizontalLegend(props) {
   const rows = props.series.map(createLegendSeries(props));
   const htmlId = htmlIdGenerator();
   const styles = reactcss({
-    hideLegned: {
+    hideLegend: {
       legend: {
         display: 'none'
       }
     }
-  }, { hideLegned: !props.showLegend });
-  let legendControlClass = 'fa fa-chevron-down';
+  }, { hideLegend: !props.showLegend });
+
+  let legendToggleIcon = 'arrowDown';
   if (!props.showLegend) {
-    legendControlClass = 'fa fa-chevron-up';
+    legendToggleIcon = 'arrowUp';
   }
   return (
-    <div className="rhythm_chart__legend-horizontal">
-      <div className="rhythm_chart__legend-control">
-        <button
-          className={legendControlClass}
-          onClick={props.onClick}
-          aria-label="Toggle chart legend"
-          aria-expanded={!!props.showLegend}
-          aria-controls={htmlId('legend')}
-        />
-      </div>
-      <div className="rhythm_chart__legend-series" style={styles.legend} id={htmlId('legend')}>
+    <div className="tvbLegend tvbLegend--horizontal">
+      <EuiButtonIcon
+        className="tvbLegend__toggle"
+        iconType={legendToggleIcon}
+        color="text"
+        iconSize="s"
+        onClick={props.onClick}
+        aria-label="Toggle chart legend"
+        aria-expanded={!!props.showLegend}
+        aria-controls={htmlId('legend')}
+      />
+      <div className="tvbLegend__series" style={styles.legend} id={htmlId('legend')}>
         { rows }
       </div>
     </div>

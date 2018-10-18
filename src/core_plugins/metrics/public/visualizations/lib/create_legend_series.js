@@ -19,7 +19,9 @@
 
 import React from 'react';
 import _ from 'lodash';
-export default props => (row, i) => {
+import { EuiIcon } from '@elastic/eui';
+
+export default props => (row) => {
 
   function tickFormatter(value) {
     if (_.isFunction(props.tickFormatter)) return props.tickFormatter(value);
@@ -28,7 +30,7 @@ export default props => (row, i) => {
 
   const formatter = row.tickFormatter || tickFormatter;
   const value = formatter(props.seriesValues[row.id]);
-  const classes = ['rhythm_chart__legend_item'];
+  const classes = ['tvbLegend__item'];
   const key = row.id;
   if (!_.includes(props.seriesFilter, row.id)) classes.push('disabled');
   if (row.label == null || row.legend === false) return (<div key={key} style={{ display: 'none' }}/>);
@@ -40,13 +42,13 @@ export default props => (row, i) => {
     >
       <button
         onClick={event => props.onToggle(event, row.id)}
-        className="rhythm_chart__legend_button"
+        className="tvbLegend__button"
       >
-        <div className="rhythm_chart__legend_label">
-          <i className="fa fa-circle" style={{ color: row.color }} />
+        <div className="tvbLegend__itemLabel">
+          <EuiIcon type="dot" color={row.color} />
           <span>{ row.label }</span>
         </div>
-        <div className="rhythm_chart__legend_value">{ value }</div>
+        <div className="tvbLegend__itemValue">{ value }</div>
       </button>
     </div>
   );

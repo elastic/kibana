@@ -1,6 +1,6 @@
 .tvbVisAnnotation {
   position: absolute;
-  z-index: $euiZLevel1;
+  z-index: 90; // Specific to not overlap chart tooltip
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -21,9 +21,8 @@
   @include euiBottomShadow($color: $euiColorFullShade);
   @include euiFontSizeXS;
   padding: $euiSizeS;
-  white-space: nowrap;
   animation-duration: .0s;
-  max-width: none;
+  animation-delay: .0;
 }
 
 .tvbVisAnnotation__timestamp {
