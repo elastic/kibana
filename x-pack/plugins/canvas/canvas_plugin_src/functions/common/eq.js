@@ -17,7 +17,7 @@ export const eq = () => ({
       aliases: ['_'],
       types: ['boolean', 'number', 'string', 'null'],
       required: true,
-      help: i18n.translate('xpack.canvas.functions.eq.argsValueHelpText', {
+      help: i18n.translate('xpack.canvas.functions.eq.args.valueHelpText', {
         defaultMessage: 'The value to compare the context to',
       }),
     },

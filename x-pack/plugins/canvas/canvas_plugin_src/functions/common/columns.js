@@ -20,14 +20,14 @@ export const columns = () => ({
   args: {
     include: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.columns.argsIncludeHelpText', {
+      help: i18n.translate('xpack.canvas.functions.columns.args.includeHelpText', {
         defaultMessage: 'A comma separated list of column names to keep in the table',
       }),
       default: null,
     },
     exclude: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.columns.argsExcludeHelpText', {
+      help: i18n.translate('xpack.canvas.functions.columns.args.excludeHelpText', {
         defaultMessage: 'A comma separated list of column names to remove from the table',
       }),
       default: null,

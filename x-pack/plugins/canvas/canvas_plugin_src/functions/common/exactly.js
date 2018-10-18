@@ -20,14 +20,14 @@ export const exactly = () => ({
     column: {
       types: ['string'],
       aliases: ['field', 'c'],
-      help: i18n.translate('xpack.canvas.functions.exactly.argsColumnHelpText', {
+      help: i18n.translate('xpack.canvas.functions.exactly.args.columnHelpText', {
         defaultMessage: 'The column or field to attach the filter to',
       }),
     },
     value: {
       types: ['string'],
       aliases: ['v', 'val'],
-      help: i18n.translate('xpack.canvas.functions.exactly.argsValueHelpText', {
+      help: i18n.translate('xpack.canvas.functions.exactly.args.valueHelpText', {
         defaultMessage: 'The value to match exactly, including white space and capitalization',
       }),
     },

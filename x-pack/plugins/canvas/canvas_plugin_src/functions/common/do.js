@@ -16,7 +16,7 @@ export const doFn = () => ({
     fn: {
       aliases: ['_'],
       multi: true,
-      help: i18n.translate('xpack.canvas.functions.doFn.argsFnHelpText', {
+      help: i18n.translate('xpack.canvas.functions.doFn.args.fnHelpText', {
         defaultMessage:
           'One or more sub-expressions. The value of these is not available in the root pipeline as this function simply returns the passed in context',
       }),

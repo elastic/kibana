@@ -18,19 +18,19 @@ export const csv = () => ({
     data: {
       aliases: ['_'],
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.csv.argsDataHelpText', {
+      help: i18n.translate('xpack.canvas.functions.csv.args.dataHelpText', {
         defaultMessage: 'CSV data to use',
       }),
     },
     delimiter: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.csv.argsDelimiterHelpText', {
+      help: i18n.translate('xpack.canvas.functions.csv.args.delimiterHelpText', {
         defaultMessage: 'Data separation character',
       }),
     },
     newline: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.csv.argsNewLineHelpText', {
+      help: i18n.translate('xpack.canvas.functions.csv.args.newLineHelpText', {
         defaultMessage: 'Row separation character',
       }),
     },

@@ -20,7 +20,7 @@ export const asFn = () => ({
     name: {
       types: ['string'],
       aliases: ['_'],
-      help: i18n.translate('xpack.canvas.functions.as.argsNameHelpText', {
+      help: i18n.translate('xpack.canvas.functions.as.args.nameHelpText', {
         defaultMessage: 'A name to give the column',
       }),
       default: 'value',

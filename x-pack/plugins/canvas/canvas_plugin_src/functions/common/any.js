@@ -18,7 +18,7 @@ export const any = () => ({
       types: ['boolean', 'null'],
       required: true,
       multi: true,
-      help: i18n.translate('xpack.canvas.functions.any.argsConditionHelpText', {
+      help: i18n.translate('xpack.canvas.functions.any.args.conditionHelpText', {
         defaultMessage: 'One or more conditions to check',
       }),
     },

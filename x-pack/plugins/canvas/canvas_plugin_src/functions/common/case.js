@@ -16,21 +16,24 @@ export const caseFn = () => ({
     when: {
       aliases: ['_'],
       resolve: false,
-      help: i18n.translate('xpack.canvas.functions.case.argsWhenHelpText', {
+      help: i18n.translate('xpack.canvas.functions.case.args.whenHelpText', {
         defaultMessage:
-          'This value is compared to the context to see if the condition is met. It is overridden by the "if" argument if both are provided.',
+          'This value is compared to the context to see if the condition is met. It is overridden by the "{ifArgument}" argument if both are provided.',
+        values: {
+          ifArgument: 'if',
+        },
       }),
     },
     if: {
       types: ['boolean'],
-      help: i18n.translate('xpack.canvas.functions.case.argsIfHelpText', {
+      help: i18n.translate('xpack.canvas.functions.case.args.ifHelpText', {
         defaultMessage:
           'This value is used as whether or not the condition is met. It overrides the unnamed argument if both are provided.',
       }),
     },
     then: {
       resolve: false,
-      help: i18n.translate('xpack.canvas.functions.case.argsThenHelpText', {
+      help: i18n.translate('xpack.canvas.functions.case.args.thenHelpText', {
         defaultMessage: 'The value to return if the condition is met',
       }),
     },

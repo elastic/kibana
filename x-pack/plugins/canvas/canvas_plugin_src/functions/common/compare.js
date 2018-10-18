@@ -10,7 +10,10 @@ export const compare = () => ({
   name: 'compare',
   help: i18n.translate('xpack.canvas.functions.compareHelpText', {
     defaultMessage:
-      'Compare the input to something else to determine true or false. Usually used in combination with `{if}`. This only works with primitive types, such as number, string, and boolean.',
+      'Compare the input to something else to determine true or false. Usually used in combination with `{ifArgument}`. This only works with primitive types, such as number, string, and boolean.',
+    values: {
+      ifArgument: '{if}',
+    },
   }),
   aliases: ['condition'],
   example: 'math "random()" | compare gt this=0.5',
@@ -23,14 +26,22 @@ export const compare = () => ({
       aliases: ['_'],
       types: ['string'],
       default: 'eq',
-      help: i18n.translate('xpack.canvas.functions.compare.argsOpHelpText', {
+      help: i18n.translate('xpack.canvas.functions.compare.args.opHelpText', {
         defaultMessage:
-          'The operator to use in the comparison: eq (equal), ne (not equal), lt (less than), gt (greater than), lte (less than equal), gte (greater than eq)',
+          'The operator to use in the comparison: {eqOperator} (equal), {neOperator} (not equal), {ltOperator} (less than), {gtOperator} (greater than), {lteOperator} (less than equal), {gteOperator} (greater than equal)',
+        values: {
+          eqOperator: '{eq}',
+          neOperator: '{ne}',
+          ltOperator: '{lt}',
+          gtOperator: '{gt}',
+          lteOperator: '{lte}',
+          gteOperator: '{gte}',
+        },
       }),
     },
     to: {
       aliases: ['this', 'b'],
-      help: i18n.translate('xpack.canvas.functions.compare.argsToHelpText', {
+      help: i18n.translate('xpack.canvas.functions.compare.args.toHelpText', {
         defaultMessage: 'The value to compare the context to, usually returned by a subexpression',
       }),
     },
@@ -61,7 +72,12 @@ export const compare = () => ({
       default:
         throw new Error(
           i18n.translate('xpack.canvas.functions.compare.invalidCompareOperatorErrorMessage', {
-            defaultMessage: 'Invalid compare operator. Use eq, ne, lt, gt, lte, or gte.',
+            defaultMessage:
+              'Invalid compare operator. Use {validCompareOperatorsList} or {gteOperator}.',
+            values: {
+              validCompareOperatorsList: 'eq, ne, lt, gt, lte,',
+              gteOperator: 'gte',
+            },
           })
         );
     }

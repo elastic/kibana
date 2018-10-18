@@ -22,7 +22,7 @@ export const markdown = () => ({
     expression: {
       aliases: ['_'],
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.markdown.argsExpressionHelpText', {
+      help: i18n.translate('xpack.canvas.functions.markdown.args.expressionHelpText', {
         defaultMessage:
           'A markdown expression. You can pass this multiple times to achieve concatenation',
       }),
@@ -31,7 +31,7 @@ export const markdown = () => ({
     },
     font: {
       types: ['style'],
-      help: i18n.translate('xpack.canvas.functions.markdown.argsFontHelpText', {
+      help: i18n.translate('xpack.canvas.functions.markdown.args.fontHelpText', {
         defaultMessage: 'Font settings. Technically, you can add other styles in here as well',
       }),
       default: '{font}',

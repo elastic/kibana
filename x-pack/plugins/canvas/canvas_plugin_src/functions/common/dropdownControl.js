@@ -20,13 +20,13 @@ export const dropdownControl = () => ({
   args: {
     filterColumn: {
       type: ['string'],
-      help: i18n.translate('xpack.canvas.functions.dropdownControl.argsFilterColumnHelpText', {
+      help: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterColumnHelpText', {
         defaultMessage: 'The column or field to attach the filter to',
       }),
     },
     valueColumn: {
       type: ['string'],
-      help: i18n.translate('xpack.canvas.functions.dropdownControl.argsValueColumnHelpText', {
+      help: i18n.translate('xpack.canvas.functions.dropdownControl.args.valueColumnHelpText', {
         defaultMessage:
           'The datatable column from which to extract the unique values for the drop down',
       }),

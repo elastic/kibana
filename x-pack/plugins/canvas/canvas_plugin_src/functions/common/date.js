@@ -29,16 +29,19 @@ export const date = () => ({
     value: {
       aliases: ['_'],
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.date.argsValueHelpText', {
+      help: i18n.translate('xpack.canvas.functions.date.args.valueHelpText', {
         defaultMessage:
           'An optional date string to parse into milliseconds since epoch. Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format',
       }),
     },
     format: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.date.argsFormatHelpText', {
+      help: i18n.translate('xpack.canvas.functions.date.args.formatHelpText', {
         defaultMessage:
-          'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/)',
+          'The momentJS format for parsing the optional date string (See {momentjsFormatDocumentationLink})',
+        values: {
+          momentjsFormatDocumentationLink: 'https://momentjs.com/docs/#/displaying/',
+        },
       }),
     },
   },

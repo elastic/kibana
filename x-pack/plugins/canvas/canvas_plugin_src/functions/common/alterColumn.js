@@ -21,20 +21,20 @@ export const alterColumn = () => ({
     column: {
       aliases: ['_'],
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.alterColumn.argsColumnHelpText', {
+      help: i18n.translate('xpack.canvas.functions.alterColumn.args.columnHelpText', {
         defaultMessage: 'The name of the column to alter',
       }),
     },
     type: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.alterColumn.argsTypeHelpText', {
+      help: i18n.translate('xpack.canvas.functions.alterColumn.args.typeHelpText', {
         defaultMessage: 'The type to convert the column to. Leave blank to not change type',
       }),
       default: null,
     },
     name: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.alterColumn.argsNameHelpText', {
+      help: i18n.translate('xpack.canvas.functions.alterColumn.args.nameHelpText', {
         defaultMessage: 'The resultant column name. Leave blank to not rename',
       }),
       default: null,
@@ -44,7 +44,16 @@ export const alterColumn = () => ({
     if (!args.column || (!args.type && !args.name)) return context;
 
     const column = context.columns.find(col => col.name === args.column);
-    if (!column) throw new Error(`Column not found: '${args.column}'`);
+    if (!column) {
+      throw new Error(
+        i18n.translate('xpack.canvas.functions.alterColumn.columnNotFoundErrorMessage', {
+          defaultMessage: "Column not found: '{argsColumn}'",
+          values: {
+            argsColumn: args.column,
+          },
+        })
+      );
+    }
 
     const name = args.name || column.name;
     const type = args.type || column.type;

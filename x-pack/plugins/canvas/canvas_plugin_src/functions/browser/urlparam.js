@@ -13,7 +13,10 @@ export const urlparam = () => ({
   type: 'string',
   help: i18n.translate('xpack.canvas.functions.urlparamHelpText', {
     defaultMessage:
-      'Access URL parameters and use them in expressions. Eg https://localhost:5601/app/canvas?myVar=20. This will always return a string',
+      'Access URL parameters and use them in expressions. Eg {canvasLocalhostLink}. This will always return a string',
+    values: {
+      canvasLocalhostLink: 'https://localhost:5601/app/canvas?myVar=20',
+    },
   }),
   context: {
     types: ['null'],
@@ -22,7 +25,7 @@ export const urlparam = () => ({
     param: {
       types: ['string'],
       aliases: ['_', 'var', 'variable'],
-      help: i18n.translate('xpack.canvas.functions.urlparam.argsParamHelpText', {
+      help: i18n.translate('xpack.canvas.functions.urlparam.args.paramHelpText', {
         defaultMessage: 'The URL hash parameter to access',
       }),
       multi: false,
@@ -30,7 +33,7 @@ export const urlparam = () => ({
     default: {
       types: ['string'],
       default: '""',
-      help: i18n.translate('xpack.canvas.functions.urlparam.argsDefaultHelpText', {
+      help: i18n.translate('xpack.canvas.functions.urlparam.args.defaultHelpText', {
         defaultMessage: 'Return this string if the url parameter is not defined',
       }),
     },

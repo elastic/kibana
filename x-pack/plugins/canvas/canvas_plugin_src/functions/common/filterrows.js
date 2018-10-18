@@ -21,7 +21,7 @@ export const filterrows = () => ({
       resolve: false,
       aliases: ['_'],
       types: ['boolean'],
-      help: i18n.translate('xpack.canvas.functions.filterRows.argsFnHelpText', {
+      help: i18n.translate('xpack.canvas.functions.filterRows.args.fnHelpText', {
         defaultMessage:
           'An expression to pass each rows in the datatable into. The expression should return a boolean. A true value will preserve the row, and a false value will remove it.',
       }),
