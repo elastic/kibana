@@ -81,17 +81,21 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     });
   };
 
+  const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      error: 'Forbidden',
+      message: `Unable to get ${type}, missing action:saved_objects/${type}/get`,
+      statusCode: 403,
+    });
+  };
+
   const createExpectSpaceAwareNotFound = (spaceId = DEFAULT_SPACE_ID) => {
     return createExpectNotFound(spaceAwareId, spaceId);
   };
 
-  const createExpectSpaceAwareRbacForbidden = () => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      error: 'Forbidden',
-      message: `Unable to get visualization, missing action:saved_objects/visualization/get`,
-      statusCode: 403,
-    });
-  };
+  const expectSpaceAwareRbacForbidden = createExpectRbacForbidden('visualization');
+  const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden('globaltype');
+  const expectDoesntExistRbacForbidden = createExpectRbacForbidden('visualization');
 
   const createExpectSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
@@ -174,8 +178,10 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     createExpectNotSpaceAwareRbacForbidden,
     createExpectNotSpaceAwareResults,
     createExpectSpaceAwareNotFound,
-    createExpectSpaceAwareRbacForbidden,
     createExpectSpaceAwareResults,
+    expectSpaceAwareRbacForbidden,
+    expectNotSpaceAwareRbacForbidden,
+    expectDoesntExistRbacForbidden,
     getTest,
   };
 }
