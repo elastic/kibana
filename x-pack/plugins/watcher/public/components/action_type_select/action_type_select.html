@@ -24,7 +24,8 @@
           <span
             ng-if="!actionType.isEnabled"
             i18n-id="xpack.watcher.actionTypeSelect.actionDisabledTextMessage"
-            i18n-default-message="Disabled. Configure elasticsearch.yml."
+            i18n-default-message="Disabled. Configure {elasticsearchYmlText}."
+            i18n-values="{ elasticsearchYmlText: 'elasticsearch.yml' }"
           ></span>
         </div>
       </div>
