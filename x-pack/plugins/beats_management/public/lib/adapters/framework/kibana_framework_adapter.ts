@@ -58,7 +58,9 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   };
 
   public render = (component: React.ReactElement<any>) => {
-    this.rootComponent = component;
+    if (this.hadValidLicense() && this.securityEnabled()) {
+      this.rootComponent = component;
+    }
   };
 
   public hadValidLicense() {
@@ -77,10 +79,10 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
-    this.register(this.uiModule);
+    if (this.hadValidLicense() && this.securityEnabled()) {
+      this.register(this.uiModule);
 
-    this.hookAngular(() => {
-      if (this.hadValidLicense() && this.securityEnabled()) {
+      this.hookAngular(() => {
         const registerSection = () =>
           this.management.register(pluginId, {
             display: 'Beats', // TODO these need to be config options not hard coded in the adapter
@@ -97,13 +99,13 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
           order: 30,
           url: `#${basePath}`,
         });
-      }
 
-      if (!this.securityEnabled()) {
-        this.notifier.error(this.xpackInfo.get(`features.beats_management.message`));
-        this.kbnUrlService.redirect('/management');
-      }
-    });
+        // if (!this.securityEnabled()) {
+        //   this.notifier.error(this.xpackInfo.get(`features.beats_management.message`));
+        //   this.kbnUrlService.redirect('/management');
+        // }
+      });
+    }
   }
 
   private manageAngularLifecycle($scope: any, $route: any, elem: any) {
