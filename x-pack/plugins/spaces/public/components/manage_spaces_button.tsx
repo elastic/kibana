@@ -14,6 +14,7 @@ interface Props {
   size?: 's' | 'l';
   style?: CSSProperties;
   userProfile: UserProfile;
+  onClick?: () => void;
 }
 
 export class ManageSpacesButton extends Component<Props, {}> {
@@ -36,6 +37,9 @@ export class ManageSpacesButton extends Component<Props, {}> {
   }
 
   private navigateToManageSpaces = () => {
+    if (this.props.onClick) {
+      this.props.onClick();
+    }
     window.location.replace(MANAGE_SPACES_URL);
   };
 }
