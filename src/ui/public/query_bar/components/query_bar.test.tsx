@@ -39,12 +39,16 @@ const mockChromeFactory = jest.fn(() => {
 
 const mockPersistedLog = {
   add: jest.fn(),
-  get: jest.fn(),
+  get: jest.fn(() => ['response:200']),
 };
 
 const mockPersistedLogFactory = jest.fn(() => {
   return mockPersistedLog;
 });
+
+const mockGetAutocompleteSuggestions = jest.fn(() => Promise.resolve([]));
+const mockAutocompleteProvider = jest.fn(() => mockGetAutocompleteSuggestions);
+const mockGetAutocompleteProvider = jest.fn(() => mockAutocompleteProvider);
 
 jest.mock('ui/chrome', () => mockChromeFactory());
 jest.mock('../../chrome', () => mockChromeFactory());
@@ -57,7 +61,7 @@ jest.mock('../../metadata', () => ({
   },
 }));
 jest.mock('../../autocomplete_providers', () => ({
-  getAutocompleteProvider: (language: string) => jest.fn(() => jest.fn(() => Promise.resolve([]))),
+  getAutocompleteProvider: mockGetAutocompleteProvider,
 }));
 
 import _ from 'lodash';
@@ -231,10 +235,6 @@ describe('QueryBar', () => {
   });
 
   it('Should use PersistedLog for recent search suggestions', async () => {
-    mockPersistedLog.get.mockImplementation(() => {
-      return ['response:200'];
-    });
-
     const component = mount(
       <QueryBar
         query={kqlQuery}
@@ -258,11 +258,20 @@ describe('QueryBar', () => {
     inputWrapper.simulate('change', { target: { value: 'extensi' } });
     expect(mockPersistedLog.get).toHaveBeenCalledTimes(1);
   });
-});
 
-// TODO sends autocomplete provider suggestions to suggestions component
-// TODO suggestion selection (click or enter) updates query (call onSubmit to validate)
-// TODO suggestion component loadMore
-// TODO other keydown keycodes (just snapshot state of suggestion component? or the whole thing to get aria attributes too?)
-// TODO EuiFieldText onKeyUp
-// TODO EuiFieldTExt onClick
+  it('Should get suggestions from the autocomplete provider for the current language', () => {
+    mount(
+      <QueryBar
+        query={kqlQuery}
+        onSubmit={noop}
+        appName={'discover'}
+        indexPatterns={[mockIndexPattern]}
+        store={createMockStorage()}
+        disableAutoFocus={true}
+      />
+    );
+
+    expect(mockGetAutocompleteProvider).toHaveBeenCalledWith('kuery');
+    expect(mockGetAutocompleteSuggestions).toHaveBeenCalled();
+  });
+});
