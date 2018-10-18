@@ -37,11 +37,13 @@ const mockChromeFactory = jest.fn(() => {
   };
 });
 
+const mockPersistedLog = {
+  add: jest.fn(),
+  get: jest.fn(),
+};
+
 const mockPersistedLogFactory = jest.fn(() => {
-  return {
-    add: jest.fn(),
-    get: jest.fn(),
-  };
+  return mockPersistedLog;
 });
 
 jest.mock('ui/chrome', () => mockChromeFactory());
@@ -49,11 +51,20 @@ jest.mock('../../chrome', () => mockChromeFactory());
 jest.mock('ui/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
-
 jest.mock('../../metadata', () => ({
   metadata: {
     branch: 'foo',
   },
+}));
+jest.mock('../../autocomplete_providers', () => ({
+  getAutocompleteProvider: (language: string) => jest.fn(() => jest.fn(() => Promise.resolve([]))),
+}));
+
+import _ from 'lodash';
+// Using doMock to avoid hoisting so that I can override only the debounce method in lodash
+jest.doMock('lodash', () => ({
+  ..._,
+  debounce: (func: () => any) => func,
 }));
 
 import { EuiFieldText } from '@elastic/eui';
@@ -219,11 +230,39 @@ describe('QueryBar', () => {
     });
   });
 
-  // TODO gets recent search suggestions from persisted log
-  // TODO stores searches in PersistedLog
-  // TODO sends autocomplete provider suggestions to suggestions component
-  // TODO suggestion selection updates query (call onSubmit to validate)
-  // TODO other keydown keycodes (just snapshot state of suggestion component? or the whole thing to get aria attributes too?)
-  // TODO EuiFieldText onKeyUp
-  // TODO EuiFieldTExt onClick
+  it('Should use PersistedLog for recent search suggestions', async () => {
+    mockPersistedLog.get.mockImplementation(() => {
+      return ['response:200'];
+    });
+
+    const component = mount(
+      <QueryBar
+        query={kqlQuery}
+        onSubmit={noop}
+        appName={'discover'}
+        indexPatterns={[mockIndexPattern]}
+        store={createMockStorage()}
+        disableAutoFocus={true}
+      />
+    );
+
+    const instance = component.instance() as QueryBar;
+    const input = instance.inputRef;
+    const inputWrapper = component.find(EuiFieldText).find('input');
+    inputWrapper.simulate('change', { target: { value: 'extension:jpg' } });
+    inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
+
+    expect(mockPersistedLog.add).toHaveBeenCalledWith('extension:jpg');
+
+    mockPersistedLog.get.mockClear();
+    inputWrapper.simulate('change', { target: { value: 'extensi' } });
+    expect(mockPersistedLog.get).toHaveBeenCalledTimes(1);
+  });
 });
+
+// TODO sends autocomplete provider suggestions to suggestions component
+// TODO suggestion selection (click or enter) updates query (call onSubmit to validate)
+// TODO suggestion component loadMore
+// TODO other keydown keycodes (just snapshot state of suggestion component? or the whole thing to get aria attributes too?)
+// TODO EuiFieldText onKeyUp
+// TODO EuiFieldTExt onClick
