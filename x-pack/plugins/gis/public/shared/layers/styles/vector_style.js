@@ -66,14 +66,14 @@ export class VectorStyle {
               property={'fillColor'}
               name={"Fill color"}
               handlePropertyChange={handlePropertyChange}
-              seedStyle={style}
+              colorStyleDescriptor={properties.fillColor}
               layer={layer}
             />
             <VectorStyleColorEditor
               property={'lineColor'}
               name={"Line color"}
               handlePropertyChange={handlePropertyChange}
-              seedStyle={style}
+              colorStyleDescriptor={properties.lineColor}
               layer={layer}
             />
           </EuiFlexItem>
@@ -88,7 +88,7 @@ export class VectorStyle {
 
   getHexColor(colorProperty) {
 
-    if (!this._descriptor.properties[colorProperty]) {
+    if (!this._descriptor.properties[colorProperty] || !this._descriptor.properties[colorProperty].options) {
       return null;
     }
 
@@ -103,7 +103,7 @@ export class VectorStyle {
   }
 
   static computeScaledValues(featureCollection, field) {
-    const fieldName = field.label;
+    const fieldName = field.name;
     if (featureCollection.computed.find(f => f === fieldName)) {
       return false;
     }
@@ -145,10 +145,13 @@ export class VectorStyle {
     }
 
     const dynamicFields = [];
-    if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options.fieldValue) {
+    //todo: should always be intialized really
+    if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options
+      && this._descriptor.properties.fillColor.options.fieldValue) {
       dynamicFields.push(this._descriptor.properties.fillColor.options.fieldValue);
     }
-    if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options.fieldValue) {
+    if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options
+      && this._descriptor.properties.lineColor.options.fieldValue) {
       dynamicFields.push(this._descriptor.properties.lineColor.options.fieldValue);
     }
 
@@ -161,12 +164,12 @@ export class VectorStyle {
 
   _getMBDataDrivenColor(property) {
 
-    if (!this._descriptor.properties[property]) {
+    if (!this._descriptor.properties[property] || !this._descriptor.properties[property].options) {
       return null;
     }
 
     if (this._descriptor.properties[property].options.fieldValue) {
-      const originalFieldName = this._descriptor.properties[property].options.fieldValue.label;
+      const originalFieldName = this._descriptor.properties[property].options.fieldValue.name;
       const targetName = VectorStyle.getComputedFieldName(originalFieldName);
       return [
         'interpolate',

@@ -20,7 +20,7 @@ export class JoinEditor extends React.Component {
   constructor() {
     super();
     this.state = {
-      joins: []
+      joins: null
     };
   }
 
@@ -54,8 +54,15 @@ export class JoinEditor extends React.Component {
   }
 
   render() {
+
     if (!this.props.layer.isJoinable()) {
       return null;
+    }
+
+    if (this.state.joins === null) {
+      //init state
+      const joins = this.props.layer.getJoins();
+      this.state.joins = joins.map(join => join.toDescriptor());
     }
 
     const addJoin = () => {

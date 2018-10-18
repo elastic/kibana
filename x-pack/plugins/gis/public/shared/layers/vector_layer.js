@@ -64,6 +64,10 @@ export class VectorLayer extends ALayer {
     return true;
   }
 
+  getJoins() {
+    return this._joins.slice();
+  }
+
   getSupportedStyles() {
     return [VectorStyle];
   }
@@ -80,7 +84,8 @@ export class VectorLayer extends ALayer {
     });
     const joinFields = this._joins.map(join => {
       return {
-        label: join.getJoinFieldName(),
+        label: join.getHumanReadableName(),
+        name: join.getJoinFieldName(),
         origin: 'join',
         join: join
       };

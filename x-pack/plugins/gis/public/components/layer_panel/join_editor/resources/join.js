@@ -21,8 +21,7 @@ export class Join extends React.Component {
     this.state = {
       stringFields: null,
       leftField: null,
-      right: null,
-      id: null
+      right: null
     };
   }
 
@@ -34,12 +33,15 @@ export class Join extends React.Component {
     }
 
     const stringFields = await this.props.layer.getStringFields();
-    console.log('string fields', stringFields);
-
     this.setState({
-      stringFields: stringFields,
-      leftField: stringFields[0] ? stringFields[0].name : null
+      stringFields: stringFields
     });
+
+    if (!this.state.leftField) {
+      this.setState({
+        leftField: stringFields[0] ? stringFields[0].name : null
+      });
+    }
 
   }
 
@@ -62,11 +64,9 @@ export class Join extends React.Component {
     });
 
     const onChange = (field) => {
-
       this.setState({
         leftField: field
       });
-
       this.props.onJoinSelection({
         leftField: field,
         right: this.state.right
@@ -95,11 +95,23 @@ export class Join extends React.Component {
       });
     };
 
-    return (<DataSelector onSelection={onSelection}/>);
+    return (<DataSelector seedSelection={this.state.right} onSelection={onSelection}/>);
   }
 
   render() {
+    if (this.props.join) {//init with default
+
+      if (this.state.leftField === null) {
+        this.state.leftField = this.props.join.leftField;
+      }
+
+      if (this.state.right === null) {
+        this.state.right = this.props.join.right;
+      }
+    }
+
     this._loadStringFields();
+
     return (
       <EuiFlexGroup>
         <EuiFlexItem>

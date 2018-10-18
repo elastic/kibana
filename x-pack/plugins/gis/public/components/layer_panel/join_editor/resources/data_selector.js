@@ -25,10 +25,9 @@ export class DataSelector extends React.Component {
   constructor() {
     super();
     this.state = {
-      isLoadingIndexPattern: false,
-      indexPatternId: '',
-      selectedStringField: '',
-      term: ''
+      indexPatternId: null,
+      indexPattern: null,
+      selectedStringField: null
     };
   }
 
@@ -48,7 +47,7 @@ export class DataSelector extends React.Component {
   };
 
   filterStringField = (field) => {
-    return ['string'].includes(field.type);
+    return field.type === 'string';
   };
 
   _renderSingleFieldSelect() {
@@ -64,6 +63,7 @@ export class DataSelector extends React.Component {
 
       this.props.onSelection({
         indexPatternId: this.state.indexPatternId,
+        indexPatternTitle: this.state.indexPattern.title,
         term: fieldName
       });
     };
@@ -79,8 +79,17 @@ export class DataSelector extends React.Component {
 
   render() {
 
-
     const termFieldSelect = this._renderSingleFieldSelect();
+
+    if (this.props.seedSelection) {
+      if (!this.state.indexPatternId) {
+        this.state.indexPatternId = this.props.seedSelection.indexPatternId;
+        this._onIndexPatternSelect(this.state.indexPatternId);
+      }
+      if (!this.state.selectedStringField) {
+        this.state.selectedStringField = this.props.seedSelection.term;
+      }
+    }
 
     return (
       <EuiFlexGroup>

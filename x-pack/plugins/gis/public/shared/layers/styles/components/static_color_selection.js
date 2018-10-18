@@ -11,9 +11,16 @@ import {
 
 export class StaticColorSelection extends React.Component {
   render() {
+
+    const onOptionChange = (color) => {
+      this.props.changeOptions({
+        color: color
+      });
+    };
+
     return (<EuiColorPicker
-      onChange={this.props.changeColor}
-      color={this.props.selectedColor}
+      onChange={onOptionChange}
+      color={this.props.selectedOptions ? this.props.selectedOptions.color : null}
     />);
   }
 }
