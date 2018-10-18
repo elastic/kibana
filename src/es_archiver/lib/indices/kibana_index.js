@@ -45,8 +45,7 @@ const buildUiExports = _.once(async () => {
  * Deletes all indices that start with `.kibana`
  */
 export async function deleteKibanaIndices({ client, stats }) {
-  const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
-  const indexNames = kibanaIndices.map(x => x.index);
+  const indexNames = await fetchKibanaIndices(client);
   if (!indexNames.length) {
     return;
   }
@@ -101,4 +100,18 @@ async function loadElasticVersion() {
   const readFile = promisify(fs.readFile);
   const packageJson = await readFile(path.join(__dirname, '../../../../package.json'));
   return JSON.parse(packageJson).version;
+}
+
+/**
+ * Migrations mean that the Kibana index will look something like:
+ * .kibana, .kibana_1, .kibana_323, etc. This finds all indices starting
+ * with .kibana, then filters out any that aren't actually Kibana's core
+ * index (e.g. we don't want to remove .kibana_task_manager or the like).
+ *
+ * @param {string} index
+ */
+async function fetchKibanaIndices(client) {
+  const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
+  const isKibanaIndex = (index) => (/^\.kibana[_]{0,1}[0-9]*$/).test(index);
+  return kibanaIndices.map(x => x.index).filter(isKibanaIndex);
 }
