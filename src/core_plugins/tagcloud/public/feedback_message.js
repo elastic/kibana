@@ -36,7 +36,7 @@ export class FeedbackMessage extends Component {
             defaultMessage="The number of tags has been truncated to avoid long draw times."
           />
         </div>
-        <div className="ttgcVisFeedback__message" style={{ display: this.state.shouldShowIncomplete ? 'block' : 'none' }}>
+        <div className="tgcVisFeedback__message" style={{ display: this.state.shouldShowIncomplete ? 'block' : 'none' }}>
           <FormattedMessage
             id="tagCloud.feedbackMessage.tooSmallContainerDescription"
             defaultMessage="The container is too small to display the entire cloud. Tags might be cropped or omitted."
