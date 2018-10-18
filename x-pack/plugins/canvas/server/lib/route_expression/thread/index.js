@@ -15,7 +15,7 @@ const serialization = populateServerRegistries(['types']).then(({ types }) =>
 );
 
 // If the worker doesn't response in 10s, kill it.
-const WORKER_TIMEOUT = 3000;
+const WORKER_TIMEOUT = 10000;
 const workerPath = resolve(__dirname, 'babeled.js');
 const heap = {};
 let worker = null;
@@ -84,7 +84,7 @@ export const thread = ({ onFunctionNotFound }) => {
           setTimeout(() => {
             if (!heap[id]) return; // Looks like this has already been cleared from the heap.
             if (worker) worker.kill();
-            reject('Request timed out');
+            reject(new Error('Request timed out'));
           }, WORKER_TIMEOUT);
         });
       },

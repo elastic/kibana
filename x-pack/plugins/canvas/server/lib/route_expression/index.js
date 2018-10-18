@@ -20,9 +20,7 @@ export const routeExpressionProvider = environments => {
       for (let i = 0; i < environmentFunctions.length; i++) {
         if (environmentFunctions[i].includes(fnName)) {
           // If we find it, run in that environment, and only that environment
-          return environments[i].interpret(ast, context).catch(e => {
-            createError(e);
-          });
+          return environments[i].interpret(ast, context).catch(e => createError(e));
         }
       }
 
