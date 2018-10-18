@@ -57,17 +57,17 @@ export class GroupList extends Component {
   }
 
   moveUp = (event, index) => {
+    event.preventDefault();
     if (index < 0) {
       return;
     } else if (index > 0) {
-      event.preventDefault();
       this.selectItems[index - 1].focus();
     }
   }
 
   moveDown = (event, index) => {
+    event.preventDefault();
     if (index < this.selectItems.length - 1) {
-      event.preventDefault();
       this.selectItems[index + 1].focus();
     }
   }
