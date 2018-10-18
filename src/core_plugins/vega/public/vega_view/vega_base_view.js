@@ -241,8 +241,8 @@ export class VegaBaseView {
       if (!handlerFunc || !this[handlerFunc]) {
         // in case functions don't match the list above
         throw new Error(i18n.translate('vega.vegaParser.baseView.functionIsNotDefinedForGraphErrorMessage', {
-          defaultMessage: '{funcName}() is not defined for this graph',
-          values: { funcName },
+          defaultMessage: '{funcName} is not defined for this graph',
+          values: { funcName: `${funcName}()` },
         }));
       }
       await this[handlerFunc](...args);
@@ -319,8 +319,7 @@ export class VegaBaseView {
       const endDate = dateMath.parse(end);
       if (!startDate || !endDate || !startDate.isValid() || !endDate.isValid()) {
         throw new Error(i18n.translate('vega.vegaParser.baseView.timeValuesTypeErrorMessage', {
-          defaultMessage: 'Error setting time filter: both time values must be either relative or absolute dates. \
-{start}, {end}',
+          defaultMessage: 'Error setting time filter: both time values must be either relative or absolute dates. {start}, {end}',
           values: {
             start: `start=${JSON.stringify(start)}`,
             end: `end=${JSON.stringify(end)}`,

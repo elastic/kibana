@@ -37,10 +37,11 @@ export class EmsFileParser {
   parseUrl(obj, url) {
     if (typeof url.name !== 'string') {
       throw new Error(i18n.translate('vega.emsFileParser.missingNameOfFileErrorMessage', {
-        defaultMessage: '{dataUrlParam} with {dataUrlParamValue} is missing the "name" of the file',
+        defaultMessage: '{dataUrlParam} with {dataUrlParamValue} is missing the {nameParam} of the file',
         values: {
           dataUrlParam: 'data.url',
           dataUrlParamValue: '{"%type%": "emsfile"}',
+          nameParam: '"name"',
         },
       }));
     }

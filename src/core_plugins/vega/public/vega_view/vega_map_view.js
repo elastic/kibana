@@ -39,8 +39,8 @@ export class VegaMapView extends VegaBaseView {
       baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
       if (!baseMapOpts) {
         this.onWarn(i18n.translate('vega.mapView.mapStyleNotFoundWarningMessage', {
-          defaultMessage: 'mapStyle {mapStyle} was not found',
-          values: { mapStyle: JSON.stringify(mapStyle) },
+          defaultMessage: '{mapStyleParam} {mapStyleName} was not found',
+          values: { mapStyleParam: 'mapStyle', mapStyleName: JSON.stringify(mapStyle) },
         }));
       } else {
         limitMinZ = baseMapOpts.minZoom;

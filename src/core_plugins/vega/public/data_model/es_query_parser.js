@@ -86,8 +86,8 @@ export class EsQueryParser {
         }));
       } else if (legacyContext !== true && (typeof legacyContext !== 'string' || legacyContext.length === 0)) {
         throw new Error(i18n.translate('vega.esQueryParser.legacyContextCanBeTrueErrorMessage', {
-          defaultMessage: 'Legacy "{legacyContext}" can either be true (ignores time range picker), \
-or it can be the name of the time field, e.g. "@timestamp"',
+          // eslint-disable-next-line max-len
+          defaultMessage: 'Legacy "{legacyContext}" can either be true (ignores time range picker), or it can be the name of the time field, e.g. "@timestamp"',
           values: { legacyContext: LEGACY_CONTEXT },
         }));
       }
@@ -102,10 +102,11 @@ or it can be the name of the time field, e.g. "@timestamp"',
       result += '}';
 
       this._onWarning(i18n.translate('vega.esQueryParser.legacyUrlShouldChangeToWarningMessage', {
-        defaultMessage: 'Legacy "url": {legacyUrl} should change to {result}',
+        defaultMessage: 'Legacy {urlParam}: {legacyUrl} should change to {result}',
         values: {
           legacyUrl: `"${LEGACY_CONTEXT}": ${JSON.stringify(legacyContext)}`,
           result,
+          urlParam: '"url"',
         },
       }));
     }
@@ -201,8 +202,11 @@ or it can be the name of the time field, e.g. "@timestamp"',
               size = 50; // by default, try to get ~80 values
             } else if (typeof size !== 'number') {
               throw new Error(i18n.translate('vega.esQueryParser.autointervalValueTypeErrorMessage', {
-                defaultMessage: '"{autointerval}" must be either true or a number',
-                values: { autointerval: AUTOINTERVAL },
+                defaultMessage: '"{autointerval}" must be either {trueValue} or a number',
+                values: {
+                  autointerval: AUTOINTERVAL,
+                  trueValue: 'true',
+                },
               }));
             }
             const bounds = this._timeCache.getTimeBounds();
@@ -266,7 +270,10 @@ or it can be the name of the time field, e.g. "@timestamp"',
       const shift = opts.shift;
       if (typeof shift !== 'number') {
         throw new Error(i18n.translate('vega.esQueryParser.shiftMustValueTypeErrorMessage', {
-          defaultMessage: 'shift must be a numeric value',
+          defaultMessage: '{shiftParam} must be a numeric value',
+          values: {
+            shiftParam: 'shift',
+          },
         }));
       }
       let multiplier;

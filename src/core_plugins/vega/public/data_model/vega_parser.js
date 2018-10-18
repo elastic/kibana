@@ -401,8 +401,7 @@ export class VegaParser {
 
     if (versionCompare(schema.version, libVersion) > 0) {
       this._onWarning(i18n.translate('vega.vegaParser.notValidLibraryVersionForInputSpecWarningMessage', {
-        defaultMessage: 'The input spec uses {schemaLibrary} {schemaVersion}, but \
-current version of {schemaLibrary} is {libraryVersion}.',
+        defaultMessage: 'The input spec uses {schemaLibrary} {schemaVersion}, but current version of {schemaLibrary} is {libraryVersion}.',
         values: {
           schemaLibrary: schema.library,
           schemaVersion: schema.version,
@@ -473,7 +472,12 @@ current version of {schemaLibrary} is {libraryVersion}.',
         // Assume that any  "data": {"url": {...}}  is a request for data
         if (obj.values !== undefined || obj.source !== undefined) {
           throw new Error(i18n.translate('vega.vegaParser.dataExceedsSomeParamsUseTimesLimitErrorMessage', {
-            defaultMessage: 'Data must not have more than one of "url", "values", and "source"',
+            defaultMessage: 'Data must not have more than one of {urlParam}, {valuesParam}, and {sourceParam}',
+            values: {
+              urlParam: '"url"',
+              valuesParam: '"values"',
+              sourceParam: '"source"',
+            },
           }));
         }
         onFind(obj);
