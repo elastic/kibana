@@ -181,7 +181,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
-        .expect(409);
+        .expect(201);
     });
   });
 }

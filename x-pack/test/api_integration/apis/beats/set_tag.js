@@ -5,10 +5,7 @@
  */
 
 import expect from 'expect.js';
-import {
-  ES_INDEX_NAME,
-  ES_TYPE_NAME
-} from './constants';
+import { ES_INDEX_NAME, ES_TYPE_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -19,9 +16,7 @@ export default function ({ getService }) {
     it('should create an empty tag', async () => {
       const tagId = 'production';
       await supertest
-        .put(
-          `/api/beats/tag/${tagId}`
-        )
+        .put(`/api/beats/tag/${tagId}`)
         .set('kbn-xsrf', 'xxx')
         .send()
         .expect(201);
@@ -29,7 +24,7 @@ export default function ({ getService }) {
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `tag:${tagId}`
+        id: `tag:${tagId}`,
       });
 
       const tagInEs = esResponse._source;
@@ -43,24 +38,30 @@ export default function ({ getService }) {
     it('should create a tag with one configuration block', async () => {
       const tagId = 'production';
       await supertest
-        .put(
-          `/api/beats/tag/${tagId}`
-        )
+        .put(`/api/beats/tag/${tagId}`)
         .set('kbn-xsrf', 'xxx')
         .send({
           configuration_blocks: [
             {
               type: 'output',
-              block_yml: 'elasticsearch:\n    hosts: [\"localhost:9200\"]\n    username: "..."'
-            }
-          ]
+              description: 'smething',
+              configs: [
+                {
+                  elasticsearch: {
+                    hosts: ['localhost:9200'],
+                    username: 'foo',
+                  },
+                },
+              ],
+            },
+          ],
         })
         .expect(201);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `tag:${tagId}`
+        id: `tag:${tagId}`,
       });
 
       const tagInEs = esResponse._source;
@@ -70,34 +71,50 @@ export default function ({ getService }) {
       expect(tagInEs.tag.configuration_blocks).to.be.an(Array);
       expect(tagInEs.tag.configuration_blocks.length).to.be(1);
       expect(tagInEs.tag.configuration_blocks[0].type).to.be('output');
-      expect(tagInEs.tag.configuration_blocks[0].block_yml).to.be('elasticsearch:\n    hosts: [\"localhost:9200\"]\n    username: "..."');
+      expect(tagInEs.tag.configuration_blocks[0].configs).to.eql([
+        {
+          elasticsearch: {
+            hosts: ['localhost:9200'],
+            username: 'foo',
+          },
+        },
+      ]);
     });
 
     it('should create a tag with two configuration blocks', async () => {
       const tagId = 'production';
       await supertest
-        .put(
-          `/api/beats/tag/${tagId}`
-        )
+        .put(`/api/beats/tag/${tagId}`)
         .set('kbn-xsrf', 'xxx')
         .send({
           configuration_blocks: [
             {
               type: 'filebeat.inputs',
-              block_yml: 'file:\n    path: "/var/log/some.log"]\n'
+              configs: [
+                {
+                  paths: ['./foo'],
+                },
+              ],
             },
             {
               type: 'output',
-              block_yml: 'elasticsearch:\n    hosts: [\"localhost:9200\"]\n    username: "..."'
-            }
-          ]
+              configs: [
+                {
+                  elasticsearch: {
+                    hosts: ['localhost:9200'],
+                    username: 'foo',
+                  },
+                },
+              ],
+            },
+          ],
         })
         .expect(201);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `tag:${tagId}`
+        id: `tag:${tagId}`,
       });
 
       const tagInEs = esResponse._source;
@@ -107,29 +124,52 @@ export default function ({ getService }) {
       expect(tagInEs.tag.configuration_blocks).to.be.an(Array);
       expect(tagInEs.tag.configuration_blocks.length).to.be(2);
       expect(tagInEs.tag.configuration_blocks[0].type).to.be('filebeat.inputs');
-      expect(tagInEs.tag.configuration_blocks[0].block_yml).to.be('file:\n    path: "/var/log/some.log"]\n');
+      expect(tagInEs.tag.configuration_blocks[0].configs).to.eql([
+        {
+          paths: ['./foo'],
+        },
+      ]);
       expect(tagInEs.tag.configuration_blocks[1].type).to.be('output');
-      expect(tagInEs.tag.configuration_blocks[1].block_yml).to.be('elasticsearch:\n    hosts: [\"localhost:9200\"]\n    username: "..."');
+      expect(tagInEs.tag.configuration_blocks[1].configs).to.eql([
+        {
+          elasticsearch: {
+            hosts: ['localhost:9200'],
+            username: 'foo',
+          },
+        },
+      ]);
     });
 
     it('should fail when creating a tag with two configuration blocks of type output', async () => {
       const tagId = 'production';
       await supertest
-        .put(
-          `/api/beats/tag/${tagId}`
-        )
+        .put(`/api/beats/tag/${tagId}`)
         .set('kbn-xsrf', 'xxx')
         .send({
           configuration_blocks: [
             {
               type: 'output',
-              block_yml: 'logstash:\n    hosts: ["localhost:9000"]\n'
+              configs: [
+                {
+                  elasticsearch: {
+                    hosts: ['localhost:9200'],
+                    username: 'foo',
+                  },
+                },
+              ],
             },
             {
               type: 'output',
-              block_yml: 'elasticsearch:\n    hosts: [\"localhost:9200\"]\n    username: "..."'
-            }
-          ]
+              configs: [
+                {
+                  elasticsearch: {
+                    hosts: ['localhost:9200'],
+                    username: 'foo',
+                  },
+                },
+              ],
+            },
+          ],
         })
         .expect(400);
     });
@@ -137,17 +177,22 @@ export default function ({ getService }) {
     it('should fail when creating a tag with an invalid configuration block type', async () => {
       const tagId = 'production';
       await supertest
-        .put(
-          `/api/beats/tag/${tagId}`
-        )
+        .put(`/api/beats/tag/${tagId}`)
         .set('kbn-xsrf', 'xxx')
         .send({
           configuration_blocks: [
             {
               type: chance.word(),
-              block_yml: 'logstash:\n    hosts: ["localhost:9000"]\n'
-            }
-          ]
+              configs: [
+                {
+                  elasticsearch: {
+                    hosts: ['localhost:9200'],
+                    username: 'foo',
+                  },
+                },
+              ],
+            },
+          ],
         })
         .expect(400);
     });
@@ -155,43 +200,57 @@ export default function ({ getService }) {
     it('should update an existing tag', async () => {
       const tagId = 'production';
       await supertest
-        .put(
-          `/api/beats/tag/${tagId}`
-        )
+        .put(`/api/beats/tag/${tagId}`)
         .set('kbn-xsrf', 'xxx')
         .send({
           configuration_blocks: [
             {
               type: 'filebeat.inputs',
-              block_yml: 'file:\n    path: "/var/log/some.log"]\n'
+              configs: [
+                {
+                  paths: ['./test'],
+                },
+              ],
             },
             {
               type: 'output',
-              block_yml: 'elasticsearch:\n    hosts: [\"localhost:9200\"]\n    username: "..."'
-            }
-          ]
+              configs: [
+                {
+                  elasticsearch: {
+                    hosts: ['localhost:9200'],
+                    username: 'foo',
+                  },
+                },
+              ],
+            },
+          ],
         })
         .expect(201);
 
       await supertest
-        .put(
-          `/api/beats/tag/${tagId}`
-        )
+        .put(`/api/beats/tag/${tagId}`)
         .set('kbn-xsrf', 'xxx')
         .send({
           configuration_blocks: [
             {
               type: 'output',
-              block_yml: 'logstash:\n    hosts: ["localhost:9000"]\n'
-            }
-          ]
+              configs: [
+                {
+                  elasticsearch: {
+                    hosts: ['localhost:9000'],
+                    username: 'foo',
+                  },
+                },
+              ],
+            },
+          ],
         })
         .expect(200);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `tag:${tagId}`
+        id: `tag:${tagId}`,
       });
 
       const tagInEs = esResponse._source;
@@ -201,7 +260,14 @@ export default function ({ getService }) {
       expect(tagInEs.tag.configuration_blocks).to.be.an(Array);
       expect(tagInEs.tag.configuration_blocks.length).to.be(1);
       expect(tagInEs.tag.configuration_blocks[0].type).to.be('output');
-      expect(tagInEs.tag.configuration_blocks[0].block_yml).to.be('logstash:\n    hosts: ["localhost:9000"]\n');
+      expect(tagInEs.tag.configuration_blocks[0].configs).to.eql([
+        {
+          elasticsearch: {
+            hosts: ['localhost:9000'],
+            username: 'foo',
+          },
+        },
+      ]);
     });
   });
 }

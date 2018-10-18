@@ -236,7 +236,7 @@ export default function ({ getService }) {
         .post('/api/beats/agents_tags/assignments')
         .set('kbn-xsrf', 'xxx')
         .send({
-          assignments: [{ beatID: nonExistentBeatId, tag: nonExistentTag }],
+          assignments: [{ beatId: nonExistentBeatId, tag: nonExistentTag }],
         })
         .expect(200);
 

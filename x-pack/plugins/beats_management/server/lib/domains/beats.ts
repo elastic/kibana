@@ -99,6 +99,11 @@ export class CMBeatsDomain {
       return { status: BeatEnrollmentStatus.InvalidEnrollmentToken };
     }
 
+    const existingBeat = await this.getById(this.framework.internalUser, beatId);
+    if (existingBeat) {
+      return { status: BeatEnrollmentStatus.Success };
+    }
+
     const accessToken = this.tokens.generateAccessToken();
     const verifiedOn = moment().toJSON();
 
