@@ -40,7 +40,7 @@ export class BulkUploader {
       throw new Error('interval number of milliseconds is required');
     }
 
-    this._timer =  null;
+    this._timer = null;
     this._interval = interval;
     this._log = {
       debug: message => server.log(['debug', ...LOGGING_TAGS], message),

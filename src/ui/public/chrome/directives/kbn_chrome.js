@@ -57,9 +57,10 @@ export function kbnChromeProvider(chrome, internals) {
         },
 
         controllerAs: 'chrome',
-        controller($scope, $rootScope, Private) {
-          const getUnhashableStates = Private(getUnhashableStatesProvider);
+        controller($scope, $rootScope, Private, config) {
+          config.watch('k7design', (val) => $scope.k7design = val);
 
+          const getUnhashableStates = Private(getUnhashableStatesProvider);
           const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
 
           function updateSubUrls() {

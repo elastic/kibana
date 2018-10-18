@@ -47,12 +47,14 @@ class ImageUpload extends React.Component {
     };
   }
 
+  componentDidMount() {
+    // keep track of whether or not the component is mounted, to prevent rogue setState calls
+    this._isMounted = true;
+  }
+
   componentWillUnmount() {
     this._isMounted = false;
   }
-
-  // keep track of whether or not the component is mounted, to prevent rogue setState calls
-  _isMounted = true;
 
   handleUpload = files => {
     const { onAssetAdd, onValueChange } = this.props;
@@ -166,7 +168,7 @@ class ImageUpload extends React.Component {
 
 export const imageUpload = () => ({
   name: 'imageUpload',
-  displayName: 'Image Upload',
+  displayName: 'Image upload',
   help: 'Select or upload an image',
   resolveArgValue: true,
   template: templateFromReactComponent(ImageUpload),

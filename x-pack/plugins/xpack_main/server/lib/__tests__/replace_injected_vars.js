@@ -9,7 +9,7 @@ import expect from 'expect.js';
 
 import { replaceInjectedVars } from '../replace_injected_vars';
 
-const buildRequest = (telemetryOptedIn = null) => {
+const buildRequest = (telemetryOptedIn = null, path = '/app/kibana') => {
   const get = sinon.stub();
   if (telemetryOptedIn === null) {
     get.withArgs('telemetry', 'telemetry').returns(Promise.reject(new Error('not found exception')));
@@ -18,6 +18,7 @@ const buildRequest = (telemetryOptedIn = null) => {
   }
 
   return {
+    path,
     getSavedObjectsClient: () => {
       return {
         get,
@@ -45,7 +46,8 @@ describe('replaceInjectedVars uiExport', () => {
       telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
-      }
+      },
+      userProfile: {},
     });
 
     sinon.assert.calledOnce(server.plugins.security.isAuthenticated);
@@ -64,7 +66,8 @@ describe('replaceInjectedVars uiExport', () => {
       telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
-      }
+      },
+      userProfile: {},
     });
   });
 
@@ -80,7 +83,8 @@ describe('replaceInjectedVars uiExport', () => {
       telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
-      }
+      },
+      userProfile: {},
     });
   });
 
@@ -96,7 +100,8 @@ describe('replaceInjectedVars uiExport', () => {
       telemetryOptedIn: false,
       xpackInitialInfo: {
         b: 1
-      }
+      },
+      userProfile: {},
     });
   });
 
@@ -112,7 +117,25 @@ describe('replaceInjectedVars uiExport', () => {
       telemetryOptedIn: true,
       xpackInitialInfo: {
         b: 1
-      }
+      },
+      userProfile: {},
+    });
+  });
+
+  it('indicates that telemetry is opted-out when not loading an application', async () => {
+    const originalInjectedVars = { a: 1 };
+    const request = buildRequest(true, '/');
+    const server = mockServer();
+    server.plugins.xpack_main.info.license.isOneOf.returns(true);
+
+    const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
+    expect(newVars).to.eql({
+      a: 1,
+      telemetryOptedIn: false,
+      xpackInitialInfo: {
+        b: 1
+      },
+      userProfile: {},
     });
   });
 
@@ -147,7 +170,8 @@ describe('replaceInjectedVars uiExport', () => {
     expect(newVars).to.eql({
       a: 1,
       telemetryOptedIn: null,
-      xpackInitialInfo: undefined
+      xpackInitialInfo: undefined,
+      userProfile: {},
     });
   });
 

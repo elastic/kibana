@@ -46,7 +46,7 @@ export const Toolbar = props => {
 
   const workpadLoader = (
     <EuiOverlayMask>
-      <EuiModal onClose={done} className="canvasModal--fixedSize">
+      <EuiModal onClose={done} className="canvasModal--fixedSize" maxWidth="1000px">
         <WorkpadLoader onClose={done} />
         <EuiModalFooter>
           <EuiButton size="s" onClick={done}>

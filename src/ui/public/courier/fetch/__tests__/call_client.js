@@ -186,7 +186,7 @@ describe('callClient', () => {
       });
     });
 
-    it(`calls searchRequest.handleFailure() with the ES error that's thrown`, async () => {
+    it(`calls searchRequest.handleFailure() with the SearchError that's thrown`, async () => {
       esShouldError = true;
       const searchRequest = createSearchRequest(1);
 
@@ -195,7 +195,8 @@ describe('callClient', () => {
       searchRequests = [ searchRequest ];
 
       return callClient(searchRequests).then(() => {
-        sinon.assert.calledWith(handleFailureSpy, 'fake es error');
+        sinon.assert.calledOnce(handleFailureSpy);
+        expect(handleFailureSpy.args[0][0].name).to.be('SearchError');
       });
     });
   });

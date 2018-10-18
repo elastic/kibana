@@ -548,6 +548,12 @@ class JobService {
       }
     }
 
+    // when jumping from a wizard to the advanced job creation,
+    // the wizard's created_by information should be stripped.
+    if (tempJob.custom_settings && tempJob.custom_settings.created_by) {
+      delete tempJob.custom_settings.created_by;
+    }
+
     return tempJob;
   }
 

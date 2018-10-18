@@ -40,6 +40,7 @@ import { palette } from './palette';
 import { pie } from './pie';
 import { plot } from './plot';
 import { ply } from './ply';
+import { progress } from './progress';
 import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
@@ -95,6 +96,7 @@ export const functions = [
   pie,
   plot,
   ply,
+  progress,
   render,
   repeatImage,
   replace,

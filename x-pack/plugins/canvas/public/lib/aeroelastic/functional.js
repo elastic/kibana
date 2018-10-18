@@ -67,29 +67,30 @@ const disjunctiveUnion = (keyFun, set1, set2) =>
  */
 const mean = (a, b) => (a + b) / 2;
 
-/**
- * unnest
- *
- * @param {*[][]} vectorOfVectors
- * @returns {*[]}
- */
-const unnest = vectorOfVectors => [].concat.apply([], vectorOfVectors);
-
 const shallowEqual = (a, b) => {
   if (a === b) return true;
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
-
   return true;
 };
 
+const not = fun => (...args) => !fun(...args);
+
+const removeDuplicates = (idFun, a) =>
+  a.filter((d, i) => a.findIndex(s => idFun(s) === idFun(d)) === i);
+
+const epsilon = 1 / 1000;
+const applyTolerance = d => Math.round(d / epsilon) * epsilon;
+
 module.exports = {
+  applyTolerance,
   disjunctiveUnion,
   flatten,
   identity,
   log,
   map,
   mean,
+  not,
+  removeDuplicates,
   shallowEqual,
-  unnest,
 };

@@ -27,7 +27,7 @@ import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response
 const noneResponseHandler = function () {
   return {
     name: 'none',
-    handler: function (vis, response) {
+    handler: function (response) {
       return new Promise((resolve) => {
         resolve(response);
       });

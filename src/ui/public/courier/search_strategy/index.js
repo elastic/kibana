@@ -24,3 +24,5 @@ export {
 } from './search_strategy_registry';
 
 export { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
+
+export { SearchError } from './search_error';

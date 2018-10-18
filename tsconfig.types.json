@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "./target/types",
+    "stripInternal": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": true
+  },
+  "include": [
+    "./src/type_exports.ts"
+  ]
+}

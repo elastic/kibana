@@ -31,7 +31,7 @@ const tokenIterator = ace.acequire('ace/token_iterator');
 
 describe('Output Tokenization', () => {
   beforeEach(() => {
-    output = initializeOutput($('#output'));
+    output = initializeOutput($('#ConAppOutput'));
     output.$el.show();
   });
   afterEach(() => {

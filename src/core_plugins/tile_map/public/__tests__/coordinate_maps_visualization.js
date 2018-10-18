@@ -36,6 +36,7 @@ function mockRawData() {
   do {
     node = stack.pop();
     if (typeof node === 'object') {
+      // eslint-disable-next-line guard-for-in
       for (const key in node) {
         if (node.hasOwnProperty(key)) {
           if (key === 'aggConfig') {
