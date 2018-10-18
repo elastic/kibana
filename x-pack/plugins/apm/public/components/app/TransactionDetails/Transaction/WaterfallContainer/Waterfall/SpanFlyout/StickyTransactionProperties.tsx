@@ -5,13 +5,15 @@
  */
 
 import React from 'react';
-// import styled from 'styled-components';
-
-// @ts-ignore
 import {
   SERVICE_NAME,
   TRANSACTION_NAME
 } from 'x-pack/plugins/apm/common/constants';
+import {
+  KibanaLink,
+  legacyEncodeURIComponent
+  // @ts-ignore
+} from 'x-pack/plugins/apm/public/utils/url';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 // @ts-ignore
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
@@ -25,12 +27,28 @@ export function StickyTransactionProperties({ transaction }: Props) {
     {
       label: 'Service',
       fieldName: SERVICE_NAME,
-      val: transaction.context.service.name
+      val: (
+        <KibanaLink
+          pathname={'/app/apm'}
+          hash={`/${transaction.context.service.name}`}
+        >
+          {transaction.context.service.name}
+        </KibanaLink>
+      )
     },
     {
       label: 'Transaction',
       fieldName: TRANSACTION_NAME,
-      val: transaction.transaction.name
+      val: (
+        <KibanaLink
+          pathname={'/app/apm'}
+          hash={`/${transaction.context.service.name}/transactions/${
+            transaction.transaction.type
+          }/${legacyEncodeURIComponent(transaction.transaction.name)}`}
+        >
+          {transaction.transaction.name}
+        </KibanaLink>
+      )
     }
   ];
 

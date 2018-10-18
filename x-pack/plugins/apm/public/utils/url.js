@@ -118,6 +118,12 @@ export function RelativeLinkComponent({
   );
 }
 
+// TODO:
+// Both KibanaLink and RelativeLink does similar things, are too magic, and have different APIs.
+// The initial idea with KibanaLink was to automatically preserve the timestamp (_g) when making links. RelativeLink went a bit overboard and preserves all query args
+// The two components have different APIs: `path` vs `pathname` and one uses EuiLink the other react-router's Link (which behaves differently)
+// Suggestion: Deprecate RelativeLink, and clean up KibanaLink
+
 export function KibanaLinkComponent({
   location,
   pathname,
@@ -125,6 +131,7 @@ export function KibanaLinkComponent({
   query = {},
   ...props
 }) {
+  // Preserve current _g and _a
   const currentQuery = toQuery(location.search);
   const nextQuery = {
     _g: query._g ? rison.encode(query._g) : currentQuery._g,
