@@ -38,7 +38,11 @@ export function esNodesRoute(server) {
 
       try {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
-        const shardStats = await getShardStats(req, esIndexPattern, clusterStats, { includeNodes: true });
+        // The cluster stats call will return the todays index which we should use when making requests
+        // for shard data as the unique key for shard documents includes the cluster state which may or
+        // may not change when daily indices rollover so to prevent potential collisions
+        const todaysIndex = clusterStats.indexName || esIndexPattern;
+        const shardStats = await getShardStats(req, todaysIndex, clusterStats, { includeNodes: true });
         const clusterStatus = getClusterStatus(clusterStats, shardStats);
         const nodes = await getNodes(req, esIndexPattern, clusterStats, shardStats);
 
