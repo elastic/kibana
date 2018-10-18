@@ -69,6 +69,11 @@ const kqlQuery = {
   language: 'kuery',
 };
 
+const luceneQuery = {
+  query: 'response:200',
+  language: 'lucene',
+};
+
 const createMockWebStorage = () => ({
   clear: jest.fn(),
   getItem: jest.fn(),
@@ -109,6 +114,20 @@ describe('QueryBar', () => {
     const component = shallow(
       <QueryBar
         query={kqlQuery}
+        onSubmit={noop}
+        appName={'discover'}
+        indexPatterns={[mockIndexPattern]}
+        store={createMockStorage()}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('Should pass the query language to the language switcher', () => {
+    const component = shallow(
+      <QueryBar
+        query={luceneQuery}
         onSubmit={noop}
         appName={'discover'}
         indexPatterns={[mockIndexPattern]}
