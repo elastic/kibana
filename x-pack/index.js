@@ -28,7 +28,7 @@ import { kueryAutocomplete } from './plugins/kuery_autocomplete';
 import { canvas } from './plugins/canvas';
 import { ingest } from './plugins/ingest';
 
-module.exports = function(kibana) {
+module.exports = function (kibana) {
   return [
     xpackMain(kibana),
     graph(kibana),
