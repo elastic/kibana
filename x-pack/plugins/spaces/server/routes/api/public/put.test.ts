@@ -64,6 +64,31 @@ describe('Spaces Public API', () => {
     });
   });
 
+  test('PUT /space should allow an empty description', async () => {
+    const payload = {
+      id: 'a-space',
+      name: 'my updated space',
+      description: '',
+    };
+
+    const { mockSavedObjectsRepository, response } = await request(
+      'PUT',
+      '/api/spaces/space/a-space',
+      {
+        payload,
+      }
+    );
+
+    const { statusCode } = response;
+
+    expect(statusCode).toEqual(200);
+    expect(mockSavedObjectsRepository.update).toHaveBeenCalledTimes(1);
+    expect(mockSavedObjectsRepository.update).toHaveBeenCalledWith('space', 'a-space', {
+      name: 'my updated space',
+      description: '',
+    });
+  });
+
   test(`returns result of routePreCheckLicense`, async () => {
     const payload = {
       id: 'a-space',
