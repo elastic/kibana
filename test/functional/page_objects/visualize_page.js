@@ -444,7 +444,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async addNewFilterAggregation() {
-      return await testSubjects.click(`visEditorAddFilterButton`);
+      return await testSubjects.click('visEditorAddFilterButton');
     }
 
     async toggleOpenEditor(index, toState = 'true') {
