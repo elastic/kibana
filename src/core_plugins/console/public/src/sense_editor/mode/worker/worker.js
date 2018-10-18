@@ -1,5 +1,5 @@
 /* eslint-disable */
-/*
+/* 
   This file is loaded up as a blob by Brace to hand to Ace to load as Jsonp
   (hence the redefining of everything).  It is based on the javascript
   mode from the brace distro.
@@ -197,7 +197,7 @@ ace.define('ace/lib/oop', ['require', 'exports', 'module'], function (
   acequire,
   exports
 ) {
-
+  
   (exports.inherits = function (ctor, superCtor) {
     (ctor.super_ = superCtor),
     (ctor.prototype = Object.create(superCtor.prototype, {
@@ -221,7 +221,7 @@ ace.define('ace/range', ['require', 'exports', 'module'], function (
   acequire,
   exports
 ) {
-
+  
   let comparePoints = function (p1, p2) {
       return p1.row - p2.row || p1.column - p2.column;
     },
@@ -426,7 +426,7 @@ ace.define('ace/apply_delta', ['require', 'exports', 'module'], function (
   acequire,
   exports
 ) {
-
+  
   exports.applyDelta = function (docLines, delta) {
     let row = delta.start.row,
       startColumn = delta.start.column,
@@ -1064,7 +1064,7 @@ ace.define('ace/lib/lang', ['require', 'exports', 'module'], function (
   acequire,
   exports
 ) {
-
+  
   (exports.last = function (a) {
     return a[a.length - 1];
   }),
@@ -1215,7 +1215,7 @@ ace.define(
     'ace/lib/lang',
   ],
   function (acequire, exports) {
-
+    
     acequire('../range').Range;
     let Document = acequire('../document').Document,
       lang = acequire('../lib/lang'),

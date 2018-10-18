@@ -5,12 +5,11 @@
  */
 
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
-import { i18n } from '@kbn/i18n';
 
-DevToolsRegistryProvider.register(() => ({
+DevToolsRegistryProvider.register((i18n) => ({
   order: 5,
   name: 'searchprofiler',
-  display: i18n.translate('xpack.searchProfiler.pageDisplayName', {
+  display: i18n('xpack.searchProfiler.pageDisplayName', {
     defaultMessage: 'Search Profiler',
   }),
   url: '#/dev_tools/searchprofiler'

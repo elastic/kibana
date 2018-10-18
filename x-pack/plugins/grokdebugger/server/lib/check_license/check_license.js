@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-
 export function checkLicense(xpackLicenseInfo) {
   // If, for some reason, we cannot get the license information
   // from Elasticsearch, assume worst case and disable the Watcher UI

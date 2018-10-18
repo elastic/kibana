@@ -20,11 +20,10 @@
 const SenseEditor = require('../sense_editor/editor');
 
 import { useResizeChecker } from '../sense_editor_resize';
-import { i18n } from '@kbn/i18n';
 
 require('ui/modules')
   .get('app/sense')
-  .directive('senseHistoryViewer', function () {
+  .directive('senseHistoryViewer', function (i18n) {
     return {
       restrict: 'E',
       scope: {
@@ -44,7 +43,7 @@ require('ui/modules')
             viewer.clearSelection();
           } else {
             viewer.getSession().setValue(
-              i18n.translate('console.historyPage.noHistoryTextMessage', { defaultMessage: 'No history available' })
+              i18n('console.historyPage.noHistoryTextMessage', { defaultMessage: 'No history available' })
             );
           }
         });

@@ -7,15 +7,14 @@
 
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-import { i18n } from '@kbn/i18n';
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register((i18n) => {
   return {
     id: 'grokdebugger',
-    title: i18n.translate('xpack.grokDebugger.registryProviderTitle', {
+    title: i18n('xpack.grokDebugger.registryProviderTitle', {
       defaultMessage: 'Grok Debugger',
     }),
-    description: i18n.translate('xpack.grokDebugger.registryProviderDescription', {
+    description: i18n('xpack.grokDebugger.registryProviderDescription', {
       defaultMessage: 'Simulate and debug grok patterns for data transformation on ingestion.',
     }),
     icon: 'grokApp',
