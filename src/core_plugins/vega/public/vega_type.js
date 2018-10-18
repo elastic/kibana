@@ -27,12 +27,9 @@ import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 import { VegaRequestHandlerProvider } from './vega_request_handler';
 import { VegaVisualizationProvider } from './vega_visualization';
 
-import './vega.less';
-
 // Editor-specific code
 import 'brace/mode/hjson';
 import 'brace/ext/searchbox';
-import './vega_editor.less';
 import './vega_editor_controller';
 import vegaEditorTemplate from './vega_editor_template.html';
 import defaultSpec from '!!raw-loader!./default.spec.hjson';
