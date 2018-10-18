@@ -82,41 +82,21 @@ class Metric extends Component {
           left: this.state.left || 0,
           transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`
         },
-        primary_text: {
-          color: 'rgba(0,0,0,0.5)'
-        },
-        primary_value: {
-          color: '#000'
-        },
-        secondary_text: {
-          color: 'rgba(0,0,0,0.5)'
-        },
-        secondary_value: {
-          color: '#000'
-        }
+        primary_value: {},
+        secondary_value: {}
       },
       reversed: {
-        primary_text: {
-          color: 'rgba(255,255,255,0.7)'
-        },
-        primary_value: {
-          color: '#FFF'
-        },
-        secondary_text: {
-          color: 'rgba(255,255,255,0.7)'
-        },
-        secondary_value: {
-          color: '#FFF'
-        }
-
+        primary_value: {},
+        secondary_value: {}
       }
     }, this.props);
 
     if (this.props.backgroundColor) styles.container.backgroundColor = this.props.backgroundColor;
     if (metric && metric.color) styles.primary_value.color = metric.color;
+
     let primaryLabel;
     if (metric && metric.label) {
-      primaryLabel = (<div style={styles.primary_text} className="rhythm_metric__primary-label">{ metric.label }</div>);
+      primaryLabel = (<div className="tvbVisMetric__label--primary">{ metric.label }</div>);
     }
 
     let secondarySnippet;
@@ -126,12 +106,12 @@ class Metric extends Component {
       if (secondary.color) styles.secondary_value.color = secondary.color;
       let secondaryLabel;
       if (secondary.label) {
-        secondaryLabel = (<div style={styles.secondary_text} className="rhythm_metric__secondary-label">{ secondary.label }</div>);
+        secondaryLabel = (<div className="tvbVisMetric__label--secondary">{ secondary.label }</div>);
       }
       secondarySnippet = (
-        <div className="rhythm_metric__secondary">
+        <div className="tvbVisMetric__secondary">
           { secondaryLabel }
-          <div style={styles.secondary_value} className="rhythm_metric__secondary-value">{ secondaryValue }</div>
+          <div style={styles.secondary_value} className="tvbVisMetric__value--secondary">{ secondaryValue }</div>
         </div>
       );
     }
@@ -139,25 +119,33 @@ class Metric extends Component {
     let additionalLabel;
     if (this.props.additionalLabel) {
       additionalLabel = (
-        <div className="rhythm_metric__additionalLabel">
+        <div className="tvbVisMetric__label--additional">
           {this.props.additionalLabel}
         </div>
       );
     }
 
+    let className = 'tvbVisMetric';
+    if (!styles.container.backgroundColor) {
+      className += ' tvbVisMetric--noBackground';
+    }
+    if (this.props.reversed) {
+      className += ' tvbVisMetric--reversed';
+    }
+
     return (
-      <div className="rhythm_metric" style={styles.container}>
+      <div className={className} style={styles.container}>
         <div
           ref={(el) => this.resize = el}
-          className="rhythm_metric__resize"
+          className="tvbVisMetric__resize"
         >
-          <div ref={(el) => this.inner = el} className="rhythm_metric__inner" style={styles.inner}>
-            <div className="rhythm_metric__primary">
+          <div ref={(el) => this.inner = el} className="tvbVisMetric__inner" style={styles.inner}>
+            <div className="tvbVisMetric__primary">
               { primaryLabel }
               <div
                 style={styles.primary_value}
                 data-test-subj="tsvbMetricValue"
-                className="rhythm_metric__primary-value"
+                className="tvbVisMetric__value--primary"
               >
                 { primaryValue }
               </div>

@@ -1,12 +1,28 @@
-.rhythm_metric {
-  font-size: 100%;
+@mixin tvbVisMetricReversedColor {
+  // Some hacking in the CSS to provide the correct text color
+  // depending on dark/light theme and/or background color provided
+  // An easier way would be to provide if the theme is dark in the JS,
+  // but it wasn't passed down.
+  .tab-dashboard.theme-dark .tvbVisMetric--noBackground &,
+  .tvbVisMetric--reversed & {
+    @content;
+  }
+}
+
+/**
+ * 1. Text is scaled using a matrix so all font sizes and related metrics
+ *    are being calcuated from a percentage of the base font size of 100% (14px).
+ */
+
+.tvbVisMetric {
+  font-size: 100%; /* 1 */
   position: relative;
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
 }
 
-.rhythm_metric__resize {
+.tvbVisMetric__resize {
   position: absolute;
   top: 0;
   right: 0;
@@ -16,52 +32,72 @@
   display: flex;
 }
 
-.rhythm_metric__primary-label {
-  text-align: center;
+.tvbVisMetric__label--primary {
   color: $tvbTextColor;
-  font-size: 0.5em;
-  margin-bottom: 0.25em;
-  line-height: 1em;
-}
-
-.rhythm_metric__primary-value {
   text-align: center;
-  color: $tvbValueColor;
-  font-size: 1em;
-  font-weight: bold;
-  line-height: 1em;
+  font-size: 0.5em; /* 1 */
+  margin-bottom: 0.25em; /* 1 */
+  line-height: 1em; /* 1 */
+
+  @include tvbVisMetricReversedColor {
+    color: $tvbTextColorReversed;
+  }
 }
 
-.rhythm_metric__secondary {
+.tvbVisMetric__value--primary {
+  color: $tvbValueColor;
+  text-align: center;
+  font-size: 1em; /* 1 */
+  font-weight: $euiFontWeightBold;
+  line-height: 1em; /* 1 */
+
+  @include tvbVisMetricReversedColor {
+    color: $tvbValueColorReversed;
+  }
+}
+
+.tvbVisMetric__secondary {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 0.05em;
+  margin-top: 0.05em; /* 1 */
 }
 
-.rhythm_metric__secondary-label {
-  font-size: 0.35em;
-  margin-right: 0.3em;
+.tvbVisMetric__label--secondary {
+  font-size: 0.35em; /* 1 */
+  margin-right: 0.3em; /* 1 */
   color: $tvbTextColor;
-  line-height: 1em;
+  line-height: 1em; /* 1 */
+
+  @include tvbVisMetricReversedColor {
+    color: $tvbTextColorReversed;
+  }
 }
 
-.rhythm_metric__secondary-value {
-  font-size: 0.35em;
+.tvbVisMetric__value--secondary {
+  font-size: 0.35em; /* 1 */
   color: $tvbValueColor;
-  line-height: 1em;
+  line-height: 1em; /* 1 */
+
+  @include tvbVisMetricReversedColor {
+    color: $tvbValueColorReversed;
+  }
 }
 
-.rhythm_metric__inner {
+.tvbVisMetric__inner {
   position: absolute;
-  padding: 0.25em 0.5em 0.5em;
+  padding: $euiSizeXS $euiSizeS $euiSizeS;
 }
 
-.rhythm_metric__additionalLabel {
-  font-size: 0.25em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 2px 0 0 0;
-  white-space: nowrap;
+.tvbVisMetric__label--additional {
+  @include euiTextTruncate;
+  font-size: 0.25em; /* 1 */
+  padding: $euiSizeXS/2 0 0 0;
   text-align: center;
+  color: $tvbValueColor;
+  line-height: 1.2; // Ensure the descenders don't get cut off
+
+  @include tvbVisMetricReversedColor {
+    color: $tvbValueColorReversed;
+  }
 }
