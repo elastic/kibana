@@ -61,6 +61,9 @@
     "type": "git",
     "url": "https://github.com/elastic/kibana.git"
   },
+  "resolutions": {
+    "**/@types/node": "8.10.21"
+  },
   "dependencies": {
     "@elastic/eui": "4.4.1",
     "@elastic/filesaver": "1.1.2",

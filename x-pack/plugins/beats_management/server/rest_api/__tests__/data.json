@@ -1,0 +1,158 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".management-beats",
+    "type": "_doc",
+    "id": "beat:qux",
+    "source": {
+      "type": "beat",
+      "beat": {
+        "type": "filebeat",
+        "active": true,
+        "host_ip": "1.2.3.4",
+        "host_name": "foo.bar.com",
+        "id": "qux",
+        "name": "qux_filebeat",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".management-beats",
+    "type": "_doc",
+    "id": "beat:baz",
+    "source": {
+      "type": "beat",
+      "beat": {
+        "type": "metricbeat",
+        "active": true,
+        "host_ip": "22.33.11.44",
+        "host_name": "baz.bar.com",
+        "id": "baz",
+        "name": "baz_metricbeat",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".management-beats",
+    "type": "_doc",
+    "id": "beat:foo",
+    "source": {
+      "type": "beat",
+      "beat": {
+        "type": "metricbeat",
+        "active": true,
+        "host_ip": "1.2.3.4",
+        "host_name": "foo.bar.com",
+        "id": "foo",
+        "name": "foo_metricbeat",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
+        "verified_on": "2018-05-15T16:25:38.924Z",
+        "tags": [
+          "production",
+          "qa"
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".management-beats",
+    "type": "_doc",
+    "id": "beat:bar",
+    "source": {
+      "type": "beat",
+      "beat": {
+        "type": "filebeat",
+        "active": true,
+        "host_ip": "11.22.33.44",
+        "host_name": "foo.com",
+        "id": "bar",
+        "name": "bar_filebeat",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".management-beats",
+    "type": "_doc",
+    "id": "tag:production",
+    "source": {
+      "type": "tag",
+      "tag": {
+        "configuration_blocks": [
+          {
+            "type": "output",
+            "description": "some description",
+            "configs": [{ 
+              "hosts": ["localhost:9200"],
+              "username": "some-username"
+            }]
+          },
+          {
+            "type": "metricbeat.modules",
+            "configs": [{ 
+              "module": "memcached",
+              "hosts": ["localhost:11211"]
+            }]
+          }
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".management-beats",
+    "type": "_doc",
+    "id": "tag:development",
+    "source": {
+      "type": "tag",
+      "tag": {
+        "configuration_blocks": []
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".management-beats",
+    "type": "_doc",
+    "id": "tag:qa",
+    "source": {
+      "type": "tag",
+      "tag": {
+        "configuration_blocks": [
+          {
+            "type": "metricbeat.modules",
+            "configs": [{ 
+              "module": "memcached",
+              "node.namespace": "node",
+              "hosts": ["localhost:4949"]
+            }]
+          }
+        ]
+      }
+    }
+  }
+}
