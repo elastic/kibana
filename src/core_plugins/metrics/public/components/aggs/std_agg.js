@@ -24,7 +24,7 @@ import FieldSelect from './field_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFormLabel } from '@elastic/eui';
 
 function StandardAgg(props) {
   const { model, panel, series, fields } = props;
@@ -49,15 +49,14 @@ function StandardAgg(props) {
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormRow label="Aggregation" fullWidth>
-            <AggSelect
-              panelType={props.panel.type}
-              siblings={props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
-              fullWidth
-            />
-          </EuiFormRow>
+          <EuiFormLabel>Aggregation</EuiFormLabel>
+          <AggSelect
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+            fullWidth
+          />
         </EuiFlexItem>
 
         {
