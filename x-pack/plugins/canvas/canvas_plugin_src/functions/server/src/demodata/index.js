@@ -12,7 +12,7 @@ export const demodata = () => ({
   name: 'demodata',
   aliases: [],
   type: 'datatable',
-  help: 'A mock data set that includes project CI times with usernames, countries and run phases',
+  help: 'A mock data set that includes project CI times with usernames, countries and run phases.',
   context: {
     types: ['filter'],
   },

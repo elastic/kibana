@@ -18,7 +18,7 @@ The following types are supported:
 - ToggleSwitch
 - LinkLabel and etc.
 
-There is one more complex case, when we have to divide a single expression into different labels.
+There is one more complex case, when we have to divide a single expression into different labels. 
 
 For example the message before translation looks like:
 
@@ -221,8 +221,8 @@ For example:
 
   ```js
   <button
-      aria-label="{{ ::'kbn.management.editIndexPattern.removeAriaLabel' | i18n: {defaultMessage: 'Remove index pattern'} }}"
-      tooltip="{{ ::'kbn.management.editIndexPattern.removeTooltip' | i18n: {defaultMessage: 'Remove index pattern'} }}"
+      aria-label="{{'kbn.management.editIndexPattern.removeAriaLabel' | i18n: {defaultMessage: 'Remove index pattern'} }}"
+      tooltip="{{'kbn.management.editIndexPattern.removeTooltip' | i18n: {defaultMessage: 'Remove index pattern'} }}"
       >
   </button>
   ```
@@ -333,3 +333,4 @@ it('should render normally', async () => {
 });
 // ...
 ```
+

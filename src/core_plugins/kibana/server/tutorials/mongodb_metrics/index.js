@@ -39,7 +39,7 @@ export function mongodbMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mongodb.html',
       },
     }),
-    euiIconType: 'logoMongodb',
+    //euiIconType: 'logoMongoDB',
     artifacts: {
       dashboards: [
         {

@@ -40,7 +40,6 @@ export function haproxyMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-haproxy.html',
       },
     }),
-    euiIconType: 'logoHAproxy',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.haproxyMetrics.artifacts.application.label', {

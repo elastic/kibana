@@ -25,7 +25,7 @@ interface DeleteTestDefinition {
   tests: DeleteTests;
 }
 
-export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
+export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const createExpectLegacyForbidden = (username: string, action: string) => (resp: {
     [key: string]: any;
   }) => {
@@ -40,75 +40,8 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql(expectedResult);
   };
 
-  const expectEmptyResult = async (resp: { [key: string]: any }) => {
+  const expectEmptyResult = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
-
-    // Query ES to ensure that we deleted everything we expected, and nothing we didn't
-    // Grouping first by namespace, then by saved object type
-    const response = await es.search({
-      index: '.kibana',
-      body: {
-        size: 0,
-        aggs: {
-          count: {
-            terms: {
-              field: 'namespace',
-              missing: 'default',
-              size: 10,
-            },
-            aggs: {
-              countByType: {
-                terms: {
-                  field: 'type',
-                  missing: 'UNKNOWN',
-                  size: 10,
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    const buckets = response.aggregations.count.buckets;
-
-    // Space 2 deleted, all others should exist
-    const expectedBuckets = [
-      {
-        key: 'default',
-        doc_count: 3,
-        countByType: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 'space',
-              doc_count: 2,
-            },
-            {
-              key: 'dashboard',
-              doc_count: 1,
-            },
-          ],
-        },
-      },
-      {
-        doc_count: 1,
-        key: 'space_1',
-        countByType: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 'dashboard',
-              doc_count: 1,
-            },
-          ],
-        },
-      },
-    ];
-
-    expect(buckets).to.eql(expectedBuckets);
   };
 
   const expectNotFound = (resp: { [key: string]: any }) => {

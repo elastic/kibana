@@ -144,7 +144,7 @@ export class InputControlVis extends Component {
     }
 
     return (
-      <div className="icvContainer">
+      <div className="inputControlVis">
         <EuiFlexGroup wrap>
           {this.renderControls()}
         </EuiFlexGroup>

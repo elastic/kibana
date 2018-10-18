@@ -188,7 +188,7 @@ import { i18n } from '@kbn/i18n';
 i18n.init(messages);
 ```
 
-One common use-case is that of internationalizing a string constant. Here's an
+One common use-case is that of internationalizing a string constant. Here's an 
 example of how we'd do that:
 
 ```js
@@ -399,7 +399,7 @@ In order to translate attributes in Angular we should use `i18nFilter`:
 ```html
 <input
   type="text"
-  placeholder="{{ ::'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER' | i18n: {
+  placeholder="{{'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER' | i18n: {
     defaultMessage: 'Search'
   } }}"
 >

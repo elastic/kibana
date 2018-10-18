@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { isClassComponent } from 'recompose';
 import PropTypes from 'prop-types';
 import { routerProvider } from '../../lib/router_provider';
 import { CanvasLoading } from './canvas_loading';
@@ -24,7 +23,7 @@ export class Router extends React.PureComponent {
     onRouteChange: PropTypes.func,
   };
 
-  state = {
+  static state = {
     router: {},
     activeComponent: CanvasLoading,
   };
@@ -38,11 +37,11 @@ export class Router extends React.PureComponent {
     // routerProvider is a singleton, and will only ever return one instance
     const { routes, onRouteChange, onLoad, onError } = this.props;
     const router = routerProvider(routes);
-    let firstLoad = true;
 
     // when the component in the route changes, render it
     router.onPathChange(route => {
       const { pathname } = route.location;
+      const firstLoad = !this.state;
       const { component } = route.meta;
 
       if (!component) {
@@ -55,7 +54,6 @@ export class Router extends React.PureComponent {
 
       // if this is the first load, execute the route
       if (firstLoad) {
-        firstLoad = false;
         router
           .execute()
           .then(() => onLoad())
@@ -72,13 +70,9 @@ export class Router extends React.PureComponent {
   }
 
   render() {
-    // show loading
     if (this.props.showLoading)
       return React.createElement(CanvasLoading, { msg: this.props.loadingMessage });
 
-    // show the activeComponent
-    return isClassComponent(this.state.activeComponent)
-      ? React.createElement(this.state.activeComponent, {})
-      : this.state.activeComponent({});
+    return React.createElement(this.state.activeComponent, {});
   }
 }

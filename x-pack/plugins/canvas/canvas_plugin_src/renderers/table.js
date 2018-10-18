@@ -11,7 +11,7 @@ import { Datatable } from '../../public/components/datatable';
 
 export const table = () => ({
   name: 'table',
-  displayName: 'Data table',
+  displayName: 'Data Table',
   help: 'Render tabular data as HTML',
   reuseDomNode: true,
   render(domNode, config, handlers) {

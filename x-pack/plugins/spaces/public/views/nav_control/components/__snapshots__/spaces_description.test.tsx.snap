@@ -20,7 +20,6 @@ exports[`SpacesDescription renders without crashing 1`] = `
     key="manageSpacesButton"
   >
     <ManageSpacesButton
-      onClick={[MockFunction]}
       size="s"
       style={
         Object {

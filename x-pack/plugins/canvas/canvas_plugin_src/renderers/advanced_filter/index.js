@@ -10,7 +10,7 @@ import { AdvancedFilter } from './component';
 
 export const advancedFilter = () => ({
   name: 'advanced_filter',
-  displayName: 'Advanced filter',
+  displayName: 'Advanced Filter',
   help: 'Render a Canvas filter expression',
   reuseDomNode: true,
   height: 50,

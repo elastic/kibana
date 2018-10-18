@@ -12,7 +12,7 @@ import { DropdownFilter } from './component';
 
 export const dropdownFilter = () => ({
   name: 'dropdown_filter',
-  displayName: 'Dropdown filter',
+  displayName: 'Dropdown Filter',
   help: 'A dropdown from which you can select values for an "exactly" filter',
   reuseDomNode: true,
   height: 50,

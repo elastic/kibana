@@ -40,7 +40,6 @@ export function etcdMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-etcd.html',
       },
     }),
-    euiIconType: 'logoEtcd',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.etcdMetrics.artifacts.application.label', {

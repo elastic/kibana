@@ -162,41 +162,12 @@ describe('SavedObjectsRepository', () => {
     }
   };
 
-  const deleteByQueryResults = {
-    took: 27,
-    timed_out: false,
-    total: 23,
-    deleted: 23,
-    batches: 1,
-    version_conflicts: 0,
-    noops: 0,
-    retries: { bulk: 0, search: 0 },
-    throttled_millis: 0,
-    requests_per_second: -1,
-    throttled_until_millis: 0,
-    failures: []
-  };
-
   const mappings = {
     doc: {
       properties: {
         'index-pattern': {
           properties: {
             someField: {
-              type: 'keyword'
-            }
-          }
-        },
-        'dashboard': {
-          properties: {
-            otherField: {
-              type: 'keyword'
-            }
-          }
-        },
-        'globaltype': {
-          properties: {
-            yetAnotherField: {
               type: 'keyword'
             }
           }
@@ -734,43 +705,6 @@ describe('SavedObjectsRepository', () => {
       });
 
       sinon.assert.calledOnce(onBeforeWrite);
-    });
-  });
-
-  describe('#deleteByNamespace', () => {
-    it('requires namespace to be defined', async () => {
-      callAdminCluster.returns(deleteByQueryResults);
-      expect(savedObjectsRepository.deleteByNamespace()).rejects.toThrowErrorMatchingSnapshot();
-      sinon.assert.notCalled(callAdminCluster);
-      sinon.assert.notCalled(onBeforeWrite);
-    });
-
-    it('requires namespace to be a string', async () => {
-      callAdminCluster.returns(deleteByQueryResults);
-      expect(savedObjectsRepository.deleteByNamespace(['namespace-1', 'namespace-2'])).rejects.toThrowErrorMatchingSnapshot();
-      sinon.assert.notCalled(callAdminCluster);
-      sinon.assert.notCalled(onBeforeWrite);
-    });
-
-    it('constructs a deleteByQuery call using all types that are namespace aware', async () => {
-      callAdminCluster.returns(deleteByQueryResults);
-      const result = await savedObjectsRepository.deleteByNamespace('my-namespace');
-
-      expect(result).toEqual(deleteByQueryResults);
-      sinon.assert.calledOnce(callAdminCluster);
-      sinon.assert.calledOnce(onBeforeWrite);
-
-      sinon.assert.calledWithExactly(getSearchDsl, mappings, schema, {
-        namespace: 'my-namespace',
-        type: ['index-pattern', 'dashboard']
-      });
-
-      sinon.assert.calledWithExactly(callAdminCluster, 'deleteByQuery', {
-        body: { conflicts: 'proceed' },
-        ignore: [404],
-        index: '.kibana-test',
-        refresh: 'wait_for'
-      });
     });
   });
 

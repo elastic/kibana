@@ -23,8 +23,7 @@ export default function (kibana) {
     uiExports: {
       visTypes: [
         'plugins/table_vis/table_vis'
-      ],
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      ]
     }
   });
 

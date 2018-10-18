@@ -63,22 +63,19 @@ function checkout_sibling {
 
       cloneAuthor="elastic"
       cloneBranch="${PR_SOURCE_BRANCH:-${GIT_BRANCH#*/}}" # GIT_BRANCH starts with the repo, i.e., origin/master
+      cloneBranch="${cloneBranch:-master}" # fall back to CI branch if not testing a PR
       if clone_target_is_valid ; then
         return 0
       fi
 
-      cloneBranch="${PR_TARGET_BRANCH:-master}"
+      cloneBranch="$PR_TARGET_BRANCH"
       if clone_target_is_valid ; then
         return 0
       fi
 
-      cloneBranch="master"
-      if clone_target_is_valid; then
-        return 0
-      fi
-
-      echo "failed to find a valid branch to clone"
-      return 1
+      # remove xpack_ prefix from target branch if all other options fail
+      cloneBranch="${PR_TARGET_BRANCH#xpack_}"
+      return 0
     }
 
     function checkout_clone_target {

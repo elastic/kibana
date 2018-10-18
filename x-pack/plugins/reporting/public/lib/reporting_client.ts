@@ -14,12 +14,8 @@ import { jobCompletionNotifications } from './job_completion_notifications';
 
 const API_BASE_URL = '/api/reporting/generate';
 
-interface JobParams {
-  [paramName: string]: any;
-}
-
 class ReportingClient {
-  public getReportingJobPath = (exportType: string, jobParams: JobParams) => {
+  public getReportingJobPath = (exportType: string, jobParams: object) => {
     return `${chrome.addBasePath(API_BASE_URL)}/${exportType}?${QueryString.param(
       'jobParams',
       rison.encode(jobParams)

@@ -29,7 +29,6 @@ export default async function ({ readConfigFile }) {
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
       usageAPI: UsageAPIProvider,
       kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
-      chance: kibanaAPITestsConfig.get('services.chance'),
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {

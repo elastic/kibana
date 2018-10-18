@@ -66,7 +66,7 @@ module.exports = {
     rules: [
       // There's some React 15 propTypes funny business in EUI, this strips out propTypes and fixes it
       {
-        test: /(@elastic[\/\\]eui|moment)[\/\\].*\.js$/,
+        test: /(@elastic\/eui|moment)\/.*\.js$/,
         loaders: 'babel-loader',
         options: {
           babelrc: false,

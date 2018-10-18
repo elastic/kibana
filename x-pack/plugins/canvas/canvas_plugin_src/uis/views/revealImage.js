@@ -6,7 +6,7 @@
 
 export const revealImage = () => ({
   name: 'revealImage',
-  displayName: 'Reveal image',
+  displayName: 'Reveal Image',
   help: '',
   modelArgs: [['_', { label: 'Value' }]],
   args: [
@@ -18,7 +18,7 @@ export const revealImage = () => ({
     },
     {
       name: 'emptyImage',
-      displayName: 'Background image',
+      displayName: 'Background Image',
       help: 'A background image. Eg, an empty glass',
       argType: 'imageUpload',
     },

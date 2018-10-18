@@ -1,0 +1,112 @@
+<div class="kuiSideBarSection">
+  <div class="form-group">
+    <div class="kuiSideBarSectionTitle">
+      <div class="kuiSideBarSectionTitle__text">
+        Layer Settings
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="regionMap">
+        Vector map
+      </label>
+      <div class="kuiSideBarFormRow__control">
+        <select
+          id="regionMap"
+          class="kuiSelect kuiSideBarSelect"
+          ng-model="editorState.params.selectedLayer"
+          ng-options="layer.name for layer in collections.vectorLayers track by layer.layerId"
+          ng-change="onLayerChange()"
+        ></select>
+      </div>
+    </div>
+
+    <div class="form-group clearfix" ng-hide="!editorState.params.emsHotLink">
+        <a
+          class="ems-hotlink pull-right"
+          target="_blank"
+          rel="noopener noreferrer"
+          ng-href="{{editorState.params.emsHotLink}}"
+          target="_blank"
+          title="Preview {{editorState.params.selectedLayer.name}} on the Elastic Maps Service"
+        ><icon aria-hidden size="'s'" type="'link'" /> Preview on EMS
+        </a>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="joinField">
+        Join field
+      </label>
+      <div class="kuiSideBarFormRow__control">
+        <select id="joinField"
+          class="kuiSelect kuiSideBarSelect"
+          ng-model="editorState.params.selectedJoinField"
+          ng-options="field.description for field in editorState.params.selectedLayer.fields track by field.name"
+        >
+          <option value=''>Select</option></select>
+      </div>
+    </div>
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="displayWarnings">
+        Display warnings
+      </label>
+
+      <div class="kuiSideBarFormRow__control">
+        <input id="displayWarnings" type="checkbox" ng-model="editorState.params.isDisplayWarning">
+        &nbsp;
+        <icon-tip
+          content="'Turns on/off warnings. When turned on, warning will be shown for each term that cannot be matched to a shape in the vector layer based on the join field. When turned off, these warnings will be turned off.'"
+          position="'right'"
+        ></icon-tip>
+      </div>
+    </div>
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="onlyShowMatchingShapes">
+        Show all shapes
+      </label>
+      <div class="kuiSideBarFormRow__control">
+        <input id="onlyShowMatchingShapes" type="checkbox" ng-model="editorState.params.showAllShapes">
+        &nbsp;
+        <icon-tip
+          content="'Turning this off only shows the shapes that were matched with a corresponding term'"
+          position="'right'"
+        ></icon-tip>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="kuiSideBarSection">
+
+  <div class="kuiSideBarSectionTitle">
+    <div class="kuiSideBarSectionTitle__text">Style settings</div>
+  </div>
+  <div class="kuiSideBarFormRow" >
+    <label class="kuiSideBarFormRow__label" for="colorSchema">
+      Color Schema
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="colorSchema"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="editorState.params.colorSchema"
+        ng-options="mode for mode in collections.colorSchemas"
+      ></select>
+    </div>
+  </div>
+  <div class="kuiSideBarFormRow" >
+    <label class="kuiSideBarFormRow__label" for="outlineWeight">
+      Outline weight
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input
+        id="outlineWeight"
+        class="kuiInput kuiSideBarInput"
+        type="number"
+        ng-model="editorState.params.outlineWeight"
+      >
+    </div>
+  </div>
+</div>
+
+<wms-options options="editorState.params.wms"></wms-options>

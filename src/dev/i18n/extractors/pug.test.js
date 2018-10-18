@@ -20,7 +20,7 @@
 import { extractPugMessages } from './pug';
 
 describe('dev/i18n/extractors/pug', () => {
-  test('extracts messages from pug template with interpolation', () => {
+  test('extracts messages from pug template', () => {
     const source = Buffer.from(`\
 #{i18n('message-id', { defaultMessage: 'Default message', context: 'Message context' })}
 `);
@@ -29,18 +29,9 @@ describe('dev/i18n/extractors/pug', () => {
     expect(messageObject).toMatchSnapshot();
   });
 
-  test('extracts messages from pug template without interpolation', () => {
-    const source = Buffer.from(`\
-.kibanaWelcomeText(data-error-message=i18n('message-id', { defaultMessage: 'Default message', context: 'Message context' }))
-`);
-    const [messageObject] = extractPugMessages(source);
-
-    expect(messageObject).toMatchSnapshot();
-  });
-
   test('throws on empty id', () => {
     const source = Buffer.from(`\
-h1= i18n('', { defaultMessage: 'Default message', context: 'Message context' })
+#{i18n('', { defaultMessage: 'Default message', context: 'Message context' })}
 `);
 
     expect(() => extractPugMessages(source).next()).toThrowErrorMatchingSnapshot();

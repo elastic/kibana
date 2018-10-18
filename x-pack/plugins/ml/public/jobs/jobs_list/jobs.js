@@ -5,11 +5,60 @@
  */
 
 
+import './styles/main.less';
+import { NewJobButton } from './components/new_job_button';
 import { JobsListView } from './components/jobs_list_view';
-import React from 'react';
+import { JobStatsBar } from './components/jobs_stats_bar';
+import { NodeAvailableWarning } from './components/node_available_warning';
+
+import React, {
+  Component
+} from 'react';
+
+import {
+  EuiSpacer,
+} from '@elastic/eui';
 
 
-export const JobsPage = () => (
-  <JobsListView />
-);
+export class JobsPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      jobsSummaryList: [],
+      updateJobStats: () => {},
+    };
+  }
 
+  setUpdateJobStats = (updateJobStats) => {
+    this.setState({ updateJobStats });
+  }
+
+  unsetUpdateJobStats = () => {
+    this.setUpdateJobStats(() => {});
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <JobStatsBar
+          setUpdateJobStats={this.setUpdateJobStats}
+          unsetUpdateJobStats={this.unsetUpdateJobStats}
+        />
+        <div className="job-management">
+          <NodeAvailableWarning />
+          <header>
+            <div className="new-job-button-container">
+              <NewJobButton />
+            </div>
+          </header>
+
+          <div className="clear" />
+
+          <EuiSpacer size="s" />
+
+          <JobsListView updateJobStats={this.state.updateJobStats} />
+        </div>
+      </React.Fragment>
+    );
+  }
+}

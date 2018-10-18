@@ -9,11 +9,11 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 
 export const sort = () => ({
   name: 'sort',
-  displayName: 'Datatable sorting',
+  displayName: 'Datatable Sorting',
   args: [
     {
       name: '_',
-      displayName: 'Sort field',
+      displayName: 'Sort Field',
       argType: 'datacolumn',
     },
     {

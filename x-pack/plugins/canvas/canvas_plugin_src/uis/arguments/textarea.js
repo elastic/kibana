@@ -63,7 +63,7 @@ EnhancedTextAreaArgInput.propTypes = {
 
 export const textarea = () => ({
   name: 'textarea',
-  displayName: 'Textarea',
+  displayName: 'textarea',
   help: 'Input long strings',
   template: templateFromReactComponent(EnhancedTextAreaArgInput),
 });

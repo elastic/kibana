@@ -101,8 +101,7 @@
   }
 
   .visualize {
-    display: flex;
-    flex-direction: column;
+    @include flex-parent();
     flex: 1 1 100%;
   }
 

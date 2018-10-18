@@ -12,7 +12,7 @@ import { Popover } from '../../../public/components/popover';
 
 export const error = () => ({
   name: 'error',
-  displayName: 'Error information',
+  displayName: 'Error Information',
   help: 'Render error data in a way that is helpful to users',
   reuseDomNode: true,
   render(domNode, config, handlers) {

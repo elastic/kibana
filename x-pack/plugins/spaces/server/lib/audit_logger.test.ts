@@ -5,16 +5,12 @@
  */
 import { SpacesAuditLogger } from './audit_logger';
 
-const createMockConfig = (settings: { [key: string]: any } = {}) => {
+const createMockConfig = (settings: any) => {
   const mockConfig = {
     get: jest.fn(),
   };
 
   mockConfig.get.mockImplementation(key => {
-    if (!settings.hasOwnProperty(key)) {
-      throw new Error('Undefined key, mock schema error');
-    }
-
     return settings[key];
   });
 
@@ -28,21 +24,8 @@ const createMockAuditLogger = () => {
 };
 
 describe(`#savedObjectsAuthorizationFailure`, () => {
-  test(`doesn't log anything when xpack.security.enabled is false`, () => {
-    const config = createMockConfig({
-      'xpack.security.enabled': false,
-    });
-    const auditLogger = createMockAuditLogger();
-
-    const securityAuditLogger = new SpacesAuditLogger(config, auditLogger);
-    securityAuditLogger.spacesAuthorizationFailure('foo-user', 'foo-action');
-
-    expect(auditLogger.log).toHaveBeenCalledTimes(0);
-  });
-
   test(`doesn't log anything when xpack.security.audit.enabled is false`, () => {
     const config = createMockConfig({
-      'xpack.security.enabled': true,
       'xpack.security.audit.enabled': false,
     });
     const auditLogger = createMockAuditLogger();
@@ -55,7 +38,6 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
 
   test('logs with spaceIds via auditLogger when xpack.security.audit.enabled is true', () => {
     const config = createMockConfig({
-      'xpack.security.enabled': true,
       'xpack.security.audit.enabled': true,
     });
     const auditLogger = createMockAuditLogger();
@@ -79,7 +61,6 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
 
   test('logs without spaceIds via auditLogger when xpack.security.audit.enabled is true', () => {
     const config = createMockConfig({
-      'xpack.security.enabled': true,
       'xpack.security.audit.enabled': true,
     });
     const auditLogger = createMockAuditLogger();
@@ -101,21 +82,8 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
 });
 
 describe(`#savedObjectsAuthorizationSuccess`, () => {
-  test(`doesn't log anything when xpack.security.enabled is false`, () => {
-    const config = createMockConfig({
-      'xpack.security.enabled': false,
-    });
-    const auditLogger = createMockAuditLogger();
-
-    const securityAuditLogger = new SpacesAuditLogger(config, auditLogger);
-    securityAuditLogger.spacesAuthorizationSuccess('foo-user', 'foo-action');
-
-    expect(auditLogger.log).toHaveBeenCalledTimes(0);
-  });
-
   test(`doesn't log anything when xpack.security.audit.enabled is false`, () => {
     const config = createMockConfig({
-      'xpack.security.enabled': true,
       'xpack.security.audit.enabled': false,
     });
     const auditLogger = createMockAuditLogger();
@@ -128,7 +96,6 @@ describe(`#savedObjectsAuthorizationSuccess`, () => {
 
   test('logs with spaceIds via auditLogger when xpack.security.audit.enabled is true', () => {
     const config = createMockConfig({
-      'xpack.security.enabled': true,
       'xpack.security.audit.enabled': true,
     });
     const auditLogger = createMockAuditLogger();
@@ -152,7 +119,6 @@ describe(`#savedObjectsAuthorizationSuccess`, () => {
 
   test('logs without spaceIds via auditLogger when xpack.security.audit.enabled is true', () => {
     const config = createMockConfig({
-      'xpack.security.enabled': true,
       'xpack.security.audit.enabled': true,
     });
     const auditLogger = createMockAuditLogger();

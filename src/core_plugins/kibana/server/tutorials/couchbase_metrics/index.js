@@ -40,7 +40,6 @@ export function couchbaseMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-couchbase.html',
       },
     }),
-    euiIconType: 'logoCouchbase',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.couchbaseMetrics.artifacts.application.label', {

@@ -38,10 +38,10 @@ exports[`renders RangeControl 1`] = `
     isInvalid={false}
   >
     <EuiFlexGroup
-      alignItems="center"
+      alignItems="stretch"
       component="div"
       direction="row"
-      gutterSize="s"
+      gutterSize="l"
       justifyContent="flexStart"
       responsive={true}
       wrap={false}
@@ -63,9 +63,9 @@ exports[`renders RangeControl 1`] = `
         />
       </EuiFlexItem>
       <EuiFlexItem
-        className="icvInputRange__container"
+        className="inputRangeContainer"
         component="div"
-        grow={false}
+        grow={true}
       >
         <InputRange
           allowSameValues={false}

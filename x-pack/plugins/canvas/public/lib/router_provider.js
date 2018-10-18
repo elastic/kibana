@@ -26,15 +26,6 @@ export function routerProvider(routes) {
     return state || history.getLocation().state;
   };
 
-  const updateLocation = (name, params, state, replace = false) => {
-    const currentState = getState(name, params, state);
-    const method = replace ? 'replace' : 'push';
-
-    // given a path, go there directly
-    if (isPath(name)) return history[method](currentState, name);
-    history[method](currentState, baseRouter.create(name, params));
-  };
-
   // our router is an extended version of the imported router
   // which mixes in history methods for navigation
   router = {
@@ -45,10 +36,16 @@ export function routerProvider(routes) {
     getPath: history.getPath,
     getFullPath: history.getFullPath,
     navigateTo(name, params, state) {
-      updateLocation(name, params, state);
+      const currentState = getState(name, params, state);
+      // given a path, go there directly
+      if (isPath(name)) return history.push(currentState, name);
+      history.push(currentState, this.create(name, params));
     },
     redirectTo(name, params, state) {
-      updateLocation(name, params, state, true);
+      const currentState = getState(name, params, state);
+      // given a path, go there directly, assuming params is state
+      if (isPath(name)) return history.replace(currentState, name);
+      history.replace(currentState, this.create(name, params));
     },
     onPathChange(fn) {
       if (componentListener != null)

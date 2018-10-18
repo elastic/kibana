@@ -59,8 +59,8 @@ function getFieldValueCounts(params) {
 
     if (params.hits.length - missing === 0) {
       return {
-        error: 'This field is present in your Elasticsearch mapping' +
-          ' but not in the ' + params.hits.length + ' documents shown in the doc table.' +
+        error: 'This field is present in your elasticsearch mapping' +
+          ' but not in any documents in the search results.' +
           ' You may still be able to visualize or search on it.'
       };
     }

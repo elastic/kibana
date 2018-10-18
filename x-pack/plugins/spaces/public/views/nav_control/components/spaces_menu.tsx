@@ -15,7 +15,6 @@ import './spaces_menu.less';
 interface Props {
   spaces: Space[];
   onSelectSpace: (space: Space) => void;
-  onManageSpacesClick: () => void;
   userProfile: UserProfile;
 }
 
@@ -140,7 +139,6 @@ export class SpacesMenu extends Component<Props, State> {
           size="s"
           style={{ width: `100%` }}
           userProfile={this.props.userProfile}
-          onClick={this.props.onManageSpacesClick}
         />
       </div>
     );

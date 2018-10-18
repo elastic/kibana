@@ -17,9 +17,9 @@ export const seriesStyle = () => ({
   args: {
     label: {
       types: ['string'],
-      displayName: 'Series label',
+      displayName: 'Series Label',
       help:
-        'The label of the line this style applies to, not the name you would like to give the line',
+        'The label of the line this style applies to, not the name you would like to give the line.',
     },
     color: {
       types: ['string', 'null'],
@@ -33,12 +33,12 @@ export const seriesStyle = () => ({
     },
     bars: {
       types: ['number'],
-      displayName: 'Bar width',
+      displayName: 'Bar Width',
       help: 'Width of bars',
     },
     points: {
       types: ['number'],
-      displayName: 'Show points',
+      displayName: 'Show Points',
       help: 'Size of points on line',
     },
     fill: {
@@ -48,13 +48,13 @@ export const seriesStyle = () => ({
     },
     stack: {
       types: ['number', 'null'],
-      displayName: 'Stack series',
+      displayName: 'Stack Series',
       help:
         'Should we stack the series? This is the stack "id". Series with the same stack id will be stacked together',
     },
     horizontalBars: {
       types: ['boolean'],
-      displayName: 'Horizontal bars orientation',
+      displayName: 'Horizontal Bars Orientation',
       help: 'Sets the orientation of bars in the chart to horizontal',
     },
   },

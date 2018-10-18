@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe.skip('Print Layout', () => {
+      describe('Print Layout', () => {
         it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
@@ -236,7 +236,7 @@ export default function ({ getService, getPageObjects }) {
           await expectEnabledGenerateReportButton();
         });
 
-        it.skip('matches baseline report', async function () {
+        it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);

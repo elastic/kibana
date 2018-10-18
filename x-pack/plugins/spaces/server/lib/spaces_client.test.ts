@@ -1072,9 +1072,7 @@ describe('#delete', () => {
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(notReservedSavedObject),
         delete: jest.fn(),
-        deleteByNamespace: jest.fn(),
       };
-
       const request = Symbol();
 
       const client = new SpacesClient(
@@ -1090,7 +1088,6 @@ describe('#delete', () => {
 
       expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
-      expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
@@ -1130,9 +1127,7 @@ describe('#delete', () => {
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(notReservedSavedObject),
         delete: jest.fn(),
-        deleteByNamespace: jest.fn(),
       };
-
       const request = Symbol();
 
       const client = new SpacesClient(
@@ -1149,7 +1144,6 @@ describe('#delete', () => {
       expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
       expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
-      expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
@@ -1232,9 +1226,7 @@ describe('#delete', () => {
       const mockInternalRepository = {
         get: jest.fn().mockReturnValue(notReservedSavedObject),
         delete: jest.fn(),
-        deleteByNamespace: jest.fn(),
       };
-
       const request = Symbol();
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -1254,7 +1246,6 @@ describe('#delete', () => {
       );
       expect(mockInternalRepository.get).toHaveBeenCalledWith('space', id);
       expect(mockInternalRepository.delete).toHaveBeenCalledWith('space', id);
-      expect(mockInternalRepository.deleteByNamespace).toHaveBeenCalledWith(id);
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete');
     });

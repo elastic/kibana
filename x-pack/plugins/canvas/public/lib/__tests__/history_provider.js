@@ -169,9 +169,7 @@ describe('historyProvider', () => {
   });
 
   describe('resetOnChange', () => {
-    // the history onChange handler was made async and now there's no way to know when the handler was called
-    // TODO: restore these tests.
-    it.skip('removes listeners', () => {
+    it('removes listeners', () => {
       const createHandler = () => {
         let callCount = 0;
 

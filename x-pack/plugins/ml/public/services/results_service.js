@@ -1399,8 +1399,6 @@ function getEventRateData(
 // Returned response contains a results property, which is an object
 // of document counts against time (epoch millis).
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 200;
-const ENTITY_AGGREGATION_SIZE = 10;
-const AGGREGATION_MIN_DOC_COUNT = 1;
 function getEventDistributionData(
   index,
   types,
@@ -1414,7 +1412,8 @@ function getEventDistributionData(
   latestMs,
   interval) {
   return new Promise((resolve, reject) => {
-    if (splitField === undefined) {
+    // only get this data for count (used by rare chart)
+    if (metricFunction !== 'count' || splitField === undefined) {
       return resolve([]);
     }
 
@@ -1465,7 +1464,7 @@ function getEventDistributionData(
           date_histogram: {
             field: timeFieldName,
             interval: interval,
-            min_doc_count: AGGREGATION_MIN_DOC_COUNT
+            min_doc_count: 0
           },
           aggs: {
             sample: {
@@ -1476,8 +1475,7 @@ function getEventDistributionData(
                 entities: {
                   terms: {
                     field: splitField.fieldName,
-                    size: ENTITY_AGGREGATION_SIZE,
-                    min_doc_count: AGGREGATION_MIN_DOC_COUNT
+                    size: 10
                   }
                 }
               }
@@ -1493,7 +1491,7 @@ function getEventDistributionData(
     }
 
     if (metricFieldName !== undefined && metricFieldName !== '') {
-      body.aggs.byTime.aggs.sample.aggs.entities.aggs = {};
+      body.aggs.byTime.aggs = {};
 
       const metricAgg = {
         [metricFunction]: {
@@ -1504,7 +1502,7 @@ function getEventDistributionData(
       if (metricFunction === 'percentiles') {
         metricAgg[metricFunction].percents = [ML_MEDIAN_PERCENTS];
       }
-      body.aggs.byTime.aggs.sample.aggs.entities.aggs.metric = metricAgg;
+      body.aggs.byTime.aggs.metric = metricAgg;
     }
 
     ml.esSearch({
@@ -1518,11 +1516,10 @@ function getEventDistributionData(
           const date = +dataForTime.key;
           const entities = _.get(dataForTime, ['sample', 'entities', 'buckets'], []);
           entities.forEach((entity) => {
-            const value = (metricFunction === 'count') ? entity.doc_count : entity.metric.value;
             d.push({
               date,
               entity: entity.key,
-              value
+              value: entity.doc_count
             });
           });
           return d;

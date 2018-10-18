@@ -9,7 +9,7 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 
 export const timefilterControl = () => ({
   name: 'timefilterControl',
-  displayName: 'Time filter',
+  displayName: 'Time Filter',
   modelArgs: [],
   args: [
     {

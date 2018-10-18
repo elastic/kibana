@@ -17,20 +17,4 @@
  * under the License.
  */
 
-/**
- * WARNING: these types are incomplete
- */
-
 export type IndexPattern = any;
-
-export interface StaticIndexPatternField {
-  name: string;
-  type: string;
-  aggregatable: boolean;
-  searchable: boolean;
-}
-
-export interface StaticIndexPattern {
-  fields: StaticIndexPatternField[];
-  title: string;
-}

@@ -14,7 +14,7 @@ export const shape = () => ({
   args: [
     {
       name: '_',
-      displayName: 'Select a shape',
+      displayName: 'Select a Shape',
       argType: 'shape',
       options: {
         shapes,
@@ -34,13 +34,13 @@ export const shape = () => ({
     },
     {
       name: 'borderWidth',
-      displayName: 'Border width',
+      displayName: 'Border Width',
       argType: 'number',
       help: 'Border width',
     },
     {
       name: 'maintainAspect',
-      displayName: 'Maintain aspect ratio',
+      displayName: 'Maintain Aspect Ratio',
       argType: 'toggle',
       help: `Select 'true' to maintain aspect ratio`,
     },

@@ -168,7 +168,7 @@ class ImageUpload extends React.Component {
 
 export const imageUpload = () => ({
   name: 'imageUpload',
-  displayName: 'Image upload',
+  displayName: 'Image Upload',
   help: 'Select or upload an image',
   resolveArgValue: true,
   template: templateFromReactComponent(ImageUpload),

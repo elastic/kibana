@@ -18,7 +18,7 @@
  */
 
 import { omit } from 'lodash';
-import { getRootType, getRootPropertiesObjects } from '../../../mappings';
+import { getRootType } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
@@ -243,38 +243,6 @@ export class SavedObjectsRepository {
     throw new Error(
       `Unexpected Elasticsearch DELETE response: ${JSON.stringify({ type, id, response, })}`
     );
-  }
-
-  /**
-   * Deletes all objects from the provided namespace.
-   *
-   * @param {string} namespace
-   * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
-   */
-  async deleteByNamespace(namespace) {
-
-    if (!namespace || typeof namespace !== 'string') {
-      throw new TypeError(`namespace is required, and must be a string`);
-    }
-
-    const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
-
-    const typesToDelete = allTypes.filter(type => !this._schema.isNamespaceAgnostic(type));
-
-    const esOptions = {
-      index: this._index,
-      ignore: [404],
-      refresh: 'wait_for',
-      body: {
-        conflicts: 'proceed',
-        ...getSearchDsl(this._mappings, this._schema, {
-          namespace,
-          type: typesToDelete,
-        })
-      }
-    };
-
-    return await this._writeToCluster('deleteByQuery', esOptions);
   }
 
   /**

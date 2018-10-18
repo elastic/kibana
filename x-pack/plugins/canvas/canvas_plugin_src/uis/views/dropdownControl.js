@@ -9,12 +9,12 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 
 export const dropdownControl = () => ({
   name: 'dropdownControl',
-  displayName: 'Dropdown filter',
+  displayName: 'Dropdown Filter',
   modelArgs: [],
   args: [
     {
       name: 'valueColumn',
-      displayName: 'Values column',
+      displayName: 'Values Column',
       help: 'Column from which to extract values to make available in the dropdown',
       argType: 'string',
       options: {
@@ -23,7 +23,7 @@ export const dropdownControl = () => ({
     },
     {
       name: 'filterColumn',
-      displayName: 'Filter column ',
+      displayName: 'Filter Column ',
       help: 'Column to which the value selected from the dropdown is applied',
       argType: 'string',
       options: {

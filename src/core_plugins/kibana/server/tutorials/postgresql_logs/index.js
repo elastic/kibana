@@ -42,7 +42,7 @@ export function postgresqlLogsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-postgresql.html',
       },
     }),
-    euiIconType: 'logoPostgres',
+    //euiIconType: 'logoPostgreSQL',
     artifacts: {
       dashboards: [
         {

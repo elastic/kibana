@@ -41,7 +41,6 @@ export function golangMetricsSpecProvider(server, context) {
         learnMoreLink: `{config.docs.beats.metricbeat}/metricbeat-module-${moduleName}.html`,
       },
     }),
-    euiIconType: 'logoGolang',
     artifacts: {
       dashboards: [
         {

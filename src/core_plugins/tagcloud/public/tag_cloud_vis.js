@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import './tag_cloud.less';
 import './tag_cloud_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
@@ -25,17 +26,15 @@ import { TagCloudVisualization } from './tag_cloud_visualization';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
 
-VisTypesRegistryProvider.register(function (Private, i18n) {
+VisTypesRegistryProvider.register(function (Private) {
 
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createBaseVisualization({
     name: 'tagcloud',
-    title: i18n('tagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
+    title: 'Tag Cloud',
     icon: 'visTagCloud',
-    description: i18n('tagCloud.vis.tagCloudDescription', {
-      defaultMessage: 'A group of words, sized according to their importance'
-    }),
+    description: 'A group of words, sized according to their importance',
     category: CATEGORY.OTHER,
     visConfig: {
       defaults: {
@@ -58,7 +57,7 @@ VisTypesRegistryProvider.register(function (Private, i18n) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n('tagCloud.vis.schemas.metricTitle', { defaultMessage: 'Tag Size' }),
+          title: 'Tag Size',
           min: 1,
           max: 1,
           aggFilter: ['!std_dev', '!percentiles', '!percentile_ranks', '!derivative', '!geo_bounds', '!geo_centroid'],
@@ -70,7 +69,7 @@ VisTypesRegistryProvider.register(function (Private, i18n) {
           group: 'buckets',
           name: 'segment',
           icon: 'fa fa-cloud',
-          title: i18n('tagCloud.vis.schemas.segmentTitle', { defaultMessage: 'Tags' }),
+          title: 'Tags',
           min: 1,
           max: 1,
           aggFilter: ['terms', 'significant_terms']

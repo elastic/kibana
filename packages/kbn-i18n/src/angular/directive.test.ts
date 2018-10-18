@@ -30,7 +30,7 @@ angular
 
 describe('i18nDirective', () => {
   let compile: angular.ICompileService;
-  let scope: angular.IRootScopeService & { word?: string };
+  let scope: angular.IRootScopeService;
 
   beforeEach(angular.mock.module('app'));
   beforeEach(
@@ -38,7 +38,6 @@ describe('i18nDirective', () => {
       ($compile: angular.ICompileService, $rootScope: angular.IRootScopeService) => {
         compile = $compile;
         scope = $rootScope.$new();
-        scope.word = 'word';
       }
     )
   );
@@ -63,23 +62,19 @@ describe('i18nDirective', () => {
   test('inserts correct translation html content with values', () => {
     const id = 'id';
     const defaultMessage = 'default-message {word}';
+    const compiledContent = 'default-message word';
 
     const element = angular.element(
       `<div
         i18n-id="${id}"
         i18n-default-message="${defaultMessage}"
-        i18n-values="{ word }"
+        i18n-values="{ word: 'word' }"
       />`
     );
 
     compile(element)(scope);
     scope.$digest();
 
-    expect(element.html()).toMatchSnapshot();
-
-    scope.word = 'anotherWord';
-    scope.$digest();
-
-    expect(element.html()).toMatchSnapshot();
+    expect(element.html()).toEqual(compiledContent);
   });
 });

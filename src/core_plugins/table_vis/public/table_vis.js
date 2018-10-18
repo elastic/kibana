@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import './table_vis.less';
 import './table_vis_controller';
 import './table_vis_params';
 import 'ui/agg_table';

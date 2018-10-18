@@ -10,7 +10,7 @@ import './reveal_image.scss';
 
 export const revealImage = () => ({
   name: 'revealImage',
-  displayName: 'Image reveal',
+  displayName: 'Image Reveal',
   help: 'Reveal a percentage of an image to make a custom gauge-style chart',
   reuseDomNode: true,
   render(domNode, config, handlers) {

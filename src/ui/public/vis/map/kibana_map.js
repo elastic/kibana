@@ -69,7 +69,7 @@ function makeLegendControl(container, kibanaMap, position) {
 
     updateContents() {
       this._legendContainer.empty();
-      const $div = $('<div>').addClass('visMapLegend');
+      const $div = $('<div>').addClass('tilemap-legend');
       this._legendContainer.append($div);
       const layers = this._kibanaMap.getLayers();
       layers.forEach((layer) =>layer.appendLegendContents($div));
@@ -497,7 +497,7 @@ export class KibanaMap extends EventEmitter {
     if (this._leafletLegendControl) {
       this._leafletMap.removeControl(this._leafletLegendControl);
     }
-    const $wrapper = $('<div>').addClass('visMapLegend__wrapper');
+    const $wrapper = $('<div>').addClass('tilemap-legend-wrapper');
     this._leafletLegendControl = makeLegendControl($wrapper, this, this._legendPosition);
     this._leafletMap.addControl(this._leafletLegendControl);
   }

@@ -54,7 +54,7 @@ class MarkdownVisComponent extends Component {
   render() {
     return (
       <div
-        className="mkdVis"
+        className="markdown-vis"
         style={{ fontSize: `${this.props.fontSize}pt` }}
       >
         <Markdown

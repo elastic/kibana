@@ -87,8 +87,6 @@ const updateGlobalPositions = (setPosition, { shapes, gestureEnd }, elems) => {
         angle: Math.round(matrixToAngle(shape.transformMatrix)),
       };
 
-      if (1 / newProps.angle === -Infinity) newProps.angle = 0; // recompose.shallowEqual discerns between 0 and -0
-
       if (!shallowEqual(oldProps, newProps)) setPosition(shape.id, newProps);
     }
   });

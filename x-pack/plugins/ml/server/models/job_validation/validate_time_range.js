@@ -25,9 +25,7 @@ export async function isValidTimeField(callWithRequest, job) {
     index,
     fields: [timeField]
   });
-  // get the field's type with the following notation
-  // because a nested field could contain dots and confuse _.get
-  const fieldType = _.get(fieldCaps, `fields['${timeField}'].date.type`);
+  const fieldType = _.get(fieldCaps, `fields.${timeField}.date.type`);
   return fieldType === ES_FIELD_TYPES.DATE;
 }
 
