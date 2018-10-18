@@ -10,5 +10,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./metrics'));
     loadTestFile(require.resolve('./waffle'));
     loadTestFile(require.resolve('./capabilities'));
+    loadTestFile(require.resolve('./sources'));
   });
 }
