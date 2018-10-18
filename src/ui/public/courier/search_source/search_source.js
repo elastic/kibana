@@ -82,8 +82,7 @@ import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
-import { KbnError } from '../../errors';
-import { documentationLinks } from '../../documentation_links';
+import { KbnError, OutdatedKuerySyntaxError } from '../../errors';
 
 const FIELDS = [
   'type',
@@ -606,9 +605,7 @@ export function SearchSourceProvider(Promise, Private, config) {
             flatData.body.query = buildESQuery(flatData.index, flatData.query, flatData.filters);
           } catch (e) {
             if (e.message === 'OutdatedKuerySyntaxError') {
-              const message =  `It looks like you're using an outdated Kuery syntax.
-                See what changed in the [docs](${documentationLinks.query.kueryQuerySyntax})!`;
-              throw new KbnError(message, KbnError);
+              throw new OutdatedKuerySyntaxError();
             }
             throw new KbnError(e.message, KbnError);
           }
