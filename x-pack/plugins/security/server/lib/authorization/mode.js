@@ -23,7 +23,7 @@ export function authorizationModeFactory(
     const getUserPrivilegesResponse = await callWithRequest(request, 'shield.getUserPrivileges');
 
     // superusers have `*` and all other roles will have the explicit application
-    // we aren't using wildcards at this time, so if the user somehow specifies them
+    // We aren't using wildcards at this time, so if the user somehow specifies them
     // using the ES apis directly (which is documented as unsupported) they won't work here.
     const result = getUserPrivilegesResponse.applications
       .some(entry => entry.application === '*' || entry.application === application);
