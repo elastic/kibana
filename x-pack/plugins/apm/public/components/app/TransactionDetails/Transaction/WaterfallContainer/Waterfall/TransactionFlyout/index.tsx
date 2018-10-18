@@ -19,17 +19,11 @@ import DiscoverButton from 'x-pack/plugins/apm/public/components/shared/Discover
 // @ts-ignore
 import { StickyProperties } from 'x-pack/plugins/apm/public/components/shared/StickyProperties';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import {
-  Transaction,
-  TransactionV2
-} from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 // @ts-ignore
 import { legacyEncodeURIComponent } from '../../../../../../../utils/url';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
-import {
-  IWaterfall,
-  IWaterfallItem
-} from '../waterfall_helpers/waterfall_helpers';
+import { IWaterfall } from '../waterfall_helpers/waterfall_helpers';
 import { SecondLevelStickyProperties } from './SecondLevelStickyProperties';
 
 function getDiscoverQuery(id: string) {
@@ -47,7 +41,7 @@ function getDiscoverQuery(id: string) {
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
-  location: Location;
+  location: any; // TODO: import location type from react router or history types?
   urlParams: IUrlParams;
   waterfall: IWaterfall;
 }
@@ -74,7 +68,7 @@ export function TransactionFlyout({
     <EuiFlyout onClose={onClose} size="l">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <span>Transaction details</span>
+          <h4>Transaction details</h4>
         </EuiTitle>
 
         <DiscoverButton query={getDiscoverQuery(transaction.id)}>
@@ -94,7 +88,7 @@ export function TransactionFlyout({
       <EuiFlyoutBody>
         <SecondLevelStickyProperties transaction={transactionGroup} />
         <TransactionPropertiesTableForFlyout
-          transaction={transaction}
+          transaction={transactionGroup}
           location={location}
           urlParams={urlParams}
         />

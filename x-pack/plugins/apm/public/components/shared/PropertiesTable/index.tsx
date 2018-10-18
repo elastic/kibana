@@ -43,7 +43,7 @@ export function AgentFeatureTipMessage({
   agentName
 }: {
   featureName: string;
-  agentName: string;
+  agentName?: string;
 }) {
   const docs = getFeatureDocs(featureName, agentName);
 
@@ -80,7 +80,7 @@ export function PropertiesTable({
 }: {
   propData: StringMap<any>;
   propKey: string;
-  agentName: string;
+  agentName?: string;
 }) {
   if (_.isEmpty(propData)) {
     return (

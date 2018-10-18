@@ -7,9 +7,7 @@
 // @ts-ignore
 import { EuiSpacer, EuiTab } from '@elastic/eui';
 import { capitalize, first, get } from 'lodash';
-import PropTypes from 'prop-types';
 import React from 'react';
-import { SERVICE_AGENT_NAME } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 // @ts-ignore
@@ -22,7 +20,7 @@ import {
 import { Tab } from '../../../shared/UIComponents';
 
 // Ensure the selected tab exists or use the first
-function getCurrentTab(tabs: string[] = [], selectedTab: string | null) {
+function getCurrentTab(tabs: string[] = [], selectedTab?: string) {
   return selectedTab && tabs.includes(selectedTab) ? selectedTab : first(tabs);
 }
 
@@ -44,7 +42,7 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
 }) => {
   const tabs = getTabs(transaction);
   const currentTab = getCurrentTab(tabs, urlParams.flyoutDetailTab);
-  const agentName = get(transaction, SERVICE_AGENT_NAME, 'n/a');
+  const agentName = transaction.context.service.agent.name;
 
   return (
     <div>
@@ -77,10 +75,4 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
       />
     </div>
   );
-};
-
-TransactionPropertiesTableForFlyout.propTypes = {
-  location: PropTypes.object.isRequired,
-  transaction: PropTypes.object.isRequired,
-  urlParams: PropTypes.object.isRequired
 };

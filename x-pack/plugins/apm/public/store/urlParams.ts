@@ -43,7 +43,7 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
         transactionId,
         detailTab,
         flyoutDetailTab,
-        activeTimelineId,
+        waterfallItemId,
         spanId,
         page,
         sortDirection,
@@ -60,7 +60,7 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
         page: toNumber(page) || 0,
         transactionId: toString(transactionId),
         traceId: toString(traceId),
-        activeTimelineId: toString(activeTimelineId),
+        waterfallItemId: toString(waterfallItemId),
         detailTab,
         flyoutDetailTab: toString(flyoutDetailTab),
         spanId: toNumber(spanId),
@@ -152,10 +152,9 @@ export const getUrlParams = createSelector(
 );
 
 export interface IUrlParams {
-  activeTimelineId: string | null;
   end?: string;
   errorGroupId?: string;
-  flyoutDetailTab: string | null;
+  flyoutDetailTab?: string;
   kuery?: string;
   serviceName?: string;
   start?: string;
@@ -163,4 +162,5 @@ export interface IUrlParams {
   transactionId?: string;
   transactionName?: string;
   transactionType?: string;
+  waterfallItemId?: string;
 }

@@ -10,6 +10,7 @@ import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
 
 import { IUrlParams } from '../../../../../../store/urlParams';
+
 // @ts-ignore
 import { fromQuery, history, toQuery } from '../../../../../../utils/url';
 // @ts-ignore
@@ -47,13 +48,16 @@ interface Props {
 export class Waterfall extends Component<Props> {
   public onOpenFlyout = (item: IWaterfallItem) => {
     this.setQueryParams({
-      flyoutDetailTab: null,
-      activeTimelineId: String(item.id)
+      flyoutDetailTab: undefined,
+      waterfallItemId: String(item.id)
     });
   };
 
   public onCloseFlyout = () => {
-    this.setQueryParams({ flyoutDetailTab: null, activeTimelineId: null });
+    this.setQueryParams({
+      flyoutDetailTab: undefined,
+      waterfallItemId: undefined
+    });
   };
 
   public renderWaterfall = (item?: IWaterfallItem) => {
@@ -70,7 +74,7 @@ export class Waterfall extends Component<Props> {
           color={serviceColors[item.serviceName]}
           item={item}
           totalDuration={waterfall.duration}
-          isSelected={true} // TODO: implement logic
+          isSelected={true} // TODO: implement logic (do we still need this if state is handled via query param?)
           onClick={() => this.onOpenFlyout(item)}
         />
 
@@ -83,8 +87,8 @@ export class Waterfall extends Component<Props> {
     const { waterfall, location, urlParams } = this.props;
 
     const currentItem =
-      urlParams.activeTimelineId &&
-      waterfall.itemsById[urlParams.activeTimelineId];
+      urlParams.waterfallItemId &&
+      waterfall.itemsById[urlParams.waterfallItemId];
 
     if (!currentItem) {
       return null;
@@ -142,10 +146,7 @@ export class Waterfall extends Component<Props> {
     );
   }
 
-  private setQueryParams(params: {
-    activeTimelineId?: string | null;
-    flyoutDetailTab?: string | null;
-  }) {
+  private setQueryParams(params: Partial<IUrlParams>) {
     const { location } = this.props;
     history.replace({
       ...location,

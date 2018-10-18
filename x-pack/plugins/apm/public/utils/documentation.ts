@@ -158,7 +158,7 @@ export const ELASTIC_DOCS = {
 //
 // Helper methods
 //
-function translateAgentName(agentName: string): string {
+function translateAgentName(agentName?: string): string | undefined {
   switch (agentName) {
     case 'js-react':
     case 'js-base':
@@ -171,11 +171,14 @@ function translateAgentName(agentName: string): string {
 
 export function getFeatureDocs(
   featureName: string,
-  agentName: string
+  agentName?: string
 ): {
   url: string;
   text?: string;
-} {
+} | void {
+  if (!agentName) {
+    return;
+  }
   const translatedAgentName = translateAgentName(agentName);
   return get(APM_AGENT_DOCS, `${featureName}.${translatedAgentName}`);
 }
