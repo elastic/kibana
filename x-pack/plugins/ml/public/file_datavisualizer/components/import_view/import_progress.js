@@ -91,7 +91,7 @@ export function ImportProgress({ statuses }) {
     },
     {
       title: uploadingDataTitle,
-      isSelected: (indexCreatedStatus === IMPORT_STATUS.COMPLETE),
+      isSelected: ((indexCreatedStatus && ingestPipelineCreatedStatus) === IMPORT_STATUS.COMPLETE),
       isComplete: (uploadStatus === IMPORT_STATUS.COMPLETE),
       status: uploadStatus,
       onClick: () => {},

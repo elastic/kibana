@@ -94,21 +94,43 @@ export class ImportView extends Component {
             }
 
             if (success) {
-              const importResp = await importer.import(index, this.setImportProgress);
-              success = importResp.success;
+              const initializeImportResp = await importer.initializeImport(index);
+
+              const indexCreated = (initializeImportResp.index !== undefined);
+              const pipelineCreated = (initializeImportResp.pipelineId !== undefined);
               this.setState({
-                uploadStatus: importResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                indexCreatedStatus: indexCreated ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
               });
-
-
-              if (success && createIndexPattern) {
-                const indexPatternName = (indexPattern === '') ? index : indexPattern;
-                const indexPatternId = await this.createIndexPattern(indexPatternName);
-                console.log(indexPatternId);
+              if (indexCreated) {
                 this.setState({
-                  indexPatternCreatedStatus: IMPORT_STATUS.COMPLETE,
-                  indexPatternId,
+                  ingestPipelineCreatedStatus: pipelineCreated  ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
                 });
+              }
+
+              success = (indexCreated && pipelineCreated);
+
+              if (success) {
+                const importId = initializeImportResp.id;
+                const pipelineId = initializeImportResp.pipelineId;
+                const importResp = await importer.import(importId, index, pipelineId, this.setImportProgress);
+                success = importResp.success;
+                this.setState({
+                  uploadStatus: importResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                });
+
+                if (success && createIndexPattern) {
+                  const indexPatternName = (indexPattern === '') ? index : indexPattern;
+
+                  const indexPatternResp = await this.createIndexPattern(indexPatternName);
+                  success = indexPatternResp.success;
+                  this.setState({
+                    indexPatternCreatedStatus: indexPatternResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                    indexPatternId: indexPatternResp.id
+                  });
+                  if (indexPatternResp.success === false) {
+                    // do something with the errors
+                  }
+                }
               }
             }
 
@@ -144,8 +166,6 @@ export class ImportView extends Component {
 
   setImportProgress = (progress) => {
     this.setState({
-      indexCreatedStatus: (progress > 0) ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.INCOMPLETE,
-      ingestPipelineCreatedStatus: (progress > 0) ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.INCOMPLETE,
       uploadProgress: progress,
     });
   }
@@ -157,7 +177,6 @@ export class ImportView extends Component {
   }
 
   async createIndexPattern(indexPatternName, timeFieldName = DEFAULT_TIME_FIELD) {
-    let createdId;
     try {
       const emptyPattern = await this.props.indexPatterns.get();
 
@@ -167,12 +186,18 @@ export class ImportView extends Component {
         timeFieldName,
       });
 
-      createdId = await emptyPattern.create();
-      return createdId;
+      const id = await emptyPattern.create();
+      return {
+        success: true,
+        id,
+      };
     } catch (error) {
       console.error(error);
+      return {
+        success: false,
+        error,
+      };
     }
-    return createdId;
   }
 
 

@@ -7,7 +7,8 @@
 
 export function importDataProvider(callWithRequest) {
   async function importData(id, index, mappings, ingestPipeline, data) {
-    let pipelineId;
+    let createdIndex;
+    let createdPipelineId;
     const docCount = data.length;
 
     try {
@@ -16,46 +17,63 @@ export function importDataProvider(callWithRequest) {
         throw 'No ingest pipeline id specified';
       }
 
-      pipelineId = ingestPipeline.id;
+      const {
+        id: pipelineId,
+        pipeline,
+      } = ingestPipeline;
 
       if (id === undefined) {
         // first chunk of data, create the index and id to return
         id = generateId();
+
         await createIndex(index, mappings);
+        createdIndex = index;
 
-        delete ingestPipeline.id;
-
-        const success = await createPipeline(pipelineId, ingestPipeline);
+        const success = await createPipeline(pipelineId, pipeline);
         if (success.acknowledged !== true) {
           console.error(success);
           throw success;
         }
+        createdPipelineId = pipelineId;
 
-        console.log('created pipeline', pipelineId);
+        console.log('created pipeline', createdPipelineId);
+      } else {
+        createdIndex = index;
+        createdPipelineId = pipelineId;
       }
 
+      let failures = [];
       if (data.length && indexExits(index)) {
-        const resp = await indexData(index, pipelineId, data);
+        const resp = await indexData(index, createdPipelineId, data);
         if (resp.success === false) {
-          throw resp;
+          if (resp.failures.length === data.length) {
+            // all docs failed, abort
+            throw resp;
+          } else {
+            // some docs failed.
+            // still report success but with a list of failures
+            failures = (resp.failures || []);
+          }
         }
       }
 
       return {
         success: true,
         id,
-        pipelineId,
+        index: createdIndex,
+        pipelineId: createdPipelineId,
         docCount,
-        failures: [],
+        failures,
       };
     } catch (error) {
       return {
         success: false,
         id,
-        pipelineId,
+        index: createdIndex,
+        pipelineId: createdPipelineId,
         error,
         docCount,
-        failures: (error.failures ? error.failures : [])
+        failures: (error.failures || [])
       };
     }
   }

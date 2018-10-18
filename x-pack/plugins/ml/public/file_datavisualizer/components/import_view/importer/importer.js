@@ -19,21 +19,9 @@ export class Importer {
     this.docArray = [];
   }
 
-  async import(index, setImportProgress) {
-    console.log('create index and ingest');
-    console.time('create index and ingest');
-    if (!index) {
-      return;
-    }
-
-    const chunks = chunk(this.docArray, CHUNK_SIZE);
-    // add an empty chunk to the beginning so the first
-    // import request only creates the index and pipeline
-    // and returns quickly
-    chunks.unshift([]);
+  async initializeImport(index) {
 
     const mappings = this.results.mappings;
-
     const pipeline = this.results.ingest_pipeline;
     updatePipelineTimezone(pipeline);
     const ingestPipeline = {
@@ -41,7 +29,33 @@ export class Importer {
       pipeline,
     };
 
-    let id = undefined;
+    const createIndexResp = await ml.fileDatavisualizer.import({
+      id: undefined,
+      index,
+      data: [],
+      mappings,
+      ingestPipeline
+    });
+
+    return createIndexResp;
+  }
+
+  async import(id, index, pipelineId, setImportProgress) {
+    console.log('create index and ingest');
+    console.time('create index and ingest');
+    if (!id || !index) {
+      return {
+        success: false,
+        error: 'no id ot index supplied'
+      };
+    }
+
+    const chunks = chunk(this.docArray, CHUNK_SIZE);
+
+    const ingestPipeline = {
+      id: pipelineId,
+    };
+
     let success = true;
     const failures = [];
 
@@ -50,7 +64,7 @@ export class Importer {
         id,
         index,
         data: chunks[i],
-        mappings,
+        mappings: {},
         ingestPipeline
       };
 
@@ -71,18 +85,15 @@ export class Importer {
         retries--;
       }
 
-
-      if (resp.success || (resp.success === false && (resp.failures.length < resp.docCount))) {
-        // allow some failures. however it must be less than the total number of docs sent
-        id = resp.id;
-        setImportProgress((i / chunks.length) * 100);
+      if (resp.success) {
+        setImportProgress(((i + 1) / chunks.length) * 100);
       } else {
         console.error(resp);
         success = false;
         break;
       }
 
-      if (resp.failures.length) {
+      if (resp.failures && resp.failures.length) {
         // update the item value to include the chunk count
         // e.g. item 3 in chunk 2 is actually item 20003
         for (let f = 0; f < resp.failures.length; f++) {
