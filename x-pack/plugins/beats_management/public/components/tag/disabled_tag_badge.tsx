@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import { TABLE_CONFIG } from '../../../common/constants';
 
