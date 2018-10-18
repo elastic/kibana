@@ -25,33 +25,36 @@ export const esdocs = () => ({
     index: {
       types: ['string', 'null'],
       default: '_all',
-      help: i18n.translate('xpack.canvas.functions.esdocs.argsIndexHelpText', {
-        defaultMessage: 'Specify an index pattern. Eg "logstash-*"',
+      help: i18n.translate('xpack.canvas.functions.esdocs.args.indexHelpText', {
+        defaultMessage: 'Specify an index pattern. Eg "{logstash}"',
+        values: {
+          logstash: 'logstash-*',
+        },
       }),
     },
     query: {
       types: ['string'],
       aliases: ['_', 'q'],
-      help: i18n.translate('xpack.canvas.functions.esdocs.argsQueryHelpText', {
+      help: i18n.translate('xpack.canvas.functions.esdocs.args.queryHelpText', {
         defaultMessage: 'A Lucene query string',
       }),
       default: '-_index:.kibana',
     },
     sort: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.esdocs.argsSortHelpText', {
+      help: i18n.translate('xpack.canvas.functions.esdocs.args.sortHelpText', {
         defaultMessage:
           'Sort directions as "field, direction". Eg "@timestamp, desc" or "bytes, asc"',
       }),
     },
     fields: {
-      help: i18n.translate('xpack.canvas.functions.esdocs.argsFieldsHelpText', {
+      help: i18n.translate('xpack.canvas.functions.esdocs.args.fieldsHelpText', {
         defaultMessage: 'Comma separated list of fields. Fewer fields will perform better',
       }),
       types: ['string', 'null'],
     },
     metaFields: {
-      help: i18n.translate('xpack.canvas.functions.esdocs.argsMetaFieldsHelpText', {
+      help: i18n.translate('xpack.canvas.functions.esdocs.args.metaFieldsHelpText', {
         defaultMessage: 'Comma separated list of meta fields, eg "_index,_type"',
       }),
       types: ['string', 'null'],
@@ -59,7 +62,7 @@ export const esdocs = () => ({
     count: {
       types: ['number'],
       default: 100,
-      help: i18n.translate('xpack.canvas.functions.esdocs.argsCountHelpText', {
+      help: i18n.translate('xpack.canvas.functions.esdocs.args.countHelpText', {
         defaultMessage: 'The number of docs to pull back. Smaller numbers perform better',
       }),
     },

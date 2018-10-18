@@ -23,7 +23,10 @@ export const pointseries = () => ({
   type: 'pointseries',
   help: i18n.translate('xpack.canvas.functions.pointseriesHelpText', {
     defaultMessage:
-      'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a [TinyMath function](http://canvas.elastic.co/reference/tinymath.html). If you enter a TinyMath expression in your argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique keys. Measures are then deduplicated by those keys using the specified TinyMath function',
+      'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a [TinyMath function]({tinyMathCanvasLink}). If you enter a TinyMath expression in your argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique keys. Measures are then deduplicated by those keys using the specified TinyMath function',
+    values: {
+      tinyMathCanvasLink: 'http://canvas.elastic.co/reference/tinymath.html',
+    },
   }),
   context: {
     types: ['datatable'],
@@ -31,31 +34,31 @@ export const pointseries = () => ({
   args: {
     x: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.pointseries.argsXHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pointseries.args.xHelpText', {
         defaultMessage: 'The values along the X-axis',
       }),
     },
     y: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.pointseries.argsYHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pointseries.args.yHelpText', {
         defaultMessage: 'The values along the y-axis',
       }),
     },
     color: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.pointseries.argsColorHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pointseries.args.colorHelpText', {
         defaultMessage: "An expression to use in determining the mark's color", // If you need categorization, transform the field.
       }),
     },
     size: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.pointseries.argsSizeHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pointseries.args.sizeHelpText', {
         defaultMessage: 'For elements that support it, the size of the marks',
       }),
     },
     text: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.pointseries.argsTextHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pointseries.args.textHelpText', {
         defaultMessage: 'For use in charts that support it, the text to show in the mark',
       }),
     },

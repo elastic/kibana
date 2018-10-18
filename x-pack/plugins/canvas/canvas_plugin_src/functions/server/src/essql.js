@@ -23,7 +23,7 @@ export const essql = () => ({
     query: {
       aliases: ['_', 'q'],
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.essql.argsQueryHelpText', {
+      help: i18n.translate('xpack.canvas.functions.essql.args.queryHelpText', {
         defaultMessage: 'SQL query',
       }),
     },

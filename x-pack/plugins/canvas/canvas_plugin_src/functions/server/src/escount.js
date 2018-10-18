@@ -20,14 +20,17 @@ export const escount = () => ({
     index: {
       types: ['string', 'null'],
       default: '_all',
-      help: i18n.translate('xpack.canvas.functions.escount.argsIndexHelpText', {
-        defaultMessage: 'Specify an index pattern. Eg "logstash-*"',
+      help: i18n.translate('xpack.canvas.functions.escount.args.indexHelpText', {
+        defaultMessage: 'Specify an index pattern. Eg "{logstash}"',
+        values: {
+          logstash: 'logstash-*',
+        },
       }),
     },
     query: {
       types: ['string'],
       aliases: ['_', 'q'],
-      help: i18n.translate('xpack.canvas.functions.escount.argsQueryHelpText', {
+      help: i18n.translate('xpack.canvas.functions.escount.args.queryHelpText', {
         defaultMessage: 'A Lucene query string',
       }),
       default: '"-_index:.kibana"',

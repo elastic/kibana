@@ -13,7 +13,7 @@ export const datatable = () => ({
     // TODO: Check columns types. Only string, boolean, number, date, allowed for now.
     if (!datatable.columns) {
       throw new Error(
-        i18n.translate('xpack.canvas.datatable.missColumnsErrorMessage', {
+        i18n.translate('xpack.canvas.datatable.missedColumnsErrorMessage', {
           defaultMessage: 'datatable must have a columns array, even if it is empty',
         })
       );
@@ -21,7 +21,7 @@ export const datatable = () => ({
 
     if (!datatable.rows) {
       throw new Error(
-        i18n.translate('xpack.canvas.datatable.missRowsErrorMessage', {
+        i18n.translate('xpack.canvas.datatable.missedRowsErrorMessage', {
           defaultMessage: 'datatable must have a rows array, even if it is empty',
         })
       );

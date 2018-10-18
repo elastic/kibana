@@ -24,7 +24,7 @@ export const demodata = () => ({
     type: {
       types: ['string', 'null'],
       aliases: ['_'],
-      help: i18n.translate('xpack.canvas.functions.demodata.argsTypeHelpText', {
+      help: i18n.translate('xpack.canvas.functions.demodata.args.typeHelpText', {
         defaultMessage: 'The name of the demo data set to use',
       }),
       default: 'ci',

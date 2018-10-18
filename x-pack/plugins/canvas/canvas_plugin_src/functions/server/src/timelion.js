@@ -18,35 +18,35 @@ export const timelion = () => ({
     query: {
       types: ['string'],
       aliases: ['_', 'q'],
-      help: i18n.translate('xpack.canvas.functions.timelion.argsQueryHelpText', {
+      help: i18n.translate('xpack.canvas.functions.timelion.args.queryHelpText', {
         defaultMessage: 'A timelion query',
       }),
       default: '".es(*)"',
     },
     interval: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.timelion.argsIntervalHelpText', {
+      help: i18n.translate('xpack.canvas.functions.timelion.args.intervalHelpText', {
         defaultMessage: 'Bucket interval for the time series',
       }),
       default: 'auto',
     },
     from: {
       type: ['string'],
-      help: i18n.translate('xpack.canvas.functions.timelion.argsFromHelpText', {
+      help: i18n.translate('xpack.canvas.functions.timelion.args.fromHelpText', {
         defaultMessage: 'Elasticsearch date math string for the start of the time range',
       }),
       default: 'now-1y',
     },
     to: {
       type: ['string'],
-      help: i18n.translate('xpack.canvas.functions.timelion.argsToHelpText', {
+      help: i18n.translate('xpack.canvas.functions.timelion.args.toHelpText', {
         defaultMessage: 'Elasticsearch date math string for the end of the time range',
       }),
       default: 'now',
     },
     timezone: {
       type: ['string'],
-      help: i18n.translate('xpack.canvas.functions.timelion.argsTimezoneHelpText', {
+      help: i18n.translate('xpack.canvas.functions.timelion.args.timezoneHelpText', {
         defaultMessage: 'Timezone for the time range',
       }),
       default: 'UTC',
