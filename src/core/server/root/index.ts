@@ -21,6 +21,7 @@ import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, tap } from 'rxjs/operators';
 
 import { Server } from '..';
+import { AlertService } from '../alerts';
 import { Config, ConfigService, Env } from '../config';
 import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
 
@@ -33,6 +34,7 @@ export class Root {
   private readonly log: Logger;
   private readonly server: Server;
   private readonly loggingService: LoggingService;
+  private readonly alertService: AlertService;
   private loggingConfigSubscription?: Subscription;
 
   constructor(
@@ -44,6 +46,7 @@ export class Root {
     this.logger = this.loggingService.asLoggerFactory();
     this.log = this.logger.get('root');
 
+    this.alertService = new AlertService();
     this.configService = new ConfigService(config$, env, this.logger);
     this.server = new Server(this.configService, this.logger, this.env);
   }
@@ -54,6 +57,7 @@ export class Root {
     try {
       await this.setupLogging();
       await this.server.start();
+      await this.alertService.start();
     } catch (e) {
       await this.shutdown(e);
       throw e;
