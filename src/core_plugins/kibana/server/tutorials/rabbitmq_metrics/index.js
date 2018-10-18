@@ -39,7 +39,7 @@ export function rabbitmqMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-rabbitmq.html',
       },
     }),
-    //euiIconType: 'logoRabbitMQ',
+    euiIconType: 'logoRabbitmq',
     isBeta: true,
     artifacts: {
       dashboards: [
