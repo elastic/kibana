@@ -12,6 +12,7 @@ function createJobFn(server) {
 
   return async function createJob({
     objectType,
+    title,
     relativeUrl,
     browserTimezone,
     layout
@@ -20,6 +21,7 @@ function createJobFn(server) {
 
     return {
       type: objectType,
+      title: title,
       relativeUrl,
       headers: serializedEncryptedHeaders,
       browserTimezone,
