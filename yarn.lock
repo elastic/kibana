@@ -3512,10 +3512,10 @@ chroma-js@^1.3.6:
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-1.3.7.tgz#38db1b46c99b002b77aa5e6b6744589388f28425"
   integrity sha512-ARq0P94NObL8hdQbgc+E33X9OHiNzdHO7epe3nC/KgxNRxkQcFpzNqnGeFjvOY2GxfVhbia686NXD2jByb1o0g==
 
-chromedriver@2.41.0:
-  version "2.41.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-2.41.0.tgz#2709d3544bc0c288b4738a6925a64c02a98a921f"
-  integrity sha512-6O9HxvrSuHqmRlIgMzi0/05GsDNHqs8kaF5gNTIyaZNwRzb/RBUWH1xNNXKNxyhXSnGSalH8hWsKP5mc/npSQQ==
+chromedriver@2.42.1:
+  version "2.42.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-2.42.1.tgz#566964c1221fbd9fd1ce836734dd92735f1ff8fb"
+  integrity sha512-ciiSoIZH3Pq3UNvNgITb717MP5aldpvte4BO5sLi/FBeahMoo6QZiQ7kDIG1LQY6yZh7N8dqjjiYENq2/J+Xlw==
   dependencies:
     del "^3.0.0"
     extract-zip "^1.6.7"
