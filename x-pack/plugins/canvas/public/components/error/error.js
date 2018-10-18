@@ -8,10 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
 import { get } from 'lodash';
-import { ShowDebugging } from './show_debugging';
 
 export const Error = ({ payload }) => {
-  const functionName = get(payload, 'info.functionName');
   const message = get(payload, 'error.message');
 
   return (
@@ -21,13 +19,8 @@ export const Error = ({ payload }) => {
       iconType="cross"
       title="Whoops! Expression failed"
     >
-      <p>
-        The function <strong>"{functionName}"</strong> failed
-        {message ? ' with the following message:' : '.'}
-      </p>
+      <p>{message ? 'Expression failed with the message:' : ''}</p>
       {message && <p style={{ padding: '0 16px' }}>{message}</p>}
-
-      <ShowDebugging payload={payload} />
     </EuiCallOut>
   );
 };

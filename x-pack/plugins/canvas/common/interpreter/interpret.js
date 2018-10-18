@@ -64,9 +64,9 @@ export function interpretProvider(config) {
 
       // Continue re-invoking chain until it's empty
       return await invokeChain(chain, newContext);
-    } catch (err) {
-      console.error(`common/interpret ${fnName}: invokeChain rejected`, err);
-      return createError(err, { name: fnName, context, args: fnArgs });
+    } catch (e) {
+      e.message = `'${fnName}' failed: ${e.message}`;
+      return createError(e);
     }
   }
 

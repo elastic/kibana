@@ -4,15 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const createError = (err, { name, context, args }) => ({
+export const createError = err => ({
   type: 'error',
   error: {
-    stack: err.stack,
     message: typeof err === 'string' ? err : err.message,
-  },
-  info: {
-    context,
-    args,
-    functionName: name,
   },
 });

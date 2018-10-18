@@ -38,7 +38,7 @@ export function socketApi(server) {
       // So we'll re-enter the router, and need to be able to catch from there.
       // We should enter the router in the same way whereever we call it.
       // Well, except, this has to return something valid right? Are we even allowed to reject here?
-      return routeExpression(ast, context).catch(e => createError(e, { context }));
+      return routeExpression(ast, context).catch(e => createError(e));
     }
 
     socket.on('getFunctionList', () => {
