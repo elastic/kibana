@@ -82,7 +82,7 @@ export class VegaBaseView {
 
     try {
       this._$parentEl.empty()
-        .addClass('vega-main')
+        .addClass(`vgaVis`)
         .css('flex-direction', this._parser.containerDir);
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
@@ -95,10 +95,11 @@ export class VegaBaseView {
         return;
       }
 
-      this._$container = $('<div class="vega-view-container">')
+      this._$container = $('<div class="vgaVis__view">')
+        // Force a height here because css is not loaded in mocha test
+        .css('height', '100%')
         .appendTo(this._$parentEl);
-      this._$controls = $('<div class="vega-controls-container">')
-        .css('flex-direction', this._parser.controlsDir)
+      this._$controls = $(`<div class="vgaVis__controls vgaVis__controls--${this._parser.controlsDir}">`)
         .appendTo(this._$parentEl);
 
       this._addDestroyHandler(() => {
@@ -165,11 +166,11 @@ export class VegaBaseView {
 
   _addMessage(type, text) {
     if (!this._$messages) {
-      this._$messages = $(`<ul class="vega-messages">`).appendTo(this._$parentEl);
+      this._$messages = $(`<ul class="vgaVis__messages">`).appendTo(this._$parentEl);
     }
     this._$messages.append(
-      $(`<li class="vega-message-${type}">`).append(
-        $(`<pre>`).text(text)
+      $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
+        $(`<pre class="vgaVis__messageCode">`).text(text)
       )
     );
   }
