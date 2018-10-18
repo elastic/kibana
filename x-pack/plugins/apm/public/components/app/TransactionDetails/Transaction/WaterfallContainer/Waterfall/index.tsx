@@ -82,7 +82,8 @@ export class Waterfall extends Component<Props> {
   public getFlyOut = () => {
     const { waterfall, location, urlParams } = this.props;
     const currentItem =
-      urlParams.activeTimelineId && waterfall.index[urlParams.activeTimelineId];
+      urlParams.activeTimelineId &&
+      waterfall.indexedWaterfall[urlParams.activeTimelineId];
 
     if (!currentItem) {
       return null;

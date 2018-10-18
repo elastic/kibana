@@ -34,7 +34,7 @@ function getDiscoverQuery(id: string) {
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
-  location: any;
+  location: Location;
   urlParams: IUrlParams;
 }
 
