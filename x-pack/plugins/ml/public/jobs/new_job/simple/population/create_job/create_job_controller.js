@@ -32,7 +32,8 @@ import { mlEscape } from 'plugins/ml/util/string_utils';
 import {
   createSearchItems,
   addNewJobToRecentlyAccessed,
-  moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+  moveToAdvancedJobCreationProvider,
+  focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { PopulationJobServiceProvider } from './create_job_service';
@@ -523,6 +524,8 @@ module
                     $scope.formConfig.end,
                     'explorer');
 
+                  focusOnResultsLink('job_running_view_results_link', $timeout);
+
                   loadCharts();
                 })
                 .catch((resp) => {
@@ -575,6 +578,7 @@ module
                   }
                 } else {
                   $scope.jobState = JOB_STATE.FINISHED;
+                  focusOnResultsLink('job_finished_view_results_link', $timeout);
                 }
                 jobCheck();
               });

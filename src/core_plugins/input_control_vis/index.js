@@ -22,7 +22,8 @@ export default function (kibana) {
     uiExports: {
       visTypes: [
         'plugins/input_control_vis/register_vis'
-      ]
+      ],
+      styleSheetPaths: `${__dirname}/public/index.scss`,
     }
   });
 }
