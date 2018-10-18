@@ -124,7 +124,7 @@ export const WorkpadConfig = ({ size, name, style, setSize, setName, setWorkpadS
         <div className="canvasArg__content">
           <EuiTextArea
             aria-label="Apply styles to all pages in this workpad"
-            value={style === '' ? '.canvasPage{\n\n}' : style}
+            value={!style.replace(/\s/g, '').length ? '.canvasPage {\n\n}' : style}
             onChange={e => setWorkpadStyle(e.target.value)}
             rows={10}
           />
