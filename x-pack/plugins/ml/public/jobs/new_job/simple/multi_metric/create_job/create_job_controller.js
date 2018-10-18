@@ -7,7 +7,6 @@
 
 
 import _ from 'lodash';
-import $ from 'jquery';
 
 import { aggTypes } from 'ui/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
@@ -33,7 +32,8 @@ import { mlEscape } from 'plugins/ml/util/string_utils';
 import {
   createSearchItems,
   addNewJobToRecentlyAccessed,
-  moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+  moveToAdvancedJobCreationProvider,
+  focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { MultiMetricJobServiceProvider } from './create_job_service';
@@ -497,11 +497,7 @@ module
                     $scope.formConfig.end,
                     'explorer');
 
-                  $timeout(() => {
-                    // Set focus to the View Results button, which also provides
-                    // accessibility feedback that the job is running
-                    $('#job_running_view_results_link').focus();
-                  }, 0);
+                  focusOnResultsLink('job_running_view_results_link', $timeout);
 
                   loadCharts();
                 })
@@ -555,11 +551,7 @@ module
                   }
                 } else {
                   $scope.jobState = JOB_STATE.FINISHED;
-                  $timeout(() => {
-                    // Set focus to the View Results button, which also provides
-                    // accessibility feedback that the job has finished
-                    $('#job_finished_view_results_link').focus();
-                  }, 0);
+                  focusOnResultsLink('job_finished_view_results_link', $timeout);
                 }
                 jobCheck();
               });
