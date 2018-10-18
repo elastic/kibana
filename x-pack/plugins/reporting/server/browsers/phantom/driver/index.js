@@ -37,6 +37,7 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
           const { sessionCookie } =  pageOptions;
           if (sessionCookie) {
             await fromCallback(cb => page.clearCookies(cb));
+            // phantom doesn't support the SameSite option for the cookie, so we aren't setting it
             await fromCallback(cb => page.addCookie({
               name: sessionCookie.name,
               value: sessionCookie.value,
