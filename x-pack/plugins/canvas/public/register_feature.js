@@ -1,4 +1,10 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -24,13 +30,12 @@ import {
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
-    id: 'timelion',
-    title: 'Timelion',
-    description:
-      'Use an expression language to analyze time series data and visualize the results.',
-    icon: 'timelionApp',
-    path: '/app/timelion',
-    showOnHomePage: false,
+    id: 'canvas',
+    title: 'Canvas',
+    description: 'Showcase your data in a pixel-perfect way.',
+    icon: 'canvasApp',
+    path: '/app/canvas',
+    showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA,
   };
 });
