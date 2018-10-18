@@ -6,9 +6,28 @@
 
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { getFromFromLocation, getToFromLocation } from './query_params';
 
-export const RedirectToHostDetail = ({ match }: RouteComponentProps<{ name: string }>) => (
-  <Redirect to={`/metrics/host/${match.params.name}`} />
-);
+export const RedirectToHostDetail = ({
+  match,
+  location,
+}: RouteComponentProps<{ name: string }>) => {
+  const to = getToFromLocation(location);
+  const from = getFromFromLocation(location);
+  const args =
+    to && from ? `?metricTime=(autoReload:!f,time:(from:${from},interval:>%3D1m,to:${to}))` : '';
+  return <Redirect to={`/metrics/host/${match.params.name}${args}`} />;
+};
 
-export const getHostDetailUrl = ({ name }: { name: string }) => `#/link-to/host-detail/${name}`;
+export const getHostDetailUrl = ({
+  name,
+  to,
+  from,
+}: {
+  name: string;
+  to?: number;
+  from?: number;
+}) => {
+  const args = to && from ? `?to=${to}&from=${from}` : '';
+  return `#/link-to/host-detail/${name}${args}`;
+};
