@@ -19,17 +19,27 @@ import {
 
 export class VectorStyleColorEditor extends React.Component {
 
+
+  static _getFallbackDescriptor() {
+    return {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        color: null
+      }
+    };
+  }
+
   constructor() {
     super();
     this.state = {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      colorStyleDesciptor: null,
       ordinalFields: null
     };
-    this._lastStaticColor = null;
+    this._lastStaticOptions = null;
   }
 
   _isDynamic() {
-    return this.state.type === VectorStyle.STYLE_TYPE.DYNAMIC;
+    return this.state.colorStyleDesciptor.type === VectorStyle.STYLE_TYPE.DYNAMIC;
   }
 
   async _loadOrdinalFields() {
@@ -44,53 +54,61 @@ export class VectorStyleColorEditor extends React.Component {
     }
   }
 
-  _renderFillAndOutlineStyle(vectorStyle) {
+  _renderFillAndOutlineStyle() {
 
     this._loadOrdinalFields();
 
-    const changeToStaticColor = (color) => {
-      const property = {
+    const changeToStaticColor = (newOptions) => {
+      const staticStyle = {
         type: VectorStyle.STYLE_TYPE.STATIC,
-        options: {
-          color: color
-        }
+        options: newOptions
       };
-      this.props.handlePropertyChange(this.props.property, property);
+      this.props.handlePropertyChange(this.props.property, staticStyle);
+      return staticStyle;
     };
 
     const changeToDynamicColor = (field) => {
-      const property = {
+      const dynamicStyle = {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           fieldValue: field ? field.value : undefined
         }
       };
-      this.props.handlePropertyChange(this.props.property, property);
+      this.props.handlePropertyChange(this.props.property, dynamicStyle);
+      return dynamicStyle;
     };
 
     const onTypeToggle = (e) => {
       const selectedStyle = e.target.checked ? VectorStyle.STYLE_TYPE.DYNAMIC : VectorStyle.STYLE_TYPE.STATIC;
+      let newStyle;
       if (selectedStyle === VectorStyle.STYLE_TYPE.STATIC) {
-        changeToStaticColor(this._lastStaticColor);
+        newStyle = changeToStaticColor(this._lastStaticOptions);
       } else {
-        changeToDynamicColor();
+        newStyle = changeToDynamicColor();
       }
       this.setState({
-        type: selectedStyle
+        colorStyleDesciptor: newStyle
       });
     };
 
     let colorSelector;
     if (this._isDynamic()) {
       if (this.state.ordinalFields !== null) {
-        colorSelector = (<DynamicColorSelection fields={this.state.ordinalFields} onChange={changeToDynamicColor}/>);
+        colorSelector = (
+          <DynamicColorSelection
+            fields={this.state.ordinalFields}
+            onChange={changeToDynamicColor}
+            selectedOptions={this.props.colorStyleDescriptor.options}
+          />
+        );
       } else {
         colorSelector = null;
       }
     } else {
-      const selectedColor = vectorStyle ? vectorStyle.getHexColor(this.props.property) : VectorStyle.DEFAULT_COLOR_HEX;
-      this._lastStaticColor = selectedColor;
-      colorSelector = (<StaticColorSelection changeColor={changeToStaticColor} selectedColor={selectedColor}/>);
+      const selectedOptions = (this.props.colorStyleDescriptor && this.props.colorStyleDescriptor.options) ?
+        this.props.colorStyleDescriptor.options : null;
+      this._lastStaticOptions = selectedOptions;
+      colorSelector = (<StaticColorSelection changeOptions={changeToStaticColor} selectedOptions={selectedOptions}/>);
     }
 
     return (
@@ -112,24 +130,16 @@ export class VectorStyleColorEditor extends React.Component {
     );
   }
 
+
   render() {
-    let seedStyle = this.props.seedStyle;
-    if (seedStyle === null) {
-      const fallbackDescriptor = VectorStyle.createDescriptor(
-        {
-          'fillColor': {
-            type: VectorStyle.STYLE_TYPE.STATIC,
-            options: {
-              color: VectorStyle.DEFAULT_COLOR_HEX
-            }
-          }
-        }
-      );
-      seedStyle = new VectorStyle(fallbackDescriptor);
+
+    if (this.state.colorStyleDesciptor === null) {
+      this.state.colorStyleDesciptor = this.props.colorStyleDescriptor || VectorStyleColorEditor._getFallbackDescriptor();
     }
+
     return (
       <EuiFlexGroup alignItems="center" justifyContent="spaceEvenly">
-        {this._renderFillAndOutlineStyle(seedStyle)}
+        {this._renderFillAndOutlineStyle()}
       </EuiFlexGroup>
     );
   }

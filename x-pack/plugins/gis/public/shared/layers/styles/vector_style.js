@@ -66,14 +66,14 @@ export class VectorStyle {
               property={'fillColor'}
               name={"Fill color"}
               handlePropertyChange={handlePropertyChange}
-              seedStyle={style}
+              colorStyleDescriptor={properties.fillColor}
               layer={layer}
             />
             <VectorStyleColorEditor
               property={'lineColor'}
               name={"Line color"}
               handlePropertyChange={handlePropertyChange}
-              seedStyle={style}
+              colorStyleDescriptor={properties.lineColor}
               layer={layer}
             />
           </EuiFlexItem>
@@ -88,7 +88,7 @@ export class VectorStyle {
 
   getHexColor(colorProperty) {
 
-    if (!this._descriptor.properties[colorProperty]) {
+    if (!this._descriptor.properties[colorProperty] || !this._descriptor.properties[colorProperty].options) {
       return null;
     }
 
