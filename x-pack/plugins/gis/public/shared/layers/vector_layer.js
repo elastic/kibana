@@ -94,15 +94,21 @@ export class VectorLayer extends ALayer {
     return numberFieldOptions.concat(joinFields);
   }
 
+  _findDataRequestForSource(sourceDataId) {
+    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
+  }
+
   async _canSkipSourceUpdate(source, sourceDataId) {
     const timeAware = await source.isTimeAware();
     const extentAware = source.isFilterByMapBounds();
+
     if (!timeAware && !extentAware) {
-      const sourceDataRequest = this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
+      const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
         return true;
       }
     }
+
     return false;
   }
 
@@ -129,6 +135,7 @@ export class VectorLayer extends ALayer {
         table: data
       };
     } catch(e) {
+      console.error(e);
       onLoadError(sourceDataId, requestToken, e.medium);
       return {
         shouldJoin: false,
@@ -176,16 +183,6 @@ export class VectorLayer extends ALayer {
     }
   }
 
-  async _getJoinDataRequests() {
-    const joinDataRequests = this._dataRequests.filter(dataRequest => {
-      const correspondingJoin = this._joins.find(join => {
-        return join.getSourceId() === dataRequest.getDataId();
-      });
-      return !!correspondingJoin;
-    });
-    return joinDataRequests;
-  }
-
   _joinToFeatureCollection(sourceResult, joinState) {
     if (!sourceResult.refreshed && !joinState.shouldJoin) {
       return;
@@ -218,6 +215,9 @@ export class VectorLayer extends ALayer {
 
   _isPointsOnly() {
     const featureCollection = this._getSourceFeatureCollection();
+    if (!featureCollection) {
+      return false;
+    }
     let isPointsOnly = true;
     if (featureCollection) {
       for (let i = 0; i < featureCollection.features.length; i++) {
@@ -239,6 +239,7 @@ export class VectorLayer extends ALayer {
     if (featureCollection !== mbSourceAfterAdding._data) {
       mbSourceAfterAdding.setData(featureCollection);
     }
+
     const shouldRefresh = this._style.addScaledPropertiesBasedOnStyle(featureCollection);
     if (shouldRefresh) {
       mbSourceAfterAdding.setData(featureCollection);

@@ -27,6 +27,7 @@ import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import { timefilter } from 'ui/timefilter/timefilter';
 
 const aggSchemas = new Schemas([
   {
@@ -63,30 +64,33 @@ export class ESTableSource extends ASource {
     return (<Fragment>table source details</Fragment>);
   }
 
-  async getTable() {
+  async getTable(searchFilters) {
 
     // inspectorAdapters.requests.resetRequest(layerId);
+
 
     if (!this._descriptor.indexPatternId && !this._descriptor.term) {
       console.warn('Table source incorrectly configured');
       return [];
     }
 
-    let indexPattern;
-    try {
-      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    } catch (error) {
-      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
-    }
+    const indexPattern = await this._getIndexPattern();
+    const timeAware = await this.isTimeAware();
 
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(), aggSchemas.all);
-    //
-    // let inspectorRequest;
+
     let resp;
     try {
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern);
       searchSource.setField('size', 0);
+      searchSource.setField('filter', () => {
+        const filters = [];
+        if (timeAware) {
+          filters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
+        }
+        return filters;
+      });
 
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
@@ -96,24 +100,32 @@ export class ESTableSource extends ASource {
     }
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, resp);
-    const colName1 = tabifiedResp.columns[0].id;
-    const colName2 = tabifiedResp.columns[1].id;
-    const table = tabifiedResp.rows.map((row) => {
+    const keyColName = tabifiedResp.columns[0].id;
+    const valueColName = tabifiedResp.columns[1].id;
+    const newTable = tabifiedResp.rows.map((row) => {
       return {
-        key: row[colName1],
-        value: row[colName2]
+        key: row[keyColName],
+        value: row[valueColName]
       };
     });
+    return newTable;
+  }
 
-    return table;
-
+  async _getIndexPattern() {
+    let indexPattern;
+    try {
+      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
+    } catch (error) {
+      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
+    }
+    return indexPattern;
   }
 
 
-
   async isTimeAware() {
-    //todo
-    return false;
+    const indexPattern = await this._getIndexPattern();
+    const timeField = indexPattern.timeFieldName;
+    return !!timeField;
   }
 
   isFilterByMapBounds() {
