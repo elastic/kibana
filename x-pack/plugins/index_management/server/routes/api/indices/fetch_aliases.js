@@ -5,18 +5,9 @@
  */
 
 export default async function fetchAliases(callWithRequest) {
-  const params = {
-    format: 'json'
-  };
-  const catAliases = await callWithRequest('cat.aliases', params);
-  const aliases = {};
-  for(let i = 0; i < catAliases.length; ++i) {
-    if(aliases[catAliases[i].index] === undefined) {
-      aliases[catAliases[i].index] = [catAliases[i].alias];
-    }else{
-      aliases[catAliases[i].index].push(catAliases[i].alias);
-    }
-  }
-
-  return aliases;
+  const catAliases = await callWithRequest('cat.aliases', { format: 'json' });
+  return catAliases.reduce((hash, val) => {
+    (hash[val.index] = hash[val.index] || []).push(val.alias);
+    return hash;
+  }, {});
 }
