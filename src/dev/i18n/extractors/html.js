@@ -32,7 +32,9 @@ import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from '../constants';
 import { createFailError } from '../../run';
 
 /**
- * Find all substrings of "{{ any text }}" pattern
+ * Find all substrings of "{{ any text }}" pattern allowing '{' and '}' chars in single quote strings
+ *
+ * Example: `{{ ::'message.id' | i18n: { defaultMessage: 'Message with {{curlyBraces}}' } }}`
  */
 const ANGULAR_EXPRESSION_REGEX = /{{([^{}]|({([^']|('([^']|(\\'))*'))*?}))*}}+/g;
 
@@ -112,7 +114,7 @@ function parseIdExpression(expression) {
     }
   }
 
-  throw createFailError(`Message id should be a string literal: \n${expression}`);
+  throw createFailError(`Message id should be a string literal, but got: \n${expression}`);
 }
 
 function trimCurlyBraces(string) {
@@ -156,19 +158,22 @@ function validateI18nFilterUsage(string) {
   const stringWithoutExpressions = string.replace(ANGULAR_EXPRESSION_REGEX, '');
   const i18nMarkerPosition = stringWithoutExpressions.indexOf(I18N_FILTER_MARKER);
 
-  if (i18nMarkerPosition !== -1) {
-    const linesCount = (stringWithoutExpressions.slice(0, i18nMarkerPosition).match(/\n/g) || [])
-      .length;
-
-    const errorWithContext = createParserErrorMessage(string, {
-      loc: {
-        line: linesCount + 1,
-        column: 0,
-      },
-      message: 'I18n filter can be used only in interpolation expressions',
-    });
-    throw createFailError(errorWithContext);
+  if (i18nMarkerPosition === -1) {
+    return;
   }
+
+  const linesCount = (stringWithoutExpressions.slice(0, i18nMarkerPosition).match(/\n/g) || [])
+    .length;
+
+  const errorWithContext = createParserErrorMessage(string, {
+    loc: {
+      line: linesCount + 1,
+      column: 0,
+    },
+    message: 'I18n filter can be used only in interpolation expressions',
+  });
+
+  throw createFailError(errorWithContext);
 }
 
 function* getFilterMessages(htmlContent) {
