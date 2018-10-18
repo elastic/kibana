@@ -44,6 +44,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
     constructor(el, vis) {
       this.el = el;
       this.vis = vis;
+      this.$scope = null;
 
       this.container = document.createElement('div');
       this.container.className = 'vislib-container';
@@ -65,20 +66,19 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
           return resolve();
         }
 
-        let $scope;
         if (this.vis.params.addLegend) {
           $(this.container).attr('class', (i, cls) => {
             return cls.replace(/vislib-container--legend-\S+/g, '');
           }).addClass(legendClassName[this.vis.params.legendPosition]);
 
-          $scope = $rootScope.$new();
-          $scope.refreshLegend = 0;
-          $scope.vis = this.vis;
-          $scope.visData = esResponse;
-          $scope.uiState = $scope.vis.getUiState();
-          const legendHtml = $compile('<vislib-legend></vislib-legend>')($scope);
+          this.$scope = $rootScope.$new();
+          this.$scope.refreshLegend = 0;
+          this.$scope.vis = this.vis;
+          this.$scope.visData = esResponse;
+          this.$scope.uiState = this.$scope.vis.getUiState();
+          const legendHtml = $compile('<vislib-legend></vislib-legend>')(this.$scope);
           this.container.appendChild(legendHtml[0]);
-          $scope.$digest();
+          this.$scope.$digest();
         }
 
         this.vis.vislibVis = new vislib.Vis(this.chartEl, this.vis.params);
@@ -88,8 +88,8 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         this.vis.vislibVis.render(esResponse, this.vis.getUiState());
 
         if (this.vis.params.addLegend) {
-          $scope.refreshLegend++;
-          $scope.$digest();
+          this.$scope.refreshLegend++;
+          this.$scope.$digest();
         }
       });
     }
@@ -102,6 +102,10 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         delete this.vis.vislibVis;
       }
       $(this.container).find('vislib-legend').remove();
+      if (this.$scope) {
+        this.$scope.$destroy();
+        this.$scope = null;
+      }
     }
   }
 
