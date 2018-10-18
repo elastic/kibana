@@ -29,7 +29,7 @@ describe('YesNo', () => {
     const wrapper = shallow(
       <YesNo name="test" onChange={handleChange} />
     );
-    wrapper.find('input').first().simulate('change');
+    wrapper.find('EuiRadio').first().simulate('change');
     expect(handleChange.calledOnce).to.equal(true);
     expect(handleChange.firstCall.args[0]).to.eql({
       test: 1
@@ -41,7 +41,7 @@ describe('YesNo', () => {
     const wrapper = shallow(
       <YesNo name="test" onChange={handleChange} />
     );
-    wrapper.find('input').last().simulate('change');
+    wrapper.find('EuiRadio').last().simulate('change');
     expect(handleChange.calledOnce).to.equal(true);
     expect(handleChange.firstCall.args[0]).to.eql({
       test: 0
