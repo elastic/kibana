@@ -34,6 +34,7 @@ import {
   EuiCard,
   EuiIcon,
   EuiHorizontalRule,
+  EuiFlexGrid,
 } from '@elastic/eui';
 
 const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
@@ -189,17 +190,17 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
 
       <EuiHorizontalRule />
 
-      <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexGrid columns={3}>
         <EuiFlexItem className={footerItemClasses}>
           <EuiText>
             <strong style={{ height: 38 }}>
               <FormattedMessage
                 id="kbn.home.addData.sampleDataTitle"
-                defaultMessage="Sample Data"
+                defaultMessage="Add sample data"
               />
             </strong>
             <EuiLink
-              style={{ marginLeft: 8 }}
+              style={{ display: 'block', textAlign: 'center' }}
               href="#/home/tutorial_directory/sampleData"
             >
               <FormattedMessage
@@ -213,12 +214,31 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
           <EuiText>
             <strong style={{ height: 38 }}>
               <FormattedMessage
-                id="kbn.home.addData.yourDataTitle"
-                defaultMessage="Your Data"
+                id="kbn.home.addData.uploadFileTitle"
+                defaultMessage="Upload data from file"
               />
             </strong>
             <EuiLink
-              style={{ marginLeft: 8 }}
+              style={{ display: 'block', textAlign: 'center' }}
+              href="#/home"
+            >
+              <FormattedMessage
+                id="kbn.home.addData.uploadFileLink"
+                defaultMessage="Import a JSON, CSV or text file"
+              />
+            </EuiLink>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem className={footerItemClasses}>
+          <EuiText>
+            <strong style={{ height: 38 }}>
+              <FormattedMessage
+                id="kbn.home.addData.yourDataTitle"
+                defaultMessage="Use Elastisearch data"
+              />
+            </strong>
+            <EuiLink
+              style={{ display: 'block', textAlign: 'center' }}
               href="#/management/kibana/index"
             >
               <FormattedMessage
@@ -228,10 +248,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
             </EuiLink>
           </EuiText>
         </EuiFlexItem>
-
-
-      </EuiFlexGroup>
-
+      </EuiFlexGrid>
     </EuiPanel>
   );
 };
