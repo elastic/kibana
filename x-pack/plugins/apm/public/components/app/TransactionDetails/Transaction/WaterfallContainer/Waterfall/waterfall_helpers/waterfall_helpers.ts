@@ -8,6 +8,10 @@ import { groupBy, indexBy, sortBy } from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
 import { Transaction } from '../../../../../../../../typings/Transaction';
 
+export interface IWaterfallIndex {
+  [key: string]: IWaterfallItem;
+}
+
 export interface IWaterfall {
   duration: number;
   services: string[];
@@ -123,12 +127,19 @@ export function getWaterfallRoot(
   ): IWaterfallItem {
     const children = itemsByParentId[item.id] || [];
     const nextChildren = sortBy(children, 'timestamp').map(getWithChildren);
+    let fullItem;
 
     // add parent transaction to spans
     if (item.docType === 'span') {
-      return {
+      fullItem = {
         parentTransaction:
           itemsByTransactionId[item.span.transaction.id].transaction,
+        ...item,
+        offset: item.timestamp - entryTransactionItem.timestamp,
+        children: nextChildren
+      };
+    } else {
+      fullItem = {
         ...item,
         offset: item.timestamp - entryTransactionItem.timestamp,
         children: nextChildren
@@ -137,13 +148,9 @@ export function getWaterfallRoot(
 
     // TODO: Think about storing this tree as a single, flat, indexed structure
     // with "children" being an array of ids, instead of it being a real tree
-    itemsById[item.id] = item;
+    itemsById[item.id] = fullItem;
 
-    return {
-      ...item,
-      offset: item.timestamp - entryTransactionItem.timestamp,
-      children: nextChildren
-    };
+    return fullItem;
   }
 
   return { root: getWithChildren(entryTransactionItem), itemsById };
