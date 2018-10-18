@@ -11,19 +11,7 @@ import { fromExpression } from '../lib/ast';
 import { getByAlias } from '../lib/get_by_alias';
 import { typesRegistry } from '../lib/types_registry';
 import { castProvider } from './cast';
-
-const createError = (err, { name, context, args }) => ({
-  type: 'error',
-  error: {
-    stack: err.stack,
-    message: typeof err === 'string' ? err : err.message,
-  },
-  info: {
-    context,
-    args,
-    functionName: name,
-  },
-});
+import { createError } from './create_error';
 
 export function interpretProvider(config) {
   const { functions, onFunctionNotFound, types } = config;

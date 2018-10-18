@@ -46,19 +46,10 @@ export function socketInterpreterProvider({
         // set a unique message ID so the code knows what response to process
         const id = uuid();
 
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
           const { serialize, deserialize } = serializeProvider(types);
 
-          const listener = resp => {
-            if (resp.error) {
-              // cast error strings back into error instances
-              const err = resp.error instanceof Error ? resp.error : new Error(resp.error);
-              if (resp.stack) err.stack = resp.stack;
-              reject(err);
-            } else {
-              resolve(deserialize(resp.value));
-            }
-          };
+          const listener = resp => resolve(deserialize(resp.value));
 
           socket.once(`resp:${id}`, listener);
 

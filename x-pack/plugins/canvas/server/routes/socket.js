@@ -13,6 +13,7 @@ import { routeExpressionProvider } from '../lib/route_expression';
 import { browser } from '../lib/route_expression/browser';
 import { thread } from '../lib/route_expression/thread';
 import { server as serverEnv } from '../lib/route_expression/server';
+import { createError } from '../../common/interpreter/create_error';
 
 console.log('LOADING SOCKET, IMPORTING EXPRESSION ROUTER');
 
@@ -33,7 +34,11 @@ export function socketApi(server) {
     ]);
 
     function onFunctionNotFound(ast, context) {
-      return routeExpression(ast, context);
+      // When a function isn't found each environment will call this.
+      // So we'll re-enter the router, and need to be able to catch from there.
+      // We should enter the router in the same way whereever we call it.
+      // Well, except, this has to return something valid right? Are we even allowed to reject here?
+      return routeExpression(ast, context).catch(e => createError(e, { context }));
     }
 
     socket.on('getFunctionList', () => {
@@ -48,10 +53,7 @@ export function socketApi(server) {
           socket.emit(`resp:${id}`, { value: serialize(value) });
         })
         .catch(e => {
-          socket.emit(`resp:${id}`, {
-            error: e.message,
-            stack: e.stack,
-          });
+          socket.emit(`resp:${id}`, createError(e));
         });
     };
 
