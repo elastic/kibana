@@ -77,6 +77,9 @@
     "type": "git",
     "url": "https://github.com/elastic/kibana.git"
   },
+  "resolutions": {
+    "**/@types/node": "8.10.21"
+  },
   "dependencies": {
     "@elastic/eui": "4.4.1",
     "@elastic/filesaver": "1.1.2",
@@ -234,9 +237,9 @@
     "@kbn/eslint-plugin-license-header": "link:packages/kbn-eslint-plugin-license-header",
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "@kbn/test": "link:packages/kbn-test",
+    "@octokit/rest": "^15.10.0",
     "@types/angular": "^1.6.50",
     "@types/angular-mocks": "^1.7.0",
-    "@octokit/rest": "^15.10.0",
     "@types/babel-core": "^6.25.5",
     "@types/bluebird": "^3.1.1",
     "@types/boom": "^7.2.0",
