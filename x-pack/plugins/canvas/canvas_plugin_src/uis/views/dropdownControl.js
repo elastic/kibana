@@ -18,12 +18,12 @@ export const dropdownControl = () => ({
     {
       name: 'valueColumn',
       displayName: i18n.translate(
-        'xpack.canvas.uis.views.dropdownControl.argsValueColumnDisplayName',
+        'xpack.canvas.uis.views.dropdownControl.args.valueColumnDisplayName',
         {
           defaultMessage: 'Values column',
         }
       ),
-      help: i18n.translate('xpack.canvas.uis.views.dropdownControl.argsValueColumnHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.dropdownControl.args.valueColumnHelpText', {
         defaultMessage: 'Column from which to extract values to make available in the dropdown',
       }),
       argType: 'string',
@@ -34,17 +34,22 @@ export const dropdownControl = () => ({
     {
       name: 'filterColumn',
       displayName: i18n.translate(
-        'xpack.canvas.uis.views.dropdownControl.argsFilterColumnDisplayName',
+        'xpack.canvas.uis.views.dropdownControl.args.filterColumnDisplayName',
         {
           defaultMessage: 'Filter column ',
         }
       ),
-      help: i18n.translate('xpack.canvas.uis.views.dropdownControl.argsFilterColumnHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.dropdownControl.args.filterColumnHelpText', {
         defaultMessage: 'Column to which the value selected from the dropdown is applied',
       }),
       argType: 'string',
       options: {
-        confirm: 'Set',
+        confirm: i18n.translate(
+          'xpack.canvas.uis.views.dropdownControl.args.options.confirmButtonLabel',
+          {
+            defaultMessage: 'Set',
+          }
+        ),
       },
     },
   ],

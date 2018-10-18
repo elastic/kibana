@@ -25,18 +25,33 @@ export const image = () => ({
     },
     {
       name: 'mode',
-      displayName: i18n.translate('xpack.canvas.uis.views.image.argsFillModeDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.image.args.fillModeDisplayName', {
         defaultMessage: 'Fill mode',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.image.argsFillModeHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.image.args.fillModeHelpText', {
         defaultMessage: 'Note: Stretched fill may not work with vector images',
       }),
       argType: 'select',
       options: {
         choices: [
-          { value: 'contain', name: 'Contain' },
-          { value: 'cover', name: 'Cover' },
-          { value: 'stretch', name: 'Stretch' },
+          {
+            value: 'contain',
+            name: i18n.translate('xpack.canvas.uis.views.image.args.options.choices.containTitle', {
+              defaultMessage: 'Contain',
+            }),
+          },
+          {
+            value: 'cover',
+            name: i18n.translate('xpack.canvas.uis.views.image.args.options.choices.coverTitle', {
+              defaultMessage: 'Cover',
+            }),
+          },
+          {
+            value: 'stretch',
+            name: i18n.translate('xpack.canvas.uis.views.image.args.options.choices.stretchTitle', {
+              defaultMessage: 'Stretch',
+            }),
+          },
         ],
       },
     },

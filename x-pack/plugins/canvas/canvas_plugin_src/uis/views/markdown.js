@@ -19,16 +19,18 @@ export const markdown = () => ({
   args: [
     {
       name: '_',
-      displayName: i18n.translate('xpack.canvas.uis.views.markdown.argsContentDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.markdown.args.underscoreDisplayName', {
         defaultMessage: 'Markdown content',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.markdown.argsContentHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.markdown.args.underscoreContentHelpText', {
         defaultMessage: 'Markdown formatted text',
       }),
       argType: 'textarea',
       default: '""',
       options: {
-        confirm: 'Apply',
+        confirm: i18n.translate('xpack.canvas.uis.views.markdown.options.confirmButtonLabel', {
+          defaultMessage: 'Apply',
+        }),
       },
       multi: true,
     },

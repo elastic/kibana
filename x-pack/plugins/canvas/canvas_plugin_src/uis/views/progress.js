@@ -13,7 +13,16 @@ export const progress = () => ({
   displayName: i18n.translate('xpack.canvas.uis.views.progressDisplayName', {
     defaultMessage: 'Progress',
   }),
-  modelArgs: [['_', { label: 'Value' }]],
+  modelArgs: [
+    [
+      '_',
+      {
+        label: i18n.translate('xpack.canvas.uis.views.progress.modelArgs.underscoreLabel', {
+          defaultMessage: 'Value',
+        }),
+      },
+    ],
+  ],
   requiresContext: false,
   args: [
     {
@@ -29,10 +38,10 @@ export const progress = () => ({
     },
     {
       name: 'max',
-      displayName: i18n.translate('xpack.canvas.uis.views.progress.argsMaxDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.progress.args.maxDisplayName', {
         defaultMessage: 'Maximum value',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.progress.argsMaxHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.progress.args.maxHelpText', {
         defaultMessage: 'Maximum value of the progress element',
       }),
       argType: 'number',
@@ -40,10 +49,10 @@ export const progress = () => ({
     },
     {
       name: 'valueColor',
-      displayName: i18n.translate('xpack.canvas.uis.views.progress.argsValueColorDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.progress.args.valueColorDisplayName', {
         defaultMessage: 'Progress color',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.progress.argsValueColorHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.progress.args.valueColorHelpText', {
         defaultMessage: 'Color of the progress bar',
       }),
       argType: 'color',
@@ -51,10 +60,10 @@ export const progress = () => ({
     },
     {
       name: 'valueWeight',
-      displayName: i18n.translate('xpack.canvas.uis.views.progress.argsValueWeightDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.progress.args.valueWeightDisplayName', {
         defaultMessage: 'Progress weight',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.progress.argsValueWeightHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.progress.args.valueWeightHelpText', {
         defaultMessage: 'Thickness of the progress bar',
       }),
       argType: 'number',
@@ -62,10 +71,10 @@ export const progress = () => ({
     },
     {
       name: 'barColor',
-      displayName: i18n.translate('xpack.canvas.uis.views.progress.argsBarColorDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.progress.args.barColorDisplayName', {
         defaultMessage: 'Background color',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.progress.argsBarColorHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.progress.args.barColorHelpText', {
         defaultMessage: 'Color of the background bar',
       }),
       argType: 'color',
@@ -73,10 +82,10 @@ export const progress = () => ({
     },
     {
       name: 'barWeight',
-      displayName: i18n.translate('xpack.canvas.uis.views.progress.argsBarWeightDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.progress.args.barWeightDisplayName', {
         defaultMessage: 'Background weight',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.progress.argsBarWeightHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.progress.args.barWeightHelpText', {
         defaultMessage: 'Thickness of the background bar',
       }),
       argType: 'number',
@@ -84,10 +93,10 @@ export const progress = () => ({
     },
     {
       name: 'label',
-      displayName: i18n.translate('xpack.canvas.uis.views.progress.argsLabelDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.progress.args.labelDisplayName', {
         defaultMessage: 'Label',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.progress.argsLabelHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.progress.args.labelHelpText', {
         defaultMessage:
           'Set true/false to show/hide label or provide a string to display as the label',
       }),
@@ -96,10 +105,10 @@ export const progress = () => ({
     },
     {
       name: 'font',
-      displayName: i18n.translate('xpack.canvas.uis.views.progress.argsFontDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.progress.args.fontDisplayName', {
         defaultMessage: 'Label settings',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.progress.argsFontHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.progress.args.fontHelpText', {
         defaultMessage:
           'Font settings for the label. Technically, you can add other styles as well',
       }),

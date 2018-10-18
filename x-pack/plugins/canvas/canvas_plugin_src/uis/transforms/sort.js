@@ -16,14 +16,14 @@ export const sort = () => ({
   args: [
     {
       name: '_',
-      displayName: i18n.translate('xpack.canvas.uis.transforms.sort.argsSortFieldDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.transforms.sort.args.underscoreDisplayName', {
         defaultMessage: 'Sort field',
       }),
       argType: 'datacolumn',
     },
     {
       name: 'reverse',
-      displayName: i18n.translate('xpack.canvas.uis.transforms.sort.argsReverseDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.transforms.sort.args.reverseDisplayName', {
         defaultMessage: 'Descending',
       }),
       argType: 'toggle',

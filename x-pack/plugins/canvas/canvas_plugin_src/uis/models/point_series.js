@@ -16,50 +16,50 @@ export const pointseries = () => ({
   args: [
     {
       name: 'x',
-      displayName: i18n.translate('xpack.canvas.uis.models.pointseries.argsXaxisDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.models.pointseries.args.xAxisDisplayName', {
         defaultMessage: 'X-axis',
       }),
-      help: i18n.translate('xpack.canvas.uis.models.pointseries.argsXaxisHelpText', {
+      help: i18n.translate('xpack.canvas.uis.models.pointseries.args.xAxisHelpText', {
         defaultMessage: 'Data along the horizontal axis. Usually a number, string or date',
       }),
       argType: 'datacolumn',
     },
     {
       name: 'y',
-      displayName: i18n.translate('xpack.canvas.uis.models.pointseries.argsYaxisDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.models.pointseries.args.yAxisDisplayName', {
         defaultMessage: 'Y-axis',
       }),
-      help: i18n.translate('xpack.canvas.uis.models.pointseries.argsYaxisHelpText', {
+      help: i18n.translate('xpack.canvas.uis.models.pointseries.args.yAxisHelpText', {
         defaultMessage: 'Data along the vertical axis. Usually a number',
       }),
       argType: 'datacolumn',
     },
     {
       name: 'color',
-      displayName: i18n.translate('xpack.canvas.uis.models.pointseries.argsColorDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.models.pointseries.args.colorDisplayName', {
         defaultMessage: 'Color',
       }),
-      help: i18n.translate('xpack.canvas.uis.models.pointseries.argsColorHelpText', {
+      help: i18n.translate('xpack.canvas.uis.models.pointseries.args.colorHelpText', {
         defaultMessage: 'Determines the color of a mark or series',
       }),
       argType: 'datacolumn',
     },
     {
       name: 'size',
-      displayName: i18n.translate('xpack.canvas.uis.models.pointseries.argsSizeDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.models.pointseries.args.sizeDisplayName', {
         defaultMessage: 'Size',
       }),
-      help: i18n.translate('xpack.canvas.uis.models.pointseries.argsSizeHelpText', {
+      help: i18n.translate('xpack.canvas.uis.models.pointseries.args.sizeHelpText', {
         defaultMessage: 'Determine the size of a mark',
       }),
       argType: 'datacolumn',
     },
     {
       name: 'text',
-      displayName: i18n.translate('xpack.canvas.uis.models.pointseries.argsTextDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.models.pointseries.args.textDisplayName', {
         defaultMessage: 'Text',
       }),
-      help: i18n.translate('xpack.canvas.uis.models.pointseries.argsTextHelpText', {
+      help: i18n.translate('xpack.canvas.uis.models.pointseries.args.textHelpText', {
         defaultMessage: 'Set the text to use as, or around, the mark',
       }),
       argType: 'datacolumn',

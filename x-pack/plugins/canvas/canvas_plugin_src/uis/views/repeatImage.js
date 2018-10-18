@@ -12,34 +12,43 @@ export const repeatImage = () => ({
     defaultMessage: 'Repeating image',
   }),
   help: '',
-  modelArgs: [['_', { label: 'Value' }]],
+  modelArgs: [
+    [
+      '_',
+      {
+        label: i18n.translate('xpack.canvas.uis.views.repeatImage.modelArgs.underscoreLabel', {
+          defaultMessage: 'Value',
+        }),
+      },
+    ],
+  ],
   args: [
     {
       name: 'image',
-      displayName: i18n.translate('xpack.canvas.uis.views.repeatImage.argsImageDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.repeatImage.args.imageDisplayName', {
         defaultMessage: 'Image',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.repeatImage.argsImageHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.repeatImage.args.imageHelpText', {
         defaultMessage: 'An image to repeat',
       }),
       argType: 'imageUpload',
     },
     {
       name: 'emptyImage',
-      displayName: i18n.translate('xpack.canvas.uis.views.repeatImage.argsEmptyImageDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.repeatImage.args.emptyImageDisplayName', {
         defaultMessage: 'Empty image',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.repeatImage.argsEmptyImageHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.repeatImage.args.emptyImageHelpText', {
         defaultMessage: 'An image to fill up the difference between the value and the max count',
       }),
       argType: 'imageUpload',
     },
     {
       name: 'size',
-      displayName: i18n.translate('xpack.canvas.uis.views.repeatImage.argsSizeDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.repeatImage.args.sizeDisplayName', {
         defaultMessage: 'Image size',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.repeatImage.argsSizeHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.repeatImage.args.sizeHelpText', {
         defaultMessage:
           'The size of the largest dimension of the image. Eg, if the image is tall but not wide, this is the height',
       }),
@@ -48,10 +57,10 @@ export const repeatImage = () => ({
     },
     {
       name: 'max',
-      displayName: i18n.translate('xpack.canvas.uis.views.repeatImage.argsMaxDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.repeatImage.args.maxDisplayName', {
         defaultMessage: 'Max count',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.repeatImage.argsMaxHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.repeatImage.args.maxHelpText', {
         defaultMessage: 'The maximum number of repeated images',
       }),
       argType: 'number',

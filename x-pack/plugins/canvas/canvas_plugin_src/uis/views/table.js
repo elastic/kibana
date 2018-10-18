@@ -22,10 +22,10 @@ export const table = () => ({
     },
     {
       name: 'perPage',
-      displayName: i18n.translate('xpack.canvas.uis.views.table.argsPerPageDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.table.args.perPageDisplayName', {
         defaultMessage: 'Rows per page',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.table.argsPerPageHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.table.args.perPageHelpText', {
         defaultMessage: 'Number of rows to display per table page',
       }),
       argType: 'select',
@@ -36,10 +36,10 @@ export const table = () => ({
     },
     {
       name: 'paginate',
-      displayName: i18n.translate('xpack.canvas.uis.views.table.argsPaginateDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.table.args.paginateDisplayName', {
         defaultMessage: 'Pagination',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.table.argsPaginateHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.table.args.paginateHelpText', {
         defaultMessage:
           'Show or hide pagination controls. If disabled only the first page will be shown',
       }),
@@ -48,10 +48,10 @@ export const table = () => ({
     },
     {
       name: 'showHeader',
-      displayName: i18n.translate('xpack.canvas.uis.views.table.argsShowHeaderDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.table.args.showHeaderDisplayName', {
         defaultMessage: 'Header',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.table.argsShowHeaderHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.table.args.showHeaderHelpText', {
         defaultMessage: 'Show or hide the header row with titles for each column',
       }),
       argType: 'toggle',

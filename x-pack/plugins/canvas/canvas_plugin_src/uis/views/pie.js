@@ -14,7 +14,24 @@ export const pie = () => ({
   displayName: i18n.translate('xpack.canvas.uis.views.pieDisplayName', {
     defaultMessage: 'Chart style',
   }),
-  modelArgs: [['color', { label: 'Slice Labels' }], ['size', { label: 'Slice Angles' }]],
+  modelArgs: [
+    [
+      'color',
+      {
+        label: i18n.translate('xpack.canvas.uis.views.pie.modelArgs.sliceLabelsLabel', {
+          defaultMessage: 'Slice Labels',
+        }),
+      },
+    ],
+    [
+      'size',
+      {
+        label: i18n.translate('xpack.canvas.uis.views.pie.modelArgs.sliceAnglesLabel', {
+          defaultMessage: 'Slice Angles',
+        }),
+      },
+    ],
+  ],
   args: [
     {
       name: 'palette',
@@ -22,10 +39,10 @@ export const pie = () => ({
     },
     {
       name: 'hole',
-      displayName: i18n.translate('xpack.canvas.uis.views.pie.argsHoleDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.pie.args.holeDisplayName', {
         defaultMessage: 'Inner radius',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.pie.argsHoleHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.pie.args.holeHelpText', {
         defaultMessage: 'Radius of the hole',
       }),
       argType: 'range',
@@ -37,10 +54,10 @@ export const pie = () => ({
     },
     {
       name: 'labels',
-      displayName: i18n.translate('xpack.canvas.uis.views.pie.argsLabelsDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.pie.args.labelsDisplayName', {
         defaultMessage: 'Labels',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.pie.argsLabelsHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.pie.args.labelsHelpText', {
         defaultMessage: 'Show/hide labels',
       }),
       argType: 'toggle',
@@ -48,10 +65,10 @@ export const pie = () => ({
     },
     {
       name: 'labelRadius',
-      displayName: i18n.translate('xpack.canvas.uis.views.pie.argsLabelRadiusDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.pie.args.labelRadiusDisplayName', {
         defaultMessage: 'Label radius',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.pie.argsLabelRadiusHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.pie.args.labelRadiusHelpText', {
         defaultMessage: 'Distance of the labels from the center of the pie',
       }),
       argType: 'range',
@@ -63,10 +80,10 @@ export const pie = () => ({
     },
     {
       name: 'legend',
-      displayName: i18n.translate('xpack.canvas.uis.views.pie.argsLegendDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.pie.args.legendDisplayName', {
         defaultMessage: 'Legend position',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.pie.argsLegendHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.pie.args.legendHelpText', {
         defaultMessage: 'Disable or position the legend',
       }),
       argType: 'select',
@@ -77,10 +94,10 @@ export const pie = () => ({
     },
     {
       name: 'radius',
-      displayName: i18n.translate('xpack.canvas.uis.views.pie.argsRadiusDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.pie.args.radiusDisplayName', {
         defaultMessage: 'Radius',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.pie.argsRadiusHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.pie.args.radiusHelpText', {
         defaultMessage: 'Radius of the pie',
       }),
       argType: 'percentage',
@@ -97,10 +114,10 @@ export const pie = () => ({
     },
     {
       name: 'tilt',
-      displayName: i18n.translate('xpack.canvas.uis.views.pie.argsTiltDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.pie.args.tiltDisplayName', {
         defaultMessage: 'Tilt angle',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.pie.argsTiltHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.pie.args.tiltHelpText', {
         defaultMessage: 'Percentage of tilt where 1 is fully vertical and 0 is completely flat',
       }),
       argType: 'percentage',

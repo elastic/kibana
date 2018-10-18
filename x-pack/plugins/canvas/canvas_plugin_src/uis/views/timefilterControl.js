@@ -18,17 +18,22 @@ export const timefilterControl = () => ({
     {
       name: 'column',
       displayName: i18n.translate(
-        'xpack.canvas.uis.views.timefilterControl.argsColumnDisplayName',
+        'xpack.canvas.uis.views.timefilterControl.args.columnDisplayName',
         {
           defaultMessage: 'Column',
         }
       ),
-      help: i18n.translate('xpack.canvas.uis.views.timefilterControl.argsColumnHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.timefilterControl.args.columnHelpText', {
         defaultMessage: 'Column to which selected time is applied',
       }),
       argType: 'string',
       options: {
-        confirm: 'Set',
+        confirm: i18n.translate(
+          'xpack.canvas.uis.views.timefilterControl.args.options.confirmButtonLabel',
+          {
+            defaultMessage: 'Set',
+          }
+        ),
       },
     },
   ],

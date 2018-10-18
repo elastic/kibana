@@ -23,10 +23,10 @@ export const render = () => ({
     },
     {
       name: 'css',
-      displayName: i18n.translate('xpack.canvas.uis.views.render.argsCssDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.render.args.cssDisplayName', {
         defaultMessage: 'CSS',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.render.argsCssHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.render.args.cssHelpText', {
         defaultMessage: 'A CSS stylesheet scoped to your element',
       }),
       argType: 'textarea',
@@ -34,7 +34,9 @@ export const render = () => ({
 
 }"`,
       options: {
-        confirm: 'Apply stylesheet',
+        confirm: i18n.translate('xpack.canvas.uis.views.render.args.options.confirmButtonLabel', {
+          defaultMessage: 'Apply stylesheet',
+        }),
       },
     },
   ],

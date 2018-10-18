@@ -24,10 +24,10 @@ export const plot = () => ({
     },
     {
       name: 'legend',
-      displayName: i18n.translate('xpack.canvas.uis.views.plot.argsLegendDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.plot.args.legendDisplayName', {
         defaultMessage: 'Legend position',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.plot.argsLegendHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.plot.args.legendHelpText', {
         defaultMessage: 'Disable or position the legend',
       }),
       argType: 'select',
@@ -38,10 +38,10 @@ export const plot = () => ({
     },
     {
       name: 'xaxis',
-      displayName: i18n.translate('xpack.canvas.uis.views.plot.argsXaxisDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.plot.args.xAxisDisplayName', {
         defaultMessage: 'X-axis',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.plot.argsXaxisHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.plot.args.xAxisHelpText', {
         defaultMessage: 'Configure or disable the x-axis',
       }),
       argType: 'axisConfig',
@@ -49,10 +49,10 @@ export const plot = () => ({
     },
     {
       name: 'yaxis',
-      displayName: i18n.translate('xpack.canvas.uis.views.plot.argsYaxisDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.plot.args.yAxisDisplayName', {
         defaultMessage: 'Y-axis',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.plot.argsYaxisHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.plot.args.yAxisHelpText', {
         defaultMessage: 'Configure or disable the Y-axis',
       }),
       argType: 'axisConfig',
@@ -64,10 +64,10 @@ export const plot = () => ({
     },
     {
       name: 'defaultStyle',
-      displayName: i18n.translate('xpack.canvas.uis.views.plot.argsDefaultStyleDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.plot.args.defaultStyleDisplayName', {
         defaultMessage: 'Default style',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.plot.argsDefaultStyleHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.plot.args.defaultStyleHelpText', {
         defaultMessage: 'Set the style to be used by default by every series, unless overridden',
       }),
       argType: 'seriesStyle',

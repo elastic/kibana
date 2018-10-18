@@ -17,10 +17,10 @@ export const metric = () => ({
   args: [
     {
       name: '_',
-      displayName: i18n.translate('xpack.canvas.uis.views.metric.argsLabelDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.metric.args.underscoreDisplayName', {
         defaultMessage: 'Label',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.metric.argsLabelHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.metric.args.underscoreHelpText', {
         defaultMessage: 'Describes the metric',
       }),
       argType: 'string',
@@ -28,10 +28,10 @@ export const metric = () => ({
     },
     {
       name: 'metricFont',
-      displayName: i18n.translate('xpack.canvas.uis.views.metric.argsMetricFontDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.metric.args.metricFontDisplayName', {
         defaultMessage: 'Metric text settings',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.metric.argsMetricFontHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.metric.args.metricFontHelpText', {
         defaultMessage: 'Fonts, alignment and color',
       }),
       argType: 'font',
@@ -39,10 +39,10 @@ export const metric = () => ({
     },
     {
       name: 'labelFont',
-      displayName: i18n.translate('xpack.canvas.uis.views.metric.argsLabelFontDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.views.metric.args.labelFontDisplayName', {
         defaultMessage: 'Label text settings',
       }),
-      help: i18n.translate('xpack.canvas.uis.views.metric.argsLabelFontHelpText', {
+      help: i18n.translate('xpack.canvas.uis.views.metric.args.labelFontHelpText', {
         defaultMessage: 'Fonts, alignment and color',
       }),
       argType: 'font',

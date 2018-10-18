@@ -17,10 +17,10 @@ export const math = () => ({
   args: [
     {
       name: '_',
-      displayName: i18n.translate('xpack.canvas.uis.models.math.argsValueDisplayName', {
+      displayName: i18n.translate('xpack.canvas.uis.models.math.args.underscoreDisplayName', {
         defaultMessage: 'Value',
       }),
-      help: i18n.translate('xpack.canvas.uis.models.math.argsValueHelpText', {
+      help: i18n.translate('xpack.canvas.uis.models.math.args.underscoreHelpText', {
         defaultMessage: 'Function and column to use in extracting a value from the datasource',
       }),
       argType: 'datacolumn',
