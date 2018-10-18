@@ -316,13 +316,6 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-5.2.5.tgz#8a4accfc403c124a0bafe8a9fc61a05ec1032073"
   integrity sha512-lAVp+Kj54ui/vLUFxsJTMtWvZraZxum3w3Nwkble2dNuV5VnPA+Mi2oGX9XYJAaIvZi3tn3cbjS/qcJXRb6Bww==
 
-"@types/moment-timezone@^0.5.8":
-  version "0.5.8"
-  resolved "https://registry.yarnpkg.com/@types/moment-timezone/-/moment-timezone-0.5.8.tgz#92aba9bc238cabf69a27a1a4f52e0ebb8f10f896"
-  integrity sha512-FpC+fLd/Hmxxcl4cxeb5HTyCmEvl3b4TeX8w9J+0frdzH+UCEkexKe4WZ3DTALwLj2/hyujn8tp3zl1YdgLrxQ==
-  dependencies:
-    moment ">=2.14.0"
-
 "@types/node@*", "@types/node@8.10.21", "@types/node@^9.4.6", "@types/node@^9.4.7":
   version "8.10.21"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.10.21.tgz#12b3f2359b27aa05a45d886c8ba1eb8d1a77e285"
@@ -404,7 +397,7 @@
     "@types/history" "*"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^16.3.14":
+"@types/react@*", "@types/react@16.3.14":
   version "16.3.14"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.3.14.tgz#f90ac6834de172e13ecca430dcb6814744225d36"
   integrity sha512-wNUGm49fPl7eE2fnYdF0v5vSOrUMdKMQD/4NwtQRnb6mnPwtkhabmuFz37eq90+hhyfz0pWd38jkZHOcaZ6LGw==
@@ -427,13 +420,6 @@
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-5.0.3.tgz#2b1840122f372350c563e3ceda2f447b55f3a927"
   integrity sha512-JvnfqYfBapg1Ktjjvb79myQ2A848yCdB+1g/okS9OyNqPrT/qWUIt71G0eyi7msZf0gC4fBd40Yu15Btw6BMfQ==
-
-"@types/styled-components@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@types/styled-components/-/styled-components-3.0.1.tgz#0f591a38e005aeb10687e85eb078c92d9b988ed1"
-  dependencies:
-    "@types/node" "*"
-    "@types/react" "*"
 
 "@types/superagent@*":
   version "3.8.4"
@@ -619,10 +605,6 @@ ammo@2.x.x:
   dependencies:
     boom "5.x.x"
     hoek "4.x.x"
-
-angular-paging@2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/angular-paging/-/angular-paging-2.2.1.tgz#8090864f71bc4c9b89307b02ab02afb205983c43"
 
 angular-resource@1.4.9:
   version "1.4.9"
