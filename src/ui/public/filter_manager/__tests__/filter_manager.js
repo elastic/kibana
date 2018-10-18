@@ -24,7 +24,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { FilterManagerProvider } from '..';
 import { FilterBarQueryFilterProvider } from '../../filter_bar/query_filter';
-import { getPhraseScript } from '../../../../utils/filters';
+import { getPhraseScript } from '@kbn/es-query';
 let queryFilter;
 let filterManager;
 let appState;

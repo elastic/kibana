@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { FilterManager } from './filter_manager.js';
-import { buildRangeFilter } from '../../../../../utils/filters';
+import { buildRangeFilter } from '@kbn/es-query';
 
 // Convert slider value into ES range filter
 function toRange(sliderValue) {

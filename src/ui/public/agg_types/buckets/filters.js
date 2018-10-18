@@ -22,7 +22,7 @@ import angular from 'angular';
 
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterFilters } from './create_filter/filters';
-import { decorateQuery, luceneStringToDsl } from '../../courier';
+import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
 import filtersTemplate from '../controls/filters.html';
 
 import chrome from 'ui/chrome';

@@ -75,6 +75,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/es-query@link:../packages/kbn-es-query":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es@link:../packages/kbn-es":
   version "0.0.0"
   uid ""

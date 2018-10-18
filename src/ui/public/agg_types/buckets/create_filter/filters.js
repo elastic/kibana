@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { buildQueryFilter } from '../../../../../utils/filters';
+import { buildQueryFilter } from '@kbn/es-query';
 import _ from 'lodash';
 
 export function createFilterFilters(aggConfig, key) {

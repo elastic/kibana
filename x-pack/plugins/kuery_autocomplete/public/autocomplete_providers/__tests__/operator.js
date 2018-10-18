@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { getSuggestionsProvider } from '../operator';
-import indexPatternResponse from '../../../../../../src/utils/__tests__/index_pattern_response.json';
+import indexPatternResponse from '../__fixtures__/index_pattern_response.json';
 
 describe('Kuery operator suggestions', function () {
   let indexPatterns;

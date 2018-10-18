@@ -18,8 +18,7 @@
  */
 
 import _ from 'lodash';
-import { buildExistsFilter, buildPhrasesFilter } from '../../../../utils/filters';
-import { buildQueryFromFilters } from '../../courier';
+import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId

@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { FilterManager } from './filter_manager.js';
-import { buildPhraseFilter, buildPhrasesFilter } from '../../../../../utils/filters';
+import { buildPhraseFilter, buildPhrasesFilter } from '@kbn/es-query';
 
 export class PhraseFilterManager extends FilterManager {
   constructor(controlId, fieldName, indexPattern, queryFilter) {

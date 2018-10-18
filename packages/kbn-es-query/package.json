@@ -1,0 +1,13 @@
+{
+  "name": "@kbn/es-query",
+  "main": "./src/index.js",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "dependencies": {
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana1"
+  },
+  "devDependencies": {
+    "expect.js": "0.3.1"
+  }
+}

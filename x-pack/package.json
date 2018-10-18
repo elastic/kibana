@@ -119,6 +119,7 @@
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
     "@kbn/datemath": "link:../packages/kbn-datemath",
+    "@kbn/es-query": "link:../packages/kbn-es-query",
     "@kbn/i18n": "link:../packages/kbn-i18n",
     "@kbn/ui-framework": "link:../packages/kbn-ui-framework",
     "@samverschueren/stream-to-observable": "^0.3.0",

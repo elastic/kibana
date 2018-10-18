@@ -19,7 +19,7 @@ import 'plugins/ml/components/form_filter_input';
 import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
 import { notify } from 'ui/notify';
-import { decorateQuery, luceneStringToDsl } from 'ui/courier';
+import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
 
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';

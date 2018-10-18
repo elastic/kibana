@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { getSuggestionsProvider } from '../field';
-import indexPatternResponse from '../../../../../../src/utils/__tests__/index_pattern_response.json';
+import indexPatternResponse from '../__fixtures__/index_pattern_response.json';
 import { isFilterable } from 'ui/index_patterns/static_utils';
 
 describe('Kuery field suggestions', function () {

@@ -19,7 +19,7 @@
 
 import chrome from '../../../chrome';
 import { dateRange } from '../../../utils/date_range';
-import { buildRangeFilter } from '../../../../../utils/filters';
+import { buildRangeFilter } from '@kbn/es-query';
 
 const config = chrome.getUiSettingsClient();
 

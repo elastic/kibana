@@ -212,6 +212,7 @@
     "@elastic/eslint-config-kibana": "link:packages/eslint-config-kibana",
     "@elastic/eslint-plugin-kibana-custom": "link:packages/eslint-plugin-kibana-custom",
     "@kbn/es": "link:packages/kbn-es",
+    "@kbn/es-query": "link:packages/kbn-es-query",
     "@kbn/eslint-import-resolver-kibana": "link:packages/kbn-eslint-import-resolver-kibana",
     "@kbn/eslint-plugin-license-header": "link:packages/kbn-eslint-plugin-license-header",
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",

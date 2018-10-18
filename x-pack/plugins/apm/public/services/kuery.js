@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  fromKueryExpression,
-  toElasticsearchQuery
-} from '../../../../../src/utils/kuery';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { getAutocompleteProvider } from 'ui/autocomplete_providers';
 
 export function convertKueryToEsQuery(kuery, indexPattern) {

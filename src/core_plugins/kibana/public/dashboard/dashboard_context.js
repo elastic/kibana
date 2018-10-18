@@ -21,7 +21,7 @@
 import _ from 'lodash';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import 'ui/state_management/app_state';
-import { luceneStringToDsl, migrateFilter } from '../../../../utils/es_query';
+import { luceneStringToDsl, migrateFilter } from '@kbn/es-query';
 
 export function dashboardContextProvider(Private, getAppState) {
   return () => {

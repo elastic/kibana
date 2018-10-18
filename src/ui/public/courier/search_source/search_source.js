@@ -71,9 +71,9 @@
 
 import _ from 'lodash';
 import angular from 'angular';
+import { BuildESQueryProvider } from '@kbn/es-query';
 
 import '../../promises';
-
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
 import { SegmentedSearchRequestProvider } from '../fetch/request/segmented_search_request';
@@ -82,7 +82,6 @@ import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
-import { BuildESQueryProvider } from '../../../../utils/es_query';
 import { KbnError } from '../../errors';
 import { documentationLinks } from '../../documentation_links';
 

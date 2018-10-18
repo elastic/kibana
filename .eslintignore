@@ -8,8 +8,6 @@ bower_components
 /src/fixtures/vislib/mock_data
 /src/ui/public/angular-bootstrap
 /src/ui/public/flot-charts
-/src/utils/kuery/ast/kuery.js
-/src/utils/kuery/ast/legacy_kuery.js
 /test/fixtures/scenarios
 /src/core_plugins/console/public/webpackShims
 /src/core_plugins/console/public/tests/webpackShims
@@ -19,6 +17,8 @@ bower_components
 /packages/*/target
 /packages/eslint-config-kibana
 /packages/eslint-plugin-kibana-custom
+/packages/kbn-es-query/src/kuery/ast/kuery.js
+/packages/kbn-es-query/src/kuery/ast/legacy_kuery.js
 /packages/kbn-pm/dist
 /packages/kbn-plugin-generator/sao_template/template
 /packages/kbn-ui-framework/dist
