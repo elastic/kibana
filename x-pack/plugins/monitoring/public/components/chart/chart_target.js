@@ -54,6 +54,18 @@ export class ChartTarget extends React.Component {
       xaxisOptions.min = _.get(timeRange, 'min');
       xaxisOptions.max = _.get(timeRange, 'max');
 
+      const anyValuesBelowZero = _.get(newProps, 'series').reduce((anyBelowZero, { data }) => {
+        if (anyBelowZero) {
+          return true;
+        }
+        return !!data.find(item => item[1] < 0);
+      }, false);
+
+      if (!anyValuesBelowZero) {
+        const yaxisOptions = this.plot.getAxes().yaxis.options;
+        yaxisOptions.min = 0;
+      }
+
       this.plot.setData(this.filterData(series, newProps.seriesToShow));
       this.plot.setupGrid();
       this.plot.draw();
