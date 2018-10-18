@@ -7,7 +7,7 @@
 import { resolve } from 'path';
 import { initRoutes } from './server/routes';
 import { kySaltTrucksSpecProvider } from './server/sample_data/ky_salt_trucks';
-import { mappings } from './mappings.json';
+import mappings from './mappings.json';
 
 export function gis(kibana) {
 
