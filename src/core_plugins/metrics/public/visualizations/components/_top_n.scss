@@ -35,7 +35,7 @@
   min-height: $euiSize;
 }
 
-.tvbVisTopN.reversed {
+.tvbVisTopN--reversed {
   tr:hover td {
     background-color: $tvbHoverBackgroundColorReversed;
   }

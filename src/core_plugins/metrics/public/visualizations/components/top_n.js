@@ -82,7 +82,7 @@ class TopN extends Component {
     const rows = this.props.series.map(this.renderRow(maxValue));
     let className = 'tvbVisTopN';
     if (this.props.reversed) {
-      className += ' reversed';
+      className += ' tvbVisTopN--reversed';
     }
 
     return (

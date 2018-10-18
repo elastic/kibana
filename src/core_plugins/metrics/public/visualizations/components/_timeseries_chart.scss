@@ -55,11 +55,15 @@
 .tvbTooltip__container {
   pointer-events: none;
   position: absolute;
-  z-index: $euiZLevel1;
+  z-index: $euiZLevel9;
   display: flex;
   align-items: center;
   padding: 0 $euiSizeS;
   transform: translate(0, -50%);
+}
+
+.tvbTooltip__container--right {
+  flex-direction: row-reverse;
 }
 
 .tvbTooltip {
@@ -70,11 +74,25 @@
   border-radius: $euiBorderRadius;
   color: $euiColorGhost;
   max-width: 320px;
-  z-index: $euiZLevel9;
 }
 
 .tvbTooltip__caret {
+  $temp-arrowSize: $euiSizeM;
+  width: $temp-arrowSize;
+  height: $temp-arrowSize;
   color: tintOrShade($euiColorFullShade, 25%, 90%);
+  border-radius: 2px;
+  background-color: tintOrShade($euiColorFullShade, 25%, 90%);
+  transform-origin: center;
+  transform: rotateZ(45deg);
+
+  .tvbTooltip__container--left & {
+    margin-right: (($temp-arrowSize/2) + 1px) * -1;
+  }
+
+  .tvbTooltip__container--right & {
+    margin-left: (($temp-arrowSize/2) + 1px) * -1;
+  }
 }
 
 .tvbTooltip__item {

@@ -133,12 +133,6 @@ class TimeseriesChart extends Component {
           left,
           right,
         },
-        rightCaret: {
-          display: right ? 'block' : 'none',
-        },
-        leftCaret: {
-          display: left ? 'block' : 'none',
-        },
       },
       hideTooltip: {
         tooltipContainer: { display: 'none' },
@@ -153,8 +147,8 @@ class TimeseriesChart extends Component {
       const formatter = metric && metric.tickFormatter || this.props.tickFormatter || ((v) => v);
       const value = item.datapoint[2] ? item.datapoint[1] - item.datapoint[2] : item.datapoint[1];
       tooltip = (
-        <div className="tvbTooltip__container" style={styles.tooltipContainer}>
-          <i className="fa fa-caret-left tvbTooltip__caret" style={styles.leftCaret} />
+        <div className={`tvbTooltip__container tvbTooltip__container--${right ? 'right' : 'left'}`} style={styles.tooltipContainer}>
+          <span className="tvbTooltip__caret"/>
           <div className="tvbTooltip">
             <div className="tvbTooltip__item">
               <EuiIcon className="tvbTooltip__icon" type="dot" color={item.series.color} />
@@ -163,7 +157,6 @@ class TimeseriesChart extends Component {
             </div>
             <div className="tvbTooltip__timestamp">{ moment(item.datapoint[0]).format(this.props.dateFormat) }</div>
           </div>
-          <i className="fa fa-caret-right tvbTooltip__caret" style={styles.rightCaret} />
         </div>
       );
     }
