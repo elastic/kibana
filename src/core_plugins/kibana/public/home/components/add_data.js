@@ -21,6 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 
 import {
   EuiButton,
@@ -220,7 +221,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
             </strong>
             <EuiLink
               style={{ display: 'block', textAlign: 'center' }}
-              href="#/home"
+              href={`${chrome.getBasePath()}/app/ml#/datavisualizer`}
             >
               <FormattedMessage
                 id="kbn.home.addData.uploadFileLink"

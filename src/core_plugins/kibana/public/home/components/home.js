@@ -35,8 +35,6 @@ import {
   EuiFlexGrid,
   EuiText,
   EuiPageBody,
-  EuiLink,
-  EuiIcon,
 } from '@elastic/eui';
 
 import { Welcome } from './welcome';
@@ -152,32 +150,6 @@ export class Home extends Component {
             apmUiEnabled={apmUiEnabled}
             isNewKibanaInstance={this.state.isNewKibanaInstance}
           />
-
-          <EuiSpacer size="l" />
-
-          <EuiFlexGroup justifyContent="spaceAround">
-            <EuiFlexItem>
-              <EuiText textAlign="center">
-                <EuiIcon type="storage" style={{ marginRight: 8, verticalAlign: 'text-top' }} />
-                <strong style={{ height: 38 }}>
-                  <FormattedMessage
-                    id="kbn.home.addData.funcBeatTitle"
-                    defaultMessage="Functionbeat"
-                  />
-                </strong>
-                <EuiLink
-                  style={{ marginLeft: 8 }}
-                  href="#/home/feature_directory"
-                >
-                  <FormattedMessage
-                    id="kbn.home.addData.funcBeatLink"
-                    defaultMessage="The core functionality of Beats deployed and run on serverless infrastructure to collect data from
-                      first-class Cloud services"
-                  />
-                </EuiLink>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
 
           <EuiSpacer size="l" />
 
