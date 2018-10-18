@@ -25,7 +25,7 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createNumberHandler from '../lib/create_number_handler';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow } from '@elastic/eui';
 
 export const SerialDiffAgg = props => {
   const { siblings } = props;
@@ -58,28 +58,31 @@ export const SerialDiffAgg = props => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('metric')}>Metric</EuiFormLabel>
-          <MetricSelect
+          <EuiFormRow
             id={htmlId('metric')}
-            onChange={handleSelectChange('field')}
-            metrics={siblings}
-            metric={model}
-            value={model.field}
-          />
+            label="Metric"
+          >
+            <MetricSelect
+              onChange={handleSelectChange('field')}
+              metrics={siblings}
+              metric={model}
+              value={model.field}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('lag')}>Lag</EuiFormLabel>
-          {/*
-            EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-            Should it be text or number?
-          */}
-          <input
-            id={htmlId('lag')}
-            className="tvbAgg__input"
-            onChange={handleNumberChange('lag')}
-            value={model.lag}
-            type="text"
-          />
+          <EuiFormRow id={htmlId('lag')} label="Lag">
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              Should it be text or number?
+            */}
+            <input
+              className="tvbAgg__input"
+              onChange={handleNumberChange('lag')}
+              value={model.lag}
+              type="text"
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

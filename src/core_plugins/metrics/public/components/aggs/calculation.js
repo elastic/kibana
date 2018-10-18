@@ -105,10 +105,9 @@ class CalculationAgg extends Component {
               }
             >
               <EuiTextArea
-                data-test-subj="mathExpression"
                 onChange={handleTextChange('script')}
-                fullWidth
                 value={model.script}
+                fullWidth
               />
             </EuiFormRow>
           </EuiFlexItem>

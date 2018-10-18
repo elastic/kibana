@@ -24,7 +24,7 @@ import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow } from '@elastic/eui';
 
 function CumulativeSumAgg(props) {
   const { model, siblings } = props;
@@ -51,14 +51,17 @@ function CumulativeSumAgg(props) {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('metric')}>Metric</EuiFormLabel>
-          <MetricSelect
+          <EuiFormRow
             id={htmlId('metric')}
-            onChange={handleSelectChange('field')}
-            metrics={siblings}
-            metric={model}
-            value={model.field}
-          />
+            label="Metric"
+          >
+            <MetricSelect
+              onChange={handleSelectChange('field')}
+              metrics={siblings}
+              metric={model}
+              value={model.field}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

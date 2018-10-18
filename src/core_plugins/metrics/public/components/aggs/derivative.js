@@ -31,6 +31,7 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiFieldText,
+  EuiFormRow,
 } from '@elastic/eui';
 
 export const DerivativeAgg = props => {
@@ -66,24 +67,32 @@ export const DerivativeAgg = props => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('metric')}>Metric</EuiFormLabel>
-          <MetricSelect
+          <EuiFormRow
             id={htmlId('metric')}
-            onChange={handleSelectChange('field')}
-            metrics={siblings}
-            metric={model}
-            value={model.field}
+            label="Metric"
             fullWidth
-          />
+          >
+            <MetricSelect
+              onChange={handleSelectChange('field')}
+              metrics={siblings}
+              metric={model}
+              value={model.field}
+              fullWidth
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('units')}>Units (1s, 1m, etc)</EuiFormLabel>
-          <EuiFieldText
+          <EuiFormRow
             id={htmlId('units')}
-            onChange={handleTextChange('unit')}
-            value={model.unit}
+            label="Units (1s, 1m, etc)"
             fullWidth
-          />
+          >
+            <EuiFieldText
+              onChange={handleTextChange('unit')}
+              value={model.unit}
+              fullWidth
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

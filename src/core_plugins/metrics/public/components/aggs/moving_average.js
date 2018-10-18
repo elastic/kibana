@@ -90,14 +90,17 @@ export const MovingAverageAgg = props => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('metric')}>Metric</EuiFormLabel>
-          <MetricSelect
+          <EuiFormRow
             id={htmlId('metric')}
-            onChange={handleSelectChange('field')}
-            metrics={siblings}
-            metric={model}
-            value={model.field}
-          />
+            label="Metric"
+          >
+            <MetricSelect
+              onChange={handleSelectChange('field')}
+              metrics={siblings}
+              metric={model}
+              value={model.field}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -105,55 +108,58 @@ export const MovingAverageAgg = props => {
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('model')}>Model</EuiFormLabel>
-          <EuiComboBox
-            isClearable={false}
+          <EuiFormRow
             id={htmlId('model')}
-            placeholder="Select"
-            options={modelOptions}
-            selectedOptions={selectedModelOption ? [selectedModelOption] : []}
-            onChange={handleSelectChange('model')}
-            singleSelection={{ asPlainText: true }}
-          />
+            label="Model"
+          >
+            <EuiComboBox
+              isClearable={false}
+              placeholder="Select"
+              options={modelOptions}
+              selectedOptions={selectedModelOption ? [selectedModelOption] : []}
+              onChange={handleSelectChange('model')}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('windowSize')}>Window size</EuiFormLabel>
-          {/*
-            EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-            Should it be text or number?
-          */}
-          <input
-            id={htmlId('windowSize')}
-            className="tvbAgg__input"
-            type="text"
-            onChange={handleNumberChange('window')}
-            value={model.window}
-          />
+          <EuiFormRow id={htmlId('windowSize')} label="Window size">
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              Should it be text or number?
+            */}
+            <input
+              className="tvbAgg__input"
+              type="text"
+              onChange={handleNumberChange('window')}
+              value={model.window}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('minimize')}>Minimize</EuiFormLabel>
-          <EuiComboBox
-            id={htmlId('minimize')}
-            placeholder="Select"
-            options={minimizeOptions}
-            selectedOptions={selectedMinimizeOption ? [selectedMinimizeOption] : []}
-            onChange={handleSelectChange('minimize')}
-            singleSelection={{ asPlainText: true }}
-          />
+          <EuiFormRow id={htmlId('minimize')} label="Minimize">
+            <EuiComboBox
+              placeholder="Select"
+              options={minimizeOptions}
+              selectedOptions={selectedMinimizeOption ? [selectedMinimizeOption] : []}
+              onChange={handleSelectChange('minimize')}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('predict')}>Predict</EuiFormLabel>
-          {/*
-            EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-            Should it be text or number?
-          */}
-          <input
-            id={htmlId('predict')}
-            className="tvbAgg__input"
-            type="text"
-            onChange={handleNumberChange('predict')}
-            value={model.predict}
-          />
+          <EuiFormRow id={htmlId('predict')} label="Predict">
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              Should it be text or number?
+            */}
+            <input
+              className="tvbAgg__input"
+              type="text"
+              onChange={handleNumberChange('predict')}
+              value={model.predict}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -169,9 +175,9 @@ export const MovingAverageAgg = props => {
           }
         >
           <EuiTextArea
-            fullWidth
             onChange={handleTextChange('settings')}
             value={model.settings}
+            fullWidth
           />
         </EuiFormRow>
       </EuiFlexItem>

@@ -32,6 +32,7 @@ import {
   EuiFieldText,
   EuiComboBox,
   EuiFormLabel,
+  EuiFormRow,
 } from '@elastic/eui';
 
 export const StandardSiblingAgg = props => {
@@ -48,12 +49,12 @@ export const StandardSiblingAgg = props => {
   if (model.type === 'std_deviation_bucket') {
     stdDev.sigma = (
       <EuiFlexItem grow={false}>
-        <EuiFormLabel htmlFor={htmlId('sigma')}>Sigma</EuiFormLabel>
-        <EuiFieldText
-          id={htmlId('sigma')}
-          value={model.sigma}
-          onChange={handleTextChange('sigma')}
-        />
+        <EuiFormRow id={htmlId('sigma')} label="Sigma">
+          <EuiFieldText
+            value={model.sigma}
+            onChange={handleTextChange('sigma')}
+          />
+        </EuiFormRow>
       </EuiFlexItem>
     );
 
@@ -69,14 +70,14 @@ export const StandardSiblingAgg = props => {
 
     stdDev.mode = (
       <EuiFlexItem>
-        <EuiFormLabel htmlFor={htmlId('mode')}>Mode</EuiFormLabel>
-        <EuiComboBox
-          id={htmlId('mode')}
-          options={modeOptions}
-          selectedOptions={selectedModeOption ? [selectedModeOption] : []}
-          onChange={handleSelectChange('mode')}
-          singleSelection={{ asPlainText: true }}
-        />
+        <EuiFormRow id={htmlId('mode')} label="Mode">
+          <EuiComboBox
+            options={modeOptions}
+            selectedOptions={selectedModeOption ? [selectedModeOption] : []}
+            onChange={handleSelectChange('mode')}
+            singleSelection={{ asPlainText: true }}
+          />
+        </EuiFormRow>
       </EuiFlexItem>
     );
   }
@@ -101,15 +102,18 @@ export const StandardSiblingAgg = props => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('metric')}>Metric</EuiFormLabel>
-          <MetricSelect
+          <EuiFormRow
             id={htmlId('metric')}
-            onChange={handleSelectChange('field')}
-            exclude={['percentile']}
-            metrics={siblings}
-            metric={model}
-            value={model.field}
-          />
+            label="Metric"
+          >
+            <MetricSelect
+              onChange={handleSelectChange('field')}
+              exclude={['percentile']}
+              metrics={siblings}
+              metric={model}
+              value={model.field}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         { stdDev.sigma }
         { stdDev.mode }

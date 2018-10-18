@@ -56,8 +56,8 @@ function AggRow(props) {
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
             testSubj="addMetric"
-            addTooltip="Add Metric"
-            deleteTooltip="Delete Metric"
+            addTooltip="Add metric"
+            deleteTooltip="Delete metric"
             onAdd={props.onAdd}
             onDelete={props.onDelete}
             disableDelete={props.disableDelete}
