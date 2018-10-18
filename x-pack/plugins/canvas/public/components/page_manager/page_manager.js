@@ -107,7 +107,7 @@ export class PageManager extends React.PureComponent {
     const pageNumber = i + 1;
 
     return (
-      <Draggable key={page.id} draggableId={page.id} index={i} isDragDisabled={isWriteable}>
+      <Draggable key={page.id} draggableId={page.id} index={i} isDragDisabled={!isWriteable}>
         {provided => (
           <div
             key={page.id}

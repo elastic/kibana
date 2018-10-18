@@ -60,8 +60,8 @@ export const WorkpadHeader = ({
 
   let readOnlyToolTip = '';
 
-  if (canUserWrite) readOnlyToolTip = "You don't have permission to edit this workpad";
-  else readOnlyToolTip = isWriteable ? 'Show editing controls' : 'Hide editing controls';
+  if (!canUserWrite) readOnlyToolTip = "You don't have permission to edit this workpad";
+  else readOnlyToolTip = isWriteable ? 'Hide editing controls' : 'Show editing controls';
 
   return (
     <div>
@@ -89,7 +89,7 @@ export const WorkpadHeader = ({
               <WorkpadExport />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {canUserWrite && (
+              {!canUserWrite && (
                 <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
               )}
               <EuiToolTip position="bottom" content={readOnlyToolTip}>
@@ -100,7 +100,7 @@ export const WorkpadHeader = ({
                   }}
                   size="s"
                   aria-label={readOnlyToolTip}
-                  isDisabled={canUserWrite}
+                  isDisabled={!canUserWrite}
                 />
               </EuiToolTip>
             </EuiFlexItem>

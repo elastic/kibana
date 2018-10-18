@@ -157,7 +157,7 @@ export class WorkpadLoader extends React.PureComponent {
                   iconType="copy"
                   onClick={() => this.cloneWorkpad(workpad)}
                   aria-label="Clone Workpad"
-                  disabled={canUserWrite}
+                  disabled={!canUserWrite}
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -316,7 +316,7 @@ export class WorkpadLoader extends React.PureComponent {
                           <EuiFlexItem grow={false}>
                             <EuiToolTip
                               content={
-                                canUserWrite ? "You don't have permission to delete workpads" : ''
+                                canUserWrite ? '' : `You don't have permission to delete workpads`
                               }
                             >
                               <EuiButton
@@ -324,7 +324,7 @@ export class WorkpadLoader extends React.PureComponent {
                                 color="danger"
                                 iconType="trash"
                                 onClick={this.openRemoveConfirm}
-                                disabled={canUserWrite}
+                                disabled={!canUserWrite}
                               >
                                 {`Delete (${selectedWorkpads.length})`}
                               </EuiButton>
@@ -347,7 +347,7 @@ export class WorkpadLoader extends React.PureComponent {
                       <EuiFlexItem grow={false}>
                         <EuiToolTip
                           content={
-                            canUserWrite ? "You don't have permission to upload workpads" : ''
+                            canUserWrite ? '' : `You don't have permission to upload workpads`
                           }
                         >
                           <WorkpadUpload
@@ -359,13 +359,13 @@ export class WorkpadLoader extends React.PureComponent {
                       <EuiFlexItem grow={false}>
                         <EuiToolTip
                           content={
-                            canUserWrite ? "You don't have permission to create workpads" : ''
+                            canUserWrite ? '' : "You don't have permission to create workpads"
                           }
                         >
                           <WorkpadCreate
                             createPending={createPending}
                             onCreate={this.createWorkpad}
-                            disabled={canUserWrite}
+                            disabled={!canUserWrite}
                           />
                         </EuiToolTip>
                       </EuiFlexItem>

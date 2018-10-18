@@ -13,6 +13,7 @@ import { notify } from '../../lib/notify';
 import { canUserWrite } from '../../state/selectors/app';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { getId } from '../../lib/get_id';
+import { setCanUserWrite } from '../../state/actions/transient';
 import { WorkpadLoader as Component } from './workpad_loader';
 
 const mapStateToProps = state => ({
@@ -20,11 +21,18 @@ const mapStateToProps = state => ({
   canUserWrite: canUserWrite(state),
 });
 
+const mapDispatchToProps = dispatch => ({
+  setCanUserWrite: canUserWrite => dispatch(setCanUserWrite(canUserWrite)),
+});
+
 export const WorkpadLoader = compose(
   getContext({
     router: PropTypes.object,
   }),
-  connect(mapStateToProps),
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  ),
   withState('workpads', 'setWorkpads', null),
   withHandlers({
     // Workpad creation via navigation
@@ -36,6 +44,9 @@ export const WorkpadLoader = compose(
           props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
         } catch (err) {
           notify.error(err, { title: `Couldn't upload workpad` });
+          // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduces
+          // https://github.com/elastic/kibana/issues/20277
+          if (err.response.status === 403) props.setCanUserWrite(false);
         }
         return;
       }
@@ -74,6 +85,9 @@ export const WorkpadLoader = compose(
         props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
       } catch (err) {
         notify.error(err, { title: `Couldn't clone workpad` });
+        // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduces
+        // https://github.com/elastic/kibana/issues/20277
+        if (err.response.status === 403) props.setCanUserWrite(false);
       }
     },
 
@@ -98,8 +112,14 @@ export const WorkpadLoader = compose(
           ([passes, errors], result) => {
             if (result.id === loadedWorkpad && !result.err) redirectHome = true;
 
-            if (result.err) errors.push(result.id);
-            else passes.push(result.id);
+            if (result.err) {
+              errors.push(result.id);
+              // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduces
+              // https://github.com/elastic/kibana/issues/20277
+              if (result.err.response.status === 403) props.setCanUserWrite(false);
+            } else {
+              passes.push(result.id);
+            }
 
             return [passes, errors];
           },
