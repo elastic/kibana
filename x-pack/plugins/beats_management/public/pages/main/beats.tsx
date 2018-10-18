@@ -18,10 +18,7 @@ import { flatten, intersection, sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { RouteComponentProps } from 'react-router';
-import {
-  ConfigurationBlockTypes,
-  UNIQUENESS_ENFORCING_TYPES,
-} from 'x-pack/plugins/beats_management/common/constants';
+import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { AppURLState } from '../../app';
