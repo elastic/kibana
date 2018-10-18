@@ -7,8 +7,9 @@
     "markdownVis": "src/core_plugins/markdown_vis",
     "metricVis": "src/core_plugins/metric_vis",
     "statusPage": "src/core_plugins/status_page",
-    "xpack.idxMgmt": "x-pack/plugins/index_management",
-    "xpack.canvas": "x-pack/plugins/canvas"
+    "tagCloud": "src/core_plugins/tagcloud",
+    "xpack.canvas": "x-pack/plugins/canvas",
+    "xpack.idxMgmt": "x-pack/plugins/index_management"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",
