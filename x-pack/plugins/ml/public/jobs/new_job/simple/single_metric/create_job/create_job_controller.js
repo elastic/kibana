@@ -32,7 +32,8 @@ import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaul
 import {
   createSearchItems,
   addNewJobToRecentlyAccessed,
-  moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+  moveToAdvancedJobCreationProvider,
+  focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { SingleMetricJobServiceProvider } from './create_job_service';
@@ -66,6 +67,7 @@ module
     $scope,
     $route,
     $filter,
+    $timeout,
     Private,
     AppState) {
 
@@ -400,6 +402,8 @@ module
                     $scope.formConfig.end,
                     'timeseriesexplorer');
 
+                  focusOnResultsLink('job_running_view_results_link', $timeout);
+
                   loadCharts();
                 })
                 .catch((resp) => {
@@ -450,6 +454,7 @@ module
               }
             } else {
               $scope.jobState = JOB_STATE.FINISHED;
+              focusOnResultsLink('job_finished_view_results_link', $timeout);
             }
 
             if (ignoreModel) {
