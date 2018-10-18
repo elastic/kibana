@@ -23,8 +23,8 @@ const { installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
 const { log: defaultLog, parseEsLog, extractConfigFiles } = require('./utils');
 const { createCliError } = require('./errors');
-const exec = require('child_process').exec;
-const treekill = require('tree-kill');
+const { promisify } = require('util');
+const treeKillAsync = promisify(require('tree-kill'));
 
 exports.Cluster = class Cluster {
   constructor(log = defaultLog) {
@@ -137,38 +137,26 @@ exports.Cluster = class Cluster {
     await this._outcome;
   }
 
+  _stopCalled = false;
+
   /**
    * Stops ES process, if it's running
    *
    * @returns {Promise}
    */
   async stop() {
+    if (this._stopCalled) {
+      return;
+    }
+    this._stopCalled = true;
+
     if (!this._process || !this._outcome) {
       throw new Error('ES has not been started');
     }
 
-    if (process.platform === 'win32') {
-      await treekill(this._process.pid);
-    } else {
-      this._process.kill();
-    }
+    await treeKillAsync(this._process.pid);
 
     await this._outcome;
-  }
-
-  /**
-   * Check if windows task is no longer running
-   */
-  async _isWinTaskKilled(pid) {
-    if (process.platform === 'win32') {
-      await exec(`tasklist /fi \"pid eq ${pid}\"`, (error, stdout) => {
-        if (stdout.includes(`${pid}`) === false && !error) {
-          return true;
-        } else {
-          return false;
-        }
-      });
-    }
   }
 
   /**
@@ -212,19 +200,15 @@ exports.Cluster = class Cluster {
 
     this._outcome = new Promise((resolve, reject) => {
       this._process.once('exit', code => {
-        if (process.platform === 'win32') {
-          if (this._isWinTaskKilled(this._process.pid)) {
-            resolve();
-          } else {
-            reject(createCliError('ES task did not exit properly'));
-          }
+        if (this._stopCalled) {
+          resolve();
+          return;
+        }
+        // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
+        if (code > 0 && !(code === 143 || code === 130)) {
+          reject(createCliError(`ES exited with code ${code}`));
         } else {
-          // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
-          if (code > 0 && !(code === 143 || code === 130)) {
-            reject(createCliError(`ES exited with code ${code}`));
-          } else {
-            resolve();
-          }
+          resolve();
         }
       });
     });
