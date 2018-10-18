@@ -145,10 +145,13 @@ export class VectorStyle {
     }
 
     const dynamicFields = [];
-    if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options.fieldValue) {
+    //todo: should always be intialized really
+    if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options
+      && this._descriptor.properties.fillColor.options.fieldValue) {
       dynamicFields.push(this._descriptor.properties.fillColor.options.fieldValue);
     }
-    if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options.fieldValue) {
+    if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options
+      && this._descriptor.properties.lineColor.options.fieldValue) {
       dynamicFields.push(this._descriptor.properties.lineColor.options.fieldValue);
     }
 
@@ -161,7 +164,7 @@ export class VectorStyle {
 
   _getMBDataDrivenColor(property) {
 
-    if (!this._descriptor.properties[property]) {
+    if (!this._descriptor.properties[property] || !this._descriptor.properties[property].options) {
       return null;
     }
 
