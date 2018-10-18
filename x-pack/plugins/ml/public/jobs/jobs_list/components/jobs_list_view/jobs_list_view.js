@@ -266,10 +266,10 @@ export class JobsListView extends Component {
         <div className="actions-bar">
           <MultiJobActions
             selectedJobs={this.state.selectedJobs}
+            allJobIds={jobIds}
             showStartDatafeedModal={this.showStartDatafeedModal}
             showDeleteJobModal={this.showDeleteJobModal}
             refreshJobs={() => this.refreshJobSummaryList(true)}
-            allJobIds={jobIds}
           />
           <JobFilterBar setFilters={this.setFilters} />
         </div>
@@ -289,6 +289,7 @@ export class JobsListView extends Component {
           setShowFunction={this.setShowEditJobFlyoutFunction}
           unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
           refreshJobs={() => this.refreshJobSummaryList(true)}
+          allJobIds={jobIds}
         />
         <DeleteJobModal
           setShowFunction={this.setShowDeleteJobModalFunction}
