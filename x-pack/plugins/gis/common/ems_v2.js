@@ -39,7 +39,7 @@ export class EMS_V2 {
   constructor(options) {
     this._queryParams = {
       my_app_version: options.kbnVersion,
-      license: options.xpackLicenceId
+      license: options.license
     };
 
     this._manifestServiceUrl = options.manifestServiceUrl;
