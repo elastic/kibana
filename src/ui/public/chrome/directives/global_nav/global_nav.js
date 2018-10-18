@@ -47,11 +47,11 @@ module.directive('globalNav', (globalNavState, chrome, i18n) => {
         scope.globalNavToggleButton = {
           classes: isOpen ? 'global-nav-link--close' : undefined,
           title: isOpen ?
-            i18n('common.ui.chrome.globalNav.collapseTitle', { defaultMessage: 'Collapse' })
-            : i18n('common.ui.chrome.globalNav.expandTitle', { defaultMessage: 'Expand' }),
+            i18n('common.ui.chrome.globalNav.navToggleButtonCollapseTitle', { defaultMessage: 'Collapse' })
+            : i18n('common.ui.chrome.globalNav.navToggleButtonExpandTitle', { defaultMessage: 'Expand' }),
           tooltipContent: isOpen ?
-            i18n('common.ui.chrome.globalNav.collapseSideBarTooltip', { defaultMessage: 'Collapse side bar' })
-            : i18n('common.ui.chrome.globalNav.expandSideBarTooltip', { defaultMessage: 'Expand side bar' }),
+            i18n('common.ui.chrome.globalNav.navToggleButtonCollapseTooltip', { defaultMessage: 'Collapse side bar' })
+            : i18n('common.ui.chrome.globalNav.navToggleButtonExpandTooltip', { defaultMessage: 'Expand side bar' }),
         };
 
         // Notify visualizations, e.g. the dashboard, that they should re-render.
