@@ -115,12 +115,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getGaugeLabel() {
-      const gaugeLabel = await find.byCssSelector('.thorHalfGauge__label');
+      const gaugeLabel = await find.byCssSelector('.tvbVisGauge__label');
       return await gaugeLabel.getVisibleText();
     }
 
     async getGaugeCount() {
-      const gaugeCount = await find.byCssSelector('.thorHalfGauge__value');
+      const gaugeCount = await find.byCssSelector('.tvbVisGauge__value');
       return await gaugeCount.getVisibleText();
     }
 

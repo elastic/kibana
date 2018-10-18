@@ -110,7 +110,7 @@ class Gauge extends Component {
     let additionalLabel;
     if (this.props.additionalLabel) {
       additionalLabel = (
-        <div className="thorGauge_additionalLabel">
+        <div className="tvbVisGauge__additionalLabel">
           {this.props.additionalLabel}
         </div>
       );
@@ -118,17 +118,17 @@ class Gauge extends Component {
     if (type === 'half') {
       metrics = (
         <div
-          className="thorHalfGauge__metrics"
+          className="tvbVisHalfGauge__metrics"
           ref={(el) => this.inner = el}
           style={styles.inner}
         >
           <div
-            className="thorHalfGauge__label"
+            className="tvbVisGauge__label"
             ref="title"
           >{ title }
           </div>
           <div
-            className="thorHalfGauge__value"
+            className="tvbVisGauge__value"
             style={styles.value}
             ref="label"
           >{ formatter(value) }
@@ -139,18 +139,18 @@ class Gauge extends Component {
     } else {
       metrics = (
         <div
-          className="thorCircleGauge__metrics"
+          className="tvbVisCircleGauge__metrics"
           ref={(el) => this.inner = el}
           style={styles.inner}
         >
           <div
-            className="thorCircleGauge__value"
+            className="tvbVisGauge__value"
             style={styles.value}
             ref="label"
           >{ formatter(value) }
           </div>
           <div
-            className="thorCircleGauge__label"
+            className="tvbVisGauge__label"
             ref="title"
           >{ title }
           </div>
@@ -158,13 +158,13 @@ class Gauge extends Component {
         </div>
       );
     }
-    let className = type === 'half' ? 'thorHalfGauge' : 'thorCircleGauge';
-    if (this.props.reversed) className = `reversed ${className}`;
+    let className = type === 'half' ? 'tvbVisHalfGauge' : 'tvbVisCircleGauge';
+    if (this.props.reversed) className = `${className} tvbVisGauge--reversed`;
     return (
       <div className={className}>
         <div
           ref={(el) => this.resize = el}
-          className={`${className}__resize`}
+          className={`tvbVisGauge__resize`}
         >
           { metrics }
           <GaugeVis {...gaugeProps}/>
