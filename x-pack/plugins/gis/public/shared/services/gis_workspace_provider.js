@@ -12,7 +12,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 export function GISWorkspaceProvider(Private, Promise, confirmModal) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const createOpts = { overwrite: true };
-  this._type = 'config';
+  this._type = 'gis-app';
   this.isSaving = false;
   this.description = 'GIS Saved Settings';
 

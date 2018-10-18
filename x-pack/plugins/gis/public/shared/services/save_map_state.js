@@ -9,16 +9,16 @@ import _ from 'lodash';
 
 
 export const storeFromSavedObjectAttributes = attributes => {
-  let { mapState } = attributes;
-  if (mapState && !_.isEmpty(mapState)) {
-    mapState = JSON.parse(mapState, (key, val) => {
+  let { data } = attributes;
+  if (data && !_.isEmpty(data)) {
+    data = JSON.parse(data, (key, val) => {
       if (isNaN(val) || typeof val === 'boolean') {
         return val;
       } else {
         return +val;
       }
     });
-    return mapState;
+    return data;
   }
 };
 
@@ -33,7 +33,7 @@ const getCurrentMapState = (() => {
   const filteredState = map => {
     const layerList = map.layerList.map(layer => {
       /*eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }]*/
-      const { data, ...layerDetails } = layer;
+      const { dataRequests, ...layerDetails } = layer;
       return layerDetails;
     });
     const filteredMap = { ...map, layerList };
@@ -52,7 +52,7 @@ export const getWorkspaceSaveFunction = async gisWorkspace => {
   const currentMapState = await getCurrentMapState();
   return ({ newTitle }) => {
     const savedObjectId = gisStateSync.get('workspaceId');
-    const newState = { mapState: currentMapState, title: newTitle };
+    const newState = { data: currentMapState, title: newTitle };
     if (savedObjectId) {
       return gisWorkspace.update(savedObjectId, newState);
     } else {
