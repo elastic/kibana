@@ -44,9 +44,9 @@ export function gis(kibana) {
           if (license) {
             if (license.gis) {
               // TODO: Replace with content to 'activate' app on license verify
-              console.log('Valid GIS License');
+              console.info('Valid GIS License');
             } else {
-              console.log('No GIS for YOU!');
+              console.warn('No GIS for YOU!');
             }
             return license;
           }

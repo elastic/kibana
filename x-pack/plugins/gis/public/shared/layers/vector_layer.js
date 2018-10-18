@@ -7,6 +7,7 @@
 import mapboxgl from 'mapbox-gl';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import _ from 'lodash';
 
 import { ALayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
@@ -98,7 +99,7 @@ export class VectorLayer extends ALayer {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }
 
-  async _canSkipSourceUpdate(source, sourceDataId) {
+  async _canSkipSourceUpdate(source, sourceDataId, filters) {
     const timeAware = await source.isTimeAware();
     const extentAware = source.isFilterByMapBounds();
 
@@ -109,7 +110,24 @@ export class VectorLayer extends ALayer {
       }
     }
 
-    return false;
+    const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
+    if (!sourceDataRequest) {
+      return false;
+    }
+    const meta = sourceDataRequest.getMeta();
+
+    let updateDueToTime = false;
+    if (timeAware) {
+      updateDueToTime = !_.isEqual(meta.timeFilters, filters.timeFilters);
+    }
+    let updateDueToExtent = false;
+    if (extentAware) {
+      //todo: should have same padding logic here as in geohash_grid
+      updateDueToExtent = !_.isEqual(meta.extent, filters.extent);
+    }
+
+    return !updateDueToTime && !updateDueToExtent;
+
   }
 
   async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -119,7 +137,7 @@ export class VectorLayer extends ALayer {
     const requestToken = Symbol(`layer-join-refresh:${ this.getId()} - ${sourceDataId}`);
 
     try {
-      const canSkip = await this._canSkipSourceUpdate(tableSource, sourceDataId);
+      const canSkip = await this._canSkipSourceUpdate(tableSource, sourceDataId, dataFilters);
       if (canSkip) {
         return {
           shouldJoin: false,
@@ -157,7 +175,7 @@ export class VectorLayer extends ALayer {
     const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
     try {
-      const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId);
+      const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId, dataFilters);
       if (canSkip) {
         const sourceDataRequest = this.getSourceDataRequest();
         return {
