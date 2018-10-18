@@ -95,11 +95,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
           order: 30,
           url: `#${basePath}`,
         });
-
-        // if (!this.securityEnabled()) {
-        //   this.notifier.error(this.xpackInfo.get(`features.beats_management.message`));
-        //   this.kbnUrlService.redirect('/management');
-        // }
       });
     }
   }
