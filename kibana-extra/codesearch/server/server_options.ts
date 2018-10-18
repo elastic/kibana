@@ -18,6 +18,10 @@ export class ServerOptions {
 
   public readonly indexFrequencyMs: number = this.options.indexFrequencyMs;
 
+  public readonly updateRepoFrequencyMs: number = this.options.updateRepoFrequencyMs;
+
+  public readonly indexRepoFrequencyMs: number = this.options.indexRepoFrequencyMs;
+
   public readonly lspRequestTimeout: number = this.options.lspRequestTimeout;
 
   public readonly maxWorkspace: number = this.options.maxWorkspace;

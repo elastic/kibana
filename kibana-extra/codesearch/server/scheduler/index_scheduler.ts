@@ -12,6 +12,11 @@ import {
   REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
 } from '../../mappings';
 import { CloneWorkerProgress, Repository, WorkerProgress } from '../../model';
+import {
+  RepositoryIndexName,
+  RepositoryReserviedField,
+  RepositoryTypeName,
+} from '../indexer/schema';
 import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { IndexWorker } from '../queue';
@@ -23,15 +28,25 @@ export class IndexScheduler extends AbstractScheduler {
     private readonly indexWorker: IndexWorker,
     private readonly serverOptions: ServerOptions,
     private readonly objectsClient: SavedObjectsClient,
-    client: EsClient,
+    protected readonly client: EsClient,
     protected readonly log: Log
   ) {
     super(client, serverOptions.indexFrequencyMs);
   }
 
+  protected getRepoSchedulingFrequencyMs() {
+    return this.serverOptions.indexRepoFrequencyMs;
+  }
+
   protected async executeSchedulingJob(repo: Repository) {
     this.log.info(`Schedule index repo request for ${repo.uri}`);
     try {
+      // This repository is too soon to execute the next index job.
+      if (repo.nextIndexTimestamp && new Date() < new Date(repo.nextIndexTimestamp)) {
+        this.log.debug(`Repo ${repo.uri} is too soon to execute the next index job.`);
+        return;
+      }
+
       const cloneStatusRes = await this.objectsClient.get(
         REPOSITORY_GIT_STATUS_INDEX_TYPE,
         repo.uri
@@ -63,6 +78,22 @@ export class IndexScheduler extends AbstractScheduler {
           revision: repo.revision,
           dataPath: this.serverOptions.repoPath,
         };
+
+        // Update the next repo index timestamp.
+        const nextRepoIndexTimestamp = this.repoNextSchedulingTime();
+        this.client.update({
+          index: RepositoryIndexName(repo.uri),
+          type: RepositoryTypeName,
+          id: repo.uri,
+          body: JSON.stringify({
+            doc: {
+              [RepositoryReserviedField]: {
+                nextIndexTimestamp: nextRepoIndexTimestamp,
+              },
+            },
+          }),
+        });
+
         await this.indexWorker.enqueueJob(payload, {});
       }
     } catch (error) {

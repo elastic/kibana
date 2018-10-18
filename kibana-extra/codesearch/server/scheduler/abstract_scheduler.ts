@@ -59,6 +59,19 @@ export abstract class AbstractScheduler {
       });
   }
 
+  protected repoNextSchedulingTime(): Date {
+    const duration =
+      this.getRepoSchedulingFrequencyMs() / 2 +
+      ((Math.random() * Number.MAX_SAFE_INTEGER) % this.getRepoSchedulingFrequencyMs());
+    const now = new Date().getTime();
+    return new Date(now + duration);
+  }
+
+  protected getRepoSchedulingFrequencyMs() {
+    // This is an abstract class. Do nothing here. You should override this.
+    return -1;
+  }
+
   protected async executeSchedulingJob(repo: Repository) {
     // This is an abstract class. Do nothing here. You should override this.
     return new Promise<any>((resolve, _) => {

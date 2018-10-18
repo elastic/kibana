@@ -15,6 +15,10 @@ export interface Repository {
   org?: string;
   defaultBranch?: string;
   revision?: string;
+  // The timestamp of next update for this repository.
+  nextUpdateTimestamp?: Date;
+  // The timestamp of next index for this repository.
+  nextIndexTimestamp?: Date;
 }
 
 export interface FileTree {

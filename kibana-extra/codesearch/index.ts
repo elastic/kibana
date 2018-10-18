@@ -60,8 +60,14 @@ export default (kibana: any) =>
         enabled: Joi.boolean().default(true),
         queueIndex: Joi.string().default('.codesearch-worker-queue'),
         queueTimeout: Joi.number().default(60 * 60 * 1000), // 1 hour by default
-        updateFreqencyMs: Joi.number().default(5 * 60 * 1000), // 5 minutes by default
-        indexFrequencyMs: Joi.number().default(24 * 60 * 60 * 1000), // 1 day by default
+        // The frequency which update scheduler executes. 5 minutes by default.
+        updateFrequencyMs: Joi.number().default(5 * 60 * 1000),
+        // The frequency which index scheduler executes. 1 day by default.
+        indexFrequencyMs: Joi.number().default(24 * 60 * 60 * 1000),
+        // The frequency which each repo tries to update. 1 hour by default.
+        updateRepoFrequencyMs: Joi.number().default(60 * 60 * 1000),
+        // The frequency which each repo tries to index. 1 day by default.
+        indexRepoFrequencyMs: Joi.number().default(24 * 60 * 1000),
         lspRequestTimeout: Joi.number().default(5 * 60), // timeout a request over 30s
         repos: Joi.array().default([]),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
@@ -166,8 +172,7 @@ export default (kibana: any) =>
       );
       if (!serverOptions.disableScheduler) {
         updateScheduler.start();
-        // Disable index scheduling before having the scheduling state persisted.
-        // indexScheduler.start();
+        indexScheduler.start();
       }
 
       // Add server routes and initialize the plugin here
