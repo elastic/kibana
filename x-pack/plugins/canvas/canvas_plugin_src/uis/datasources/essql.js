@@ -71,7 +71,7 @@ EssqlDatasource.propTypes = {
 export const essql = () => ({
   name: 'essql',
   displayName: 'Elasticsearch SQL',
-  help: 'Use Elasticsearch SQL to get a datatable',
+  help: 'Use Elasticsearch SQL to get a data table',
   // Replace this with a SQL logo when we have one in EUI
   image: 'logoElasticsearch',
   template: templateFromReactComponent(EssqlDatasource),
