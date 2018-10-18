@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getWaterfallRoot } from './waterfall_helpers';
+import { Span } from 'x-pack/plugins/apm/typings/Span';
+import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { getWaterfallRoot, IWaterfallItem } from './waterfall_helpers';
 
 it('getWaterfallRoot', () => {
-  const items = [
+  const items: IWaterfallItem[] = [
     {
       id: 'd',
       parentId: 'c',
@@ -16,7 +18,9 @@ it('getWaterfallRoot', () => {
       duration: 210,
       timestamp: 1536763736371000,
       offset: 0,
-      docType: 'span'
+      docType: 'span',
+      parentTransaction: {} as Transaction,
+      span: {} as Span
     },
     {
       id: 'b',
@@ -26,7 +30,9 @@ it('getWaterfallRoot', () => {
       duration: 4694,
       timestamp: 1536763736368000,
       offset: 0,
-      docType: 'span'
+      docType: 'span',
+      parentTransaction: {} as Transaction,
+      span: {} as Span
     },
     {
       id: 'b2',
@@ -36,7 +42,9 @@ it('getWaterfallRoot', () => {
       duration: 4694,
       timestamp: 1536763736367000,
       offset: 0,
-      docType: 'span'
+      docType: 'span',
+      parentTransaction: {} as Transaction,
+      span: {} as Span
     },
     {
       id: 'c',
@@ -46,7 +54,8 @@ it('getWaterfallRoot', () => {
       duration: 3581,
       timestamp: 1536763736369000,
       offset: 0,
-      docType: 'transaction'
+      docType: 'transaction',
+      transaction: {} as Transaction
     },
     {
       id: 'a',
@@ -55,7 +64,8 @@ it('getWaterfallRoot', () => {
       duration: 9480,
       timestamp: 1536763736366000,
       offset: 0,
-      docType: 'transaction'
+      docType: 'transaction',
+      transaction: {} as Transaction
     }
   ];
 

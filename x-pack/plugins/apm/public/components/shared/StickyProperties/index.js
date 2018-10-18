@@ -24,15 +24,16 @@ const TooltipFieldName = styled.span`
 
 const PropertiesContainer = styled.div`
   display: flex;
-  padding: 0 ${px(units.plus)};
   width: 100%;
   justify-content: flex-start;
   flex-wrap: wrap;
 `;
 
 const Property = styled.div`
-  width: 33%;
-  margin-bottom: ${px(unit)};
+  margin-right: ${px(units.triple)};
+  margin-top: ${px(units.half)};
+  margin-bottom: ${px(units.half)};
+  flex-grow: 1;
 `;
 
 const PropertyLabel = styled.div`

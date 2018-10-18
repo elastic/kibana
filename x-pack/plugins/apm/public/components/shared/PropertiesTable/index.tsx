@@ -44,7 +44,7 @@ export function AgentFeatureTipMessage({
 }: {
   featureName: string;
   agentName: string;
-}): JSX.Element | null {
+}) {
   const docs = getFeatureDocs(featureName, agentName);
 
   if (!docs) {
