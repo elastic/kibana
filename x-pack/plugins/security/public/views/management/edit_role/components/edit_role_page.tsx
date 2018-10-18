@@ -285,6 +285,9 @@ export class EditRolePage extends Component<Props, State> {
       );
       role.elasticsearch.indices.forEach(index => index.query || delete index.query);
 
+      // "custom" is just a UI construct, and shouldn't be persisted
+      role.kibana.global = role.kibana.global.filter(privilege => privilege !== 'custom');
+
       saveRole(httpClient, role)
         .then(() => {
           toastNotifications.addSuccess('Saved role');

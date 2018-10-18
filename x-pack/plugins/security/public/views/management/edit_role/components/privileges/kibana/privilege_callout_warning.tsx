@@ -87,19 +87,27 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
       }
     }
 
-    if (basePrivilege === NO_PRIVILEGE_VALUE && isReservedRole) {
-      callout = (
-        <EuiCallOut
-          color="warning"
-          iconType="iInCircle"
-          title={"Cannot customize a reserved role's space privileges"}
-        >
-          <p>
-            This role never grants access to any spaces within Kibana. To customize privileges for
-            individual spaces, you must create a new role.
-          </p>
-        </EuiCallOut>
-      );
+    if (basePrivilege === NO_PRIVILEGE_VALUE) {
+      if (isReservedRole) {
+        callout = (
+          <EuiCallOut
+            color="warning"
+            iconType="iInCircle"
+            title={"Cannot customize a reserved role's space privileges"}
+          >
+            <p>
+              This role never grants access to any spaces within Kibana. To customize privileges for
+              individual spaces, you must create a new role.
+            </p>
+          </EuiCallOut>
+        );
+      } else {
+        callout = (
+          <EuiCallOut color="warning" iconType="iInCircle" title={'No access to Kibana'}>
+            <p>This role will have no access to Kibana.</p>
+          </EuiCallOut>
+        );
+      }
     }
 
     return callout;

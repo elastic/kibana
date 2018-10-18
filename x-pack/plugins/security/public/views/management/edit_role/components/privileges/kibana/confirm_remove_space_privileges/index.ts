@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
-
-export const NO_PRIVILEGE_VALUE: KibanaPrivilege = 'none';
+export { ConfirmRemoveSpacePrivileges } from './confirm_remove_space_privileges';

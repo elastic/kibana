@@ -7,14 +7,12 @@
 import { EuiSelect } from '@elastic/eui';
 import React, { ChangeEvent, Component } from 'react';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
-import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 
 interface Props {
   ['data-test-subj']: string;
   availablePrivileges: KibanaPrivilege[];
   onChange: (privilege: KibanaPrivilege) => void;
   value: KibanaPrivilege | null;
-  allowNone?: boolean;
   disabled?: boolean;
   compressed?: boolean;
 }
@@ -23,13 +21,9 @@ export class PrivilegeSelector extends Component<Props, {}> {
   public state = {};
 
   public render() {
-    const { availablePrivileges, value, disabled, allowNone, compressed } = this.props;
+    const { availablePrivileges, value, disabled, compressed } = this.props;
 
     const options = [];
-
-    if (allowNone) {
-      options.push({ value: NO_PRIVILEGE_VALUE, text: 'none' });
-    }
 
     options.push(
       ...availablePrivileges.map(p => ({
@@ -42,7 +36,7 @@ export class PrivilegeSelector extends Component<Props, {}> {
       <EuiSelect
         data-test-subj={this.props['data-test-subj']}
         options={options}
-        hasNoInitialSelection={!allowNone && !value}
+        hasNoInitialSelection={!value}
         value={value || undefined}
         onChange={this.onChange}
         disabled={disabled}

@@ -10,6 +10,8 @@ import { NO_PRIVILEGE_VALUE } from './constants';
 export function getAvailablePrivileges(minimumPrivilege: KibanaPrivilege): KibanaPrivilege[] {
   switch (minimumPrivilege) {
     case NO_PRIVILEGE_VALUE:
+      return [];
+    case 'custom':
       return ['read', 'all'];
     case 'read':
       return ['read', 'all'];

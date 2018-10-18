@@ -26,6 +26,7 @@ import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 import { copyRole } from '../../../lib/copy_role';
 import { getAvailablePrivileges } from '../../../lib/get_available_privileges';
 import { RoleValidator } from '../../../lib/validate_role';
+import { ConfirmRemoveSpacePrivileges } from './confirm_remove_space_privileges';
 import { ImpactedSpacesFlyout } from './impacted_spaces_flyout';
 import { PrivilegeCalloutWarning } from './privilege_callout_warning';
 import { PrivilegeSelector } from './privilege_selector';
@@ -54,6 +55,7 @@ interface SpacePrivileges {
 interface State {
   spacePrivileges: SpacePrivileges;
   privilegeForms: PrivilegeForm[];
+  showConfirmDialog: boolean;
 }
 
 export class SpaceAwarePrivilegeForm extends Component<Props, State> {
@@ -69,6 +71,7 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
     this.state = {
       spacePrivileges,
       privilegeForms: [],
+      showConfirmDialog: false,
     };
   }
 
@@ -89,8 +92,12 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
 
     const assignedPrivileges = role.kibana;
 
-    const basePrivilege =
+    let basePrivilege =
       assignedPrivileges.global.length > 0 ? assignedPrivileges.global[0] : NO_PRIVILEGE_VALUE;
+
+    if (basePrivilege === NO_PRIVILEGE_VALUE && this.hasAnySpacePrivileges(role)) {
+      basePrivilege = 'custom';
+    }
 
     const description = <p>Specify the minimum actions users can perform in your spaces.</p>;
 
@@ -105,6 +112,12 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
 
     return (
       <Fragment>
+        {this.state.showConfirmDialog && (
+          <ConfirmRemoveSpacePrivileges
+            onCancel={this.onCancelRemoveSpacePrivileges}
+            onConfirm={this.onConfirmRemoveSpacePrivileges}
+          />
+        )}
         <EuiDescribedFormGroup
           title={<h3>Minimum privileges for all spaces</h3>}
           description={description}
@@ -112,10 +125,9 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
           <EuiFormRow hasEmptyLabelSpace helpText={helptext}>
             <PrivilegeSelector
               data-test-subj={'kibanaMinimumPrivilege'}
-              availablePrivileges={kibanaAppPrivileges}
+              availablePrivileges={['all', 'read', 'custom', 'none']}
               value={basePrivilege}
               disabled={isReservedRole(role)}
-              allowNone={true}
               onChange={this.onKibanaBasePrivilegeChange}
             />
           </EuiFormRow>
@@ -138,7 +150,7 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
 
     const availableSpaces = this.getAvailableSpaces();
 
-    const canAssignSpacePrivileges = basePrivilege !== 'all';
+    const canAssignSpacePrivileges = basePrivilege !== 'all' && basePrivilege !== 'none';
     const hasAssignedSpacePrivileges = Object.keys(this.state.spacePrivileges).length > 0;
 
     const showAddPrivilegeButton =
@@ -163,7 +175,7 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
           </p>
         </EuiText>
         <EuiSpacer size={'s'} />
-        {(basePrivilege !== NO_PRIVILEGE_VALUE || isReservedRole(this.props.role)) && (
+        {(basePrivilege !== 'custom' || isReservedRole(this.props.role)) && (
           <PrivilegeCalloutWarning
             basePrivilege={basePrivilege}
             isReservedRole={isReservedRole(this.props.role)}
@@ -357,6 +369,13 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
   public onKibanaBasePrivilegeChange = (privilege: KibanaPrivilege) => {
     const role = copyRole(this.props.role);
 
+    const isRemovingKibanaAccess = privilege === NO_PRIVILEGE_VALUE;
+
+    if (isRemovingKibanaAccess && this.hasAnySpacePrivileges(role)) {
+      this.setState({ showConfirmDialog: true });
+      return;
+    }
+
     // Remove base privilege value
     role.kibana.global = [];
 
@@ -365,5 +384,30 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
     }
 
     this.props.onChange(role);
+  };
+
+  public onCancelRemoveSpacePrivileges = () => {
+    this.setState({ showConfirmDialog: false });
+  };
+
+  public onConfirmRemoveSpacePrivileges = () => {
+    const role = copyRole(this.props.role);
+
+    // Remove base privilege value
+    role.kibana.global = [];
+
+    // Remove all space privileges
+    role.kibana.space = {};
+
+    this.setState({
+      showConfirmDialog: false,
+      privilegeForms: [],
+      spacePrivileges: {},
+    });
+    this.props.onChange(role);
+  };
+
+  private hasAnySpacePrivileges = (role: Role) => {
+    return Object.keys(role.kibana.space).length > 0;
   };
 }
