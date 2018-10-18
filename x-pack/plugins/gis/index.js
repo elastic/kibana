@@ -43,11 +43,8 @@ export function gis(kibana) {
         async license => {
           if (license) {
             if (license.gis) {
-              initRoutes(server);
-              server.registerSampleDataset(kySaltTrucksSpecProvider);
-              server.injectUiAppVars('gis', async () => {
-                return await server.getInjectedUiAppVars('kibana');
-              });
+              // TODO: Replace with content to 'activate' app on license verify
+              console.log('Valid GIS License');
             } else {
               console.log('No GIS for YOU!');
             }
@@ -57,6 +54,12 @@ export function gis(kibana) {
       xpackMainPlugin.info
         .feature(thisPlugin.id)
         .registerLicenseCheckResultsGenerator(checkLicense);
+
+      initRoutes(server);
+      server.registerSampleDataset(kySaltTrucksSpecProvider);
+      server.injectUiAppVars('gis', async () => {
+        return await server.getInjectedUiAppVars('kibana');
+      });
     }
   });
 }
