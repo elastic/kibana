@@ -23,6 +23,28 @@ export const SecondLevelStickyProperties: React.SFC<Props> = ({
       fieldName: '@timestamp',
       label: 'Timestamp',
       val: transaction['@timestamp']
+    },
+    {
+      fieldName: 'transaction.context.request.url.full',
+      label: 'URL',
+      val: transaction.context.request.url.full
+    },
+    {
+      fieldName: 'transaction.duration.us',
+      label: 'Duration',
+      val: `${transaction.transaction.duration.us} ms`
+    },
+    {
+      label: '% of trace duration',
+      val: 'TBD'
+    },
+    {
+      label: 'Result',
+      val: transaction.transaction.result
+    },
+    {
+      label: 'User ID',
+      val: transaction.context.user && transaction.context.user.id
     }
   ];
   return <StickyProperties stickyProperties={properties} />;

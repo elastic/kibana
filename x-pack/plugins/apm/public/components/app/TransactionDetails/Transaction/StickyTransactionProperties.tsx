@@ -4,19 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { StickyProperties } from '../../../shared/StickyProperties';
+import PropTypes from 'prop-types';
+import React from 'react';
 import {
+  REQUEST_URL_FULL,
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
-  USER_ID,
-  REQUEST_URL_FULL
+  USER_ID
 } from '../../../../../common/constants';
+import { Transaction } from '../../../../../typings/Transaction';
+// @ts-ignore
 import { asTime } from '../../../../utils/formatters';
+// @ts-ignore
+import { StickyProperties } from '../../../shared/StickyProperties';
 
-export default function StickyTransactionProperties({ transaction }) {
+interface Props {
+  transaction: Transaction;
+}
+
+export function StickyTransactionProperties({ transaction }: Props) {
   const timestamp = get(transaction, '@timestamp');
   const url = get(transaction, REQUEST_URL_FULL, 'N/A');
   const duration = get(transaction, TRANSACTION_DURATION);
@@ -51,7 +58,3 @@ export default function StickyTransactionProperties({ transaction }) {
 
   return <StickyProperties stickyProperties={stickyProperties} />;
 }
-
-StickyTransactionProperties.propTypes = {
-  transaction: PropTypes.object.isRequired
-};

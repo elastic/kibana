@@ -13,7 +13,7 @@ import {
   TRANSACTION_ID
 } from '../../../../../common/constants';
 import DiscoverButton from '../../../shared/DiscoverButton';
-import StickyTransactionProperties from './StickyTransactionProperties';
+import { StickyTransactionProperties } from './StickyTransactionProperties';
 import { TransactionPropertiesTable } from './TransactionPropertiesTable';
 import EmptyMessage from '../../../shared/EmptyMessage';
 

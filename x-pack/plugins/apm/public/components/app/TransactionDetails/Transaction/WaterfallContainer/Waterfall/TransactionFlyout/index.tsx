@@ -22,9 +22,9 @@ import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 // @ts-ignore
 import { legacyEncodeURIComponent } from '../../../../../../../utils/url';
+import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { IWaterfall } from '../waterfall_helpers/waterfall_helpers';
-import { SecondLevelStickyProperties } from './SecondLevelStickyProperties';
 
 function getDiscoverQuery(id: string) {
   return {
@@ -47,22 +47,17 @@ interface Props {
 }
 
 export function TransactionFlyout({
-  transaction: transactionGroup,
+  transaction: transactionDoc,
   onClose,
   location,
   urlParams,
   waterfall
 }: Props) {
-  if (!transactionGroup) {
+  if (!transactionDoc) {
     return null;
   }
 
-  const { context, transaction } = transactionGroup;
-  // fieldName - context.blah.example
-  // label - Example
-  // val - my value for this field
-  // truncated - bool (should truncate value)
-  // if fieldName === @timestamp, it will do the formatting for us
+  const { context, transaction } = transactionDoc;
 
   return (
     <EuiFlyout onClose={onClose} size="l">
@@ -86,9 +81,9 @@ export function TransactionFlyout({
         </Link>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SecondLevelStickyProperties transaction={transactionGroup} />
+        <StickyTransactionProperties transaction={transactionDoc} />
         <TransactionPropertiesTableForFlyout
-          transaction={transactionGroup}
+          transaction={transactionDoc}
           location={location}
           urlParams={urlParams}
         />
