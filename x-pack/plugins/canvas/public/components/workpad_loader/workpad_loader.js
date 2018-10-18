@@ -35,7 +35,7 @@ const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
 export class WorkpadLoader extends React.PureComponent {
   static propTypes = {
     workpadId: PropTypes.string.isRequired,
-    readOnlyUser: PropTypes.bool.isRequired,
+    canUserWrite: PropTypes.bool.isRequired,
     createWorkpad: PropTypes.func.isRequired,
     findWorkpads: PropTypes.func.isRequired,
     downloadWorkpad: PropTypes.func.isRequired,
@@ -134,7 +134,7 @@ export class WorkpadLoader extends React.PureComponent {
 
   renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
     const { sortField, sortDirection } = this.state;
-    const { readOnlyUser, createPending } = this.props;
+    const { canUserWrite, createPending } = this.props;
 
     const actions = [
       {
@@ -151,13 +151,13 @@ export class WorkpadLoader extends React.PureComponent {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
-                content={readOnlyUser ? "You don't have permission to clone workpads" : 'Clone'}
+                content={canUserWrite ? 'Clone' : `You don't have permission to clone workpads`}
               >
                 <EuiButtonIcon
                   iconType="copy"
                   onClick={() => this.cloneWorkpad(workpad)}
                   aria-label="Clone Workpad"
-                  disabled={readOnlyUser}
+                  disabled={canUserWrite}
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -232,7 +232,7 @@ export class WorkpadLoader extends React.PureComponent {
 
     return (
       <Fragment>
-        <WorkpadDropzone onUpload={this.uploadWorkpad} disabled={createPending || readOnlyUser}>
+        <WorkpadDropzone onUpload={this.uploadWorkpad} disabled={createPending || !canUserWrite}>
           <EuiBasicTable
             compressed
             items={rows}
@@ -264,7 +264,7 @@ export class WorkpadLoader extends React.PureComponent {
       sortField,
       sortDirection,
     } = this.state;
-    const { readOnlyUser } = this.props;
+    const { canUserWrite } = this.props;
 
     const isLoading = this.props.workpads == null;
     const modalTitle =
@@ -316,7 +316,7 @@ export class WorkpadLoader extends React.PureComponent {
                           <EuiFlexItem grow={false}>
                             <EuiToolTip
                               content={
-                                readOnlyUser ? "You don't have permission to delete workpads" : ''
+                                canUserWrite ? "You don't have permission to delete workpads" : ''
                               }
                             >
                               <EuiButton
@@ -324,7 +324,7 @@ export class WorkpadLoader extends React.PureComponent {
                                 color="danger"
                                 iconType="trash"
                                 onClick={this.openRemoveConfirm}
-                                disabled={readOnlyUser}
+                                disabled={canUserWrite}
                               >
                                 {`Delete (${selectedWorkpads.length})`}
                               </EuiButton>
@@ -347,25 +347,25 @@ export class WorkpadLoader extends React.PureComponent {
                       <EuiFlexItem grow={false}>
                         <EuiToolTip
                           content={
-                            readOnlyUser ? "You don't have permission to upload workpads" : ''
+                            canUserWrite ? "You don't have permission to upload workpads" : ''
                           }
                         >
                           <WorkpadUpload
                             onUpload={this.uploadWorkpad}
-                            disabled={createPending || readOnlyUser}
+                            disabled={createPending || !canUserWrite}
                           />
                         </EuiToolTip>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiToolTip
                           content={
-                            readOnlyUser ? "You don't have permission to create workpads" : ''
+                            canUserWrite ? "You don't have permission to create workpads" : ''
                           }
                         >
                           <WorkpadCreate
                             createPending={createPending}
                             onCreate={this.createWorkpad}
-                            disabled={readOnlyUser}
+                            disabled={canUserWrite}
                           />
                         </EuiToolTip>
                       </EuiFlexItem>

@@ -32,8 +32,8 @@ export function getWorkpadInfo(state) {
   return omit(getWorkpad(state), ['pages']);
 }
 
-export function getReadOnly(state) {
-  return get(state, append(workpadRoot, 'readOnly'), false);
+export function isWriteable(state) {
+  return get(state, append(workpadRoot, 'isWriteable'), true);
 }
 
 // page getters

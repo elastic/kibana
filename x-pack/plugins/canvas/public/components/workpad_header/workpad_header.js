@@ -24,16 +24,16 @@ import { FullscreenControl } from '../fullscreen_control';
 import { RefreshControl } from '../refresh_control';
 
 export const WorkpadHeader = ({
-  readOnly,
-  readOnlyUser,
-  toggleReadOnly,
+  isWriteable,
+  canUserWrite,
+  toggleWriteable,
   hasAssets,
   addElement,
   setShowElementModal,
   showElementModal,
 }) => {
   const keyHandler = action => {
-    if (action === 'EDITING') toggleReadOnly();
+    if (action === 'EDITING') toggleWriteable();
   };
 
   const elementAdd = (
@@ -60,8 +60,8 @@ export const WorkpadHeader = ({
 
   let readOnlyToolTip = '';
 
-  if (readOnlyUser) readOnlyToolTip = "You don't have permission to edit this workpad";
-  else readOnlyToolTip = readOnly ? 'Show editing controls' : 'Hide editing controls';
+  if (canUserWrite) readOnlyToolTip = "You don't have permission to edit this workpad";
+  else readOnlyToolTip = isWriteable ? 'Show editing controls' : 'Hide editing controls';
 
   return (
     <div>
@@ -89,24 +89,24 @@ export const WorkpadHeader = ({
               <WorkpadExport />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {!readOnlyUser && (
+              {canUserWrite && (
                 <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
               )}
               <EuiToolTip position="bottom" content={readOnlyToolTip}>
                 <EuiButtonIcon
-                  iconType={readOnly ? 'lock' : 'lockOpen'}
+                  iconType={isWriteable ? 'lockOpen' : 'lock'}
                   onClick={() => {
-                    toggleReadOnly();
+                    toggleWriteable();
                   }}
                   size="s"
                   aria-label={readOnlyToolTip}
-                  isDisabled={readOnlyUser}
+                  isDisabled={canUserWrite}
                 />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {!readOnly ? (
+        {isWriteable ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               {hasAssets && (
@@ -133,8 +133,8 @@ export const WorkpadHeader = ({
 };
 
 WorkpadHeader.propTypes = {
-  readOnly: PropTypes.bool,
-  toggleReadOnly: PropTypes.func,
+  isWriteable: PropTypes.bool,
+  toggleWriteable: PropTypes.func,
   hasAssets: PropTypes.bool,
   addElement: PropTypes.func.isRequired,
   showElementModal: PropTypes.bool,

@@ -28,8 +28,8 @@ export const transientReducer = handleActions(
       );
     },
 
-    [actions.setReadOnlyUser]: (transientState, { payload }) => {
-      return set(transientState, 'readOnlyUser', Boolean(payload));
+    [actions.setCanUserWrite]: (transientState, { payload }) => {
+      return set(transientState, 'canUserWrite', Boolean(payload));
     },
 
     [actions.setFullscreen]: (transientState, { payload }) => {

@@ -7,8 +7,8 @@
 import { get } from 'lodash';
 
 // page getters
-export function getReadOnlyUser(state) {
-  return get(state, 'transient.readOnlyUser', false);
+export function canUserWrite(state) {
+  return get(state, 'transient.canUserWrite', true);
 }
 
 export function getFullscreen(state) {

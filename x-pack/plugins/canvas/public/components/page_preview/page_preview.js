@@ -10,7 +10,7 @@ import { DomPreview } from '../dom_preview';
 import { PageControls } from './page_controls';
 
 export const PagePreview = ({
-  readOnly,
+  isWriteable,
   page,
   pageNumber,
   height,
@@ -22,7 +22,7 @@ export const PagePreview = ({
     style={{ backgroundColor: page.style.background }}
   >
     <DomPreview elementId={page.id} pageNumber={pageNumber} height={height} />
-    {!readOnly && (
+    {isWriteable && (
       <PageControls
         pageId={page.id}
         pageNumber={pageNumber}
@@ -34,7 +34,7 @@ export const PagePreview = ({
 );
 
 PagePreview.propTypes = {
-  readOnly: PropTypes.bool.isRequired,
+  isWriteable: PropTypes.bool.isRequired,
   page: PropTypes.shape({
     id: PropTypes.string.isRequired,
     style: PropTypes.shape({

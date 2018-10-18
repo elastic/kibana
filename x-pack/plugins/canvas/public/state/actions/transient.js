@@ -6,6 +6,6 @@
 
 import { createAction } from 'redux-actions';
 
-export const setReadOnlyUser = createAction('setReadOnlyUser');
+export const setCanUserWrite = createAction('setCanUserWrite');
 export const setFullscreen = createAction('setFullscreen');
 export const selectElement = createAction('selectElement');

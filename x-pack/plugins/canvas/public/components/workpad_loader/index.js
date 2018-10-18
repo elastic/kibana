@@ -10,14 +10,14 @@ import { compose, withState, getContext, withHandlers } from 'recompose';
 import fileSaver from 'file-saver';
 import * as workpadService from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
-import { getReadOnlyUser } from '../../state/selectors/app';
+import { canUserWrite } from '../../state/selectors/app';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { getId } from '../../lib/get_id';
 import { WorkpadLoader as Component } from './workpad_loader';
 
 const mapStateToProps = state => ({
   workpadId: getWorkpad(state).id,
-  readOnlyUser: getReadOnlyUser(state),
+  canUserWrite: canUserWrite(state),
 });
 
 export const WorkpadLoader = compose(

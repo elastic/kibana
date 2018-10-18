@@ -9,14 +9,14 @@ import PropTypes from 'prop-types';
 import { compose, withState, withProps } from 'recompose';
 import { aeroelastic } from '../../lib/aeroelastic_kibana';
 import { removeElements } from '../../state/actions/elements';
-import { getFullscreen, getReadOnlyUser } from '../../state/selectors/app';
-import { getElements, getReadOnly } from '../../state/selectors/workpad';
+import { getFullscreen, canUserWrite } from '../../state/selectors/app';
+import { getElements, isWriteable } from '../../state/selectors/workpad';
 import { withEventHandlers } from './event_handlers';
 import { WorkpadPage as Component } from './workpad_page';
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    isEditable: !(getFullscreen(state) || getReadOnly(state) || getReadOnlyUser(state)),
+    isEditable: !getFullscreen(state) && isWriteable(state) && canUserWrite(state),
     elements: getElements(state, ownProps.page.id),
   };
 };
