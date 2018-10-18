@@ -12,6 +12,7 @@ import React, {
 
 import {
   EuiIcon,
+  keyCodes,
 } from '@elastic/eui';
 
 import './styles/main.less';
@@ -47,22 +48,53 @@ export class GroupList extends Component {
     this.state = {
       groups: [],
     };
+
+    this.selectItems = []; // keep track of each of the group item refs
   }
 
   selectGroup = (group) => {
     this.props.selectGroup(group);
   }
 
+  handleKeyDown = (event, group, index) => {
+    switch (event.keyCode) {
+      case keyCodes.ENTER:
+        this.selectGroup(group);
+        break;
+      case keyCodes.SPACE:
+        this.selectGroup(group);
+        break;
+      case keyCodes.DOWN: // 40
+        if (index < this.selectItems.length - 1) {
+          event.preventDefault();
+          this.selectItems[index + 1].focus();
+        }
+        break;
+      case keyCodes.UP: // 38
+        if (index < 0) {
+          return;
+        } else if (index > 0) {
+          event.preventDefault();
+          this.selectItems[index - 1].focus();
+        }
+        break;
+    }
+  }
+
   render() {
     const { selectedGroups, groups } = this.props;
+
     return (
       <div className="group-list">
         {
-          groups.map(g => (
+          groups.map((g, index) => (
             <div
+              tabIndex={'0'}
+              onKeyDown={(event) => this.handleKeyDown(event, g, index)}
               key={g.id}
               className="group-item"
               onClick={() => this.selectGroup(g)}
+              ref={(ref) => this.selectItems[index] = ref}
             >
               <Check group={g} selectedGroups={selectedGroups} />
               <JobGroup name={g.id} />
