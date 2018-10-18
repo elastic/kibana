@@ -20,7 +20,7 @@ export function ingest(kibana: any) {
     uiExports: {
       app: {
         description: 'Explore your infrastructure',
-        icon: 'plugins/ingest/public/images/infra_mono_white.svg',
+        icon: 'plugins/ingest/images/infra_mono_white.svg',
         euiIconType: 'infraApp',
         main: 'plugins/ingest/app',
         title: 'InfraOps',
@@ -31,7 +31,7 @@ export function ingest(kibana: any) {
       links: [
         {
           description: 'Explore your infrastructure',
-          icon: 'plugins/ingest/public/images/infra_mono_white.svg',
+          icon: 'plugins/ingest/images/infra_mono_white.svg',
           euiIconType: 'infraApp',
           id: 'infraops:home',
           order: 8000,
@@ -40,7 +40,7 @@ export function ingest(kibana: any) {
         },
         {
           description: 'Explore your logs',
-          icon: 'plugins/ingest/public/images/logging_mono_white.svg',
+          icon: 'plugins/ingest/images/logging_mono_white.svg',
           euiIconType: 'loggingApp',
           id: 'infraops:logs',
           order: 8001,
