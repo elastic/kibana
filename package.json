@@ -259,7 +259,6 @@
     "@types/type-detect": "^4.0.1",
     "@types/uuid": "^3.4.4",
     "angular-mocks": "1.4.7",
-    "apollo-boost": "^0.1.16",
     "babel-eslint": "^9.0.0",
     "babel-jest": "^23.4.2",
     "backport": "4.4.1",
