@@ -56,7 +56,7 @@ export class UsersUI extends Component {
       } else {
         toastNotifications.addDanger(
           this.props.intl.formatMessage({
-            id: "xpack.security.components.management.user.user.errorFetchingUserTitle",
+            id: "xpack.security.components.management.users.fetchingUsersErrorMessage",
             defaultMessage: "Error fetching users: {message}"
           }, { message: e.data.message })
         );
@@ -76,7 +76,7 @@ export class UsersUI extends Component {
         onClick={() => this.setState({ showDeleteConfirmation: true })}
       >
         <FormattedMessage
-          id="xpack.security.components.management.user.user.deleteUsersButton"
+          id="xpack.security.components.management.users.deleteUsersButtonLabel"
           defaultMessage="Delete {numSelected} user{numSelected, plural, one { } other {s}}"
           values={{
             numSelected: numSelected,
@@ -102,14 +102,14 @@ export class UsersUI extends Component {
                 title={
                   <h2>
                     <FormattedMessage
-                      id="xpack.security.components.management.user.user.deniedPermissionTitle"
+                      id="xpack.security.components.management.users.deniedPermissionTitle"
                       defaultMessage="Permission denied"
                     />
                   </h2>}
                 body={
                   <p data-test-subj="permissionDeniedMessage">
                     <FormattedMessage
-                      id="xpack.security.components.management.user.user.deniedPermissionDescriptionTitle"
+                      id="xpack.security.components.management.users.permissionDeniedToManageUsersDescription"
                       defaultMessage="You do not have permission to manage users."
                     />
                   </p>}
@@ -123,7 +123,7 @@ export class UsersUI extends Component {
     const columns = [
       {
         field: 'full_name',
-        name: intl.formatMessage({ id: "xpack.security.components.management.user.user.fullNameTitle", defaultMessage: "Full Name" }),
+        name: intl.formatMessage({ id: "xpack.security.components.management.users.fullNameColumnName", defaultMessage: "Full Name" }),
         sortable: true,
         truncateText: true,
         render: fullName => {
@@ -132,7 +132,7 @@ export class UsersUI extends Component {
       },
       {
         field: 'username',
-        name: intl.formatMessage({ id: "xpack.security.components.management.user.user.userNameTitle", defaultMessage: "User Name" }),
+        name: intl.formatMessage({ id: "xpack.security.components.management.users.userNameColumnName", defaultMessage: "User Name" }),
         sortable: true,
         truncateText: true,
         render: username => (
@@ -144,7 +144,7 @@ export class UsersUI extends Component {
       {
         field: 'email',
         name: intl.formatMessage({
-          id: "xpack.security.components.management.user.user.emailAddressTitle",
+          id: "xpack.security.components.management.users.emailAddressColumnName",
           defaultMessage: "Email Address"
         }),
         sortable: true,
@@ -152,7 +152,7 @@ export class UsersUI extends Component {
       },
       {
         field: 'roles',
-        name: intl.formatMessage({ id: "xpack.security.components.management.user.user.rolesTitle", defaultMessage: "Roles" }),
+        name: intl.formatMessage({ id: "xpack.security.components.management.users.rolesColumnName", defaultMessage: "Roles" }),
         render: rolenames => {
           const roleLinks = rolenames.map((rolename, index) => {
             return (
@@ -167,13 +167,13 @@ export class UsersUI extends Component {
       },
       {
         field: 'metadata._reserved',
-        name: intl.formatMessage({ id: "xpack.security.components.management.user.user.reservedTitle", defaultMessage: "Reserved" }),
+        name: intl.formatMessage({ id: "xpack.security.components.management.users.reservedColumnName", defaultMessage: "Reserved" }),
         sortable: false,
         width: '100px',
         align: 'right',
         description:
           intl.formatMessage({
-            id: "xpack.security.components.management.user.user.reservedDescription",
+            id: "xpack.security.components.management.users.reservedColumnDescription",
             defaultMessage: "Reserved users are built-in and cannot be removed. Only the password can be changed."
           }),
         render: reserved =>
@@ -230,7 +230,7 @@ export class UsersUI extends Component {
                 <EuiTitle>
                   <h2>
                     <FormattedMessage
-                      id="xpack.security.components.management.user.user.h2UsersTitle"
+                      id="xpack.security.components.management.users.usersTitle"
                       defaultMessage="Users"
                     />
                   </h2>
@@ -242,7 +242,7 @@ export class UsersUI extends Component {
                   href="#/management/security/users/edit"
                 >
                   <FormattedMessage
-                    id="xpack.security.components.management.user.user.newUserCreationButton"
+                    id="xpack.security.components.management.users.createNewUserButtonLabel"
                     defaultMessage="Create new user"
                   />
                 </EuiButton>
