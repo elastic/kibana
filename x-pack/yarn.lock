@@ -221,10 +221,10 @@
   resolved "https://registry.yarnpkg.com/@types/delay/-/delay-2.0.1.tgz#61bcf318a74b61e79d1658fbf054f984c90ef901"
   integrity sha512-D1/YuYOcdOIdaQnaiUJ77VcilVvESkynw79CtGqpjkXyv4OUezEVZtdXnSOwXL8Zcelu66QbyC8QQcVQ/ZPdig==
 
-"@types/elasticsearch@^5.0.22":
-  version "5.0.24"
-  resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.24.tgz#b09082d2ba3d8ae1627ea771bd2fbd2851e4a035"
-  integrity sha512-QRpGleGwKv70hEcdklBh3HiLZ3OHPp40nRiVfhLk9wlQ4+V//SX+n90uIHN/mfKz828bjSSAxSG/kDUEp4Yp8Q==
+"@types/elasticsearch@^5.0.26":
+  version "5.0.28"
+  resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.28.tgz#0e4cdf7d9c9a3fe901c0da4fb9ad824c6d3b4091"
+  integrity sha512-hM9Rs1trCkthBz1z9UwAJKQ4/ZaNnKbKB2Utf4iuY91OssLMUHzXZP8mBrkUif4kp/bNOPt6w92L9YmL2nSMuA==
 
 "@types/events@*":
   version "1.2.0"
@@ -380,10 +380,10 @@
     "@types/react" "*"
     redux "^4.0.0"
 
-"@types/react-router-dom@4.2.6":
-  version "4.2.6"
-  resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-4.2.6.tgz#9f7eb3c0e6661a9607d878ff8675cc4ea95cd276"
-  integrity sha512-K7SdbkF8xgecp2WCeXw51IMySYvQ1EuVPKfjU1fymyTSX9bZk5Qx8T5cipwtAY8Zhb/4GIjhYKm0ZGVEbCKEzQ==
+"@types/react-router-dom@4.3.1":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-4.3.1.tgz#71fe2918f8f60474a891520def40a63997dafe04"
+  integrity sha512-GbztJAScOmQ/7RsQfO4cd55RuH1W4g6V1gDW3j4riLlt+8yxYLqqsiMzmyuXBLzdFmDtX/uU2Bpcm0cmudv44A==
   dependencies:
     "@types/history" "*"
     "@types/react" "*"
