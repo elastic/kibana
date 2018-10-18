@@ -236,7 +236,7 @@ class FlyoutUI extends Component {
         this.setState({
           loadingMessage: intl.formatMessage({
             id: 'kbn.management.objects.objectsTable.flyout.confirmImport.resolvingConflictsLoadingMessage',
-            defaultMessage: 'Resolving conflicts..',
+            defaultMessage: 'Resolving conflicts…',
           }),
         });
         if (resolutions.length) {
@@ -249,7 +249,7 @@ class FlyoutUI extends Component {
         this.setState({
           loadingMessage: intl.formatMessage({
             id: 'kbn.management.objects.objectsTable.flyout.confirmImport.savingConflictsLoadingMessage',
-            defaultMessage: 'Saving conflicts...',
+            defaultMessage: 'Saving conflicts…',
           }),
         });
         importCount += await saveObjects(
@@ -259,7 +259,7 @@ class FlyoutUI extends Component {
         this.setState({
           loadingMessage: intl.formatMessage({
             id: 'kbn.management.objects.objectsTable.flyout.confirmImport.savedSearchAreLinkedProperlyLoadingMessage',
-            defaultMessage: 'Ensure saved searches are linked properly...',
+            defaultMessage: 'Ensure saved searches are linked properly…',
           }),
         });
         importCount += await resolveSavedSearches(
@@ -271,7 +271,7 @@ class FlyoutUI extends Component {
         this.setState({
           loadingMessage: intl.formatMessage({
             id: 'kbn.management.objects.objectsTable.flyout.confirmImport.retryingFailedObjectsLoadingMessage',
-            defaultMessage: 'Retrying failed objects...',
+            defaultMessage: 'Retrying failed objects…',
           }),
         });
         importCount += await saveObjects(

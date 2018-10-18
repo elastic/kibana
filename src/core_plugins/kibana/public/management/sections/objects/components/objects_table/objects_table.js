@@ -25,7 +25,6 @@ import { Flyout } from './components/flyout';
 import { Relationships } from './components/relationships';
 import { Table } from './components/table';
 
-
 import {
   EuiSpacer,
   Query,
@@ -427,7 +426,7 @@ class ObjectsTableUI extends Component {
             isDeleting
               ? (<FormattedMessage
                 id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteProcessButtonLabel"
-                defaultMessage="Deleting..."
+                defaultMessage="Deleting…"
               />)
               :  (<FormattedMessage
                 id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
@@ -498,12 +497,9 @@ class ObjectsTableUI extends Component {
         <EuiConfirmModal
           title={(<FormattedMessage
             id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
-            defaultMessage="Export {filteredItemCount} {filteredItemCountDescription}"
+            defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
             values={{
-              filteredItemCount,
-              filteredItemCountDescription: (
-                filteredItemCount === 1 ? 'object' : 'objects'
-              ),
+              filteredItemCount
             }}
           />)}
           onCancel={() =>

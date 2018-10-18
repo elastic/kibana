@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import angular from 'angular';
 import rison from 'rison-node';
-import { i18n } from '@kbn/i18n';
 import { savedObjectManagementRegistry } from '../../saved_object_registry';
 import objectViewHTML from './_view.html';
 import uiRoutes from 'ui/routes';
@@ -39,7 +38,7 @@ uiRoutes
   });
 
 uiModules.get('apps/management')
-  .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal) {
+  .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal, i18n) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private) {
@@ -200,15 +199,15 @@ uiModules.get('apps/management')
           }
           const confirmModalOptions = {
             onConfirm: doDelete,
-            confirmButtonText: i18n.translate('kbn.management.objects.confirmModalOptions.deleteButtonLabel', {
+            confirmButtonText: i18n('kbn.management.objects.confirmModalOptions.deleteButtonLabel', {
               defaultMessage: 'Delete',
             }),
-            title: i18n.translate('kbn.management.objects.confirmModalOptions.modalTitle', {
+            title: i18n('kbn.management.objects.confirmModalOptions.modalTitle', {
               defaultMessage: 'Delete saved Kibana object?'
             }),
           };
           confirmModal(
-            i18n.translate('kbn.management.objects.confirmModalOptions.modalDescription', {
+            i18n('kbn.management.objects.confirmModalOptions.modalDescription', {
               defaultMessage: 'You can\'t recover deleted objects',
             }),
             confirmModalOptions

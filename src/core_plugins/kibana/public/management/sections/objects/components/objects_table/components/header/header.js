@@ -61,12 +61,9 @@ export const Header = ({
             >
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.header.exportButtonLabel"
-                defaultMessage="Export {filteredCount} {filteredCountDescription}"
+                defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
                 values={{
-                  filteredCount,
-                  filteredCountDescription: (
-                    filteredCount === 1 ? 'object' : 'objects'
-                  ),
+                  filteredCount
                 }}
               />
             </EuiButtonEmpty>
