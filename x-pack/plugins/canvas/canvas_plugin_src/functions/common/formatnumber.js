@@ -21,7 +21,10 @@ export const formatnumber = () => ({
       aliases: ['_'],
       types: ['string'],
       help: i18n.translate('xpack.canvas.functions.formatNumber.argsFormatHelpText', {
-        defaultMessage: 'NumeralJS format string http://numeraljs.com/#format',
+        defaultMessage: 'NumeralJS format string {numeraljsFormatLink}',
+        values: {
+          numeraljsFormatLink: 'http://numeraljs.com/#format',
+        },
       }),
     },
   },

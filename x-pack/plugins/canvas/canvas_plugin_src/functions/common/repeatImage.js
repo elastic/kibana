@@ -21,7 +21,7 @@ export const repeatImage = () => ({
   args: {
     image: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.repeatImage.argsImageHelpText', {
+      help: i18n.translate('xpack.canvas.functions.repeatImage.args.imageHelpText', {
         defaultMessage: 'The image to repeat. Usually a dataURL or an asset',
       }),
       default: elasticOutline,
@@ -29,23 +29,26 @@ export const repeatImage = () => ({
     size: {
       types: ['number'],
       default: 100,
-      help: i18n.translate('xpack.canvas.functions.repeatImage.argsSizeHelpText', {
+      help: i18n.translate('xpack.canvas.functions.repeatImage.args.sizeHelpText', {
         defaultMessage:
           'The maximum height or width of the image, in pixels. Eg, if you images is taller than it is wide, this will limit its height',
       }),
     },
     max: {
       types: ['number', 'null'],
-      help: i18n.translate('xpack.canvas.functions.repeatImage.argsMaxHelpText', {
+      help: i18n.translate('xpack.canvas.functions.repeatImage.args.maxHelpText', {
         defaultMessage: 'Maximum number of times the image may repeat',
       }),
       default: 1000,
     },
     emptyImage: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.repeatImage.argsEmptyImageHelpText', {
+      help: i18n.translate('xpack.canvas.functions.repeatImage.args.emptyImageHelpText', {
         defaultMessage:
-          'Fill the difference between the input and the `max=` parameter with this image',
+          'Fill the difference between the input and the `{maxParameter}` parameter with this image',
+        values: {
+          maxParameter: 'max=',
+        },
       }),
       default: null,
     },

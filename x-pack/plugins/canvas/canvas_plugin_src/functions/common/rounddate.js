@@ -20,9 +20,13 @@ export const rounddate = () => ({
     format: {
       aliases: ['_'],
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.rounddate.argsFormatHelpText', {
+      help: i18n.translate('xpack.canvas.functions.rounddate.args.formatHelpText', {
         defaultMessage:
-          'MomentJS Format with which to bucket (See https://momentjs.com/docs/#/displaying/). For example "YYYY-MM" would round to the month',
+          'MomentJS Format with which to bucket (See {momentjsFormatLink}). For example "{dateFormatExample}" would round to the month',
+        values: {
+          momentjsFormatLink: 'https://momentjs.com/docs/#/displaying/',
+          dateFormatExample: 'YYYY-MM',
+        },
       }),
     },
   },

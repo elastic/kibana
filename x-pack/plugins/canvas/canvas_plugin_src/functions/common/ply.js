@@ -73,7 +73,7 @@ export const ply = () => ({
   args: {
     by: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.ply.argsByHelpText', {
+      help: i18n.translate('xpack.canvas.functions.ply.args.byHelpText', {
         defaultMessage: 'The column to subdivide on',
       }),
       multi: true,
@@ -83,9 +83,12 @@ export const ply = () => ({
       resolve: false,
       multi: true,
       aliases: ['fn', 'function'],
-      help: i18n.translate('xpack.canvas.functions.ply.argsExpressionHelpText', {
+      help: i18n.translate('xpack.canvas.functions.ply.args.expressionHelpText', {
         defaultMessage:
-          'An expression to pass each resulting data table into. Tips: \n Expressions must return a datatable. Use `as` to turn literals into datatables.\n Multiple expressions must return the same number of rows. If you need to return a differing row count, pipe into another instance of ply.\n If multiple expressions return the same columns, the last one wins.',
+          'An expression to pass each resulting data table into. Tips: \n Expressions must return a datatable. Use `{asArgument}` to turn literals into datatables.\n Multiple expressions must return the same number of rows. If you need to return a differing row count, pipe into another instance of ply.\n If multiple expressions return the same columns, the last one wins.',
+        values: {
+          asArgument: 'as',
+        },
       }),
     },
     // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
@@ -99,7 +102,16 @@ export const ply = () => ({
     if (args.by) {
       byColumns = args.by.map(by => {
         const column = context.columns.find(column => column.name === by);
-        if (!column) throw new Error(`No such column: ${by}`);
+        if (!column) {
+          throw new Error(
+            i18n.translate('xpack.canvas.functions.ply.noSuchColumnErrorMessage', {
+              defaultMessage: 'No such column: {by}',
+              values: {
+                by,
+              },
+            })
+          );
+        }
         return column;
       });
       const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, args.by)));

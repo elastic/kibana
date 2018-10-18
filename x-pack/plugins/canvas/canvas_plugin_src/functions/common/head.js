@@ -21,7 +21,7 @@ export const head = () => ({
     count: {
       aliases: ['_'],
       types: ['number'],
-      help: i18n.translate('xpack.canvas.functions.head.argsCountHelpText', {
+      help: i18n.translate('xpack.canvas.functions.head.args.countHelpText', {
         defaultMessage: 'Return this many rows from the beginning of the datatable',
       }),
       default: 1,

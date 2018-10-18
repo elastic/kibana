@@ -21,7 +21,7 @@ export const tail = () => ({
     count: {
       aliases: ['_'],
       types: ['number'],
-      help: i18n.translate('xpack.canvas.functions.tail.argsCountHelpText', {
+      help: i18n.translate('xpack.canvas.functions.tail.args.countHelpText', {
         defaultMessage: 'Return this many rows from the end of the datatable',
       }),
     },

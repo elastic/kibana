@@ -19,7 +19,7 @@ export const shape = () => ({
   args: {
     shape: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.shape.argsShapeHelpText', {
+      help: i18n.translate('xpack.canvas.functions.shape.args.shapeHelpText', {
         defaultMessage: 'Pick a shape',
       }),
       aliases: ['_'],
@@ -27,7 +27,7 @@ export const shape = () => ({
     },
     fill: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.shape.argsFillHelpText', {
+      help: i18n.translate('xpack.canvas.functions.shape.args.fillHelpText', {
         defaultMessage: 'Valid CSS color string',
       }),
       default: 'black',
@@ -35,21 +35,21 @@ export const shape = () => ({
     border: {
       types: ['string', 'null'],
       aliases: ['stroke'],
-      help: i18n.translate('xpack.canvas.functions.shape.argsBorderHelpText', {
+      help: i18n.translate('xpack.canvas.functions.shape.args.borderHelpText', {
         defaultMessage: 'Valid CSS color string',
       }),
     },
     borderWidth: {
       types: ['number', 'null'],
       aliases: ['strokeWidth'],
-      help: i18n.translate('xpack.canvas.functions.shape.argsBorderWidthHelpText', {
+      help: i18n.translate('xpack.canvas.functions.shape.args.borderWidthHelpText', {
         defaultMessage: 'Thickness of the border',
       }),
       default: '0',
     },
     maintainAspect: {
       types: ['boolean'],
-      help: i18n.translate('xpack.canvas.functions.shape.argsMaintainAspectHelpText', {
+      help: i18n.translate('xpack.canvas.functions.shape.args.maintainAspectHelpText', {
         defaultMessage: 'Select true to maintain aspect ratio',
       }),
       default: false,

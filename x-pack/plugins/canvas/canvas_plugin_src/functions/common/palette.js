@@ -22,7 +22,7 @@ export const palette = () => ({
       aliases: ['_'],
       multi: true,
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.palette.argsColorHelpText', {
+      help: i18n.translate('xpack.canvas.functions.palette.args.colorHelpText', {
         defaultMessage:
           'Palette colors, rgba, hex, or HTML color string. Pass this multiple times.',
       }),
@@ -30,14 +30,14 @@ export const palette = () => ({
     gradient: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('xpack.canvas.functions.palette.argsGradientHelpText', {
+      help: i18n.translate('xpack.canvas.functions.palette.args.gradientHelpText', {
         defaultMessage: 'Prefer to make a gradient where supported and useful?',
       }),
     },
     reverse: {
       type: ['boolean'],
       default: false,
-      help: i18n.translate('xpack.canvas.functions.palette.argsReverseHelpText', {
+      help: i18n.translate('xpack.canvas.functions.palette.args.reverseHelpText', {
         defaultMessage: 'Reverse the palette',
       }),
     },

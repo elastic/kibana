@@ -21,21 +21,21 @@ export const revealImage = () => ({
   args: {
     image: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.revealImage.argsImageHelpText', {
+      help: i18n.translate('xpack.canvas.functions.revealImage.args.imageHelpText', {
         defaultMessage: 'The image to reveal',
       }),
       default: elasticOutline,
     },
     emptyImage: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.revealImage.argsEmptyImageHelpText', {
+      help: i18n.translate('xpack.canvas.functions.revealImage.args.emptyImageHelpText', {
         defaultMessage: 'An optional background image to reveal over',
       }),
       default: null,
     },
     origin: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.revealImage.argsOriginHelpText', {
+      help: i18n.translate('xpack.canvas.functions.revealImage.args.originHelpText', {
         defaultMessage: 'Where to start from. Eg, top, left, bottom or right',
       }),
       default: 'bottom',

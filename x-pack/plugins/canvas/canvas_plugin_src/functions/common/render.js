@@ -20,7 +20,7 @@ export const render = () => ({
   args: {
     as: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.render.argsAsHelpText', {
+      help: i18n.translate('xpack.canvas.functions.render.args.asHelpText', {
         defaultMessage:
           'The element type to use in rendering. You probably want a specialized function instead, such as plot or grid',
       }),
@@ -28,13 +28,13 @@ export const render = () => ({
     css: {
       types: ['string', 'null'],
       default: '"* > * {}"',
-      help: i18n.translate('xpack.canvas.functions.render.argsCssHelpText', {
+      help: i18n.translate('xpack.canvas.functions.render.args.cssHelpText', {
         defaultMessage: 'Any block of custom CSS to be scoped to this element.',
       }),
     },
     containerStyle: {
       types: ['containerStyle', 'null'],
-      help: i18n.translate('xpack.canvas.functions.render.argsContainerStyleHelpText', {
+      help: i18n.translate('xpack.canvas.functions.render.args.containerStyleHelpText', {
         defaultMessage: 'Style for the container, including background, border, and opacity',
       }),
     },

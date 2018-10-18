@@ -21,8 +21,10 @@ export const formatdate = () => ({
       aliases: ['_'],
       types: ['string'],
       help: i18n.translate('xpack.canvas.functions.formatDate.argsFormatHelpText', {
-        defaultMessage:
-          'MomentJS Format with which to bucket (See https://momentjs.com/docs/#/displaying/)',
+        defaultMessage: 'MomentJS Format with which to bucket (See {momentjsFormatDateLink})',
+        values: {
+          momentjsFormatLink: 'https://momentjs.com/docs/#/displaying/',
+        },
       }),
     },
   },

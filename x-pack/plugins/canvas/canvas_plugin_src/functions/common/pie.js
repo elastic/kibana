@@ -23,7 +23,7 @@ export const pie = () => ({
   args: {
     palette: {
       types: ['palette', 'null'],
-      help: i18n.translate('xpack.canvas.functions.pie.argsPaletteHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pie.args.paletteHelpText', {
         defaultMessage: 'A palette object for describing the colors to use on this pie',
       }),
       default: '{palette}',
@@ -31,13 +31,13 @@ export const pie = () => ({
     seriesStyle: {
       multi: true,
       types: ['seriesStyle', 'null'],
-      help: i18n.translate('xpack.canvas.functions.pie.argsSeriesStyleHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pie.args.seriesStyleHelpText', {
         defaultMessage: 'A style of a specific series',
       }),
     },
     radius: {
       type: ['string', 'number'],
-      help: i18n.translate('xpack.canvas.functions.pie.argsRadiusHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pie.args.radiusHelpText', {
         defaultMessage:
           "Radius of the pie as a percentage (between 0 and 1) of the available space. Set to 'auto' to automatically set radius",
       }),
@@ -46,34 +46,34 @@ export const pie = () => ({
     hole: {
       types: ['number'],
       default: 0,
-      help: i18n.translate('xpack.canvas.functions.pie.argsHoleHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pie.args.holeHelpText', {
         defaultMessage: 'Draw a hole in the pie, 0-100, as a percentage of the pie radius',
       }),
     },
     labels: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('xpack.canvas.functions.pie.argsLabelsHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pie.args.labelsHelpText', {
         defaultMessage: 'Show pie labels',
       }),
     },
     labelRadius: {
       types: ['number'],
       default: 100,
-      help: i18n.translate('xpack.canvas.functions.pie.argsLabelRadiusHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pie.args.labelRadiusHelpText', {
         defaultMessage: 'Percentage of area of container to use as radius for the label circle',
       }),
     },
     font: {
       types: ['style'],
-      help: i18n.translate('xpack.canvas.functions.pie.argsFontHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pie.args.fontHelpText', {
         defaultMessage: 'Label font',
       }),
       default: '{font}',
     },
     legend: {
       types: ['string', 'boolean'],
-      help: i18n.translate('xpack.canvas.functions.pie.argsLegendHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pie.args.legendHelpText', {
         defaultMessage: 'Legend position, nw, sw, ne, se or false',
       }),
       default: false,
@@ -81,7 +81,7 @@ export const pie = () => ({
     tilt: {
       types: ['number'],
       default: 1,
-      help: i18n.translate('xpack.canvas.functions.pie.argsTiltHelpText', {
+      help: i18n.translate('xpack.canvas.functions.pie.args.tiltHelpText', {
         defaultMessage: 'Percentage of tilt where 1 is fully vertical and 0 is completely flat',
       }),
     },

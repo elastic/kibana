@@ -23,7 +23,7 @@ export const image = () => ({
     dataurl: {
       // This was accepting dataurl, but there was no facility in fn for checking type and handling a dataurl type.
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.image.argsDataurlHelpText', {
+      help: i18n.translate('xpack.canvas.functions.image.args.dataurlHelpText', {
         defaultMessage: 'The HTTP(S) URL or base64 data of an image.',
       }),
       aliases: ['_', 'url'],
@@ -31,9 +31,14 @@ export const image = () => ({
     },
     mode: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.image.argsModeHelpText', {
+      help: i18n.translate('xpack.canvas.functions.image.args.modeHelpText', {
         defaultMessage:
-          '"contain" will show the entire image, scaled to fit. "cover" will fill the container with the image, cropping from the sides or bottom as needed. "stretch" will resize the height and width of the image to 100% of the container',
+          '"{contain}" will show the entire image, scaled to fit. "{cover}" will fill the container with the image, cropping from the sides or bottom as needed. "{stretch}" will resize the height and width of the image to 100% of the container',
+        values: {
+          contain: 'contain',
+          cover: 'cover',
+          stretch: 'stretch',
+        },
       }),
       default: 'contain',
     },

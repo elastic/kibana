@@ -18,14 +18,14 @@ export const getCell = () => ({
     column: {
       types: ['string'],
       aliases: ['_', 'c'],
-      help: i18n.translate('xpack.canvas.functions.getCell.argsColumnHelpText', {
+      help: i18n.translate('xpack.canvas.functions.getCell.args.columnHelpText', {
         defaultMessage: 'The name of the column value to fetch',
       }),
     },
     row: {
       types: ['number'],
       aliases: ['r'],
-      help: i18n.translate('xpack.canvas.functions.getCell.argsRowHelpText', {
+      help: i18n.translate('xpack.canvas.functions.getCell.args.rowHelpText', {
         defaultMessage: 'The row number, starting at 0',
       }),
       default: 0,

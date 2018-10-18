@@ -17,14 +17,14 @@ export const switchFn = () => ({
       aliases: ['_'],
       resolve: false,
       multi: true,
-      help: i18n.translate('xpack.canvas.functions.switchFn.argsCaseHelpText', {
+      help: i18n.translate('xpack.canvas.functions.switchFn.args.caseHelpText', {
         defaultMessage: 'The list of conditions to check',
       }),
     },
     default: {
       aliases: ['finally'],
       resolve: false,
-      help: i18n.translate('xpack.canvas.functions.switchFn.argsDefaultHelpText', {
+      help: i18n.translate('xpack.canvas.functions.switchFn.args.defaultHelpText', {
         defaultMessage: 'The default case if no cases match',
       }),
     },

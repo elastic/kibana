@@ -20,14 +20,14 @@ export const staticColumn = () => ({
     name: {
       types: ['string'],
       aliases: ['_', 'column'],
-      help: i18n.translate('xpack.canvas.functions.staticColumn.argsNameHelpText', {
+      help: i18n.translate('xpack.canvas.functions.staticColumn.args.nameHelpText', {
         defaultMessage: 'The name of the new column column',
       }),
       required: true,
     },
     value: {
       types: ['string', 'number', 'boolean', 'null'],
-      help: i18n.translate('xpack.canvas.functions.staticColumn.argsValueHelpText', {
+      help: i18n.translate('xpack.canvas.functions.staticColumn.args.valueHelpText', {
         defaultMessage:
           'The value to insert in each column. Tip: use a sub-expression to rollup other columns into a static value',
       }),

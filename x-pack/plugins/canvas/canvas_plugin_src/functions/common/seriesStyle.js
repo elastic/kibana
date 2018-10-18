@@ -20,65 +20,65 @@ export const seriesStyle = () => ({
   args: {
     label: {
       types: ['string'],
-      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.argsLabelDisplayName', {
+      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.args.labelDisplayName', {
         defaultMessage: 'Series label',
       }),
-      help: i18n.translate('xpack.canvas.functions.seriesStyle.argsLabelHelpText', {
+      help: i18n.translate('xpack.canvas.functions.seriesStyle.args.labelHelpText', {
         defaultMessage:
           'The label of the line this style applies to, not the name you would like to give the line',
       }),
     },
     color: {
       types: ['string', 'null'],
-      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.argsColorDisplayName', {
+      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.args.colorDisplayName', {
         defaultMessage: 'Color',
       }),
-      help: i18n.translate('xpack.canvas.functions.seriesStyle.argsColorHelpText', {
+      help: i18n.translate('xpack.canvas.functions.seriesStyle.args.colorHelpText', {
         defaultMessage: 'Color to assign the line',
       }),
     },
     lines: {
       types: ['number'],
-      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.argsLinesDisplayName', {
+      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.args.linesDisplayName', {
         defaultMessage: 'Line width',
       }),
-      help: i18n.translate('xpack.canvas.functions.seriesStyle.argsLinesHelpText', {
+      help: i18n.translate('xpack.canvas.functions.seriesStyle.args.linesHelpText', {
         defaultMessage: 'Width of the line',
       }),
     },
     bars: {
       types: ['number'],
-      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.argsBarsDisplayName', {
+      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.args.barsDisplayName', {
         defaultMessage: 'Bar width',
       }),
-      help: i18n.translate('xpack.canvas.functions.seriesStyle.argsBarsHelpText', {
+      help: i18n.translate('xpack.canvas.functions.seriesStyle.args.barsHelpText', {
         defaultMessage: 'Width of bars',
       }),
     },
     points: {
       types: ['number'],
-      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.argsPointsDisplayName', {
+      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.args.pointsDisplayName', {
         defaultMessage: 'Show points',
       }),
-      help: i18n.translate('xpack.canvas.functions.seriesStyle.argsPointsHelpText', {
+      help: i18n.translate('xpack.canvas.functions.seriesStyle.args.pointsHelpText', {
         defaultMessage: 'Size of points on line',
       }),
     },
     fill: {
       types: ['number', 'boolean'],
-      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.argsFillDisplayName', {
+      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.args.fillDisplayName', {
         defaultMessage: 'Fill points',
       }),
-      help: i18n.translate('xpack.canvas.functions.seriesStyle.argsFillHelpText', {
+      help: i18n.translate('xpack.canvas.functions.seriesStyle.args.fillHelpText', {
         defaultMessage: 'Should we fill points?',
       }),
     },
     stack: {
       types: ['number', 'null'],
-      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.argsStackDisplayName', {
+      displayName: i18n.translate('xpack.canvas.functions.seriesStyle.args.stackDisplayName', {
         defaultMessage: 'Stack series',
       }),
-      help: i18n.translate('xpack.canvas.functions.seriesStyle.argsStackHelpText', {
+      help: i18n.translate('xpack.canvas.functions.seriesStyle.args.stackHelpText', {
         defaultMessage:
           'Should we stack the series? This is the stack "id". Series with the same stack id will be stacked together',
       }),
@@ -86,13 +86,13 @@ export const seriesStyle = () => ({
     horizontalBars: {
       types: ['boolean'],
       displayName: i18n.translate(
-        'xpack.canvas.functions.seriesStyle.argsHorizontalBarsOrientationDisplayName',
+        'xpack.canvas.functions.seriesStyle.args.horizontalBarsOrientationDisplayName',
         {
           defaultMessage: 'Horizontal bars orientation',
         }
       ),
       help: i18n.translate(
-        'xpack.canvas.functions.seriesStyle.argsHorizontalBarsOrientationHelpText',
+        'xpack.canvas.functions.seriesStyle.args.horizontalBarsOrientationHelpText',
         {
           defaultMessage: 'Sets the orientation of bars in the chart to horizontal',
         }

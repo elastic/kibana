@@ -21,7 +21,7 @@ export const font = () => ({
   args: {
     size: {
       types: ['number'],
-      help: i18n.translate('xpack.canvas.functions.font.argsSizeHelpText', {
+      help: i18n.translate('xpack.canvas.functions.font.args.sizeHelpText', {
         defaultMessage: 'Font size (px)',
       }),
       default: 14,
@@ -29,48 +29,51 @@ export const font = () => ({
     lHeight: {
       types: ['number'],
       aliases: ['lineHeight'],
-      help: i18n.translate('xpack.canvas.functions.font.argsLHeightHelpText', {
+      help: i18n.translate('xpack.canvas.functions.font.args.lHeightHelpText', {
         defaultMessage: 'Line height (px)',
       }),
     },
     family: {
       types: ['string'],
       default: `"${openSans.value}"`,
-      help: i18n.translate('xpack.canvas.functions.font.argsFamilyHelpText', {
+      help: i18n.translate('xpack.canvas.functions.font.args.familyHelpText', {
         defaultMessage: 'An acceptable CSS web font string',
       }),
     },
     color: {
       types: ['string', 'null'],
-      help: i18n.translate('xpack.canvas.functions.font.argsColorHelpText', {
+      help: i18n.translate('xpack.canvas.functions.font.args.colorHelpText', {
         defaultMessage: 'Text color',
       }),
     },
     weight: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.font.argsWeightHelpText', {
-        defaultMessage:
-          'Set the font weight, e.g. normal, bold, bolder, lighter, 100, 200, 300, 400, 500, 600, 700, 800, 900',
+      help: i18n.translate('xpack.canvas.functions.font.args.weightHelpText', {
+        defaultMessage: 'Set the font weight, e.g. {fontWeightValuesList}',
+        values: {
+          fontWeightValuesList:
+            'normal, bold, bolder, lighter, 100, 200, 300, 400, 500, 600, 700, 800, 900',
+        },
       }),
       default: 'normal',
     },
     underline: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('xpack.canvas.functions.font.argsUnderlineHelpText', {
+      help: i18n.translate('xpack.canvas.functions.font.args.underlineHelpText', {
         defaultMessage: 'Underline the text, true or false',
       }),
     },
     italic: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('xpack.canvas.functions.font.argsItalicHelpText', {
+      help: i18n.translate('xpack.canvas.functions.font.args.italicHelpText', {
         defaultMessage: 'Italicize, true or false',
       }),
     },
     align: {
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.font.argsAlignHelpText', {
+      help: i18n.translate('xpack.canvas.functions.font.args.alignHelpText', {
         defaultMessage: 'Horizontal text alignment',
       }),
       default: 'left',

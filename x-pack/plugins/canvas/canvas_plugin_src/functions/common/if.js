@@ -8,27 +8,27 @@ import { i18n } from '@kbn/i18n';
 
 export const ifFn = () => ({
   name: 'if',
-  help: i18n.translate('xpack.canvas.functions.ifFnHelpText', {
+  help: i18n.translate('xpack.canvas.functions.ifHelpText', {
     defaultMessage: 'Perform conditional logic',
   }),
   args: {
     condition: {
       types: ['boolean', 'null'],
       aliases: ['_'],
-      help: i18n.translate('xpack.canvas.functions.ifFn.argsConditionHelpText', {
+      help: i18n.translate('xpack.canvas.functions.if.args.conditionHelpText', {
         defaultMessage:
           'A boolean true or false, usually returned by a subexpression. If this is not supplied then the input context will be used',
       }),
     },
     then: {
       resolve: false,
-      help: i18n.translate('xpack.canvas.functions.ifFn.argsThenHelpText', {
+      help: i18n.translate('xpack.canvas.functions.if.args.thenHelpText', {
         defaultMessage: 'The return value if true',
       }),
     },
     else: {
       resolve: false,
-      help: i18n.translate('xpack.canvas.functions.ifFn.argsElseHelpText', {
+      help: i18n.translate('xpack.canvas.functions.if.args.elseHelpText', {
         defaultMessage:
           'The return value if false. If else is not specified, and the condition is false then the input context to the function will be returned',
       }),

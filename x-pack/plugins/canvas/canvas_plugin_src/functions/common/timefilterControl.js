@@ -20,13 +20,13 @@ export const timefilterControl = () => ({
     column: {
       type: ['string'],
       aliases: ['field', 'c'],
-      help: i18n.translate('xpack.canvas.functions.timefilterControl.argsColumnHelpText', {
+      help: i18n.translate('xpack.canvas.functions.timefilterControl.args.columnHelpText', {
         defaultMessage: 'The column or field to attach the filter to',
       }),
     },
     compact: {
       type: ['boolean'],
-      help: i18n.translate('xpack.canvas.functions.timefilterControl.argsCompactHelpText', {
+      help: i18n.translate('xpack.canvas.functions.timefilterControl.args.compactHelpText', {
         defaultMessage: 'Show the time filter as a button that triggers a popover',
       }),
       default: true,

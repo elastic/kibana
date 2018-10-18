@@ -22,22 +22,28 @@ export const timefilter = () => ({
       type: ['string'],
       aliases: ['field', 'c'],
       default: '@timestamp',
-      help: i18n.translate('xpack.canvas.functions.timefilter.argsColumnHelpText', {
+      help: i18n.translate('xpack.canvas.functions.timefilter.args.columnHelpText', {
         defaultMessage: 'The column or field to attach the filter to',
       }),
     },
     from: {
       types: ['string', 'null'],
       aliases: ['f', 'start'],
-      help: i18n.translate('xpack.canvas.functions.timefilter.argsFromHelpText', {
-        defaultMessage: 'Beginning of the range, in ISO8601 or Elasticsearch datemath format',
+      help: i18n.translate('xpack.canvas.functions.timefilter.args.fromHelpText', {
+        defaultMessage: 'Beginning of the range, in {isoFormat} or Elasticsearch datemath format',
+        values: {
+          isoFormat: 'ISO8601',
+        },
       }),
     },
     to: {
       types: ['string', 'null'],
       aliases: ['t', 'end'],
       help: i18n.translate('xpack.canvas.functions.timefilter.argsToHelpText', {
-        defaultMessage: 'End of the range, in ISO8601 or Elasticsearch datemath format',
+        defaultMessage: 'End of the range, in {isoFormat} or Elasticsearch datemath format',
+        values: {
+          isoFormat: 'ISO8601',
+        },
       }),
     },
   },

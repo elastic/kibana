@@ -20,7 +20,7 @@ export const string = () => ({
       aliases: ['_'],
       types: ['string'],
       multi: true,
-      help: i18n.translate('xpack.canvas.functions.string.argsValueHelpText', {
+      help: i18n.translate('xpack.canvas.functions.string.args.valueHelpText', {
         defaultMessage: "One or more strings to join together. Don't forget spaces where needed!",
       }),
     },

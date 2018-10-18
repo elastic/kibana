@@ -20,14 +20,14 @@ export const table = () => ({
     font: {
       types: ['style'],
       default: '{font}',
-      help: i18n.translate('xpack.canvas.functions.table.argsFontHelpText', {
+      help: i18n.translate('xpack.canvas.functions.table.args.fontHelpText', {
         defaultMessage: 'Font style',
       }),
     },
     paginate: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('xpack.canvas.functions.table.argsPaginateHelpText', {
+      help: i18n.translate('xpack.canvas.functions.table.args.paginateHelpText', {
         defaultMessage:
           'Show pagination controls. If set to false only the first page will be displayed',
       }),
@@ -35,7 +35,7 @@ export const table = () => ({
     perPage: {
       types: ['number'],
       default: 10,
-      help: i18n.translate('xpack.canvas.functions.table.argsPerPageHelpText', {
+      help: i18n.translate('xpack.canvas.functions.table.args.perPageHelpText', {
         defaultMessage:
           'Show this many rows per page. You probably want to raise this is disabling pagination',
       }),
@@ -43,7 +43,7 @@ export const table = () => ({
     showHeader: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('xpack.canvas.functions.table.argsShowHeaderHelpText', {
+      help: i18n.translate('xpack.canvas.functions.table.args.showHeaderHelpText', {
         defaultMessage: 'Show or hide the header row with titles for each column',
       }),
     },

@@ -23,13 +23,13 @@ export const progress = () => ({
     shape: {
       type: ['string'],
       alias: ['_'],
-      help: i18n.translate('xpack.canvas.functions.progress.argsShapeHelpText', {
+      help: i18n.translate('xpack.canvas.functions.progress.args.shapeHelpText', {
         defaultMessage: 'Select {shapeNames}',
         values: {
           shapeNames: Object.keys(shapes)
             .map((key, i, src) => {
               return i === src.length - 1
-                ? i18n.translate('xpack.canvas.functions.progress.argsShape.orText', {
+                ? i18n.translate('xpack.canvas.functions.progress.args.shape.orText', {
                     defaultMessage: 'or {shapeName}',
                     values: { shapeName: shapes[key].name },
                   })
@@ -42,42 +42,42 @@ export const progress = () => ({
     },
     max: {
       type: ['number'],
-      help: i18n.translate('xpack.canvas.functions.progress.argsMaxHelpText', {
+      help: i18n.translate('xpack.canvas.functions.progress.args.maxHelpText', {
         defaultMessage: 'Maximum value of the progress element',
       }),
       default: 1,
     },
     valueColor: {
       type: ['string'],
-      help: i18n.translate('xpack.canvas.functions.progress.argsValueColorHelpText', {
+      help: i18n.translate('xpack.canvas.functions.progress.args.valueColorHelpText', {
         defaultMessage: 'Color of the progress bar',
       }),
       default: `#1785b0`,
     },
     barColor: {
       type: ['string'],
-      help: i18n.translate('xpack.canvas.functions.progress.argsBarColorHelpText', {
+      help: i18n.translate('xpack.canvas.functions.progress.args.barColorHelpText', {
         defaultMessage: 'Color of the background bar',
       }),
       default: `#f0f0f0`,
     },
     valueWeight: {
       type: ['number'],
-      help: i18n.translate('xpack.canvas.functions.progress.argsValueWeightHelpText', {
+      help: i18n.translate('xpack.canvas.functions.progress.args.valueWeightHelpText', {
         defaultMessage: 'Thickness of the progress bar',
       }),
       default: 20,
     },
     barWeight: {
       type: ['number'],
-      help: i18n.translate('xpack.canvas.functions.progress.argsBarWeightHelpText', {
+      help: i18n.translate('xpack.canvas.functions.progress.args.barWeightHelpText', {
         defaultMessage: 'Thickness of the background bar',
       }),
       default: 20,
     },
     label: {
       type: ['boolean', 'string'],
-      help: i18n.translate('xpack.canvas.functions.progress.argsLabelHelpText', {
+      help: i18n.translate('xpack.canvas.functions.progress.args.labelHelpText', {
         defaultMessage:
           'Set true/false to show/hide label or provide a string to display as the label',
       }),
@@ -85,7 +85,7 @@ export const progress = () => ({
     },
     font: {
       types: ['style'],
-      help: i18n.translate('xpack.canvas.functions.progress.argsFontHelpText', {
+      help: i18n.translate('xpack.canvas.functions.progress.args.fontHelpText', {
         defaultMessage:
           'Font settings for the label. Technically you can stick other styles in here too!',
       }),
@@ -96,7 +96,10 @@ export const progress = () => ({
     if (args.max <= 0) {
       throw new Error(
         i18n.translate('xpack.canvas.functions.progress.maxValueLessOrEqualZeroMessageError', {
-          defaultMessage: "'max' must be greater than 0",
+          defaultMessage: "'{maxArgument}' must be greater than 0",
+          values: {
+            maxArgument: 'max',
+          },
         })
       );
     }

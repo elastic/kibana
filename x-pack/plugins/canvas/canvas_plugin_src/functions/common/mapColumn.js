@@ -21,7 +21,7 @@ export const mapColumn = () => ({
     name: {
       types: ['string'],
       aliases: ['_', 'column'],
-      help: i18n.translate('xpack.canvas.functions.mapColumn.argsNameHelpText', {
+      help: i18n.translate('xpack.canvas.functions.mapColumn.args.nameHelpText', {
         defaultMessage: 'The name of the resulting column',
       }),
       required: true,
@@ -30,7 +30,7 @@ export const mapColumn = () => ({
       types: ['boolean', 'number', 'string', 'null'],
       resolve: false,
       aliases: ['exp', 'fn'],
-      help: i18n.translate('xpack.canvas.functions.mapColumn.argsExpressionHelpText', {
+      help: i18n.translate('xpack.canvas.functions.mapColumn.args.expressionHelpText', {
         defaultMessage:
           'A canvas expression which will be passed each row as a single row datatable',
       }),

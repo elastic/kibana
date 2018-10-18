@@ -17,7 +17,7 @@ export const gt = () => ({
       aliases: ['_'],
       types: ['boolean', 'number', 'string', 'null'],
       required: true,
-      help: i18n.translate('xpack.canvas.functions.gt.argsValueHelpText', {
+      help: i18n.translate('xpack.canvas.functions.gt.args.valueHelpText', {
         defaultMessage: 'The value to compare the context to',
       }),
     },

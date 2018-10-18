@@ -21,14 +21,14 @@ export const metric = () => ({
     label: {
       types: ['string'],
       aliases: ['_', 'text', 'description'],
-      help: i18n.translate('xpack.canvas.functions.metric.argsLabelHelpText', {
+      help: i18n.translate('xpack.canvas.functions.metric.args.labelHelpText', {
         defaultMessage: 'Text describing the metric',
       }),
       default: '""',
     },
     metricFont: {
       types: ['style'],
-      help: i18n.translate('xpack.canvas.functions.metric.argsMetricFontHelpText', {
+      help: i18n.translate('xpack.canvas.functions.metric.args.metricFontHelpText', {
         defaultMessage:
           'Font settings for the metric. Technically you can stick other styles in here too!',
       }),
@@ -36,7 +36,7 @@ export const metric = () => ({
     },
     labelFont: {
       types: ['style'],
-      help: i18n.translate('xpack.canvas.functions.metric.argsLabelFontHelpText', {
+      help: i18n.translate('xpack.canvas.functions.metric.args.labelFontHelpText', {
         defaultMessage:
           'Font settings for the label. Technically you can stick other styles in here too!',
       }),

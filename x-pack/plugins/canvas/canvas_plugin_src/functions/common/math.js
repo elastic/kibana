@@ -22,14 +22,23 @@ export const math = () => ({
     expression: {
       aliases: ['_'],
       types: ['string'],
-      help: i18n.translate('xpack.canvas.functions.math.argsExpressionHelpText', {
+      help: i18n.translate('xpack.canvas.functions.math.args.expressionHelpText', {
         defaultMessage:
-          'An evaluated TinyMath expression. (See [TinyMath Functions](http://canvas.elastic.co/reference/tinymath.html))',
+          'An evaluated TinyMath expression. (See [TinyMath Functions]({tinyMathFunctionsLink}))',
+        values: {
+          tinyMathFunctionsLink: 'http://canvas.elastic.co/reference/tinymath.html',
+        },
       }),
     },
   },
   fn: (context, args) => {
-    if (!args.expression || args.expression.trim() === '') throw new Error('Empty expression');
+    if (!args.expression || args.expression.trim() === '') {
+      throw new Error(
+        i18n.translate('xpack.canvas.functions.math.emptyExpressionErrorMessage', {
+          defaultMessage: 'Empty expression',
+        })
+      );
+    }
 
     const isDatatable = context && context.type === 'datatable';
     const mathContext = isDatatable
@@ -40,7 +49,7 @@ export const math = () => ({
       if (Array.isArray(result)) {
         if (result.length === 1) return result[0];
         throw new Error(
-          i18n.translate('xpack.canvas.functions.math.expressionReturnMultipleNumberErrorMessage', {
+          i18n.translate('xpack.canvas.functions.math.expressionReturnValueErrorMessage', {
             defaultMessage:
               'Expressions must return a single number. Try wrapping your expression in mean() or sum()',
           })
