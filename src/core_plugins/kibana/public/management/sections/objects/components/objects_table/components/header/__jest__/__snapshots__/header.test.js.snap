@@ -54,12 +54,11 @@ exports[`Header should render normally 1`] = `
             type="button"
           >
             <FormattedMessage
-              defaultMessage="Export {filteredCount} {filteredCountDescription}"
+              defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
               id="kbn.management.objects.objectsTable.header.exportButtonLabel"
               values={
                 Object {
                   "filteredCount": 2,
-                  "filteredCountDescription": "objects",
                 }
               }
             />

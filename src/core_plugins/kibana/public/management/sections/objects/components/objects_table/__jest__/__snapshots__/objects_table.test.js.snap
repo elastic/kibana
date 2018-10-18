@@ -91,12 +91,11 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
   onConfirm={[Function]}
   title={
     <FormattedMessage
-      defaultMessage="Export {filteredItemCount} {filteredItemCountDescription}"
+      defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
       id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
       values={
         Object {
           "filteredItemCount": 4,
-          "filteredItemCountDescription": "objects",
         }
       }
     />
