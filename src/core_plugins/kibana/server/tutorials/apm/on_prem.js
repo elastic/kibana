@@ -22,6 +22,7 @@ import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_varia
 import {
   createWindowsServerInstructions,
   createEditConfig,
+  createStartServerUnixSysv,
   createStartServerUnix,
   createDownloadServerRpm,
   createDownloadServerDeb,
@@ -41,6 +42,7 @@ import {
 export function onPremInstructions(apmIndexPattern) {
   const EDIT_CONFIG = createEditConfig();
   const START_SERVER_UNIX = createStartServerUnix();
+  const START_SERVER_UNIX_SYSV = createStartServerUnixSysv();
 
   return {
     instructionSets: [
@@ -55,11 +57,11 @@ export function onPremInstructions(apmIndexPattern) {
           },
           {
             id: INSTRUCTION_VARIANT.DEB,
-            instructions: [createDownloadServerDeb(), EDIT_CONFIG, START_SERVER_UNIX],
+            instructions: [createDownloadServerDeb(), EDIT_CONFIG, START_SERVER_UNIX_SYSV],
           },
           {
             id: INSTRUCTION_VARIANT.RPM,
-            instructions: [createDownloadServerRpm(), EDIT_CONFIG, START_SERVER_UNIX],
+            instructions: [createDownloadServerRpm(), EDIT_CONFIG, START_SERVER_UNIX_SYSV],
           },
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
