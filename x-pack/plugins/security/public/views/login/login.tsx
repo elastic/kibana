@@ -43,11 +43,13 @@ interface AnyObject {
       $scope.$$postDigest(() => {
         const domNode = document.getElementById('reactLoginRoot');
 
+        const msgQueryParam = parse($window.location.href, true).query.msg || '';
+
         render(
           <LoginPage
             http={$http}
             window={$window}
-            infoMessage={get(messageMap, parse($window.location.href, true).query.msg)}
+            infoMessage={get(messageMap, msgQueryParam)}
             loginState={loginState}
             isSecureConnection={isSecure}
             requiresSecureConnection={secureCookies}
