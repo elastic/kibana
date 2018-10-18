@@ -1,5 +1,5 @@
 # Kibana is served by a back end server. This setting specifies the port to use.
-#server.port: 5601
+#server.port: 5701
 
 # Specifies the address to which the Kibana server will bind. IP addresses and host names are both valid values.
 # The default is 'localhost', which usually means remote machines will not be able to connect.
@@ -25,7 +25,7 @@
 #server.name: "your-hostname"
 
 # The URL of the Elasticsearch instance to use for all your queries.
-#elasticsearch.url: "http://localhost:9200"
+elasticsearch.url: "http://localhost:9201"
 
 # When this setting's value is true Kibana uses the hostname specified in the server.host
 # setting. When the value of this setting is false, Kibana uses the hostname of the host
