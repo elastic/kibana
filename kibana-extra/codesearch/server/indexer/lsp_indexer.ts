@@ -26,6 +26,7 @@ import {
   ReferenceIndexName,
   ReferenceSchema,
   ReferenceTypeName,
+  RepositoryReservedField,
   SymbolAnalysisSettings,
   SymbolIndexName,
   SymbolSchema,
@@ -101,6 +102,61 @@ export class LspIndexer extends AbstractIndexer {
     } catch (e) {
       this.log.error(`Prepare lsp indexing requests error: ${e}`);
       throw e;
+    }
+  }
+
+  protected async cleanIndex(repoUri: RepositoryUri) {
+    // Clean up all the symbol documents in the symbol index
+    try {
+      await this.client.deleteByQuery({
+        index: SymbolIndexName(repoUri),
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+      this.log.info(`Clean up symbols for ${repoUri} done.`);
+    } catch (error) {
+      this.log.error(`Clean up symbols for ${repoUri} error: ${error}`);
+    }
+
+    // Clean up all the reference documents in the reference index
+    try {
+      await this.client.deleteByQuery({
+        index: ReferenceIndexName(repoUri),
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+      this.log.info(`Clean up references for ${repoUri} done.`);
+    } catch (error) {
+      this.log.error(`Clean up references for ${repoUri} error: ${error}`);
+    }
+
+    // Clean up all the document documents in the document index but keep the repository document.
+    try {
+      await this.client.deleteByQuery({
+        index: DocumentIndexName(repoUri),
+        body: {
+          query: {
+            bool: {
+              must_not: [
+                {
+                  exists: {
+                    field: RepositoryReservedField,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+      this.log.info(`Clean up documents for ${repoUri} done.`);
+    } catch (error) {
+      this.log.error(`Clean up documents for ${repoUri} error: ${error}`);
     }
   }
 

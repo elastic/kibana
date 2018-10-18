@@ -7,7 +7,7 @@
 import { EsClient } from '@codesearch/esqueue';
 
 import { Repository, RepositorySearchRequest, RepositorySearchResult } from '../../model';
-import { RepositoryIndexNamePrefix, RepositoryReserviedField } from '../indexer/schema';
+import { RepositoryIndexNamePrefix, RepositoryReservedField } from '../indexer/schema';
 import { Log } from '../log';
 import { AbstractSearchClient } from './abstract_search_client';
 
@@ -32,8 +32,8 @@ export class RepositorySearchClient extends AbstractSearchClient {
                 simple_query_string: {
                   query: req.query,
                   fields: [
-                    `${RepositoryReserviedField}.name^1.0`,
-                    `${RepositoryReserviedField}.org^1.0`,
+                    `${RepositoryReservedField}.name^1.0`,
+                    `${RepositoryReservedField}.org^1.0`,
                   ],
                   default_operator: 'or',
                   lenient: false,
@@ -44,7 +44,7 @@ export class RepositorySearchClient extends AbstractSearchClient {
               // This prefix query is mostly for typeahead search.
               {
                 prefix: {
-                  [`${RepositoryReserviedField}.name`]: {
+                  [`${RepositoryReservedField}.name`]: {
                     value: req.query,
                     boost: 100.0,
                   },

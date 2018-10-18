@@ -14,7 +14,7 @@ import { RepositoryIndexInitializer } from '../indexer';
 import {
   RepositoryIndexName,
   RepositoryIndexNamePrefix,
-  RepositoryReserviedField,
+  RepositoryReservedField,
   RepositoryTypeName,
 } from '../indexer/schema';
 import { Server } from '../kibana_types';
@@ -69,7 +69,7 @@ export function repositoryRoute(
             type: RepositoryTypeName,
             id: repo.uri,
             body: JSON.stringify({
-              [RepositoryReserviedField]: repo,
+              [RepositoryReservedField]: repo,
             }),
           });
 
@@ -135,7 +135,7 @@ export function repositoryRoute(
           type: RepositoryTypeName,
           id: repoUri,
         });
-        const repo: Repository = response._source[RepositoryReserviedField];
+        const repo: Repository = response._source[RepositoryReservedField];
         reply(repo);
       } catch (error) {
         const msg = `Get repository ${repoUri} error: ${error}`;
@@ -179,7 +179,7 @@ export function repositoryRoute(
           body: {
             query: {
               exists: {
-                field: RepositoryReserviedField,
+                field: RepositoryReservedField,
               },
             },
           },
@@ -188,7 +188,7 @@ export function repositoryRoute(
         });
         const hits: any[] = response.hits.hits;
         const repos: Repository[] = hits.map(hit => {
-          const repo: Repository = hit._source[RepositoryReserviedField];
+          const repo: Repository = hit._source[RepositoryReservedField];
           return repo;
         });
         reply(repos);

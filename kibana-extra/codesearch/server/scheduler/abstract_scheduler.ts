@@ -8,7 +8,7 @@ import { EsClient } from '@codesearch/esqueue';
 import { Repository } from '../../model';
 import {
   RepositoryIndexNamePrefix,
-  RepositoryReserviedField,
+  RepositoryReservedField,
   RepositoryTypeName,
 } from '../indexer/schema';
 import { Poller } from '../poller';
@@ -44,7 +44,7 @@ export abstract class AbstractScheduler {
         body: {
           query: {
             exists: {
-              field: RepositoryReserviedField,
+              field: RepositoryReservedField,
             },
           },
         },
@@ -53,7 +53,7 @@ export abstract class AbstractScheduler {
       })
       .then((res: any) => {
         Array.from(res.hits.hits).map((hit: any) => {
-          const repo: Repository = hit._source[RepositoryReserviedField];
+          const repo: Repository = hit._source[RepositoryReservedField];
           this.executeSchedulingJob(repo);
         });
       });

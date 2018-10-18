@@ -30,6 +30,9 @@ export abstract class AbstractIndexer implements Indexer {
       return;
     }
 
+    // Clean up the index if necessary
+    await this.cleanIndex(repoUri);
+
     // Prepare all the index requests
     let reqs;
     let totalCount = 0;
@@ -69,6 +72,13 @@ export abstract class AbstractIndexer implements Indexer {
         }
       }
     }
+  }
+
+  protected async cleanIndex(repoUri: RepositoryUri): Promise<void> {
+    // This is the abstract implementation. You should override this.
+    return new Promise<void>((resolve, reject) => {
+      resolve();
+    });
   }
 
   protected async prepareRequests(repoUri: RepositoryUri): Promise<IndexRequest[]> {

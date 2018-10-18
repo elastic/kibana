@@ -18,4 +18,4 @@ export const RepositoryTypeName = DocumentTypeName;
 export const RepositoryIndexNamePrefix = DocumentIndexNamePrefix;
 export const RepositoryIndexName = DocumentIndexName;
 
-export const RepositoryReserviedField = 'repository';
+export const RepositoryReservedField = 'repository';

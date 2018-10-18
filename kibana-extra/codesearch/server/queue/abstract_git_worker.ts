@@ -12,7 +12,7 @@ import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../mod
 import { getDefaultBranch, getHeadRevision } from '../git_operations';
 import {
   RepositoryIndexName,
-  RepositoryReserviedField,
+  RepositoryReservedField,
   RepositoryTypeName,
 } from '../indexer/schema';
 import { SavedObjectsClient } from '../kibana_types';
@@ -47,7 +47,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
       id: repoUri,
       body: JSON.stringify({
         doc: {
-          [RepositoryReserviedField]: {
+          [RepositoryReservedField]: {
             defaultBranch,
             revision,
           },
