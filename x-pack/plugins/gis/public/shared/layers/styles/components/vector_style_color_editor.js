@@ -84,7 +84,7 @@ export class VectorStyleColorEditor extends React.Component {
       if (selectedStyle === VectorStyle.STYLE_TYPE.STATIC) {
         newStyle = changeToStaticColor(this._lastStaticOptions);
       } else {
-        newStyle = changeToDynamicColor();
+        newStyle = changeToDynamicColor(this._lastDynamicOptions);
       }
       this.setState({
         colorStyleDesciptor: newStyle
@@ -94,11 +94,14 @@ export class VectorStyleColorEditor extends React.Component {
     let colorSelector;
     if (this._isDynamic()) {
       if (this.state.ordinalFields !== null) {
+        const selectedOptions = (this.props.colorStyleDescriptor && this.props.colorStyleDescriptor.options) ?
+          this.props.colorStyleDescriptor.options : null;
+        this._lastDynamicOptions = selectedOptions;
         colorSelector = (
           <DynamicColorSelection
             fields={this.state.ordinalFields}
             onChange={changeToDynamicColor}
-            selectedOptions={this.props.colorStyleDescriptor.options}
+            selectedOptions={selectedOptions}
           />
         );
       } else {
