@@ -111,7 +111,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
         securityEnabled: false,
         licenseValid: false,
         message:
-          'You cannot manage Beats centeral management because license information is not available at this time.',
+          'You cannot manage Beats central management because license information is not available at this time.',
       };
     }
 
@@ -127,7 +127,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       return {
         securityEnabled: true,
         licenseValid: false,
-        message: `Your ${licenseType} license does not support Beats centeral management features. Please upgrade your license.`,
+        message: `Your ${licenseType} license does not support Beats central management features. Please upgrade your license.`,
       };
     }
 
@@ -136,14 +136,14 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       return {
         securityEnabled: true,
         licenseValid: false,
-        message: `You cannot edit, create, or delete your Beats centeral management configurations because your ${licenseType} license has expired.`,
+        message: `You cannot edit, create, or delete your Beats central management configurations because your ${licenseType} license has expired.`,
       };
     }
 
     // Security is not enabled in ES
     if (!isSecurityEnabled) {
       const message =
-        'Security must be enabled in order to use Beats centeral management features.' +
+        'Security must be enabled in order to use Beats central management features.' +
         ' Please set xpack.security.enabled: true in your elasticsearch.yml.';
       return {
         securityEnabled: false,
