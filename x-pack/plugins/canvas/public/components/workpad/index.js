@@ -16,7 +16,6 @@ import {
   getAllElements,
   getWorkpad,
   getPages,
-  isWriteable,
 } from '../../state/selectors/workpad';
 import { Workpad as Component } from './workpad';
 
@@ -26,7 +25,6 @@ const mapStateToProps = state => ({
   totalElementCount: getAllElements(state).length,
   workpad: getWorkpad(state),
   isFullscreen: getFullscreen(state),
-  isWriteable: isWriteable(state),
 });
 
 const mapDispatchToProps = {
