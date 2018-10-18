@@ -441,7 +441,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setFilterAggregationValue(filterValue, filterIndex = 0, aggregationId = 2) {
       const inputField = await testSubjects.find(`visEditorFilterInput_${aggregationId}_${filterIndex}`);
       await inputField.type(filterValue);
-      await remote.pressKeys(Keys.RETURN);
     }
 
     async addNewFilterAggregation() {

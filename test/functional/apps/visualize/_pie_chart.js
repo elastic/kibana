@@ -113,33 +113,6 @@ export default function ({ getService, getPageObjects }) {
       expect(pieData).to.eql(expectedTableData);
     });
 
-    it('should show no data message when changing data to an empty window', async function () {
-      await PageObjects.visualize.navigateToNewVisualization();
-      log.debug('clickPieChart');
-      await PageObjects.visualize.clickPieChart();
-      await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      log.debug('select bucket Split Slices');
-      await PageObjects.visualize.clickBucket('Split Slices');
-      log.debug('Click aggregation Filters');
-      await PageObjects.visualize.selectAggregation('Filters');
-      log.debug('Set the 1st filter value');
-      await PageObjects.visualize.setFilterAggregationValue('geo.dest :"US"');
-      log.debug('Add new filter');
-      await PageObjects.visualize.addNewFilterAggregation();
-      log.debug('Set the 2nd filter value');
-      await PageObjects.visualize.setFilterAggregationValue('geo.dest :"CN"', 1);
-      const emptyFromTime = '2016-09-19 06:31:44.000';
-      const emptyToTime = '2016-09-23 18:31:44.000';
-      log.debug('Switch to a different time range from \"' + emptyFromTime + '\" to \"' + emptyToTime + '\"');
-      await PageObjects.header.setAbsoluteRange(emptyFromTime, emptyToTime);
-      log.debug('clickGo');
-      await PageObjects.visualize.clickGo();
-      await PageObjects.visualize.waitForVisualization();
-      await PageObjects.visualize.hasPieChartError();
-    });
-
     describe('disabled aggs', () => {
       before(async () => {
         await PageObjects.visualize.loadSavedVisualization(vizName1);
@@ -194,6 +167,34 @@ export default function ({ getService, getPageObjects }) {
         const pieData = await PageObjects.visualize.getPieChartLabels();
         log.debug('pieData.length = ' + pieData.length);
         expect(pieData).to.eql(expectedTableData);
+      });
+    });
+
+    describe('empty time window', () => {
+      it('should show no data message when no data on selected timerange', async function () {
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickPieChart');
+        await PageObjects.visualize.clickPieChart();
+        await PageObjects.visualize.clickNewSearch();
+        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        log.debug('select bucket Split Slices');
+        await PageObjects.visualize.clickBucket('Split Slices');
+        log.debug('Click aggregation Filters');
+        await PageObjects.visualize.selectAggregation('Filters');
+        log.debug('Set the 1st filter value');
+        await PageObjects.visualize.setFilterAggregationValue('geo.dest:"US"');
+        log.debug('Add new filter');
+        await PageObjects.visualize.addNewFilterAggregation();
+        log.debug('Set the 2nd filter value');
+        await PageObjects.visualize.setFilterAggregationValue('geo.dest:"CN"', 1);
+        await PageObjects.visualize.clickGo();
+        const emptyFromTime = '2016-09-19 06:31:44.000';
+        const emptyToTime = '2016-09-23 18:31:44.000';
+        log.debug('Switch to a different time range from \"' + emptyFromTime + '\" to \"' + emptyToTime + '\"');
+        await PageObjects.header.setAbsoluteRange(emptyFromTime, emptyToTime);
+        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visualize.hasPieChartError();
       });
     });
   });
