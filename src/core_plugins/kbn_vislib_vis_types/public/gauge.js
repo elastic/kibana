@@ -31,7 +31,7 @@ export default function GaugeVisType(Private, i18n) {
     title: i18n('kbnVislibVisTypes.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
     icon: 'visGauge',
     description: i18n('kbnVislibVisTypes.gauge.gaugeDescription', {
-      defaultMessage: 'Gauges indicate the status of a metric. Use it to show how a metric\'s value relates to reference threshold values.'
+      defaultMessage: "Gauges indicate the status of a metric. Use it to show how a metric's value relates to reference threshold values."
     }),
     category: CATEGORY.DATA,
     visConfig: {
