@@ -130,12 +130,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getTopNLabel() {
-      const topNLabel = await find.byCssSelector('.rhythm_top_n__label');
+      const topNLabel = await find.byCssSelector('.tvbVisTopN__label');
       return await topNLabel.getVisibleText();
     }
 
     async getTopNCount() {
-      const gaugeCount = await find.byCssSelector('.rhythm_top_n__value');
+      const gaugeCount = await find.byCssSelector('.tvbVisTopN__value');
       return await gaugeCount.getVisibleText();
     }
 

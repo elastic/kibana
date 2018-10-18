@@ -1,41 +1,50 @@
-.rhythm_top_n {
+
+
+.tvbVisTopN {
   position: relative;
   overflow: auto;
   display: flex;
   flex-direction: column;
 
-  tr:hover { td { background-color: rgba(0,0,0,0.1) } }
+  tr:hover td {
+    background-color: $tvbHoverBackgroundColor;
+  }
 }
 
-.rhythm_top_n__labels,
-.rhythm_top_n__value {
+.tvbVisTopN__value {
   text-align: right;
   white-space: nowrap;
   line-height: 0;
   vertical-align: middle;
-}
-
-.rhythm_top_n__label {
-  color: $tvbTextColor;
-  padding: 4px 0;
-}
-
-.rhythm_top_n__value {
   color: $tvbValueColor;
-  padding: 4px 4px 4px 0;
+  padding: $euiSizeXS;
+  padding-bottom: 0;
 }
 
-.rhythm_top_n__bar {
-  padding: 4px 10px;
+.tvbVisTopN__label {
+  color: $tvbTextColor;
+  padding: $euiSizeXS 0;
+}
+
+.tvbVisTopN__bar {
+  padding: $euiSizeXS $euiSizeM;
   vertical-align: middle;
 }
 
-.rhythm_top_n__inner-bar {
-  min-height: 16px;
+.tvbVisTopN__innerBar {
+  min-height: $euiSize;
 }
 
-.rhythm_top_n.reversed {
-  tr:hover { td { background-color: rgba(255,255,255,0.1) } }
-  .rhythm_top_n__label { color: $tvbTextColorReversed; }
-  .rhythm_top_n__value { color: $tvbValueColorReversed; }
+.tvbVisTopN.reversed {
+  tr:hover td {
+    background-color: $tvbHoverBackgroundColorReversed;
+  }
+
+  .tvbVisTopN__label {
+    color: $tvbTextColorReversed;
+  }
+
+  .tvbVisTopN__value {
+    color: $tvbValueColorReversed;
+  }
 }

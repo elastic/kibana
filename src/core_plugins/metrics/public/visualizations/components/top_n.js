@@ -59,14 +59,14 @@ class TopN extends Component {
           onClick={this.handleClick({ lastValue, ...item })}
           style={styles.row}
         >
-          <td width="1*" className="rhythm_top_n__label">{ item.label }</td>
-          <td width="100%" className="rhythm_top_n__bar">
+          <td width="1*" className="tvbVisTopN__label">{ item.label }</td>
+          <td width="100%" className="tvbVisTopN__bar">
             <div
-              className="rhythm_top_n__inner-bar"
+              className="tvbVisTopN__innerBar"
               style={styles.innerBar}
             />
           </td>
-          <td width="1*" className="rhythm_top_n__value" data-test-subj="tsvbTopNValue">{ value }</td>
+          <td width="1*" className="tvbVisTopN__value" data-test-subj="tsvbTopNValue">{ value }</td>
         </tr>
       );
     };
@@ -80,14 +80,14 @@ class TopN extends Component {
     }, 0);
 
     const rows = this.props.series.map(this.renderRow(maxValue));
-    let className = 'rhythm_top_n';
+    let className = 'tvbVisTopN';
     if (this.props.reversed) {
       className += ' reversed';
     }
 
     return (
       <div className={className}>
-        <table className="rhythm_top_n__table">
+        <table className="tvbVisTopN__table">
           <tbody>
             { rows }
           </tbody>
