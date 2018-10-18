@@ -122,7 +122,7 @@ class ImageUploadUI extends React.Component {
         <Loading
           animated
           text={intl.formatMessage({
-            id: 'xpack.canvas.uis.arguments.imageUpload,imageLoadingText',
+            id: 'xpack.canvas.uis.arguments.imageUpload.imageLoadingText',
             defaultMessage: 'Image uploading',
           })}
         />
@@ -138,11 +138,11 @@ class ImageUploadUI extends React.Component {
           defaultValue={this.state.url}
           inputRef={ref => (this.inputRefs.srcUrlText = ref)}
           placeholder={intl.formatMessage({
-            id: 'xpack.canvas.uis.arguments.imageUpload.inputPlaceholder',
+            id: 'xpack.canvas.uis.arguments.imageUpload.imageUrlPlaceholder',
             defaultMessage: 'Image URL',
           })}
           aria-label={intl.formatMessage({
-            id: 'xpack.canvas.uis.arguments.imageUpload.inputAriaLabel',
+            id: 'xpack.canvas.uis.arguments.imageUpload.imageUrlAriaLabel',
             defaultMessage: 'Image URL',
           })}
         />

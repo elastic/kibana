@@ -54,7 +54,7 @@ class EssqlDatasource extends PureComponent {
         isInvalid={isInvalid}
         label={
           <FormattedMessage
-            id="xpack.canvas.uis.datasource.essqlFormRowQueryLabel"
+            id="xpack.canvas.uis.datasource.essql.elasticsearchSQLQueryFormRowLabel"
             defaultMessage="Elasticsearch SQL query"
           />
         }

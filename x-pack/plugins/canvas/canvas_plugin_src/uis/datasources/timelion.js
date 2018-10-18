@@ -52,13 +52,13 @@ const TimelionDatasource = ({ args, updateArgs }) => {
       <EuiText size="xs">
         <h3>
           <FormattedMessage
-            id="xpack.canvas.uis.datasource.timelionTitle"
+            id="xpack.canvas.uis.datasource.timelion.timelionTitle"
             defaultMessage="Timelion"
           />
         </h3>
         <p>
           <FormattedMessage
-            id="xpack.canvas.uis.datasource.timelionDescription"
+            id="xpack.canvas.uis.datasource.timelion.timelionDescription"
             defaultMessage="Canvas integrates with Kibana's Timelion application to allow you to use Timelion queries to pull back timeseries data in a tabular format that can be used with Canvas elements."
           />
         </p>
@@ -69,13 +69,13 @@ const TimelionDatasource = ({ args, updateArgs }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.canvas.uis.datasource.timelionFormRowQueryLabel"
+            id="xpack.canvas.uis.datasource.timelion.queryFormRowLabel"
             defaultMessage="Query"
           />
         }
         helpText={
           <FormattedMessage
-            id="xpack.canvas.uis.datasource.timelionFormRowQueryHelpText"
+            id="xpack.canvas.uis.datasource.timelion.queryFormRowHelpText"
             defaultMessage="Lucene Query String syntax"
           />
         }
@@ -92,13 +92,13 @@ const TimelionDatasource = ({ args, updateArgs }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.canvas.uis.datasource.timelionFormRowIntervalLabel"
+            id="xpack.canvas.uis.datasource.timelion.intervalFormRowLabel"
             defaultMessage="Interval"
           />
         }
         helpText={
           <FormattedMessage
-            id="xpack.canvas.uis.datasource.timelionFormRowIntervalHelpText"
+            id="xpack.canvas.uis.datasource.timelion.intervalFormRowHelpText"
             defaultMessage="Accepts Elasticsearch date math: 1w, 5d, 10s, or auto"
           />
         }
@@ -111,7 +111,7 @@ const TimelionDatasource = ({ args, updateArgs }) => {
         color="warning"
         title={
           <FormattedMessage
-            id="xpack.canvas.uis.datasource.timelionTipsTitle"
+            id="xpack.canvas.uis.datasource.timelion.someTipsTitle"
             defaultMessage="Some tips"
           />
         }
@@ -120,13 +120,13 @@ const TimelionDatasource = ({ args, updateArgs }) => {
         <ul>
           <li>
             <FormattedMessage
-              id="xpack.canvas.uis.datasource.timelionFirstTipDescription"
+              id="xpack.canvas.uis.datasource.timelion.howToAddTimeRangeDescription"
               defaultMessage="Timelion requires a time range, you should add a time filter element to your page somewhere, or use the code editor to pass in a time filter."
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.canvas.uis.datasource.timelionSecondTipDescription"
+              id="xpack.canvas.uis.datasource.timelion.whatDoesNotTranslateToCanvasDataTableDescription"
               defaultMessage="TSome Timelion functions, such as {color}, don't translate to a Canvas data table. Anything todo with data manipulation should work grand."
               values={{
                 color: <EuiCode>.color()</EuiCode>,

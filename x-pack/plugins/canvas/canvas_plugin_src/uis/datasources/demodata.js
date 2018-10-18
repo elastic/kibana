@@ -14,13 +14,13 @@ const DemodataDatasource = () => (
   <EuiText>
     <h3>
       <FormattedMessage
-        id="xpack.canvas.uis.datasource.demodataTitle"
+        id="xpack.canvas.uis.datasource.demodata.demodataTitle"
         defaultMessage="You are using demo data"
       />
     </h3>
     <p>
       <FormattedMessage
-        id="xpack.canvas.uis.datasource.demodataDescription"
+        id="xpack.canvas.uis.datasource.demodata.demodataDescription"
         defaultMessage="This data source is connected to every Canvas element by default. Its purpose is to give you
         some playground data to get started. The demo set contains 4 strings, 3 numbers and a date.
         Feel free to experiment and, when you're ready, click {changeDatasource} link
@@ -29,7 +29,7 @@ const DemodataDatasource = () => (
           changeDatasource: (
             <strong>
               <FormattedMessage
-                id="xpack.canvas.uis.datasource.demodataDescrition.changeYourDatasourceText"
+                id="xpack.canvas.uis.datasource.demodata.demodataDescription.changeYourDatasourceFragmentText"
                 defaultMessage="Change your data source"
               />
             </strong>
