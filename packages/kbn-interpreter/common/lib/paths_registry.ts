@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { PathLike } from 'fs';
+
 class PathsRegistry {
   private paths: Map<string, string[]>;
 
@@ -24,20 +26,19 @@ class PathsRegistry {
     this.paths = new Map();
   }
 
-  public register = (type: string, paths: any) => {
+  public register = (type: string, paths: PathLike | PathLike[]) => {
     if (!type) {
       throw new Error(`Register requires a type`);
     }
     const lowerCaseType = type.toLowerCase();
 
-    const pathArray = Array.isArray(paths) ? paths : [paths];
+    const pathArray: PathLike[] = Array.isArray(paths) ? paths : [paths];
     if (!this.paths.has(lowerCaseType)) {
       this.paths.set(lowerCaseType, []);
     }
 
     pathArray.forEach(p => {
-      // @ts-ignore
-      this.paths.get(lowerCaseType).push(p);
+      this.paths.get(lowerCaseType)!.push(p);
     });
   };
 
@@ -51,12 +52,12 @@ class PathsRegistry {
     return [...this.paths.values()];
   };
 
-  public get = (type: string) => {
-    if (type === undefined) {
+  public get = (type: string): PathLike[] => {
+    if (!type) {
       return [];
     }
     const lowerCaseType = type.toLowerCase();
-    return this.paths.has(lowerCaseType) ? this.paths.get(lowerCaseType) : [];
+    return this.paths.has(lowerCaseType) ? this.paths.get(lowerCaseType)! : [];
   };
 
   public reset = () => {
