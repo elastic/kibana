@@ -335,7 +335,7 @@ CORS configuration of the server permits requests from the Kibana application on
     }
 
     const titleText = this._metricsAgg.makeLabel();
-    const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
+    const $title = $('<div>').addClass('visMapLegend__title').text(titleText);
     jqueryDiv.append($title);
 
     this._legendColors.forEach((color) => {

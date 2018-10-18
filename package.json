@@ -61,6 +61,9 @@
     "type": "git",
     "url": "https://github.com/elastic/kibana.git"
   },
+  "resolutions": {
+    "**/@types/node": "8.10.21"
+  },
   "dependencies": {
     "@elastic/eui": "4.4.1",
     "@elastic/filesaver": "1.1.2",
@@ -73,6 +76,8 @@
     "@kbn/pm": "link:packages/kbn-pm",
     "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
+    "@types/mustache": "^0.8.31",
+    "JSONStream": "1.1.1",
     "abortcontroller-polyfill": "^1.1.9",
     "angular": "1.6.9",
     "angular-aria": "1.6.6",
@@ -134,7 +139,7 @@
     "leaflet.heat": "0.2.0",
     "less": "2.7.1",
     "less-loader": "4.0.5",
-    "lodash": "3.10.1",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lru-cache": "4.1.1",
     "markdown-it": "^8.4.1",
     "minimatch": "^3.0.4",
@@ -214,9 +219,9 @@
     "@kbn/eslint-plugin-license-header": "link:packages/kbn-eslint-plugin-license-header",
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "@kbn/test": "link:packages/kbn-test",
+    "@octokit/rest": "^15.10.0",
     "@types/angular": "^1.6.50",
     "@types/angular-mocks": "^1.7.0",
-    "@octokit/rest": "^15.10.0",
     "@types/babel-core": "^6.25.5",
     "@types/bluebird": "^3.1.1",
     "@types/boom": "^7.2.0",
@@ -261,7 +266,7 @@
     "chance": "1.0.10",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
-    "chromedriver": "2.41.0",
+    "chromedriver": "2.42.1",
     "classnames": "2.2.5",
     "dedent": "^0.7.0",
     "enzyme": "3.2.0",
@@ -346,6 +351,6 @@
   },
   "engines": {
     "node": "8.11.4",
-    "yarn": "^1.6.0"
+    "yarn": "^1.10.1"
   }
 }
