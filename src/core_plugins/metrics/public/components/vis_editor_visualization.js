@@ -147,7 +147,7 @@ class VisEditorVisualization extends Component {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiText color={dirty ? 'text' : 'subdued'} size="xs">
+          <EuiText color={dirty ? 'default' : 'subdued'} size="xs">
             <p>
               {applyMessage}
             </p>
