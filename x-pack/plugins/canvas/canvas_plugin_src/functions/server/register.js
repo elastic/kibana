@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functions } from './index';
+import { functions } from './src/index';
 
 functions.forEach(canvas.register);

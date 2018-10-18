@@ -11,6 +11,7 @@ import {
   getSeverity,
   getSeverityWithLow,
   getSeverityColor,
+  getMultiBucketImpactLabel,
   getEntityFieldName,
   getEntityFieldValue,
   showActualForFunction,
@@ -277,6 +278,35 @@ describe('ML - anomaly utils', () => {
     it('returns correct hex code for unknown for scores less than 0 or string input', () => {
       expect(getSeverityColor(-10)).to.be('#ffffff');
       expect(getSeverityColor('value')).to.be('#ffffff');
+    });
+
+  });
+
+  describe('getMultiBucketImpactLabel', () => {
+
+    it('returns high for 3 <= score <= 5', () => {
+      expect(getMultiBucketImpactLabel(3)).to.be('high');
+      expect(getMultiBucketImpactLabel(5)).to.be('high');
+    });
+
+    it('returns medium for 2 <= score < 3', () => {
+      expect(getMultiBucketImpactLabel(2)).to.be('medium');
+      expect(getMultiBucketImpactLabel(2.99)).to.be('medium');
+    });
+
+    it('returns low for 1 <= score < 2', () => {
+      expect(getMultiBucketImpactLabel(1)).to.be('low');
+      expect(getMultiBucketImpactLabel(1.99)).to.be('low');
+    });
+
+    it('returns none for -5 <= score < 1', () => {
+      expect(getMultiBucketImpactLabel(-5)).to.be('none');
+      expect(getMultiBucketImpactLabel(0.99)).to.be('none');
+    });
+
+    it('returns expected label when impact outside normal bounds', () => {
+      expect(getMultiBucketImpactLabel(10)).to.be('high');
+      expect(getMultiBucketImpactLabel(-10)).to.be('none');
     });
 
   });

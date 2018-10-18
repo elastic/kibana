@@ -57,7 +57,7 @@ function moveElementLayer(workpadState, pageId, elementId, movement) {
 
 export const elementsReducer = handleActions(
   {
-    // TODO: This takes the entire element, which is not neccesary, it could just take the id.
+    // TODO: This takes the entire element, which is not necessary, it could just take the id.
     [actions.setExpression]: (workpadState, { payload }) => {
       const { expression, pageId, elementId } = payload;
       return assignElementProperties(workpadState, pageId, elementId, { expression });
@@ -85,14 +85,18 @@ export const elementsReducer = handleActions(
 
       return push(workpadState, ['pages', pageIndex, 'elements'], element);
     },
-    [actions.removeElement]: (workpadState, { payload: { pageId, elementId } }) => {
+    [actions.removeElements]: (workpadState, { payload: { pageId, elementIds } }) => {
       const pageIndex = getPageIndexById(workpadState, pageId);
       if (pageIndex < 0) return workpadState;
 
-      const elementIndex = getElementIndexById(workpadState.pages[pageIndex], elementId);
-      if (elementIndex < 0) return workpadState;
+      const elementIndices = elementIds
+        .map(elementId => getElementIndexById(workpadState.pages[pageIndex], elementId))
+        .sort((a, b) => b - a); // deleting from end toward beginning, otherwise indices will become off - todo fuse loops!
 
-      return del(workpadState, ['pages', pageIndex, 'elements', elementIndex]);
+      return elementIndices.reduce(
+        (state, nextElementIndex) => del(state, ['pages', pageIndex, 'elements', nextElementIndex]),
+        workpadState
+      );
     },
   },
   {}

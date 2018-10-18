@@ -80,9 +80,9 @@ export class TelemetryOptIn extends React.Component {
         button={readMoreButton}
         isOpen={showMoreTelemetryInfo}
         closePopover={this.closeReadMorePopover}
-        className="licenseManagement__baseline"
+        className="eui-AlignBaseline"
       >
-        <EuiText className="licenseManagement__narrowText" >
+        <EuiText className="licManagement__narrowText" >
           <p>
         This feature periodically sends basic feature usage statistics.
         This information will not be shared outside of Elastic.

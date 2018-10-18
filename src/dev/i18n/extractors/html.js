@@ -120,6 +120,34 @@ function trimCurlyBraces(string) {
   return string.slice(2, -2).trim();
 }
 
+/**
+ * Removes parentheses from the start and the end of a string.
+ *
+ * Example: `('id' | i18n: { defaultMessage: 'Message' })`
+ * @param {string} string string to trim
+ */
+function trimParentheses(string) {
+  if (string.startsWith('(') && string.endsWith(')')) {
+    return string.slice(1, -1);
+  }
+
+  return string;
+}
+
+/**
+ * Removes one-time binding operator `::` from the start of a string.
+ *
+ * Example: `::'id' | i18n: { defaultMessage: 'Message' }`
+ * @param {string} string string to trim
+ */
+function trimOneTimeBindingOperator(string) {
+  if (string.startsWith('::')) {
+    return string.slice(2);
+  }
+
+  return string;
+}
+
 function* getFilterMessages(htmlContent) {
   const expressions = (htmlContent.match(ANGULAR_EXPRESSION_REGEX) || [])
     .filter(expression => expression.includes(I18N_FILTER_MARKER))
@@ -127,7 +155,10 @@ function* getFilterMessages(htmlContent) {
 
   for (const expression of expressions) {
     const filterStart = expression.indexOf(I18N_FILTER_MARKER);
-    const idExpression = expression.slice(0, filterStart).trim();
+    const idExpression = trimParentheses(
+      trimOneTimeBindingOperator(expression.slice(0, filterStart).trim())
+    );
+
     const filterObjectExpression = expression.slice(filterStart + I18N_FILTER_MARKER.length).trim();
 
     if (!filterObjectExpression || !idExpression) {

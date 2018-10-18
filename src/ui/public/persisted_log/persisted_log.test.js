@@ -22,6 +22,12 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import { PersistedLog } from './';
 
+jest.mock('ui/chrome', () => {
+  return {
+    getBasePath: () => `/some/base/path`
+  };
+});
+
 const historyName = 'testHistory';
 const historyLimit = 10;
 const payload = [

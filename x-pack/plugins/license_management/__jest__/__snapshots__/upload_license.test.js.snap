@@ -86,6 +86,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                         focusTrapOptions={
                           Object {
                             "fallbackFocus": [Function],
+                            "initialFocus": undefined,
                           }
                         }
                       >

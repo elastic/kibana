@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, intl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
-import { SourceFiltersTableComponent } from '../source_filters_table';
+import { SourceFiltersTable } from '../source_filters_table';
 
 jest.mock('@elastic/eui', () => ({
   EuiButton: 'eui-button',
@@ -57,11 +57,9 @@ const indexPattern = {
 
 
 describe('SourceFiltersTable', () => {
-  afterEach(() => intl.formatMessage.mockClear());
-
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <SourceFiltersTableComponent
+    const component = shallow(
+      <SourceFiltersTable
         indexPattern={indexPattern}
         fieldWildcardMatcher={() => {}}
       />
@@ -71,8 +69,8 @@ describe('SourceFiltersTable', () => {
   });
 
   it('should filter based on the query bar', async () => {
-    const component = shallowWithIntl(
-      <SourceFiltersTableComponent
+    const component = shallow(
+      <SourceFiltersTable
         indexPattern={indexPattern}
         fieldWildcardMatcher={() => {}}
       />
@@ -83,8 +81,8 @@ describe('SourceFiltersTable', () => {
   });
 
   it('should should a loading indicator when saving', async () => {
-    const component = shallowWithIntl(
-      <SourceFiltersTableComponent
+    const component = shallow(
+      <SourceFiltersTable
         indexPattern={{
           sourceFilters: [{ value: 'tim*' }]
         }}
@@ -97,8 +95,8 @@ describe('SourceFiltersTable', () => {
   });
 
   it('should show a delete modal', async () => {
-    const component = shallowWithIntl(
-      <SourceFiltersTableComponent
+    const component = shallow(
+      <SourceFiltersTable
         indexPattern={{
           sourceFilters: [{ value: 'tim*' }]
         }}
@@ -108,16 +106,13 @@ describe('SourceFiltersTable', () => {
 
     component.instance().startDeleteFilter({ value: 'tim*' });
     component.update(); // We are not calling `.setState` directly so we need to re-render
-    expect({
-      component,
-      i18n: intl.formatMessage.mock.calls,
-    }).toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 
   it('should remove a filter', async () => {
     const save = jest.fn();
-    const component = shallowWithIntl(
-      <SourceFiltersTableComponent
+    const component = shallow(
+      <SourceFiltersTable
         indexPattern={{
           save,
           sourceFilters: [{ value: 'tim*' }, { value: 'na*' }]
@@ -137,8 +132,8 @@ describe('SourceFiltersTable', () => {
 
   it('should add a filter', async () => {
     const save = jest.fn();
-    const component = shallowWithIntl(
-      <SourceFiltersTableComponent
+    const component = shallow(
+      <SourceFiltersTable
         indexPattern={{
           save,
           sourceFilters: [{ value: 'tim*' }]
@@ -156,8 +151,8 @@ describe('SourceFiltersTable', () => {
 
   it('should update a filter', async () => {
     const save = jest.fn();
-    const component = shallowWithIntl(
-      <SourceFiltersTableComponent
+    const component = shallow(
+      <SourceFiltersTable
         indexPattern={{
           save,
           sourceFilters: [{ value: 'tim*' }]
