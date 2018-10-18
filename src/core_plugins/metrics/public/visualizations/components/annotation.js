@@ -21,47 +21,30 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import moment from 'moment';
 import reactcss from 'reactcss';
+import { EuiToolTip } from '@elastic/eui';
 class Annotation extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      showTooltip: false
-    };
-    this.handleMouseOut = this.handleMouseOut.bind(this);
-    this.handleMouseOver = this.handleMouseOver.bind(this);
   }
 
   renderTooltip() {
-    if (!this.state.showTooltip) return null;
     const [ timestamp, messageSource ] = this.props.series;
-    const reversed = this.props.reversed ? '-reversed' : '';
     const messages = messageSource.map((message, i) => {
       return (
         <div
           key={`${message}-${i}`}
-          className="annotation__message"
+          className="tvbVisAnnotation__message"
         >{ message }
         </div>
       );
     });
     return (
-      <div className="annotation__tooltip">
-        <div className={`annotation__tooltip-body${reversed}`}>
-          <div className={`annotation__timestamp${reversed}`}>{ moment(timestamp).format('lll') }</div>
-          { messages }
-        </div>
-        <div className={`annotation__caret${reversed}`} />
+      <div>
+        <div className={`tvbVisAnnotation__timestamp`}>{ moment(timestamp).format('lll') }</div>
+        { messages }
       </div>
     );
-  }
-
-  handleMouseOver() {
-    this.setState({ showTooltip: true });
-  }
-
-  handleMouseOut() {
-    this.setState({ showTooltip: false });
   }
 
   render() {
@@ -82,18 +65,11 @@ class Annotation extends Component {
       }
     });
     return(
-      <div className="annotation" style={style.container}>
-        <div className="annotation__line" style={style.line} />
-        <div
-          onFocus={this.handleMouseOver}
-          onBlur={this.handleMouseOut}
-          onMouseOver={this.handleMouseOver}
-          onMouseOut={this.handleMouseOut}
-          className="annotation__icon"
-        >
-          <i className={`fa ${icon}`} style={style.icon} />
-          { tooltip }
-        </div>
+      <div className="tvbVisAnnotation" style={style.container}>
+        <div className="tvbVisAnnotation__line" style={style.line} />
+        <EuiToolTip className="tvbVisAnnotation__tooltip" content={tooltip} position="bottom">
+          <i className={`tvbVisAnnotation__icon fa ${icon}`} style={style.icon} />
+        </EuiToolTip>
       </div>
     );
   }
