@@ -38,7 +38,7 @@ interface JsonObject {
   [key: string]: JsonValue;
 }
 
-interface JsonArray extends Array<JsonValue> { }
+interface JsonArray extends Array<JsonValue> {}
 
 export function fromKueryExpression(
   expression: string,

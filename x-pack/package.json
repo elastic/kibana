@@ -20,6 +20,9 @@
       "intermediateBuildDirectory": "build/plugin/kibana/x-pack"
     }
   },
+  "resolutions": {
+    "**/@types/node": "8.10.21"
+  },
   "devDependencies": {
     "@kbn/dev-utils": "link:../packages/kbn-dev-utils",
     "@kbn/es": "link:../packages/kbn-es",
@@ -38,6 +41,7 @@
     "@types/history": "^4.6.2",
     "@types/jest": "^23.3.1",
     "@types/joi": "^10.4.4",
+    "@types/jsonwebtoken": "^7.2.7",
     "@types/lodash": "^3.10.1",
     "@types/mocha": "^5.2.5",
     "@types/pngjs": "^3.3.1",
@@ -46,7 +50,7 @@
     "@types/react-datepicker": "^1.1.5",
     "@types/react-dom": "^16.0.5",
     "@types/react-redux": "^6.0.6",
-    "@types/react-router-dom": "^4.2.6",
+    "@types/react-router-dom": "4.2.6",
     "@types/reduce-reducers": "^0.1.3",
     "@types/sinon": "^5.0.1",
     "@types/supertest": "^2.0.5",
@@ -158,6 +162,7 @@
     "extract-zip": "1.5.0",
     "file-saver": "^1.3.8",
     "font-awesome": "4.4.0",
+    "formsy-react": "^1.1.5",
     "get-port": "2.1.0",
     "getos": "^3.1.0",
     "glob": "6.0.4",
@@ -174,6 +179,7 @@
     "isomorphic-fetch": "2.2.1",
     "joi": "6.10.1",
     "jquery": "^3.3.1",
+    "jsonwebtoken": "^8.3.0",
     "jstimezonedetect": "1.0.5",
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lodash.clone": "^4.5.0",
