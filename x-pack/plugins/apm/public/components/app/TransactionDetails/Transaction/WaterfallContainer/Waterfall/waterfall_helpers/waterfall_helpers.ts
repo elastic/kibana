@@ -13,7 +13,7 @@ export interface IWaterfall {
   services: string[];
   childrenCount: number;
   root: IWaterfallItem;
-  indexedWaterfall: IWaterfallIndex;
+  itemsById: IWaterfallIndex;
 }
 
 interface IWaterfallItemBase {
@@ -111,7 +111,7 @@ export function getWaterfallRoot(
     items,
     item => (item.parentId ? item.parentId : 'root')
   );
-  const indexedWaterfall: IWaterfallIndex = {};
+  const itemsById: IWaterfallIndex = {};
 
   const itemsByTransactionId = indexBy(
     items.filter(item => item.docType === 'transaction'),
@@ -137,7 +137,7 @@ export function getWaterfallRoot(
 
     // TODO: Think about storing this tree as a single, flat, indexed structure
     // with "children" being an array of ids, instead of it being a real tree
-    indexedWaterfall[item.id] = item;
+    itemsById[item.id] = item;
 
     return {
       ...item,
@@ -146,7 +146,7 @@ export function getWaterfallRoot(
     };
   }
 
-  return { root: getWithChildren(entryTransactionItem), indexedWaterfall };
+  return { root: getWithChildren(entryTransactionItem), itemsById };
 }
 
 export function getWaterfall(
@@ -172,12 +172,12 @@ export function getWaterfall(
     });
 
   const entryTransactionItem = getTransactionItem(entryTransaction);
-  const { root, index } = getWaterfallRoot(items, entryTransactionItem);
+  const { root, itemsById } = getWaterfallRoot(items, entryTransactionItem);
   return {
     duration: root.duration,
     services,
     childrenCount: hits.length,
     root,
-    index
+    itemsById
   };
 }

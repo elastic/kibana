@@ -81,9 +81,10 @@ export class Waterfall extends Component<Props> {
 
   public getFlyOut = () => {
     const { waterfall, location, urlParams } = this.props;
+
     const currentItem =
       urlParams.activeTimelineId &&
-      waterfall.indexedWaterfall[urlParams.activeTimelineId];
+      waterfall.itemsById[urlParams.activeTimelineId];
 
     if (!currentItem) {
       return null;
@@ -106,6 +107,7 @@ export class Waterfall extends Component<Props> {
             onClose={this.onCloseFlyout}
             location={location}
             urlParams={urlParams}
+            waterfall={waterfall}
           />
         );
       default:

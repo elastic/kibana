@@ -5,19 +5,32 @@
  */
 
 import {
+  EuiButton,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-
+// @ts-ignore
+import { Link } from 'react-router-dom';
 // @ts-ignore
 import DiscoverButton from 'x-pack/plugins/apm/public/components/shared/DiscoverButton';
 // @ts-ignore
+import { StickyProperties } from 'x-pack/plugins/apm/public/components/shared/StickyProperties';
+import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import {
+  Transaction,
+  TransactionV2
+} from 'x-pack/plugins/apm/typings/Transaction';
+// @ts-ignore
+import { legacyEncodeURIComponent } from '../../../../../../../utils/url';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
+import {
+  IWaterfall,
+  IWaterfallItem
+} from '../waterfall_helpers/waterfall_helpers';
+import { SecondLevelStickyProperties } from './SecondLevelStickyProperties';
 
 function getDiscoverQuery(id: string) {
   return {
@@ -36,30 +49,50 @@ interface Props {
   transaction?: Transaction;
   location: Location;
   urlParams: IUrlParams;
+  waterfall: IWaterfall;
 }
 
 export function TransactionFlyout({
-  transaction,
+  transaction: transactionGroup,
   onClose,
   location,
-  urlParams
+  urlParams,
+  waterfall
 }: Props) {
-  if (!transaction) {
+  if (!transactionGroup) {
     return null;
   }
 
+  const { context, transaction } = transactionGroup;
+  // fieldName - context.blah.example
+  // label - Example
+  // val - my value for this field
+  // truncated - bool (should truncate value)
+  // if fieldName === @timestamp, it will do the formatting for us
+
   return (
     <EuiFlyout onClose={onClose} size="l">
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>Transaction details</h2>
+          <span>Transaction details</span>
         </EuiTitle>
 
-        <DiscoverButton query={getDiscoverQuery(transaction.transaction.id)}>
+        <DiscoverButton query={getDiscoverQuery(transaction.id)}>
           {`Open in Discover`}
         </DiscoverButton>
+
+        <Link
+          to={`/${context.service.name}/transactions/${
+            transaction.type
+          }/${legacyEncodeURIComponent(transaction.name)}`}
+        >
+          <EuiButton iconType="visLine">
+            View transaction group details
+          </EuiButton>
+        </Link>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <SecondLevelStickyProperties transaction={transactionGroup} />
         <TransactionPropertiesTableForFlyout
           transaction={transaction}
           location={location}

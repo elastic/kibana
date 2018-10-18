@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore
-import { EuiTab } from '@elastic/eui';
+import { EuiSpacer, EuiTab } from '@elastic/eui';
 import { capitalize, first, get } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -27,7 +27,7 @@ function getCurrentTab(tabs: string[] = [], selectedTab: string | null) {
 }
 
 function getTabs(transactionData: Transaction) {
-  const dynamicProps = Object.keys(transactionData.context);
+  const dynamicProps = Object.keys(transactionData.context || {});
   return getPropertyTabNames(dynamicProps);
 }
 
@@ -67,6 +67,9 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
           </EuiTab>
         );
       })}
+
+      <EuiSpacer />
+
       <PropertiesTable
         propData={get(transaction.context, currentTab)}
         propKey={currentTab}
