@@ -169,13 +169,14 @@ describe('QueryBar', () => {
     expect(mockPersistedLogFactory.mock.calls[0][0]).toBe('typeahead:discover-kuery');
   });
 
-  it("Should store the user's query preference in localstorage", () => {
+  it("On language selection, should store the user's preference in localstorage and reset the query", () => {
     const mockStorage = createMockStorage();
+    const mockCallback = jest.fn();
 
     const component = shallow(
       <QueryBar
         query={kqlQuery}
-        onSubmit={noop}
+        onSubmit={mockCallback}
         appName={'discover'}
         indexPatterns={[mockIndexPattern]}
         store={mockStorage}
@@ -185,6 +186,10 @@ describe('QueryBar', () => {
 
     component.find(QueryLanguageSwitcher).simulate('selectLanguage', 'lucene');
     expect(mockStorage.set).toHaveBeenCalledWith('kibana.userQueryLanguage', 'lucene');
+    expect(mockCallback).toHaveBeenCalledWith({
+      query: '',
+      language: 'lucene',
+    });
   });
 
   it('Should call onSubmit with the current query when the user hits enter inside the query bar', () => {
@@ -213,4 +218,12 @@ describe('QueryBar', () => {
       language: 'kuery',
     });
   });
+
+  // TODO gets recent search suggestions from persisted log
+  // TODO stores searches in PersistedLog
+  // TODO sends autocomplete provider suggestions to suggestions component
+  // TODO suggestion selection updates query (call onSubmit to validate)
+  // TODO other keydown keycodes (just snapshot state of suggestion component? or the whole thing to get aria attributes too?)
+  // TODO EuiFieldText onKeyUp
+  // TODO EuiFieldTExt onClick
 });
