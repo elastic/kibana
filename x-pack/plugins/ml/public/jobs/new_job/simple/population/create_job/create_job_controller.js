@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import $ from 'jquery';
 
 import { aggTypes } from 'ui/agg_types/index';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
@@ -523,6 +524,12 @@ module
                     $scope.formConfig.end,
                     'explorer');
 
+                  $timeout(() => {
+                    // Set focus to the View Results button, which also provides
+                    // accessibility feedback that the job is running
+                    $('#job_running_view_results_link').focus();
+                  }, 0);
+
                   loadCharts();
                 })
                 .catch((resp) => {
@@ -575,6 +582,11 @@ module
                   }
                 } else {
                   $scope.jobState = JOB_STATE.FINISHED;
+                  $timeout(() => {
+                    // Set focus to the View Results button, which also provides
+                    // accessibility feedback that the job has finished
+                    $('#job_finished_view_results_link').focus();
+                  }, 0);
                 }
                 jobCheck();
               });
