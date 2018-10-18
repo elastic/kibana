@@ -72,7 +72,7 @@ export function SpanFlyout({
 
   return (
     <EuiFlyout onClose={onClose} size="l">
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2>Span details</h2>
         </EuiTitle>

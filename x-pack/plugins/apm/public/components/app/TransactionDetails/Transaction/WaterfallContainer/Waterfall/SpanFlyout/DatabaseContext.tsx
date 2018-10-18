@@ -26,7 +26,7 @@ import { xcode } from 'react-syntax-highlighter/dist/styles';
 // @ts-ignore
 import sql from 'react-syntax-highlighter/dist/languages/sql';
 
-import { EuiText } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import { DbContext } from '../../../../../../../../typings/Span';
 
 registerLanguage('sql', sql);
@@ -55,9 +55,9 @@ export function DatabaseContext({ dbContext }: Props) {
 
   return (
     <Fragment>
-      <EuiText>
-        <h4>Database statement</h4>
-      </EuiText>
+      <EuiTitle size="xs">
+        <h3>Database statement</h3>
+      </EuiTitle>
       <DatabaseStatement>
         <SyntaxHighlighter
           language={'sql'}
