@@ -16,12 +16,9 @@
   display: flex;
 }
 
-.rhythm_metric__primary {
-}
-
 .rhythm_metric__primary-label {
   text-align: center;
-  color: @textColor;
+  color: $tvbTextColor;
   font-size: 0.5em;
   margin-bottom: 0.25em;
   line-height: 1em;
@@ -29,7 +26,7 @@
 
 .rhythm_metric__primary-value {
   text-align: center;
-  color: @valueColor;
+  color: $tvbValueColor;
   font-size: 1em;
   font-weight: bold;
   line-height: 1em;
@@ -45,13 +42,13 @@
 .rhythm_metric__secondary-label {
   font-size: 0.35em;
   margin-right: 0.3em;
-  color: @textColor;
+  color: $tvbTextColor;
   line-height: 1em;
 }
 
 .rhythm_metric__secondary-value {
   font-size: 0.35em;
-  color: @valueColor;
+  color: $tvbValueColor;
   line-height: 1em;
 }
 

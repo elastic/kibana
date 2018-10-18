@@ -16,12 +16,12 @@
 }
 
 .rhythm_top_n__label {
-  color: @textColor;
+  color: $tvbTextColor;
   padding: 4px 0;
 }
 
 .rhythm_top_n__value {
-  color: @valueColor;
+  color: $tvbValueColor;
   padding: 4px 4px 4px 0;
 }
 
@@ -36,6 +36,6 @@
 
 .rhythm_top_n.reversed {
   tr:hover { td { background-color: rgba(255,255,255,0.1) } }
-  .rhythm_top_n__label { color: @textColorReversed; }
-  .rhythm_top_n__value { color: @valueColorReversed; }
+  .rhythm_top_n__label { color: $tvbTextColorReversed; }
+  .rhythm_top_n__value { color: $tvbValueColorReversed; }
 }

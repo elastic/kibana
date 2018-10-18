@@ -6,7 +6,7 @@
 }
 
 .rhythm_chart__title {
-  color: @textColor;
+  color: $euiTextColor;
   margin: 0 0 10px;
 }
 
@@ -35,7 +35,7 @@
 
 .rhythm_chart__legend-control {
   padding: 6px 2px 0 0;
-  color: @textColor;
+  color: $euiTextColor;
   font-size: 12px;
 
   button {
@@ -75,9 +75,9 @@
     opacity: 0.5;
   }
   padding: 5px;
-  border-bottom: 1px solid @lineColor;
+  border-bottom: 1px solid $tvbLineColor;
   &:first-child {
-    border-top: 1px solid @lineColor;
+    border-top: 1px solid $tvbLineColor;
   }
   display: flex;
   max-width: 170px;
@@ -88,25 +88,25 @@
   overflow: hidden;
   white-space: nowrap;
   span {
-    color: @textColor;
+    color: $euiTextColor;
     margin-left: 5px;
   }
 }
 
 .rhythm_chart__legend_value {
-  color: @valueColor;
+  color: $tvbValueColor;
   margin-left: 3px;
 }
 
 .rhythm_chart.reversed {
-  .rhythm_chart__title { color: @textColorReversed; }
-  .rhythm_chart__legend-control { color: @textColorReversed; }
+  .rhythm_chart__title { color: $tvbTextColorReversed; }
+  .rhythm_chart__legend-control { color: $tvbTextColorReversed; }
   .rhythm_chart__legend_item {
-    border-bottom: 1px solid @lineColorReversed;
-    &:first-child { border-top: 1px solid @lineColorReversed; }
+    border-bottom: 1px solid $tvbLineColorReversed;
+    &:first-child { border-top: 1px solid $tvbLineColorReversed; }
   }
-  .rhythm_chart__legend_label { span { color: @textColorReversed; } }
-  .rhythm_chart__legend_value { color: @valueColorReversed; }
+  .rhythm_chart__legend_label { span { color: $tvbTextColorReversed; } }
+  .rhythm_chart__legend_value { color: $tvbValueColorReversed; }
 }
 
 .rhythm_chart__legend-horizontal,
@@ -142,74 +142,10 @@
 
 .rhythm_chart__axis-label {
   font-size: 0.8em;
-  color: rgba(0,0,0,0.4);
+  color: $tvbTextColor;
   text-align: center;
   min-height: 1.2em;
   &.reversed {
-    color: rgba(255,255,255,0.6);
+    color: $tvbTextColorReversed;
   }
-}
-
-.annotation {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  z-index: 90;
-  align-items: center;
-}
-.annotation__line {
-  flex: 1 0 auto;
-  width: 2px;
-}
-.annotation__icon {
-  position: relative;
-  flex: 0 0 auto;
-  width: 12px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.annotation__tooltip {
-  position: absolute;
-  bottom: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.annotation__message,
-.annotation__timestamp {
-  font-size: 12px;
-}
-.annotation__caret {
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 5px solid rgba(0,0,0,0.7);
-}
-.annotation__caret-reversed {
-  .annotation__caret;
-  border-top: none;
-  border-bottom: 5px solid rgba(0,0,0,0.7);
-}
-.annotation__tooltip-body {
-  border-radius: 4px;
-  padding: 4px;
-  white-space: nowrap;
-  color: white;
-  background-color: rgba(0,0,0,0.7);
-}
-.annotation__tooltip-body-reversed {
-  .annotation__tooltip-body;
-  color: black;
-  background-color: rgba(255,255,255,0.7);
-}
-.annotation__timestamp {
-  color: rgba(255,255,255,0.7);
-
-}
-.annotation__timestamp-reversed {
-  color: rgba(0,0,0,0.7);
 }

@@ -7,6 +7,9 @@
 //   tvbChart__legend--small
 //   tvbChart__legend-isLoading
 
+@import './variables';
+@import './mixins';
+
 // Hacks (mostly todo's)
 @import './hacks';
 
@@ -14,4 +17,7 @@
 @import './ui_sortable';
 
 // Components
-@import 'components/index';
+@import './components/index';
+
+// Visualizations
+@import './visualizations/components/index';
