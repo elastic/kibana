@@ -11,8 +11,7 @@ import CodePreview from '../../shared/CodePreview';
 import { Ellipsis } from '../../shared/Icons';
 import { units, px } from '../../../style/variables';
 import EmptyMessage from '../../shared/EmptyMessage';
-import { EuiLink } from '@elastic/eui';
-import { HeaderXSmall } from '../UIComponents';
+import { EuiLink, EuiText } from '@elastic/eui';
 
 const LibraryFrameToggle = styled.div`
   margin: 0 0 ${px(units.plus)} 0;
@@ -75,7 +74,9 @@ class Stacktrace extends PureComponent {
 
     return (
       <div>
-        <HeaderXSmall>Stacktraces</HeaderXSmall>
+        <EuiText>
+          <h4>Stack traces</h4>
+        </EuiText>
         {getCollapsedLibraryFrames(stackframes).map((item, i) => {
           if (!item.libraryFrame) {
             return (

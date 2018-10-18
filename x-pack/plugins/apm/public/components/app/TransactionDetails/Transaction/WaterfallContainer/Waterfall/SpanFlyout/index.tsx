@@ -8,6 +8,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiTitle
 } from '@elastic/eui';
 import { get } from 'lodash';
@@ -24,21 +25,26 @@ import Stacktrace from '../../../../../../shared/Stacktrace';
 import { DatabaseContext } from './DatabaseContext';
 import { StickySpanProperties } from './StickySpanProperties';
 
+import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { Span } from '../../../../../../../../typings/Span';
 // @ts-ignore
 import DiscoverButton from '../../../../../../shared/DiscoverButton';
+import { StickyTransactionProperties } from './StickyTransactionProperties';
 
 const StackTraceContainer = styled.div`
   margin-top: ${px(unit)};
 `;
 
-function getDiscoverQuery(id: number) {
+function getDiscoverQuery(span: Span) {
   return {
     _a: {
       interval: 'auto',
       query: {
         language: 'lucene',
-        query: `span.hex_id:${id}`
+        query:
+          span.version === 'v2'
+            ? `span.hex_id:${span.span.hex_id}`
+            : `span.id:${span.span.id}`
       }
     }
   };
@@ -46,11 +52,17 @@ function getDiscoverQuery(id: number) {
 
 interface Props {
   span?: Span;
+  parentTransaction: Transaction;
   totalDuration: number;
   onClose: () => void;
 }
 
-export function SpanFlyout({ span, totalDuration, onClose }: Props) {
+export function SpanFlyout({
+  span,
+  parentTransaction,
+  totalDuration,
+  onClose
+}: Props) {
   if (!span) {
     return null;
   }
@@ -65,11 +77,13 @@ export function SpanFlyout({ span, totalDuration, onClose }: Props) {
           <h2>Span details</h2>
         </EuiTitle>
 
-        <DiscoverButton query={getDiscoverQuery(span.span.id)}>
+        <DiscoverButton query={getDiscoverQuery(span)}>
           {`View span in Discover`}
         </DiscoverButton>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <StickyTransactionProperties transaction={parentTransaction} />
+        <EuiHorizontalRule />
         <StickySpanProperties span={span} totalDuration={totalDuration} />
         <DatabaseContext dbContext={dbContext} />
         <StackTraceContainer>

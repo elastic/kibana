@@ -95,6 +95,7 @@ export class Waterfall extends Component<Props, State> {
           <SpanFlyout
             totalDuration={waterfall.duration}
             span={currentItem.span}
+            parentTransaction={currentItem.parentTransaction}
             onClose={this.onCloseFlyout}
           />
         );
