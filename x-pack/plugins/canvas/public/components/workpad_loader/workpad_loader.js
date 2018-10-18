@@ -265,8 +265,56 @@ export class WorkpadLoader extends React.PureComponent {
       sortDirection,
     } = this.state;
     const { canUserWrite } = this.props;
-
     const isLoading = this.props.workpads == null;
+
+    let createButton = (
+      <WorkpadCreate
+        createPending={createPending}
+        onCreate={this.createWorkpad}
+        disabled={!canUserWrite}
+      />
+    );
+
+    let deleteButton = (
+      <EuiButton
+        size="s"
+        color="danger"
+        iconType="trash"
+        onClick={this.openRemoveConfirm}
+        disabled={!canUserWrite}
+      >
+        {`Delete (${selectedWorkpads.length})`}
+      </EuiButton>
+    );
+
+    const downloadButton = (
+      <EuiButton size="s" color="secondary" onClick={this.downloadWorkpads} iconType="sortDown">
+        {`Download (${selectedWorkpads.length})`}
+      </EuiButton>
+    );
+
+    let uploadButton = (
+      <WorkpadUpload onUpload={this.uploadWorkpad} disabled={createPending || !canUserWrite} />
+    );
+
+    if (!canUserWrite) {
+      createButton = (
+        <EuiToolTip content="You don't have permission to create workpads">
+          {createButton}
+        </EuiToolTip>
+      );
+      deleteButton = (
+        <EuiToolTip content="You don't have permission to delete workpads">
+          {deleteButton}
+        </EuiToolTip>
+      );
+      uploadButton = (
+        <EuiToolTip content="You don't have permission to upload workpads">
+          {uploadButton}
+        </EuiToolTip>
+      );
+    }
+
     const modalTitle =
       selectedWorkpads.length === 1
         ? `Delete workpad '${selectedWorkpads[0].name}'?`
@@ -303,33 +351,8 @@ export class WorkpadLoader extends React.PureComponent {
                     <EuiFlexGroup gutterSize="s">
                       {selectedWorkpads.length > 0 && (
                         <Fragment>
-                          <EuiFlexItem grow={false}>
-                            <EuiButton
-                              size="s"
-                              color="secondary"
-                              onClick={this.downloadWorkpads}
-                              iconType="sortDown"
-                            >
-                              {`Download (${selectedWorkpads.length})`}
-                            </EuiButton>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiToolTip
-                              content={
-                                canUserWrite ? '' : `You don't have permission to delete workpads`
-                              }
-                            >
-                              <EuiButton
-                                size="s"
-                                color="danger"
-                                iconType="trash"
-                                onClick={this.openRemoveConfirm}
-                                disabled={!canUserWrite}
-                              >
-                                {`Delete (${selectedWorkpads.length})`}
-                              </EuiButton>
-                            </EuiToolTip>
-                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>{downloadButton}</EuiFlexItem>
+                          <EuiFlexItem grow={false}>{deleteButton}</EuiFlexItem>
                         </Fragment>
                       )}
                       <EuiFlexItem grow={1}>
@@ -344,31 +367,8 @@ export class WorkpadLoader extends React.PureComponent {
                   </EuiFlexItem>
                   <EuiFlexItem grow={2}>
                     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" wrap>
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          content={
-                            canUserWrite ? '' : `You don't have permission to upload workpads`
-                          }
-                        >
-                          <WorkpadUpload
-                            onUpload={this.uploadWorkpad}
-                            disabled={createPending || !canUserWrite}
-                          />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          content={
-                            canUserWrite ? '' : "You don't have permission to create workpads"
-                          }
-                        >
-                          <WorkpadCreate
-                            createPending={createPending}
-                            onCreate={this.createWorkpad}
-                            disabled={!canUserWrite}
-                          />
-                        </EuiToolTip>
-                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{uploadButton}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
