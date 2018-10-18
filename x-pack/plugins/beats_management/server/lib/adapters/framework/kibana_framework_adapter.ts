@@ -115,24 +115,12 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       };
     }
 
-    const VALID_LICENSE_MODES = ['trial', 'gold', 'platinum'];
+    const VALID_LICENSE_MODES = ['trial', 'standard', 'gold', 'platinum'];
 
     const isLicenseValid = xPackInfo.license.isOneOf(VALID_LICENSE_MODES);
     const isLicenseActive = xPackInfo.license.isActive();
     const licenseType = xPackInfo.license.getType();
     const isSecurityEnabled = xPackInfo.feature('security').isEnabled();
-
-    // Security is not enabled in ES
-    if (!isSecurityEnabled) {
-      const message =
-        'Security must be enabled in order to use Beats centeral management features.' +
-        ' Please set xpack.security.enabled: true in your elasticsearch.yml.';
-      return {
-        securityEnabled: false,
-        licenseValid: true,
-        message,
-      };
-    }
 
     // License is not valid
     if (!isLicenseValid) {
@@ -149,6 +137,18 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
         securityEnabled: true,
         licenseValid: false,
         message: `You cannot edit, create, or delete your Beats centeral management configurations because your ${licenseType} license has expired.`,
+      };
+    }
+
+    // Security is not enabled in ES
+    if (!isSecurityEnabled) {
+      const message =
+        'Security must be enabled in order to use Beats centeral management features.' +
+        ' Please set xpack.security.enabled: true in your elasticsearch.yml.';
+      return {
+        securityEnabled: false,
+        licenseValid: true,
+        message,
       };
     }
 
