@@ -153,7 +153,7 @@ export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
       });
 
       throw createFailError(
-        `Couldn't parse default message with intl-messageformat-parser ("${messageId}"):\n${errorWithContext}`
+        `Couldn't parse default message ("${messageId}"):\n${errorWithContext}`
       );
     }
 
@@ -162,29 +162,29 @@ export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
 
   const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
 
+  // skip validation if intl-messageformat-parser didn't return an AST with nonempty elements array
   if (!defaultMessageAst || !defaultMessageAst.elements || !defaultMessageAst.elements.length) {
     return;
   }
 
-  const defaultMessageReferencesKeys = defaultMessageAst.elements.reduce((keys, element) => {
+  const defaultMessageValueReferences = defaultMessageAst.elements.reduce((keys, element) => {
     if (element.type === ARGUMENT_ELEMENT_TYPE) {
       keys.push(element.id);
     }
     return keys;
   }, []);
 
-  const missingValuesKeys = difference(defaultMessageReferencesKeys, valuesKeys);
-  const unusedValuesKeys = difference(valuesKeys, defaultMessageReferencesKeys);
-
-  if (unusedValuesKeys.length) {
-    throw createFailError(
-      `"values" object contains unused properties ("${messageId}"):\n[${unusedValuesKeys}].`
-    );
-  }
-
+  const missingValuesKeys = difference(defaultMessageValueReferences, valuesKeys);
   if (missingValuesKeys.length) {
     throw createFailError(
       `some properties are missing in "values" object ("${messageId}"):\n[${missingValuesKeys}].`
+    );
+  }
+
+  const unusedValuesKeys = difference(valuesKeys, defaultMessageValueReferences);
+  if (unusedValuesKeys.length) {
+    throw createFailError(
+      `"values" object contains unused properties ("${messageId}"):\n[${unusedValuesKeys}].`
     );
   }
 }
@@ -197,25 +197,25 @@ export function extractMessageIdFromNode(node) {
   return node.value;
 }
 
-export function extractMessageValueFromNode(node, id) {
+export function extractMessageValueFromNode(node, messageId) {
   if (!isStringLiteral(node)) {
-    throw createFailError(`defaultMessage value should be a string literal ("${id}").`);
+    throw createFailError(`defaultMessage value should be a string literal ("${messageId}").`);
   }
 
   return node.value;
 }
 
-export function extractContextValueFromNode(node, id) {
+export function extractContextValueFromNode(node, messageId) {
   if (!isStringLiteral(node)) {
-    throw createFailError(`context value should be a string literal ("${id}").`);
+    throw createFailError(`context value should be a string literal ("${messageId}").`);
   }
 
   return node.value;
 }
 
-export function extractValuesKeysFromNode(node, id) {
+export function extractValuesKeysFromNode(node, messageId) {
   if (!isObjectExpression(node)) {
-    throw createFailError(`"values" value should be an object expression ("${id}").`);
+    throw createFailError(`"values" value should be an object expression ("${messageId}").`);
   }
 
   return node.properties.map(

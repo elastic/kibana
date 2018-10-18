@@ -21,6 +21,16 @@ exports[`i18n utils should throw if "values" has a value that is unused in the m
 [url]."
 `;
 
+exports[`i18n utils should throw if "values" property is not provided and defaultMessage requires it 1`] = `
+"some properties are missing in \\"values\\" object (\\"namespace.message.id\\"):
+[username,password,url]."
+`;
+
+exports[`i18n utils should throw if "values" property is provided and defaultMessage doesn't include any references 1`] = `
+"some properties are missing in \\"values\\" object (\\"namespace.message.id\\"):
+[username,password,url]."
+`;
+
 exports[`i18n utils should throw if some key is missing in "values" 1`] = `
 "some properties are missing in \\"values\\" object (\\"namespace.message.id\\"):
 [password]."

@@ -65,33 +65,33 @@ function parseFilterObjectExpression(expression, messageId) {
     throw error;
   }
 
-  for (const node of traverseNodes(ast.program.body)) {
-    if (!isObjectExpression(node)) {
-      continue;
-    }
+  const objectExpressionNode = [...traverseNodes(ast.program.body)].find(node =>
+    isObjectExpression(node)
+  );
 
-    const [messageProperty, contextProperty, valuesProperty] = [
-      DEFAULT_MESSAGE_KEY,
-      CONTEXT_KEY,
-      VALUES_KEY,
-    ].map(key => node.properties.find(property => isPropertyWithKey(property, key)));
-
-    const message = messageProperty
-      ? formatJSString(extractMessageValueFromNode(messageProperty.value, messageId))
-      : undefined;
-
-    const context = contextProperty
-      ? formatJSString(extractContextValueFromNode(contextProperty.value, messageId))
-      : undefined;
-
-    const valuesKeys = valuesProperty
-      ? extractValuesKeysFromNode(valuesProperty.value, messageId)
-      : [];
-
-    return { message, context, valuesKeys };
+  if (!objectExpressionNode) {
+    return {};
   }
 
-  return {};
+  const [messageProperty, contextProperty, valuesProperty] = [
+    DEFAULT_MESSAGE_KEY,
+    CONTEXT_KEY,
+    VALUES_KEY,
+  ].map(key => objectExpressionNode.properties.find(property => isPropertyWithKey(property, key)));
+
+  const message = messageProperty
+    ? formatJSString(extractMessageValueFromNode(messageProperty.value, messageId))
+    : undefined;
+
+  const context = contextProperty
+    ? formatJSString(extractContextValueFromNode(contextProperty.value, messageId))
+    : undefined;
+
+  const valuesKeys = valuesProperty
+    ? extractValuesKeysFromNode(valuesProperty.value, messageId)
+    : [];
+
+  return { message, context, valuesKeys };
 }
 
 function parseIdExpression(expression) {
@@ -110,13 +110,10 @@ function parseIdExpression(expression) {
     throw error;
   }
 
-  for (const node of traverseNodes(ast.program.directives)) {
-    if (isDirectiveLiteral(node)) {
-      return formatJSString(node.value);
-    }
-  }
-
-  return null;
+  const stringNode = [...traverseNodes(ast.program.directives)].find(node =>
+    isDirectiveLiteral(node)
+  );
+  return stringNode ? formatJSString(stringNode.value) : null;
 }
 
 function trimCurlyBraces(string) {
@@ -194,6 +191,8 @@ function* getDirectiveMessages(htmlContent) {
       const valuesKeys = extractValuesKeysFromNode(valuesObjectNode);
 
       checkValuesProperty(valuesKeys, message, messageId);
+    } else {
+      checkValuesProperty([], message, messageId);
     }
 
     yield [messageId, { message, context: formatHTMLString(element.context) || undefined }];

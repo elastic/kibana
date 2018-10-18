@@ -119,7 +119,9 @@ describe('i18n utils', () => {
     const defaultMessage = 'Test message with {username} and {password}.';
     const messageId = 'namespace.message.id';
 
-    expect(() => checkValuesProperty(valuesKeys, defaultMessage, messageId)).toThrowErrorMatchingSnapshot();
+    expect(() =>
+      checkValuesProperty(valuesKeys, defaultMessage, messageId)
+    ).toThrowErrorMatchingSnapshot();
   });
 
   test('should throw if some key is missing in "values"', () => {
@@ -127,6 +129,28 @@ describe('i18n utils', () => {
     const defaultMessage = 'Test message with {username}, {password} and [markdown link]({url}).';
     const messageId = 'namespace.message.id';
 
-    expect(() => checkValuesProperty(valuesKeys, defaultMessage, messageId)).toThrowErrorMatchingSnapshot();
+    expect(() =>
+      checkValuesProperty(valuesKeys, defaultMessage, messageId)
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  test('should throw if "values" property is not provided and defaultMessage requires it', () => {
+    const valuesKeys = [];
+    const defaultMessage = 'Test message with {username}, {password} and [markdown link]({url}).';
+    const messageId = 'namespace.message.id';
+
+    expect(() =>
+      checkValuesProperty(valuesKeys, defaultMessage, messageId)
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  test(`should throw if "values" property is provided and defaultMessage doesn't include any references`, () => {
+    const valuesKeys = [];
+    const defaultMessage = 'Test message with {username}, {password} and [markdown link]({url}).';
+    const messageId = 'namespace.message.id';
+
+    expect(() =>
+      checkValuesProperty(valuesKeys, defaultMessage, messageId)
+    ).toThrowErrorMatchingSnapshot();
   });
 });

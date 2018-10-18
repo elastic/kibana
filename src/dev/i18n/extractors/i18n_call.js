@@ -44,7 +44,7 @@ export function extractI18nCallMessages(node) {
 
   if (!isObjectExpression(optionsSubTree)) {
     throw createFailError(
-      `Object with defaultMessage property is not passed to i18n function call ("${messageId}").`
+      `Object with defaultMessage property is not passed to i18n() or i18n.translate() function call ("${messageId}").`
     );
   }
 
