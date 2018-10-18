@@ -48,12 +48,28 @@ export class GroupList extends Component {
     this.state = {
       groups: [],
     };
-
-    this.selectItems = []; // keep track of each of the group item refs
+    // keep track of each of the group item refs
+    this.selectItems = [];
   }
 
   selectGroup = (group) => {
     this.props.selectGroup(group);
+  }
+
+  moveUp = (event, index) => {
+    if (index < 0) {
+      return;
+    } else if (index > 0) {
+      event.preventDefault();
+      this.selectItems[index - 1].focus();
+    }
+  }
+
+  moveDown = (event, index) => {
+    if (index < this.selectItems.length - 1) {
+      event.preventDefault();
+      this.selectItems[index + 1].focus();
+    }
   }
 
   handleKeyDown = (event, group, index) => {
@@ -64,21 +80,17 @@ export class GroupList extends Component {
       case keyCodes.SPACE:
         this.selectGroup(group);
         break;
-      case keyCodes.DOWN: // 40
-        if (index < this.selectItems.length - 1) {
-          event.preventDefault();
-          this.selectItems[index + 1].focus();
-        }
+      case keyCodes.DOWN:
+        this.moveDown(event, index);
         break;
-      case keyCodes.UP: // 38
-        if (index < 0) {
-          return;
-        } else if (index > 0) {
-          event.preventDefault();
-          this.selectItems[index - 1].focus();
-        }
+      case keyCodes.UP:
+        this.moveUp(event, index);
         break;
     }
+  }
+
+  setRef = (ref, index) => {
+    this.selectItems[index] = ref;
   }
 
   render() {
@@ -94,7 +106,7 @@ export class GroupList extends Component {
               key={g.id}
               className="group-item"
               onClick={() => this.selectGroup(g)}
-              ref={(ref) => this.selectItems[index] = ref}
+              ref={(ref) => this.setRef(ref, index)}
             >
               <Check group={g} selectedGroups={selectedGroups} />
               <JobGroup name={g.id} />
