@@ -210,7 +210,7 @@ export function screenshotsObservableFactory(server) {
     return elementsPositionAndAttributes;
   };
 
-  const getScreenshots = async (browser, elementsPositionAndAttributes) => {
+  const getScreenshots = async ({ browser, elementsPositionAndAttributes }) => {
     const screenshots = [];
     for (const item of elementsPositionAndAttributes) {
       const base64EncodedData = await asyncDurationLogger('screenshot', browser.screenshot(item.position));
@@ -224,19 +224,26 @@ export function screenshotsObservableFactory(server) {
     return screenshots;
   };
 
-  return async function screenshotsObservable(url, headers, layout, browserTimezone) {
+  return async function screenshotsObservable(url, headers, layout, browserTimezone, cancellationToken) {
 
     const bridgePort = await getPort();
 
     logger.debug(`Creating browser driver factory`);
 
-    const browser = await browserDriverFactory.create({
+    const { browser, chromium } = await browserDriverFactory.create({
       bridgePort,
       viewport: layout.getBrowserViewport(),
       zoom: layout.getBrowserZoom(),
       logger,
       browserTimezone
     });
+
+    if (cancellationToken) {
+      cancellationToken.on(() => {
+        logger.debug(`Closing Chromium due to cancellation`);
+        chromium.close();
+      });
+    }
 
     logger.debug('Driver factory created');
 
@@ -273,7 +280,9 @@ export function screenshotsObservableFactory(server) {
     const elementsPositionAndAttributes = await getElementPositionAndAttributes(browser, layout);
 
     logger.debug(`taking screenshots`);
-    const screenshots = await getScreenshots(browser, elementsPositionAndAttributes);
+    const screenshots = await getScreenshots({ browser, elementsPositionAndAttributes });
+
+    await chromium.close();
 
     return screenshots;
   };

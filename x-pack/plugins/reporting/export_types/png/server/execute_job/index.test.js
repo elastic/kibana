@@ -8,9 +8,9 @@ import * as Rx from 'rxjs';
 import { memoize } from 'lodash';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { executeJobFactory } from './index';
-import { generatePngObservableFactory } from '../lib/generate_png';
+import { generatePngPromiseFactory } from '../lib/generate_png';
 
-jest.mock('../lib/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
+jest.mock('../lib/generate_png', () => ({ generatePngPromiseFactory: jest.fn() }));
 
 const cancellationToken = {
   on: jest.fn()
@@ -46,10 +46,10 @@ beforeEach(() => {
     }[key];
   });
 
-  generatePngObservableFactory.mockReturnValue(jest.fn());
+  generatePngPromiseFactory.mockReturnValue(jest.fn());
 });
 
-afterEach(() => generatePngObservableFactory.mockReset());
+afterEach(() => generatePngPromiseFactory.mockReset());
 
 const encryptHeaders = async (headers) => {
   const crypto = cryptoFactory(mockServer);
@@ -68,7 +68,7 @@ test(`passes in decrypted headers to generatePng`, async () => {
     baz: 'quix',
   };
 
-  const generatePngObservable = generatePngObservableFactory();
+  const generatePngObservable = generatePngPromiseFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const encryptedHeaders = await encryptHeaders(headers);
@@ -97,7 +97,7 @@ test(`omits blacklisted headers`, async () => {
     ...blacklistedHeaders
   });
 
-  const generatePngObservable = generatePngObservableFactory();
+  const generatePngObservable = generatePngPromiseFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
@@ -112,7 +112,7 @@ test(`gets logo from uiSettings`, async () => {
   const logo = 'custom-logo';
   mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
 
-  const generatePngObservable = generatePngObservableFactory();
+  const generatePngObservable = generatePngPromiseFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
@@ -125,7 +125,7 @@ test(`gets logo from uiSettings`, async () => {
 test(`passes browserTimezone to generatePng`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePngObservable = generatePngObservableFactory();
+  const generatePngObservable = generatePngPromiseFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
@@ -139,7 +139,7 @@ test(`passes browserTimezone to generatePng`, async () => {
 test(`adds forceNow to hash's query, if it exists`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePngObservable = generatePngObservableFactory();
+  const generatePngObservable = generatePngPromiseFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
@@ -153,7 +153,7 @@ test(`adds forceNow to hash's query, if it exists`, async () => {
 test(`appends forceNow to hash's query, if it exists`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePngObservable = generatePngObservableFactory();
+  const generatePngObservable = generatePngPromiseFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
@@ -171,7 +171,7 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
 test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePngObservable = generatePngObservableFactory();
+  const generatePngObservable = generatePngPromiseFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
@@ -185,7 +185,7 @@ test(`returns content_type of application/Png`, async () => {
   const executeJob = executeJobFactory(mockServer);
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePngObservable = generatePngObservableFactory();
+  const generatePngObservable = generatePngPromiseFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const { content_type: contentType } = await executeJob({ objects: [], timeRange: {}, headers: encryptedHeaders }, cancellationToken);
@@ -195,7 +195,7 @@ test(`returns content_type of application/Png`, async () => {
 test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const testContent = 'test content';
 
-  const generatePngObservable = generatePngObservableFactory();
+  const generatePngObservable = generatePngPromiseFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
 
   const executeJob = executeJobFactory(mockServer);

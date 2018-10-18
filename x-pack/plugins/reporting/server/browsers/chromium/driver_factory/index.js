@@ -44,9 +44,8 @@ export class HeadlessChromiumDriverFactory {
         args: chromiumArgs,
         env: {
           TZ: browserTimezone
-        },
+        }
       });
-
 
       page = await chromium.newPage();
     } catch (err) {
@@ -111,7 +110,8 @@ export class HeadlessChromiumDriverFactory {
     });
 
     chromium.on('disconnected', err => {
-      throw new Error(`Chromium exited with code: ${err}. ${JSON.stringify(err)}`);
+      this.logger.error("Chromium Disconected " + err);
+      //throw new Error(`Chromium exited with code: ${err}. ${JSON.stringify(err)}`);
     });
     /*
       const processError$ = Rx.fromEvent(page, 'error').pipe(
@@ -161,6 +161,6 @@ export class HeadlessChromiumDriverFactory {
     });
 
 
-    return browser;
+    return { browser, chromium };
   }
 }

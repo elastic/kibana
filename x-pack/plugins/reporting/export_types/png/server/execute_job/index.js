@@ -75,7 +75,7 @@ function executeJobFn(server) {
     return hashUrl;
   };
 
-  return async function executeJob(jobToExecute) {
+  return async function executeJob(jobToExecute, cancellationToken) {
 
     let decryptedHeaders;
     try {
@@ -90,7 +90,7 @@ function executeJobFn(server) {
 
     const url = addForceNowQuerystring(jobToExecute);
 
-    const pngPromise =  generatePngPromise(url, filteredHeaders, jobToExecute.layout);
+    const pngPromise =  generatePngPromise(url, jobToExecute.browserTimezone, filteredHeaders, jobToExecute.layout, cancellationToken);
 
     return pngPromise;
   };

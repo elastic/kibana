@@ -96,7 +96,7 @@ function executeJobFn(server) {
       mergeMap(getCustomLogo),
       mergeMap(addForceNowQuerystring),
       mergeMap(({ job, filteredHeaders, logo, urls }) => {
-        return generatePdfObservable(job.title, urls, job.browserTimezone, filteredHeaders, job.layout, logo);
+        return generatePdfObservable(job.title, urls, job.browserTimezone, filteredHeaders, job.layout, logo, cancellationToken);
       }),
       map(buffer => ({
         content_type: 'application/pdf',

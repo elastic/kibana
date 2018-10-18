@@ -11,9 +11,9 @@ import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 function generatePngPromiseFn(server) {
   const screenshotsObservable = screenshotsObservableFactory(server);
 
-  const urlScreenshot = async (url, headers, layout) => {
+  const urlScreenshot = async (url, headers, layout, browserTimezone, cancellationToken) => {
 
-    const screenShots = await screenshotsObservable(url, headers, layout);
+    const screenShots = await screenshotsObservable(url, headers, layout, browserTimezone, cancellationToken);
 
     if (screenShots.length !== 1) {
       throw new Error(`Expected there to be 1 screenshot, but there are ${screenShots.length}`);
@@ -23,7 +23,7 @@ function generatePngPromiseFn(server) {
 
   };
 
-  return async function generatePngPromise(url, headers, layoutParams) {
+  return async function generatePngPromise(url, browserTimezone, headers, layoutParams, cancellationToken) {
 
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
@@ -31,7 +31,7 @@ function generatePngPromiseFn(server) {
 
     const layout =  new PreserveLayout(layoutParams.dimensions);
 
-    const screenshot = await urlScreenshot(url, headers, layout);
+    const screenshot = await urlScreenshot(url, headers, layout, browserTimezone, cancellationToken);
 
     return {
       content_type: 'image/png',
