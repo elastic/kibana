@@ -5,44 +5,33 @@
  */
 
 import { AGG_TYPES } from 'plugins/watcher/../common/constants';
-import { i18n } from '@kbn/i18n';
 
 export const aggTypes = {
   count: {
-    label: i18n.translate('xpack.watcher.thresholdWatchExpression.aggTypes.countLabel', {
-      defaultMessage: 'count()',
-    }),
+    label: 'count()',
     fieldRequired: false,
     value: AGG_TYPES.COUNT
   },
   average: {
-    label: i18n.translate('xpack.watcher.thresholdWatchExpression.aggTypes.averageLabel', {
-      defaultMessage: 'average()',
-    }),
+    label: 'average()',
     fieldRequired: true,
     validNormalizedTypes: ['number'],
     value: AGG_TYPES.AVERAGE
   },
   sum: {
-    label: i18n.translate('xpack.watcher.thresholdWatchExpression.aggTypes.sumLabel', {
-      defaultMessage: 'sum()',
-    }),
+    label: 'sum()',
     fieldRequired: true,
     validNormalizedTypes: ['number'],
     value: AGG_TYPES.SUM
   },
   min: {
-    label: i18n.translate('xpack.watcher.thresholdWatchExpression.aggTypes.minLabel', {
-      defaultMessage: 'min()',
-    }),
+    label: 'min()',
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date'],
     value: AGG_TYPES.MIN
   },
   max: {
-    label: i18n.translate('xpack.watcher.thresholdWatchExpression.aggTypes.maxLabel', {
-      defaultMessage: 'max()',
-    }),
+    label: 'max()',
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date'],
     value: AGG_TYPES.MAX
