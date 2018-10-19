@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`headers it fails if it can't decrypt the headers 1`] = `"Failed to decrypt report job data. Please re-generate this report."`;
+
+exports[`sessionCookie it fails if it can't decrypt the session 1`] = `"Failed to decrypt report job data. Please re-generate this report."`;
+
+exports[`sessionCookie it throws error if cookie name can't be determined 1`] = `"Unable to determine the session cookie name"`;
+
+exports[`urls it throw error if full URL is provided that is not a Kibana URL 1`] = `"Unable to generate report for url https://localhost/app/kibana, it's not a Kibana URL"`;
