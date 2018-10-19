@@ -5,10 +5,11 @@
  */
 
 import expect from 'expect.js';
+import { CapabilitiesQuery } from '../../../../plugins/infra/common/graphql/types';
 import { capabilitiesQuery } from '../../../../plugins/infra/public/containers/capabilities/capabilities.gql_query';
-import { get } from 'lodash';
+import { KbnTestProvider } from './types';
 
-export default function ({ getService }) {
+const capabilitiesTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -17,18 +18,22 @@ export default function ({ getService }) {
     after(() => esArchiver.unload('infraops'));
 
     it('supports the capabilities container query', () => {
-      return client.query({
-        query: capabilitiesQuery,
-        variables: {
-          sourceId: 'default',
-          nodeId: 'demo-stack-nginx-01',
-          nodeType: 'host'
-        }
-      }).then(resp => {
-        const capabilities = get(resp, 'data.source.capabilitiesByNode');
-        expect(capabilities.length).to.be(14);
-      });
+      return client
+        .query<CapabilitiesQuery.Query>({
+          query: capabilitiesQuery,
+          variables: {
+            sourceId: 'default',
+            nodeId: 'demo-stack-nginx-01',
+            nodeType: 'host',
+          },
+        })
+        .then(resp => {
+          const capabilities = resp.data.source.capabilitiesByNode;
+          expect(capabilities.length).to.be(14);
+        });
     });
   });
-}
+};
 
+// tslint:disable-next-line no-default-export
+export default capabilitiesTests;
