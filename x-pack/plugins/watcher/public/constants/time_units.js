@@ -9,34 +9,34 @@ import { i18n } from '@kbn/i18n';
 
 export const TIME_UNITS = {
   [COMMON_TIME_UNITS.SECOND]: {
-    labelPlural: i18n.translate('xpack.watcher.constants.timeUnits.secondPluralLabel', {
+    labelPlural: i18n.translate('xpack.watcher.timeUnits.secondPluralLabel', {
       defaultMessage: 'seconds',
     }),
-    labelSingular: i18n.translate('xpack.watcher.constants.timeUnits.secondSingularLabel', {
+    labelSingular: i18n.translate('xpack.watcher.timeUnits.secondSingularLabel', {
       defaultMessage: 'second',
     }),
   },
   [COMMON_TIME_UNITS.MINUTE]: {
-    labelPlural: i18n.translate('xpack.watcher.constants.timeUnits.minutePluralLabel', {
+    labelPlural: i18n.translate('xpack.watcher.timeUnits.minutePluralLabel', {
       defaultMessage: 'minutes',
     }),
-    labelSingular: i18n.translate('xpack.watcher.constants.timeUnits.minuteSingularLabel', {
+    labelSingular: i18n.translate('xpack.watcher.timeUnits.minuteSingularLabel', {
       defaultMessage: 'minute',
     })
   },
   [COMMON_TIME_UNITS.HOUR]: {
-    labelPlural: i18n.translate('xpack.watcher.constants.timeUnits.hourPluralLabel', {
+    labelPlural: i18n.translate('xpack.watcher.timeUnits.hourPluralLabel', {
       defaultMessage: 'hours',
     }),
-    labelSingular: i18n.translate('xpack.watcher.constants.timeUnits.hourSingularLabel', {
+    labelSingular: i18n.translate('xpack.watcher.timeUnits.hourSingularLabel', {
       defaultMessage: 'hour',
     }),
   },
   [COMMON_TIME_UNITS.DAY]: {
-    labelPlural: i18n.translate('xpack.watcher.constants.timeUnits.dayPluralLabel', {
+    labelPlural: i18n.translate('xpack.watcher.timeUnits.dayPluralLabel', {
       defaultMessage: 'days',
     }),
-    labelSingular: i18n.translate('xpack.watcher.constants.timeUnits.daySingularLabel', {
+    labelSingular: i18n.translate('xpack.watcher.timeUnits.daySingularLabel', {
       defaultMessage: 'day',
     }),
   }

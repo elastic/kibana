@@ -57,7 +57,7 @@ export class ThresholdWatch extends BaseWatch {
   }
 
   get titleDescription() {
-    const staticPart = i18n.translate('xpack.watcher.models.watch.thresholdWatchDescription.firstPartTitleDescription', {
+    const staticPart = i18n.translate('xpack.watcher.models.thresholdWatch.sendAlertOnSpecificConditionTitleDescription', {
       defaultMessage: 'Send an alert when a specific condition is met.'
     });
     if (isNaN(this.triggerIntervalSize)) {
@@ -65,7 +65,7 @@ export class ThresholdWatch extends BaseWatch {
     }
 
     const timeUnitLabel = getTimeUnitsLabel(this.triggerIntervalUnit, this.triggerIntervalSize);
-    const dynamicPartText = i18n.translate('xpack.watcher.models.watch.thresholdWatchDescription.secondPartTitleDescription', {
+    const dynamicPartText = i18n.translate('xpack.watcher.models.thresholdWatch.thresholdWatchIntervalTitleDescription', {
       defaultMessage: 'This will run every {triggerIntervalSize} {timeUnitLabel}.',
       values: {
         triggerIntervalSize: this.triggerIntervalSize,
@@ -103,11 +103,11 @@ export class ThresholdWatch extends BaseWatch {
     return DEFAULT_VALUES;
   }
 
-  static typeName = i18n.translate('xpack.watcher.models.watch.thresholdWatch.typeName', {
+  static typeName = i18n.translate('xpack.watcher.models.thresholdWatch.typeName', {
     defaultMessage: 'Threshold Alert'
   });
   static iconClass = '';
-  static selectMessage = i18n.translate('xpack.watcher.models.watch.thresholdWatch.selectMessageText', {
+  static selectMessage = i18n.translate('xpack.watcher.models.thresholdWatch.selectMessageText', {
     defaultMessage: 'Send an alert on a specific condition'
   });
   static isCreatable = true;

@@ -16,7 +16,7 @@
       xpack-aria-describes="{{thresholdWatchGroupBy.makeId('termSize')}}"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchGroupBy.isValidationMessageVisible('termSize', 'required')"
-      i18n-id="xpack.watcher.thresholdWatchExpression.groupBy.valueIsRequiredValidationMessage"
+      i18n-id="xpack.watcher.thresholdWatchExpression.groupBy.requiredValueValidationMessage"
       i18n-default-message="A value is required."
     ></div>
     <div
@@ -40,7 +40,7 @@
       xpack-aria-describes="{{thresholdWatchGroupBy.makeId('termField')}}"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchGroupBy.isValidationMessageVisible('termField', 'required')"
-      i18n-id="xpack.watcher.thresholdWatchExpression.groupBy.fieldMustBeSelectedValidationMessage"
+      i18n-id="xpack.watcher.thresholdWatchExpression.groupBy.requiredFieldValidationMessage"
       i18n-default-message="Please select a field."
     ></div>
     <select
@@ -70,7 +70,7 @@
       <option
         value=""
         i18n-id="xpack.watcher.thresholdWatchExpression.groupBy.selectFieldDropdownPlaceholder"
-        i18n-default-message="Select a field..."
+        i18n-default-message="Select a field…"
       ></option>
     </select>
   </form>

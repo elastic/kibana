@@ -46,7 +46,7 @@ export class BaseWatch {
 
     if (!Boolean(ActionType)) {
       throw new Error(
-        i18n.translate('xpack.watcher.models.watch.baseWatch.createUnknownActionTypeErrorMessage', {
+        i18n.translate('xpack.watcher.models.baseWatch.createUnknownActionTypeErrorMessage', {
           defaultMessage: 'Attempted to create unknown action type {type}.',
           values: { type }
         })

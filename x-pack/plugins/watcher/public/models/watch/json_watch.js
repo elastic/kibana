@@ -35,11 +35,11 @@ export class JsonWatch extends BaseWatch {
   }
 
   static defaultWatchJson =  defaultWatchJson;
-  static typeName = i18n.translate('xpack.watcher.models.watch.jsonWatch.typeName', {
+  static typeName = i18n.translate('xpack.watcher.models.jsonWatch.typeName', {
     defaultMessage: 'Advanced Watch'
   });
   static iconClass = '';
-  static selectMessage = i18n.translate('xpack.watcher.models.watch.jsonWatch.selectMessageText', {
+  static selectMessage = i18n.translate('xpack.watcher.models.jsonWatch.selectMessageText', {
     defaultMessage: 'Set up a custom watch in raw JSON.'
   });
   static isCreatable = true;
