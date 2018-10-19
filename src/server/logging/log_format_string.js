@@ -49,6 +49,7 @@ const typeColors = {
   optmzr: 'white',
   manager: 'green',
   optimize: 'magentaBright',
+  'optimize:dynamic_dll_plugin': 'magentaBright',
   listening: 'magentaBright',
   scss: 'magentaBright',
 };
