@@ -19,6 +19,7 @@
 
 declare class Metadata {
   public branch: string;
+  public version: string;
 }
 
 declare const metadata: Metadata;
