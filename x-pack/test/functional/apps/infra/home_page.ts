@@ -16,7 +16,7 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
 
   describe('Home page', () => {
     describe('without metrics present', () => {
-      before(async () => await esArchiver.unload('infraops'));
+      before(async () => await esArchiver.unload('infra'));
 
       it('renders an empty data prompt', async () => {
         await pageObjects.common.navigateToApp('infraOps');
@@ -26,10 +26,10 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
 
     describe('with metrics present', () => {
       before(async () => {
-        await esArchiver.load('infraops');
+        await esArchiver.load('infra');
         await pageObjects.common.navigateToApp('infraOps');
       });
-      after(async () => await esArchiver.unload('infraops'));
+      after(async () => await esArchiver.unload('infra'));
 
       it('renders the waffle map for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
