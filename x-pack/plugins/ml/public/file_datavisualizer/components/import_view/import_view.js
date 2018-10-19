@@ -12,7 +12,6 @@ import React, {
 import {
   EuiFieldText,
   EuiButton,
-  EuiCallOut,
   EuiSpacer,
   EuiFormRow,
   EuiCheckbox,
@@ -22,6 +21,7 @@ import {
 import { importerFactory } from './importer';
 import { ResultsLinks } from './results_links';
 import { ImportProgress, IMPORT_STATUS } from './import_progress';
+import { Errors } from './errors';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 
@@ -41,6 +41,8 @@ const DEFAULT_STATE = {
   createIndexPattern: true,
   indexPattern: '',
   indexPatternId: '',
+  errors: [],
+  importFailures: [],
 };
 
 export class ImportView extends Component {
@@ -67,6 +69,8 @@ export class ImportView extends Component {
       createIndexPattern,
     } = this.state;
 
+    const errors = [];
+
     if (index !== '') {
       this.setState({
         importing: true,
@@ -91,6 +95,7 @@ export class ImportView extends Component {
 
             if (readResp.success === false) {
               console.error(readResp.error);
+              errors.push(readResp.error);
             }
 
             if (success) {
@@ -116,6 +121,7 @@ export class ImportView extends Component {
                 success = importResp.success;
                 this.setState({
                   uploadStatus: importResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                  importFailures: importResp.failures,
                 });
 
                 if (success && createIndexPattern) {
@@ -128,15 +134,20 @@ export class ImportView extends Component {
                     indexPatternId: indexPatternResp.id
                   });
                   if (indexPatternResp.success === false) {
-                    // do something with the errors
+                    errors.push(indexPatternResp.error);
                   }
+                } else {
+                  errors.push(importResp.error);
                 }
+              } else {
+                errors.push(initializeImportResp.error);
               }
             }
 
             this.setState({
               importing: false,
               imported: success,
+              errors,
             });
           } else {
             console.error('Unsupported file format');
@@ -217,6 +228,8 @@ export class ImportView extends Component {
       uploadProgress,
       uploadStatus,
       createIndexPattern,
+      errors,
+      // importFailures,
     } = this.state;
 
     const statuses = {
@@ -307,19 +320,15 @@ export class ImportView extends Component {
             </EuiPanel>
 
             {
-              (readStatus === IMPORT_STATUS.FAILED || uploadStatus === IMPORT_STATUS.FAILED) &&
+              (errors.length > 0) &&
               <React.Fragment>
                 <EuiSpacer size="m" />
 
-                <EuiCallOut
-                  title="Sorry, there was an error"
-                  color="danger"
-                  iconType="cross"
-                >
-                  <p>
-                    Now you have to fix it, but maybe
-                  </p>
-                </EuiCallOut>
+                <Errors
+                  errors={errors}
+                  statuses={statuses}
+                />
+
               </React.Fragment>
             }
           </React.Fragment>

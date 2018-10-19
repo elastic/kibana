@@ -25,7 +25,6 @@ export class CsvImporter extends Importer {
     console.time('read delimited file');
 
     try {
-      // throw 'test';
       const settings = {
         skip_empty_lines: true,
         delimiter: this.delimiter,

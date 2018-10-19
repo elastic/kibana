@@ -58,6 +58,7 @@ export class Importer {
 
     let success = true;
     const failures = [];
+    let error;
 
     for (let i = 0; i < chunks.length; i++) {
       const aggs = {
@@ -90,6 +91,7 @@ export class Importer {
       } else {
         console.error(resp);
         success = false;
+        error = resp.error;
         break;
       }
 
@@ -105,11 +107,20 @@ export class Importer {
     }
 
     console.log('total failures', failures);
+    console.timeEnd('create index and ingest');
+
+    const result = {
+      success,
+      failures,
+    };
+
     if (success) {
       setImportProgress(100);
+    } else {
+      result.error = error;
     }
-    console.timeEnd('create index and ingest');
-    return { success, failures };
+
+    return result;
   }
 }
 

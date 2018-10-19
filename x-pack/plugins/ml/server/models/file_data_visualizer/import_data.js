@@ -121,11 +121,20 @@ export function importDataProvider(callWithRequest) {
         };
       }
     } catch (error) {
-      const failures = getFailures(error.items || []);
+      let failures = [];
+      if (error.errors !== undefined && Array.isArray(error.items)) {
+        // an expected error where some or all of the bulk request
+        // docs have failed to be ingested.
+        failures = getFailures(error.items);
+      } else {
+        // some other error has happened. assume all the docs have failed to be ingested
+        failures = data;
+      }
+
       return {
         success: false,
         error,
-        docs: data.length,
+        docCount: data.length,
         failures,
       };
     }
