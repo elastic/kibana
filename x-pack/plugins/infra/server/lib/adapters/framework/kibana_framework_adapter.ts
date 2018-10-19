@@ -5,7 +5,7 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { Request, ResponseObject, ResponseToolkit, Server } from 'hapi';
+import { Request, ResponseToolkit, Server } from 'hapi';
 
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
@@ -138,12 +138,11 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     };
 
     const res = await server.inject(request);
-    const result: ResponseObject = res.result as ResponseObject;
-    if (!result || result.statusCode !== 200) {
-      throw result;
+    if (res.statusCode !== 200) {
+      throw res;
     }
 
-    return result.source as InfraTSVBResponse;
+    return res.result as InfraTSVBResponse;
   }
 }
 
