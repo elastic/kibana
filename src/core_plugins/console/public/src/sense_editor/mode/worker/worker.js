@@ -579,7 +579,7 @@ ace.define(
   'ace/anchor',
   ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/event_emitter'],
   function (acequire, exports) {
-
+    
     let oop = acequire('./lib/oop'),
       EventEmitter = acequire('./lib/event_emitter').EventEmitter,
       Anchor = (exports.Anchor = function (doc, row, column) {
@@ -696,7 +696,7 @@ ace.define(
     'ace/anchor',
   ],
   function (acequire, exports) {
-    
+
     let oop = acequire('./lib/oop'),
       applyDelta = acequire('./apply_delta').applyDelta,
       EventEmitter = acequire('./lib/event_emitter').EventEmitter,
