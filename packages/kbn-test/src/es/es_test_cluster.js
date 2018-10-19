@@ -21,9 +21,9 @@ import { resolve } from 'path';
 import { format } from 'url';
 import { get } from 'lodash';
 import toPath from 'lodash/internal/toPath';
+import { del } from 'del';
 import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
-import { rmrfSync } from './rmrf_sync';
 import { KIBANA_ROOT } from '../';
 import elasticsearch from 'elasticsearch';
 const path = require('path');
@@ -91,7 +91,7 @@ export function createEsTestCluster(options = {}) {
 
     async cleanup() {
       await this.stop();
-      rmrfSync(config.installPath);
+      await del(config.installPath);
       log.info('[es] cleanup complete');
     }
 
