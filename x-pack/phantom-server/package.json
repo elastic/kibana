@@ -1,0 +1,15 @@
+{
+  "name": "phantom-server",
+  "description": "Image Renderer using PhantomJS",
+  "version": "1.0.0-alpha1",
+  "private": false,
+  "scripts": {
+    "start": "./node_modules/.bin/phantomjs phantom-server.js"
+  },
+  "dependencies": {
+    "phantomjs-prebuilt": "^2.1.16"
+  },
+  "devDependencies": {},
+  "keywords": [],
+  "repository": ""
+}
