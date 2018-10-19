@@ -5,6 +5,8 @@
  */
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -73,13 +75,19 @@ export function SpanFlyout({
   return (
     <EuiFlyout onClose={onClose} size="l">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle>
-          <h2>Span details</h2>
-        </EuiTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2>Span details</h2>
+            </EuiTitle>
+          </EuiFlexItem>
 
-        <DiscoverButton query={getDiscoverQuery(span)}>
-          {`View span in Discover`}
-        </DiscoverButton>
+          <EuiFlexItem grow={false}>
+            <DiscoverButton query={getDiscoverQuery(span)}>
+              {`View span in Discover`}
+            </DiscoverButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <FlyoutTopLevelProperties transaction={parentTransaction} />
