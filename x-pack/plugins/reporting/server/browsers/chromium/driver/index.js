@@ -30,7 +30,7 @@ export class HeadlessChromiumDriver {
     return result.result.value;
   }
 
-  async open(url, { headers, waitForSelector }) {
+  async open(url, { sessionCookie, waitForSelector }) {
     this._logger.debug(`HeadlessChromiumDriver:opening url ${url}`);
     const { Network, Page } = this._client;
     await Promise.all([
@@ -39,7 +39,7 @@ export class HeadlessChromiumDriver {
     ]);
 
     await ignoreSSLErrorsBehavior(this._client.Security);
-    await Network.setExtraHTTPHeaders({ headers });
+    await Network.setCookie(sessionCookie);
     await Page.navigate({ url });
     await Page.loadEventFired();
     const { frameTree } = await Page.getResourceTree();
