@@ -543,7 +543,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       if (!append) {
         await input.clearValue();
       }
-      await input.type(newValue + '');
+      // await input.type(newValue + '');
+      // await remote.type(input, newValue + '');
+      await find.setValueElement(input, newValue);
       await PageObjects.common.sleep(1000);
     }
 

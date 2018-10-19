@@ -128,8 +128,9 @@ export async function RemoteProvider({ getService }) {
         await driver.manage().window().setRect({ width: x, height: y });
       },
 
-      async exists(selectorObj) {
-        const possibleElements = await this.findElements(selectorObj, 1000);
+      async exists(selectorObj, timeout = 1000) {
+        const possibleElements = await this.findElements(selectorObj, timeout);
+        console.log(`remote.exists found ${possibleElements.length} elements with timeout=${timeout}`);
         return await possibleElements.length > 0;
       },
 
@@ -187,8 +188,8 @@ export async function RemoteProvider({ getService }) {
       },
 
       async moveMouseTo(element) {
-        // const element = await this.findByCssSelector(selector);
-        await actions.pause(mouse).move({ origin: element });
+        const actions = driver.actions({ bridge: true });
+        await actions.pause(mouse).move({ origin: element }).perform();
       },
 
       async getActiveElement() {

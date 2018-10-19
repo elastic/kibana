@@ -64,6 +64,15 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       }
     }
 
+
+    // // Returns if a value is an array
+    // function isArray (value) {
+    // return value && typeof value === 'object' && value.constructor === Array;
+    // }
+    //
+    // // ES5 actually has a method for this (ie9+)
+    // Array.isArray(value);
+
     async toggleExpandPanel(parent) {
       log.debug('toggleExpandPanel');
       await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
@@ -113,7 +122,9 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
 
     async customizePanel(parent) {
       await this.openContextMenu(parent);
+      await PageObjects.common.sleep(1111);
       await testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+      await PageObjects.common.sleep(1112);
     }
 
     async openInspector(parent) {
@@ -133,7 +144,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
 
     async toggleExpandActionExists() {
       log.debug('toggleExpandActionExists');
-      return await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
+      return await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ, 2000);
     }
 
     async customizePanelActionExists(parent) {
@@ -159,6 +170,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
         panelOptions = await this.getPanelHeading(originalTitle);
       }
       await this.customizePanel(panelOptions);
+      await PageObjects.common.sleep(1113);
       await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
     }
 

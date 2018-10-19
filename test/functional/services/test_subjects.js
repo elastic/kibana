@@ -33,10 +33,10 @@ export function TestSubjectsProvider({ getService }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class TestSubjects {
-    async exists(selector) {
-      log.debug(`TestSubjects.exists(${selector})`);
+    async exists(selector, timeout = 1000) {
+      log.debug(`TestSubjects.exists(${selector}) with timeout ${timeout}`);
       const dataTestSubj = testSubjSelector(selector);
-      return await remote.exists(By.css(dataTestSubj));
+      return await remote.exists(By.css(dataTestSubj), timeout);
     }
 
     async existOrFail(selector, timeout = 1000) {
@@ -60,7 +60,8 @@ export function TestSubjectsProvider({ getService }) {
       return await retry.try(async () => {
         const input = await this.find(selector);
         await input.click();
-        await input.type(text);
+        await remote.type(input, text);
+        // await input.type(text);
       });
     }
 
@@ -68,7 +69,8 @@ export function TestSubjectsProvider({ getService }) {
       log.debug(`TestSubjects.click(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
-        //await remote.moveMouseTo(element);
+        await remote.moveMouseTo(element);
+        // log.debug(`----test_subjects.click ---------------------- ${JSON.stringify(element)}`);
         await element.click();
       });
     }
@@ -88,9 +90,11 @@ export function TestSubjectsProvider({ getService }) {
       return descendants.length > 0;
     }
 
-    // async findDescendant(selector, parentElement) {
-    //   return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
-    // }
+    async findDescendant(selector, parentElement) {
+      // return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
+      // log.debug(`--------------------- findDescendant selector = ${selector} and parentElement = ${parentElement}`);
+      return await parentElement.findElement(By.css(testSubjSelector(selector)));
+    }
 
     // async findAllDescendant(selector, parentElement) {
     //   return await find.allDescendantByCssSelector(testSubjSelector(selector), parentElement);
