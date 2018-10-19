@@ -53,3 +53,13 @@ export interface ElementPosition {
 export interface HeadlessElementInfo {
   position: ElementPosition;
 }
+
+export interface SessionCookie {
+  name: string;
+  value: string;
+  domain: string;
+  path: string;
+  httpOnly: boolean;
+  secure: boolean;
+  sameSite: 'Strict' | 'Lax';
+}

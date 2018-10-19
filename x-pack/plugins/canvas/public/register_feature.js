@@ -1,4 +1,10 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -17,11 +23,19 @@
  * under the License.
  */
 
-import { mapValues } from 'lodash';
+import {
+  FeatureCatalogueRegistryProvider,
+  FeatureCatalogueCategory,
+} from 'ui/registry/feature_catalogue';
 
-export function unhashQueryString(parsedQueryString, states) {
-  return mapValues(parsedQueryString, (val, key) => {
-    const state = states.find(s => key === s.getQueryParamName());
-    return state ? state.translateHashToRison(val) : val;
-  });
-}
+FeatureCatalogueRegistryProvider.register(() => {
+  return {
+    id: 'canvas',
+    title: 'Canvas',
+    description: 'Showcase your data in a pixel-perfect way.',
+    icon: 'canvasApp',
+    path: '/app/canvas',
+    showOnHomePage: true,
+    category: FeatureCatalogueCategory.DATA,
+  };
+});
