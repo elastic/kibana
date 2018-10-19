@@ -24,7 +24,7 @@
 .canvasTextArea--code {
   @include euiScrollBar;
   font-size: $euiFontSize;
-  font-family: monospace;
+  font-family: $euiCodeFontFamily;
   width: 100%;
   max-width: 100%;
 }
