@@ -511,6 +511,13 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async incrementCounter(type, id, counterFieldName, options = {}) {
+    if (typeof type !== 'string') {
+      throw new Error('"type" argument must be a string');
+    }
+    if (typeof counterFieldName !== 'string') {
+      throw new Error('"counterFieldName" argument must be a string');
+    }
+
     const {
       migrationVersion,
       namespace,

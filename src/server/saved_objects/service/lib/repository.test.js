@@ -1405,6 +1405,64 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.calledOnce(onBeforeWrite);
     });
+
+    it('should assert that the "type" and "counterFieldName" arguments are strings', () => {
+      expect.assertions(6);
+
+      expect(savedObjectsRepository.incrementCounter(
+        null,
+        '6.0.0-alpha1',
+        'buildNum',
+        {
+          namespace: 'foo-namespace',
+        }),
+      ).rejects.toEqual(new Error('"type" argument must be a string'));
+
+      expect(savedObjectsRepository.incrementCounter(
+        42,
+        '6.0.0-alpha1',
+        'buildNum',
+        {
+          namespace: 'foo-namespace',
+        }),
+      ).rejects.toEqual(new Error('"type" argument must be a string'));
+
+      expect(savedObjectsRepository.incrementCounter(
+        {},
+        '6.0.0-alpha1',
+        'buildNum',
+        {
+          namespace: 'foo-namespace',
+        }),
+      ).rejects.toEqual(new Error('"type" argument must be a string'));
+
+      expect(savedObjectsRepository.incrementCounter(
+        'config',
+        '6.0.0-alpha1',
+        null,
+        {
+          namespace: 'foo-namespace',
+        }),
+      ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
+
+      expect(savedObjectsRepository.incrementCounter(
+        'config',
+        '6.0.0-alpha1',
+        42,
+        {
+          namespace: 'foo-namespace',
+        }),
+      ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
+
+      expect(savedObjectsRepository.incrementCounter(
+        'config',
+        '6.0.0-alpha1',
+        {},
+        {
+          namespace: 'foo-namespace',
+        }),
+      ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
+    });
   });
 
   describe('onBeforeWrite', () => {
