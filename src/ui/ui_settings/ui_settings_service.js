@@ -195,9 +195,9 @@ export class UiSettingsService {
           version: this._id,
           buildNum: this._buildNum,
           log: this._log,
-          onWriteError: (error, failedUpgradeAttributes) => {
+          onWriteError(error, attributes) {
             if (isNotAuthorizedError(error) || isForbiddenError(error)) {
-              return failedUpgradeAttributes;
+              return attributes;
             }
 
             throw error;
