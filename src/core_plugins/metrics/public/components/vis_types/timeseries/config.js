@@ -256,6 +256,20 @@ function TimeseriesConfig(props) {
 
       <EuiHorizontalRule margin="s" />
 
+      <EuiFormRow
+        id={htmlId('series_filter')}
+        label="Filter"
+        fullWidth
+      >
+        <EuiFieldText
+          onChange={handleTextChange('filter')}
+          value={model.filter}
+          fullWidth
+        />
+      </EuiFormRow>
+
+      <EuiHorizontalRule margin="s" />
+
       { type }
 
       <EuiHorizontalRule margin="s" />
@@ -383,21 +397,6 @@ function TimeseriesConfig(props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiHorizontalRule margin="s" />
-
-      <EuiFormRow
-        id={htmlId('series_filter')}
-        label="Filter"
-        fullWidth
-      >
-        <EuiFieldText
-          onChange={handleTextChange('filter')}
-          value={model.filter}
-          fullWidth
-        />
-      </EuiFormRow>
-
 
     </div>
   );
