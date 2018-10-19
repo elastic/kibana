@@ -29,7 +29,10 @@ function createQueueFn(server) {
 
   const queue = new Esqueue(index, queueOptions);
 
-  createWorkers(queue);
+  if (queueConfig.pollEnabled) {
+    // create workers to poll the index for idle jobs waiting to be claimed and executed
+    createWorkers(queue);
+  }
 
   return queue;
 }
