@@ -15,6 +15,8 @@ import _ from 'lodash';
 import config from './config';
 import { storeFromSavedObjectAttributes } from '../shared/services/save_map_state';
 
+export let store;
+
 const rootReducer = combineReducers({
   map,
   ui,
@@ -65,12 +67,13 @@ export const getStore = async function () {
       if (initConfig !== null) {
         clearInterval(handle);
         const storeConfig = (_.isEmpty(initConfig)) ? initConfig : { map: { ...initConfig, layerList: [], ready: false } };
-        const store = createStore(
+        const createdStore = createStore(
           rootReducer,
           storeConfig,
           compose(...enhancers)
         );
-        resolve(store);
+        store = createdStore;
+        resolve(createdStore);
         loadMetaResources(store.dispatch).then(()=> {
           if (initConfig.layerList && initConfig.layerList.length) {
             store.dispatch(replaceLayerList(initConfig.layerList));
