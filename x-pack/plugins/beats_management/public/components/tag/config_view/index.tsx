@@ -69,14 +69,14 @@ export class ConfigView extends React.Component<ComponentProps, any> {
             <h2>
               {this.editMode
                 ? this.props.onSave
-                  ? 'Edit Configuration'
-                  : 'View Configuration'
-                : 'Add Configuration'}
+                  ? 'Edit configuration'
+                  : 'View configuration'
+                : 'Add configuration'}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiFormRow label="Configuration type">
+          <EuiFormRow label="Type">
             <EuiSelect
               options={supportedConfigs}
               value={this.state.configBlock.type}
@@ -84,7 +84,7 @@ export class ConfigView extends React.Component<ComponentProps, any> {
               onChange={this.onValueChange('type')}
             />
           </EuiFormRow>
-          <EuiFormRow label="Configuration description">
+          <EuiFormRow label="Description">
             <EuiFieldText
               value={this.state.configBlock.description}
               disabled={!this.props.onSave}
@@ -93,11 +93,11 @@ export class ConfigView extends React.Component<ComponentProps, any> {
             />
           </EuiFormRow>
           <h3>
-            Config for&nbsp;
             {
               (supportedConfigs.find(config => this.state.configBlock.type === config.value) as any)
                 .text
             }
+            &nbsp;configuration
           </h3>
           <EuiHorizontalRule />
 

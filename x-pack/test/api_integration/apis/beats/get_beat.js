@@ -49,85 +49,6 @@ export default function ({ getService }) {
         'node.namespace': 'node',
       });
     });
-    it('first request of config from a changed beat should update status to waiting, then again for OK', async () => {
-      // 1. Initial request
-      await supertest
-        .get('/api/beats/agent/foo/configuration?validSetting=true')
-        .set(
-          'kbn-beats-access-token',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
-            'eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.' +
-            'SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI'
-        )
-        .expect(200);
-
-      let esResponse = await es.get({
-        index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
-        id: `beat:foo`,
-      });
-
-      let beat = esResponse._source.beat;
-      expect(beat.config_status).to.be('OK');
-
-      // 2. Settings changed
-      await supertest
-        .post('/api/beats/agents_tags/assignments')
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          assignments: [{ beatId: 'foo', tag: 'development' }],
-        })
-        .expect(200);
-
-      esResponse = await es.get({
-        index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
-        id: `beat:foo`,
-      });
-
-      beat = esResponse._source.beat;
-      expect(beat.config_status).to.be('REQUIRES_UPDATE');
-
-      // 3. Beat polls for settings
-      await supertest
-        .get('/api/beats/agent/foo/configuration?validSetting=true')
-        .set(
-          'kbn-beats-access-token',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
-            'eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.' +
-            'SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI'
-        )
-        .expect(200);
-
-      esResponse = await es.get({
-        index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
-        id: `beat:foo`,
-      });
-
-      beat = esResponse._source.beat;
-      expect(beat.config_status).to.be('WAITING_FOR_SUCCESS');
-
-      // 4. Beat polls for settings a second time
-      await supertest
-        .get('/api/beats/agent/foo/configuration?validSetting=true')
-        .set(
-          'kbn-beats-access-token',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
-            'eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.' +
-            'SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI'
-        )
-        .expect(200);
-
-      esResponse = await es.get({
-        index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
-        id: `beat:foo`,
-      });
-
-      beat = esResponse._source.beat;
-      expect(beat.config_status).to.be('OK');
-    });
 
     it('A config check with a validSetting of false should set an error status on the beat', async () => {
       // 1. Initial request
@@ -150,45 +71,7 @@ export default function ({ getService }) {
       let beat = esResponse._source.beat;
       expect(beat.config_status).to.be('OK');
 
-      // 2. Settings changed
-      await supertest
-        .post('/api/beats/agents_tags/assignments')
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          assignments: [{ beatId: 'foo', tag: 'development' }],
-        })
-        .expect(200);
-
-      esResponse = await es.get({
-        index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
-        id: `beat:foo`,
-      });
-
-      beat = esResponse._source.beat;
-      expect(beat.config_status).to.be('REQUIRES_UPDATE');
-
-      // 3. Beat polls for settings
-      await supertest
-        .get('/api/beats/agent/foo/configuration?validSetting=true')
-        .set(
-          'kbn-beats-access-token',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
-            'eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.' +
-            'SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI'
-        )
-        .expect(200);
-
-      esResponse = await es.get({
-        index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
-        id: `beat:foo`,
-      });
-
-      beat = esResponse._source.beat;
-      expect(beat.config_status).to.be('WAITING_FOR_SUCCESS');
-
-      // 4. Beat polls for settings a second time
+      // 2. Beat polls reporting an error
       await supertest
         .get('/api/beats/agent/foo/configuration?validSetting=false')
         .set(

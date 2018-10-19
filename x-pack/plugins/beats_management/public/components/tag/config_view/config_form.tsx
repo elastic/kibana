@@ -142,10 +142,15 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                   <FormsyEuiFieldText
                     key={schema.id}
                     id={schema.id}
-                    defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
+                    defaultValue={get(
+                      this.props,
+                      `values.configs[0].${schema.id}`,
+                      schema.defaultValue
+                    )}
                     name={schema.id}
                     disabled={!this.props.onSubmit}
                     helpText={schema.ui.helpText}
+                    placeholder={schema.ui.placeholder}
                     label={schema.ui.label}
                     validations={schema.validations}
                     validationError={schema.error}
@@ -158,8 +163,13 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     key={schema.id}
                     id={schema.id}
                     disabled={!this.props.onSubmit}
-                    defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
+                    defaultValue={get(
+                      this.props,
+                      `values.configs[0].${schema.id}`,
+                      schema.defaultValue
+                    )}
                     name={schema.id}
+                    placeholder={schema.ui.placeholder}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
                     validations={schema.validations}
@@ -173,8 +183,13 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     key={schema.id}
                     id={schema.id}
                     disabled={!this.props.onSubmit}
-                    defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
+                    defaultValue={get(
+                      this.props,
+                      `values.configs[0].${schema.id}`,
+                      schema.defaultValue
+                    )}
                     name={schema.id}
+                    placeholder={schema.ui.placeholder}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
                     validations={schema.validations}
@@ -189,7 +204,11 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     id={schema.id}
                     name={schema.id}
                     disabled={!this.props.onSubmit}
-                    defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
+                    defaultValue={get(
+                      this.props,
+                      `values.configs[0].${schema.id}`,
+                      schema.defaultValue
+                    )}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
                     options={[{ value: '', text: 'Please Select An Option' }].concat(
@@ -207,7 +226,11 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     mode="yaml"
                     disabled={!this.props.onSubmit}
                     id={schema.id}
-                    defaultValue={get(this.props, `values.configs[0].${schema.id}`)}
+                    defaultValue={get(
+                      this.props,
+                      `values.configs[0].${schema.id}`,
+                      schema.defaultValue
+                    )}
                     name={schema.id}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}

@@ -44,13 +44,12 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
       let newStatus: CMBeat['config_status'] = 'OK';
       if (!request.query.validSetting) {
         newStatus = 'ERROR';
-      } else if (beat.config_status === 'REQUIRES_UPDATE' && request.query.validSetting) {
-        newStatus = 'WAITING_FOR_SUCCESS';
-      } else if (beat.config_status === 'WAITING_FOR_SUCCESS' && request.query.validSetting) {
-        newStatus = 'OK';
       }
 
-      await libs.beats.update(libs.framework.internalUser, beat.id, { config_status: newStatus });
+      await libs.beats.update(libs.framework.internalUser, beat.id, {
+        config_status: newStatus,
+        last_updated: new Date(),
+      });
 
       tags = await libs.tags.getTagsWithIds(libs.framework.internalUser, beat.tags || []);
     } catch (err) {

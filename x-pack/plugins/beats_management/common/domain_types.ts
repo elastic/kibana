@@ -57,7 +57,7 @@ export interface ReturnedConfigurationBlock
 
 export interface CMBeat {
   id: string;
-  config_status: 'OK' | 'REQUIRES_UPDATE' | 'WAITING_FOR_SUCCESS' | 'ERROR';
+  config_status: 'OK' | 'REQUIRES_UPDATE' | 'WAITING_FOR_SUCCESS' | 'UNKNOWN' | 'ERROR';
   enrollment_token: string;
   active: boolean;
   access_token: string;
@@ -67,7 +67,7 @@ export interface CMBeat {
   host_ip: string;
   host_name: string;
   ephemeral_id?: string;
-  last_updated?: string;
+  last_updated?: Date;
   event_rate?: string;
   local_configuration_yml?: string;
   tags?: string[];

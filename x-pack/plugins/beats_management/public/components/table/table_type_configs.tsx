@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, IconColor } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiToolTip, IconColor } from '@elastic/eui';
 import { first, sortBy, sortByOrder, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -88,26 +88,37 @@ export const BeatsTableType: TableType = {
       render: (value: string, beat: CMPopulatedBeat) => {
         let color: IconColor = 'success';
         let statusText = 'OK';
+        let tooltipText = 'Everything looks good!';
+
         switch (beat.config_status) {
-          case 'OK':
-            color = 'success';
-            statusText = 'OK';
-            break;
           case 'REQUIRES_UPDATE':
             statusText = 'Waiting for Beat checkin';
+            tooltipText = 'Waiting for the Beat to download the latest config';
           case 'WAITING_FOR_SUCCESS':
             color = 'warning';
             statusText = 'Verifying Config';
+            tooltipText = 'Waiting for a status update from the Beat';
+            break;
+          case 'UNKNOWN':
+            color = 'subdued';
+            statusText = 'Offline';
+            if (moment().diff(beat.last_updated, 'minutes') > 9) {
+              tooltipText = 'This Beat has not connected to kibana in over 10min';
+            }
+            tooltipText = 'This Beat has not yet been started.';
             break;
           case 'ERROR':
             color = 'danger';
             statusText = 'Error';
+            tooltipText = "Please check the logs of this Beat's host for error details";
             break;
         }
 
         return (
           <EuiFlexGroup wrap responsive={true} gutterSize="xs">
-            <EuiHealth color={color}>{statusText}</EuiHealth>
+            <EuiToolTip content={tooltipText}>
+              <EuiHealth color={color}>{statusText}</EuiHealth>
+            </EuiToolTip>
           </EuiFlexGroup>
         );
       },

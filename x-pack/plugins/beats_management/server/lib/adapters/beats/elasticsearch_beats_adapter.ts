@@ -36,7 +36,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async insert(user: FrameworkUser, beat: CMBeat) {
-    beat.config_status = 'OK';
+    beat.config_status = 'UNKNOWN';
     const body = {
       beat,
       type: 'beat',
@@ -180,7 +180,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
         const script = `
           def beat = ctx._source.beat;
           if (beat.tags != null) {
-            beat.config_status = "REQUIRES_UPDATE";
             beat.tags.removeAll([params.tag]);
           }`;
 
@@ -216,7 +215,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
             beat.tags = [];
           }
           if (!beat.tags.contains(params.tag)) {
-            beat.config_status = "REQUIRES_UPDATE";
             beat.tags.add(params.tag);
           }`;
 
