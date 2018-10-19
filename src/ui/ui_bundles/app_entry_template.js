@@ -40,7 +40,7 @@ const injectedMetadata = JSON.parse(document.querySelector('kbn-injected-metadat
 i18n.init(injectedMetadata.legacyMetadata.translations);
 
 new CoreSystem({
-  injectedMetadata: injectedMetadata,
+  injectedMetadata,
   rootDomElement: document.body,
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
