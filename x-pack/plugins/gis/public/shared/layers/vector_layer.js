@@ -13,9 +13,10 @@ import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
 
 import { FeatureTooltip } from 'plugins/gis/components/map/feature_tooltip';
+import { store } from '../../store/store';
+import { getMapColors } from '../../selectors/map_selectors';
 
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
-let defaultColorIndex = 0;
 
 export class VectorLayer extends ALayer {
 
@@ -34,15 +35,20 @@ export class VectorLayer extends ALayer {
   }
 
   static createDescriptor(options) {
+    // Colors must be state aware to reduce unnecessary incrementation
+    const mapColors = getMapColors(store.getState());
+    const lastColor = mapColors.pop();
+    const nextColor = DEFAULT_COLORS[
+      (DEFAULT_COLORS.indexOf(lastColor) + 1) % (DEFAULT_COLORS.length - 1)
+    ];
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = VectorLayer.type;
-    defaultColorIndex = defaultColorIndex  % DEFAULT_COLORS.length;
     if (!options.style) {
       layerDescriptor.style = VectorStyle.createDescriptor({
         'fillColor': {
           type: VectorStyle.STYLE_TYPE.STATIC,
           options: {
-            color: DEFAULT_COLORS[defaultColorIndex++]
+            color: nextColor
           }
         }
       });

@@ -115,6 +115,15 @@ export const getMapExtent = ({ map }) => map.mapState.extent ?
 export const getMapZoom = ({ map }) => map.mapState.zoom ?
   map.mapState.zoom : 0;
 
+export const getMapColors = ({ map }) => {
+  return map.layerList.reduce((accu, layer) => {
+    // This will evolve as color options are expanded
+    const color = _.get(layer, 'style.properties.fillColor.options.color', null);
+    if (!layer.temporary && color) accu.push(color);
+    return accu;
+  }, []);
+};
+
 export const getTimeFilters = ({ map }) => map.mapState.timeFilters;
 
 export const getMetadata = ({ config }) => config && config.meta;
