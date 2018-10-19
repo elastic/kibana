@@ -32,6 +32,7 @@ export function canvas(kibana) {
         'plugins/canvas/lib/load_expression_types.js',
         'plugins/canvas/lib/load_transitions.js',
       ],
+      home: ['plugins/canvas/register_feature'],
       mappings,
     },
 
