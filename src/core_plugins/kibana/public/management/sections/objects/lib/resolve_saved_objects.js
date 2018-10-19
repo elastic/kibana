@@ -18,6 +18,7 @@
  */
 
 import { SavedObjectNotFound } from 'ui/errors';
+import { i18n } from '@kbn/i18n';
 
 async function getSavedObject(doc, services) {
   const service = services.find(service => service.type === doc._type);
@@ -36,7 +37,16 @@ function addJsonFieldToIndexPattern(target, sourceString, fieldName, indexName) 
     try {
       target[fieldName] = JSON.parse(sourceString);
     } catch (error) {
-      throw new Error(`Error encountered parsing ${fieldName} for index pattern ${indexName}: ${error.message}`);
+      throw new Error(
+        i18n.translate('kbn.management.objects.parsingFieldErrorMessage', {
+          defaultMessage: 'Error encountered parsing {fieldName} for index pattern {indexName}: {errorMessage}',
+          values: {
+            fieldName,
+            indexName,
+            errorMessage: error.message,
+          }
+        }),
+      );
     }
   }
 }
