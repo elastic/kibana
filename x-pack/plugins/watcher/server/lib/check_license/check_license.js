@@ -15,7 +15,10 @@ export function checkLicense(xpackLicenseInfo) {
       showLinks: true,
       enableLinks: false,
       message: i18n.translate('xpack.watcher.checkLicense.licenseInformationNotAvailableTextMessage', {
-        defaultMessage: 'You cannot use Watcher because license information is not available at this time.',
+        defaultMessage: 'You cannot use {watcher} because license information is not available at this time.',
+        values: {
+          watcher: 'Watcher'
+        }
       }),
     };
   }
@@ -37,8 +40,11 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: false,
       message: i18n.translate('xpack.watcher.checkLicense.licenseDoesNotSupportTextMessage', {
-        defaultMessage: 'Your {licenseType} license does not support Watcher. Please upgrade your license.',
-        values: { licenseType },
+        defaultMessage: 'Your {licenseType} license does not support {watcher}. Please upgrade your license.',
+        values: {
+          licenseType,
+          watcher: 'Watcher'
+        },
       }),
     };
   }
@@ -50,8 +56,11 @@ export function checkLicense(xpackLicenseInfo) {
       showLinks: true,
       enableLinks: false,
       message: i18n.translate('xpack.watcher.server.checkLicense.licenseExpiredTextMessage', {
-        defaultMessage: 'You cannot use Watcher because your {licenseType} license has expired',
-        values: { licenseType },
+        defaultMessage: 'You cannot use {watcher} because your {licenseType} license has expired',
+        values: {
+          licenseType,
+          watcher: 'Watcher'
+        },
       }),
     };
   }

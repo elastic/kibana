@@ -18,11 +18,11 @@ export const WATCH_STATE_COMMENTS = {
     defaultMessage: 'Throttled'
   }),
 
-  PARTIALLY_ACKNOWLEDGED: i18n.translate('xpack.watcher.constants.watchStateComments.partiallyAckedStateCommentText', {
+  PARTIALLY_ACKNOWLEDGED: i18n.translate('xpack.watcher.constants.watchStateComments.partiallyAcknowledgedStateCommentText', {
     defaultMessage: 'Partially Acked'
   }),
 
-  ACKNOWLEDGED: i18n.translate('xpack.watcher.constants.watchStateComments.ackedStateCommentText', {
+  ACKNOWLEDGED: i18n.translate('xpack.watcher.constants.watchStateComments.acknowledgedStateCommentText', {
     defaultMessage: 'Acked'
   }),
 

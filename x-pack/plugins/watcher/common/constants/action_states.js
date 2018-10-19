@@ -14,7 +14,7 @@ export const ACTION_STATES = {
   }),
 
   // Action has been acknowledged by user
-  ACKNOWLEDGED: i18n.translate('xpack.watcher.constants.actionStates.ackedStateText', {
+  ACKNOWLEDGED: i18n.translate('xpack.watcher.constants.actionStates.acknowledgedStateText', {
     defaultMessage: 'Acked'
   }),
 
