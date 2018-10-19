@@ -8,7 +8,7 @@ import actionCreatorFactory from 'typescript-fsa';
 
 import { TextScale } from '../../../../common/log_text_scale';
 
-const actionCreator = actionCreatorFactory('x-pack/infra/local/log_textview');
+const actionCreator = actionCreatorFactory('x-pack/ingest/local/log_textview');
 
 export const setTextviewScale = actionCreator<TextScale>('SET_TEXTVIEW_SCALE');
 

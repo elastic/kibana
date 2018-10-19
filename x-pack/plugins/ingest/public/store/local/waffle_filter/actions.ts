@@ -8,7 +8,7 @@ import actionCreatorFactory from 'typescript-fsa';
 
 import { FilterQuery } from './reducer';
 
-const actionCreator = actionCreatorFactory('x-pack/infra/local/waffle_filter');
+const actionCreator = actionCreatorFactory('x-pack/ingest/local/waffle_filter');
 
 export const setWaffleFilterQueryDraft = actionCreator<FilterQuery>(
   'SET_WAFFLE_FILTER_QUERY_DRAFT'

@@ -14,7 +14,7 @@ const APP_ID = 'ingest';
 export function ingest(kibana: any) {
   return new kibana.Plugin({
     id: APP_ID,
-    configPrefix: 'xpack.infra',
+    configPrefix: 'xpack.ingest',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch'],
     uiExports: {

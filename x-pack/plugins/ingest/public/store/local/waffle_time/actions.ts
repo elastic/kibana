@@ -6,7 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-const actionCreator = actionCreatorFactory('x-pack/infra/local/waffle_time');
+const actionCreator = actionCreatorFactory('x-pack/ingest/local/waffle_time');
 
 export const jumpToTime = actionCreator<number>('JUMP_TO_TIME');
 

@@ -61,7 +61,7 @@ export const createGraphqlOperationActionCreators = <Data, Variables, Error = Ap
   stateKey: string,
   operationKey: string
 ): OperationActionCreators<Data, Variables, Error> => {
-  const actionCreator = actionCreatorFactory(`x-pack/infra/remote/${stateKey}/${operationKey}`);
+  const actionCreator = actionCreatorFactory(`x-pack/ingest/remote/${stateKey}/${operationKey}`);
 
   const resolve = actionCreator<Variables>('RESOLVE');
   const resolveEffect = actionCreator.async<Variables, ApolloQueryResult<Data>>('RESOLVE');

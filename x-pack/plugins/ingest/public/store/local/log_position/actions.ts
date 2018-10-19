@@ -8,7 +8,7 @@ import actionCreatorFactory from 'typescript-fsa';
 
 import { TimeKey } from '../../../../common/time';
 
-const actionCreator = actionCreatorFactory('x-pack/infra/local/log_position');
+const actionCreator = actionCreatorFactory('x-pack/ingest/local/log_position');
 
 export const jumpToTargetPosition = actionCreator<TimeKey>('JUMP_TO_TARGET_POSITION');
 

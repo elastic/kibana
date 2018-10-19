@@ -6,6 +6,6 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-const actionCreator = actionCreatorFactory('x-pack/infra/local/log_minimap');
+const actionCreator = actionCreatorFactory('x-pack/ingest/local/log_minimap');
 
 export const setMinimapIntervalSize = actionCreator<number>('SET_MINIMAP_INTERVAL_SIZE');

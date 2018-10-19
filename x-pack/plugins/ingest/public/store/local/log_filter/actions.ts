@@ -8,7 +8,7 @@ import actionCreatorFactory from 'typescript-fsa';
 
 import { FilterQuery } from './reducer';
 
-const actionCreator = actionCreatorFactory('x-pack/infra/local/log_filter');
+const actionCreator = actionCreatorFactory('x-pack/ingest/local/log_filter');
 
 export const setLogFilterQueryDraft = actionCreator<FilterQuery>('SET_LOG_FILTER_QUERY_DRAFT');
 
