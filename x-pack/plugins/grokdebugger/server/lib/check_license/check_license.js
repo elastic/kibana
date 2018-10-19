@@ -14,7 +14,10 @@ export function checkLicense(xpackLicenseInfo) {
       enableLink: false,
       enableAPIRoute: false,
       message: i18n.translate('xpack.grokDebugger.unavailableLicenseInformationMessage', {
-        defaultMessage: 'You cannot use the Grok Debugger because license information is not available at this time.',
+        defaultMessage: 'You cannot use the {grokLogParsingTool} Debugger because license information is not available at this time.',
+        values: {
+          grokLogParsingTool: 'Grok'
+        }
       }),
     };
   }
@@ -28,8 +31,11 @@ export function checkLicense(xpackLicenseInfo) {
       enableLink: false,
       enableAPIRoute: false,
       message: i18n.translate('xpack.grokDebugger.licenseHasExpiredMessage', {
-        defaultMessage: 'You cannot use the Grok Debugger because your {licenseType} license has expired.',
-        values: { licenseType },
+        defaultMessage: 'You cannot use the {grokLogParsingTool} Debugger because your {licenseType} license has expired.',
+        values: {
+          licenseType,
+          grokLogParsingTool: 'Grok'
+        },
       }),
     };
   }

@@ -12,10 +12,16 @@ FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'grokdebugger',
     title: i18n('xpack.grokDebugger.registryProviderTitle', {
-      defaultMessage: 'Grok Debugger',
+      defaultMessage: '{grokLogParsingTool} Debugger',
+      values: {
+        grokLogParsingTool: 'Grok'
+      }
     }),
     description: i18n('xpack.grokDebugger.registryProviderDescription', {
-      defaultMessage: 'Simulate and debug grok patterns for data transformation on ingestion.',
+      defaultMessage: 'Simulate and debug {grokLogParsingTool} patterns for data transformation on ingestion.',
+      values: {
+        grokLogParsingTool: 'grok'
+      }
     }),
     icon: 'grokApp',
     path: '/app/kibana#/dev_tools/grokdebugger',
