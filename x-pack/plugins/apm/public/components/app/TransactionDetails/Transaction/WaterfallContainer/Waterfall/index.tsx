@@ -65,7 +65,7 @@ export class Waterfall extends Component<Props> {
       return null;
     }
 
-    const { serviceColors, waterfall }: Props = this.props;
+    const { serviceColors, waterfall, urlParams }: Props = this.props;
 
     return (
       <Fragment key={item.id}>
@@ -74,7 +74,7 @@ export class Waterfall extends Component<Props> {
           color={serviceColors[item.serviceName]}
           item={item}
           totalDuration={waterfall.duration}
-          isSelected={true} // TODO: implement logic (do we still need this if state is handled via query param?)
+          isSelected={item.id === urlParams.waterfallItemId}
           onClick={() => this.onOpenFlyout(item)}
         />
 

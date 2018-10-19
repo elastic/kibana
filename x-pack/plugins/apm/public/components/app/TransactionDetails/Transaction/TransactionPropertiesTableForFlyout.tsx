@@ -30,7 +30,7 @@ function getTabs(transactionData: Transaction) {
 }
 
 interface Props {
-  location: Location;
+  location: any;
   transaction: Transaction;
   urlParams: IUrlParams;
 }
