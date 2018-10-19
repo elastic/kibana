@@ -118,11 +118,7 @@ async function runSingleConfig(configPath, options) {
     await runKibanaServer({ procs, config, options: opts });
     await runFtr({ configPath, options: opts });
 
-    try {
-      await procs.stop('kibana');
-    } catch (error) {
-      // do nothing
-    }
+    await procs.stop('kibana');
     await es.cleanup();
   });
 }
