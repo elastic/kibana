@@ -14,8 +14,8 @@ const capabilitiesTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('capabilities', () => {
-    before(() => esArchiver.load('infraops'));
-    after(() => esArchiver.unload('infraops'));
+    before(() => esArchiver.load('infra'));
+    after(() => esArchiver.unload('infra'));
 
     it('supports the capabilities container query', () => {
       return client

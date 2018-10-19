@@ -15,8 +15,8 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('sources', () => {
-    before(() => esArchiver.load('infraops'));
-    after(() => esArchiver.unload('infraops'));
+    before(() => esArchiver.load('infra'));
+    after(() => esArchiver.unload('infra'));
 
     it('supports the redux store query', () => {
       return client
@@ -37,7 +37,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           expect(sourceConfiguration.fields.host).to.be('beat.hostname');
           expect(sourceConfiguration.fields.pod).to.be('kubernetes.pod.name');
 
-          // test data in x-pack/test/functional/es_archives/infraops/data.json.gz
+          // test data in x-pack/test/functional/es_archives/infra/data.json.gz
           expect(sourceStatus.indexFields.length).to.be(1765);
           expect(sourceStatus.logIndicesExist).to.be(true);
           expect(sourceStatus.metricIndicesExist).to.be(true);
