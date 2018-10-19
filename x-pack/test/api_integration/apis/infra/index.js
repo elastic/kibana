@@ -8,5 +8,6 @@
 export default function ({ loadTestFile }) {
   describe('InfraOps GraphQL Endpoints', () => {
     loadTestFile(require.resolve('./metrics'));
+    loadTestFile(require.resolve('./waffle'));
   });
 }
