@@ -4,8 +4,7 @@ exports[`AgentFeatureTipMessage component should render null empty string when n
 
 exports[`AgentFeatureTipMessage component should render when docs are returned 1`] = `
 <styled.div>
-  <EuiIcon
-    size="m"
+  <Styled(EuiIcon)
     type="iInCircle"
   />
   You can configure your agent to add contextual information about your users.
@@ -20,13 +19,9 @@ exports[`AgentFeatureTipMessage component should render when docs are returned 1
 
 exports[`PropertiesTable component should render empty when data has no keys 1`] = `
 <styled.div>
-  <styled.div>
-    <EuiIcon
-      size="m"
-      type="iInCircle"
-    />
-     No data available
-  </styled.div>
+  <Styled(styled.div)>
+    No data available
+  </Styled(styled.div)>
   <AgentFeatureTipMessage
     agentName="testAgentName"
     featureName="testPropKey"
@@ -36,13 +31,9 @@ exports[`PropertiesTable component should render empty when data has no keys 1`]
 
 exports[`PropertiesTable component should render empty when data isn't present 1`] = `
 <styled.div>
-  <styled.div>
-    <EuiIcon
-      size="m"
-      type="iInCircle"
-    />
-     No data available
-  </styled.div>
+  <Styled(styled.div)>
+    No data available
+  </Styled(styled.div)>
   <AgentFeatureTipMessage
     agentName="testAgentName"
     featureName="testPropKey"

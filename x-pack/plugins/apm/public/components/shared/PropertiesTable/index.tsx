@@ -10,7 +10,14 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { StringMap } from '../../../../typings/common';
-import { colors, fontSize, px, unit, units } from '../../../style/variables';
+import {
+  colors,
+  fontSize,
+  fontSizes,
+  px,
+  unit,
+  units
+} from '../../../style/variables';
 import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
 // @ts-ignore
 import { ExternalLink } from '../../../utils/url';
@@ -29,6 +36,15 @@ const TableInfo = styled.div`
   font-size: ${fontSize};
   color: ${colors.gray2};
   line-height: 1.5;
+`;
+
+const TableInfoHeader = styled(TableInfo)`
+  font-size: ${fontSizes.large};
+  color: ${colors.black2};
+`;
+
+const EuiIconWithSpace = styled(EuiIcon)`
+  margin-right: ${px(units.half)};
 `;
 
 export function getPropertyTabNames(selected: string[]): string[] {
@@ -63,7 +79,7 @@ export function AgentFeatureTipMessage({
 
   return (
     <TableInfo>
-      <EuiIcon type="iInCircle" />
+      <EuiIconWithSpace type="iInCircle" />
       {getAgentFeatureText(featureName)}{' '}
       <ExternalLink href={docsUrl}>
         Learn more in the documentation.
@@ -102,9 +118,7 @@ export function PropertiesTable({
           depth={1}
         />
       ) : (
-        <TableInfo>
-          <EuiIcon type="iInCircle" /> No data available
-        </TableInfo>
+        <TableInfoHeader>No data available</TableInfoHeader>
       )}
       <AgentFeatureTipMessage featureName={propKey} agentName={agentName} />
     </TableContainer>
