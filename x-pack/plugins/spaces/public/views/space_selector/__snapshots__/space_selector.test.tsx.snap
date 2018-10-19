@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<EuiPage
+  className="spaceSelector__page"
+  data-test-subj="kibanaSpaceSelector"
+  restrictWidth={false}
+>
+  <EuiPageBody
+    restrictWidth={false}
+  >
+    <EuiPageHeader
+      className="spaceSelector__heading"
+      responsive={true}
+    >
+      <EuiPageHeaderSection
+        className="spaceSelector__logoHeader"
+      >
+        <div
+          className="spaceSelector__logoCircle"
+        >
+          <EuiIcon
+            size="xxl"
+            type="logoKibana"
+          />
+        </div>
+        <EuiSpacer
+          size="l"
+        />
+        <EuiTitle
+          className="euiTextColor--ghost"
+          size="l"
+        >
+          <p>
+            Select your space
+          </p>
+        </EuiTitle>
+      </EuiPageHeaderSection>
+    </EuiPageHeader>
+    <EuiPageContent
+      className="spaceSelector__pageContent"
+      panelPaddingSize="l"
+    >
+      <EuiFlexGroup
+        alignItems="center"
+        component="div"
+        direction="column"
+        gutterSize="l"
+        justifyContent="flexStart"
+        responsive={false}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <EuiText
+            grow={true}
+            size="xs"
+          >
+            <p>
+              You can change your space at anytime.
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer
+        size="xl"
+      />
+      <SpaceCards
+        onSpaceSelect={[Function]}
+        spaces={Array []}
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="l"
+        />
+        <EuiText
+          color="subdued"
+          grow={true}
+          textAlign="center"
+        >
+          No spaces match search criteria
+        </EuiText>
+      </React.Fragment>
+    </EuiPageContent>
+  </EuiPageBody>
+</EuiPage>
+`;

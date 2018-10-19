@@ -18,16 +18,19 @@ function createJobFn(server) {
     relativeUrls,
     browserTimezone,
     layout
-  }, headers) {
+  }, headers, serializedSession, request) {
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
+    const encryptedSerializedSession = await crypto.encrypt(serializedSession);
 
     return {
       type: objectType,
       title: title,
       objects: relativeUrls.map(u => ({ relativeUrl: u })),
       headers: serializedEncryptedHeaders,
+      session: encryptedSerializedSession,
       browserTimezone,
       layout,
+      basePath: request.getBasePath(),
       forceNow: new Date().toISOString(),
     };
   });

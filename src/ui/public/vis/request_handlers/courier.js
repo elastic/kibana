@@ -87,7 +87,7 @@ const CourierRequestHandlerProvider = function () {
       aggs.setTimeRange(timeRange);
 
       // For now we need to mirror the history of the passed search source, since
-      // the spy panel wouldn't work otherwise.
+      // the request inspector wouldn't work otherwise.
       Object.defineProperty(requestSearchSource, 'history', {
         get() {
           return searchSource.history;

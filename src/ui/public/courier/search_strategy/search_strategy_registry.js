@@ -19,7 +19,7 @@
 
 const searchStrategies = [];
 
-const addSearchStrategy = searchStrategy => {
+export const addSearchStrategy = searchStrategy => {
   if (searchStrategies.includes(searchStrategy)) {
     return;
   }
@@ -47,12 +47,11 @@ const getSearchStrategy = indexPattern => {
  * We use an array of objects to preserve the order of the search requests, which we use to
  * deterministically associate each response with the originating request.
  */
-const assignSearchRequestsToSearchStrategies = searchRequests => {
+export const assignSearchRequestsToSearchStrategies = searchRequests => {
   const searchStrategiesWithRequests = [];
   const searchStrategyById = {};
 
   searchRequests.forEach(searchRequest => {
-
     const indexPattern = searchRequest.source.getField('index');
     const matchingSearchStrategy = getSearchStrategy(indexPattern);
 
@@ -76,12 +75,6 @@ const assignSearchRequestsToSearchStrategies = searchRequests => {
   return searchStrategiesWithRequests;
 };
 
-const hasSearchStategyForIndexPattern = indexPattern => {
+export const hasSearchStategyForIndexPattern = indexPattern => {
   return Boolean(getSearchStrategy(indexPattern));
-};
-
-export {
-  assignSearchRequestsToSearchStrategies,
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
 };

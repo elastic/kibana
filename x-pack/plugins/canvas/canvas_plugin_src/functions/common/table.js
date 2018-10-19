@@ -21,7 +21,8 @@ export const table = () => ({
     paginate: {
       types: ['boolean'],
       default: true,
-      help: 'Show pagination controls. If set to false only the first page will be displayed.',
+      help: 'Show pagination controls. If set to false only the first page will be displayed',
+      options: [true, false],
     },
     perPage: {
       types: ['number'],
@@ -31,7 +32,8 @@ export const table = () => ({
     showHeader: {
       types: ['boolean'],
       default: true,
-      help: 'Show or hide the header row with titles for each column.',
+      help: 'Show or hide the header row with titles for each column',
+      options: [true, false],
     },
   },
   fn: (context, args) => {

@@ -6,10 +6,12 @@
 
 export default function ({ loadTestFile }) {
   describe('apis', () => {
+    loadTestFile(require.resolve('./es'));
     loadTestFile(require.resolve('./security'));
     loadTestFile(require.resolve('./monitoring'));
     loadTestFile(require.resolve('./xpack_main'));
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./kibana'));
+    loadTestFile(require.resolve('./beats'));
   });
 }

@@ -34,6 +34,7 @@ import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
 import { IntervalHelperProvider, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { mlExplorerDashboardService } from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
@@ -76,11 +77,11 @@ module.controller('MlExplorerController', function (
   AppState,
   Private,
   mlCheckboxShowChartsService,
-  mlExplorerDashboardService,
   mlSelectLimitService,
   mlSelectIntervalService,
   mlSelectSeverityService) {
 
+  $scope.anomalyChartRecords = [];
   $scope.timeFieldName = 'timestamp';
   $scope.loading = true;
   timefilter.enableTimeRangeSelector();
@@ -105,7 +106,7 @@ module.controller('MlExplorerController', function (
   $scope.queryFilters = [];
 
   const dragSelect = new DragSelect({
-    selectables: document.querySelectorAll('.sl-cell'),
+    selectables: document.getElementsByClassName('sl-cell'),
     callback(elements) {
       if (elements.length > 1 && !ALLOW_CELL_RANGE_SELECTION) {
         elements = [elements[0]];
@@ -360,7 +361,6 @@ module.controller('MlExplorerController', function (
       MlTimeBuckets: TimeBuckets,
       swimlaneData: getSwimlaneData(swimlaneType),
       swimlaneType,
-      mlExplorerDashboardService,
       selection: $scope.appState.mlExplorerSwimlane
     };
   }
@@ -508,7 +508,8 @@ module.controller('MlExplorerController', function (
 
   // Listens to render updates of the swimlanes to update dragSelect
   const swimlaneRenderDoneListener = function () {
-    dragSelect.addSelectables(document.querySelectorAll('.sl-cell'));
+    dragSelect.clearSelection();
+    dragSelect.setSelectables(document.getElementsByClassName('sl-cell'));
   };
   mlExplorerDashboardService.swimlaneRenderDone.watch(swimlaneRenderDoneListener);
 

@@ -25,6 +25,7 @@ export {
 export {
   mappings,
   migrations,
+  savedObjectSchemas,
   validations,
 } from './saved_object';
 

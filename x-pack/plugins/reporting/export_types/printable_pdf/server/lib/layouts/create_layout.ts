@@ -14,11 +14,11 @@ interface LayoutParams {
   dimensions: Size;
 }
 
-export function createLayout(server: KbnServer, layoutParams: LayoutParams): Layout {
+export function createLayout(server: KbnServer, layoutParams?: LayoutParams): Layout {
   if (layoutParams && layoutParams.id === LayoutTypes.PRESERVE_LAYOUT) {
-    return new PreserveLayout(layoutParams.id, layoutParams.dimensions);
+    return new PreserveLayout(layoutParams.dimensions);
   }
 
   // this is the default because some jobs won't have anything specified
-  return new PrintLayout(server, layoutParams.id);
+  return new PrintLayout(server);
 }

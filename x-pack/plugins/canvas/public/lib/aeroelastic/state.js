@@ -82,4 +82,5 @@ module.exports = {
   createStore,
   select,
   selectReduce,
+  makeUid,
 };

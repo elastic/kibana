@@ -21,7 +21,7 @@
  * This file provides logic for migrating raw documents.
  */
 
-import { isRawSavedObject, RawDoc, rawToSavedObject, savedObjectToRaw } from '../../serialization';
+import { RawDoc, SavedObjectsSerializer } from '../../serialization';
 import { TransformFn } from './document_migrator';
 
 /**
@@ -32,12 +32,16 @@ import { TransformFn } from './document_migrator';
  * @param {RawDoc[]} rawDocs
  * @returns {RawDoc[]}
  */
-export function migrateRawDocs(migrateDoc: TransformFn, rawDocs: RawDoc[]): RawDoc[] {
+export function migrateRawDocs(
+  serializer: SavedObjectsSerializer,
+  migrateDoc: TransformFn,
+  rawDocs: RawDoc[]
+): RawDoc[] {
   return rawDocs.map(raw => {
-    if (isRawSavedObject(raw)) {
-      const savedObject = rawToSavedObject(raw);
+    if (serializer.isRawSavedObject(raw)) {
+      const savedObject = serializer.rawToSavedObject(raw);
       savedObject.migrationVersion = savedObject.migrationVersion || {};
-      return savedObjectToRaw(migrateDoc(savedObject));
+      return serializer.savedObjectToRaw(migrateDoc(savedObject));
     }
 
     return raw;
