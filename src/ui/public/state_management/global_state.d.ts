@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { State } from './state';
 
-export type AppState = State;
+export type GlobalState = State;
