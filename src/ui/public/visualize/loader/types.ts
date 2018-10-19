@@ -28,7 +28,7 @@ export interface TimeRange {
 }
 
 export interface Filter {
-  meta: object;
+  meta: any;
   query: object;
 }
 
