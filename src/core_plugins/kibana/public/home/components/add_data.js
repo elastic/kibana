@@ -219,7 +219,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
             <strong style={{ height: 38 }}>
               <FormattedMessage
                 id="kbn.home.addData.uploadFileTitle"
-                defaultMessage="Upload data from file"
+                defaultMessage="Upload data from a file"
               />
             </strong>
             <EuiLink

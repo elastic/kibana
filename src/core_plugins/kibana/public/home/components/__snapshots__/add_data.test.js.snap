@@ -265,7 +265,7 @@ exports[`apmUiEnabled 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Upload data from file"
+            defaultMessage="Upload data from a file"
             id="kbn.home.addData.uploadFileTitle"
             values={Object {}}
           />
@@ -562,7 +562,7 @@ exports[`isNewKibanaInstance 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Upload data from file"
+            defaultMessage="Upload data from a file"
             id="kbn.home.addData.uploadFileTitle"
             values={Object {}}
           />
@@ -859,7 +859,7 @@ exports[`render 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Upload data from file"
+            defaultMessage="Upload data from a file"
             id="kbn.home.addData.uploadFileTitle"
             values={Object {}}
           />
