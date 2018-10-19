@@ -33,10 +33,9 @@ export function registerKqlTelemetryApi(server) {
       tags: ['api'],
     },
     handler: async function (request, reply) {
-      const { savedObjects: { SavedObjectsClient, getSavedObjectsRepository } } = server;
+      const { savedObjects: { getSavedObjectsRepository } } = server;
       const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
       const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-      const savedObjectsClient = new SavedObjectsClient(internalRepository);
 
       const {
         payload: { opt_in: optIn },
@@ -45,7 +44,7 @@ export function registerKqlTelemetryApi(server) {
       const counterName = optIn ? 'optInCount' : 'optOutCount';
 
       try {
-        await savedObjectsClient.incrementCounter(
+        await internalRepository.incrementCounter(
           'kql-telemetry',
           'kql-telemetry',
           counterName,

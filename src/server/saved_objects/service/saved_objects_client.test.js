@@ -127,20 +127,3 @@ test(`#update`, async () => {
   expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options);
   expect(result).toBe(returnValue);
 });
-
-test(`#incrementCounter`, async () => {
-  const returnValue = Symbol();
-  const mockRepository = {
-    incrementCounter: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
-  };
-  const client = new SavedObjectsClient(mockRepository);
-
-  const type = Symbol();
-  const id = Symbol();
-  const counterFieldName = Symbol();
-  const options = Symbol();
-  const result = await client.incrementCounter(type, id, counterFieldName, options);
-
-  expect(mockRepository.incrementCounter).toHaveBeenCalledWith(type, id, counterFieldName, options);
-  expect(result).toBe(returnValue);
-});

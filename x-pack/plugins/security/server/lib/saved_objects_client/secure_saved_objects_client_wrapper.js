@@ -101,16 +101,6 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.update(type, id, attributes, options);
   }
 
-  async incrementCounter(type, id, counterFieldName, options = {}) {
-    await this._ensureAuthorized(
-      type,
-      'incrementCounter',
-      { type, id, counterFieldName, options },
-    );
-
-    return await this._baseClient.incrementCounter(type, id, counterFieldName, options);
-  }
-
   async _checkSavedObjectPrivileges(actions) {
     try {
       if (this._spaces) {

@@ -197,17 +197,4 @@ export class SavedObjectsClient {
   async update(type, id, attributes, options = {}) {
     return this._repository.update(type, id, attributes, options);
   }
-
-  /**
-   * Increases a counter field by one. Creates the document if one doesn't exist for the given id.
-   *
-   * @param {string} type
-   * @param {string} id
-   * @param {string} counterFieldName
-   * @param {object} [options={}]
-   * @returns {promise}
-   */
-  async incrementCounter(type, id, counterFieldName, options = {}) {
-    return this._repository.incrementCounter(type, id, counterFieldName, options);
-  }
 }
