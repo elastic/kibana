@@ -146,21 +146,36 @@ export class ReportListing extends Component<Props, State> {
         field: 'status',
         name: 'Status',
         render: (status: string, record: Job) => {
+          if (status === 'pending') {
+            return <div>pending - waiting for polling worker to claim the job</div>;
+          }
+
           let maxSizeReached;
           if (record.max_size_reached) {
             maxSizeReached = <span> - max size reached</span>;
           }
+
           let statusTimestamp;
           if (status === 'processing' && record.started_at) {
             statusTimestamp = this.formatDate(record.started_at);
           } else if (record.completed_at && (status === 'completed' || status === 'failed')) {
             statusTimestamp = this.formatDate(record.completed_at);
           }
+          if (statusTimestamp) {
+            return (
+              <div>
+                {status}
+                {' at '}
+                <span className="eui-textNoWrap">{statusTimestamp}</span>
+                {maxSizeReached}
+              </div>
+            );
+          }
+
+          // unknown status
           return (
             <div>
               {status}
-              {' at '}
-              <span className="eui-textNoWrap">{statusTimestamp}</span>
               {maxSizeReached}
             </div>
           );
