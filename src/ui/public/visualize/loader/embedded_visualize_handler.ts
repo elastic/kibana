@@ -64,7 +64,7 @@ export class EmbeddedVisualizeHandler {
   }, 100);
 
   private dataLoaderParams: RequestHandlerParams;
-  private appState: AppState;
+  private readonly appState?: AppState;
   private uiState: PersistedState;
   private dataLoader: VisualizeDataLoader;
 
