@@ -23,10 +23,13 @@ import '../../directives/validate_cidr_mask';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterIpRange } from './create_filter/ip_range';
 import ipRangesTemplate from '../controls/ip_ranges.html';
+import { i18n } from '@kbn/i18n';
 
 export const ipRangeBucketAgg = new BucketAggType({
   name: 'ip_range',
-  title: 'IPv4 Range',
+  title: i18n.translate('common.ui.aggTypes.buckets.ipRangeTitle', {
+    defaultMessage: 'IPv4 Range',
+  }),
   createFilter: createFilterIpRange,
   getKey: function (bucket, key) {
     if (key) return key;
@@ -35,7 +38,12 @@ export const ipRangeBucketAgg = new BucketAggType({
     return `${from} to ${to}`;
   },
   makeLabel: function (aggConfig) {
-    return aggConfig.getFieldDisplayName() + ' IP ranges';
+    return i18n.translate('common.ui.aggTypes.buckets.ipRangeLabel', {
+      defaultMessage: '{aggConfigGetFieldDisplayName} IP ranges',
+      values: {
+        aggConfigGetFieldDisplayName: aggConfig.getFieldDisplayName()
+      }
+    });
   },
   params: [
     {

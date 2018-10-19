@@ -22,16 +22,24 @@ import { createFilterRange } from './create_filter/range';
 import { FieldFormat } from '../../../field_formats/field_format';
 import { RangeKey } from './range_key';
 import rangesTemplate from '../controls/ranges.html';
+import { i18n } from '@kbn/i18n';
 
 const keyCaches = new WeakMap();
 const formats = new WeakMap();
 
 export const rangeBucketAgg = new BucketAggType({
   name: 'range',
-  title: 'Range',
+  title: i18n.translate('common.ui.aggTypes.buckets.rangeTitle', {
+    defaultMessage: 'Range',
+  }),
   createFilter: createFilterRange,
   makeLabel: function (aggConfig) {
-    return aggConfig.getFieldDisplayName() + ' ranges';
+    return i18n.translate('common.ui.aggTypes.buckets.rangesLabel', {
+      defaultMessage: '{aggConfigGetFieldDisplayName} ranges',
+      values: {
+        aggConfigGetFieldDisplayName: aggConfig.getFieldDisplayName()
+      }
+    });
   },
   getKey: function (bucket, key, agg) {
     let keys = keyCaches.get(agg);
@@ -57,7 +65,13 @@ export const rangeBucketAgg = new BucketAggType({
 
     const RangeFormat = FieldFormat.from(function (range) {
       const format = agg.fieldOwnFormatter();
-      return `${format(range.gte)} to ${format(range.lt)}`;
+      return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
+        defaultMessage: '{rangeFormatGte} to {rangeFormatLt}',
+        values: {
+          rangeFormatGte: format(range.gte),
+          rangeFormatLt: format(range.lt)
+        }
+      });
     });
 
     format = new RangeFormat();

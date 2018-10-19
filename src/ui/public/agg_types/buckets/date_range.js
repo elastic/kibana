@@ -24,10 +24,13 @@ import { BucketAggType } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { fieldFormats } from '../../registry/field_formats';
 import dateRangesTemplate from '../controls/date_ranges.html';
+import { i18n } from '@kbn/i18n';
 
 export const dateRangeBucketAgg = new BucketAggType({
   name: 'date_range',
-  title: 'Date Range',
+  title: i18n.translate('common.ui.aggTypes.buckets.dateRangeTitle', {
+    defaultMessage: 'Date Range',
+  }),
   createFilter: createFilterDateRange,
   getKey: function (bucket, key, agg) {
     const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));

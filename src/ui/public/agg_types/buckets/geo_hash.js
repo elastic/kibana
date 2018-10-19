@@ -23,6 +23,7 @@ import { BucketAggType } from './_bucket_agg_type';
 import precisionTemplate from '../controls/precision.html';
 import { geohashColumns } from '../../utils/decode_geo_hash';
 import { geoContains, scaleBounds } from '../../utils/geo_utils';
+import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
 
@@ -68,7 +69,9 @@ function isOutsideCollar(bounds, collar) {
 
 export const geoHashBucketAgg = new BucketAggType({
   name: 'geohash_grid',
-  title: 'Geohash',
+  title: i18n.translate('common.ui.aggTypes.buckets.geohashGridTitle', {
+    defaultMessage: 'Geohash',
+  }),
   params: [
     {
       name: 'field',

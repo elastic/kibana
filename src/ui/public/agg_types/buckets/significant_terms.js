@@ -20,12 +20,21 @@
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
 import orderAndSizeTemplate from '../controls/order_and_size.html';
+import { i18n } from '@kbn/i18n';
 
 export const significantTermsBucketAgg = new BucketAggType({
   name: 'significant_terms',
-  title: 'Significant Terms',
+  title: i18n.translate('common.ui.aggTypes.buckets.significantTermsTitle', {
+    defaultMessage: 'Significant Terms',
+  }),
   makeLabel: function (aggConfig) {
-    return 'Top ' + aggConfig.params.size + ' unusual terms in ' + aggConfig.getFieldDisplayName();
+    return i18n.translate('common.ui.aggTypes.buckets.significantTermsLabel', {
+      defaultMessage: 'Top {aggConfigParamsSize} unusual terms in { aggConfigGetFieldDisplayName}',
+      values: {
+        aggConfigParamsSize: aggConfig.params.size,
+        aggConfigGetFieldDisplayName: aggConfig.getFieldDisplayName(),
+      }
+    });
   },
   createFilter: createFilterTerms,
   params: [

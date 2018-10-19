@@ -24,10 +24,13 @@ import { BucketAggType } from './_bucket_agg_type';
 import { createFilterFilters } from './create_filter/filters';
 import { decorateQuery, luceneStringToDsl } from '../../courier';
 import filtersTemplate from '../controls/filters.html';
+import { i18n } from '@kbn/i18n';
 
 export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
-  title: 'Filters',
+  title: i18n.translate('common.ui.aggTypes.buckets.filtersTitle', {
+    defaultMessage: 'Filters',
+  }),
   createFilter: createFilterFilters,
   customLabels: false,
   params: [
