@@ -64,15 +64,6 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       }
     }
 
-
-    // // Returns if a value is an array
-    // function isArray (value) {
-    // return value && typeof value === 'object' && value.constructor === Array;
-    // }
-    //
-    // // ES5 actually has a method for this (ie9+)
-    // Array.isArray(value);
-
     async toggleExpandPanel(parent) {
       log.debug('toggleExpandPanel');
       await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
