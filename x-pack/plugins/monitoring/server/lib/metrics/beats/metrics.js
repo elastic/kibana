@@ -254,27 +254,9 @@ export const metrics = {
     field: 'beats_stats.metrics.beat.handles.open',
     label: 'Open Handles',
     title: 'Open Handles',
-    description: 'TODO',
+    description: 'Count of open file handlers',
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
-  }),
-  beat_handles_hard_limit: new BeatsMetric({
-    field: 'beats_stats.metrics.beat.handles.limit.hard',
-    label: 'Hard Limit',
-    title: 'Hard Limit',
-    description: 'TODO',
-    format: SMALL_FLOAT,
-    metricAgg: 'max',
-    units: ''
-  }),
-  beat_handles_soft_limit: new BeatsMetric({
-    field: 'beats_stats.metrics.beat.handles.limit.soft',
-    label: 'Soft Limit',
-    title: 'Soft Limit',
-    description: 'TODO',
-    format: SMALL_FLOAT,
-    metricAgg: 'max',
-    units: ''
   })
 };

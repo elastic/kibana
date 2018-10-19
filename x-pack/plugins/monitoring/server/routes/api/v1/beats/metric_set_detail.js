@@ -48,8 +48,6 @@ export const metricSet = [
     name: 'beat_handles',
     keys: [
       'beat_handles_open',
-      'beat_handles_hard_limit',
-      'beat_handles_soft_limit',
     ]
   }
 ];

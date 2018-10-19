@@ -22,6 +22,8 @@ export function handleResponse(response, beatUuid) {
   const eventsEmittedLast = get(stats, 'metrics.libbeat.pipeline.events.published', null);
   const eventsDroppedLast = get(stats, 'metrics.libbeat.pipeline.events.dropped', null);
   const bytesWrittenLast = get(stats, 'metrics.libbeat.output.write.bytes', null);
+  const handlesHardLimit = get(stats, 'metrics.beat.handles.limit.hard', null);
+  const handlesSoftLimit = get(stats, 'metrics.beat.handles.limit.soft', null);
 
   return {
     uuid: beatUuid,
@@ -36,6 +38,8 @@ export function handleResponse(response, beatUuid) {
     eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst),
     eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst),
     bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst),
+    handlesHardLimit,
+    handlesSoftLimit,
   };
 }
 
@@ -61,6 +65,8 @@ export async function getBeatSummary(req, beatsIndexPattern, { clusterUuid, beat
       'hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
       'hits.hits._source.beats_stats.metrics.libbeat.config.reloads',
       'hits.hits._source.beats_stats.metrics.beat.info.uptime.ms',
+      'hits.hits._source.beats_stats.metrics.beat.handles.limit.hard',
+      'hits.hits._source.beats_stats.metrics.beat.handles.limit.soft',
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.published',
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.total',
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.dropped',
@@ -87,6 +93,8 @@ export async function getBeatSummary(req, beatsIndexPattern, { clusterUuid, beat
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
+
+  console.log(JSON.stringify(response));
 
   return handleResponse(response, beatUuid);
 }
