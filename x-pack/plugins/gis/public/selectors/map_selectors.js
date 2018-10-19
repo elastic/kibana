@@ -118,8 +118,10 @@ export const getMapZoom = ({ map }) => map.mapState.zoom ?
 export const getMapColors = ({ map }) => {
   return map.layerList.reduce((accu, layer) => {
     // This will evolve as color options are expanded
-    const color = _.get(layer, 'style.properties.fillColor.options.color', null);
-    if (!layer.temporary && color) accu.push(color);
+    if (!layer.temporary) {
+      const color = _.get(layer, 'style.properties.fillColor.options.color', null);
+      if (color) accu.push(color);
+    }
     return accu;
   }, []);
 };
