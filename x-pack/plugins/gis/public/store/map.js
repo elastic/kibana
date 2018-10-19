@@ -22,7 +22,7 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
   PROMOTE_TEMPORARY_STYLES,
-  CLEAR_TEMPORARY_STYLES, SET_JOINS,
+  CLEAR_TEMPORARY_STYLES, SET_JOINS, TOUCH_LAYER,
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -73,6 +73,17 @@ export function map(state = INITIAL_STATE, action) {
       return updateWithDataLoadError(state, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
+    case TOUCH_LAYER:
+      //action to enforce a reflow of the styles
+      const layer = state.layerList.find(layer => layer.id === action.layerId);
+      if (!layer) {
+        return state;
+      }
+      const indexOfLayer = state.layerList.indexOf(layer);
+      const newLayer = { ...layer };
+      const newLayerList = [...state.layerList];
+      newLayerList[indexOfLayer] = newLayer;
+      return { ...state, layerList: newLayerList };
     case MAP_READY:
       return { ...state, ready: true };
     case MAP_EXTENT_CHANGED:

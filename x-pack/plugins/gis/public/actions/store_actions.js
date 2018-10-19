@@ -27,16 +27,21 @@ export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
 export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
 export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
+export const TOUCH_LAYER = 'TOUCH_LAYER';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
     startLoading: (dataId, requestToken, initData) => dispatch(startDataLoad(layerId, dataId, requestToken, initData)),
-    stopLoading: async (dataId, requestToken, returnData) => {
-      await dispatch(endDataLoad(layerId, dataId, requestToken, returnData));
-    },
-    onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage))
+    stopLoading: (dataId, requestToken, returnData) => dispatch(endDataLoad(layerId, dataId, requestToken, returnData)),
+    onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
+    onRefreshStyle: async () => {
+      await dispatch({
+        type: TOUCH_LAYER,
+        layerId: layerId
+      });
+    }
   };
 }
 
