@@ -59,6 +59,9 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
+    if (!this.isSecurityEnabled()) {
+      return;
+    }
     this.server.route({
       handler: {
         directory: {
@@ -89,6 +92,13 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       config: route.config,
     });
   }
+
+  private isSecurityEnabled = () => {
+    return (
+      this.server.plugins.xpack_main.info.isAvailable() &&
+      this.server.plugins.xpack_main.info.feature('security').isEnabled()
+    );
+  };
 
   private validateConfig() {
     // @ts-ignore
