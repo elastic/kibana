@@ -44,6 +44,16 @@ const createStartServer = () => ({
   }),
 });
 
+export function createStartServerUnixSysv() {
+  const START_SERVER = createStartServer();
+
+  return {
+    title: START_SERVER.title,
+    textPre: START_SERVER.textPre,
+    commands: ['service apm-server start'],
+  };
+}
+
 export function createStartServerUnix() {
   const START_SERVER = createStartServer();
 
@@ -128,7 +138,7 @@ to allow the script to run. For example: {command}.',
     {
       title: START_SERVER.title,
       textPre: START_SERVER.textPre,
-      commands: ['apm-server.exe -e'],
+      commands: ['Start-Service apm-server'],
     },
   ];
 }
