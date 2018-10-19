@@ -6,7 +6,7 @@
 
 import { Server } from 'hapi';
 import JoiNamespace from 'joi';
-import { initInfraServer } from './infra_server';
+import { initInfraServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { UsageCollector } from './usage/usage_collector';
 
