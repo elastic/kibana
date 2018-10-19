@@ -29,7 +29,7 @@ import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { Span } from '../../../../../../../../typings/Span';
 // @ts-ignore
 import DiscoverButton from '../../../../../../shared/DiscoverButton';
-import { StickyTransactionProperties } from './StickyTransactionProperties';
+import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 
 const StackTraceContainer = styled.div`
   margin-top: ${px(unit)};
@@ -82,7 +82,7 @@ export function SpanFlyout({
         </DiscoverButton>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <StickyTransactionProperties transaction={parentTransaction} />
+        <FlyoutTopLevelProperties transaction={parentTransaction} />
         <EuiHorizontalRule />
         <StickySpanProperties span={span} totalDuration={totalDuration} />
         <DatabaseContext dbContext={dbContext} />

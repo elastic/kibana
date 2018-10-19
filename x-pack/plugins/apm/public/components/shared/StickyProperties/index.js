@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
@@ -20,20 +21,6 @@ import {
 
 const TooltipFieldName = styled.span`
   font-family: ${fontFamilyCode};
-`;
-
-const PropertiesContainer = styled.div`
-  display: flex;
-  width: 100%;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-`;
-
-const Property = styled.div`
-  margin-right: ${px(units.triple)};
-  margin-top: ${px(units.half)};
-  margin-bottom: ${px(units.half)};
-  flex-grow: 1;
 `;
 
 const PropertyLabel = styled.div`
@@ -114,16 +101,23 @@ function getPropertyValue({ val, fieldName, truncated = false }) {
   return <PropertyValue>{val}</PropertyValue>;
 }
 
-export function StickyProperties({ stickyProperties }) {
+export function StickyProperties({ stickyProperties, groupProps = {} }) {
+  const itemStyles = {};
+  if (groupProps.gutterSize === 'none') {
+    itemStyles.paddingTop = '1em';
+    itemStyles.paddingBottom = '1em';
+  }
   return (
-    <PropertiesContainer>
+    <EuiFlexGroup wrap={true} {...groupProps}>
       {stickyProperties &&
-        stickyProperties.map((prop, i) => (
-          <Property key={i}>
-            {getPropertyLabel(prop)}
-            {getPropertyValue(prop)}
-          </Property>
-        ))}
-    </PropertiesContainer>
+        stickyProperties.map(({ width = 0, ...prop }, i) => {
+          return (
+            <EuiFlexItem key={i} style={{ minWidth: width, ...itemStyles }}>
+              {getPropertyLabel(prop)}
+              {getPropertyValue(prop)}
+            </EuiFlexItem>
+          );
+        })}
+    </EuiFlexGroup>
   );
 }

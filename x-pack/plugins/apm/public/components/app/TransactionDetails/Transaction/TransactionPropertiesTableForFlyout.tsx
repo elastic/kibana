@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore
-import { EuiSpacer, EuiTab } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { capitalize, first, get } from 'lodash';
 import React from 'react';
 import { Transaction } from '../../../../../typings/Transaction';
@@ -46,28 +46,28 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
 
   return (
     <div>
-      {tabs.map(key => {
-        return (
-          <EuiTab
-            onClick={() => {
-              history.replace({
-                ...location,
-                search: fromQuery({
-                  ...toQuery(location.search),
-                  flyoutDetailTab: key
-                })
-              });
-            }}
-            isSelected={currentTab === key}
-            key={key}
-          >
-            {capitalize(key)}
-          </EuiTab>
-        );
-      })}
-
+      <EuiTabs>
+        {tabs.map(key => {
+          return (
+            <EuiTab
+              onClick={() => {
+                history.replace({
+                  ...location,
+                  search: fromQuery({
+                    ...toQuery(location.search),
+                    flyoutDetailTab: key
+                  })
+                });
+              }}
+              isSelected={currentTab === key}
+              key={key}
+            >
+              {capitalize(key)}
+            </EuiTab>
+          );
+        })}
+      </EuiTabs>
       <EuiSpacer />
-
       <PropertiesTable
         propData={get(transaction.context, currentTab)}
         propKey={currentTab}

@@ -16,13 +16,13 @@ import {
 } from 'x-pack/plugins/apm/public/utils/url';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 // @ts-ignore
-import { StickyProperties } from '../../../../../../shared/StickyProperties';
+import { StickyProperties } from '../../../../../shared/StickyProperties';
 
 interface Props {
   transaction: Transaction;
 }
 
-export function StickyTransactionProperties({ transaction }: Props) {
+export function FlyoutTopLevelProperties({ transaction }: Props) {
   const stickyProperties = [
     {
       label: 'Service',

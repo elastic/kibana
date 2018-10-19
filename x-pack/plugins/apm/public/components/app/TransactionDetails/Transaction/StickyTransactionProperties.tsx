@@ -5,7 +5,6 @@
  */
 
 import { get } from 'lodash';
-import PropTypes from 'prop-types';
 import React from 'react';
 import {
   REQUEST_URL_FULL,
@@ -31,30 +30,51 @@ export function StickyTransactionProperties({ transaction }: Props) {
     {
       label: 'Timestamp',
       fieldName: '@timestamp',
-      val: timestamp
+      val: timestamp,
+      width: '50%'
     },
     {
       fieldName: REQUEST_URL_FULL,
       label: 'URL',
       val: url,
-      truncated: true
+      truncated: true,
+      width: '50%'
     },
     {
       label: 'Duration',
       fieldName: TRANSACTION_DURATION,
-      val: duration ? asTime(duration) : 'N/A'
+      val: duration ? asTime(duration) : 'N/A',
+      width: '25%'
+    },
+    {
+      label: '% of trace duration',
+      val: 'tbd',
+      width: '25%'
     },
     {
       label: 'Result',
       fieldName: TRANSACTION_RESULT,
-      val: get(transaction, TRANSACTION_RESULT, 'N/A')
+      val: get(transaction, TRANSACTION_RESULT, 'N/A'),
+      width: '25%'
     },
     {
       label: 'User ID',
       fieldName: USER_ID,
-      val: get(transaction, USER_ID, 'N/A')
+      val: get(transaction, USER_ID, 'N/A'),
+      width: '25%'
     }
   ];
 
-  return <StickyProperties stickyProperties={stickyProperties} />;
+  const flexGroupProps = {
+    gutterSize: 'none'
+  };
+
+  return (
+    <div style={{ marginTop: '-1em', marginBottom: '-1em' }}>
+      <StickyProperties
+        stickyProperties={stickyProperties}
+        groupProps={flexGroupProps}
+      />
+    </div>
+  );
 }

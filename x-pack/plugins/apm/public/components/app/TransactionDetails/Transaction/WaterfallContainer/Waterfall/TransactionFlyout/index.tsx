@@ -6,9 +6,12 @@
 
 import {
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
@@ -24,6 +27,7 @@ import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { legacyEncodeURIComponent } from '../../../../../../../utils/url';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
+import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 import { IWaterfall } from '../waterfall_helpers/waterfall_helpers';
 
 function getDiscoverQuery(id: string) {
@@ -62,26 +66,37 @@ export function TransactionFlyout({
   return (
     <EuiFlyout onClose={onClose} size="l">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle>
-          <h4>Transaction details</h4>
-        </EuiTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h4>Transaction details</h4>
+            </EuiTitle>
+          </EuiFlexItem>
 
-        <DiscoverButton query={getDiscoverQuery(transaction.id)}>
-          {`Open in Discover`}
-        </DiscoverButton>
+          <EuiFlexItem grow={false}>
+            <DiscoverButton query={getDiscoverQuery(transaction.id)}>
+              {`Open in Discover`}
+            </DiscoverButton>
+          </EuiFlexItem>
 
-        <Link
-          to={`/${context.service.name}/transactions/${
-            transaction.type
-          }/${legacyEncodeURIComponent(transaction.name)}`}
-        >
-          <EuiButton iconType="visLine">
-            View transaction group details
-          </EuiButton>
-        </Link>
+          <EuiFlexItem grow={false}>
+            <Link
+              to={`/${context.service.name}/transactions/${
+                transaction.type
+              }/${legacyEncodeURIComponent(transaction.name)}`}
+            >
+              <EuiButton iconType="visLine">
+                View transaction group details
+              </EuiButton>
+            </Link>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <FlyoutTopLevelProperties transaction={transactionDoc} />
+        <EuiHorizontalRule />
         <StickyTransactionProperties transaction={transactionDoc} />
+        <EuiHorizontalRule />
         <TransactionPropertiesTableForFlyout
           transaction={transactionDoc}
           location={location}
