@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { groupBy, sortBy } from 'lodash';
+import { groupBy, indexBy, sortBy } from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
 import { Transaction } from '../../../../../../../../typings/Transaction';
 
@@ -104,7 +104,7 @@ export function getWaterfallRoot(
     item => (item.parentId ? item.parentId : 'root')
   );
 
-  const itemsByTransactionId = _.indexBy(
+  const itemsByTransactionId = indexBy(
     items.filter(item => item.docType === 'transaction'),
     item => item.id
   ) as { [key: string]: IWaterfallItemTransaction };

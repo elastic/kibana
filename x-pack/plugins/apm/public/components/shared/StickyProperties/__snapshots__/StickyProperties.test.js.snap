@@ -6,7 +6,6 @@ exports[`StickyProperties should render 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  padding: 0 24px;
   width: 100%;
   -webkit-box-pack: start;
   -webkit-justify-content: flex-start;
@@ -18,8 +17,13 @@ exports[`StickyProperties should render 1`] = `
 }
 
 .c1 {
-  width: 33%;
-  margin-bottom: 16px;
+  margin-right: 48px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
 }
 
 .c2 {

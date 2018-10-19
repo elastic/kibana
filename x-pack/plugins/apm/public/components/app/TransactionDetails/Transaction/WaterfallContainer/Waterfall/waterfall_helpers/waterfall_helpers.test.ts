@@ -20,7 +20,11 @@ it('getWaterfallRoot', () => {
       offset: 0,
       docType: 'span',
       parentTransaction: {} as Transaction,
-      span: {} as Span
+      span: {
+        transaction: {
+          id: 'c'
+        }
+      } as Span
     },
     {
       id: 'b',
@@ -32,7 +36,11 @@ it('getWaterfallRoot', () => {
       offset: 0,
       docType: 'span',
       parentTransaction: {} as Transaction,
-      span: {} as Span
+      span: {
+        transaction: {
+          id: 'a'
+        }
+      } as Span
     },
     {
       id: 'b2',
@@ -44,7 +52,11 @@ it('getWaterfallRoot', () => {
       offset: 0,
       docType: 'span',
       parentTransaction: {} as Transaction,
-      span: {} as Span
+      span: {
+        transaction: {
+          id: 'a'
+        }
+      } as Span
     },
     {
       id: 'c',
@@ -77,6 +89,7 @@ it('getWaterfallRoot', () => {
     offset: 0,
     serviceName: 'opbeans-java',
     timestamp: 1536763736366000,
+    transaction: {},
     children: [
       {
         duration: 4694,
@@ -87,6 +100,12 @@ it('getWaterfallRoot', () => {
         parentId: 'a',
         serviceName: 'opbeans-java',
         timestamp: 1536763736367000,
+        parentTransaction: {},
+        span: {
+          transaction: {
+            id: 'a'
+          }
+        },
         children: []
       },
       {
@@ -98,6 +117,12 @@ it('getWaterfallRoot', () => {
         parentId: 'a',
         serviceName: 'opbeans-java',
         timestamp: 1536763736368000,
+        parentTransaction: {},
+        span: {
+          transaction: {
+            id: 'a'
+          }
+        },
         children: [
           {
             duration: 3581,
@@ -107,6 +132,7 @@ it('getWaterfallRoot', () => {
             offset: 3000,
             parentId: 'b',
             serviceName: 'opbeans-java',
+            transaction: {},
             timestamp: 1536763736369000,
             children: [
               {
@@ -118,6 +144,12 @@ it('getWaterfallRoot', () => {
                 parentId: 'c',
                 serviceName: 'opbeans-java',
                 timestamp: 1536763736371000,
+                parentTransaction: {},
+                span: {
+                  transaction: {
+                    id: 'c'
+                  }
+                },
                 children: []
               }
             ]
