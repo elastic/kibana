@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
@@ -64,8 +64,8 @@ describe('Table', () => {
       onShowRelationships: () => {},
     };
 
-    const component = shallow(
-      <Table
+    const component = shallowWithIntl(
+      <Table.WrappedComponent
         {...props}
       />
     );

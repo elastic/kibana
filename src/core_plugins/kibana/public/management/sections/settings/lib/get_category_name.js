@@ -18,16 +18,33 @@
  */
 
 import { StringUtils } from 'ui/utils/string_utils';
+import { i18n } from '@kbn/i18n';
 
 const names = {
-  general: 'General',
-  timelion: 'Timelion',
-  notifications: 'Notifications',
-  visualizations: 'Visualizations',
-  discover: 'Discover',
-  dashboard: 'Dashboard',
-  reporting: 'Reporting',
-  search: 'Search',
+  general: i18n.translate('kbn.management.settings.categoryNames.generalLabel', {
+    defaultMessage: 'General',
+  }),
+  timelion: i18n.translate('kbn.management.settings.categoryNames.timelionLabel', {
+    defaultMessage: 'Timelion',
+  }),
+  notifications: i18n.translate('kbn.management.settings.categoryNames.notificationsLabel', {
+    defaultMessage: 'Notifications',
+  }),
+  visualizations: i18n.translate('kbn.management.settings.categoryNames.visualizationsLabel', {
+    defaultMessage: 'Visualizations',
+  }),
+  discover: i18n.translate('kbn.management.settings.categoryNames.discoverLabel', {
+    defaultMessage: 'Discover',
+  }),
+  dashboard: i18n.translate('kbn.management.settings.categoryNames.dashboardLabel', {
+    defaultMessage: 'Dashboard',
+  }),
+  reporting: i18n.translate('kbn.management.settings.categoryNames.reportingLabel', {
+    defaultMessage: 'Reporting',
+  }),
+  search: i18n.translate('kbn.management.settings.categoryNames.searchLabel', {
+    defaultMessage: 'Search',
+  }),
 };
 
 export function getCategoryName(category) {
