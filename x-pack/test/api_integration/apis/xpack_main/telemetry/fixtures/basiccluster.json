@@ -197,30 +197,28 @@
           "total": 0
         },
         "plugins": {
-          "xpack": {
-            "reporting": {
-              "available": true,
+          "reporting": {
+            "available": true,
+            "enabled": false,
+            "csv": {
+              "available": true
+            },
+            "printable_pdf": {
+              "available": false
+            },
+            "status": {},
+            "lastDay": {
               "csv": {
                 "available": true
               },
-              "enabled": false,
-              "last7Days": {
-                "csv": {
-                  "available": true
-                },
-                "printable_pdf": {
-                  "available": false
-                },
-                "status": {}
+              "printable_pdf": {
+                "available": false
               },
-              "lastDay": {
-                "csv": {
-                  "available": true
-                },
-                "printable_pdf": {
-                  "available": false
-                },
-                "status": {}
+              "status": {}
+            },
+            "last7Days": {
+              "csv": {
+                "available": true
               },
               "printable_pdf": {
                 "available": false
