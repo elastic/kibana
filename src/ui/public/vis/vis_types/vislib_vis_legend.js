@@ -137,7 +137,7 @@ uiModules.get('kibana')
         function refresh() {
           const vislibVis = $scope.vis.vislibVis;
           if (!vislibVis || !vislibVis.visConfig) {
-            $scope.labels = [{ label: i18n('common.ui.vis.visTypes.legend.loadingLabel', { defaultMessage: 'loading ...' }) }];
+            $scope.labels = [{ label: i18n('common.ui.vis.visTypes.legend.loadingLabel', { defaultMessage: 'loading…' }) }];
             return;
           }  // make sure vislib is defined at this point
 
