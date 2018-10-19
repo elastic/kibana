@@ -17,6 +17,11 @@
  * under the License.
  */
 
+const commonPipelineParams = {
+  on_failure: [],
+  if: ''
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/append-processor.html
 const appendProcessorDefinition = {
   append: {
@@ -25,7 +30,23 @@ const appendProcessorDefinition = {
       value: []
     },
     field: '',
-    value: []
+    value: [],
+    ...commonPipelineParams
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/bytes-processor.html
+const bytesProcessorDefinition = {
+  bytes: {
+    __template: {
+      field: ''
+    },
+    field: '',
+    target_field: '',
+    ignore_missing: {
+      __one_of: [ false, true ]
+    },
+    ...commonPipelineParams
   }
 };
 
@@ -43,7 +64,8 @@ const convertProcessorDefinition = {
     target_field: '',
     ignore_missing: {
       __one_of: [ false, true ]
-    }
+    },
+    ...commonPipelineParams
   }
 };
 
@@ -58,7 +80,8 @@ const dateProcessorDefinition = {
     target_field: '@timestamp',
     formats: [],
     timezone: 'UTC',
-    locale: 'ENGLISH'
+    locale: 'ENGLISH',
+    ...commonPipelineParams
   }
 };
 
@@ -76,7 +99,45 @@ const dateIndexNameProcessorDefinition = {
     date_formats: [],
     timezone: 'UTC',
     locale: 'ENGLISH',
-    index_name_format: 'yyyy-MM-dd'
+    index_name_format: 'yyyy-MM-dd',
+    ...commonPipelineParams
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/dissect-processor.html
+const dissectProcessorDefinition = {
+  dissect: {
+    __template: {
+      field: '',
+      pattern: ''
+    },
+    field: '',
+    pattern: '',
+    append_separator: '',
+    ignore_missing: {
+      __one_of: [ false, true ]
+    },
+    ...commonPipelineParams
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/dot-expand-processor.html
+const dotExpanderProcessorDefinition = {
+  dot_expander: {
+    __template: {
+      field: ''
+    },
+    field: '',
+    path: '',
+    ...commonPipelineParams
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/drop-processor.html
+const dropProcessorDefinition = {
+  drop: {
+    __template: {},
+    ...commonPipelineParams
   }
 };
 
@@ -86,7 +147,8 @@ const failProcessorDefinition = {
     __template: {
       message: ''
     },
-    message: ''
+    message: '',
+    ...commonPipelineParams
   }
 };
 
@@ -100,7 +162,8 @@ const foreachProcessorDefinition = {
     field: '',
     processor: {
       __scope_link: '_processor'
-    }
+    },
+    ...commonPipelineParams
   }
 };
 
@@ -119,7 +182,8 @@ const grokProcessorDefinition = {
     },
     ignore_missing: {
       __one_of: [ false, true ]
-    }
+    },
+    ...commonPipelineParams
   }
 };
 
@@ -133,7 +197,8 @@ const gsubProcessorDefinition = {
     },
     field: '',
     pattern: '',
-    replacement: ''
+    replacement: '',
+    ...commonPipelineParams
   }
 };
 
@@ -145,7 +210,8 @@ const joinProcessorDefinition = {
       separator: ''
     },
     field: '',
-    separator: ''
+    separator: '',
+    ...commonPipelineParams
   }
 };
 
@@ -159,7 +225,8 @@ const jsonProcessorDefinition = {
     target_field: '',
     add_to_root: {
       __one_of: [ false, true ]
-    }
+    },
+    ...commonPipelineParams
   }
 };
 
@@ -178,7 +245,8 @@ const kvProcessorDefinition = {
     include_keys: [],
     ignore_missing: {
       __one_of: [ false, true ]
-    }
+    },
+    ...commonPipelineParams
   }
 };
 
@@ -191,7 +259,19 @@ const lowercaseProcessorDefinition = {
     field: '',
     ignore_missing: {
       __one_of: [ false, true ]
-    }
+    },
+    ...commonPipelineParams
+  }
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/pipeline-processor.html
+const pipelineProcessorDefinition = {
+  pipeline: {
+    __template: {
+      pipeline: ''
+    },
+    pipeline: '',
+    ...commonPipelineParams
   }
 };
 
@@ -201,7 +281,8 @@ const removeProcessorDefinition = {
     __template: {
       field: ''
     },
-    field: ''
+    field: '',
+    ...commonPipelineParams
   }
 };
 
@@ -216,7 +297,8 @@ const renameProcessorDefinition = {
     target_field: '',
     ignore_missing: {
       __one_of: [ false, true ]
-    }
+    },
+    ...commonPipelineParams
   }
 };
 
@@ -228,7 +310,8 @@ const scriptProcessorDefinition = {
     file: '',
     id: '',
     inline: '',
-    params: {}
+    params: {},
+    ...commonPipelineParams
   }
 };
 
@@ -243,7 +326,8 @@ const setProcessorDefinition = {
     value: '',
     override: {
       __one_of: [ true, false ]
-    }
+    },
+    ...commonPipelineParams
   }
 };
 
@@ -258,7 +342,8 @@ const splitProcessorDefinition = {
     separator: '',
     ignore_missing: {
       __one_of: [ false, true ]
-    }
+    },
+    ...commonPipelineParams
   }
 };
 
@@ -269,7 +354,8 @@ const sortProcessorDefinition = {
       field: ''
     },
     field: '',
-    order: 'asc'
+    order: 'asc',
+    ...commonPipelineParams
   }
 };
 
@@ -282,7 +368,8 @@ const trimProcessorDefinition = {
     field: '',
     ignore_missing: {
       __one_of: [ false, true ]
-    }
+    },
+    ...commonPipelineParams
   }
 };
 
@@ -295,27 +382,21 @@ const uppercaseProcessorDefinition = {
     field: '',
     ignore_missing: {
       __one_of: [ false, true ]
-    }
-  }
-};
-
-// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/dot-expand-processor.html
-const dotExpanderProcessorDefinition = {
-  dot_expander: {
-    __template: {
-      field: ''
     },
-    field: '',
-    path: ''
+    ...commonPipelineParams
   }
 };
 
 const processorDefinition = {
   __one_of: [
     appendProcessorDefinition,
+    bytesProcessorDefinition,
     convertProcessorDefinition,
     dateProcessorDefinition,
     dateIndexNameProcessorDefinition,
+    dissectProcessorDefinition,
+    dotExpanderProcessorDefinition,
+    dropProcessorDefinition,
     failProcessorDefinition,
     foreachProcessorDefinition,
     grokProcessorDefinition,
@@ -324,6 +405,7 @@ const processorDefinition = {
     jsonProcessorDefinition,
     kvProcessorDefinition,
     lowercaseProcessorDefinition,
+    pipelineProcessorDefinition,
     removeProcessorDefinition,
     renameProcessorDefinition,
     scriptProcessorDefinition,
@@ -331,8 +413,7 @@ const processorDefinition = {
     splitProcessorDefinition,
     sortProcessorDefinition,
     trimProcessorDefinition,
-    uppercaseProcessorDefinition,
-    dotExpanderProcessorDefinition
+    uppercaseProcessorDefinition
   ]
 };
 
@@ -343,7 +424,6 @@ const pipelineDefinition = {
   ],
   version: 123,
 };
-
 
 export default function (api) {
 
