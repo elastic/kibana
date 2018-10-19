@@ -36,7 +36,6 @@ export function importDataProvider(callWithRequest) {
         }
         createdPipelineId = pipelineId;
 
-        console.log('created pipeline', createdPipelineId);
       } else {
         createdIndex = index;
         createdPipelineId = pipelineId;
@@ -88,9 +87,7 @@ export function importDataProvider(callWithRequest) {
         }
       };
 
-      console.log('creating index');
-      const gg = await callWithRequest('indices.create', { index, body });
-      console.log(gg);
+      await callWithRequest('indices.create', { index, body });
     } else {
       throw `${index} already exists.`;
     }
