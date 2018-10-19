@@ -20,6 +20,15 @@
 import React from 'react';
 import { AddData } from './add_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import chrome from 'ui/chrome';
+
+jest.mock(
+  'ui/chrome',
+  () => ({
+    getBasePath: jest.fn(() => 'path'),
+  }),
+  { virtual: true }
+);
 
 test('render', () => {
   const component = shallowWithIntl(<AddData.WrappedComponent
@@ -27,6 +36,7 @@ test('render', () => {
     isNewKibanaInstance={false}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(chrome.getBasePath).toHaveBeenCalledTimes(1);
 });
 
 test('apmUiEnabled', () => {
@@ -35,6 +45,7 @@ test('apmUiEnabled', () => {
     isNewKibanaInstance={false}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(chrome.getBasePath).toHaveBeenCalledTimes(1);
 });
 
 test('isNewKibanaInstance', () => {
@@ -43,4 +54,5 @@ test('isNewKibanaInstance', () => {
     isNewKibanaInstance={true}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(chrome.getBasePath).toHaveBeenCalledTimes(1);
 });

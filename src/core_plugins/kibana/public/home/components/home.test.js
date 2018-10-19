@@ -23,6 +23,14 @@ import { shallow } from 'enzyme';
 import { Home } from './home';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
+jest.mock(
+  'ui/chrome',
+  () => ({
+    getBasePath: jest.fn(() => 'path'),
+  }),
+  { virtual: true }
+);
+
 describe('home', () => {
   let defaultProps;
 

@@ -38,6 +38,7 @@ import {
   EuiFlexGrid,
 } from '@elastic/eui';
 
+/* istanbul ignore next */
 const basePath = chrome.getBasePath();
 
 const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {

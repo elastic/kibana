@@ -272,7 +272,7 @@ exports[`apmUiEnabled 1`] = `
         </strong>
         <EuiLink
           color="primary"
-          href="#/home"
+          href="path/app/ml#/datavisualizer"
           style={
             Object {
               "display": "block",
@@ -569,7 +569,7 @@ exports[`isNewKibanaInstance 1`] = `
         </strong>
         <EuiLink
           color="primary"
-          href="#/home"
+          href="path/app/ml#/datavisualizer"
           style={
             Object {
               "display": "block",
@@ -866,7 +866,7 @@ exports[`render 1`] = `
         </strong>
         <EuiLink
           color="primary"
-          href="#/home"
+          href="path/app/ml#/datavisualizer"
           style={
             Object {
               "display": "block",
