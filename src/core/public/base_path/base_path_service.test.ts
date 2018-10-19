@@ -23,11 +23,14 @@ function setup(options: any = {}) {
   const injectedBasePath: string =
     options.injectedBasePath === undefined ? '/foo/bar' : options.injectedBasePath;
 
+  const injectedSocketBasePath: string =
+    options.injectedSocketBasePath === undefined ? '/socket' : options.injectedSocketBasePath;
+
   const service = new BasePathService();
 
   const injectedMetadata = {
     getBasePath: jest.fn().mockReturnValue(injectedBasePath),
-    getSocketBasePath: jest.fn().mockReturnValue('TODO'),
+    getSocketBasePath: jest.fn().mockReturnValue(injectedSocketBasePath),
   } as any;
 
   const startContract = service.start({
@@ -50,6 +53,18 @@ describe('startContract.get()', () => {
   it('returns the injected basePath', () => {
     const { startContract } = setup();
     expect(startContract.get()).toBe('/foo/bar');
+  });
+});
+
+describe('startContract.getSocketBasePath()', () => {
+  it('returns an empty string if no socketBasePath is injected', () => {
+    const { startContract } = setup({ injectedSocketBasePath: null });
+    expect(startContract.getSocketBasePath()).toBe('');
+  });
+
+  it('returns the injected socketBasePath', () => {
+    const { startContract } = setup();
+    expect(startContract.getSocketBasePath()).toBe('/socket');
   });
 });
 
