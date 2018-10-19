@@ -9,6 +9,7 @@ import { badRequest } from 'boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { ActionStatus } from '../action_status';
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 function getActionStatusTotals(watchStatus) {
   const result = {};
@@ -129,10 +130,24 @@ export class WatchStatus {
   // generate object from elasticsearch response
   static fromUpstreamJson(json) {
     if (!json.id) {
-      throw badRequest('json argument must contain an id property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.watchStatus.absenceOfIdPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {id} property',
+          values: {
+            id: 'id'
+          }
+        }),
+      );
     }
     if (!json.watchStatusJson) {
-      throw badRequest('json argument must contain a watchStatusJson property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.watchStatus.absenceOfWatchStatusJsonPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain a {watchStatusJson} property',
+          values: {
+            watchStatusJson: 'watchStatusJson'
+          }
+        }),
+      );
     }
 
     return new WatchStatus(json);
