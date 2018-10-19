@@ -18,13 +18,14 @@ function createQueueFn(server) {
   const createWorkers = createWorkersFactory(server);
   const { getClient } = server.plugins.elasticsearch.getCluster('admin');
 
+  const logger = createTaggedLogger(server, ['reporting', 'esqueue']);
   const queueOptions = {
     doctype: QUEUE_DOCTYPE,
     interval: queueConfig.indexInterval,
     timeout: queueConfig.timeout,
     dateSeparator: dateSeparator,
     client: getClient(),
-    logger: createTaggedLogger(server, ['reporting', 'esqueue'])
+    logger,
   };
 
   const queue = new Esqueue(index, queueOptions);
@@ -32,6 +33,14 @@ function createQueueFn(server) {
   if (queueConfig.pollEnabled) {
     // create workers to poll the index for idle jobs waiting to be claimed and executed
     createWorkers(queue);
+  } else {
+    logger(
+      'xpack.reporting.queue.pollEnabled is set to false. This Kibana instance ' +
+      'will not poll for idle jobs to claim and execute. Make sure another ' +
+      'Kibana instance with polling enabled is running in this cluster so ' +
+      'reporting jobs can complete.',
+      ['info']
+    );
   }
 
   return queue;
