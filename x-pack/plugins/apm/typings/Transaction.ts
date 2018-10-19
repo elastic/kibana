@@ -5,6 +5,7 @@
  */
 
 import { APMDocV1, APMDocV2, ContextService } from './APMDoc';
+import { StringMap } from './common';
 
 interface Processor {
   name: 'transaction';
@@ -36,6 +37,7 @@ export interface TransactionV1 extends APMDocV1 {
       us: number;
     };
     id: string;
+    marks?: StringMap;
     name: string; // name could be missing in ES but the UI will always only aggregate on transactions with a name
     result?: string;
     sampled: boolean;
@@ -57,6 +59,7 @@ export interface TransactionV2 extends APMDocV2 {
       us: number;
     };
     id: string;
+    marks?: StringMap;
     name: string; // name could be missing in ES but the UI will always only aggregate on transactions with a name
     result?: string;
     sampled: boolean;
