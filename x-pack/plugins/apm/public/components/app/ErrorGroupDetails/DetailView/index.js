@@ -166,7 +166,9 @@ function DetailView({ errorGroup, urlParams, location }) {
         </DiscoverButton>
       </HeaderContainer>
 
-      <StickyProperties stickyProperties={stickyProperties} />
+      <TabContentContainer>
+        <StickyProperties stickyProperties={stickyProperties} />
+      </TabContentContainer>
 
       <TabContainer>
         {tabs.map(key => {

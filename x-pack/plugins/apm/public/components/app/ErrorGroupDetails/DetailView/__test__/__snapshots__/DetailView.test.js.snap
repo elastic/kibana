@@ -3,26 +3,26 @@
 exports[`DetailView should render empty state 1`] = `""`;
 
 exports[`DetailView should render with data 1`] = `
-.c3 {
+.c4 {
   margin-bottom: 8px;
   font-size: 12px;
   color: #999999;
 }
 
-.c3 span {
+.c4 span {
   cursor: help;
 }
 
-.c5 {
+.c6 {
   color: #999999;
 }
 
-.c4 {
+.c5 {
   display: inline-block;
   line-height: 16px;
 }
 
-.c6 {
+.c7 {
   display: inline-block;
   line-height: 16px;
   max-width: 100%;
@@ -37,7 +37,7 @@ exports[`DetailView should render with data 1`] = `
   margin: 0;
 }
 
-.c8 {
+.c9 {
   display: inline-block;
   font-size: 16px;
   padding: 16px 20px;
@@ -50,7 +50,7 @@ exports[`DetailView should render with data 1`] = `
   border-bottom: 2px solid #006E8A;
 }
 
-.c9 {
+.c10 {
   display: inline-block;
   font-size: 16px;
   padding: 16px 20px;
@@ -201,12 +201,12 @@ exports[`DetailView should render with data 1`] = `
   margin-bottom: 16px;
 }
 
-.c7 {
+.c8 {
   padding: 0 24px;
   border-bottom: 1px solid #d9d9d9;
 }
 
-.c10 {
+.c3 {
   padding: 24px 24px 0;
 }
 
@@ -264,217 +264,221 @@ exports[`DetailView should render with data 1`] = `
     </a>
   </div>
   <div
-    className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
-    style={
-      Object {
-        "marginBottom": "-1em",
-        "marginTop": "-1em",
-      }
-    }
+    className="c3"
   >
     <div
-      className="euiFlexItem"
+      className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
       style={
         Object {
-          "minWidth": 0,
-          "padding": "1em 1em 1em 0",
+          "marginBottom": "-1em",
+          "marginTop": "-1em",
         }
       }
     >
       <div
-        className="c3"
+        className="euiFlexItem"
+        style={
+          Object {
+            "minWidth": 0,
+            "padding": "1em 1em 1em 0",
+          }
+        }
       >
-        <span
-          aria-describedby="overlay1"
-          onMouseOut={[Function]}
-          onMouseOver={[Function]}
+        <div
+          className="c4"
         >
-          Timestamp
-        </span>
-      </div>
-      <div
-        className="c4"
-      >
-        1337 minutes ago (mocking 1515508740)
-         
-        <span
+          <span
+            aria-describedby="overlay1"
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            Timestamp
+          </span>
+        </div>
+        <div
           className="c5"
         >
-          (
-          1st of January (mocking 1515508740)
-          )
-        </span>
+          1337 minutes ago (mocking 1515508740)
+           
+          <span
+            className="c6"
+          >
+            (
+            1st of January (mocking 1515508740)
+            )
+          </span>
+        </div>
       </div>
-    </div>
-    <div
-      className="euiFlexItem"
-      style={
-        Object {
-          "minWidth": 0,
-          "padding": "1em 1em 1em 0",
-        }
-      }
-    >
       <div
-        className="c3"
+        className="euiFlexItem"
+        style={
+          Object {
+            "minWidth": 0,
+            "padding": "1em 1em 1em 0",
+          }
+        }
       >
+        <div
+          className="c4"
+        >
+          <span
+            aria-describedby="overlay2"
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            URL
+          </span>
+        </div>
         <span
-          aria-describedby="overlay2"
+          aria-describedby="overlay3"
+          className="c7"
           onMouseOut={[Function]}
           onMouseOver={[Function]}
         >
-          URL
+          N/A
         </span>
       </div>
-      <span
-        aria-describedby="overlay3"
-        className="c6"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
-      >
-        N/A
-      </span>
-    </div>
-    <div
-      className="euiFlexItem"
-      style={
-        Object {
-          "minWidth": 0,
-          "padding": "1em 1em 1em 0",
+      <div
+        className="euiFlexItem"
+        style={
+          Object {
+            "minWidth": 0,
+            "padding": "1em 1em 1em 0",
+          }
         }
-      }
-    >
-      <div
-        className="c3"
       >
-        <span
-          aria-describedby="overlay4"
-          onMouseOut={[Function]}
-          onMouseOver={[Function]}
+        <div
+          className="c4"
         >
-          Request method
-        </span>
+          <span
+            aria-describedby="overlay4"
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            Request method
+          </span>
+        </div>
+        <div
+          className="c5"
+        >
+          GET
+        </div>
       </div>
       <div
-        className="c4"
-      >
-        GET
-      </div>
-    </div>
-    <div
-      className="euiFlexItem"
-      style={
-        Object {
-          "minWidth": 0,
-          "padding": "1em 1em 1em 0",
+        className="euiFlexItem"
+        style={
+          Object {
+            "minWidth": 0,
+            "padding": "1em 1em 1em 0",
+          }
         }
-      }
-    >
-      <div
-        className="c3"
       >
-        <span
-          aria-describedby="overlay5"
-          onMouseOut={[Function]}
-          onMouseOver={[Function]}
+        <div
+          className="c4"
         >
-          Handled
-        </span>
+          <span
+            aria-describedby="overlay5"
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            Handled
+          </span>
+        </div>
+        <div
+          className="c5"
+        >
+          N/A
+        </div>
       </div>
       <div
-        className="c4"
-      >
-        N/A
-      </div>
-    </div>
-    <div
-      className="euiFlexItem"
-      style={
-        Object {
-          "minWidth": 0,
-          "padding": "1em 1em 1em 0",
+        className="euiFlexItem"
+        style={
+          Object {
+            "minWidth": 0,
+            "padding": "1em 1em 1em 0",
+          }
         }
-      }
-    >
-      <div
-        className="c3"
       >
-        <span
-          aria-describedby="overlay6"
-          onMouseOut={[Function]}
-          onMouseOver={[Function]}
+        <div
+          className="c4"
         >
-          User ID
-        </span>
-      </div>
-      <div
-        className="c4"
-      >
-        N/A
+          <span
+            aria-describedby="overlay6"
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            User ID
+          </span>
+        </div>
+        <div
+          className="c5"
+        >
+          N/A
+        </div>
       </div>
     </div>
   </div>
   <div
-    className="c7"
+    className="c8"
   >
     <div
-      className="c8"
+      className="c9"
       onClick={[Function]}
       selected={true}
     >
       Exception stacktrace
     </div>
     <div
-      className="c9"
+      className="c10"
       onClick={[Function]}
       selected={false}
     >
       Request
     </div>
     <div
-      className="c9"
+      className="c10"
       onClick={[Function]}
       selected={false}
     >
       Response
     </div>
     <div
-      className="c9"
+      className="c10"
       onClick={[Function]}
       selected={false}
     >
       System
     </div>
     <div
-      className="c9"
+      className="c10"
       onClick={[Function]}
       selected={false}
     >
       Service
     </div>
     <div
-      className="c9"
+      className="c10"
       onClick={[Function]}
       selected={false}
     >
       Process
     </div>
     <div
-      className="c9"
+      className="c10"
       onClick={[Function]}
       selected={false}
     >
       User
     </div>
     <div
-      className="c9"
+      className="c10"
       onClick={[Function]}
       selected={false}
     >
       Tags
     </div>
     <div
-      className="c9"
+      className="c10"
       onClick={[Function]}
       selected={false}
     >
@@ -482,7 +486,7 @@ exports[`DetailView should render with data 1`] = `
     </div>
   </div>
   <div
-    className="c10"
+    className="c3"
   >
     <div>
       <h3
