@@ -696,7 +696,7 @@ ace.define(
     'ace/anchor',
   ],
   function (acequire, exports) {
-
+    
     let oop = acequire('./lib/oop'),
       applyDelta = acequire('./apply_delta').applyDelta,
       EventEmitter = acequire('./lib/event_emitter').EventEmitter,
