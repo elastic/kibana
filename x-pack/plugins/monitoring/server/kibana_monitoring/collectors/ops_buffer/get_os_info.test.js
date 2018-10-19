@@ -37,7 +37,7 @@ describe('getOSInfo', () => {
       os: 'linux',
       dist: 'Ubuntu Linux',
       codename: 'precise',
-      platformRelease: '12.04'
+      release: '12.04'
     }));
 
     const osInfo = await getOSInfo();

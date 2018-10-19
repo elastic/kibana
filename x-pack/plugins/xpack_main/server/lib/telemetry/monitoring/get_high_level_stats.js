@@ -90,10 +90,10 @@ function groupInstancesByCluster(instances, product) {
           versions: new Map(),
           cloudMap: new Map(),
           os: {
-            platform: new Map(),
-            platformRelease: new Map(),
-            distro: new Map(),
-            distroRelease: new Map(),
+            platforms: new Map(),
+            platformReleases: new Map(),
+            distros: new Map(),
+            distroReleases: new Map(),
           }
         };
         clusterMap.set(clusterUuid, cluster);
@@ -106,10 +106,10 @@ function groupInstancesByCluster(instances, product) {
       reduceCloudForCluster(cluster.cloudMap, cloud);
 
       if (os) {
-        incrementByKey(cluster.os.platform, os.platform);
-        incrementByKey(cluster.os.platformRelease, os.platformRelease);
-        incrementByKey(cluster.os.distro, os.distro);
-        incrementByKey(cluster.os.distroRelease, os.distroRelease);
+        incrementByKey(cluster.os.platforms, os.platform);
+        incrementByKey(cluster.os.platformReleases, os.platformRelease);
+        incrementByKey(cluster.os.distros, os.distro);
+        incrementByKey(cluster.os.distroReleases, os.distroRelease);
       }
     }
   });
@@ -240,10 +240,10 @@ export function handleHighLevelStatsResponse(response, product) {
       // remap the versions into something more digestable that won't blowup mappings:
       versions: mapToList(cluster.versions, 'version'),
       os: {
-        platforms: mapToList(cluster.os.platform, 'platform'),
-        platformReleases: mapToList(cluster.os.platformRelease, 'platformRelease'),
-        distros: mapToList(cluster.os.distro, 'distro'),
-        distroReleases: mapToList(cluster.os.distroRelease, 'distroRelease'),
+        platforms: mapToList(cluster.os.platforms, 'platform'),
+        platformReleases: mapToList(cluster.os.platformReleases, 'platformRelease'),
+        distros: mapToList(cluster.os.distros, 'distro'),
+        distroReleases: mapToList(cluster.os.distroReleases, 'distroRelease'),
       },
       cloud: clouds.length > 0 ? clouds : undefined
     };
