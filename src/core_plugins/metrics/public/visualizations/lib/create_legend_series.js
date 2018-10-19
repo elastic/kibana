@@ -44,7 +44,7 @@ export default props => (row) => {
         onClick={event => props.onToggle(event, row.id)}
         className="tvbLegend__button"
       >
-        <div className="tvbLegend__itemLabel">
+        <div className="tvbLegend__itemLabel" title={`${row.label}: ${value}`}>
           <EuiIcon type="dot" color={row.color} />
           <span>{ row.label }</span>
         </div>
