@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { QueryLanguageSwitcher } from 'ui/query_bar/components/language_switcher';
-
 const mockChromeFactory = jest.fn(() => {
   return {
     getBasePath: () => `foo`,
@@ -75,6 +73,7 @@ import { EuiFieldText } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { QueryBar } from 'ui/query_bar';
+import { QueryLanguageSwitcher } from 'ui/query_bar/components/language_switcher';
 
 const noop = () => {
   return;
