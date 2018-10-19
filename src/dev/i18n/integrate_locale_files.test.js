@@ -22,7 +22,7 @@ import path from 'path';
 import { verifyMessages, integrateLocaleFiles } from './integrate_locale_files';
 import { normalizePath } from './utils';
 
-const localesPath = path.resolve(__dirname, '__fixtures__', 'integrate_locale_files');
+const localePath = path.resolve(__dirname, '__fixtures__', 'integrate_locale_files', 'fr.json');
 
 jest.mock('./extract_default_translations.js', () => ({
   getDefaultMessagesMap: () => {
@@ -104,7 +104,8 @@ describe('dev/i18n/integrate_locale_files', () => {
 
   describe('integrateLocaleFiles', () => {
     test('splits locale file by plugins and writes them into the right folders', async () => {
-      await integrateLocaleFiles(localesPath);
+      const success = jest.fn();
+      await integrateLocaleFiles(localePath, { success });
 
       const [[path1, json1], [path2, json2]] = utils.writeFileAsync.mock.calls;
       const [[dirPath1], [dirPath2]] = utils.makeDirAsync.mock.calls;

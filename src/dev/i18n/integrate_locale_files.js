@@ -19,7 +19,14 @@
 
 import path from 'path';
 
-import { difference, readFileAsync, writeFileAsync, accessAsync, makeDirAsync } from './utils';
+import {
+  difference,
+  readFileAsync,
+  writeFileAsync,
+  accessAsync,
+  makeDirAsync,
+  normalizePath,
+} from './utils';
 import { paths } from '../../../.i18nrc.json';
 import { getDefaultMessagesMap } from './extract_default_translations';
 import { createFailError } from '../run';
@@ -89,6 +96,6 @@ export async function integrateLocaleFiles(filePath, log) {
 
     const writePath = path.resolve(destPath, 'translations', path.basename(filePath));
     await writeFileAsync(writePath, serializeToJson(messages, localizedMessages.formats));
-    log.success(`Translations have been integrated to ${path.relative('./', writePath)}`);
+    log.success(`Translations have been integrated to ${normalizePath(writePath)}`);
   }
 }

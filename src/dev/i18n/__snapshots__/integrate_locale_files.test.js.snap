@@ -139,21 +139,21 @@ Array [
 `;
 
 exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id and missing id 1`] = `
-"Error in translations/fr.json:
+"
 Missing translations:
-plugin-1.message-id-2."
+plugin-1.message-id-2"
 `;
 
 exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id and missing id 2`] = `
-"Error in translations/fr.json:
+"
 Unused translations:
-plugin-1.message-id-3."
+plugin-1.message-id-3"
 `;
 
 exports[`dev/i18n/integrate_locale_files verifyMessages throws an error for unused id and missing id 3`] = `
-"Error in translations/fr.json:
+"
 Unused translations:
 plugin-2.message
 Missing translations:
-plugin-2.message-id."
+plugin-2.message-id"
 `;

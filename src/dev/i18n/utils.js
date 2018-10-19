@@ -27,6 +27,8 @@ import {
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
+import normalize from 'normalize-path';
+import path from 'path';
 import chalk from 'chalk';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
@@ -37,6 +39,10 @@ export const writeFileAsync = promisify(fs.writeFile);
 export const makeDirAsync = promisify(fs.mkdir);
 export const accessAsync = promisify(fs.access);
 export const globAsync = promisify(glob);
+
+export function normalizePath(inputPath) {
+  return normalize(path.relative('.', inputPath));
+}
 
 export function difference(left = [], right = []) {
   return left.filter(value => !right.includes(value));

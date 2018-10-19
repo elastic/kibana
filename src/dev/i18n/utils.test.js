@@ -26,6 +26,7 @@ import {
   traverseNodes,
   formatJSString,
   createParserErrorMessage,
+  normalizePath,
 } from './utils';
 
 const i18nTranslateSources = ['i18n', 'i18n.translate'].map(
@@ -103,5 +104,9 @@ describe('i18n utils', () => {
     } catch (error) {
       expect(createParserErrorMessage(content, error)).toMatchSnapshot();
     }
+  });
+
+  test('should normalizePath', () => {
+    expect(normalizePath(__dirname)).toMatchSnapshot();
   });
 });

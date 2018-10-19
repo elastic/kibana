@@ -9,6 +9,8 @@ exports[`i18n utils should create verbose parser error message 1`] = `
 "
 `;
 
+exports[`i18n utils should normalizePath 1`] = `"src/dev/i18n"`;
+
 exports[`i18n utils should not escape linebreaks 1`] = `
 "Text 
  with

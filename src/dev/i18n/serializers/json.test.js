@@ -32,6 +32,6 @@ describe('dev/i18n/serializers/json', () => {
       ],
     ]);
 
-    expect(serializeToJson(messages)).toMatchSnapshot();
+    expect(serializeToJson([...messages])).toMatchSnapshot();
   });
 });
