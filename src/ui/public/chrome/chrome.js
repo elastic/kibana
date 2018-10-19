@@ -37,7 +37,6 @@ import { initChromeControlsApi } from './api/controls';
 import { initChromeNavApi } from './api/nav';
 import templateApi from './api/template';
 import { initChromeThemeApi } from './api/theme';
-import translationsApi from './api/translations';
 import { initChromeXsrfApi } from './api/xsrf';
 import { initUiSettingsApi } from './api/ui_settings';
 import { initLoadingCountApi } from './api/loading_count';
@@ -73,7 +72,6 @@ initAngularApi(chrome, internals);
 initChromeControlsApi(chrome);
 templateApi(chrome, internals);
 initChromeThemeApi(chrome);
-translationsApi(chrome, internals);
 
 const waitForBootstrap = new Promise(resolve => {
   chrome.bootstrap = function (targetDomElement) {

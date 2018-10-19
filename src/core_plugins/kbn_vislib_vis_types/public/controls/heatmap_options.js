@@ -22,7 +22,7 @@ import heatmapOptionsTemplate from './heatmap_options.html';
 import _ from 'lodash';
 const module = uiModules.get('kibana');
 
-module.directive('heatmapOptions', function () {
+module.directive('heatmapOptions', function (i18n) {
   return {
     restrict: 'E',
     template: heatmapOptionsTemplate,
@@ -87,6 +87,10 @@ module.directive('heatmapOptions', function () {
 
       $scope.uiState.on('colorChanged', () => {
         $scope.customColors = true;
+      });
+
+      $scope.requiredText = i18n('kbnVislibVisTypes.controls.heatmapOptions.requiredText', {
+        defaultMessage: 'Required:'
       });
     }
   };
