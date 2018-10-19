@@ -34,7 +34,8 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
         >
           {transaction.context.service.name}
         </KibanaLink>
-      )
+      ),
+      width: '50%'
     },
     {
       label: 'Transaction',
@@ -48,7 +49,8 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
         >
           {transaction.transaction.name}
         </KibanaLink>
-      )
+      ),
+      width: '50%'
     }
   ];
 

@@ -101,18 +101,38 @@ function getPropertyValue({ val, fieldName, truncated = false }) {
   return <PropertyValue>{val}</PropertyValue>;
 }
 
-export function StickyProperties({ stickyProperties, groupProps = {} }) {
-  const itemStyles = {};
-  if (groupProps.gutterSize === 'none') {
-    itemStyles.paddingTop = '1em';
-    itemStyles.paddingBottom = '1em';
-  }
+export function StickyProperties({ stickyProperties }) {
+  /**
+   * Note: the padding and margin styles here are strange because
+   * EUI flex groups and items have a default "gutter" applied that
+   * won't allow percentage widths to line up correctly, so we have
+   * to turn the gutter off with gutterSize: none. When we do that,
+   * the top/bottom spacing *also* collapses, so we have to add
+   * padding between each item without adding it to the outside of
+   * the flex group itself.
+   *
+   * Hopefully we can make EUI handle this better and remove all this.
+   */
+  const itemStyles = {
+    padding: '1em 1em 1em 0'
+  };
+  const groupStyles = {
+    marginTop: '-1em',
+    marginBottom: '-1em'
+  };
+
   return (
-    <EuiFlexGroup wrap={true} {...groupProps}>
+    <EuiFlexGroup wrap={true} gutterSize="none" style={groupStyles}>
       {stickyProperties &&
         stickyProperties.map(({ width = 0, ...prop }, i) => {
           return (
-            <EuiFlexItem key={i} style={{ minWidth: width, ...itemStyles }}>
+            <EuiFlexItem
+              key={i}
+              style={{
+                minWidth: width,
+                ...itemStyles
+              }}
+            >
               {getPropertyLabel(prop)}
               {getPropertyValue(prop)}
             </EuiFlexItem>

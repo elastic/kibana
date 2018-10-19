@@ -31,6 +31,7 @@ export function StickyTransactionProperties({ transaction }: Props) {
       label: 'Timestamp',
       fieldName: '@timestamp',
       val: timestamp,
+      truncated: true,
       width: '50%'
     },
     {
@@ -61,20 +62,10 @@ export function StickyTransactionProperties({ transaction }: Props) {
       label: 'User ID',
       fieldName: USER_ID,
       val: get(transaction, USER_ID, 'N/A'),
+      truncated: true,
       width: '25%'
     }
   ];
 
-  const flexGroupProps = {
-    gutterSize: 'none'
-  };
-
-  return (
-    <div style={{ marginTop: '-1em', marginBottom: '-1em' }}>
-      <StickyProperties
-        stickyProperties={stickyProperties}
-        groupProps={flexGroupProps}
-      />
-    </div>
-  );
+  return <StickyProperties stickyProperties={stickyProperties} />;
 }

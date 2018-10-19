@@ -93,6 +93,7 @@ export function SpanFlyout({
         <FlyoutTopLevelProperties transaction={parentTransaction} />
         <EuiHorizontalRule />
         <StickySpanProperties span={span} totalDuration={totalDuration} />
+        <EuiHorizontalRule />
         <DatabaseContext dbContext={dbContext} />
         <StackTraceContainer>
           <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
