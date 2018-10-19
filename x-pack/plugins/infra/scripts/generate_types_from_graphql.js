@@ -5,13 +5,13 @@
  */
 
 const { join, resolve } = require('path');
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line import/no-extraneous-dependencies, import/no-unresolved
 const { generate } = require('graphql-code-generator');
 
 const GRAPHQL_GLOBS = [
   join('public', 'containers', '**', '*.gql_query.ts{,x}'),
   join('public', 'store', '**', '*.gql_query.ts{,x}'),
-  join('common', 'graphql', '**', '*.gql_query.ts{,x}')
+  join('common', 'graphql', '**', '*.gql_query.ts{,x}'),
 ];
 const CONFIG_PATH = resolve(__dirname, 'gql_gen.json');
 const OUTPUT_INTROSPECTION_PATH = resolve('common', 'graphql', 'introspection.json');

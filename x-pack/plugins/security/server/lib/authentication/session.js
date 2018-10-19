@@ -6,6 +6,8 @@
 
 import hapiAuthCookie from 'hapi-auth-cookie';
 
+import iron from 'iron';
+
 const HAPI_STRATEGY_NAME = 'security-cookie';
 // Forbid applying of Hapi authentication strategies to routes automatically.
 const HAPI_STRATEGY_MODE = false;
@@ -15,6 +17,16 @@ function assertRequest(request) {
     throw new Error(`Request should be a valid object, was [${typeof request}].`);
   }
 }
+
+/**
+ * CookieOptions
+ * @typedef {Object} CookieOptions
+ * @property {string} name - The name of the cookie
+ * @property {string} password - The password that is used to encrypt the cookie
+ * @property {string} path - The path that is set for the cookie
+ * @property {boolean} secure - Whether the cookie should only be sent over HTTPS
+ * @property {?number} ttl - Session duration in ms. If `null` session will stay active until the browser is closed.
+ */
 
 /**
  * Manages Kibana user session.
@@ -28,20 +40,20 @@ export class Session {
   _server = null;
 
   /**
-   * Session duration in ms. If `null` session will stay active until the browser is closed.
-   * @type {?number}
+   * Options for the cookie
+   * @type {CookieOptions}
    * @private
    */
-  _ttl = null;
+  _cookieOptions = null;
 
   /**
    * Instantiates Session. Constructor is not supposed to be used directly. To make sure that all
    * `Session` dependencies/plugins are properly initialized one should use static `Session.create` instead.
    * @param {Hapi.Server} server HapiJS Server instance.
    */
-  constructor(server) {
+  constructor(server, cookieOptions) {
     this._server = server;
-    this._ttl = this._server.config().get('xpack.security.sessionTimeout');
+    this._cookieOptions = cookieOptions;
   }
 
   /**
@@ -79,7 +91,7 @@ export class Session {
 
     request.cookieAuth.set({
       value,
-      expires: this._ttl && Date.now() + this._ttl
+      expires: this._cookieOptions.ttl && Date.now() + this._cookieOptions.ttl
     });
   }
 
@@ -95,6 +107,43 @@ export class Session {
   }
 
   /**
+   * Serializes current session.
+   * @param {Hapi.Request} request HapiJS request instance.
+   * @returns {Promise.<string>}
+   */
+  async serialize(request) {
+    const state = request._states[this._cookieOptions.name];
+    if (!state) {
+      return null;
+    }
+
+    const value = await new Promise((resolve, reject) => {
+      iron.seal(state.value, this._cookieOptions.password, iron.defaults, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+
+    return value;
+  }
+
+  /**
+   * Returns the options that we're using for the session cookie
+   * @returns {CookieOptions}
+   */
+  getCookieOptions() {
+    return {
+      name: this._cookieOptions.name,
+      path: this._cookieOptions.path,
+      httpOnly: this._cookieOptions.httpOnly,
+      secure: this._cookieOptions.secure,
+    };
+  }
+
+  /**
    * Prepares and creates a session instance.
    * @param {Hapi.Server} server HapiJS Server instance.
    * @returns {Promise.<Session>}
@@ -106,15 +155,21 @@ export class Session {
     });
 
     const config =  server.config();
+    const httpOnly = true;
+    const name = config.get('xpack.security.cookieName');
+    const password = config.get('xpack.security.encryptionKey');
+    const path = `${config.get('server.basePath')}/`;
+    const secure = config.get('xpack.security.secureCookies');
+    const ttl = config.get(`xpack.security.sessionTimeout`);
+
     server.auth.strategy(HAPI_STRATEGY_NAME, 'cookie', {
-      cookie: config.get('xpack.security.cookieName'),
-      password: config.get('xpack.security.encryptionKey'),
+      cookie: name,
+      password,
       clearInvalid: true,
       validateFunc: Session._validateCookie,
-      isSecure: config.get('xpack.security.secureCookies'),
-      isHttpOnly: true,
-      isSameSite: false,
-      path: `${config.get('server.basePath')}/`
+      isHttpOnly: httpOnly,
+      isSecure: secure,
+      path: path,
     });
 
     if (HAPI_STRATEGY_MODE) {
@@ -124,7 +179,14 @@ export class Session {
       });
     }
 
-    return new Session(server);
+    return new Session(server, {
+      httpOnly,
+      name,
+      password,
+      path,
+      secure,
+      ttl,
+    });
   }
 
   /**

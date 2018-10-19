@@ -27,8 +27,8 @@ export class CcrShard extends PureComponent {
   renderCharts() {
     const { metrics } = this.props;
     const seriesToShow = [
-      metrics.ccr_sync_lag_time,
-      metrics.ccr_sync_lag_ops
+      metrics.ccr_sync_lag_ops,
+      metrics.ccr_sync_lag_time
     ];
 
     const charts = seriesToShow.map((data, index) => (
