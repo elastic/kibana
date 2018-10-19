@@ -121,7 +121,6 @@ class ColorRules extends Component {
         <EuiFlexItem>
           <EuiFieldNumber
             aria-label="Value"
-            type="number"
             value={model.value}
             onChange={this.handleChange(model, 'value', Number)}
             fullWidth

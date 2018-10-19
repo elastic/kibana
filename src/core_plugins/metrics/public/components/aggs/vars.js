@@ -51,7 +51,7 @@ class CalculationVars extends Component {
             <EuiFieldText
               className="tvbAggs__varName"
               aria-label="Variable name"
-              placeholder="Variable Name"
+              placeholder="Variable name"
               onChange={this.handleChange(row, 'name')}
               value={row.name}
             />

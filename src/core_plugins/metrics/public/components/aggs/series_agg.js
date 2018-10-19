@@ -30,6 +30,7 @@ import {
   EuiFormLabel,
   EuiComboBox,
   EuiTitle,
+  EuiFormRow,
 } from '@elastic/eui';
 
 function SeriesAgg(props) {
@@ -91,14 +92,14 @@ function SeriesAgg(props) {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('function')}>Function</EuiFormLabel>
-          <EuiComboBox
-            id={htmlId('function')}
-            options={functionOptions}
-            selectedOptions={selectedFunctionOption ? [selectedFunctionOption] : []}
-            onChange={handleSelectChange('function')}
-            singleSelection={{ asPlainText: true }}
-          />
+          <EuiFormRow id={htmlId('function')} label="Function">
+            <EuiComboBox
+              options={functionOptions}
+              selectedOptions={selectedFunctionOption ? [selectedFunctionOption] : []}
+              onChange={handleSelectChange('function')}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

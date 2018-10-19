@@ -105,7 +105,7 @@ class Percentiles extends Component {
           </EuiFlexItem>
 
           <EuiFlexItem style={optionsStyle} grow={false}>
-            <EuiFormLabel style={labelStyle} htmlFor={htmlId('mode')}>Fill to:</EuiFormLabel>
+            <EuiFormLabel style={labelStyle} htmlFor={htmlId('fillTo')}>Fill to:</EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem style={optionsStyle} grow={false}>
             <EuiFieldNumber
@@ -117,7 +117,7 @@ class Percentiles extends Component {
           </EuiFlexItem>
 
           <EuiFlexItem style={optionsStyle} grow={false}>
-            <EuiFormLabel style={labelStyle} htmlFor={htmlId('mode')}>Shade (0 to 1):</EuiFormLabel>
+            <EuiFormLabel style={labelStyle} htmlFor={htmlId('shade')}>Shade (0 to 1):</EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem style={optionsStyle} grow={false}>
             <EuiFieldNumber

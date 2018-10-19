@@ -70,7 +70,7 @@ export const SeriesConfig = props => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
-            id={htmlId('offset')}
+            id={htmlId('offsetSeries')}
             label="Offset series time by (1m, 1h, 1w, 1d)"
           >
             <EuiFieldText

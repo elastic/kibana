@@ -140,16 +140,16 @@ function MarkdownSeries(props) {
           <EuiFieldText
             fullWidth
             onChange={handleChange('var_name')}
-            placeholder="Variable Name"
+            placeholder="Variable name"
             value={model.var_name}
           />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
-            addTooltip="Add Series"
-            deleteTooltip="Delete Series"
-            cloneTooltip="Clone Series"
+            addTooltip="Add series"
+            deleteTooltip="Delete series"
+            cloneTooltip="Clone series"
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}

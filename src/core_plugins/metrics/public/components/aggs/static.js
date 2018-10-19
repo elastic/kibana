@@ -30,6 +30,7 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiFieldNumber,
+  EuiFormRow,
 } from '@elastic/eui';
 
 export const Static = props => {
@@ -66,13 +67,13 @@ export const Static = props => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('staticValue')}>Static value</EuiFormLabel>
-          <EuiFieldNumber
-            id={htmlId('staticValue')}
-            onChange={handleTextChange('value')}
-            value={Number(model.value)}
-            step={0.1}
-          />
+          <EuiFormRow id={htmlId('staticValue')} label="Static value">
+            <EuiFieldNumber
+              onChange={handleTextChange('value')}
+              value={Number(model.value)}
+              step={0.1}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>
