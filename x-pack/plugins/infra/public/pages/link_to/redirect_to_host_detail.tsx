@@ -6,21 +6,12 @@
 
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { replaceStateKeyInQueryString } from '../../utils/url_state';
-import { getFromFromLocation, getToFromLocation } from './query_params';
+import { createQueryStringForDetailTime } from './create_query_string_for_detail_time';
 export const RedirectToHostDetail = ({
   match,
   location,
 }: RouteComponentProps<{ name: string }>) => {
-  const to = getToFromLocation(location);
-  const from = getFromFromLocation(location);
-  const args =
-    to && from
-      ? '?' +
-        replaceStateKeyInQueryString('metricTime', {
-          time: { to, from },
-        })('')
-      : '';
+  const args = createQueryStringForDetailTime(location);
   return <Redirect to={`/metrics/host/${match.params.name}${args}`} />;
 };
 

@@ -6,16 +6,13 @@
 
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { getFromFromLocation, getToFromLocation } from './query_params';
+import { createQueryStringForDetailTime } from './create_query_string_for_detail_time';
 
 export const RedirectToContainerDetail = ({
   match,
   location,
 }: RouteComponentProps<{ name: string }>) => {
-  const to = getToFromLocation(location);
-  const from = getFromFromLocation(location);
-  const args =
-    to && from ? `?metricTime=(autoReload:!f,time:(from:${from},interval:>%3D1m,to:${to}))` : '';
+  const args = createQueryStringForDetailTime(location);
   return <Redirect to={`/metrics/container/${match.params.name}${args}`} />;
 };
 
