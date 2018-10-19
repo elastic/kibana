@@ -8,10 +8,13 @@ import testSubjSelector from '@kbn/test-subj-selector';
 import Keys from 'leadfoot/keys';
 import moment from 'moment';
 
-export function InfraOpsPageProvider({ getService, getPageObjects }) {
-  const retry = getService('retry');
+import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+
+export function InfraOpsPageProvider({
+  getService,
+  getPageObjects,
+}: KibanaFunctionalTestDefaultProviders) {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common', 'home', 'security']);
   const find = getService('find');
 
   return {
