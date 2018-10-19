@@ -37,17 +37,6 @@ function buildRequest(req, config, esIndexPattern) {
         field: 'ccr_stats.number_of_operations_indexed'
       }
     },
-
-    last_fetch_time_max: {
-      max: {
-        field: 'ccr_stats.time_since_last_fetch_millis'
-      }
-    },
-    last_fetch_time_min: {
-      min: {
-        field: 'ccr_stats.time_since_last_fetch_millis'
-      }
-    },
     lag_ops_leader_max: {
       max: {
         field: 'ccr_stats.leader_max_seq_no'
@@ -79,7 +68,6 @@ function buildRequest(req, config, esIndexPattern) {
       }
     },
 
-    last_fetch_time: getBucketScript('last_fetch_time_max', 'last_fetch_time_min'),
     ops_synced: getBucketScript('ops_synced_max', 'ops_synced_min'),
     lag_ops_leader: getBucketScript('lag_ops_leader_max', 'lag_ops_leader_min'),
     lag_ops_global: getBucketScript('lag_ops_global_max', 'lag_ops_global_min'),
@@ -96,10 +84,10 @@ function buildRequest(req, config, esIndexPattern) {
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.fetch_exceptions',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.follower_index',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.shard_id',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.time_since_last_fetch_millis',
       'aggregations.by_follower_index.buckets.key',
       'aggregations.by_follower_index.buckets.leader_index.buckets.key',
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.key',
-      'aggregations.by_follower_index.buckets.by_shard_id.buckets.last_fetch_time.value',
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.ops_synced.value',
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.lag_ops.value',
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.leader_lag_ops.value',
@@ -231,7 +219,7 @@ export function ccrRoute(server) {
               shardId: shardBucket.key,
               error: fullStat.fetch_exceptions.length ? fullStat.fetch_exceptions[0].exception.type : null,
               opsSynced: get(shardBucket, 'ops_synced.value'),
-              syncLagTime: get(shardBucket, 'last_fetch_time.value'),
+              syncLagTime: fullStat.time_since_last_fetch_millis,
               syncLagOps: get(shardBucket, 'lag_ops.value'),
               syncLagOpsLeader: get(shardBucket, 'leader_lag_ops.value'),
               syncLagOpsFollower: get(shardBucket, 'follower_lag_ops.value'),

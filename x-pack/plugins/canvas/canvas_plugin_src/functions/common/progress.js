@@ -6,7 +6,17 @@
 
 import { get } from 'lodash';
 import { openSans } from '../../../common/lib/fonts';
-import { shapes } from '../../renderers/progress/shapes';
+
+const shapes = [
+  'gauge',
+  'horizontalBar',
+  'horizontalPill',
+  'semicircle',
+  'unicorn',
+  'verticalBar',
+  'verticalPill',
+  'wheel',
+];
 
 export const progress = () => ({
   name: 'progress',
@@ -20,9 +30,8 @@ export const progress = () => ({
     shape: {
       type: ['string'],
       alias: ['_'],
-      help: `Select ${Object.keys(shapes)
-        .map((key, i, src) => (i === src.length - 1 ? `or ${shapes[key].name}` : shapes[key].name))
-        .join(', ')}`,
+      help: `Select ${shapes.slice(0, -1).join(', ')}, or ${shapes.slice(-1)[0]}`,
+      options: shapes,
       default: 'gauge',
     },
     max: {
