@@ -32,11 +32,19 @@ export class Storage {
   }
 
   public get = (key: string) => {
+    if (!this.store) {
+      return null;
+    }
+
     const storageItem = this.store.getItem(key);
     if (storageItem === null) {
       return null;
-    } else {
+    }
+
+    try {
       return JSON.parse(storageItem);
+    } catch (error) {
+      return null;
     }
   };
 
