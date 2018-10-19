@@ -25,8 +25,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private routes: any;
   private XPackInfoProvider: any;
   private xpackInfo: null | any;
-  private notifier: any;
-  private kbnUrlService: any;
   private chrome: any;
 
   constructor(
@@ -34,8 +32,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     management: any,
     routes: any,
     chrome: any,
-    XPackInfoProvider: any,
-    Notifier: any
+    XPackInfoProvider: any
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
     this.management = management;
@@ -44,7 +41,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     this.chrome = chrome;
     this.XPackInfoProvider = XPackInfoProvider;
     this.appState = {};
-    this.notifier = new Notifier({ location: 'Beats' });
   }
 
   public get baseURLPath(): string {
@@ -58,7 +54,9 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   };
 
   public render = (component: React.ReactElement<any>) => {
-    this.rootComponent = component;
+    if (this.hadValidLicense() && this.securityEnabled()) {
+      this.rootComponent = component;
+    }
   };
 
   public hadValidLicense() {
@@ -77,10 +75,10 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
-    this.register(this.uiModule);
+    if (this.hadValidLicense() && this.securityEnabled()) {
+      this.register(this.uiModule);
 
-    this.hookAngular(() => {
-      if (this.hadValidLicense() && this.securityEnabled()) {
+      this.hookAngular(() => {
         const registerSection = () =>
           this.management.register(pluginId, {
             display: 'Beats', // TODO these need to be config options not hard coded in the adapter
@@ -97,13 +95,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
           order: 30,
           url: `#${basePath}`,
         });
-      }
-
-      if (!this.securityEnabled()) {
-        this.notifier.error(this.xpackInfo.get(`features.beats_management.message`));
-        this.kbnUrlService.redirect('/management');
-      }
-    });
+      });
+    }
   }
 
   private manageAngularLifecycle($scope: any, $route: any, elem: any) {
@@ -131,10 +124,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     this.chrome.dangerouslyGetActiveInjector().then(($injector: any) => {
       const Private = $injector.get('Private');
       const xpackInfo = Private(this.XPackInfoProvider);
-      const kbnUrlService = $injector.get('kbnUrl');
 
       this.xpackInfo = xpackInfo;
-      this.kbnUrlService = kbnUrlService;
       done();
     });
   }
