@@ -39,7 +39,7 @@ export function uptimeMonitorsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.heartbeat}/heartbeat-getting-started.html',
       },
     }),
-    euiIconType: 'heartBeatApp',
+    euiIconType: 'heartbeatApp',
     artifacts: {
       dashboards: [
         {
