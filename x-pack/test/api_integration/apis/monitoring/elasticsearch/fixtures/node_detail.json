@@ -158,11 +158,11 @@
         "field": "node_stats.process.cpu.percent",
         "metricAgg": "max",
         "label": "CPU Utilization",
-        "description": "Percentage of CPU usage for the Elasticsearch process.",
+        "description": "CPU Usage time compared to the CPU quota shown in percentage. If CPU quotas are not set, then no data will be shown.",
         "units": "%",
         "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": false
+        "hasCalculation": true,
+        "isDerivative": true
       },
       "data": []
     }],
