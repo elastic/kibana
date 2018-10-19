@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
@@ -28,7 +28,7 @@ interface Props {
   validator: RoleValidator;
 }
 
-export class PrivilegeSpaceFormUI extends Component<Props, {}> {
+export class PrivilegeSpaceForm extends Component<Props, {}> {
   public render() {
     const {
       availableSpaces,
@@ -36,18 +36,18 @@ export class PrivilegeSpaceFormUI extends Component<Props, {}> {
       availablePrivileges,
       selectedPrivilege,
       validator,
-      intl,
     } = this.props;
 
     return (
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiFormRow
-            label={intl.formatMessage({
-              id:
-                'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceForm.spacesTitle',
-              defaultMessage: 'Spaces',
-            })}
+            label={
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceForm.spacesFormRowLabel"
+                defaultMessage="Spaces"
+              />
+            }
             {...validator.validateSelectedSpaces(selectedSpaceIds, selectedPrivilege)}
           >
             <SpaceSelector
@@ -59,11 +59,12 @@ export class PrivilegeSpaceFormUI extends Component<Props, {}> {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
-            label={intl.formatMessage({
-              id:
-                'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceForm.privilegeTitle',
-              defaultMessage: 'Privilege',
-            })}
+            label={
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceForm.privilegeFormRowLabel"
+                defaultMessage="Privilege"
+              />
+            }
             {...validator.validateSelectedPrivilege(selectedSpaceIds, selectedPrivilege)}
           >
             <PrivilegeSelector
@@ -102,5 +103,3 @@ export class PrivilegeSpaceFormUI extends Component<Props, {}> {
     });
   };
 }
-
-export const PrivilegeSpaceForm = injectI18n(PrivilegeSpaceFormUI);

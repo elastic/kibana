@@ -11,7 +11,7 @@ import {
   // @ts-ignore
   EuiOverlayMask,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 
 interface Props {
@@ -23,7 +23,7 @@ interface State {
   showModal: boolean;
 }
 
-export class DeleteRoleButtonUI extends Component<Props, State> {
+export class DeleteRoleButton extends Component<Props, State> {
   public state = {
     showModal: false,
   };
@@ -37,7 +37,7 @@ export class DeleteRoleButtonUI extends Component<Props, State> {
       <Fragment>
         <EuiButtonEmpty color={'danger'} onClick={this.showModal}>
           <FormattedMessage
-            id="xpack.security.views.management.editRoles.components.deleteRoleButton.deleteRoleButton"
+            id="xpack.security.views.management.editRoles.components.deleteRoleButton.deleteRoleButtonLabel"
             defaultMessage="Delete role"
           />
         </EuiButtonEmpty>
@@ -54,34 +54,37 @@ export class DeleteRoleButtonUI extends Component<Props, State> {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={intl.formatMessage({
-            id:
-              'xpack.security.views.management.editRoles.components.deleteRoleButton.deleteRoleTitle',
-            defaultMessage: 'Delete Role',
-          })}
+          title={
+            <FormattedMessage
+              id="xpack.security.views.management.editRoles.components.deleteRoleButton.deleteRoleTitle"
+              defaultMessage="Delete Role"
+            />
+          }
           onCancel={this.closeModal}
           onConfirm={this.onConfirmDelete}
-          cancelButtonText={intl.formatMessage({
-            id:
-              'xpack.security.views.management.editRoles.components.deleteRoleButton.dontDeleteButton',
-            defaultMessage: "No, don't delete",
-          })}
-          confirmButtonText={intl.formatMessage({
-            id:
-              'xpack.security.views.management.editRoles.components.deleteRoleButton.yesDeleteButton',
-            defaultMessage: 'Yes, delete role',
-          })}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.security.views.management.editRoles.components.deleteRoleButton.cancelButtonLabel"
+              defaultMessage="No, don't delete"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.security.views.management.editRoles.components.deleteRoleButton.confirmButtonLabel"
+              defaultMessage="Yes, delete role"
+            />
+          }
           buttonColor={'danger'}
         >
           <p>
             <FormattedMessage
-              id="xpack.security.views.management.editRoles.components.deleteRoleButton.areYouSureTitle"
+              id="xpack.security.views.management.editRoles.components.deleteRoleButton.deletingRoleConfirmationText"
               defaultMessage="Are you sure you want to delete this role?"
             />
           </p>
           <p>
             <FormattedMessage
-              id="xpack.security.views.management.editRoles.components.deleteRoleButton.actionCannotUndoneTitle"
+              id="xpack.security.views.management.editRoles.components.deleteRoleButton.deletingRoleWarningText"
               defaultMessage="This action cannot be undone!"
             />
           </p>
@@ -107,5 +110,3 @@ export class DeleteRoleButtonUI extends Component<Props, State> {
     this.props.onDelete();
   };
 }
-
-export const DeleteRoleButton = injectI18n(DeleteRoleButtonUI);

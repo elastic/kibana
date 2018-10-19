@@ -77,7 +77,7 @@ export class PrivilegeSpaceTableUI extends Component<Props, State> {
             incremental: true,
             placeholder: intl.formatMessage({
               id:
-                'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceTable.filterTitle',
+                'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceTable.filterPlaceholder',
               defaultMessage: 'Filter',
             }),
           },
@@ -111,7 +111,7 @@ export class PrivilegeSpaceTableUI extends Component<Props, State> {
         field: 'space',
         name: intl.formatMessage({
           id:
-            'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceTable.spaceTitle',
+            'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceTable.spaceName',
           defaultMessage: 'Space',
         }),
         width: this.props.readonly ? '75%' : '50%',
@@ -120,7 +120,7 @@ export class PrivilegeSpaceTableUI extends Component<Props, State> {
             return (
               <EuiText color={'subdued'}>
                 <FormattedMessage
-                  id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceTable.spaceDeletedTitle"
+                  id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceTable.deletedSpaceDescription"
                   defaultMessage="{valur} (deleted)"
                   values={{ value: space.id }}
                 />
@@ -135,7 +135,7 @@ export class PrivilegeSpaceTableUI extends Component<Props, State> {
         field: 'privilege',
         name: intl.formatMessage({
           id:
-            'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceTable.privilegeTitle',
+            'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceTable.privilegeName',
           defaultMessage: 'Privilege',
         }),
         width: this.props.readonly ? '25%' : undefined,
@@ -162,7 +162,7 @@ export class PrivilegeSpaceTableUI extends Component<Props, State> {
         // name: 'Actions',
         name: intl.formatMessage({
           id:
-            'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceTable.actionsTitle',
+            'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceTable.actionsName',
           defaultMessage: 'Actions',
         }),
         actions: [

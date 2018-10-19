@@ -15,7 +15,7 @@ import {
   EuiSwitch,
   EuiTextArea,
 } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { IndexPrivilege } from '../../../../../../../common/model/index_privilege';
 // @ts-ignore
@@ -44,7 +44,7 @@ interface State {
   documentQuery?: string;
 }
 
-export class IndexPrivilegeFormUI extends Component<Props, State> {
+export class IndexPrivilegeForm extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -77,17 +77,17 @@ export class IndexPrivilegeFormUI extends Component<Props, State> {
   }
 
   public getPrivilegeForm = () => {
-    const { intl } = this.props;
     return (
       <Fragment>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
-              label={intl.formatMessage({
-                id:
-                  'xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.indicesLabel',
-                defaultMessage: 'Indices',
-              })}
+              label={
+                <FormattedMessage
+                  id="xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.indicesFormRowLabel"
+                  defaultMessage="Indices"
+                />
+              }
               fullWidth={true}
               {...this.props.validator.validateIndexPrivilege(this.props.indexPrivilege)}
             >
@@ -103,11 +103,12 @@ export class IndexPrivilegeFormUI extends Component<Props, State> {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
-              label={intl.formatMessage({
-                id:
-                  'xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.privilegesLabel',
-                defaultMessage: 'Privileges',
-              })}
+              label={
+                <FormattedMessage
+                  id="xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.privilegesFormRowLabel"
+                  defaultMessage="Privileges"
+                />
+              }
               fullWidth={true}
             >
               <EuiComboBox
@@ -130,13 +131,7 @@ export class IndexPrivilegeFormUI extends Component<Props, State> {
   };
 
   public getGrantedFieldsControl = () => {
-    const {
-      allowFieldLevelSecurity,
-      availableFields,
-      indexPrivilege,
-      isReservedRole,
-      intl,
-    } = this.props;
+    const { allowFieldLevelSecurity, availableFields, indexPrivilege, isReservedRole } = this.props;
 
     if (!allowFieldLevelSecurity) {
       return null;
@@ -148,22 +143,23 @@ export class IndexPrivilegeFormUI extends Component<Props, State> {
       return (
         <EuiFlexItem>
           <EuiFormRow
-            label={intl.formatMessage({
-              id:
-                'xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.grantedFieldsLabel',
-              defaultMessage: 'Granted fields (optional)',
-            })}
+            label={
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.grantedFieldsFormRowLabel"
+                defaultMessage="Granted fields (optional)"
+              />
+            }
             fullWidth={true}
             className="indexPrivilegeForm__grantedFieldsRow"
             helpText={
-              !isReservedRole && grant.length === 0
-                ? intl.formatMessage({
-                    id:
-                      'xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.noAbleSeeAnyDataTitle',
-                    defaultMessage:
-                      'If no fields are granted, then users assigned to this role will not be able to see any data for this index.',
-                  })
-                : undefined
+              !isReservedRole && grant.length === 0 ? (
+                <FormattedMessage
+                  id="xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.grantedFieldsFormRowHelpText"
+                  defaultMessage="If no fields are granted, then users assigned to this role will not be able to see any data for this index."
+                />
+              ) : (
+                undefined
+              )
             }
           >
             <Fragment>
@@ -185,7 +181,7 @@ export class IndexPrivilegeFormUI extends Component<Props, State> {
   };
 
   public getGrantedDocumentsControl = () => {
-    const { allowDocumentLevelSecurity, indexPrivilege, intl } = this.props;
+    const { allowDocumentLevelSecurity, indexPrivilege } = this.props;
 
     if (!allowDocumentLevelSecurity) {
       return null;
@@ -198,11 +194,12 @@ export class IndexPrivilegeFormUI extends Component<Props, State> {
           <EuiFlexItem>
             <EuiSwitch
               data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
-              label={intl.formatMessage({
-                id:
-                  'xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.grantReadPrivilegesLabel',
-                defaultMessage: 'Grant read privileges to specific documents',
-              })}
+              label={
+                <FormattedMessage
+                  id="xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.grantReadPrivilegesLabel"
+                  defaultMessage="Grant read privileges to specific documents"
+                />
+              }
               // @ts-ignore
               compressed={true}
               // @ts-ignore
@@ -214,11 +211,12 @@ export class IndexPrivilegeFormUI extends Component<Props, State> {
         {this.state.queryExpanded && (
           <EuiFlexItem>
             <EuiFormRow
-              label={intl.formatMessage({
-                id:
-                  'xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.grantedDocumentsQueryLabel',
-                defaultMessage: 'Granted documents query',
-              })}
+              label={
+                <FormattedMessage
+                  id="xpack.security.views.management.editRoles.components.privileges.es.indexPrivilegeForm.grantedDocumentsQueryFormRowLabel"
+                  defaultMessage="Granted documents query"
+                />
+              }
               fullWidth={true}
             >
               <EuiTextArea
@@ -322,5 +320,3 @@ export class IndexPrivilegeFormUI extends Component<Props, State> {
     });
   };
 }
-
-export const IndexPrivilegeForm = injectI18n(IndexPrivilegeFormUI);

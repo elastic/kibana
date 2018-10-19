@@ -19,10 +19,10 @@ routes.when(ROLES_PATH, {
   resolve: {
     roles(ShieldRole, kbnUrl, Promise, Private) {
       // $promise is used here because the result is an ngResource, not a promise itself
-      return ShieldRole.query().$promise
-        .catch(checkLicenseError(kbnUrl, Promise, Private))
+      return ShieldRole.query()
+        .$promise.catch(checkLicenseError(kbnUrl, Promise, Private))
         .catch(_.identity); // Return the error if there is one
-    }
+    },
   },
   controller($scope, $route, $q, confirmModal, i18n) {
     $scope.roles = $route.current.locals.roles;
@@ -30,24 +30,23 @@ routes.when(ROLES_PATH, {
     $scope.selectedRoles = [];
     $scope.sort = { orderBy: 'name', reverse: false };
     $scope.editRolesHref = `#${EDIT_ROLES_PATH}`;
-    $scope.getEditRoleHref = (role) => `#${EDIT_ROLES_PATH}/${role}`;
+    $scope.getEditRoleHref = role => `#${EDIT_ROLES_PATH}/${role}`;
 
     $scope.deleteRoles = () => {
       const doDelete = () => {
-        $q.all($scope.selectedRoles.map((role) => role.$delete()))
-          .then(() => toastNotifications.addSuccess(
-            i18n('xpack.security.views.management.roles.deleteRoleTitle', {
-              values: {
-                valueText: $scope.selectedRoles.length > 1 ?
-                  i18n('xpack.security.views.management.roles.deleteRoleRolesTitle', { defaultMessage: 'roles' })
-                  : i18n('xpack.security.views.management.roles.deleteRoleRoleTitle', { defaultMessage: 'role' }),
-                value: $scope.selectedRoles.length
-              },
-              defaultMessage: 'Deleted {value} {valueText}'
-            })
-          ))
+        $q.all($scope.selectedRoles.map(role => role.$delete()))
+          .then(() =>
+            toastNotifications.addSuccess(
+              i18n('xpack.security.views.management.roles.deleteRoleTitle', {
+                defaultMessage: 'Deleted {value, plural, one {# role} other {# roles}}',
+                values: {
+                  value: $scope.selectedRoles.length,
+                },
+              })
+            )
+          )
           .then(() => {
-            $scope.selectedRoles.map((role) => {
+            $scope.selectedRoles.map(role => {
               const i = $scope.roles.indexOf(role);
               $scope.roles.splice(i, 1);
             });
@@ -55,12 +54,15 @@ routes.when(ROLES_PATH, {
           });
       };
       const confirmModalOptions = {
-        confirmButtonText: i18n('xpack.security.views.management.roles.deleteRoleButton', { defaultMessage: 'Delete role(s)' }),
-        onConfirm: doDelete
+        confirmButtonText: i18n('xpack.security.views.management.roles.deleteRoleConfirmButtonLabel', {
+          defaultMessage: 'Delete role(s)',
+        }),
+        onConfirm: doDelete,
       };
       confirmModal(
-        i18n('xpack.security.views.management.roles.sureToDeleteRoleTitle', {
-          defaultMessage: 'Are you sure you want to delete the selected role(s)? This action is irreversible!'
+        i18n('xpack.security.views.management.roles.deletingRolesWarningMessage', {
+          defaultMessage:
+            'Are you sure you want to delete the selected role(s)? This action is irreversible!',
         }),
         confirmModalOptions
       );
@@ -95,11 +97,20 @@ routes.when(ROLES_PATH, {
     $scope.toggleSort = toggleSort;
 
     function getActionableRoles() {
-      return $scope.roles.filter((role) => !role.metadata._reserved);
+      return $scope.roles.filter(role => !role.metadata._reserved);
     }
 
-    $scope.noFoundMatches = i18n('xpack.security.views.management.roles.noMatches', {
-      defaultMessage: 'matching'
+    $scope.noFoundMatches = i18n('xpack.security.views.management.roles.matchingText', {
+      defaultMessage: 'matching',
     });
-  }
+
+    $scope.reversedTooltip = i18n('xpack.security.views.management.roles.reversedTooltip', {
+      defaultMessage: 'Reserved roles are built-in and cannot be removed or modified. Only the password may be changed.',
+    });
+
+    $scope.reversedAriaLabel = i18n('xpack.security.views.management.roles.reversedAriaLabel', {
+      defaultMessage: 'Reserved roles are built-in and cannot be removed or modified. Only the password may be changed.',
+    });
+
+  },
 });

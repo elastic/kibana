@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
@@ -18,13 +18,13 @@ interface State {
   showImpactedSpaces: boolean;
 }
 
-export class PrivilegeCalloutWarningUI extends Component<Props, State> {
+export class PrivilegeCalloutWarning extends Component<Props, State> {
   public state = {
     showImpactedSpaces: false,
   };
 
   public render() {
-    const { basePrivilege, isReservedRole, intl } = this.props;
+    const { basePrivilege, isReservedRole } = this.props;
 
     let callout = null;
 
@@ -34,15 +34,16 @@ export class PrivilegeCalloutWarningUI extends Component<Props, State> {
           <EuiCallOut
             color="warning"
             iconType="iInCircle"
-            title={intl.formatMessage({
-              id:
-                'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.cannotCustomizeOneTitle',
-              defaultMessage: "Cannot customize a reserved role's space privileges",
-            })}
+            title={
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.notPossibleToCustomizeReservedRoleSpacePrivilegesTitle"
+                defaultMessage="Cannot customize a reserved role's space privileges"
+              />
+            }
           >
             <p>
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.roleTitle"
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.howToCustomizePrivilegesDescription"
                 defaultMessage="This role always grants full access to all spaces. To customize privileges for
                 individual spaces, you must create a new role."
               />
@@ -54,39 +55,40 @@ export class PrivilegeCalloutWarningUI extends Component<Props, State> {
           <EuiCallOut
             color="warning"
             iconType="iInCircle"
-            title={intl.formatMessage({
-              id:
-                'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.minimumPrivilegeTitle',
-              defaultMessage: 'Minimum privilege is too high to customize individual spaces',
-            })}
+            title={
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.minimumPrivilegeTitle"
+                defaultMessage="Minimum privilege is too high to customize individual spaces"
+              />
+            }
           >
             <p>
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.settingsMinimumTitle"
-                defaultMessage="Setting the minimum privilege to {firstStrong} grants full access to all
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.howToCustomizePrivilegesForIndividualSpacesDescription"
+                defaultMessage="Setting the minimum privilege to {allText} grants full access to all
                 spaces. To customize privileges for individual spaces, the minimum privilege must be
-                either {secondStrong} or {thirdStrong}."
+                either {readText} or {noneText}."
                 values={{
-                  firstStrong: (
+                  allText: (
                     <strong>
                       <FormattedMessage
-                        id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.minAllTitle"
+                        id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.allText"
                         defaultMessage="all"
                       />
                     </strong>
                   ),
-                  secondStrong: (
+                  readText: (
                     <strong>
                       <FormattedMessage
-                        id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.minReadTitle"
+                        id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.readText"
                         defaultMessage="read"
                       />
                     </strong>
                   ),
-                  thirdStrong: (
+                  noneText: (
                     <strong>
                       <FormattedMessage
-                        id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.minNoneTitle"
+                        id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.noneText"
                         defaultMessage="none"
                       />
                     </strong>
@@ -105,11 +107,12 @@ export class PrivilegeCalloutWarningUI extends Component<Props, State> {
           <EuiCallOut
             color="warning"
             iconType="iInCircle"
-            title={intl.formatMessage({
-              id:
-                'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.cannotCustomizeTwoTitle',
-              defaultMessage: "Cannot customize a reserved role's space privileges",
-            })}
+            title={
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.notPossibleToCustomizeReservedRoleSpacePrivilegesTitle"
+                defaultMessage="Cannot customize a reserved role's space privileges"
+              />
+            }
           >
             <p>
               <FormattedMessage
@@ -129,12 +132,12 @@ export class PrivilegeCalloutWarningUI extends Component<Props, State> {
               <span>
                 <FormattedMessage
                   id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.minimalPossiblePrivilageTitle"
-                  defaultMessage="The minimal possible privilege is {message}."
+                  defaultMessage="The minimal possible privilege is {readText}."
                   values={{
-                    message: (
+                    readText: (
                       <strong>
                         <FormattedMessage
-                          id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.minPossibleReadTitle"
+                          id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.readText"
                           defaultMessage="read"
                         />
                       </strong>
@@ -153,11 +156,12 @@ export class PrivilegeCalloutWarningUI extends Component<Props, State> {
         <EuiCallOut
           color="warning"
           iconType="iInCircle"
-          title={intl.formatMessage({
-            id:
-              'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.cannotCustomizeThreeTitle',
-            defaultMessage: "Cannot customize a reserved role's space privileges",
-          })}
+          title={
+            <FormattedMessage
+              id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.notPossibleToCustomizeReservedRoleSpacePrivilegesTitle"
+              defaultMessage="Cannot customize a reserved role's space privileges"
+            />
+          }
         >
           <p>
             <FormattedMessage
@@ -173,5 +177,3 @@ export class PrivilegeCalloutWarningUI extends Component<Props, State> {
     return callout;
   }
 }
-
-export const PrivilegeCalloutWarning = injectI18n(PrivilegeCalloutWarningUI);

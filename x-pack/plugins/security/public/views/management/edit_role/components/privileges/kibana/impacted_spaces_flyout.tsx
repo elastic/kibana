@@ -49,7 +49,7 @@ export class ImpactedSpacesFlyoutUI extends Component<Props, State> {
         <div className="showImpactedSpaces">
           <EuiLink onClick={this.toggleShowImpactedSpaces}>
             <FormattedMessage
-              id="xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.summarySpacePrivilegesTitle"
+              id="xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.viewSpacesPrivilegesSummaryLinkText"
               defaultMessage="View summary of spaces privileges"
             />
           </EuiLink>
@@ -126,7 +126,7 @@ export class ImpactedSpacesFlyoutUI extends Component<Props, State> {
           <EuiTitle size="m">
             <h1 id="showImpactedSpacesTitle">
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.summarySpaceTitle"
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.spacePrivilegesSummaryTitle"
                 defaultMessage="Summary of space privileges"
               />
             </h1>

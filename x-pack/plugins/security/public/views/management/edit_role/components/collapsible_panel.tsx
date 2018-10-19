@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import './collapsible_panel.less';
 
@@ -26,7 +26,7 @@ interface State {
   collapsed: boolean;
 }
 
-export class CollapsiblePanelUI extends Component<Props, State> {
+export class CollapsiblePanel extends Component<Props, State> {
   public state = {
     collapsed: false,
   };
@@ -41,8 +41,6 @@ export class CollapsiblePanelUI extends Component<Props, State> {
   }
 
   public getTitle = () => {
-    const { intl } = this.props;
-
     return (
       // @ts-ignore
       <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
@@ -60,17 +58,17 @@ export class CollapsiblePanelUI extends Component<Props, State> {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink onClick={this.toggleCollapsed}>
-            {this.state.collapsed
-              ? intl.formatMessage({
-                  id:
-                    'xpack.security.views.management.editRoles.components.collapsiblePanel.showTitle',
-                  defaultMessage: 'show',
-                })
-              : intl.formatMessage({
-                  id:
-                    'xpack.security.views.management.editRoles.components.collapsiblePanel.hideTitle',
-                  defaultMessage: 'hide',
-                })}
+            {this.state.collapsed ? (
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.collapsiblePanel.showLinkText"
+                defaultMessage="show"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.collapsiblePanel.hideLinkText"
+                defaultMessage="hide"
+              />
+            )}
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -96,5 +94,3 @@ export class CollapsiblePanelUI extends Component<Props, State> {
     });
   };
 }
-
-export const CollapsiblePanel = injectI18n(CollapsiblePanelUI);

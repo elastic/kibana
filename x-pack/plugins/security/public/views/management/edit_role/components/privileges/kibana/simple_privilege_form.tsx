@@ -39,7 +39,7 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
     const description = (
       <p>
         <FormattedMessage
-          id="xpack.security.views.management.editRoles.components.privileges.kibana.simplePrivilegeForm.specifyTitle"
+          id="xpack.security.views.management.editRoles.components.privileges.kibana.simplePrivilegeForm.specifyPrivilegeForRoleDescription"
           defaultMessage="Specifies the Kibana privilege for this role."
         />
       </p>

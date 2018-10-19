@@ -69,18 +69,17 @@ export class EditRolePageUI extends Component<Props, State> {
   }
 
   public render() {
-    const { intl } = this.props;
-    const description = this.props.spacesEnabled
-      ? intl.formatMessage({
-          id:
-            'xpack.security.views.management.editRoles.components.editRoles.accessToYourKibanaTitle',
-          defaultMessage:
-            'Set privileges on your Elasticsearch data and control access to your Kibana spaces.',
-        })
-      : intl.formatMessage({
-          id: 'xpack.security.views.management.editRoles.components.editRoles.accessToKibanaTitle',
-          defaultMessage: 'Set privileges on your Elasticsearch data and control access to Kibana.',
-        });
+    const description = this.props.spacesEnabled ? (
+      <FormattedMessage
+        id="xpack.security.views.management.editRoles.components.editRole.setPrivilegesToKibanaSpacesDescription"
+        defaultMessage="Set privileges on your Elasticsearch data and control access to your Kibana spaces."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.security.views.management.editRoles.components.editRole.setPrivilegesToKibanaDescription"
+        defaultMessage="Set privileges on your Elasticsearch data and control access to Kibana."
+      />
+    );
 
     return (
       <EuiPage className="editRolePage" restrictWidth>
@@ -98,7 +97,7 @@ export class EditRolePageUI extends Component<Props, State> {
                 <EuiText size="s" color="subdued">
                   <p id="reservedRoleDescription" tabIndex={1}>
                     <FormattedMessage
-                      id="xpack.security.views.management.editRoles.components.editRoles.reversedRolesTitle"
+                      id="xpack.security.views.management.editRoles.components.editRole.modifyingReversedRolesDescription"
                       defaultMessage="Reserved roles are built-in and cannot be removed or modified."
                     />
                   </p>
@@ -124,27 +123,32 @@ export class EditRolePageUI extends Component<Props, State> {
   }
 
   public getFormTitle = () => {
-    const { intl } = this.props;
     let titleText;
     const props: HTMLProps<HTMLDivElement> = {
       tabIndex: 0,
     };
     if (isReservedRole(this.props.role)) {
-      titleText = intl.formatMessage({
-        id: 'xpack.security.components.management.user.editUser.viewingRoleTitle',
-        defaultMessage: 'Viewing role',
-      });
+      titleText = (
+        <FormattedMessage
+          id="xpack.security.views.management.editRoles.components.editRole.viewingRoleTitle"
+          defaultMessage="Viewing role"
+        />
+      );
       props['aria-describedby'] = 'reservedRoleDescription';
     } else if (this.editingExistingRole()) {
-      titleText = intl.formatMessage({
-        id: 'xpack.security.components.management.user.editUser.editRoleTitle',
-        defaultMessage: 'Edit role',
-      });
+      titleText = (
+        <FormattedMessage
+          id="xpack.security.views.management.editRoles.components.editRole.editRoleTitle"
+          defaultMessage="Edit role"
+        />
+      );
     } else {
-      titleText = intl.formatMessage({
-        id: 'xpack.security.components.management.user.editUser.createRoleTitle',
-        defaultMessage: 'Create role',
-      });
+      titleText = (
+        <FormattedMessage
+          id="xpack.security.views.management.editRoles.components.editRole.createRoleTitle"
+          defaultMessage="Create role"
+        />
+      );
     }
 
     return (
@@ -169,23 +173,24 @@ export class EditRolePageUI extends Component<Props, State> {
   };
 
   public getRoleName = () => {
-    const { intl } = this.props;
-
     return (
       <EuiPanel>
         <EuiFormRow
-          label={intl.formatMessage({
-            id: 'xpack.security.views.management.editRoles.components.editRoles.roleNameTitle',
-            defaultMessage: 'Role name',
-          })}
+          label={
+            <FormattedMessage
+              id="xpack.security.views.management.editRoles.components.editRole.roleNameFormRowTitle"
+              defaultMessage="Role name"
+            />
+          }
           helpText={
-            !isReservedRole(this.props.role) && this.editingExistingRole()
-              ? intl.formatMessage({
-                  id:
-                    'xpack.security.views.management.editRoles.components.editRoles.cannotChangeNameTitle',
-                  defaultMessage: "A role's name cannot be changed once it has been created.",
-                })
-              : undefined
+            !isReservedRole(this.props.role) && this.editingExistingRole() ? (
+              <FormattedMessage
+                id="xpack.security.views.management.editRoles.components.editRole.roleNameFormRowHelpText"
+                defaultMessage="A role's name cannot be changed once it has been created."
+              />
+            ) : (
+              undefined
+            )
           }
           {...this.validator.validateRoleName(this.state.role)}
         >
@@ -257,27 +262,28 @@ export class EditRolePageUI extends Component<Props, State> {
   };
 
   public getFormButtons = () => {
-    const { intl } = this.props;
     if (isReservedRole(this.props.role)) {
       return (
         <EuiButton onClick={this.backToRoleList}>
           <FormattedMessage
-            id="xpack.security.views.management.editRoles.components.editRoles.returnToListTitle"
+            id="xpack.security.views.management.editRoles.components.editRole.returnToRoleListButtonLabel"
             defaultMessage="Return to role list"
           />
         </EuiButton>
       );
     }
 
-    const saveText = this.editingExistingRole()
-      ? intl.formatMessage({
-          id: 'xpack.security.views.management.editRoles.components.editRoles.updateRoleOneTitle',
-          defaultMessage: 'Update role',
-        })
-      : intl.formatMessage({
-          id: 'xpack.security.views.management.editRoles.components.editRoles.createRoleOneTitle',
-          defaultMessage: 'Create role',
-        });
+    const saveText = this.editingExistingRole() ? (
+      <FormattedMessage
+        id="xpack.security.views.management.editRoles.components.editRole.updateRoleText"
+        defaultMessage="Update role"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.security.views.management.editRoles.components.editRole.createRoleText"
+        defaultMessage="Create role"
+      />
+    );
 
     return (
       <EuiFlexGroup responsive={false}>
@@ -294,7 +300,7 @@ export class EditRolePageUI extends Component<Props, State> {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty data-test-subj={`roleFormCancelButton`} onClick={this.backToRoleList}>
             <FormattedMessage
-              id="xpack.security.views.management.editRoles.components.editRoles.cancelTitle"
+              id="xpack.security.views.management.editRoles.components.editRole.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
@@ -341,7 +347,8 @@ export class EditRolePageUI extends Component<Props, State> {
         .then(() => {
           toastNotifications.addSuccess(
             intl.formatMessage({
-              id: 'xpack.security.views.management.editRoles.components.editRoles.savedRoleTitle',
+              id:
+                'xpack.security.views.management.editRoles.components.editRoles.roleSuccessfullySavedNotificationMessage',
               defaultMessage: 'Saved role',
             })
           );
@@ -360,7 +367,8 @@ export class EditRolePageUI extends Component<Props, State> {
       .then(() => {
         toastNotifications.addSuccess(
           intl.formatMessage({
-            id: 'xpack.security.views.management.editRoles.components.editRoles.deletedRoleTitle',
+            id:
+              'xpack.security.views.management.editRoles.components.editRoles.roleSuccessfullyDeletedNotificationMessage',
             defaultMessage: 'Deleted role',
           })
         );
