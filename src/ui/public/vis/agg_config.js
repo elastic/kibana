@@ -137,21 +137,15 @@ class AggConfig {
 
   createFilter(key, params = {}) {
     if (!this.isFilterable()) {
-      throw new TypeError(i18n.translate('common.ui.vis.aggConfig.noFilteringSupportErrorMessage', {
-        defaultMessage: 'The "{typeTitle}" aggregation does not support filtering.', values: { typeTitle: this.type.title } }
-      ));
+      throw new TypeError(`The "${this.type.title}" aggregation does not support filtering.`);
     }
 
     const field = this.getField();
     const label = this.getFieldDisplayName();
     if (field && !field.filterable) {
-      let message = i18n.translate('common.ui.vis.aggConfig.fieldCanNotBeUsedForFilteringErrorMessage', {
-        defaultMessage: 'The "{label}" field can not be used for filtering.', values: { label } }
-      );
+      let message = `The "${label}" field can not be used for filtering.`;
       if (field.scripted) {
-        message = i18n.translate('common.ui.vis.aggConfig.scriptedFieldCanNotBeUsedForFilteringErrorMessage', {
-          defaultMessage: 'The "{label}" field is scripted and can not be used for filtering.', values: { label } }
-        );
+        message = `The "${label}" field is scripted and can not be used for filtering.`;
       }
       throw new TypeError(message);
     }
