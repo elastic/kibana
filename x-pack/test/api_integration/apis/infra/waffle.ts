@@ -15,8 +15,8 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('waffle nodes', () => {
-    before(() => esArchiver.load('infraops'));
-    after(() => esArchiver.unload('infraops'));
+    before(() => esArchiver.load('infra'));
+    after(() => esArchiver.unload('infra'));
 
     it('should basically work', () => {
       return client
