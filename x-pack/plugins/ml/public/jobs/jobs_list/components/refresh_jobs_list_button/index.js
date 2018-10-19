@@ -5,11 +5,5 @@
  */
 
 
-import { JobsListView } from './components/jobs_list_view';
-import React from 'react';
 
-
-export const JobsPage = () => (
-  <JobsListView />
-);
-
+export { RefreshJobsListButton } from './refresh_jobs_list_button';
