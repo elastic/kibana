@@ -74,6 +74,7 @@ export const metrics = {
     metric: 'index',
     fieldSource: 'index_stats.primaries',
     field: 'index_stats.primaries.indexing.index_total',
+    title: 'Latency',
     label: 'Indexing Latency',
     description:
       'Average latency for indexing documents, which is time it takes to index documents divided by number that were indexed. This only considers primary shards.', // eslint-disable-line max-len
