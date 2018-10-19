@@ -26,6 +26,9 @@ jest.mock('../../services/results_service', () => ({
     },
     getScheduledEventsByBucket() {
       return Promise.resolve(mockSeriesPromisesResponse[0][2]);
+    },
+    getEventDistributionData() {
+      return Promise.resolve([]);
     }
   }
 }));
@@ -54,7 +57,6 @@ const mockChartContainer = {
 function mockGetDefaultData() {
   return {
     seriesToPlot: [],
-    layoutCellsPerChart: 12,
     tooManyBuckets: false,
     timeFieldName: 'timestamp'
   };
@@ -82,7 +84,7 @@ describe('explorerChartsContainerService', () => {
     callbackData.push(mockGetDefaultData());
     callbackData.push({
       ...mockGetDefaultData(),
-      layoutCellsPerChart: 6
+      chartsPerRow: 2
     });
 
     const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
@@ -99,7 +101,9 @@ describe('explorerChartsContainerService', () => {
 
     function callback(data) {
       if (callbackData.length > 0) {
-        expect(data).toEqual(callbackData.shift());
+        expect(data).toEqual({
+          ...callbackData.shift()
+        });
       }
       if (callbackData.length === 0) {
         done();
