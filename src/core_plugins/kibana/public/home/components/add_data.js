@@ -38,6 +38,8 @@ import {
   EuiFlexGrid,
 } from '@elastic/eui';
 
+const basePath = chrome.getBasePath();
+
 const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
 
   const renderCards = () => {
@@ -221,7 +223,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
             </strong>
             <EuiLink
               style={{ display: 'block', textAlign: 'center' }}
-              href={`${chrome.getBasePath()}/app/ml#/datavisualizer`}
+              href={`${basePath}/app/ml#/datavisualizer`}
             >
               <FormattedMessage
                 id="kbn.home.addData.uploadFileLink"

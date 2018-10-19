@@ -204,14 +204,10 @@ exports[`apmUiEnabled 1`] = `
     margin="l"
     size="full"
   />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
+  <EuiFlexGrid
+    columns={3}
     gutterSize="l"
-    justifyContent="spaceAround"
     responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
       className="homAddData__footerItem"
@@ -229,7 +225,7 @@ exports[`apmUiEnabled 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Sample Data"
+            defaultMessage="Add sample data"
             id="kbn.home.addData.sampleDataTitle"
             values={Object {}}
           />
@@ -239,7 +235,8 @@ exports[`apmUiEnabled 1`] = `
           href="#/home/tutorial_directory/sampleData"
           style={
             Object {
-              "marginLeft": 8,
+              "display": "block",
+              "textAlign": "center",
             }
           }
           type="button"
@@ -268,7 +265,47 @@ exports[`apmUiEnabled 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Your Data"
+            defaultMessage="Upload data from file"
+            id="kbn.home.addData.uploadFileTitle"
+            values={Object {}}
+          />
+        </strong>
+        <EuiLink
+          color="primary"
+          href="#/home"
+          style={
+            Object {
+              "display": "block",
+              "textAlign": "center",
+            }
+          }
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Import a JSON, CSV or text file"
+            id="kbn.home.addData.uploadFileLink"
+            values={Object {}}
+          />
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="homAddData__footerItem"
+      component="div"
+      grow={true}
+    >
+      <EuiText
+        grow={true}
+      >
+        <strong
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          <FormattedMessage
+            defaultMessage="Use Elastisearch data"
             id="kbn.home.addData.yourDataTitle"
             values={Object {}}
           />
@@ -278,7 +315,8 @@ exports[`apmUiEnabled 1`] = `
           href="#/management/kibana/index"
           style={
             Object {
-              "marginLeft": 8,
+              "display": "block",
+              "textAlign": "center",
             }
           }
           type="button"
@@ -291,7 +329,7 @@ exports[`apmUiEnabled 1`] = `
         </EuiLink>
       </EuiText>
     </EuiFlexItem>
-  </EuiFlexGroup>
+  </EuiFlexGrid>
 </EuiPanel>
 `;
 
@@ -463,14 +501,10 @@ exports[`isNewKibanaInstance 1`] = `
     margin="l"
     size="full"
   />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
+  <EuiFlexGrid
+    columns={3}
     gutterSize="l"
-    justifyContent="spaceAround"
     responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
       className="homAddData__footerItem homAddData__footerItem--highlight"
@@ -488,7 +522,7 @@ exports[`isNewKibanaInstance 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Sample Data"
+            defaultMessage="Add sample data"
             id="kbn.home.addData.sampleDataTitle"
             values={Object {}}
           />
@@ -498,7 +532,8 @@ exports[`isNewKibanaInstance 1`] = `
           href="#/home/tutorial_directory/sampleData"
           style={
             Object {
-              "marginLeft": 8,
+              "display": "block",
+              "textAlign": "center",
             }
           }
           type="button"
@@ -527,7 +562,47 @@ exports[`isNewKibanaInstance 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Your Data"
+            defaultMessage="Upload data from file"
+            id="kbn.home.addData.uploadFileTitle"
+            values={Object {}}
+          />
+        </strong>
+        <EuiLink
+          color="primary"
+          href="#/home"
+          style={
+            Object {
+              "display": "block",
+              "textAlign": "center",
+            }
+          }
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Import a JSON, CSV or text file"
+            id="kbn.home.addData.uploadFileLink"
+            values={Object {}}
+          />
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="homAddData__footerItem homAddData__footerItem--highlight"
+      component="div"
+      grow={true}
+    >
+      <EuiText
+        grow={true}
+      >
+        <strong
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          <FormattedMessage
+            defaultMessage="Use Elastisearch data"
             id="kbn.home.addData.yourDataTitle"
             values={Object {}}
           />
@@ -537,7 +612,8 @@ exports[`isNewKibanaInstance 1`] = `
           href="#/management/kibana/index"
           style={
             Object {
-              "marginLeft": 8,
+              "display": "block",
+              "textAlign": "center",
             }
           }
           type="button"
@@ -550,7 +626,7 @@ exports[`isNewKibanaInstance 1`] = `
         </EuiLink>
       </EuiText>
     </EuiFlexItem>
-  </EuiFlexGroup>
+  </EuiFlexGrid>
 </EuiPanel>
 `;
 
@@ -722,14 +798,10 @@ exports[`render 1`] = `
     margin="l"
     size="full"
   />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
+  <EuiFlexGrid
+    columns={3}
     gutterSize="l"
-    justifyContent="spaceAround"
     responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
       className="homAddData__footerItem"
@@ -747,7 +819,7 @@ exports[`render 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Sample Data"
+            defaultMessage="Add sample data"
             id="kbn.home.addData.sampleDataTitle"
             values={Object {}}
           />
@@ -757,7 +829,8 @@ exports[`render 1`] = `
           href="#/home/tutorial_directory/sampleData"
           style={
             Object {
-              "marginLeft": 8,
+              "display": "block",
+              "textAlign": "center",
             }
           }
           type="button"
@@ -786,7 +859,47 @@ exports[`render 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Your Data"
+            defaultMessage="Upload data from file"
+            id="kbn.home.addData.uploadFileTitle"
+            values={Object {}}
+          />
+        </strong>
+        <EuiLink
+          color="primary"
+          href="#/home"
+          style={
+            Object {
+              "display": "block",
+              "textAlign": "center",
+            }
+          }
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Import a JSON, CSV or text file"
+            id="kbn.home.addData.uploadFileLink"
+            values={Object {}}
+          />
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="homAddData__footerItem"
+      component="div"
+      grow={true}
+    >
+      <EuiText
+        grow={true}
+      >
+        <strong
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          <FormattedMessage
+            defaultMessage="Use Elastisearch data"
             id="kbn.home.addData.yourDataTitle"
             values={Object {}}
           />
@@ -796,7 +909,8 @@ exports[`render 1`] = `
           href="#/management/kibana/index"
           style={
             Object {
-              "marginLeft": 8,
+              "display": "block",
+              "textAlign": "center",
             }
           }
           type="button"
@@ -809,6 +923,6 @@ exports[`render 1`] = `
         </EuiLink>
       </EuiText>
     </EuiFlexItem>
-  </EuiFlexGroup>
+  </EuiFlexGrid>
 </EuiPanel>
 `;
