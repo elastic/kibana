@@ -50,7 +50,7 @@ class CalculationVarsUi extends Component {
         <div className="vis_editor__calc_vars-name">
           <input
             aria-label={intl.formatMessage({ id: 'metrics.vars.variableNameAriaLabel', defaultMessage: 'Variable name' })}
-            placeholder={intl.formatMessage({ id: 'metrics.vars.variableNamePlaceholder', defaultMessage: 'Variable name' })}
+            placeholder={intl.formatMessage({ id: 'metrics.vars.variableNamePlaceholder', defaultMessage: 'Variable Name' })}
             className="vis_editor__input-grows-100"
             type="text"
             onChange={this.handleChange(row, 'name')}

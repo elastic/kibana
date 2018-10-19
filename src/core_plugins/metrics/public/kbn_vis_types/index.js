@@ -36,8 +36,8 @@ export default function MetricsVisProvider(Private, i18n) {
 
   return VisFactory.createReactVisualization({
     name: 'metrics',
-    title: i18n('metrics.kbnVisTypes.visualBuilderTitle', { defaultMessage: 'Visual Builder' }),
-    description: i18n('metrics.kbnVisTypes.visualBuilderDescription',
+    title: i18n('metrics.kbnVisTypes.metricsTitle', { defaultMessage: 'Visual Builder' }),
+    description: i18n('metrics.kbnVisTypes.metricsDescription',
       { defaultMessage: 'Build time-series using a visual pipeline interface' }),
     category: CATEGORY.TIME,
     icon: 'visVisualBuilder',

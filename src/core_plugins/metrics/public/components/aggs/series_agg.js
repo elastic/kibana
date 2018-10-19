@@ -91,7 +91,7 @@ function SeriesAggUi(props) {
         <div className="vis_editor__item">
           <div className="vis_editor__label">
             <FormattedMessage
-              id="metrics.seriesAgg.isNotCompatibleLabel"
+              id="metrics.seriesAgg.seriesAggIsNotCompatibleLabel"
               defaultMessage="Series Agg is not compatible with the table visualization."
             />
           </div>

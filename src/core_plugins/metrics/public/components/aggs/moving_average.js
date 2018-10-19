@@ -130,7 +130,7 @@ const MovingAverageAggUi = props => {
             <EuiComboBox
               isClearable={false}
               id={htmlId('model')}
-              placeholder={intl.formatMessage({ id: 'metrics.movingAverage.model.selectPlaceholder', defaultMessage: 'Select...' })}
+              placeholder={intl.formatMessage({ id: 'metrics.movingAverage.model.selectPlaceholder', defaultMessage: 'Select…' })}
               options={modelOptions}
               selectedOptions={selectedModelOption ? [selectedModelOption] : []}
               onChange={handleSelectChange('model')}
@@ -161,7 +161,7 @@ const MovingAverageAggUi = props => {
             </label>
             <EuiComboBox
               id={htmlId('minimize')}
-              placeholder={intl.formatMessage({ id: 'metrics.movingAverage.minimize.selectPlaceholder', defaultMessage: 'Select...' })}
+              placeholder={intl.formatMessage({ id: 'metrics.movingAverage.minimize.selectPlaceholder', defaultMessage: 'Select…' })}
               options={minimizeOptions}
               selectedOptions={selectedMinimizeOption ? [selectedMinimizeOption] : []}
               onChange={handleSelectChange('minimize')}

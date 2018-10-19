@@ -150,7 +150,7 @@ const TopHitAggUi = props => {
             <EuiComboBox
               isClearable={false}
               id={htmlId('agg_with')}
-              placeholder={intl.formatMessage({ id: 'metrics.topHit.aggregateWith.selectPlaceholder', defaultMessage: 'Select...' })}
+              placeholder={intl.formatMessage({ id: 'metrics.topHit.aggregateWith.selectPlaceholder', defaultMessage: 'Select…' })}
               options={aggWithOptions}
               selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
               onChange={handleSelectChange('agg_with')}
@@ -183,7 +183,7 @@ const TopHitAggUi = props => {
             <EuiComboBox
               isClearable={false}
               id={htmlId('order')}
-              placeholder={intl.formatMessage({ id: 'metrics.topHit.order.selectPlaceholder', defaultMessage: 'Select...' })}
+              placeholder={intl.formatMessage({ id: 'metrics.topHit.order.selectPlaceholder', defaultMessage: 'Select…' })}
               options={orderOptions}
               selectedOptions={selectedOrderOption ? [selectedOrderOption] : []}
               onChange={handleSelectChange('order')}
