@@ -74,7 +74,7 @@ interface State {
   query: Query;
   inputIsPristine: boolean;
   isSuggestionsVisible: boolean;
-  index: number;
+  index: number | null;
   suggestions: AutocompleteSuggestion[];
   suggestionLimit: number;
 }
@@ -119,7 +119,7 @@ export class QueryBar extends Component<Props, State> {
     },
     inputIsPristine: true,
     isSuggestionsVisible: false,
-    index: 0,
+    index: null,
     suggestions: [],
     suggestionLimit: 50,
   };
@@ -219,7 +219,7 @@ export class QueryBar extends Component<Props, State> {
           ...this.state.query,
           query: value.substr(0, start) + text + value.substr(end),
         },
-        index: 0,
+        index: null,
       },
       () => {
         if (!this.inputRef) {
@@ -255,7 +255,7 @@ export class QueryBar extends Component<Props, State> {
   };
 
   public onOutsideClick = () => {
-    this.setState({ isSuggestionsVisible: false });
+    this.setState({ isSuggestionsVisible: false, index: null });
   };
 
   public onClickInput = (event: React.MouseEvent<HTMLInputElement>) => {
@@ -286,7 +286,7 @@ export class QueryBar extends Component<Props, State> {
       },
       inputIsPristine: false,
       isSuggestionsVisible: hasValue,
-      index: 0,
+      index: null,
       suggestionLimit: 50,
     });
   };
@@ -328,7 +328,7 @@ export class QueryBar extends Component<Props, State> {
       switch (event.keyCode) {
         case KEY_CODES.DOWN:
           event.preventDefault();
-          if (isSuggestionsVisible) {
+          if (isSuggestionsVisible && index !== null) {
             this.incrementIndex(index);
           } else {
             this.setState({ isSuggestionsVisible: true, index: 0 });
@@ -336,13 +336,13 @@ export class QueryBar extends Component<Props, State> {
           break;
         case KEY_CODES.UP:
           event.preventDefault();
-          if (isSuggestionsVisible) {
+          if (isSuggestionsVisible && index !== null) {
             this.decrementIndex(index);
           }
           break;
         case KEY_CODES.ENTER:
           event.preventDefault();
-          if (isSuggestionsVisible && this.state.suggestions[index]) {
+          if (isSuggestionsVisible && index !== null && this.state.suggestions[index]) {
             this.selectSuggestion(this.state.suggestions[index]);
           } else {
             this.onSubmit(() => event.preventDefault());
@@ -350,10 +350,10 @@ export class QueryBar extends Component<Props, State> {
           break;
         case KEY_CODES.ESC:
           event.preventDefault();
-          this.setState({ isSuggestionsVisible: false });
+          this.setState({ isSuggestionsVisible: false, index: null });
           break;
         case KEY_CODES.TAB:
-          this.setState({ isSuggestionsVisible: false });
+          this.setState({ isSuggestionsVisible: false, index: null });
           break;
         default:
           if (selectionStart !== null && selectionEnd !== null) {

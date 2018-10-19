@@ -24,7 +24,7 @@ import './suggestion.less';
 import { SuggestionComponent } from './suggestion_component';
 
 interface Props {
-  index: number;
+  index: number | null;
   onClick: (suggestion: AutocompleteSuggestion) => void;
   onMouseEnter: (index: number) => void;
   show: boolean;
@@ -81,6 +81,9 @@ export class SuggestionsComponent extends Component<Props> {
   }
 
   private scrollIntoView = () => {
+    if (this.props.index === null) {
+      return;
+    }
     const parent = this.parentNode;
     const child = this.childNodes[this.props.index];
 
