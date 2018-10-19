@@ -219,7 +219,7 @@ function updateWithDataResponse(state, action) {
   }
 
   dataRequest.data = action.data;
-  dataRequest.dataMeta = layerReceivingData.dataMetaAtStart;
+  dataRequest.dataMeta = dataRequest.dataMetaAtStart;
   dataRequest.dataMetaAtStart = null;
   dataRequest.dataRequestToken = null;
   dataRequest.dataId = action.dataId;

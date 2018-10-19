@@ -17,7 +17,6 @@ const DEFAULT_COLOR = '#e6194b';
 export class VectorStyle {
 
   static type = 'VECTOR';
-  static DEFAULT_COLOR_HEX = '#ffffff';
   static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
 
   static getComputedFieldName(fieldName) {
@@ -104,7 +103,8 @@ export class VectorStyle {
 
   static computeScaledValues(featureCollection, field) {
     const fieldName = field.name;
-    if (featureCollection.computed.find(f => f === fieldName)) {
+    const alreadyComputed = featureCollection.computed.find(f => f === fieldName);
+    if (alreadyComputed) {
       return false;
     }
 
