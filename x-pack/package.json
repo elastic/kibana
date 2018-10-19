@@ -37,7 +37,6 @@
     "@types/elasticsearch": "^5.0.22",
     "@types/expect.js": "^0.3.29",
     "@types/graphql": "^0.13.1",
-    "@types/hapi": "15.0.1",
     "@types/history": "^4.6.2",
     "@types/jsonwebtoken": "^7.2.7",
     "@types/mocha": "^5.2.5",

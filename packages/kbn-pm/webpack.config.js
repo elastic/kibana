@@ -84,4 +84,8 @@ module.exports = {
   watchOptions: {
     ignored: [/node_modules/, /vendor/],
   },
+
+  optimization: {
+    minimize: false,
+  },
 };
