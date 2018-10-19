@@ -49,7 +49,7 @@ export function compose(): InfraFrontendLibs {
         headers: {
           'kbn-xsrf': chrome.getXsrfToken(),
         },
-        uri: `${chrome.getBasePath()}/api/infra/graphql`,
+        uri: `${chrome.getBasePath()}/api/ingest/graphql`,
       }),
     ]),
   };

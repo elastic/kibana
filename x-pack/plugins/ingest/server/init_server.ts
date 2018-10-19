@@ -28,7 +28,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
     typeDefs: schemas,
   });
 
-  libs.framework.registerGraphQLEndpoint('/api/infra/graphql', schema);
+  libs.framework.registerGraphQLEndpoint('/api/ingest/graphql', schema);
 
   initLegacyLoggingRoutes(libs.framework);
 };
