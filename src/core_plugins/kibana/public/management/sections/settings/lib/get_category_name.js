@@ -20,7 +20,6 @@
 import { StringUtils } from 'ui/utils/string_utils';
 import { i18n } from '@kbn/i18n';
 
-
 const names = {
   general: i18n.translate('kbn.management.settings.categoryNames.generalLabel', {
     defaultMessage: 'General',
