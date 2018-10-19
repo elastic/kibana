@@ -12,7 +12,7 @@ export const createGetBeatRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/agent/{beatId}/{token?}',
 
-  handler: async (request: any, reply: any) => {
+  handler: async (request: any, h: any) => {
     const beatId = request.params.beatId;
 
     let beat: CMBeat | null;
@@ -20,24 +20,24 @@ export const createGetBeatRoute = (libs: CMServerLibs) => ({
       try {
         beat = await libs.beats.getByEnrollmentToken(request.user, request.params.token);
         if (beat === null) {
-          return reply().code(200);
+          return h.response().code(200);
         }
       } catch (err) {
-        return reply(wrapEsError(err));
+        return wrapEsError(err);
       }
     } else {
       try {
         beat = await libs.beats.getById(request.user, beatId);
         if (beat === null) {
-          return reply({ message: 'Beat not found' }).code(404);
+          return h.response({ message: 'Beat not found' }).code(404);
         }
       } catch (err) {
-        return reply(wrapEsError(err));
+        return wrapEsError(err);
       }
     }
 
     delete beat.access_token;
 
-    reply(beat);
+    return beat;
   },
 });

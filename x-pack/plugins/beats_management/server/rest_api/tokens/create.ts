@@ -26,15 +26,15 @@ export const createTokensRoute = (libs: CMServerLibs) => ({
       }).allow(null),
     },
   },
-  handler: async (request: FrameworkRequest, reply: any) => {
+  handler: async (request: FrameworkRequest) => {
     const numTokens = get(request, 'payload.num_tokens', DEFAULT_NUM_TOKENS);
 
     try {
       const tokens = await libs.tokens.createEnrollmentTokens(request.user, numTokens);
-      reply({ tokens });
+      return { tokens };
     } catch (err) {
       // TODO move this to kibana route thing in adapter
-      return reply(wrapEsError(err));
+      return wrapEsError(err);
     }
   },
 });

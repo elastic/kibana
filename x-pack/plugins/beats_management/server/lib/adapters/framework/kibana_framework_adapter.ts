@@ -13,6 +13,7 @@ import { wrapRequest } from '../../../utils/wrap_request';
 import {
   BackendFrameworkAdapter,
   FrameworkInternalUser,
+  FrameworkResponse,
   FrameworkRouteOptions,
   FrameworkWrappableRequest,
 } from './adapter_types';
@@ -73,16 +74,17 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     });
   }
 
-  public registerRoute<RouteRequest extends FrameworkWrappableRequest, RouteResponse>(
-    route: FrameworkRouteOptions<RouteRequest, RouteResponse>
-  ) {
-    const wrappedHandler = (licenseRequired: boolean) => (request: any, reply: any) => {
+  public registerRoute<
+    RouteRequest extends FrameworkWrappableRequest,
+    RouteResponse extends FrameworkResponse
+  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
+    const wrappedHandler = (licenseRequired: boolean) => (request: any, h: any) => {
       const xpackMainPlugin = this.server.plugins.xpack_main;
       const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN.ID).getLicenseCheckResults();
       if (licenseRequired && !licenseCheckResults.licenseValid) {
-        reply(Boom.forbidden(licenseCheckResults.message));
+        return Boom.forbidden(licenseCheckResults.message);
       }
-      return route.handler(wrapRequest(request), reply);
+      return route.handler(wrapRequest(request), h);
     };
 
     this.server.route({

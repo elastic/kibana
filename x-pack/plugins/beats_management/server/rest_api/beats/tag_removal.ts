@@ -26,15 +26,15 @@ export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: FrameworkRequest, reply: any) => {
+  handler: async (request: FrameworkRequest) => {
     const { removals } = request.payload;
 
     try {
       const response = await libs.beats.removeTagsFromBeats(request.user, removals);
-      reply(response);
+      return response;
     } catch (err) {
       // TODO move this to kibana route thing in adapter
-      return reply(wrapEsError(err));
+      return wrapEsError(err);
     }
   },
 });

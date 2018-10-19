@@ -23,7 +23,7 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
     }),
   },
   licenseRequired: true,
-  handler: async (request: any, reply: any) => {
+  handler: async (request: any) => {
     let tags: BeatTag[];
     try {
       tags = await libs.tags.getAll(
@@ -31,9 +31,9 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
         // request.query ? JSON.parse(request.query.ESQuery) : undefined
       );
     } catch (err) {
-      return reply(wrapEsError(err));
+      return wrapEsError(err);
     }
 
-    reply(tags);
+    return tags;
   },
 });

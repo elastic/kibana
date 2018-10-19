@@ -3,13 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Lifecycle, ResponseToolkit } from 'hapi';
 import { internalAuthData } from '../../../utils/wrap_request';
+
 export interface BackendFrameworkAdapter {
   internalUser: FrameworkInternalUser;
   version: string;
   getSetting(settingPath: string): any;
   exposeStaticDir(urlPath: string, dir: string): void;
-  registerRoute<RouteRequest extends FrameworkWrappableRequest, RouteResponse>(
+  registerRoute<
+    RouteRequest extends FrameworkWrappableRequest,
+    RouteResponse extends FrameworkResponse
+  >(
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;
 }
@@ -45,7 +50,7 @@ export interface FrameworkRequest<
 
 export interface FrameworkRouteOptions<
   RouteRequest extends FrameworkWrappableRequest,
-  RouteResponse
+  RouteResponse extends FrameworkResponse
 > {
   path: string;
   method: string | string[];
@@ -55,10 +60,10 @@ export interface FrameworkRouteOptions<
   config?: {};
 }
 
-export type FrameworkRouteHandler<RouteRequest extends FrameworkWrappableRequest, RouteResponse> = (
-  request: FrameworkRequest<RouteRequest>,
-  reply: any
-) => void;
+export type FrameworkRouteHandler<
+  RouteRequest extends FrameworkWrappableRequest,
+  RouteResponse extends FrameworkResponse
+> = (request: FrameworkRequest<RouteRequest>, h: ResponseToolkit) => void;
 
 export interface FrameworkWrappableRequest<
   Payload = any,
@@ -73,3 +78,5 @@ export interface FrameworkWrappableRequest<
   params: Params;
   query: Query;
 }
+
+export type FrameworkResponse = Lifecycle.ReturnValue;
