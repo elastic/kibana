@@ -279,7 +279,7 @@ exports[`DetailView should render with data 1`] = `
         className="euiFlexItem"
         style={
           Object {
-            "minWidth": 0,
+            "minWidth": "50%",
             "padding": "1em 1em 1em 0",
           }
         }
@@ -313,7 +313,7 @@ exports[`DetailView should render with data 1`] = `
         className="euiFlexItem"
         style={
           Object {
-            "minWidth": 0,
+            "minWidth": "50%",
             "padding": "1em 1em 1em 0",
           }
         }
@@ -342,7 +342,7 @@ exports[`DetailView should render with data 1`] = `
         className="euiFlexItem"
         style={
           Object {
-            "minWidth": 0,
+            "minWidth": "25%",
             "padding": "1em 1em 1em 0",
           }
         }
@@ -368,7 +368,7 @@ exports[`DetailView should render with data 1`] = `
         className="euiFlexItem"
         style={
           Object {
-            "minWidth": 0,
+            "minWidth": "25%",
             "padding": "1em 1em 1em 0",
           }
         }
@@ -394,7 +394,7 @@ exports[`DetailView should render with data 1`] = `
         className="euiFlexItem"
         style={
           Object {
-            "minWidth": 0,
+            "minWidth": "50%",
             "padding": "1em 1em 1em 0",
           }
         }
