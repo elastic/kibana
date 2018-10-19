@@ -21,7 +21,6 @@ import './core.css';
 
 import { BasePathService } from './base_path';
 import { FatalErrorsService } from './fatal_errors';
-import { I18nService } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
 import { LoadingCountService } from './loading_count';
@@ -44,7 +43,6 @@ interface Params {
 export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
-  private readonly i18nService: I18nService;
   private readonly legacyPlatform: LegacyPlatformService;
   private readonly notifications: NotificationsService;
   private readonly loadingCount: LoadingCountService;
@@ -63,8 +61,6 @@ export class CoreSystem {
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
     });
-
-    this.i18nService = new I18nService();
 
     this.fatalErrors = new FatalErrorsService({
       rootDomElement,
@@ -99,9 +95,8 @@ export class CoreSystem {
       this.rootDomElement.appendChild(this.notificationsTargetDomElement);
       this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
 
-      const injectedMetadata = this.injectedMetadata.start();
-      this.i18nService.start({ injectedMetadata });
       const notifications = this.notifications.start();
+      const injectedMetadata = this.injectedMetadata.start();
       const fatalErrors = this.fatalErrors.start();
       const loadingCount = this.loadingCount.start({ fatalErrors });
       const basePath = this.basePath.start({ injectedMetadata });

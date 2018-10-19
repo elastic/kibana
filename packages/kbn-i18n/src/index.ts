@@ -22,4 +22,3 @@ import * as loader from './loader';
 
 export const i18n = i18nCore;
 export const i18nLoader = loader;
-export { PlainMessages } from './messages';

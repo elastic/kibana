@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { PlainMessages } from '@kbn/i18n';
 import { get } from 'lodash';
 import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from './deep_freeze';
@@ -32,7 +31,7 @@ export interface InjectedMetadataParams {
     };
     legacyMetadata: {
       app: unknown;
-      translations: PlainMessages;
+      translations: unknown;
       bundleId: string;
       nav: unknown;
       version: string;
