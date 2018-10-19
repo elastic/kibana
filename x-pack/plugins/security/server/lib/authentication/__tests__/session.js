@@ -47,7 +47,6 @@ describe('Session', () => {
         validateFunc: sinon.match.func,
         isHttpOnly: true,
         isSecure: 'secure-cookies',
-        isHttpOnly: true,
         isSameSite: false,
         path: 'base/path/'
       });

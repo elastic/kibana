@@ -169,6 +169,7 @@ export class Session {
       validateFunc: Session._validateCookie,
       isHttpOnly: httpOnly,
       isSecure: secure,
+      isSameSite: false,
       path: path,
     });
 
