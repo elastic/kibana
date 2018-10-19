@@ -91,6 +91,50 @@ describe('Get Kibana Stats', () => {
 
           expect(getUsageStats(rawStats)).to.eql(expected);
         });
+
+        it('flattens x-pack stats', () => {
+          const rawStats = {
+            hits: {
+              hits: [{
+                _source: {
+                  cluster_uuid: 'clusterone',
+                  kibana_stats: {
+                    kibana: { version: '7.0.0-alpha1-test02' },
+                    usage: {
+                      dashboard: { total: 1 },
+                      visualization: { total: 3 },
+                      search: { total: 1 },
+                      index_pattern: { total: 1 },
+                      graph_workspace: { total: 1 },
+                      timelion_sheet: { total: 1 },
+                      index: '.kibana-test-01',
+                      foo: { total: 5 },
+                      xpack: {
+                        fancy: {
+                          available: true,
+                          total: 15
+                        }
+                      }
+                    }
+                  }
+                }
+              }]
+            }
+          };
+          expect(getUsageStats(rawStats)).to.eql({
+            clusterone: {
+              dashboard: { total: 1 },
+              visualization: { total: 3 },
+              search: { total: 1 },
+              index_pattern: { total: 1 },
+              graph_workspace: { total: 1 },
+              timelion_sheet: { total: 1 },
+              indices: 1,
+              plugins: { foo: { total: 5 }, fancy: { available: true, total: 15 } }
+            }
+          });
+        });
+
       });
 
       describe('separate indices', () => {

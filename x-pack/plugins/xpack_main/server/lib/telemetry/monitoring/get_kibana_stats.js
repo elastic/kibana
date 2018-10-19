@@ -36,16 +36,8 @@ export function getUsageStats(rawStats) {
     }
     clusterIndexCache.add(clusterIndexCombination);
 
-    const plugins = omit(currUsage, [
-      'index',
-      'dashboard',
-      'visualization',
-      'search',
-      'index_pattern',
-      'graph_workspace',
-      'timelion_sheet',
-      'plugins.xpack', // FIXME nested omit doesn't work
-    ]);
+    // Get the stats that were read from any number of different .kibana indices in the cluster,
+    // roll them up into cluster-wide totals
     const rolledUpStats = get(accum, clusterUuid, { indices: 0 });
     const stats = {
       dashboard: rollUpTotals(rolledUpStats, currUsage, 'dashboard'),
@@ -56,6 +48,23 @@ export function getUsageStats(rawStats) {
       timelion_sheet: rollUpTotals(rolledUpStats, currUsage, 'timelion_sheet'),
       indices: rollUpIndices(rolledUpStats)
     };
+
+    // Get the stats provided by telemetry collectors.
+    const pluginsNested = omit(currUsage, [
+      'index',
+      'dashboard',
+      'visualization',
+      'search',
+      'index_pattern',
+      'graph_workspace',
+      'timelion_sheet',
+    ]);
+
+    // Stats filtered by telemetry collectors need to be flattened since they're pulled in a generic way.
+    // A plugin might not provide flat stats if it implements formatForBulkUpload in its collector.
+    // e.g: we want `xpack.reporting` to just be `reporting`
+    const top = omit(pluginsNested, 'xpack');
+    const plugins = { ...top, ...pluginsNested.xpack };
 
     return {
       ...accum,
