@@ -10,10 +10,7 @@ import moment from 'moment';
 
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
-export function InfraOpsPageProvider({
-  getService,
-  getPageObjects,
-}: KibanaFunctionalTestDefaultProviders) {
+export function InfraHomePageProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
@@ -31,7 +28,11 @@ export function InfraOpsPageProvider({
       return await testSubjects.find('waffleMap');
     },
 
-    async getEmptyPrompt() {
+    async getNoMetricsIndicesPrompt() {
+      return await testSubjects.find('noMetricsIndicesPrompt');
+    },
+
+    async getNoMetricsDataPrompt() {
       return await testSubjects.find('noMetricsDataPrompt');
     },
   };

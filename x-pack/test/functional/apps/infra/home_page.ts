@@ -12,8 +12,7 @@ const DATE_WITHOUT_DATA = new Date(1539122400000);
 // tslint:disable-next-line:no-default-export
 export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
   const esArchiver = getService('esArchiver');
-  const pageObjects = getPageObjects(['common', 'infraOps']);
-  const testSubjects = getService('testSubjects');
+  const pageObjects = getPageObjects(['common', 'infraHome']);
 
   describe('Home page', () => {
     describe('without metrics present', () => {
@@ -21,7 +20,7 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
 
       it('renders an empty data prompt', async () => {
         await pageObjects.common.navigateToApp('infraOps');
-        await testSubjects.existOrFail('noMetricsIndicesPrompt');
+        await pageObjects.infraHome.getNoMetricsIndicesPrompt();
       });
     });
 
@@ -33,13 +32,13 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
       after(async () => await esArchiver.unload('infraops'));
 
       it('renders the waffle map for dates with data', async () => {
-        await pageObjects.infraOps.goToTime(DATE_WITH_DATA);
-        await pageObjects.infraOps.getWaffleMap();
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.getWaffleMap();
       });
 
       it('renders an empty data prompt for dates with no data', async () => {
-        await pageObjects.infraOps.goToTime(DATE_WITHOUT_DATA);
-        await pageObjects.infraOps.getEmptyPrompt();
+        await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
+        await pageObjects.infraHome.getNoMetricsDataPrompt();
       });
     });
   });
