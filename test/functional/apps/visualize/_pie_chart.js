@@ -89,29 +89,64 @@ export default function ({ getService, getPageObjects }) {
       expect(data).to.eql(expectedTableData);
     });
 
-    it('should show other and missing bucket', async function () {
-      const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'Missing', 'Other' ];
+    describe('other bucket', () => {
+      it('should show other and missing bucket', async function () {
+        const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'Missing', 'Other' ];
 
-      await PageObjects.visualize.navigateToNewVisualization();
-      log.debug('clickPieChart');
-      await PageObjects.visualize.clickPieChart();
-      await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      log.debug('select bucket Split Slices');
-      await PageObjects.visualize.clickBucket('Split Slices');
-      log.debug('Click aggregation Histogram');
-      await PageObjects.visualize.selectAggregation('Terms');
-      log.debug('Click field memory');
-      await PageObjects.visualize.selectField('machine.os.raw');
-      await PageObjects.visualize.toggleOtherBucket();
-      await PageObjects.visualize.toggleMissingBucket();
-      log.debug('clickGo');
-      await PageObjects.visualize.clickGo();
-      await PageObjects.common.sleep(1003);
-      const pieData = await PageObjects.visualize.getPieChartLabels();
-      log.debug('pieData.length = ' + pieData.length);
-      expect(pieData).to.eql(expectedTableData);
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickPieChart');
+        await PageObjects.visualize.clickPieChart();
+        await PageObjects.visualize.clickNewSearch();
+        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        log.debug('select bucket Split Slices');
+        await PageObjects.visualize.clickBucket('Split Slices');
+        log.debug('Click aggregation Terms');
+        await PageObjects.visualize.selectAggregation('Terms');
+        log.debug('Click field machine.os.raw');
+        await PageObjects.visualize.selectField('machine.os.raw');
+        await PageObjects.visualize.toggleOtherBucket();
+        await PageObjects.visualize.toggleMissingBucket();
+        log.debug('clickGo');
+        await PageObjects.visualize.clickGo();
+        await PageObjects.common.sleep(1003);
+        const pieData = await PageObjects.visualize.getPieChartLabels();
+        log.debug('pieData.length = ' + pieData.length);
+        expect(pieData).to.eql(expectedTableData);
+      });
+
+      it.skip('should apply correct filter on other bucket', async () => {
+        const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'Missing', 'Other' ];
+
+        const pieSlice = await PageObjects.visualize.filterPieSlice('Other');
+        await pieSlice.click();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const pieData = await PageObjects.visualize.getPieChartLabels();
+        log.debug('pieData.length = ' + pieData.length);
+        expect(pieData).to.eql(expectedTableData);
+      });
+
+      it('should show two levels of other buckets', async () => {
+        const expectedTableData =  [ 'win 8', 'CN', 'IN', 'US', 'ID', 'BR', 'Other', 'win xp',
+          'CN', 'IN', 'US', 'ID', 'BR', 'Other', 'win 7', 'CN', 'IN', 'US', 'ID', 'BR', 'Other',
+          'ios', 'IN', 'CN', 'US', 'ID', 'BR', 'Other', 'Missing', 'CN', 'IN', 'US', 'BR', 'PK',
+          'Other', 'Other', 'IN', 'CN', 'US', 'ID', 'BR', 'Other' ];
+
+        await PageObjects.visualize.toggleOpenEditor(2, 'false');
+        await PageObjects.visualize.clickAddBucket();
+        await PageObjects.visualize.clickBucket('Split Slices');
+        await PageObjects.visualize.selectAggregation('Terms');
+        log.debug('Click field geo.src');
+        await PageObjects.visualize.selectField('geo.src');
+        await PageObjects.visualize.toggleOtherBucket();
+        await PageObjects.visualize.toggleMissingBucket();
+        log.debug('clickGo');
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const pieData = await PageObjects.visualize.getPieChartLabels();
+        log.debug('pieData.length = ' + pieData.length);
+        expect(pieData).to.eql(expectedTableData);
+      });
     });
 
     describe('disabled aggs', () => {

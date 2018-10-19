@@ -114,7 +114,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
             const { aggConfig, id: columnId } = data.columns[columnIndex];
             let filter = [];
             const value = rowIndex > -1 ? data.rows[rowIndex][columnId] : cellValue;
-            if (!value) {
+            if (value == null) {
               return;
             }
             if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {

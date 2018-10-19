@@ -586,11 +586,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async toggleOtherBucket() {
-      return await find.clickByCssSelector('input[name="showOther"]');
+      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showOther"]');
     }
 
     async toggleMissingBucket() {
-      return await find.clickByCssSelector('input[name="showMissing"]');
+      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showMissing"]');
     }
 
     async isApplyEnabled() {
@@ -1112,6 +1112,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async selectBucketType(type) {
       const bucketType = await find.byCssSelector(`[data-test-subj="${type}"]`);
       return await bucketType.click();
+    }
+
+    async filterPieSlice(name) {
+      const slice = await this.getPieSlice(name);
+      const event = document.createEvent('SVGEvents');
+      event.initEvent('click', true, true);
+      slice.dispatchEvent(event);
     }
 
     async getPieSlice(name) {
