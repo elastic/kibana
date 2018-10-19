@@ -84,7 +84,7 @@ export function normalizeBreakdown(breakdown) {
     }
     return partialTotal;
   }, 0);
-  Object.keys(breakdown).forEach(key => {
+  Object.keys(breakdown).sort().forEach(key => {
     let relative = 0;
     if (key.indexOf('_count') === -1) {
       relative = ((breakdown[key] / total) * 100).toFixed(1);
@@ -97,8 +97,15 @@ export function normalizeBreakdown(breakdown) {
       tip: getToolTip(key)
     });
   });
-  final.sort((a, b) => comparator(a.time, b.time));
-  return final;
+
+  // Sort by time descending and then key ascending
+  return final.sort((a, b) => {
+    if (comparator(a.time, b.time) !== 0) {
+      return comparator(a.time, b.time);
+    }
+
+    return -1 * comparator(a.key, b.key);
+  });
 }
 
 export function normalizeTimes(data, totalTime, depth) {
