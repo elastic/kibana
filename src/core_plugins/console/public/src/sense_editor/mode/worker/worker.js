@@ -467,7 +467,7 @@ ace.define(
   'ace/lib/event_emitter',
   ['require', 'exports', 'module'],
   function (acequire, exports) {
-
+    
     let EventEmitter = {},
       stopPropagation = function () {
         this.propagationStopped = !0;

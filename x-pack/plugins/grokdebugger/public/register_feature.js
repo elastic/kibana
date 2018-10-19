@@ -8,7 +8,7 @@
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register((i18n) => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'grokdebugger',
     title: i18n('xpack.grokDebugger.registryProviderTitle', {
