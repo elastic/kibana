@@ -21,12 +21,13 @@ export const alterColumn = () => ({
     },
     type: {
       types: ['string'],
-      help: 'The type to convert the column to. Leave blank to not change type.',
+      help: 'The type to convert the column to. Leave blank to not change type',
       default: null,
+      options: ['null', 'boolean', 'number', 'string'],
     },
     name: {
       types: ['string'],
-      help: 'The resultant column name. Leave blank to not rename.',
+      help: 'The resultant column name. Leave blank to not rename',
       default: null,
     },
   },

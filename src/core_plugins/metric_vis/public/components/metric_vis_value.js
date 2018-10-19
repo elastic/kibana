@@ -40,9 +40,9 @@ class MetricVisValue extends Component {
       color: metric.color,
     };
 
-    const containerClassName = classNames('metric-container', {
-      'metric-container--light': metric.lightText,
-      'metric-container--filterable': hasFilter
+    const containerClassName = classNames('mtrVis__container', {
+      'mtrVis__container--light': metric.lightText,
+      'mtrVis__container-isfilterable': hasFilter
     });
 
     const metricComponent = (
@@ -54,7 +54,7 @@ class MetricVisValue extends Component {
         role={hasFilter ? 'button' : null}
       >
         <div
-          className="metric-value"
+          className="mtrVis__value"
           style={metricValueStyle}
           /*
            * Justification for dangerouslySetInnerHTML:
