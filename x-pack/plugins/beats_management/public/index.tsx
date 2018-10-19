@@ -15,7 +15,6 @@ import { PageRouter } from './router';
 
 // TODO use theme provided from parentApp when kibana supports it
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
-import '@elastic/eui/dist/eui_theme_light.css';
 import { ThemeProvider } from 'styled-components';
 
 function startApp(libs: FrontendLibs) {

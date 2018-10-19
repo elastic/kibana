@@ -7,28 +7,35 @@
 * You shouldn't be futzing around in the grammar very often anyway.
 */
 
+{
+  function addMeta(node, text, { start: { offset: start }, end: { offset: end } }) {
+    if (!options.addMeta) return node;
+    return { node, text, start, end };
+  }
+}
+
 /* ----- Expressions ----- */
 
 start
   = expression
 
 expression
-  = first:function rest:('|' fn:function { return fn; })* {
-    return {
+  = space? first:function rest:('|' space? fn:function { return fn; })* {
+    return addMeta({
       type: 'expression',
       chain: [first].concat(rest)
-    };
+    }, text(), location());
   }
 
 /* ----- Functions ----- */
 
 function "function"
-  = space? name:identifier arg_list:arg_list {
-    return {
+  = name:identifier arg_list:arg_list {
+    return addMeta({
       type: 'function',
       function: name,
       arguments: arg_list
-    };
+    }, text(), location());
   }
 
 /* ----- Arguments ----- */
@@ -42,8 +49,10 @@ argument_assignment
   }
 
 argument
-  = '$'? '{' space? expression:expression space? '}' { return expression; }
-  / literal
+  = '$'? '{' expression:expression '}' { return expression; }
+  / value:literal {
+    return addMeta(value, text(), location());
+  }
 
 arg_list
   = args:(space arg:argument_assignment { return arg; })* space? {
