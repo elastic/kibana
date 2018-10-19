@@ -83,21 +83,18 @@ export function handleClusterStats(response) {
 
   return hits.map(hit => {
     const cluster = get(hit, '_source');
-    const indexName = get(hit, '_index', '');
 
     if (cluster) {
-      const ccs = parseCrossClusterPrefix(indexName);
+      cluster.indexName = get(hit, '_index', '');
 
       // use CCS whenever we come across it so that we can avoid talking to other monitoring clusters whenever possible
+      const ccs = parseCrossClusterPrefix(cluster.indexName);
       if (ccs) {
         cluster.ccs = ccs;
       }
     }
 
-    return {
-      ...cluster,
-      indexName,
-    };
+    return cluster;
   })
     .filter(Boolean);
 }
