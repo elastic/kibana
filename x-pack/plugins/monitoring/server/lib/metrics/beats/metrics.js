@@ -12,7 +12,7 @@ import {
   BeatsCpuUtilizationMetric,
   BeatsMetric
 } from './classes';
-import { LARGE_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
+import { LARGE_FLOAT, LARGE_BYTES, SMALL_FLOAT } from '../../../../common/formatting';
 
 export const metrics = {
   beat_cluster_pipeline_events_total_rate: new BeatsEventsRateClusterMetric({
@@ -246,6 +246,34 @@ export const metrics = {
     title: 'System Load',
     description: 'Load average over the last 15 minutes',
     format: LARGE_FLOAT,
+    metricAgg: 'max',
+    units: ''
+  }),
+
+  beat_handles_open: new BeatsMetric({
+    field: 'beats_stats.metrics.beat.handles.open',
+    label: 'Open Handles',
+    title: 'Open Handles',
+    description: 'TODO',
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+  }),
+  beat_handles_hard_limit: new BeatsMetric({
+    field: 'beats_stats.metrics.beat.handles.limit.hard',
+    label: 'Hard Limit',
+    title: 'Hard Limit',
+    description: 'TODO',
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: ''
+  }),
+  beat_handles_soft_limit: new BeatsMetric({
+    field: 'beats_stats.metrics.beat.handles.limit.soft',
+    label: 'Soft Limit',
+    title: 'Soft Limit',
+    description: 'TODO',
+    format: SMALL_FLOAT,
     metricAgg: 'max',
     units: ''
   })

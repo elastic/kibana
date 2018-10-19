@@ -19,6 +19,7 @@ export function Beat({ summary, metrics, ...props }) {
     metrics.beat_memory,
     metrics.beat_cpu_utilization,
     metrics.beat_os_load,
+    metrics.beat_handles,
   ];
 
   const wrapChild = ({ label, value, dataTestSubj }, index) => (
