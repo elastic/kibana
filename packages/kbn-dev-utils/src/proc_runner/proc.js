@@ -127,7 +127,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       this._stopCalled = true;
       await withTimeout(
         async () => {
-          log.debug(`Proc "${name}" is being "${signal}"`);
+          log.debug(`Sending "${signal}" to proc "${name}"`);
           await treeKillAsync(childProcess.pid, signal);
           await this.getOutcomePromise();
         },
