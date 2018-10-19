@@ -94,7 +94,5 @@ export async function getBeatSummary(req, beatsIndexPattern, { clusterUuid, beat
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
 
-  console.log(JSON.stringify(response));
-
   return handleResponse(response, beatUuid);
 }
