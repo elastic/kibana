@@ -48,7 +48,18 @@ const featureContextTagsText =
 const featureContextCustomText =
   'You can configure your agent to add custom contextual information on transactions.';
 
-export const APM_AGENT_DOCS = {
+interface AgentDoc {
+  url: string;
+  text?: string;
+}
+
+interface AgentDocList {
+  [key: string]: {
+    [key: string]: AgentDoc;
+  };
+}
+
+export const APM_AGENT_DOCS: AgentDocList = {
   home: {
     nodejs: {
       url: `${DOCS_ROOT}/agent/nodejs/1.x/index.html`
@@ -112,7 +123,7 @@ export const APM_AGENT_DOCS = {
       url: `${DOCS_ROOT}/agent/ruby/1.x/advanced.html#_adding_tags`
     },
     javascript: {
-      text: `${DOCS_ROOT}/agent/js-base/0.x/api.html#apm-set-tags`
+      url: `${DOCS_ROOT}/agent/js-base/0.x/api.html#apm-set-tags`
     }
   },
   'context-custom': {
@@ -158,7 +169,7 @@ export const ELASTIC_DOCS = {
 //
 // Helper methods
 //
-function translateAgentName(agentName: string): string {
+function translateAgentName(agentName?: string) {
   switch (agentName) {
     case 'js-react':
     case 'js-base':
@@ -171,11 +182,11 @@ function translateAgentName(agentName: string): string {
 
 export function getFeatureDocs(
   featureName: string,
-  agentName: string
-): {
-  url: string;
-  text?: string;
-} {
+  agentName?: string
+): AgentDoc | void {
+  if (!agentName) {
+    return;
+  }
   const translatedAgentName = translateAgentName(agentName);
   return get(APM_AGENT_DOCS, `${featureName}.${translatedAgentName}`);
 }

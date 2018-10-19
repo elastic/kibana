@@ -5,6 +5,8 @@
  */
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -29,7 +31,7 @@ import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { Span } from '../../../../../../../../typings/Span';
 // @ts-ignore
 import DiscoverButton from '../../../../../../shared/DiscoverButton';
-import { StickyTransactionProperties } from './StickyTransactionProperties';
+import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 
 const StackTraceContainer = styled.div`
   margin-top: ${px(unit)};
@@ -73,18 +75,25 @@ export function SpanFlyout({
   return (
     <EuiFlyout onClose={onClose} size="l">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle>
-          <h2>Span details</h2>
-        </EuiTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2>Span details</h2>
+            </EuiTitle>
+          </EuiFlexItem>
 
-        <DiscoverButton query={getDiscoverQuery(span)}>
-          {`View span in Discover`}
-        </DiscoverButton>
+          <EuiFlexItem grow={false}>
+            <DiscoverButton query={getDiscoverQuery(span)}>
+              {`View span in Discover`}
+            </DiscoverButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <StickyTransactionProperties transaction={parentTransaction} />
+        <FlyoutTopLevelProperties transaction={parentTransaction} />
         <EuiHorizontalRule />
         <StickySpanProperties span={span} totalDuration={totalDuration} />
+        <EuiHorizontalRule />
         <DatabaseContext dbContext={dbContext} />
         <StackTraceContainer>
           <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />

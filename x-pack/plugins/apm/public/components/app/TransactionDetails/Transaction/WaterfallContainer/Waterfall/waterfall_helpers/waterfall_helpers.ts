@@ -8,6 +8,18 @@ import { groupBy, indexBy, sortBy } from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
 import { Transaction } from '../../../../../../../../typings/Transaction';
 
+export interface IWaterfallIndex {
+  [key: string]: IWaterfallItem;
+}
+
+export interface IWaterfall {
+  duration: number;
+  services: string[];
+  childrenCount: number;
+  root: IWaterfallItem;
+  itemsById: IWaterfallIndex;
+}
+
 interface IWaterfallItemBase {
   id: string | number;
   parentId?: string;
@@ -103,6 +115,7 @@ export function getWaterfallRoot(
     items,
     item => (item.parentId ? item.parentId : 'root')
   );
+  const itemsById: IWaterfallIndex = {};
 
   const itemsByTransactionId = indexBy(
     items.filter(item => item.docType === 'transaction'),
@@ -114,33 +127,33 @@ export function getWaterfallRoot(
   ): IWaterfallItem {
     const children = itemsByParentId[item.id] || [];
     const nextChildren = sortBy(children, 'timestamp').map(getWithChildren);
+    let fullItem;
 
     // add parent transaction to spans
     if (item.docType === 'span') {
-      return {
+      fullItem = {
         parentTransaction:
           itemsByTransactionId[item.span.transaction.id].transaction,
         ...item,
         offset: item.timestamp - entryTransactionItem.timestamp,
         children: nextChildren
       };
+    } else {
+      fullItem = {
+        ...item,
+        offset: item.timestamp - entryTransactionItem.timestamp,
+        children: nextChildren
+      };
     }
 
-    return {
-      ...item,
-      offset: item.timestamp - entryTransactionItem.timestamp,
-      children: nextChildren
-    };
+    // TODO: Think about storing this tree as a single, flat, indexed structure
+    // with "children" being an array of ids, instead of it being a real tree
+    itemsById[item.id] = fullItem;
+
+    return fullItem;
   }
 
-  return getWithChildren(entryTransactionItem);
-}
-
-export interface IWaterfall {
-  duration: number;
-  services: string[];
-  childrenCount: number;
-  root: IWaterfallItem;
+  return { root: getWithChildren(entryTransactionItem), itemsById };
 }
 
 export function getWaterfall(
@@ -166,11 +179,12 @@ export function getWaterfall(
     });
 
   const entryTransactionItem = getTransactionItem(entryTransaction);
-  const root = getWaterfallRoot(items, entryTransactionItem);
+  const { root, itemsById } = getWaterfallRoot(items, entryTransactionItem);
   return {
     duration: root.duration,
     services,
     childrenCount: hits.length,
-    root
+    root,
+    itemsById
   };
 }

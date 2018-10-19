@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
@@ -20,20 +21,6 @@ import {
 
 const TooltipFieldName = styled.span`
   font-family: ${fontFamilyCode};
-`;
-
-const PropertiesContainer = styled.div`
-  display: flex;
-  width: 100%;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-`;
-
-const Property = styled.div`
-  margin-right: ${px(units.triple)};
-  margin-top: ${px(units.half)};
-  margin-bottom: ${px(units.half)};
-  flex-grow: 1;
 `;
 
 const PropertyLabel = styled.div`
@@ -115,15 +102,42 @@ function getPropertyValue({ val, fieldName, truncated = false }) {
 }
 
 export function StickyProperties({ stickyProperties }) {
+  /**
+   * Note: the padding and margin styles here are strange because
+   * EUI flex groups and items have a default "gutter" applied that
+   * won't allow percentage widths to line up correctly, so we have
+   * to turn the gutter off with gutterSize: none. When we do that,
+   * the top/bottom spacing *also* collapses, so we have to add
+   * padding between each item without adding it to the outside of
+   * the flex group itself.
+   *
+   * Hopefully we can make EUI handle this better and remove all this.
+   */
+  const itemStyles = {
+    padding: '1em 1em 1em 0'
+  };
+  const groupStyles = {
+    marginTop: '-1em',
+    marginBottom: '-1em'
+  };
+
   return (
-    <PropertiesContainer>
+    <EuiFlexGroup wrap={true} gutterSize="none" style={groupStyles}>
       {stickyProperties &&
-        stickyProperties.map((prop, i) => (
-          <Property key={i}>
-            {getPropertyLabel(prop)}
-            {getPropertyValue(prop)}
-          </Property>
-        ))}
-    </PropertiesContainer>
+        stickyProperties.map(({ width = 0, ...prop }, i) => {
+          return (
+            <EuiFlexItem
+              key={i}
+              style={{
+                minWidth: width,
+                ...itemStyles
+              }}
+            >
+              {getPropertyLabel(prop)}
+              {getPropertyValue(prop)}
+            </EuiFlexItem>
+          );
+        })}
+    </EuiFlexGroup>
   );
 }

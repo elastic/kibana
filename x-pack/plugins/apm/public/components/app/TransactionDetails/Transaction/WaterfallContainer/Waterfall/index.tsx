@@ -10,6 +10,9 @@ import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
 
 import { IUrlParams } from '../../../../../../store/urlParams';
+
+// @ts-ignore
+import { fromQuery, history, toQuery } from '../../../../../../utils/url';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
 import { SpanFlyout } from './SpanFlyout';
@@ -42,21 +45,19 @@ interface Props {
   };
 }
 
-interface State {
-  currentItem: IWaterfallItem | null;
-}
-
-export class Waterfall extends Component<Props, State> {
-  public state: Readonly<State> = {
-    currentItem: null
-  };
-
-  public onOpenFlyout = (currentItem: IWaterfallItem) => {
-    this.setState({ currentItem });
+export class Waterfall extends Component<Props> {
+  public onOpenFlyout = (item: IWaterfallItem) => {
+    this.setQueryParams({
+      flyoutDetailTab: undefined,
+      waterfallItemId: String(item.id)
+    });
   };
 
   public onCloseFlyout = () => {
-    this.setState({ currentItem: null });
+    this.setQueryParams({
+      flyoutDetailTab: undefined,
+      waterfallItemId: undefined
+    });
   };
 
   public renderWaterfall = (item?: IWaterfallItem) => {
@@ -64,7 +65,7 @@ export class Waterfall extends Component<Props, State> {
       return null;
     }
 
-    const { serviceColors, waterfall }: Props = this.props;
+    const { serviceColors, waterfall, urlParams }: Props = this.props;
 
     return (
       <Fragment key={item.id}>
@@ -73,7 +74,7 @@ export class Waterfall extends Component<Props, State> {
           color={serviceColors[item.serviceName]}
           item={item}
           totalDuration={waterfall.duration}
-          isSelected={true} // TODO: implement logic
+          isSelected={item.id === urlParams.waterfallItemId}
           onClick={() => this.onOpenFlyout(item)}
         />
 
@@ -83,8 +84,12 @@ export class Waterfall extends Component<Props, State> {
   };
 
   public getFlyOut = () => {
-    const { currentItem } = this.state;
-    const { waterfall } = this.props;
+    const { waterfall, location, urlParams } = this.props;
+
+    const currentItem =
+      urlParams.waterfallItemId &&
+      waterfall.itemsById[urlParams.waterfallItemId];
+
     if (!currentItem) {
       return null;
     }
@@ -104,6 +109,9 @@ export class Waterfall extends Component<Props, State> {
           <TransactionFlyout
             transaction={currentItem.transaction}
             onClose={this.onCloseFlyout}
+            location={location}
+            urlParams={urlParams}
+            waterfall={waterfall}
           />
         );
       default:
@@ -136,6 +144,17 @@ export class Waterfall extends Component<Props, State> {
         {this.getFlyOut()}
       </Container>
     );
+  }
+
+  private setQueryParams(params: Partial<IUrlParams>) {
+    const { location } = this.props;
+    history.replace({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        ...params
+      })
+    });
   }
 }
 

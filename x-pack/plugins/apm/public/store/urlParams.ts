@@ -42,6 +42,8 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
         traceId,
         transactionId,
         detailTab,
+        flyoutDetailTab,
+        waterfallItemId,
         spanId,
         page,
         sortDirection,
@@ -58,7 +60,9 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
         page: toNumber(page) || 0,
         transactionId: toString(transactionId),
         traceId: toString(traceId),
+        waterfallItemId: toString(waterfallItemId),
         detailTab,
+        flyoutDetailTab: toString(flyoutDetailTab),
         spanId: toNumber(spanId),
         kuery: legacyDecodeURIComponent(kuery),
 
@@ -150,6 +154,7 @@ export const getUrlParams = createSelector(
 export interface IUrlParams {
   end?: string;
   errorGroupId?: string;
+  flyoutDetailTab?: string;
   kuery?: string;
   serviceName?: string;
   start?: string;
@@ -157,4 +162,5 @@ export interface IUrlParams {
   transactionId?: string;
   transactionName?: string;
   transactionType?: string;
+  waterfallItemId?: string;
 }
