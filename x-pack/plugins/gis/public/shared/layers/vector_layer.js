@@ -115,6 +115,9 @@ export class VectorLayer extends ALayer {
       return false;
     }
     const meta = sourceDataRequest.getMeta();
+    if (!meta) {
+      return false;
+    }
 
     let updateDueToTime = false;
     if (timeAware) {

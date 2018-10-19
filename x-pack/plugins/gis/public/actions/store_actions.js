@@ -33,9 +33,21 @@ const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
     startLoading: (dataId, requestToken, initData) => dispatch(startDataLoad(layerId, dataId, requestToken, initData)),
-    stopLoading: (dataId, requestToken, returnData) => dispatch(endDataLoad(layerId, dataId, requestToken, returnData)),
+    stopLoading: async (dataId, requestToken, returnData) => {
+      await dispatch(endDataLoad(layerId, dataId, requestToken, returnData));
+    },
     onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage))
   };
+}
+
+async function syncDataForAllLayers(getState, dispatch, dataFilters) {
+  const state = getState();
+  const layerList = getLayerList(state);
+  const syncs = layerList.map(layer => {
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
+    return layer.syncData({ ...loadingFunctions, dataFilters });
+  });
+  await Promise.all(syncs);
 }
 
 export function replaceLayerList(newLayerList) {
@@ -44,15 +56,8 @@ export function replaceLayerList(newLayerList) {
       type: REPLACE_LAYERLIST,
       layerList: newLayerList
     });
-
-    const state = getState();
-    const layerList = getLayerList(state);
-    const dataFilters = getDataFilters(state);
-
-    layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-      layer.syncData({ ...loadingFunctions, dataFilters });
-    });
+    const dataFilters = getDataFilters(getState());
+    await syncDataForAllLayers(getState, dispatch, dataFilters);
   };
 
 }
@@ -110,7 +115,6 @@ export function mapExtentChanged(newMapConstants) {
   return async (dispatch, getState) => {
     const state = getState();
     const dataFilters = getDataFilters(state);
-
     dispatch({
       type: MAP_EXTENT_CHANGED,
       mapState: {
@@ -118,15 +122,8 @@ export function mapExtentChanged(newMapConstants) {
         ...newMapConstants
       }
     });
-
-    const layerList = getLayerList(state);
-    layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-      layer.syncData({
-        ...loadingFunctions,
-        dataFilters: { ...dataFilters, ...newMapConstants }
-      });
-    });
+    const newDataFilters =  { ...dataFilters, ...newMapConstants };
+    await syncDataForAllLayers(getState, dispatch, newDataFilters);
   };
 }
 
@@ -168,7 +165,7 @@ export function addPreviewLayer(layer, position) {
     await dispatch(addLayer(layerDescriptor, position));
     const dataFilters = getDataFilters(getState());
     const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-    layer.syncData({ ...loadingFunctions, dataFilters });
+    await layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
 
@@ -230,20 +227,14 @@ export function setTimeFilters(timeFilters) {
       type: SET_TIME_FILTERS,
       ...timeFilters
     });
-    const state = getState();
-    const dataFilters = getDataFilters(state);
-    const layerList = getLayerList(getState());
-    layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-      layer.syncData({
-        ...loadingFunctions,
-        dataFilters: { ...dataFilters, timeFilters: { ...timeFilters } }
-      });
-    });
+
+    const dataFilters = getDataFilters(getState());
+    const newDataFilters = { ...dataFilters, timeFilters: { ...timeFilters } };
+    await syncDataForAllLayers(getState, dispatch, newDataFilters);
   };
 }
 
-export function updateLayerStyle(style, temporary = true) {
+export function updateLayerStyleForSelectedLayer(style, temporary = true) {
   return async (dispatch, getState) => {
     await dispatch({
       type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
@@ -256,7 +247,7 @@ export function updateLayerStyle(style, temporary = true) {
     const dataFilters = getDataFilters(state);
     const layer = getSelectedLayer(state);
     const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-    layer.syncData({ ...loadingFunctions, dataFilters });
+    await layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
 
@@ -284,7 +275,7 @@ export function setJoinsForLayer(layer, joins) {
     const layersWithJoin = getLayerList(getState());
     const layerWithJoin = layersWithJoin.find(lwj => lwj.getId() === layer.getId());
     const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-    layerWithJoin.syncData({ ...loadingFunctions, dataFilters });
+    await layerWithJoin.syncData({ ...loadingFunctions, dataFilters });
   };
 }
 
@@ -324,21 +315,96 @@ export async function loadMapResources(dispatch) {
         minZoom: 0,
         maxZoom: 24,
       },
-      {
-        "id": "giflh",
-        "label": null,
-        "showAtAllZoomLevels": true,
-        "minZoom": 0,
-        "maxZoom": 24,
-        "sourceDescriptor": { "type": "EMS_FILE", "name": "World Countries" },
-        "visible": true,
-        "temporary": false,
-        "style": {
-          "type": "VECTOR",
-          "properties": { "fillColor": { "type": "STATIC", "options": { "color": "#e6194b" } } }
-        },
-        "type": "VECTOR"
-      }
+      // {
+      //   "id": "k4a3t",
+      //   "label": null,
+      //   "showAtAllZoomLevels": true,
+      //   "minZoom": 0,
+      //   "maxZoom": 24,
+      //   "sourceDescriptor": { "type": "EMS_FILE", "name": "World Countries" },
+      //   "visible": true,
+      //   "temporary": false,
+      //   "style": {
+      //     "type": "VECTOR",
+      //     "properties": {
+      //       "fillColor": {
+      //         "type": "DYNAMIC",
+      //         "options": {
+      //           "fieldValue": {
+      //             "label": "count of log* by geo.dest",
+      //             "name": "__kbn__join({\"leftField\":\"iso2\",\"right\":{\"indexPatternId\":\"9d3244d0-b6c5-11e8-98f4-8dc7caa69a1a\",\"indexPatternTitle\":\"log*\",\"term\":\"geo.dest\"}})",
+      //             "origin": "join",
+      //             "join": {
+      //               "_descriptor": {
+      //                 "leftField": "iso2",
+      //                 "right": {
+      //                   "indexPatternId": "9d3244d0-b6c5-11e8-98f4-8dc7caa69a1a",
+      //                   "indexPatternTitle": "log*",
+      //                   "term": "geo.dest"
+      //                 }
+      //               },
+      //               "_rightSource": {
+      //                 "_descriptor": {
+      //                   "indexPatternId": "9d3244d0-b6c5-11e8-98f4-8dc7caa69a1a",
+      //                   "indexPatternTitle": "log*",
+      //                   "term": "geo.dest"
+      //                 }
+      //               }
+      //             }
+      //           }
+      //         }
+      //       }
+      //     },
+      //     "temporary": true,
+      //     "previousStyle": null
+      //   },
+      //   "type": "VECTOR",
+      //   "joins": [{
+      //     "leftField": "iso2",
+      //     "right": {
+      //       "indexPatternId": "9d3244d0-b6c5-11e8-98f4-8dc7caa69a1a",
+      //       "indexPatternTitle": "log*",
+      //       "term": "geo.dest"
+      //     }
+      //   }]
+      // }
+      // {
+      //   "id": "giflh",
+      //   "label": null,
+      //   "showAtAllZoomLevels": true,
+      //   "minZoom": 0,
+      //   "maxZoom": 24,
+      //   "sourceDescriptor": { "type": "EMS_FILE", "name": "World Countries" },
+      //   "visible": true,
+      //   "temporary": false,
+      //   "style": {
+      //     "type": "VECTOR",
+      //     "properties": { "fillColor": { "type": "STATIC", "options": { "color": "#e6194b" } } }
+      //   },
+      //   "type": "VECTOR"
+      // }
+      // {
+      //   "id": "0x4p4",
+      //   "label": null,
+      //   "showAtAllZoomLevels": true,
+      //   "minZoom": 0,
+      //   "maxZoom": 24,
+      //   "sourceDescriptor": {
+      //     "type": "ES_SEARCH",
+      //     "indexPatternId": "9d3244d0-b6c5-11e8-98f4-8dc7caa69a1a",
+      //     "geoField": "geo.coordinates",
+      //     "limit": 256,
+      //     "showTooltip": true,
+      //     "tooltipProperties": []
+      //   },
+      //   "visible": true,
+      //   "temporary": false,
+      //   "style": {
+      //     "type": "VECTOR",
+      //     "properties": { "fillColor": { "type": "STATIC", "options": { "color": "#ffe119" } } }
+      //   },
+      //   "type": "VECTOR"
+      // }
     ]
   ));
 
