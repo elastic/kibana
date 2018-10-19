@@ -16,6 +16,7 @@ import {
   GrokDebuggerPageProvider,
   WatcherPageProvider,
   ReportingPageProvider,
+  SpaceSelectorPageProvider,
 } from './page_objects';
 
 import {
@@ -64,6 +65,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/watcher'),
       resolve(__dirname, './apps/dashboard_mode'),
       resolve(__dirname, './apps/security'),
+      resolve(__dirname, './apps/spaces'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
     ],
@@ -113,6 +115,7 @@ export default async function ({ readConfigFile }) {
       grokDebugger: GrokDebuggerPageProvider,
       watcher: WatcherPageProvider,
       reporting: ReportingPageProvider,
+      spaceSelector: SpaceSelectorPageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -133,6 +136,8 @@ export default async function ({ readConfigFile }) {
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
+        // todo: remove this once https://github.com/elastic/kibana/issues/23837 is resolved
+        '--xpack.canvas.enabled=false'
       ],
     },
 
@@ -159,6 +164,9 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/dev_tools/grokdebugger'
       },
+      spaceSelector: {
+        pathname: '/',
+      }
     },
 
     // choose where esArchiver should load archives from

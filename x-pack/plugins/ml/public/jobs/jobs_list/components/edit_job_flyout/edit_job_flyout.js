@@ -23,6 +23,8 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 
+import './styles/main.less';
+
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
@@ -133,7 +135,11 @@ export class EditJobFlyout extends Component {
     }
 
     if (jobDetails.jobGroups !== undefined) {
-      jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
+      if (jobDetails.jobGroups.some(j => this.props.allJobIds.includes(j))) {
+        jobGroupsValidationError = 'A job with this ID already exists. Groups and jobs cannot use the same ID.';
+      } else {
+        jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
+      }
     }
 
     const isValidJobDetails = (jobModelMemoryLimitValidationError === '' && jobGroupsValidationError === '');
@@ -317,4 +323,5 @@ EditJobFlyout.propTypes = {
   setShowFunction: PropTypes.func.isRequired,
   unsetShowFunction: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
+  allJobIds: PropTypes.array.isRequired,
 };

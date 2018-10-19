@@ -24,6 +24,8 @@ import {
   map as mapAsync,
 } from 'bluebird';
 
+import { WAIT_FOR_EXISTS_TIME } from './find';
+
 export function TestSubjectsProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
@@ -33,12 +35,12 @@ export function TestSubjectsProvider({ getService }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class TestSubjects {
-    async exists(selector, timeout = 1000) {
+    async exists(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`TestSubjects.exists(${selector})`);
       return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
     }
 
-    async existOrFail(selector, timeout = 1000) {
+    async existOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       await retry.try(async () => {
         log.debug(`TestSubjects.existOrFail(${selector})`);
         const doesExist = await this.exists(selector, timeout);
@@ -47,7 +49,7 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
-    async missingOrFail(selector, timeout = 1000) {
+    async missingOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`TestSubjects.missingOrFail(${selector})`);
       const doesExist = await this.exists(selector, timeout);
       // Verify element is missing, or else fail the test consuming this.
@@ -63,13 +65,14 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
+    async clickWhenNotDisabled(selector, { timeout } = { timeout: defaultFindTimeout }) {
+      log.debug(`TestSubjects.click(${selector})`);
+      await find.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), { timeout });
+    }
+
     async click(selector, timeout = defaultFindTimeout) {
       log.debug(`TestSubjects.click(${selector})`);
-      return await retry.try(async () => {
-        const element = await this.find(selector, timeout);
-        await remote.moveMouseTo(element);
-        await element.click();
-      });
+      await find.clickByCssSelector(testSubjSelector(selector), timeout);
     }
 
     async doubleClick(selector, timeout = defaultFindTimeout) {
@@ -80,7 +83,6 @@ export function TestSubjectsProvider({ getService }) {
         await remote.doubleClick();
       });
     }
-
 
     async descendantExists(selector, parentElement) {
       return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);

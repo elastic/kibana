@@ -29,7 +29,7 @@ export const createFindRoute = (prereqs) => ({
       query: Joi.object().keys({
         per_page: Joi.number().min(0).default(20),
         page: Joi.number().min(0).default(1),
-        type: Joi.array().items(Joi.string()).single(),
+        type: Joi.array().items(Joi.string()).single().required(),
         search: Joi.string().allow('').optional(),
         search_fields: Joi.array().items(Joi.string()).single(),
         sort_field: Joi.array().items(Joi.string()).single(),

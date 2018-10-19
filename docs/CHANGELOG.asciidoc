@@ -17,6 +17,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.4.2>>
 * <<release-notes-6.4.1>>
 * <<release-notes-6.4.0>>
 * <<release-notes-6.3.2>>
@@ -76,9 +77,22 @@ This section summarizes the changes in each release.
 //=== Known Issues
 ////
 
+[[release-notes-6.4.2]]
+== {kib} 6.4.2
+
+[float]
+[[bug-6.4.2]]
+=== Bug fixes
+
+Platform::
+* Updates Typescript to enable support for iterators in browsers {pull}22986[#22986]
+
+Security::
+* Fixes sorting by full name and email address in *Management > Users* {pull}23242[#23242]
+
+
 [[release-notes-6.4.1]]
 == {kib} 6.4.1
-coming[6.4.1]
 
 [float]
 [[bug-6.4.1]]

@@ -56,7 +56,7 @@ routes.when(ROLES_PATH, {
       };
       confirmModal(`
         Are you sure you want to delete the selected role(s)? This action is irreversible!`,
-        confirmModalOptions
+      confirmModalOptions
       );
     };
 

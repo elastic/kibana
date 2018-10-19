@@ -1,0 +1,255 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<SpaceAwarePrivilegeForm> hides the space table if there are no existing space privileges 1`] = `
+<PrivilegeSpaceTable
+  availablePrivileges={
+    Array [
+      "all",
+      "read",
+    ]
+  }
+  onChange={[Function]}
+  role={
+    Object {
+      "elasticsearch": Object {
+        "cluster": Array [
+          "manage",
+        ],
+        "indices": Array [],
+        "run_as": Array [],
+      },
+      "kibana": Object {
+        "global": Array [],
+        "space": Object {},
+      },
+      "name": "",
+    }
+  }
+  spacePrivileges={Object {}}
+  spaces={
+    Array [
+      Object {
+        "_reserved": true,
+        "id": "default",
+        "name": "Default Space",
+      },
+      Object {
+        "id": "marketing",
+        "name": "Marketing",
+      },
+    ]
+  }
+/>
+`;
+
+exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
+<React.Fragment>
+  <EuiDescribedFormGroup
+    description={
+      <p>
+        Specify the minimum actions users can perform in your spaces.
+      </p>
+    }
+    fullWidth={false}
+    gutterSize="l"
+    title={
+      <h3>
+        Minimum privileges for all spaces
+      </h3>
+    }
+    titleSize="xs"
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={false}
+      hasEmptyLabelSpace={true}
+      helpText="No access to spaces"
+    >
+      <PrivilegeSelector
+        allowNone={true}
+        availablePrivileges={
+          Array [
+            "all",
+            "read",
+          ]
+        }
+        data-test-subj="kibanaMinimumPrivilege"
+        disabled={false}
+        onChange={[Function]}
+        value="none"
+      />
+    </EuiFormRow>
+  </EuiDescribedFormGroup>
+  <EuiSpacer
+    size="l"
+  />
+  <React.Fragment>
+    <EuiTitle
+      size="xs"
+    >
+      <h3>
+        Higher privileges for individual spaces
+      </h3>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiText
+      color="subdued"
+      grow={false}
+      size="s"
+    >
+      <p>
+        Grant more privileges on a per space basis. For example, if the privileges are
+         
+        <strong>
+          read
+        </strong>
+         for all spaces, you can set the privileges to 
+        <strong>
+          all
+        </strong>
+         
+        for an individual space.
+      </p>
+    </EuiText>
+    <EuiSpacer
+      size="s"
+    />
+    <React.Fragment>
+      <PrivilegeSpaceTable
+        availablePrivileges={
+          Array [
+            "all",
+            "read",
+          ]
+        }
+        onChange={[Function]}
+        role={
+          Object {
+            "elasticsearch": Object {
+              "cluster": Array [
+                "manage",
+              ],
+              "indices": Array [],
+              "run_as": Array [],
+            },
+            "kibana": Object {
+              "global": Array [],
+              "space": Object {},
+            },
+            "name": "",
+          }
+        }
+        spacePrivileges={Object {}}
+        spaces={
+          Array [
+            Object {
+              "_reserved": true,
+              "id": "default",
+              "name": "Default Space",
+            },
+            Object {
+              "id": "marketing",
+              "name": "Marketing",
+            },
+          ]
+        }
+      />
+    </React.Fragment>
+    <EuiFlexGroup
+      alignItems="baseline"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="addSpacePrivilegeButton"
+          fill={false}
+          iconSide="left"
+          iconType="plusInCircle"
+          onClick={[Function]}
+          size="s"
+          type="button"
+        >
+          Add space privilege
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <ImpactedSpacesFlyout
+          role={
+            Object {
+              "elasticsearch": Object {
+                "cluster": Array [
+                  "manage",
+                ],
+                "indices": Array [],
+                "run_as": Array [],
+              },
+              "kibana": Object {
+                "global": Array [],
+                "space": Object {},
+              },
+              "name": "",
+            }
+          }
+          spaces={
+            Array [
+              Object {
+                "_reserved": true,
+                "id": "default",
+                "name": "Default Space",
+              },
+              Object {
+                "id": "marketing",
+                "name": "Marketing",
+              },
+            ]
+          }
+          userProfile={
+            Object {
+              "hasCapability": [Function],
+            }
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </React.Fragment>
+</React.Fragment>
+`;
+
+exports[`<SpaceAwarePrivilegeForm> with user profile disabling "manageSpaces" renders a warning message instead of the privilege form 1`] = `
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  size="m"
+  title={
+    <p>
+      Insufficient Privileges
+    </p>
+  }
+>
+  <p>
+    You are not authorized to view all available spaces.
+  </p>
+  <p>
+    Please ensure your account has all privileges granted by the
+     
+    <strong>
+      kibana_user
+    </strong>
+     role, and try again.
+  </p>
+</EuiCallOut>
+`;

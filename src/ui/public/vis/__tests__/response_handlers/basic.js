@@ -19,7 +19,7 @@
 
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { VislibResponseHandlerProvider } from '../../response_handlers/vislib';
+import { VislibSeriesResponseHandlerProvider } from '../../response_handlers/vislib';
 import { VisProvider } from '../..';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -39,7 +39,7 @@ describe('Basic Response Handler', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    basicResponseHandler = Private(VislibResponseHandlerProvider).handler;
+    basicResponseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));

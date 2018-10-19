@@ -34,6 +34,7 @@ export function VisualizeListingController($injector) {
   const Notifier = $injector.get('Notifier');
   const Private = $injector.get('Private');
   const config = $injector.get('config');
+  const breadcrumbState = $injector.get('breadcrumbState');
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
@@ -58,4 +59,7 @@ export function VisualizeListingController($injector) {
     return visualizationService.delete(selectedIds)
       .catch(error => notify.error(error));
   };
+
+  breadcrumbState.set([{ text: 'Visualize' }]);
+  config.watch('k7design', (val) => this.showPluginBreadcrumbs = !val);
 }

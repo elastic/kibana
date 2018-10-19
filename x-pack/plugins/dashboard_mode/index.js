@@ -40,7 +40,6 @@ export function dashboardMode(kibana) {
         hidden: true,
         description: 'view dashboards',
         main: 'plugins/dashboard_mode/dashboard_viewer',
-        styleSheetPath: `${__dirname}/public/index.scss`,
         links: [
           {
             id: 'kibana:dashboard',
@@ -52,7 +51,7 @@ export function dashboardMode(kibana) {
             icon: 'plugins/kibana/assets/dashboard.svg',
           }
         ],
-      }
+      },
     },
 
     config(Joi) {

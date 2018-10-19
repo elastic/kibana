@@ -8,7 +8,7 @@ import header from './header.png';
 
 export const horizontalBarChart = () => ({
   name: 'horizontalBarChart',
-  displayName: 'Horizontal Bar Chart',
+  displayName: 'Horizontal bar chart',
   help: 'A customizable horizontal bar chart',
   image: header,
   expression: `filters

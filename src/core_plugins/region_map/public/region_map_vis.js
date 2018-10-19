@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './region_map.less';
 import './region_map_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
@@ -103,7 +102,6 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
           aggFilter: ['terms']
         }
       ])
-    },
-    responseHandler: 'tabify'
+    }
   });
 });

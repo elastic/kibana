@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KibanaMigrator migratorOptsFromKbnServer returns full index mappings w/ core properties 1`] = `
+exports[`KibanaMigrator getActiveMappings returns full index mappings w/ core properties 1`] = `
 Object {
   "doc": Object {
     "dynamic": "strict",
@@ -22,6 +22,9 @@ Object {
       "migrationVersion": Object {
         "dynamic": "true",
         "type": "object",
+      },
+      "namespace": Object {
+        "type": "keyword",
       },
       "type": Object {
         "type": "keyword",

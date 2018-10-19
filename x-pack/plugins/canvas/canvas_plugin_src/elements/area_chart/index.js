@@ -7,7 +7,7 @@
 export const areaChart = () => {
   return {
     name: 'areaChart',
-    displayName: 'Area Chart',
+    displayName: 'Area chart',
     help: 'A line chart with a filled body',
     image: require('./header.png'),
     expression: `filters
