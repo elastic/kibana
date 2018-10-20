@@ -11,7 +11,7 @@ import React, { Fragment } from 'react';
 import { VectorSource } from './source';
 import {
   EuiFormRow,
-  EuiFieldNumber,
+  // EuiFieldNumber,
   EuiSwitch,
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
@@ -26,7 +26,7 @@ import { hitsToGeoJson, createExtentFilter } from '../../../elasticsearch_geo_ut
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
 
-const DEFAULT_LIMIT = 256;
+const DEFAULT_LIMIT = 10000;
 export class ESSearchSource extends VectorSource {
 
   static type = 'ES_SEARCH';
@@ -72,7 +72,8 @@ export class ESSearchSource extends VectorSource {
           <span className="bold">Geo field: </span><span>{this._descriptor.geoField}</span>
         </div>
         <div>
-          <span className="bold">Limit: </span><span>{this._descriptor.limit}</span>
+          {/*//todo : skip for now to reduce form-length for demo*/}
+          {/*<span className="bold">Limit: </span><span>{this._descriptor.limit}</span>*/}
         </div>
       </Fragment>
     );
@@ -379,18 +380,18 @@ class Editor extends React.Component {
     return (
       <Fragment>
 
-        <EuiFormRow
-          label="Limit"
-          helpText="Maximum documents retrieved from elasticsearch."
-          compressed
-        >
-          <EuiFieldNumber
-            placeholder="10"
-            value={this.state.limit}
-            onChange={this.onLimitChange}
-            aria-label="Limit"
-          />
-        </EuiFormRow>
+        {/*<EuiFormRow*/}
+          {/*label="Limit"*/}
+          {/*helpText="Maximum documents retrieved from elasticsearch."*/}
+          {/*compressed*/}
+        {/*>*/}
+          {/*<EuiFieldNumber*/}
+            {/*placeholder="10"*/}
+            {/*value={this.state.limit}*/}
+            {/*onChange={this.onLimitChange}*/}
+            {/*aria-label="Limit"*/}
+          {/*/>*/}
+        {/*</EuiFormRow>*/}
 
         <EuiFormRow compressed>
           <EuiSwitch
