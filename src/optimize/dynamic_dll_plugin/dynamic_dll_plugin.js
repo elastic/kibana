@@ -146,7 +146,6 @@ export class DynamicDllPlugin {
               requiresMap[`require('${path.relative(dllOutputPath, absoluteResource)}');`] = true;
               requiredModulePath = absoluteResource;
             }
-            // requires.push(`require('${path.relative(dllOutputPath, absoluteResource)}');`);
           }
 
           // include requires for modules that need to be added to the dll
