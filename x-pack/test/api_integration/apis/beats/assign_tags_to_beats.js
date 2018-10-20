@@ -38,7 +38,6 @@ export default function ({ getService }) {
 
       const beat = esResponse._source.beat;
       expect(beat.tags).to.eql(['production']);
-      expect(beat.config_status).to.eql('REQUIRES_UPDATE');
     });
 
     it('should not re-add an existing tag to a beat', async () => {
@@ -118,7 +117,6 @@ export default function ({ getService }) {
 
       beat = esResponse._source.beat;
       expect(beat.tags).to.eql(['development']);
-      expect(beat.config_status).to.eql('REQUIRES_UPDATE');
     });
 
     it('should add multiple tags to a single beat', async () => {
