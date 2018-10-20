@@ -20,9 +20,8 @@
 /**
  * @notice
  *
- * This product has relied on ASTExplorer that is licensed under MIT,
- * Esprima licensed under BSD-2-Clause
- * Font License, Version 1.1.
+ * This product has relied on ASTExplorer that is licensed under MIT
+ * and Esprima documentation for the ESTree licensed under BSD-2-Clause.
  */
 export function dependenciesVisitorsGenerator(dependenciesAcc) {
   return (() => {

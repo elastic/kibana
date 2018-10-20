@@ -63,10 +63,10 @@ export async function dependenciesParseStrategy(build, parseSingleFile, mainEntr
   return dependencies.reduce((filteredEntries, entry) => {
     const absEntryPath = build.resolvePath(dirname(mainEntry), entry);
     const requiredPath = canRequire(build, absEntryPath);
-    const relativeFile = !isAbsolute(entry);
     const requiredRelativePath = canRequire(build, entry);
-    const isNodeModuleDep = relativeFile && !requiredPath && requiredRelativePath;
-    const isNewEntry = relativeFile && requiredPath;
+    const isRelativeFile = !isAbsolute(entry);
+    const isNodeModuleDep = isRelativeFile && !requiredPath && requiredRelativePath;
+    const isNewEntry = isRelativeFile && requiredPath;
 
     // If it is a node_module add it to the results and also
     // add the resolved path for the node_module main file
