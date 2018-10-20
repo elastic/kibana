@@ -81,7 +81,7 @@
     "**/@types/node": "8.10.21"
   },
   "dependencies": {
-    "@elastic/eui": "4.4.1",
+    "@elastic/eui": "4.5.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
