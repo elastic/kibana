@@ -91,7 +91,7 @@ export function createEsTestCluster(options = {}) {
 
     async cleanup() {
       await this.stop();
-      await del(config.installPath, {force: true} );
+      await del(config.installPath, { force: true });
       log.info('[es] cleanup complete');
     }
 
