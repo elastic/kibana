@@ -199,7 +199,7 @@ export default class BaseOptimizer {
               name: 'commons',
               chunks: 'initial',
               minChunks: 2,
-              reuseExistingChunk: true, // check this again
+              reuseExistingChunk: true
             }
           }
         },
