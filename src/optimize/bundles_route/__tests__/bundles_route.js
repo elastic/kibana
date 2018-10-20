@@ -91,7 +91,7 @@ describe('optimizer/bundle route', () => {
           dllBundlesPath: '/absolute/path',
           basePublicPath: ''
         });
-      }).to.not.throwError(e => console.log(e));
+      }).to.not.throwError();
     });
     it('validates that basePublicPath is valid', () => {
       expect(() => {
