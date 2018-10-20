@@ -124,8 +124,8 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                 <EuiSelect
                   value={this.state.beatType}
                   options={[
-                    { value: 'filebeat', label: 'Filebeat' },
-                    { value: 'metricbeat', label: 'Metricbeat' },
+                    { value: 'filebeat', text: 'Filebeat' },
+                    { value: 'metricbeat', text: 'Metricbeat' },
                   ]}
                   onChange={(e: any) => this.setState({ beatType: e.target.value })}
                   fullWidth={true}
@@ -149,17 +149,17 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                   options={[
                     {
                       value: `sudo ${this.state.beatType}`,
-                      label: 'DEB / RPM',
+                      text: 'DEB / RPM',
                     },
                     {
                       value: `PS C:\\Program Files\\${capitalize(this.state.beatType)}> ${
                         this.state.beatType
                       }.exe`,
-                      label: 'Windows',
+                      text: 'Windows',
                     },
                     {
                       value: `./${this.state.beatType}`,
-                      label: 'MacOS',
+                      text: 'MacOS',
                     },
                   ]}
                   onChange={(e: any) => this.setState({ command: e.target.value })}
