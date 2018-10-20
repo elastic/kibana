@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// @ts-ignore
 import expect from 'expect.js';
 import _ from 'lodash';
 import { parseRange } from '../range';
@@ -101,7 +102,7 @@ describe('Range parsing utility', () => {
 
       spec.within.forEach(tup => {
         it('#within(' + tup[0] + ')', () => {
-          expect(range.within(tup[0])).to.be(tup[1]);
+          expect(range.within(tup[0] as number)).to.be(tup[1]);
         });
       });
     });
