@@ -15,6 +15,7 @@ import {
   renderComponent,
 } from 'recompose';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
+import { getFunctionDefinitions } from '../../state/selectors/app';
 import { setExpression, flushContext } from '../../state/actions/elements';
 import { fromExpression } from '../../../common/lib/ast';
 import { ElementNotSelected } from './element_not_selected';
@@ -23,6 +24,7 @@ import { Expression as Component } from './expression';
 const mapStateToProps = state => ({
   pageId: getSelectedPage(state),
   element: getSelectedElement(state),
+  functionDefinitions: getFunctionDefinitions(state),
 });
 
 const mapDispatchToProps = dispatch => ({
