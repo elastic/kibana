@@ -29,7 +29,9 @@ export class MonacoHelper {
   constructor(
     private readonly container: HTMLElement,
     private readonly editorActions: EditorActions
-  ) {}
+  ) {
+    this.handleCopy = this.handleCopy.bind(this);
+  }
   public init() {
     return new Promise(resolve => {
       initMonaco((monaco: Monaco) => {
@@ -77,9 +79,12 @@ export class MonacoHelper {
             const { uri } = parseSchema(this.editor!.getModel().uri.toString())!;
             history.push(`${uri}!L${e.target.position.lineNumber}:0`);
           }
+          this.container.focus();
         });
         const hoverController: HoverController = new HoverController(this.editor);
         hoverController.setReduxActions(this.editorActions);
+        document.addEventListener('copy', this.handleCopy);
+        document.addEventListener('cut', this.handleCopy);
         resolve(this.editor);
       });
     });
@@ -87,6 +92,9 @@ export class MonacoHelper {
 
   public destroy = () => {
     this.monaco = null;
+    document.removeEventListener('copy', this.handleCopy);
+    document.removeEventListener('cut', this.handleCopy);
+
     if (this.resizeChecker) {
       this.resizeChecker!.destroy();
     }
@@ -156,5 +164,18 @@ export class MonacoHelper {
     ]);
     this.editor!.revealPositionInCenter(position);
     this.editor!.setPosition(position);
+  }
+
+  private handleCopy(e) {
+    if (
+      this.editor &&
+      this.editor.hasTextFocus() &&
+      this.editor.hasWidgetFocus() &&
+      !this.editor.getSelection().isEmpty()
+    ) {
+      const text = this.editor.getModel().getValueInRange(this.editor.getSelection());
+      e.clipboardData.setData('text/plain', text);
+      e.preventDefault();
+    }
   }
 }
