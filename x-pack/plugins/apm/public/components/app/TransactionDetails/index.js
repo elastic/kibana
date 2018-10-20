@@ -7,11 +7,16 @@
 import { connect } from 'react-redux';
 import TransactionsDetails from './view';
 import { getUrlParams } from '../../../store/urlParams';
+import { ID as v1ID } from '../../../store/reactReduxRequest/waterfallV1';
+import { ID as v2ID } from '../../../store/reactReduxRequest/waterfallV2';
 
 function mapStateToProps(state = {}) {
+  const waterfall =
+    state.reactReduxRequest[v1ID] || state.reactReduxRequest[v2ID];
   return {
     location: state.location,
-    urlParams: getUrlParams(state)
+    urlParams: getUrlParams(state),
+    waterfall: waterfall ? waterfall.data : null
   };
 }
 

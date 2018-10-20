@@ -15,7 +15,7 @@ import { KueryBar } from '../../shared/KueryBar';
 import { Transaction } from './Transaction';
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
 
-function TransactionDetails({ urlParams, location }) {
+function TransactionDetails({ urlParams, location, waterfall }) {
   return (
     <div>
       <HeaderLarge>{urlParams.transactionName}</HeaderLarge>
@@ -56,6 +56,7 @@ function TransactionDetails({ urlParams, location }) {
               location={location}
               transaction={res.data}
               urlParams={urlParams}
+              waterfall={waterfall}
             />
           );
         }}

@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle
+} from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -12,18 +18,22 @@ import {
   PROCESSOR_EVENT,
   TRANSACTION_ID
 } from '../../../../../common/constants';
+import { Transaction as ITransaction } from '../../../../../typings/Transaction';
+import { WaterfallResponse } from '../../../../../typings/waterfall';
+import { IUrlParams } from '../../../../store/urlParams';
 // @ts-ignore
 import DiscoverButton from '../../../shared/DiscoverButton';
 import EmptyMessage from '../../../shared/EmptyMessage';
-import { TraceLink } from '../../../shared/TraceLink';
+import { StickyTransactionProperties } from './StickyTransactionProperties';
 // @ts-ignore
 import { TransactionPropertiesTable } from './TransactionPropertiesTable';
-import { TransactionSampleHeader } from './TransactionSampleHeader';
+import { ViewTraceLink } from './ViewTraceLink';
 
 interface Props {
-  transaction: any;
-  urlParams: any;
+  transaction: ITransaction;
+  urlParams: IUrlParams;
   location: Location;
+  waterfall: WaterfallResponse;
 }
 
 function getDiscoverQuery(transactionId: string) {
@@ -41,7 +51,8 @@ function getDiscoverQuery(transactionId: string) {
 export const Transaction: React.SFC<Props> = ({
   transaction,
   urlParams,
-  location
+  location,
+  waterfall
 }) => {
   if (isEmpty(transaction)) {
     return (
@@ -52,43 +63,42 @@ export const Transaction: React.SFC<Props> = ({
     );
   }
 
-  const isRootTransaction = !transaction.parent;
-  const buttonStyle: React.CSSProperties = {
-    float: 'right',
-    marginLeft: '10px'
-  };
+  // v1 transactions are *always* root transactions
+  const isRootTransaction = transaction.version === 'v1' || !transaction.parent;
+
   return (
     <EuiPanel paddingSize="m" hasShadow={true}>
-      <div>
-        <EuiTitle size="s">
-          <span>Transaction sample</span>
-        </EuiTitle>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <span>Transaction sample</span>
+          </EuiTitle>
+        </EuiFlexItem>
 
-        {!isRootTransaction && (
-          <TraceLink
-            serviceName={transaction.context.service.name}
-            transactionType={transaction.transaction.type}
-            traceId={transaction.trace.id}
-            transactionId={transaction.transaction.id} // bzzzzt this needs to be the ROOT transaction ID
-            name={transaction.transaction.name}
-          >
-            <EuiButton iconType="apmApp" style={buttonStyle}>
-              View full trace
-            </EuiButton>
-          </TraceLink>
-        )}
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <DiscoverButton
+                query={getDiscoverQuery(transaction.transaction.id)}
+              >
+                {`View transaction in Discover`}
+              </DiscoverButton>
+            </EuiFlexItem>
 
-        <DiscoverButton
-          query={getDiscoverQuery(transaction.transaction.id)}
-          style={buttonStyle}
-        >
-          {`View transaction in Discover`}
-        </DiscoverButton>
-      </div>
+            {!isRootTransaction && (
+              <EuiFlexItem grow={false}>
+                <ViewTraceLink waterfall={waterfall} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer />
 
-      <TransactionSampleHeader transaction={transaction} />
+      <StickyTransactionProperties transaction={transaction} />
+
+      <EuiSpacer />
 
       <TransactionPropertiesTable
         transaction={transaction}

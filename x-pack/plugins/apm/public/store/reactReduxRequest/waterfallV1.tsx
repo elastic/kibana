@@ -19,7 +19,7 @@ import { IUrlParams } from '../urlParams';
 // @ts-ignore
 import { createInitialDataSelector } from './helpers';
 
-const ID = 'waterfallV1';
+export const ID = 'waterfallV1';
 
 interface Props {
   urlParams: IUrlParams;

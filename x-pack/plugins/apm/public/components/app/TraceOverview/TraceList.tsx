@@ -10,18 +10,30 @@ import { ITransactionGroup } from '../../../../typings/TransactionGroup';
 import { fontSizes, truncate } from '../../../style/variables';
 // @ts-ignore
 import { asMillisWithDefault } from '../../../utils/formatters';
-// @ts-ignore
-import { legacyEncodeURIComponent, RelativeLink } from '../../../utils/url';
+import { getTraceLinkProps, KibanaLink } from '../../../utils/url';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 // @ts-ignore
 import TooltipOverlay from '../../shared/TooltipOverlay';
 
+const TraceLink = ({
+  transactionGroup,
+  ...rest
+}: {
+  transactionGroup: ITransactionGroup;
+}) => {
+  const linkProps = getTraceLinkProps({ transactionGroup });
+  if (!linkProps) {
+    return null;
+  }
+  return <KibanaLink pathname="/app/apm" {...linkProps} {...rest} />;
+};
+
 function formatString(value: string) {
   return value || 'N/A';
 }
 
-const AppLink = styled(RelativeLink)`
+const StyledTraceLink = styled(TraceLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -37,22 +49,11 @@ const traceListColumns: ITableColumn[] = [
     name: 'Name',
     width: '40%',
     sortable: true,
-    render: (
-      name: string,
-      { serviceName, transactionType, id, traceId }: ITransactionGroup
-    ) => (
+    render: (name: string, transactionGroup: ITransactionGroup) => (
       <TooltipOverlay content={formatString(name)}>
-        <AppLink
-          path={`${serviceName}/transactions/${transactionType}/${legacyEncodeURIComponent(
-            name
-          )}`}
-          query={{
-            transactionId: id,
-            traceId
-          }}
-        >
+        <StyledTraceLink transactionGroup={transactionGroup}>
           {formatString(name)}
-        </AppLink>
+        </StyledTraceLink>
       </TooltipOverlay>
     )
   },

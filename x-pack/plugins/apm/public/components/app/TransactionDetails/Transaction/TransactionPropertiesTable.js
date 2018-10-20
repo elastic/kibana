@@ -9,19 +9,14 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { capitalize, get, first } from 'lodash';
 import { SERVICE_AGENT_NAME } from '../../../../../common/constants';
-import { units, colors, px } from '../../../../style/variables';
+import { units, px } from '../../../../style/variables';
 import {
   getPropertyTabNames,
   PropertiesTable
 } from '../../../shared/PropertiesTable';
 import { history, toQuery, fromQuery } from '../../../../utils/url';
-import { Tab } from '../../../shared/UIComponents';
 import { WaterfallContainer } from './WaterfallContainer';
-
-const TabContainer = styled.div`
-  padding: 0 ${px(units.plus)};
-  border-bottom: 1px solid ${colors.gray4};
-`;
+import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
 
 const TableContainer = styled.div`
   padding: ${px(units.plus)} ${px(units.plus)} 0;
@@ -50,10 +45,10 @@ export function TransactionPropertiesTable({
 
   return (
     <div>
-      <TabContainer>
+      <EuiTabs>
         {tabs.map(key => {
           return (
-            <Tab
+            <EuiTab
               onClick={() => {
                 history.replace({
                   ...location,
@@ -67,10 +62,12 @@ export function TransactionPropertiesTable({
               key={key}
             >
               {capitalize(key)}
-            </Tab>
+            </EuiTab>
           );
         })}
-      </TabContainer>
+      </EuiTabs>
+
+      <EuiSpacer />
 
       {currentTab === TIMELINE_TAB && (
         <WaterfallContainer

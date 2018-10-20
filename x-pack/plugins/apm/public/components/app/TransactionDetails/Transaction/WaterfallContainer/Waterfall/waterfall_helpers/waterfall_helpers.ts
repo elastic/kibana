@@ -30,13 +30,13 @@ interface IWaterfallItemBase {
   offset: number;
 }
 
-interface IWaterfallItemTransaction extends IWaterfallItemBase {
+export interface IWaterfallItemTransaction extends IWaterfallItemBase {
   transaction: Transaction;
   docType: 'transaction';
   children?: Array<IWaterfallItemSpan | IWaterfallItemTransaction>;
 }
 
-interface IWaterfallItemSpan extends IWaterfallItemBase {
+export interface IWaterfallItemSpan extends IWaterfallItemBase {
   parentTransaction: Transaction;
   span: Span;
   docType: 'span';

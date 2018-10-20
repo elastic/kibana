@@ -4,33 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import qs from 'querystring';
-import url from 'url';
-import { Link } from 'react-router-dom';
-import _ from 'lodash';
-import rison from 'rison-node';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import createHistory from 'history/createHashHistory';
+import _ from 'lodash';
+import qs from 'querystring';
+import React from 'react';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
+import rison from 'rison-node';
 import chrome from 'ui/chrome';
+import url from 'url';
+import { StringMap } from '../../typings/common';
+import { TransactionV2 } from '../../typings/Transaction';
+import { ITransactionGroup } from '../../typings/TransactionGroup';
+
+interface ViewMlJobArgs {
+  serviceName: string;
+  transactionType: string;
+  location: any;
+  children: any;
+}
 
 export function ViewMLJob({
   serviceName,
   transactionType,
   location,
   children = 'View Job'
-}) {
+}: ViewMlJobArgs) {
   const { _g, _a } = decodeKibanaSearchParams(location.search);
-
   const pathname = '/app/ml';
   const hash = '/timeseriesexplorer';
+  const jobId = `${serviceName}-${transactionType}-high_mean_response_time`;
   const query = {
     _g: {
-      ..._g,
+      ...(_g as object),
       ml: {
-        jobIds: [`${serviceName}-${transactionType}-high_mean_response_time`]
+        jobIds: [jobId]
       }
     },
     _a
@@ -46,17 +55,17 @@ export function ViewMLJob({
   );
 }
 
-export function toQuery(search) {
-  return qs.parse(search.slice(1));
+export function toQuery(search?: string) {
+  return search ? qs.parse(search.slice(1)) : {};
 }
 
-export function fromQuery(query) {
+export function fromQuery(query: StringMap) {
   const encodedQuery = encodeQuery(query, ['_g', '_a']);
   return stringifyWithoutEncoding(encodedQuery);
 }
 
-export function encodeQuery(query, exclude = []) {
-  return _.mapValues(query, (value, key) => {
+export function encodeQuery(query: StringMap, exclude: string[] = []) {
+  return _.mapValues(query, (value: any, key: string) => {
     if (exclude.includes(key)) {
       return encodeURI(value);
     }
@@ -64,34 +73,92 @@ export function encodeQuery(query, exclude = []) {
   });
 }
 
-function stringifyWithoutEncoding(query) {
-  return qs.stringify(query, null, null, {
-    encodeURIComponent: v => v
-  });
-}
+export function getTraceLinkProps({
+  transactionDoc,
+  transactionGroup = {}
+}: {
+  transactionDoc?: TransactionV2;
+  transactionGroup: ITransactionGroup | { [key: string]: any };
+}) {
+  let {
+    serviceName,
+    transactionType,
+    traceId,
+    id: transactionId,
+    name
+  } = transactionGroup;
 
-export function decodeKibanaSearchParams(search) {
-  const query = toQuery(search);
+  if (transactionDoc) {
+    serviceName = transactionDoc.context.service.name;
+    transactionType = transactionDoc.transaction.type;
+    traceId = transactionDoc.trace.id;
+    transactionId = transactionDoc.transaction.id;
+    name = transactionDoc.transaction.name;
+  }
+
+  if (!serviceName || !transactionType || !name) {
+    return null;
+  }
+
   return {
-    _g: query._g ? rison.decode(query._g) : null,
-    _a: query._a ? rison.decode(query._a) : null
+    hash: `/${serviceName}/transactions/${transactionType}/${legacyEncodeURIComponent(
+      name
+    )}`,
+    query: {
+      traceId,
+      transactionId
+    }
   };
 }
 
-export function encodeKibanaSearchParams(query) {
+function stringifyWithoutEncoding(query: StringMap) {
+  return qs.stringify(query, undefined, undefined, {
+    encodeURIComponent: (v: string) => v
+  });
+}
+
+function decodeAsObject(value: string) {
+  const decoded = rison.decode(value);
+  return _.isPlainObject(decoded) ? decoded : {};
+}
+
+export function decodeKibanaSearchParams(search: string) {
+  const query = toQuery(search);
+  return {
+    _g:
+      query._g && typeof query._g === 'string'
+        ? decodeAsObject(query._g)
+        : null,
+    _a:
+      query._a && typeof query._a === 'string' ? decodeAsObject(query._a) : null
+  };
+}
+
+export function encodeKibanaSearchParams(query: StringMap) {
   return stringifyWithoutEncoding({
     _g: rison.encode(query._g),
     _a: rison.encode(query._a)
   });
 }
 
+export interface RelativeLinkComponentArgs {
+  location: {
+    search?: string;
+    pathname?: string;
+  };
+  path: string;
+  query?: StringMap;
+  disabled: boolean;
+  to: StringMap;
+  className: string;
+}
 export function RelativeLinkComponent({
   location,
   path,
   query,
   disabled,
   ...props
-}) {
+}: RelativeLinkComponentArgs) {
   if (disabled) {
     return <EuiLink aria-disabled="true" {...props} />;
   }
@@ -124,16 +191,30 @@ export function RelativeLinkComponent({
 // The two components have different APIs: `path` vs `pathname` and one uses EuiLink the other react-router's Link (which behaves differently)
 // Suggestion: Deprecate RelativeLink, and clean up KibanaLink
 
+export interface KibanaLinkArgs {
+  location: {
+    search?: string;
+    pathname?: string;
+  };
+  pathname: string;
+  hash?: string;
+  query?: StringMap;
+  disabled?: boolean;
+  to?: StringMap;
+  className?: string;
+}
+
 export function KibanaLinkComponent({
   location,
   pathname,
   hash,
   query = {},
   ...props
-}) {
+}: KibanaLinkArgs) {
   // Preserve current _g and _a
   const currentQuery = toQuery(location.search);
   const nextQuery = {
+    ...query,
     _g: query._g ? rison.encode(query._g) : currentQuery._g,
     _a: query._a ? rison.encode(query._a) : ''
   };
@@ -148,7 +229,7 @@ export function KibanaLinkComponent({
 }
 
 const withLocation = connect(
-  ({ location }) => ({ location }),
+  ({ location }: { location: any }) => ({ location }),
   {}
 );
 export const RelativeLink = withLocation(RelativeLinkComponent);
@@ -157,21 +238,17 @@ export const KibanaLink = withLocation(KibanaLinkComponent);
 // This is downright horrible 😭 💔
 // Angular decodes encoded url tokens like "%2F" to "/" which causes the route to change.
 // It was supposedly fixed in https://github.com/angular/angular.js/commit/1b779028fdd339febaa1fff5f3bd4cfcda46cc09 but still seeing the issue
-export function legacyEncodeURIComponent(url) {
-  return url && encodeURIComponent(url).replace(/%/g, '~');
+export function legacyEncodeURIComponent(rawUrl?: string) {
+  return rawUrl && encodeURIComponent(rawUrl).replace(/%/g, '~');
 }
 
-export function legacyDecodeURIComponent(url) {
-  return url && decodeURIComponent(url.replace(/~/g, '%'));
+export function legacyDecodeURIComponent(encodedUrl: string) {
+  return encodedUrl && decodeURIComponent(encodedUrl.replace(/~/g, '%'));
 }
 
-export function ExternalLink(props) {
+export function ExternalLink(props: EuiLinkAnchorProps) {
   return <EuiLink target="_blank" rel="noopener noreferrer" {...props} />;
 }
-
-ExternalLink.propTypes = {
-  href: PropTypes.string.isRequired
-};
 
 // Make history singleton available across APM project.
 // This is not great. Other options are to use context or withRouter helper
