@@ -102,7 +102,7 @@ export const BeatsTableType: TableType = {
           case 'UNKNOWN':
             color = 'subdued';
             statusText = 'Offline';
-            if (moment().diff(beat.last_updated, 'minutes') > 9) {
+            if (moment().diff(beat.last_checkin, 'minutes') > 9) {
               tooltipText = 'This Beat has not connected to kibana in over 10min';
             }
             tooltipText = 'This Beat has not yet been started.';

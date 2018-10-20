@@ -64,6 +64,9 @@
             "active": {
               "type": "boolean"
             },
+            "last_checkin": {
+              "type": "date"
+            },
             "enrollment_token": {
               "type": "keyword"
             },

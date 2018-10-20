@@ -67,7 +67,7 @@ export interface CMBeat {
   host_ip: string;
   host_name: string;
   ephemeral_id?: string;
-  last_updated?: Date;
+  last_checkin?: Date;
   event_rate?: string;
   local_configuration_yml?: string;
   tags?: string[];

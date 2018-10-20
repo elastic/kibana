@@ -48,7 +48,7 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
 
       await libs.beats.update(libs.framework.internalUser, beat.id, {
         config_status: newStatus,
-        last_updated: new Date(),
+        last_checkin: new Date(),
       });
 
       tags = await libs.tags.getTagsWithIds(libs.framework.internalUser, beat.tags || []);
