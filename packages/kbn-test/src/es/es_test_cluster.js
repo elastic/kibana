@@ -21,12 +21,12 @@ import { resolve } from 'path';
 import { format } from 'url';
 import { get } from 'lodash';
 import toPath from 'lodash/internal/toPath';
-import { del } from 'del';
 import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
 import { KIBANA_ROOT } from '../';
 import elasticsearch from 'elasticsearch';
 const path = require('path');
+const del = require('del');
 
 export function createEsTestCluster(options = {}) {
   const {
@@ -91,7 +91,7 @@ export function createEsTestCluster(options = {}) {
 
     async cleanup() {
       await this.stop();
-      await del(config.installPath);
+      await del(config.installPath, {force: true} );
       log.info('[es] cleanup complete');
     }
 
