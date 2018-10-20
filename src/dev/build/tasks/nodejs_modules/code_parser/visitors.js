@@ -17,13 +17,22 @@
  * under the License.
  */
 
+/**
+ * @notice
+ *
+ * This product has relied on ASTExplorer that is licensed under MIT,
+ * Esprima licensed under BSD-2-Clause
+ * Font License, Version 1.1.
+ */
 export function dependenciesVisitorsGenerator(dependenciesAcc) {
   return (() => {
     // This was built based on two main tools: an ast explorer and the
-    // main docs for the Esprima
+    // main docs for the Esprima which is a complete and useful docs
+    // for the ESTree spec.
     //
     // https://astexplorer.net
     // https://esprima.readthedocs.io/en/latest/syntax-tree-format.html
+    // https://github.com/estree/estree
     return {
       // Visitors to traverse and found dependencies
       // raw values on require + require.resolve
