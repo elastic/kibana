@@ -7,7 +7,7 @@ installDir=$(pwd)
 mkdir -p "$installDir" 
 
 # Get Version
-pkg_version=$(cat package.json | grep "\"version\"" | cut -d ':' -f 2 | tr -d ",\"\ +")
+pkg_version=$(jq -r .version package.json)
 version=${TEST_ES_BRANCH:=${pkg_version}-SNAPSHOT}
 
 # Download Kibana Package 
