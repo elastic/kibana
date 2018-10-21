@@ -2,8 +2,7 @@ Kibana source code with Kibana X-Pack source code
 Copyright 2012-2018 Elasticsearch B.V.
 
 ---
-This product has relied on ASTExplorer that is licensed under MIT
-and Esprima documentation for the ESTree licensed under BSD-2-Clause.
+This product has relied on ASTExplorer that is licensed under MIT.
 
 ---
 This product includes code that was extracted from angular-ui-bootstrap@0.13.1

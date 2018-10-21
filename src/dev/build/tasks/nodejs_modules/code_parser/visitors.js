@@ -22,16 +22,16 @@ import { matches } from 'lodash';
 /**
  * @notice
  *
- * This product has relied on ASTExplorer that is licensed under MIT
- * and Esprima documentation for the ESTree licensed under BSD-2-Clause.
+ * This product has relied on ASTExplorer that is licensed under MIT.
  */
 export function dependenciesVisitorsGenerator(dependenciesAcc) {
   return (() => {
-    // This was built based on two main tools: an ast explorer and the
-    // main docs for the Esprima which is a complete and useful docs
-    // for the ESTree spec.
+    // This was built with help on an ast explorer and some ESTree docs
+    // like the babel parser ast spec and the main docs for the Esprima
+    // which is a complete and useful docs for the ESTree spec.
     //
     // https://astexplorer.net
+    // https://github.com/babel/babel/blob/master/packages/babel-parser/ast/spec.md
     // https://esprima.readthedocs.io/en/latest/syntax-tree-format.html
     // https://github.com/estree/estree
     return {
