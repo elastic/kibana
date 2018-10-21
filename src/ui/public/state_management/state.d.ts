@@ -17,8 +17,10 @@
  * under the License.
  */
 
-export function getUnhashableStatesProvider(getAppState, globalState) {
-  return function getUnhashableStates() {
-    return [getAppState(), globalState].filter(Boolean);
-  };
+export interface State {
+  [key: string]: any;
+  translateHashToRison: (
+    stateHashOrRison: string | string[] | undefined
+  ) => string | string[] | undefined;
+  getQueryParamName: () => string;
 }
