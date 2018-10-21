@@ -18,7 +18,8 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+
 
 import { Query } from '@elastic/eui';
 import { Search } from './search';
@@ -29,8 +30,8 @@ const categories = ['general', 'dashboard', 'hiddenCategory', 'x-pack'];
 describe('Search', () => {
   it('should render normally', async () => {
     const onQueryChange = () => {};
-    const component = shallow(
-      <Search
+    const component = shallowWithIntl(
+      <Search.WrappedComponent
         query={query}
         categories={categories}
         onQueryChange={onQueryChange}
@@ -44,8 +45,8 @@ describe('Search', () => {
     //This test is brittle as it knows about implementation details
     // (EuiFieldSearch uses onKeyup instead of onChange to handle input)
     const onQueryChange = jest.fn();
-    const component = mount(
-      <Search
+    const component = mountWithIntl(
+      <Search.WrappedComponent
         query={query}
         categories={categories}
         onQueryChange={onQueryChange}

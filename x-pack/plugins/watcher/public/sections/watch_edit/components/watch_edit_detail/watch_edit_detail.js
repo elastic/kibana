@@ -11,7 +11,7 @@ import { documentationLinks } from 'plugins/watcher/lib/documentation_links';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('watchEditDetail', function () {
+app.directive('watchEditDetail', function (i18n) {
   return {
     restrict: 'E',
     template: template,
@@ -36,7 +36,7 @@ app.directive('watchEditDetail', function () {
         $scope.$watch('watchEditDetail.form.$valid', () => {
           this.updateIsValid();
         });
-
+        this.syntaxLinkLabel = i18n('xpack.watcher.sections.watchEdit.detail.syntaxLinkLabel', { defaultMessage: 'Syntax' });
         this.documentationLinks = documentationLinks;
       }
 

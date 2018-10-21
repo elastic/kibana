@@ -10,14 +10,14 @@
     </div>
     <div class="form-group">
       <label i18n-id="tagCloud.visParams.fontSizeLabel" i18n-default-message="Font Size"></label>
-      <div class="tag-cloud-fontsize-slider"></div>
+      <div class="tgcFontSizeSlider"></div>
       <div class="kuiBar">
         <div class="kuiBarSection">
           <input
             type="number"
             min="1"
             max="{{editorState.params.maxFontSize}}"
-            class="kuiTextInput tag-cloud-fontsize-slider__input"
+            class="kuiTextInput tgcFontSizeSlider__input"
             ng-model="editorState.params.minFontSize"
             aria-label="{{ ::'tagCloud.visParams.minFontSizeAriaLabel' | i18n: { defaultMessage: 'Minimum tag font size' } }}"
             aria-describedby="tagCloudFontSliderMinUnit"
@@ -29,7 +29,7 @@
             type="number"
             min="{{editorState.params.minFontSize}}"
             max="100"
-            class="kuiTextInput tag-cloud-fontsize-slider__input"
+            class="kuiTextInput tgcFontSizeSlider__input"
             ng-model="editorState.params.maxFontSize"
             aria-label="{{ ::'tagCloud.visParams.maxFontSizeAriaLabel' | i18n: { defaultMessage: 'Maximum tag font size' } }}"
             aria-describedby="tagCloudFontSliderMaxUnit"

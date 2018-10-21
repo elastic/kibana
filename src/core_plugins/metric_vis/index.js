@@ -24,7 +24,8 @@ export default function (kibana) {
     uiExports: {
       visTypes: [
         'plugins/metric_vis/metric_vis'
-      ]
+      ],
+      styleSheetPaths: `${__dirname}/public/index.scss`,
     }
 
   });
