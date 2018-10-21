@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { matches } from 'lodash';
+
 /**
  * @notice
  *
@@ -38,15 +40,29 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       CallExpression: ({ node }) => {
         // AST check for require expressions
         const isRequire = (node) => {
-          return node.callee && node.callee.type === 'Identifier' && node.callee.name === 'require';
+          return matches({
+            callee: {
+              type: 'Identifier',
+              name: 'require'
+            }
+          })(node);
         };
 
         // AST check for require.resolve expressions
         const isRequireResolve = (node) => {
-          return node.callee && node.callee.type === 'MemberExpression' && node.callee.object
-            && node.callee.object.type === 'Identifier' && node.callee.object.name === 'require'
-            && node.callee.property && node.callee.property.type === 'Identifier'
-            && node.callee.property.name === 'resolve';
+          return matches({
+            callee: {
+              type: 'MemberExpression',
+              object: {
+                type: 'Identifier',
+                name: 'require'
+              },
+              property: {
+                type: 'Identifier',
+                name: 'resolve'
+              }
+            }
+          })(node);
         };
 
         // Get string values inside the expressions
@@ -69,7 +85,12 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       ImportDeclaration: ({ node }) => {
         // AST check for supported import expressions
         const isImport = (node) => {
-          return node.type === 'ImportDeclaration' && node.source && node.source.type === 'StringLiteral';
+          return matches({
+            type: 'ImportDeclaration',
+            source: {
+              type: 'StringLiteral'
+            }
+          })(node);
         };
 
         // Get string values from import expressions
@@ -83,7 +104,12 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       ExportNamedDeclaration: ({ node }) => {
         // AST check for supported export from expressions
         const isExportFrom = (node) => {
-          return node.type === 'ExportNamedDeclaration' && node.source && node.source.type === 'StringLiteral';
+          return matches({
+            type: 'ExportNamedDeclaration',
+            source: {
+              type: 'StringLiteral'
+            }
+          })(node);
         };
 
         // Get string values from export from expressions
@@ -97,7 +123,12 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       ExportAllDeclaration: ({ node }) => {
         // AST check for supported export * from expressions
         const isExportAllFrom = (node) => {
-          return node.type === 'ExportAllDeclaration' && node.source && node.source.type === 'StringLiteral';
+          return matches({
+            type: 'ExportAllDeclaration',
+            source: {
+              type: 'StringLiteral'
+            }
+          })(node);
         };
 
         // Get string values from export * from expressions
