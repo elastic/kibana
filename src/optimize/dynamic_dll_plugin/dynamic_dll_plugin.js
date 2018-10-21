@@ -128,8 +128,24 @@ export class DynamicDllPlugin {
           return compilation.needsDLLCompilation = false;
         }
 
-        // Run the procedures in order to decide if we need
-        // a Dll compilation
+        // Run the procedures in order to execute our dll compilation
+        // The process is very straightforward in it's conception:
+        //
+        // * 1 - loop through every compilation module in order to start building
+        //   the dll entry paths arrays and assume it is the new entry paths
+        // * 1.1 - start from adding the modules already included into the dll, if any.
+        // * 1.2 - adding the new discovered stub modules
+        // * 1.3 - check if the module added to the entry path is from node_modules or
+        //   webpackShims, otherwise throw an error.
+        // * 1.3.1 - for the entry path modules coming from webpackShims search for every
+        //   require statements inside of them
+        // * 1.3.2 - discard the ones that are not js dependencies
+        // * 1.3.3 - add those new discovered dependencies inside the webpackShims to the
+        //   entry paths array
+        // * 2 - compare the built entry paths and compares it to the old one (if any)
+        // * 3 - runs a new dll compilation in case there is none old entry paths or if the
+        //   new built one differs from the old one.
+        //
         const rawDllConfig = this.dllCompiler.rawDllConfig;
         const dllContext = rawDllConfig.context;
         const dllOutputPath = rawDllConfig.outputPath;
