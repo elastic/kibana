@@ -12,7 +12,7 @@ import {
   sortKeysByConfig,
   getPropertyTabNames
 } from '..';
-import { getFeatureDocs } from '../../../../utils/documentation';
+import { getAgentFeatureDocs } from '../../../../utils/documentation';
 
 jest.mock('../../../../utils/documentation');
 jest.mock('../propertyConfig.json', () => [
@@ -114,7 +114,7 @@ describe('AgentFeatureTipMessage component', () => {
       text: 'Mock Docs Text',
       url: 'mock-url'
     };
-    getFeatureDocs.mockImplementation(() => mockDocs);
+    getAgentFeatureDocs.mockImplementation(() => mockDocs);
   });
 
   it('should render when docs are returned', () => {
@@ -126,7 +126,7 @@ describe('AgentFeatureTipMessage component', () => {
         />
       )
     ).toMatchSnapshot();
-    expect(getFeatureDocs).toHaveBeenCalledWith(featureName, agentName);
+    expect(getAgentFeatureDocs).toHaveBeenCalledWith(featureName, agentName);
   });
 
   it('should render when docs are returned, but missing a url', () => {

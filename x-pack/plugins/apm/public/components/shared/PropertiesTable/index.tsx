@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { StringMap } from '../../../../typings/common';
 import { colors, fontSize, px, unit, units } from '../../../style/variables';
-import { getFeatureDocs } from '../../../utils/documentation';
+import { getAgentFeatureDocs } from '../../../utils/documentation';
 // @ts-ignore
 import { ExternalLink } from '../../../utils/url';
 import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
@@ -45,7 +45,7 @@ export function AgentFeatureTipMessage({
   featureName: string;
   agentName?: string;
 }) {
-  const docs = getFeatureDocs(featureName, agentName);
+  const docs = getAgentFeatureDocs(featureName, agentName);
 
   if (!docs) {
     return null;
@@ -55,11 +55,9 @@ export function AgentFeatureTipMessage({
     <TableInfo>
       <EuiIcon type="iInCircle" />
       {docs.text}{' '}
-      {docs.url && (
-        <ExternalLink href={docs.url}>
-          Learn more in the documentation.
-        </ExternalLink>
-      )}
+      <ExternalLink href={docs.url}>
+        Learn more in the documentation.
+      </ExternalLink>
     </TableInfo>
   );
 }
@@ -100,10 +98,7 @@ export function PropertiesTable({
         keySorter={sortKeysByConfig}
         depth={1}
       />
-      <AgentFeatureTipMessage
-        featureName={`context-${propKey}`}
-        agentName={agentName}
-      />
+      <AgentFeatureTipMessage featureName={propKey} agentName={agentName} />
     </TableContainer>
   );
 }

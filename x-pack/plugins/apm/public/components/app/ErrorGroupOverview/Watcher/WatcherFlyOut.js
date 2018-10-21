@@ -228,7 +228,7 @@ export default class WatcherFlyout extends Component {
           read our{' '}
           <EuiLink
             target="_blank"
-            href={_.get(ELASTIC_DOCS, 'watcher-get-started.url')}
+            href={ELASTIC_DOCS['watcher-get-started'].url}
           >
             documentation
           </EuiLink>
@@ -346,7 +346,7 @@ export default class WatcherFlyout extends Component {
                   If you have not configured email, please see the{' '}
                   <EuiLink
                     target="_blank"
-                    href={_.get(ELASTIC_DOCS, 'x-pack-emails.url')}
+                    href={ELASTIC_DOCS['x-pack-emails'].url}
                   >
                     documentation
                   </EuiLink>

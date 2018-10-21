@@ -4,43 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 // @ts-ignore
 import { metadata } from 'ui/metadata';
 
 const STACK_VERSION = metadata.branch;
-const DOCS_ROOT = 'https://www.elastic.co/guide/en/apm';
+const APM_URL_ROOT = 'https://www.elastic.co/guide/en/apm';
+const XPACK_URL_ROOT = `https://www.elastic.co/guide/en/x-pack/${STACK_VERSION}`;
 
-//
-// General APM
-//
-export const APM_DOCS = {
-  'get-started': {
-    url: `${DOCS_ROOT}/get-started/${STACK_VERSION}/index.html`
+// TODO: currently unused but should be added to timeline view
+export const APM_AGENT_DROPPED_SPANS_DOCS = {
+  nodejs: {
+    url: `${APM_URL_ROOT}/agent/nodejs/1.x/agent-api.html#transaction-max-spans`
+  },
+  python: {
+    url: `${APM_URL_ROOT}/agent/python/2.x/configuration.html#config-transaction-max-spans`
   }
 };
 
-//
-// APM Server docs
-//
-export const APM_SERVER_DOCS = {
-  download: {
-    url: 'https://www.elastic.co/downloads/apm/apm-server'
+export const ELASTIC_DOCS = {
+  'x-pack-emails': {
+    url: `${XPACK_URL_ROOT}/actions-email.html#configuring-email`
   },
-  configuring: {
-    url: `${DOCS_ROOT}/server/${STACK_VERSION}/configuring.html`
-  },
-  'running-on-docker': {
-    url: `${DOCS_ROOT}/server/${STACK_VERSION}/running-on-docker.html#running-on-docker`
-  },
-  frontend: {
-    url: `${DOCS_ROOT}/server/${STACK_VERSION}/frontend.html`
+  'watcher-get-started': {
+    url: `${XPACK_URL_ROOT}/watcher-getting-started.html`
   }
 };
 
-//
-// APM Agents docs
-//
 const featureContextUserText =
   'You can configure your agent to add contextual information about your users.';
 const featureContextTagsText =
@@ -48,127 +37,69 @@ const featureContextTagsText =
 const featureContextCustomText =
   'You can configure your agent to add custom contextual information on transactions.';
 
-interface AgentDoc {
-  url: string;
-  text?: string;
-}
-
-interface AgentDocList {
-  [key: string]: {
-    [key: string]: AgentDoc;
+const APM_AGENT_FEATURE_DOCS: {
+  [featureName: string]: {
+    [agentName: string]: {
+      url: string;
+      text?: string;
+    };
   };
-}
-
-export const APM_AGENT_DOCS: AgentDocList = {
-  home: {
-    nodejs: {
-      url: `${DOCS_ROOT}/agent/nodejs/1.x/index.html`
-    },
-    python: {
-      url: `${DOCS_ROOT}/agent/python/2.x/index.html`
-    },
-    ruby: {
-      url: `${DOCS_ROOT}/agent/ruby/1.x/index.html`
-    },
-    javascript: {
-      url: `${DOCS_ROOT}/agent/js-base/0.x/index.html`
-    }
-  },
-  'get-started': {
-    python: {
-      url: `${DOCS_ROOT}/agent/python/2.x/getting-started.html`
-    },
-    javascript: {
-      url: `${DOCS_ROOT}/agent/js-base/0.x/getting-started.html`
-    }
-  },
-  'nodejs-only': {
-    'babel-es-modules': {
-      url: `${DOCS_ROOT}/agent/nodejs/1.x/advanced-setup.html#es-modules`
-    }
-  },
-  'python-only': {
-    django: { url: `${DOCS_ROOT}/agent/python/2.x/django-support.html` },
-    flask: { url: `${DOCS_ROOT}/agent/python/2.x/flask-support.html` }
-  },
-  'context-user': {
+} = {
+  user: {
     nodejs: {
       text: featureContextUserText,
-      url: `${DOCS_ROOT}/agent/nodejs/1.x/agent-api.html#apm-set-user-context`
+      url: `${APM_URL_ROOT}/agent/nodejs/1.x/agent-api.html#apm-set-user-context`
     },
     python: {
       text: featureContextUserText,
-      url: `${DOCS_ROOT}/agent/python/2.x/api.html#api-set-user-context`
+      url: `${APM_URL_ROOT}/agent/python/2.x/api.html#api-set-user-context`
     },
     ruby: {
       text: featureContextUserText,
-      url: `${DOCS_ROOT}/agent/ruby/1.x/advanced.html#_providing_info_about_the_user`
+      url: `${APM_URL_ROOT}/agent/ruby/1.x/advanced.html#_providing_info_about_the_user`
     },
     javascript: {
       text: featureContextUserText,
-      url: `${DOCS_ROOT}/agent/js-base/0.x/api.html#apm-set-user-context`
+      url: `${APM_URL_ROOT}/agent/js-base/0.x/api.html#apm-set-user-context`
     }
   },
-  'context-tags': {
+  tags: {
     nodejs: {
       text: featureContextTagsText,
-      url: `${DOCS_ROOT}/agent/nodejs/1.x/agent-api.html#apm-set-tag`
+      url: `${APM_URL_ROOT}/agent/nodejs/1.x/agent-api.html#apm-set-tag`
     },
     python: {
       text: featureContextTagsText,
-      url: `${DOCS_ROOT}/agent/python/2.x/api.html#api-tag`
+      url: `${APM_URL_ROOT}/agent/python/2.x/api.html#api-tag`
     },
     ruby: {
       text: featureContextTagsText,
-      url: `${DOCS_ROOT}/agent/ruby/1.x/advanced.html#_adding_tags`
+      url: `${APM_URL_ROOT}/agent/ruby/1.x/advanced.html#_adding_tags`
     },
     javascript: {
-      url: `${DOCS_ROOT}/agent/js-base/0.x/api.html#apm-set-tags`
+      url: `${APM_URL_ROOT}/agent/js-base/0.x/api.html#apm-set-tags`
     }
   },
-  'context-custom': {
+  custom: {
     nodejs: {
       text: featureContextCustomText,
-      url: `${DOCS_ROOT}/agent/nodejs/1.x/agent-api.html#apm-set-custom-context`
+      url: `${APM_URL_ROOT}/agent/nodejs/1.x/agent-api.html#apm-set-custom-context`
     },
     python: {
       text: featureContextCustomText,
-      url: `${DOCS_ROOT}/agent/python/2.x/api.html#api-set-custom-context`
+      url: `${APM_URL_ROOT}/agent/python/2.x/api.html#api-set-custom-context`
     },
     ruby: {
       text: featureContextCustomText,
-      url: `${DOCS_ROOT}/agent/ruby/1.x/advanced.html#_adding_custom_context`
+      url: `${APM_URL_ROOT}/agent/ruby/1.x/advanced.html#_adding_custom_context`
     },
     javascript: {
       text: featureContextCustomText,
-      url: `${DOCS_ROOT}/agent/js-base/0.x/api.html#apm-set-custom-context`
-    }
-  },
-  'dropped-spans': {
-    nodejs: {
-      url: `${DOCS_ROOT}/agent/nodejs/1.x/agent-api.html#transaction-max-spans`
-    },
-    python: {
-      url: `${DOCS_ROOT}/agent/python/2.x/configuration.html#config-transaction-max-spans`
+      url: `${APM_URL_ROOT}/agent/js-base/0.x/api.html#apm-set-custom-context`
     }
   }
 };
 
-//
-// Elastic docs
-//
-export const ELASTIC_DOCS = {
-  'x-pack-emails': {
-    url: `https://www.elastic.co/guide/en/x-pack/${STACK_VERSION}/actions-email.html#configuring-email`
-  },
-  'watcher-get-started': {
-    url: `https://www.elastic.co/guide/en/x-pack/${STACK_VERSION}/watcher-getting-started.html`
-  }
-};
-
-//
-// Helper methods
-//
 function translateAgentName(agentName?: string) {
   switch (agentName) {
     case 'js-react':
@@ -180,13 +111,9 @@ function translateAgentName(agentName?: string) {
   }
 }
 
-export function getFeatureDocs(
-  featureName: string,
-  agentName?: string
-): AgentDoc | void {
-  if (!agentName) {
-    return;
-  }
+export function getAgentFeatureDocs(featureName: string, agentName?: string) {
   const translatedAgentName = translateAgentName(agentName);
-  return get(APM_AGENT_DOCS, `${featureName}.${translatedAgentName}`);
+  if (APM_AGENT_FEATURE_DOCS[featureName] && translatedAgentName) {
+    return APM_AGENT_FEATURE_DOCS[featureName][translatedAgentName];
+  }
 }
