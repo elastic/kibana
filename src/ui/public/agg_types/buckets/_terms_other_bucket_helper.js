@@ -132,7 +132,7 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
       _.each(agg.buckets, (bucket, bucketObjKey) => {
         const bucketKey = currentAgg.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey);
         const filter = _.cloneDeep(bucket.filters) || currentAgg.createFilter(bucketKey);
-        const newFilters = [...filters, filter].flat();
+        const newFilters = _.flatten([...filters, filter]);
         walkBucketTree(newAggIndex, bucket, newAgg.id, newFilters, `${key}-${bucketKey.toString()}`);
       });
       return;
