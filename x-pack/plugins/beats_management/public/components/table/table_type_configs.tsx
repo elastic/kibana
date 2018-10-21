@@ -88,29 +88,22 @@ export const BeatsTableType: TableType = {
       render: (value: string, beat: CMPopulatedBeat) => {
         let color: IconColor = 'success';
         let statusText = 'OK';
-        let tooltipText = 'Everything looks good!';
+        let tooltipText = 'Beat successfully applied latest config';
 
         switch (beat.config_status) {
-          case 'REQUIRES_UPDATE':
-            statusText = 'Waiting for Beat checkin';
-            tooltipText = 'Waiting for the Beat to download the latest config';
-          case 'WAITING_FOR_SUCCESS':
-            color = 'warning';
-            statusText = 'Verifying Config';
-            tooltipText = 'Waiting for a status update from the Beat';
-            break;
           case 'UNKNOWN':
             color = 'subdued';
             statusText = 'Offline';
-            if (moment().diff(beat.last_checkin, 'minutes') > 9) {
+            if (moment().diff(beat.last_checkin, 'minutes') >= 10) {
               tooltipText = 'This Beat has not connected to kibana in over 10min';
+            } else {
+              tooltipText = 'This Beat has not yet been started.';
             }
-            tooltipText = 'This Beat has not yet been started.';
             break;
           case 'ERROR':
             color = 'danger';
             statusText = 'Error';
-            tooltipText = "Please check the logs of this Beat's host for error details";
+            tooltipText = 'Please check the logs of this Beat for error details';
             break;
         }
 

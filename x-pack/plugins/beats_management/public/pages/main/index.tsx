@@ -133,7 +133,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
     if (this.props.location.pathname.includes('/overview/initial')) {
       return (
         <WalkthroughLayout
-          title="Get started with Beats centeral management"
+          title="Get started with Beats central management"
           walkthroughSteps={walkthroughSteps}
           goTo={this.props.goTo}
           activePath={this.props.location.pathname}
