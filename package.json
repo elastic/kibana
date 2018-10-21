@@ -267,7 +267,7 @@
     "chance": "1.0.10",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
-    "chromedriver": "2.42.1",
+    "chromedriver": "2.43.0",
     "classnames": "2.2.5",
     "dedent": "^0.7.0",
     "enzyme": "3.2.0",
