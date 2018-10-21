@@ -114,18 +114,10 @@ const defaultEditor = function ($rootScope, $compile) {
             }
           };
 
-          let lockDirty = false;
           $scope.$watch(() => {
             return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
-            // when visualization updates its `vis.params` we need to update the editor, but we should
-            // not set the dirty flag (as this change came from vis itself and is already applied)
-            if (lockDirty) {
-              lockDirty = false;
-            } else {
-              $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
-            }
-
+            $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
             $scope.responseValueAggs = null;
             try {
               $scope.responseValueAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
