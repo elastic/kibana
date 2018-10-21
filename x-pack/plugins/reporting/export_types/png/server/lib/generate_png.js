@@ -14,9 +14,9 @@ function generatePngObservableFn(server) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
 
-  const urlScreenshotsObservable = (url, headers, layout) => {
+  const urlScreenshotsObservable = (url, sessionCookie, layout, browserTimezone) => {
     return Rx.of(url).pipe(
-      mergeMap(url => screenshotsObservable(url, headers, layout),
+      mergeMap(url => screenshotsObservable(url, sessionCookie, layout, browserTimezone),
         (outer, inner) => inner,
         captureConcurrency
       )
@@ -36,7 +36,7 @@ function generatePngObservableFn(server) {
 
   };
 
-  return function generatePngObservable(url, headers, layoutParams) {
+  return function generatePngObservable(url, browserTimezone, sessionCookie, layoutParams) {
 
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
@@ -44,7 +44,7 @@ function generatePngObservableFn(server) {
 
     const layout =  new PreserveLayout(layoutParams.dimensions);
 
-    const screenshots$ = urlScreenshotsObservable(url, headers, layout);
+    const screenshots$ = urlScreenshotsObservable(url, sessionCookie, layout, browserTimezone);
 
     return screenshots$.pipe(
       toArray(),
