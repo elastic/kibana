@@ -105,19 +105,16 @@ describe('getPropertyTabNames', () => {
 });
 
 describe('AgentFeatureTipMessage component', () => {
-  let mockDocs;
   const featureName = '';
   const agentName = '';
 
-  beforeEach(() => {
-    mockDocs = {
+  it('should render when docs are returned', () => {
+    const mockDocs = {
       text: 'Mock Docs Text',
       url: 'mock-url'
     };
     getAgentFeatureDocs.mockImplementation(() => mockDocs);
-  });
 
-  it('should render when docs are returned', () => {
     expect(
       shallow(
         <AgentFeatureTipMessage
@@ -129,20 +126,8 @@ describe('AgentFeatureTipMessage component', () => {
     expect(getAgentFeatureDocs).toHaveBeenCalledWith(featureName, agentName);
   });
 
-  it('should render when docs are returned, but missing a url', () => {
-    delete mockDocs.url;
-    expect(
-      shallow(
-        <AgentFeatureTipMessage
-          featureName={featureName}
-          agentName={agentName}
-        />
-      )
-    ).toMatchSnapshot();
-  });
-
   it('should render null empty string when no docs are returned', () => {
-    mockDocs = null;
+    getAgentFeatureDocs.mockImplementation(() => null);
     expect(
       shallow(
         <AgentFeatureTipMessage

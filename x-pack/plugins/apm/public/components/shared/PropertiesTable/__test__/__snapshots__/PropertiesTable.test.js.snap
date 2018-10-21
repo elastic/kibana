@@ -18,17 +18,6 @@ exports[`AgentFeatureTipMessage component should render when docs are returned 1
 </styled.div>
 `;
 
-exports[`AgentFeatureTipMessage component should render when docs are returned, but missing a url 1`] = `
-<styled.div>
-  <EuiIcon
-    size="m"
-    type="iInCircle"
-  />
-  Mock Docs Text
-   
-</styled.div>
-`;
-
 exports[`PropertiesTable component should render empty when data has no keys 1`] = `
 <styled.div>
   <styled.div>
@@ -68,7 +57,7 @@ exports[`PropertiesTable component should render with data 1`] = `
   />
   <AgentFeatureTipMessage
     agentName="testAgentName"
-    featureName="context-testPropKey"
+    featureName="testPropKey"
   />
 </styled.div>
 `;
