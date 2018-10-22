@@ -26,6 +26,7 @@ declare module '@elastic/eui' {
 import { debounce } from 'lodash';
 import React, { Component, SFC } from 'react';
 import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
+import { kfetch } from 'ui/kfetch';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
 import {
@@ -389,6 +390,23 @@ export class QueryBar extends Component<Props, State> {
     this.setState({ isSuggestionsVisible: false });
   };
 
+  public onSelectLanguage = (language: string) => {
+    // Send telemetry info every time the user opts in or out of kuery
+    // As a result it is important this function only ever gets called in the
+    // UI component's change handler.
+    kfetch({
+      pathname: '/api/kibana/kql_opt_in_telemetry',
+      method: 'POST',
+      body: JSON.stringify({ opt_in: language === 'kuery' }),
+    });
+
+    this.props.store.set('kibana.userQueryLanguage', language);
+    this.props.onSubmit({
+      query: '',
+      language,
+    });
+  };
+
   public componentDidMount() {
     this.persistedLog = new PersistedLog(
       `typeahead:${this.props.appName}-${this.state.query.language}`,
@@ -462,13 +480,7 @@ export class QueryBar extends Component<Props, State> {
                 <div className="kuiLocalSearchAssistedInput__assistance">
                   <QueryLanguageSwitcher
                     language={this.state.query.language}
-                    onSelectLanguage={language => {
-                      this.props.store.set('kibana.userQueryLanguage', language);
-                      this.props.onSubmit({
-                        query: '',
-                        language,
-                      });
-                    }}
+                    onSelectLanguage={this.onSelectLanguage}
                   />
                 </div>
               </div>
