@@ -34,7 +34,7 @@ export function infra(kibana: any) {
           euiIconType: 'infraApp',
           id: 'infra:home',
           order: 8000,
-          title: 'InfraOps',
+          title: 'Infra Ops',
           url: `/app/${APP_ID}#/home`,
         },
         {
