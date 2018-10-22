@@ -194,19 +194,19 @@ function discoverController(
   };
 
   $scope.topNavMenu = [{
-    key: i18n('kbn.discover.newSearchTitle', {
+    key: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {
       defaultMessage: 'new',
     }),
-    description: i18n('kbn.discover.newSearchDescription', {
+    description: i18n('kbn.discover.localMenu.newSearchDescription', {
       defaultMessage: 'New Search',
     }),
     run: function () { kbnUrl.change('/discover'); },
     testId: 'discoverNewButton',
   }, {
-    key: i18n('kbn.discover.saveTitle', {
+    key: i18n('kbn.discover.localMenu.saveTitle', {
       defaultMessage: 'save',
     }),
-    description: i18n('kbn.discover.saveSearchDescription', {
+    description: i18n('kbn.discover.localMenu.saveSearchDescription', {
       defaultMessage: 'Save Search',
     }),
     testId: 'discoverSaveButton',
@@ -240,10 +240,10 @@ function discoverController(
       showSaveModal(saveModal);
     }
   }, {
-    key: i18n('kbn.discover.openTitle', {
+    key: i18n('kbn.discover.localMenu.openTitle', {
       defaultMessage: 'open',
     }),
-    description: i18n('kbn.discover.openSavedSearchDescription', {
+    description: i18n('kbn.discover.localMenu.openSavedSearchDescription', {
       defaultMessage: 'Open Saved Search',
     }),
     testId: 'discoverOpenButton',
@@ -255,10 +255,10 @@ function discoverController(
       });
     }
   }, {
-    key: i18n('kbn.discover.shareTitle', {
+    key: i18n('kbn.discover.localMenu.shareTitle', {
       defaultMessage: 'share',
     }),
-    description: i18n('kbn.discover.shareSearchDescription', {
+    description: i18n('kbn.discover.localMenu.shareSearchDescription', {
       defaultMessage: 'Share Search',
     }),
     testId: 'shareTopNavButton',
@@ -279,10 +279,10 @@ function discoverController(
       });
     }
   }, {
-    key: i18n('kbn.discover.inspectTitle', {
+    key: i18n('kbn.discover.localMenu.inspectTitle', {
       defaultMessage: 'inspect',
     }),
-    description: i18n('kbn.discover.openInspectorForSearchDescription', {
+    description: i18n('kbn.discover.localMenu.openInspectorForSearchDescription', {
       defaultMessage: 'Open Inspector for search',
     }),
     testId: 'openInspectorButton',
@@ -312,15 +312,14 @@ function discoverController(
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   docTitle.change(`Discover${pageTitleSuffix}`);
+  const discoverBreadcrumbText = i18n('kbn.discover.discoverBreadcrumbText', {
+    defaultMessage: 'Discover',
+  });
 
   if (savedSearch.id && savedSearch.title) {
-    breadcrumbState.set([{ text: i18n('kbn.discover.discoverBreadcrumbText', {
-      defaultMessage: 'Discover',
-    }), href: '#/discover' }, { text: savedSearch.title }]);
+    breadcrumbState.set([{ text: discoverBreadcrumbText, href: '#/discover' }, { text: savedSearch.title }]);
   } else {
-    breadcrumbState.set([{ text: i18n('kbn.discover.discoverBreadcrumbText', {
-      defaultMessage: 'Discover',
-    }) }]);
+    breadcrumbState.set([{ text: discoverBreadcrumbText }]);
   }
 
   let stateMonitor;
@@ -410,8 +409,8 @@ function discoverController(
   $scope.getBucketIntervalToolTipText = () => {
     return (
       i18n('kbn.discover.bucketIntervalTooltip', {
-        defaultMessage: 'This interval creates {bucketsDescription} \
-to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
+        // eslint-disable-next-line max-len
+        defaultMessage: 'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
         values: {
           bucketsDescription: $scope.bucketInterval.scale > 1
             ? i18n('kbn.discover.tooLargeBucketsText', {
@@ -568,7 +567,7 @@ to show in the selected time range, so it has been scaled to {bucketIntervalDesc
         stateMonitor.setInitialState($state.toJSON());
         if (id) {
           toastNotifications.addSuccess({
-            title: i18n('kbn.discover.searchTitleSuccessfullySavedTitle', {
+            title: i18n('kbn.discover.notifications.savedSearchTitle', {
               defaultMessage: 'Search \'{savedSearchTitle}\' was saved',
               values: {
                 savedSearchTitle: savedSearch.title,
@@ -589,7 +588,7 @@ to show in the selected time range, so it has been scaled to {bucketIntervalDesc
       return { id };
     } catch(saveError) {
       toastNotifications.addDanger({
-        title: i18n('kbn.discover.searchTitleNotSavedTitle', {
+        title: i18n('kbn.discover.notifications.notSavedSearchTitle', {
           defaultMessage: 'Search \'{savedSearchTitle}\' was not saved.',
           values: {
             savedSearchTitle: savedSearch.title,
@@ -691,14 +690,14 @@ to show in the selected time range, so it has been scaled to {bucketIntervalDesc
 
       if (status.remaining > 0) {
         const inspectorRequest = inspectorAdapters.requests.start(
-          i18n('kbn.discover.segmentFetchCompleteStatusTitle', {
+          i18n('kbn.discover.inspectorRequest.segmentFetchCompleteStatusTitle', {
             defaultMessage: 'Segment {fetchCompleteStatus}',
             values: {
               fetchCompleteStatus: $scope.fetchStatus.complete,
             }
           }),
           {
-            description: i18n('kbn.discover.segmentFetchCompleteStatusDescription', {
+            description: i18n('kbn.discover.inspectorRequest.segmentFetchCompleteStatusDescription', {
               defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
             }),
           });
@@ -929,9 +928,9 @@ to show in the selected time range, so it has been scaled to {bucketIntervalDesc
 
     if (stateVal && !stateValFound) {
       const warningTitle = i18n('kbn.discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
-        defaultMessage: '"{stateVal}" is not a configured index pattern ID',
+        defaultMessage: '{stateVal} is not a configured index pattern ID',
         values: {
-          stateVal,
+          stateVal: '"' + stateVal + '"',
         },
       });
 

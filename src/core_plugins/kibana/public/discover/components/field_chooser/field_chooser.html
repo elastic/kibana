@@ -1,4 +1,4 @@
-<section class="sidebar-list" aria-label="{{::'kbn.discover.fieldChooser.indexAndFieldsSectionAriaLabel' | i18n: {defaultMessage: 'Index and fields'} }}">
+<section class="sidebar-list" aria-label="{{::'kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel' | i18n: {defaultMessage: 'Index and fields'} }}">
   <div ng-show="indexPatternList.length > 1">
     <ui-select
       class="index-pattern-selection"
@@ -36,7 +36,7 @@
       class="sidebar-list-header-label"
       id="selected_fields"
       tabindex="0"
-      i18n-id="kbn.discover.fieldChooser.selectedFieldsTitle"
+      i18n-id="kbn.discover.fieldChooser.filter.selectedFieldsTitle"
       i18n-default-message="Selected fields"
     ></h3>
   </div>
@@ -57,7 +57,7 @@
       class="euiFlexItem sidebar-list-header-label"
       id="available_fields"
       tabindex="0"
-      i18n-id="kbn.discover.fieldChooser.availableFieldsTitle"
+      i18n-id="kbn.discover.fieldChooser.filter.availableFieldsTitle"
       i18n-default-message="Available fields"
     ></h3>
 
@@ -95,7 +95,7 @@
       <div class="form-group">
         <label
           for="discoverFieldChooserFilterAggregatable"
-          i18n-id="kbn.discover.fieldChooser.aggregatableLabel"
+          i18n-id="kbn.discover.fieldChooser.filter.aggregatableLabel"
           i18n-default-message="Aggregatable"
         ></label>
         <select
@@ -108,7 +108,7 @@
       <div class="form-group">
         <label
           for="discoverFieldChooserFilterSearchable"
-          i18n-id="kbn.discover.fieldChooser.searchableLabel"
+          i18n-id="kbn.discover.fieldChooser.filter.searchableLabel"
           i18n-default-message="Searchable"
         ></label>
         <select
@@ -121,7 +121,7 @@
       <div class="form-group">
         <label
           for="discoverFieldChooserFilterType"
-          i18n-id="kbn.discover.fieldChooser.typeLabel"
+          i18n-id="kbn.discover.fieldChooser.filter.typeLabel"
           i18n-default-message="Type"
         ></label>
         <select
@@ -134,7 +134,7 @@
       <div class="form-group">
         <label
           for="discoverFieldChooserFilterFieldName"
-          i18n-id="kbn.discover.fieldChooser.fieldNameLabel"
+          i18n-id="kbn.discover.fieldChooser.filter.fieldNameLabel"
           i18n-default-message="Field name"
         ></label>
         <input
@@ -146,7 +146,7 @@
       </div>
       <div class="form-group">
         <label for="discoverFieldChooserHideMissingFields"
-          i18n-id="kbn.discover.fieldChooser.hideMissingFieldsLabel"
+          i18n-id="kbn.discover.fieldChooser.filter.hideMissingFieldsLabel"
           i18n-default-message="{input} Hide missing fields"
           i18n-values="{ input: '<input id=\'discoverFieldChooserHideMissingFields\' type=\'checkbox\' ng-model=\'filter.vals.missing\'></label>'}"
         ></label>
@@ -155,7 +155,7 @@
         ng-click="filter.reset()"
         ng-disabled="!filter.active"
         class="kuiButton kuiButton--danger kuiButton--fullWidth"
-        i18n-id="kbn.discover.fieldChooser.resetFiltersButtonLabel"
+        i18n-id="kbn.discover.fieldChooser.filter.resetFiltersButtonLabel"
         i18n-default-message="Reset filters"
       ></button>
     </form>
@@ -167,7 +167,7 @@
     class="list-unstyled sidebar-well dscFieldList--popular">
     <li class="sidebar-item sidebar-list-header">
       <h6
-        i18n-id="kbn.discover.fieldChooser.popularTitle"
+        i18n-id="kbn.discover.fieldChooser.filter.popularTitle"
         i18n-default-message="Popular"
       ></h6>
     </li>

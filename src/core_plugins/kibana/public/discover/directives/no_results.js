@@ -64,20 +64,20 @@ export class DiscoverNoResults extends Component {
           <EuiText size="xs">
             <FormattedMessage
               id="kbn.discover.noResults.indexFailureShardText"
-              defaultMessage="{index}, shard &lsquo;{failureShard}&rsquo;"
+              defaultMessage="{index}, shard {failureShard}"
               values={{
                 index: (
                   <strong>
                     <FormattedMessage
                       id="kbn.discover.noResults.indexFailureIndexText"
-                      defaultMessage="Index &lsquo;{failure.index}&rsquo;"
+                      defaultMessage="Index {failureIndex}"
                       values={{
-                        failureIndex: failure.index,
+                        failureIndex: '"' + failure.index + '"',
                       }}
                     />
                   </strong>
                 ),
-                failureShard: failure.shard,
+                failureShard: '"' + failure.shard + '"',
               }}
             />
           </EuiText>
@@ -99,7 +99,7 @@ export class DiscoverNoResults extends Component {
           <EuiText>
             <h3>
               <FormattedMessage
-                id="kbn.discover.noResults.addressShardFailures"
+                id="kbn.discover.noResults.addressShardFailuresTitle"
                 defaultMessage="Address shard failures"
               />
             </h3>
@@ -137,8 +137,7 @@ export class DiscoverNoResults extends Component {
                 id="kbn.discover.noResults.queryMayNotMatchTitle"
                 defaultMessage="One or more of the indices you&rsquo;re looking at contains a date field. Your query may
                   not match anything in the current time range, or there may not be any data at all in
-                  the currently selected time range. You can try {timepickerLink} and changing the time range to one which contains data.
-                "
+                  the currently selected time range. You can try {timepickerLink} and changing the time range to one which contains data."
                 values={{
                   timepickerLink: (
                     <EuiLink

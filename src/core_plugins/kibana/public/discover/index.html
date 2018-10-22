@@ -18,7 +18,13 @@
             ></span>&nbsp;
           </span>
           <span data-test-subj="discoverQueryHits" class="kuiLocalBreadcrumb__emphasis">{{(hits || 0) | number:0}}</span>
-          <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
+          <span
+            i18n-id="kbn.discover.hitsPluralTitle"
+            i18n-default-message="{hits, plural, one{hit} other {hits}}"
+            i18n-values="{
+              hits
+            }"
+          ></span>
         </h1>
       </div>
 

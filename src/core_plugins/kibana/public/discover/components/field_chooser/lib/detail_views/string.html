@@ -37,7 +37,7 @@
             css-truncate
             css-truncate-expandable="true"
             class="dscFieldDetails__value"
-            aria-label="{{bucketAriaLabel}}"
+            aria-label="{{::bucketAriaLabel}}"
           >
             {{::bucket.display}}
             <em
@@ -101,9 +101,9 @@
       i18n-default-message="Visualize"
     ></span>
     <span class="discover-field-vis-warning" ng-show="warnings.length" tooltip="{{warnings.join(' ')}}">
-    ( {{::warnings.length}} <span
+    ( <span
       i18n-id="kbn.discover.fieldChooser.detailViews.warningsText"
-      i18n-default-message="{warningsLength, plural, one {warning} other {warnings}}"
+      i18n-default-message="{warningsLength, plural, one {# warning} other {# warnings}}"
       i18n-values="{ warningsLength: warnings.length }"
     ></span> <i aria-hidden="true" class="fa fa-warning"></i> )
     </span>

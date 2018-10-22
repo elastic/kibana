@@ -46,12 +46,13 @@ const DiscoverFetchError = ({ fetchError }) => {
       <p>
         <FormattedMessage
           id="kbn.discover.fetchError.howToAddressErrorDescription"
-          defaultMessage="You can address this error by editing the &lsquo;{fetchErrorScript}&rsquo; field
+          defaultMessage="You can address this error by editing the {fetchErrorScript} field
             in {managementLink},
-            under the &ldquo;Scripted fields&rdquo; tab.
+            under the {scriptFaild} tab.
           "
           values={{
-            fetchErrorScript: fetchError.script,
+            fetchErrorScript: '&lsquo;' + fetchError.script + '&rsquo;',
+            scriptFaild: '&ldquo;Scripted fields&rdquo;',
             managementLink: <a
               href={url}
               id="kbn.discover.fetchError.managmentLinkText"
