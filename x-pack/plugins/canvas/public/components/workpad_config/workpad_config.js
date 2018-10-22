@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFieldText,
@@ -20,125 +20,149 @@ import {
   EuiTextArea,
   EuiAccordion,
   EuiText,
+  EuiButton,
 } from '@elastic/eui';
 
-export const WorkpadConfig = ({ size, name, style, setSize, setName, setWorkpadStyle }) => {
-  const rotate = () => setSize({ width: size.height, height: size.width });
+export class WorkpadConfig extends PureComponent {
+  static propTypes = {
+    size: PropTypes.object.isRequired,
+    name: PropTypes.string.isRequired,
+    style: PropTypes.string,
+    setSize: PropTypes.func.isRequired,
+    setName: PropTypes.func.isRequired,
+    setWorkpadStyle: PropTypes.func.isRequired,
+  };
 
-  const badges = [
-    {
-      name: '1080p',
-      size: { height: 1080, width: 1920 },
-    },
-    {
-      name: '720p',
-      size: { height: 720, width: 1280 },
-    },
-    {
-      name: 'A4',
-      size: { height: 842, width: 590 },
-    },
-    {
-      name: 'US Letter',
-      size: { height: 792, width: 612 },
-    },
-  ];
+  state = {
+    style: this.props.style,
+  };
 
-  return (
-    <div>
-      <EuiTitle size="xs">
-        <h4>Workpad</h4>
-      </EuiTitle>
+  render() {
+    const { size, name, setSize, setName, setWorkpadStyle } = this.props;
+    const { style } = this.state;
+    const rotate = () => setSize({ width: size.height, height: size.width });
 
-      <EuiSpacer size="m" />
+    const badges = [
+      {
+        name: '1080p',
+        size: { height: 1080, width: 1920 },
+      },
+      {
+        name: '720p',
+        size: { height: 720, width: 1280 },
+      },
+      {
+        name: 'A4',
+        size: { height: 842, width: 590 },
+      },
+      {
+        name: 'US Letter',
+        size: { height: 792, width: 612 },
+      },
+    ];
 
-      <EuiFormRow label="Name" compressed>
-        <EuiFieldText value={name} onChange={e => setName(e.target.value)} />
-      </EuiFormRow>
-
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem>
-          <EuiFormRow label="Width" compressed>
-            <EuiFieldNumber
-              onChange={e => setSize({ width: Number(e.target.value), height: size.height })}
-              value={size.width}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiToolTip position="bottom" content="Flip the width and height">
-              <EuiButtonIcon
-                iconType="merge"
-                color="text"
-                onClick={rotate}
-                aria-label="Swap Page Dimensions"
-                style={{ marginBottom: 12 }}
-              />
-            </EuiToolTip>
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow label="Height" compressed>
-            <EuiFieldNumber
-              onChange={e => setSize({ height: Number(e.target.value), width: size.width })}
-              value={size.height}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
-
+    return (
       <div>
-        {badges.map((badge, i) => (
-          <EuiBadge
-            key={`page-size-badge-${i}`}
-            color="hollow"
-            onClick={() => setSize(badge.size)}
-            aria-label={`Preset Page Size: ${badge.name}`}
-            onClickAriaLabel={`Set page size to ${badge.name}`}
-          >
-            {badge.name}
-          </EuiBadge>
-        ))}
-      </div>
+        <EuiTitle size="xs">
+          <h4>Workpad</h4>
+        </EuiTitle>
 
-      <EuiSpacer size="m" />
+        <EuiSpacer size="m" />
 
-      <EuiAccordion
-        id="accordion-global-css"
-        className="canvasArg__accordion"
-        buttonContent={
-          <EuiToolTip
-            content="Apply styles to all pages in this workpad"
-            position="left"
-            className="canvasArg__tooltip"
-          >
-            <EuiText size="s" color="subdued">
-              Global CSS overrides
-            </EuiText>
-          </EuiToolTip>
-        }
-      >
-        <div className="canvasArg__content">
-          <EuiTextArea
-            aria-label="Apply styles to all pages in this workpad"
-            value={style}
-            onChange={e => setWorkpadStyle(e.target.value)}
-            rows={10}
-          />
+        <EuiFormRow label="Name" compressed>
+          <EuiFieldText value={name} onChange={e => setName(e.target.value)} />
+        </EuiFormRow>
+
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem>
+            <EuiFormRow label="Width" compressed>
+              <EuiFieldNumber
+                onChange={e => setSize({ width: Number(e.target.value), height: size.height })}
+                value={size.width}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiToolTip position="bottom" content="Flip the width and height">
+                <EuiButtonIcon
+                  iconType="merge"
+                  color="text"
+                  onClick={rotate}
+                  aria-label="Swap Page Dimensions"
+                  style={{ marginBottom: 12 }}
+                />
+              </EuiToolTip>
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow label="Height" compressed>
+              <EuiFieldNumber
+                onChange={e => setSize({ height: Number(e.target.value), width: size.width })}
+                value={size.height}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <div>
+          {badges.map((badge, i) => (
+            <EuiBadge
+              key={`page-size-badge-${i}`}
+              color="hollow"
+              onClick={() => setSize(badge.size)}
+              aria-label={`Preset Page Size: ${badge.name}`}
+              onClickAriaLabel={`Set page size to ${badge.name}`}
+            >
+              {badge.name}
+            </EuiBadge>
+          ))}
         </div>
-      </EuiAccordion>
-    </div>
-  );
-};
 
-WorkpadConfig.propTypes = {
-  size: PropTypes.object.isRequired,
-  name: PropTypes.string.isRequired,
-  style: PropTypes.string,
-  setSize: PropTypes.func.isRequired,
-  setName: PropTypes.func.isRequired,
-  setWorkpadStyle: PropTypes.func.isRequired,
-};
+        <EuiSpacer size="m" />
+
+        <EuiAccordion
+          id="accordion-global-css"
+          className="canvasArg__accordion"
+          buttonContent={
+            <EuiToolTip
+              content="Apply styles to all pages in this workpad"
+              position="left"
+              className="canvasArg__tooltip"
+            >
+              <EuiText size="s" color="subdued">
+                Global CSS overrides
+              </EuiText>
+            </EuiToolTip>
+          }
+        >
+          <div className="canvasArg__content">
+            <EuiTextArea
+              aria-label="Apply styles to all pages in this workpad"
+              value={style}
+              onChange={e => this.setState({ style: e.target.value })}
+              rows={10}
+            />
+            <EuiSpacer size="s" />
+            <EuiButton
+              size="s"
+              onClick={() =>
+                setWorkpadStyle(
+                  style ||
+                    `.canvasPage {
+
+}`
+                )
+              }
+            >
+              Apply stylesheet
+            </EuiButton>
+            <EuiSpacer size="xs" />
+          </div>
+        </EuiAccordion>
+      </div>
+    );
+  }
+}
