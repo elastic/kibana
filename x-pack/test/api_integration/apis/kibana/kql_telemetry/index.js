@@ -5,8 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('kibana', () => {
-    loadTestFile(require.resolve('./stats'));
+  describe('KQL', () => {
     loadTestFile(require.resolve('./kql_telemetry'));
   });
 }

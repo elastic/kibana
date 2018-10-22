@@ -17,20 +17,13 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', () => {
-    loadTestFile(require.resolve('./elasticsearch'));
-    loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./home'));
-    loadTestFile(require.resolve('./index_patterns'));
-    loadTestFile(require.resolve('./kql_telemetry'));
-    loadTestFile(require.resolve('./management'));
-    loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./scripts'));
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./shorten'));
-    loadTestFile(require.resolve('./suggestions'));
-    loadTestFile(require.resolve('./status'));
-    loadTestFile(require.resolve('./stats'));
+import { fetch } from './fetch';
+
+export function makeKQLUsageCollector(server) {
+  const kqlUsageCollector = server.usage.collectorSet.makeUsageCollector({
+    type: 'kql',
+    fetch,
   });
+
+  server.usage.collectorSet.register(kqlUsageCollector);
 }
