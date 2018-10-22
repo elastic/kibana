@@ -20,24 +20,24 @@
 import { difference } from 'lodash';
 import { transformDeprecations } from './transform_deprecations';
 import { unset, formatListAsProse, getFlattenedObject } from '../../utils';
-import { createTransform, Deprecations } from '../../deprecation';
+import { getTransform } from '../../deprecation';
 
 
 const getFlattenedKeys = object => (
   Object.keys(getFlattenedObject(object))
 );
 
-function getUnusedConfigKeys(plugins, disabledPluginSpecs, rawSettings, configValues) {
+async function getUnusedConfigKeys(plugins, disabledPluginSpecs, rawSettings, configValues) {
   // transform deprecated core settings
-  let settings = transformDeprecations(rawSettings);
+  const settings = transformDeprecations(rawSettings);
 
   // transform deprecated plugin settings
-  plugins.forEach(async ({ spec }) => {
-    const deprecationsProvider = spec.getDeprecationsProvider();
-    if (!deprecationsProvider) return;
-    const transformer = await deprecationsProvider(Deprecations);
-    settings = createTransform(transformer)(settings);
-  });
+  await Promise.all(
+    plugins.map(async ({ spec }) => {
+      const transform = await getTransform(spec);
+      transform(settings);
+    })
+  );
 
   // remove config values from disabled plugins
   for (const spec of disabledPluginSpecs) {
@@ -68,19 +68,20 @@ export default async function (kbnServer, server, config) {
     kbnServer.disabledPluginSpecs,
     kbnServer.settings,
     config.get()
-  )
-    .map(key => `"${key}"`);
+  );
+
 
   if (!unusedKeys.length) {
     return;
   }
 
-  const desc = unusedKeys.length === 1
+  const formattedUnusedKeys = unusedKeys.map(key => `"${key}"`);
+  const desc = formattedUnusedKeys.length === 1
     ? 'setting was'
     : 'settings were';
 
   const error = new Error(
-    `${formatListAsProse(unusedKeys)} ${desc} not applied. ` +
+    `${formatListAsProse(formattedUnusedKeys)} ${desc} not applied. ` +
     'Check for spelling errors and ensure that expected ' +
     'plugins are installed.'
   );
