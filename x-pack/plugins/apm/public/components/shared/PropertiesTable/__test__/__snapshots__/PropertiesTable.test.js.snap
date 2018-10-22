@@ -8,8 +8,8 @@ exports[`AgentFeatureTipMessage component should render when docs are returned 1
     size="m"
     type="iInCircle"
   />
-  Mock Docs Text
-   
+  You can configure your agent to add contextual information about your users.
+
   <ExternalLink
     href="mock-url"
   >

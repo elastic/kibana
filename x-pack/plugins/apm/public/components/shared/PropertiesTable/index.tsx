@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { StringMap } from '../../../../typings/common';
 import { colors, fontSize, px, unit, units } from '../../../style/variables';
-import { getAgentFeatureDocs } from '../../../utils/documentation';
+import { getAgentFeatureDocsUrl } from '../../../utils/documentation';
 // @ts-ignore
 import { ExternalLink } from '../../../utils/url';
 import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
@@ -38,6 +38,17 @@ export function getPropertyTabNames(selected: string[]): string[] {
   ).map(({ key }: { key: string }) => key);
 }
 
+function getAgentFeatureText(featureName: string) {
+  switch (featureName) {
+    case 'user':
+      return 'You can configure your agent to add contextual information about your users.';
+    case 'tags':
+      return 'You can configure your agent to add filterable tags on transactions.';
+    case 'custom':
+      return 'You can configure your agent to add custom contextual information on transactions.';
+  }
+}
+
 export function AgentFeatureTipMessage({
   featureName,
   agentName
@@ -45,17 +56,17 @@ export function AgentFeatureTipMessage({
   featureName: string;
   agentName?: string;
 }) {
-  const docs = getAgentFeatureDocs(featureName, agentName);
+  const docsUrl = getAgentFeatureDocsUrl(featureName, agentName);
 
-  if (!docs) {
+  if (!docsUrl) {
     return null;
   }
 
   return (
     <TableInfo>
       <EuiIcon type="iInCircle" />
-      {docs.text}{' '}
-      <ExternalLink href={docs.url}>
+      {getAgentFeatureText(featureName)}{' '}
+      <ExternalLink href={docsUrl}>
         Learn more in the documentation.
       </ExternalLink>
     </TableInfo>
