@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { mapValues } from 'lodash';
+import { fetch } from './fetch';
 
-export function unhashQueryString(parsedQueryString, states) {
-  return mapValues(parsedQueryString, (val, key) => {
-    const state = states.find(s => key === s.getQueryParamName());
-    return state ? state.translateHashToRison(val) : val;
+export function makeKQLUsageCollector(server) {
+  const kqlUsageCollector = server.usage.collectorSet.makeUsageCollector({
+    type: 'kql',
+    fetch,
   });
+
+  server.usage.collectorSet.register(kqlUsageCollector);
 }

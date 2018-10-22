@@ -16,34 +16,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { cloneDeep, isEqual, set, isPlainObject } from 'lodash';
+import { cloneDeep, isEqual, isPlainObject, set } from 'lodash';
+import { State } from './state';
 
 export const stateMonitorFactory = {
-  create: (state, customInitialState) => stateMonitor(state, customInitialState)
+  create: (state: State, customInitialState: State) => stateMonitor(state, customInitialState),
 };
 
-function stateMonitor(state, customInitialState) {
+interface StateStatus {
+  clean: boolean;
+  dirty: boolean;
+}
+
+type ChangeHandlerFn = (status: StateStatus, type: string | null, keys: string[]) => void;
+
+function stateMonitor(state: State, customInitialState: State) {
   let destroyed = false;
-  let ignoredProps = [];
-  let changeHandlers = [];
-  let initialState;
+  let ignoredProps: string[] = [];
+  let changeHandlers: ChangeHandlerFn[] | undefined = [];
+  let initialState: State;
 
   setInitialState(customInitialState);
 
-  function setInitialState(customInitialState) {
+  function setInitialState(innerCustomInitialState: State) {
     // state.toJSON returns a reference, clone so we can mutate it safely
-    initialState = cloneDeep(customInitialState) || cloneDeep(state.toJSON());
+    initialState = cloneDeep(innerCustomInitialState) || cloneDeep(state.toJSON());
   }
 
-  function removeIgnoredProps(state) {
+  function removeIgnoredProps(innerState: State) {
     ignoredProps.forEach(path => {
-      set(state, path, true);
+      set(innerState, path, true);
     });
-    return state;
+    return innerState;
   }
 
-  function getStatus() {
+  function getStatus(): StateStatus {
     // state.toJSON returns a reference, clone so we can mutate it safely
     const currentState = removeIgnoredProps(cloneDeep(state.toJSON()));
     const isClean = isEqual(currentState, initialState);
@@ -54,49 +61,60 @@ function stateMonitor(state, customInitialState) {
     };
   }
 
-  function dispatchChange(type = null, keys = []) {
+  function dispatchChange(type: string | null = null, keys: string[] = []) {
     const status = getStatus();
+    if (!changeHandlers) {
+      throw new Error('Change handlers is undefined, this object has been destroyed');
+    }
     changeHandlers.forEach(changeHandler => {
       changeHandler(status, type, keys);
     });
   }
 
-  function dispatchFetch(keys) {
+  function dispatchFetch(keys: string[]) {
     dispatchChange('fetch_with_changes', keys);
   }
 
-  function dispatchSave(keys) {
+  function dispatchSave(keys: string[]) {
     dispatchChange('save_with_changes', keys);
   }
 
-  function dispatchReset(keys) {
+  function dispatchReset(keys: string[]) {
     dispatchChange('reset_with_changes', keys);
   }
 
   return {
-    setInitialState(customInitialState) {
-      if (!isPlainObject(customInitialState)) throw new TypeError('The default state must be an object');
+    setInitialState(innerCustomInitialState: State) {
+      if (!isPlainObject(innerCustomInitialState)) {
+        throw new TypeError('The default state must be an object');
+      }
 
       // check the current status
       const previousStatus = getStatus();
 
       // update the initialState and apply ignoredProps
-      setInitialState(customInitialState);
+      setInitialState(innerCustomInitialState);
       removeIgnoredProps(initialState);
 
       // fire the change handler if the status has changed
-      if (!isEqual(previousStatus, getStatus())) dispatchChange();
+      if (!isEqual(previousStatus, getStatus())) {
+        dispatchChange();
+      }
     },
 
-    ignoreProps(props) {
+    ignoreProps(props: string[]) {
       ignoredProps = ignoredProps.concat(props);
       removeIgnoredProps(initialState);
       return this;
     },
 
-    onChange(callback) {
-      if (destroyed) throw new Error('Monitor has been destroyed');
-      if (typeof callback !== 'function') throw new Error('onChange handler must be a function');
+    onChange(callback: ChangeHandlerFn) {
+      if (destroyed || !changeHandlers) {
+        throw new Error('Monitor has been destroyed');
+      }
+      if (typeof callback !== 'function') {
+        throw new Error('onChange handler must be a function');
+      }
 
       changeHandlers.push(callback);
 
@@ -107,7 +125,9 @@ function stateMonitor(state, customInitialState) {
 
       // if the state is already dirty, fire the change handler immediately
       const status = getStatus();
-      if (status.dirty) dispatchChange();
+      if (status.dirty) {
+        dispatchChange();
+      }
 
       return this;
     },
@@ -118,6 +138,6 @@ function stateMonitor(state, customInitialState) {
       state.off('fetch_with_changes', dispatchFetch);
       state.off('save_with_changes', dispatchSave);
       state.off('reset_with_changes', dispatchReset);
-    }
+    },
   };
 }
