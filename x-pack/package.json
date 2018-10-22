@@ -154,7 +154,6 @@
     "concat-stream": "1.5.1",
     "cookie": "^0.3.1",
     "copy-to-clipboard": "^3.0.8",
-    "csv-parse": "^3.1.2",
     "d3": "3.5.6",
     "d3-scale": "1.0.6",
     "dataloader": "^1.4.0",

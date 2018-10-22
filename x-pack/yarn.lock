@@ -2803,11 +2803,6 @@ csstype@^2.2.0:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.5.5.tgz#4125484a3d42189a863943f23b9e4b80fedfa106"
   integrity sha512-EGMjeoiN3aqEX5u/cyH5mSdGBDGdLcCQvcEcBWNGFSPXKd9uOTIeVG91YQ22OxI44DKpvI+4C7VUSmEpsHWJaA==
 
-csv-parse@^3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/csv-parse/-/csv-parse-3.1.2.tgz#51bfd2d39b13e66f6da8656360b8ec82ca159494"
-  integrity sha512-NtcS4h3rLcwawpJJDRolYeuQW/2RvutpHpzbokbk5xMCNEDSyvAK3SmuCtd6tKOftKiMa2wn4viOU32A/5VDTQ==
-
 currently-unhandled@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/currently-unhandled/-/currently-unhandled-0.4.1.tgz#988df33feab191ef799a61369dd76c17adf957ea"

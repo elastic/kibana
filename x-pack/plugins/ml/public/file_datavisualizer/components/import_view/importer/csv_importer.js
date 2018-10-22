@@ -6,8 +6,7 @@
 
 
 import { Importer } from './importer';
-import { parse } from './csv_parse';
-// import csvParse from 'csv-parse';
+import Papa from 'papaparse';
 
 export class CsvImporter extends Importer {
   constructor(results) {
@@ -21,57 +20,33 @@ export class CsvImporter extends Importer {
   }
 
   async read(csv) {
-    console.log('read delimited file');
-    console.time('read delimited file');
-
     try {
-      const settings = {
-        skip_empty_lines: true,
+      const config = {
+        header: false,
+        skipEmptyLines: 'greedy',
         delimiter: this.delimiter,
-        quote: this.quote,
-        columns: this.columnNames,
-        relax_column_count: true,
+        quoteChar: this.quote,
       };
 
-      // commented out code left in for future work to optimise
-      // csv parsing
+      const parserOutput = Papa.parse(csv, config);
 
-      // const parser = csvParse(settings);
-      // parser.write(csv);
-      // parser.end();
+      if (parserOutput.errors.length) {
+        // throw an error with the message of the first error encountered
+        throw parserOutput.errors[0].message;
+      }
 
-      this.data = await parse(csv, settings);
-
-      // const output = [];
-      // parser.on('readable', () => {
-      //   let record;
-      //   while (record = parser.read()) {
-      //     output.push(record);
-      //   }
-      // });
-
-      // parser.on('error', (err) => {
-      //   console.error(err.message);
-      // });
-
-      // parser.on('end', () => {
-      //   console.log('output', output);
-      //   console.timeEnd('read file');
-      // });
+      this.data = parserOutput.data;
 
       if (this.hasHeaderRow) {
         this.data.shift();
       }
 
-      this.docArray = this.data;
-      // this.docArray = formatToJson(this.data, this.columnNames);
-      console.timeEnd('read delimited file');
+      this.docArray = formatToJson(this.data, this.columnNames);
 
       return {
         success: true,
       };
     } catch (error) {
-      console.timeEnd('read delimited file');
       return {
         success: false,
         error,
@@ -80,15 +55,15 @@ export class CsvImporter extends Importer {
   }
 }
 
-// function formatToJson(data, columnNames) {
-//   const docArray = [];
-//   for (let i = 0; i < data.length; i++) {
-//     const line = {};
-//     for (let c = 0; c < columnNames.length; c++) {
-//       const col = columnNames[c];
-//       line[col] = data[i][c];
-//     }
-//     docArray.push(line);
-//   }
-//   return docArray;
-// }
+function formatToJson(data, columnNames) {
+  const docArray = [];
+  for (let i = 0; i < data.length; i++) {
+    const line = {};
+    for (let c = 0; c < columnNames.length; c++) {
+      const col = columnNames[c];
+      line[col] = data[i][c];
+    }
+    docArray.push(line);
+  }
+  return docArray;
+}
