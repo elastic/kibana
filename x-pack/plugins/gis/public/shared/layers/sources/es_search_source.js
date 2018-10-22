@@ -269,9 +269,7 @@ class Editor extends React.Component {
     //make default selection
     const geoFields = indexPattern.fields.filter(Editor._filterGeoField);
     if (geoFields[0]) {
-      this.setState({
-        geoField: geoFields[0].name
-      });
+      this.onGeoFieldSelect(geoFields[0].name);
     }
 
   }, 300);
