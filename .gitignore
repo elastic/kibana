@@ -11,7 +11,6 @@ build
 *.iws
 *.iml
 *.ipr
-/kibana/
 /data/
 .project
 .classpath

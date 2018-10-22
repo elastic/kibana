@@ -5,3 +5,6 @@
 [submodule "lsp/eclipse.jdt.ls"]
 	path = lsp/eclipse.jdt.ls
 	url = ../eclipse.jdt.ls
+[submodule "kibana"]
+	path = kibana
+	url = https://github.com/elastic/kibana

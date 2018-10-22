@@ -2,10 +2,6 @@ buildscript {
   repositories {
     jcenter()
   }
-
-  dependencies {
-    classpath 'com.palominolabs.gradle.task:gradle-git-clone-task:0.0.3'
-  }
 }
 
 plugins {
@@ -18,17 +14,7 @@ node {
   download = true
 }
 
-task checkoutKibana(type: com.palominolabs.gradle.task.git.clone.GitCloneTask) {
-  inputs.property("kibanaVersion", kibanaVersion)
-  outputs.files(fileTree("$rootDir/kibana/src"))
-
-  dir = file("$rootDir/kibana")
-  uri = 'https://github.com/elastic/kibana'
-  treeish = kibanaVersion
-  forceFetch = true
-}
-
-task bootstrap(type: YarnTask, dependsOn: [yarnSetup, checkoutKibana, rootProject.tasks.checkoutSubmodule])  {
+task bootstrap(type: YarnTask, dependsOn: [yarnSetup, rootProject.tasks.checkoutSubmodule])  {
   inputs.property("kibanaVersion", kibanaVersion)
   inputs.files(
     file("$rootDir/kibana-extra/codesearch/package.json"),
