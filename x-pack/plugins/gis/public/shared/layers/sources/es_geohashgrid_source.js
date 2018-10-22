@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 
 import {
   EuiFormRow,
-  EuiButton,
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../components/single_field_select';
@@ -316,6 +315,18 @@ class Editor extends React.Component {
     );
   }
 
+  filterForGeoPoint = () => {
+    return fields => {
+      let hasGeoPoint = false;
+      try {
+        hasGeoPoint = fields.some(({ type }) => type === 'geo_point');
+      } catch (error) {
+        throw new Error(error);
+      }
+      return hasGeoPoint;
+    };
+  }
+
   render() {
     return (
       <Fragment>
@@ -328,6 +339,7 @@ class Editor extends React.Component {
             indexPatternId={this.state.indexPatternId}
             onChange={this.onIndexPatternSelect}
             placeholder="Select index pattern"
+            filterFields={this.filterForGeoPoint()}
           />
         </EuiFormRow>
 
