@@ -84,7 +84,7 @@ export class EMSFileSource extends VectorSource {
     );
   }
 
-  getDisplayName() {
+  async getDisplayName() {
     return this._descriptor.name;
   }
 

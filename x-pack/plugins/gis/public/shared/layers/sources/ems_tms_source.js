@@ -61,7 +61,7 @@ export class EMSTMSSource extends TMSSource {
     });
   }
 
-  getDisplayName() {
+  async getDisplayName() {
     return this._descriptor.id;
   }
 

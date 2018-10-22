@@ -15,72 +15,102 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-export function TOCEntry({ layer, openLayerPanel, toggleVisible, zoom }) {
+export class TOCEntry extends React.Component {
 
-  let visibilityIndicator;
-  if (layer.dataHasLoadError()) {
-    visibilityIndicator = (
-      <EuiIconTip
-        aria-label="Load warning"
-        size="m"
-        type="alert"
-        color="warning"
-        content={layer.getDataLoadError()}
-      />
-    );
-  } else if (layer.isLayerLoading()) {
-    visibilityIndicator = <EuiLoadingSpinner size="s"/>;
-  } else if (!layer.showAtZoomLevel(zoom)) {
-    const { minZoom, maxZoom } = layer.getZoomConfig();
-    visibilityIndicator = (
-      <EuiToolTip
-        position="left"
-        content={`Map is at zoom level ${zoom}.
+
+  constructor() {
+    super();
+    this.state = {
+      displayName: null };
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    const displayName = this.props.layer.getDisplayName();
+    Promise.all([displayName]).then(labels => {
+      if (this._isMounted) {
+        this.setState({
+          displayName: labels[0]
+        });
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  render() {
+
+    const { layer, openLayerPanel, toggleVisible, zoom } = this.props;
+
+    let visibilityIndicator;
+    if (layer.dataHasLoadError()) {
+      visibilityIndicator = (
+        <EuiIconTip
+          aria-label="Load warning"
+          size="m"
+          type="alert"
+          color="warning"
+          content={layer.getDataLoadError()}
+        />
+      );
+    } else if (layer.isLayerLoading()) {
+      visibilityIndicator = <EuiLoadingSpinner size="s"/>;
+    } else if (!layer.showAtZoomLevel(zoom)) {
+      const { minZoom, maxZoom } = layer.getZoomConfig();
+      visibilityIndicator = (
+        <EuiToolTip
+          position="left"
+          content={`Map is at zoom level ${zoom}.
           This layer is only visible between zoom levels ${minZoom} to ${maxZoom}.`}
-      >
+        >
+          <EuiCheckbox
+            id={layer.getId()}
+            checked={layer.isVisible()}
+            onChange={() => {}}
+            disabled
+          />
+        </EuiToolTip>
+      );
+    } else {
+      visibilityIndicator = (
         <EuiCheckbox
           id={layer.getId()}
           checked={layer.isVisible()}
-          onChange={() => {}}
-          disabled
+          onChange={() => toggleVisible(layer.getId())}
         />
-      </EuiToolTip>
-    );
-  } else {
-    visibilityIndicator = (
-      <EuiCheckbox
+      );
+    }
+
+
+    return (
+      <div
+        className="layerEntry"
         id={layer.getId()}
-        checked={layer.isVisible()}
-        onChange={() => toggleVisible(layer.getId())}
-      />
+        data-layerid={layer.getId()}
+      >
+        <EuiFlexGroup
+          gutterSize="s"
+          responsive={false}
+          className={layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.dataHasLoadError() ? 'visible' : 'notvisible'}
+        >
+          <EuiFlexItem grow={false} className="layerEntry--visibility">
+            {visibilityIndicator}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <button onClick={() => openLayerPanel(layer.getId())} >
+              <div style={{ width: 180 }} className="eui-textTruncate">
+                {this.state.displayName}
+              </div>
+            </button>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <span className="grab"><EuiIcon type="grab" className="grab"/></span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     );
   }
 
-  return (
-    <div
-      className="layerEntry"
-      id={layer.getId()}
-      data-layerid={layer.getId()}
-    >
-      <EuiFlexGroup
-        gutterSize="s"
-        responsive={false}
-        className={layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.dataHasLoadError() ? 'visible' : 'notvisible'}
-      >
-        <EuiFlexItem grow={false} className="layerEntry--visibility">
-          {visibilityIndicator}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <button onClick={() => openLayerPanel(layer.getId())} >
-            <div style={{ width: 180 }} className="eui-textTruncate">
-              {layer.getDisplayName()}
-            </div>
-          </button>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <span className="grab"><EuiIcon type="grab" className="grab"/></span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
-  );
 }

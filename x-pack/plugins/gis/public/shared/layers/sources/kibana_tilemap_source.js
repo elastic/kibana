@@ -66,6 +66,10 @@ export class KibanaTilemapSource extends  TMSSource {
   getUrlTemplate() {
     return this._descriptor.url;
   }
+
+  async getDisplayName() {
+    return this.getUrlTemplate();
+  }
 }
 
 class KibanaTilemapEditor extends React.Component {

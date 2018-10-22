@@ -36,7 +36,7 @@ export class ASource {
     throw new Error(`Source#createDefaultLayer not implemented`);
   }
 
-  getDisplayName() {
+  async getDisplayName() {
     console.warn('Source should implement Source#getDisplayName');
     return '';
   }

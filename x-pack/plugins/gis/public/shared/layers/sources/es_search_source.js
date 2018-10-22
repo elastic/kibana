@@ -174,8 +174,9 @@ export class ESSearchSource extends VectorSource {
     return _.get(this._descriptor, 'filterByMapBounds', false);
   }
 
-  getDisplayName() {
-    return this._descriptor.indexPatternId;
+  async getDisplayName() {
+    const indexPattern = await this._getIndexPattern();
+    return indexPattern.title;
   }
 
   async getStringFields() {

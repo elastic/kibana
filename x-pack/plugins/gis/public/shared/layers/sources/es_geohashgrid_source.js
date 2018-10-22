@@ -143,6 +143,22 @@ export class ESGeohashGridSource extends ASource {
     return featureCollection;
   }
 
+  async isTimeAware() {
+    const indexPattern = await this._getIndexPattern();
+    const timeField = indexPattern.timeFieldName;
+    return !!timeField;
+  }
+
+  async _getIndexPattern() {
+    let indexPattern;
+    try {
+      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
+    } catch (error) {
+      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
+    }
+    return indexPattern;
+  }
+
   _makeAggConfigs(precision) {
     return [
       // TODO allow user to configure metric(s) aggregations
@@ -183,8 +199,9 @@ export class ESGeohashGridSource extends ASource {
     });
   }
 
-  getDisplayName() {
-    return `geohash_grid ${this._descriptor.indexPatternId}`;
+  async getDisplayName() {
+    const indexPattern = await this._getIndexPattern();
+    return indexPattern.title;
   }
 }
 
@@ -192,7 +209,7 @@ class Editor extends React.Component {
 
   static propTypes = {
     onSelect: PropTypes.func.isRequired,
-  }
+  };
 
   constructor() {
     super();

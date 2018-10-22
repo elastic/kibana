@@ -77,7 +77,7 @@ export class KibanaRegionmapSource extends VectorSource {
     return VectorSource.getGeoJson(fileSource, fileSource.url);
   }
 
-  getDisplayName() {
+  async getDisplayName() {
     return this._descriptor.name;
   }
 

@@ -63,7 +63,7 @@ export class XYZTMSSource extends TMSSource {
     });
   }
 
-  getDisplayName() {
+  async getDisplayName() {
     return this._descriptor.urlTemplate;
   }
 

@@ -20,54 +20,78 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-export function LayerPanel({ selectedLayer, cancelLayerPanel }) {
+export class LayerPanel  extends React.Component {
 
-
-  if (!selectedLayer) {
-    //todo: temp placeholder to bypass state-bug
-    return (<div />);
+  constructor() {
+    super();
+    this.state = {
+      displayName: null
+    };
   }
 
-  const joinSection = selectedLayer.isJoinable() ? (<EuiFlyoutBody style={{ paddingTop: 0 }}>
-    <EuiTitle size="s"><h2><strong>Joins</strong></h2></EuiTitle>
-    <EuiSpacer size="l"/>
-    <JoinEditor layer={selectedLayer}/>
-    <EuiSpacer size="l"/>
-  </EuiFlyoutBody>) : null;
+  componentDidMount() {
+    this._isMounted = true;
+    const displayName = this.props.selectedLayer.getDisplayName();
+    Promise.all([displayName]).then(labels => {
+      if (this._isMounted) {
+        this.setState({
+          displayName: labels[0]
+        });
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  render() {
+    const { selectedLayer, cancelLayerPanel } = this.props;
+    if (!selectedLayer) {
+      //todo: temp placeholder to bypass state-bug
+      return (<div/>);
+    }
+
+    const joinSection = selectedLayer.isJoinable() ? (<EuiFlyoutBody style={{ paddingTop: 0 }}>
+      <EuiTitle size="s"><h2><strong>Joins</strong></h2></EuiTitle>
+      <EuiSpacer size="l"/>
+      <JoinEditor layer={selectedLayer}/>
+      <EuiSpacer size="l"/>
+    </EuiFlyoutBody>) : null;
 
 
+    return (
+      <EuiFlyout
+        onClose={cancelLayerPanel}
+        style={{ maxWidth: 768 }}
+      >
+        <EuiFlyoutHeader>
+          <EuiTitle size="s">
+            <h1>{this.state.displayName}</h1>
+          </EuiTitle>
+          <EuiSpacer size="m"/>
+          <EuiSpacer/>
 
-  return (
-    <EuiFlyout
-      onClose={cancelLayerPanel}
-      style={{ maxWidth: 768 }}
-    >
-      <EuiFlyoutHeader>
-        <EuiTitle size="s">
-          <h1>{selectedLayer.getDisplayName()}</h1>
-        </EuiTitle>
-        <EuiSpacer size="m"/>
-        <EuiSpacer/>
+          <div>
+            {selectedLayer.renderSourceDetails()}
+          </div>
+          <EuiSpacer/>
 
-        <div>
-          {selectedLayer.renderSourceDetails()}
-        </div>
-        <EuiSpacer/>
+          <EuiHorizontalRule margin="none"/>
+        </EuiFlyoutHeader>
 
-        <EuiHorizontalRule margin="none"/>
-      </EuiFlyoutHeader>
+        {joinSection}
 
-      {joinSection}
+        <EuiFlyoutBody style={{ paddingTop: 0 }}>
+          <EuiSpacer size="l"/>
+          <StyleTabs layer={selectedLayer}/>
+          <EuiSpacer size="l"/>
+        </EuiFlyoutBody>
 
-      <EuiFlyoutBody style={{ paddingTop: 0 }}>
-        <EuiSpacer size="l"/>
-        <StyleTabs layer={selectedLayer}/>
-        <EuiSpacer size="l"/>
-      </EuiFlyoutBody>
-
-      <EuiFlyoutFooter>
-        <FlyoutFooter/>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
-  );
+        <EuiFlyoutFooter>
+          <FlyoutFooter/>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    );
+  }
 }

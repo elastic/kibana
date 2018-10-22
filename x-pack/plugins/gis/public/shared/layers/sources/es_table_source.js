@@ -157,7 +157,7 @@ export class ESTableSource extends ASource {
   }
 
 
-  getDisplayName() {
+  async getDisplayName() {
     return `es_table ${this._descriptor.indexPatternId}`;
   }
 }
