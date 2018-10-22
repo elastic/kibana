@@ -32,6 +32,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
+import { injectI18n } from '@kbn/i18n/react';
 import { NavLink } from '../';
 
 interface Props {
@@ -42,7 +43,7 @@ interface State {
   isOpen: boolean;
 }
 
-export class HeaderAppMenu extends Component<Props, State> {
+class HeaderAppMenuUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
@@ -52,14 +53,17 @@ export class HeaderAppMenu extends Component<Props, State> {
   }
 
   public render() {
-    const { navLinks = [] } = this.props;
+    const { navLinks = [], intl } = this.props;
 
     const button = (
       <EuiHeaderSectionItemButton
         aria-controls="keyPadMenu"
         aria-expanded={this.state.isOpen}
         aria-haspopup="true"
-        aria-label="Apps menu"
+        aria-label={intl.formatMessage({
+          id: 'common.ui.chrome.headerGlobalNav.appMenuButtonAriaLabel',
+          defaultMessage: 'Apps menu',
+        })}
         onClick={this.onMenuButtonClick}
       >
         <EuiIcon type="apps" size="m" />
@@ -106,3 +110,5 @@ export class HeaderAppMenu extends Component<Props, State> {
     </EuiKeyPadMenuItem>
   );
 }
+
+export const HeaderAppMenu = injectI18n(HeaderAppMenuUI);
