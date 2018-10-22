@@ -17,6 +17,7 @@ import {
   WatcherPageProvider,
   ReportingPageProvider,
   SpaceSelectorPageProvider,
+  InfraHomePageProvider,
 } from './page_objects';
 
 import {
@@ -68,6 +69,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/spaces'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
+      resolve(__dirname, './apps/infra'),
     ],
 
     // define the name and providers for services that should be
@@ -116,6 +118,7 @@ export default async function ({ readConfigFile }) {
       watcher: WatcherPageProvider,
       reporting: ReportingPageProvider,
       spaceSelector: SpaceSelectorPageProvider,
+      infraHome: InfraHomePageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -166,6 +169,9 @@ export default async function ({ readConfigFile }) {
       },
       spaceSelector: {
         pathname: '/',
+      },
+      infraOps: {
+        pathname: '/app/infra'
       }
     },
 

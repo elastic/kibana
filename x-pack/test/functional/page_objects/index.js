@@ -12,3 +12,4 @@ export { GrokDebuggerPageProvider } from './grok_debugger_page';
 export { WatcherPageProvider } from './watcher_page';
 export { ReportingPageProvider } from './reporting_page';
 export { SpaceSelectorPageProvider } from './space_selector_page';
+export { InfraHomePageProvider } from './infra_home_page';
