@@ -80,6 +80,7 @@ class MultiFieldText extends Component<
       className,
       disabled,
       helpText,
+      placeholder,
     } = this.props;
 
     const { allowError } = this.state;
@@ -98,6 +99,7 @@ class MultiFieldText extends Component<
           name={name}
           value={getValue() ? getValue().join('\n') : ''}
           isInvalid={!disabled && error}
+          placeholder={placeholder}
           onChange={this.handleChange}
           onBlur={this.handleBlur}
           fullWidth={fullWidth}
