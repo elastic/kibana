@@ -7,7 +7,6 @@
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 // @ts-ignore
 import template from 'plugins/spaces/views/space_selector/space_selector.html';
-import 'plugins/spaces/views/space_selector/space_selector.less';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 // @ts-ignore
