@@ -265,6 +265,15 @@ class Editor extends React.Component {
       isLoadingIndexPattern: false,
       indexPattern: indexPattern
     });
+
+    //make default selection
+    const geoFields = indexPattern.fields.filter(Editor._filterGeoField);
+    if (geoFields[0]) {
+      this.setState({
+        geoField: geoFields[0].name
+      });
+    }
+
   }, 300);
 
   onGeoFieldSelect = (geoField) => {
@@ -319,7 +328,7 @@ class Editor extends React.Component {
     }
   }
 
-  filterGeoField = (field) => {
+  static _filterGeoField = (field) => {
     return ['geo_point', 'geo_shape'].includes(field.type);
   }
 
@@ -337,7 +346,7 @@ class Editor extends React.Component {
           placeholder="Select geo field"
           value={this.state.geoField}
           onChange={this.onGeoFieldSelect}
-          filterField={this.filterGeoField}
+          filterField={Editor._filterGeoField}
           fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
         />
       </EuiFormRow>
