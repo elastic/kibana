@@ -147,7 +147,7 @@ export class ReportListing extends Component<Props, State> {
         name: 'Status',
         render: (status: string, record: Job) => {
           if (status === 'pending') {
-            return <div>pending - waiting for polling worker to claim the job</div>;
+            return <div>pending - waiting for job to be processed</div>;
           }
 
           let maxSizeReached;
