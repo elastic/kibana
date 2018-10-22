@@ -120,6 +120,6 @@ For more information about these configuration options, see
 
 . <<start-stop,Start {kib}>>.
 
-. {metricbeat-ref}/metricbeat-starting[Start {metricbeat}]. 
+. {metricbeat-ref}/metricbeat-starting.html[Start {metricbeat}]. 
 
 . <<monitoring-data,View the monitoring data in {kib}>>. 

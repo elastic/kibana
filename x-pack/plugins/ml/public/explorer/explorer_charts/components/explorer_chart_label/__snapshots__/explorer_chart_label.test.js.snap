@@ -14,28 +14,25 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
       </React.Fragment>
     </span>
     <React.Fragment>
-      <React.Fragment
-        key="nginx.access.remote_ip 72.57.0.53"
-      >
-        <ExplorerChartLabelBadge
-          entity={
-            Object {
-              "$$hashKey": "object:813",
-              "fieldName": "nginx.access.remote_ip",
-              "fieldValue": "72.57.0.53",
-            }
+      <ExplorerChartLabelBadge
+        entity={
+          Object {
+            "$$hashKey": "object:813",
+            "fieldName": "nginx.access.remote_ip",
+            "fieldValue": "72.57.0.53",
           }
-        />
-         
-      </React.Fragment>
+        }
+        key="nginx.access.remote_ip 72.57.0.53"
+      />
        
       <span
         className="ml-explorer-chart-info-icon"
       >
         <EuiIconTip
           aria-label="Info"
+          className="ml-explorer-chart-eui-icon-tip"
           content={
-            <ExplorerChartTooltip
+            <ExplorerChartInfoTooltip
               aggregationInterval="1h"
               chartFunction="sum nginx.access.body_sent.bytes"
               entityFields={
@@ -77,8 +74,9 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
     >
       <EuiIconTip
         aria-label="Info"
+        className="ml-explorer-chart-eui-icon-tip"
         content={
-          <ExplorerChartTooltip
+          <ExplorerChartInfoTooltip
             aggregationInterval="1h"
             chartFunction="sum nginx.access.body_sent.bytes"
             entityFields={
@@ -98,23 +96,19 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
       />
     </span>
   </span>
-  <div
-    className="ml-explorer-chart-label-fields"
+  <span
+    className="ml-explorer-chart-label-badges"
   >
-    <React.Fragment
-      key="nginx.access.remote_ip 72.57.0.53"
-    >
-      <ExplorerChartLabelBadge
-        entity={
-          Object {
-            "$$hashKey": "object:813",
-            "fieldName": "nginx.access.remote_ip",
-            "fieldValue": "72.57.0.53",
-          }
+    <ExplorerChartLabelBadge
+      entity={
+        Object {
+          "$$hashKey": "object:813",
+          "fieldName": "nginx.access.remote_ip",
+          "fieldValue": "72.57.0.53",
         }
-      />
-       
-    </React.Fragment>
-  </div>
+      }
+      key="nginx.access.remote_ip 72.57.0.53"
+    />
+  </span>
 </React.Fragment>
 `;

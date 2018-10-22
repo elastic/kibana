@@ -67,13 +67,19 @@ export class NavControlPopover extends Component<Props, State> {
 
     let element: React.ReactNode;
     if (this.state.spaces.length < 2) {
-      element = <SpacesDescription userProfile={this.props.userProfile} />;
+      element = (
+        <SpacesDescription
+          userProfile={this.props.userProfile}
+          onManageSpacesClick={this.toggleSpaceSelector}
+        />
+      );
     } else {
       element = (
         <SpacesMenu
           spaces={this.state.spaces}
           onSelectSpace={this.onSelectSpace}
           userProfile={this.props.userProfile}
+          onManageSpacesClick={this.toggleSpaceSelector}
         />
       );
     }
@@ -87,6 +93,8 @@ export class NavControlPopover extends Component<Props, State> {
         closePopover={this.closeSpaceSelector}
         anchorPosition={this.props.anchorPosition}
         panelPaddingSize="none"
+        // @ts-ignore
+        repositionOnScroll={true}
         ownFocus
       >
         {element}
