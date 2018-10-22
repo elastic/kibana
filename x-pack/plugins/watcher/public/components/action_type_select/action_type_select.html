@@ -2,7 +2,7 @@
   ng-model="actionTypeSelect.selectedItem.value"
   on-select="actionTypeSelect.onSelect($select.selected)"
 >
-  <ui-select-match placeholder="Add new action">
+  <ui-select-match placeholder="{{ 'xpack.watcher.actionTypeSelect.addNewActionPlaceholder' | i18n: { defaultMessage: 'Add new action' } }}">
     {{$select.selected.typeName}}
   </ui-select-match>
   <ui-select-choices repeat="actionType in actionTypeSelect.actionTypes | filter:$select.search">
@@ -21,7 +21,12 @@
         ></div>
         <div class="action-type-description">
           <span ng-if="actionType.isEnabled" ng-bind-html="actionType.selectMessage | highlight: $select.search"></span>
-          <span ng-if="!actionType.isEnabled">Disabled. Configure elasticsearch.yml.</span>
+          <span
+            ng-if="!actionType.isEnabled"
+            i18n-id="xpack.watcher.actionTypeSelect.actionDisabledTextMessage"
+            i18n-default-message="Disabled. Configure {elasticsearchYmlText}."
+            i18n-values="{ elasticsearchYmlText: 'elasticsearch.yml' }"
+          ></span>
         </div>
       </div>
     </div>
