@@ -20,7 +20,8 @@ export function getClustersSummary(clusters, kibanaUuid) {
       kibana,
       ml,
       beats,
-      alerts
+      alerts,
+      ccs
     } = cluster;
 
     const {
@@ -65,6 +66,7 @@ export function getClustersSummary(clusters, kibanaUuid) {
       logstash,
       kibana: omit(kibana, 'uuids'),
       ml,
+      ccs,
       beats,
       alerts,
       isPrimary: kibana.uuids.includes(kibanaUuid),
