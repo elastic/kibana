@@ -12,14 +12,17 @@ import {
   EuiPage,
   EuiPageBody,
 } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 
 export default () => (
-  <EuiPage restrictWidth>
-    <EuiPageBody className="licManagement__pageBody">
-      <Switch>
-        <Route path={`${BASE_PATH}upload_license`} component={UploadLicense}/>
-        <Route path={`${BASE_PATH}`} component={LicenseDashboard}/>
-      </Switch>
-    </EuiPageBody>
-  </EuiPage>
+  <I18nProvider>
+    <EuiPage restrictWidth>
+      <EuiPageBody className="licManagement__pageBody">
+        <Switch>
+          <Route path={`${BASE_PATH}upload_license`} component={UploadLicense}/>
+          <Route path={`${BASE_PATH}`} component={LicenseDashboard}/>
+        </Switch>
+      </EuiPageBody>
+    </EuiPage>
+  </I18nProvider>
 );

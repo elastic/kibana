@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
 import { optInToTelemetry } from '../../lib/telemetry';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export class UploadLicense extends React.PureComponent {
   componentDidMount() {
     this.props.addUploadErrorMessage('');
@@ -51,11 +53,20 @@ export class UploadLicense extends React.PureComponent {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title="Confirm License Upload"
+          title={<FormattedMessage
+            id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
+            defaultMessage="Confirm License Upload"
+          />}
           onCancel={this.cancel}
           onConfirm={() => this.send(true)}
-          cancelButtonText="Cancel"
-          confirmButtonText="Confirm"
+          cancelButtonText={<FormattedMessage
+            id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />}
+          confirmButtonText={<FormattedMessage
+            id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
+            defaultMessage="Confirm"
+          />}
         >
           <div>
             <EuiText>{firstLine}</EuiText>
@@ -86,10 +97,15 @@ export class UploadLicense extends React.PureComponent {
   };
   submit = event => {
     event.preventDefault();
-    if (this.file) {
+    if (!this.file) {
       this.send();
     } else {
-      this.props.addUploadErrorMessage('You must select a license file.');
+      this.props.addUploadErrorMessage(
+        <FormattedMessage
+          id="xpack.licenseMgmt.uploadLicense.uploadWrongFileTypeErrorMessage"
+          defaultMessage="You must select a license file."
+        />
+      );
     }
   };
   render() {
@@ -97,7 +113,12 @@ export class UploadLicense extends React.PureComponent {
     return (
       <Fragment>
         <EuiTitle className="eui-textCenter" size="l">
-          <h1>Upload your license</h1>
+          <h1>
+            <FormattedMessage
+              id="xpack.licenseMgmt.uploadLicense.pageTitle"
+              defaultMessage="Upload your license"
+            />
+          </h1>
         </EuiTitle>
 
         <EuiSpacer />
@@ -107,10 +128,22 @@ export class UploadLicense extends React.PureComponent {
             {this.acknowledgeModal()}
 
             <EuiText>
-              <p>Your license key is a JSON file with a signature attached.</p>
               <p>
-                Uploading a license will replace your current{' '}
-                <strong>{currentLicenseType.toUpperCase()}</strong> license.
+                <FormattedMessage
+                  id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
+                  defaultMessage="Your license key is a JSON file with a signature attached."
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  id="xpack.licenseMgmt.uploadLicense.overwriteCurrentLicenseDescription"
+                  defaultMessage="Uploading a license will replace your current {currentLicenseType} license."
+                  values={{
+                    currentLicenseType: (
+                      <strong>{currentLicenseType.toUpperCase()}</strong>
+                    )
+                  }}
+                />
               </p>
             </EuiText>
             <EuiSpacer />
@@ -118,7 +151,10 @@ export class UploadLicense extends React.PureComponent {
               <EuiText>
                 <EuiFilePicker
                   id="licenseFile"
-                  initialPromptText="Select or drag your license file"
+                  initialPromptText={<FormattedMessage
+                    id="xpack.licenseMgmt.uploadLicense.filePickerDescription"
+                    defaultMessage="Select or drag your license file"
+                  />}
                   onChange={this.handleFile}
                 />
               </EuiText>
@@ -131,7 +167,12 @@ export class UploadLicense extends React.PureComponent {
               <EuiSpacer size="m" />
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty href={`#${BASE_PATH}home`}>Cancel</EuiButtonEmpty>
+                  <EuiButtonEmpty href={`#${BASE_PATH}home`}>
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
+                      defaultMessage="Cancel"
+                    />
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
@@ -140,7 +181,15 @@ export class UploadLicense extends React.PureComponent {
                     isLoading={applying}
                     onClick={this.submit}
                   >
-                    {applying ? 'Uploading...' : 'Upload'}
+                    {applying ?
+                      <FormattedMessage
+                        id="xpack.licenseMgmt.uploadLicense.uploadProcessingButtonLabel"
+                        defaultMessage="Uploading…"
+                      />
+                      : <FormattedMessage
+                        id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
+                        defaultMessage="Upload"
+                      />}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

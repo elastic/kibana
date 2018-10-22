@@ -13,6 +13,7 @@ import {
   EuiPopover
 } from '@elastic/eui';
 import { showTelemetryOptIn, getTelemetryFetcher, PRIVACY_STATEMENT_URL, OptInExampleFlyout } from '../../lib/telemetry';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class TelemetryOptIn extends React.Component {
   constructor() {
@@ -60,7 +61,12 @@ export class TelemetryOptIn extends React.Component {
       toCurrentCustomers = (
         <Fragment>
           <EuiText>
-            <p>Gold and platinum customers: help support give you better service.</p>
+            <p>
+              <FormattedMessage
+                id="xpack.licenseMgmt.telemetryOptIn.opportunitiesDescription"
+                defaultMessage="Gold and platinum customers: help support give you better service."
+              />
+            </p>
           </EuiText>
           <EuiSpacer  size="s"/>
         </Fragment>
@@ -69,7 +75,10 @@ export class TelemetryOptIn extends React.Component {
 
     const readMoreButton = (
       <EuiLink onClick={this.onClickReadMore}>
-      Read more
+        <FormattedMessage
+          id="xpack.licenseMgmt.telemetryOptIn.readMoreButtonLabel"
+          defaultMessage="Read more"
+        />
       </EuiLink>
     );
 
@@ -84,19 +93,33 @@ export class TelemetryOptIn extends React.Component {
       >
         <EuiText className="licManagement__narrowText" >
           <p>
-        This feature periodically sends basic feature usage statistics.
-        This information will not be shared outside of Elastic.
-        See an <EuiLink onClick={this.onClickExample}>example</EuiLink>
-            {' '}
-          or read our
-            {' '}
-            <EuiLink
-              href={PRIVACY_STATEMENT_URL}
-              target="_blank"
-            >
-          telemetry privacy statement
-            </EuiLink>.
-        You can disable this feature any time.
+            <FormattedMessage
+              id="xpack.licenseMgmt.telemetryOptIn.readMore.popoverTextDescription"
+              defaultMessage="This feature periodically sends basic feature usage statistics.
+              This information will not be shared outside of Elastic.
+              See an {exampleLink} or read our {telemetryPrivacyStatementLink}.
+              You can disable this feature any time."
+              values={{
+                exampleLink: (
+                  <EuiLink onClick={this.onClickExample}>
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.telemetryOptIn.readMore.popoverTextDescription.exampleText"
+                      defaultMessage="example"
+                    />
+                  </EuiLink>),
+                telemetryPrivacyStatementLink: (
+                  <EuiLink
+                    href={PRIVACY_STATEMENT_URL}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.telemetryOptIn.readMore.popoverTextDescription.telemetryPrivacyStatementText"
+                      defaultMessage="telemetry privacy statement"
+                    />
+                  </EuiLink>
+                )
+              }}
+            />
           </p>
         </EuiText>
       </EuiPopover>
@@ -107,7 +130,15 @@ export class TelemetryOptIn extends React.Component {
         {example}
         {toCurrentCustomers}
         <EuiCheckbox
-          label={<span>Send basic feature usage statistics to Elastic periodically. {popover}</span>}
+          label={
+            <span>
+              <FormattedMessage
+                id="xpack.licenseMgmt.telemetryOptIn.sendStatisticsLabel"
+                defaultMessage="Send basic feature usage statistics to Elastic periodically."
+              />
+              {popover}
+            </span>
+          }
           id="isOptingInToTelemetry"
           checked={isOptingInToTelemetry}
           onChange={this.onChangeOptIn}
