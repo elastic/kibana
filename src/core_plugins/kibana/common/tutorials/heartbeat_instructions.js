@@ -361,7 +361,7 @@ export const createHeartbeatCloudInstructions = () => ({
 });
 
 export function heartbeatEnableInstructionsOnPrem() {
-  const defaultTitle = i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.defaultTitle', {
+  const defaultTitle = i18n.translate('kbn.common.tutorials.heartbeatEnableOnPremInstructions.defaultTitle', {
     defaultMessage: 'Edit the configuration - Add monitors',
   });
   const defaultCommands = [
@@ -369,7 +369,7 @@ export function heartbeatEnableInstructionsOnPrem() {
     '  urls: ["<http://localhost:9200>"]',
     '  schedule: "@every 10s"'
   ];
-  const defaultTextPost = i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.defaultTextPost', {
+  const defaultTextPost = i18n.translate('kbn.common.tutorials.heartbeatEnableOnPremInstructions.defaultTextPost', {
     defaultMessage: 'Where {hostTemplate} is your monitored URL, For more details on how to configure Monitors in \
       Heartbeat, read the [Heartbeat configuration docs.]({configureLink})',
     values: {
@@ -380,7 +380,7 @@ export function heartbeatEnableInstructionsOnPrem() {
   return {
     OSX: {
       title: defaultTitle,
-      textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.osxTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableOnPremInstructions.osxTextPre', {
         defaultMessage: 'Modify the settings in the `heartbeat.yml` file.',
       }),
       commands: defaultCommands,
@@ -388,7 +388,7 @@ export function heartbeatEnableInstructionsOnPrem() {
     },
     DEB: {
       title: defaultTitle,
-      textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.debTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableOnPremInstructions.debTextPre', {
         defaultMessage: 'Modify the monitors in the `/etc/heartbeat/heartbeat.yml` file.',
       }),
       commands: defaultCommands,
@@ -396,7 +396,7 @@ export function heartbeatEnableInstructionsOnPrem() {
     },
     RPM: {
       title: defaultTitle,
-      textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.rpmTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableOnPremInstructions.rpmTextPre', {
         defaultMessage: 'Modify the monitors in the `/etc/heartbeat/heartbeat.yml` file.',
       }),
       commands: defaultCommands,
@@ -404,7 +404,7 @@ export function heartbeatEnableInstructionsOnPrem() {
     },
     WINDOWS: {
       title: defaultTitle,
-      textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableCloudInstructions.windowsTextPre', {
+      textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableOnPremInstructions.windowsTextPre', {
         defaultMessage: 'From the {path} folder, run:',
         values: { path: `C:\\Program Files\\Heartbeat` },
       }),
