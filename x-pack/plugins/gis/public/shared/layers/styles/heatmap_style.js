@@ -7,7 +7,6 @@
 import React from 'react';
 
 import {
-  EuiIcon,
   EuiSuperSelect,
 } from '@elastic/eui';
 
@@ -97,9 +96,9 @@ class HeatmapEditor extends React.Component {
   render() {
 
     const options = [
-      { value: 'coarse', inputDisplay: 'coarse', dropdownDisplay: (<EuiIcon type="visHeatmap" size="l"/>) },
-      { value: 'fine', inputDisplay: 'fine', dropdownDisplay: (<EuiIcon type="visHeatmap" size="m"/>) },
-      { value: 'most_fine', inputDisplay: 'most_fine', dropdownDisplay: (<EuiIcon type="visHeatmap" size="s"/>) }
+      { value: 'coarse', inputDisplay: 'coarse' },
+      { value: 'fine', inputDisplay: 'fine' },
+      { value: 'most_fine', inputDisplay: 'finest' }
     ];
 
     const onChange = (value) => {

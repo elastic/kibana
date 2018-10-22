@@ -27,6 +27,7 @@ export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
 export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
 export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
+export const TOUCH_LAYER = 'TOUCH_LAYER';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -34,8 +35,24 @@ function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
     startLoading: (dataId, requestToken, initData) => dispatch(startDataLoad(layerId, dataId, requestToken, initData)),
     stopLoading: (dataId, requestToken, returnData) => dispatch(endDataLoad(layerId, dataId, requestToken, returnData)),
-    onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage))
+    onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
+    onRefreshStyle: async () => {
+      await dispatch({
+        type: TOUCH_LAYER,
+        layerId: layerId
+      });
+    }
   };
+}
+
+async function syncDataForAllLayers(getState, dispatch, dataFilters) {
+  const state = getState();
+  const layerList = getLayerList(state);
+  const syncs = layerList.map(layer => {
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
+    return layer.syncData({ ...loadingFunctions, dataFilters });
+  });
+  await Promise.all(syncs);
 }
 
 export function replaceLayerList(newLayerList) {
@@ -44,15 +61,8 @@ export function replaceLayerList(newLayerList) {
       type: REPLACE_LAYERLIST,
       layerList: newLayerList
     });
-
-    const state = getState();
-    const layerList = getLayerList(state);
-    const dataFilters = getDataFilters(state);
-
-    layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-      layer.syncData({ ...loadingFunctions, dataFilters });
-    });
+    const dataFilters = getDataFilters(getState());
+    await syncDataForAllLayers(getState, dispatch, dataFilters);
   };
 
 }
@@ -110,7 +120,6 @@ export function mapExtentChanged(newMapConstants) {
   return async (dispatch, getState) => {
     const state = getState();
     const dataFilters = getDataFilters(state);
-
     dispatch({
       type: MAP_EXTENT_CHANGED,
       mapState: {
@@ -118,15 +127,8 @@ export function mapExtentChanged(newMapConstants) {
         ...newMapConstants
       }
     });
-
-    const layerList = getLayerList(state);
-    layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-      layer.syncData({
-        ...loadingFunctions,
-        dataFilters: { ...dataFilters, ...newMapConstants }
-      });
-    });
+    const newDataFilters =  { ...dataFilters, ...newMapConstants };
+    await syncDataForAllLayers(getState, dispatch, newDataFilters);
   };
 }
 
@@ -168,7 +170,7 @@ export function addPreviewLayer(layer, position) {
     await dispatch(addLayer(layerDescriptor, position));
     const dataFilters = getDataFilters(getState());
     const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-    layer.syncData({ ...loadingFunctions, dataFilters });
+    await layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
 
@@ -230,20 +232,14 @@ export function setTimeFilters(timeFilters) {
       type: SET_TIME_FILTERS,
       ...timeFilters
     });
-    const state = getState();
-    const dataFilters = getDataFilters(state);
-    const layerList = getLayerList(getState());
-    layerList.forEach(layer => {
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-      layer.syncData({
-        ...loadingFunctions,
-        dataFilters: { ...dataFilters, timeFilters: { ...timeFilters } }
-      });
-    });
+
+    const dataFilters = getDataFilters(getState());
+    const newDataFilters = { ...dataFilters, timeFilters: { ...timeFilters } };
+    await syncDataForAllLayers(getState, dispatch, newDataFilters);
   };
 }
 
-export function updateLayerStyle(style, temporary = true) {
+export function updateLayerStyleForSelectedLayer(style, temporary = true) {
   return async (dispatch, getState) => {
     await dispatch({
       type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
@@ -256,7 +252,7 @@ export function updateLayerStyle(style, temporary = true) {
     const dataFilters = getDataFilters(state);
     const layer = getSelectedLayer(state);
     const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-    layer.syncData({ ...loadingFunctions, dataFilters });
+    await layer.syncData({ ...loadingFunctions, dataFilters });
   };
 }
 
@@ -284,7 +280,7 @@ export function setJoinsForLayer(layer, joins) {
     const layersWithJoin = getLayerList(getState());
     const layerWithJoin = layersWithJoin.find(lwj => lwj.getId() === layer.getId());
     const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
-    layerWithJoin.syncData({ ...loadingFunctions, dataFilters });
+    await layerWithJoin.syncData({ ...loadingFunctions, dataFilters });
   };
 }
 
@@ -301,21 +297,6 @@ export async function loadMapResources(dispatch) {
         id: "0hmz5",
         label: 'light theme tiles',
         sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
-        visible: false,
-        temporary: false,
-        style: {},
-        type: "TILE",
-        showAtAllZoomLevels: true,
-        minZoom: 0,
-        maxZoom: 24,
-      },
-      {
-        id: "0pmk0",
-        label: 'dark theme tiles',
-        sourceDescriptor: {
-          "type": "EMS_XYZ",
-          "urlTemplate": "https://api.mapbox.com/styles/v1/npeihl/cjgib11ei001w2rrva9nomul9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibnBlaWhsIiwiYSI6InVmU21qeVUifQ.jwa9V6XsmccKsEHKh5QfmQ"
-        },
         visible: true,
         temporary: false,
         style: {},
@@ -323,21 +304,6 @@ export async function loadMapResources(dispatch) {
         showAtAllZoomLevels: true,
         minZoom: 0,
         maxZoom: 24,
-      },
-      {
-        "id": "giflh",
-        "label": null,
-        "showAtAllZoomLevels": true,
-        "minZoom": 0,
-        "maxZoom": 24,
-        "sourceDescriptor": { "type": "EMS_FILE", "name": "World Countries" },
-        "visible": true,
-        "temporary": false,
-        "style": {
-          "type": "VECTOR",
-          "properties": { "fillColor": { "type": "STATIC", "options": { "color": "#e6194b" } } }
-        },
-        "type": "VECTOR"
       }
     ]
   ));

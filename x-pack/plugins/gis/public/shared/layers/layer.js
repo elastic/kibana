@@ -5,6 +5,13 @@
  */
 import _ from 'lodash';
 import { DataRequest } from './util/data_request';
+import React, { Fragment } from 'react';
+import {
+  EuiFormRow,
+  EuiFieldText,
+  EuiRange,
+} from '@elastic/eui';
+
 
 export class ALayer {
 
@@ -19,6 +26,68 @@ export class ALayer {
     } else {
       this._dataRequests = [];
     }
+  }
+
+
+  static _renderZoomSliders(minZoom, maxZoom, onMinZoomChange, onMaxZoomChange) {
+    // if (this.state.showAtAllZoomLevels) {
+    //   return;
+    // }
+
+    return (
+      <Fragment>
+        <EuiFormRow
+          label="Min zoom"
+          compressed
+        >
+          <EuiRange
+            min={0}
+            max={24}
+            value={minZoom.toString()}
+            onChange={onMinZoomChange}
+            showInput
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label="Max zoom"
+          compressed
+        >
+          <EuiRange
+            min={0}
+            max={24}
+            value={maxZoom.toString()}
+            onChange={onMaxZoomChange}
+            showInput
+          />
+        </EuiFormRow>
+      </Fragment>
+    );
+  }
+
+  static _renderLabel(seedLabel, onLabelChange) {
+    return (
+      <EuiFormRow
+        label="Label"
+        compressed
+      >
+        <EuiFieldText
+          value={seedLabel}
+          onChange={onLabelChange}
+          aria-label="layer display name"
+        />
+      </EuiFormRow>
+    );
+  }
+
+
+  static renderGlobalSettings({ label, onLabelChange, minZoom, maxZoom, onMinZoomChange, onMaxZoomChange }) {
+    return (
+      <Fragment>
+        {ALayer._renderLabel(label, onLabelChange)}
+        {ALayer._renderZoomSliders(minZoom, maxZoom, onMinZoomChange, onMaxZoomChange)}
+      </Fragment>
+    );
   }
 
   static createDescriptor(options) {

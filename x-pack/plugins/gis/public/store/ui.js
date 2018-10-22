@@ -23,7 +23,7 @@ export const LAYER_LOAD_STATE = {
 
 const INITIAL_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
-  isDarkTheme: true,
+  isDarkTheme: false,
   layerLoad: {
     status: LAYER_LOAD_STATE.inactive,
     time: Date()

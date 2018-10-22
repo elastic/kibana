@@ -63,7 +63,7 @@ export class KibanaRegionmapSource extends VectorSource {
           <span className="bold">Source: </span><span>Kibana Region Map</span>
         </div>
         <div>
-          <span className="bold">Type: </span><span>Vector (todo, use icon)</span>
+          <span className="bold">Type: </span><span>Vector</span>
         </div>
         <div>
           <span className="bold">Name: </span><span>{this._descriptor.name}</span>
@@ -77,7 +77,7 @@ export class KibanaRegionmapSource extends VectorSource {
     return VectorSource.getGeoJson(fileSource, fileSource.url);
   }
 
-  getDisplayName() {
+  async getDisplayName() {
     return this._descriptor.name;
   }
 

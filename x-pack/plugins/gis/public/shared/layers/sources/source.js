@@ -36,13 +36,13 @@ export class ASource {
     throw new Error(`Source#createDefaultLayer not implemented`);
   }
 
-  getDisplayName() {
+  async getDisplayName() {
     console.warn('Source should implement Source#getDisplayName');
     return '';
   }
 
   isFilterByMapBounds() {
-    return _.get(this._descriptor, 'filterByMapBounds', false);
+    return false;
   }
 }
 

@@ -68,7 +68,7 @@ export class VectorLayer extends ALayer {
   }
 
   isJoinable() {
-    return true;
+    return !this._source.isFilterByMapBounds();
   }
 
   getJoins() {
@@ -121,6 +121,9 @@ export class VectorLayer extends ALayer {
       return false;
     }
     const meta = sourceDataRequest.getMeta();
+    if (!meta) {
+      return false;
+    }
 
     let updateDueToTime = false;
     if (timeAware) {
@@ -209,27 +212,34 @@ export class VectorLayer extends ALayer {
 
   _joinToFeatureCollection(sourceResult, joinState) {
     if (!sourceResult.refreshed && !joinState.shouldJoin) {
-      return;
+      return false;
     }
     if (!sourceResult.featureCollection) {
-      return;
+      return false;
     }
     joinState.join.joinTableToFeatureCollection(sourceResult.featureCollection, joinState.table);
+    return true;
   }
 
   async _performJoins(sourceResult, joinStates) {
-    for (let i = 0; i < joinStates.length; i++) {
-      this._joinToFeatureCollection(sourceResult, joinStates[i]);
-    }
+
+    const hasJoined = joinStates.map(joinState => {
+      return this._joinToFeatureCollection(sourceResult, joinState);
+    });
+
+    return hasJoined.some(shouldRefresh => shouldRefresh === true);
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+  async syncData({ startLoading, stopLoading, onLoadError, onRefreshStyle, dataFilters }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
     const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
     const joinResults = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-    this._performJoins(sourceResult, joinResults);
+    const shouldRefresh = await this._performJoins(sourceResult, joinResults);
+    if (shouldRefresh) {
+      onRefreshStyle();
+    }
   }
 
   _getSourceFeatureCollection() {

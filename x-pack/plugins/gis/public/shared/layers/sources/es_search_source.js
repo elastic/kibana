@@ -11,7 +11,7 @@ import React, { Fragment } from 'react';
 import { VectorSource } from './source';
 import {
   EuiFormRow,
-  EuiFieldNumber,
+  // EuiFieldNumber,
   EuiSwitch,
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
@@ -26,7 +26,7 @@ import { hitsToGeoJson, createExtentFilter } from '../../../elasticsearch_geo_ut
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
 
-const DEFAULT_LIMIT = 256;
+const DEFAULT_LIMIT = 2048;
 export class ESSearchSource extends VectorSource {
 
   static type = 'ES_SEARCH';
@@ -46,7 +46,7 @@ export class ESSearchSource extends VectorSource {
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
       limit: descriptor.limit,
-      filterByMapBounds: descriptor.isFilterByMapBounds,
+      filterByMapBounds: descriptor.filterByMapBounds,
       showTooltip: _.get(descriptor, 'showTooltip', false),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     });
@@ -72,7 +72,8 @@ export class ESSearchSource extends VectorSource {
           <span className="bold">Geo field: </span><span>{this._descriptor.geoField}</span>
         </div>
         <div>
-          <span className="bold">Limit: </span><span>{this._descriptor.limit}</span>
+          {/*//todo : skip for now to reduce form-length for demo*/}
+          {/*<span className="bold">Limit: </span><span>{this._descriptor.limit}</span>*/}
         </div>
       </Fragment>
     );
@@ -169,8 +170,13 @@ export class ESSearchSource extends VectorSource {
     return filteredProperties;
   }
 
-  getDisplayName() {
-    return this._descriptor.indexPatternId;
+  isFilterByMapBounds() {
+    return _.get(this._descriptor, 'filterByMapBounds', false);
+  }
+
+  async getDisplayName() {
+    const indexPattern = await this._getIndexPattern();
+    return indexPattern.title;
   }
 
   async getStringFields() {
@@ -362,13 +368,13 @@ class Editor extends React.Component {
 
     return (
       <Fragment>
-        <EuiFormRow compressed>
-          <EuiSwitch
-            label="Show tooltip on feature mouseover"
-            checked={this.state.showTooltip}
-            onChange={this.onShowTooltipChange}
-          />
-        </EuiFormRow>
+        {/*<EuiFormRow compressed>*/}
+          {/*<EuiSwitch*/}
+            {/*label="Show tooltip on feature mouseover"*/}
+            {/*checked={this.state.showTooltip}*/}
+            {/*onChange={this.onShowTooltipChange}*/}
+          {/*/>*/}
+        {/*</EuiFormRow>*/}
 
         {fieldSelectFormRow}
       </Fragment>
@@ -391,18 +397,18 @@ class Editor extends React.Component {
     return (
       <Fragment>
 
-        <EuiFormRow
-          label="Limit"
-          helpText="Maximum documents retrieved from elasticsearch."
-          compressed
-        >
-          <EuiFieldNumber
-            placeholder="10"
-            value={this.state.limit}
-            onChange={this.onLimitChange}
-            aria-label="Limit"
-          />
-        </EuiFormRow>
+        {/*<EuiFormRow*/}
+          {/*label="Limit"*/}
+          {/*helpText="Maximum documents retrieved from elasticsearch."*/}
+          {/*compressed*/}
+        {/*>*/}
+          {/*<EuiFieldNumber*/}
+            {/*placeholder="10"*/}
+            {/*value={this.state.limit}*/}
+            {/*onChange={this.onLimitChange}*/}
+            {/*aria-label="Limit"*/}
+          {/*/>*/}
+        {/*</EuiFormRow>*/}
 
         <EuiFormRow compressed>
           <EuiSwitch

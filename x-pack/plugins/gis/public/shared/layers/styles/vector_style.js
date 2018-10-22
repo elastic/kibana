@@ -12,6 +12,7 @@ import {
   EuiFlexItem
 } from '@elastic/eui';
 
+
 const DEFAULT_COLOR = '#e6194b';
 
 export class VectorStyle {
@@ -103,21 +104,19 @@ export class VectorStyle {
 
   static computeScaledValues(featureCollection, field) {
     const fieldName = field.name;
-    const alreadyComputed = featureCollection.computed.find(f => f === fieldName);
-    if (alreadyComputed) {
-      return false;
-    }
-
     const features = featureCollection.features;
     if (!features.length) {
       return false;
     }
 
-    let min = features[0].properties[fieldName];
-    let max = features[0].properties[fieldName];
-    for (let i = 1; i < features.length; i++) {
-      min = Math.min(min, features[i].properties[fieldName]);
-      max = Math.max(max, features[i].properties[fieldName]);
+    let min = Infinity;
+    let max = -Infinity;
+    for (let i = 0; i < features.length; i++) {
+      const newValue = parseFloat(features[i].properties[fieldName]);
+      if (!isNaN(newValue)) {
+        min = Math.min(min, newValue);
+        max = Math.max(max, newValue);
+      }
     }
 
     //scale to [0,1]
@@ -130,7 +129,6 @@ export class VectorStyle {
   }
 
   addScaledPropertiesBasedOnStyle(featureCollection) {
-
 
     if (!this._isPropertyDynamic('fillColor') && !this._isPropertyDynamic('lineColor')) {
       return false;

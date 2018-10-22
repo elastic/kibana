@@ -55,7 +55,7 @@ export class ESGeohashGridSource extends ASource {
 
   static type = 'ES_GEOHASH_GRID';
 
-  static typeDisplayName = 'Elasticsearch geoHash grid';
+  static typeDisplayName = 'Elasticsearch geohash heatmap';
 
   static createDescriptor({ indexPatternId, geoField }) {
     return {
@@ -79,13 +79,13 @@ export class ESGeohashGridSource extends ASource {
     return (
       <Fragment>
         <div>
-          <span className="bold">Type: </span><span>Geohash grid (todo, use icon)</span>
+          <span className="bold">Type: </span><span>geohash_grid</span>
         </div>
         <div>
-          <span className="bold">Index pattern: </span><span>{this._descriptor.esIndexPattern}</span>
+          <span className="bold">Index pattern: </span><span>{this._descriptor.indexPatternId}</span>
         </div>
         <div>
-          <span className="bold">Point field: </span><span>{this._descriptor.pointField}</span>
+          <span className="bold">Point field: </span><span>{this._descriptor.geoField}</span>
         </div>
       </Fragment>
     );
@@ -142,6 +142,22 @@ export class ESGeohashGridSource extends ASource {
     return featureCollection;
   }
 
+  async isTimeAware() {
+    const indexPattern = await this._getIndexPattern();
+    const timeField = indexPattern.timeFieldName;
+    return !!timeField;
+  }
+
+  async _getIndexPattern() {
+    let indexPattern;
+    try {
+      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
+    } catch (error) {
+      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
+    }
+    return indexPattern;
+  }
+
   _makeAggConfigs(precision) {
     return [
       // TODO allow user to configure metric(s) aggregations
@@ -182,8 +198,9 @@ export class ESGeohashGridSource extends ASource {
     });
   }
 
-  getDisplayName() {
-    return `geohash_grid ${this._descriptor.indexPatternId}`;
+  async getDisplayName() {
+    const indexPattern = await this._getIndexPattern();
+    return indexPattern.title;
   }
 }
 
@@ -191,7 +208,7 @@ class Editor extends React.Component {
 
   static propTypes = {
     onSelect: PropTypes.func.isRequired,
-  }
+  };
 
   constructor() {
     super();
