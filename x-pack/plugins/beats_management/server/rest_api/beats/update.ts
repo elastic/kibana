@@ -15,9 +15,6 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
   path: '/api/beats/agent/{beatId}',
   licenseRequired: true,
   config: {
-    auth: {
-      mode: 'optional',
-    },
     validate: {
       headers: Joi.object({
         'kbn-beats-access-token': Joi.string(),

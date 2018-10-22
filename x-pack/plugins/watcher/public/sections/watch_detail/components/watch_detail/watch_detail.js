@@ -22,7 +22,7 @@ import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('watchDetail', function ($injector) {
+app.directive('watchDetail', function ($injector, i18n) {
   const watchService = $injector.get('xpackWatcherWatchService');
   const licenseService = $injector.get('xpackWatcherLicenseService');
 
@@ -152,17 +152,28 @@ app.directive('watchDetail', function ($injector) {
 
       onWatchDelete = () => {
         const confirmModalOptions = {
-          confirmButtonText: 'Delete Watch',
+          confirmButtonText: i18n('xpack.watcher.sections.watchDetail.deleteConfirmModal.deleteWatchButtonLabel', {
+            defaultMessage: 'Delete Watch' }
+          ),
           onConfirm: this.deleteWatch
         };
 
-        return confirmModal('This will permanently delete the watch. Are you sure?', confirmModalOptions);
+        return confirmModal(
+          i18n('xpack.watcher.sections.watchDetail.deleteConfirmModal.description', {
+            defaultMessage: 'This will permanently delete the watch. Are you sure?' }
+          ),
+          confirmModalOptions);
       }
 
       deleteWatch = () => {
         return watchService.deleteWatch(this.watch.id)
           .then(() => {
-            toastNotifications.addSuccess(`Deleted '${this.watch.displayName}'`);
+            toastNotifications.addSuccess(
+              i18n('xpack.watcher.sections.watchDetail.deleteWatchSuccessNotificationText', {
+                defaultMessage: 'Deleted {watchName}',
+                values: { watchName: this.watch.displayName } }
+              ),
+            );
             this.close();
           })
           .catch(err => {
