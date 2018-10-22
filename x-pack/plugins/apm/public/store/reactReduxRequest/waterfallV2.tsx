@@ -10,9 +10,7 @@ import { Request, RRRRender } from 'react-redux-request';
 import { TRACE_ID } from 'x-pack/plugins/apm/common/constants';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
-
-// @ts-ignore
-import { loadSpans, loadTrace } from '../../services/rest/apm';
+import { loadTrace } from '../../services/rest/apm';
 import { IUrlParams } from '../urlParams';
 // @ts-ignore
 import { createInitialDataSelector } from './helpers';

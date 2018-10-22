@@ -7,7 +7,6 @@
 import React from 'react';
 import { Request } from 'react-redux-request';
 import { IDistributionResponse } from '../../../server/lib/transactions/distribution/get_distribution';
-// @ts-ignore
 import { loadTransactionDistribution } from '../../services/rest/apm';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';
