@@ -5,6 +5,7 @@
  */
 
 import React, { Component } from 'react';
+import moment from 'moment-timezone';
 import { i18n }  from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { NoMatch } from '../no_match';
@@ -39,6 +40,12 @@ const HEADERS = {
   }),
   coveredIndices: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.coveredIndicesHeader', {
     defaultMessage: 'Covered Indices',
+  }),
+  version: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.versionHeader', {
+    defaultMessage: 'Version',
+  }),
+  modified_date: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.modifiedDateHeader', {
+    defaultMessage: 'Modified date',
   }),
 };
 
@@ -170,15 +177,14 @@ export class PolicyTableUi extends Component {
           {value}
         </EuiLink>
       );
-    } else if (fieldName === 'coveredIndices') {
-      if (!value) {
-        return null;
-      }
+    } else if (fieldName === 'coveredIndices' && value) {
       return (
         <EuiText>
           <b>{value.length}</b> ({value.join(', ')})
         </EuiText>
       );
+    } else if (fieldName === 'modified_date' && value) {
+      return moment(value).format('YYYY-MM-DD HH:mm:ss');
     }
     return value;
   }
