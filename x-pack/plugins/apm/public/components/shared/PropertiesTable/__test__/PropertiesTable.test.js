@@ -14,7 +14,7 @@ import {
 } from '..';
 import { getAgentFeatureDocsUrl } from '../../../../utils/documentation/agents';
 
-jest.mock('../../../../utils/documentation');
+jest.mock('../../../../utils/documentation/agents');
 jest.mock('../propertyConfig.json', () => [
   {
     key: 'testProperty',

@@ -57,7 +57,6 @@ export function AgentFeatureTipMessage({
   agentName?: string;
 }) {
   const docsUrl = getAgentFeatureDocsUrl(featureName, agentName);
-
   if (!docsUrl) {
     return null;
   }
