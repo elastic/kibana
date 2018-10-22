@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import { StyleTabs } from './style_tabs';
 import { JoinEditor } from './join_editor';
@@ -45,6 +45,18 @@ export class LayerPanel  extends React.Component {
     this._isMounted = false;
   }
 
+  _renderJoinSection() {
+    return this.props.selectedLayer.isJoinable() ?
+      (
+        <Fragment>
+          <EuiTitle size="s"><h2><strong>Joins</strong></h2></EuiTitle>
+          <EuiSpacer size="l"/>
+          <JoinEditor layer={this.props.selectedLayer}/>
+          <EuiSpacer size="l"/>
+        </Fragment>
+      ) : null;
+  }
+
   render() {
     const { selectedLayer, cancelLayerPanel } = this.props;
     if (!selectedLayer) {
@@ -52,12 +64,7 @@ export class LayerPanel  extends React.Component {
       return (<div/>);
     }
 
-    const joinSection = selectedLayer.isJoinable() ? (<EuiFlyoutBody style={{ paddingTop: 0 }}>
-      <EuiTitle size="s"><h2><strong>Joins</strong></h2></EuiTitle>
-      <EuiSpacer size="l"/>
-      <JoinEditor layer={selectedLayer}/>
-      <EuiSpacer size="l"/>
-    </EuiFlyoutBody>) : null;
+    const joinSection = this._renderJoinSection();
 
 
     return (
@@ -76,13 +83,11 @@ export class LayerPanel  extends React.Component {
             {selectedLayer.renderSourceDetails()}
           </div>
           <EuiSpacer/>
-
           <EuiHorizontalRule margin="none"/>
         </EuiFlyoutHeader>
 
-        {joinSection}
-
         <EuiFlyoutBody style={{ paddingTop: 0 }}>
+          {joinSection}
           <EuiSpacer size="l"/>
           <StyleTabs layer={selectedLayer}/>
           <EuiSpacer size="l"/>
