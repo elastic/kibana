@@ -15,34 +15,17 @@ import {
 import { isEmpty } from 'lodash';
 import React from 'react';
 import {
-  PROCESSOR_EVENT,
-  TRANSACTION_ID
-} from '../../../../../common/constants';
-import {
   Transaction as ITransaction,
   TransactionV2
 } from '../../../../../typings/Transaction';
 import { WaterfallResponse } from '../../../../../typings/waterfall';
 import { IUrlParams } from '../../../../store/urlParams';
-// @ts-ignore
-import DiscoverButton from '../../../shared/DiscoverButton';
 import EmptyMessage from '../../../shared/EmptyMessage';
 import { TraceLink } from '../../../shared/TraceLink';
+import { ActionMenu } from './ActionMenu';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
 // @ts-ignore
 import { TransactionPropertiesTable } from './TransactionPropertiesTable';
-
-function getDiscoverQuery(transactionId: string) {
-  return {
-    _a: {
-      interval: 'auto',
-      query: {
-        language: 'lucene',
-        query: `${PROCESSOR_EVENT}:transaction AND ${TRANSACTION_ID}:${transactionId}`
-      }
-    }
-  };
-}
 
 function MaybeViewTraceLink({
   waterfall,
@@ -110,11 +93,7 @@ export const Transaction: React.SFC<Props> = ({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <DiscoverButton
-                query={getDiscoverQuery(transaction.transaction.id)}
-              >
-                {`View transaction in Discover`}
-              </DiscoverButton>
+              <ActionMenu transaction={transaction} />
             </EuiFlexItem>
             <MaybeViewTraceLink
               transaction={transaction}
