@@ -27,15 +27,16 @@ const getFlattenedKeys = object => (
   Object.keys(getFlattenedObject(object))
 );
 
-const getUnusedConfigKeys = (plugins, disabledPluginSpecs, rawSettings, configValues) => {
+function getUnusedConfigKeys(plugins, disabledPluginSpecs, rawSettings, configValues) {
   // transform deprecated core settings
   let settings = transformDeprecations(rawSettings);
 
   // transform deprecated plugin settings
-  plugins.forEach(({ spec }) => {
+  plugins.forEach(async ({ spec }) => {
     const deprecationsProvider = spec.getDeprecationsProvider();
     if (!deprecationsProvider) return;
-    settings = createTransform(deprecationsProvider(Deprecations))(settings);
+    const transformer = await deprecationsProvider(Deprecations);
+    settings = createTransform(transformer)(settings);
   });
 
   // remove config values from disabled plugins
@@ -54,15 +55,20 @@ const getUnusedConfigKeys = (plugins, disabledPluginSpecs, rawSettings, configVa
   }
 
   return difference(inputKeys, appliedKeys);
-};
+}
 
-export default function (kbnServer, server, config) {
+export default async function (kbnServer, server, config) {
 
   server.decorate('server', 'config', function () {
     return kbnServer.config;
   });
 
-  const unusedKeys = getUnusedConfigKeys(kbnServer.plugins, kbnServer.disabledPluginSpecs, kbnServer.settings, config.get())
+  const unusedKeys = await getUnusedConfigKeys(
+    kbnServer.plugins,
+    kbnServer.disabledPluginSpecs,
+    kbnServer.settings,
+    config.get()
+  )
     .map(key => `"${key}"`);
 
   if (!unusedKeys.length) {
