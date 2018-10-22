@@ -83,10 +83,10 @@ export class ESGeohashGridSource extends ASource {
           <span className="bold">Type: </span><span>Geohash grid (todo, use icon)</span>
         </div>
         <div>
-          <span className="bold">Index pattern: </span><span>{this._descriptor.esIndexPattern}</span>
+          <span className="bold">Index pattern: </span><span>{this._descriptor.indexPatternId}</span>
         </div>
         <div>
-          <span className="bold">Point field: </span><span>{this._descriptor.pointField}</span>
+          <span className="bold">Point field: </span><span>{this._descriptor.geoField}</span>
         </div>
       </Fragment>
     );
