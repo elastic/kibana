@@ -9,11 +9,8 @@ import { getAgentMarks } from './get_agent_marks';
 
 describe('getAgentMarks', () => {
   it('should sort the marks', () => {
-    const transaction = ({
+    const transaction: Transaction = {
       transaction: {
-        duration: {
-          us: 1000
-        },
         marks: {
           agent: {
             domInteractive: 117,
@@ -22,11 +19,18 @@ describe('getAgentMarks', () => {
           }
         }
       }
-    } as any) as Transaction;
+    } as any;
     expect(getAgentMarks(transaction)).toEqual([
       { name: 'timeToFirstByte', us: 10000 },
       { name: 'domInteractive', us: 117000 },
       { name: 'domComplete', us: 118000 }
     ]);
+  });
+
+  it('should return empty array if marks are missing', () => {
+    const transaction: Transaction = {
+      transaction: {}
+    } as any;
+    expect(getAgentMarks(transaction)).toEqual([]);
   });
 });

@@ -15,6 +15,7 @@ import { IUrlParams } from '../../../../../../store/urlParams';
 import { fromQuery, history, toQuery } from '../../../../../../utils/url';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
+import { AgentMark } from '../get_agent_marks';
 import { SpanFlyout } from './SpanFlyout';
 import { TransactionFlyout } from './TransactionFlyout';
 import {
@@ -37,6 +38,7 @@ const TIMELINE_MARGINS = {
 };
 
 interface Props {
+  agentMarks: AgentMark[];
   urlParams: IUrlParams;
   waterfall: IWaterfall;
   location: any;
@@ -128,6 +130,7 @@ export class Waterfall extends Component<Props> {
       <Container>
         <StickyContainer>
           <Timeline
+            agentMarks={this.props.agentMarks}
             duration={waterfall.duration}
             height={waterfallHeight}
             margins={TIMELINE_MARGINS}

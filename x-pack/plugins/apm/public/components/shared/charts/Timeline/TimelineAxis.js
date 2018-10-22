@@ -64,9 +64,9 @@ function TimelineAxis({ plotValues, agentMarks }) {
 
               {agentMarks.map(agentMark => (
                 <AgentMarker
-                  key={agentMark.timeAxis}
+                  key={agentMark.name}
                   agentMark={agentMark}
-                  x={xScale(agentMark.timeAxis)}
+                  x={xScale(agentMark.us)}
                 />
               ))}
             </XYPlot>

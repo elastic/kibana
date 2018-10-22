@@ -249,7 +249,6 @@
     "@types/minimatch": "^2.0.29",
     "@types/moment-timezone": "^0.5.8",
     "@types/mustache": "^0.8.31",
-    "@types/moment-timezone": "^0.5.8",
     "@types/node": "^8.10.20",
     "@types/prop-types": "^15.5.3",
     "@types/puppeteer": "^1.6.2",
