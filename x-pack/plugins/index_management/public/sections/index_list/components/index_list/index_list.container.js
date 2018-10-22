@@ -13,7 +13,6 @@ import {
 } from '../../../../store/actions';
 
 const mapDispatchToProps = (dispatch) => {
-  console.log("mapDispatchToProps");
   return {
     loadIndices: () => {
       dispatch(loadIndices());

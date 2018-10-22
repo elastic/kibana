@@ -26,7 +26,6 @@ function formatHits(hits) {
   });
 }
 
-
 async function fetchIndices(callWithRequest) {
   const params = {
     format: 'json'

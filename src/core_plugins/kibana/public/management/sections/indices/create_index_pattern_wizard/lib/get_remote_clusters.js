@@ -23,9 +23,4 @@ const apiPrefix = chrome.addBasePath('/api/index_management');
 export async function getRemoteClusters($http) {
   const response = await $http.get(`${apiPrefix}/clusters`);
   return response.data;
-  /*
-    console.log("getRemoteClusters", typeof es.cluster, es.cluster.remoteInfo);
-    const response = await es.cluster.remoteInfo();
-    return (!response || response.error) ? [] : Object.keys(response);
-    */
 }
