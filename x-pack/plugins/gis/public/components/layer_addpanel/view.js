@@ -37,7 +37,7 @@ export class AddLayerPanel extends React.Component {
     this.state = {
       label: '',
       sourceType: '',
-      showAtAllZoomLevels: true,
+      showAtAllZoomLevels: false,
       minZoom: 0,
       maxZoom: 24,
     };
@@ -311,13 +311,14 @@ export class AddLayerPanel extends React.Component {
           />
         </EuiFormRow>
 
-        <EuiFormRow compressed>
-          <EuiSwitch
-            label="Show layer at all zoom levels"
-            checked={this.state.showAtAllZoomLevels}
-            onChange={this._onShowAtAllZoomLevelsChange}
-          />
-        </EuiFormRow>
+
+        {/*<EuiFormRow compressed>*/}
+          {/*<EuiSwitch*/}
+            {/*label="Show layer at all zoom levels"*/}
+            {/*checked={this.state.showAtAllZoomLevels}*/}
+            {/*onChange={this._onShowAtAllZoomLevelsChange}*/}
+          {/*/>*/}
+        {/*</EuiFormRow>*/}
         {this._renderZoomSliders()}
         {this._renderSourceSelect()}
         {this._renderSourceEditor()}
