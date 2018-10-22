@@ -17,20 +17,32 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', () => {
-    loadTestFile(require.resolve('./elasticsearch'));
-    loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./home'));
-    loadTestFile(require.resolve('./index_patterns'));
-    loadTestFile(require.resolve('./kql_telemetry'));
-    loadTestFile(require.resolve('./management'));
-    loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./scripts'));
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./shorten'));
-    loadTestFile(require.resolve('./suggestions'));
-    loadTestFile(require.resolve('./status'));
-    loadTestFile(require.resolve('./stats'));
+import { makeKQLUsageCollector } from './make_kql_usage_collector';
+
+describe('makeKQLUsageCollector', () => {
+
+  let server;
+  let makeUsageCollectorStub;
+  let registerStub;
+
+  beforeEach(() => {
+    makeUsageCollectorStub = jest.fn();
+    registerStub = jest.fn();
+    server = {
+      usage: {
+        collectorSet: { makeUsageCollector: makeUsageCollectorStub, register: registerStub },
+      },
+    };
   });
-}
+
+  it('should call collectorSet.register', () => {
+    makeKQLUsageCollector(server);
+    expect(registerStub).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call makeUsageCollector with type = kql', () => {
+    makeKQLUsageCollector(server);
+    expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
+    expect(makeUsageCollectorStub.mock.calls[0][0].type).toBe('kql');
+  });
+});
