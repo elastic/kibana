@@ -24,8 +24,11 @@ export const uploadWorkpad = (file, onUpload) => {
       workpad.id = getId('workpad');
 
       // sanity check for workpad object
-      if (!Array.isArray(workpad.pages) || workpad.pages.length === 0 || !workpad.assets)
-        throw new Error(`This file is missing required properties for a Canvas workpad`);
+      if (!Array.isArray(workpad.pages) || workpad.pages.length === 0 || !workpad.assets) {
+        throw new Error(
+          `Some properties required for a Canvas workpad are missing.  Edit your JSON file to provide the correct property values and try again.`
+        );
+      }
 
       onUpload(workpad);
     } catch (e) {
