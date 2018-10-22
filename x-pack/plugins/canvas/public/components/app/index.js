@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { createSocket } from '../../socket';
 import { initialize as initializeInterpreter } from '../../lib/interpreter';
+import { populateBrowserRegistries } from '../../lib/browser_registries';
 import { getAppReady } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
 import { trackRouteChange } from './track_route_change';
@@ -26,6 +27,7 @@ const mapDispatchToProps = dispatch => ({
   setAppReady: async () => {
     // initialize the socket and interpreter
     createSocket();
+    await populateBrowserRegistries();
     await initializeInterpreter();
 
     // set app state to ready

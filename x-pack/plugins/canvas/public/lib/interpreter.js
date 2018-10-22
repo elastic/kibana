@@ -13,7 +13,8 @@ import { functionsRegistry } from './functions_registry';
 import { getBrowserRegistries } from './browser_registries';
 
 let socket;
-let functionList;
+let resolve;
+const functionList = new Promise(_resolve => (resolve = _resolve));
 
 export async function initialize() {
   socket = getSocket();
@@ -29,7 +30,7 @@ export async function initialize() {
 
   // Create the function list
   socket.emit('getFunctionList');
-  functionList = new Promise(resolve => socket.once('functionList', resolve));
+  socket.once('functionList', resolve);
   return functionList;
 }
 

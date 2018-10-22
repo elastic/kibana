@@ -19,7 +19,7 @@ import { renderFunctionsRegistry } from './render_functions_registry';
 import { functionsRegistry as browserFunctions } from './functions_registry';
 import { loadPrivateBrowserFunctions } from './load_private_browser_functions';
 
-const types = {
+const registries = {
   browserFunctions: browserFunctions,
   commonFunctions: browserFunctions,
   elements: elementsRegistry,
@@ -33,6 +33,8 @@ const types = {
 };
 
 let resolve = null;
+let called = false;
+
 const populatePromise = new Promise(_resolve => {
   resolve = _resolve;
 });
@@ -42,20 +44,28 @@ export const getBrowserRegistries = () => {
 };
 
 export const populateBrowserRegistries = () => {
+  if (called) throw new Error('function should only be called once per process');
+  called = true;
+
   // loadPrivateBrowserFunctions is sync. No biggie.
   loadPrivateBrowserFunctions();
-  const remainingTypes = Object.keys(types);
+
+  const remainingTypes = Object.keys(registries);
+  const populatedTypes = {};
+
   function loadType() {
     const type = remainingTypes.pop();
     window.canvas = window.canvas || {};
-    window.canvas.register = d => types[type].register(d);
+    window.canvas.register = d => registries[type].register(d);
 
     // Load plugins one at a time because each needs a different loader function
     // $script will only load each of these once, we so can call this as many times as we need?
     const pluginPath = chrome.addBasePath(`/api/canvas/plugins?type=${type}`);
     $script(pluginPath, () => {
+      populatedTypes[type] = registries[type];
+
       if (remainingTypes.length) loadType();
-      else resolve(true);
+      else resolve(populatedTypes);
     });
   }
 

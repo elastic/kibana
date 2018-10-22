@@ -9,7 +9,7 @@ import { resolve } from 'path';
 import uuid from 'uuid/v4';
 
 // If the worker doesn't response in 10s, kill it.
-const WORKER_TIMEOUT = 10000;
+const WORKER_TIMEOUT = 20000;
 const workerPath = resolve(__dirname, 'babeled.js');
 const heap = {};
 let worker = null;
@@ -21,6 +21,7 @@ export function getWorker() {
   // 'exit' happens whether we kill the worker or it just dies.
   // No need to look for 'error', our worker is intended to be long lived so it isn't running, it's an issue
   worker.on('exit', () => {
+    // Heads up: there is no worker.off
     worker = null;
     // Restart immediately on exit since node takes a couple seconds to spin up
     worker = getWorker();

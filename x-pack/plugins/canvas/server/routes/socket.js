@@ -12,7 +12,6 @@ import { routeExpressionProvider } from '../lib/route_expression';
 import { browser } from '../lib/route_expression/browser';
 import { thread } from '../lib/route_expression/thread';
 import { server as serverEnv } from '../lib/route_expression/server';
-import { createError } from '../../common/interpreter/create_error';
 
 export function socketApi(server) {
   const io = socket(server.listener, { path: '/socket.io' });
@@ -46,7 +45,7 @@ export function socketApi(server) {
         routeExpression(ast, deserialize(context))
           .then(value => socket.emit(`resp:${id}`, { type: 'msgSuccess', value: serialize(value) }))
           // TODO: I don't think it is possible to hit this right now? Maybe ever?
-          .catch(e => socket.emit(`resp:${id}`, { type: 'msgError', error: createError(e) }))
+          .catch(e => socket.emit(`resp:${id}`, { type: 'msgError', value: e }))
       );
     };
 

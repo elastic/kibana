@@ -15,6 +15,8 @@ const registries = {
 };
 
 let resolve = null;
+let called = false;
+
 const populatePromise = new Promise(_resolve => {
   resolve = _resolve;
 });
@@ -24,6 +26,8 @@ export const getServerRegistries = () => {
 };
 
 export const populateServerRegistries = types => {
+  if (called) throw new Error('function should only be called once per process');
+  called = true;
   if (!types || !types.length) throw new Error('types is required');
 
   const remainingTypes = types;
