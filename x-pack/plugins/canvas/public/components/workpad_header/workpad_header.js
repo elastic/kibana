@@ -41,6 +41,7 @@ export const WorkpadHeader = ({
         onClose={() => setShowElementModal(false)}
         className="canvasModal--fixedSize"
         maxWidth="1000px"
+        initialFocus=".canvasElements__filter"
       >
         <ElementTypes
           onClick={element => {
