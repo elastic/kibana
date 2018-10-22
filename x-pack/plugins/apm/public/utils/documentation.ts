@@ -41,7 +41,7 @@ const APM_AGENT_FEATURE_DOCS: {
   [featureName: string]: {
     [agentName: string]: {
       url: string;
-      text?: string;
+      text: string;
     };
   };
 } = {
@@ -77,6 +77,7 @@ const APM_AGENT_FEATURE_DOCS: {
       url: `${APM_URL_ROOT}/agent/ruby/1.x/advanced.html#_adding_tags`
     },
     javascript: {
+      text: featureContextTagsText,
       url: `${APM_URL_ROOT}/agent/js-base/0.x/api.html#apm-set-tags`
     }
   },
