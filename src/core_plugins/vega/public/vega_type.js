@@ -46,7 +46,7 @@ VisTypesRegistryProvider.register((Private) => {
       defaultMessage: 'Vega',
     }),
     description: i18n.translate('vega.type.vegaВescription', {
-      defaultMessage: 'Create custom visualizations using Vega and VegaLite',
+      defaultMessage: 'Create custom visualizations using Vega and Vega-Lite',
     }),
     icon: 'visVega',
     category: CATEGORY.OTHER,

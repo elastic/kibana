@@ -66,8 +66,8 @@ export class EmsFileParser {
       const foundLayer = layers.find(v => v.name === name);
       if (!foundLayer) {
         throw new Error(i18n.translate('vega.emsFileParser.emsFileNameDoesNotExistErrorMessage', {
-          defaultMessage: 'emsfile {name} does not exist',
-          values: { name: JSON.stringify(name) },
+          defaultMessage: '{emsfile} {emsfileName} does not exist',
+          values: { emsfileName: JSON.stringify(name), emsfile: 'emsfile' },
         }));
       }
 

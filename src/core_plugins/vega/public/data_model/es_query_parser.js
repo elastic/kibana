@@ -69,26 +69,28 @@ export class EsQueryParser {
     if (legacyContext !== undefined) {
       if (body.query !== undefined) {
         throw new Error(i18n.translate('vega.esQueryParser.dataUrlMustNotHaveLegacyAndBodyQueryValuesAtTheSameTimeErrorMessage', {
-          defaultMessage: 'Data url must not have legacy "{legacyContext}" and "{bodyQueryConfigName}" values at the same time',
+          defaultMessage: 'Data {urlParam} must not have legacy "{legacyContext}" and "{bodyQueryConfigName}" values at the same time',
           values: {
             legacyContext: LEGACY_CONTEXT,
             bodyQueryConfigName: 'body.query',
+            urlParam: 'url',
           },
         }));
       } else if (usesContext) {
         throw new Error(i18n.translate('vega.esQueryParser.dataUrlMustNotHaveLegacyContextTogetherWithContextOrTimefieldErrorMessage', {
-          defaultMessage: 'Data url must not have "{legacyContext}" together with "{context}" or "{timefield}"',
+          defaultMessage: 'Data {urlParam} must not have "{legacyContext}" together with "{context}" or "{timefield}"',
           values: {
             legacyContext: LEGACY_CONTEXT,
             context: CONTEXT,
             timefiels: TIMEFIELD,
+            urlParam: 'url',
           },
         }));
       } else if (legacyContext !== true && (typeof legacyContext !== 'string' || legacyContext.length === 0)) {
         throw new Error(i18n.translate('vega.esQueryParser.legacyContextCanBeTrueErrorMessage', {
           // eslint-disable-next-line max-len
-          defaultMessage: 'Legacy "{legacyContext}" can either be true (ignores time range picker), or it can be the name of the time field, e.g. "@timestamp"',
-          values: { legacyContext: LEGACY_CONTEXT },
+          defaultMessage: 'Legacy "{legacyContext}" can either be {trueValue} (ignores time range picker), or it can be the name of the time field, e.g. "@timestamp"',
+          values: { legacyContext: LEGACY_CONTEXT, trueValue: 'true' },
         }));
       }
 
@@ -300,7 +302,11 @@ export class EsQueryParser {
           break;
         default:
           throw new Error(i18n.translate('vega.esQueryParser.unknownUnitValueErrorMessage', {
-            defaultMessage: 'Unknown unit value. Must be one of: [week, day, hour, minute, second]',
+            defaultMessage: 'Unknown {unitParamName} value. Must be one of: {unitParamValues}',
+            values: {
+              unitParamName: 'unit',
+              unitParamValues: '[week, day, hour, minute, second]',
+            },
           }));
       }
       result += shift * multiplier;

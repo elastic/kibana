@@ -132,7 +132,7 @@ export class VegaParser {
           this.spec.projections[0].name !== 'projection'
         ) {
           throw new Error(i18n.translate('vega.vegaParser.VLCompilerShouldHaveGeneratedSingleProtectionObjectErrorMessage', {
-            defaultMessage: 'Internal error: VL compiler should have generated a single projection object',
+            defaultMessage: 'Internal error: Vega-Lite compiler should have generated a single projection object',
           }));
         }
         delete this.spec.projections;
