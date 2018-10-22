@@ -122,7 +122,7 @@ export class DashboardGridUi extends React.Component {
       isLayoutInvalid = true;
       toastNotifications.addDanger({
         title: props.intl.formatMessage({
-          id: 'kbn.dashboard.dashboardGrid.toastNotifications.UnableToLoadDashboardDangerMessage',
+          id: 'kbn.dashboard.dashboardGrid.unableToLoadDashboardDangerMessage',
           defaultMessage: 'Unable to load dashboard.',
         }),
         text: error.message,

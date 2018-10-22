@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { injectI18nProvider } from '@kbn/i18n/react';
 import './dashboard_app';
 import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
@@ -42,8 +43,26 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 app.directive('dashboardListing', function (reactDirective) {
-  return reactDirective(DashboardListing);
+  return reactDirective(injectI18nProvider(DashboardListing));
 });
+
+function createNewDashboardCtrl($scope) {
+  $scope.addVisualizationToDashboardLinkText = i18n.translate('kbn.dashboard.app.addVisualizationToDashboardLinkText', {
+    defaultMessage: 'Add',
+  });
+
+  $scope.addVisualizationToDashboardLinkAriaLabel = i18n.translate('kbn.dashboard.app.addVisualizationToDashboardLinkAriaLabel', {
+    defaultMessage: 'Add visualization',
+  });
+
+  $scope.visitVisualizeAppLinkText = i18n.translate('kbn.dashboard.app.visitVisualizeAppLinkText', {
+    defaultMessage: 'visit the Visualize app',
+  });
+
+  $scope.howToStartWorkingOnNewDashboardEditLinkText = i18n.translate('kbn.dashboard.app.howToStartWorkingOnNewDashboardEditLinkText', {
+    defaultMessage: 'Edit',
+  });
+}
 
 uiRoutes
   .defaults(/dashboard/, {
@@ -94,23 +113,7 @@ uiRoutes
   })
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
-    controller($scope) {
-      $scope.addVisualizationToDashboardLinkText = i18n.translate('kbn.dashboard.app.addVisualizationToDashboardLinkText', {
-        defaultMessage: 'Add',
-      });
-
-      $scope.addVisualizationToDashboardLinkAriaLabel = i18n.translate('kbn.dashboard.app.addVisualizationToDashboardLinkAriaLabel', {
-        defaultMessage: 'Add visualization',
-      });
-
-      $scope.visitVisualizeAppLinkText = i18n.translate('kbn.dashboard.app.visitVisualizeAppLinkText', {
-        defaultMessage: 'visit the Visualize app',
-      });
-
-      $scope.howToStartWorkingOnNewDashboardEditLinkText = i18n.translate('kbn.dashboard.app.howToStartWorkingOnNewDashboardEditLinkText', {
-        defaultMessage: 'Edit',
-      });
-    },
+    controller: createNewDashboardCtrl,
     resolve: {
       dash: function (savedDashboards, redirectWhenMissing) {
         return savedDashboards.get()
@@ -122,6 +125,7 @@ uiRoutes
   })
   .when(createDashboardEditUrl(':id'), {
     template: dashboardTemplate,
+    controller: createNewDashboardCtrl,
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, redirectWhenMissing, kbnUrl, AppState, i18n) {
         const id = $route.current.params.id;

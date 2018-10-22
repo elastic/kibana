@@ -106,11 +106,12 @@ class DashboardCloneModalUi extends React.Component {
             defaultMessage="Click {confirmClone} to clone the dashboard with the duplicate title."
             values={{
               confirmClone: (
-                <FormattedMessage
-                  id="kbn.dashboard.topNav.cloneModal.confirmCloneTDescription"
-                  defaultMessage="Confirm Clone"
-                  tagName="strong"
-                />
+                <strong>
+                  <FormattedMessage
+                    id="kbn.dashboard.topNav.cloneModal.confirmCloneTDescription"
+                    defaultMessage="Confirm Clone"
+                  />
+                </strong>
               ),
             }}
             tagName="p"
@@ -140,11 +141,12 @@ class DashboardCloneModalUi extends React.Component {
 
           <EuiModalBody>
             <EuiText>
-              <FormattedMessage
-                id="kbn.dashboard.topNav.cloneModal.enterNewNameForDashboardDescription"
-                defaultMessage="Please enter a new name for your dashboard."
-                tagName="p"
-              />
+              <p>
+                <FormattedMessage
+                  id="kbn.dashboard.topNav.cloneModal.enterNewNameForDashboardDescription"
+                  defaultMessage="Please enter a new name for your dashboard."
+                />
+              </p>
             </EuiText>
 
             <EuiSpacer />

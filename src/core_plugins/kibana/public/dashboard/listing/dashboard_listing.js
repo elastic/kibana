@@ -19,7 +19,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { i18n } from '@kbn/i18n';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import {
@@ -50,7 +50,7 @@ export const EMPTY_FILTER = '';
 // and not supporting server-side paging.
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
-export class DashboardListing extends React.Component {
+class DashboardListingUi extends React.Component {
 
   constructor(props) {
     super(props);
@@ -112,7 +112,7 @@ export class DashboardListing extends React.Component {
       await this.props.delete(this.state.selectedIds);
     } catch (error) {
       toastNotifications.addDanger({
-        title: i18n.translate('kbn.dashboard.listing.toastNotifications.unableToDeleteDashboardDangerMessage', {
+        title: this.props.intl.formatMessage('kbn.dashboard.listing.unableToDeleteDashboardsDangerMessage', {
           defaultMessage: 'Unable to delete dashboard(s)',
         }),
         text: `${error}`,
@@ -197,23 +197,26 @@ export class DashboardListing extends React.Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={i18n.translate('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.title', {
+          title={this.props.intl.formatMessage('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.title', {
             defaultMessage: 'Delete selected dashboards?',
           })}
           onCancel={this.closeDeleteModal}
           onConfirm={this.deleteSelectedItems}
-          cancelButtonText={i18n.translate('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.cancelButtonLabel', {
+          cancelButtonText={this.props.intl.formatMessage('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.cancelButtonLabel', {
             defaultMessage: 'Cancel',
           })}
-          confirmButtonText={i18n.translate('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.confirmButtonLabel', {
-            defaultMessage: 'Delete',
-          })}
+          confirmButtonText={
+            this.props.intl.formatMessage('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.confirmButtonLabel', {
+              defaultMessage: 'Delete',
+            })
+          }
           defaultFocusedButton="cancel"
         >
           <p>
-            {i18n.translate('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.description', {
-              defaultMessage: 'You can\'t recover deleted dashboards.',
-            })}
+            <FormattedMessage
+              id="kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.description"
+              defaultMessage="You can't recover deleted dashboards."
+            />
           </p>
         </EuiConfirmModal>
       </EuiOverlayMask>
@@ -225,14 +228,14 @@ export class DashboardListing extends React.Component {
       return (
         <React.Fragment>
           <EuiCallOut
-            title={i18n.translate('kbn.dashboard.listing.listingLimitExceeded.title', {
+            title={this.props.intl.formatMessage('kbn.dashboard.listing.listingLimitExceeded.title', {
               defaultMessage: 'Listing limit exceeded',
             })}
             color="warning"
             iconType="help"
           >
             <p>
-              {i18n.translate('kbn.dashboard.listing.listingLimitExceeded.description', {
+              {this.props.intl.formatMessage('kbn.dashboard.listing.listingLimitExceeded.description', {
                 defaultMessage: 'You have {totalDashboards} dashboards, \
 but your {listingLimitText} setting prevents the table below from displaying more than {listingLimitValue}. \
 You can change this setting under {advancedSettingsLink}.',
@@ -240,14 +243,14 @@ You can change this setting under {advancedSettingsLink}.',
                   totalDashboards: this.state.totalDashboards,
                   listingLimitValue: this.props.listingLimit,
                   listingLimitText: (
-                    <strong>{i18n.translate('kbn.dashboard.listing.listingLimitExceeded.listingLimitText', {
+                    <strong>{this.props.intl.formatMessage('kbn.dashboard.listing.listingLimitExceeded.listingLimitText', {
                       defaultMessage: 'listingLimit',
                     })}
                     </strong>
                   ),
                   advancedSettingsLink: (
                     <EuiLink href="#/management/kibana/settings">
-                      {i18n.translate('kbn.dashboard.listing.listingLimitExceeded.advancedSettingsLinkText', {
+                      {this.props.intl.formatMessage('kbn.dashboard.listing.listingLimitExceeded.advancedSettingsLinkText', {
                         defaultMessage: 'Advanced Settings',
                       })}
                     </EuiLink>
@@ -267,7 +270,7 @@ You can change this setting under {advancedSettingsLink}.',
       return '';
     }
 
-    return i18n.translate('kbn.dashboard.listing.noMatchedDashboardsMessage', {
+    return this.props.intl.formatMessage('kbn.dashboard.listing.noMatchedDashboardsMessage', {
       defaultMessage: 'No dashboards matched your search.',
     });
   }
@@ -279,9 +282,10 @@ You can change this setting under {advancedSettingsLink}.',
         <EuiText>
           <h2>
             <EuiTextColor color="subdued">
-              {i18n.translate('kbn.dashboard.listing.noDashboardsItemsMessage', {
-                defaultMessage: 'Looks like you don\'t have any dashboards.',
-              })}
+              <FormattedMessage
+                id="kbn.dashboard.listing.noDashboardsItemsMessage"
+                defaultMessage="Looks like you don't have any dashboards."
+              />
             </EuiTextColor>
           </h2>
         </EuiText>
@@ -294,31 +298,35 @@ You can change this setting under {advancedSettingsLink}.',
           iconType="dashboardApp"
           title={
             <h2>
-              {i18n.translate('kbn.dashboard.listing.createNewDashboard.title', {
-                defaultMessage: 'Create your first dashboard',
-              })}
+              <FormattedMessage
+                id="kbn.dashboard.listing.createNewDashboard.title"
+                defaultMessage="Create your first dashboard"
+              />
             </h2>
           }
           body={
             <Fragment>
               <p>
-                {i18n.translate('kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription', {
-                  defaultMessage: 'You can combine data views from any Kibana app into one dashboard and see everything in one place.',
-                })}
+                <FormattedMessage
+                  id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                />
               </p>
               <p>
-                {i18n.translate('kbn.dashboard.listing.createNewDashboard.newToKibanaDescription', {
-                  defaultMessage: 'New to Kibana? {sampleDataInstallLink} to take a test drive.',
-                  values: {
+                <FormattedMessage
+                  id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  values={{
                     sampleDataInstallLink: (
                       <EuiLink href="#/home/tutorial_directory/sampleData">
-                        {i18n.translate('kbn.dashboard.listing.createNewDashboard.sampleDataInstallLink', {
-                          defaultMessage: 'Install some sample data',
-                        })}
+                        <FormattedMessage
+                          id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                          defaultMessage="Install some sample data"
+                        />
                       </EuiLink>
                     ),
-                  },
-                })}
+                  }}
+                />
               </p>
             </Fragment>
           }
@@ -329,9 +337,10 @@ You can change this setting under {advancedSettingsLink}.',
               iconType="plusInCircle"
               data-test-subj="createDashboardPromptButton"
             >
-              {i18n.translate('kbn.dashboard.listing.createNewDashboard.createButtonLabel', {
-                defaultMessage: 'Create new dashboard',
-              })}
+              <FormattedMessage
+                id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
+                defaultMessage="Create new dashboard"
+              />
             </EuiButton>
           }
         />
@@ -351,9 +360,10 @@ You can change this setting under {advancedSettingsLink}.',
             data-test-subj="deleteSelectedDashboards"
             key="delete"
           >
-            {i18n.translate('kbn.dashboard.listing.searchBar.deleteSelectedButtonLabel', {
-              defaultMessage: 'Delete selected',
-            })}
+            <FormattedMessage
+              id="kbn.dashboard.listing.searchBar.deleteSelectedButtonLabel"
+              defaultMessage="Delete selected"
+            />
           </EuiButton>
         </EuiFlexItem>
       );
@@ -365,7 +375,7 @@ You can change this setting under {advancedSettingsLink}.',
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
             aria-label="Filter dashboards"
-            placeholder={i18n.translate('kbn.dashboard.listing.searchBar.searchField.placeholder', {
+            placeholder={this.props.intl.formatMessage('kbn.dashboard.listing.searchBar.searchField.placeholder', {
               defaultMessage: 'Search...',
             })}
             fullWidth
@@ -386,7 +396,7 @@ You can change this setting under {advancedSettingsLink}.',
     const tableColumns = [
       {
         field: 'title',
-        name: i18n.translate('kbn.dashboard.listing.table.titleColumn.title', {
+        name: this.props.intl.formatMessage('kbn.dashboard.listing.table.titleColumn.title', {
           defaultMessage: 'Title',
         }),
         sortable: true,
@@ -401,7 +411,7 @@ You can change this setting under {advancedSettingsLink}.',
       },
       {
         field: 'description',
-        name: i18n.translate('kbn.dashboard.listing.table.descriptionColumn.title', {
+        name: this.props.intl.formatMessage('kbn.dashboard.listing.table.descriptionColumn.title', {
           defaultMessage: 'Description',
         }),
         dataType: 'string',
@@ -410,7 +420,7 @@ You can change this setting under {advancedSettingsLink}.',
     ];
     if (!this.props.hideWriteControls) {
       tableColumns.push({
-        name: i18n.translate('kbn.dashboard.listing.table.actionsColumn.title', {
+        name: this.props.intl.formatMessage('kbn.dashboard.listing.table.actionsColumn.title', {
           defaultMessage: 'Actions',
         }),
         actions: [
@@ -420,9 +430,10 @@ You can change this setting under {advancedSettingsLink}.',
                 <EuiLink
                   href={`#${createDashboardEditUrl(record.id)}?_a=(viewMode:edit)`}
                 >
-                  {i18n.translate('kbn.dashboard.listing.table.actionsColumn.editLinkText', {
-                    defaultMessage: 'Edit',
-                  })}
+                  <FormattedMessage
+                    id="kbn.dashboard.listing.table.actionsColumn.editLinkText"
+                    defaultMessage="Edit"
+                  />
                 </EuiLink>
               );
             }
@@ -484,9 +495,10 @@ You can change this setting under {advancedSettingsLink}.',
             href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}
             data-test-subj="newDashboardLink"
           >
-            {i18n.translate('kbn.dashboard.listing.createNewDashboardButtonLabel', {
-              defaultMessage: 'Create new dashboard',
-            })}
+            <FormattedMessage
+              id="kbn.dashboard.listing.createNewDashboardButtonLabel"
+              defaultMessage="Create new dashboard"
+            />
           </EuiButton>
         </EuiFlexItem>
       );
@@ -499,9 +511,10 @@ You can change this setting under {advancedSettingsLink}.',
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h1>
-                {i18n.translate('kbn.dashboard.listing.dashboardsTitle', {
-                  defaultMessage: 'Dashboards',
-                })}
+                <FormattedMessage
+                  id="kbn.dashboard.listing.dashboardsTitle"
+                  defaultMessage="Dashboards"
+                />
               </h1>
             </EuiTitle>
           </EuiFlexItem>
@@ -546,7 +559,7 @@ You can change this setting under {advancedSettingsLink}.',
   }
 }
 
-DashboardListing.propTypes = {
+DashboardListingUi.propTypes = {
   find: PropTypes.func.isRequired,
   delete: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,
@@ -554,6 +567,8 @@ DashboardListing.propTypes = {
   initialFilter: PropTypes.string,
 };
 
-DashboardListing.defaultProps = {
+DashboardListingUi.defaultProps = {
   initialFilter: EMPTY_FILTER,
 };
+
+export const DashboardListing = injectI18n(DashboardListingUi);

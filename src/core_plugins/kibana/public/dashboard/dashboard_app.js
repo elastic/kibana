@@ -24,6 +24,7 @@ import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import { applyTheme } from 'ui/theme';
 import { toastNotifications } from 'ui/notify';
+import { injectI18nProvider } from '@kbn/i18n/react';
 
 import 'ui/query_bar';
 
@@ -67,7 +68,7 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 app.directive('dashboardViewportProvider', function (reactDirective) {
-  return reactDirective(DashboardViewportProvider);
+  return reactDirective(injectI18nProvider(DashboardViewportProvider));
 });
 
 app.directive('dashboardApp', function ($injector) {
@@ -306,7 +307,7 @@ app.directive('dashboardApp', function ($injector) {
           .then(function (id) {
             if (id) {
               toastNotifications.addSuccess({
-                title: i18n('kbn.dashboard.app.toastNotifications.dashboardWasSavedSuccessMessage',
+                title: i18n('kbn.dashboard.app.dashboardWasSavedSuccessMessage',
                   {
                     defaultMessage: 'Dashboard \'{dashTitle}\' was saved',
                     values: { dashTitle: dash.title },
@@ -325,7 +326,7 @@ app.directive('dashboardApp', function ($injector) {
             return { id };
           }).catch((error) => {
             toastNotifications.addDanger({
-              title: i18n('kbn.dashboard.app.toastNotifications.dashboardWasNotSavedDangerMessage',
+              title: i18n('kbn.dashboard.app.dashboardWasNotSavedDangerMessage',
                 {
                   defaultMessage: 'Dashboard \'{dashTitle}\' was not saved. Error: {errorMessage}',
                   values: {

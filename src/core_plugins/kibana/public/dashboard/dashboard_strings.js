@@ -29,14 +29,26 @@ import { DashboardViewMode } from './dashboard_view_mode';
  */
 export function getDashboardTitle(title, viewMode, isDirty) {
   const isEditMode = viewMode === DashboardViewMode.EDIT;
-  const unsavedSuffix = isEditMode && isDirty
-    ? i18n.translate('kbn.dashboard.title.unsavedSuffix', {
-      defaultMessage: ' (unsaved)',
-    })
-    : '';
+  let displayTitle;
 
-  const displayTitle = `${title}${unsavedSuffix}`;
-  return isEditMode ? i18n.translate('kbn.dashboard.title.editModeText', {
-    defaultMessage: 'Editing ',
-  }) + displayTitle : displayTitle;
+  if (isEditMode && isDirty && isEditMode) {
+    displayTitle = i18n.translate('kbn.dashboard.strings.dashboardUnsavedEditTitle', {
+      defaultMessage: 'Editing {title} (unsaved)',
+      title,
+    });
+  } else if (isEditMode && isDirty) {
+    displayTitle = i18n.translate('kbn.dashboard.strings.dashboardUnsavedTitle', {
+      defaultMessage: '{title} (unsaved)',
+      title,
+    });
+  } else if (isEditMode) {
+    displayTitle = i18n.translate('kbn.dashboard.strings.dashboardEditTitle', {
+      defaultMessage: 'Editing {title}',
+      title,
+    });
+  } else {
+    displayTitle = title;
+  }
+
+  return displayTitle;
 }

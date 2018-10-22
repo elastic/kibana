@@ -62,16 +62,16 @@
     <p
       class="kuiText kuiVerticalRhythm"
       i18n-id="kbn.dashboard.app.addVisualizationToDashboardDescription"
-      i18n-default-message="Click the {addVisualizationToDashboardLink} button in the menu bar above to add a visualization to the dashboard. {br}If you haven't set up any visualizations yet, {visitVisualizeAppLink} to create your first visualization."
+      i18n-default-message="Click the {unsafe_addVisualizationToDashboardLink} button in the menu bar above to add a visualization to the dashboard. {br}If you haven't set up any visualizations yet, {visitVisualizeAppLink} to create your first visualization."
       i18n-values="{
-        addVisualizationToDashboardLink: '<a
+        unsafe_addVisualizationToDashboardLink: '<a
           kbn-accessible-click
-          class="kuiButton kuiButton--primary kuiButton--small"
-          ng-click="showAddPanel()"
-          aria-label="' + addVisualizationToDashboardLinkAriaLabel + '"
-          data-test-subj="emptyDashboardAddPanelButton">' + addVisualizationToDashboardLinkText + '</a>',
+          class=\'kuiButton kuiButton--primary kuiButton--small\'
+          ng-click=\'showAddPanel()\'
+          aria-label=\'' + addVisualizationToDashboardLinkAriaLabel + '\'
+          data-test-subj=\'emptyDashboardAddPanelButton\'>' + addVisualizationToDashboardLinkText + '</a>',
         br: '<br/>',
-        visitVisualizeAppLink: '<a class="kuiLink" href="#/visualize">' + visitVisualizeAppLinkText + '</a>'}"
+        visitVisualizeAppLink: '<a class=\'kuiLink\' href=\'#/visualize\'>' + visitVisualizeAppLinkText + '</a>'}"
     >
     </p>
   </div>
@@ -87,13 +87,13 @@
     <p
       class="kuiText kuiVerticalRhythm"
       i18n-id="kbn.dashboard.app.howToStartWorkingOnNewDashboardDescription"
-      i18n-default-message="Click the {howToStartWorkingOnNewDashboardEditLink} button in the menu bar above to start working on your new dashboard."
+      i18n-default-message="Click the {unsafe_howToStartWorkingOnNewDashboardEditLink} button in the menu bar above to start working on your new dashboard."
       i18n-values="{
-        howToStartWorkingOnNewDashboardEditLink: '
+        unsafe_howToStartWorkingOnNewDashboardEditLink: '
           <a
             kbn-accessible-click
-            class="kuiButton kuiButton--primary kuiButton--small"
-            ng-click="enterEditMode()"
+            class=\'kuiButton kuiButton--primary kuiButton--small\'
+            ng-click=\'enterEditMode()\'
           >' + howToStartWorkingOnNewDashboardEditLinkText + '</a>'
       }"
     >
