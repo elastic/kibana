@@ -4,20 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiAvatar,
-  // @ts-ignore
-  EuiHeaderSectionItemButton,
-  EuiPopover,
-  PopoverAnchorPosition,
-} from '@elastic/eui';
-import React, { Component } from 'react';
+import { EuiAvatar, EuiPopover, PopoverAnchorPosition } from '@elastic/eui';
+import React, { Component, ComponentClass } from 'react';
 import { UserProfile } from '../../../../xpack_main/public/services/user_profile';
 import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
 import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
+import { ButtonProps } from './types';
 
 interface Props {
   spacesManager: SpacesManager;
@@ -28,7 +23,7 @@ interface Props {
   };
   userProfile: UserProfile;
   anchorPosition: PopoverAnchorPosition;
-  location: 'globalNav' | 'header';
+  buttonClass: ComponentClass<ButtonProps>;
 }
 
 interface State {
@@ -142,32 +137,15 @@ export class NavControlPopover extends Component<Props, State> {
   };
 
   private getButton = (linkIcon: JSX.Element, linkTitle: string) => {
-    // Mimics the current angular-based navigation link
-    if (this.props.location === 'globalNav') {
-      return (
-        <div className="global-nav-link">
-          <a className="global-nav-link__anchor" onClick={this.toggleSpaceSelector}>
-            <div className="global-nav-link__icon"> {linkIcon} </div>
-            <div className="global-nav-link__title"> {linkTitle} </div>
-          </a>
-        </div>
-      );
-    } else if (this.props.location === 'header') {
-      return (
-        <EuiHeaderSectionItemButton
-          aria-controls="headerSpacesMenuList"
-          aria-expanded={this.state.showSpaceSelector}
-          aria-haspopup="true"
-          aria-label={linkTitle}
-          title={linkTitle}
-          onClick={this.toggleSpaceSelector}
-        >
-          {linkIcon}
-        </EuiHeaderSectionItemButton>
-      );
-    } else {
-      throw new Error(`Unexpected location ${this.props.location}`);
-    }
+    const Button = this.props.buttonClass;
+    return (
+      <Button
+        linkTitle={linkTitle}
+        linkIcon={linkIcon}
+        toggleSpaceSelector={this.toggleSpaceSelector}
+        spaceSelectorShown={this.state.showSpaceSelector}
+      />
+    );
   };
 
   private toggleSpaceSelector = () => {

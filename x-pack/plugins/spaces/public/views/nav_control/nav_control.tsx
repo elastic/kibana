@@ -22,6 +22,8 @@ import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_c
 // @ts-ignore
 import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
 import { Space } from '../../../common/model/space';
+import { SpacesGlobalNavButton } from './components/spaces_global_nav_button';
+import { SpacesHeaderNavButton } from './components/spaces_header_nav_button';
 
 chromeNavControlsRegistry.register(
   constant({
@@ -60,7 +62,7 @@ module.controller(
             activeSpace={activeSpace}
             userProfile={userProfile}
             anchorPosition={'rightCenter'}
-            location={'globalNav'}
+            buttonClass={SpacesGlobalNavButton}
           />,
           domNode
         );
@@ -109,7 +111,7 @@ chromeHeaderNavControlsRegistry.register(
           activeSpace={activeSpace}
           userProfile={userProfile}
           anchorPosition="downLeft"
-          location={'header'}
+          buttonClass={SpacesHeaderNavButton}
         />,
         el
       );

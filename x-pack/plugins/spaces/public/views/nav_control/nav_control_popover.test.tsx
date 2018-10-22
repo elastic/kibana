@@ -8,6 +8,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
+import { SpacesGlobalNavButton } from './components/spaces_global_nav_button';
 import { NavControlPopover } from './nav_control_popover';
 
 const mockChrome = {
@@ -39,7 +40,7 @@ const createMockHttpAgent = (withSpaces = false) => {
 };
 
 describe('NavControlPopover', () => {
-  it('renders for the global nav without crashing', () => {
+  it('renders without crashing', () => {
     const activeSpace = {
       space: { id: '', name: 'foo' },
       valid: true,
@@ -53,27 +54,7 @@ describe('NavControlPopover', () => {
         spacesManager={spacesManager}
         userProfile={{ hasCapability: () => true }}
         anchorPosition={'downRight'}
-        location={'globalNav'}
-      />
-    );
-    expect(wrapper).toMatchSnapshot();
-  });
-
-  it('renders for the header without crashing', () => {
-    const activeSpace = {
-      space: { id: '', name: 'foo' },
-      valid: true,
-    };
-
-    const spacesManager = new SpacesManager(createMockHttpAgent(), mockChrome, '/');
-
-    const wrapper = shallow(
-      <NavControlPopover
-        activeSpace={activeSpace}
-        spacesManager={spacesManager}
-        userProfile={{ hasCapability: () => true }}
-        anchorPosition={'rightCenter'}
-        location={'header'}
+        buttonClass={SpacesGlobalNavButton}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -95,7 +76,7 @@ describe('NavControlPopover', () => {
         spacesManager={spacesManager}
         userProfile={{ hasCapability: () => true }}
         anchorPosition={'rightCenter'}
-        location={'header'}
+        buttonClass={SpacesGlobalNavButton}
       />
     );
 
