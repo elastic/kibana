@@ -304,21 +304,6 @@ export async function loadMapResources(dispatch) {
         showAtAllZoomLevels: true,
         minZoom: 0,
         maxZoom: 24,
-      },
-      {
-        id: "0pmk0",
-        label: 'dark theme tiles',
-        sourceDescriptor: {
-          "type": "EMS_XYZ",
-          "urlTemplate": "https://api.mapbox.com/styles/v1/npeihl/cjgib11ei001w2rrva9nomul9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibnBlaWhsIiwiYSI6InVmU21qeVUifQ.jwa9V6XsmccKsEHKh5QfmQ"
-        },
-        visible: false,
-        temporary: false,
-        style: {},
-        type: "TILE",
-        showAtAllZoomLevels: true,
-        minZoom: 0,
-        maxZoom: 24,
       }
     ]
   ));
