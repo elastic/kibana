@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { VectorStyle } from '../vector_style';
 import { DynamicColorSelection } from './dynamic_color_selection';
 import { StaticColorSelection } from './static_color_selection';
@@ -13,7 +13,8 @@ import _ from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch
+  EuiSwitch,
+  EuiTitle
 } from '@elastic/eui';
 
 
@@ -115,21 +116,27 @@ export class VectorStyleColorEditor extends React.Component {
     }
 
     return (
-      <Fragment>
-        <EuiFlexItem grow={false}>
-          {this.props.name}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={this._isDynamic() ? 'Dynamic' : 'Static'}
-            checked={this._isDynamic()}
-            onChange={onTypeToggle}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          {colorSelector}
-        </EuiFlexItem>
-      </Fragment>
+      <div>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={true}>
+            <EuiTitle size="xxxs" textTransform="uppercase">
+              <h6>{this.props.name}</h6>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={'Dynamic?'}
+              checked={this._isDynamic()}
+              onChange={onTypeToggle}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={true}>
+            {colorSelector}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     );
   }
 
@@ -140,11 +147,7 @@ export class VectorStyleColorEditor extends React.Component {
       this.state.colorStyleDesciptor = this.props.colorStyleDescriptor || VectorStyleColorEditor._getFallbackDescriptor();
     }
 
-    return (
-      <EuiFlexGroup alignItems="center" justifyContent="spaceEvenly">
-        {this._renderFillAndOutlineStyle()}
-      </EuiFlexGroup>
-    );
+    return (this._renderFillAndOutlineStyle());
   }
 
 }

@@ -25,7 +25,7 @@ import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
 import { initGisApp } from './init_gis_app';
 
-import './style/main.less';
+import "mapbox-gl/dist/mapbox-gl.css";
 
 import gisAppTemplate from './gis_app.html';
 import { GISApp } from './components/gis_app';
