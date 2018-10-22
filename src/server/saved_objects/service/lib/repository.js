@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import uuid from 'uuid';
-
-import { getRootType } from '../../../mappings';
+import { omit } from 'lodash';
+import { getRootType, getRootPropertiesObjects } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
-import { trimIdPrefix } from './trim_id_prefix';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import * as errors from './errors';
-
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -36,14 +33,31 @@ export class SavedObjectsRepository {
       index,
       mappings,
       callCluster,
-      onBeforeWrite = () => {},
+      schema,
+      serializer,
+      migrator,
+      onBeforeWrite = () => { },
     } = options;
 
+    // It's important that we migrate documents / mark them as up-to-date
+    // prior to writing them to the index. Otherwise, we'll cause unecessary
+    // index migrations to run at Kibana startup, and those will probably fail
+    // due to invalidly versioned documents in the index.
+    //
+    // The migrator performs double-duty, and validates the documents prior
+    // to returning them.
+    this._migrator = migrator;
     this._index = index;
     this._mappings = mappings;
+    this._schema = schema;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
-    this._unwrappedCallCluster = callCluster;
+    this._unwrappedCallCluster = async (...args) => {
+      await migrator.awaitMigration();
+      return callCluster(...args);
+    };
+    this._schema = schema;
+    this._serializer = serializer;
   }
 
   /**
@@ -54,37 +68,45 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
+   * @property {object} [options.migrationVersion=undefined]
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
     const {
       id,
-      overwrite = false
+      migrationVersion,
+      overwrite = false,
+      namespace,
     } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
 
     try {
+      const migrated = this._migrator.migrateDocument({
+        id,
+        type,
+        namespace,
+        attributes,
+        migrationVersion,
+        updated_at: time,
+      });
+
+      const raw = this._serializer.savedObjectToRaw(migrated);
+
       const response = await this._writeToCluster(method, {
-        id: this._generateEsId(type, id),
+        id: raw._id,
         type: this._type,
         index: this._index,
         refresh: 'wait_for',
-        body: {
-          type,
-          updated_at: time,
-          [type]: attributes
-        },
+        body: raw._source,
       });
 
-      return {
-        id: trimIdPrefix(response._id, type),
-        type,
-        updated_at: time,
-        version: response._version,
-        attributes
-      };
+      return this._rawToSavedObject({
+        ...raw,
+        ...response,
+      });
     } catch (error) {
       if (errors.isNotFoundError(error)) {
         // See "503s from missing index" above
@@ -98,31 +120,38 @@ export class SavedObjectsRepository {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes }]
+   * @param {array} objects - [{ type, id, attributes, migrationVersion }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
+   * @property {string} [options.namespace]
    * @returns {promise} -  {saved_objects: [[{ id, type, version, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}) {
     const {
-      overwrite = false
+      namespace,
+      overwrite = false,
     } = options;
     const time = this._getCurrentTime();
     const objectToBulkRequest = (object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
+      const migrated = this._migrator.migrateDocument({
+        id: object.id,
+        type: object.type,
+        attributes: object.attributes,
+        migrationVersion: object.migrationVersion,
+        namespace,
+        updated_at: time,
+      });
+      const raw = this._serializer.savedObjectToRaw(migrated);
 
       return [
         {
           [method]: {
-            _id: this._generateEsId(object.type, object.id),
+            _id: raw._id,
             _type: this._type,
           }
         },
-        {
-          type: object.type,
-          updated_at: time,
-          [object.type]: object.attributes
-        }
+        raw._source,
       ];
     };
 
@@ -182,11 +211,17 @@ export class SavedObjectsRepository {
    *
    * @param {string} type
    * @param {string} id
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type, id) {
+  async delete(type, id, options = {}) {
+    const {
+      namespace
+    } = options;
+
     const response = await this._writeToCluster('delete', {
-      id: this._generateEsId(type, id),
+      id: this._serializer.generateRawId(namespace, type, id),
       type: this._type,
       index: this._index,
       refresh: 'wait_for',
@@ -211,6 +246,38 @@ export class SavedObjectsRepository {
   }
 
   /**
+   * Deletes all objects from the provided namespace.
+   *
+   * @param {string} namespace
+   * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
+   */
+  async deleteByNamespace(namespace) {
+
+    if (!namespace || typeof namespace !== 'string') {
+      throw new TypeError(`namespace is required, and must be a string`);
+    }
+
+    const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
+
+    const typesToDelete = allTypes.filter(type => !this._schema.isNamespaceAgnostic(type));
+
+    const esOptions = {
+      index: this._index,
+      ignore: [404],
+      refresh: 'wait_for',
+      body: {
+        conflicts: 'proceed',
+        ...getSearchDsl(this._mappings, this._schema, {
+          namespace,
+          type: typesToDelete,
+        })
+      }
+    };
+
+    return await this._writeToCluster('deleteByQuery', esOptions);
+  }
+
+  /**
    * @param {object} [options={}]
    * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
@@ -221,6 +288,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -233,7 +301,12 @@ export class SavedObjectsRepository {
       sortField,
       sortOrder,
       fields,
+      namespace,
     } = options;
+
+    if (!type) {
+      throw new TypeError(`options.type must be a string or an array of strings`);
+    }
 
     if (searchFields && !Array.isArray(searchFields)) {
       throw new TypeError('options.searchFields must be an array');
@@ -251,12 +324,13 @@ export class SavedObjectsRepository {
       ignore: [404],
       body: {
         version: true,
-        ...getSearchDsl(this._mappings, {
+        ...getSearchDsl(this._mappings, this._schema, {
           search,
           searchFields,
           type,
           sortField,
-          sortOrder
+          sortOrder,
+          namespace,
         })
       }
     };
@@ -278,16 +352,7 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map(hit => {
-        const { type, updated_at: updatedAt } = hit._source;
-        return {
-          id: trimIdPrefix(hit._id, type),
-          type,
-          ...updatedAt && { updated_at: updatedAt },
-          version: hit._version,
-          attributes: hit._source[type],
-        };
-      }),
+      saved_objects: response.hits.hits.map(hit => this._rawToSavedObject(hit)),
     };
   }
 
@@ -295,6 +360,8 @@ export class SavedObjectsRepository {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -303,7 +370,11 @@ export class SavedObjectsRepository {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = []) {
+  async bulkGet(objects = [], options = {}) {
+    const {
+      namespace
+    } = options;
+
     if (objects.length === 0) {
       return { saved_objects: [] };
     }
@@ -312,7 +383,7 @@ export class SavedObjectsRepository {
       index: this._index,
       body: {
         docs: objects.map(object => ({
-          _id: this._generateEsId(object.type, object.id),
+          _id: this._serializer.generateRawId(namespace, object.type, object.id),
           _type: this._type,
         }))
       }
@@ -336,7 +407,8 @@ export class SavedObjectsRepository {
           type,
           ...time && { updated_at: time },
           version: doc._version,
-          attributes: doc._source[type]
+          attributes: doc._source[type],
+          migrationVersion: doc._source.migrationVersion,
         };
       })
     };
@@ -347,11 +419,17 @@ export class SavedObjectsRepository {
    *
    * @param {string} type
    * @param {string} id
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id) {
+  async get(type, id, options = {}) {
+    const {
+      namespace
+    } = options;
+
     const response = await this._callCluster('get', {
-      id: this._generateEsId(type, id),
+      id: this._serializer.generateRawId(namespace, type, id),
       type: this._type,
       index: this._index,
       ignore: [404]
@@ -371,7 +449,8 @@ export class SavedObjectsRepository {
       type,
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
-      attributes: response._source[type]
+      attributes: response._source[type],
+      migrationVersion: response._source.migrationVersion,
     };
   }
 
@@ -382,21 +461,27 @@ export class SavedObjectsRepository {
    * @param {string} id
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
+   * @property {string} [options.namespace]
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
+    const {
+      version,
+      namespace
+    } = options;
+
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
-      id: this._generateEsId(type, id),
+      id: this._serializer.generateRawId(namespace, type, id),
       type: this._type,
       index: this._index,
-      version: options.version,
+      version,
       refresh: 'wait_for',
       ignore: [404],
       body: {
         doc: {
+          [type]: attributes,
           updated_at: time,
-          [type]: attributes
         }
       },
     });
@@ -432,11 +517,16 @@ export class SavedObjectsRepository {
     }
   }
 
-  _generateEsId(type, id) {
-    return `${type}:${id || uuid.v1()}`;
-  }
-
   _getCurrentTime() {
     return new Date().toISOString();
+  }
+
+  // The internal representation of the saved object that the serializer returns
+  // includes the namespace, and we use this for migrating documents. However, we don't
+  // want the namespcae to be returned from the repository, as the repository scopes each
+  // method transparently to the specified namespace.
+  _rawToSavedObject(raw) {
+    const savedObject = this._serializer.rawToSavedObject(raw);
+    return omit(savedObject, 'namespace');
   }
 }

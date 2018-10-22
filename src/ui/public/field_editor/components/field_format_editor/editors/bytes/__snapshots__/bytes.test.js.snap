@@ -15,7 +15,12 @@ exports[`BytesFormatEditor should render normally 1`] = `
           target="_window"
           type="button"
         >
-          Documentation 
+          <FormattedMessage
+            defaultMessage="Documentation"
+            id="common.ui.fieldEditor.number.documentaionLabel"
+            values={Object {}}
+          />
+           
           <EuiIcon
             size="m"
             type="link"
@@ -25,13 +30,17 @@ exports[`BytesFormatEditor should render normally 1`] = `
     }
     isInvalid={false}
     label={
-      <span>
-        Numeral.js format pattern (Default: 
-        <EuiCode>
-          0,0.[000]b
-        </EuiCode>
-        )
-      </span>
+      <FormattedMessage
+        defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
+        id="common.ui.fieldEditor.number.numeralLabel"
+        values={
+          Object {
+            "defaultPattern": <EuiCode>
+              0,0.[000]b
+            </EuiCode>,
+          }
+        }
+      />
     }
   >
     <EuiFieldText
@@ -43,7 +52,7 @@ exports[`BytesFormatEditor should render normally 1`] = `
       placeholder="0,0.[000]b"
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={
       Array [
         Object {

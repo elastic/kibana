@@ -22,16 +22,6 @@ import { Reducer } from 'redux';
 import { PanelActions, PanelActionTypeKeys, SetPanelTitleActionPayload } from '../actions';
 import { PanelId, PanelsMap, PanelState } from '../selectors';
 
-/**
- * @param panel - New panel data (can be partial data) to merge with possibly existing panel data in
- * the panels mapping.
- * @param panels
- * @return a new PanelState which has the merged data.
- */
-function mergePanelData(panel: PanelState, panels: PanelsMap): PanelState {
-  return _.defaultsDeep(panel, panels[panel.panelIndex]);
-}
-
 const deletePanel = (panels: PanelsMap, panelId: PanelId): PanelsMap => {
   const panelsCopy = { ...panels };
   delete panelsCopy[panelId];
@@ -40,13 +30,13 @@ const deletePanel = (panels: PanelsMap, panelId: PanelId): PanelsMap => {
 
 const updatePanel = (panels: PanelsMap, panelState: PanelState): PanelsMap => ({
   ...panels,
-  [panelState.panelIndex]: mergePanelData(panelState, panels),
+  [panelState.panelIndex]: panelState,
 });
 
 const updatePanels = (panels: PanelsMap, updatedPanels: PanelsMap): PanelsMap => {
   const panelsCopy = { ...panels };
   Object.values(updatedPanels).forEach(panel => {
-    panelsCopy[panel.panelIndex] = mergePanelData(panel, panels);
+    panelsCopy[panel.panelIndex] = panel;
   });
   return panelsCopy;
 };

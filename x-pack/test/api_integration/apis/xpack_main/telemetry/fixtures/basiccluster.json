@@ -180,6 +180,12 @@
         "index_pattern": {
           "total": 1
         },
+        "os": {
+          "distros": [],
+          "distroReleases": [],
+          "platforms": [],
+          "platformReleases": []
+        },
         "indices": 1,
         "search": {
           "total": 0

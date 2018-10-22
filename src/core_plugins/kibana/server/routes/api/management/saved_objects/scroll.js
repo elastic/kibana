@@ -49,7 +49,7 @@ export function registerScrollForExportRoute(server) {
       const savedObjectsClient = req.getSavedObjectsClient();
       const objects = await findAll(savedObjectsClient, {
         perPage: 1000,
-        typesToInclude: req.payload.typesToInclude
+        type: req.payload.typesToInclude
       });
       const response = objects.map(hit => {
         const type = hit.type;
@@ -59,7 +59,8 @@ export function registerScrollForExportRoute(server) {
           _source: hit.attributes,
           _meta: {
             savedObjectVersion: 2
-          }
+          },
+          _migrationVersion: hit.migrationVersion,
         };
       });
 

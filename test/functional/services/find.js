@@ -17,6 +17,21 @@
  * under the License.
  */
 
+// Many of our tests use the `exists` functions to determine where the user is. For
+// example, you'll see a lot of code like:
+// if (!testSubjects.exists('someElementOnPageA')) {
+//   navigateToPageA();
+// }
+// If the element doesn't exist, selenium would wait up to defaultFindTimeout for it to
+// appear. Because there are many times when we expect it to not be there, we don't want
+// to wait the full amount of time, or it would greatly slow our tests down. We used to have
+// this value at 1 second, but this caused flakiness because sometimes the element was deemed missing
+// only because the page hadn't finished loading.
+// The best path forward it to prefer functions like `testSubjects.existOrFail` or
+// `testSubjects.missingOrFail` instead of just the `exists` checks, and be deterministic about
+// where your user is and what they should click next.
+export const WAIT_FOR_EXISTS_TIME = 2500;
+
 export function FindProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
@@ -72,6 +87,13 @@ export function FindProvider({ getService }) {
       });
     }
 
+    async byClassName(selector, timeout = defaultFindTimeout) {
+      log.debug(`findByCssSelector ${selector}`);
+      return await this._ensureElementWithTimeout(timeout, async remote => {
+        return await remote.findByClassName(selector);
+      });
+    }
+
     async setValue(selector, text) {
       return await retry.try(async () => {
         const element = await this.byCssSelector(selector);
@@ -108,7 +130,7 @@ export function FindProvider({ getService }) {
       return await this.allByCustom(remote => remote.findAllByCssSelector(selector), timeout);
     }
 
-    async descendantExistsByCssSelector(selector, parentElement, timeout = 1000) {
+    async descendantExistsByCssSelector(selector, parentElement, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug('Find.descendantExistsByCssSelector: ' + selector);
       return await this.exists(async () => await parentElement.findDisplayedByCssSelector(selector), timeout);
     }
@@ -116,6 +138,14 @@ export function FindProvider({ getService }) {
     async descendantDisplayedByCssSelector(selector, parentElement) {
       log.debug('Find.descendantDisplayedByCssSelector: ' + selector);
       return await this._ensureElement(async () => await parentElement.findDisplayedByCssSelector(selector));
+    }
+
+    async allDescendantDisplayedByCssSelector(selector, parentElement) {
+      log.debug(`Find.allDescendantDisplayedByCssSelector(${selector})`);
+      const allElements = await parentElement.findAllByCssSelector(selector);
+      return await Promise.all(
+        allElements.map((element) => this._ensureElement(async () => element))
+      );
     }
 
     async displayedByCssSelector(selector, timeout = defaultFindTimeout, parentElement) {
@@ -132,6 +162,13 @@ export function FindProvider({ getService }) {
       });
     }
 
+    async findDisplayedByLinkText(selector, timeout = defaultFindTimeout) {
+      log.debug('Find.byLinkText: ' + selector);
+      return await this._ensureElementWithTimeout(timeout, async remote => {
+        return await remote.findDisplayedByLinkText(selector);
+      });
+    }
+
     async byPartialLinkText(partialLinkText, timeout = defaultFindTimeout) {
       log.debug(`find.byPartialLinkText(${partialLinkText})`);
       return await this._ensureElementWithTimeout(timeout, async remote => {
@@ -139,7 +176,7 @@ export function FindProvider({ getService }) {
       });
     }
 
-    async exists(findFunction, timeout = 1000) {
+    async exists(findFunction, timeout = WAIT_FOR_EXISTS_TIME) {
       return await this._withTimeout(timeout, async remote => {
         try {
           await findFunction(remote);
@@ -150,19 +187,41 @@ export function FindProvider({ getService }) {
       });
     }
 
-    async existsByLinkText(linkText, timeout = 1000) {
+    async existsByLinkText(linkText, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`existsByLinkText ${linkText}`);
       return await this.exists(async remote => await remote.findDisplayedByLinkText(linkText), timeout);
     }
 
-    async existsByDisplayedByCssSelector(selector, timeout = 1000) {
+    async existsByDisplayedByCssSelector(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`existsByDisplayedByCssSelector ${selector}`);
       return await this.exists(async remote => await remote.findDisplayedByCssSelector(selector), timeout);
     }
 
-    async existsByCssSelector(selector, timeout = 1000) {
+    async existsByCssSelector(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`existsByCssSelector ${selector}`);
       return await this.exists(async remote => await remote.findByCssSelector(selector), timeout);
+    }
+
+    async clickByCssSelectorWhenNotDisabled(selector, { timeout } = { timeout: defaultFindTimeout }) {
+      log.debug(`Find.clickByCssSelectorWhenNotDisabled`);
+      // Don't wrap this code in a retry, or stale element checks may get caught here and the element
+      // will never be re-grabbed.  Let errors bubble, but continue checking for disabled property until
+      // it's gone.
+      const element = await this.byCssSelector(selector, timeout);
+      await remote.moveMouseTo(element);
+
+      const clickIfNotDisabled = async (element, resolve) => {
+        const disabled = await element.getProperty('disabled');
+        if (disabled) {
+          log.debug('Element is disabled, try again');
+          setTimeout(() => clickIfNotDisabled(element, resolve), 250);
+        } else {
+          await element.click();
+          resolve();
+        }
+      };
+
+      await new Promise(resolve => clickIfNotDisabled(element, resolve));
     }
 
     async clickByPartialLinkText(linkText, timeout = defaultFindTimeout) {
@@ -210,6 +269,21 @@ export function FindProvider({ getService }) {
       log.debug(`clickByCssSelector(${selector})`);
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
+        await remote.moveMouseTo(element);
+        await element.click();
+      });
+    }
+    async clickByDisplayedLinkText(linkText, timeout = defaultFindTimeout) {
+      log.debug(`clickByDisplayedLinkText(${linkText})`);
+      await retry.try(async () => {
+        const element = await this.findDisplayedByLinkText(linkText, timeout);
+        await remote.moveMouseTo(element);
+        await element.click();
+      });
+    }
+    async clickDisplayedByCssSelector(selector, timeout = defaultFindTimeout) {
+      await retry.try(async () => {
+        const element = await this.findDisplayedByCssSelector(selector, timeout);
         await remote.moveMouseTo(element);
         await element.click();
       });

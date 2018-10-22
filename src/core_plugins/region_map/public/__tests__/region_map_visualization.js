@@ -36,9 +36,9 @@ import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
 
-const manifestUrl = 'https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest';
-const tmsManifestUrl = `"https://tiles-maps-stage.elastic.co/v2/manifest`;
-const vectorManifestUrl = `"https://staging-dot-elastic-layer.appspot.com/v1/manifest`;
+const manifestUrl = 'https://catalogue-staging.maps.elastic.co/v2/manifest';
+const tmsManifestUrl = `https://tiles-maps-stage.elastic.co/v2/manifest`;
+const vectorManifestUrl = `https://vector-staging.maps.elastic.co/v2/manifest`;
 const manifest = {
   'services': [{
     'id': 'tiles_v2',
@@ -93,7 +93,7 @@ const vectorManifest = {
 
 
 const THRESHOLD = 0.45;
-const PIXEL_DIFF = 64;
+const PIXEL_DIFF = 96;
 
 describe('RegionMapsVisualizationTests', function () {
 
@@ -108,22 +108,26 @@ describe('RegionMapsVisualizationTests', function () {
   const _makeJsonAjaxCallOld = ChoroplethLayer.prototype._makeJsonAjaxCall;
 
   const dummyTableGroup = {
-    tables: [
-      {
-        columns: [{
-          'aggConfig': {
-            'id': '2',
-            'enabled': true,
-            'type': 'terms',
-            'schema': 'segment',
-            'params': { 'field': 'geo.dest', 'size': 5, 'order': 'desc', 'orderBy': '1' }
-          }, 'title': 'geo.dest: Descending'
-        }, {
-          'aggConfig': { 'id': '1', 'enabled': true, 'type': 'count', 'schema': 'metric', 'params': {} },
-          'title': 'Count'
-        }],
-        rows: [['CN', 26], ['IN', 17], ['US', 6], ['DE', 4], ['BR', 3]]
-      }
+    columns: [{
+      'id': 'col-0',
+      'aggConfig': {
+        'id': '2',
+        'enabled': true,
+        'type': 'terms',
+        'schema': 'segment',
+        'params': { 'field': 'geo.dest', 'size': 5, 'order': 'desc', 'orderBy': '1' }
+      }, 'title': 'geo.dest: Descending'
+    }, {
+      'id': 'col-1',
+      'aggConfig': { 'id': '1', 'enabled': true, 'type': 'count', 'schema': 'metric', 'params': {} },
+      'title': 'Count'
+    }],
+    rows: [
+      { 'col-0': 'CN', 'col-1': 26 },
+      { 'col-0': 'IN', 'col-1': 17 },
+      { 'col-0': 'US', 'col-1': 6 },
+      { 'col-0': 'DE', 'col-1': 4 },
+      { 'col-0': 'BR', 'col-1': 3 }
     ]
   };
 
@@ -185,7 +189,7 @@ describe('RegionMapsVisualizationTests', function () {
         'attribution': '<p><a href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>&#10;',
         'name': 'World Countries',
         'format': 'geojson',
-        'url': 'https://staging-dot-elastic-layer.appspot.com/blob/5715999101812736?elastic_tile_service_tos=agree&my_app_version=7.0.0-alpha1',
+        'url': 'https://vector-staging.maps.elastic.co/blob/5715999101812736?elastic_tile_service_tos=agree&my_app_version=7.0.0-alpha1',
         'fields': [{ 'name': 'iso2', 'description': 'Two letter abbreviation' }, {
           'name': 'iso3',
           'description': 'Three letter abbreviation'
@@ -293,7 +297,7 @@ describe('RegionMapsVisualizationTests', function () {
       });
 
       const newTableGroup = _.cloneDeep(dummyTableGroup);
-      newTableGroup.tables[0].rows.pop();//remove one shape
+      newTableGroup.rows.pop();//remove one shape
 
       await regionMapsVisualization.render(newTableGroup, {
         resize: false,
@@ -306,7 +310,7 @@ describe('RegionMapsVisualizationTests', function () {
 
 
       const anotherTableGroup = _.cloneDeep(newTableGroup);
-      anotherTableGroup.tables[0].rows.pop();//remove one shape
+      anotherTableGroup.rows.pop();//remove one shape
       domNode.style.width = '412px';
       domNode.style.height = '112px';
       await regionMapsVisualization.render(anotherTableGroup, {
@@ -336,7 +340,7 @@ describe('RegionMapsVisualizationTests', function () {
       });
 
       const newTableGroup = _.cloneDeep(dummyTableGroup);
-      newTableGroup.tables[0].rows.pop();//remove one shape
+      newTableGroup.rows.pop();//remove one shape
       vis.params.colorSchema = 'Blues';
       await regionMapsVisualization.render(newTableGroup, {
         resize: false,

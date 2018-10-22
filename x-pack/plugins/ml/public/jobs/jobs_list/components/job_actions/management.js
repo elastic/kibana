@@ -62,6 +62,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
       enabled: () => (canCreateJob),
       onClick: (item) => {
         cloneJob(item.id);
+        closeMenu(true);
       }
     }, {
       name: 'Edit job',

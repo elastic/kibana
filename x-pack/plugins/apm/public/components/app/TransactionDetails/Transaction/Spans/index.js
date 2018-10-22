@@ -16,4 +16,7 @@ function mapStateToProps(state = {}) {
 }
 
 const mapDispatchToProps = {};
-export default connect(mapStateToProps, mapDispatchToProps)(Spans);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Spans);

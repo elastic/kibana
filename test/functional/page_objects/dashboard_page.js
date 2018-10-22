@@ -34,6 +34,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize']);
 
   const defaultFindTimeout = config.get('timeouts.find');
@@ -168,13 +169,29 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
-    async isDuplicateTitleWarningDisplayed() {
-      return await testSubjects.exists('titleDupicateWarnMsg');
+    /**
+     * Asserts that the duplicate title warning is either displayed or not displayed.
+     * @param { displayed: boolean }
+     */
+    async expectDuplicateTitleWarningDisplayed({ displayed }) {
+      if (displayed) {
+        await testSubjects.existOrFail('titleDupicateWarnMsg');
+      } else {
+        await testSubjects.missingOrFail('titleDupicateWarnMsg');
+      }
     }
 
-    async clickEdit() {
-      log.debug('Clicking edit');
-      return await testSubjects.click('dashboardEditMode');
+    async switchToEditMode() {
+      log.debug('Switching to edit mode');
+      await testSubjects.click('dashboardEditMode');
+      // wait until the count of dashboard panels equals the count of toggle menu icons
+      await retry.waitFor('in edit mode', async () => {
+        const [panels, menuIcons] = await Promise.all([
+          testSubjects.findAll('dashboardPanel'),
+          testSubjects.findAll('dashboardPanelToggleMenuIcon'),
+        ]);
+        return panels.length === menuIcons.length;
+      });
     }
 
     async getIsInViewMode() {
@@ -206,6 +223,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('createDashboardPromptButton');
     }
 
+    async checkDashboardListingRow(id) {
+      await testSubjects.click(`checkboxSelectRow-${id}`);
+    }
+
     async checkDashboardListingSelectAllCheckbox() {
       const element = await testSubjects.find('checkboxSelectAll');
       const isSelected = await element.isSelected();
@@ -219,13 +240,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('deleteSelectedDashboards');
     }
 
-    async clickOptions() {
-      await testSubjects.click('dashboardOptionsButton');
-    }
-
     async isOptionsOpen() {
       log.debug('isOptionsOpen');
-      return await testSubjects.exists('dashboardDarkThemeCheckbox');
+      return await testSubjects.exists('dashboardOptionsMenu');
     }
 
     async openOptions() {
@@ -252,6 +269,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async useDarkTheme(on) {
+      log.debug(`useDarkTheme: on ${on}`);
       await this.openOptions();
       const isDarkThemeOn = await this.isDarkThemeOn();
       if (isDarkThemeOn !== on) {
@@ -276,16 +294,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async gotoDashboardEditMode(dashboardName) {
       await this.loadSavedDashboard(dashboardName);
-      await this.clickEdit();
+      await this.switchToEditMode();
     }
 
     async renameDashboard(dashName) {
       log.debug(`Naming dashboard ` + dashName);
       await testSubjects.click('dashboardRenameButton');
-      await testSubjects.setValue('dashboardTitle', dashName);
+      await testSubjects.setValue('savedObjectTitle', dashName);
     }
 
     /**
+     * Save the current dashboard with the specified name and options and
+     * verify that the save was successful
      *
      * @param dashName {String}
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
@@ -299,8 +319,27 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      // Confirm that the Dashboard has been saved.
-      return await testSubjects.exists('saveDashboardSuccess');
+      // Confirm that the Dashboard has actually been saved
+      await testSubjects.existOrFail('saveDashboardSuccess');
+
+      await this.waitForSaveModalToClose();
+    }
+
+    async waitForSaveModalToClose() {
+      log.debug('Waiting for dashboard save modal to close');
+      await retry.try(async () => {
+        if (await testSubjects.exists('savedObjectSaveModal')) {
+          throw new Error('dashboard save still open');
+        }
+      });
+    }
+
+    async deleteDashboard(dashboardName, dashboardId) {
+      await this.gotoDashboardLandingPage();
+      await this.searchForDashboardWithName(dashboardName);
+      await this.checkDashboardListingRow(dashboardId);
+      await this.clickDeleteSelectedDashboards();
+      await PageObjects.common.clickConfirmOnModal();
     }
 
     async cancelSave() {
@@ -309,10 +348,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickSave() {
-      await retry.try(async () => {
-        log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveDashboardButton');
-      });
+      log.debug('DashboardPage.clickSave');
+      await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
     /**
@@ -326,7 +363,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       log.debug('entering new title');
-      await testSubjects.setValue('dashboardTitle', dashboardTitle);
+      await testSubjects.setValue('savedObjectTitle', dashboardTitle);
 
       if (saveOptions.storeTimeWithDashboard !== undefined) {
         await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
@@ -378,7 +415,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await find.allByCssSelector('.dashboardLink');
+      const dashboardTitles = await find.allByCssSelector('[data-test-subj^="dashboardListingTitleLink"]');
       return dashboardTitles.length;
     }
 
@@ -394,6 +431,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     // entry, or at least to a single page of results
     async loadSavedDashboard(dashName) {
       log.debug(`Load Saved Dashboard ${dashName}`);
+
+      await this.gotoDashboardLandingPage();
 
       await retry.try(async () => {
         await this.searchForDashboardWithName(dashName);
@@ -549,22 +588,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async waitForRenderComplete() {
-      await retry.try(async () => {
-        const sharedItems = await find.allByCssSelector('[data-shared-item]');
-        const renderComplete = await Promise.all(sharedItems.map(async sharedItem => {
-          return await sharedItem.getAttribute('data-render-complete');
-        }));
-        if (renderComplete.length !== sharedItems.length) {
-          const expecting = `expecting: ${sharedItems.length}, received: ${renderComplete.length}`;
-          throw new Error(
-            `Some shared items dont have data-render-complete attribute, ${expecting}`);
-        }
-        const totalCount = renderComplete.filter(value => value === 'true' || value === 'disabled').length;
-        if (totalCount < sharedItems.length) {
-          const expecting = `${sharedItems.length}, received: ${totalCount}`;
-          throw new Error(`Still waiting on more visualizations to finish rendering, expecting: ${expecting}`);
-        }
-      });
+      log.debug('waitForRenderComplete');
+      const count = await this.getSharedItemsCount();
+      await renderable.waitForRender(parseInt(count));
     }
 
     async getSharedContainerData() {
@@ -572,7 +598,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const sharedContainer = await find.byCssSelector('[data-shared-items-container]');
       return {
         title: await sharedContainer.getAttribute('data-title'),
-        description: await sharedContainer.getAttribute('data-description')
+        description: await sharedContainer.getAttribute('data-description'),
+        count: await sharedContainer.getAttribute('data-shared-items-count'),
       };
     }
 

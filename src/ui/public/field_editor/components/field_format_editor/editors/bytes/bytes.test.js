@@ -34,6 +34,10 @@ const onChange = jest.fn();
 const onError = jest.fn();
 
 describe('BytesFormatEditor', () => {
+  it('should have a formatId', () => {
+    expect(BytesFormatEditor.formatId).toEqual('bytes');
+  });
+
   it('should render normally', async () => {
     const component = shallow(
       <BytesFormatEditor

@@ -22,7 +22,6 @@ import $ from 'jquery';
 
 const app = require('ui/modules').get('apps/timelion', []);
 import template from './timelion_interval.html';
-import './timelion_interval.less';
 
 app.directive('timelionInterval', function ($compile, $timeout) {
   return {

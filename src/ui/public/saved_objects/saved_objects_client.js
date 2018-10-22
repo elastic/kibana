@@ -50,6 +50,7 @@ export class SavedObjectsClient {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
+   * @property {object} [options.migrationVersion]
    * @returns {promise} - SavedObject({ id, type, version, attributes })
    */
   create = (type, attributes = {}, options = {}) => {
@@ -60,7 +61,7 @@ export class SavedObjectsClient {
     const path = this._getPath([type, options.id]);
     const query = _.pick(options, ['overwrite']);
 
-    return this._request({ method: 'POST', path, query, body: { attributes } })
+    return this._request({ method: 'POST', path, query, body: { attributes, migrationVersion: options.migrationVersion } })
       .catch(error => {
         if (isAutoCreateIndexError(error)) {
           return showAutoCreateIndexErrorPage();
@@ -74,7 +75,7 @@ export class SavedObjectsClient {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes }]
+   * @param {array} objects - [{ type, id, attributes, migrationVersion }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false]
    * @returns {promise} - { savedObjects: [{ id, type, version, attributes, error: { message } }]}
@@ -172,11 +173,13 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
+   * @param {object} attributes
    * @param {object} options
-   * @param {integer} options.version - ensures version matches that of persisted object
+   * @prop {integer} options.version - ensures version matches that of persisted object
+   * @prop {object} options.migrationVersion - The optional migrationVersion of this document
    * @returns {promise}
    */
-  update = (type, id, attributes, { version } = {}) => {
+  update(type, id, attributes, { version, migrationVersion } = {}) {
     if (!type || !id || !attributes) {
       return Promise.reject(new Error('requires type, id and attributes'));
     }
@@ -184,6 +187,7 @@ export class SavedObjectsClient {
     const path = this._getPath([type, id]);
     const body = {
       attributes,
+      migrationVersion,
       version
     };
 

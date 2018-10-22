@@ -104,6 +104,20 @@ export default function ({ getService }) {
             assertStatsAndMetrics(body);
           });
       });
+
+      describe('legacy', () => {
+        it(`should return return the 'extended' data in the old format with 'legacy' query string param present`, () => {
+          return supertest
+            .get('/api/stats?extended&legacy')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.clusterUuid).to.be.a('string');
+              expect(body.usage).to.be.an('object'); // no usage collectors have been registered so usage is an empty object
+              assertStatsAndMetrics(body, true);
+            });
+        });
+      });
     });
   });
 }

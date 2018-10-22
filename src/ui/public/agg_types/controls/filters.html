@@ -1,12 +1,12 @@
 <div class="form-group">
   <div ng-repeat="filter in agg.params.filters">
-    <div class="vis-editor-agg-header">
-      <label for="visEditorFilterInput{{agg.id}}">
+    <div class="visEditorAggHeader">
+      <label class="visEditorAggHeader__title visEditorAggHeader__title--grow" for="visEditorFilterInput{{agg.id}}">
           Filter {{$index + 1}}
           <span ng-if="filter.label">- {{ filter.label }}</span>
       </label>
 
-      <div class="kuiButtonGroup kuiButtonGroup--united">
+      <div class="visEditorAggHeader__controls kuiButtonGroup kuiButtonGroup--united">
         <button
           ng-click="showConfig = !showConfig"
           type="button"

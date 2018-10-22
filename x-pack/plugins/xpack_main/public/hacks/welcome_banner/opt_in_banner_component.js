@@ -17,8 +17,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { CONFIG_TELEMETRY_DESC } from '../../../common/constants';
-import { OptInExampleFlyout } from './opt_in_details_component';
+import { CONFIG_TELEMETRY_DESC, PRIVACY_STATEMENT_URL } from '../../../common/constants';
+import { OptInExampleFlyout } from '../../components';
 
 /**
  * React component for displaying the Telemetry opt-in banner.
@@ -55,7 +55,7 @@ export class OptInBanner extends Component {
     if (this.state.showDetails) {
       details = (
         <EuiText>
-          <p>
+          <p tabIndex="0">
             No information about the data you process or store will be sent. This feature
             will periodically send basic feature usage statistics. See an {(
               <EuiLink onClick={() => this.setState({ showExample: !this.state.showExample })}>
@@ -63,7 +63,7 @@ export class OptInBanner extends Component {
               </EuiLink>
             )} or read our {(
               <EuiLink
-                href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                href={PRIVACY_STATEMENT_URL}
                 target="_blank"
               >
                 telemetry privacy statement
@@ -84,7 +84,7 @@ export class OptInBanner extends Component {
     } else {
       title = (
         <Fragment>
-          { CONFIG_TELEMETRY_DESC } {(
+          {CONFIG_TELEMETRY_DESC} {(
             <EuiLink onClick={() => this.setState({ showDetails: true })}>
               Read more
             </EuiLink>
@@ -93,8 +93,12 @@ export class OptInBanner extends Component {
       );
     }
 
+    const titleNode = (
+      <span tabIndex="0">{title}</span>
+    );
+
     return (
-      <EuiCallOut iconType="questionInCircle" title={title}>
+      <EuiCallOut iconType="questionInCircle" title={titleNode}>
         { details }
         { flyoutDetails }
         <EuiSpacer size="s" />

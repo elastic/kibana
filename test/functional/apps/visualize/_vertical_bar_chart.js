@@ -53,11 +53,11 @@ export default function ({ getService, getPageObjects }) {
     before(initBarChart);
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);
-      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
@@ -115,6 +115,80 @@ export default function ({ getService, getPageObjects }) {
       expect(data).to.eql(expectedChartData);
     });
 
+    describe.skip('switch between Y axis scale types', () => {
+      before(initBarChart);
+      const axisId = 'ValueAxis-1';
+
+      it('should show ticks on selecting log scale', async () => {
+        await PageObjects.visualize.clickMetricsAndAxes();
+        await PageObjects.visualize.clickYAxisOptions(axisId);
+        await PageObjects.visualize.selectYAxisScaleType(axisId, 'log');
+        await PageObjects.visualize.clickYAxisAdvancedOptions(axisId);
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
+          '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show filtered ticks on selecting log scale', async () => {
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
+          '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show ticks on selecting square root scale', async () => {
+        await PageObjects.visualize.selectYAxisScaleType(axisId, 'square root');
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show filtered ticks on selecting square root scale', async () => {
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '200', '400', '600', '800', '1,000', '1,200', '1,400',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show ticks on selecting linear scale', async () => {
+        await PageObjects.visualize.selectYAxisScaleType(axisId, 'linear');
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        log.debug(labels);
+        const expectedLabels = [
+          '0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show filtered ticks on selecting linear scale', async () => {
+        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visualize.clickGo();
+        const labels = await PageObjects.visualize.getYAxisLabels();
+        const expectedLabels = [
+          '200', '400', '600', '800', '1,000', '1,200', '1,400',
+        ];
+        expect(labels).to.eql(expectedLabels);
+      });
+    });
+
     describe('vertical bar with split series', function () {
       before(initBarChart);
 
@@ -131,6 +205,17 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['200', '404', '503'];
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        expect(legendEntries).to.eql(expectedEntries);
+      });
+
+      it('should allow custom sorting of series', async () => {
+        await PageObjects.visualize.toggleOpenEditor(1, 'false');
+        await PageObjects.visualize.selectCustomSortMetric(3, 'Min', 'bytes');
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const expectedEntries = ['404', '200', '503'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
       });
@@ -197,6 +282,17 @@ export default function ({ getService, getPageObjects }) {
         ];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
+      });
+
+      it('should show an error if last bucket aggregation is terms', async () => {
+        await PageObjects.visualize.toggleOpenEditor(2, 'false');
+        await PageObjects.visualize.clickAddBucket();
+        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('response.raw');
+
+        const errorMessage = await PageObjects.visualize.getBucketErrorMessage();
+        expect(errorMessage).to.contain('Last bucket aggregation must be "Date Histogram"');
       });
 
     });

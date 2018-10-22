@@ -19,10 +19,11 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { ILLEGAL_CHARACTERS, MAX_SEARCH_SIZE } from '../../constants';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS as ILLEGAL_CHARACTERS } from 'ui/index_patterns';
+import { MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
-  containsInvalidCharacters,
+  containsIllegalCharacters,
   getMatchedIndices,
   canAppendWildcard,
   ensureMinimumTime
@@ -38,11 +39,12 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 
 const uiSettings = chrome.getUiSettingsClient();
 
-export class StepIndexPattern extends Component {
+export class StepIndexPatternComponent extends Component {
   static propTypes = {
     allIndices: PropTypes.array.isRequired,
     isIncludingSystemIndices: PropTypes.bool.isRequired,
@@ -209,17 +211,26 @@ export class StepIndexPattern extends Component {
 
     return (
       <EuiCallOut
-        title="Whoops!"
+        title={<FormattedMessage
+          id="kbn.management.createIndexPattern.step.warningHeader"
+          defaultMessage="Whoops!"
+        />}
         iconType="help"
         color="warning"
       >
-        <p>There&apos;s already an index pattern called `{query}`</p>
+        <p>
+          <FormattedMessage
+            id="kbn.management.createIndexPattern.step.warningLabel"
+            defaultMessage="There's already an index pattern called `{query}`"
+            values={{ query }}
+          />
+        </p>
       </EuiCallOut>
     );
   }
 
   renderHeader({ exactMatchedIndices: indices }) {
-    const { goToNextStep } = this.props;
+    const { goToNextStep, intl } = this.props;
     const { query, showingIndexPatternQueryErrors, indexPatternExists } = this.state;
 
     let containsErrors = false;
@@ -230,8 +241,15 @@ export class StepIndexPattern extends Component {
       // This is an error scenario but do not report an error
       containsErrors = true;
     }
-    else if (!containsInvalidCharacters(query, ILLEGAL_CHARACTERS)) {
-      errors.push(`An index pattern cannot contain spaces or the characters: ${characterList}`);
+    else if (containsIllegalCharacters(query, ILLEGAL_CHARACTERS)) {
+      const errorMessage = intl.formatMessage(
+        {
+          id: 'kbn.management.createIndexPattern.step.invalidCharactersErrorMessage',
+          defaultMessage: 'An index pattern cannot contain spaces or the characters: {characterList}'
+        },
+        { characterList });
+
+      errors.push(errorMessage);
       containsErrors = true;
     }
 
@@ -277,3 +295,5 @@ export class StepIndexPattern extends Component {
     );
   }
 }
+
+export const StepIndexPattern = injectI18n(StepIndexPatternComponent);

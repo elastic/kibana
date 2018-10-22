@@ -19,6 +19,16 @@
 
 import { ManagementSection } from './section';
 
+export {
+  PAGE_TITLE_COMPONENT,
+  PAGE_SUBTITLE_COMPONENT,
+  PAGE_FOOTER_COMPONENT,
+} from '../../../core_plugins/kibana/public/management/sections/settings/components/default_component_registry';
+
+export { registerSettingsComponent } from '../../../core_plugins/kibana/public/management/sections/settings/components/component_registry';
+
+export { Field } from '../../../core_plugins/kibana/public/management/sections/settings/components/field/field';
+
 export const management = new ManagementSection('management', {
   display: 'Management'
 });
@@ -31,15 +41,18 @@ management.register('data', {
 
 management.register('elasticsearch', {
   display: 'Elasticsearch',
-  order: 20
+  order: 20,
+  icon: 'logoElasticsearch'
 });
 
 management.register('kibana', {
   display: 'Kibana',
   order: 30,
+  icon: 'logoKibana',
 });
 
 management.register('logstash', {
   display: 'Logstash',
   order: 30,
+  icon: 'logoLogstash',
 });

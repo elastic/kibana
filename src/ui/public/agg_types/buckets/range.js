@@ -68,6 +68,7 @@ export const rangeBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: ['number']
     },
     {

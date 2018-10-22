@@ -25,6 +25,7 @@ import {
   isConflictError,
   isNotAuthorizedError,
   isForbiddenError,
+  isRequestEntityTooLargeError,
   isNotFoundError,
   isBadRequestError,
 } from './errors';
@@ -82,6 +83,13 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(isForbiddenError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(isForbiddenError(error)).toBe(true);
+  });
+
+  it('makes es.RequestEntityTooLarge a SavedObjectsClient/RequestEntityTooLarge error', () => {
+    const error = new esErrors.RequestEntityTooLarge();
+    expect(isRequestEntityTooLargeError(error)).toBe(false);
+    expect(decorateEsError(error)).toBe(error);
+    expect(isRequestEntityTooLargeError(error)).toBe(true);
   });
 
   it('discards es.NotFound errors and returns a generic NotFound error', () => {

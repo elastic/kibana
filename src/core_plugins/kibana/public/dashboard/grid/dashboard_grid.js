@@ -22,6 +22,8 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import ReactGridLayout from 'react-grid-layout';
 import classNames from 'classnames';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 
 import { PanelUtils } from '../panel/panel_utils';
 import { DashboardViewMode } from '../dashboard_view_mode';
@@ -65,10 +67,10 @@ function ResponsiveGrid({
   // grid to re-render so it'll show a grid with a width of 0.
   lastValidGridSize = size.width > 0 ? size.width : lastValidGridSize;
   const classes = classNames({
-    'layout-view': isViewMode,
-    'layout-edit': !isViewMode,
-    'layout-maximized-panel': maximizedPanelId !== undefined,
-    'layout-with-margins': useMargins,
+    'dshLayout--viewing': isViewMode,
+    'dshLayout--editing': !isViewMode,
+    'dshLayout-isMaximizedPanel': maximizedPanelId !== undefined,
+    'dshLayout-withoutMargins': !useMargins,
   });
 
   const MARGINS = useMargins ? 8 : 0;
@@ -86,7 +88,9 @@ function ResponsiveGrid({
       margin={[MARGINS, MARGINS]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
       rowHeight={DASHBOARD_GRID_HEIGHT}
-      draggableHandle={isViewMode ? '.doesnt-exist' : '.panel-title'}
+      // Pass the named classes of what should get the dragging handle
+      // (.doesnt-exist literally doesnt exist)
+      draggableHandle={isViewMode ? '.doesnt-exist' : '.dshPanel__title'}
       layout={layout}
       onLayoutChange={onLayoutChange}
       measureBeforeMount={false}
@@ -170,14 +174,15 @@ export class DashboardGrid extends React.Component {
   }
 
   onLayoutChange = (layout) => {
-    const { onPanelsUpdated } = this.props;
+    const { onPanelsUpdated, panels } = this.props;
     const updatedPanels = layout.reduce((updatedPanelsAcc, panelLayout) => {
       updatedPanelsAcc[panelLayout.i] = {
+        ...panels[panelLayout.i],
         panelIndex: panelLayout.i,
         gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i'])
       };
       return updatedPanelsAcc;
-    }, {});
+    }, []);
     onPanelsUpdated(updatedPanels);
   };
 
@@ -212,8 +217,8 @@ export class DashboardGrid extends React.Component {
       const expandPanel = maximizedPanelId !== undefined && maximizedPanelId === panel.panelIndex;
       const hidePanel = maximizedPanelId !== undefined && maximizedPanelId !== panel.panelIndex;
       const classes = classNames({
-        'grid-item--expanded': expandPanel,
-        'grid-item--hidden': hidePanel,
+        'dshDashboardGrid__item--expanded': expandPanel,
+        'dshDashboardGrid__item--hidden': hidePanel,
       });
       return (
         <div

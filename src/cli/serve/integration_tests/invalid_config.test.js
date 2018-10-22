@@ -39,7 +39,8 @@ describe('cli invalid config support', function () {
       .map(obj => ({
         ...obj,
         pid: '## PID ##',
-        '@timestamp': '## @timestamp ##'
+        '@timestamp': '## @timestamp ##',
+        error: '## Error with stack trace ##',
       }));
 
     expect(error).toBe(undefined);

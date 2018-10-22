@@ -12,13 +12,7 @@ import { initStatusApi } from './server/routes/status_check';
 
 export function apm(kibana) {
   return new kibana.Plugin({
-    require: [
-      'kibana',
-      'elasticsearch',
-      'xpack_main',
-      'apm_oss',
-      'kuery_autocomplete'
-    ],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
     id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),
@@ -28,7 +22,8 @@ export function apm(kibana) {
         title: 'APM',
         description: 'APM for the Elastic Stack',
         main: 'plugins/apm/index',
-        icon: 'plugins/apm/icon.svg'
+        icon: 'plugins/apm/icon.svg',
+        euiIconType: 'apmApp'
       },
       home: ['plugins/apm/register_feature'],
       injectDefaultVars(server) {

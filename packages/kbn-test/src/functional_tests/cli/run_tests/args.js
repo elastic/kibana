@@ -18,7 +18,7 @@
  */
 
 import dedent from 'dedent';
-import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
 const options = {
   help: { desc: 'Display this menu and exit.' },
@@ -93,10 +93,16 @@ export function processOptions(userOptions, defaultConfigPaths) {
     }
   }
 
+  if (userOptions['kibana-install-dir']) {
+    userOptions.installDir = userOptions['kibana-install-dir'];
+    delete userOptions['kibana-install-dir'];
+  }
+
   function createLogger() {
-    const log = createToolingLog(pickLevelFromFlags(userOptions));
-    log.pipe(process.stdout);
-    return log;
+    return new ToolingLog({
+      level: pickLevelFromFlags(userOptions),
+      writeTo: process.stdout,
+    });
   }
 
   return {

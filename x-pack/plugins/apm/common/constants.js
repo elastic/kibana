@@ -31,4 +31,6 @@ export const ERROR_LOG_MESSAGE = 'error.log.message';
 export const ERROR_EXC_MESSAGE = 'error.exception.message';
 export const ERROR_EXC_HANDLED = 'error.exception.handled';
 
+export const REQUEST_URL_FULL = 'context.request.url.full';
+
 export const USER_ID = 'context.user.id';

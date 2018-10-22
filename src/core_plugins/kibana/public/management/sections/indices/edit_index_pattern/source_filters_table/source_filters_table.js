@@ -31,6 +31,7 @@ import {
 import { Table } from './components/table';
 import { Header } from './components/header';
 import { AddFilter } from './components/add_filter';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class SourceFiltersTable extends Component {
   static propTypes = {
@@ -161,11 +162,23 @@ export class SourceFiltersTable extends Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={`Delete source filter '${filterToDelete.value}'?`}
+          title={<FormattedMessage
+            id="kbn.management.editIndexPattern.source.deleteSourceFilterLabel"
+            defaultMessage="Delete source filter '{value}'?"
+            values={{
+              value: filterToDelete.value,
+            }}
+          />}
           onCancel={this.hideDeleteConfirmationModal}
           onConfirm={this.deleteFilter}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete"
+          cancelButtonText={<FormattedMessage
+            id="kbn.management.editIndexPattern.source.deleteFilter.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />}
+          confirmButtonText={<FormattedMessage
+            id="kbn.management.editIndexPattern.source.deleteFilter.deleteButtonLabel"
+            defaultMessage="Delete"
+          />}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />
       </EuiOverlayMask>

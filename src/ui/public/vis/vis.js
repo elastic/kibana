@@ -49,7 +49,11 @@ const getTerms = (table, columnIndex, rowIndex) => {
   }
 
   // get only rows where cell value matches current row for all the fields before columnIndex
-  const rows = table.rows.filter(row => row.every((cell, i) => cell === table.rows[rowIndex][i] || i >= columnIndex));
+  const rows = table.rows.filter(row => {
+    return table.columns.every((column, i) => {
+      return row[column.id] === table.rows[rowIndex][column.id] || i >= columnIndex;
+    });
+  });
   const terms = rows.map(row => row[columnIndex]);
 
   return [...new Set(terms.filter(term => {
@@ -99,17 +103,17 @@ export function VisProvider(Private, indexPatterns, getAppState) {
             filterBarClickHandler(appState)(event);
           },
           addFilter: (data, columnIndex, rowIndex, cellValue) => {
-            const agg = data.columns[columnIndex].aggConfig;
+            const { aggConfig, id: columnId } = data.columns[columnIndex];
             let filter = [];
-            const value = rowIndex > -1 ? data.rows[rowIndex][columnIndex] : cellValue;
+            const value = rowIndex > -1 ? data.rows[rowIndex][columnId] : cellValue;
             if (!value) {
               return;
             }
-            if (agg.type.name === 'terms' && agg.params.otherBucket) {
+            if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
               const terms = getTerms(data, columnIndex, rowIndex);
-              filter = agg.createFilter(value, { terms });
+              filter = aggConfig.createFilter(value, { terms });
             } else {
-              filter = agg.createFilter(value);
+              filter = aggConfig.createFilter(value);
             }
             queryFilter.addFilters(filter);
           }, brush: (event) => {
@@ -117,6 +121,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
           }
         },
         inspectorAdapters: this._getActiveInspectorAdapters(),
+        getAppState,
       };
     }
 
@@ -187,7 +192,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
 
       updateVisualizationConfig(state.params, this.params);
 
-      this.aggs = new AggConfigs(this, state.aggs);
+      this.aggs = new AggConfigs(this.indexPattern, state.aggs, this.type.schemas.all);
     }
 
     setState(state, updateCurrentState = true) {
@@ -232,7 +237,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
 
     copyCurrentState(includeDisabled = false) {
       const state = this.getCurrentState(includeDisabled);
-      state.aggs = new AggConfigs(this, state.aggs);
+      state.aggs = new AggConfigs(this.indexPattern, state.aggs, this.type.schemas.all);
       return state;
     }
 
@@ -251,7 +256,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
     }
 
     getAggConfig() {
-      return new AggConfigs(this, this.aggs.raw.filter(agg => agg.enabled));
+      return this.aggs.clone({ enabledOnly: true });
     }
 
     getState() {

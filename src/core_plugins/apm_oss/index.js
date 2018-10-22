@@ -30,10 +30,10 @@ export default function apmOss(kibana) {
         indexPattern: Joi.string().default('apm-*'),
 
         // ES Indices
-        errorIndices: Joi.string().default('apm-*-error-*'),
-        onboardingIndices: Joi.string().default('apm-*-onboarding-*'),
-        spanIndices: Joi.string().default('apm-*-span-*'),
-        transactionIndices: Joi.string().default('apm-*-transaction-*'),
+        errorIndices: Joi.string().default('apm-*'),
+        onboardingIndices: Joi.string().default('apm-*'),
+        spanIndices: Joi.string().default('apm-*'),
+        transactionIndices: Joi.string().default('apm-*'),
       }).default();
     },
   });

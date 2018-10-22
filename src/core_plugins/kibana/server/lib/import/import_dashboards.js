@@ -26,8 +26,14 @@ export async function importDashboards(req) {
 
   const savedObjectsClient = req.getSavedObjectsClient();
 
+  // The server assumes that documents with no migrationVersion are up to date.
+  // That assumption enables Kibana and other API consumers to not have to build
+  // up migrationVersion prior to creating new objects. But it means that imports
+  // need to set migrationVersion to something other than undefined, so that imported
+  // docs are not seen as automatically up-to-date.
   const docs = payload.objects
-    .filter(item => !exclude.includes(item.type));
+    .filter(item => !exclude.includes(item.type))
+    .map(doc => ({ ...doc, migrationVersion: doc.migrationVersion || { } }));
 
   const results = await savedObjectsClient.bulkCreate(docs, { overwrite });
   return { objects: results.saved_objects };

@@ -23,47 +23,17 @@ import _ from 'lodash';
 import Boom from 'boom';
 import Hapi from 'hapi';
 import { setupVersionCheck } from './version_check';
-import { handleShortUrlError } from './short_url_error';
-import { shortUrlAssertValid } from './short_url_assert_valid';
-import { shortUrlLookupProvider } from './short_url_lookup';
 import { registerHapiPlugins } from './register_hapi_plugins';
+import { setupBasePathProvider } from './setup_base_path_provider';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
   kbnServer.server = new Hapi.Server();
   server = kbnServer.server;
 
-  const shortUrlLookup = shortUrlLookupProvider(server);
+  server.connection(kbnServer.core.serverOptions);
 
-  // Note that all connection options configured here should be exactly the same
-  // as in `getServerOptions()` in the new platform (see `src/core/server/http/http_tools`).
-  //
-  // The only exception is `tls` property: TLS is entirely handled by the new
-  // platform and we don't have to duplicate all TLS related settings here, we just need
-  // to indicate to Hapi connection that TLS is used so that it can use correct protocol
-  // name in `server.info` and `request.connection.info` that are used throughout Kibana.
-  //
-  // Any change SHOULD BE applied in both places.
-  server.connection({
-    host: config.get('server.host'),
-    port: config.get('server.port'),
-    tls: config.get('server.ssl.enabled'),
-    listener: kbnServer.newPlatform.proxyListener,
-    state: {
-      strictHeader: false,
-    },
-    routes: {
-      cors: config.get('server.cors'),
-      payload: {
-        maxBytes: config.get('server.maxPayloadBytes'),
-      },
-      validate: {
-        options: {
-          abortEarly: false,
-        },
-      },
-    },
-  });
+  setupBasePathProvider(server, config);
 
   registerHapiPlugins(server);
 
@@ -88,7 +58,7 @@ export default async function (kbnServer, server, config) {
     this.views({
       path: path,
       isCached: config.get('optimize.viewCaching'),
-      engines: _.assign({ jade: require('jade') }, engines || {})
+      engines: _.assign({ pug: require('pug') }, engines || {})
     });
   });
 
@@ -119,7 +89,7 @@ export default async function (kbnServer, server, config) {
     path: '/',
     method: 'GET',
     handler(req, reply) {
-      const basePath = config.get('server.basePath');
+      const basePath = req.getBasePath();
       const defaultRoute = config.get('server.defaultRoute');
       reply.redirect(`${basePath}${defaultRoute}`);
     }
@@ -133,51 +103,12 @@ export default async function (kbnServer, server, config) {
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(Boom.notFound());
       }
-      const pathPrefix = config.get('server.basePath') ? `${config.get('server.basePath')}/` : '';
+      const pathPrefix = req.getBasePath() ? `${req.getBasePath()}/` : '';
       return reply.redirect(format({
         search: req.url.search,
         pathname: pathPrefix + path.slice(0, -1),
       }))
         .permanent(true);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/goto/{urlId}',
-    handler: async function (request, reply) {
-      try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId, request);
-        shortUrlAssertValid(url);
-
-        const uiSettings = request.getUiSettingsService();
-        const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
-        if (!stateStoreInSessionStorage) {
-          reply().redirect(config.get('server.basePath') + url);
-          return;
-        }
-
-        const app = server.getHiddenUiAppById('stateSessionStorageRedirect');
-        reply.renderApp(app, {
-          redirectUrl: url,
-        });
-      } catch (err) {
-        reply(handleShortUrlError(err));
-      }
-    }
-  });
-
-  server.route({
-    method: 'POST',
-    path: '/shorten',
-    handler: async function (request, reply) {
-      try {
-        shortUrlAssertValid(request.payload.url);
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
-        reply(urlId);
-      } catch (err) {
-        reply(handleShortUrlError(err));
-      }
     }
   });
 

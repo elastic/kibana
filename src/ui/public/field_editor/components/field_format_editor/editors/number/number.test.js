@@ -34,6 +34,10 @@ const onChange = jest.fn();
 const onError = jest.fn();
 
 describe('NumberFormatEditor', () => {
+  it('should have a formatId', () => {
+    expect(NumberFormatEditor.formatId).toEqual('number');
+  });
+
   it('should render normally', async () => {
     const component = shallow(
       <NumberFormatEditor

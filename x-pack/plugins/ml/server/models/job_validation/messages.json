@@ -75,23 +75,23 @@
   "detectors_duplicates": {
     "status": "ERROR",
     "text": "Duplicate detectors were found. Detectors having the same combined configuration for 'function', 'field_name', 'by_field_name', 'over_field_name' and 'partition_field_name' are not allowed within the same job.",
-    "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-detectorconfig"
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors"
   },
   "detectors_empty": {
     "status": "ERROR",
     "text": "No detectors were found. At least one detector must be specified.",
-    "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-detectorconfig"
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors"
   },
   "detectors_function_empty": {
     "status": "ERROR",
     "text": "One of the detector functions is empty.",
-    "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-detectorconfig"
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors"
   },
   "detectors_function_not_empty": {
     "status": "SUCCESS",
     "heading": "Dectector functions",
     "text": "Presence of detector functions validated in all detectors.",
-    "url": "https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-detectorconfig"
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors"
   },
   "index_fields_invalid": {
     "status": "ERROR",
@@ -189,7 +189,7 @@
     "status": "SUCCESS",
     "heading": "Model memory limit",
     "text": "Valid and within the estimated model memory limit.",
-    "url": "https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/ml-gs-job1-manage.html"
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#model-memory-limits"
   },
   "success_time_range": {
     "status": "SUCCESS",

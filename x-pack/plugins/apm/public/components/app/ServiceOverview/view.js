@@ -35,8 +35,9 @@ class ServiceOverview extends Component {
     this.checkForHistoricalData(this.props);
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.checkForHistoricalData(nextProps);
+  componentDidUpdate() {
+    // QUESTION: Do we want to check on ANY update, or only if serviceList status/data have changed?
+    this.checkForHistoricalData(this.props);
   }
 
   render() {
@@ -47,7 +48,7 @@ class ServiceOverview extends Component {
       <EmptyMessage
         heading={
           historicalDataFound
-            ? 'No services with data in the selected time range.'
+            ? 'No services were found'
             : "Looks like you don't have any services with APM installed. Let's add some!"
         }
         subheading={

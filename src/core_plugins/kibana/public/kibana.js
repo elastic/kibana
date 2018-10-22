@@ -35,7 +35,7 @@ import 'uiExports/savedObjectTypes';
 import 'uiExports/fieldFormats';
 import 'uiExports/fieldFormatEditors';
 import 'uiExports/navbarExtensions';
-import 'uiExports/dashboardPanelActions';
+import 'uiExports/contextMenuActions';
 import 'uiExports/managementSections';
 import 'uiExports/devTools';
 import 'uiExports/docViews';
@@ -43,6 +43,7 @@ import 'uiExports/embeddableFactories';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
 import 'uiExports/autocompleteProviders';
+import 'uiExports/shareContextMenuExtensions';
 
 import 'ui/autoload/all';
 import './home';
@@ -57,9 +58,8 @@ import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
-import { Notifier } from 'ui/notify';
+import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
-import { KibanaRootController } from './kibana_root_controller';
 
 routes.enable();
 
@@ -68,6 +68,4 @@ routes
     redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
   });
 
-chrome.setRootController('kibana', KibanaRootController);
-
-uiModules.get('kibana').run(Notifier.pullMessageFromUrl);
+uiModules.get('kibana').run(showAppRedirectNotification);

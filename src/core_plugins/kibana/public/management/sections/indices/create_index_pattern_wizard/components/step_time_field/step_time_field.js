@@ -35,7 +35,9 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-export class StepTimeField extends Component {
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
+export class StepTimeFieldComponent extends Component {
   static propTypes = {
     indexPattern: PropTypes.string.isRequired,
     indexPatternsService: PropTypes.object.isRequired,
@@ -121,7 +123,12 @@ export class StepTimeField extends Component {
               <EuiLoadingSpinner/>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText>Creating index pattern...</EuiText>
+              <EuiText>
+                <FormattedMessage
+                  id="kbn.management.createIndexPattern.stepTime.creatingLabel"
+                  defaultMessage="Creating index pattern..."
+                />
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -149,7 +156,7 @@ export class StepTimeField extends Component {
 
     return (
       <EuiPanel paddingSize="l">
-        <Header indexPattern={indexPattern}/>
+        <Header indexPattern={indexPattern} />
         <EuiSpacer size="xs"/>
         <TimeField
           isVisible={showTimeField}
@@ -176,3 +183,5 @@ export class StepTimeField extends Component {
     );
   }
 }
+
+export const StepTimeField = injectI18n(StepTimeFieldComponent);

@@ -48,21 +48,21 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);
-      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);
-      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
@@ -103,6 +103,63 @@ export default function ({ getService, getPageObjects }) {
       const data = await PageObjects.visualize.getInspectorTableData();
       log.debug(data);
       expect(data).to.eql(expectedChartData);
+      await PageObjects.visualize.closeInspector();
+    });
+
+    it('should show 4 color ranges as default colorNumbers param', async function () {
+      const legends = await PageObjects.visualize.getLegendEntries();
+      const expectedLegends = ['0 - 400', '400 - 800', '800 - 1,200', '1,200 - 1,600'];
+      expect(legends).to.eql(expectedLegends);
+    });
+
+    it('should show 6 color ranges if changed on options', async function () {
+      await PageObjects.visualize.clickOptionsTab();
+      await PageObjects.visualize.changeHeatmapColorNumbers(6);
+      await PageObjects.visualize.clickGo();
+      const legends = await PageObjects.visualize.getLegendEntries();
+      const expectedLegends = [
+        '0 - 267',
+        '267 - 534',
+        '534 - 800',
+        '800 - 1,067',
+        '1,067 - 1,334',
+        '1,334 - 1,600',
+      ];
+      expect(legends).to.eql(expectedLegends);
+    });
+    it('should show 6 custom color ranges', async function () {
+      await PageObjects.visualize.clickOptionsTab();
+      await PageObjects.visualize.clickEnableCustomRanges();
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.isCustomRangeTableShown();
+      await PageObjects.visualize.addCustomRange(0, 100);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(100, 200);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(200, 300);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(300, 400);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(400, 500);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(500, 600);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(600, 700);
+      await PageObjects.visualize.clickAddRange();
+      await PageObjects.visualize.addCustomRange(700, 800);
+      await PageObjects.visualize.clickGo();
+      const legends = await PageObjects.visualize.getLegendEntries();
+      const expectedLegends = [
+        '0 - 100',
+        '100 - 200',
+        '200 - 300',
+        '300 - 400',
+        '400 - 500',
+        '500 - 600',
+        '600 - 700',
+        '700 - 800',
+      ];
+      expect(legends).to.eql(expectedLegends);
     });
   });
 }

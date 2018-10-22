@@ -59,6 +59,18 @@ export default function ({ getService }) {
           expect(body.usage.kibana.index).to.be('.kibana');
           expect(body.usage.kibana.dashboard.total).to.be(0);
         });
+
+        it('should return 200 for extended and legacy', async () => {
+          const { body } = await supertest
+            .get('/api/stats?extended&legacy')
+            .expect(200);
+          expect(body.kibana.uuid).to.eql('5b2de169-2785-441b-ae8c-186a1936b17d');
+          expect(body.process.uptime_ms).to.be.greaterThan(0);
+          expect(body.os.uptime_ms).to.be.greaterThan(0);
+          expect(body.usage.index).to.be('.kibana');
+          expect(body.usage.dashboard.total).to.be(0);
+          expect(body.usage.xpack.reporting.available).to.be(true);
+        });
       });
     });
   });

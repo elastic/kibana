@@ -24,35 +24,30 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiSpacer,
-  EuiText,
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export const LoadingState = () => (
   <EuiPanel paddingSize="l">
-    <EuiFlexGroup justifyContent="center" alignItems="center">
+    <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiTitle>
+        <EuiTitle size="s">
           <EuiTextColor color="subdued">
-            <h2 style={{ textAlign: 'center' }}>Checking for Elasticsearch data</h2>
+            <h2 style={{ textAlign: 'center' }}>
+              <FormattedMessage
+                id="kbn.management.createIndexPattern.loadingState.checkingLabel"
+                defaultMessage="Checking for Elasticsearch data"
+              />
+            </h2>
           </EuiTextColor>
         </EuiTitle>
+      </EuiFlexItem>
 
-        <EuiSpacer size="s"/>
-
-        <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l"/>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              Reticulating splines...
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="l"/>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>

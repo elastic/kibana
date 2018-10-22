@@ -32,7 +32,7 @@ function Distribution({ distribution }) {
   const isEmpty = distribution.totalHits === 0;
 
   if (isEmpty) {
-    return <EmptyMessage heading="No errors in the selected time range." />;
+    return <EmptyMessage heading="No errors were found" />;
   }
 
   return (

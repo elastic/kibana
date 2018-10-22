@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import './region_map.less';
 import './region_map_vis_params';
-import image from './images/icon-vector-map.svg';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -33,7 +31,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
   const VisFactory = Private(VisFactoryProvider);
   const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
 
-  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted'));
+  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted', false));
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 
@@ -43,13 +41,14 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
     description: 'Show metrics on a thematic map. Use one of the provided base maps, or add your own. ' +
     'Darker colors represent higher values.',
     category: CATEGORY.MAP,
-    image,
+    icon: 'visMapRegion',
     visConfig: {
       defaults: {
         legendPosition: 'bottomright',
         addTooltip: true,
         colorSchema: 'Yellow to Red',
         selectedLayer: selectedLayer,
+        emsHotLink: '',
         selectedJoinField: selectedJoinField,
         isDisplayWarning: true,
         wms: config.get('visualization:tileMap:WMSdefaults'),
@@ -78,8 +77,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
           text: 'top right',
         }],
         colorSchemas: Object.keys(truncatedColorMaps),
-        vectorLayers: vectorLayers,
-        baseLayers: []
+        vectorLayers: vectorLayers
       },
       schemas: new Schemas([
         {
@@ -104,7 +102,6 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
           aggFilter: ['terms']
         }
       ])
-    },
-    responseHandler: 'tabify'
+    }
   });
 });

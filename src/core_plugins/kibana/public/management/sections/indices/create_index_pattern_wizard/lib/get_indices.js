@@ -42,7 +42,7 @@ export async function getIndices(es, rawPattern, limit) {
 
   // We need to always provide a limit and not rely on the default
   if (!limit) {
-    throw '`getIndices()` was called without the required `limit` parameter.';
+    throw new Error('`getIndices()` was called without the required `limit` parameter.');
   }
 
   const params = {

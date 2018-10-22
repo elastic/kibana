@@ -18,6 +18,7 @@
  */
 
 import { SavedObjectNotFound } from 'ui/errors';
+import { i18n } from '@kbn/i18n';
 
 async function getSavedObject(doc, services) {
   const service = services.find(service => service.type === doc._type);
@@ -27,17 +28,42 @@ async function getSavedObject(doc, services) {
 
   const obj = await service.get();
   obj.id = doc._id;
+  obj.migrationVersion = doc._migrationVersion;
   return obj;
 }
 
+function addJsonFieldToIndexPattern(target, sourceString, fieldName, indexName) {
+  if (sourceString) {
+    try {
+      target[fieldName] = JSON.parse(sourceString);
+    } catch (error) {
+      throw new Error(
+        i18n.translate('kbn.management.objects.parsingFieldErrorMessage', {
+          defaultMessage: 'Error encountered parsing {fieldName} for index pattern {indexName}: {errorMessage}',
+          values: {
+            fieldName,
+            indexName,
+            errorMessage: error.message,
+          }
+        }),
+      );
+    }
+  }
+}
 async function importIndexPattern(doc, indexPatterns, overwriteAll) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
   const emptyPattern = await indexPatterns.get();
-  Object.assign(emptyPattern, {
+  const { title, timeFieldName, fields, fieldFormatMap, sourceFilters } = doc._source;
+  const importedIndexPattern = {
     id: doc._id,
-    title: doc._source.title,
-    timeFieldName: doc._source.timeFieldName,
-  });
+    title,
+    timeFieldName
+  };
+  addJsonFieldToIndexPattern(importedIndexPattern, fields, 'fields', title);
+  addJsonFieldToIndexPattern(importedIndexPattern, fieldFormatMap, 'fieldFormatMap', title);
+  addJsonFieldToIndexPattern(importedIndexPattern, sourceFilters, 'sourceFilters', title);
+  Object.assign(emptyPattern, importedIndexPattern);
+
   const newId = await emptyPattern.create(true, !overwriteAll);
   indexPatterns.cache.clear(newId);
   return newId;
@@ -148,13 +174,18 @@ export async function resolveSavedObjects(
   // Keep track of how many we actually import because the user
   // can cancel an override
   let importedObjectCount = 0;
-
+  const failedImports = [];
   // Start with the index patterns since everything is dependent on them
   await awaitEachItemInParallel(
     docTypes.indexPatterns,
     async indexPatternDoc => {
-      if (await importIndexPattern(indexPatternDoc, indexPatterns, overwriteAll)) {
-        importedObjectCount++;
+      try {
+        const importedIndexPatternId = await importIndexPattern(indexPatternDoc, indexPatterns, overwriteAll);
+        if (importedIndexPatternId) {
+          importedObjectCount++;
+        }
+      } catch (error) {
+        failedImports.push({ indexPatternDoc, error });
       }
     }
   );
@@ -167,7 +198,7 @@ export async function resolveSavedObjects(
   // saved objects.
   const conflictedIndexPatterns = [];
   // Keep a record of any objects which fail to import for unknown reasons.
-  const failedImports = [];
+
   // It's possible to have saved objects that link to saved searches which then link to index patterns
   // and those could error out, but the error comes as an index pattern not found error. We can't resolve
   // those the same as way as normal index pattern not found errors, but when those are fixed, it's very
@@ -203,6 +234,9 @@ export async function resolveSavedObjects(
       }
     } catch (error) {
       if (error instanceof SavedObjectNotFound) {
+        if (error.savedObjectType === 'search') {
+          failedImports.push({ obj, error });
+        }
         if (error.savedObjectType === 'index-pattern') {
           if (obj.savedSearchId) {
             conflictedSavedObjectsLinkedToSavedSearches.push(obj);

@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NavControlPopover renders without crashing 1`] = `
+<EuiPopover
+  anchorPosition="rightCenter"
+  button={
+    <div
+      className="global-nav-link"
+    >
+      <a
+        className="global-nav-link__anchor"
+        onClick={[Function]}
+      >
+        <div
+          className="global-nav-link__icon"
+        >
+           
+          <Unknown
+            className="spaceNavGraphic"
+            size="s"
+            space={
+              Object {
+                "id": "",
+                "name": "foo",
+              }
+            }
+          />
+           
+        </div>
+        <div
+          className="global-nav-link__title"
+        >
+           
+          foo
+           
+        </div>
+      </a>
+    </div>
+  }
+  closePopover={[Function]}
+  data-test-subj="spacesNavSelector"
+  hasArrow={true}
+  id="spacesMenuPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+  repositionOnScroll={true}
+>
+  <Component
+    onManageSpacesClick={[Function]}
+    userProfile={
+      Object {
+        "hasCapability": [Function],
+      }
+    }
+  />
+</EuiPopover>
+`;

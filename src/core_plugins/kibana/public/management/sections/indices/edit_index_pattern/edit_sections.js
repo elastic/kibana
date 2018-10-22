@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 export function IndicesEditSectionsProvider() {
 
@@ -34,17 +35,17 @@ export function IndicesEditSectionsProvider() {
 
     return [
       {
-        title: 'Fields',
+        title: i18n.translate('kbn.management.editIndexPattern.tabs.fieldsHeader', { defaultMessage: 'Fields' }),
         index: 'indexedFields',
         count: fieldCount.indexed
       },
       {
-        title: 'Scripted fields',
+        title: i18n.translate('kbn.management.editIndexPattern.tabs.scriptedHeader', { defaultMessage: 'Scripted fields' }),
         index: 'scriptedFields',
         count: fieldCount.scripted
       },
       {
-        title: 'Source filters',
+        title: i18n.translate('kbn.management.editIndexPattern.tabs.sourceHeader', { defaultMessage: 'Source filters' }),
         index: 'sourceFilters',
         count: fieldCount.sourceFilters
       }

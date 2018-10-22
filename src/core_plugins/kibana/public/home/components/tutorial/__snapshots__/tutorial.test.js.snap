@@ -2,10 +2,12 @@
 
 exports[`isCloudEnabled is false should not render instruction toggle when ON_PREM_ELASTIC_CLOUD instructions are not provided 1`] = `
 <EuiPage
-  className="home"
+  className="homPage"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <div>
       <EuiLink
         color="primary"
@@ -36,7 +38,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
         size="l"
       />
       <div
-        className="text-center"
+        className="eui-textCenter"
       />
       <EuiSpacer
         size="l"
@@ -46,7 +48,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
         hasShadow={false}
         paddingSize="l"
       >
-        <InstructionSet
+        <InjectIntl(InstructionSetUi)
           instructionVariants={
             Array [
               Object {
@@ -76,10 +78,12 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
 
 exports[`isCloudEnabled is false should render ON_PREM instructions with instruction toggle 1`] = `
 <EuiPage
-  className="home"
+  className="homPage"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <div>
       <EuiLink
         color="primary"
@@ -111,25 +115,43 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
         size="l"
       />
       <div
-        className="text-center"
+        className="eui-textCenter"
       >
-        <RadioButtonGroup
-          buttons={
-            Array [
-              Object {
-                "dataTestSubj": "onPremBtn",
-                "label": "Self managed",
-                "onClick": [Function],
-              },
-              Object {
-                "dataTestSubj": "onPremElasticCloudBtn",
-                "label": "Elastic Cloud",
-                "onClick": [Function],
-              },
-            ]
-          }
-          selectedBtnLabel="Self managed"
-        />
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          direction="row"
+          gutterSize="l"
+          justifyContent="center"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            component="div"
+            grow={false}
+          >
+            <EuiButtonGroup
+              buttonSize="s"
+              color="primary"
+              idSelected="onPrem"
+              idToSelectedMap={Object {}}
+              onChange={[Function]}
+              options={
+                Array [
+                  Object {
+                    "id": "onPrem",
+                    "label": "Self managed",
+                  },
+                  Object {
+                    "id": "onPremElasticCloud",
+                    "label": "Elastic Cloud",
+                  },
+                ]
+              }
+              type="single"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
       <EuiSpacer
         size="l"
@@ -139,7 +161,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
         hasShadow={false}
         paddingSize="l"
       >
-        <InstructionSet
+        <InjectIntl(InstructionSetUi)
           instructionVariants={
             Array [
               Object {
@@ -169,10 +191,12 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
 
 exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`] = `
 <EuiPage
-  className="home"
+  className="homPage"
   restrictWidth={false}
 >
-  <EuiPageBody>
+  <EuiPageBody
+    restrictWidth={false}
+  >
     <div>
       <EuiLink
         color="primary"
@@ -204,7 +228,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
         size="l"
       />
       <div
-        className="text-center"
+        className="eui-textCenter"
       />
       <EuiSpacer
         size="l"
@@ -214,7 +238,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
         hasShadow={false}
         paddingSize="l"
       >
-        <InstructionSet
+        <InjectIntl(InstructionSetUi)
           instructionVariants={
             Array [
               Object {

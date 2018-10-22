@@ -100,7 +100,7 @@ export function VislibAxisLabelsProvider() {
         const el = $(config.get('rootEl')).find(config.get('elSelector'));
         const maxSize = config.isHorizontal() ? el.width() : el.height();
         const scaleRange = self.axisScale.scale.range();
-        const scaleWidth = scaleRange[scaleRange.length - 1] - scaleRange[0];
+        const scaleWidth = Math.abs(scaleRange[scaleRange.length - 1] - scaleRange[0]);
         const scaleStartPad = .5 * (maxSize - scaleWidth);
 
         selection.selectAll('.tick text')

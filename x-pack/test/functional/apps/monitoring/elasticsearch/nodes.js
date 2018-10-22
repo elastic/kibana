@@ -33,13 +33,13 @@ export default function ({ getService, getPageObjects }) {
 
       it('should have an Elasticsearch Cluster Summary Status with correct info', async () => {
         expect(await esClusterSummaryStatus.getContent()).to.eql({
-          nodesCount: 'Nodes: 2',
-          indicesCount: 'Indices: 20',
-          memory: 'Memory: 696.6 MB / 1.3 GB',
-          totalShards: 'Total Shards: 79',
-          unassignedShards: 'Unassigned Shards: 7',
-          documentCount: 'Documents: 25,758',
-          dataSize: 'Data: 100.0 MB',
+          nodesCount: 'Nodes:\n2',
+          indicesCount: 'Indices:\n20',
+          memory: 'Memory:\n696.6 MB / 1.3 GB',
+          totalShards: 'Total Shards:\n79',
+          unassignedShards: 'Unassigned Shards:\n7',
+          documentCount: 'Documents:\n25,758',
+          dataSize: 'Data:\n100.0 MB',
           health: 'Health: yellow',
         });
       });
@@ -187,13 +187,13 @@ export default function ({ getService, getPageObjects }) {
 
       it('should have an Elasticsearch Cluster Summary Status with correct info', async () => {
         expect(await esClusterSummaryStatus.getContent()).to.eql({
-          nodesCount: 'Nodes: 3',
-          indicesCount: 'Indices: 20',
-          memory: 'Memory: 575.3 MB / 2.0 GB',
-          totalShards: 'Total Shards: 80',
-          unassignedShards: 'Unassigned Shards: 5',
-          documentCount: 'Documents: 25,927',
-          dataSize: 'Data: 101.6 MB',
+          nodesCount: 'Nodes:\n3',
+          indicesCount: 'Indices:\n20',
+          memory: 'Memory:\n575.3 MB / 2.0 GB',
+          totalShards: 'Total Shards:\n80',
+          unassignedShards: 'Unassigned Shards:\n5',
+          documentCount: 'Documents:\n25,927',
+          dataSize: 'Data:\n101.6 MB',
           health: 'Health: yellow',
         });
       });

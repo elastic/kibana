@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   const fromTime = '2015-09-19 06:31:44.000';
@@ -51,12 +52,26 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
     });
 
+    it('should allow applying changed params', async () => {
+      await PageObjects.visualize.setNumericInterval('1', { append: true });
+      const interval = await PageObjects.visualize.getInputTypeParam('interval');
+      expect(interval).to.be('20001');
+      const isApplyButtonEnabled = await PageObjects.visualize.isApplyEnabled();
+      expect(isApplyButtonEnabled).to.be(true);
+    });
+
+    it('should allow reseting changed params', async () => {
+      await PageObjects.visualize.clickReset();
+      const interval = await PageObjects.visualize.getInputTypeParam('interval');
+      expect(interval).to.be('2000');
+    });
+
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualization(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
       log.debug(`Save viz page title is ${pageTitle}`);
       expect(pageTitle).to.contain(vizName1);
-      await PageObjects.header.waitForToastMessageGone();
+      await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
@@ -87,6 +102,22 @@ export default function ({ getService, getPageObjects }) {
         log.debug(data);
         expect(data).to.eql(expectedChartData);
       });
+    });
+
+    it('should show correct data when using average pipeline aggregation', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.clickAddMetric();
+      await PageObjects.visualize.clickBucket('Metric', 'metric');
+      await PageObjects.visualize.selectAggregation('Average Bucket', 'metrics');
+      await PageObjects.visualize.selectAggregation('Terms', 'metrics', 'buckets');
+      await PageObjects.visualize.selectField('geo.src', 'metrics', 'buckets');
+      await PageObjects.visualize.clickGo();
+      const data = await PageObjects.visualize.getTableVisData();
+      log.debug(data.split('\n'));
+      expect(data.trim().split('\n')).to.be.eql(['14,004 1,412.6']);
     });
 
     it('should show correct data for a data table with date histogram', async () => {
@@ -129,13 +160,37 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should correctly filter for applied time filter on the main timefield', async () => {
-      await filterBar.addFilter('@timestamp', 'is between', ['2015-09-19', '2015-09-21']);
+      await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.common.sleep(1000);
+      await renderable.waitForRender();
       const data = await PageObjects.visualize.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',
       ]);
+    });
+
+    it('should correctly filter for pinned filters', async () => {
+      await filterBar.toggleFilterPinned('@timestamp');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await renderable.waitForRender();
+      const data = await PageObjects.visualize.getTableVisData();
+      expect(data.trim().split('\n')).to.be.eql([
+        '2015-09-20', '4,757',
+      ]);
+    });
+
+    it('should show correct data for a data table with top hits', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.clickMetricEditor();
+      await PageObjects.visualize.selectAggregation('Top Hit', 'metrics');
+      await PageObjects.visualize.selectField('_source', 'metrics');
+      await PageObjects.visualize.clickGo();
+      const data = await PageObjects.visualize.getTableVisData();
+      log.debug(data);
+      expect(data.length).to.be.greaterThan(0);
     });
   });
 }

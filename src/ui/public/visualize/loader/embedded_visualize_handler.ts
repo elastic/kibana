@@ -38,6 +38,7 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
+const LOADING_ATTRIBUTE = 'data-loading';
 
 /**
  * A handler to the embedded visualization. It offers several methods to interact
@@ -51,7 +52,6 @@ export class EmbeddedVisualizeHandler {
   private listeners = new EventEmitter();
   private firstRenderComplete: Promise<void>;
   private renderCompleteHelper: RenderCompleteHelper;
-  private onRenderCompleteListener: () => void;
   private shouldForceNextFetch: boolean = false;
   private debouncedFetchAndRender = debounce(() => {
     if (this.destroyed) {
@@ -64,7 +64,7 @@ export class EmbeddedVisualizeHandler {
   }, 100);
 
   private dataLoaderParams: RequestHandlerParams;
-  private appState: AppState;
+  private readonly appState?: AppState;
   private uiState: PersistedState;
   private dataLoader: VisualizeDataLoader;
 
@@ -93,10 +93,7 @@ export class EmbeddedVisualizeHandler {
       this.listeners.once(RENDER_COMPLETE_EVENT, resolve);
     });
 
-    this.onRenderCompleteListener = () => {
-      this.listeners.emit(RENDER_COMPLETE_EVENT);
-    };
-
+    element.setAttribute(LOADING_ATTRIBUTE, '');
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
     this.appState = appState;
@@ -108,7 +105,7 @@ export class EmbeddedVisualizeHandler {
 
     this.vis.on('update', this.handleVisUpdate);
     this.vis.on('reload', this.reload);
-    this.uiState.on('change', this.fetchAndRender);
+    this.uiState.on('change', this.onUiStateChange);
     timefilter.on('autoRefreshFetch', this.reload);
 
     this.dataLoader = new VisualizeDataLoader(vis, Private);
@@ -168,7 +165,7 @@ export class EmbeddedVisualizeHandler {
     this.vis.removeListener('reload', this.reload);
     this.vis.removeListener('update', this.handleVisUpdate);
     this.element.removeEventListener('renderComplete', this.onRenderCompleteListener);
-    this.uiState.off('change', this.fetchAndRender);
+    this.uiState.off('change', this.onUiStateChange);
     visualizationLoader.destroy(this.element);
     this.renderCompleteHelper.destroy();
   }
@@ -224,6 +221,15 @@ export class EmbeddedVisualizeHandler {
     this.listeners.removeListener(RENDER_COMPLETE_EVENT, listener);
   }
 
+  private onRenderCompleteListener = () => {
+    this.listeners.emit(RENDER_COMPLETE_EVENT);
+    this.element.removeAttribute(LOADING_ATTRIBUTE);
+  };
+
+  private onUiStateChange = () => {
+    this.fetchAndRender();
+  };
+
   /**
    * Fetches new data and renders the chart. This will happen debounced for a couple
    * of milliseconds, to bundle fast successive calls into one fetch and render,
@@ -236,6 +242,7 @@ export class EmbeddedVisualizeHandler {
    */
   private fetchAndRender = (forceFetch = false): void => {
     this.shouldForceNextFetch = forceFetch || this.shouldForceNextFetch;
+    this.element.setAttribute(LOADING_ATTRIBUTE, '');
     this.debouncedFetchAndRender();
   };
 

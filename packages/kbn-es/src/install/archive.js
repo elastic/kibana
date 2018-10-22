@@ -52,10 +52,14 @@ exports.installArchive = async function installArchive(archive, options = {}) {
   await decompress(archive, installPath);
   log.info('extracted to %s', chalk.bold(installPath));
 
+  if (license === 'trial') {
+    // starting in 6.3, security is disabled by default. Since we bootstrap
+    // the keystore, we can enable security ourselves.
+    await appendToConfig(installPath, 'xpack.security.enabled', 'true');
+  }
+
   if (license !== 'oss') {
     await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
-
-    await appendToConfig(installPath, 'xpack.security.enabled', 'true');
     await configureKeystore(installPath, password, log);
   }
 

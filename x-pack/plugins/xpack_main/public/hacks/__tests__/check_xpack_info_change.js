@@ -6,7 +6,7 @@
 
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
-import { Notifier } from 'ui/notify';
+import { banners } from 'ui/notify';
 
 const XPACK_INFO_SIG_KEY = 'xpackMain.infoSignature';
 const XPACK_INFO_KEY = 'xpackMain.info';
@@ -42,7 +42,7 @@ describe('CheckXPackInfoChange Factory', () => {
     // like the one related to the session expiration.
     $http.defaults.headers.common['kbn-system-api'] = 'x';
 
-    sandbox.stub(Notifier.prototype, 'directive');
+    sandbox.stub(banners, 'add');
   }));
 
   afterEach(function () {
@@ -68,7 +68,7 @@ describe('CheckXPackInfoChange Factory', () => {
     $httpBackend.flush();
     $timeout.flush();
 
-    sinon.assert.notCalled(Notifier.prototype.directive);
+    sinon.assert.notCalled(banners.add);
   });
 
   it('shows "license expired" banner if license is expired only once.', async () => {
@@ -87,21 +87,16 @@ describe('CheckXPackInfoChange Factory', () => {
     $httpBackend.flush();
     $timeout.flush();
 
-    sinon.assert.calledOnce(Notifier.prototype.directive);
-    sinon.assert.calledWithExactly(Notifier.prototype.directive, {
-      template: sinon.match('Your diamond license is currently expired')
-    }, {
-      type: 'error'
-    });
+    sinon.assert.calledOnce(banners.add);
 
     // If license didn't change banner shouldn't be displayed.
-    Notifier.prototype.directive.resetHistory();
+    banners.add.resetHistory();
     mockSessionStorage.getItem.withArgs(XPACK_INFO_SIG_KEY).returns('bar');
 
     $http.post('/api/test');
     $httpBackend.flush();
     $timeout.flush();
 
-    sinon.assert.notCalled(Notifier.prototype.directive);
+    sinon.assert.notCalled(banners.add);
   });
 });

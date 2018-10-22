@@ -40,7 +40,8 @@ describe('config/deprecation warnings mixin', function () {
       env: {
         CREATE_SERVER_OPTS: JSON.stringify({
           logging: {
-            quiet: false
+            quiet: false,
+            silent: false
           },
           uiSettings: {
             enabled: true

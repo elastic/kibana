@@ -28,8 +28,8 @@ const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');
 
 export class Config {
-  static async withDefaultSchema(settings = {}) {
-    const defaultSchema = await createDefaultSchema();
+  static withDefaultSchema(settings = {}) {
+    const defaultSchema = createDefaultSchema();
     return new Config(defaultSchema, settings);
   }
 

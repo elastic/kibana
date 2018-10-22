@@ -23,7 +23,7 @@ export function registerTutorials(server) {
     path: '/api/kibana/home/tutorials',
     method: ['GET'],
     handler: async function (req, reply) {
-      reply(server.getTutorials());
+      reply(server.getTutorials(req));
     }
   });
 }

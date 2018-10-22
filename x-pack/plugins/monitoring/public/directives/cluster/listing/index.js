@@ -134,7 +134,7 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
           if (this.props.license.expiry_date_in_millis < moment().valueOf()) {
             // license is expired
             return (
-              <span className="monitoringTableCell__ClusterCell__expired">
+              <span className="monTableCell__clusterCellExpired">
                 Expired
               </span>
             );
@@ -150,10 +150,10 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
 
         return (
           <div>
-            <div className="monitoringTableCell__ClusterCell__license">
+            <div className="monTableCell__clusterCellLiscense">
               { capitalize(this.props.license.type) }
             </div>
-            <div className="monitoringTableCell__ClusterCell__expiration">
+            <div className="monTableCell__clusterCellExpiration">
               { showLicenseExpiration ? licenseExpiry() : null }
             </div>
           </div>
@@ -220,7 +220,7 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
       return (
         <KuiTableRow data-test-subj={`clusterRow_${this.props.cluster_uuid}`}>
           <KuiTableRowCell>
-            <span className="monitoringTableCell__name">
+            <span className="monTableCell__name">
               { this.getClusterAction() }
             </span>
           </KuiTableRowCell>

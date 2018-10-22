@@ -17,14 +17,27 @@
  * under the License.
  */
 
+import angular from 'angular';
+import { BasePathStartContract } from '../base_path';
+import { ChromeStartContract } from '../chrome';
+import { FatalErrorsStartContract } from '../fatal_errors';
 import { InjectedMetadataStartContract } from '../injected_metadata';
+import { LoadingCountStartContract } from '../loading_count';
+import { NotificationsStartContract } from '../notifications';
+import { UiSettingsClient } from '../ui_settings';
 
 interface Deps {
   injectedMetadata: InjectedMetadataStartContract;
+  fatalErrors: FatalErrorsStartContract;
+  notifications: NotificationsStartContract;
+  loadingCount: LoadingCountStartContract;
+  basePath: BasePathStartContract;
+  uiSettings: UiSettingsClient;
+  chrome: ChromeStartContract;
 }
 
 export interface LegacyPlatformParams {
-  rootDomElement: HTMLElement;
+  targetDomElement: HTMLElement;
   requireLegacyFiles: () => void;
   useLegacyTestHarness?: boolean;
 }
@@ -39,10 +52,27 @@ export interface LegacyPlatformParams {
 export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public start({ injectedMetadata }: Deps) {
+  public start({
+    injectedMetadata,
+    fatalErrors,
+    notifications,
+    loadingCount,
+    basePath,
+    uiSettings,
+    chrome,
+  }: Deps) {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
     require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
+    require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
+    require('ui/notify/toasts').__newPlatformInit__(notifications.toasts);
+    require('ui/chrome/api/loading_count').__newPlatformInit__(loadingCount);
+    require('ui/chrome/api/base_path').__newPlatformInit__(basePath);
+    require('ui/chrome/api/ui_settings').__newPlatformInit__(uiSettings);
+    require('ui/chrome/api/injected_vars').__newPlatformInit__(injectedMetadata);
+    require('ui/chrome/api/controls').__newPlatformInit__(chrome);
+    require('ui/chrome/api/theme').__newPlatformInit__(chrome);
+    require('ui/chrome/services/global_nav_state').__newPlatformInit__(chrome);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first
@@ -51,16 +81,33 @@ export class LegacyPlatformService {
     // require the files that will tie into the legacy platform
     this.params.requireLegacyFiles();
 
-    bootstrapModule.bootstrap(this.params.rootDomElement);
+    bootstrapModule.bootstrap(this.params.targetDomElement);
+  }
+
+  public stop() {
+    const angularRoot = angular.element(this.params.targetDomElement);
+    const injector$ = angularRoot.injector();
+
+    // if we haven't gotten to the point of bootstraping
+    // angular, injector$ won't be defined
+    if (!injector$) {
+      return;
+    }
+
+    // destroy the root angular scope
+    injector$.get('$rootScope').$destroy();
+
+    // clear the inner html of the root angular element
+    this.params.targetDomElement.textContent = '';
   }
 
   private loadBootstrapModule(): {
-    bootstrap: (rootDomElement: HTMLElement) => void;
+    bootstrap: (targetDomElement: HTMLElement) => void;
   } {
     if (this.params.useLegacyTestHarness) {
       // wrapped in NODE_ENV check so the `ui/test_harness` module
       // is not included in the distributable
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true') {
         return require('ui/test_harness');
       }
 

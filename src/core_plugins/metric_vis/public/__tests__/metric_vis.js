@@ -25,7 +25,7 @@ import { VisProvider } from 'ui/vis';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import MetricVisProvider from '../metric_vis';
 
-describe('metric_vis', () => {
+describe('metric vis', () => {
   let setup = null;
   let vis;
 
@@ -62,10 +62,8 @@ describe('metric_vis', () => {
 
     const ip = '235.195.237.208';
     render({
-      tables: [{
-        columns: [{ title: 'ip', aggConfig: vis.aggs[0] }],
-        rows: [[ ip ]]
-      }]
+      columns: [{ id: 'col-0', title: 'ip', aggConfig: vis.aggs[0] }],
+      rows: [{ 'col-0': ip }]
     });
 
     const $link = $(el)

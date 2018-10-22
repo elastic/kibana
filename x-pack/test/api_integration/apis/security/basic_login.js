@@ -54,7 +54,7 @@ export default function ({ getService }) {
       const loginResponse = await supertest.post('/api/security/v1/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: validUsername, password: validPassword })
-        .expect(200);
+        .expect(204);
 
       const cookies = loginResponse.headers['set-cookie'];
       expect(cookies).to.have.length(1);
@@ -111,7 +111,7 @@ export default function ({ getService }) {
         const loginResponse = await supertest.post('/api/security/v1/login')
           .set('kbn-xsrf', 'xxx')
           .send({ username: validUsername, password: validPassword })
-          .expect(200);
+          .expect(204);
 
         sessionCookie = request.cookie(loginResponse.headers['set-cookie'][0]);
       });

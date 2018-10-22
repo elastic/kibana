@@ -41,7 +41,7 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
     return (
       <KuiTableRow>
         <KuiTableRowCell>
-          <div className="monitoringTableCell__name">
+          <div className="monTableCell__name">
             <EuiLink
               onClick={onPipelineClick.bind(null, id)}
               data-test-subj="id"
@@ -67,7 +67,7 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
               />
             </KuiFlexItem>
             <KuiFlexItem
-              className="monitoringTableCell__number"
+              className="monTableCell__number"
               data-test-subj="eventsEmittedRate"
             >
               { formatMetric(latestThroughput, '0.[0]a', throughputMetric.metric.units) }
@@ -91,7 +91,7 @@ const pipelineRowFactory = (onPipelineClick, onBrush, tooltipXValueFormatter, to
               />
             </KuiFlexItem>
             <KuiFlexItem
-              className="monitoringTableCell__number"
+              className="monTableCell__number"
               data-test-subj="nodeCount"
             >
               { formatMetric(latestNodesCount, '0a') }

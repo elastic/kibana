@@ -27,9 +27,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-export const UrlTemplateFlyout = ({
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
+export const UrlTemplateFlyoutComponent = ({
   isVisible = false,
   onClose = () => {},
+  intl,
 }) => {
   return isVisible ? (
     <EuiFlyout
@@ -37,21 +40,40 @@ export const UrlTemplateFlyout = ({
     >
       <EuiFlyoutBody>
         <EuiText>
-          <h3>Url Template</h3>
+          <h3>
+            <FormattedMessage id="common.ui.fieldEditor.urlTemplateHeader" defaultMessage="Url Template" />
+          </h3>
           <p>
-            If a field only contains part of a URL then a <strong>Url Template</strong> can be used to format the value
-            as a complete URL. The format is a string which uses double curly brace notation <EuiCode>{('{{ }}')}</EuiCode>
-            to inject values. The following values can be accessed:
+            <FormattedMessage
+              id="common.ui.fieldEditor.urlTemplateLabel.fieldDetail"
+              defaultMessage="If a field only contains part of a URL then a {strongUrlTemplate} can be used to format the value as
+              a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values.
+              The following values can be accessed:"
+              values={{
+                doubleCurlyBraces: <EuiCode>{('{{ }}')}</EuiCode>,
+                strongUrlTemplate: (
+                  <strong>
+                    <FormattedMessage
+                      id="common.ui.fieldEditor.urlTemplateLabel.strongUrlTemplateLabel"
+                      defaultMessage="Url Template"
+                    />
+                  </strong>)
+              }}
+            />
           </p>
           <ul>
             <li>
-              <EuiCode>value</EuiCode> &mdash; The URI-escaped value
+              <EuiCode>value</EuiCode> &mdash;&nbsp;
+              <FormattedMessage id="common.ui.fieldEditor.urlTemplate.valueLabel" defaultMessage="The URI-escaped value" />
             </li>
             <li>
-              <EuiCode>rawValue</EuiCode> &mdash; The unescaped value
+              <EuiCode>rawValue</EuiCode> &mdash;&nbsp;
+              <FormattedMessage id="common.ui.fieldEditor.urlTemplate.rawValueLabel" defaultMessage="The unescaped value" />
             </li>
           </ul>
-          <h4>Examples</h4>
+          <h4>
+            <FormattedMessage id="common.ui.fieldEditor.urlTemplate.examplesHeader" defaultMessage="Examples" />
+          </h4>
           <EuiBasicTable
             items={[
               {
@@ -61,7 +83,7 @@ export const UrlTemplateFlyout = ({
               },
               {
                 input: 'users/admin',
-                template: 'http://company.net/groups?id={{value}',
+                template: 'http://company.net/groups?id={{value}}',
                 output: 'http://company.net/groups?id=users%2Fadmin',
               },
               {
@@ -73,16 +95,16 @@ export const UrlTemplateFlyout = ({
             columns={[
               {
                 field: 'input',
-                name: 'Input',
+                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.inputHeader', defaultMessage: 'Input' }),
                 width: '160px',
               },
               {
                 field: 'template',
-                name: 'Template',
+                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.templateHeader', defaultMessage: 'Template' }),
               },
               {
                 field: 'output',
-                name: 'Output',
+                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.outputHeader', defaultMessage: 'Output' }),
               },
             ]}
           />
@@ -92,4 +114,6 @@ export const UrlTemplateFlyout = ({
   ) : null;
 };
 
-UrlTemplateFlyout.displayName = 'UrlTemplateFlyout';
+UrlTemplateFlyoutComponent.displayName = 'UrlTemplateFlyout';
+
+export const UrlTemplateFlyout = injectI18n(UrlTemplateFlyoutComponent);

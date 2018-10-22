@@ -15,7 +15,12 @@ exports[`DateFormatEditor should render normally 1`] = `
           target="_window"
           type="button"
         >
-          Documentation 
+          <FormattedMessage
+            defaultMessage="Documentation"
+            id="common.ui.fieldEditor.date.documentationLabel"
+            values={Object {}}
+          />
+           
           <EuiIcon
             size="m"
             type="link"
@@ -25,13 +30,17 @@ exports[`DateFormatEditor should render normally 1`] = `
     }
     isInvalid={false}
     label={
-      <span>
-        Moment.js format pattern (Default: 
-        <EuiCode>
-          MMMM Do YYYY, HH:mm:ss.SSS
-        </EuiCode>
-        )
-      </span>
+      <FormattedMessage
+        defaultMessage="Moment.js format pattern (Default: {defaultPattern})"
+        id="common.ui.fieldEditor.date.momentLabel"
+        values={
+          Object {
+            "defaultPattern": <EuiCode>
+              MMMM Do YYYY, HH:mm:ss.SSS
+            </EuiCode>,
+          }
+        }
+      />
     }
   >
     <EuiFieldText
@@ -44,7 +53,7 @@ exports[`DateFormatEditor should render normally 1`] = `
       placeholder="MMMM Do YYYY, HH:mm:ss.SSS"
     />
   </EuiFormRow>
-  <FormatEditorSamples
+  <InjectIntl(FormatEditorSamplesComponent)
     samples={
       Array [
         Object {

@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
+import { checkPermission } from '../../../privilege/check_privilege';
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
 
 

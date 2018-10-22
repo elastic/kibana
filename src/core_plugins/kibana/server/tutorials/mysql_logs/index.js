@@ -17,27 +17,39 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function mysqlLogsSpecProvider() {
+export function mysqlLogsSpecProvider(server, context) {
   const moduleName = 'mysql';
   const geoipRequired = false;
   const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'mysqlLogs',
-    name: 'MySQL logs',
+    name: i18n.translate('kbn.server.tutorials.mysqlLogs.nameTitle', {
+      defaultMessage: 'MySQL logs',
+    }),
     category: TUTORIAL_CATEGORY.LOGGING,
-    shortDescription: 'Collect and parse error and slow logs created by MySQL.',
-    longDescription: 'The `mysql` Filebeat module parses error and slow logs created by MySQL.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-mysql.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.mysqlLogs.shortDescription', {
+      defaultMessage: 'Collect and parse error and slow logs created by MySQL.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.mysqlLogs.longDescription', {
+      defaultMessage: 'The `mysql` Filebeat module parses error and slow logs created by MySQL. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-mysql.html',
+      },
+    }),
     euiIconType: 'logoMySQL',
     artifacts: {
       dashboards: [
         {
           id: 'Filebeat-MySQL-Dashboard',
-          linkLabel: 'MySQL logs dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.mysqlLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'MySQL logs dashboard',
+          }),
           isOverview: true
         }
       ],
@@ -47,7 +59,7 @@ export function mysqlLogsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/mysql_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

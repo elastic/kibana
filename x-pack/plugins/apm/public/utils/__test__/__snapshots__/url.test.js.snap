@@ -3,7 +3,7 @@
 exports[`KibanaLinkComponent should render correct markup 1`] = `
 <a
   className="euiLink euiLink--primary"
-  href="/app/kibana#/discover?_g=&_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))"
+  href="myBasePath/app/kibana#/discover?_g=&_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))"
 >
   Go to Discover
 </a>
@@ -17,4 +17,25 @@ exports[`RelativeLinkComponent should render correct markup 1`] = `
 >
   Go to Discover
 </a>
+`;
+
+exports[`ViewMLJob should render component 1`] = `
+<Connect(KibanaLinkComponent)
+  hash="/timeseriesexplorer"
+  pathname="/app/ml"
+  query={
+    Object {
+      "_a": null,
+      "_g": Object {
+        "ml": Object {
+          "jobIds": Array [
+            "myServiceName-myTransactionType-high_mean_response_time",
+          ],
+        },
+      },
+    }
+  }
+>
+  View Job
+</Connect(KibanaLinkComponent)>
 `;

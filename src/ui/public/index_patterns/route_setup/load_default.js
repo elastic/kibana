@@ -27,6 +27,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { clearTimeout } from 'timers';
+import { i18n } from '@kbn/i18n';
 
 let bannerId;
 let timeoutId;
@@ -43,8 +44,9 @@ function displayBanner() {
         color="warning"
         iconType="iInCircle"
         title={
-          `In order to visualize and explore data in Kibana,
-          you'll need to create an index pattern to retrieve data from Elasticsearch.`
+          i18n.translate('common.ui.indexPattern.bannerLabel',
+            //eslint-disable-next-line max-len
+            { defaultMessage: 'In order to visualize and explore data in Kibana, you\'ll need to create an index pattern to retrieve data from Elasticsearch.' })
         }
       />
     )

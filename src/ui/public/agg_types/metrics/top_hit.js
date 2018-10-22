@@ -21,10 +21,25 @@ import _ from 'lodash';
 import { MetricAggType } from './metric_agg_type';
 import topSortEditor from '../controls/top_sort.html';
 import aggregateAndSizeEditor from '../controls/top_aggregate_and_size.html';
+import { aggTypeFieldFilters } from '../param_types/filter';
 
 const isNumber = function (type) {
   return type === 'number';
 };
+
+aggTypeFieldFilters.addFilter(
+  (
+    field,
+    fieldParamType,
+    aggConfig,
+    vis
+  ) => {
+    if (aggConfig.type.name !== 'top_hit' || vis.type.name === 'table' || vis.type.name === 'metric') {
+      return true;
+    }
+    return field.type === 'number';
+
+  });
 
 export const topHitMetricAgg = new MetricAggType({
   name: 'top_hits',
@@ -40,13 +55,9 @@ export const topHitMetricAgg = new MetricAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       onlyAggregatable: false,
-      filterFieldTypes: function (vis, value) {
-        if (vis.type.name === 'table' || vis.type.name === 'metric') {
-          return true;
-        }
-        return value === 'number';
-      },
+      filterFieldTypes: '*',
       write(agg, output) {
         const field = agg.params.field;
         output.params = {};
@@ -62,7 +73,7 @@ export const topHitMetricAgg = new MetricAggType({
           };
         } else {
           if (field.readFromDocValues) {
-            output.params.docvalue_fields = [ field.name ];
+            output.params.docvalue_fields = [ { field: field.name, format: 'use_field_mapping' } ];
           }
           output.params._source = field.name === '_source' ? true : field.name;
         }
@@ -137,7 +148,7 @@ export const topHitMetricAgg = new MetricAggType({
       editor: null,
       filterFieldTypes: [ 'number', 'date', 'ip',  'string' ],
       default: function (agg) {
-        return agg._indexPattern.timeFieldName;
+        return agg.getIndexPattern().timeFieldName;
       },
       write: _.noop // prevent default write, it is handled below
     },
@@ -187,7 +198,7 @@ export const topHitMetricAgg = new MetricAggType({
     const path = agg.params.field.name;
 
     let values = _(hits).map(hit => {
-      return path === '_source' ? hit._source : agg._indexPattern.flattenHit(hit, true)[path];
+      return path === '_source' ? hit._source : agg.getIndexPattern().flattenHit(hit, true)[path];
     })
       .flatten()
       .value();

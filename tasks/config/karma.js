@@ -32,7 +32,7 @@ module.exports = function (grunt) {
 
     switch (getOsPlatform()) {
       case 'win32':
-        return 'IE';
+        return 'Chrome';
       default:
         return 'Chrome';
     }
@@ -56,7 +56,7 @@ module.exports = function (grunt) {
       reporters: process.env.CI ? ['dots', 'junit'] : ['progress'],
 
       junitReporter: {
-        outputFile: resolve(ROOT, 'target/junit/karma.xml'),
+        outputFile: resolve(ROOT, 'target/junit/TEST-karma.xml'),
         useBrowserName: false,
         nameFormatter: (browser, result) => [
           ...result.suite,
@@ -71,11 +71,9 @@ module.exports = function (grunt) {
       // list of files / patterns to load in the browser
       files: [
         'http://localhost:5610/bundles/vendors.bundle.js',
-        'http://localhost:5610/bundles/commons.bundle.js',
         'http://localhost:5610/bundles/tests.bundle.js',
 
         'http://localhost:5610/bundles/vendors.style.css',
-        'http://localhost:5610/bundles/commons.style.css',
         'http://localhost:5610/bundles/tests.style.css'
       ],
 

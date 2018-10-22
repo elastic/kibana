@@ -1,1 +1,24 @@
-@import '../../../../src/ui/public/styles/styling_constants';
+@import 'ui/public/styles/styling_constants';
+
+// Context styles
+@import './context/index';
+
+// Dev tools styles
+@import './dev_tools/index';
+
+// Discover styles
+@import './discover/index';
+
+// Home styles
+@import './home/index';
+
+// Visualize styles
+@import './visualize/index';
+@import 'ui/public/vis/index';
+
+// Management styles
+@import './management/index';
+
+// Dashboard styles
+// MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
+@import './dashboard/index';
