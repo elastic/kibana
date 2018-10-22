@@ -15,8 +15,6 @@ import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import url from 'url';
 import { StringMap } from '../../typings/common';
-import { TransactionV2 } from '../../typings/Transaction';
-import { ITransactionGroup } from '../../typings/TransactionGroup';
 
 interface ViewMlJobArgs {
   serviceName: string;
@@ -71,44 +69,6 @@ export function encodeQuery(query: StringMap, exclude: string[] = []) {
     }
     return qs.escape(value);
   });
-}
-
-export function getTraceLinkProps({
-  transactionDoc,
-  transactionGroup = {}
-}: {
-  transactionDoc?: TransactionV2;
-  transactionGroup: ITransactionGroup | { [key: string]: any };
-}) {
-  let {
-    serviceName,
-    transactionType,
-    traceId,
-    id: transactionId,
-    name
-  } = transactionGroup;
-
-  if (transactionDoc) {
-    serviceName = transactionDoc.context.service.name;
-    transactionType = transactionDoc.transaction.type;
-    traceId = transactionDoc.trace.id;
-    transactionId = transactionDoc.transaction.id;
-    name = transactionDoc.transaction.name;
-  }
-
-  if (!serviceName || !transactionType || !name) {
-    return null;
-  }
-
-  return {
-    hash: `/${serviceName}/transactions/${transactionType}/${legacyEncodeURIComponent(
-      name
-    )}`,
-    query: {
-      traceId,
-      transactionId
-    }
-  };
 }
 
 function stringifyWithoutEncoding(query: StringMap) {

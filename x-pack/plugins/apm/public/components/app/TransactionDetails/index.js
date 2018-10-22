@@ -16,7 +16,7 @@ function mapStateToProps(state = {}) {
   return {
     location: state.location,
     urlParams: getUrlParams(state),
-    waterfall: waterfall ? waterfall.data : null
+    waterfall: waterfall && waterfall.data ? waterfall.data : null
   };
 }
 

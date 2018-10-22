@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -12,29 +13,24 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import PropTypes from 'prop-types';
 import React from 'react';
 import {
   PROCESSOR_EVENT,
   TRANSACTION_ID
 } from '../../../../../common/constants';
-import { Transaction as ITransaction } from '../../../../../typings/Transaction';
+import {
+  Transaction as ITransaction,
+  TransactionV2
+} from '../../../../../typings/Transaction';
 import { WaterfallResponse } from '../../../../../typings/waterfall';
 import { IUrlParams } from '../../../../store/urlParams';
 // @ts-ignore
 import DiscoverButton from '../../../shared/DiscoverButton';
 import EmptyMessage from '../../../shared/EmptyMessage';
+import { TraceLink } from '../../../shared/TraceLink';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
 // @ts-ignore
 import { TransactionPropertiesTable } from './TransactionPropertiesTable';
-import { ViewTraceLink } from './ViewTraceLink';
-
-interface Props {
-  transaction: ITransaction;
-  urlParams: IUrlParams;
-  location: Location;
-  waterfall: WaterfallResponse;
-}
 
 function getDiscoverQuery(transactionId: string) {
   return {
@@ -46,6 +42,45 @@ function getDiscoverQuery(transactionId: string) {
       }
     }
   };
+}
+
+function MaybeViewTraceLink({
+  waterfall,
+  transaction
+}: {
+  waterfall: WaterfallResponse | null;
+  transaction: ITransaction;
+}) {
+  // v1 transactions are *always* root transactions
+  // v2 transactions with a parent should not show a trace link
+  const isRoot = transaction.version === 'v1' || !transaction.parent;
+
+  if (isRoot || waterfall === null) {
+    return null;
+  }
+
+  const root = waterfall.hits.find(
+    hit => hit.version === 'v2' && !hit.parent
+  ) as TransactionV2;
+
+  if (!root) {
+    return null;
+  }
+
+  return (
+    <EuiFlexItem grow={false}>
+      <TraceLink transactionDoc={root}>
+        <EuiButton iconType="apmApp">View full trace</EuiButton>
+      </TraceLink>
+    </EuiFlexItem>
+  );
+}
+
+interface Props {
+  transaction: ITransaction;
+  urlParams: IUrlParams;
+  location: Location;
+  waterfall: WaterfallResponse | null;
 }
 
 export const Transaction: React.SFC<Props> = ({
@@ -62,9 +97,6 @@ export const Transaction: React.SFC<Props> = ({
       />
     );
   }
-
-  // v1 transactions are *always* root transactions
-  const isRootTransaction = transaction.version === 'v1' || !transaction.parent;
 
   return (
     <EuiPanel paddingSize="m" hasShadow={true}>
@@ -84,12 +116,10 @@ export const Transaction: React.SFC<Props> = ({
                 {`View transaction in Discover`}
               </DiscoverButton>
             </EuiFlexItem>
-
-            {!isRootTransaction && (
-              <EuiFlexItem grow={false}>
-                <ViewTraceLink waterfall={waterfall} />
-              </EuiFlexItem>
-            )}
+            <MaybeViewTraceLink
+              transaction={transaction}
+              waterfall={waterfall}
+            />
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -107,10 +137,4 @@ export const Transaction: React.SFC<Props> = ({
       />
     </EuiPanel>
   );
-};
-
-Transaction.propTypes = {
-  location: PropTypes.object.isRequired,
-  transaction: PropTypes.object.isRequired,
-  urlParams: PropTypes.object.isRequired
 };

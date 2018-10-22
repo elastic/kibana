@@ -10,24 +10,11 @@ import { ITransactionGroup } from '../../../../typings/TransactionGroup';
 import { fontSizes, truncate } from '../../../style/variables';
 // @ts-ignore
 import { asMillisWithDefault } from '../../../utils/formatters';
-import { getTraceLinkProps, KibanaLink } from '../../../utils/url';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 // @ts-ignore
 import TooltipOverlay from '../../shared/TooltipOverlay';
-
-const TraceLink = ({
-  transactionGroup,
-  ...rest
-}: {
-  transactionGroup: ITransactionGroup;
-}) => {
-  const linkProps = getTraceLinkProps({ transactionGroup });
-  if (!linkProps) {
-    return null;
-  }
-  return <KibanaLink pathname="/app/apm" {...linkProps} {...rest} />;
-};
+import { TraceLink } from '../../shared/TraceLink';
 
 function formatString(value: string) {
   return value || 'N/A';
