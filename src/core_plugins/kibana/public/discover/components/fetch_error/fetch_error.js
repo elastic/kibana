@@ -48,8 +48,7 @@ const DiscoverFetchError = ({ fetchError }) => {
           id="kbn.discover.fetchError.howToAddressErrorDescription"
           defaultMessage="You can address this error by editing the {fetchErrorScript} field
             in {managementLink},
-            under the {scriptFaild} tab.
-          "
+            under the {scriptFaild} tab."
           values={{
             fetchErrorScript: '&lsquo;' + fetchError.script + '&rsquo;',
             scriptFaild: '&ldquo;Scripted fields&rdquo;',
