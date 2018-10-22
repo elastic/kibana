@@ -9,11 +9,20 @@ import io from 'socket.io-client';
 import { functionsRegistry } from '../common/lib/functions_registry';
 import { getBrowserRegistries } from './lib/browser_registries';
 
-const basePath = chrome.getBasePath();
-export const socket = io(undefined, { path: `${basePath}/socket.io` });
+let socket;
 
-socket.on('getFunctionList', () => {
-  const pluginsLoaded = getBrowserRegistries();
+export function createSocket() {
+  const basePath = chrome.getBasePath();
+  socket = io(undefined, { path: `${basePath}/socket.io` });
 
-  pluginsLoaded.then(() => socket.emit('functionList', functionsRegistry.toJS()));
-});
+  socket.on('getFunctionList', () => {
+    const pluginsLoaded = getBrowserRegistries();
+
+    pluginsLoaded.then(() => socket.emit('functionList', functionsRegistry.toJS()));
+  });
+}
+
+export function getSocket() {
+  if (!socket) throw new Error('getSocket failed, socket has not been created');
+  return socket;
+}

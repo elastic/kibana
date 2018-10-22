@@ -6,21 +6,37 @@
 
 import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
 import { serializeProvider } from '../../common/lib/serialize';
-import { socket } from '../socket';
+import { getSocket } from '../socket';
 import { typesRegistry } from '../../common/lib/types_registry';
-import { createError } from '../../common/interpreter/create_error';
 import { createHandlers } from './create_handlers';
 import { functionsRegistry } from './functions_registry';
 import { getBrowserRegistries } from './browser_registries';
 
-// Create the function list
-socket.emit('getFunctionList');
-export const getServerFunctions = new Promise(resolve => socket.once('functionList', resolve));
+let socket;
+let functionList;
+
+export async function initialize() {
+  socket = getSocket();
+
+  // Listen for interpreter runs
+  socket.on('run', ({ ast, context, id }) => {
+    const types = typesRegistry.toJS();
+    const { serialize, deserialize } = serializeProvider(types);
+    interpretAst(ast, deserialize(context)).then(value => {
+      socket.emit(`resp:${id}`, { value: serialize(value) });
+    });
+  });
+
+  // Create the function list
+  socket.emit('getFunctionList');
+  functionList = new Promise(resolve => socket.once('functionList', resolve));
+  return functionList;
+}
 
 // Use the above promise to seed the interpreter with the functions it can defer to
-export function interpretAst(ast, context) {
+export async function interpretAst(ast, context) {
   // Load plugins before attempting to get functions, otherwise this gets racey
-  return Promise.all([getServerFunctions, getBrowserRegistries()])
+  return Promise.all([functionList, getBrowserRegistries()])
     .then(([serverFunctionList]) => {
       return socketInterpreterProvider({
         types: typesRegistry.toJS(),
@@ -32,12 +48,3 @@ export function interpretAst(ast, context) {
     })
     .then(interpretFn => interpretFn(ast, context));
 }
-
-socket.on('run', ({ ast, context, id }) => {
-  const types = typesRegistry.toJS();
-  const { serialize, deserialize } = serializeProvider(types);
-  interpretAst(ast, deserialize(context))
-    .then(value => socket.emit(`resp:${id}`, { type: 'msgSuccess', value: serialize(value) }))
-    // TODO: I don't think this is possible to hit. I'm leaving it as a comment for now
-    .catch(e => socket.emit(`resp:${id}`, { type: 'msgError', value: createError(e) }));
-});
