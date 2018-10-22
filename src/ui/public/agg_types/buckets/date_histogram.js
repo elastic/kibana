@@ -150,7 +150,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
     },
     {
       name: 'drop_partials',
-      default: false,
+      default: true,
       write: _.noop,
       editor: dropPartialTemplate,
     },
