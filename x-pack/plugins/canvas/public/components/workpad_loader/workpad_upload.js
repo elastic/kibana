@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFilePicker } from '@elastic/eui';
-import { uploadWorkpad } from './upload_handler';
+import { uploadWorkpad } from './upload_workpad';
 
 export const WorkpadUpload = ({ onUpload, ...rest }) => (
   <EuiFilePicker
