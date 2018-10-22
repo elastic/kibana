@@ -166,6 +166,29 @@ describe('plugins/console', function () {
           const { agent } = getElasticsearchProxyConfig(server);
           expect(agent.options.passphrase).to.be('secret');
         });
+
+        it(`doesn't set cert when only certificate path is specified`, async function () {
+          const certificatePath = __dirname + '/fixtures/cert.crt';
+          setElasticsearchConfig('ssl.alwaysPresentCertificate', true);
+          setElasticsearchConfig('ssl.certificate', certificatePath);
+          setElasticsearchConfig('ssl.key', undefined);
+
+          const { agent } = getElasticsearchProxyConfig(server);
+          expect(agent.options.cert).to.be(undefined);
+          expect(agent.options.key).to.be(undefined);
+        });
+
+        it(`doesn't set key when only key path is specified`, async function () {
+          const keyPath = __dirname + '/fixtures/cert.key';
+          setElasticsearchConfig('ssl.alwaysPresentCertificate', true);
+          setElasticsearchConfig('ssl.certificate', undefined);
+          setElasticsearchConfig('ssl.key', keyPath);
+
+          const { agent } = getElasticsearchProxyConfig(server);
+          expect(agent.options.cert).to.be(undefined);
+          expect(agent.options.key).to.be(undefined);
+        });
+
       });
     });
   });
