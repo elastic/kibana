@@ -21,7 +21,7 @@ const mapStateToProps = state => {
       width: get(workpad, 'width'),
       height: get(workpad, 'height'),
     },
-    style: get(workpad, 'style'),
+    style: get(workpad, 'style') || '.canvasPage {\n\n}',
   };
 };
 

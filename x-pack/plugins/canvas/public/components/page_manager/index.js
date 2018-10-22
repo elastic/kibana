@@ -11,12 +11,17 @@ import { canUserWrite } from '../../state/selectors/app';
 import { getSelectedPage, getWorkpad, getPages, isWriteable } from '../../state/selectors/workpad';
 import { PageManager as Component } from './page_manager';
 
-const mapStateToProps = state => ({
-  isWriteable: isWriteable(state) && canUserWrite(state),
-  pages: getPages(state),
-  selectedPage: getSelectedPage(state),
-  workpadId: getWorkpad(state).id,
-});
+const mapStateToProps = state => {
+  const { id, style } = getWorkpad(state);
+
+  return {
+    isWriteable: isWriteable(state) && canUserWrite(state),
+    pages: getPages(state),
+    selectedPage: getSelectedPage(state),
+    workpadId: id,
+    workpadStyle: style,
+  };
+};
 
 const mapDispatchToProps = dispatch => ({
   addPage: () => dispatch(pageActions.addPage()),
