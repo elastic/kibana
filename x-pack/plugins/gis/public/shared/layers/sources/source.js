@@ -42,7 +42,7 @@ export class ASource {
   }
 
   isFilterByMapBounds() {
-    return _.get(this._descriptor, 'filterByMapBounds', false);
+    return false;
   }
 }
 

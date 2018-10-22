@@ -170,6 +170,10 @@ export class ESSearchSource extends VectorSource {
     return filteredProperties;
   }
 
+  isFilterByMapBounds() {
+    return _.get(this._descriptor, 'filterByMapBounds', false);
+  }
+
   getDisplayName() {
     return this._descriptor.indexPatternId;
   }

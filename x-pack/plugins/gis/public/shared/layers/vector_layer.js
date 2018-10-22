@@ -68,7 +68,7 @@ export class VectorLayer extends ALayer {
   }
 
   isJoinable() {
-    return true;
+    return !this._source.isFilterByMapBounds();
   }
 
   getJoins() {
