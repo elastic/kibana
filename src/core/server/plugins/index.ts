@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { ConfigService, Env } from '../config';
+import { ConfigService } from '../config';
 import { LoggerFactory } from '../logging';
 import { PluginsService } from './plugins_service';
 
 export class PluginsModule {
   public readonly service: PluginsService;
 
-  constructor(private readonly configService: ConfigService, logger: LoggerFactory, env: Env) {
-    this.service = new PluginsService(env, logger, this.configService);
+  constructor(private readonly configService: ConfigService, logger: LoggerFactory) {
+    this.service = new PluginsService(logger, this.configService);
   }
 }

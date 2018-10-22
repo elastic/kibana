@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { filter, first, tap, toArray } from 'rxjs/operators';
+import { filter, first, map, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types/core_service';
-import { ConfigService, Env } from '../config';
+import { ConfigService } from '../config';
 import { Logger, LoggerFactory } from '../logging';
 import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 import { PluginsConfig } from './plugins_config';
@@ -29,11 +29,7 @@ export class PluginsService implements CoreService {
   private readonly log: Logger;
   private readonly discovery: PluginsDiscovery;
 
-  constructor(
-    readonly env: Env,
-    readonly logger: LoggerFactory,
-    private readonly configService: ConfigService
-  ) {
+  constructor(logger: LoggerFactory, private readonly configService: ConfigService) {
     this.log = logger.get('plugins', 'service');
     this.discovery = new PluginsDiscovery(logger.get('plugins', 'discovery'));
   }
@@ -41,9 +37,13 @@ export class PluginsService implements CoreService {
   public async start() {
     this.log.debug('starting plugins service');
 
-    const { plugins$, errors$ } = this.discovery.discover(
-      this.configService.atPath('plugins', PluginsConfig).pipe(first())
-    );
+    const { errors$, plugins$ } = await this.configService
+      .atPath('plugins', PluginsConfig)
+      .pipe(
+        first(),
+        map(config => this.discovery.discover(config))
+      )
+      .toPromise();
 
     await plugins$
       .pipe(
@@ -55,9 +55,7 @@ export class PluginsService implements CoreService {
     await errors$
       .pipe(
         filter(error => error.type === PluginDiscoveryErrorType.InvalidManifest),
-        tap(invalidManifestError => {
-          this.log.error(invalidManifestError);
-        })
+        tap(invalidManifestError => this.log.error(invalidManifestError))
       )
       .toPromise();
   }

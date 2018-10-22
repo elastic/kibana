@@ -19,7 +19,7 @@
 
 import { readdir, readFile, stat } from 'fs';
 import { resolve } from 'path';
-import { bindNodeCallback, from, merge, Observable, throwError } from 'rxjs';
+import { bindNodeCallback, from, merge, throwError } from 'rxjs';
 import { catchError, mergeMap, shareReplay } from 'rxjs/operators';
 import { Logger } from '../logging';
 import { PluginDiscoveryError, PluginDiscoveryErrorType } from './plugin_discovery_error';
@@ -33,7 +33,7 @@ const fsReadFile$ = bindNodeCallback(readFile);
  * Describes the set of required and optional properties plugin can define in its
  * mandatory JSON manifest file.
  */
-interface PluginManifest {
+export interface PluginManifest {
   /**
    * Identifier of the plugin.
    */
@@ -53,20 +53,20 @@ interface PluginManifest {
    * An optional list of the other plugins that **must be** installed and enabled
    * for this plugin to function properly.
    */
-  requiredPlugins?: string[];
+  requiredPlugins: string[];
 
   /**
    * An optional list of the other plugins that if installed and enabled **may be**
    * leveraged by this plugin for some additional functionality but otherwise are
    * not required for this plugin to work properly.
    */
-  optionalPlugins?: string[];
+  optionalPlugins: string[];
 
   /**
    * Specifies whether plugin includes some client/browser specific functionality
    * that should be included into client bundle via `public/ui_plugin.js` file.
    */
-  ui?: boolean;
+  ui: boolean;
 }
 
 interface DiscoveryResult {
@@ -92,15 +92,15 @@ export class PluginsDiscovery {
    * Discovery result consists of two separate streams, the one (`plugins$`) is
    * for the successfully discovered plugins and the other one (`errors$`) is for
    * all the errors that occurred during discovery process.
-   * @param config$ Plugin config instance.
+   * @param config Plugin config instance.
    */
-  public discover(config$: Observable<PluginsConfig>) {
+  public discover(config: PluginsConfig) {
     this.log.debug('Discovering plugins...');
 
-    const discoveryResults$ = config$.pipe(
-      mergeMap(config =>
-        merge(this.processScanDirs$(config.scanDirs), this.processPaths$(config.paths))
-      ),
+    const discoveryResults$ = merge(
+      this.processScanDirs$(config.scanDirs),
+      this.processPaths$(config.paths)
+    ).pipe(
       mergeMap(pluginPathOrError => {
         return typeof pluginPathOrError === 'string'
           ? this.createPlugin$(pluginPathOrError)
@@ -204,14 +204,25 @@ export class PluginsDiscovery {
  * @param rawManifest Buffer containing plugin manifest JSON.
  */
 function parseManifest(rawManifest: Buffer): PluginManifest {
-  const manifest = JSON.parse(rawManifest.toString());
+  const manifest: Partial<PluginManifest> = JSON.parse(rawManifest.toString());
   if (
+    manifest &&
     manifest.id &&
     manifest.version &&
     typeof manifest.id === 'string' &&
     typeof manifest.version === 'string'
   ) {
-    return manifest;
+    return {
+      id: manifest.id,
+      version: manifest.version,
+      kibanaVersion:
+        typeof manifest.kibanaVersion === 'string' && manifest.kibanaVersion
+          ? manifest.kibanaVersion
+          : manifest.version,
+      requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
+      optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
+      ui: typeof manifest.ui === 'boolean' ? manifest.ui : false,
+    };
   }
 
   throw new Error('The "id" or/and "version" is missing in the plugin manifest.');

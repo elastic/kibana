@@ -26,11 +26,12 @@ jest.mock('fs', () => ({
   stat: mockStat,
 }));
 
-import { of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';
 import { logger } from '../logging/__mocks__';
-import { PluginsDiscovery } from './plugins_discovery';
+import { PluginManifest, PluginsDiscovery } from './plugins_discovery';
 
+let discovery: PluginsDiscovery;
 beforeEach(() => {
   mockReaddir.mockImplementation((path, cb) => {
     if (path === '/scan/non-empty/') {
@@ -63,6 +64,8 @@ beforeEach(() => {
       cb(null, Buffer.from(JSON.stringify({ id: 'plugin', version: '1' })));
     }
   });
+
+  discovery = new PluginsDiscovery(logger.get());
 });
 
 afterEach(() => {
@@ -70,20 +73,21 @@ afterEach(() => {
 });
 
 test('properly scans folders and paths', async () => {
-  const discovery = new PluginsDiscovery(logger.get());
-  const { plugins$, errors$ } = discovery.discover(
-    of({
-      initialize: true,
-      scanDirs: ['/scan/non-empty/', '/scan/non-existent/', '/scan/empty/', '/scan/non-empty-2/'],
-      paths: ['/path/existent-dir', '/path/non-dir', '/path/non-existent', '/path/existent-dir-2'],
-    })
-  );
+  const { plugins$, errors$ } = discovery.discover({
+    initialize: true,
+    scanDirs: ['/scan/non-empty/', '/scan/non-existent/', '/scan/empty/', '/scan/non-empty-2/'],
+    paths: ['/path/existent-dir', '/path/non-dir', '/path/non-existent', '/path/existent-dir-2'],
+  });
 
   await expect(plugins$.pipe(toArray()).toPromise()).resolves.toMatchInlineSnapshot(`
 Array [
   Object {
     "manifest": Object {
       "id": "plugin",
+      "kibanaVersion": "1",
+      "optionalPlugins": Array [],
+      "requiredPlugins": Array [],
+      "ui": false,
       "version": "1",
     },
     "path": "/scan/non-empty/1",
@@ -91,6 +95,10 @@ Array [
   Object {
     "manifest": Object {
       "id": "plugin",
+      "kibanaVersion": "1",
+      "optionalPlugins": Array [],
+      "requiredPlugins": Array [],
+      "ui": false,
       "version": "1",
     },
     "path": "/scan/non-empty/3",
@@ -98,6 +106,10 @@ Array [
   Object {
     "manifest": Object {
       "id": "plugin",
+      "kibanaVersion": "1",
+      "optionalPlugins": Array [],
+      "requiredPlugins": Array [],
+      "ui": false,
       "version": "1",
     },
     "path": "/scan/non-empty-2/6",
@@ -105,6 +117,10 @@ Array [
   Object {
     "manifest": Object {
       "id": "plugin",
+      "kibanaVersion": "1",
+      "optionalPlugins": Array [],
+      "requiredPlugins": Array [],
+      "ui": false,
       "version": "1",
     },
     "path": "/path/existent-dir",
@@ -112,6 +128,10 @@ Array [
   Object {
     "manifest": Object {
       "id": "plugin",
+      "kibanaVersion": "1",
+      "optionalPlugins": Array [],
+      "requiredPlugins": Array [],
+      "ui": false,
       "version": "1",
     },
     "path": "/path/existent-dir-2",
@@ -136,4 +156,150 @@ Array [
   "Error: ENOENT (invalid-plugin-dir, /path/non-existent)",
 ]
 `);
+});
+
+describe('parsing plugin manifest', () => {
+  let plugins$: Observable<Array<{ path: string; manifest: PluginManifest }>>;
+  let errors$: Observable<string[]>;
+  beforeEach(async () => {
+    const discoveryResult = discovery.discover({
+      initialize: true,
+      scanDirs: [],
+      paths: ['/path/existent-dir'],
+    });
+
+    plugins$ = discoveryResult.plugins$.pipe(toArray());
+    errors$ = discoveryResult.errors$.pipe(
+      map(error => error.toString()),
+      toArray()
+    );
+  });
+
+  test('return error when manifest is empty', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(null, Buffer.from(''));
+    });
+
+    await expect(plugins$.toPromise()).resolves.toEqual([]);
+    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
+Array [
+  "Error: Unexpected end of JSON input (invalid-manifest, /path/existent-dir/kibana.json)",
+]
+`);
+  });
+
+  test('return error when manifest content is null', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(null, Buffer.from('null'));
+    });
+
+    await expect(plugins$.toPromise()).resolves.toEqual([]);
+    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
+Array [
+  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, /path/existent-dir/kibana.json)",
+]
+`);
+  });
+
+  test('return error when manifest content is not a valid JSON', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(null, Buffer.from('not-json'));
+    });
+
+    await expect(plugins$.toPromise()).resolves.toEqual([]);
+    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
+Array [
+  "Error: Unexpected token o in JSON at position 1 (invalid-manifest, /path/existent-dir/kibana.json)",
+]
+`);
+  });
+
+  test('return error when plugin id is missing', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(null, Buffer.from(JSON.stringify({ version: 'some-version' })));
+    });
+
+    await expect(plugins$.toPromise()).resolves.toEqual([]);
+    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
+Array [
+  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, /path/existent-dir/kibana.json)",
+]
+`);
+  });
+
+  test('return error when plugin version is missing', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(null, Buffer.from(JSON.stringify({ id: 'some-id' })));
+    });
+
+    await expect(plugins$.toPromise()).resolves.toEqual([]);
+    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
+Array [
+  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, /path/existent-dir/kibana.json)",
+]
+`);
+  });
+
+  test('set defaults for all missing optional fields', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(null, Buffer.from(JSON.stringify({ id: 'some-id', version: 'some-version' })));
+    });
+
+    await expect(plugins$.toPromise()).resolves.toMatchInlineSnapshot(`
+Array [
+  Object {
+    "manifest": Object {
+      "id": "some-id",
+      "kibanaVersion": "some-version",
+      "optionalPlugins": Array [],
+      "requiredPlugins": Array [],
+      "ui": false,
+      "version": "some-version",
+    },
+    "path": "/path/existent-dir",
+  },
+]
+`);
+    await expect(errors$.toPromise()).resolves.toEqual([]);
+  });
+
+  test('return all set optional fields as they are in manifest', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(
+        null,
+        Buffer.from(
+          JSON.stringify({
+            id: 'some-id',
+            version: 'some-version',
+            kibanaVersion: 'some-kibana-version',
+            requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
+            optionalPlugins: ['some-optional-plugin'],
+            ui: true,
+          })
+        )
+      );
+    });
+
+    await expect(plugins$.toPromise()).resolves.toMatchInlineSnapshot(`
+Array [
+  Object {
+    "manifest": Object {
+      "id": "some-id",
+      "kibanaVersion": "some-kibana-version",
+      "optionalPlugins": Array [
+        "some-optional-plugin",
+      ],
+      "requiredPlugins": Array [
+        "some-required-plugin",
+        "some-required-plugin-2",
+      ],
+      "ui": true,
+      "version": "some-version",
+    },
+    "path": "/path/existent-dir",
+  },
+]
+`);
+    await expect(errors$.toPromise()).resolves.toEqual([]);
+  });
 });
