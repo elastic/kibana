@@ -57,7 +57,7 @@ export function DatavisualizerSelector() {
           <EuiFlexItem grow={false}>
             <EuiText color="subdued">
               The Machine Learning Data Visualizer tool helps you understand your data, by analyzing the metrics and fields in
-              an existing Elasticsearch index or in a log file.
+              a log file or an existing Elasticsearch index.
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -69,7 +69,7 @@ export function DatavisualizerSelector() {
               title="Import data"
               description="Visualize data from a log file. Supported for files up to 100MB in size."
               betaBadgeLabel="Experimental"
-              betaBadgeTooltipContent="Experimental feature. Please help us by reporting any bugs."
+              betaBadgeTooltipContent="Experimental feature. We'd love to hear your feedback."
               footer={
                 <EuiButton
                   target="_self"

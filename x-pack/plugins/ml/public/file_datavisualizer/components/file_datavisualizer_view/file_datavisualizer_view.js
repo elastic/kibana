@@ -20,6 +20,7 @@ import {
 import { isEqual } from 'lodash';
 
 import { ml } from '../../../services/ml_api_service';
+import { AboutPanel } from '../about_panel';
 import { ResultsView } from '../results_view';
 import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { EditFlyout } from '../edit_flyout';
@@ -217,6 +218,13 @@ export class FileDataVisualizerView extends Component {
             </div>
 
             <EuiSpacer size="l" />
+
+            {(!loading && !loaded) &&
+              <React.Fragment>
+                <AboutPanel />
+                <EuiSpacer size="l" />
+              </React.Fragment>
+            }
 
             {(loading) &&
               <div style={{ textAlign: 'center' }} >
