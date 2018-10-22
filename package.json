@@ -65,7 +65,7 @@
     "**/@types/node": "8.10.21"
   },
   "dependencies": {
-    "@elastic/eui": "4.4.1",
+    "@elastic/eui": "4.5.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
@@ -113,6 +113,7 @@
     "extract-text-webpack-plugin": "3.0.1",
     "file-loader": "1.1.4",
     "font-awesome": "4.4.0",
+    "getos": "^3.1.0",
     "glob": "^7.1.2",
     "glob-all": "^3.1.0",
     "good-squeeze": "2.1.0",
