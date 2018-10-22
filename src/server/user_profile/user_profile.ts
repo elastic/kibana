@@ -44,14 +44,6 @@ export class UserProfile {
     return this.hasCapability(`saved_objects/${savedObjectType}/create`, defaultValue);
   }
 
-  public canDeleteSavedObject(savedObjectType: string, defaultValue: boolean = true): boolean {
-    return this.hasCapability(`saved_objects/${savedObjectType}/delete`, defaultValue);
-  }
-
-  public canShareFeature(feature: string, defaultValue: boolean = true): boolean {
-    return this.hasCapability(`features/${feature}/share`, defaultValue);
-  }
-
   public toJSON() {
     return {
       ...this.capabilities,

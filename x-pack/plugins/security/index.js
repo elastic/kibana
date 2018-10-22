@@ -24,6 +24,7 @@ import { createAuthorizationService, registerPrivilegesWithCluster } from './ser
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
+import { capabilityDecorator } from './server/lib/capability_decorator';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -60,8 +61,10 @@ export const security = (kibana) => new kibana.Plugin({
     managementSections: ['plugins/security/views/management'],
     styleSheetPaths: `${__dirname}/public/index.scss`,
     userProfile: {
-      capabilityProviders: [],
-      capabilityDecorators: [resolve(__dirname, './server/lib/capability_decorator')],
+      capabilityDecorators: [{
+        priority: Number.MAX_SAFE_INTEGER,
+        decorator: capabilityDecorator
+      }],
     },
     apps: [{
       id: 'login',

@@ -9,8 +9,7 @@ interface AnyObject {
   [key: string]: any;
 }
 
-// tslint:disable:no-default-export
-export default async function capabilityDecorator(
+export async function capabilityDecorator(
   server: AnyObject,
   request: AnyObject,
   capabilities: { [key: string]: boolean }
@@ -37,6 +36,8 @@ export default async function capabilityDecorator(
   return {
     ...capabilities,
     ...result.privileges,
+    'ui:kibana:discover/read': false,
+    'ui:canvas/read': false,
   };
 }
 

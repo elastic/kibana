@@ -17,29 +17,30 @@
  * under the License.
  */
 
-interface AnyObject {
-  [key: string]: any;
-}
+import { PriorityCollection } from './priority_collection';
 
 export interface Capabilities {
   [capability: string]: boolean;
 }
 
 export type CapabilityDecorator = (
-  server: AnyObject,
-  request: AnyObject,
+  server: Record<string, any>,
+  request: Record<string, any>,
   capabilities: Capabilities
 ) => Promise<Capabilities>;
 
-const decorators: CapabilityDecorator[] = [];
+const decorators: PriorityCollection<CapabilityDecorator> = new PriorityCollection();
 
-export function registerUserProfileCapabilityDecorator(decorator: CapabilityDecorator) {
-  decorators.push(decorator);
+export function registerUserProfileCapabilityDecorator(
+  priority: number,
+  decorator: CapabilityDecorator
+) {
+  decorators.add(priority, decorator);
 }
 
 export async function buildUserCapabilities(
-  server: AnyObject,
-  request: AnyObject
+  server: Record<string, any>,
+  request: Record<string, any>
 ): Promise<Capabilities> {
   const decoratedCapabilities = await executeDecorators(server, request, {});
 
@@ -47,17 +48,17 @@ export async function buildUserCapabilities(
 }
 
 async function executeDecorators(
-  server: AnyObject,
-  request: AnyObject,
+  server: Record<string, any>,
+  request: Record<string, any>,
   capabilities: Capabilities
 ): Promise<Capabilities> {
-  return await asyncForEach(decorators, server, request, capabilities);
+  return await asyncForEach(decorators.toPrioritizedArray(), server, request, capabilities);
 }
 
 async function asyncForEach(
   array: CapabilityDecorator[],
-  server: AnyObject,
-  request: AnyObject,
+  server: Record<string, any>,
+  request: Record<string, any>,
   initialCapabilities: Capabilities
 ) {
   let capabilities = initialCapabilities;

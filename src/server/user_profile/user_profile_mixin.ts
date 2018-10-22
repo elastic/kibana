@@ -20,26 +20,28 @@
 import { UserProfile } from './user_profile';
 import {
   buildUserCapabilities,
+  CapabilityDecorator,
   registerUserProfileCapabilityDecorator,
 } from './user_profile_capability_registry';
 
-interface AnyObject {
-  [key: string]: any;
+interface DecoratorEntry {
+  priority: number;
+  decorator: CapabilityDecorator;
 }
 
-export function userProfileMixin(kbnServer: AnyObject, server: AnyObject) {
+export function userProfileMixin(kbnServer: Record<string, any>, server: Record<string, any>) {
   const profileCache = new WeakMap();
 
   const { userProfile = {} } = kbnServer.uiExports;
   const { capabilityDecorators = [] } = userProfile;
 
-  capabilityDecorators.forEach((decorator: string) =>
-    registerUserProfileCapabilityDecorator(require(decorator).default)
+  capabilityDecorators.forEach(({ priority, decorator }: DecoratorEntry) =>
+    registerUserProfileCapabilityDecorator(priority, decorator)
   );
 
   server.decorate('request', 'getUserProfile', async function getUserProfile() {
     // @ts-ignore
-    const request: AnyObject = this;
+    const request: Record<string, any> = this;
 
     if (profileCache.has(request)) {
       return profileCache.get(request);
