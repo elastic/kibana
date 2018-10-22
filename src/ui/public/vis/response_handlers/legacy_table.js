@@ -18,6 +18,7 @@
  */
 
 import get from 'lodash.get';
+import moment from 'moment';
 import AggConfigResult from '../../vis/agg_config_result';
 
 function keyRowsByValue(rows, key) {
@@ -26,6 +27,13 @@ function keyRowsByValue(rows, key) {
     acc[splitValue] = [...(acc[splitValue] || []), rest];
     return acc;
   }, {});
+}
+
+function formatSplitFieldValue(aggConfig, value) {
+  if (get(aggConfig, 'params.field.type') === 'date') {
+    return moment(parseInt(value)).format('YYYY-MM-DD');
+  }
+  return value;
 }
 
 export function legacyTableResponseHandler() {
@@ -58,7 +66,7 @@ export function legacyTableResponseHandler() {
           return {
             $parent: $newParent,
             aggConfig: splitColumn.aggConfig,
-            title: `${splitValue}: ${splitColumn.aggConfig.makeLabel()}`,
+            title: `${formatSplitFieldValue(splitColumn.aggConfig, splitValue)}: ${splitColumn.aggConfig.makeLabel()}`,
             key: splitValue,
             tables: splitTable(filteredColumns, rowsByColumnValue[splitValue], $newParent),
           };
