@@ -34,6 +34,9 @@ jest.mock('../lib/get_indices', () => ({
     ];
   },
 }));
+jest.mock('ui/chrome', () => ({
+  addBasePath: () => { },
+}));
 
 const loadingDataDocUrl = '';
 const initialQuery = '';

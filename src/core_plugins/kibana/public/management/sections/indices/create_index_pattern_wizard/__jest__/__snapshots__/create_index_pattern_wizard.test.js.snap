@@ -60,6 +60,23 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
 </div>
 `;
 
+exports[`CreateIndexPatternWizard renders when there are no indices but there are remote clusters 1`] = `
+<div>
+  <Header
+    isIncludingSystemIndices={false}
+    onChangeIncludingSystemIndices={[Function]}
+  />
+  <StepIndexPattern
+    allIndices={Array []}
+    esService={Object {}}
+    goToNextStep={[Function]}
+    initialQuery=""
+    isIncludingSystemIndices={false}
+    savedObjectsClient={Object {}}
+  />
+</div>
+`;
+
 exports[`CreateIndexPatternWizard shows system indices even if there are no other indices if the include system indices is toggled 1`] = `
 <div>
   <Header

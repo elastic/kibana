@@ -36,6 +36,7 @@ jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
     get: () => '',
   }),
+  addBasePath: () => { },
 }));
 
 jest.mock('../../../lib/get_indices', () => ({
@@ -57,7 +58,7 @@ const esService = {};
 const savedObjectsClient = {
   find: () => ({ savedObjects: [] })
 };
-const goToNextStep = () => {};
+const goToNextStep = () => { };
 
 const createComponent = props => {
   return shallowWithIntl(

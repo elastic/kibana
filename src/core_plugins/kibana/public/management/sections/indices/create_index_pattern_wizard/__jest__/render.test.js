@@ -32,6 +32,7 @@ jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
     get: () => '',
   }),
+  addBasePath: () => { },
 }));
 
 const { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } = require('../render');
@@ -51,7 +52,7 @@ describe('CreateIndexPatternWizardRender', () => {
         indexPatterns: {},
         savedObjectsClient: {},
         config: {},
-        changeUrl: () => {},
+        changeUrl: () => { },
       }
     );
 
