@@ -159,6 +159,7 @@ export class NavControlPopover extends Component<Props, State> {
           aria-expanded={this.state.showSpaceSelector}
           aria-haspopup="true"
           aria-label={linkTitle}
+          title={linkTitle}
           onClick={this.toggleSpaceSelector}
         >
           {linkIcon}
