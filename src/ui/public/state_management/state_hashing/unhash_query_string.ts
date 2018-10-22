@@ -17,24 +17,21 @@
  * under the License.
  */
 
-import * as fs from 'fs';
+import { mapValues } from 'lodash';
+import { ParsedUrlQuery } from 'querystring';
+import { State } from '../state';
 
 /**
- * Recursive deletion for a directory
- *
- * @param {String} path
+ * Takes in a parsed url query and state objects, finding the state objects that match the query parameters and expanding
+ * the hashed state. For example, a url query string like '?_a=@12353&_g=@19028df' will become
+ * '?_a=[expanded app state here]&_g=[expanded global state here]. This is used when storeStateInSessionStorage is turned on.
  */
-export function rmrfSync(path) {
-  if (fs.existsSync(path)) {
-    fs.readdirSync(path).forEach(file => {
-      const curPath = path + '/' + file;
-
-      if (fs.lstatSync(curPath).isDirectory()) {
-        rmrfSync(curPath);
-      } else {
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(path);
-  }
+export function unhashQueryString(
+  parsedQueryString: ParsedUrlQuery,
+  states: State[]
+): ParsedUrlQuery {
+  return mapValues(parsedQueryString, (val, key) => {
+    const state = states.find(s => key === s.getQueryParamName());
+    return state ? state.translateHashToRison(val) : val;
+  });
 }

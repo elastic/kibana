@@ -61,10 +61,10 @@ export const tagConfigAssignmentOptions: AssignmentControlSchema[] = [
     type: AssignmentComponentType.Action,
     danger: true,
     grow: false,
-    name: 'Detach beat(s)',
+    name: 'Remove tag(s)',
     showWarning: true,
-    warningHeading: 'Detatch beats',
-    warningMessage: 'This will detatch the selected beat(s) from this tag.',
+    warningHeading: 'Remove tag(s)',
+    warningMessage: 'Remove the tag from the selected beat(s)?',
     action: AssignmentActionType.Delete,
   },
 ];

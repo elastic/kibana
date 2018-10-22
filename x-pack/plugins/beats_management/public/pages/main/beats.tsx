@@ -14,11 +14,12 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
 } from '@elastic/eui';
-import { sortBy } from 'lodash';
+import { flatten, intersection, sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { RouteComponentProps } from 'react-router';
-import { CMPopulatedBeat } from '../../../common/domain_types';
+import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
+import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { AppURLState } from '../../app';
 import { BeatsTableType, Table } from '../../components/table';
@@ -122,7 +123,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
                 value: this.props.urlState.beatsKBar || '',
               }}
               assignmentOptions={{
-                items: this.state.tags || [],
+                items: this.filterSelectedBeatTags(),
                 schema: beatsListAssignmentOptions,
                 type: 'assignment',
                 actionHandler: this.handleBeatsActions,
@@ -289,4 +290,32 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     });
     return beats;
   };
+
+  private filterSelectedBeatTags = () => {
+    if (!this.state.tags) {
+      return [];
+    }
+    return this.selectedBeatConfigsRequireUniqueness()
+      ? this.state.tags.map(this.disableTagForUniquenessEnforcement)
+      : this.state.tags;
+  };
+
+  private configBlocksRequireUniqueness = (configurationBlocks: ConfigurationBlock[]) =>
+    intersection(UNIQUENESS_ENFORCING_TYPES, configurationBlocks.map(block => block.type))
+      .length !== 0;
+
+  private disableTagForUniquenessEnforcement = (tag: BeatTag) =>
+    this.configBlocksRequireUniqueness(tag.configuration_blocks) &&
+    // if > 0 beats are associated with the tag, it will result in disassociation, so do not disable it
+    !this.getSelectedBeats().some(beat => beat.full_tags.some(({ id }) => id === tag.id))
+      ? { ...tag, disabled: true }
+      : tag;
+
+  private selectedBeatConfigsRequireUniqueness = () =>
+    // union beat tags
+    flatten(this.getSelectedBeats().map(({ full_tags }) => full_tags))
+      // map tag list to bool
+      .map(({ configuration_blocks }) => this.configBlocksRequireUniqueness(configuration_blocks))
+      // reduce to result
+      .reduce((acc, cur) => acc || cur, false);
 }

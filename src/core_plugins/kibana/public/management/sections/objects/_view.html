@@ -3,9 +3,12 @@
     <!-- Header -->
     <div class="kuiViewContentItem kuiBar kuiVerticalRhythm">
       <div class="kuiBarSection">
-        <h1 class="kuiTitle">
-          Edit {{ title }}
-        </h1>
+        <h1
+          class="kuiTitle"
+          i18n-id="kbn.management.objects.view.editItemTitle"
+          i18n-default-message="Edit {title}"
+          i18n-values="{ title }"
+        ></h1>
       </div>
 
       <div class="kuiBarSection">
@@ -15,7 +18,11 @@
         >
           <span class="kuiButton__inner">
             <span class="kuiButton__icon kuiIcon fa-eye"></span>
-            <span>View {{ title }}</span>
+            <span
+              i18n-id="kbn.management.objects.view.viewItemButtonLabel"
+              i18n-default-message="View {title}"
+              i18n-values="{ title }"
+            ></span>
           </span>
         </a>
 
@@ -25,7 +32,11 @@
         >
           <span class="kuiButton__inner">
             <span class="kuiButton__icon kuiIcon fa-trash-o"></span>
-            <span>Delete {{ title }}</span>
+            <span
+              i18n-id="kbn.management.objects.view.deleteItemButtonLabel"
+              i18n-default-message="Delete {title}"
+              i18n-values="{ title }"
+              ></span>
           </span>
         </button>
       </div>
@@ -39,36 +50,40 @@
       <div class="kuiInfoPanel kuiInfoPanel--error">
         <div class="kuiInfoPanelHeader">
           <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
-          <span class="kuiInfoPanelHeader__title">
-            There is a problem with this saved object
-          </span>
+          <span
+            class="kuiInfoPanelHeader__title"
+            i18n-id="kbn.management.objects.view.savedObjectProblemErrorMessage"
+            i18n-default-message="There is a problem with this saved object"
+            ></span>
         </div>
 
         <div class="kuiInfoPanelBody">
           <div
             class="kuiInfoPanelBody__message"
             ng-if="notFound === 'search'"
-          >
-            The saved search associated with this object no longer exists.
-          </div>
+            i18n-id="kbn.management.objects.view.savedSearchDoesNotExistErrorMessage"
+            i18n-default-message="The saved search associated with this object no longer exists."
+          ></div>
 
           <div
             class="kuiInfoPanelBody__message"
             ng-if="notFound === 'index-pattern'"
-          >
-            The index pattern associated with this object no longer exists.
-          </div>
+            i18n-id="kbn.management.objects.view.indexPatternDoesNotExistErrorMessage"
+            i18n-default-message="The index pattern associated with this object no longer exists."
+          ></div>
 
           <div
             class="kuiInfoPanelBody__message"
             ng-if="notFound === 'index-pattern-field'"
-          >
-            A field associated with this object no longer exists in the index pattern.
-          </div>
+            i18n-id="kbn.management.objects.view.fieldDoesNotExistErrorMessage"
+            i18n-default-message="A field associated with this object no longer exists in the index pattern."
+          ></div>
 
-          <div class="kuiInfoPanelBody__message">
-            If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above.
-          </div>
+          <div
+            class="kuiInfoPanelBody__message"
+            i18n-id="kbn.management.objects.view.howToFixErrorDescription"
+            i18n-default-message="If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above."
+          ></div>
         </div>
       </div>
     </div>
@@ -78,14 +93,19 @@
       <div class="kuiInfoPanel kuiInfoPanel--warning">
         <div class="kuiInfoPanelHeader">
           <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
-          <span class="kuiInfoPanelHeader__title">
-            Proceed with caution!
-          </span>
+          <span
+            class="kuiInfoPanelHeader__title"
+            i18n-id="kbn.management.objects.view.howToModifyObjectTitle"
+            i18n-default-message="Proceed with caution!"
+          ></span>
         </div>
 
         <div class="kuiInfoPanelBody">
-          <div class="kuiInfoPanelBody__message">
-            Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn&rsquo;t be.
+          <div
+            class="kuiInfoPanelBody__message"
+            i18n-id="kbn.management.objects.view.howToModifyObjectDescription"
+            i18n-default-message=" Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn&rsquo;t be."
+          >
           </div>
         </div>
       </div>
@@ -143,20 +163,21 @@
       <div class="kuiButtonGroup">
         <button
           class="kuiButton kuiButton--primary"
-          aria-label="Save {{ title }} Object"
+          aria-label="{{ 'kbn.management.objects.view.saveButtonAriaLabel' | i18n: { defaultMessage: 'Save { title } Object', values: { title } } }}"
           ng-click="submit()"
           ng-disabled="objectForm.$invalid || aceInvalidEditors.length !==0"
-        >
-          Save {{ title }} Object
-        </button>
+          i18n-id="kbn.management.objects.view.saveButtonLabel"
+          i18n-default-message="Save { title } Object"
+          i18n-values="{ title }"
+        ></button>
 
         <button
           class="kuiButton kuiButton--basic"
-          aria-label="Cancel"
+          aria-label="{{ 'kbn.management.objects.view.cancelButtonAriaLabel' | i18n: { defaultMessage: 'Cancel'} }}"
           ng-click="cancel()"
-        >
-          Cancel
-        </button>
+          i18n-id="kbn.management.objects.view.cancelButtonLabel"
+          i18n-default-message="Cancel"
+        ></button>
       </div>
     </div>
   </kbn-management-objects-view>
