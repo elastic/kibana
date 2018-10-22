@@ -23,6 +23,8 @@ const { installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
 const { log: defaultLog, parseEsLog, extractConfigFiles } = require('./utils');
 const { createCliError } = require('./errors');
+const { promisify } = require('util');
+const treeKillAsync = promisify(require('tree-kill'));
 
 exports.Cluster = class Cluster {
   constructor(log = defaultLog) {
@@ -135,17 +137,25 @@ exports.Cluster = class Cluster {
     await this._outcome;
   }
 
+  _stopCalled = false;
+
   /**
    * Stops ES process, if it's running
    *
    * @returns {Promise}
    */
   async stop() {
+    if (this._stopCalled) {
+      return;
+    }
+    this._stopCalled = true;
+
     if (!this._process || !this._outcome) {
       throw new Error('ES has not been started');
     }
 
-    this._process.kill();
+    await treeKillAsync(this._process.pid);
+
     await this._outcome;
   }
 
@@ -190,6 +200,10 @@ exports.Cluster = class Cluster {
 
     this._outcome = new Promise((resolve, reject) => {
       this._process.once('exit', code => {
+        if (this._stopCalled) {
+          resolve();
+          return;
+        }
         // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
         if (code > 0 && !(code === 143 || code === 130)) {
           reject(createCliError(`ES exited with code ${code}`));

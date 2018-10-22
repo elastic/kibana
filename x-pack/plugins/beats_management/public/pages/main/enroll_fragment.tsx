@@ -117,7 +117,7 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
-                      <h3>Select your beat type:</h3>
+                      <h3>Beat type:</h3>
                     </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -140,7 +140,7 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
-                      <h3>Select your platform:</h3>
+                      <h3>Platform:</h3>
                     </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -175,7 +175,10 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                   <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="xs">
-                        <h3>Run the following command to enroll your beat</h3>
+                        <h3>
+                          On the host where your {capitalize(this.state.beatType)} is installed,
+                          run:
+                        </h3>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -200,7 +203,7 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                       <EuiFlexGroup gutterSize="s" alignItems="center">
                         <EuiFlexItem grow={false}>
                           <EuiTitle size="xs">
-                            <h3>Waiting for enroll command to be run...</h3>
+                            <h3>Waiting for {capitalize(this.state.beatType)} to enroll...</h3>
                           </EuiTitle>
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -214,8 +217,8 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
           </React.Fragment>
         )}
         {this.state.enrolledBeat && (
-          <EuiModalBody style={{ textAlign: 'center' }}>
-            A Beat was enrolled with the following data:
+          <EuiModalBody>
+            The Beat is now enrolled in central management:
             <br />
             <br />
             <br />
