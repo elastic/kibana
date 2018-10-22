@@ -19,6 +19,7 @@
 
 export default function ({ loadTestFile }) {
   describe('saved_objects', () => {
+    loadTestFile(require.resolve('./bulk_create'));
     loadTestFile(require.resolve('./bulk_get'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
