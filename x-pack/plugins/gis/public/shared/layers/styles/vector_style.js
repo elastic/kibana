@@ -46,7 +46,7 @@ export class VectorStyle {
   }
 
   static getDisplayName() {
-    return 'Vector Style';
+    return 'Vector style';
   }
 
   static renderEditor({ handleStyleChange, style, layer }) {

@@ -4,21 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import {
-  EuiTabs,
   EuiTitle,
-  EuiSpacer
+  EuiPanel,
+  EuiHorizontalRule
 } from '@elastic/eui';
-import { StyleTab } from './resources/style_tab';
 
 export class StyleTabs extends React.Component {
 
   constructor(props) {
     super();
     this.state = {
-      tabSelected: '',
       currentStyle: props.layer && props.layer.getCurrentStyle()
     };
   }
@@ -26,44 +24,26 @@ export class StyleTabs extends React.Component {
   static getDerivedStateFromProps(nextProps, prevState) {
     const currentStyle = nextProps.layer.getCurrentStyle();
     if (currentStyle) {
-      if (!prevState.tabSelected) {
-        return {
-          tabSelected: currentStyle.constructor.getDisplayName(),
-          currentStyle
-        };
-      } else {
-        return {
-          ...prevState,
-          currentStyle
-        };
-      }
+      return {
+        ...prevState,
+        currentStyle
+      };
     } else {
       return {};
     }
   }
 
-  _activateTab = tabName => {
-    this.setState({ tabSelected: tabName });
-  };
-
-
   render() {
-    const { currentStyle, tabSelected } = this.state;
-    if (!tabSelected) {
-      return null;
-    }
+    const { currentStyle } = this.state;
     const supportedStyles = this.props.layer.getSupportedStyles();
-    const styleTabHeaders = supportedStyles.map((style, index) => {
-      return (<StyleTab
-        key={index}
-        name={style.getDisplayName()}
-        selected={tabSelected}
-        onClick={this._activateTab}
-      />);
-    });
 
     const styleEditors = supportedStyles.map((style, index) => {
       const seedStyle = (style.canEdit(currentStyle)) ? currentStyle : null;
+
+      const editorHeader = (
+        <EuiTitle size="xs"><h5>{style.getDisplayName()}</h5></EuiTitle>
+      );
+
       const styleEditor = this.props.layer.renderStyleEditor(style, {
         handleStyleChange: (styleDescriptor) => {
           this.props.updateStyle(styleDescriptor);
@@ -71,23 +51,19 @@ export class StyleTabs extends React.Component {
         style: seedStyle,
         resetStyle: () => this.props.reset()
       });
+
       return (
-        <Fragment key={index}>
+        <EuiPanel key={index}>
+          {editorHeader}
+          <EuiHorizontalRule margin="m" />
           {styleEditor}
-        </Fragment>
+        </EuiPanel>
       );
     });
 
     return (
       <div>
-        <EuiTitle size="s"><h2><strong>Styling</strong></h2></EuiTitle>
-        <Fragment>
-          <EuiTabs>
-            {styleTabHeaders}
-          </EuiTabs>
-          <EuiSpacer />
-          {styleEditors}
-        </Fragment>
+        {styleEditors}
       </div>
     );
   }

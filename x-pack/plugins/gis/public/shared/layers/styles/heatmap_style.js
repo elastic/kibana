@@ -31,7 +31,7 @@ export class HeatmapStyle {
   }
 
   static getDisplayName() {
-    return 'Heatmap Settings';
+    return 'Heatmap style';
   }
 
   static renderEditor({ style, handleStyleChange }) {
