@@ -9,6 +9,7 @@ import { set, del, insert } from 'object-path-immutable';
 import { getId } from '../../lib/get_id';
 import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
+import { arrayToMap } from '../../lib/aeroelastic/functional';
 import * as actions from '../actions/pages';
 
 function setPageIndex(workpadState, index) {
@@ -29,10 +30,21 @@ function addPage(workpadState, payload, srcIndex = workpadState.pages.length - 1
 function clonePage(page) {
   // TODO: would be nice if we could more reliably know which parameters need to get a unique id
   // this makes a pretty big assumption about the shape of the page object
+  const getParent = element => element.position.parent;
+  const groupIdMap = arrayToMap(page.elements.filter(getParent).map(getParent));
+  const postfix = getId(''); // will just return a '-e5983ef1-9c7d-4b87-b70a-f34ea199e50c' or so
+  // remove the possibly preexisting postfix (otherwise it can keep growing...), then append the new postfix
+  const uniquify = id => (groupIdMap[id] ? id.split('-')[0] + postfix : getId('element'));
+  // We simultaneously provide unique id values for all elements (across all pages)
+  // AND ensure that parent-child relationships are retained (via matching id values within page)
   return {
     ...page,
     id: getId('page'),
-    elements: page.elements.map(element => ({ ...element, id: getId('element') })),
+    elements: page.elements.map(element => ({
+      ...element,
+      id: uniquify(element.id),
+      position: { ...element.position, parent: getParent(element) && uniquify(getParent(element)) },
+    })),
   };
 }
 

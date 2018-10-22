@@ -10,11 +10,12 @@ import { createThunk } from 'redux-thunks';
 import { set, del } from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
-import { getPages, getElementById, getSelectedPageIndex } from '../selectors/workpad';
+import { getPages, getElementById, getElements, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { notify } from '../../lib/notify';
 import { runInterpreter } from '../../lib/run_interpreter';
+import { subMultitree } from '../../lib/aeroelastic/functional';
 import { selectElement } from './transient';
 import * as args from './resolved_args';
 
@@ -32,9 +33,7 @@ export function getSiblingContext(state, elementId, checkIndex) {
 
   // check previous index while we're still above 0
   const prevContextIndex = checkIndex - 1;
-  if (prevContextIndex < 0) {
-    return {};
-  }
+  if (prevContextIndex < 0) return {};
 
   // walk back up to find the closest cached context available
   return getSiblingContext(state, elementId, prevContextIndex);
@@ -42,9 +41,7 @@ export function getSiblingContext(state, elementId, checkIndex) {
 
 function getBareElement(el, includeId = false) {
   const props = ['position', 'expression', 'filter'];
-  if (includeId) {
-    return pick(el, props.concat('id'));
-  }
+  if (includeId) return pick(el, props.concat('id'));
   return cloneDeep(pick(el, props));
 }
 
@@ -63,9 +60,7 @@ export const fetchContext = createThunk(
     const chain = get(element, ['ast', 'chain']);
     const invalidIndex = chain ? index >= chain.length : true;
 
-    if (!element || !chain || invalidIndex) {
-      throw new Error(`Invalid argument index: ${index}`);
-    }
+    if (!element || !chain || invalidIndex) throw new Error(`Invalid argument index: ${index}`);
 
     // cache context as the previous index
     const contextIndex = index - 1;
@@ -85,9 +80,7 @@ export const fetchContext = createThunk(
 
     // modify the ast chain passed to the interpreter
     const astChain = element.ast.chain.filter((exp, i) => {
-      if (prevContextValue != null) {
-        return i > prevContextIndex && i < index;
-      }
+      if (prevContextValue != null) return i > prevContextIndex && i < index;
       return i < index;
     });
 
@@ -202,11 +195,8 @@ export const duplicateElement = createThunk(
     dispatch(_duplicateElement({ pageId, element: newElement }));
 
     // refresh all elements if there's a filter, otherwise just render the new element
-    if (element.filter) {
-      dispatch(fetchAllRenderables());
-    } else {
-      dispatch(fetchRenderable(newElement));
-    }
+    if (element.filter) dispatch(fetchAllRenderables());
+    else dispatch(fetchRenderable(newElement));
 
     // select the new element
     dispatch(selectElement(newElement.id));
@@ -215,9 +205,20 @@ export const duplicateElement = createThunk(
 
 export const removeElements = createThunk(
   'removeElements',
-  ({ dispatch, getState }, elementIds, pageId) => {
+  ({ dispatch, getState }, rootElementIds, pageId) => {
+    const state = getState();
+
+    // todo consider doing the group membership collation in aeroelastic when pros/cons crystallize
+    const allElements = getElements(state, pageId);
+    const allRoots = rootElementIds.map(id => allElements.find(e => id === e.id));
+    if (allRoots.indexOf(undefined) !== -1)
+      throw new Error('Some of the elements to be deleted do not exist');
+    const elementIds = subMultitree(e => e.id, e => e.position.parent, allElements, allRoots).map(
+      e => e.id
+    );
+
     const shouldRefresh = elementIds.some(elementId => {
-      const element = getElementById(getState(), elementId, pageId);
+      const element = getElementById(state, elementId, pageId);
       const filterIsApplied = element.filter != null && element.filter.length > 0;
       return filterIsApplied;
     });
@@ -228,9 +229,7 @@ export const removeElements = createThunk(
     }));
     dispatch(_removeElements(elementIds, pageId));
 
-    if (shouldRefresh) {
-      dispatch(fetchAllRenderables());
-    }
+    if (shouldRefresh) dispatch(fetchAllRenderables());
   }
 );
 
@@ -240,9 +239,7 @@ export const setFilter = createThunk(
     const _setFilter = createAction('setFilter');
     dispatch(_setFilter({ filter, elementId, pageId }));
 
-    if (doRender === true) {
-      dispatch(fetchAllRenderables());
-    }
+    if (doRender === true) dispatch(fetchAllRenderables());
   }
 );
 
@@ -254,9 +251,7 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
 
   // read updated element from state and fetch renderable
   const updatedElement = getElementById(getState(), elementId, pageId);
-  if (doRender === true) {
-    dispatch(fetchRenderable(updatedElement));
-  }
+  if (doRender === true) dispatch(fetchRenderable(updatedElement));
 }
 
 const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRender = true) => {
@@ -298,9 +293,7 @@ export const setAstAtIndex = createThunk(
       const partialAst = {
         ...newAst,
         chain: newAst.chain.filter((exp, i) => {
-          if (contextValue) {
-            return i > contextIndex;
-          }
+          if (contextValue) return i > contextIndex;
           return i >= index;
         }),
       };
@@ -319,9 +312,7 @@ export const setAstAtIndex = createThunk(
 export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch }, args) => {
   const { index, argName, value, valueIndex, element, pageId } = args;
   const selector = ['ast', 'chain', index, 'arguments', argName];
-  if (valueIndex != null) {
-    selector.push(valueIndex);
-  }
+  if (valueIndex != null) selector.push(valueIndex);
 
   const newElement = set(element, selector, value);
   const newAst = get(newElement, ['ast', 'chain', index]);
@@ -369,22 +360,15 @@ export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dis
   payload: element defaults. Eg {expression: 'foo'}
 */
 export const addElement = createThunk('addElement', ({ dispatch }, pageId, element) => {
-  const newElement = { ...getDefaultElement(), ...getBareElement(element) };
-  if (element.width) {
-    newElement.position.width = element.width;
-  }
-  if (element.height) {
-    newElement.position.height = element.height;
-  }
+  const newElement = { ...getDefaultElement(), ...getBareElement(element, true) };
+  if (element.width) newElement.position.width = element.width;
+  if (element.height) newElement.position.height = element.height;
   const _addElement = createAction('addElement');
   dispatch(_addElement({ pageId, element: newElement }));
 
   // refresh all elements if there's a filter, otherwise just render the new element
-  if (element.filter) {
-    dispatch(fetchAllRenderables());
-  } else {
-    dispatch(fetchRenderable(newElement));
-  }
+  if (element.filter) dispatch(fetchAllRenderables());
+  else dispatch(fetchRenderable(newElement));
 
   // select the new element
   dispatch(selectElement(newElement.id));
