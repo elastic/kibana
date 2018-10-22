@@ -65,7 +65,7 @@ export default function ({ getService }) {
       });
 
       beat = esResponse._source.beat;
-      expect(beat.tags).to.eql(['production', 'qa']); // as beat 'foo' already had 'production' and 'qa' tags attached to i
+      expect(beat.tags).to.eql(['production', 'qa']); // as beat 'foo' already had 'production' and 'qa' tags attached to it
 
       // Beat bar
       esResponse = await es.get({
