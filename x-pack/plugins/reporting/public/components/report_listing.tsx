@@ -15,6 +15,7 @@ import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { Poller } from '../../../../common/poller';
+import { JobStatuses } from '../constants/job_statuses';
 import { downloadReport } from '../lib/download_report';
 import { jobQueueClient, JobQueueEntry } from '../lib/job_queue_client';
 import { ReportErrorButton } from './report_error_button';
@@ -41,6 +42,7 @@ interface Job {
   started_at?: string;
   completed_at?: string;
   status: string;
+  statusLabel: string;
   max_size_reached: boolean;
 }
 
@@ -164,9 +166,13 @@ class ReportListingUi extends Component<Props, State> {
         }),
         render: (status: string, record: Job) => {
           let statusTimestamp;
-          if (status === 'processing' && record.started_at) {
+          if (status === JobStatuses.JOB_STATUS_PROCESSING && record.started_at) {
             statusTimestamp = this.formatDate(record.started_at);
-          } else if (record.completed_at && (status === 'completed' || status === 'failed')) {
+          } else if (
+            record.completed_at &&
+            (status === JobStatuses.JOB_STATUS_COMPLETED ||
+              status === JobStatuses.JOB_STATUS_FAILED)
+          ) {
             statusTimestamp = this.formatDate(record.completed_at);
           }
           return (
@@ -175,7 +181,7 @@ class ReportListingUi extends Component<Props, State> {
                 id="xpack.reporting.listing.tableValue.createdAtDetail"
                 defaultMessage="{status} at {time}{maxSizeReached}"
                 values={{
-                  status,
+                  status: record.statusLabel,
                   time: <span className="eui-textNoWrap">{statusTimestamp}</span>,
                   maxSizeReached: record.max_size_reached ? (
                     <span>
@@ -244,7 +250,7 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   private renderDownloadButton = (record: Job) => {
-    if (record.status !== 'completed') {
+    if (record.status !== JobStatuses.JOB_STATUS_COMPLETED) {
       return;
     }
 
@@ -278,7 +284,7 @@ class ReportListingUi extends Component<Props, State> {
   };
 
   private renderReportErrorButton = (record: Job) => {
-    if (record.status !== 'failed') {
+    if (record.status !== JobStatuses.JOB_STATUS_FAILED) {
       return;
     }
 
@@ -331,6 +337,39 @@ class ReportListingUi extends Component<Props, State> {
     }
 
     if (this.mounted) {
+      const { intl } = this.props;
+      const getStatusLabel = (statusString: string) => {
+        switch (statusString) {
+          case JobStatuses.JOB_STATUS_PENDING:
+            return intl.formatMessage({
+              id: 'xpack.reporting.JobStatuses.pendingText',
+              defaultMessage: 'pending',
+            });
+          case JobStatuses.JOB_STATUS_PROCESSING:
+            return intl.formatMessage({
+              id: 'xpack.reporting.JobStatuses.processingText',
+              defaultMessage: 'processing',
+            });
+          case JobStatuses.JOB_STATUS_COMPLETED:
+            return intl.formatMessage({
+              id: 'xpack.reporting.JobStatuses.completedText',
+              defaultMessage: 'completed',
+            });
+          case JobStatuses.JOB_STATUS_FAILED:
+            return intl.formatMessage({
+              id: 'xpack.reporting.JobStatuses.failedText',
+              defaultMessage: 'failed',
+            });
+          case JobStatuses.JOB_STATUS_CANCELLED:
+            return intl.formatMessage({
+              id: 'xpack.reporting.JobStatuses.cancelledText',
+              defaultMessage: 'cancelled',
+            });
+          default:
+            return statusString;
+        }
+      };
+
       this.setState({
         isLoading: false,
         total,
@@ -345,6 +384,7 @@ class ReportListingUi extends Component<Props, State> {
             started_at: job._source.started_at,
             completed_at: job._source.completed_at,
             status: job._source.status,
+            statusLabel: getStatusLabel(job._source.status),
             max_size_reached: job._source.output ? job._source.output.max_size_reached : false,
           };
         }),

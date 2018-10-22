@@ -10,15 +10,15 @@ async function parseResponse(request) {
   const response = await request;
   if (!response._scroll_id) {
     throw new Error(i18n.translate('xpack.reporting.exportTypes.csv.hitIterator.expectedScrollIdErrorMessage', {
-      defaultMessage: 'Expected _scroll_id in the following Elasticsearch response: {response}',
-      values: { response: JSON.stringify(response) }
+      defaultMessage: 'Expected {scrollId} in the following Elasticsearch response: {response}',
+      values: { response: JSON.stringify(response), scrollId: '_scroll_id' }
     }));
   }
 
   if (!response.hits) {
     throw new Error(i18n.translate('xpack.reporting.exportTypes.csv.hitIterator.expectedHitsErrorMessage', {
-      defaultMessage: 'Expected hits in the following Elasticsearch response: {response}',
-      values: { response: JSON.stringify(response) }
+      defaultMessage: 'Expected {hits} in the following Elasticsearch response: {response}',
+      values: { response: JSON.stringify(response), hits: 'hits' }
     }));
   }
 

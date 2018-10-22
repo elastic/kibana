@@ -19,7 +19,9 @@ export function compatibilityShimFactory(server) {
       const decryptedHeaders = await crypto.decrypt(job.headers);
       return decryptedHeaders;
     } catch (err) {
-      throw new Error('Failed to decrypt report job data. Please re-generate this report.');
+      throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptErrorMessage', {
+        defaultMessage: 'Failed to decrypt report job data. Please re-generate this report.'
+      }));
     }
   };
 
@@ -52,7 +54,9 @@ export function compatibilityShimFactory(server) {
       try {
         return await crypto.decrypt(jobSession);
       } catch (err) {
-        throw new Error('Failed to decrypt report job data. Please re-generate this report.');
+        throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptDataErrorMessage', {
+          defaultMessage: 'Failed to decrypt report job data. Please re-generate this report.'
+        }));
       }
     }
 
@@ -63,7 +67,9 @@ export function compatibilityShimFactory(server) {
 
     const cookieName = server.plugins.security.getSessionCookieOptions().name;
     if (!cookieName) {
-      throw new Error('Unable to determine the session cookie name');
+      throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.noSessionCookieNameErrorMessage', {
+        defaultMessage: 'Unable to determine the session cookie name'
+      }));
     }
 
     return cookies[cookieName];
