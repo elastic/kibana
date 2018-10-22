@@ -265,7 +265,7 @@ exports[`apmUiEnabled 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Upload data from a file"
+            defaultMessage="Upload data from file"
             id="kbn.home.addData.uploadFileTitle"
             values={Object {}}
           />
@@ -282,7 +282,7 @@ exports[`apmUiEnabled 1`] = `
           type="button"
         >
           <FormattedMessage
-            defaultMessage="Import a JSON, CSV or text file"
+            defaultMessage="Import a JSON, CSV, or text file"
             id="kbn.home.addData.uploadFileLink"
             values={Object {}}
           />
@@ -562,7 +562,7 @@ exports[`isNewKibanaInstance 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Upload data from a file"
+            defaultMessage="Upload data from file"
             id="kbn.home.addData.uploadFileTitle"
             values={Object {}}
           />
@@ -579,7 +579,7 @@ exports[`isNewKibanaInstance 1`] = `
           type="button"
         >
           <FormattedMessage
-            defaultMessage="Import a JSON, CSV or text file"
+            defaultMessage="Import a JSON, CSV, or text file"
             id="kbn.home.addData.uploadFileLink"
             values={Object {}}
           />
@@ -859,7 +859,7 @@ exports[`render 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Upload data from a file"
+            defaultMessage="Upload data from file"
             id="kbn.home.addData.uploadFileTitle"
             values={Object {}}
           />
@@ -876,7 +876,7 @@ exports[`render 1`] = `
           type="button"
         >
           <FormattedMessage
-            defaultMessage="Import a JSON, CSV or text file"
+            defaultMessage="Import a JSON, CSV, or text file"
             id="kbn.home.addData.uploadFileLink"
             values={Object {}}
           />

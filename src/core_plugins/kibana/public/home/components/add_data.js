@@ -40,6 +40,7 @@ import {
 
 /* istanbul ignore next */
 const basePath = chrome.getBasePath();
+const mlEnabled = chrome.getInjected('mlEnabled', true);
 
 const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
 
@@ -194,7 +195,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
 
       <EuiHorizontalRule />
 
-      <EuiFlexGrid columns={3}>
+      <EuiFlexGrid columns={mlEnabled !== false ? 3 : 2}>
         <EuiFlexItem className={footerItemClasses}>
           <EuiText>
             <strong style={{ height: 38 }}>
@@ -214,25 +215,28 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
             </EuiLink>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem className={footerItemClasses}>
-          <EuiText>
-            <strong style={{ height: 38 }}>
-              <FormattedMessage
-                id="kbn.home.addData.uploadFileTitle"
-                defaultMessage="Upload data from a file"
-              />
-            </strong>
-            <EuiLink
-              style={{ display: 'block', textAlign: 'center' }}
-              href={`${basePath}/app/ml#/datavisualizer`}
-            >
-              <FormattedMessage
-                id="kbn.home.addData.uploadFileLink"
-                defaultMessage="Import a JSON, CSV or text file"
-              />
-            </EuiLink>
-          </EuiText>
-        </EuiFlexItem>
+        {mlEnabled !== false ?
+          <EuiFlexItem className={footerItemClasses}>
+            <EuiText>
+              <strong style={{ height: 38 }}>
+                <FormattedMessage
+                  id="kbn.home.addData.uploadFileTitle"
+                  defaultMessage="Upload data from file"
+                />
+              </strong>
+              <EuiLink
+                style={{ display: 'block', textAlign: 'center' }}
+                href={`${basePath}/app/ml#/datavisualizer`}
+              >
+                <FormattedMessage
+                  id="kbn.home.addData.uploadFileLink"
+                  defaultMessage="Import a JSON, CSV, or text file"
+                />
+              </EuiLink>
+            </EuiText>
+          </EuiFlexItem>
+          : null
+        }
         <EuiFlexItem className={footerItemClasses}>
           <EuiText>
             <strong style={{ height: 38 }}>

@@ -27,6 +27,7 @@ jest.mock(
   'ui/chrome',
   () => ({
     getBasePath: jest.fn(() => 'path'),
+    getInjected: jest.fn(() => ''),
   }),
   { virtual: true }
 );
