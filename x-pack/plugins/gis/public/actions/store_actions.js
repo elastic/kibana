@@ -297,7 +297,7 @@ export async function loadMapResources(dispatch) {
         id: "0hmz5",
         label: 'light theme tiles',
         sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
-        visible: false,
+        visible: true,
         temporary: false,
         style: {},
         type: "TILE",
@@ -312,104 +312,14 @@ export async function loadMapResources(dispatch) {
           "type": "EMS_XYZ",
           "urlTemplate": "https://api.mapbox.com/styles/v1/npeihl/cjgib11ei001w2rrva9nomul9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibnBlaWhsIiwiYSI6InVmU21qeVUifQ.jwa9V6XsmccKsEHKh5QfmQ"
         },
-        visible: true,
+        visible: false,
         temporary: false,
         style: {},
         type: "TILE",
         showAtAllZoomLevels: true,
         minZoom: 0,
         maxZoom: 24,
-      },
-      // {
-      //   "id": "k4a3t",
-      //   "label": null,
-      //   "showAtAllZoomLevels": true,
-      //   "minZoom": 0,
-      //   "maxZoom": 24,
-      //   "sourceDescriptor": { "type": "EMS_FILE", "name": "World Countries" },
-      //   "visible": true,
-      //   "temporary": false,
-      //   "style": {
-      //     "type": "VECTOR",
-      //     "properties": {
-      //       "fillColor": {
-      //         "type": "DYNAMIC",
-      //         "options": {
-      //           "fieldValue": {
-      //             "label": "count of log* by geo.dest",
-      //             "name": "__kbn__join({\"leftField\":\"iso2\",\"right\":{\"indexPatternId\":\"9d3244d0-b6c5-11e8-98f4-8dc7caa69a1a\",\"indexPatternTitle\":\"log*\",\"term\":\"geo.dest\"}})",
-      //             "origin": "join",
-      //             "join": {
-      //               "_descriptor": {
-      //                 "leftField": "iso2",
-      //                 "right": {
-      //                   "indexPatternId": "9d3244d0-b6c5-11e8-98f4-8dc7caa69a1a",
-      //                   "indexPatternTitle": "log*",
-      //                   "term": "geo.dest"
-      //                 }
-      //               },
-      //               "_rightSource": {
-      //                 "_descriptor": {
-      //                   "indexPatternId": "9d3244d0-b6c5-11e8-98f4-8dc7caa69a1a",
-      //                   "indexPatternTitle": "log*",
-      //                   "term": "geo.dest"
-      //                 }
-      //               }
-      //             }
-      //           }
-      //         }
-      //       }
-      //     },
-      //     "temporary": true,
-      //     "previousStyle": null
-      //   },
-      //   "type": "VECTOR",
-      //   "joins": [{
-      //     "leftField": "iso2",
-      //     "right": {
-      //       "indexPatternId": "9d3244d0-b6c5-11e8-98f4-8dc7caa69a1a",
-      //       "indexPatternTitle": "log*",
-      //       "term": "geo.dest"
-      //     }
-      //   }]
-      // }
-      // {
-      //   "id": "giflh",
-      //   "label": null,
-      //   "showAtAllZoomLevels": true,
-      //   "minZoom": 0,
-      //   "maxZoom": 24,
-      //   "sourceDescriptor": { "type": "EMS_FILE", "name": "World Countries" },
-      //   "visible": true,
-      //   "temporary": false,
-      //   "style": {
-      //     "type": "VECTOR",
-      //     "properties": { "fillColor": { "type": "STATIC", "options": { "color": "#e6194b" } } }
-      //   },
-      //   "type": "VECTOR"
-      // }
-      // {
-      //   "id": "0x4p4",
-      //   "label": null,
-      //   "showAtAllZoomLevels": true,
-      //   "minZoom": 0,
-      //   "maxZoom": 24,
-      //   "sourceDescriptor": {
-      //     "type": "ES_SEARCH",
-      //     "indexPatternId": "9d3244d0-b6c5-11e8-98f4-8dc7caa69a1a",
-      //     "geoField": "geo.coordinates",
-      //     "limit": 256,
-      //     "showTooltip": true,
-      //     "tooltipProperties": []
-      //   },
-      //   "visible": true,
-      //   "temporary": false,
-      //   "style": {
-      //     "type": "VECTOR",
-      //     "properties": { "fillColor": { "type": "STATIC", "options": { "color": "#ffe119" } } }
-      //   },
-      //   "type": "VECTOR"
-      // }
+      }
     ]
   ));
 
