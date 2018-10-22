@@ -38,7 +38,7 @@ export default (kibana: any) =>
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
-        title: 'Code Search',
+        title: 'Code',
         description: 'Code Search Plugin',
         main: 'plugins/codesearch/app',
         styleSheetPath: resolve(__dirname, 'public/styles.scss'),
