@@ -166,7 +166,7 @@ interface TranslateArguments {
   context?: string;
 }
 
-function translateUsingPseudoLocale(message: string) {
+export function translateUsingPseudoLocale(message: string) {
   /**
    * Replaces every latin char by pseudo char and repeats every third char twice.
    */

@@ -19,9 +19,13 @@
 
 import * as PropTypes from 'prop-types';
 import * as React from 'react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider, intlShape } from 'react-intl';
 
 import * as i18n from '../core';
+
+function isPseudoLocale() {
+  return i18n.getLocale() === 'en-xa';
+}
 
 /**
  * The library uses the provider pattern to scope an i18n context to a tree
@@ -29,12 +33,26 @@ import * as i18n from '../core';
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
 export class I18nProvider extends React.PureComponent {
-  public static propTypes = {
-    children: PropTypes.object,
-  };
+  public static propTypes = { children: PropTypes.element.isRequired };
+  public static contextTypes = { intl: intlShape };
+  public static childContextTypes = { intl: intlShape };
+
+  public getChildContext() {
+    if (this.context.intl && isPseudoLocale()) {
+      const formatMessage = this.context.intl.formatMessage;
+      this.context.intl.formatMessage = (...args: any[]) => {
+        return i18n.translateUsingPseudoLocale(formatMessage.apply(this.context.intl, args));
+      };
+    }
+
+    return { intl: this.context.intl };
+  }
 
   public render() {
-    const { children } = this.props;
+    const child = React.Children.only(this.props.children);
+    if (this.context.intl) {
+      return child;
+    }
 
     return (
       <IntlProvider
@@ -45,7 +63,7 @@ export class I18nProvider extends React.PureComponent {
         defaultFormats={i18n.getFormats()}
         textComponent={React.Fragment}
       >
-        {children}
+        {isPseudoLocale() ? <I18nProvider>{child}</I18nProvider> : child}
       </IntlProvider>
     );
   }
