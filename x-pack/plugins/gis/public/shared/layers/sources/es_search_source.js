@@ -26,7 +26,7 @@ import { hitsToGeoJson, createExtentFilter } from '../../../elasticsearch_geo_ut
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
 
-const DEFAULT_LIMIT = 1000;
+const DEFAULT_LIMIT = 2048;
 export class ESSearchSource extends VectorSource {
 
   static type = 'ES_SEARCH';
