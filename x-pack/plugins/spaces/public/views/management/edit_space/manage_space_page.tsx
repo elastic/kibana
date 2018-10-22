@@ -97,9 +97,9 @@ export class ManageSpacePage extends Component<Props, State> {
     const content = this.state.isLoading ? this.getLoadingIndicator() : this.getForm();
 
     return (
-      <EuiPage className="manageSpacePage">
+      <EuiPage className="spcManagePage">
         <EuiPageBody>
-          <EuiPageContent className="manageSpacePage__content">
+          <EuiPageContent className="spcManagePage__content">
             <EuiPageContentBody>{content}</EuiPageContentBody>
           </EuiPageContent>
           {this.maybeGetSecureSpacesMessage()}
@@ -134,32 +134,28 @@ export class ManageSpacePage extends Component<Props, State> {
 
         <EuiSpacer />
 
-        <EuiFlexGroup>
-          <EuiFlexItem style={{ maxWidth: '400px' }}>
-            <EuiFormRow label="Name" {...this.validator.validateSpaceName(this.state.space)}>
-              <EuiFieldText
-                name="name"
-                placeholder={'Awesome space'}
-                value={name}
-                onChange={this.onNameChange}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          {name && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow hasEmptyLabelSpace={true}>
-                    <SpaceAvatar space={this.state.space} />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <EuiFormRow label="Name" {...this.validator.validateSpaceName(this.state.space)}>
+          <EuiFieldText
+            name="name"
+            placeholder={'Awesome space'}
+            value={name}
+            onChange={this.onNameChange}
+          />
+        </EuiFormRow>
 
-        <EuiSpacer />
+        {name && (
+          <Fragment>
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow label="Avatar">
+                  <SpaceAvatar space={this.state.space} size="l" />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
+            </EuiFlexGroup>
+            <EuiSpacer />
+          </Fragment>
+        )}
 
         {this.state.space && isReservedSpace(this.state.space) ? null : (
           <Fragment>

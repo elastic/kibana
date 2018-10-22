@@ -78,7 +78,7 @@ export class NavControlPopover extends Component<Props, State> {
 
     return (
       <EuiPopover
-        id={'spacesMenuPopover'}
+        id={'spcMenuPopover'}
         data-test-subj={`spacesNavSelector`}
         button={button}
         isOpen={this.state.showSpaceSelector}
