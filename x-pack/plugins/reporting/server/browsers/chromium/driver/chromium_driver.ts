@@ -11,6 +11,7 @@ import {
   EvalFn,
   EvaluateOptions,
   Logger,
+  SessionCookie,
   ViewZoomWidthHeight,
 } from '../../../../types';
 
@@ -31,11 +32,19 @@ export class HeadlessChromiumDriver {
 
   public async open(
     url: string,
-    { headers, waitForSelector }: { headers: Record<string, string>; waitForSelector: string }
+    {
+      sessionCookie,
+      waitForSelector,
+    }: {
+      sessionCookie: SessionCookie;
+      waitForSelector: string;
+    }
   ) {
     this.logger.debug(`HeadlessChromiumDriver:opening url ${url}`);
+    if (sessionCookie) {
+      await this.page.setCookie(sessionCookie);
+    }
 
-    await this.page.setExtraHTTPHeaders(headers);
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
     await this.page.waitFor(waitForSelector);
   }

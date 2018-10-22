@@ -24,6 +24,8 @@ import {
   map as mapAsync,
 } from 'bluebird';
 
+import { WAIT_FOR_EXISTS_TIME } from './find';
+
 export function TestSubjectsProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
@@ -33,12 +35,12 @@ export function TestSubjectsProvider({ getService }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class TestSubjects {
-    async exists(selector, timeout = 1000) {
+    async exists(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`TestSubjects.exists(${selector})`);
       return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
     }
 
-    async existOrFail(selector, timeout = 1000) {
+    async existOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       await retry.try(async () => {
         log.debug(`TestSubjects.existOrFail(${selector})`);
         const doesExist = await this.exists(selector, timeout);
@@ -47,7 +49,7 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
-    async missingOrFail(selector, timeout = 1000) {
+    async missingOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`TestSubjects.missingOrFail(${selector})`);
       const doesExist = await this.exists(selector, timeout);
       // Verify element is missing, or else fail the test consuming this.

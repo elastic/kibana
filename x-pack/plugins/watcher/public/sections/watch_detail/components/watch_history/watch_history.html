@@ -27,10 +27,10 @@
 
   <!-- Watch history table -->
   <table-info ng-show="watchHistory.isLoading">
-    Loading watch history&hellip;
+    {{ 'xpack.watcher.sections.watchDetail.watchHistory.watchHistoryLoadingText' | i18n: { defaultMessage: 'Loading watch history' } }}&hellip;
   </table-info>
   <table-info ng-show="!watchHistory.isLoading && !watchHistory.hasPageOfHistoryItems">
-    No watch history found.
+    {{ 'xpack.watcher.sections.watchDetail.watchHistory.watchHistoryNotFoundText' | i18n: { defaultMessage: 'No watch history found.' } }}
   </table-info>
   <watch-history-table
     xpack-watch="watchHistory.watch"

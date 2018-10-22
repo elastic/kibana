@@ -44,8 +44,10 @@ exports[`NavControlPopover renders without crashing 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
+  repositionOnScroll={true}
 >
   <Component
+    onManageSpacesClick={[Function]}
     userProfile={
       Object {
         "hasCapability": [Function],

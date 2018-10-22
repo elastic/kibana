@@ -30,11 +30,11 @@ export function screenshotsObservableFactory(server) {
     return result;
   };
 
-  const openUrl = async (browser, url, headers) => {
+  const openUrl = async (browser, url, sessionCookie) => {
     const waitForSelector = '.application';
 
     await browser.open(url, {
-      headers,
+      sessionCookie,
       waitForSelector,
     });
   };
@@ -226,7 +226,7 @@ export function screenshotsObservableFactory(server) {
     return screenshots;
   };
 
-  return function screenshotsObservable(url, headers, layout, browserTimezone) {
+  return function screenshotsObservable(url, sessionCookie, layout, browserTimezone) {
 
     return Rx.defer(async () => await getPort()).pipe(
       mergeMap(bridgePort => {
@@ -254,7 +254,7 @@ export function screenshotsObservableFactory(server) {
         const screenshot$ = driver$.pipe(
           tap(() => logger.debug(`opening ${url}`)),
           mergeMap(
-            browser => openUrl(browser, url, headers),
+            browser => openUrl(browser, url, sessionCookie),
             browser => browser
           ),
           tap(() => logger.debug('injecting custom css')),
