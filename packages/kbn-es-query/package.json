@@ -1,13 +1,19 @@
 {
   "name": "@kbn/es-query",
-  "main": "./src/index.js",
+  "main": "target/index.js",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
+  "scripts": {
+    "build": "babel src --out-dir target",
+    "kbn:bootstrap": "yarn build"
+  },
   "dependencies": {
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1"
   },
   "devDependencies": {
+    "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "babel-cli": "^6.26.0",
     "expect.js": "0.3.1"
   }
 }
