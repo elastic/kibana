@@ -12,6 +12,7 @@ interface EmptyPageProps {
   title: string;
   actionLabel: string;
   actionUrl: string;
+  'data-test-subj'?: string;
 }
 
 export const EmptyPage: React.SFC<EmptyPageProps> = ({
@@ -19,6 +20,7 @@ export const EmptyPage: React.SFC<EmptyPageProps> = ({
   actionUrl,
   message,
   title,
+  ...rest
 }) => (
   <EuiEmptyPrompt
     title={<h2>{title}</h2>}
@@ -28,5 +30,6 @@ export const EmptyPage: React.SFC<EmptyPageProps> = ({
         {actionLabel}
       </EuiButton>
     }
+    {...rest}
   />
 );
