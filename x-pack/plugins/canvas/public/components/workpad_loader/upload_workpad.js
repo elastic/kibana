@@ -9,6 +9,7 @@ import { getId } from '../../lib/get_id';
 import { notify } from '../../lib/notify';
 
 export const uploadWorkpad = (file, onUpload) => {
+  if (!file) return;
   if (get(file, 'type') !== 'application/json') {
     return notify.warning('Only JSON files are accepted', {
       title: `Couldn't upload '${file.name || 'file'}'`,
