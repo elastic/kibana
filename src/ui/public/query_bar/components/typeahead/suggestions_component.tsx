@@ -20,7 +20,6 @@
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
-import './suggestion.less';
 import { SuggestionComponent } from './suggestion_component';
 
 interface Props {
