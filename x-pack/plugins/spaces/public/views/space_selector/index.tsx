@@ -12,6 +12,7 @@ import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 
+import 'plugins/spaces/views/space_selector/space_selector.less';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Space } from '../../../common/model/space';
