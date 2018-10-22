@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { dirname, extname, basename } from 'path';
+import { dirname, extname } from 'path';
+import compressing from 'compressing';
 
-import { mkdirp, exec } from '../lib';
+import { mkdirp } from '../lib';
 
 export const CreateArchivesTask = {
   description: 'Creating the archives for each platform',
@@ -33,23 +34,13 @@ export const CreateArchivesTask = {
 
       await mkdirp(dirname(destination));
 
-      const cwd = dirname(source);
-      const sourceName = basename(source);
-
       switch (extname(destination)) {
         case '.zip':
-          await exec(log, 'zip', ['-rq', '-ll', destination, sourceName], { cwd });
+          await compressing.zip.compressDir(source, destination);
           break;
 
         case '.gz':
-          const args = ['-zchf', destination, sourceName];
-
-          // Add a flag to handle filepaths with colons (i.e. C://...) on windows
-          if (config.getPlatformForThisOs().isWindows()) {
-            args.push('--force-local');
-          }
-
-          await exec(log, 'tar', args, { cwd });
+          await compressing.tgz.compressDir(source, destination);
           break;
 
         default:
