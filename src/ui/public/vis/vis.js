@@ -108,7 +108,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
               data = data.$parent;
             }
             const appState = getAppState();
-            filterBarPushFilters(appState)(filters.flat());
+            filterBarPushFilters(appState)(_.flatten(filters));
           },
           createFilter: (data, columnIndex, rowIndex, cellValue) => {
             const { aggConfig, id: columnId } = data.columns[columnIndex];
