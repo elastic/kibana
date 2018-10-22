@@ -550,8 +550,8 @@ font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=27 align="lef
               "expression" : `
 filters
 | esdocs index="kibana_sample_data_logs" sort="timestamp, desc" fields="machine.os, machine.ram" count=1
-| markdown "**OS:** " {getCell "machine.os"} " \
-**RAM:** " {getCell "machine.ram" | formatNumber "00.0b"}
+| markdown "**OS:** " {getCell "machine.os"} "\\
+ **RAM:** " {getCell "machine.ram" | formatNumber "00.0b"}
 font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=20 align="left" color="#FFFFFF" weight="lighter" underline=false italic=false}
 | render containerStyle={containerStyle padding="5px"}
 `
@@ -585,8 +585,8 @@ font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=20 align="lef
               "expression" : `
 filters
 | esdocs index="kibana_sample_data_logs" sort="timestamp, desc" fields="geo.src, geo.dest" count=1
-| markdown "**ORIGIN COUNTRY:** " {getCell "geo.src"} " \
-**DESTINATION:** " {getCell "geo.dest"}
+| markdown "**ORIGIN COUNTRY:** " {getCell "geo.src"} "\\
+ **DESTINATION:** " {getCell "geo.dest"}
 font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=20 align="left" color="#FFFFFF" weight="lighter" underline=false italic=false}
 | render containerStyle={containerStyle padding="5px"}
 `
