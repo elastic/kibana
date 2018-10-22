@@ -5,20 +5,18 @@
  */
 
 import PropTypes from 'prop-types';
-import { compose, withState, withHandlers } from 'recompose';
+import { compose, withHandlers } from 'recompose';
 import { notify } from '../../../lib/notify';
-import { uploadWorkpad } from '../upload_handler';
+import { uploadWorkpad } from '../upload_workpad';
 import { WorkpadDropzone as Component } from './workpad_dropzone';
 
 export const WorkpadDropzone = compose(
-  withState('isDropping', 'setDropping', false),
   withHandlers({
     onDropAccepted: ({ onUpload }) => ([file]) => uploadWorkpad(file, onUpload),
-    onDropRejected: ({ setDropping }) => ([file]) => {
+    onDropRejected: () => ([file]) => {
       notify.warning('Only JSON files are accepted', {
         title: `Couldn't upload '${file.name || 'file'}'`,
       });
-      setDropping(false);
     },
   })
 )(Component);

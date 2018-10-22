@@ -9,8 +9,9 @@ import PropTypes from 'prop-types';
 import { EuiFilePicker } from '@elastic/eui';
 import { uploadWorkpad } from './upload_handler';
 
-export const WorkpadUpload = ({ onUpload }) => (
+export const WorkpadUpload = ({ onUpload, ...rest }) => (
   <EuiFilePicker
+    {...rest}
     compressed
     initialPromptText="Import workpad JSON file"
     onChange={([file]) => uploadWorkpad(file, onUpload)}
