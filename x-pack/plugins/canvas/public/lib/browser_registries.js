@@ -32,23 +32,33 @@ const types = {
   argumentUIs: argTypeRegistry,
 };
 
-export const populateBrowserRegistries = () =>
-  new Promise(resolve => {
-    loadPrivateBrowserFunctions();
-    const remainingTypes = Object.keys(types);
-    function loadType() {
-      const type = remainingTypes.pop();
-      window.canvas = window.canvas || {};
-      window.canvas.register = d => types[type].register(d);
+let resolve = null;
+const populatePromise = new Promise(_resolve => {
+  resolve = _resolve;
+});
 
-      // Load plugins one at a time because each needs a different loader function
-      // $script will only load each of these once, we so can call this as many times as we need?
-      const pluginPath = chrome.addBasePath(`/api/canvas/plugins?type=${type}`);
-      $script(pluginPath, () => {
-        if (remainingTypes.length) loadType();
-        else resolve(true);
-      });
-    }
+export const getBrowserRegistries = () => {
+  return populatePromise;
+};
 
-    loadType();
-  });
+export const populateBrowserRegistries = () => {
+  // loadPrivateBrowserFunctions is sync. No biggie.
+  loadPrivateBrowserFunctions();
+  const remainingTypes = Object.keys(types);
+  function loadType() {
+    const type = remainingTypes.pop();
+    window.canvas = window.canvas || {};
+    window.canvas.register = d => types[type].register(d);
+
+    // Load plugins one at a time because each needs a different loader function
+    // $script will only load each of these once, we so can call this as many times as we need?
+    const pluginPath = chrome.addBasePath(`/api/canvas/plugins?type=${type}`);
+    $script(pluginPath, () => {
+      if (remainingTypes.length) loadType();
+      else resolve(true);
+    });
+  }
+
+  if (remainingTypes.length) loadType();
+  return populatePromise;
+};

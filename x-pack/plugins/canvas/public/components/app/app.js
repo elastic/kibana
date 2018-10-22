@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { routes } from '../../apps';
 import { shortcutManager } from '../../lib/shortcut_manager';
+import { populateBrowserRegistries } from '../../lib/browser_registries';
 import { Router } from '../router';
 
 export class App extends React.PureComponent {
@@ -37,6 +38,8 @@ export class App extends React.PureComponent {
     );
   };
 
+  onLoad = () => populateBrowserRegistries().then(() => this.props.setAppReady(true));
+
   render() {
     if (this.props.appState instanceof Error) return this.renderError();
 
@@ -47,7 +50,7 @@ export class App extends React.PureComponent {
           showLoading={this.props.appState.ready === false}
           loadingMessage="Canvas is loading"
           onRouteChange={this.props.onRouteChange}
-          onLoad={() => this.props.setAppReady(true)}
+          onLoad={this.onLoad}
           onError={err => this.props.setAppError(err)}
         />
       </div>

@@ -7,13 +7,13 @@
 import chrome from 'ui/chrome';
 import io from 'socket.io-client';
 import { functionsRegistry } from '../common/lib/functions_registry';
-import { populateBrowserRegistries } from './lib/populate_browser_registries';
+import { getBrowserRegistries } from './lib/browser_registries';
 
 const basePath = chrome.getBasePath();
 export const socket = io(undefined, { path: `${basePath}/socket.io` });
 
 socket.on('getFunctionList', () => {
-  const pluginsLoaded = populateBrowserRegistries();
+  const pluginsLoaded = getBrowserRegistries();
 
   pluginsLoaded.then(() => socket.emit('functionList', functionsRegistry.toJS()));
 });
