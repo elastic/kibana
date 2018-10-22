@@ -26,7 +26,7 @@ import { hitsToGeoJson, createExtentFilter } from '../../../elasticsearch_geo_ut
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
 
-const DEFAULT_LIMIT = 10000;
+const DEFAULT_LIMIT = 1000;
 export class ESSearchSource extends VectorSource {
 
   static type = 'ES_SEARCH';
@@ -46,7 +46,7 @@ export class ESSearchSource extends VectorSource {
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,
       limit: descriptor.limit,
-      filterByMapBounds: descriptor.isFilterByMapBounds,
+      filterByMapBounds: descriptor.filterByMapBounds,
       showTooltip: _.get(descriptor, 'showTooltip', false),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     });
