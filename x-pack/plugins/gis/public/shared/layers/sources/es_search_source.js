@@ -367,13 +367,13 @@ class Editor extends React.Component {
 
     return (
       <Fragment>
-        <EuiFormRow compressed>
-          <EuiSwitch
-            label="Show tooltip on feature mouseover"
-            checked={this.state.showTooltip}
-            onChange={this.onShowTooltipChange}
-          />
-        </EuiFormRow>
+        {/*<EuiFormRow compressed>*/}
+          {/*<EuiSwitch*/}
+            {/*label="Show tooltip on feature mouseover"*/}
+            {/*checked={this.state.showTooltip}*/}
+            {/*onChange={this.onShowTooltipChange}*/}
+          {/*/>*/}
+        {/*</EuiFormRow>*/}
 
         {fieldSelectFormRow}
       </Fragment>
