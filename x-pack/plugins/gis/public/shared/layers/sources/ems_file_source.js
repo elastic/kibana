@@ -72,14 +72,14 @@ export class EMSFileSource extends VectorSource {
           <span className="bold">Source: </span><span>Elastic Maps Service</span>
         </div>
         <div>
-          <span className="bold">Type: </span><span>Vector (todo, use icon)</span>
+          <span className="bold">Type: </span><span>Vector</span>
         </div>
         <div>
           <span className="bold">Name: </span><span>{this._descriptor.name}</span>
         </div>
-        <div>
-          <span className="bold">todo hotlink to EMS landing page</span>
-        </div>
+        {/*<div>*/}
+          {/*<span className="bold">todo hotlink to EMS landing page</span>*/}
+        {/*</div>*/}
       </Fragment>
     );
   }

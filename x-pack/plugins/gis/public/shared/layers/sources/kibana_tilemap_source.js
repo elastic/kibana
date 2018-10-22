@@ -39,7 +39,7 @@ export class KibanaTilemapSource extends  TMSSource {
           <span className="bold">Source: </span><span>Kibana Tilemap Configuration</span>
         </div>
         <div>
-          <span className="bold">Type: </span><span>Tile (todo, use icon)</span>
+          <span className="bold">Type: </span><span>Tile</span>
         </div>
         <div>
           <span className="bold">Id: </span><span>{this._descriptor.id}</span>

@@ -56,7 +56,7 @@ export class ESGeohashGridSource extends ASource {
 
   static type = 'ES_GEOHASH_GRID';
 
-  static typeDisplayName = 'Elasticsearch geoHash grid';
+  static typeDisplayName = 'Elasticsearch geohash heatmap';
 
   static createDescriptor({ indexPatternId, geoField }) {
     return {
@@ -80,7 +80,7 @@ export class ESGeohashGridSource extends ASource {
     return (
       <Fragment>
         <div>
-          <span className="bold">Type: </span><span>Geohash grid (todo, use icon)</span>
+          <span className="bold">Type: </span><span>geohash_grid</span>
         </div>
         <div>
           <span className="bold">Index pattern: </span><span>{this._descriptor.indexPatternId}</span>

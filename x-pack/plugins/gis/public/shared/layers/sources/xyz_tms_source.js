@@ -40,7 +40,7 @@ export class XYZTMSSource extends TMSSource {
     return (
       <Fragment>
         <div>
-          <span className="bold">Type: </span><span>Tile (todo, use icon)</span>
+          <span className="bold">Type: </span><span>Tile</span>
         </div>
         <div>
           <span className="bold">Url: </span><span>{this._descriptor.urlTemplate}</span>
