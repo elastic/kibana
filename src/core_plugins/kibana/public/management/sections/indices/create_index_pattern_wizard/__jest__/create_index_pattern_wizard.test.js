@@ -42,8 +42,8 @@ const services = {
   indexPatterns: {},
   savedObjectsClient: {},
   config: {},
-  changeUrl: () => {},
-  scopeApply: () => {},
+  changeUrl: () => { },
+  scopeApply: () => { },
 };
 
 describe('CreateIndexPatternWizard', () => {
@@ -71,6 +71,26 @@ describe('CreateIndexPatternWizard', () => {
     component.setState({
       isInitiallyLoadingIndices: false,
       allIndices: [],
+      remoteClustersExist: false
+    });
+
+    await component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  it('renders when there are no indices but there are remote clusters', async () => {
+    const component = shallow(
+      <CreateIndexPatternWizard
+        loadingDataDocUrl={loadingDataDocUrl}
+        initialQuery={initialQuery}
+        services={services}
+      />
+    );
+
+    component.setState({
+      isInitiallyLoadingIndices: false,
+      allIndices: [],
+      remoteClustersExist: true
     });
 
     await component.update();
