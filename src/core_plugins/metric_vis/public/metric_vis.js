@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './metric_vis.less';
 import './metric_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';

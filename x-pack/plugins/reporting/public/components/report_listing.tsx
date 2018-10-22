@@ -7,7 +7,6 @@
 // TODO: Remove once typescript definitions are in EUI
 declare module '@elastic/eui' {
   export const EuiBasicTable: React.SFC<any>;
-  export const EuiTextColor: React.SFC<any>;
 }
 
 import moment from 'moment';
@@ -78,7 +77,7 @@ export class ReportListing extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage className="repReportListing__page">
+      <EuiPage>
         <EuiPageBody restrictWidth>
           <EuiPageContent horizontalPosition="center">
             <EuiTitle>

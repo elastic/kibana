@@ -46,6 +46,7 @@ test(`calls server.expose with exposed services`, () => {
     config: jest.fn().mockReturnValue(mockConfig),
     plugins: Symbol(),
     savedObjects: Symbol(),
+    log: Symbol(),
   };
   const mockShieldClient = Symbol();
   getClient.mockReturnValue(mockShieldClient);
@@ -63,11 +64,10 @@ test(`calls server.expose with exposed services`, () => {
   expect(actionsFactory).toHaveBeenCalledWith(mockConfig);
   expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(mockActions, application, mockShieldClient);
   expect(authorizationModeFactory).toHaveBeenCalledWith(
-    mockActions,
-    mockCheckPrivilegesWithRequest,
+    application,
     mockConfig,
-    mockServer.plugins,
-    mockServer.savedObjects,
+    expect.any(Function),
+    mockShieldClient,
     mockXpackInfoFeature,
   );
 });

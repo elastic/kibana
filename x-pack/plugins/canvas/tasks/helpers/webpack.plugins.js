@@ -5,6 +5,7 @@
  */
 
 const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const sourceDir = path.resolve(__dirname, '../../canvas_plugin_src');
 const buildDir = path.resolve(__dirname, '../../canvas_plugin');
@@ -20,7 +21,6 @@ module.exports = {
     'uis/arguments/all': path.join(sourceDir, 'uis/arguments/register.js'),
     'functions/browser/all': path.join(sourceDir, 'functions/browser/register.js'),
     'functions/common/all': path.join(sourceDir, 'functions/common/register.js'),
-    'functions/server/all': path.join(sourceDir, 'functions/server/register.js'),
     'types/all': path.join(sourceDir, 'types/register.js'),
   },
   target: 'webworker',
@@ -53,13 +53,20 @@ module.exports = {
         }
       });
     },
+    new CopyWebpackPlugin([
+      {
+        from: `${sourceDir}/functions/server/`,
+        to: `${buildDir}/functions/server/`,
+        ignore: '**/__tests__/**',
+      },
+    ]),
   ],
 
   module: {
     rules: [
       // There's some React 15 propTypes funny business in EUI, this strips out propTypes and fixes it
       {
-        test: /(@elastic\/eui|moment)\/.*\.js$/,
+        test: /(@elastic[\/\\]eui|moment)[\/\\].*\.js$/,
         loaders: 'babel-loader',
         options: {
           babelrc: false,

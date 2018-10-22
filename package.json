@@ -13,6 +13,7 @@
   "private": true,
   "version": "7.0.0-alpha1",
   "branch": "master",
+  "types": "./target/types/type_exports.d.ts",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
@@ -52,23 +53,30 @@
     "uiFramework:build": "cd packages/kbn-ui-framework && yarn docSiteBuild",
     "uiFramework:createComponent": "cd packages/kbn-ui-framework && yarn createComponent",
     "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent",
-    "kbn:watch": "node scripts/kibana --dev --logging.json=false"
+    "kbn:watch": "node scripts/kibana --dev --logging.json=false",
+    "build:types": "tsc --p tsconfig.types.json",
+    "kbn:bootstrap": "yarn build:types"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/elastic/kibana.git"
   },
+  "resolutions": {
+    "**/@types/node": "8.10.21"
+  },
   "dependencies": {
-    "@elastic/eui": "4.0.1",
+    "@elastic/eui": "4.5.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
+    "@kbn/config-schema": "link:packages/kbn-config-schema",
     "@kbn/datemath": "link:packages/kbn-datemath",
     "@kbn/i18n": "link:packages/kbn-i18n",
     "@kbn/pm": "link:packages/kbn-pm",
     "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
+    "JSONStream": "1.1.1",
     "abortcontroller-polyfill": "^1.1.9",
     "angular": "1.6.9",
     "angular-aria": "1.6.6",
@@ -105,6 +113,7 @@
     "extract-text-webpack-plugin": "3.0.1",
     "file-loader": "1.1.4",
     "font-awesome": "4.4.0",
+    "getos": "^3.1.0",
     "glob": "^7.1.2",
     "glob-all": "^3.1.0",
     "good-squeeze": "2.1.0",
@@ -130,7 +139,7 @@
     "leaflet.heat": "0.2.0",
     "less": "2.7.1",
     "less-loader": "4.0.5",
-    "lodash": "3.10.1",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lru-cache": "4.1.1",
     "markdown-it": "^8.4.1",
     "minimatch": "^3.0.4",
@@ -210,9 +219,9 @@
     "@kbn/eslint-plugin-license-header": "link:packages/kbn-eslint-plugin-license-header",
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "@kbn/test": "link:packages/kbn-test",
+    "@octokit/rest": "^15.10.0",
     "@types/angular": "^1.6.50",
     "@types/angular-mocks": "^1.7.0",
-    "@octokit/rest": "^15.10.0",
     "@types/babel-core": "^6.25.5",
     "@types/bluebird": "^3.1.1",
     "@types/boom": "^7.2.0",
@@ -234,6 +243,7 @@
     "@types/listr": "^0.13.0",
     "@types/lodash": "^3.10.1",
     "@types/minimatch": "^2.0.29",
+    "@types/mustache": "^0.8.31",
     "@types/node": "^8.10.20",
     "@types/prop-types": "^15.5.3",
     "@types/puppeteer": "^1.6.2",
@@ -257,7 +267,7 @@
     "chance": "1.0.10",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
-    "chromedriver": "2.41.0",
+    "chromedriver": "2.42.1",
     "classnames": "2.2.5",
     "dedent": "^0.7.0",
     "enzyme": "3.2.0",
@@ -342,6 +352,6 @@
   },
   "engines": {
     "node": "8.11.4",
-    "yarn": "^1.6.0"
+    "yarn": "^1.10.1"
   }
 }
