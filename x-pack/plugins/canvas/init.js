@@ -9,6 +9,11 @@ import { functionsRegistry } from './common/lib/functions_registry';
 import { commonFunctions } from './common/functions';
 import { loadServerPlugins } from './server/lib/load_server_plugins';
 import { registerCanvasUsageCollector } from './server/usage';
+import {
+  ecommerceSavedObjects,
+  flightsSavedObjects,
+  webLogsSavedObjects,
+} from './server/sample_data';
 
 export default function(server /*options*/) {
   server.injectUiAppVars('canvas', () => {
@@ -31,4 +36,8 @@ export default function(server /*options*/) {
 
   loadServerPlugins().then(() => routes(server));
   registerCanvasUsageCollector(server);
+
+  server.addSavedObjectsToSampleDataset('ecommerce', ecommerceSavedObjects);
+  server.addSavedObjectsToSampleDataset('flights', flightsSavedObjects);
+  server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);
 }
