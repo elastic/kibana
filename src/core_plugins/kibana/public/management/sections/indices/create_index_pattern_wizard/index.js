@@ -35,6 +35,7 @@ uiRoutes.when('/management/kibana/index', {
         config: $injector.get('config'),
         es: $injector.get('es'),
         indexPatterns: $injector.get('indexPatterns'),
+        $http: $injector.get('$http'),
         savedObjectsClient: $injector.get('Private')(SavedObjectsClientProvider),
         changeUrl: url => {
           $scope.$evalAsync(() => kbnUrl.changePath(url));

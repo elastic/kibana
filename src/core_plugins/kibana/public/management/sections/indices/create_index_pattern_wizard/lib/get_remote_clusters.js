@@ -17,16 +17,15 @@
  * under the License.
  */
 
-export { canAppendWildcard } from './can_append_wildcard';
+import chrome from 'ui/chrome';
+const apiPrefix = chrome.addBasePath('/api/index_management');
 
-export { ensureMinimumTime } from './ensure_minimum_time';
-
-export { getIndices } from './get_indices';
-
-export { getMatchedIndices } from './get_matched_indices';
-
-export { containsIllegalCharacters } from './contains_illegal_characters';
-
-export { extractTimeFields } from './extract_time_fields';
-
-export { getRemoteClusters } from './get_remote_clusters';
+export async function getRemoteClusters($http) {
+  const response = await $http.get(`${apiPrefix}/clusters`);
+  return response.data;
+  /*
+    console.log("getRemoteClusters", typeof es.cluster, es.cluster.remoteInfo);
+    const response = await es.cluster.remoteInfo();
+    return (!response || response.error) ? [] : Object.keys(response);
+    */
+}

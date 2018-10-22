@@ -19,8 +19,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
-import { ensureMinimumTime } from './lib';
+import { ensureMinimumTime, getIndices, getRemoteClusters } from './lib';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
@@ -28,7 +27,6 @@ import { LoadingState } from './components/loading_state';
 import { EmptyState } from './components/empty_state';
 
 import { MAX_SEARCH_SIZE } from './constants';
-import { getIndices } from './lib/get_indices';
 
 export class CreateIndexPatternWizard extends Component {
   static propTypes = {
@@ -48,20 +46,30 @@ export class CreateIndexPatternWizard extends Component {
       step: 1,
       indexPattern: '',
       allIndices: [],
+      remoteClustersExist: false,
       isInitiallyLoadingIndices: true,
       isIncludingSystemIndices: false,
     };
   }
 
   async componentWillMount() {
-    this.fetchIndices();
+    this.fetchData();
   }
 
-  fetchIndices = async () => {
-    this.setState({ allIndices: [], isInitiallyLoadingIndices: true });
-    const { services } = this.props;
-    const allIndices = await ensureMinimumTime(getIndices(services.es, `*`, MAX_SEARCH_SIZE));
-    this.setState({ allIndices, isInitiallyLoadingIndices: false });
+  fetchData = async () => {
+    this.setState({ allIndices: [], isInitiallyLoadingIndices: true, remoteClustersExist: false });
+    const { services, $http } = this.props;
+
+    const [allIndicies, remoteClusters] = await ensureMinimumTime([
+      getIndices(services.es, `*`, MAX_SEARCH_SIZE),
+      getRemoteClusters($http)
+    ]);
+
+    this.setState({
+      allIndicies,
+      isInitiallyLoadingIndices: false,
+      remoteClustersExist: remoteClusters.length !== 0
+    });
   }
 
   createIndexPattern = async (timeFieldName, indexPatternId) => {
@@ -118,6 +126,7 @@ export class CreateIndexPatternWizard extends Component {
       isIncludingSystemIndices,
       step,
       indexPattern,
+      remoteClustersExist
     } = this.state;
 
     if (isInitiallyLoadingIndices) {
@@ -125,8 +134,8 @@ export class CreateIndexPatternWizard extends Component {
     }
 
     const hasDataIndices = allIndices.some(({ name }) => !name.startsWith('.'));
-    if (!hasDataIndices && !isIncludingSystemIndices) {
-      return <EmptyState onRefresh={this.fetchIndices} />;
+    if (!hasDataIndices && !isIncludingSystemIndices && !remoteClustersExist) {
+      return <EmptyState onRefresh={this.fetchData} />;
     }
 
     if (step === 1) {
