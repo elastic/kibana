@@ -262,4 +262,32 @@ describe('ML - validateModelMemoryLimit', () => {
     );
   });
 
+  it('Called with specified invalid mml of "1023KB"', () => {
+    const dtrs = createDetectors(1);
+    const job = getJobConfig(['instance'], dtrs);
+    const duration = { start: 0, end: 1 };
+    job.analysis_limits.model_memory_limit = '1023KB';
+
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql(['mml_value_invalid']);
+      }
+    );
+  });
+
+  it('Called with specified valid mml of "1024KB"', () => {
+    const dtrs = createDetectors(1);
+    const job = getJobConfig(['instance'], dtrs);
+    const duration = { start: 0, end: 1 };
+    job.analysis_limits.model_memory_limit = '1024KB';
+
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql(['estimated_mml_greater_than_mml']);
+      }
+    );
+  });
+
 });
