@@ -198,6 +198,13 @@ export class ImportView extends Component {
       });
 
       const id = await emptyPattern.create();
+
+      // check if there's a default index pattern, if not,
+      // set the newly created one as the defaut index pattern.
+      if (!this.props.kibanaConfig.get('defaultIndex')) {
+        await this.props.kibanaConfig.set('defaultIndex', id);
+      }
+
       return {
         success: true,
         id,
@@ -355,5 +362,3 @@ export class ImportView extends Component {
     );
   }
 }
-
-

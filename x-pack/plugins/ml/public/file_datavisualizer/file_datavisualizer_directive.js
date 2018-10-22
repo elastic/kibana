@@ -39,6 +39,8 @@ import { FileDataVisualizerPage } from './file_datavisualizer';
 module.directive('fileDatavisualizerPage', function ($injector) {
   const reactDirective = $injector.get('reactDirective');
   const indexPatterns = $injector.get('indexPatterns');
+  const kibanaConfig = $injector.get('config');
 
-  return reactDirective(FileDataVisualizerPage, undefined, { restrict: 'E' }, { indexPatterns });
+
+  return reactDirective(FileDataVisualizerPage, undefined, { restrict: 'E' }, { indexPatterns, kibanaConfig });
 });
