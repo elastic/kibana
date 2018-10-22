@@ -57,7 +57,7 @@ export class CreateIndexPatternWizard extends Component {
   }
 
   fetchData = async () => {
-    const { services, $http } = this.props;
+    const { services } = this.props;
 
     this.setState({
       allIndices: [],
@@ -67,7 +67,7 @@ export class CreateIndexPatternWizard extends Component {
 
     const [allIndicies, remoteClusters] = await ensureMinimumTime([
       getIndices(services.es, `*`, MAX_SEARCH_SIZE),
-      getRemoteClusters($http)
+      getRemoteClusters(services.$http)
     ]);
 
     this.setState({
