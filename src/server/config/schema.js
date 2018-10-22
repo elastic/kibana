@@ -244,11 +244,9 @@ export default () => Joi.object({
     }),
     profile: Joi.boolean().default(false)
   }).default(),
-
   status: Joi.object({
     allowAnonymous: Joi.boolean().default(false)
   }).default(),
-
   map: Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
     tilemap: tilemapSchema,
