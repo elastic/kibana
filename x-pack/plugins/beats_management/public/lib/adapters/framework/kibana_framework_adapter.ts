@@ -54,9 +54,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   };
 
   public render = (component: React.ReactElement<any>) => {
-    if (this.hadValidLicense() && this.securityEnabled()) {
-      this.rootComponent = component;
-    }
+    this.rootComponent = component;
   };
 
   public hadValidLicense() {
@@ -75,10 +73,10 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
-    if (this.hadValidLicense() && this.securityEnabled()) {
-      this.register(this.uiModule);
+    this.register(this.uiModule);
 
-      this.hookAngular(() => {
+    this.hookAngular(() => {
+      if (this.hadValidLicense() && this.securityEnabled()) {
         const registerSection = () =>
           this.management.register(pluginId, {
             display: 'Beats', // TODO these need to be config options not hard coded in the adapter
@@ -95,8 +93,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
           order: 30,
           url: `#${basePath}`,
         });
-      });
-    }
+      }
+    });
   }
 
   private manageAngularLifecycle($scope: any, $route: any, elem: any) {
