@@ -23,7 +23,7 @@ import { extname } from 'path';
 import * as parser from '@babel/parser';
 import traverse from '@babel/traverse';
 
-async function parseSingleFile(filePath, visitorsGenerator) {
+export async function _parseSingleFile(filePath, visitorsGenerator) {
   const results = [];
 
   // Don't parse any other files than .js ones
@@ -73,7 +73,7 @@ export async function parseEntries(build, entries, strategy, results, wasParsed 
     }
 
     // Find new entries and adds them to the end of the queue
-    entriesQueue.push(...(await strategy(build, parseSingleFile, mainEntry, wasParsed, results)));
+    entriesQueue.push(...(await strategy(build, _parseSingleFile, mainEntry, wasParsed, results)));
 
     // Mark the current main entry as already parsed
     wasParsed[mainEntry] = true;

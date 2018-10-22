@@ -21,7 +21,7 @@ import { canRequire } from './can_require';
 import { dependenciesVisitorsGenerator } from './visitors';
 import { dirname, isAbsolute } from 'path';
 
-function calculateTopLevelDependency(inputDep, outputDep = '') {
+export function _calculateTopLevelDependency(inputDep, outputDep = '') {
   // The path separator will be always the forward slash
   // as at this point we only have the found entries into
   // the provided source code entries where we just use it
@@ -45,7 +45,7 @@ function calculateTopLevelDependency(inputDep, outputDep = '') {
   // dependencies values with '@the-deps/a' and '@the-deps/a/b'
   // we don't want to map it to '@the-deps' but also to @'the-deps/a'
   // because inside '@the-deps' we can also have '@the-dep/b'
-  return calculateTopLevelDependency(depSplitPaths.join(pathSeparator), outputDep);
+  return _calculateTopLevelDependency(depSplitPaths.join(pathSeparator), outputDep);
 }
 
 export async function dependenciesParseStrategy(build, parseSingleFile, mainEntry, wasParsed, results) {
@@ -74,7 +74,7 @@ export async function dependenciesParseStrategy(build, parseSingleFile, mainEntr
     // not already parsed
     if (isNodeModuleDep) {
       // Save the result as the top level dependency
-      results[calculateTopLevelDependency(entry)] = true;
+      results[_calculateTopLevelDependency(entry)] = true;
 
       if (!wasParsed[requiredRelativePath]) {
         filteredEntries.push(requiredRelativePath);
