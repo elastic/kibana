@@ -57,6 +57,7 @@ export const RefreshControl = ({ inFlight, setRefreshInterval, refreshInterval, 
       {({ closePopover }) => (
         <div>
           <AutoRefreshControls
+            inFlight={inFlight}
             refreshInterval={refreshInterval}
             setRefresh={val => {
               setRefresh(val);
