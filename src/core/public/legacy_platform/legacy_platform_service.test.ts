@@ -86,6 +86,38 @@ jest.mock('ui/chrome/api/ui_settings', () => {
   };
 });
 
+const mockInjectedVarsInit = jest.fn();
+jest.mock('ui/chrome/api/injected_vars', () => {
+  mockLoadOrder.push('ui/chrome/api/injected_vars');
+  return {
+    __newPlatformInit__: mockInjectedVarsInit,
+  };
+});
+
+const mockChromeControlsInit = jest.fn();
+jest.mock('ui/chrome/api/controls', () => {
+  mockLoadOrder.push('ui/chrome/api/controls');
+  return {
+    __newPlatformInit__: mockChromeControlsInit,
+  };
+});
+
+const mockChromeThemeInit = jest.fn();
+jest.mock('ui/chrome/api/theme', () => {
+  mockLoadOrder.push('ui/chrome/api/theme');
+  return {
+    __newPlatformInit__: mockChromeThemeInit,
+  };
+});
+
+const mockGlobalNavStateInit = jest.fn();
+jest.mock('ui/chrome/services/global_nav_state', () => {
+  mockLoadOrder.push('ui/chrome/services/global_nav_state');
+  return {
+    __newPlatformInit__: mockGlobalNavStateInit,
+  };
+});
+
 import { LegacyPlatformService } from './legacy_platform_service';
 
 const fatalErrorsStartContract = {} as any;
@@ -110,6 +142,7 @@ const basePathStartContract = {
 };
 
 const uiSettingsStartContract: any = {};
+const chromeStartContract: any = {};
 
 const defaultParams = {
   targetDomElement: document.createElement('div'),
@@ -125,6 +158,7 @@ const defaultStartDeps = {
   loadingCount: loadingCountStartContract,
   basePath: basePathStartContract,
   uiSettings: uiSettingsStartContract,
+  chrome: chromeStartContract,
 };
 
 afterEach(() => {
@@ -203,6 +237,50 @@ describe('#start()', () => {
 
       expect(mockUiSettingsInit).toHaveBeenCalledTimes(1);
       expect(mockUiSettingsInit).toHaveBeenCalledWith(uiSettingsStartContract);
+    });
+
+    it('passes injectedMetadata service to ui/chrome/api/injected_vars', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockInjectedVarsInit).toHaveBeenCalledTimes(1);
+      expect(mockInjectedVarsInit).toHaveBeenCalledWith(injectedMetadataStartContract);
+    });
+
+    it('passes chrome service to ui/chrome/api/controls', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockChromeControlsInit).toHaveBeenCalledTimes(1);
+      expect(mockChromeControlsInit).toHaveBeenCalledWith(chromeStartContract);
+    });
+
+    it('passes chrome service to ui/chrome/api/theme', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockChromeThemeInit).toHaveBeenCalledTimes(1);
+      expect(mockChromeThemeInit).toHaveBeenCalledWith(chromeStartContract);
+    });
+
+    it('passes chrome service to ui/chrome/api/global_nav_state', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockGlobalNavStateInit).toHaveBeenCalledTimes(1);
+      expect(mockGlobalNavStateInit).toHaveBeenCalledWith(chromeStartContract);
     });
 
     describe('useLegacyTestHarness = false', () => {

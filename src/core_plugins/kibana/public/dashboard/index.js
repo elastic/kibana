@@ -51,7 +51,7 @@ uiRoutes
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
-    controller($injector, $location, $scope, Private, config) {
+    controller($injector, $location, $scope, Private, config, breadcrumbState) {
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
       const dashboardConfig = $injector.get('dashboardConfig');
 
@@ -64,6 +64,7 @@ uiRoutes
       };
       $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
       $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;
+      breadcrumbState.set([{ text: 'Dashboards' }]);
     },
     resolve: {
       dash: function ($route, Private, redirectWhenMissing, kbnUrl) {

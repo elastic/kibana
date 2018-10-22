@@ -49,7 +49,9 @@ import {
 
 import { isDefaultValue } from '../../lib';
 
-export class Field extends PureComponent {
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
+class FieldUI extends PureComponent {
 
   static propTypes = {
     setting: PropTypes.object.isRequired,
@@ -141,7 +143,11 @@ export class Field extends PureComponent {
           JSON.parse(newUnsavedValue);
         } catch (e) {
           isInvalid = true;
-          error = 'Invalid JSON syntax';
+          error = (
+            <FormattedMessage
+              id="kbn.management.settings.field.codeEditorSyntaxErrorMessage"
+              defaultMessage="Invalid JSON syntax"
+            />);
         }
         break;
       default:
@@ -208,12 +214,23 @@ export class Field extends PureComponent {
       const isInvalid = !!(maxSize && maxSize.length && base64Image.length > maxSize.length);
       this.setState({
         isInvalid,
-        error: isInvalid ? `Image is too large, maximum size is ${maxSize.description}` : null,
+        error: isInvalid
+          ? this.props.intl.formattedMessage({
+            id: 'kbn.management.settings.field.imageTooLargeErrorMessage',
+            defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}'
+          }, {
+            maxSizeDescription: maxSize.description
+          }) : null,
         changeImage: true,
         unsavedValue: base64Image,
       });
     } catch (err) {
-      toastNotifications.addDanger('Image could not be saved');
+      toastNotifications.addDanger(
+        this.props.intl.formatMessage({
+          id: 'kbn.management.settings.field.imageChangeErrorMessage',
+          defaultMessage: 'Image could not be saved'
+        })
+      );
       this.cancelChangeImage();
     }
   }
@@ -299,7 +316,13 @@ export class Field extends PureComponent {
         this.cancelChangeImage();
       }
     } catch (e) {
-      toastNotifications.addDanger(`Unable to save ${name}`);
+      toastNotifications.addDanger(
+        this.props.intl.formatMessage({
+          id: 'kbn.management.settings.field.saveFieldErrorMessage',
+          defaultMessage: 'Unable to save {name}'
+        },
+        { name })
+      );
     }
     this.setLoading(false);
   }
@@ -312,14 +335,20 @@ export class Field extends PureComponent {
       this.cancelChangeImage();
       this.clearError();
     } catch (e) {
-      toastNotifications.addDanger(`Unable to reset ${name}`);
+      toastNotifications.addDanger(
+        this.props.intl.formatMessage({
+          id: 'kbn.management.settings.field.resetFieldErrorMessage',
+          defaultMessage: 'Unable to reset {name}'
+        },
+        { name })
+      );
     }
     this.setLoading(false);
   }
 
   renderField(setting) {
     const { loading, changeImage, unsavedValue } = this.state;
-    const { name, value, type, options, isOverridden } = setting;
+    const { name, value, type, options, isOverridden, ariaName } = setting;
 
     switch (type) {
       case 'boolean':
@@ -331,6 +360,7 @@ export class Field extends PureComponent {
             disabled={loading || isOverridden}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
+            aria-label={ariaName}
           />
         );
       case 'markdown':
@@ -338,6 +368,7 @@ export class Field extends PureComponent {
         return (
           <div data-test-subj={`advancedSetting-editField-${name}`}>
             <EuiCodeEditor
+              aria-label={ariaName}
               mode={type}
               theme="textmate"
               value={unsavedValue}
@@ -362,6 +393,7 @@ export class Field extends PureComponent {
         if (!isDefaultValue(setting) && !changeImage) {
           return (
             <EuiImage
+              aria-label={ariaName}
               allowFullScreen
               url={value}
               alt={name}
@@ -382,6 +414,7 @@ export class Field extends PureComponent {
       case 'select':
         return (
           <EuiSelect
+            aria-label={ariaName}
             value={unsavedValue}
             options={options.map((text) => {
               return { text, value: text };
@@ -396,6 +429,7 @@ export class Field extends PureComponent {
       case 'number':
         return (
           <EuiFieldNumber
+            aria-label={ariaName}
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
@@ -407,6 +441,7 @@ export class Field extends PureComponent {
       default:
         return (
           <EuiFieldText
+            aria-label={ariaName}
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
@@ -419,18 +454,17 @@ export class Field extends PureComponent {
   }
 
   renderLabel(setting) {
-    return (
-      <span aria-label={setting.ariaName}>
-        {setting.name}
-      </span>
-    );
+    return setting.name;
   }
 
   renderHelpText(setting) {
     if (setting.isOverridden) {
       return (
         <EuiText size="xs">
-          This setting is overriden by the Kibana server and can not be changed.
+          <FormattedMessage
+            id="kbn.management.settings.field.helpText"
+            defaultMessage="This setting is overriden by the Kibana server and can not be changed."
+          />
         </EuiText>
       );
     }
@@ -455,7 +489,18 @@ export class Field extends PureComponent {
       <h3>
         {setting.displayName || setting.name}
         {setting.isCustom ?
-          <EuiIconTip type="asterisk" color="primary" aria-label="Custom setting" content="Custom setting" />
+          <EuiIconTip
+            type="asterisk"
+            color="primary"
+            aria-label={this.props.intl.formatMessage({
+              id: 'kbn.management.settings.field.customSettingAriaLabel',
+              defaultMessage: 'Custom setting',
+            })}
+            content={(<FormattedMessage
+              id="kbn.management.settings.field.customSettingTooltip"
+              defaultMessage="Custom setting"
+            />)}
+          />
           : ''}
       </h3>
     );
@@ -497,18 +542,31 @@ export class Field extends PureComponent {
         <EuiText size="xs">
           {type === 'json' ? (
             <Fragment>
-              Default:
-              <EuiCodeBlock
-                language="json"
-                paddingSize="s"
-                overflowHeight={defVal.length >= 500 ? 300 : null}
-              >
-                {this.getDisplayedDefaultValue(type, defVal)}
-              </EuiCodeBlock>
+              <FormattedMessage
+                id="kbn.management.settings.field.defaultValueTypeJsonText"
+                defaultMessage="Default: {value}"
+                values={{
+                  value: (
+                    <EuiCodeBlock
+                      language="json"
+                      paddingSize="s"
+                      overflowHeight={defVal.length >= 500 ? 300 : null}
+                    >
+                      {this.getDisplayedDefaultValue(type, defVal)}
+                    </EuiCodeBlock>
+                  )
+                }}
+              />
             </Fragment>
           ) : (
             <Fragment>
-                Default: <EuiCode>{this.getDisplayedDefaultValue(type, defVal)}</EuiCode>
+              <FormattedMessage
+                id="kbn.management.settings.field.defaultValueText"
+                defaultMessage="Default: {value}"
+                values={{
+                  value: (<EuiCode>{this.getDisplayedDefaultValue(type, defVal)}</EuiCode>),
+                }}
+              />
             </Fragment>
           )}
         </EuiText>
@@ -524,11 +582,20 @@ export class Field extends PureComponent {
     return (
       <span>
         <EuiLink
-          aria-label={`Reset ${ariaName} to default`}
+          aria-label={this.props.intl.formatMessage({
+            id: 'kbn.management.settings.field.resetToDefaultLinkAriaLabel',
+            defaultMessage: 'Reset {ariaName} to default',
+          },
+          {
+            ariaName,
+          })}
           onClick={this.resetField}
           data-test-subj={`advancedSetting-resetField-${name}`}
         >
-          Reset to default
+          <FormattedMessage
+            id="kbn.management.settings.field.resetToDefaultLinkText"
+            defaultMessage="Reset to default"
+          />
         </EuiLink>
         &nbsp;&nbsp;&nbsp;
       </span>
@@ -544,11 +611,20 @@ export class Field extends PureComponent {
     return (
       <span>
         <EuiLink
-          aria-label={`Change ${ariaName}`}
+          aria-label={this.props.intl.formatMessage({
+            id: 'kbn.management.settings.field.changeImageLinkAriaLabel',
+            defaultMessage: 'Change {ariaName}',
+          },
+          {
+            ariaName,
+          })}
           onClick={this.changeImage}
           data-test-subj={`advancedSetting-changeImage-${name}`}
         >
-          Change image
+          <FormattedMessage
+            id="kbn.management.settings.field.changeImageLinkText"
+            defaultMessage="Change image"
+          />
         </EuiLink>
       </span>
     );
@@ -558,33 +634,52 @@ export class Field extends PureComponent {
     const { ariaName, name } = setting;
     const { loading, isInvalid, changeImage, savedValue, unsavedValue } = this.state;
     const isDisabled = loading || setting.isOverridden;
+    const { intl } = this.props;
 
     if (savedValue === unsavedValue && !changeImage) {
       return;
     }
 
     return (
-      <EuiFormRow className="advancedSettings__field__actions">
+      <EuiFormRow className="mgtAdvancedSettings__fieldActions" hasEmptyLabelSpace>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              aria-label={`Save ${ariaName}`}
+              aria-label={intl.formatMessage({
+                id: 'kbn.management.settings.field.saveButtonAriaLabel',
+                defaultMessage: 'Save {ariaName}',
+              },
+              {
+                ariaName,
+              })}
               onClick={this.saveEdit}
               disabled={isDisabled || isInvalid}
               data-test-subj={`advancedSetting-saveEditField-${name}`}
             >
-              Save
+              <FormattedMessage
+                id="kbn.management.settings.field.saveButtonLabel"
+                defaultMessage="Save"
+              />
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              aria-label={`Cancel editing ${ariaName}`}
+              aria-label={intl.formatMessage({
+                id: 'kbn.management.settings.field.cancelEditingButtonAriaLabel',
+                defaultMessage: 'Cancel editing {ariaName}',
+              },
+              {
+                ariaName,
+              })}
               onClick={() => changeImage ? this.cancelChangeImage() : this.cancelEdit()}
               disabled={isDisabled}
               data-test-subj={`advancedSetting-cancelEditField-${name}`}
             >
-              Cancel
+              <FormattedMessage
+                id="kbn.management.settings.field.cancelEditingButtonLabel"
+                defaultMessage="Cancel"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -597,10 +692,10 @@ export class Field extends PureComponent {
     const { error, isInvalid } = this.state;
 
     return (
-      <EuiFlexGroup className="advancedSettings__field">
+      <EuiFlexGroup className="mgtAdvancedSettings__field">
         <EuiFlexItem grow={false}>
           <EuiDescribedFormGroup
-            className="advancedSettings__field__wrapper"
+            className="mgtAdvancedSettings__fieldWrapper"
             title={this.renderTitle(setting)}
             description={this.renderDescription(setting)}
             idAria={`${setting.name}-aria`}
@@ -623,3 +718,5 @@ export class Field extends PureComponent {
     );
   }
 }
+
+export const Field = injectI18n(FieldUI);

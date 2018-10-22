@@ -24,8 +24,6 @@ import { toastNotifications } from 'ui/notify';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiButton,
@@ -67,7 +65,7 @@ class DashboardAddPanelUi extends React.Component {
           key="visSavedObjectFinder"
           callToActionButton={addNewVisBtn}
           onChoose={this.onAddPanel}
-          find={this.props.find}
+          visTypes={this.props.visTypes}
           noItemsMessage={props.intl.formatMessage({
             id: 'kbn.dashboard.topNav.addPanel.visSavedObjectFinder.noMatchingVisualizationsMessage',
             defaultMessage: 'No matching visualizations found.',
@@ -87,7 +85,6 @@ class DashboardAddPanelUi extends React.Component {
         <SavedObjectFinder
           key="searchSavedObjectFinder"
           onChoose={this.onAddPanel}
-          find={this.props.find}
           noItemsMessage={props.intl.formatMessage({
             id: 'kbn.dashboard.topNav.addPanel.searchSavedObjectFinder.noMatchingVisualizationsMessage',
             defaultMessage: 'No matching saved searches found.',
@@ -155,17 +152,14 @@ class DashboardAddPanelUi extends React.Component {
       >
         <EuiFlyoutBody>
 
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle>
-                <FormattedMessage
-                  id="kbn.dashboard.topNav.addPanel.title"
-                  defaultMessage="Add Panels"
-                  tagName="h2"
-                />
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTitle size="s">
+            <h1>
+              <FormattedMessage
+                id="kbn.dashboard.topNav.addPanel.title"
+                defaultMessage="Add Panels"
+              />
+            </h1>
+          </EuiTitle>
 
           <EuiTabs>
             {this.renderTabs()}
@@ -183,7 +177,7 @@ class DashboardAddPanelUi extends React.Component {
 
 DashboardAddPanelUi.propTypes = {
   onClose: PropTypes.func.isRequired,
-  find: PropTypes.func.isRequired,
+  visTypes: PropTypes.object.isRequired,
   addNewPanel: PropTypes.func.isRequired,
   addNewVis: PropTypes.func.isRequired,
 };

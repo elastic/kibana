@@ -25,7 +25,6 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
-import './less/main.less';
 import appTemplate from './templates/index.html';
 
 import './angular-venn-simple.js';

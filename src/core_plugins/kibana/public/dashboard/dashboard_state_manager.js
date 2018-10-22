@@ -38,6 +38,7 @@ import {
   clearStagedFilters,
   updateFilters,
   updateQuery,
+  closeContextMenu,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
@@ -101,6 +102,8 @@ export class DashboardStateManager {
     PanelUtils.initPanelIndexes(this.getPanels());
 
     this.createStateMonitor();
+
+    store.dispatch(closeContextMenu());
 
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());

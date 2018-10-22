@@ -46,6 +46,14 @@ export async function setupMocha(lifecycle, log, config, providers) {
     await lifecycle.trigger('beforeEachTest');
   });
 
-  loadTestFiles(mocha, log, lifecycle, providers, config.get('testFiles'), config.get('updateBaselines'));
+  loadTestFiles({
+    mocha,
+    log,
+    lifecycle,
+    providers,
+    paths: config.get('testFiles'),
+    excludePaths: config.get('excludeTestFiles'),
+    updateBaselines: config.get('updateBaselines'),
+  });
   return mocha;
 }

@@ -43,6 +43,17 @@ describe('dev/i18n/extractors/html', () => {
     expect(actual.sort()).toMatchSnapshot();
   });
 
+  test('extracts default messages from HTML with one-time binding', () => {
+    const actual = Array.from(
+      extractHtmlMessages(`
+<div>
+  {{::'kbn.id' | i18n: { defaultMessage: 'Message text with {value}', values: { value: 'value' } }}}
+</div>
+`)
+    );
+    expect(actual.sort()).toMatchSnapshot();
+  });
+
   test('throws on empty i18n-id', () => {
     const source = Buffer.from(`\
 <p

@@ -50,14 +50,21 @@ export const filters = {
     addItems,
     removeItems
   ) {
+    const data = {};
+    if (description !== undefined) {
+      data.description = description;
+    }
+    if (addItems !== undefined) {
+      data.addItems = addItems;
+    }
+    if (removeItems !== undefined) {
+      data.removeItems = removeItems;
+    }
+
     return http({
       url: `${basePath}/filters/${filterId}`,
       method: 'PUT',
-      data: {
-        description,
-        addItems,
-        removeItems
-      }
+      data
     });
   },
 

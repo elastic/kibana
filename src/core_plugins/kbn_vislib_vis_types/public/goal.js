@@ -22,16 +22,17 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import gaugeTemplate from './editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import image from './images/icon-goal.svg';
 
-export default function GoalVisType(Private) {
+export default function GoalVisType(Private, i18n) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'goal',
-    title: 'Goal',
-    image,
-    description: 'A goal chart indicates how close you are to your final goal.',
+    title: i18n('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
+    icon: 'visGoal',
+    description: i18n('kbnVislibVisTypes.goal.goalDescription', {
+      defaultMessage: 'A goal chart indicates how close you are to your final goal.'
+    }),
     category: CATEGORY.DATA,
     visConfig: {
       defaults: {
@@ -87,7 +88,7 @@ export default function GoalVisType(Private) {
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Metric',
+          title: i18n('kbnVislibVisTypes.goal.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
           aggFilter: [
             '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
@@ -99,7 +100,7 @@ export default function GoalVisType(Private) {
         {
           group: 'buckets',
           name: 'group',
-          title: 'Split Group',
+          title: i18n('kbnVislibVisTypes.goal.groupTitle', { defaultMessage: 'Split Group' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!filter']

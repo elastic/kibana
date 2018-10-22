@@ -4,94 +4,85 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq } from 'lodash';
-import { ALL_RESOURCE } from '../../../common/constants';
-import { buildLegacyIndexPrivileges } from './privileges';
+import { pick, transform, uniq } from 'lodash';
+import { GLOBAL_RESOURCE } from '../../../common/constants';
+import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
 import { validateEsPrivilegeResponse } from './validate_es_response';
 
-export const CHECK_PRIVILEGES_RESULT = {
-  UNAUTHORIZED: Symbol('Unauthorized'),
-  AUTHORIZED: Symbol('Authorized'),
-  LEGACY: Symbol('Legacy'),
-};
-
-export function checkPrivilegesWithRequestFactory(shieldClient, config, actions, application) {
+export function checkPrivilegesWithRequestFactory(actions, application, shieldClient) {
   const { callWithRequest } = shieldClient;
 
-  const kibanaIndex = config.get('kibana.index');
-
   const hasIncompatibileVersion = (applicationPrivilegesResponse) => {
-    return !applicationPrivilegesResponse[actions.version] && applicationPrivilegesResponse[actions.login];
-  };
-
-  const hasAllApplicationPrivileges = (applicationPrivilegesResponse) => {
-    return Object.values(applicationPrivilegesResponse).every(val => val === true);
-  };
-
-  const hasNoApplicationPrivileges = (applicationPrivilegesResponse) => {
-    return Object.values(applicationPrivilegesResponse).every(val => val === false);
-  };
-
-  const isLegacyFallbackEnabled = () => {
-    return config.get('xpack.security.authorization.legacyFallback.enabled');
-  };
-
-  const hasLegacyPrivileges = (indexPrivilegesResponse) => {
-    return Object.values(indexPrivilegesResponse).includes(true);
-  };
-
-  const determineResult = (applicationPrivilegesResponse, indexPrivilegesResponse) => {
-    if (hasAllApplicationPrivileges(applicationPrivilegesResponse)) {
-      return CHECK_PRIVILEGES_RESULT.AUTHORIZED;
-    }
-
-    if (
-      isLegacyFallbackEnabled() &&
-      hasNoApplicationPrivileges(applicationPrivilegesResponse) &&
-      hasLegacyPrivileges(indexPrivilegesResponse)
-    ) {
-      return CHECK_PRIVILEGES_RESULT.LEGACY;
-    }
-
-    return CHECK_PRIVILEGES_RESULT.UNAUTHORIZED;
+    return Object.values(applicationPrivilegesResponse).some(resource => !resource[actions.version] && resource[actions.login]);
   };
 
   return function checkPrivilegesWithRequest(request) {
 
-    return async function checkPrivileges(privileges) {
+    const checkPrivilegesAtResources = async (resources, privilegeOrPrivileges) => {
+      const privileges = Array.isArray(privilegeOrPrivileges) ? privilegeOrPrivileges : [privilegeOrPrivileges];
       const allApplicationPrivileges = uniq([actions.version, actions.login, ...privileges]);
+
       const hasPrivilegesResponse = await callWithRequest(request, 'shield.hasPrivileges', {
         body: {
           applications: [{
             application,
-            resources: [ALL_RESOURCE],
+            resources,
             privileges: allApplicationPrivileges
-          }],
-          index: [{
-            names: [kibanaIndex],
-            privileges: buildLegacyIndexPrivileges()
           }],
         }
       });
 
-      validateEsPrivilegeResponse(hasPrivilegesResponse, application, allApplicationPrivileges, [ALL_RESOURCE], kibanaIndex);
+      validateEsPrivilegeResponse(hasPrivilegesResponse, application, allApplicationPrivileges, resources);
 
-      const applicationPrivilegesResponse = hasPrivilegesResponse.application[application][ALL_RESOURCE];
-      const indexPrivilegesResponse = hasPrivilegesResponse.index[kibanaIndex];
+      const applicationPrivilegesResponse = hasPrivilegesResponse.application[application];
 
       if (hasIncompatibileVersion(applicationPrivilegesResponse)) {
         throw new Error('Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.');
       }
 
       return {
-        result: determineResult(applicationPrivilegesResponse, indexPrivilegesResponse),
+        hasAllRequested: hasPrivilegesResponse.has_all_requested,
         username: hasPrivilegesResponse.username,
-
-        // we only return missing privileges that they're specifically checking for
-        missing: Object.keys(applicationPrivilegesResponse)
-          .filter(privilege => privileges.includes(privilege))
-          .filter(privilege => !applicationPrivilegesResponse[privilege])
+        // we need to filter out the non requested privileges from the response
+        resourcePrivileges: transform(applicationPrivilegesResponse, (result, value, key) => {
+          result[key] = pick(value, privileges);
+        }),
       };
+    };
+
+    const checkPrivilegesAtResource = async (resource, privilegeOrPrivileges) => {
+      const { hasAllRequested, username, resourcePrivileges } = await checkPrivilegesAtResources([resource], privilegeOrPrivileges);
+      return {
+        hasAllRequested,
+        username,
+        privileges: resourcePrivileges[resource],
+      };
+    };
+
+    return {
+      // TODO: checkPrivileges.atResources isn't necessary once we have the ES API to list all privileges
+      // this should be removed when we switch to this API, and is not covered by unit tests currently
+      atResources: checkPrivilegesAtResources,
+      async atSpace(spaceId, privilegeOrPrivileges) {
+        const spaceResource = spaceApplicationPrivilegesSerializer.resource.serialize(spaceId);
+        return await checkPrivilegesAtResource(spaceResource, privilegeOrPrivileges);
+      },
+      async atSpaces(spaceIds, privilegeOrPrivileges) {
+        const spaceResources = spaceIds.map(spaceId => spaceApplicationPrivilegesSerializer.resource.serialize(spaceId));
+        const { hasAllRequested, username, resourcePrivileges } = await checkPrivilegesAtResources(spaceResources, privilegeOrPrivileges);
+        return {
+          hasAllRequested,
+          username,
+          // we need to turn the resource responses back into the space ids
+          spacePrivileges: transform(resourcePrivileges, (result, value, key) => {
+            result[spaceApplicationPrivilegesSerializer.resource.deserialize(key)] = value;
+          }),
+        };
+
+      },
+      async globally(privilegeOrPrivileges) {
+        return await checkPrivilegesAtResource(GLOBAL_RESOURCE, privilegeOrPrivileges);
+      },
     };
   };
 }

@@ -17,6 +17,32 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
           "title": "rule",
         },
         Object {
+          "description": <EditConditionLink
+            anomaly={
+              Object {
+                "actual": Array [
+                  50,
+                ],
+                "detectorIndex": 0,
+                "source": Object {
+                  "airline": Array [
+                    "AAL",
+                  ],
+                  "function": "mean",
+                },
+                "typical": Array [
+                  1.23,
+                ],
+              }
+            }
+            appliesTo="actual"
+            conditionIndex={0}
+            conditionValue={1}
+            updateConditionValue={[Function]}
+          />,
+          "title": "actions",
+        },
+        Object {
           "description": <EuiLink
             color="primary"
             onClick={[Function]}
@@ -24,11 +50,11 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
           >
             Edit rule
           </EuiLink>,
-          "title": "actions",
+          "title": "",
         },
         Object {
           "description": <DeleteRuleModal
-            deleteRuleAtIndex={[Function]}
+            deleteRuleAtIndex={[MockFunction]}
             ruleIndex={0}
           />,
           "title": "",
@@ -41,7 +67,7 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
 </EuiPanel>
 `;
 
-exports[`RuleActionPanel renders panel for rule with a condition and scope  1`] = `
+exports[`RuleActionPanel renders panel for rule with a condition and scope, value not in filter list 1`] = `
 <EuiPanel
   className="select-rule-action-panel"
   grow={true}
@@ -54,8 +80,16 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope  1`] 
     listItems={
       Array [
         Object {
-          "description": "skip model update when actual is greater than 500 AND instance is not in eu-airlines",
+          "description": "skip model update when airline is not in eu-airlines",
           "title": "rule",
+        },
+        Object {
+          "description": <AddToFilterListLink
+            addItemToFilterList={[MockFunction]}
+            fieldValue="AAL"
+            filterId="eu-airlines"
+          />,
+          "title": "actions",
         },
         Object {
           "description": <EuiLink
@@ -65,12 +99,12 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope  1`] 
           >
             Edit rule
           </EuiLink>,
-          "title": "actions",
+          "title": "",
         },
         Object {
           "description": <DeleteRuleModal
-            deleteRuleAtIndex={[Function]}
-            ruleIndex={2}
+            deleteRuleAtIndex={[MockFunction]}
+            ruleIndex={1}
           />,
           "title": "",
         },
@@ -82,7 +116,7 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope  1`] 
 </EuiPanel>
 `;
 
-exports[`RuleActionPanel renders panel for rule with scope  1`] = `
+exports[`RuleActionPanel renders panel for rule with scope, value in filter list 1`] = `
 <EuiPanel
   className="select-rule-action-panel"
   grow={true}
@@ -95,7 +129,7 @@ exports[`RuleActionPanel renders panel for rule with scope  1`] = `
     listItems={
       Array [
         Object {
-          "description": "skip model update when instance is not in eu-airlines",
+          "description": "skip model update when airline is not in eu-airlines",
           "title": "rule",
         },
         Object {
@@ -110,7 +144,7 @@ exports[`RuleActionPanel renders panel for rule with scope  1`] = `
         },
         Object {
           "description": <DeleteRuleModal
-            deleteRuleAtIndex={[Function]}
+            deleteRuleAtIndex={[MockFunction]}
             ruleIndex={1}
           />,
           "title": "",

@@ -38,8 +38,6 @@ require('plugins/timelion/directives/timelion_expression_input');
 require('plugins/timelion/directives/timelion_help/timelion_help');
 require('plugins/timelion/directives/timelion_interval/timelion_interval');
 
-require('plugins/timelion/app.less');
-
 document.title = 'Timelion - Kibana';
 
 const app = require('ui/modules').get('apps/timelion', []);

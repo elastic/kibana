@@ -60,6 +60,8 @@ export const schema = Joi.object().keys({
     otherwise: Joi.default([]),
   }),
 
+  excludeTestFiles: Joi.array().items(Joi.string()).default([]),
+
   services: Joi.object().pattern(
     ID_PATTERN,
     Joi.func().required()

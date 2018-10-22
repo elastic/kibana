@@ -21,18 +21,8 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
+import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import {
-  EuiButton,
-  EuiFieldText,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiOverlayMask,
-  EuiSpacer,
-  EuiCallOut,
-  EuiForm,
   EuiFormRow,
   EuiTextArea,
   EuiSwitch,
@@ -43,56 +33,19 @@ class DashboardSaveModalUi extends React.Component {
     super(props);
 
     this.state = {
-      title: props.title,
       description: props.description,
-      copyOnSave: false,
       timeRestore: props.timeRestore,
-      isTitleDuplicateConfirmed: false,
-      hasTitleDuplicate: false,
-      isLoading: false,
     };
   }
-  componentDidMount() {
-    this._isMounted = true;
-  }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  onTitleDuplicate = () => {
-    this.setState({
-      isLoading: false,
-      isTitleDuplicateConfirmed: true,
-      hasTitleDuplicate: true,
-    });
-  }
-
-  saveDashboard = async () => {
-    if (this.state.isLoading) {
-      // ignore extra clicks
-      return;
-    }
-
-    this.setState({
-      isLoading: true,
-    });
-
-    await this.props.onSave({
-      newTitle: this.state.title,
+  saveDashboard = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+    this.props.onSave({
+      newTitle,
       newDescription: this.state.description,
-      newCopyOnSave: this.state.copyOnSave,
+      newCopyOnSave,
       newTimeRestore: this.state.timeRestore,
-      isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
-      onTitleDuplicate: this.onTitleDuplicate,
-    });
-  };
-
-  onTitleChange = (event) => {
-    this.setState({
-      title: event.target.value,
-      isTitleDuplicateConfirmed: false,
-      hasTitleDuplicate: false,
+      isTitleDuplicateConfirmed,
+      onTitleDuplicate,
     });
   };
 
@@ -102,178 +55,59 @@ class DashboardSaveModalUi extends React.Component {
     });
   };
 
-  onCopyOnSaveChange = (event) => {
-    this.setState({
-      copyOnSave: event.target.checked,
-    });
-  }
-
   onTimeRestoreChange = (event) => {
     this.setState({
       timeRestore: event.target.checked,
     });
   }
 
-  renderDuplicateTitleCallout = () => {
-    if (!this.state.hasTitleDuplicate) {
-      return;
-    }
-
+  renderDashboardSaveOptions() {
     return (
       <Fragment>
-        <EuiCallOut
-          title={this.props.intl.formatMessage({
-            id: 'kbn.dashboard.topNav.saveModal.dashboardWIthTitleExistsCallOurTitle',
-            defaultMessage: 'A Dashboard with the title \'{title}\' already exists.',
-            values: {
-              title: this.state.title,
-            },
-          })}
-          color="warning"
-          data-test-subj="titleDupicateWarnMsg"
+        <EuiFormRow
+          label={<FormattedMessage
+            id="kbn.dashboard.topNav.saveModal.descriptionFormRowLabel"
+            defaultMessage="Description"
+          />}
         >
-          <FormattedMessage
-            id="kbn.dashboard.topNav.saveModal.clickConfirmToSaveDashboardWithDuplicateTitleDescription"
-            defaultMessage="Click {confirmSave} to save the dashboard with the duplicate title."
-            values={{
-              confirmSave: (
-                <strong>
-                  <FormattedMessage
-                    id="kbn.dashboard.topNav.saveModal.confirmSaveText"
-                    defaultMessage="Confirm Save"
-                  />
-                </strong>
-              )
-            }}
-            tagName="p"
+          <EuiTextArea
+            data-test-subj="dashboardDescription"
+            value={this.state.description}
+            onChange={this.onDescriptionChange}
+            compressed
           />
-        </EuiCallOut>
-        <EuiSpacer />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={<FormattedMessage
+            id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+            defaultMessage="Store time with dashboard"
+          />}
+          helpText={<FormattedMessage
+            id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
+            defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
+          />}
+        >
+          <EuiSwitch
+            data-test-subj="storeTimeWithDashboard"
+            checked={this.state.timeRestore}
+            onChange={this.onTimeRestoreChange}
+          />
+        </EuiFormRow>
       </Fragment>
-    );
-  }
-
-  renderCopyOnSave = () => {
-    if (!this.props.showCopyOnSave) {
-      return;
-    }
-
-    return (
-      <EuiFormRow
-        label={this.props.intl.formatMessage({
-          id: 'kbn.dashboard.topNav.saveModal.saveAsNewDashboardFormRow.label',
-          defaultMessage: 'Save as a new dashboard',
-        })}
-      >
-        <EuiSwitch
-          data-test-subj="saveAsNewCheckbox"
-          checked={this.state.copyOnSave}
-          onChange={this.onCopyOnSaveChange}
-        />
-      </EuiFormRow>
     );
   }
 
   render() {
     return (
-      <EuiOverlayMask>
-        <EuiModal
-          data-test-subj="dashboardSaveModal"
-          className="dshSaveModal"
-          onClose={this.props.onClose}
-        >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="kbn.dashboard.topNav.saveModal.saveDashboardModalHeaderTitle"
-                defaultMessage="Save Dashboard"
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>
-
-            {this.renderDuplicateTitleCallout()}
-
-            <EuiForm>
-
-              {this.renderCopyOnSave()}
-
-              <EuiFormRow
-                label={this.props.intl.formatMessage({
-                  id: 'kbn.dashboard.topNav.saveModal.titleFormRow.label',
-                  defaultMessage: 'Title',
-                })}
-              >
-                <EuiFieldText
-                  autoFocus
-                  data-test-subj="dashboardTitle"
-                  value={this.state.title}
-                  onChange={this.onTitleChange}
-                  isInvalid={this.state.hasTitleDuplicate}
-                />
-              </EuiFormRow>
-
-              <EuiFormRow
-                label={this.props.intl.formatMessage({
-                  id: 'kbn.dashboard.topNav.saveModal.descriptionFormRow.label',
-                  defaultMessage: 'Description',
-                })}
-              >
-                <EuiTextArea
-                  data-test-subj="dashboardDescription"
-                  value={this.state.description}
-                  onChange={this.onDescriptionChange}
-                  compressed
-                />
-              </EuiFormRow>
-
-              <EuiFormRow
-                label={this.props.intl.formatMessage({
-                  id: 'kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRow.label',
-                  defaultMessage: 'Store time with dashboard',
-                })}
-                helpText={this.props.intl.formatMessage({
-                  id: 'kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRow.helpText',
-                  defaultMessage: 'This changes the time filter to the currently selected time each time this dashboard is loaded.',
-                })}
-              >
-                <EuiSwitch
-                  data-test-subj="storeTimeWithDashboard"
-                  checked={this.state.timeRestore}
-                  onChange={this.onTimeRestoreChange}
-                />
-              </EuiFormRow>
-
-            </EuiForm>
-
-          </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButton
-              data-test-subj="saveCancelButton"
-              onClick={this.props.onClose}
-            >
-              <FormattedMessage
-                id="kbn.dashboard.topNav.saveModal.saveDashboardCancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButton>
-
-            <EuiButton
-              fill
-              data-test-subj="confirmSaveDashboardButton"
-              onClick={this.saveDashboard}
-              isLoading={this.state.isLoading}
-            >
-              <FormattedMessage
-                id="kbn.dashboard.topNav.saveModal.saveDashboardConfirmButtonLabel"
-                defaultMessage="Confirm Save"
-              />
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+      <SavedObjectSaveModal
+        onSave={this.saveDashboard}
+        onClose={this.props.onClose}
+        title={this.props.title}
+        showCopyOnSave={this.props.showCopyOnSave}
+        objectType="dashboard"
+        options={this.renderDashboardSaveOptions()}
+      />
     );
   }
 }

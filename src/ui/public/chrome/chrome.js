@@ -33,16 +33,16 @@ import './services';
 
 import { initAngularApi } from './api/angular';
 import appsApi from './api/apps';
-import controlsApi from './api/controls';
+import { initChromeControlsApi } from './api/controls';
 import { initChromeNavApi } from './api/nav';
 import templateApi from './api/template';
-import themeApi from './api/theme';
-import translationsApi from './api/translations';
+import { initChromeThemeApi } from './api/theme';
 import { initChromeXsrfApi } from './api/xsrf';
 import { initUiSettingsApi } from './api/ui_settings';
 import { initLoadingCountApi } from './api/loading_count';
 import { initSavedObjectClient } from './api/saved_object_client';
 import { initChromeBasePathApi } from './api/base_path';
+import { initChromeInjectedVarsApi } from './api/injected_vars';
 
 export const chrome = {};
 const internals = _.defaults(
@@ -65,13 +65,13 @@ initSavedObjectClient(chrome);
 appsApi(chrome, internals);
 initChromeXsrfApi(chrome, internals);
 initChromeBasePathApi(chrome);
+initChromeInjectedVarsApi(chrome);
 initChromeNavApi(chrome, internals);
 initLoadingCountApi(chrome, internals);
 initAngularApi(chrome, internals);
-controlsApi(chrome, internals);
+initChromeControlsApi(chrome);
 templateApi(chrome, internals);
-themeApi(chrome, internals);
-translationsApi(chrome, internals);
+initChromeThemeApi(chrome);
 
 const waitForBootstrap = new Promise(resolve => {
   chrome.bootstrap = function (targetDomElement) {
@@ -80,6 +80,9 @@ const waitForBootstrap = new Promise(resolve => {
     // and such setup by all other modules
     require('uiExports/chromeNavControls');
     require('uiExports/hacks');
+
+    // sets attribute on body for stylesheet sandboxing
+    document.body.setAttribute('id', `${internals.app.id}-app`);
 
     chrome.setupAngular();
     targetDomElement.setAttribute('id', 'kibana-body');

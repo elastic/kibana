@@ -191,6 +191,7 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
     <EuiButtonIcon
       aria-label="Next"
       color="danger"
+      iconSize="m"
       iconType="trash"
       onClick={[Function]}
       size="s"
@@ -389,6 +390,7 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
     <EuiButtonIcon
       aria-label="Next"
       color="danger"
+      iconSize="m"
       iconType="trash"
       onClick={[Function]}
       size="s"
