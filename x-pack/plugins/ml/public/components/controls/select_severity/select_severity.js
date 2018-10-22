@@ -22,7 +22,7 @@ import {
 
 import './styles/main.less';
 
-import { getSeverityColor } from 'plugins/ml/../common/util/anomaly_utils';
+import { getSeverityColor } from '../../../../common/util/anomaly_utils';
 
 const OPTIONS = [
   { val: 0, display: 'warning', color: getSeverityColor(0) },
