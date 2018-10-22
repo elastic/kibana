@@ -158,7 +158,7 @@ describe('ML - validateModelMemoryLimit', () => {
     return validateModelMemoryLimit(callWithRequest, job, duration).then(
       (messages) => {
         const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['estimated_mml_greater_than_mml']);
+        expect(ids).to.eql(['half_estimated_mml_greater_than_mml']);
       }
     );
   });
@@ -173,7 +173,7 @@ describe('ML - validateModelMemoryLimit', () => {
     return validateModelMemoryLimit(callWithRequest, job, duration).then(
       (messages) => {
         const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['estimated_mml_greater_than_mml']);
+        expect(ids).to.eql(['half_estimated_mml_greater_than_mml']);
       }
     );
   });
@@ -276,7 +276,7 @@ describe('ML - validateModelMemoryLimit', () => {
     );
   });
 
-  it('Called with specified valid mml of "1024KB"', () => {
+  it('Called with specified valid mml of "1024KB", still triggers a warning', () => {
     const dtrs = createDetectors(1);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
@@ -285,7 +285,35 @@ describe('ML - validateModelMemoryLimit', () => {
     return validateModelMemoryLimit(callWithRequest, job, duration).then(
       (messages) => {
         const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['estimated_mml_greater_than_mml']);
+        expect(ids).to.eql(['half_estimated_mml_greater_than_mml']);
+      }
+    );
+  });
+
+  it('Called with specified valid mml of "6MB", still triggers info', () => {
+    const dtrs = createDetectors(1);
+    const job = getJobConfig(['instance'], dtrs);
+    const duration = { start: 0, end: 1 };
+    job.analysis_limits.model_memory_limit = '6MB';
+
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql(['half_estimated_mml_greater_than_mml']);
+      }
+    );
+  });
+
+  it('Called with specified valid mml of "20MB", triggers success message', () => {
+    const dtrs = createDetectors(1);
+    const job = getJobConfig(['instance'], dtrs);
+    const duration = { start: 0, end: 1 };
+    job.analysis_limits.model_memory_limit = '20MB';
+
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql(['success_mml']);
       }
     );
   });

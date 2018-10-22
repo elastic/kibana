@@ -124,6 +124,12 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
             id: 'mml_value_invalid',
             mml
           });
+        } else if ((mmlEstimateBytes / 2) > mmlBytes) {
+          messages.push({
+            id: 'half_estimated_mml_greater_than_mml',
+            maxModelMemoryLimit,
+            mml
+          });
         } else if (mmlEstimateBytes > mmlBytes) {
           messages.push({
             id: 'estimated_mml_greater_than_mml',
