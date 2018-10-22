@@ -23,7 +23,16 @@ import Wreck from 'wreck';
 import { trimLeft, trimRight } from 'lodash';
 
 function resolveUri(base, path) {
-  return `${trimRight(base, '/')}/${trimLeft(path, '/')}`;
+  let pathToUse = `${trimRight(base, '/')}/${trimLeft(path, '/')}`;
+  const questionMarkIndex = pathToUse.indexOf('?');
+  // no query string in pathToUse, append '?pretty'
+  if (questionMarkIndex === -1) {
+    pathToUse = `${pathToUse}?pretty`;
+  } else {
+    // pathToUse has query string, append '&pretty'
+    pathToUse = `${pathToUse}&pretty`;
+  }
+  return pathToUse;
 }
 
 function extendCommaList(obj, property, value) {

@@ -33,7 +33,7 @@ exports[`TelemetryForm renders as expected 1`] = `
       <EuiSpacer
         size="s"
       />
-      <Field
+      <InjectIntl(FieldUI)
         clear={[Function]}
         save={[Function]}
         setting={
