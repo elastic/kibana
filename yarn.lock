@@ -129,10 +129,10 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@4.4.1":
-  version "4.4.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-4.4.1.tgz#a1a4ab5bb209da8ea6d48c065476e74b1f48249b"
-  integrity sha512-SLgJQEDEuH16GFGmRmMvPUingisoNMjpdHnNqns9lug5Zk0PS96306xpbaXb3R+mz0RVQQjWsjnFJMN91QD26A==
+"@elastic/eui@4.5.1":
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-4.5.1.tgz#29ac4f07ab80b229ff4b183f7ced580b84a13df5"
+  integrity sha512-wUI2ALqKH2MPS7xUsfzm6QOmtnw2itSlWxIaje3y6kbnGyjdSyrewpaws6TRQL7bHss+ylKTVwJCWR6dSC3nVw==
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
@@ -3960,7 +3960,7 @@ convert-source-map@1.X, convert-source-map@^1.1.0, convert-source-map@^1.4.0, co
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.5.1.tgz#b8278097b9bc229365de5c62cf5fcaed8b5599e5"
   integrity sha1-uCeAl7m8IpNl3lxiz1/K7YtVmeU=
 
-cookie@0.3.1:
+cookie@0.3.1, cookie@^0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.3.1.tgz#e7e0a1f9ef43b4c8ba925c5c5a96e806d16873bb"
   integrity sha1-5+Ch+e9DtMi6klxcWpboBtFoc7s=
@@ -8149,7 +8149,7 @@ ip-regex@^1.0.1:
   resolved "https://registry.yarnpkg.com/ip-regex/-/ip-regex-1.0.3.tgz#dc589076f659f419c222039a33316f1c7387effd"
   integrity sha1-3FiQdvZZ9BnCIgOaMzFvHHOH7/0=
 
-iron@4.x.x:
+iron@4, iron@4.x.x:
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/iron/-/iron-4.0.5.tgz#4f042cceb8b9738f346b59aa734c83a89bc31428"
   integrity sha1-TwQszri5c480a1mqc0yDqJvDFCg=

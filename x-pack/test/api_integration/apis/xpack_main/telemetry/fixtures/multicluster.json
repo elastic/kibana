@@ -744,6 +744,12 @@
           "total": 0
         },
         "indices": 1,
+        "os": {
+          "distros": [],
+          "distroReleases": [],
+          "platforms": [],
+          "platformReleases": []
+        },
         "search": {
           "total": 0
         },
@@ -759,6 +765,12 @@
       },
       "logstash": {
         "count": 1,
+        "os": {
+          "distros": [],
+          "distroReleases": [],
+          "platforms": [],
+          "platformReleases": []
+        },
         "versions": [
           {
             "count": 1,
