@@ -91,7 +91,7 @@
     "language-detect": "^1.1.0",
     "moment": "^2.22.2",
     "monaco-editor": "^0.14.2",
-    "nodegit": "^0.22.1",
+    "nodegit": "^0.23.0-alpha.2",
     "path-to-regexp": "^2.2.1",
     "popper.js": "^1.14.3",
     "prop-types": "15.5.8",
