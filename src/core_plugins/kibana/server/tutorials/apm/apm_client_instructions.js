@@ -361,7 +361,7 @@ export const createGoClientInstructions = () => [
     textPre: i18n.translate('kbn.server.tutorials.apm.goClient.install.textPre', {
       defaultMessage: 'Install the APM agent packages for Go.',
     }),
-    commands: ['go get github.com/elastic/apm-agent-go'],
+    commands: ['go get go.elastic.co/apm'],
   },
   {
     title: i18n.translate('kbn.server.tutorials.apm.goClient.configure.title', {
@@ -384,13 +384,14 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
   })}
 export ELASTIC_APM_SERVICE_NAME=
 
-# ${i18n.translate('kbn.server.tutorials.apm.goClient.configure.commands.setAmpServerUrlComment', {
-    defaultMessage: 'Set the APM Server URL. If unspecified, the agent will effectively be disabled.',
+# ${i18n.translate('kbn.server.tutorials.apm.goClient.configure.commands.setCustomApmServerUrlComment', {
+    defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+    values: { defaultApmServerUrl: 'http://localhost:8200' },
   })}
 export ELASTIC_APM_SERVER_URL=
 
-# ${i18n.translate('kbn.server.tutorials.apm.goClient.configure.commands.setIfAmpServerRequiresTokenComment', {
-    defaultMessage: 'Set if APM Server requires a token.',
+# ${i18n.translate('kbn.server.tutorials.apm.goClient.configure.commands.useIfApmRequiresTokenComment', {
+    defaultMessage: 'Use if APM Server requires a token',
   })}
 export ELASTIC_APM_SECRET_TOKEN=
 `.split('\n'),
@@ -407,11 +408,11 @@ export ELASTIC_APM_SECRET_TOKEN=
       defaultMessage: 'Instrument your Go application by using one of the provided instrumentation modules or \
 by using the tracer API directly.',
     }),
-    commands: `
+    commands: `\
 import (
 	"net/http"
 
-	"github.com/elastic/apm-agent-go/module/apmhttp"
+	"go.elastic.co/apm/module/apmhttp"
 )
 
 func main() {curlyOpen}
@@ -422,8 +423,7 @@ func main() {curlyOpen}
 `.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.goClient.instrument.textPost', {
       defaultMessage: 'See the [documentation]({documentationLink}) for a detailed \
-guide to instrumenting Go source code.\n\n\
-**Warning: The Go agent is currently in Beta and not meant for production use.**',
+guide to instrumenting Go source code.',
       values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/go/current/instrumenting-source.html' },
     }),
   },

@@ -377,7 +377,7 @@ class IndexActionsContextMenuUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.indexActionsMenu.deleteEntity.deleteDescription"
-                defaultMessage="You are about to delete  {oneIndexSelected, plural, one {this} other {these}"
+                defaultMessage="You are about to delete  {oneIndexSelected, plural, one {this} other {these}}"
                 values={{ oneIndexSelected: oneIndexSelected ? 1 : 0 }}
               />
               {' '}
