@@ -10,7 +10,6 @@ export const routeExpressionProvider = environments => {
     // List of environments in order of preference
 
     return Promise.all(environments).then(environments => {
-      // This will likely need to be async also
       const environmentFunctions = environments.map(env => env.getFunctions());
 
       // Grab name of the first function in the chain
@@ -25,7 +24,7 @@ export const routeExpressionProvider = environments => {
       }
 
       // If the function isn't found in any environment, give up
-      throw new Error(`Function not found: ${fnName}`);
+      throw new Error(`Function not found: [${fnName}]`);
     });
   }
 

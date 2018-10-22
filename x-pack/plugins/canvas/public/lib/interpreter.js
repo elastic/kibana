@@ -8,6 +8,7 @@ import { socketInterpreterProvider } from '../../common/interpreter/socket_inter
 import { serializeProvider } from '../../common/lib/serialize';
 import { socket } from '../socket';
 import { typesRegistry } from '../../common/lib/types_registry';
+import { createError } from '../../common/interpreter/create_error';
 import { createHandlers } from './create_handlers';
 import { functionsRegistry } from './functions_registry';
 import { populateBrowserRegistries } from './populate_browser_registries';
@@ -35,7 +36,8 @@ export function interpretAst(ast, context) {
 socket.on('run', ({ ast, context, id }) => {
   const types = typesRegistry.toJS();
   const { serialize, deserialize } = serializeProvider(types);
-  interpretAst(ast, deserialize(context)).then(value => {
-    socket.emit(`resp:${id}`, { value: serialize(value) });
-  });
+  interpretAst(ast, deserialize(context))
+    .then(value => socket.emit(`resp:${id}`, { type: 'msgSuccess', value: serialize(value) }))
+    // TODO: I don't think this is possible to hit. I'm leaving it as a comment for now
+    .catch(e => socket.emit(`resp:${id}`, { type: 'msgError', value: createError(e) }));
 });

@@ -6,16 +6,13 @@
 
 import socket from 'socket.io';
 import { serializeProvider } from '../../common/lib/serialize';
-import { functionsRegistry } from '../../common/lib/functions_registry';
 import { typesRegistry } from '../../common/lib/types_registry';
-import { populateServerRegistries } from '../lib/populate_server_registries';
+import { getServerRegistries } from '../lib/server_registries';
 import { routeExpressionProvider } from '../lib/route_expression';
 import { browser } from '../lib/route_expression/browser';
 import { thread } from '../lib/route_expression/thread';
 import { server as serverEnv } from '../lib/route_expression/server';
 import { createError } from '../../common/interpreter/create_error';
-
-console.log('LOADING SOCKET, IMPORTING EXPRESSION ROUTER');
 
 export function socketApi(server) {
   const io = socket(server.listener, { path: '/socket.io' });
@@ -26,35 +23,31 @@ export function socketApi(server) {
     const types = typesRegistry.toJS();
     const { serialize, deserialize } = serializeProvider(types);
 
-    // We'd be better off creating the environments here, then passing them to the expression router
+    // I'd love to find a way to generalize all of these, but they each need a different set of things
+    // Note that ORDER MATTERS here. The environments will be tried in this order. Do not reorder this array.
     const routeExpression = routeExpressionProvider([
       thread({ onFunctionNotFound, serialize, deserialize }),
-      serverEnv({ server, socket, onFunctionNotFound, serialize, deserialize }),
-      browser({ socket, onFunctionNotFound, serialize, deserialize }),
+      serverEnv({ onFunctionNotFound, socket, server }),
+      browser({ onFunctionNotFound, socket, serialize, deserialize }),
     ]);
 
     function onFunctionNotFound(ast, context) {
-      // When a function isn't found each environment will call this.
-      // So we'll re-enter the router, and need to be able to catch from there.
-      // We should enter the router in the same way whereever we call it.
-      // Well, except, this has to return something valid right? Are we even allowed to reject here?
-      return routeExpression(ast, context).catch(e => createError(e));
+      return routeExpression(ast, context);
     }
 
     socket.on('getFunctionList', () => {
-      populateServerRegistries(['serverFunctions', 'types']).then(() =>
-        socket.emit('functionList', functionsRegistry.toJS())
+      getServerRegistries().then(({ serverFunctions }) =>
+        socket.emit('functionList', serverFunctions.toJS())
       );
     });
 
     const handler = ({ ast, context, id }) => {
-      return routeExpression(ast, deserialize(context))
-        .then(value => {
-          socket.emit(`resp:${id}`, { value: serialize(value) });
-        })
-        .catch(e => {
-          socket.emit(`resp:${id}`, createError(e));
-        });
+      return (
+        routeExpression(ast, deserialize(context))
+          .then(value => socket.emit(`resp:${id}`, { type: 'msgSuccess', value: serialize(value) }))
+          // TODO: I don't think it is possible to hit this right now? Maybe ever?
+          .catch(e => socket.emit(`resp:${id}`, { type: 'msgError', error: createError(e) }))
+      );
     };
 
     socket.on('run', handler);

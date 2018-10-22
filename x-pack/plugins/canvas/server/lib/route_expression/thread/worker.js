@@ -5,23 +5,23 @@
  */
 
 import uuid from 'uuid/v4';
-import { populateServerRegistries } from '../../populate_server_registries';
+import { populateServerRegistries } from '../../server_registries';
 import { interpretProvider } from '../../../../common/interpreter/interpret';
 import { serializeProvider } from '../../../../common/lib/serialize';
 
+// We actually DO need populateServerRegistries here since this is a different node process
 const pluginsReady = populateServerRegistries(['commonFunctions', 'types']);
 const heap = {};
 
 process.on('message', msg => {
-  const { type, id } = msg;
+  const { type, id, value } = msg;
   const threadId = id;
 
-  if (type === 'ping') process.send({ type: 'pong' });
-
   pluginsReady.then(({ commonFunctions, types }) => {
-    const { serialize, deserialize } = serializeProvider(types.toJS());
+    types = types.toJS();
+    const { serialize, deserialize } = serializeProvider(types);
     const interpret = interpretProvider({
-      types: types.toJS(),
+      types,
       functions: commonFunctions.toJS(),
       handlers: { environment: 'serverThreaded' },
       onFunctionNotFound: (ast, context) => {
@@ -37,8 +37,9 @@ process.on('message', msg => {
           },
         });
 
+        // Note that there is no facility to reject here. That's because this would only occur as the result of something that happens in the main thread, and we reject there
         return new Promise(resolve => {
-          heap[id] = resolve;
+          heap[id] = { resolve };
         });
       },
     });
@@ -46,9 +47,8 @@ process.on('message', msg => {
     if (type === 'getFunctions')
       process.send({ type: 'functionList', value: Object.keys(commonFunctions.toJS()) });
 
-    if (type === 'result') {
-      const { id, value } = msg;
-      heap[id](deserialize(value));
+    if (type === 'msgSuccess') {
+      heap[id].resolve(deserialize(value));
       delete heap[id];
     }
 
@@ -57,11 +57,11 @@ process.on('message', msg => {
 
       interpret(ast, deserialize(context))
         .then(value => {
-          // TODO: Serialize value
-          process.send({ type: 'result', value: serialize(value), id });
+          process.send({ type: 'msgSuccess', value: serialize(value), id });
         })
+        // TODO: I don't think it is even possible to hit this
         .catch(value => {
-          process.send({ type: 'error', value, id });
+          process.send({ type: 'msgError', value, id });
         });
     }
   });

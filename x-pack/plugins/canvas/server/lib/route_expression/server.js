@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { populateServerRegistries } from '../populate_server_registries';
+import { getServerRegistries } from '../server_registries';
 import { interpretProvider } from '../../../common/interpreter/interpret';
 import { createHandlers } from '../create_handlers';
 import { getAuthHeader } from '../../routes/get_auth/get_auth_header';
 
-const pluginsReady = populateServerRegistries(['serverFunctions', 'types']);
-
 export const server = ({ onFunctionNotFound, server, socket }) => {
+  const pluginsReady = getServerRegistries(['serverFunctions', 'types']);
+
   const request = socket.handshake;
   const authHeader = getAuthHeader(request, server);
 
@@ -20,14 +20,12 @@ export const server = ({ onFunctionNotFound, server, socket }) => {
       if (server.plugins.security) request.headers.authorization = authHeader;
 
       return {
-        interpret: async (ast, context) => {
+        interpret: (ast, context) => {
           const interpret = interpretProvider({
             types: types.toJS(),
             functions: serverFunctions.toJS(),
             handlers: createHandlers(request, server),
-            onFunctionNotFound: (ast, context) => {
-              return onFunctionNotFound(ast, context);
-            },
+            onFunctionNotFound,
           });
 
           return interpret(ast, context);

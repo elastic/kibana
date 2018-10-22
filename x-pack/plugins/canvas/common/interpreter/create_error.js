@@ -7,6 +7,7 @@
 export const createError = err => ({
   type: 'error',
   error: {
+    stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
     message: typeof err === 'string' ? err : err.message,
   },
 });

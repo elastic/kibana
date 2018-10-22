@@ -7,12 +7,6 @@
 import { fork } from 'child_process';
 import { resolve } from 'path';
 import uuid from 'uuid/v4';
-import { serializeProvider } from '../../../../common/lib/serialize';
-import { populateServerRegistries } from '../../populate_server_registries';
-
-const serialization = populateServerRegistries(['types']).then(({ types }) =>
-  serializeProvider(types.toJS())
-);
 
 // If the worker doesn't response in 10s, kill it.
 const WORKER_TIMEOUT = 10000;
@@ -20,7 +14,7 @@ const workerPath = resolve(__dirname, 'babeled.js');
 const heap = {};
 let worker = null;
 
-function getWorker() {
+export function getWorker() {
   if (worker) return worker;
   worker = fork(workerPath, {});
 
@@ -28,6 +22,7 @@ function getWorker() {
   // No need to look for 'error', our worker is intended to be long lived so it isn't running, it's an issue
   worker.on('exit', () => {
     worker = null;
+    // Restart immediately on exit since node takes a couple seconds to spin up
     worker = getWorker();
   });
 
@@ -36,36 +31,34 @@ function getWorker() {
     if (type === 'run') {
       const { threadId } = msg;
       const { ast, context } = value;
-      heap[threadId].onFunctionNotFound(ast, context).then(value => {
-        worker.send({ type: 'result', id, value: value });
-      });
+      heap[threadId]
+        .onFunctionNotFound(ast, context)
+        .then(value => {
+          worker.send({ type: 'msgSuccess', id, value: value });
+        })
+        .catch(e => heap[threadId].reject(e));
     }
 
-    if (type === 'result') {
-      if (heap[id]) heap[id].resolve(value);
-      delete heap[id];
-    }
+    if (type === 'msgSuccess' && heap[id]) heap[id].resolve(value);
 
-    if (type === 'error') {
-      delete heap[id];
-      throw new Error(value);
-    }
+    // TODO: I don't think it is even possible to hit this
+    if (type === 'msgError' && heap[id]) heap[id].reject(new Error(value));
   });
+
   return worker;
 }
 
-// Tip: This can return a promise
-export const thread = ({ onFunctionNotFound }) => {
-  const functionList = new Promise(resolve => {
+// All serialize/deserialize must occur in here. We should not return serialized stuff to the expressionRouter
+export const thread = ({ onFunctionNotFound, serialize, deserialize }) => {
+  const getWorkerFunctions = new Promise(resolve => {
     const worker = getWorker();
     worker.send({ type: 'getFunctions' });
     worker.on('message', msg => {
       if (msg.type === 'functionList') resolve(msg.value);
     });
   });
-  return Promise.all([functionList, serialization]).then(([functions, serialization]) => {
-    const { serialize, deserialize } = serialization;
 
+  return getWorkerFunctions.then(functions => {
     return {
       interpret: (ast, context) => {
         const worker = getWorker();
@@ -75,7 +68,14 @@ export const thread = ({ onFunctionNotFound }) => {
         return new Promise((resolve, reject) => {
           heap[id] = {
             time: new Date().getTime(),
-            resolve: value => resolve(deserialize(value)),
+            resolve: value => {
+              delete heap[id];
+              resolve(deserialize(value));
+            },
+            reject: e => {
+              delete heap[id];
+              reject(e);
+            },
             onFunctionNotFound: (ast, context) =>
               onFunctionNotFound(ast, deserialize(context)).then(serialize),
           };
@@ -84,7 +84,9 @@ export const thread = ({ onFunctionNotFound }) => {
           setTimeout(() => {
             if (!heap[id]) return; // Looks like this has already been cleared from the heap.
             if (worker) worker.kill();
-            reject(new Error('Request timed out'));
+
+            // The heap will be cleared because the reject on heap will delete its own id
+            heap[id].reject(new Error('Request timed out'));
           }, WORKER_TIMEOUT);
         });
       },

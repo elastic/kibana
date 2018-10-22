@@ -4,23 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO: This is sort of a hack. We should probably be building the babeled worker right?
-require('babel-register')({
-  plugins: [
-    'transform-object-rest-spread',
-    'transform-async-to-generator',
-    'transform-class-properties',
-  ],
-  presets: [
-    [
-      'env',
-      {
-        targets: {
-          node: 'current',
-        },
-      },
-    ],
-  ],
-});
-
+// The babel-register below uses .babelrc by default.
+require('babel-register');
 require('./worker');

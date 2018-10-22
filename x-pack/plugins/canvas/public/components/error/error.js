@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
 import { get } from 'lodash';
+import { ShowDebugging } from './show_debugging';
 
 export const Error = ({ payload }) => {
   const message = get(payload, 'error.message');
@@ -21,6 +22,8 @@ export const Error = ({ payload }) => {
     >
       <p>{message ? 'Expression failed with the message:' : ''}</p>
       {message && <p style={{ padding: '0 16px' }}>{message}</p>}
+
+      <ShowDebugging payload={payload} />
     </EuiCallOut>
   );
 };

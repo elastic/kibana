@@ -7,7 +7,7 @@
 import { routes } from './server/routes';
 import { functionsRegistry } from './common/lib/functions_registry';
 import { commonFunctions } from './common/functions';
-import { populateServerRegistries } from './server/lib/populate_server_registries';
+import { populateServerRegistries } from './server/lib/server_registries';
 import { registerCanvasUsageCollector } from './server/usage';
 
 export default function(server /*options*/) {
@@ -30,5 +30,7 @@ export default function(server /*options*/) {
   commonFunctions.forEach(func => functionsRegistry.register(func));
 
   registerCanvasUsageCollector(server);
+
+  // Do not initialize the app until the registries are populated
   return populateServerRegistries(['serverFunctions', 'types']).then(() => routes(server));
 }
