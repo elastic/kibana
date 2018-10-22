@@ -179,7 +179,7 @@
   },
   "mml_value_invalid": {
     "status": "ERROR",
-    "text": "{{mml}} is not a valid value for model memory limit. The value needs to be at least 1MB and should be specified in bytes e.g. 10MB",
+    "text": "{{mml}} is not a valid value for model memory limit. The value needs to be at least 1MB and should be specified in bytes e.g. 10MB.",
     "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#model-memory-limits"
   },
   "half_estimated_mml_greater_than_mml": {
