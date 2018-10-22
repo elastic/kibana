@@ -1,9 +1,0 @@
-{
-  "name": "task_manager",
-  "version": "kibana",
-  "config": {
-    "@elastic/eslint-import-resolver-kibana": {
-      "projectRoot": false
-    }
-  }
-}
