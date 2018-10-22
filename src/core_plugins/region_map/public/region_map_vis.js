@@ -22,7 +22,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { createTruncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
 import { RegionMapsVisualizationProvider } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
@@ -34,7 +34,6 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
   const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted', false));
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
-  const TRUNCATED_COLOR_MAPS = createTruncatedColorMaps();
 
   return VisFactory.createBaseVisualization({
     name: 'region_map',
@@ -77,7 +76,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
           value: 'topright',
           text: 'top right',
         }],
-        colorSchemas: Object.values(TRUNCATED_COLOR_MAPS).map(value => ({ id: value.id, label: value.label })),
+        colorSchemas: Object.values(truncatedColorMaps).map(value => ({ id: value.id, label: value.label })),
         vectorLayers: vectorLayers
       },
       schemas: new Schemas([

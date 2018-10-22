@@ -22,7 +22,7 @@ import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
-import { createTruncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import * as topojson from 'topojson-client';
 import { toastNotifications } from 'ui/notify';
 import * as colorUtil from 'ui/vis/map/color_util';
@@ -73,8 +73,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
     this._metrics = null;
     this._joinField = null;
-    const TRUNCATED_COLOR_MAPS = createTruncatedColorMaps();
-    this._colorRamp = TRUNCATED_COLOR_MAPS[Object.keys(TRUNCATED_COLOR_MAPS)[0]].value;
+    this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]].value;
     this._lineWeight = 1;
     this._tooltipFormatter = () => '';
     this._attribution = attribution;

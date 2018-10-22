@@ -22,7 +22,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { createVislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { MetricVisComponent } from './metric_vis_controller';
 // we need to load the css ourselves
 
@@ -33,7 +33,6 @@ VisTypesRegistryProvider.register(MetricVisProvider);
 
 function MetricVisProvider(Private, i18n) {
   const VisFactory = Private(VisFactoryProvider);
-  const COLOR_MAPS = createVislibColorMaps();
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
@@ -87,7 +86,7 @@ function MetricVisProvider(Private, i18n) {
             label: i18n('metricVis.colorModes.backgroundOptionLabel', { defaultMessage: 'Background' })
           }
         ],
-        colorSchemas: Object.values(COLOR_MAPS).map(value => ({ id: value.id, label: value.label })),
+        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
       },
       optionsTemplate: '<metric-vis-params></metric-vis-params>',
       schemas: new Schemas([

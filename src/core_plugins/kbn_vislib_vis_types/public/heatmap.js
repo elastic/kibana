@@ -21,11 +21,10 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import heatmapTemplate from './editors/heatmap.html';
-import { createVislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
 export default function HeatmapVisType(Private, i18n) {
   const VisFactory = Private(VisFactoryProvider);
-  const COLOR_MAPS = createVislibColorMaps();
 
   return VisFactory.createVislibVisualization({
     name: 'heatmap',
@@ -80,7 +79,7 @@ export default function HeatmapVisType(Private, i18n) {
           text: 'bottom',
         }],
         scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.values(COLOR_MAPS).map(value => ({ id: value.id, label: value.label })),
+        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
       },
       optionsTemplate: heatmapTemplate,
       schemas: new Schemas([

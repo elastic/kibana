@@ -22,7 +22,7 @@ import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
-import { createTruncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import * as colorUtil from 'ui/vis/map/color_util';
 
 export class ScaledCirclesMarkers extends EventEmitter {
@@ -214,8 +214,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
 
 function makeLegendColors(colorRampKey) {
-  const TRUNCATED_COLOR_MAPS = createTruncatedColorMaps();
-  const colorRamp = _.get(TRUNCATED_COLOR_MAPS[colorRampKey], 'value');
+  const colorRamp = _.get(truncatedColorMaps[colorRampKey], 'value');
   return colorUtil.getLegendColors(colorRamp);
 }
 

@@ -21,7 +21,7 @@ import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import _ from 'lodash';
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
 import ChoroplethLayer from './choropleth_layer';
-import { createTruncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
+import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
 import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter';
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
@@ -95,16 +95,13 @@ export function RegionMapsVisualizationProvider(Private, config) {
         return;
       }
 
-
-      const TRUNCATED_COLOR_MAPS = createTruncatedColorMaps();
-
       this._updateChoroplethLayerForNewProperties(
         visParams.selectedLayer.url,
         visParams.selectedLayer.attribution,
         this._vis.params.showAllShapes
       );
       this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
-      this._choroplethLayer.setColorRamp(TRUNCATED_COLOR_MAPS[visParams.colorSchema].value);
+      this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
       this._choroplethLayer.setLineWeight(visParams.outlineWeight);
       this._setTooltipFormatter();
 

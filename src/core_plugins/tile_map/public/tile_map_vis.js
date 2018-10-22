@@ -27,13 +27,12 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
 import { makeGeoJsonResponseHandler } from './coordinatemap_response_handler';
-import { createTruncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 
 VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
 
   const VisFactory = Private(VisFactoryProvider);
   const CoordinateMapsVisualization = Private(CoordinateMapsVisualizationProvider);
-  const TRUNCATED_COLOR_MAPS = createTruncatedColorMaps();
 
   return VisFactory.createBaseVisualization({
     name: 'tile_map',
@@ -61,7 +60,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     visualization: CoordinateMapsVisualization,
     editorConfig: {
       collections: {
-        colorSchemas: Object.values(TRUNCATED_COLOR_MAPS).map(value => ({ id: value.id, label: value.label })),
+        colorSchemas: Object.values(truncatedColorMaps).map(value => ({ id: value.id, label: value.label })),
         legendPositions: [{
           value: 'bottomleft',
           text: 'bottom left',
