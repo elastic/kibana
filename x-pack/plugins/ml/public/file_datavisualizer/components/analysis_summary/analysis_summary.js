@@ -8,11 +8,12 @@
 import React from 'react';
 
 import {
-  EuiDescriptionList,
   EuiTitle,
+  EuiSpacer,
+  EuiDescriptionList,
 } from '@elastic/eui';
 
-export function Summary({ results }) {
+export function AnalysisSummary({ results }) {
   const items = createDisplayItems(results);
 
   return (
@@ -20,11 +21,15 @@ export function Summary({ results }) {
       <EuiTitle size="s">
         <h3>Summary</h3>
       </EuiTitle>
-      <EuiDescriptionList
-        type="column"
-        listItems={items}
-        style={{ maxWidth: '400px' }}
-      />
+
+      <EuiSpacer size="m" />
+
+      <div className="analysis-summary-list">
+        <EuiDescriptionList
+          type="column"
+          listItems={items}
+        />
+      </div>
     </React.Fragment>
   );
 }

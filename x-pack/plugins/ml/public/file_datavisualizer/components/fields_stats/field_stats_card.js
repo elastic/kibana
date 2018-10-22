@@ -68,11 +68,11 @@ export function FieldStatsCard({ field }) {
 
                 <div className="stats">
                   <div className="stat">top values</div>
-                  {field.top_hits.map((h) => {
-                    const pcnt = Math.round(((h.count / field.count) * 100) * 100) / 100;
+                  {field.top_hits.map(({ count, value }) => {
+                    const pcnt = Math.round(((count / field.count) * 100) * 100) / 100;
                     return (
-                      <div key={h.value} className="top-value">
-                        <div className="field-label">{h.value}&nbsp;</div>
+                      <div key={value} className="top-value">
+                        <div className="field-label">{value}&nbsp;</div>
                         <div className="top-value-bar-holder">
                           <div
                             className={`top-value-bar ${type}`}

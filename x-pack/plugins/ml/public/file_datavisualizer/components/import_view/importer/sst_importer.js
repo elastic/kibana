@@ -8,8 +8,8 @@
 import { Importer } from './importer';
 
 export class SstImporter extends Importer {
-  constructor(results) {
-    super(results);
+  constructor(results, settings) {
+    super(settings);
 
     this.format = results.format;
     this.multilineStartPattern = results.multiline_start_pattern;
@@ -23,9 +23,6 @@ export class SstImporter extends Importer {
   // if it does, it is a legitimate end of line and can be pushed into the list,
   // if not, it must be a new line char inside a field value, so keep looking.
   async read(text) {
-    console.log('read sst file');
-    console.time('read sst file');
-
     try {
       const data = [];
 
@@ -47,13 +44,19 @@ export class SstImporter extends Importer {
         }
       }
 
+      // add the last line of the file to the list
+      if (message !== '') {
+        data.push({ message });
+      }
+
+      // remove first line if it is blank
       if (data[0] && data[0].message === '') {
         data.shift();
       }
+
       this.data = data;
       this.docArray = this.data;
 
-      console.timeEnd('read sst file');
       return {
         success: true,
       };

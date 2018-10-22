@@ -1,0 +1,19 @@
+.import-summary-list {
+  .euiDescriptionList {
+    .euiDescriptionList__title {
+      flex-basis: 15%;
+    }
+    .euiDescriptionList__description {
+      flex-basis: 85%;
+    }
+  }
+}
+
+.failure-list {
+  max-height: 200px;
+  overflow-y: auto;
+
+  .error-message {
+    color: $euiColorDanger;
+  }
+}
