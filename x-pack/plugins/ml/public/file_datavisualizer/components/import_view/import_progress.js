@@ -34,40 +34,70 @@ export function ImportProgress({ statuses }) {
 
   let statusInfo = null;
 
-  let processFileTitle = 'Process file';
+  let completedStep = 0;
+
   if (reading === true && readStatus === IMPORT_STATUS.INCOMPLETE) {
+    completedStep = 0;
+  }
+  if (
+    readStatus === IMPORT_STATUS.COMPLETE &&
+    indexCreatedStatus  === IMPORT_STATUS.INCOMPLETE &&
+    ingestPipelineCreatedStatus  === IMPORT_STATUS.INCOMPLETE
+  ) {
+    completedStep = 1;
+  }
+  if (indexCreatedStatus === IMPORT_STATUS.COMPLETE) {
+    completedStep = 2;
+  }
+  if (ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE) {
+    completedStep = 3;
+  }
+  if (uploadStatus === IMPORT_STATUS.COMPLETE) {
+    completedStep = 4;
+  }
+  if (indexPatternCreatedStatus === IMPORT_STATUS.COMPLETE) {
+    completedStep = 5;
+  }
+
+
+  let processFileTitle = 'Process file';
+  let createIndexTitle = 'Create index';
+  let createIngestPipelineTitle = 'Create ingest pipeline';
+  let uploadingDataTitle = 'Upload data';
+  let createIndexPatternTitle = 'Create index pattern';
+
+  if (completedStep >= 0) {
     processFileTitle = 'Processing file';
     statusInfo = (<p>Converting file for import</p>);
-  } else if (reading === false && readStatus === IMPORT_STATUS.COMPLETE) {
+  }
+  if (completedStep >= 1) {
     processFileTitle = 'File processed';
+    createIndexTitle = 'Creating index';
+    statusInfo = (<p>Creating index and ingest pipeline</p>);
   }
-
-  let createIndexTitle = 'Create index';
-  if (indexCreatedStatus === IMPORT_STATUS.COMPLETE) {
+  if (completedStep >= 2) {
     createIndexTitle = 'Index created';
+    createIngestPipelineTitle = 'Creating ingest pipeline';
+    statusInfo = (<p>Creating index and ingest pipeline</p>);
   }
-
-  let createIngestPipelineTitle = 'Create ingest pipeline';
-  if (ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE) {
+  if (completedStep >= 3) {
     createIngestPipelineTitle = 'Ingest pipeline created';
-  }
-
-  let uploadingDataTitle = 'Upload data';
-  if (uploadProgress > 0 && uploadStatus === IMPORT_STATUS.INCOMPLETE) {
     uploadingDataTitle = 'Uploading data';
-
     statusInfo = (<UploadFunctionProgress progress={uploadProgress} />);
-  } else if (uploadStatus === IMPORT_STATUS.COMPLETE) {
-    uploadingDataTitle = 'Data uploaded';
   }
-
-  let createIndexPatternTitle = 'Create index pattern';
-  if (indexPatternCreatedStatus === IMPORT_STATUS.FAILED) {
+  if (completedStep >= 4) {
+    uploadingDataTitle = 'Data uploaded';
+    if (createIndexPattern === true) {
+      createIndexPatternTitle = 'Creating index pattern';
+      statusInfo = (<p>Creating index pattern</p>);
+    }
+  }
+  if (completedStep >= 5) {
     createIndexPatternTitle = 'Index pattern created';
     statusInfo = null;
   }
 
-  const firstSetOfSteps = [
+  const steps = [
     {
       title: processFileTitle,
       isSelected: true,
@@ -91,7 +121,7 @@ export function ImportProgress({ statuses }) {
     },
     {
       title: uploadingDataTitle,
-      isSelected: (indexCreatedStatus === IMPORT_STATUS.COMPLETE),
+      isSelected: (indexCreatedStatus === IMPORT_STATUS.COMPLETE && ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE),
       isComplete: (uploadStatus === IMPORT_STATUS.COMPLETE),
       status: uploadStatus,
       onClick: () => {},
@@ -99,7 +129,7 @@ export function ImportProgress({ statuses }) {
   ];
 
   if (createIndexPattern === true) {
-    firstSetOfSteps.push({
+    steps.push({
       title: createIndexPatternTitle,
       isSelected: (uploadStatus === IMPORT_STATUS.COMPLETE),
       isComplete: (indexPatternCreatedStatus === IMPORT_STATUS.COMPLETE),
@@ -111,9 +141,14 @@ export function ImportProgress({ statuses }) {
   return (
     <React.Fragment>
       <EuiStepsHorizontal
-        steps={firstSetOfSteps}
+        steps={steps}
       />
-      { statusInfo }
+      { statusInfo &&
+        <React.Fragment>
+          <EuiSpacer size="m" />
+          { statusInfo }
+        </React.Fragment>
+      }
     </React.Fragment>
   );
 }

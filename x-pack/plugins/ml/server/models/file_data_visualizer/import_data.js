@@ -7,54 +7,72 @@
 
 export function importDataProvider(callWithRequest) {
   async function importData(id, index, mappings, ingestPipeline, data) {
-    let pipelineId;
+    let createdIndex;
+    let createdPipelineId;
     const docCount = data.length;
 
     try {
-      // first chunk of data, create the index and id to return
-      if (id === undefined) {
-        id = generateId();
-        await createIndex(index, mappings);
 
-        if (ingestPipeline !== undefined) {
-          const pid = `${index}-pipeline`;
-          const success = await createPipeline(pid, ingestPipeline);
-          if (success.acknowledged === true) {
-            pipelineId = pid;
-          } else {
-            console.error(success);
-            throw success;
-          }
-          console.log('creating pipeline', pipelineId);
-        }
-      } else {
-        if (ingestPipeline !== undefined) {
-          pipelineId = `${index}-pipeline`;
-        }
+      if (ingestPipeline === undefined || ingestPipeline.id === undefined) {
+        throw 'No ingest pipeline id specified';
       }
 
+      const {
+        id: pipelineId,
+        pipeline,
+      } = ingestPipeline;
+
+      if (id === undefined) {
+        // first chunk of data, create the index and id to return
+        id = generateId();
+
+        await createIndex(index, mappings);
+        createdIndex = index;
+
+        const success = await createPipeline(pipelineId, pipeline);
+        if (success.acknowledged !== true) {
+          console.error(success);
+          throw success;
+        }
+        createdPipelineId = pipelineId;
+
+      } else {
+        createdIndex = index;
+        createdPipelineId = pipelineId;
+      }
+
+      let failures = [];
       if (data.length && indexExits(index)) {
-        const resp = await indexData(index, pipelineId, data);
+        const resp = await indexData(index, createdPipelineId, data);
         if (resp.success === false) {
-          throw resp;
+          if (resp.failures.length === data.length) {
+            // all docs failed, abort
+            throw resp;
+          } else {
+            // some docs failed.
+            // still report success but with a list of failures
+            failures = (resp.failures || []);
+          }
         }
       }
 
       return {
         success: true,
         id,
-        pipelineId,
+        index: createdIndex,
+        pipelineId: createdPipelineId,
         docCount,
-        failures: [],
+        failures,
       };
     } catch (error) {
       return {
         success: false,
         id,
-        pipelineId,
+        index: createdIndex,
+        pipelineId: createdPipelineId,
         error,
         docCount,
-        failures: (error.failures ? error.failures : [])
+        failures: (error.failures || [])
       };
     }
   }
@@ -69,9 +87,7 @@ export function importDataProvider(callWithRequest) {
         }
       };
 
-      console.log('creating index');
-      const gg = await callWithRequest('indices.create', { index, body });
-      console.log(gg);
+      await callWithRequest('indices.create', { index, body });
     } else {
       throw `${index} already exists.`;
     }
@@ -102,11 +118,20 @@ export function importDataProvider(callWithRequest) {
         };
       }
     } catch (error) {
-      const failures = getFailures(error.items || []);
+      let failures = [];
+      if (error.errors !== undefined && Array.isArray(error.items)) {
+        // an expected error where some or all of the bulk request
+        // docs have failed to be ingested.
+        failures = getFailures(error.items);
+      } else {
+        // some other error has happened. assume all the docs have failed to be ingested
+        failures = data;
+      }
+
       return {
         success: false,
         error,
-        docs: data.length,
+        docCount: data.length,
         failures,
       };
     }

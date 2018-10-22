@@ -10,6 +10,7 @@ import { chunk } from 'lodash';
 import moment from 'moment';
 
 const CHUNK_SIZE = 10000;
+const IMPORT_RETRIES = 5;
 
 export class Importer {
   constructor(results) {
@@ -18,48 +19,83 @@ export class Importer {
     this.docArray = [];
   }
 
-  async import(index, setImportProgress) {
+  async initializeImport(index) {
+
+    const mappings = this.results.mappings;
+    const pipeline = this.results.ingest_pipeline;
+    updatePipelineTimezone(pipeline);
+    const ingestPipeline = {
+      id: `${index}-pipeline`,
+      pipeline,
+    };
+
+    const createIndexResp = await ml.fileDatavisualizer.import({
+      id: undefined,
+      index,
+      data: [],
+      mappings,
+      ingestPipeline
+    });
+
+    return createIndexResp;
+  }
+
+  async import(id, index, pipelineId, setImportProgress) {
     console.log('create index and ingest');
     console.time('create index and ingest');
-    if (!index) {
-      return;
+    if (!id || !index) {
+      return {
+        success: false,
+        error: 'no id ot index supplied'
+      };
     }
 
     const chunks = chunk(this.docArray, CHUNK_SIZE);
-    // add an empty chunk to the beginning so the first
-    // import request only creates the index and pipeline
-    // and returns quickly
-    chunks.unshift([]);
 
-    const mappings = this.results.mappings;
-    const ingestPipeline = this.results.ingest_pipeline;
-    updatePipelineTimezone(ingestPipeline);
+    const ingestPipeline = {
+      id: pipelineId,
+    };
 
-    let id = undefined;
     let success = true;
     const failures = [];
+    let error;
 
     for (let i = 0; i < chunks.length; i++) {
       const aggs = {
         id,
         index,
         data: chunks[i],
-        mappings,
+        mappings: {},
         ingestPipeline
       };
-      const resp = await ml.fileDatavisualizer.import(aggs);
 
-      if (resp.success || (resp.success === false && (resp.failures.length < resp.docCount))) {
-        // allow some failures. however it must be less than the total number of docs sent
-        id = resp.id;
-        setImportProgress((i / chunks.length) * 100);
+      let retries = IMPORT_RETRIES;
+      let resp = {
+        success: false,
+        failures: [],
+        docCount: 0,
+      };
+
+      while (resp.success === false && retries > 0) {
+        resp = await ml.fileDatavisualizer.import(aggs);
+
+        if (retries < IMPORT_RETRIES) {
+          console.log(`Retrying import ${IMPORT_RETRIES - retries}`);
+        }
+
+        retries--;
+      }
+
+      if (resp.success) {
+        setImportProgress(((i + 1) / chunks.length) * 100);
       } else {
         console.error(resp);
         success = false;
+        error = resp.error;
         break;
       }
 
-      if (resp.failures.length) {
+      if (resp.failures && resp.failures.length) {
         // update the item value to include the chunk count
         // e.g. item 3 in chunk 2 is actually item 20003
         for (let f = 0; f < resp.failures.length; f++) {
@@ -71,11 +107,20 @@ export class Importer {
     }
 
     console.log('total failures', failures);
+    console.timeEnd('create index and ingest');
+
+    const result = {
+      success,
+      failures,
+    };
+
     if (success) {
       setImportProgress(100);
+    } else {
+      result.error = error;
     }
-    console.timeEnd('create index and ingest');
-    return { success, failures };
+
+    return result;
   }
 }
 

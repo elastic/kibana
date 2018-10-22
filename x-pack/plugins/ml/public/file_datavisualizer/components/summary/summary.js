@@ -35,10 +35,10 @@ function createDisplayItems(results) {
       title: 'Number of lines analyzed',
       description: results.num_lines_analyzed,
     },
-    {
-      title: 'Charset',
-      description: results.charset,
-    }
+    // {
+    //   title: 'Charset',
+    //   description: results.charset,
+    // }
   ];
 
   if (results.format !== undefined) {

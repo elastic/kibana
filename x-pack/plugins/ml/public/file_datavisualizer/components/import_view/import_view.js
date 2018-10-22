@@ -12,7 +12,6 @@ import React, {
 import {
   EuiFieldText,
   EuiButton,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiFormRow,
   EuiCheckbox,
@@ -22,29 +21,39 @@ import {
 import { importerFactory } from './importer';
 import { ResultsLinks } from './results_links';
 import { ImportProgress, IMPORT_STATUS } from './import_progress';
+import { Errors } from './errors';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
+
+const DEFAULT_STATE = {
+  index: '',
+  importing: false,
+  imported: false,
+  initialized: false,
+  reading: false,
+  readProgress: 0,
+  readStatus: IMPORT_STATUS.INCOMPLETE,
+  indexCreatedStatus: IMPORT_STATUS.INCOMPLETE,
+  indexPatternCreatedStatus: IMPORT_STATUS.INCOMPLETE,
+  ingestPipelineCreatedStatus: IMPORT_STATUS.INCOMPLETE,
+  uploadProgress: 0,
+  uploadStatus: IMPORT_STATUS.INCOMPLETE,
+  createIndexPattern: true,
+  indexPattern: '',
+  indexPatternId: '',
+  errors: [],
+  importFailures: [],
+};
 
 export class ImportView extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      index: '',
-      importing: false,
-      imported: false,
-      reading: false,
-      readProgress: 0,
-      readStatus: IMPORT_STATUS.INCOMPLETE,
-      indexCreatedStatus: IMPORT_STATUS.INCOMPLETE,
-      indexPatternCreatedStatus: IMPORT_STATUS.INCOMPLETE,
-      ingestPipelineCreatedStatus: IMPORT_STATUS.INCOMPLETE,
-      uploadProgress: 0,
-      uploadStatus: IMPORT_STATUS.INCOMPLETE,
-      createIndexPattern: true,
-      indexPattern: '',
-      indexPatternId: '',
-    };
+    this.state = DEFAULT_STATE;
+  }
+
+  clickReset = () => {
+    this.setState(DEFAULT_STATE);
   }
 
   clickImport() {
@@ -60,45 +69,85 @@ export class ImportView extends Component {
       createIndexPattern,
     } = this.state;
 
+    const errors = [];
+
     if (index !== '') {
       this.setState({
         importing: true,
         imported: false,
         reading: true,
+        initialized: true,
       }, () => {
         setTimeout(async () => {
+          let success = false;
+
           const importer = importerFactory(format, results);
           if (importer !== undefined) {
 
             console.log('read start');
-            let success = await importer.read(fileContents, this.setReadProgress);
+            const readResp = await importer.read(fileContents, this.setReadProgress);
             console.log('read end');
+            success = readResp.success;
             this.setState({
-              readStatus: IMPORT_STATUS.COMPLETE,
+              readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
               reading: false,
             });
 
+            if (readResp.success === false) {
+              console.error(readResp.error);
+              errors.push(readResp.error);
+            }
+
             if (success) {
-              const resp = await importer.import(index, this.setImportProgress);
-              success = resp.success;
-              const uploadStatus = success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED;
-              this.setState({ uploadStatus });
+              const initializeImportResp = await importer.initializeImport(index);
 
-
-              if (success && createIndexPattern) {
-                const indexPatternName = (indexPattern === '') ? index : indexPattern;
-                const indexPatternId = await this.createIndexPattern(indexPatternName);
-                console.log(indexPatternId);
+              const indexCreated = (initializeImportResp.index !== undefined);
+              const pipelineCreated = (initializeImportResp.pipelineId !== undefined);
+              this.setState({
+                indexCreatedStatus: indexCreated ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+              });
+              if (indexCreated) {
                 this.setState({
-                  indexPatternCreatedStatus: IMPORT_STATUS.COMPLETE,
-                  indexPatternId,
+                  ingestPipelineCreatedStatus: pipelineCreated  ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
                 });
+              }
+
+              success = (indexCreated && pipelineCreated);
+
+              if (success) {
+                const importId = initializeImportResp.id;
+                const pipelineId = initializeImportResp.pipelineId;
+                const importResp = await importer.import(importId, index, pipelineId, this.setImportProgress);
+                success = importResp.success;
+                this.setState({
+                  uploadStatus: importResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                  importFailures: importResp.failures,
+                });
+
+                if (success && createIndexPattern) {
+                  const indexPatternName = (indexPattern === '') ? index : indexPattern;
+
+                  const indexPatternResp = await this.createIndexPattern(indexPatternName);
+                  success = indexPatternResp.success;
+                  this.setState({
+                    indexPatternCreatedStatus: indexPatternResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                    indexPatternId: indexPatternResp.id
+                  });
+                  if (indexPatternResp.success === false) {
+                    errors.push(indexPatternResp.error);
+                  }
+                } else {
+                  errors.push(importResp.error);
+                }
+              } else {
+                errors.push(initializeImportResp.error);
               }
             }
 
             this.setState({
               importing: false,
               imported: success,
+              errors,
             });
           } else {
             console.error('Unsupported file format');
@@ -128,8 +177,6 @@ export class ImportView extends Component {
 
   setImportProgress = (progress) => {
     this.setState({
-      indexCreatedStatus: (progress > 0) ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.INCOMPLETE,
-      ingestPipelineCreatedStatus: (progress > 0) ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.INCOMPLETE,
       uploadProgress: progress,
     });
   }
@@ -141,7 +188,6 @@ export class ImportView extends Component {
   }
 
   async createIndexPattern(indexPatternName, timeFieldName = DEFAULT_TIME_FIELD) {
-    let createdId;
     try {
       const emptyPattern = await this.props.indexPatterns.get();
 
@@ -151,12 +197,18 @@ export class ImportView extends Component {
         timeFieldName,
       });
 
-      createdId = await emptyPattern.create();
-      return createdId;
+      const id = await emptyPattern.create();
+      return {
+        success: true,
+        id,
+      };
     } catch (error) {
       console.error(error);
+      return {
+        success: false,
+        error,
+      };
     }
-    return createdId;
   }
 
 
@@ -168,6 +220,7 @@ export class ImportView extends Component {
       importing,
       imported,
       reading,
+      initialized,
       readStatus,
       indexCreatedStatus,
       ingestPipelineCreatedStatus,
@@ -175,6 +228,8 @@ export class ImportView extends Component {
       uploadProgress,
       uploadStatus,
       createIndexPattern,
+      errors,
+      // importFailures,
     } = this.state;
 
     const statuses = {
@@ -199,7 +254,7 @@ export class ImportView extends Component {
             <EuiFieldText
               placeholder="index name"
               value={index}
-              disabled={importing === true}
+              disabled={initialized === true}
               onChange={this.onIndexChange}
             />
           </EuiFormRow>
@@ -208,7 +263,7 @@ export class ImportView extends Component {
             id="createIndexPattern"
             label="Create index pattern"
             checked={createIndexPattern === true}
-            disabled={importing === true}
+            disabled={initialized === true}
             onChange={this.onCreateIndexPatternChange}
           />
 
@@ -216,10 +271,10 @@ export class ImportView extends Component {
 
           <EuiFormRow
             label="Index pattern name"
-            disabled={(createIndexPattern === false || importing === true)}
+            disabled={(createIndexPattern === false || initialized === true)}
           >
             <EuiFieldText
-              disabled={(createIndexPattern === false || importing === true)}
+              disabled={(createIndexPattern === false || initialized === true)}
               placeholder={(createIndexPattern === true) ? index : ''}
               value={indexPattern}
               onChange={this.onIndexPatternChange}
@@ -228,23 +283,33 @@ export class ImportView extends Component {
 
           <EuiSpacer size="m" />
 
-          <EuiButton
-            isDisabled={importing}
-            onClick={() => this.clickImport()}
-          >
-            Import
-          </EuiButton>
+          {
+            (initialized === false || importing === true) &&
 
-
-          {(importing === true) &&
-            <React.Fragment>
-              <EuiLoadingSpinner size="m"/>
-            </React.Fragment>
+            <EuiButton
+              isDisabled={index === '' || initialized === true}
+              onClick={() => this.clickImport()}
+              isLoading={importing}
+              iconSide="right"
+            >
+              Import
+            </EuiButton>
           }
+
+          {
+            (initialized === true && importing === false) &&
+
+            <EuiButton
+              onClick={() => this.clickReset()}
+            >
+              Reset
+            </EuiButton>
+          }
+
         </EuiPanel>
 
 
-        {(importing === true || imported === true) &&
+        {(initialized === true) &&
           <React.Fragment>
             <EuiSpacer size="m" />
 
@@ -253,6 +318,19 @@ export class ImportView extends Component {
               <ImportProgress statuses={statuses} />
 
             </EuiPanel>
+
+            {
+              (errors.length > 0) &&
+              <React.Fragment>
+                <EuiSpacer size="m" />
+
+                <Errors
+                  errors={errors}
+                  statuses={statuses}
+                />
+
+              </React.Fragment>
+            }
           </React.Fragment>
         }
 

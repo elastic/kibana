@@ -67,11 +67,15 @@ export class CsvImporter extends Importer {
       // this.docArray = formatToJson(this.data, this.columnNames);
       console.timeEnd('read delimited file');
 
-      return true;
+      return {
+        success: true,
+      };
     } catch (error) {
-      console.error(error);
       console.timeEnd('read delimited file');
-      return false;
+      return {
+        success: false,
+        error,
+      };
     }
   }
 }
