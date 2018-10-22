@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IResolvers, makeExecutableSchema } from 'graphql-tools';
+import { addMockFunctionsToSchema, IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { schemas } from './graphql';
 import { createCapabilitiesResolvers } from './graphql/capabilities';
 import { createLogEntriesResolvers } from './graphql/log_entries';
@@ -14,8 +14,11 @@ import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { InfraBackendLibs } from './lib/infra_types';
 import { initLegacyLoggingRoutes } from './logging_legacy';
+import { Logger } from './utils/logger';
 
-export const initInfraServer = (libs: InfraBackendLibs) => {
+import { createMocks } from './graphql';
+
+export const initInfraServer = (libs: InfraBackendLibs, logger: Logger) => {
   const schema = makeExecutableSchema({
     resolvers: [
       createCapabilitiesResolvers(libs) as IResolvers,
@@ -27,6 +30,14 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
     ],
     typeDefs: schemas,
   });
+
+  if (process.env.INGEST_MOCKS === 'true') {
+    logger.info(
+      'Mocks for Ingest are activated. No real Ingest data will be used, only mocks will be used.'
+    );
+    const mocks = createMocks(logger);
+    addMockFunctionsToSchema({ mocks, schema });
+  }
 
   libs.framework.registerGraphQLEndpoint('/api/ingest/graphql', schema);
 
