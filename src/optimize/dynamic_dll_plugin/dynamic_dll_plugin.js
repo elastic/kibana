@@ -174,13 +174,6 @@ export class DynamicDllPlugin {
           // aren't already being handled by dll and were not also
           // in the entry paths before. The majority should come
           // from webpackShims, otherwise we should throw
-
-          // NOTE: is possible we are able to do this reading and searching
-          // through the compilation's webpack modules, however
-          // for a sake of simplicity, and as the webpackShims
-          // should be really small files, we are parsing them
-          // manually and getting the requires
-
           if (requiredModulePath && !requiredModulePath.includes('node_modules')) {
             if (!requiredModulePath.includes('webpackShims')) {
               throw new Error(
@@ -190,108 +183,21 @@ export class DynamicDllPlugin {
               );
             }
 
-            // Discover the requires inside the webpackShims
-            const shimsDependencies = paperwork(requiredModulePath, { includeCore: true, es6: { mixedImports: true } });
-
-            // Resolve webpackShims dependencies with alias
-            shimsDependencies.forEach((dep) => {
-              const isRelative = dep && dep.charAt(0) === '.';
-              let absoluteResource = null;
-
-              // check if the dependency value is relative
-              if (isRelative) {
-                absoluteResource = path.resolve(path.dirname(requiredModulePath), dep);
-              } else {
-                // get the imports and search for alias in the dependency
-                const alias = compilation.compiler.options.resolve.alias;
-                const aliasFound = Object.keys(alias).find((aliasKey) => {
-                  return dep.search(`${aliasKey}/`) !== -1;
-                });
-                // search for imports with webpack-loaders
-                const webpackLoaderFoundIdx = dep.search('!');
-
-                if (webpackLoaderFoundIdx !== -1) {
-                  // get the loader
-                  const loader = dep.substring(0, webpackLoaderFoundIdx);
-                  // get the rest of the dependency require value
-                  // after the webpack loader char (!)
-                  const restImport = dep.substring(webpackLoaderFoundIdx + 1);
-                  // build the first part with the loader resolved
-                  const absoluteResourceFirstPart = require.resolve(loader);
-                  // check if we have a relative path in the script require
-                  // path being passed to the loader
-                  const isRestImportRelative = restImport && restImport.charAt(0) === '.';
-                  // resolve the relative script dependency path
-                  // in case we have one
-                  const sanitizedRestImport = isRestImportRelative
-                    ? path.resolve(path.dirname(requiredModulePath), restImport)
-                    : restImport;
-                  // replace the alias in the script dependency require path
-                  // in case we have found the alias
-                  const absoluteResourceSecondPart = aliasFound
-                    ? require.resolve(`${alias[aliasFound]}${sanitizedRestImport.substring(aliasFound.length)}`)
-                    : require.resolve(sanitizedRestImport);
-
-                  // finally build our absolute entry path again in the
-                  // original loader format `webpack-loader!script_path`
-                  absoluteResource = `${absoluteResourceFirstPart}!${absoluteResourceSecondPart}`;
-                } else {
-                  // in case we don't have any webpack loader in the
-                  // dependency require value, just replace the alias
-                  // if we have one and then resolve the result,
-                  // or just resolve the dependency path if we don't
-                  // have any alias
-                  absoluteResource = aliasFound
-                    ? require.resolve(`${alias[aliasFound]}${dep.substring(aliasFound.length)}`)
-                    : require.resolve(dep);
-                }
-              }
-
-              // Only consider found js entries
-              if (!absoluteResource.includes('.js') || absoluteResource.includes('json')) {
-                return;
-              }
-
-              // add the absolute built resource to the list of
-              // entry paths found inside the webpackShims
-              // to be merged with the general requiresMap
-              // in the end
-              resolvedShimsDependenciesMap[absoluteResource] = true;
-            });
+            // Get dependencies found in each webpack shim entry and just
+            // adds them to the global map for the resolvedShimsDependencies
+            Object.assign(
+              resolvedShimsDependenciesMap,
+              this.getDependenciesFromShim(requiredModulePath, compilation)
+            );
           }
         }
 
         // Adds the discovered dep modules in webpackShims
         // to the final require results
-        const resolvedShimsDependencies = Object.keys(resolvedShimsDependenciesMap);
-        resolvedShimsDependencies.forEach((resolvedDep) => {
-          if (resolvedDep) {
-            // check if this is a require shim dependency with
-            // an webpack-loader
-            const webpackLoaderFoundIdx = resolvedDep.search('!');
-
-            if (webpackLoaderFoundIdx !== -1) {
-              // get the webpack-loader
-              const loader = resolvedDep.substring(0, webpackLoaderFoundIdx);
-              // get the rest of the dependency require value
-              // after the webpack-loader char (!)
-              const restImport = resolvedDep.substring(webpackLoaderFoundIdx + 1);
-              // resolve the loader and the restImport parts separately
-              const resolvedDepToRequireFirstPart = path.relative(dllOutputPath, loader);
-              const resolvedDepToRequireSecondPart = path.relative(dllOutputPath, restImport);
-
-              // rebuild our final webpackShim entry path in the original
-              // webpack loader format `webpack-loader!script_path`
-              // but right now resolved relatively to the dll output path
-              requiresMap[`require('${resolvedDepToRequireFirstPart}!${resolvedDepToRequireSecondPart}');`] = true;
-            } else {
-              // in case we didn't have any webpack-loader in the require path
-              // resolve the dependency path relative to the dllOutput path
-              // to get our final entry path
-              requiresMap[`require('${path.relative(dllOutputPath, resolvedDep)}');`] = true;
-            }
-          }
-        });
+        Object.assign(
+          requiresMap,
+          this.getRequireEntriesFromShimsDependencies(resolvedShimsDependenciesMap, dllOutputPath)
+        );
 
         // Sort and join all the discovered require deps
         // in order to create a consistent entry file
@@ -336,19 +242,129 @@ export class DynamicDllPlugin {
     });
   }
 
+  getDependenciesFromShim(requiredModulePath, compilation) {
+    // NOTE: is possible we are able to do this reading and searching
+    // through the compilation's webpack modules, however
+    // for a sake of simplicity, and as the webpackShims
+    // should be really small files, we are parsing them
+    // manually and getting the requires
+
+    // Internal map to keep track of the dependencies found for the
+    // current webpackShim file
+    const resolvedShimDependencies = {};
+
+    // Discover the requires inside the webpackShims
+    const shimsDependencies = paperwork(requiredModulePath, { includeCore: true, es6: { mixedImports: true } });
+
+    // Resolve webpackShims dependencies with alias
+    shimsDependencies.forEach((dep) => {
+      const isRelative = dep && dep.charAt(0) === '.';
+      let absoluteResource = null;
+
+      // check if the dependency value is relative
+      if (isRelative) {
+        absoluteResource = path.resolve(path.dirname(requiredModulePath), dep);
+      } else {
+        // get the imports and search for alias in the dependency
+        const alias = compilation.compiler.options.resolve.alias;
+        const aliasFound = Object.keys(alias).find((aliasKey) => {
+          return dep.search(`${aliasKey}/`) !== -1;
+        });
+        // search for imports with webpack-loaders
+        const webpackLoaderFoundIdx = dep.search('!');
+
+        if (webpackLoaderFoundIdx !== -1) {
+          // get the loader
+          const loader = dep.substring(0, webpackLoaderFoundIdx);
+          // get the rest of the dependency require value
+          // after the webpack loader char (!)
+          const restImport = dep.substring(webpackLoaderFoundIdx + 1);
+          // build the first part with the loader resolved
+          const absoluteResourceFirstPart = require.resolve(loader);
+          // check if we have a relative path in the script require
+          // path being passed to the loader
+          const isRestImportRelative = restImport && restImport.charAt(0) === '.';
+          // resolve the relative script dependency path
+          // in case we have one
+          const sanitizedRestImport = isRestImportRelative
+            ? path.resolve(path.dirname(requiredModulePath), restImport)
+            : restImport;
+          // replace the alias in the script dependency require path
+          // in case we have found the alias
+          const absoluteResourceSecondPart = aliasFound
+            ? require.resolve(`${alias[aliasFound]}${sanitizedRestImport.substring(aliasFound.length)}`)
+            : require.resolve(sanitizedRestImport);
+
+          // finally build our absolute entry path again in the
+          // original loader format `webpack-loader!script_path`
+          absoluteResource = `${absoluteResourceFirstPart}!${absoluteResourceSecondPart}`;
+        } else {
+          // in case we don't have any webpack loader in the
+          // dependency require value, just replace the alias
+          // if we have one and then resolve the result,
+          // or just resolve the dependency path if we don't
+          // have any alias
+          absoluteResource = aliasFound
+            ? require.resolve(`${alias[aliasFound]}${dep.substring(aliasFound.length)}`)
+            : require.resolve(dep);
+        }
+      }
+
+      // Only consider found js entries
+      if (!absoluteResource.includes('.js') || absoluteResource.includes('json')) {
+        return;
+      }
+
+      // add the absolute built resource to the list of
+      // entry paths found inside the webpackShims
+      // to be merged with the general requiresMap
+      // in the end
+      resolvedShimDependencies[absoluteResource] = true;
+    });
+
+    return resolvedShimDependencies;
+  }
+
+  getRequireEntriesFromShimsDependencies(resolvedShimsDependenciesMap, dllOutputPath) {
+    const internalRequiresMap = {};
+    const resolvedShimsDependencies = Object.keys(resolvedShimsDependenciesMap);
+
+    resolvedShimsDependencies.forEach((resolvedDep) => {
+      if (resolvedDep) {
+        // check if this is a require shim dependency with
+        // an webpack-loader
+        const webpackLoaderFoundIdx = resolvedDep.search('!');
+
+        if (webpackLoaderFoundIdx !== -1) {
+          // get the webpack-loader
+          const loader = resolvedDep.substring(0, webpackLoaderFoundIdx);
+          // get the rest of the dependency require value
+          // after the webpack-loader char (!)
+          const restImport = resolvedDep.substring(webpackLoaderFoundIdx + 1);
+          // resolve the loader and the restImport parts separately
+          const resolvedDepToRequireFirstPart = path.relative(dllOutputPath, loader);
+          const resolvedDepToRequireSecondPart = path.relative(dllOutputPath, restImport);
+
+          // rebuild our final webpackShim entry path in the original
+          // webpack loader format `webpack-loader!script_path`
+          // but right now resolved relatively to the dll output path
+          internalRequiresMap[`require('${resolvedDepToRequireFirstPart}!${resolvedDepToRequireSecondPart}');`] = true;
+        } else {
+          // in case we didn't have any webpack-loader in the require path
+          // resolve the dependency path relative to the dllOutput path
+          // to get our final entry path
+          internalRequiresMap[`require('${path.relative(dllOutputPath, resolvedDep)}');`] = true;
+        }
+      }
+    });
+
+    return internalRequiresMap;
+  }
+
   mustCompileDll() {
     const forceDllCreation = process && process.env && process.env.FORCE_DLL_CREATION;
 
     return !IS_KIBANA_DISTRIBUTABLE || forceDllCreation;
-  }
-
-  async runDLLCompiler(mainCompiler) {
-    await this.dllCompiler.run(this.entryPaths);
-
-    // We need to purge the cache into the inputFileSystem
-    // for every single built in previous compilation
-    // that we rely in next ones.
-    mainCompiler.inputFileSystem.purge(this.dllCompiler.getManifestPath());
   }
 
   async mapNormalModule(module) {
@@ -405,5 +421,14 @@ export class DynamicDllPlugin {
     stubModule.stubOriginalModule = module;
 
     return stubModule;
+  }
+
+  async runDLLCompiler(mainCompiler) {
+    await this.dllCompiler.run(this.entryPaths);
+
+    // We need to purge the cache into the inputFileSystem
+    // for every single built in previous compilation
+    // that we rely in next ones.
+    mainCompiler.inputFileSystem.purge(this.dllCompiler.getManifestPath());
   }
 }
