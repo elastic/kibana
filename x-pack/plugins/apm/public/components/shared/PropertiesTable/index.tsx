@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { StringMap } from '../../../../typings/common';
 import { colors, fontSize, px, unit, units } from '../../../style/variables';
-import { getAgentFeatureDocsUrl } from '../../../utils/documentation';
+import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
 // @ts-ignore
 import { ExternalLink } from '../../../utils/url';
 import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';

@@ -12,7 +12,7 @@ import {
   sortKeysByConfig,
   getPropertyTabNames
 } from '..';
-import { getAgentFeatureDocsUrl } from '../../../../utils/documentation';
+import { getAgentFeatureDocsUrl } from '../../../../utils/documentation/agents';
 
 jest.mock('../../../../utils/documentation');
 jest.mock('../propertyConfig.json', () => [

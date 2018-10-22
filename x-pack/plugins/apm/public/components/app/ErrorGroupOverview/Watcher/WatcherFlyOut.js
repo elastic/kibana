@@ -31,7 +31,7 @@ import {
   EuiLink
 } from '@elastic/eui';
 
-import { XPACK_DOCS } from '../../../../utils/documentation';
+import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
 
 import { KibanaLink } from '../../../../utils/url';
 import { createErrorGroupWatch } from './createErrorGroupWatch';
