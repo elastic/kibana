@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Flyout } from '../flyout';
 
@@ -66,7 +66,7 @@ const mockFile = {
 
 describe('Flyout', () => {
   it('should render import step', async () => {
-    const component = shallow(<Flyout {...defaultProps} />);
+    const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -77,7 +77,7 @@ describe('Flyout', () => {
   });
 
   it('should toggle the overwrite all control', async () => {
-    const component = shallow(<Flyout {...defaultProps} />);
+    const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -90,7 +90,7 @@ describe('Flyout', () => {
   });
 
   it('should allow picking a file', async () => {
-    const component = shallow(<Flyout {...defaultProps} />);
+    const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -104,7 +104,7 @@ describe('Flyout', () => {
 
   it('should handle invalid files', async () => {
     const { importFile } = require('../../../../../lib/import_file');
-    const component = shallow(<Flyout {...defaultProps} />);
+    const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -183,7 +183,7 @@ describe('Flyout', () => {
     });
 
     it('should figure out conflicts', async () => {
-      const component = shallow(<Flyout {...defaultProps} />);
+      const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -226,7 +226,7 @@ describe('Flyout', () => {
     });
 
     it('should allow conflict resolution', async () => {
-      const component = shallow(<Flyout {...defaultProps} />);
+      const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -270,7 +270,7 @@ describe('Flyout', () => {
     });
 
     it('should handle errors', async () => {
-      const component = shallow(<Flyout {...defaultProps} />);
+      const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));

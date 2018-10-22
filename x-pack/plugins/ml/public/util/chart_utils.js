@@ -15,9 +15,10 @@ import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
 
+import { CHART_TYPE } from '../explorer/explorer_constants';
 
 export const LINE_CHART_ANOMALY_RADIUS = 7;
-export const MULTI_BUCKET_SYMBOL_SIZE = 144;   // In square pixels for use with d3 symbol.size
+export const MULTI_BUCKET_SYMBOL_SIZE = 100;   // In square pixels for use with d3 symbol.size
 export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
 
 const MAX_LABEL_WIDTH = 100;
@@ -125,6 +126,29 @@ export function filterAxisLabels(selection, chartWidth) {
         parent.remove();
       }
     });
+}
+
+// feature flags for chart types
+const EVENT_DISTRIBUTION_ENABLED = true;
+const POPULATION_DISTRIBUTION_ENABLED = true;
+
+// get the chart type based on its configuration
+export function getChartType(config) {
+  if (
+    EVENT_DISTRIBUTION_ENABLED &&
+    config.functionDescription === 'rare' &&
+    (config.entityFields.some(f => f.fieldType === 'over') === false)
+  ) {
+    return CHART_TYPE.EVENT_DISTRIBUTION;
+  } else if (
+    POPULATION_DISTRIBUTION_ENABLED &&
+    config.functionDescription !== 'rare' &&
+    config.entityFields.some(f => f.fieldType === 'over')
+  ) {
+    return CHART_TYPE.POPULATION_DISTRIBUTION;
+  }
+
+  return CHART_TYPE.SINGLE_METRIC;
 }
 
 export function getExploreSeriesLink(series) {

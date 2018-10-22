@@ -10,7 +10,7 @@ import { cryptoFactory } from '../../../server/lib/crypto';
 function createJobFn(server) {
   const crypto = cryptoFactory(server);
 
-  return async function createJob(jobParams, headers, request) {
+  return async function createJob(jobParams, headers, serializedSession, request) {
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
 
     const savedObjectsClient = request.getSavedObjectsClient();
