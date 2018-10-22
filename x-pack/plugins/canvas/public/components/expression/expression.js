@@ -6,21 +6,25 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiPanel,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPanel, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ExpressionInput } from '../expression_input';
 
-export const Expression = ({ formState, updateValue, setExpression, done, error }) => {
+export const Expression = ({
+  functionDefinitions,
+  formState,
+  updateValue,
+  setExpression,
+  done,
+  error,
+}) => {
   return (
     <EuiPanel>
-      <ExpressionInput error={error} value={formState.expression} onChange={updateValue} />
-      <EuiSpacer size="m" />
+      <ExpressionInput
+        functionDefinitions={functionDefinitions}
+        error={error}
+        value={formState.expression}
+        onChange={updateValue}
+      />
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty size="s" color={formState.dirty ? 'danger' : 'primary'} onClick={done}>
@@ -43,6 +47,7 @@ export const Expression = ({ formState, updateValue, setExpression, done, error 
 };
 
 Expression.propTypes = {
+  functionDefinitions: PropTypes.array,
   formState: PropTypes.object,
   updateValue: PropTypes.func,
   setExpression: PropTypes.func,
