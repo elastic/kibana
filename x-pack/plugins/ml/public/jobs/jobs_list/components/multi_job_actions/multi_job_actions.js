@@ -24,7 +24,7 @@ export class MultiJobActions extends Component {
 
   render() {
     const s = (this.props.selectedJobs.length > 1) ? 's' : '';
-    const jobsSelected = this.props.selectedJobs.length > 0;
+    const jobsSelected = (this.props.selectedJobs.length > 0);
     return (
       <div className={`multi-select-actions${jobsSelected ? '' : '-no-display'}`}>
         {jobsSelected &&
