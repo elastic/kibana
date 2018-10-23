@@ -15,32 +15,14 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
-// @ts-ignore
-import { Link } from 'react-router-dom';
-// @ts-ignore
-import DiscoverButton from 'x-pack/plugins/apm/public/components/shared/DiscoverButton';
-// @ts-ignore
-import { StickyProperties } from 'x-pack/plugins/apm/public/components/shared/StickyProperties';
+import { TraceLink } from 'x-pack/plugins/apm/public/components/shared/TraceLink';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-// @ts-ignore
-import { legacyEncodeURIComponent } from '../../../../../../../utils/url';
+import { ActionMenu } from '../../../ActionMenu';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 import { IWaterfall } from '../waterfall_helpers/waterfall_helpers';
-
-function getDiscoverQuery(id: string) {
-  return {
-    _a: {
-      interval: 'auto',
-      query: {
-        language: 'lucene',
-        query: `_id:${id}`
-      }
-    }
-  };
-}
 
 interface Props {
   onClose: () => void;
@@ -61,8 +43,6 @@ export function TransactionFlyout({
     return null;
   }
 
-  const { context, transaction } = transactionDoc;
-
   return (
     <EuiFlyout onClose={onClose} size="l">
       <EuiFlyoutHeader hasBorder>
@@ -74,21 +54,15 @@ export function TransactionFlyout({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <DiscoverButton query={getDiscoverQuery(transaction.id)}>
-              {`Open in Discover`}
-            </DiscoverButton>
+            <ActionMenu transaction={transactionDoc} />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <Link
-              to={`/${context.service.name}/transactions/${
-                transaction.type
-              }/${legacyEncodeURIComponent(transaction.name)}`}
-            >
+            <TraceLink transaction={transactionDoc}>
               <EuiButton iconType="visLine">
                 View transaction group details
               </EuiButton>
-            </Link>
+            </TraceLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
