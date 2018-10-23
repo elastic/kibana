@@ -7,13 +7,17 @@
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 import { WorkpadManager } from '../../components/workpad_manager';
+import { setDocTitle } from '../../lib/doc_title';
 
-export const HomeApp = () => (
-  <EuiPage restrictWidth style={{ width: '100%' }}>
-    <EuiPageBody>
-      <EuiPageContent panelPaddingSize="none" horizontalPosition="center">
-        <WorkpadManager onClose={() => {}} />
-      </EuiPageContent>
-    </EuiPageBody>
-  </EuiPage>
-);
+export const HomeApp = () => {
+  setDocTitle('Canvas');
+  return (
+    <EuiPage restrictWidth style={{ width: '100%' }}>
+      <EuiPageBody>
+        <EuiPageContent panelPaddingSize="none" horizontalPosition="center">
+          <WorkpadManager onClose={() => {}} />
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
+  );
+};

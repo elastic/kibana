@@ -109,6 +109,7 @@ export class Waffle extends React.Component<Props, {}> {
               Check for new data
             </EuiButton>
           }
+          data-test-subj="noMetricsDataPrompt"
         />
       );
     }
@@ -124,7 +125,10 @@ export class Waffle extends React.Component<Props, {}> {
         {({ measureRef, content: { width = 0, height = 0 } }) => {
           const groupsWithLayout = applyWaffleMapLayout(map, width, height);
           return (
-            <WaffleMapOuterContiner innerRef={(el: any) => measureRef(el)}>
+            <WaffleMapOuterContiner
+              innerRef={(el: any) => measureRef(el)}
+              data-test-subj="waffleMap"
+            >
               <WaffleMapInnerContainer>
                 {groupsWithLayout.map(this.renderGroup(bounds))}
               </WaffleMapInnerContainer>

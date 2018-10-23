@@ -11,8 +11,9 @@ import { get } from 'lodash';
 import { getId } from '../../lib/get_id';
 import { notify } from '../../lib/notify';
 
-export const WorkpadUpload = ({ onUpload }) => (
+export const WorkpadUpload = ({ onUpload, ...rest }) => (
   <EuiFilePicker
+    {...rest}
     compressed
     className="canvasWorkpad__upload--compressed"
     initialPromptText="Import workpad JSON file"
