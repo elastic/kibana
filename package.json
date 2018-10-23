@@ -56,7 +56,7 @@
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
     "checkLicenses": "grunt licenses --dev",
-    "build": "node scripts/build",
+    "build": "node scripts/build --all-platforms",
     "start": "sh ./bin/kibana --dev",
     "precommit": "node scripts/precommit_hook",
     "karma": "karma start",
