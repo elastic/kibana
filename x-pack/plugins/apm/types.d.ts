@@ -7,10 +7,6 @@
 // allow JSON files to be imported directly without TSLint errors
 // see: https://github.com/palantir/tslint/issues/1264#issuecomment-228433367
 // and: https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#arbitrary-expressions-are-forbidden-in-export-assignments-in-ambient-contexts
-declare module '*.json' {
-  const json: any;
-  export default json;
-}
 
 interface StringMap<T> {
   [key: string]: T;
