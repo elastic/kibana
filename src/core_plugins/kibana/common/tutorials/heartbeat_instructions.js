@@ -505,7 +505,7 @@ export function onPremInstructions(platforms, geoipRequired, uaRequired, context
             instructions: [
               HEARTBEAT_INSTRUCTIONS.INSTALL.OSX,
               HEARTBEAT_INSTRUCTIONS.CONFIG.OSX,
-	      heartbeatEnableInstructionsOnPrem().OSX,
+      	      heartbeatEnableInstructionsOnPrem().OSX,
               HEARTBEAT_INSTRUCTIONS.START.OSX,
             ],
           },
