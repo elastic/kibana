@@ -234,7 +234,7 @@
     "@types/fetch-mock": "^5.12.2",
     "@types/getopts": "^2.0.0",
     "@types/glob": "^5.0.35",
-    "@types/hapi-latest": "npm:@types/hapi@17.0.12",
+    "@types/hapi-latest": "npm:@types/hapi@^17.0.12",
     "@types/has-ansi": "^3.0.0",
     "@types/jest": "^23.3.1",
     "@types/joi": "^10.4.4",
