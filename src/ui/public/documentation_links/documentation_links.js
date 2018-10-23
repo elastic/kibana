@@ -18,7 +18,7 @@ export default {
     scriptFields: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/search-request-script-fields.html`,
     scriptAggs: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/search-aggregations.html#_values_source`,
     painless: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless.html`,
-    painlessApi: `${baseUrl}guide/en/elasticsearch/painless/${urlVersion}/painless-api-reference.html`,
+    painlessApi: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/painless-api-reference.html`,
     painlessSyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless-syntax.html`,
     luceneExpressions: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-expression.html`
   }
