@@ -26,14 +26,6 @@ export class TOCEntry extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
-    const displayName = this.props.layer.getDisplayName();
-    Promise.all([displayName]).then(labels => {
-      if (this._isMounted) {
-        this.setState({
-          displayName: labels[0]
-        });
-      }
-    });
   }
 
   componentWillUnmount() {
@@ -43,6 +35,17 @@ export class TOCEntry extends React.Component {
   render() {
 
     const { layer, openLayerPanel, toggleVisible, zoom } = this.props;
+
+    const displayName = layer.getDisplayName();
+    Promise.resolve(displayName).then(label => {
+      if (this._isMounted) {
+        if (label !== this.state.displayName) {
+          this.setState({
+            displayName: label
+          });
+        }
+      }
+    });
 
     let visibilityIndicator;
     if (layer.dataHasLoadError()) {

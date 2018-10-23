@@ -76,8 +76,7 @@ export class AddLayerPanel extends React.Component {
     this.props.previewLayer(this.layer);
   }
 
-  _onLabelChange = (event) => {
-    const label = event.target.value;
+  _onLabelChange = (label) => {
     this.setState({ label });
 
     if (this.layer) {

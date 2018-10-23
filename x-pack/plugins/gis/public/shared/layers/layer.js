@@ -73,7 +73,7 @@ export class ALayer {
       >
         <EuiFieldText
           value={seedLabel}
-          onChange={onLabelChange}
+          onChange={(event) => {onLabelChange(event.target.value);}}
           aria-label="layer display name"
         />
       </EuiFormRow>
@@ -150,12 +150,16 @@ export class ALayer {
     return false;
   }
 
-  getDisplayName() {
+  async getDisplayName() {
     if (this._descriptor.label) {
       return this._descriptor.label;
     }
 
-    return this._source.getDisplayName() || `Layer ${this._descriptor.id}`;
+    return (await this._source.getDisplayName()) || `Layer ${this._descriptor.id}`;
+  }
+
+  getLabel() {
+    return this._descriptor.label;
   }
 
   getId() {
