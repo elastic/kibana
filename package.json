@@ -38,7 +38,7 @@
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
     "checkLicenses": "grunt licenses --dev",
-    "build": "node scripts/build",
+    "build": "node scripts/build --all-platforms",
     "start": "node scripts/kibana --dev",
     "debug": "node --nolazy --inspect scripts/kibana --dev",
     "debug-break": "node --nolazy --inspect-brk scripts/kibana --dev",
