@@ -21,9 +21,9 @@ import { resolveApi } from './server';
 describe('resolveApi', () => {
   it('allows known APIs to be resolved', () => {
     const mockReply = jest.fn((result) => ({ type: () => result }));
-    const result = resolveApi('Sense Version', ['es_6_0'], mockReply);
+    const result = resolveApi('Sense Version', ['es_5_0'], mockReply);
     expect(result).toMatchObject({
-      es_6_0: {
+      es_5_0: {
         endpoints: expect.any(Object),
         globals: expect.any(Object),
         name: expect.any(String),
@@ -39,9 +39,9 @@ describe('resolveApi', () => {
 
   it('handles request for apis that are known and unknown', () => {
     const mockReply = jest.fn((result) => ({ type: () => result }));
-    const result = resolveApi('Sense Version', ['es_6_0'], mockReply);
+    const result = resolveApi('Sense Version', ['es_5_0'], mockReply);
     expect(result).toMatchObject({
-      es_6_0: {
+      es_5_0: {
         endpoints: expect.any(Object),
         globals: expect.any(Object),
         name: expect.any(String),
