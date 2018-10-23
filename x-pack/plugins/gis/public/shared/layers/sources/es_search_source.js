@@ -391,17 +391,8 @@ class Editor extends React.Component {
     );
   }
 
-  filterForGeoPointOrShape = () => {
-    return fields => {
-      let hasGeoPointOrShape = false;
-      try {
-        hasGeoPointOrShape = fields.some(({ type }) => type === 'geo_point'
-          || type === 'geo_shape');
-      } catch (error) {
-        throw new Error(error);
-      }
-      return hasGeoPointOrShape;
-    };
+  filterForGeoPointOrShape = fields => {
+    return fields.some(({ type }) => type === 'geo_point' || type === 'geo_shape');
   }
 
   render() {
@@ -430,7 +421,7 @@ class Editor extends React.Component {
             indexPatternId={this.state.indexPatternId}
             onChange={this.onIndexPatternSelect}
             placeholder="Select index pattern"
-            filterFields={this.filterForGeoPointOrShape()}
+            filterIndexPatterns={this.filterForGeoPointOrShape}
           />
         </EuiFormRow>
 

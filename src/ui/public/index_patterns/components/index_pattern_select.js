@@ -24,7 +24,7 @@ import chrome from 'ui/chrome';
 
 import { EuiComboBox } from '@elastic/eui';
 
-const getIndexPatterns = async (search, fields, filterFields) => {
+const getIndexPatterns = async (search, fields, filterIndexPatterns) => {
   const resp = await chrome.getSavedObjectsClient().find({
     type: 'index-pattern',
     fields,
@@ -32,7 +32,7 @@ const getIndexPatterns = async (search, fields, filterFields) => {
     search_fields: ['title'],
     perPage: 100
   });
-  const filteredResult = filterFields(resp.savedObjects);
+  const filteredResult = filterIndexPatterns(resp.savedObjects);
   return filteredResult;
 };
 
@@ -102,8 +102,9 @@ export class IndexPatternSelect extends Component {
 
   debouncedFetch = _.debounce(async (searchValue) => {
     const fields = this.getFields();
-    const filterFields = this.getFilterFieldsFunction();
-    const savedObjects = await getIndexPatterns(searchValue, fields, filterFields);
+    const filterIndexPatterns = this.getFilterIndexPatterns();
+    const savedObjects = await getIndexPatterns(searchValue, fields,
+      filterIndexPatterns);
 
     if (!this._isMounted) {
       return;
@@ -135,20 +136,20 @@ export class IndexPatternSelect extends Component {
   getFields = () => {
     const fieldDefaults = ['title'];
     const fields = [...fieldDefaults, ...(this.props.fields ? this.props.fields : [])];
-    if (this.props.filterFields && !fields.includes('fields')) {
+    if (this.props.filterIndexPatterns && !fields.includes('fields')) {
       fields.push('fields'); // Field filter must have fields to search
     }
     return fields;
   }
 
-  getFilterFieldsFunction = () => {
-    const { filterFields } = this.props;
+  getFilterIndexPatterns = () => {
+    const { filterIndexPatterns } = this.props;
     return (savedObjects = []) => {
-      if (filterFields && savedObjects.length) {
+      if (filterIndexPatterns && savedObjects.length) {
         return savedObjects.filter(savedObject => {
           const { fields } = savedObject.attributes;
           const parsedFields = JSON.parse(fields);
-          return filterFields(parsedFields);
+          return filterIndexPatterns(parsedFields);
         });
       } else {
         return savedObjects;
@@ -188,5 +189,5 @@ IndexPatternSelect.propTypes = {
   indexPatternId: PropTypes.string,
   placeholder: PropTypes.string,
   fields: PropTypes.arrayOf(PropTypes.string),
-  filterFields: PropTypes.func
+  filterIndexPatterns: PropTypes.func
 };

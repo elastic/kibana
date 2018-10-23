@@ -325,17 +325,9 @@ class Editor extends React.Component {
     );
   }
 
-  filterForGeoPoint = () => {
-    return fields => {
-      let hasGeoPoint = false;
-      try {
-        hasGeoPoint = fields.some(({ type }) => type === 'geo_point');
-      } catch (error) {
-        throw new Error(error);
-      }
-      return hasGeoPoint;
-    };
-  };
+  filterForGeoPoint = fields => {
+    return fields.some(({ type }) => type === 'geo_point');
+  }
 
   render() {
     return (
@@ -349,7 +341,7 @@ class Editor extends React.Component {
             indexPatternId={this.state.indexPatternId}
             onChange={this.onIndexPatternSelect}
             placeholder="Select index pattern"
-            filterFields={this.filterForGeoPoint()}
+            filterIndexPatterns={this.filterForGeoPoint}
           />
         </EuiFormRow>
 
