@@ -27,7 +27,7 @@ let shouldClear = false;
 
 // Subject used by Header component to subscribe to breadcrumbs changes.
 // This is not exposed publicly.
-const breadcrumbsSubject = new Subject();
+const breadcrumbsSubject = new Subject<Breadcrumb[]>();
 
 /**
  * A rxjs subscribable that can be used to subscribe to breadcrumb updates.
