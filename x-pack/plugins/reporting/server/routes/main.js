@@ -110,9 +110,12 @@ export function main(server) {
 
   async function handler(exportTypeId, jobParams, request, reply) {
     const user = request.pre.user;
-    const headers = request.headers;
+    const headers = {
+      authorization: request.headers.authorization,
+    };
+    const serializedSession = server.plugins.security ? await server.plugins.security.serializeSession(request) : null;
 
-    const job = await enqueueJob(exportTypeId, jobParams, user, headers, request);
+    const job = await enqueueJob(exportTypeId, jobParams, user, headers, serializedSession, request);
 
     // return the queue's job information
     const jobJson = job.toJSON();

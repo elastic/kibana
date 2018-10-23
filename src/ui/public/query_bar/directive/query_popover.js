@@ -21,6 +21,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { uiModules } from '../../modules';
 import { documentationLinks } from '../../documentation_links/documentation_links';
+import { kfetch } from 'ui/kfetch';
 import {
   EuiPopover,
   EuiButtonEmpty,
@@ -62,8 +63,18 @@ module.directive('queryPopover', function (localStorage) {
       }
 
       function onSwitchChange() {
+        const newLanguage = $scope.language === 'lucene' ? 'kuery' : 'lucene';
+
+        // Send telemetry info every time the user opts in or out of kuery
+        // As a result it is important this function only ever gets called in the
+        // UI component's change handler.
+        kfetch({
+          pathname: '/api/kibana/kql_opt_in_telemetry',
+          method: 'POST',
+          body: JSON.stringify({ opt_in: newLanguage === 'kuery' }),
+        });
+
         $scope.$evalAsync(() => {
-          const newLanguage = $scope.language === 'lucene' ? 'kuery' : 'lucene';
           localStorage.set('kibana.userQueryLanguage', newLanguage);
           $scope.onSelectLanguage({ $language: newLanguage });
         });

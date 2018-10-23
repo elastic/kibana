@@ -32,8 +32,9 @@ import {
 
 import { getCategoryName } from '../../lib';
 import { Field } from '../field';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class Form extends PureComponent {
+class FormUI extends PureComponent {
 
   static propTypes = {
     settings: PropTypes.object.isRequired,
@@ -52,11 +53,23 @@ export class Form extends PureComponent {
       return (
         <EuiFlexItem grow={false}>
           <em>
-            Search terms are hiding {totalSettings - currentSettings} settings {(
-              <EuiLink onClick={clearQuery}>
-                <em>(clear search)</em>
-              </EuiLink>
-            )}
+            <FormattedMessage
+              id="kbn.management.settings.form.searchResultText"
+              defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+              values={{
+                settingsCount: (totalSettings - currentSettings),
+                clearSearch: (
+                  <EuiLink onClick={clearQuery}>
+                    <em>
+                      <FormattedMessage
+                        id="kbn.management.settings.form.clearSearchResultText"
+                        defaultMessage="(clear search)"
+                      />
+                    </em>
+                  </EuiLink>
+                ),
+              }}
+            />
           </em>
         </EuiFlexItem>
       );
@@ -100,7 +113,20 @@ export class Form extends PureComponent {
     if (this.props.showNoResultsMessage) {
       return (
         <EuiPanel paddingSize="l">
-          No settings found <EuiLink onClick={clearQuery}>(Clear search)</EuiLink>
+          <FormattedMessage
+            id="kbn.management.settings.form.noSearchResultText"
+            defaultMessage="No settings found {clearSearch}"
+            values={{
+              clearSearch: (
+                <EuiLink onClick={clearQuery}>
+                  <FormattedMessage
+                    id="kbn.management.settings.form.clearNoSearchResultText"
+                    defaultMessage="(clear search)"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
         </EuiPanel>
       );
     }
@@ -130,3 +156,5 @@ export class Form extends PureComponent {
     );
   }
 }
+
+export const Form = injectI18n(FormUI);
