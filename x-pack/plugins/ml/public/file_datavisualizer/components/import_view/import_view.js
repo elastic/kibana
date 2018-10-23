@@ -424,7 +424,7 @@ export class ImportView extends Component {
   }
 }
 
-async function createKibanaIndexPattern(indexPatternName, indexPatterns,  kibanaConfig, timeFieldName = DEFAULT_TIME_FIELD) {
+async function createKibanaIndexPattern(indexPatternName, indexPatterns, kibanaConfig, timeFieldName = DEFAULT_TIME_FIELD) {
   try {
     const emptyPattern = await indexPatterns.get();
 
