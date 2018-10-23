@@ -200,7 +200,7 @@ export class ImportView extends Component {
       const id = await emptyPattern.create();
 
       // check if there's a default index pattern, if not,
-      // set the newly created one as the defaut index pattern.
+      // set the newly created one as the default index pattern.
       if (!this.props.kibanaConfig.get('defaultIndex')) {
         await this.props.kibanaConfig.set('defaultIndex', id);
       }
