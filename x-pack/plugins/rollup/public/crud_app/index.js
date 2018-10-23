@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
@@ -76,4 +77,15 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
       });
     }
   }
+});
+FeatureCatalogueRegistryProvider.register(() => {
+  return {
+    id: 'rollup_jobs',
+    title: 'Rollups',
+    description: 'Preserve historical data for analysis with a smaller storage footprint.',
+    icon: 'indexRollupApp',
+    path: `#${CRUD_APP_BASE_PATH}/job_list`,
+    showOnHomePage: true,
+    category: FeatureCatalogueCategory.ADMIN
+  };
 });
