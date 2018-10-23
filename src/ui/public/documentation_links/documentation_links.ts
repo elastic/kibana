@@ -31,13 +31,13 @@ export const documentationLinks = {
     configuration: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-configuration.html`,
     elasticsearchOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html`,
     startup: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
-    exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`
+    exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`,
   },
   metricbeat: {
-    base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`
+    base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
   },
   logstash: {
-    base: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`
+    base: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`,
   },
   aggs: {
     date_histogram: `${ELASTIC_DOCS}search-aggregations-bucket-datehistogram-aggregation.html`,
@@ -77,19 +77,18 @@ export const documentationLinks = {
     painless: `${ELASTIC_DOCS}modules-scripting-painless.html`,
     painlessApi: `${PAINLESS_DOCS}painless-api-reference.html`,
     painlessSyntax: `${ELASTIC_DOCS}modules-scripting-painless-syntax.html`,
-    luceneExpressions: `${ELASTIC_DOCS}modules-scripting-expression.html`
+    luceneExpressions: `${ELASTIC_DOCS}modules-scripting-expression.html`,
   },
   indexPatterns: {
     loadingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
     introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
   },
   query: {
-    luceneQuerySyntax:
-      `${ELASTIC_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
+    luceneQuerySyntax: `${ELASTIC_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
     queryDsl: `${ELASTIC_DOCS}query-dsl.html`,
     kueryQuerySyntax: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kuery-query.html`,
   },
   date: {
-    dateMath: `${ELASTIC_DOCS}common-options.html#date-math`
+    dateMath: `${ELASTIC_DOCS}common-options.html#date-math`,
   },
 };
