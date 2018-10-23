@@ -8,7 +8,8 @@ import { TMSSource } from './source';
 import { TileLayer } from '../tile_layer';
 import {
   EuiFieldText,
-  EuiButton
+  EuiButton,
+  EuiText
 } from '@elastic/eui';
 
 export class KibanaTilemapSource extends  TMSSource {
@@ -34,17 +35,13 @@ export class KibanaTilemapSource extends  TMSSource {
 
   renderDetails() {
     return (
-      <Fragment>
-        <div>
-          <span className="bold">Source: </span><span>Kibana Tilemap Configuration</span>
-        </div>
-        <div>
-          <span className="bold">Type: </span><span>Tile</span>
-        </div>
-        <div>
-          <span className="bold">Id: </span><span>{this._descriptor.id}</span>
-        </div>
-      </Fragment>
+      <EuiText className="gisLayerDetails" color="subdued" size="s">
+        <p>
+          <strong className="gisLayerDetails__label">Source: </strong> &emsp; <span>Kibana Tilemap Configuration</span><br/>
+          <strong className="gisLayerDetails__label">Type: </strong> &emsp; <span>Tile</span><br/>
+          <strong className="gisLayerDetails__label">Id: </strong> &emsp; <span>{this._descriptor.id}</span><br/>
+        </p>
+      </EuiText>
     );
   }
 

@@ -13,6 +13,7 @@ import {
   EuiFormRow,
   // EuiFieldNumber,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../components/single_field_select';
@@ -61,21 +62,15 @@ export class ESSearchSource extends VectorSource {
 
   renderDetails() {
     return (
-      <Fragment>
-        <div>
-          <span className="bold">Type: </span><span>Elasticsearch document</span>
-        </div>
-        <div>
-          <span className="bold">Index pattern: </span><span>{this._descriptor.indexPatternId}</span>
-        </div>
-        <div>
-          <span className="bold">Geo field: </span><span>{this._descriptor.geoField}</span>
-        </div>
-        <div>
+      <EuiText className="gisLayerDetails" color="subdued" size="s">
+        <p>
+          <strong className="gisLayerDetails__label">Type: </strong> &emsp; <span>Elasticsearch document</span><br/>
+          <strong className="gisLayerDetails__label">Index pattern: </strong> &emsp; <span>{this._descriptor.indexPatternId}</span><br/>
+          <strong className="gisLayerDetails__label">Geo field: </strong> &emsp; <span>{this._descriptor.geoField}</span><br/>
           {/*//todo : skip for now to reduce form-length for demo*/}
-          {/*<span className="bold">Limit: </span><span>{this._descriptor.limit}</span>*/}
-        </div>
-      </Fragment>
+          {/*<strong className="gisLayerDetails__label">Limit: </strong> &emsp; <span>{this._descriptor.limit}</span>*/}
+        </p>
+      </EuiText>
     );
   }
 

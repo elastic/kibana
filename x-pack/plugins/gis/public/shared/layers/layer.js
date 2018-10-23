@@ -81,7 +81,6 @@ export class ALayer {
     return (
       <EuiFormRow
         label="Layer display name"
-        compressed
         fullWidth
       >
         <EuiFieldText

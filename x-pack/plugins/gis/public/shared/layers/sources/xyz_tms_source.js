@@ -8,6 +8,7 @@ import React, { Fragment } from 'react';
 
 import {
   EuiFieldText,
+  EuiText,
 } from '@elastic/eui';
 
 import { TMSSource } from './source';
@@ -37,14 +38,13 @@ export class XYZTMSSource extends TMSSource {
 
   renderDetails() {
     return (
-      <Fragment>
-        <div>
-          <span className="bold">Type: </span><span>Tile</span>
-        </div>
-        <div>
-          <span className="bold">Url: </span><span>{this._descriptor.urlTemplate}</span>
-        </div>
-      </Fragment>
+      <EuiText className="gisLayerDetails" color="subdued" size="s">
+        <p>
+          <strong className="gisLayerDetails__label">Type: </strong> &emsp; <span>Tile</span><br/>
+          <strong className="gisLayerDetails__label">Url: </strong> &emsp;
+          <span className="eui-textBreakAll">{this._descriptor.urlTemplate}</span><br/>
+        </p>
+      </EuiText>
     );
   }
 

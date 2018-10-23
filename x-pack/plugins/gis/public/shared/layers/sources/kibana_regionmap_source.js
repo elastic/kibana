@@ -42,33 +42,27 @@ export class KibanaRegionmapSource extends VectorSource {
     };
 
     return (
-      <EuiText>
-        <Fragment>
-          <EuiSpacer size="m"/>
-          <EuiSelect
-            hasNoInitialSelection
-            options={regionmapOptions}
-            onChange={onChange}
-            aria-label="Use aria labels when no actual label is in use"
-          />
-        </Fragment>
-      </EuiText>
+      <Fragment>
+        <EuiSpacer size="m"/>
+        <EuiSelect
+          hasNoInitialSelection
+          options={regionmapOptions}
+          onChange={onChange}
+          aria-label="Use aria labels when no actual label is in use"
+        />
+      </Fragment>
     );
   };
 
   renderDetails() {
     return (
-      <Fragment>
-        <div>
-          <span className="bold">Source: </span><span>Kibana Region Map</span>
-        </div>
-        <div>
-          <span className="bold">Type: </span><span>Vector</span>
-        </div>
-        <div>
-          <span className="bold">Name: </span><span>{this._descriptor.name}</span>
-        </div>
-      </Fragment>
+      <EuiText className="gisLayerDetails" color="subdued" size="s">
+        <p>
+          <strong className="gisLayerDetails__label">Source: </strong> &emsp; <span>Kibana Region Map</span><br/>
+          <strong className="gisLayerDetails__label">Type: </strong> &emsp; <span>Vector</span><br/>
+          <strong className="gisLayerDetails__label">Name: </strong> &emsp; <span>{this._descriptor.name}</span><br/>
+        </p>
+      </EuiText>
     );
   }
 

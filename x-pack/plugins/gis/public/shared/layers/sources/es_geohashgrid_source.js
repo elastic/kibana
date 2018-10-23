@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 
 import {
   EuiFormRow,
+  EuiText,
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../components/single_field_select';
@@ -77,17 +78,13 @@ export class ESGeohashGridSource extends ASource {
 
   renderDetails() {
     return (
-      <Fragment>
-        <div>
-          <span className="bold">Type: </span><span>geohash_grid</span>
-        </div>
-        <div>
-          <span className="bold">Index pattern: </span><span>{this._descriptor.indexPatternId}</span>
-        </div>
-        <div>
-          <span className="bold">Point field: </span><span>{this._descriptor.geoField}</span>
-        </div>
-      </Fragment>
+      <EuiText className="gisLayerDetails" color="subdued" size="s">
+        <p>
+          <strong className="gisLayerDetails__label">Type: </strong> &emsp; <span>geohash_grid</span><br/>
+          <strong className="gisLayerDetails__label">Index pattern: </strong> &emsp; <span>{this._descriptor.indexPatternId}</span><br/>
+          <strong className="gisLayerDetails__label">Point field: </strong> &emsp; <span>{this._descriptor.geoField}</span><br/>
+        </p>
+      </EuiText>
     );
   }
 
