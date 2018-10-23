@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import get from 'lodash.get';
+import { get } from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 
 /**
@@ -92,8 +92,6 @@ function splitTable(columns, rows, $parent) {
   });
 }
 
-export function legacyTableResponseHandler(table) {
-  return new Promise(resolve => {
-    resolve({ tables: splitTable(table.columns, table.rows, null) });
-  });
+export async function legacyTableResponseHandler(table) {
+  return { tables: splitTable(table.columns, table.rows, null) };
 }
