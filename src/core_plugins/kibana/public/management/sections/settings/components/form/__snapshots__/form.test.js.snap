@@ -9,14 +9,25 @@ exports[`Form should render no settings message when there are no settings 1`] =
     hasShadow={false}
     paddingSize="l"
   >
-    No settings found 
-    <EuiLink
-      color="primary"
-      onClick={[Function]}
-      type="button"
-    >
-      (Clear search)
-    </EuiLink>
+    <FormattedMessage
+      defaultMessage="No settings found {clearSearch}"
+      id="kbn.management.settings.form.noSearchResultText"
+      values={
+        Object {
+          "clearSearch": <EuiLink
+            color="primary"
+            onClick={[Function]}
+            type="button"
+          >
+            <FormattedMessage
+              defaultMessage="(clear search)"
+              id="kbn.management.settings.form.clearNoSearchResultText"
+              values={Object {}}
+            />
+          </EuiLink>,
+        }
+      }
+    />
   </EuiPanel>
 </React.Fragment>
 `;
@@ -184,18 +195,28 @@ exports[`Form should render normally 1`] = `
               grow={false}
             >
               <em>
-                Search terms are hiding 
-                9
-                 settings 
-                <EuiLink
-                  color="primary"
-                  onClick={[Function]}
-                  type="button"
-                >
-                  <em>
-                    (clear search)
-                  </em>
-                </EuiLink>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="kbn.management.settings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        color="primary"
+                        onClick={[Function]}
+                        type="button"
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="kbn.management.settings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": 9,
+                    }
+                  }
+                />
               </em>
             </EuiFlexItem>
           </EuiFlexGroup>

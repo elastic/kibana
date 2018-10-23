@@ -13,6 +13,7 @@ import './spaces_description.less';
 
 interface Props {
   userProfile: UserProfile;
+  onManageSpacesClick: () => void;
 }
 
 export const SpacesDescription: SFC<Props> = (props: Props) => {
@@ -27,7 +28,12 @@ export const SpacesDescription: SFC<Props> = (props: Props) => {
         <p>{SPACES_FEATURE_DESCRIPTION}</p>
       </EuiText>
       <div key="manageSpacesButton" className="spacesDescription__manageButtonWrapper">
-        <ManageSpacesButton size="s" style={{ width: `100%` }} userProfile={props.userProfile} />
+        <ManageSpacesButton
+          size="s"
+          style={{ width: `100%` }}
+          userProfile={props.userProfile}
+          onClick={props.onManageSpacesClick}
+        />
       </div>
     </EuiContextMenuPanel>
   );

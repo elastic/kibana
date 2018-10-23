@@ -9,9 +9,7 @@ import './styles/main.less';
 import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
 
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React from 'react';
 
 function createJobStats(jobsSummaryList) {
 
@@ -76,46 +74,20 @@ Stat.propTypes = {
   stat: PropTypes.object.isRequired,
 };
 
-export class JobStatsBar extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      jobsSummaryList: [],
-      jobStats: {},
-    };
-  }
+export const JobStatsBar = ({ jobsSummaryList }) => {
+  const jobStats = createJobStats(jobsSummaryList);
+  const stats = Object.keys(jobStats).map(k => jobStats[k]);
 
-  updateJobStats = (jobsSummaryList) => {
-    const jobStats = createJobStats(jobsSummaryList);
-    this.setState({
-      jobsSummaryList,
-      jobStats,
-    });
-  };
+  return (
+    <div className="jobs-stats-bar">
+      {
+        stats.filter(s => (s.show)).map(s => <Stat key={s.label} stat={s} />)
+      }
+    </div>
+  );
+};
 
-  componentDidMount() {
-    this.props.setUpdateJobStats(this.updateJobStats);
-  }
-
-  componentWillUnmount() {
-    this.props.unsetUpdateJobStats();
-  }
-
-  render() {
-    const { jobStats } = this.state;
-    const stats = Object.keys(jobStats).map(k => jobStats[k]);
-
-    return (
-      <div className="jobs-stats-bar">
-        {
-          stats.filter(s => (s.show)).map(s => <Stat key={s.label} stat={s} />)
-        }
-      </div>
-    );
-  }
-}
 JobStatsBar.propTypes = {
-  setUpdateJobStats: PropTypes.func.isRequired,
-  unsetUpdateJobStats: PropTypes.func.isRequired,
+  jobsSummaryList: PropTypes.array.isRequired,
 };
 

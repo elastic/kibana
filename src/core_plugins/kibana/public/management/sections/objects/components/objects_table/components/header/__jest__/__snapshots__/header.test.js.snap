@@ -19,7 +19,11 @@ exports[`Header should render normally 1`] = `
         size="m"
       >
         <h1>
-          Saved Objects
+          <FormattedMessage
+            defaultMessage="Saved Objects"
+            id="kbn.management.objects.objectsTable.header.savedObjectsTitle"
+            values={Object {}}
+          />
         </h1>
       </EuiTitle>
     </EuiFlexItem>
@@ -49,10 +53,15 @@ exports[`Header should render normally 1`] = `
             size="s"
             type="button"
           >
-            Export 
-            2
-             
-            objects
+            <FormattedMessage
+              defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
+              id="kbn.management.objects.objectsTable.header.exportButtonLabel"
+              values={
+                Object {
+                  "filteredCount": 2,
+                }
+              }
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
@@ -68,7 +77,11 @@ exports[`Header should render normally 1`] = `
             size="s"
             type="button"
           >
-            Import
+            <FormattedMessage
+              defaultMessage="Import"
+              id="kbn.management.objects.objectsTable.header.importButtonLabel"
+              values={Object {}}
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
@@ -83,7 +96,11 @@ exports[`Header should render normally 1`] = `
             size="s"
             type="button"
           >
-            Refresh
+            <FormattedMessage
+              defaultMessage="Refresh"
+              id="kbn.management.objects.objectsTable.header.refreshButtonLabel"
+              values={Object {}}
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -100,7 +117,11 @@ exports[`Header should render normally 1`] = `
         color="subdued"
         component="span"
       >
-        From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen.
+        <FormattedMessage
+          defaultMessage="From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen."
+          id="kbn.management.objects.objectsTable.howToDeleteSavedObjectsDescription"
+          values={Object {}}
+        />
       </EuiTextColor>
     </p>
   </EuiText>

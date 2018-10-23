@@ -489,22 +489,25 @@ module.directive('mlTimeseriesChart', function () {
           return markerClass;
         });
 
+
       // Render cross symbols for any multi-bucket anomalies.
       const multiBucketMarkers = d3.select('.focus-chart-markers').selectAll('.multi-bucket')
         .data(data.filter(d => (d.anomalyScore !== null && showMultiBucketAnomalyMarker(d) === true)));
 
-      // Remove multi-bucket markers that are no longer needed
+      // Remove multi-bucket markers that are no longer needed.
       multiBucketMarkers.exit().remove();
 
-      // Update markers to new positions.
+      // Add any new markers that are needed i.e. if number of multi-bucket points has increased.
       multiBucketMarkers.enter().append('path')
         .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
-        .attr('transform', d => `translate(${focusXScale(d.date)}, ${focusYScale(d.value)})`)
-        .attr('class', d => `metric-value anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`)
         .on('mouseover', function (d) {
           showFocusChartTooltip(d, this);
         })
         .on('mouseout', () => mlChartTooltipService.hide());
+
+      // Update all markers to new positions.
+      multiBucketMarkers.attr('transform', d => `translate(${focusXScale(d.date)}, ${focusYScale(d.value)})`)
+        .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`);
 
 
       // Add rectangular markers for any scheduled events.
@@ -1056,21 +1059,21 @@ module.directive('mlTimeseriesChart', function () {
         if (showMultiBucketAnomalyMarker(markerToSelect) === true) {
           selectedMarker.enter().append('path')
             .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
-            .attr('transform', d => `translate(${focusXScale(d.date)}, ${focusYScale(d.value)})`);
+            .attr('transform', d => `translate(${focusXScale(d.date)}, ${focusYScale(d.value)})`)
+            .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)} highlighted`);
         } else {
           selectedMarker.enter().append('circle')
             .attr('r', LINE_CHART_ANOMALY_RADIUS)
             .attr('cx', d => focusXScale(d.date))
-            .attr('cy', d => focusYScale(d.value));
+            .attr('cy', d => focusYScale(d.value))
+            .attr('class', d => `anomaly-marker metric-value ${getSeverityWithLow(d.anomalyScore)} highlighted`);
         }
-        selectedMarker.attr('class',
-          d => `metric-value anomaly-marker ${getSeverityWithLow(d.anomalyScore)} highlighted`);
 
         // Display the chart tooltip for this marker.
         // Note the values of the record and marker may differ depending on the levels of aggregation.
-        const circle = $('.focus-chart-markers .anomaly-marker.highlighted');
-        if (circle.length) {
-          showFocusChartTooltip(markerToSelect, circle[0]);
+        const anomalyMarker = $('.focus-chart-markers .anomaly-marker.highlighted');
+        if (anomalyMarker.length) {
+          showFocusChartTooltip(markerToSelect, anomalyMarker[0]);
         }
       }
     }
