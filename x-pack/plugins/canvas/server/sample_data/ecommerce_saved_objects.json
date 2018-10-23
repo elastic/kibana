@@ -1,13 +1,4 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
-/* eslint max-len: 0 */
-/* eslint quotes: 0 */
-
-export const ecommerceSavedObjects = [
+[
   {
     "id" : "workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e",
     "type": "canvas-workpad",
@@ -1224,4 +1215,4 @@ export const ecommerceSavedObjects = [
       }
     }
   }
-];
+]

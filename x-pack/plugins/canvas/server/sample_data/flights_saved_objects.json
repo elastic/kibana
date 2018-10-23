@@ -1,20 +1,11 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
-/* eslint max-len: 0 */
-/* eslint quotes: 0 */
-
-export const flightsSavedObjects = [
+[
   {
     "id" : "workpad-a474e74b-aedc-47c3-894a-db77e62c41e0",
     "type": "canvas-workpad",
     "updated_at" : "2018-10-22T14:17:04.040Z",
     "version": 1,
     "attributes" : {
-      "name" : "[Flights] Overview",
+            "name" : "[Flights] Overview",
       "id" : "workpad-a474e74b-aedc-47c3-894a-db77e62c41e0",
       "width" : 1280,
       "height" : 720,
@@ -38,10 +29,7 @@ export const flightsSavedObjects = [
                 "height" : 140.250363384436,
                 "angle" : 0
               },
-              "expression" : `
-shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintainAspect=false
-| render
-`
+              "expression" : "\nshape \"square\" fill=\"#FFFFFF\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id" : "element-60c9ac53-47a7-4ec2-a975-9d10bbe038bb",
@@ -52,10 +40,7 @@ shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintai
                 "height" : 140.250363384436,
                 "angle" : 0
               },
-              "expression" : `
-shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintainAspect=false
-| render
-`
+              "expression" : "\nshape \"square\" fill=\"#FFFFFF\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id" : "element-f573cae3-0d2b-4265-9a6f-314c865c4e5c",
@@ -66,10 +51,7 @@ shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintai
                 "height" : 140.250363384436,
                 "angle" : 0
               },
-              "expression" : `
-shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintainAspect=false
-| render
-`
+              "expression" : "\nshape \"square\" fill=\"#FFFFFF\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id" : "element-0f5b4a1f-8107-4f84-a12f-755b41dd1ca9",
@@ -80,17 +62,7 @@ shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintai
                 "height" : 99,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| essql
-query="SELECT COUNT(DISTINCT OriginAirportID) as total_airports
-FROM kibana_sample_data_flights"
-| math "total_airports"
-| metric "AIRPORTS"
-metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=60 align="right" color="#43988F" weight="normal" underline=false italic=false}
-labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="right" color="#43988F" weight="normal" underline=false italic=false}
-| render
-`
+              "expression" : "\nfilters\n| essql\nquery=\"SELECT COUNT(DISTINCT OriginAirportID) as total_airports\nFROM kibana_sample_data_flights\"\n| math \"total_airports\"\n| metric \"AIRPORTS\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#43988F\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#43988F\" weight=\"normal\" underline=false italic=false}\n| render\n"
             },
             {
               "id" : "element-096136f5-279d-4d29-a784-1bd33243db29",
@@ -101,13 +73,7 @@ labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align
                 "height" : 33,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| demodata
-| markdown "### LONGEST FLIGHT"
-font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=10 align="left" color="#FFFFFF" weight="normal" underline=false italic=false}
-| render
-`,
+              "expression" : "\nfilters\n| demodata\n| markdown \"### LONGEST FLIGHT\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=10 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter" : null
             },
             {
@@ -119,19 +85,7 @@ font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=10 align="lef
                 "height" : 92.812409153891,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| essql
-query="SELECT MAX(DistanceMiles) as max_distance
-FROM kibana_sample_data_flights
-WHERE DistanceMiles > 0"
-| math "max_distance"
-| formatNumber "00.0a"
-| metric "MILES"
-metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=60 align="right" color="#EFB341" weight="normal" underline=false italic=false}
-labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="right" color="#EFB341" weight="normal" underline=false italic=false}
-| render
-`,
+              "expression" : "\nfilters\n| essql\nquery=\"SELECT MAX(DistanceMiles) as max_distance\nFROM kibana_sample_data_flights\nWHERE DistanceMiles > 0\"\n| math \"max_distance\"\n| formatNumber \"00.0a\"\n| metric \"MILES\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#EFB341\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#EFB341\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter" : null
             },
             {
@@ -143,11 +97,8 @@ labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align
                 "height" : 50,
                 "angle" : 0
               },
-              "expression" : `
-timefilterControl compact=true column="timestamp"
-| render
-`,
-              "filter" : `timefilter from="now-24h" to=now column=timestamp`
+              "expression" : "\ntimefilterControl compact=true column=\"timestamp\"\n| render\n",
+              "filter" : "timefilter from=\"now-24h\" to=now column=timestamp"
             },
             {
               "id" : "element-08333e7c-2986-4ee7-b07c-8c07be09c751",
@@ -158,10 +109,7 @@ timefilterControl compact=true column="timestamp"
                 "height" : 358,
                 "angle" : 0
               },
-              "expression" : `
-image mode="cover" dataurl={asset "asset-2da3aba1-6e0f-4a79-879e-0ab3cfa170d6"}
-| render
-`
+              "expression" : "\nimage mode=\"cover\" dataurl={asset \"asset-2da3aba1-6e0f-4a79-879e-0ab3cfa170d6\"}\n| render\n"
             },
             {
               "id" : "element-90336033-8ca4-4bf5-ad20-94162aec28b6",
@@ -172,10 +120,7 @@ image mode="cover" dataurl={asset "asset-2da3aba1-6e0f-4a79-879e-0ab3cfa170d6"}
                 "height" : 672.125545076654,
                 "angle" : 0
               },
-              "expression" : `
-shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintainAspect=false
-| render
-`
+              "expression" : "\nshape \"square\" fill=\"#FFFFFF\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id" : "element-e0ff80ac-8372-421f-918e-fd9f257b2f32",
@@ -186,10 +131,7 @@ shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintai
                 "height" : 699.125545076654,
                 "angle" : 0
               },
-              "expression" : `
-image mode="contain" dataurl={asset "asset-9e41d208-ec45-472d-a118-e2e2c811291b"}
-| render
-`
+              "expression" : "\nimage mode=\"contain\" dataurl={asset \"asset-9e41d208-ec45-472d-a118-e2e2c811291b\"}\n| render\n"
             },
             {
               "id" : "element-0d68f8e7-dc04-4358-b459-127c42e274b4",
@@ -200,10 +142,7 @@ image mode="contain" dataurl={asset "asset-9e41d208-ec45-472d-a118-e2e2c811291b"
                 "height" : 153.375181692218,
                 "angle" : 0
               },
-              "expression" : `
-shape "circle" fill="rgba(255,255,255,0)" border="#48A8E0" borderWidth=2 maintainAspect=true
-| render
-`
+              "expression" : "\nshape \"circle\" fill=\"rgba(255,255,255,0)\" border=\"#48A8E0\" borderWidth=2 maintainAspect=true\n| render\n"
             },
             {
               "id" : "element-f56821a4-4fd8-4de1-8bb7-6722c9ee5334",
@@ -214,13 +153,7 @@ shape "circle" fill="rgba(255,255,255,0)" border="#48A8E0" borderWidth=2 maintai
                 "height" : 44,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| demodata
-| markdown "TIME IN AIR"
-font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=38 align="center" color="#48A8E0" weight="normal" underline=false italic=false}
-| render
-`,
+              "expression" : "\nfilters\n| demodata\n| markdown \"TIME IN AIR\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=38 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter" : null
             },
             {
@@ -232,10 +165,7 @@ font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=38 align="cen
                 "height" : 153.375181692218,
                 "angle" : 0
               },
-              "expression" : `
-shape "circle" fill="rgba(255,255,255,0)" border="#48A8E0" borderWidth=2 maintainAspect=true
-| render
-`,
+              "expression" : "\nshape \"circle\" fill=\"rgba(255,255,255,0)\" border=\"#48A8E0\" borderWidth=2 maintainAspect=true\n| render\n",
               "filter" : null
             },
             {
@@ -247,10 +177,7 @@ shape "circle" fill="rgba(255,255,255,0)" border="#48A8E0" borderWidth=2 maintai
                 "height" : 153.375181692218,
                 "angle" : 0
               },
-              "expression" : `
-shape "circle" fill="rgba(255,255,255,0)" border="#48A8E0" borderWidth=2 maintainAspect=true
-| render
-`,
+              "expression" : "\nshape \"circle\" fill=\"rgba(255,255,255,0)\" border=\"#48A8E0\" borderWidth=2 maintainAspect=true\n| render\n",
               "filter" : null
             },
             {
@@ -262,17 +189,7 @@ shape "circle" fill="rgba(255,255,255,0)" border="#48A8E0" borderWidth=2 maintai
                 "height" : 65,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| essql
-query="SELECT FLOOR((SUM(FlightTimeMin) % 1440) / 60) as hours
-FROM kibana_sample_data_flights"
-| math "hours"
-| formatNumber "00"
-| metric
-metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=50 align="center" color="#48A8E0" weight="normal" underline=false italic=false}
-| render
-`,
+              "expression" : "\nfilters\n| essql\nquery=\"SELECT FLOOR((SUM(FlightTimeMin) % 1440) / 60) as hours\nFROM kibana_sample_data_flights\"\n| math \"hours\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=50 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter" : null
             },
             {
@@ -284,13 +201,7 @@ metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=50 alig
                 "height" : 39,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| demodata
-| markdown "DAYS"
-font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="center" color="#48A8E0" weight="normal" underline=false italic=false}
-| render
-`
+              "expression" : "\nfilters\n| demodata\n| markdown \"DAYS\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n"
             },
             {
               "id" : "element-b253908c-b8bd-4ea1-a35f-eae5eb1ae63a",
@@ -301,17 +212,7 @@ font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="cen
                 "height" : 65,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| essql
-query="SELECT FLOOR(SUM(FlightTimeMin)/1440) as total_days
-FROM kibana_sample_data_flights"
-| math "total_days"
-| formatNumber "00a"
-| metric
-metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=50 align="center" color="#48A8E0" weight="normal" underline=false italic=false}
-| render
-`,
+              "expression" : "\nfilters\n| essql\nquery=\"SELECT FLOOR(SUM(FlightTimeMin)/1440) as total_days\nFROM kibana_sample_data_flights\"\n| math \"total_days\"\n| formatNumber \"00a\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=50 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter" : null
             },
             {
@@ -323,17 +224,7 @@ metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=50 alig
                 "height" : 54,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| essql
-query="SELECT ((SUM(FlightTimeMin) % 1440) / 60 ) as minutes
-FROM kibana_sample_data_flights"
-| math "minutes"
-| formatNumber "00"
-| metric
-metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=50 align="center" color="#48A8E0" weight="normal" underline=false italic=false}
-| render
-`,
+              "expression" : "\nfilters\n| essql\nquery=\"SELECT ((SUM(FlightTimeMin) % 1440) / 60 ) as minutes\nFROM kibana_sample_data_flights\"\n| math \"minutes\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=50 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter" : null
             },
             {
@@ -345,13 +236,7 @@ metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=50 alig
                 "height" : 39,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| demodata
-| markdown "HOURS"
-font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="center" color="#48A8E0" weight="normal" underline=false italic=false}
-| render
-`,
+              "expression" : "\nfilters\n| demodata\n| markdown \"HOURS\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter" : null
             },
             {
@@ -363,13 +248,7 @@ font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="cen
                 "height" : 39,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| demodata
-| markdown "MINS"
-font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="center" color="#48A8E0" weight="normal" underline=false italic=false}
-| render
-`,
+              "expression" : "\nfilters\n| demodata\n| markdown \"MINS\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter" : null
             },
             {
@@ -381,10 +260,7 @@ font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="cen
                 "height" : 140.250363384436,
                 "angle" : 0
               },
-              "expression" : `
-shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintainAspect=false
-| render
-`
+              "expression" : "\nshape \"square\" fill=\"#FFFFFF\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id" : "element-1d11f5a4-95a3-4a50-9191-6beb61bb8fbc",
@@ -395,10 +271,7 @@ shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintai
                 "height" : 140.250363384436,
                 "angle" : 0
               },
-              "expression" : `
-shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintainAspect=false
-| render
-`
+              "expression" : "\nshape \"square\" fill=\"#FFFFFF\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id" : "element-cfe6524e-b201-439a-974c-037406b760f6",
@@ -409,17 +282,7 @@ shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintai
                 "height" : 99,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| essql query="SELECT COUNT(*) as total_flights
-FROM kibana_sample_data_flights"
-| math "total_flights"
-| formatNumber "0a]"
-| metric "FLIGHTS"
-metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=67 align="right" color="#4184A5" weight="normal" underline=false italic=false}
-labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="right" color="#4184A5" weight="normal" underline=false italic=false}
-| render
-`
+              "expression" : "\nfilters\n| essql query=\"SELECT COUNT(*) as total_flights\nFROM kibana_sample_data_flights\"\n| math \"total_flights\"\n| formatNumber \"0a]\"\n| metric \"FLIGHTS\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=67 align=\"right\" color=\"#4184A5\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#4184A5\" weight=\"normal\" underline=false italic=false}\n| render\n"
             },
             {
               "id" : "element-e162c0b4-9393-43f9-8324-0263f40b4b85",
@@ -430,10 +293,7 @@ labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align
                 "height" : 59.312409153891,
                 "angle" : 0
               },
-              "expression" : `
-image mode="contain" dataurl={asset "asset-520a03a1-f522-4a18-ad4a-b84e87e4dc44"}
-| render
-`
+              "expression" : "\nimage mode=\"contain\" dataurl={asset \"asset-520a03a1-f522-4a18-ad4a-b84e87e4dc44\"}\n| render\n"
             },
             {
               "id" : "element-0c37705e-004f-49c6-abda-9847b762c9f2",
@@ -444,19 +304,7 @@ image mode="contain" dataurl={asset "asset-520a03a1-f522-4a18-ad4a-b84e87e4dc44"
                 "height" : 100,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| essql
-query="SELECT MIN(DistanceMiles) as min_distance
-FROM kibana_sample_data_flights
-WHERE DistanceMiles > 0"
-| math "min_distance"
-| formatNumber "00.0a"
-| metric "MILES"
-metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=67 align="right" color="#7EA030" weight="normal" underline=false italic=false}
-labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="right" color="#7EA030" weight="normal" underline=false italic=false}
-| render
-`,
+              "expression" : "\nfilters\n| essql\nquery=\"SELECT MIN(DistanceMiles) as min_distance\nFROM kibana_sample_data_flights\nWHERE DistanceMiles > 0\"\n| math \"min_distance\"\n| formatNumber \"00.0a\"\n| metric \"MILES\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=67 align=\"right\" color=\"#7EA030\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#7EA030\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter" : null
             },
             {
@@ -468,10 +316,7 @@ labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align
                 "height" : 45.812409153891,
                 "angle" : 0
               },
-              "expression" : `
-image mode="contain" dataurl={asset "asset-08aa2e8f-6c3b-428f-82de-581004292cf0"}
-| render
-`
+              "expression" : "\nimage mode=\"contain\" dataurl={asset \"asset-08aa2e8f-6c3b-428f-82de-581004292cf0\"}\n| render\n"
             },
             {
               "id" : "element-a81c83c7-8b61-4a1f-8da5-3270821c0089",
@@ -482,13 +327,7 @@ image mode="contain" dataurl={asset "asset-08aa2e8f-6c3b-428f-82de-581004292cf0"
                 "height" : 30.5,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| demodata
-| markdown "SHORTEST FLIGHT"
-font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="left" color="#7EA030" weight="normal" underline=false italic=false}
-| render
-`
+              "expression" : "\nfilters\n| demodata\n| markdown \"SHORTEST FLIGHT\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"left\" color=\"#7EA030\" weight=\"normal\" underline=false italic=false}\n| render\n"
             },
             {
               "id" : "element-79393fba-8da9-4884-a280-e2a87e163f1a",
@@ -499,10 +338,7 @@ font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="lef
                 "height" : 59.312409153891,
                 "angle" : 0
               },
-              "expression" : `
-image mode="contain" dataurl={asset "asset-11a8022c-c1ac-4bbd-857a-db95fb8ca452"}
-| render
-`
+              "expression" : "\nimage mode=\"contain\" dataurl={asset \"asset-11a8022c-c1ac-4bbd-857a-db95fb8ca452\"}\n| render\n"
             },
             {
               "id" : "element-ec914936-fc84-4915-82f7-1ca6b37ddc03",
@@ -513,13 +349,7 @@ image mode="contain" dataurl={asset "asset-11a8022c-c1ac-4bbd-857a-db95fb8ca452"
                 "height" : 30.5,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| demodata
-| markdown "LONGEST FLIGHT"
-font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="left" color="#EFB341" weight="normal" underline=false italic=false}
-| render
-`,
+              "expression" : "\nfilters\n| demodata\n| markdown \"LONGEST FLIGHT\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"left\" color=\"#EFB341\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter" : null
             },
             {
@@ -531,10 +361,7 @@ font={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="lef
                 "height" : 59.312409153891,
                 "angle" : 0
               },
-              "expression" : `
-image mode="contain" dataurl={asset "asset-e73f53c5-fdcc-4232-bd6f-85a06281cf6c"}
-| render
-`,
+              "expression" : "\nimage mode=\"contain\" dataurl={asset \"asset-e73f53c5-fdcc-4232-bd6f-85a06281cf6c\"}\n| render\n",
               "filter" : null
             },
             {
@@ -546,10 +373,7 @@ image mode="contain" dataurl={asset "asset-e73f53c5-fdcc-4232-bd6f-85a06281cf6c"
                 "height" : 140.250363384436,
                 "angle" : 0
               },
-              "expression" : `
-shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintainAspect=false
-| render
-`
+              "expression" : "\nshape \"square\" fill=\"#FFFFFF\" border=\"rgba(255,255,255,0)\" borderWidth=0 maintainAspect=false\n| render\n"
             },
             {
               "id" : "element-b6e7d5e1-3221-4274-ac97-5e0387d090c0",
@@ -560,19 +384,7 @@ shape "square" fill="#FFFFFF" border="rgba(255,255,255,0)" borderWidth=0 maintai
                 "height" : 96.687590846109,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| essql
-query="SELECT COUNT(*) as total_cancellations
-FROM kibana_sample_data_flights
-WHERE Cancelled = true"
-| math "total_cancellations"
-| formatNumber "0a"
-| metric "CANCELLATIONS"
-metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=60 align="right" color="#D88734" weight="normal" underline=false italic=false}
-labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="right" color="#D88734" weight="normal" underline=false italic=false}
-| render
-`,
+              "expression" : "\nfilters\n| essql\nquery=\"SELECT COUNT(*) as total_cancellations\nFROM kibana_sample_data_flights\nWHERE Cancelled = true\"\n| math \"total_cancellations\"\n| formatNumber \"0a\"\n| metric \"CANCELLATIONS\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#D88734\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#D88734\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter" : null
             },
             {
@@ -584,10 +396,7 @@ labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align
                 "height" : 59.312409153891,
                 "angle" : 0
               },
-              "expression" : `
-image mode="contain" dataurl={asset "asset-63a49130-fb96-4576-ac31-d86c934234d1"}
-| render
-`,
+              "expression" : "\nimage mode=\"contain\" dataurl={asset \"asset-63a49130-fb96-4576-ac31-d86c934234d1\"}\n| render\n",
               "filter" : null
             },
             {
@@ -599,17 +408,7 @@ image mode="contain" dataurl={asset "asset-63a49130-fb96-4576-ac31-d86c934234d1"
                 "height" : 105,
                 "angle" : 0
               },
-              "expression" : `
-filters
-| essql
-query="SELECT COUNT(DISTINCT OriginCountry) as total_countries
-FROM kibana_sample_data_flights"
-| math "total_countries"
-| metric "COUNTRIES"
-metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=60 align="right" color="#CB3072" weight="normal" underline=false italic=false}
-labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align="right" color="#CB3072" weight="normal" underline=false italic=false}
-| render
-`,
+              "expression" : "\nfilters\n| essql\nquery=\"SELECT COUNT(DISTINCT OriginCountry) as total_countries\nFROM kibana_sample_data_flights\"\n| math \"total_countries\"\n| metric \"COUNTRIES\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#CB3072\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#CB3072\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter" : null
             },
             {
@@ -621,10 +420,7 @@ labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=24 align
                 "height" : 59.312409153891,
                 "angle" : 0
               },
-              "expression" : `
-image mode="contain" dataurl={asset "asset-4843e3bb-6cb0-43b7-b076-deea9a901fc6"}
-| render
-`,
+              "expression" : "\nimage mode=\"contain\" dataurl={asset \"asset-4843e3bb-6cb0-43b7-b076-deea9a901fc6\"}\n| render\n",
               "filter" : null
             }
           ]
@@ -715,4 +511,4 @@ image mode="contain" dataurl={asset "asset-4843e3bb-6cb0-43b7-b076-deea9a901fc6"
       }
     }
   }
-];
+]

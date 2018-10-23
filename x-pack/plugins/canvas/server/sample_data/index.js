@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ecommerceSavedObjects } from './ecommerce_saved_objects';
-export { flightsSavedObjects } from './flights_saved_objects';
-export { webLogsSavedObjects } from './web_logs_saved_objects';
+import ecommerceSavedObjects from './ecommerce_saved_objects.json';
+import flightsSavedObjects from './flights_saved_objects.json';
+import webLogsSavedObjects from './web_logs_saved_objects.json';
+
+console.log(ecommerceSavedObjects.length);
+
+export { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects };
