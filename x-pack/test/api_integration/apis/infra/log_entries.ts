@@ -25,7 +25,7 @@ const LATEST_KEY_WITH_DATA = {
 };
 
 const logEntriesAroundQuery = gql`
-  query TestQuery(
+  query LogEntriesAroundQuery(
     $timeKey: InfraTimeKeyInput!
     $countBefore: Int = 0
     $countAfter: Int = 0
@@ -70,70 +70,176 @@ const logEntriesAroundQuery = gql`
   }
 `;
 
+const logEntriesBetweenQuery = gql`
+  query LogEntriesBetweenQuery(
+    $startKey: InfraTimeKeyInput!
+    $endKey: InfraTimeKeyInput!
+    $filterQuery: String
+  ) {
+    source(id: "default") {
+      id
+      logEntriesBetween(startKey: $startKey, endKey: $endKey, filterQuery: $filterQuery) {
+        start {
+          time
+          tiebreaker
+        }
+        end {
+          time
+          tiebreaker
+        }
+        hasMoreBefore
+        hasMoreAfter
+        entries {
+          gid
+          key {
+            time
+            tiebreaker
+          }
+          message {
+            ... on InfraLogMessageFieldSegment {
+              field
+              value
+            }
+            ... on InfraLogMessageConstantSegment {
+              constant
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 const logEntriesTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
-  describe('logEntriesAround', () => {
+  describe('log entry apis', () => {
     before(() => esArchiver.load('infra'));
     after(() => esArchiver.unload('infra'));
 
-    it('should return newer and older log entries when present', async () => {
-      const {
-        data: {
-          source: { logEntriesAround },
-        },
-      } = await client.query<any>({
-        query: logEntriesAroundQuery,
-        variables: {
-          timeKey: KEY_WITHIN_DATA_RANGE,
-          countBefore: 100,
-          countAfter: 100,
-        },
+    describe('logEntriesAround', () => {
+      it('should return newer and older log entries when present', async () => {
+        const {
+          data: {
+            source: { logEntriesAround },
+          },
+        } = await client.query<any>({
+          query: logEntriesAroundQuery,
+          variables: {
+            timeKey: KEY_WITHIN_DATA_RANGE,
+            countBefore: 100,
+            countAfter: 100,
+          },
+        });
+
+        expect(logEntriesAround).to.have.property('entries');
+        expect(logEntriesAround.entries).to.have.length(200);
+        expect(isSorted(ascendingTimeKey)(logEntriesAround.entries)).to.equal(true);
+
+        expect(logEntriesAround.hasMoreBefore).to.equal(true);
+        expect(logEntriesAround.hasMoreAfter).to.equal(true);
       });
 
-      expect(logEntriesAround).to.have.property('entries');
-      expect(logEntriesAround.entries).to.have.length(200);
-      expect(isSorted(ascendingTimeKey)(logEntriesAround.entries)).to.equal(true);
+      it('should indicate if no older entries are present', async () => {
+        const {
+          data: {
+            source: { logEntriesAround },
+          },
+        } = await client.query<any>({
+          query: logEntriesAroundQuery,
+          variables: {
+            timeKey: EARLIEST_KEY_WITH_DATA,
+            countBefore: 100,
+            countAfter: 100,
+          },
+        });
 
-      expect(logEntriesAround.hasMoreBefore).to.equal(true);
-      expect(logEntriesAround.hasMoreAfter).to.equal(true);
+        expect(logEntriesAround.hasMoreBefore).to.equal(false);
+        expect(logEntriesAround.hasMoreAfter).to.equal(true);
+      });
+
+      it('should indicate if no newer entries are present', async () => {
+        const {
+          data: {
+            source: { logEntriesAround },
+          },
+        } = await client.query<any>({
+          query: logEntriesAroundQuery,
+          variables: {
+            timeKey: LATEST_KEY_WITH_DATA,
+            countBefore: 100,
+            countAfter: 100,
+          },
+        });
+
+        expect(logEntriesAround.hasMoreBefore).to.equal(true);
+        expect(logEntriesAround.hasMoreAfter).to.equal(false);
+      });
     });
 
-    it('should indicate if no older entries are present', async () => {
-      const {
-        data: {
-          source: { logEntriesAround },
-        },
-      } = await client.query<any>({
-        query: logEntriesAroundQuery,
-        variables: {
-          timeKey: EARLIEST_KEY_WITH_DATA,
-          countBefore: 100,
-          countAfter: 100,
-        },
+    describe('logEntriesBetween', () => {
+      it('should return log entries between the start and end keys', async () => {
+        const {
+          data: {
+            source: { logEntriesBetween },
+          },
+        } = await client.query<any>({
+          query: logEntriesBetweenQuery,
+          variables: {
+            startKey: EARLIEST_KEY_WITH_DATA,
+            endKey: KEY_WITHIN_DATA_RANGE,
+          },
+        });
+
+        expect(logEntriesBetween).to.have.property('entries');
+        expect(logEntriesBetween.entries).to.not.be.empty();
+        expect(isSorted(ascendingTimeKey)(logEntriesBetween.entries)).to.equal(true);
+
+        expect(
+          ascendingTimeKey(logEntriesBetween.entries[0], { key: EARLIEST_KEY_WITH_DATA })
+        ).to.be.above(-1);
+        expect(
+          ascendingTimeKey(logEntriesBetween.entries[logEntriesBetween.entries.length - 1], {
+            key: KEY_WITHIN_DATA_RANGE,
+          })
+        ).to.be.below(1);
       });
 
-      expect(logEntriesAround.hasMoreBefore).to.equal(false);
-      expect(logEntriesAround.hasMoreAfter).to.equal(true);
-    });
+      it('should return results consistent with logEntriesAround', async () => {
+        const {
+          data: {
+            source: { logEntriesAround },
+          },
+        } = await client.query<any>({
+          query: logEntriesAroundQuery,
+          variables: {
+            timeKey: KEY_WITHIN_DATA_RANGE,
+            countBefore: 100,
+            countAfter: 100,
+          },
+        });
 
-    it('should indicate if no newer entries are present', async () => {
-      const {
-        data: {
-          source: { logEntriesAround },
-        },
-      } = await client.query<any>({
-        query: logEntriesAroundQuery,
-        variables: {
-          timeKey: LATEST_KEY_WITH_DATA,
-          countBefore: 100,
-          countAfter: 100,
-        },
+        const {
+          data: {
+            source: { logEntriesBetween },
+          },
+        } = await client.query<any>({
+          query: logEntriesBetweenQuery,
+          variables: {
+            startKey: {
+              time: logEntriesAround.start.time,
+              tiebreaker: logEntriesAround.start.tiebreaker - 1,
+            },
+            endKey: {
+              time: logEntriesAround.end.time,
+              tiebreaker: logEntriesAround.end.tiebreaker + 1,
+            },
+          },
+        });
+
+        expect(logEntriesBetween).to.eql(logEntriesAround);
       });
-
-      expect(logEntriesAround.hasMoreBefore).to.equal(true);
-      expect(logEntriesAround.hasMoreAfter).to.equal(false);
     });
   });
 };
