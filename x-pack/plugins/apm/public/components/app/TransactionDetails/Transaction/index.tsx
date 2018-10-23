@@ -10,7 +10,8 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
+  EuiToolTip
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -31,20 +32,23 @@ function MaybeViewTraceLink({
   transaction: ITransaction;
 }) {
   const isRoot = transaction.transaction.id === root.transaction.id;
+  let button;
 
-  if (isRoot) {
-    return null;
-  }
-
-  if (!root) {
-    return null;
+  if (isRoot || !root) {
+    button = (
+      <EuiToolTip content="Currently viewing the full trace">
+        <EuiButton iconType="apmApp" disabled={true}>
+          View full trace
+        </EuiButton>
+      </EuiToolTip>
+    );
+  } else {
+    button = <EuiButton iconType="apmApp">View full trace</EuiButton>;
   }
 
   return (
     <EuiFlexItem grow={false}>
-      <TraceLink transaction={root}>
-        <EuiButton iconType="apmApp">View full trace</EuiButton>
-      </TraceLink>
+      <TraceLink transaction={root}>{button}</TraceLink>
     </EuiFlexItem>
   );
 }

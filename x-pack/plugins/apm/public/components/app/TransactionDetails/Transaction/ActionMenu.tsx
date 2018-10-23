@@ -13,18 +13,23 @@ import {
 import React from 'react';
 import {
   PROCESSOR_EVENT,
+  TRACE_ID,
   TRANSACTION_ID
 } from 'x-pack/plugins/apm/common/constants';
 import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 
-function getDiscoverQuery(transactionId: string) {
+function getDiscoverQuery(transactionId: string, traceId?: string) {
+  let query = `${PROCESSOR_EVENT}:transaction AND ${TRANSACTION_ID}:${transactionId}`;
+  if (traceId) {
+    query += ` AND ${TRACE_ID}:${traceId}`;
+  }
   return {
     _a: {
       interval: 'auto',
       query: {
         language: 'lucene',
-        query: `${PROCESSOR_EVENT}:transaction AND ${TRANSACTION_ID}:${transactionId}`
+        query
       }
     }
   };
@@ -70,9 +75,12 @@ export class ActionMenu extends React.Component<
         <KibanaLink
           pathname="/app/kibana"
           hash="/discover"
-          query={getDiscoverQuery(transaction.transaction.id)}
+          query={getDiscoverQuery(
+            transaction.transaction.id,
+            transaction.version === 'v2' ? transaction.trace.id : undefined
+          )}
         >
-          {'View transaction in Discover'}
+          View sample document
         </KibanaLink>
       </EuiContextMenuItem>,
       <EuiContextMenuItem icon="infraApp">
@@ -80,7 +88,7 @@ export class ActionMenu extends React.Component<
           pathname="/app/infra"
           hash={`/link-to/host-detail/${transaction.host.name}`}
         >
-          {`View logs for this host`}
+          View host logs
         </KibanaLink>
       </EuiContextMenuItem>
     ];
@@ -94,7 +102,7 @@ export class ActionMenu extends React.Component<
         anchorPosition="downRight"
         panelPaddingSize="none"
       >
-        <EuiContextMenuPanel items={items} />
+        <EuiContextMenuPanel items={items} title="Actions" />
       </EuiPopover>
     );
   }
