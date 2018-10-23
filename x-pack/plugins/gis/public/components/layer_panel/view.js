@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import { StyleTabs } from './style_tabs';
 import { JoinEditor } from './join_editor';
@@ -66,12 +66,11 @@ export class LayerPanel  extends React.Component {
     });
 
     const frags = (
-      <Fragment>
-        <EuiTitle size="s"><h2><strong>Settings</strong></h2></EuiTitle>
-        <EuiSpacer size="l"/>
+      <EuiPanel>
+        <EuiTitle size="xs"><h5>Layer settings</h5></EuiTitle>
+        <EuiHorizontalRule margin="m"/>
         {layerSettings}
-        <EuiSpacer size="l"/>
-      </Fragment>);
+      </EuiPanel>);
 
     return frags;
 
@@ -117,23 +116,19 @@ export class LayerPanel  extends React.Component {
           <EuiTitle size="s">
             <h1>{this.state.displayName}</h1>
           </EuiTitle>
-          <EuiSpacer size="m"/>
-          <EuiSpacer/>
-
-          <div>
-            {selectedLayer.renderSourceDetails()}
-          </div>
           <EuiSpacer/>
           <EuiHorizontalRule margin="none"/>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody style={{ paddingTop: 0 }}>
           {globalLayerSettings}
-          <EuiSpacer size="l"/>
+          <EuiSpacer size="m"/>
           {joinSection}
-          <EuiSpacer size="l"/>
+          <EuiSpacer size="m"/>
           <StyleTabs layer={selectedLayer}/>
-          <EuiSpacer size="l"/>
+          <EuiSpacer size="m"/>
+
+          {selectedLayer.renderSourceDetails()}
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
