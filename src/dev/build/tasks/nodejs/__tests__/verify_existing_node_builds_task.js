@@ -39,7 +39,7 @@ describe('src/dev/build/tasks/nodejs/verify_existing_node_builds_task', () => {
 
     const log = { success: sinon.stub() };
     const config = {
-      getPlatforms: () => platforms,
+      getTargetPlatforms: () => platforms,
       getNodeVersion: () => 'nodeVersion',
     };
 
