@@ -17,24 +17,13 @@
  * under the License.
  */
 
-import * as fs from 'fs';
+import { fetch } from './fetch';
 
-/**
- * Recursive deletion for a directory
- *
- * @param {String} path
- */
-export function rmrfSync(path) {
-  if (fs.existsSync(path)) {
-    fs.readdirSync(path).forEach(file => {
-      const curPath = path + '/' + file;
+export function makeKQLUsageCollector(server) {
+  const kqlUsageCollector = server.usage.collectorSet.makeUsageCollector({
+    type: 'kql',
+    fetch,
+  });
 
-      if (fs.lstatSync(curPath).isDirectory()) {
-        rmrfSync(curPath);
-      } else {
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(path);
-  }
+  server.usage.collectorSet.register(kqlUsageCollector);
 }
