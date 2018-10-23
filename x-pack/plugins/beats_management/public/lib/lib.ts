@@ -30,7 +30,6 @@ export interface YamlConfigSchema {
     type: 'input' | 'multi-input' | 'select' | 'code' | 'password';
     helpText?: string;
     placeholder?: string;
-    transform?: 'removed';
   };
   options?: Array<{ value: string; text: string }>;
   validations?: 'isHosts' | 'isString' | 'isPeriod' | 'isPath' | 'isPaths' | 'isYaml';
