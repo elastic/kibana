@@ -18,6 +18,7 @@ import { WaterfallV1Request } from 'x-pack/plugins/apm/public/store/reactReduxRe
 import { WaterfallV2Request } from 'x-pack/plugins/apm/public/store/reactReduxRequest/waterfallV2';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
+import { getAgentMarks } from './get_agent_marks';
 import { getServiceColors } from './getServiceColors';
 import { ServiceLegends } from './ServiceLegends';
 import { Waterfall } from './Waterfall';
@@ -70,6 +71,7 @@ export function WaterfallContainer({
       urlParams={urlParams}
       transaction={transaction}
       render={({ data }) => {
+        const agentMarks = getAgentMarks(transaction);
         const waterfall = getWaterfall(data.hits, data.services, transaction);
         if (!waterfall) {
           return null;
@@ -80,6 +82,7 @@ export function WaterfallContainer({
           <div>
             <ServiceLegends serviceColors={serviceColors} />
             <Waterfall
+              agentMarks={agentMarks}
               location={location}
               serviceColors={serviceColors}
               urlParams={urlParams}
