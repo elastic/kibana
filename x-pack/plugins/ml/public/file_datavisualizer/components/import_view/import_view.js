@@ -458,8 +458,19 @@ function getDefaultState(state, results) {
 }
 
 function isIndexNameValid(name, indexNames) {
+  const indexRegExp = '[\\\\/\*\?\"\<\>\|\\s\,\#]+';
+
   if (indexNames.find(i => i === name)) {
     return 'Index name already exists';
+  }
+
+  if (
+    (name !== name.toLowerCase()) ||
+    (name === '.' || name === '..')   ||
+    name.match(/^[-_+]/) !== null  ||
+    name.match(new RegExp(indexRegExp)) !== null
+  ) {
+    return 'Index name contains illegal characters';
   }
   return '';
 }
@@ -470,9 +481,14 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
   }
   const newName = name.replace('*', '.*');
   const reg = new RegExp(`^${newName}$`);
-  if (index.match(reg) === null) {
+  if ((
+    name.match(/[\.\+]/g) !== null) ||
+    (index.match(reg) === null)
+  ) {
     return 'Index pattern does not match index name';
   }
 
   return '';
 }
+
+
