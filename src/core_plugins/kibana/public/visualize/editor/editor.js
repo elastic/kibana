@@ -39,7 +39,7 @@ import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
-import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
+import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
 import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
