@@ -19,7 +19,8 @@
 
 const commonPipelineParams = {
   on_failure: [],
-  if: ''
+  if: '',
+  tag: ''  
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/append-processor.html
@@ -268,9 +269,9 @@ const lowercaseProcessorDefinition = {
 const pipelineProcessorDefinition = {
   pipeline: {
     __template: {
-      pipeline: ''
+      name: ''
     },
-    pipeline: '',
+    name: '',
     ...commonPipelineParams
   }
 };
