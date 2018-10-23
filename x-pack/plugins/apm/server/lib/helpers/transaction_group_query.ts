@@ -42,7 +42,6 @@ export const TRANSACTION_GROUP_AGGREGATES = {
     aggs: {
       sample: {
         top_hits: {
-          // _source: ['context', 'transaction', 'trace'],
           size: 1,
           sort: [{ '@timestamp': { order: 'desc' } }]
         }
