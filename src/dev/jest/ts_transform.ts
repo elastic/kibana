@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import TsJest from 'ts-jest';
+import * as TsJest from 'ts-jest';
+import { TsJestGlobalOptions } from 'ts-jest/dist/types';
 
 import { getTsProjectForAbsolutePath } from '../typescript';
 
@@ -49,26 +50,28 @@ function extendJestConfig(jestConfig: jest.ProjectConfig, filePath: string) {
   };
 }
 
-module.exports = {
-  canInstrument: true,
+export function createTransformer(baseConfig?: TsJestGlobalOptions) {
+  const tsJestTransformer = TsJest.createTransformer(baseConfig);
 
-  process(
-    src: string,
-    filePath: jest.Path,
-    jestConfig: jest.ProjectConfig,
-    transformOptions: jest.TransformOptions
-  ) {
-    const extendedConfig = extendJestConfig(jestConfig, filePath);
-    return TsJest.process(src, filePath, extendedConfig, transformOptions);
-  },
+  return {
+    process(
+      src: string,
+      filePath: jest.Path,
+      jestConfig: jest.ProjectConfig,
+      transformOptions: jest.TransformOptions
+    ) {
+      const extendedConfig = extendJestConfig(jestConfig, filePath);
+      return tsJestTransformer.process(src, filePath, extendedConfig, transformOptions);
+    },
 
-  getCacheKey(
-    src: string,
-    filePath: string,
-    jestConfigJSON: string,
-    transformOptions: jest.TransformOptions
-  ) {
-    const extendedConfigJSON = extendJestConfigJSON(jestConfigJSON, filePath);
-    return TsJest.getCacheKey!(src, filePath, extendedConfigJSON, transformOptions);
-  },
-};
+    getCacheKey(
+      src: string,
+      filePath: string,
+      jestConfigJSON: string,
+      transformOptions: jest.TransformOptions
+    ) {
+      const extendedConfigJSON = extendJestConfigJSON(jestConfigJSON, filePath);
+      return tsJestTransformer.getCacheKey(src, filePath, extendedConfigJSON, transformOptions);
+    },
+  };
+}
