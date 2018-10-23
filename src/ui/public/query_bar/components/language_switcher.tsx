@@ -34,6 +34,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { Component } from 'react';
+// @ts-ignore
 import { documentationLinks } from '../../documentation_links/documentation_links';
 
 const luceneQuerySyntaxDocs = documentationLinks.query.luceneQuerySyntax;
