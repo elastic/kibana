@@ -9,6 +9,7 @@ import 'brace/mode/yaml';
 
 import 'brace/theme/github';
 import React from 'react';
+import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
 import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
 import { AppURLState } from '../../app';
 import { PrimaryLayout } from '../../components/layouts/primary';
@@ -79,7 +80,7 @@ export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageS
               <EuiButton
                 fill
                 disabled={
-                  this.state.tag.id === '' // || this.state.tag.configuration_blocks.length === 0
+                  this.state.tag.id === '' || this.getNumExclusiveConfigurationBlocks() > 1 // || this.state.tag.configuration_blocks.length === 0
                 }
                 onClick={this.saveTag}
               >
@@ -117,5 +118,9 @@ export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageS
     await this.props.libs.tags.upsertTag(this.state.tag as BeatTag);
     this.props.goTo(`/overview/tags`);
   };
+  private getNumExclusiveConfigurationBlocks = () =>
+    this.state.tag.configuration_blocks
+      .map(({ type }) => UNIQUENESS_ENFORCING_TYPES.some(uniqueType => uniqueType === type))
+      .reduce((acc, cur) => (cur ? acc + 1 : acc), 0);
 }
 export const TagPage = withUrlState<TagPageProps>(TagPageComponent);
