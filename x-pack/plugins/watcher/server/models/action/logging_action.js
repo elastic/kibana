@@ -7,6 +7,7 @@
 import { badRequest } from 'boom';
 import { BaseAction } from './base_action';
 import { ACTION_TYPES } from '../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 export class LoggingAction extends BaseAction {
   constructor(props) {
@@ -55,10 +56,24 @@ export class LoggingAction extends BaseAction {
     const props = super.getPropsFromUpstreamJson(json);
 
     if (!json.actionJson.logging) {
-      throw badRequest('json argument must contain an actionJson.logging property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.loggingAction.absenceOfActionJsonLoggingPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJsonLogging} property',
+          values: {
+            actionJsonLogging: 'actionJson.logging'
+          }
+        }),
+      );
     }
     if (!json.actionJson.logging.text) {
-      throw badRequest('json argument must contain an actionJson.logging.text property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.loggingAction.absenceOfActionJsonLoggingTextPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJsonLoggingText} property',
+          values: {
+            actionJsonLoggingText: 'actionJson.logging.text'
+          }
+        }),
+      );
     }
 
     Object.assign(props, {

@@ -6,6 +6,7 @@
 
 import { get, isArray } from 'lodash';
 import { BaseAction } from './base_action';
+import { i18n } from '@kbn/i18n';
 
 export class SlackAction extends BaseAction {
   constructor(props = {}) {
@@ -29,26 +30,47 @@ export class SlackAction extends BaseAction {
 
   get description() {
     const toList = this.to.join(', ');
-    return `Slack message will be sent to ${toList}`;
+    return i18n.translate('xpack.watcher.models.slackAction.description', {
+      defaultMessage: 'Slack message will be sent to {toList}',
+      values: {
+        toList
+      }
+    });
   }
 
   get simulateMessage() {
     const toList = this.to.join(', ');
-    return `Sample Slack message sent to ${toList}.`;
+    return i18n.translate('xpack.watcher.models.slackAction.simulateMessage', {
+      defaultMessage: 'Sample Slack message sent to {toList}.',
+      values: {
+        toList
+      }
+    });
   }
 
   get simulateFailMessage() {
     const toList = this.to.join(', ');
-    return `Failed to send sample Slack message to ${toList}.`;
+    return i18n.translate('xpack.watcher.models.slackAction.simulateFailMessage', {
+      defaultMessage: 'Failed to send sample Slack message to {toList}.',
+      values: {
+        toList
+      }
+    });
   }
 
   static fromUpstreamJson(upstreamAction) {
     return new SlackAction(upstreamAction);
   }
 
-  static typeName = 'Slack';
+  static typeName = i18n.translate('xpack.watcher.models.slackAction.TypeName', {
+    defaultMessage: 'Slack'
+  });
   static iconClass = 'kuiIcon fa-slack';
   static template = '<watch-slack-action></watch-slack-action>';
-  static selectMessage = 'Send a message to a slack user or channel.';
-  static simulatePrompt = 'Send a sample message now';
+  static selectMessage = i18n.translate('xpack.watcher.models.slackAction.selectMessageText', {
+    defaultMessage: 'Send a message to a slack user or channel.'
+  });
+  static simulatePrompt = i18n.translate('xpack.watcher.models.slackAction.simulateButtonLabel', {
+    defaultMessage: 'Send a sample message now'
+  });
 }
