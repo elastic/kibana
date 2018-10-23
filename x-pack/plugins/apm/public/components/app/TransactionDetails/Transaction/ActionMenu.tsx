@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -32,6 +33,19 @@ function getDiscoverQuery(transactionId: string, traceId?: string) {
         query
       }
     }
+  };
+}
+
+function getInfraMetricsQuery(transaction: Transaction) {
+  const plus5 = new Date(transaction['@timestamp']);
+  const minus5 = new Date(transaction['@timestamp']);
+
+  plus5.setMinutes(plus5.getMinutes() + 5);
+  minus5.setMinutes(minus5.getMinutes() - 5);
+
+  return {
+    from: minus5.getTime(),
+    to: plus5.getTime()
   };
 }
 
@@ -71,7 +85,7 @@ export class ActionMenu extends React.Component<
     const { transaction } = this.props;
 
     const items = [
-      <EuiContextMenuItem icon="discoverApp">
+      <EuiContextMenuItem icon="discoverApp" key="discover-transaction">
         <KibanaLink
           pathname="/app/kibana"
           hash="/discover"
@@ -83,12 +97,22 @@ export class ActionMenu extends React.Component<
           View sample document
         </KibanaLink>
       </EuiContextMenuItem>,
-      <EuiContextMenuItem icon="infraApp">
+      <EuiContextMenuItem icon="infraApp" key="infra-host-metrics">
         <KibanaLink
           pathname="/app/infra"
-          hash={`/link-to/host-detail/${transaction.host.name}`}
+          hash={`/link-to/host-detail/${transaction.context.system.hostname}`}
+          query={getInfraMetricsQuery(transaction)}
         >
-          View host logs
+          <span>View host metrics (beta)</span>
+        </KibanaLink>
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem icon="infraApp" key="infra-host-logs">
+        <KibanaLink
+          pathname="/app/infra"
+          hash={`/link-to/host-logs/${transaction.context.system.hostname}`}
+          query={{ time: new Date(transaction['@timestamp']).getTime() }}
+        >
+          <span>View host logs (beta)</span>
         </KibanaLink>
       </EuiContextMenuItem>
     ];
