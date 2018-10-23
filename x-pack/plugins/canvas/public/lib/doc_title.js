@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createAction } from 'redux-actions';
-
-export const setCanUserWrite = createAction('setCanUserWrite');
-export const setFullscreen = createAction('setFullscreen');
-export const selectElement = createAction('selectElement');
+export const setDocTitle = title => (document.title = `${title} - Kibana`);
