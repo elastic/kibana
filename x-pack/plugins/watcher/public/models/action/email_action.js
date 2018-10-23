@@ -6,6 +6,7 @@
 
 import { get, isArray } from 'lodash';
 import { BaseAction } from './base_action';
+import { i18n } from '@kbn/i18n';
 
 export class EmailAction extends BaseAction {
   constructor(props = {}) {
@@ -32,26 +33,48 @@ export class EmailAction extends BaseAction {
   get description() {
     const toList = this.to.join(', ');
     const subject = this.subject || '';
-    return `"${subject}" will be sent to ${toList}`;
+    return i18n.translate('xpack.watcher.models.emailAction.description', {
+      defaultMessage: '"{subject}" will be sent to {toList}',
+      values: {
+        subject,
+        toList
+      }
+    });
   }
 
   get simulateMessage() {
     const toList = this.to.join(', ');
-    return `Sample e-mail sent to ${toList}`;
+    return i18n.translate('xpack.watcher.models.emailAction.simulateMessage', {
+      defaultMessage: 'Sample e-mail sent to {toList}',
+      values: {
+        toList
+      }
+    });
   }
 
   get simulateFailMessage() {
     const toList = this.to.join(', ');
-    return `Failed to send e-mail to ${toList}.`;
+    return i18n.translate('xpack.watcher.models.emailAction.simulateFailMessage', {
+      defaultMessage: 'Failed to send e-mail to {toList}.',
+      values: {
+        toList
+      }
+    });
   }
 
   static fromUpstreamJson(upstreamAction) {
     return new EmailAction(upstreamAction);
   }
 
-  static typeName = 'E-mail';
+  static typeName = i18n.translate('xpack.watcher.models.emailAction.typeName', {
+    defaultMessage: 'E-mail',
+  });
   static iconClass = 'kuiIcon fa-envelope-o';
   static template = '<watch-email-action></watch-email-action>';
-  static selectMessage = 'Send out an e-mail from your server.';
-  static simulatePrompt = 'Test fire an e-mail now';
+  static selectMessage = i18n.translate('xpack.watcher.models.emailAction.selectMessageText', {
+    defaultMessage: 'Send out an e-mail from your server.',
+  });
+  static simulatePrompt = i18n.translate('xpack.watcher.models.emailAction.simulateButtonLabel', {
+    defaultMessage: 'Test fire an e-mail now'
+  });
 }

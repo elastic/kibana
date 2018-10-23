@@ -1,0 +1,215 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CcrShard that is renders an exception properly 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="m"
+>
+  <EuiTitle
+    color="danger"
+    size="s"
+  >
+    <h3>
+      <EuiTextColor
+        color="danger"
+        component="span"
+      >
+        Errors
+      </EuiTextColor>
+    </h3>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "exception.type",
+          "name": "Type",
+        },
+        Object {
+          "field": "exception.reason",
+          "name": "Reason",
+          "width": "75%",
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "reason": "not sure but something happened",
+          "type": "something_is_wrong",
+        },
+      ]
+    }
+    noItemsMessage="No items found"
+    responsive={true}
+  />
+</EuiPanel>
+`;
+
+exports[`CcrShard that it renders normally 1`] = `
+<EuiPage
+  restrictWidth={false}
+  style={
+    Object {
+      "backgroundColor": "white",
+    }
+  }
+>
+  <EuiPageBody
+    restrictWidth={false}
+  >
+    <Status
+      formattedLeader="leader on remote"
+      oldestStat={
+        Object {
+          "number_of_failed_fetches": 0,
+          "number_of_operations_indexed": 2976,
+        }
+      }
+      stat={
+        Object {
+          "fetch_exceptions": Array [],
+          "follower_global_checkpoint": 3049,
+          "follower_index": "follower",
+          "follower_max_seq_no": 3049,
+          "last_requested_seq_no": 3049,
+          "leader_global_checkpoint": 3049,
+          "leader_index": "leader",
+          "leader_max_seq_no": 3049,
+          "mapping_version": 2,
+          "number_of_concurrent_reads": 1,
+          "number_of_concurrent_writes": 0,
+          "number_of_failed_bulk_operations": 0,
+          "number_of_failed_fetches": 0,
+          "number_of_operations_indexed": 3050,
+          "number_of_queued_writes": 0,
+          "number_of_successful_bulk_operations": 3050,
+          "number_of_successful_fetches": 3050,
+          "operations_received": 3050,
+          "shard_id": 0,
+          "time_since_last_fetch_millis": 9402,
+          "total_fetch_time_millis": 44128980,
+          "total_index_time_millis": 41827,
+          "total_transferred_bytes": 234156,
+        }
+      }
+    />
+    <EuiSpacer
+      size="s"
+    />
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={true}
+    >
+      <React.Fragment>
+        <EuiFlexItem
+          component="div"
+          grow={true}
+          key="0"
+          style={
+            Object {
+              "minWidth": "45%",
+            }
+          }
+        >
+          <EuiPanel
+            grow={true}
+            hasShadow={false}
+            paddingSize="m"
+          >
+            <MonitoringTimeseriesContainer />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={true}
+          key="1"
+          style={
+            Object {
+              "minWidth": "45%",
+            }
+          }
+        >
+          <EuiPanel
+            grow={true}
+            hasShadow={false}
+            paddingSize="m"
+          >
+            <MonitoringTimeseriesContainer />
+          </EuiPanel>
+        </EuiFlexItem>
+      </React.Fragment>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      margin="l"
+      size="full"
+    />
+    <EuiAccordion
+      buttonContent={
+        <EuiTitle
+          size="m"
+        >
+          <h2>
+            Advanced
+          </h2>
+        </EuiTitle>
+      }
+      id="ccrLatestStat"
+      initialIsOpen={false}
+      paddingSize="l"
+    >
+      <React.Fragment>
+        <EuiTitle
+          size="s"
+        >
+          <h4>
+            September 27, 2018 9:32:09 AM
+          </h4>
+        </EuiTitle>
+        <EuiHorizontalRule
+          margin="l"
+          size="full"
+        />
+        <EuiCodeBlock
+          language="json"
+        >
+          {
+  "fetch_exceptions": [],
+  "follower_global_checkpoint": 3049,
+  "follower_index": "follower",
+  "follower_max_seq_no": 3049,
+  "last_requested_seq_no": 3049,
+  "leader_global_checkpoint": 3049,
+  "leader_index": "leader",
+  "leader_max_seq_no": 3049,
+  "mapping_version": 2,
+  "number_of_concurrent_reads": 1,
+  "number_of_concurrent_writes": 0,
+  "number_of_failed_bulk_operations": 0,
+  "number_of_failed_fetches": 0,
+  "number_of_operations_indexed": 3050,
+  "number_of_queued_writes": 0,
+  "number_of_successful_bulk_operations": 3050,
+  "number_of_successful_fetches": 3050,
+  "operations_received": 3050,
+  "shard_id": 0,
+  "time_since_last_fetch_millis": 9402,
+  "total_fetch_time_millis": 44128980,
+  "total_index_time_millis": 41827,
+  "total_transferred_bytes": 234156
+}
+        </EuiCodeBlock>
+      </React.Fragment>
+    </EuiAccordion>
+  </EuiPageBody>
+</EuiPage>
+`;
