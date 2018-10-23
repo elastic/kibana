@@ -4,17 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchParams, SearchResponse } from 'elasticsearch';
+import { oc } from 'ts-optchain';
+import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import {
-  TRANSACTION_ID,
   PROCESSOR_EVENT,
-  TRACE_ID
+  TRACE_ID,
+  TRANSACTION_ID
 } from '../../../common/constants';
-import { get } from 'lodash';
+import { Setup } from '../helpers/setup_request';
 
-async function getTransaction({ transactionId, traceId, setup }) {
+export async function getTransaction(
+  transactionId: string,
+  traceId: string | undefined,
+  setup: Setup
+) {
   const { start, end, esFilterQuery, client, config } = setup;
 
-  const params = {
+  const params: SearchParams = {
     index: config.get('apm_oss.transactionIndices'),
     body: {
       size: 1,
@@ -46,8 +53,6 @@ async function getTransaction({ transactionId, traceId, setup }) {
     params.body.query.bool.filter.push({ term: { [TRACE_ID]: traceId } });
   }
 
-  const resp = await client('search', params);
-  return get(resp, 'hits.hits[0]._source', {});
+  const resp: SearchResponse<Transaction> = await client('search', params);
+  return oc(resp).hits.hits[0]._source();
 }
-
-export default getTransaction;

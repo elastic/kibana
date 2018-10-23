@@ -6,23 +6,22 @@
 
 /* tslint:disable no-console */
 import { SearchParams, SearchResponse } from 'elasticsearch';
+import { Request, Server } from 'hapi';
 import moment from 'moment';
-import { Url } from 'url';
-import { StringMap } from '../../../typings/common';
 
 function decodeEsQuery(esQuery?: string): object {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
 }
 
-// TODO: get these from hapi
-interface Request {
-  query: StringMap;
-  server: any;
-  method: string;
-  url: Url;
+interface KibanaServer extends Server {
+  config: () => KibanaConfig;
 }
 
-interface ServerConfig {
+interface KibanaRequest extends Request {
+  server: KibanaServer;
+}
+
+interface KibanaConfig {
   get: (key: string) => any;
 }
 
@@ -31,12 +30,15 @@ type Client<T> = (type: string, params: SearchParams) => SearchResponse<T>;
 export interface Setup<T = any> {
   start: number;
   end: number;
-  esFilterQuery: object;
+  esFilterQuery: any;
   client: Client<T>;
-  config: ServerConfig;
+  config: KibanaConfig;
 }
 
-export function setupRequest(req: Request, reply: (setup: Setup) => void) {
+export function setupRequest(
+  req: KibanaRequest,
+  reply: (setup: Setup) => void
+) {
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
 
   function client<T>(type: string, params: SearchParams): SearchResponse<T> {

@@ -18,7 +18,7 @@ interface ITransactionGroupSample {
   context: Transaction['context'];
 }
 
-interface ITransactionGroupBucket {
+export interface ITransactionGroupBucket {
   key: string;
   doc_count: number;
   avg: {

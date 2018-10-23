@@ -4,25 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
 import Boom from 'boom';
-
+import { IReply, Request, Server } from 'hapi';
+import Joi from 'joi';
+import { withDefaultValidators } from '../lib/helpers/input_validation';
+import { setupRequest } from '../lib/helpers/setup_request';
+// @ts-ignore
 import { getTimeseriesData } from '../lib/transactions/charts/get_timeseries_data';
-import { getSpans } from '../lib/transactions/spans/get_spans';
 import { getDistribution } from '../lib/transactions/distribution/get_distribution';
 import { getTopTransactions } from '../lib/transactions/get_top_transactions';
-import getTransaction from '../lib/transactions/get_transaction';
-import { setupRequest } from '../lib/helpers/setup_request';
-import { withDefaultValidators } from '../lib/helpers/input_validation';
+import { getTransaction } from '../lib/transactions/get_transaction';
+import { getSpans } from '../lib/transactions/spans/get_spans';
 
 const pre = [{ method: setupRequest, assign: 'setup' }];
 const ROOT = '/api/apm/services/{serviceName}/transactions';
-const defaultErrorHandler = reply => err => {
+const defaultErrorHandler = (reply: IReply) => (err: Error) => {
+  // tslint:disable-next-line
   console.error(err.stack);
+  // @ts-ignore
   reply(Boom.wrap(err, 400));
 };
 
-export function initTransactionsApi(server) {
+export function initTransactionsApi(server: Server) {
   server.route({
     method: 'GET',
     path: ROOT,
@@ -35,7 +38,7 @@ export function initTransactionsApi(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: (req: Request, reply: IReply) => {
       const { serviceName } = req.params;
       const { transaction_type: transactionType } = req.query;
       const { setup } = req.pre;
@@ -61,11 +64,11 @@ export function initTransactionsApi(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: (req: Request, reply: IReply) => {
       const { transactionId } = req.params;
       const { traceId } = req.query;
       const { setup } = req.pre;
-      return getTransaction({ transactionId, traceId, setup })
+      return getTransaction(transactionId, traceId, setup)
         .then(reply)
         .catch(defaultErrorHandler(reply));
     }
@@ -80,7 +83,7 @@ export function initTransactionsApi(server) {
         query: withDefaultValidators()
       }
     },
-    handler: (req, reply) => {
+    handler: (req: Request, reply: IReply) => {
       const { transactionId } = req.params;
       const { setup } = req.pre;
       return getSpans(transactionId, setup)
@@ -102,7 +105,7 @@ export function initTransactionsApi(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: (req: Request, reply: IReply) => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
       const transactionType = req.query.transaction_type;
@@ -130,7 +133,7 @@ export function initTransactionsApi(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: (req: Request, reply: IReply) => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
       const { transaction_name: transactionName } = req.query;

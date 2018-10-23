@@ -7,6 +7,8 @@
 // @ts-ignore
 import { camelizeKeys } from 'humps';
 import { isEmpty } from 'lodash';
+import { ServiceResponse } from 'x-pack/plugins/apm/server/lib/services/get_service';
+import { ServiceListItemResponse } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { IDistributionResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_distribution';
 import { Span } from 'x-pack/plugins/apm/typings/Span';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
@@ -53,7 +55,11 @@ export async function getEncodedEsQuery(kuery?: string) {
   return encodeURIComponent(JSON.stringify(esFilterQuery));
 }
 
-export async function loadServiceList({ start, end, kuery }: IUrlParams) {
+export async function loadServiceList({
+  start,
+  end,
+  kuery
+}: IUrlParams): Promise<ServiceListItemResponse> {
   return callApi({
     pathname: `/api/apm/services`,
     query: {
@@ -69,7 +75,7 @@ export async function loadServiceDetails({
   start,
   end,
   kuery
-}: IUrlParams) {
+}: IUrlParams): Promise<ServiceResponse> {
   return callApi({
     pathname: `/api/apm/services/${serviceName}`,
     query: {
@@ -151,7 +157,7 @@ export async function loadSpans({
   start,
   end,
   transactionId
-}: IUrlParams) {
+}: IUrlParams): Promise<Span[]> {
   const hits: Span[] = await callApi({
     pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}/spans`,
     query: {
@@ -189,7 +195,7 @@ export async function loadTransaction({
   traceId,
   kuery
 }: IUrlParams) {
-  const result = await callApi(
+  const result: Transaction = await callApi(
     {
       pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
       query: {

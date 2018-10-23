@@ -5,19 +5,22 @@
  */
 
 import Boom from 'boom';
-import { getServices } from '../lib/services/get_services';
-import { getService } from '../lib/services/get_service';
-import { setupRequest } from '../lib/helpers/setup_request';
+import { IReply, Request, Server } from 'hapi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
+import { setupRequest } from '../lib/helpers/setup_request';
+import { getService } from '../lib/services/get_service';
+import { getServices } from '../lib/services/get_services';
 
 const ROOT = '/api/apm/services';
 const pre = [{ method: setupRequest, assign: 'setup' }];
-const defaultErrorHandler = reply => err => {
+const defaultErrorHandler = (reply: IReply) => (err: Error) => {
+  // tslint:disable-next-line
   console.error(err.stack);
+  // @ts-ignore
   reply(Boom.wrap(err, 400));
 };
 
-export function initServicesApi(server) {
+export function initServicesApi(server: Server) {
   server.route({
     method: 'GET',
     path: ROOT,
@@ -27,9 +30,9 @@ export function initServicesApi(server) {
         query: withDefaultValidators()
       }
     },
-    handler: (req, reply) => {
+    handler: (req: Request, reply: IReply) => {
       const { setup } = req.pre;
-      return getServices({ setup })
+      return getServices(setup)
         .then(reply)
         .catch(defaultErrorHandler(reply));
     }
@@ -44,10 +47,10 @@ export function initServicesApi(server) {
         query: withDefaultValidators()
       }
     },
-    handler: (req, reply) => {
+    handler: (req: Request, reply: IReply) => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
-      return getService({ serviceName, setup })
+      return getService(serviceName, setup)
         .then(reply)
         .catch(defaultErrorHandler(reply));
     }
