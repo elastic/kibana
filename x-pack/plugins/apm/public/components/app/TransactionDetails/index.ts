@@ -5,11 +5,8 @@
  */
 
 import { connect } from 'react-redux';
-import { TransactionsDetails } from 'x-pack/plugins/apm/public/components/app/TransactionDetails/view';
-import {
-  selectWaterfall,
-  selectWaterfallRoot
-} from 'x-pack/plugins/apm/public/store/selectors/waterfall';
+import { TransactionDetailsView } from 'x-pack/plugins/apm/public/components/app/TransactionDetails/view';
+import { selectWaterfallRoot } from 'x-pack/plugins/apm/public/store/selectors/waterfall';
 import {
   getUrlParams,
   IUrlParams
@@ -34,4 +31,4 @@ const mapDispatchToProps = {};
 export const TransactionDetails = connect<{}, {}, Props>(
   mapStateToProps,
   mapDispatchToProps
-)(TransactionsDetails);
+)(TransactionDetailsView);

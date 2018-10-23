@@ -29,7 +29,7 @@ interface Props {
   waterfallRoot: ITransaction;
 }
 
-export function TransactionDetails({
+export function TransactionDetailsView({
   urlParams,
   location,
   waterfallRoot

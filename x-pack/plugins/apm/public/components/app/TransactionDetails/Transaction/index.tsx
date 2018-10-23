@@ -42,7 +42,7 @@ function MaybeViewTraceLink({
 
   return (
     <EuiFlexItem grow={false}>
-      <TraceLink transactionDoc={root}>
+      <TraceLink transaction={root}>
         <EuiButton iconType="apmApp">View full trace</EuiButton>
       </TraceLink>
     </EuiFlexItem>

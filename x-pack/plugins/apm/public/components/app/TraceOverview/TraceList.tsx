@@ -6,6 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { Transaction } from '../../../../typings/Transaction';
 import { ITransactionGroup } from '../../../../typings/TransactionGroup';
 import { fontSizes, truncate } from '../../../style/variables';
 // @ts-ignore
@@ -32,23 +33,24 @@ interface Props {
 
 const traceListColumns: ITableColumn[] = [
   {
-    field: 'name',
+    field: 'sample',
     name: 'Name',
     width: '40%',
     sortable: true,
-    render: (name: string, transactionGroup: ITransactionGroup) => (
-      <TooltipOverlay content={formatString(name)}>
-        <StyledTraceLink transactionGroup={transactionGroup}>
-          {formatString(name)}
+    render: (transaction: Transaction) => (
+      <TooltipOverlay content={formatString(transaction.transaction.name)}>
+        <StyledTraceLink transaction={transaction}>
+          {formatString(transaction.transaction.name)}
         </StyledTraceLink>
       </TooltipOverlay>
     )
   },
   {
-    field: 'serviceName',
+    field: 'sample',
     name: 'Originating service',
     sortable: true,
-    render: (serviceName: string) => formatString(serviceName)
+    render: (transaction: Transaction) =>
+      formatString(transaction.context.service.name)
   },
   {
     field: 'averageResponseTime',

@@ -6,42 +6,23 @@
 
 import React from 'react';
 import { Transaction } from '../../../typings/Transaction';
-import { ITransactionGroup } from '../../../typings/TransactionGroup';
 import { KibanaLink, legacyEncodeURIComponent } from '../../utils/url';
 
 interface TraceLinkProps {
-  transactionDoc?: Transaction;
-  transactionGroup?: ITransactionGroup | { [key: string]: any };
+  transaction: Transaction;
 }
 
 /**
  * Return the path and query used to build a trace link,
  * given either a v2 Transaction or a Transaction Group
  */
-export function getLinkProps({
-  transactionDoc,
-  transactionGroup = {}
-}: TraceLinkProps) {
-  let {
-    serviceName,
-    transactionType,
-    traceId,
-    id: transactionId,
-    name
-  } = transactionGroup;
-
-  if (transactionDoc) {
-    serviceName = transactionDoc.context.service.name;
-    transactionType = transactionDoc.transaction.type;
-    traceId =
-      transactionDoc.version === 'v2' ? transactionDoc.trace.id : undefined;
-    transactionId = transactionDoc.transaction.id;
-    name = transactionDoc.transaction.name;
-  }
-
-  if (!serviceName || !transactionType || !name) {
-    return null;
-  }
+export function getLinkProps(transaction: Transaction) {
+  const serviceName = transaction.context.service.name;
+  const transactionType = transaction.transaction.type;
+  const traceId =
+    transaction.version === 'v2' ? transaction.trace.id : undefined;
+  const transactionId = transaction.transaction.id;
+  const name = transaction.transaction.name;
 
   const encodedName = legacyEncodeURIComponent(name);
 
@@ -54,17 +35,24 @@ export function getLinkProps({
   };
 }
 
-export const TraceLink: React.SFC<TraceLinkProps> = props => {
-  const linkProps = getLinkProps(props);
+export const TraceLink: React.SFC<TraceLinkProps> = ({
+  transaction,
+  children
+}) => {
+  if (!transaction) {
+    return null;
+  }
+
+  const linkProps = getLinkProps(transaction);
 
   if (!linkProps) {
     // TODO: Should this case return unlinked children, null, or something else?
-    return <React.Fragment>{props.children}</React.Fragment>;
+    return <React.Fragment>{children}</React.Fragment>;
   }
 
   return (
     <KibanaLink pathname="/app/apm" {...linkProps}>
-      {props.children}
+      {children}
     </KibanaLink>
   );
 };
