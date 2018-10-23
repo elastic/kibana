@@ -8,6 +8,4 @@ import ecommerceSavedObjects from './ecommerce_saved_objects.json';
 import flightsSavedObjects from './flights_saved_objects.json';
 import webLogsSavedObjects from './web_logs_saved_objects.json';
 
-console.log(ecommerceSavedObjects.length);
-
 export { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects };
