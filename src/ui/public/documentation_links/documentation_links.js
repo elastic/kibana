@@ -3,8 +3,6 @@ import { metadata } from '../metadata';
 const urlVersion = metadata.branch;
 const baseUrl = 'https://www.elastic.co/';
 
-const PAINLESS_DOCS = `${baseUrl}guide/en/elasticsearch/painless/${urlVersion}/`;
-
 export const documentationLinks = {
   filebeat: {
     installation: `${baseUrl}guide/en/beats/filebeat/${urlVersion}/filebeat-installation.html`,
@@ -17,7 +15,7 @@ export const documentationLinks = {
     scriptFields: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/search-request-script-fields.html`,
     scriptAggs: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/search-aggregations.html#_values_source`,
     painless: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless.html`,
-    painlessApi: `${PAINLESS_DOCS}painless-api-reference.html`,
+    painlessApi: `${baseUrl}guide/en/elasticsearch/painless/${urlVersion}/painless-api-reference.html`,
     painlessSyntax: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-painless-syntax.html`,
     luceneExpressions: `${baseUrl}guide/en/elasticsearch/reference/${urlVersion}/modules-scripting-expression.html`
   },
