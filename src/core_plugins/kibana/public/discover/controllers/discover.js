@@ -290,7 +290,7 @@ function discoverController(
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   docTitle.change(`Discover${pageTitleSuffix}`);
 
-  const discoverBreadcrumbsTitle = i18n.translate('discover.discoverBreadcrumbsTitle', {
+  const discoverBreadcrumbsTitle = i18n.translate('kbn.discover.discoverBreadcrumbsTitle', {
     defaultMessage: 'Discover',
   });
 

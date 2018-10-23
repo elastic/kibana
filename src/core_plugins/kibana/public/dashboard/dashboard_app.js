@@ -185,7 +185,7 @@ app.directive('dashboardApp', function ($injector) {
       const updateBreadcrumbs = () => {
         breadcrumbState.set([
           {
-            text: i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
+            text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
               defaultMessage: 'Dashboard',
             }),
             href: $scope.landingPageUrl()

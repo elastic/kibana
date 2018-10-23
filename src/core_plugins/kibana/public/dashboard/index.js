@@ -65,7 +65,7 @@ uiRoutes
       $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
       $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;
       breadcrumbState.set([{
-        text: i18n.translate('dashboard.dashboardBreadcrumbsTitle', {
+        text: i18n.translate('kbn.dashboard.dashboardBreadcrumbsTitle', {
           defaultMessage: 'Dashboards',
         }),
       }]);

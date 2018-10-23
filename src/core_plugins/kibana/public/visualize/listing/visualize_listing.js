@@ -62,7 +62,7 @@ export function VisualizeListingController($injector) {
   };
 
   breadcrumbState.set([{
-    text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
+    text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
       defaultMessage: 'Visualize',
     })
   }]);
