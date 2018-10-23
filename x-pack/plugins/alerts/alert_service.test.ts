@@ -6,15 +6,20 @@
 
 import { AlertService } from './alert_service';
 
-const mockServer = { start: jest.fn(), stop: jest.fn() };
-const mockKbnServer = { server: mockServer };
-const mockConfig = {};
-const alertService = new AlertService(mockKbnServer, mockConfig);
+const mockTaskManager = { registerTaskDefinitions: jest.fn() };
+const mockServer = {
+  start: jest.fn(),
+  stop: jest.fn(),
+  route: jest.fn(),
+  taskManager: mockTaskManager,
+};
+const mockKbnServer = { server: mockServer, afterPluginsInit: jest.fn() };
+const alertService = new AlertService(mockKbnServer);
 
 test('condition gets registered and saved', async () => {
   alertService.registerCondition({
     name: 'Test Condition',
-    runnable: (params: any) => {
+    runnable: () => {
       return false;
     },
   });

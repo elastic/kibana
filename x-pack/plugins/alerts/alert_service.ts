@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
+import { TaskManager } from '../task_manager/task_manager';
 
 interface AlertCondition {
   name: string;
@@ -16,42 +16,29 @@ export class AlertService {
   private condMap: any = {};
   private alerts: any = {};
   private kbnServer: any;
-  private config: any;
+  private taskManager: TaskManager;
 
-  constructor(kbnServer: any, config: any) {
+  constructor(kbnServer: any) {
     this.kbnServer = kbnServer;
-    this.config = config;
 
     const server = this.kbnServer.server;
-    const tm = server.plugins;
-    server.log(['warning', 'alert-service'], `Task Manager ${Object.keys(tm).join(', ')}`);
-    server.log(['warning', 'alert-service'], 'Hello!');
     server.route({
       method: 'GET',
       path: '/api/alerts',
-      handler: (req: any, reply: any) => {
+      handler: (_: any, reply: any) => {
         reply('Hello World!');
       },
     });
 
-    const { taskManager } = server;
-    taskManager.registerTaskDefinitions({
+    const info = this.info.bind(this);
+    this.taskManager = server.taskManager;
+    this.taskManager.registerTaskDefinitions({
       // clusterMonitoring is the task type, and must be unique across the entire system
       clusterMonitoring: {
-        // Human friendly name, used to represent this task in logs, UI, etc
-        title: 'Human friendly name',
-
-        // Optional, human-friendly, more detailed description
-        description: 'Amazing!!',
-
-        // Optional, how long, in minutes, the system should wait before
-        // a running instance of this task is considered to be timed out.
-        // This defaults to 5 minutes.
+        type: 'clusterMonitoring',
+        title: 'Human friendly name', // Human friendly name, used to represent this task in logs, UI, etc
+        description: 'Amazing!!', // Optional, human-friendly, more detailed description
         timeOut: '5m',
-
-        // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
-        // 5 clusterMonitoring tasks could run concurrently per Kibana instance. This value is
-        // overridden by the `override_num_workers` config value, if specified.
         numWorkers: 2,
 
         // The createTaskRunner function / method returns an object that is responsible for
@@ -59,10 +46,7 @@ export class AlertService {
         createTaskRunner() {
           return {
             async run() {
-              server.log(
-                ['info', 'alert-service'],
-                'I am an alerting service task that is running'
-              );
+              info('I am an alerting service task that is running');
             },
 
             // Optional, will be called if a running instance of this task times out, allowing the task
@@ -75,25 +59,7 @@ export class AlertService {
       },
     });
 
-    const runTime = `${moment().toString()}`;
-    this.kbnServer.afterPluginsInit(async () => {
-      server.log(['warning', 'alert-service'], `Task Manager ${Object.keys(server).join(', ')}`);
-      // const task = await taskManager.schedule({
-      //   taskType: 'clusterMonitoring',
-      //   runAt: '2018-10-19T16:00:00.000',
-      //   interval: '10m',
-      //   params: { key: 'params' },
-      //   scope: 'my-fanci-app',
-      // });
-      const tasks = await taskManager.fetch({ scope: 'my-fanci-app' });
-      if (tasks !== undefined) {
-        tasks.map((task: any) => {
-          server.log(['info', 'alert-service'], `Destroying task ${task.id}`);
-          taskManager.remove({ id: task.id });
-          return {};
-        });
-      }
-    });
+    this.kbnServer.afterPluginsInit(this.initAfterPlugins.bind(this));
   }
 
   public getConditions(): string[] {
@@ -120,5 +86,37 @@ export class AlertService {
     return {
       registerCondition: this.registerCondition,
     };
+  }
+
+  public async info(message: string) {
+    this.kbnServer.server.log(['info', 'alert-service'], message);
+  }
+
+  private async initAfterPlugins() {
+    const es = this.kbnServer.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+    try {
+      const index = await es('indices.create', { index: '.alerts' });
+      this.info(`Index is ${JSON.stringify(index, null, 2)}`);
+    } catch (err) {
+      if ('resource_already_exists_exception' !== err.body.error.type) {
+        throw err;
+      }
+    }
+
+    const tasks = await this.taskManager.fetch({
+      query: {
+        match: {
+          type: 'my-fanci-app',
+        },
+      },
+    });
+    if (tasks !== undefined) {
+      this.info(`We got ${tasks.docs.length} tasks from task manager.`);
+      tasks.docs.map((task: any) => {
+        this.info(`Destroying task ${task.id}`);
+        this.taskManager.remove(task.id);
+        return {};
+      });
+    }
   }
 }
