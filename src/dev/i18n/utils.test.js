@@ -145,8 +145,8 @@ describe('i18n utils', () => {
   });
 
   test(`should throw if "values" property is provided and defaultMessage doesn't include any references`, () => {
-    const valuesKeys = [];
-    const defaultMessage = 'Test message with {username}, {password} and [markdown link]({url}).';
+    const valuesKeys = ['url', 'username'];
+    const defaultMessage = 'Test message';
     const messageId = 'namespace.message.id';
 
     expect(() =>
