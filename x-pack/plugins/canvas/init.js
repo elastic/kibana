@@ -10,7 +10,7 @@ import { commonFunctions } from './common/functions';
 import { loadServerPlugins } from './server/lib/load_server_plugins';
 import { registerCanvasUsageCollector } from './server/usage';
 
-export default function(server /*options*/) {
+export default async function(server /*options*/) {
   server.injectUiAppVars('canvas', () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
@@ -29,6 +29,7 @@ export default function(server /*options*/) {
   // There are some common functions that use private APIs, load them here
   commonFunctions.forEach(func => functionsRegistry.register(func));
 
-  loadServerPlugins().then(() => routes(server));
+  await loadServerPlugins();
+  routes(server);
   registerCanvasUsageCollector(server);
 }
