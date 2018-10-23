@@ -1252,6 +1252,219 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
+  describe('#incrementCounter', () => {
+    beforeEach(() => {
+      callAdminCluster.callsFake((method, params) => ({
+        _type: 'doc',
+        _id: params.id,
+        _version: 2,
+        _index: '.kibana',
+        get: {
+          found: true,
+          _source: {
+            type: 'config',
+            ...mockTimestampFields,
+            config: {
+              buildNum: 8468,
+              defaultIndex: 'logstash-*',
+            },
+          },
+        },
+      }));
+    });
+
+    it('formats Elasticsearch response', async () => {
+      callAdminCluster.callsFake((method, params) => ({
+        _type: 'doc',
+        _id: params.id,
+        _version: 2,
+        _index: '.kibana',
+        get: {
+          found: true,
+          _source: {
+            type: 'config',
+            ...mockTimestampFields,
+            config: {
+              buildNum: 8468,
+              defaultIndex: 'logstash-*',
+            },
+          },
+        },
+      }));
+
+
+      const response = await savedObjectsRepository.incrementCounter(
+        'config',
+        '6.0.0-alpha1',
+        'buildNum',
+        {
+          namespace: 'foo-namespace',
+        }
+      );
+
+      expect(response).toEqual({
+        type: 'config',
+        id: '6.0.0-alpha1',
+        ...mockTimestampFields,
+        version: 2,
+        attributes: {
+          buildNum: 8468,
+          defaultIndex: 'logstash-*'
+        }
+      });
+    });
+
+    it('migrates the doc if an upsert is required', async () => {
+      migrator.migrateDocument = (doc) => {
+        doc.attributes.buildNum = 42;
+        doc.migrationVersion = { foo: '2.3.4' };
+        return doc;
+      };
+
+      await savedObjectsRepository.incrementCounter(
+        'config',
+        'doesnotexist',
+        'buildNum',
+        {
+          namespace: 'foo-namespace',
+        }
+      );
+
+      sinon.assert.calledOnce(callAdminCluster);
+      expect(callAdminCluster.firstCall.args[1]).toMatchObject({
+        body: {
+          upsert: {
+            config: { buildNum: 42 },
+            migrationVersion: { foo: '2.3.4' },
+            type: 'config',
+            ...mockTimestampFields
+          }
+        },
+      });
+    });
+
+    it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
+      await savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', 'buildNum', {
+        namespace: 'foo-namespace',
+      });
+
+      sinon.assert.calledOnce(callAdminCluster);
+
+      const requestDoc = callAdminCluster.firstCall.args[1];
+      expect(requestDoc.id).toBe('foo-namespace:config:6.0.0-alpha1');
+      expect(requestDoc.body.script.params.type).toBe('config');
+      expect(requestDoc.body.upsert.type).toBe('config');
+      expect(requestDoc).toHaveProperty('body.upsert.config');
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
+      await savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', 'buildNum');
+
+      sinon.assert.calledOnce(callAdminCluster);
+
+      const requestDoc = callAdminCluster.firstCall.args[1];
+      expect(requestDoc.id).toBe('config:6.0.0-alpha1');
+      expect(requestDoc.body.script.params.type).toBe('config');
+      expect(requestDoc.body.upsert.type).toBe('config');
+      expect(requestDoc).toHaveProperty('body.upsert.config');
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
+      callAdminCluster.callsFake((method, params) => ({
+        _type: 'doc',
+        _id: params.id,
+        _version: 2,
+        _index: '.kibana',
+        get: {
+          found: true,
+          _source: {
+            type: 'globaltype',
+            ...mockTimestampFields,
+            globaltype: {
+              counter: 1,
+            },
+          },
+        },
+      }));
+
+      await savedObjectsRepository.incrementCounter('globaltype', 'foo', 'counter', {
+        namespace: 'foo-namespace',
+      });
+
+      sinon.assert.calledOnce(callAdminCluster);
+
+      const requestDoc = callAdminCluster.firstCall.args[1];
+      expect(requestDoc.id).toBe('globaltype:foo');
+      expect(requestDoc.body.script.params.type).toBe('globaltype');
+      expect(requestDoc.body.upsert.type).toBe('globaltype');
+      expect(requestDoc).toHaveProperty('body.upsert.globaltype');
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('should assert that the "type" and "counterFieldName" arguments are strings', () => {
+      expect.assertions(6);
+
+      expect(savedObjectsRepository.incrementCounter(
+        null,
+        '6.0.0-alpha1',
+        'buildNum',
+        {
+          namespace: 'foo-namespace',
+        }),
+      ).rejects.toEqual(new Error('"type" argument must be a string'));
+
+      expect(savedObjectsRepository.incrementCounter(
+        42,
+        '6.0.0-alpha1',
+        'buildNum',
+        {
+          namespace: 'foo-namespace',
+        }),
+      ).rejects.toEqual(new Error('"type" argument must be a string'));
+
+      expect(savedObjectsRepository.incrementCounter(
+        {},
+        '6.0.0-alpha1',
+        'buildNum',
+        {
+          namespace: 'foo-namespace',
+        }),
+      ).rejects.toEqual(new Error('"type" argument must be a string'));
+
+      expect(savedObjectsRepository.incrementCounter(
+        'config',
+        '6.0.0-alpha1',
+        null,
+        {
+          namespace: 'foo-namespace',
+        }),
+      ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
+
+      expect(savedObjectsRepository.incrementCounter(
+        'config',
+        '6.0.0-alpha1',
+        42,
+        {
+          namespace: 'foo-namespace',
+        }),
+      ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
+
+      expect(savedObjectsRepository.incrementCounter(
+        'config',
+        '6.0.0-alpha1',
+        {},
+        {
+          namespace: 'foo-namespace',
+        }),
+      ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
+    });
+  });
+
   describe('onBeforeWrite', () => {
     it('blocks calls to callCluster of requests', async () => {
       onBeforeWrite.returns(delay(500));
