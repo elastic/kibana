@@ -5,6 +5,7 @@
  */
 
 import { EuiButton, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { Component, Fragment } from 'react';
 // @ts-ignore
@@ -26,14 +27,20 @@ interface State {
   showConfirmRedirectModal: boolean;
 }
 
-export class DeleteSpacesButton extends Component<Props, State> {
+export class DeleteSpacesButtonUI extends Component<Props, State> {
   public state = {
     showConfirmDeleteModal: false,
     showConfirmRedirectModal: false,
   };
 
   public render() {
-    const buttonText = `Delete space`;
+    const buttonText = (
+      <FormattedMessage
+        id="xpack.spaces.view.management.editSpace.deleteSpaceButton.deleteSpaceTitle"
+        defaultMessage="Delete space"
+      />
+    );
+    const { intl } = this.props;
 
     let ButtonComponent: any = EuiButton;
 
@@ -49,7 +56,10 @@ export class DeleteSpacesButton extends Component<Props, State> {
         <ButtonComponent
           color={'danger'}
           onClick={this.onDeleteClick}
-          aria-label={'Delete this space'}
+          aria-label={intl.formatMessage({
+            id: 'xpack.spaces.view.management.editSpace.deleteSpaceButton.deleteSpaceAriaLabel',
+            defaultMessage: 'Delete this space',
+          })}
           {...extraProps}
         >
           {buttonText}
@@ -88,21 +98,39 @@ export class DeleteSpacesButton extends Component<Props, State> {
   };
 
   public deleteSpaces = async () => {
-    const { spacesManager, space, spacesNavState } = this.props;
+    const { spacesManager, space, spacesNavState, intl } = this.props;
 
     try {
       await spacesManager.deleteSpace(space);
     } catch (error) {
       const { message: errorMessage = '' } = error.data || {};
 
-      toastNotifications.addDanger(`Error deleting space: ${errorMessage}`);
+      toastNotifications.addDanger(
+        intl.formatMessage(
+          {
+            id: 'xpack.spaces.view.management.editSpace.deleteSpaceButton.deleteSpaceErrorTitle',
+            defaultMessage: 'Error deleting space: {errorMessage}',
+          },
+          {
+            errorMessage,
+          }
+        )
+      );
     }
 
     this.setState({
       showConfirmDeleteModal: false,
     });
 
-    const message = `Deleted "${space.name}" space.`;
+    const message = intl.formatMessage(
+      {
+        id: 'xpack.spaces.view.management.editSpace.deleteSpaceButton.deleteSpaceNameTitle',
+        defaultMessage: 'Deleted {spaceName} space.',
+      },
+      {
+        spaceName: space.name,
+      }
+    );
 
     toastNotifications.addSuccess(message);
 
@@ -113,3 +141,5 @@ export class DeleteSpacesButton extends Component<Props, State> {
     spacesNavState.refreshSpacesList();
   };
 }
+
+export const DeleteSpacesButton = injectI18n(DeleteSpacesButtonUI);

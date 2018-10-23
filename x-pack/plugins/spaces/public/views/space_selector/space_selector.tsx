@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { SpacesManager } from 'plugins/spaces/lib';
 import React, { Component, Fragment } from 'react';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common/constants';
@@ -35,7 +36,7 @@ interface State {
   spaces: Space[];
 }
 
-export class SpaceSelector extends Component<Props, State> {
+export class SpaceSelectorUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
@@ -94,7 +95,12 @@ export class SpaceSelector extends Component<Props, State> {
               <EuiSpacer />
 
               <EuiTitle size="l" className="euiTextColor--ghost">
-                <p>Select your space</p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.spaces.view.spaceSelector.spaceSelector.selectSpacesTitle"
+                    defaultMessage="Select your space"
+                  />
+                </p>
               </EuiTitle>
             </EuiPageHeaderSection>
           </EuiPageHeader>
@@ -109,7 +115,12 @@ export class SpaceSelector extends Component<Props, State> {
 
               <EuiFlexItem>
                 <EuiText size="xs">
-                  <p>You can change your space at anytime.</p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.spaces.view.spaceSelector.spaceSelector.youCanChangeSpaceAnytimeTitle"
+                      defaultMessage="You can change your spacasdasdasde at anytime."
+                    />
+                  </p>
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -126,7 +137,10 @@ export class SpaceSelector extends Component<Props, State> {
                   // @ts-ignore
                   textAlign="center"
                 >
-                  No spaces match search criteria
+                  <FormattedMessage
+                    id="xpack.spaces.view.spaceSelector.spaceSelector.noSpacesMatchSearchTitle"
+                    defaultMessage="No spaces match search criteria"
+                  />
                 </EuiText>
               </Fragment>
             )}
@@ -137,6 +151,7 @@ export class SpaceSelector extends Component<Props, State> {
   }
 
   public getSearchField = () => {
+    const { intl } = this.props;
     if (!this.props.spaces || this.props.spaces.length < SPACE_SEARCH_COUNT_THRESHOLD) {
       return null;
     }
@@ -144,7 +159,10 @@ export class SpaceSelector extends Component<Props, State> {
       <EuiFlexItem className="spaceSelector__searchHolder">
         <EuiFieldSearch
           className="spaceSelector__searchField"
-          placeholder="Find a space"
+          placeholder={intl.formatMessage({
+            id: 'xpack.spaces.view.spaceSelector.spaceSelector.findSpaceTitle',
+            defaultMessage: 'Find a space',
+          })}
           incremental={true}
           // @ts-ignore
           onSearch={this.onSearch}
@@ -163,3 +181,5 @@ export class SpaceSelector extends Component<Props, State> {
     this.props.spacesManager.changeSelectedSpace(space);
   };
 }
+
+export const SpaceSelector = injectI18n(SpaceSelectorUI);

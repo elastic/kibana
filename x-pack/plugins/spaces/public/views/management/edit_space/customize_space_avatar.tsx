@@ -5,6 +5,7 @@
  */
 // @ts-ignore
 import { EuiColorPicker, EuiFieldText, EuiFlexItem, EuiFormRow, EuiLink } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { MAX_SPACE_INITIALS } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
@@ -21,7 +22,7 @@ interface State {
   pendingInitials?: string | null;
 }
 
-export class CustomizeSpaceAvatar extends Component<Props, State> {
+export class CustomizeSpaceAvatarUI extends Component<Props, State> {
   private initialsRef: HTMLInputElement | null = null;
 
   constructor(props: Props) {
@@ -37,14 +38,19 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
   }
 
   public getCustomizeFields = () => {
-    const { space } = this.props;
+    const { space, intl } = this.props;
 
     const { initialsHasFocus, pendingInitials } = this.state;
 
     return (
       <Fragment>
         <EuiFlexItem grow={false}>
-          <EuiFormRow label={'Initials (2 max)'}>
+          <EuiFormRow
+            label={intl.formatMessage({
+              id: 'xpack.spaces.view.management.editSpace.customizeSpaceAvatar.initialItemsTitle',
+              defaultMessage: 'Initials (2 max)',
+            })}
+          >
             <EuiFieldText
               inputRef={this.initialsInputRef}
               name="spaceInitials"
@@ -56,7 +62,12 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow label={'Color'}>
+          <EuiFormRow
+            label={intl.formatMessage({
+              id: 'xpack.spaces.view.management.editSpace.customizeSpaceAvatar.colorTitle',
+              defaultMessage: 'Color',
+            })}
+          >
             <EuiColorPicker color={getSpaceColor(space)} onChange={this.onColorChange} />
           </EuiFormRow>
         </EuiFlexItem>
@@ -97,7 +108,10 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
       <EuiFlexItem grow={false}>
         <EuiFormRow hasEmptyLabelSpace={true}>
           <EuiLink name="customize_space_link" onClick={this.showFields}>
-            Customize
+            <FormattedMessage
+              id="xpack.spaces.view.management.editSpace.customizeSpaceAvatar.customizeTitle"
+              defaultMessage="Customize"
+            />
           </EuiLink>
         </EuiFormRow>
       </EuiFlexItem>
@@ -130,3 +144,5 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
     });
   };
 }
+
+export const CustomizeSpaceAvatar = injectI18n(CustomizeSpaceAvatarUI);

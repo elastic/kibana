@@ -5,15 +5,27 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 export const UnauthorizedPrompt = () => (
   <EuiEmptyPrompt
     iconType="spacesApp"
     iconColor={'danger'}
-    title={<h2>Permission denied</h2>}
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.spaces.view.management.unauthorizedPrompt.permissionDeniedTitle"
+          defaultMessage="Permission denied"
+        />
+      </h2>}
     body={
-      <p data-test-subj="permissionDeniedMessage">You do not have permission to manage spaces.</p>
+      <p data-test-subj="permissionDeniedMessage">
+        <FormattedMessage
+          id="xpack.spaces.view.management.unauthorizedPrompt.youDontHavePermissionTitle"
+          defaultMessage="You do not have permission to manage spaces."
+        />
+      </p>
     }
   />
 );

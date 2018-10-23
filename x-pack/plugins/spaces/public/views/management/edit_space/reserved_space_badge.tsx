@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 
@@ -19,7 +20,14 @@ export const ReservedSpaceBadge = (props: Props) => {
 
   if (space && isReservedSpace(space)) {
     return (
-      <EuiToolTip content={'Reserved spaces are built-in and can only be partially modified.'}>
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.spaces.view.management.editSpace.reversedSpaceBadge.reversedSpacesOnlyInPartiallyModifiedTitle"
+            defaultMessage="Reserved spaces are built-in and can only be partially modified."
+          />
+        }
+      >
         <EuiIcon style={{ verticalAlign: 'super' }} type={'lock'} />
       </EuiToolTip>
     );

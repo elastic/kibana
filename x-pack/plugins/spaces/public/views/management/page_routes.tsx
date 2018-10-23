@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { I18nProvider } from '@kbn/i18n/react';
 import 'plugins/spaces/views/management/manage_spaces.less';
 // @ts-ignore
 import template from 'plugins/spaces/views/management/template.html';
@@ -40,11 +40,13 @@ routes.when('/management/spaces/list', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-        <SpacesGridPage
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          userProfile={userProfile}
-        />,
+        <I18nProvider>
+          <SpacesGridPage
+            spacesManager={spacesManager}
+            spacesNavState={spacesNavState}
+            userProfile={userProfile}
+          />
+        </I18nProvider>,
         domNode
       );
 
@@ -76,11 +78,13 @@ routes.when('/management/spaces/create', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-        <ManageSpacePage
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          userProfile={userProfile}
-        />,
+        <I18nProvider>
+          <ManageSpacePage
+            spacesManager={spacesManager}
+            spacesNavState={spacesNavState}
+            userProfile={userProfile}
+          />
+        </I18nProvider>,
         domNode
       );
 
@@ -119,12 +123,14 @@ routes.when('/management/spaces/edit/:spaceId', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-        <ManageSpacePage
-          spaceId={spaceId}
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          userProfile={userProfile}
-        />,
+        <I18nProvider>
+          <ManageSpacePage
+            spaceId={spaceId}
+            spacesManager={spacesManager}
+            spacesNavState={spacesNavState}
+            userProfile={userProfile}
+          />
+        </I18nProvider>,
         domNode
       );
 

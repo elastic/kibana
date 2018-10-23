@@ -5,6 +5,7 @@
  */
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiFieldSearch, EuiText } from '@elastic/eui';
+import { FormattedMessage, injectI18n, intlShape } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../common/constants';
@@ -24,20 +25,24 @@ interface State {
   allowSpacesListFocus: boolean;
 }
 
-export class SpacesMenu extends Component<Props, State> {
+export class SpacesMenuUI extends Component<Props, State> {
   public state = {
     searchTerm: '',
     allowSpacesListFocus: false,
   };
 
   public render() {
+    const { intl } = this.props;
     const { searchTerm } = this.state;
 
     const items = this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
 
     const panelProps = {
       className: 'spacesMenu',
-      title: 'Change current space',
+      title: intl.formatMessage({
+        id: 'xpack.spaces.view.navControl.spacesMenu.changeCurrentSpaceTitle',
+        defaultMessage: 'Change current space',
+      }),
       watchedItemProps: ['data-search-term'],
     };
 
@@ -77,8 +82,10 @@ export class SpacesMenu extends Component<Props, State> {
     if (items.length === 0) {
       return (
         <EuiText color="subdued" className="eui-textCenter">
-          {' '}
-          no spaces found{' '}
+          <FormattedMessage
+            id="xpack.spaces.view.navControl.spacesMenu.noSpacesFoundTitle"
+            defaultMessage=" no spaces found "
+          />
         </EuiText>
       );
     }
@@ -96,10 +103,14 @@ export class SpacesMenu extends Component<Props, State> {
   };
 
   private renderSearchField = () => {
+    const { intl } = this.props;
     return (
       <div key="manageSpacesSearchField" className="spacesMenu__searchFieldWrapper">
         <EuiFieldSearch
-          placeholder="Find a space"
+          placeholder={intl.formatMessage({
+            id: 'xpack.spaces.view.navControl.spacesMenu.findSpacePlaceholder',
+            defaultMessage: 'Find a space',
+          })}
           incremental={true}
           // FIXME needs updated typedef
           // @ts-ignore
@@ -167,3 +178,5 @@ export class SpacesMenu extends Component<Props, State> {
     );
   };
 }
+
+export const SpacesMenu = injectI18n(SpacesMenuUI);

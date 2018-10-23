@@ -5,6 +5,7 @@
  */
 
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { UserProfile } from 'plugins/xpack_main/services/user_profile';
 import React, { Fragment } from 'react';
 
@@ -19,8 +20,20 @@ export const SecureSpaceMessage = (props: Props) => {
         <EuiSpacer />
         <EuiText className="eui-textCenter">
           <p>
-            Want to assign a role to a space? Go to Management and select{' '}
-            <EuiLink href="#/management/security/roles">Roles</EuiLink>.
+            <FormattedMessage
+              id="xpack.spaces.view.management.secureSpaceMessage.settingsTitle"
+              defaultMessage="Want to assign a role to a space? Go to Management and select {button}."
+              values={{
+                button: (
+                  <EuiLink href="#/management/security/roles">
+                    <FormattedMessage
+                      id="xpack.spaces.view.management.secureSpaceMessage.rolesTitle"
+                      defaultMessage="Roles"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
           </p>
         </EuiText>
       </Fragment>

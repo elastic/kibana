@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
@@ -56,7 +57,7 @@ interface State {
   };
 }
 
-export class ManageSpacePage extends Component<Props, State> {
+export class ManageSpacePageUI extends Component<Props, State> {
   private readonly validator: SpaceValidator;
 
   constructor(props: Props) {
@@ -69,7 +70,7 @@ export class ManageSpacePage extends Component<Props, State> {
   }
 
   public componentDidMount() {
-    const { spaceId, spacesManager } = this.props;
+    const { spaceId, spacesManager, intl } = this.props;
 
     if (spaceId) {
       spacesManager
@@ -85,7 +86,17 @@ export class ManageSpacePage extends Component<Props, State> {
         .catch(error => {
           const { message = '' } = error.data || {};
 
-          toastNotifications.addDanger(`Error loading space: ${message}`);
+          toastNotifications.addDanger(
+            intl.formatMessage(
+              {
+                id: 'xpack.spaces.view.management.editSpace.manageSpacePage.errorLoadingSpaceTitle',
+                defaultMessage: 'Error loading space: {message}',
+              },
+              {
+                message,
+              }
+            )
+          );
           this.backToSpacesList();
         });
     } else {
@@ -113,14 +124,19 @@ export class ManageSpacePage extends Component<Props, State> {
       <div>
         <EuiLoadingSpinner size={'xl'} />{' '}
         <EuiTitle>
-          <h1>Loading...</h1>
+          <h1>
+            <FormattedMessage
+              id="xpack.spaces.view.management.editSpace.manageSpacePage.loadingTitle"
+              defaultMessage="Loading…"
+            />
+          </h1>
         </EuiTitle>
       </div>
     );
   };
 
   public getForm = () => {
-    const { userProfile } = this.props;
+    const { userProfile, intl } = this.props;
 
     if (!userProfile.hasCapability('manageSpaces')) {
       return <UnauthorizedPrompt />;
@@ -136,10 +152,20 @@ export class ManageSpacePage extends Component<Props, State> {
 
         <EuiFlexGroup>
           <EuiFlexItem style={{ maxWidth: '400px' }}>
-            <EuiFormRow label="Name" {...this.validator.validateSpaceName(this.state.space)}>
+            <EuiFormRow
+              label={intl.formatMessage({
+                id: 'xpack.spaces.view.management.editSpace.manageSpacePage.nameTitle',
+                defaultMessage: 'Name',
+              })}
+              {...this.validator.validateSpaceName(this.state.space)}
+            >
               <EuiFieldText
                 name="name"
-                placeholder={'Awesome space'}
+                placeholder={intl.formatMessage({
+                  id:
+                    'xpack.spaces.view.management.editSpace.manageSpacePage.awesomeSpacePlaceHolder',
+                  defaultMessage: 'Awesome space',
+                })}
                 value={name}
                 onChange={this.onNameChange}
               />
@@ -173,12 +199,19 @@ export class ManageSpacePage extends Component<Props, State> {
         )}
 
         <EuiFormRow
-          label="Description (optional)"
+          label={intl.formatMessage({
+            id: 'xpack.spaces.view.management.editSpace.manageSpacePage.optionalDescriptionTitle',
+            defaultMessage: 'Description (optional)',
+          })}
           {...this.validator.validateSpaceDescription(this.state.space)}
         >
           <EuiFieldText
             name="description"
-            placeholder={'This is where the magic happens'}
+            placeholder={intl.formatMessage({
+              id:
+                'xpack.spaces.view.management.editSpace.manageSpacePage.hereMagicHappensPlaceHolder',
+              defaultMessage: 'This is where the magic happens',
+            })}
             value={description}
             onChange={this.onDescriptionChange}
           />
@@ -203,9 +236,19 @@ export class ManageSpacePage extends Component<Props, State> {
 
   public getTitle = () => {
     if (this.editingExistingSpace()) {
-      return `Edit space`;
+      return (
+        <FormattedMessage
+          id="xpack.spaces.view.management.editSpace.manageSpacePage.editSpaceButton"
+          defaultMessage="Edit space"
+        />
+      );
     }
-    return `Create space`;
+    return (
+      <FormattedMessage
+        id="xpack.spaces.view.management.editSpace.manageSpacePage.createSpaceButton"
+        defaultMessage="Create space"
+      />
+    );
   };
 
   public maybeGetSecureSpacesMessage = () => {
@@ -216,7 +259,17 @@ export class ManageSpacePage extends Component<Props, State> {
   };
 
   public getFormButtons = () => {
-    const saveText = this.editingExistingSpace() ? 'Update space' : 'Create space';
+    const saveText = this.editingExistingSpace() ? (
+      <FormattedMessage
+        id="xpack.spaces.view.management.editSpace.manageSpacePage.updateSpaceButton"
+        defaultMessage="Update space"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.spaces.view.management.editSpace.manageSpacePage.createSpaceButton"
+        defaultMessage="Create space"
+      />
+    );
     return (
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
@@ -226,7 +279,10 @@ export class ManageSpacePage extends Component<Props, State> {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={this.backToSpacesList} data-test-subj="cancel-space-button">
-            Cancel
+            <FormattedMessage
+              id="xpack.spaces.view.management.editSpace.manageSpacePage.cancelButton"
+              defaultMessage="Cancel"
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={true} />
@@ -315,6 +371,7 @@ export class ManageSpacePage extends Component<Props, State> {
   };
 
   private performSave = () => {
+    const { intl } = this.props;
     if (!this.state.space) {
       return;
     }
@@ -340,13 +397,33 @@ export class ManageSpacePage extends Component<Props, State> {
     action
       .then(() => {
         this.props.spacesNavState.refreshSpacesList();
-        toastNotifications.addSuccess(`'${name}' was saved`);
+        toastNotifications.addSuccess(
+          intl.formatMessage(
+            {
+              id: 'xpack.spaces.view.management.editSpace.manageSpacePage.savesNameTitle',
+              defaultMessage: '{name} was saved',
+            },
+            {
+              name,
+            }
+          )
+        );
         window.location.hash = `#/management/spaces/list`;
       })
       .catch(error => {
         const { message = '' } = error.data || {};
 
-        toastNotifications.addDanger(`Error saving space: ${message}`);
+        toastNotifications.addDanger(
+          intl.formatMessage(
+            {
+              id: 'xpack.spaces.view.management.editSpace.manageSpacePage.errorSavingSpaceTitle',
+              defaultMessage: 'Error saving space: {message}',
+            },
+            {
+              message,
+            }
+          )
+        );
       });
   };
 
@@ -356,3 +433,5 @@ export class ManageSpacePage extends Component<Props, State> {
 
   private editingExistingSpace = () => !!this.props.spaceId;
 }
+
+export const ManageSpacePage = injectI18n(ManageSpacePageUI);

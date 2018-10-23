@@ -5,6 +5,7 @@
  */
 
 import { EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, CSSProperties } from 'react';
 import { UserProfile } from '../../../xpack_main/public/services/user_profile';
 import { MANAGE_SPACES_URL } from '../lib/constants';
@@ -31,7 +32,10 @@ export class ManageSpacesButton extends Component<Props, {}> {
         onClick={this.navigateToManageSpaces}
         style={this.props.style}
       >
-        Manage spaces
+        <FormattedMessage
+          id="xpack.spaces.managementSpacesButton.manageSpacesButton"
+          defaultMessage="Manage spaces"
+        />
       </EuiButton>
     );
   }

@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
 
@@ -46,7 +47,7 @@ interface State {
   error: Error | null;
 }
 
-export class SpacesGridPage extends Component<Props, State> {
+export class SpacesGridPageUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -75,6 +76,7 @@ export class SpacesGridPage extends Component<Props, State> {
   }
 
   public getPageContent() {
+    const { intl } = this.props;
     if (!this.props.userProfile.hasCapability('manageSpaces')) {
       return <UnauthorizedPrompt />;
     }
@@ -84,7 +86,12 @@ export class SpacesGridPage extends Component<Props, State> {
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem grow={false}>
             <EuiText>
-              <h1>Spaces</h1>
+              <h1>
+                <FormattedMessage
+                  id="xpack.spaces.view.management.spacesGrid.spacesGridPage.spacesTitle"
+                  defaultMessage="Spaces"
+                />
+              </h1>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
@@ -99,11 +106,23 @@ export class SpacesGridPage extends Component<Props, State> {
           pagination={true}
           search={{
             box: {
-              placeholder: 'Search',
+              placeholder: intl.formatMessage({
+                id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.searchPlaceHolder',
+                defaultMessage: 'Search',
+              }),
             },
           }}
           loading={this.state.loading}
-          message={this.state.loading ? 'loading...' : undefined}
+          message={
+            this.state.loading ? (
+              <FormattedMessage
+                id="xpack.spaces.view.management.spacesGrid.spacesGridPage.loadingTitle"
+                defaultMessage="loading…"
+              />
+            ) : (
+              undefined
+            )
+          }
         />
       </Fragment>
     );
@@ -117,7 +136,10 @@ export class SpacesGridPage extends Component<Props, State> {
           window.location.hash = `#/management/spaces/create`;
         }}
       >
-        Create space
+        <FormattedMessage
+          id="xpack.spaces.view.management.spacesGrid.spacesGridPage.createSpaceButton"
+          defaultMessage="Create space"
+        />
       </EuiButton>
     );
   }
@@ -145,6 +167,7 @@ export class SpacesGridPage extends Component<Props, State> {
   };
 
   public deleteSpace = async () => {
+    const { intl } = this.props;
     const { spacesManager, spacesNavState } = this.props;
 
     const space = this.state.selectedSpace;
@@ -158,7 +181,17 @@ export class SpacesGridPage extends Component<Props, State> {
     } catch (error) {
       const { message: errorMessage = '' } = error.data || {};
 
-      toastNotifications.addDanger(`Error deleting space: ${errorMessage}`);
+      toastNotifications.addDanger(
+        intl.formatMessage(
+          {
+            id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.errorDeletingSpaceTitle',
+            defaultMessage: 'Error deleting space: {errorMessage}',
+          },
+          {
+            errorMessage,
+          }
+        )
+      );
     }
 
     this.setState({
@@ -167,7 +200,15 @@ export class SpacesGridPage extends Component<Props, State> {
 
     this.loadGrid();
 
-    const message = `Deleted "${space.name}" space.`;
+    const message = intl.formatMessage(
+      {
+        id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.deletingSpaceTitle',
+        defaultMessage: 'Deleted "{spaceName}" space.',
+      },
+      {
+        spaceName: space.name,
+      }
+    );
 
     toastNotifications.addSuccess(message);
 
@@ -203,6 +244,7 @@ export class SpacesGridPage extends Component<Props, State> {
   };
 
   public getColumnConfig() {
+    const { intl } = this.props;
     return [
       {
         field: 'name',
@@ -223,7 +265,10 @@ export class SpacesGridPage extends Component<Props, State> {
       },
       {
         field: 'name',
-        name: 'Space',
+        name: intl.formatMessage({
+          id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.spaceColumnNameTitle',
+          defaultMessage: 'Space',
+        }),
         sortable: true,
         render: (value: string, record: Space) => {
           return (
@@ -239,20 +284,35 @@ export class SpacesGridPage extends Component<Props, State> {
       },
       {
         field: 'id',
-        name: 'Identifier',
+        name: intl.formatMessage({
+          id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.identifierColumnNameTitle',
+          defaultMessage: 'Identifier',
+        }),
         sortable: true,
       },
       {
         field: 'description',
-        name: 'Description',
+        name: intl.formatMessage({
+          id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.descriptionColumnNameTitle',
+          defaultMessage: 'Description',
+        }),
         sortable: true,
       },
       {
-        name: 'Actions',
+        name: intl.formatMessage({
+          id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.ActionsColumnNameTitle',
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
-            name: 'Edit',
-            description: 'Edit this space.',
+            name: intl.formatMessage({
+              id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.editNameTitle',
+              defaultMessage: 'Edit',
+            }),
+            description: intl.formatMessage({
+              id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.editSpaceTitle',
+              defaultMessage: 'Edit this space.',
+            }),
             onClick: this.onEditSpaceClick,
             type: 'icon',
             icon: 'pencil',
@@ -260,8 +320,14 @@ export class SpacesGridPage extends Component<Props, State> {
           },
           {
             available: (record: Space) => !isReservedSpace(record),
-            name: 'Delete',
-            description: 'Delete this space.',
+            name: intl.formatMessage({
+              id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.deleteNameTitle',
+              defaultMessage: 'Delete',
+            }),
+            description: intl.formatMessage({
+              id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.deleteThisSpaceTitle',
+              defaultMessage: 'Delete this space.',
+            }),
             onClick: this.onDeleteSpaceClick,
             type: 'icon',
             icon: 'trash',
@@ -283,3 +349,5 @@ export class SpacesGridPage extends Component<Props, State> {
     });
   };
 }
+
+export const SpacesGridPage = injectI18n(SpacesGridPageUI);
