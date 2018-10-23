@@ -29,7 +29,11 @@ import { charMap } from './pseudo_locale';
 // Add all locale data to `IntlMessageFormat`.
 import './locales.js';
 
-const CHARS_FOR_PSEUDO_LOCALIZATION_REGEX = /[A-Za-z]|((?<=\[[\s\S]*?\])\([\s\S]*?\))|(<([^"<>]|("[^"]*?"))*?>)/g;
+/**
+ * Matches every single [A-Za-z] character, `<tag attr="any > text">` and `](markdown-link-address)`
+ */
+const CHARS_FOR_PSEUDO_LOCALIZATION_REGEX = /[A-Za-z]|(\]\([\s\S]*?\))|(<([^"<>]|("[^"]*?"))*?>)/g;
+const PSEUDO_LOCALE = 'en-xa';
 
 const EN_LOCALE = 'en';
 const LOCALE_DELIMITER = '-';
@@ -166,6 +170,10 @@ interface TranslateArguments {
   context?: string;
 }
 
+export function isPseudoLocale() {
+  return currentLocale.toLowerCase() === PSEUDO_LOCALE;
+}
+
 export function translateUsingPseudoLocale(message: string) {
   /**
    * Replaces every latin char by pseudo char and repeats every third char twice.
@@ -174,6 +182,7 @@ export function translateUsingPseudoLocale(message: string) {
     let count = 0;
 
     return (match: string) => {
+      // if `match.length !== 1`, then `match` is html tag or markdown link address, so it should be ignored
       if (match.length !== 1) {
         return match;
       }
@@ -200,7 +209,7 @@ export function translate(
     defaultMessage: '',
   }
 ) {
-  const shouldUsePseudoLocale = currentLocale.toLowerCase() === 'en-xa';
+  const shouldUsePseudoLocale = isPseudoLocale();
 
   if (!id || !isString(id)) {
     throw new Error('[I18n] An `id` must be a non-empty string to translate a message.');

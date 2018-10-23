@@ -23,10 +23,6 @@ import { IntlProvider, intlShape } from 'react-intl';
 
 import * as i18n from '../core';
 
-function isPseudoLocale() {
-  return i18n.getLocale() === 'en-xa';
-}
-
 /**
  * The library uses the provider pattern to scope an i18n context to a tree
  * of components. This component is used to setup the i18n context for a tree.
@@ -38,7 +34,7 @@ export class I18nProvider extends React.PureComponent {
   public static childContextTypes = { intl: intlShape };
 
   public getChildContext() {
-    if (this.context.intl && isPseudoLocale()) {
+    if (this.context.intl && i18n.isPseudoLocale()) {
       const formatMessage = this.context.intl.formatMessage;
       this.context.intl.formatMessage = (...args: any[]) => {
         return i18n.translateUsingPseudoLocale(formatMessage.apply(this.context.intl, args));
@@ -63,7 +59,7 @@ export class I18nProvider extends React.PureComponent {
         defaultFormats={i18n.getFormats()}
         textComponent={React.Fragment}
       >
-        {isPseudoLocale() ? <I18nProvider>{child}</I18nProvider> : child}
+        {i18n.isPseudoLocale() ? <I18nProvider>{child}</I18nProvider> : child}
       </IntlProvider>
     );
   }
