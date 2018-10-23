@@ -28,7 +28,7 @@ import { EuiFlyoutBody } from '@elastic/eui';
  * inspector view. It makes sure, that the appropriate stylings are applied to the
  * view.
  */
-const InspectorView: React.SFC<{ useFlex?: boolean }> = ({ useFlex, children }) => {
+const InspectorView: React.SFC<{ useFlex?: boolean | null }> = ({ useFlex, children }) => {
   const classes = classNames({
     'inspector-view__flex': Boolean(useFlex),
   });
