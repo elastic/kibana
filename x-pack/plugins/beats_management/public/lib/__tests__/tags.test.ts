@@ -118,7 +118,7 @@ describe('Tags Client Domain Lib', () => {
     );
   });
 
-  it.only('should convert JSON to tokenized fields', async () => {
+  it('should convert JSON to tokenized fields', async () => {
     const convertedTag = tagsLib.jsonConfigToUserYaml([
       {
         id: 'dfgdfgdfgdfgdfg',
