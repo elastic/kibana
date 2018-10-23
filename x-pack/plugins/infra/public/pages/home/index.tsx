@@ -42,6 +42,7 @@ export class HomePage extends React.PureComponent {
                     message="Let's add some!"
                     actionLabel="Setup Instructions"
                     actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
+                    data-test-subj="noMetricsIndicesPrompt"
                   />
                 )}
               </WithKibanaChrome>
