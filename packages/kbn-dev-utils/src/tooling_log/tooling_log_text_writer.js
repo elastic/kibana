@@ -85,7 +85,7 @@ export class ToolingLogTextWriter {
         lineIndent += PREFIX_INDENT;
       }
 
-      this.writeTo.write(`${lineIndent}${timestamp}${line}\n`);
+      this.writeTo.write(`${timestamp}${lineIndent}${line}\n`);
     });
 
     return true;
