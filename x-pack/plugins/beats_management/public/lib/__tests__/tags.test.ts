@@ -84,6 +84,74 @@ describe('Tags Client Domain Lib', () => {
     expect(convertedTag[0].configuration_blocks[0].configs[0]).not.toHaveProperty('other');
   });
 
+  it('should convert tokenized fields to JSON', async () => {
+    const convertedTag = tagsLib.userConfigsToJson([
+      {
+        id: 'dfgdfgdfgdfgdfg',
+        color: '#DD0A73',
+        configuration_blocks: [
+          {
+            type: 'output',
+            description: 'something',
+            configs: [
+              {
+                output: 'console',
+                '{{output}}': { hosts: ['esefsfsgg', 'drgdrgdgr'], username: '', password: '' },
+              },
+            ],
+          },
+        ],
+        last_updated: '2018-10-22T23:59:59.016Z',
+      } as any,
+    ]);
+
+    expect(convertedTag.length).toBe(1);
+    expect(convertedTag[0].configuration_blocks.length).toBe(1);
+    expect(convertedTag[0].configuration_blocks[0].configs.length).toBe(1);
+    expect(convertedTag[0].configuration_blocks[0].configs[0]).toHaveProperty('console');
+    expect((convertedTag[0].configuration_blocks[0].configs[0] as any).console).toHaveProperty(
+      'hosts'
+    );
+
+    expect((convertedTag[0].configuration_blocks[0].configs[0] as any).console.hosts.length).toBe(
+      2
+    );
+  });
+
+  it.only('should convert JSON to tokenized fields', async () => {
+    const convertedTag = tagsLib.jsonConfigToUserYaml([
+      {
+        id: 'dfgdfgdfgdfgdfg',
+        color: '#DD0A73',
+        configuration_blocks: [
+          {
+            type: 'output',
+            description: 'something',
+            configs: [
+              {
+                output: 'console',
+                console: { hosts: ['esefsfsgg', 'drgdrgdgr'], username: '', password: '' },
+              },
+            ],
+          },
+        ],
+        last_updated: '2018-10-22T23:59:59.016Z',
+      } as any,
+    ]);
+
+    expect(convertedTag.length).toBe(1);
+    expect(convertedTag[0].configuration_blocks.length).toBe(1);
+    expect(convertedTag[0].configuration_blocks[0].configs.length).toBe(1);
+    expect(convertedTag[0].configuration_blocks[0].configs[0]).toHaveProperty('{{output}}');
+    expect(
+      (convertedTag[0].configuration_blocks[0].configs[0] as any)['{{output}}']
+    ).toHaveProperty('hosts');
+
+    expect(
+      (convertedTag[0].configuration_blocks[0].configs[0] as any)['{{output}}'].hosts.length
+    ).toBe(2);
+  });
+
   it('should use helper function to convert config object to users yaml', async () => {
     const convertedTag = tagsLib.jsonConfigToUserYaml([
       {
