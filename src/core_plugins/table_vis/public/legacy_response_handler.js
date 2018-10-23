@@ -52,15 +52,9 @@ function splitTable(columns, rows, $parent) {
     return [{
       $parent,
       columns: columns.map(column => ({ title: column.name, ...column })),
-      rows: rows.map((row, rowIndex) => {
-        return columns.map((column, columnIndex) => {
-          const aggConfigResult = new AggConfigResult(column.aggConfig, $parent, row[column.id], row[column.id]);
-          aggConfigResult.rawData = {
-            table: { columns, rows },
-            columnIndex,
-            rowIndex,
-          };
-          return aggConfigResult;
+      rows: rows.map(row => {
+        return columns.map(column => {
+          return new AggConfigResult(column.aggConfig, $parent, row[column.id], row[column.id]);
         });
       })
     }];
@@ -73,14 +67,8 @@ function splitTable(columns, rows, $parent) {
     .filter((column, i) => i !== splitColumnIndex)
     .map(column => ({ title: column.name, ...column }));
 
-  return splitRows.results.map((splitValue, rowIndex) => {
-    const aggConfigResult = new AggConfigResult(splitColumn.aggConfig, $parent, splitValue, splitValue);
-    aggConfigResult.rawData = {
-      table: { columns, rows },
-      columnIndex: splitColumnIndex,
-      rowIndex,
-    };
-    const $newParent = aggConfigResult;
+  return splitRows.results.map(splitValue => {
+    const $newParent = new AggConfigResult(splitColumn.aggConfig, $parent, splitValue, splitValue);
     return {
       $parent: $newParent,
       aggConfig: splitColumn.aggConfig,
