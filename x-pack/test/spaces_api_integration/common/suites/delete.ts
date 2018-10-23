@@ -76,7 +76,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 3,
+        doc_count: 4,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
@@ -86,6 +86,10 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
               doc_count: 2,
             },
             {
+              key: 'config',
+              doc_count: 1,
+            },
+            {
               key: 'dashboard',
               doc_count: 1,
             },
@@ -93,12 +97,16 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         },
       },
       {
-        doc_count: 1,
+        doc_count: 2,
         key: 'space_1',
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
+            {
+              key: 'config',
+              doc_count: 1,
+            },
             {
               key: 'dashboard',
               doc_count: 1,
@@ -139,7 +147,22 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     { user = {}, spaceId, tests }: DeleteTestDefinition
   ) => {
     describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
+      before(async () => {
+        await esArchiver.load('saved_objects/spaces');
+
+        // since we want to verify that we only delete the right things
+        // and can't include a config document with the correct id in the
+        // archive we read the settings to trigger an automatic upgrade
+        // in each space
+        await supertest
+          .get('/api/kibana/settings')
+          .auth(user.username, user.password)
+          .expect(200);
+        await supertest
+          .get('/s/space_1/api/kibana/settings')
+          .auth(user.username, user.password)
+          .expect(200);
+      });
       after(() => esArchiver.unload('saved_objects/spaces'));
 
       it(`should return ${tests.exists.statusCode}`, async () => {

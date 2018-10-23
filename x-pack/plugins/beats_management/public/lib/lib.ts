@@ -29,6 +29,7 @@ export interface YamlConfigSchema {
     label: string;
     type: 'input' | 'multi-input' | 'select' | 'code' | 'password';
     helpText?: string;
+    placeholder?: string;
     transform?: 'removed';
   };
   options?: Array<{ value: string; text: string }>;
