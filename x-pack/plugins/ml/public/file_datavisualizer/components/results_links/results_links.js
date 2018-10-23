@@ -20,7 +20,7 @@ import moment from 'moment';
 import uiChrome from 'ui/chrome';
 import { ml } from '../../../services/ml_api_service';
 
-const RECHECK_DELAY = 3000;
+const RECHECK_DELAY_MS = 3000;
 
 export class ResultsLinks extends Component {
   constructor(props) {
@@ -31,7 +31,7 @@ export class ResultsLinks extends Component {
       to: 'now',
     };
 
-    this.reCheckTimeout = null;
+    this.recheckTimeout = null;
   }
 
   componentDidMount() {
@@ -39,10 +39,10 @@ export class ResultsLinks extends Component {
   }
 
   componentWillUnmount() {
-    clearTimeout(this.reCheckTimeout);
+    clearTimeout(this.recheckTimeout);
   }
 
-  async updateTimeValues(reCheck = true) {
+  async updateTimeValues(recheck = true) {
     const {
       index,
       timeFieldName,
@@ -54,16 +54,16 @@ export class ResultsLinks extends Component {
       to: (to === null) ? this.state.to : to,
     });
 
-    // these links may have been drawn too quickly for he index to be ready
-    // to give us the correct start and and times.
+    // these links may have been drawn too quickly for the index to be ready
+    // to give us the correct start and end times.
     // especially if the data was small.
     // so if the start and end were null, try again in 3s
     // the timeout is cleared when this component unmounts. just in case the user
     // resets the form or navigates away within 3s
-    if (reCheck && (from === null || to === null)) {
-      this.reCheckTimeout = setTimeout(() => {
+    if (recheck && (from === null || to === null)) {
+      this.recheckTimeout = setTimeout(() => {
         this.updateTimeValues(false);
-      }, RECHECK_DELAY);
+      }, RECHECK_DELAY_MS);
     }
   }
 

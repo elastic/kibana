@@ -483,12 +483,14 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
   if (indexPatternNames.find(i => i === name)) {
     return 'Index pattern name already exists';
   }
-  const newName = name.replace('*', '.*');
+
+  // escape . and + to stop the regex matching more than it should.
+  let newName = name.replace('.', '\\.');
+  newName = newName.replace('+', '\\+');
+  // replace * with .* to make the wildcard match work.
+  newName = newName.replace('*', '.*');
   const reg = new RegExp(`^${newName}$`);
-  if ((
-    name.match(/[\.\+]/g) !== null) || // avoid accidental .+ regexp matches
-    (index.match(reg) === null) // name should match index
-  ) {
+  if (index.match(reg) === null) { // name should match index
     return 'Index pattern does not match index name';
   }
 

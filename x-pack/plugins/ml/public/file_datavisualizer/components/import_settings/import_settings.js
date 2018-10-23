@@ -5,9 +5,7 @@
  */
 
 
-import React, {
-  Component,
-} from 'react';
+import React from 'react';
 
 import {
   EuiTabbedContent,
@@ -17,88 +15,79 @@ import {
 import { SimpleSettings } from './simple';
 import { AdvancedSettings } from './advanced';
 
-export class ImportSettings extends Component {
-  constructor(props) {
-    super(props);
+export function ImportSettings({
+  index,
+  indexPattern,
+  initialized,
+  onIndexChange,
+  createIndexPattern,
+  onCreateIndexPatternChange,
+  onIndexPatternChange,
+  indexSettingsString,
+  mappingsString,
+  pipelineString,
+  onIndexSettingsStringChange,
+  onMappingsStringChange,
+  onPipelineStringChange,
+  indexNameError,
+  indexPatternNameError
+}) {
 
-    this.state = {};
-  }
-
-  render() {
-    const {
-      index,
-      indexPattern,
-      initialized,
-      onIndexChange,
-      createIndexPattern,
-      onCreateIndexPatternChange,
-      onIndexPatternChange,
-      indexSettingsString,
-      mappingsString,
-      pipelineString,
-      onIndexSettingsStringChange,
-      onMappingsStringChange,
-      onPipelineStringChange,
-      indexNameError,
-      indexPatternNameError
-    } = this.props;
-
-    const tabs = [{
-      id: 'simple-settings',
-      name: 'Simple',
-      content: (
-        <React.Fragment>
-
-          <EuiSpacer size="m" />
-
-          <SimpleSettings
-            index={index}
-            initialized={initialized}
-            onIndexChange={onIndexChange}
-            createIndexPattern={createIndexPattern}
-            onCreateIndexPatternChange={onCreateIndexPatternChange}
-            indexNameError={indexNameError}
-          />
-        </React.Fragment>
-      )
-    },
-    {
-      id: 'advanced-settings',
-      name: 'Advanced',
-      content: (
-        <React.Fragment>
-
-          <EuiSpacer size="m" />
-
-          <AdvancedSettings
-            index={index}
-            indexPattern={indexPattern}
-            initialized={initialized}
-            onIndexChange={onIndexChange}
-            createIndexPattern={createIndexPattern}
-            onCreateIndexPatternChange={onCreateIndexPatternChange}
-            onIndexPatternChange={onIndexPatternChange}
-            indexSettingsString={indexSettingsString}
-            mappingsString={mappingsString}
-            pipelineString={pipelineString}
-            onIndexSettingsStringChange={onIndexSettingsStringChange}
-            onMappingsStringChange={onMappingsStringChange}
-            onPipelineStringChange={onPipelineStringChange}
-            indexNameError={indexNameError}
-            indexPatternNameError={indexPatternNameError}
-          />
-        </React.Fragment>
-      )
-    }
-    ];
-    return (
+  const tabs = [{
+    id: 'simple-settings',
+    name: 'Simple',
+    content: (
       <React.Fragment>
-        <EuiTabbedContent
-          tabs={tabs}
-          initialSelectedTab={tabs[0]}
-          onTabClick={() => { }}
+
+        <EuiSpacer size="m" />
+
+        <SimpleSettings
+          index={index}
+          initialized={initialized}
+          onIndexChange={onIndexChange}
+          createIndexPattern={createIndexPattern}
+          onCreateIndexPatternChange={onCreateIndexPatternChange}
+          indexNameError={indexNameError}
         />
       </React.Fragment>
-    );
+    )
+  },
+  {
+    id: 'advanced-settings',
+    name: 'Advanced',
+    content: (
+      <React.Fragment>
+
+        <EuiSpacer size="m" />
+
+        <AdvancedSettings
+          index={index}
+          indexPattern={indexPattern}
+          initialized={initialized}
+          onIndexChange={onIndexChange}
+          createIndexPattern={createIndexPattern}
+          onCreateIndexPatternChange={onCreateIndexPatternChange}
+          onIndexPatternChange={onIndexPatternChange}
+          indexSettingsString={indexSettingsString}
+          mappingsString={mappingsString}
+          pipelineString={pipelineString}
+          onIndexSettingsStringChange={onIndexSettingsStringChange}
+          onMappingsStringChange={onMappingsStringChange}
+          onPipelineStringChange={onPipelineStringChange}
+          indexNameError={indexNameError}
+          indexPatternNameError={indexPatternNameError}
+        />
+      </React.Fragment>
+    )
   }
+  ];
+  return (
+    <React.Fragment>
+      <EuiTabbedContent
+        tabs={tabs}
+        initialSelectedTab={tabs[0]}
+        onTabClick={() => { }}
+      />
+    </React.Fragment>
+  );
 }

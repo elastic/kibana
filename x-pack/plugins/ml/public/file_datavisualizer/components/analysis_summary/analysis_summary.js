@@ -24,12 +24,11 @@ export function AnalysisSummary({ results }) {
 
       <EuiSpacer size="m" />
 
-      <div className="analysis-summary-list">
-        <EuiDescriptionList
-          type="column"
-          listItems={items}
-        />
-      </div>
+      <EuiDescriptionList
+        type="column"
+        listItems={items}
+        className="analysis-summary-list"
+      />
     </React.Fragment>
   );
 }

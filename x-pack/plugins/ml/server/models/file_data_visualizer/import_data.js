@@ -44,7 +44,7 @@ export function importDataProvider(callWithRequest) {
       if (data.length && indexExits(index)) {
         const resp = await indexData(index, createdPipelineId, data);
         if (resp.success === false) {
-          if (resp.ingestError/* || resp.failures.length === data.length*/) {
+          if (resp.ingestError) {
             // all docs failed, abort
             throw resp;
           } else {

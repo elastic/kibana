@@ -36,12 +36,11 @@ export function ImportSummary({
         color="success"
         iconType="check"
       >
-        <div className="import-summary-list">
-          <EuiDescriptionList
-            type="column"
-            listItems={items}
-          />
-        </div>
+        <EuiDescriptionList
+          type="column"
+          listItems={items}
+          className="import-summary-list"
+        />
       </EuiCallOut>
 
       {(importFailures && importFailures.length > 0) &&
