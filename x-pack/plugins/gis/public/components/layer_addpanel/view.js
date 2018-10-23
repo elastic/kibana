@@ -120,13 +120,14 @@ export class AddLayerPanel extends React.Component {
 
   _renderNextBtn() {
     const { layerLoading, temporaryLayers, nextAction } = this.props;
-    const addToMapBtnText = 'Next >>';
+    const addToMapBtnText = 'Next';
     return (
       <EuiButton
         style={{ width: '9rem' }}
         disabled={!temporaryLayers || layerLoading}
         isLoading={layerLoading}
-        iconType={temporaryLayers && !layerLoading ? 'check' : undefined}
+        iconSide="right"
+        iconType={'sortRight'}
         onClick={() => {
           const layerId = this.layer.getId();
           this.layer = null;
