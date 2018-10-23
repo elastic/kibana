@@ -530,7 +530,7 @@ exports[`Timeline should render with data 1`] = `
             <div
               style={
                 Object {
-                  "bottom": 0,
+                  "bottom": "-6px",
                   "left": "484.2043232706185px",
                   "position": "absolute",
                 }
@@ -560,7 +560,7 @@ exports[`Timeline should render with data 1`] = `
             <div
               style={
                 Object {
-                  "bottom": 0,
+                  "bottom": "-6px",
                   "left": "528.1747555976804px",
                   "position": "absolute",
                 }
@@ -590,7 +590,7 @@ exports[`Timeline should render with data 1`] = `
             <div
               style={
                 Object {
-                  "bottom": 0,
+                  "bottom": "-6px",
                   "left": "879.9382142141751px",
                   "position": "absolute",
                 }
