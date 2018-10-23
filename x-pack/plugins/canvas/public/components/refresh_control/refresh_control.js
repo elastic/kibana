@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLoadingSpinner } from '@elastic/eui';
 import { Popover } from '../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
 
@@ -36,8 +36,15 @@ export const RefreshControl = ({ inFlight, setRefreshInterval, refreshInterval, 
   const setRefresh = val => setRefreshInterval(getRefreshInterval(val));
 
   const popoverButton = handleClick => (
-    <EuiButtonEmpty isLoading={inFlight} size="s" onClick={handleClick}>
-      Refresh
+    <EuiButtonEmpty size="s" onClick={handleClick}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {inFlight && (
+          <Fragment>
+            <EuiLoadingSpinner size="m" /> &nbsp;
+          </Fragment>
+        )}
+        Refresh
+      </div>
     </EuiButtonEmpty>
   );
 
@@ -50,6 +57,7 @@ export const RefreshControl = ({ inFlight, setRefreshInterval, refreshInterval, 
       {({ closePopover }) => (
         <div>
           <AutoRefreshControls
+            inFlight={inFlight}
             refreshInterval={refreshInterval}
             setRefresh={val => {
               setRefresh(val);

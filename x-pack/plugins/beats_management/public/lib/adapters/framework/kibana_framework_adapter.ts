@@ -25,8 +25,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private routes: any;
   private XPackInfoProvider: any;
   private xpackInfo: null | any;
-  private notifier: any;
-  private kbnUrlService: any;
   private chrome: any;
 
   constructor(
@@ -34,8 +32,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     management: any,
     routes: any,
     chrome: any,
-    XPackInfoProvider: any,
-    Notifier: any
+    XPackInfoProvider: any
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
     this.management = management;
@@ -44,7 +41,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     this.chrome = chrome;
     this.XPackInfoProvider = XPackInfoProvider;
     this.appState = {};
-    this.notifier = new Notifier({ location: 'Beats' });
   }
 
   public get baseURLPath(): string {
@@ -98,11 +94,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
           url: `#${basePath}`,
         });
       }
-
-      if (!this.securityEnabled()) {
-        this.notifier.error(this.xpackInfo.get(`features.beats_management.message`));
-        this.kbnUrlService.redirect('/management');
-      }
     });
   }
 
@@ -131,10 +122,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     this.chrome.dangerouslyGetActiveInjector().then(($injector: any) => {
       const Private = $injector.get('Private');
       const xpackInfo = Private(this.XPackInfoProvider);
-      const kbnUrlService = $injector.get('kbnUrl');
 
       this.xpackInfo = xpackInfo;
-      this.kbnUrlService = kbnUrlService;
       done();
     });
   }
