@@ -40,6 +40,8 @@ export class Worker extends events.EventEmitter {
     this.jobtype = type;
     this.workerFn = workerFn;
     this.checkSize = opts.size || 10;
+    this.capacity = opts.capacity || 2;
+    this.processingJobCount = 0;
     this.doctype = opts.doctype || constants.DEFAULT_SETTING_DOCTYPE;
 
     this.debug = (msg, err) => {
@@ -61,7 +63,9 @@ export class Worker extends events.EventEmitter {
 
     this._poller = new Poller({
       functionToPoll: () => {
-        return this._processPendingJobs();
+        this._processPendingJobs();
+        // Return an empty promise so that the processing jobs won't block the next poll.
+        return Promise.resolve();
       },
       pollFrequencyInMillis: opts.interval,
       trailing: true,
@@ -230,13 +234,16 @@ export class Worker extends events.EventEmitter {
       cancellationToken.on(() => {
         this._cancelJob(job);
       });
+      this.processingJobCount += 1;
       Promise.resolve(this.workerFn.call(null, job._source.payload, cancellationToken))
         .then((res) => {
           isResolved = true;
+          this.processingJobCount -= 1;
           resolve(res);
         })
         .catch((err) => {
           isResolved = true;
+          this.processingJobCount -= 1;
           reject(err);
         });
 
@@ -245,6 +252,7 @@ export class Worker extends events.EventEmitter {
         if (isResolved) return;
 
         cancellationToken.cancel();
+        this.processingJobCount -= 1;
         this.debug(`Timeout processing job ${job._id}`);
         reject(new WorkerTimeoutError(`Worker timed out, timeout = ${job._source.timeout}`, {
           timeout: job._source.timeout,
@@ -336,30 +344,32 @@ export class Worker extends events.EventEmitter {
   _claimPendingJobs(jobs) {
     if (!jobs || jobs.length === 0) return;
 
-    let claimed = false;
+    let claimed = 0;
 
-    // claim a single job, stopping after first successful claim
     return jobs.reduce((chain, job) => {
-      return chain.then((claimedJob) => {
-        // short-circuit the promise chain if a job has been claimed
-        if (claimed) return claimedJob;
+      return chain.then((claimedJobs) => {
+        // Apply capacity control to make sure there won't be more jobs processing than the capacity.
+        if (claimed === (this.capacity - this.processingJobCount)) return claimedJobs;
 
         return this._claimJob(job)
           .then((claimResult) => {
             if (claimResult !== false) {
-              claimed = true;
-              return claimResult;
+              claimed += 1;
+              claimedJobs.push(claimResult);
+              return claimedJobs;
             }
           });
       });
-    }, Promise.resolve())
-      .then((claimedJob) => {
-        if (!claimedJob) {
+    }, Promise.resolve([]))
+      .then((claimedJobs) => {
+        if (!claimedJobs || claimedJobs.length === 0) {
           this.debug(`All ${jobs.length} jobs already claimed`);
           return;
         }
-        this.debug(`Claimed job ${claimedJob._id}`);
-        return this._performJob(claimedJob);
+        this.debug(`Claimed ${claimedJobs.size} jobs`);
+        return Promise.all(claimedJobs.map((job) => {
+          return this._performJob(job);
+        }));
       })
       .catch((err) => {
         this.debug('Error claiming jobs', err);

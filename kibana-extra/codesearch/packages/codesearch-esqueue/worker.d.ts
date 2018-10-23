@@ -51,6 +51,7 @@ export type WorkerFn<P, R extends WorkerOutput> = (
 
 export interface WorkerOptions {
   interval: number;
+  capacity: number;
   intervalErrorMultiplier: number;
   client?: EsClient;
   size?: number;

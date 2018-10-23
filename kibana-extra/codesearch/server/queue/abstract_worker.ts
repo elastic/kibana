@@ -62,7 +62,8 @@ export abstract class AbstractWorker implements Worker {
     };
 
     const workerOptions = {
-      interval: 3000,
+      interval: 5000,
+      capacity: 5,
       intervalErrorMultiplier: 1,
     };
 
