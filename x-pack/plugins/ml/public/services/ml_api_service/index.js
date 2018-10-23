@@ -14,6 +14,7 @@ import { http } from '../../services/http_service';
 import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
+import { fileDatavisualizer } from './datavisualizer';
 
 const basePath = chrome.addBasePath('/api/ml');
 
@@ -408,7 +409,16 @@ export const ml = {
     });
   },
 
+  getIndices() {
+    const tempBasePath = chrome.addBasePath('/api');
+    return http({
+      url: `${tempBasePath}/index_management/indices`,
+      method: 'GET',
+    });
+  },
+
   filters,
   results,
   jobs,
+  fileDatavisualizer,
 };

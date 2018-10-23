@@ -8,16 +8,21 @@ import { constant } from 'lodash';
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 // @ts-ignore
 import template from 'plugins/spaces/views/nav_control/nav_control.html';
+import { NavControlPopover } from 'plugins/spaces/views/nav_control/nav_control_popover';
 import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { NavControlSide } from 'ui/chrome/directives/header_global_nav';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 // @ts-ignore
+import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
+// @ts-ignore
 import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
-
-import { NavControlPopover } from 'plugins/spaces/views/nav_control/nav_control_popover';
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { Space } from '../../../common/model/space';
+import { SpacesGlobalNavButton } from './components/spaces_global_nav_button';
+import { SpacesHeaderNavButton } from './components/spaces_header_nav_button';
 
 chromeNavControlsRegistry.register(
   constant({
@@ -55,6 +60,8 @@ module.controller(
             spacesManager={spacesManager}
             activeSpace={activeSpace}
             userProfile={userProfile}
+            anchorPosition={'rightCenter'}
+            buttonClass={SpacesGlobalNavButton}
           />,
           domNode
         );
@@ -84,3 +91,29 @@ module.service('spacesNavState', (activeSpace: any) => {
     },
   } as SpacesNavState;
 });
+
+chromeHeaderNavControlsRegistry.register(
+  ($http: any, chrome: any, Private: any, activeSpace: any) => ({
+    name: 'spaces',
+    order: 1000,
+    side: NavControlSide.Left,
+    render(el: HTMLElement) {
+      const userProfile = Private(UserProfileProvider);
+
+      const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
+
+      spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
+
+      ReactDOM.render(
+        <NavControlPopover
+          spacesManager={spacesManager}
+          activeSpace={activeSpace}
+          userProfile={userProfile}
+          anchorPosition="downLeft"
+          buttonClass={SpacesHeaderNavButton}
+        />,
+        el
+      );
+    },
+  })
+);
