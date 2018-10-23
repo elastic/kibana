@@ -89,6 +89,7 @@ export class EMSFileSource extends VectorSource {
   }
 
   async getStringFields() {
+    //todo: use map/service-settings instead.
     const fileSource = this._emsFiles.find((source => source.name === this._descriptor.name));
 
     return fileSource.fields.map(f => {
