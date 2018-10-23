@@ -1,6 +1,7 @@
 {
   "rootDir": "../../..",
   "roots": [
+    "<rootDir>/src/core_plugins/console/api_server",
     "<rootDir>/src/core_plugins/kibana/public/dashboard",
     "<rootDir>/ui_framework/"
   ],
