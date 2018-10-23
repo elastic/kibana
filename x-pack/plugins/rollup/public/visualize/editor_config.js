@@ -67,6 +67,9 @@ editorConfigProviders.register((aggType, indexPattern, aggConfig) => {
       interval: {
         fixedValue: 'custom',
       },
+      useNormalizedEsInterval: {
+        fixedValue: false,
+      },
       customInterval: {
         default: interval,
         timeBase: interval,
