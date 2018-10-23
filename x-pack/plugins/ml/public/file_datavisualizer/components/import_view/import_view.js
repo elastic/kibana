@@ -458,17 +458,16 @@ function getDefaultState(state, results) {
 }
 
 function isIndexNameValid(name, indexNames) {
-  const indexRegExp = '[\\\\/\*\?\"\<\>\|\\s\,\#]+';
-
   if (indexNames.find(i => i === name)) {
     return 'Index name already exists';
   }
 
+  const reg = new RegExp('[\\\\/\*\?\"\<\>\|\\s\,\#]+');
   if (
-    (name !== name.toLowerCase()) ||
-    (name === '.' || name === '..')   ||
-    name.match(/^[-_+]/) !== null  ||
-    name.match(new RegExp(indexRegExp)) !== null
+    (name !== name.toLowerCase()) || // name should be lowercase
+    (name === '.' || name === '..')   || // name can't be . or ..
+    name.match(/^[-_+]/) !== null  || // name can't start with these chars
+    name.match(reg) !== null // name can't contain these chars
   ) {
     return 'Index name contains illegal characters';
   }
@@ -482,8 +481,8 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
   const newName = name.replace('*', '.*');
   const reg = new RegExp(`^${newName}$`);
   if ((
-    name.match(/[\.\+]/g) !== null) ||
-    (index.match(reg) === null)
+    name.match(/[\.\+]/g) !== null) || // avoid accidental .+ regexp matches
+    (index.match(reg) === null) // name should match index
   ) {
     return 'Index pattern does not match index name';
   }
