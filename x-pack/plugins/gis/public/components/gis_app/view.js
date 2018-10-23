@@ -37,18 +37,16 @@ export function GISApp(props) {
     );
   }
   return (
-    <EuiFlexGroup className="wrapper" gutterSize="none">
+    <EuiFlexGroup gutterSize="none" responsive={false}>
       <EuiFlexItem className="gisMapWrapper">
         <MBMapContainer/>
         <LayerControl/>
       </EuiFlexItem>
 
-      <EuiFlexItem
-        className={`gisLayerPanel ${currentPanelClassName}`}
-        grow={false}
-      >
+      <EuiFlexItem className={`gisLayerPanel ${currentPanelClassName}`}grow={false}>
         {currentPanel}
       </EuiFlexItem>
+
       <Toasts/>
     </EuiFlexGroup>
   );

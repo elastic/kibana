@@ -35,11 +35,16 @@
   position: absolute;
   z-index: 100;
   min-width: 17rem;
-  top: 24px;
-  right: 24px;
+  top: $euiSizeM;
+  right: $euiSizeM;
   max-width: 24rem;
   padding-bottom: 8px;
   border-color: transparent;
+
+  &.euiPanel--shadow {
+    @include euiBottomShadowLarge;
+  }
+
   .LayerControl--header {
     padding: 16px 16px 8px;
   }
@@ -83,6 +88,11 @@
 .gisLayerPanel {
   background-color: $euiColorLightestShade;
   width: 0;
+  overflow: hidden;
+
+  > * {
+    width: $euiSizeXXL * 11;
+  }
 
   &-isVisible {
     width: $euiSizeXXL * 11;

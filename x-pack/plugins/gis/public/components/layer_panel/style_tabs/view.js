@@ -61,10 +61,6 @@ export class StyleTabs extends React.Component {
       );
     });
 
-    return (
-      <div>
-        {styleEditors}
-      </div>
-    );
+    return (styleEditors);
   }
 }
