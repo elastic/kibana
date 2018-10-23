@@ -1,48 +1,48 @@
 {
-  "nodeSummary": {
-    "resolver": "jUT5KdxfRbORSCWkb5zjmA",
-    "node_ids": [
+  nodeSummary: {
+    resolver: "jUT5KdxfRbORSCWkb5zjmA",
+    node_ids: [
       "jUT5KdxfRbORSCWkb5zjmA"
     ],
-    "attributes": {
-      "ml.max_open_jobs": "10",
-      "ml.enabled": "true"
+    attributes: {
+      ml.max_open_jobs: "10",
+      ml.enabled: "true"
     },
-    "transport_address": "127.0.0.1:9300",
-    "name": "whatever-01",
-    "type": "master",
-    "nodeTypeLabel": "Master Node",
-    "nodeTypeClass": "fa-star",
-    "totalShards": 38,
-    "indexCount": 20,
-    "documents": 24830,
-    "dataSize": 52847579,
-    "freeSpace": 186755088384,
-    "usedHeap": 29,
-    "status": "Online",
-    "isOnline": true
+    transport_address: "127.0.0.1:9300",
+    name: "whatever-01",
+    type: "master",
+    nodeTypeLabel: "Master Node",
+    nodeTypeClass: "fa-star",
+    totalShards: 38,
+    indexCount: 20,
+    documents: 24830,
+    dataSize: 52847579,
+    freeSpace: 186755088384,
+    usedHeap: 29,
+    status: "Online",
+    isOnline: true
   },
-  "metrics": {
-    "node_jvm_mem": [
+  metrics: {
+    node_jvm_mem: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.jvm.mem.heap_max_in_bytes",
-          "metricAgg": "max",
-          "label": "Max Heap",
-          "title": "JVM Heap",
-          "description": "Total heap available to Elasticsearch running in the JVM.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.jvm.mem.heap_max_in_bytes",
+          metricAgg: "max",
+          label: "Max Heap",
+          title: "JVM Heap",
+          description: "Total heap available to Elasticsearch running in the JVM.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             709623808
@@ -122,24 +122,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.jvm.mem.heap_used_in_bytes",
-          "metricAgg": "max",
-          "label": "Used Heap",
-          "title": "JVM Heap",
-          "description": "Total heap used by Elasticsearch running in the JVM.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.jvm.mem.heap_used_in_bytes",
+          metricAgg: "max",
+          label: "Used Heap",
+          title: "JVM Heap",
+          description: "Total heap used by Elasticsearch running in the JVM.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             317052776
@@ -219,26 +219,26 @@
         ]
       }
     ],
-    "node_gc": [
+    node_gc: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.jvm.gc.collectors.old.collection_count",
-          "metricAgg": "max",
-          "label": "Old",
-          "title": "GC Count",
-          "description": "Number of old Garbage Collections.",
-          "units": "",
-          "format": "0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.jvm.gc.collectors.old.collection_count",
+          metricAgg: "max",
+          label: "Old",
+          title: "GC Count",
+          description: "Number of old Garbage Collections.",
+          units: "",
+          format: "0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -318,24 +318,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.jvm.gc.collectors.young.collection_count",
-          "metricAgg": "max",
-          "label": "Young",
-          "title": "GC Count",
-          "description": "Number of young Garbage Collections.",
-          "units": "",
-          "format": "0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.jvm.gc.collectors.young.collection_count",
+          metricAgg: "max",
+          label: "Young",
+          title: "GC Count",
+          description: "Number of young Garbage Collections.",
+          units: "",
+          format: "0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -415,26 +415,26 @@
         ]
       }
     ],
-    "node_gc_time": [
+    node_gc_time: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.jvm.gc.collectors.old.collection_time_in_millis",
-          "metricAgg": "max",
-          "label": "Old",
-          "title": "GC Duration",
-          "description": "Time spent performing old Garbage Collections.",
-          "units": "ms",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.jvm.gc.collectors.old.collection_time_in_millis",
+          metricAgg: "max",
+          label: "Old",
+          title: "GC Duration",
+          description: "Time spent performing old Garbage Collections.",
+          units: "ms",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -514,24 +514,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.jvm.gc.collectors.young.collection_time_in_millis",
-          "metricAgg": "max",
-          "label": "Young",
-          "title": "GC Duration",
-          "description": "Time spent performing young Garbage Collections.",
-          "units": "ms",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.jvm.gc.collectors.young.collection_time_in_millis",
+          metricAgg: "max",
+          label: "Young",
+          title: "GC Duration",
+          description: "Time spent performing young Garbage Collections.",
+          units: "ms",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -611,26 +611,26 @@
         ]
       }
     ],
-    "node_index_1": [
+    node_index_1: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.segments.memory_in_bytes",
-          "metricAgg": "max",
-          "label": "Lucene Total",
-          "title": "Index Memory - Lucene 1",
-          "description": "Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.segments.memory_in_bytes",
+          metricAgg: "max",
+          label: "Lucene Total",
+          title: "Index Memory - Lucene 1",
+          description: "Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             4797457
@@ -710,24 +710,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.segments.stored_fields_memory_in_bytes",
-          "metricAgg": "max",
-          "label": "Stored Fields",
-          "title": "Index Memory",
-          "description": "Heap memory used by Stored Fields (e.g., _source). This is a part of Lucene Total.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.segments.stored_fields_memory_in_bytes",
+          metricAgg: "max",
+          label: "Stored Fields",
+          title: "Index Memory",
+          description: "Heap memory used by Stored Fields (e.g., _source). This is a part of Lucene Total.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             56792
@@ -807,24 +807,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.segments.doc_values_memory_in_bytes",
-          "metricAgg": "max",
-          "label": "Doc Values",
-          "title": "Index Memory",
-          "description": "Heap memory used by Doc Values. This is a part of Lucene Total.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.segments.doc_values_memory_in_bytes",
+          metricAgg: "max",
+          label: "Doc Values",
+          title: "Index Memory",
+          description: "Heap memory used by Doc Values. This is a part of Lucene Total.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             516824
@@ -904,24 +904,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.segments.norms_memory_in_bytes",
-          "metricAgg": "max",
-          "label": "Norms",
-          "title": "Index Memory",
-          "description": "Heap memory used by Norms (normalization factors for query-time, text scoring). This is a part of Lucene Total.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.segments.norms_memory_in_bytes",
+          metricAgg: "max",
+          label: "Norms",
+          title: "Index Memory",
+          description: "Heap memory used by Norms (normalization factors for query-time, text scoring). This is a part of Lucene Total.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             447232
@@ -1001,26 +1001,26 @@
         ]
       }
     ],
-    "node_index_2": [
+    node_index_2: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.segments.memory_in_bytes",
-          "metricAgg": "max",
-          "label": "Lucene Total",
-          "title": "Index Memory - Lucene 2",
-          "description": "Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.segments.memory_in_bytes",
+          metricAgg: "max",
+          label: "Lucene Total",
+          title: "Index Memory - Lucene 2",
+          description: "Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             4797457
@@ -1100,24 +1100,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.segments.terms_memory_in_bytes",
-          "metricAgg": "max",
-          "label": "Terms",
-          "title": "Index Memory",
-          "description": "Heap memory used by Terms (e.g., text). This is a part of Lucene Total.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.segments.terms_memory_in_bytes",
+          metricAgg: "max",
+          label: "Terms",
+          title: "Index Memory",
+          description: "Heap memory used by Terms (e.g., text). This is a part of Lucene Total.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             3764438
@@ -1197,24 +1197,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.segments.points_memory_in_bytes",
-          "metricAgg": "max",
-          "label": "Points",
-          "title": "Index Memory",
-          "description": "Heap memory used by Points (e.g., numbers, IPs, and geo data). This is a part of Lucene Total.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.segments.points_memory_in_bytes",
+          metricAgg: "max",
+          label: "Points",
+          title: "Index Memory",
+          description: "Heap memory used by Points (e.g., numbers, IPs, and geo data). This is a part of Lucene Total.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             12171
@@ -1294,26 +1294,26 @@
         ]
       }
     ],
-    "node_index_3": [
+    node_index_3: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.segments.memory_in_bytes",
-          "metricAgg": "max",
-          "label": "Lucene Total",
-          "title": "Index Memory - Lucene 3",
-          "description": "Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.segments.memory_in_bytes",
+          metricAgg: "max",
+          label: "Lucene Total",
+          title: "Index Memory - Lucene 3",
+          description: "Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             4797457
@@ -1393,24 +1393,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.segments.fixed_bit_set_memory_in_bytes",
-          "metricAgg": "max",
-          "label": "Fixed Bitsets",
-          "title": "Index Memory",
-          "description": "Heap memory used by Fixed Bit Sets (e.g., deeply nested documents). This is a part of Lucene Total.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.segments.fixed_bit_set_memory_in_bytes",
+          metricAgg: "max",
+          label: "Fixed Bitsets",
+          title: "Index Memory",
+          description: "Heap memory used by Fixed Bit Sets (e.g., deeply nested documents). This is a part of Lucene Total.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             4024
@@ -1490,24 +1490,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.segments.term_vectors_memory_in_bytes",
-          "metricAgg": "max",
-          "label": "Term Vectors",
-          "title": "Index Memory",
-          "description": "Heap memory used by Term Vectors. This is a part of Lucene Total.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.segments.term_vectors_memory_in_bytes",
+          metricAgg: "max",
+          label: "Term Vectors",
+          title: "Index Memory",
+          description: "Heap memory used by Term Vectors. This is a part of Lucene Total.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             0
@@ -1587,24 +1587,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.segments.version_map_memory_in_bytes",
-          "metricAgg": "max",
-          "label": "Version Map",
-          "title": "Index Memory",
-          "description": "Heap memory used by Versioning (e.g., updates and deletes). This is NOT a part of Lucene Total.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.segments.version_map_memory_in_bytes",
+          metricAgg: "max",
+          label: "Version Map",
+          title: "Index Memory",
+          description: "Heap memory used by Versioning (e.g., updates and deletes). This is NOT a part of Lucene Total.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             5551
@@ -1684,26 +1684,26 @@
         ]
       }
     ],
-    "node_index_4": [
+    node_index_4: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.query_cache.memory_size_in_bytes",
-          "metricAgg": "max",
-          "label": "Query Cache",
-          "title": "Index Memory - Elasticsearch",
-          "description": "Heap memory used by Query Cache (e.g., cached filters). This is for the same shards, but not a part of Lucene Total.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.query_cache.memory_size_in_bytes",
+          metricAgg: "max",
+          label: "Query Cache",
+          title: "Index Memory - Elasticsearch",
+          description: "Heap memory used by Query Cache (e.g., cached filters). This is for the same shards, but not a part of Lucene Total.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             0
@@ -1783,24 +1783,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.request_cache.memory_size_in_bytes",
-          "metricAgg": "max",
-          "label": "Request Cache",
-          "title": "Index Memory",
-          "description": "Heap memory used by Request Cache (e.g., instant aggregations). This is for the same shards, but not a part of Lucene Total.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.request_cache.memory_size_in_bytes",
+          metricAgg: "max",
+          label: "Request Cache",
+          title: "Index Memory",
+          description: "Heap memory used by Request Cache (e.g., instant aggregations). This is for the same shards, but not a part of Lucene Total.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             2921
@@ -1880,24 +1880,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.fielddata.memory_size_in_bytes",
-          "metricAgg": "max",
-          "label": "Fielddata",
-          "title": "Index Memory",
-          "description": "Heap memory used by Fielddata (e.g., global ordinals or explicitly enabled fielddata on text fields). This is for the same shards, but not a part of Lucene Total.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.fielddata.memory_size_in_bytes",
+          metricAgg: "max",
+          label: "Fielddata",
+          title: "Index Memory",
+          description: "Heap memory used by Fielddata (e.g., global ordinals or explicitly enabled fielddata on text fields). This is for the same shards, but not a part of Lucene Total.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             0
@@ -1977,24 +1977,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.segments.index_writer_memory_in_bytes",
-          "metricAgg": "max",
-          "label": "Index Writer",
-          "title": "Index Memory",
-          "description": "Heap memory used by the Index Writer. This is NOT a part of Lucene Total.",
-          "units": "B",
-          "format": "0.0 b",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.segments.index_writer_memory_in_bytes",
+          metricAgg: "max",
+          label: "Index Writer",
+          title: "Index Memory",
+          description: "Heap memory used by the Index Writer. This is NOT a part of Lucene Total.",
+          units: "B",
+          format: "0.0 b",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             153549
@@ -2074,26 +2074,26 @@
         ]
       }
     ],
-    "node_request_total": [
+    node_request_total: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.search.query_total",
-          "metricAgg": "max",
-          "label": "Search Total",
-          "title": "Request Rate",
-          "description": "Amount of search operations (per shard).",
-          "units": "",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.search.query_total",
+          metricAgg: "max",
+          label: "Search Total",
+          title: "Request Rate",
+          description: "Amount of search operations (per shard).",
+          units: "",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -2173,24 +2173,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.indexing.index_total",
-          "metricAgg": "max",
-          "label": "Indexing Total",
-          "title": "Request Rate",
-          "description": "Amount of indexing operations.",
-          "units": "",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.indexing.index_total",
+          metricAgg: "max",
+          label: "Indexing Total",
+          title: "Request Rate",
+          description: "Amount of indexing operations.",
+          units: "",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -2270,26 +2270,26 @@
         ]
       }
     ],
-    "node_index_time": [
+    node_index_time: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.indexing.index_time_in_millis",
-          "metricAgg": "max",
-          "label": "Index Time",
-          "title": "Indexing Time",
-          "description": "Amount of time spent on indexing operations.",
-          "units": "ms",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.indexing.index_time_in_millis",
+          metricAgg: "max",
+          label: "Index Time",
+          title: "Indexing Time",
+          description: "Amount of time spent on indexing operations.",
+          units: "ms",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -2369,24 +2369,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.indices.indexing.throttle_time_in_millis",
-          "metricAgg": "max",
-          "label": "Index Throttling Time",
-          "title": "Indexing Time",
-          "description": "Amount of time spent with index throttling, which indicates slow disks on a node.",
-          "units": "ms",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.indexing.throttle_time_in_millis",
+          metricAgg: "max",
+          label: "Index Throttling Time",
+          title: "Indexing Time",
+          description: "Amount of time spent with index throttling, which indicates slow disks on a node.",
+          units: "ms",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -2466,26 +2466,26 @@
         ]
       }
     ],
-    "node_index_threads": [
+    node_index_threads: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.thread_pool.write.queue",
-          "metricAgg": "max",
-          "label": "Write Queue",
-          "title": "Indexing Threads",
-          "description": "Number of index, bulk, and write operations in the queue. The bulk threadpool was renamed to write in 6.3, and the index threadpool is deprecated.",
-          "units": "",
-          "format": "0.[00]",
-          "hasCalculation": true,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.thread_pool.write.queue",
+          metricAgg: "max",
+          label: "Write Queue",
+          title: "Indexing Threads",
+          description: "Number of index, bulk, and write operations in the queue. The bulk threadpool was renamed to write in 6.3, and the index threadpool is deprecated.",
+          units: "",
+          format: "0.[00]",
+          hasCalculation: true,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             0
@@ -2565,24 +2565,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.thread_pool.write.rejected",
-          "metricAgg": "max",
-          "label": "Write Rejections",
-          "title": "Indexing Threads",
-          "description": "Number of index, bulk, and write operations that have been rejected, which occurs when the queue is full. The bulk threadpool was renamed to write in 6.3, and the index threadpool is deprecated.",
-          "units": "",
-          "format": "0.[00]",
-          "hasCalculation": true,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.thread_pool.write.rejected",
+          metricAgg: "max",
+          label: "Write Rejections",
+          title: "Indexing Threads",
+          description: "Number of index, bulk, and write operations that have been rejected, which occurs when the queue is full. The bulk threadpool was renamed to write in 6.3, and the index threadpool is deprecated.",
+          units: "",
+          format: "0.[00]",
+          hasCalculation: true,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -2662,26 +2662,26 @@
         ]
       }
     ],
-    "node_read_threads": [
+    node_read_threads: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.thread_pool.search.queue",
-          "metricAgg": "max",
-          "label": "Search Queue",
-          "title": "Read Threads",
-          "description": "Number of search operations in the queue (e.g., shard level searches).",
-          "units": "",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.thread_pool.search.queue",
+          metricAgg: "max",
+          label: "Search Queue",
+          title: "Read Threads",
+          description: "Number of search operations in the queue (e.g., shard level searches).",
+          units: "",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -2761,24 +2761,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.thread_pool.search.rejected",
-          "metricAgg": "max",
-          "label": "Search Rejections",
-          "title": "Read Threads",
-          "description": "Number of search operations that have been rejected, which occurs when the queue is full.",
-          "units": "",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.thread_pool.search.rejected",
+          metricAgg: "max",
+          label: "Search Rejections",
+          title: "Read Threads",
+          description: "Number of search operations that have been rejected, which occurs when the queue is full.",
+          units: "",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -2858,24 +2858,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.thread_pool.get.queue",
-          "metricAgg": "max",
-          "label": "GET Queue",
-          "title": "Read Threads",
-          "description": "Number of GET operations in the queue.",
-          "units": "",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.thread_pool.get.queue",
+          metricAgg: "max",
+          label: "GET Queue",
+          title: "Read Threads",
+          description: "Number of GET operations in the queue.",
+          units: "",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -2955,24 +2955,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.thread_pool.get.rejected",
-          "metricAgg": "max",
-          "label": "GET Rejections",
-          "title": "Read Threads",
-          "description": "Number of GET operations that have been rejected, which occurs when the queue is full.",
-          "units": "",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.thread_pool.get.rejected",
+          metricAgg: "max",
+          label: "GET Rejections",
+          title: "Read Threads",
+          description: "Number of GET operations that have been rejected, which occurs when the queue is full.",
+          units: "",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -3052,25 +3052,25 @@
         ]
       }
     ],
-    "node_cpu_utilization": [
+    node_cpu_utilization: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.process.cpu.percent",
-          "metricAgg": "max",
-          "label": "CPU Utilization",
-          "description": "Percentage of CPU usage for the Elasticsearch process.",
-          "units": "%",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": false
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.process.cpu.percent",
+          metricAgg: "max",
+          label: "CPU Utilization",
+          description: "Percentage of CPU usage for the Elasticsearch process.",
+          units: "%",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: false
         },
-        "data": [
+        data: [
           [
             1507235520000,
             1
@@ -3150,24 +3150,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.process.cpu.percent",
-          "metricAgg": "max",
-          "label": "Cgroup CPU Utilization",
-          "title": "CPU Utilization",
-          "description": "CPU Usage time compared to the CPU quota shown in percentage. If CPU quotas are not set, then no data will be shown.",
-          "units": "%",
-          "format": "0,0.[00]",
-          "hasCalculation": true,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.process.cpu.percent",
+          metricAgg: "max",
+          label: "Cgroup CPU Utilization",
+          title: "CPU Utilization",
+          description: "CPU Usage time compared to the CPU quota shown in percentage. If CPU quotas are not set, then no data will be shown.",
+          units: "%",
+          format: "0,0.[00]",
+          hasCalculation: true,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -3247,26 +3247,26 @@
         ]
       }
     ],
-    "node_cgroup_cpu": [
+    node_cgroup_cpu: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.os.cgroup.cpuacct.usage_nanos",
-          "metricAgg": "max",
-          "label": "Cgroup Usage",
-          "title": "Cgroup CPU Performance",
-          "description": "The usage, reported in nanoseconds, of the Cgroup. Compare this with the throttling to discover issues.",
-          "units": "ns",
-          "format": "0,0.[0]a",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.os.cgroup.cpuacct.usage_nanos",
+          metricAgg: "max",
+          label: "Cgroup Usage",
+          title: "Cgroup CPU Performance",
+          description: "The usage, reported in nanoseconds, of the Cgroup. Compare this with the throttling to discover issues.",
+          units: "ns",
+          format: "0,0.[0]a",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -3346,24 +3346,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.os.cgroup.cpu.stat.time_throttled_nanos",
-          "metricAgg": "max",
-          "label": "Cgroup Throttling",
-          "title": "Cgroup CPU Performance",
-          "description": "The amount of throttled time, reported in nanoseconds, of the Cgroup.",
-          "units": "ns",
-          "format": "0,0.[0]a",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.os.cgroup.cpu.stat.time_throttled_nanos",
+          metricAgg: "max",
+          label: "Cgroup Throttling",
+          title: "Cgroup CPU Performance",
+          description: "The amount of throttled time, reported in nanoseconds, of the Cgroup.",
+          units: "ns",
+          format: "0,0.[0]a",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -3443,26 +3443,26 @@
         ]
       }
     ],
-    "node_cgroup_stats": [
+    node_cgroup_stats: [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods",
-          "metricAgg": "max",
-          "label": "Cgroup Elapsed Periods",
-          "title": "Cgroup CFS Stats",
-          "description": "The number of sampling periods from the Completely Fair Scheduler (CFS). Compare against the number of times throttled.",
-          "units": "",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods",
+          metricAgg: "max",
+          label: "Cgroup Elapsed Periods",
+          title: "Cgroup CFS Stats",
+          description: "The number of sampling periods from the Completely Fair Scheduler (CFS). Compare against the number of times throttled.",
+          units: "",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -3542,24 +3542,24 @@
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
         },
-        "metric": {
-          "app": "elasticsearch",
-          "field": "node_stats.os.cgroup.cpu.stat.number_of_times_throttled",
-          "metricAgg": "max",
-          "label": "Cgroup Throttled Count",
-          "title": "Cgroup CFS Stats",
-          "description": "The number of times that the CPU was throttled by the Cgroup.",
-          "units": "",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": true
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.os.cgroup.cpu.stat.number_of_times_throttled",
+          metricAgg: "max",
+          label: "Cgroup Throttled Count",
+          title: "Cgroup CFS Stats",
+          description: "The number of times that the CPU was throttled by the Cgroup.",
+          units: "",
+          format: "0,0.[00]",
+          hasCalculation: false,
+          isDerivative: true
         },
-        "data": [
+        data: [
           [
             1507235520000,
             null
@@ -3635,6 +3635,202 @@
           [
             1507235700000,
             null
+          ]
+        ]
+      }
+    ],
+    node_latency: [
+      {
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
+        },
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.search.query_total",
+          metricAgg: "sum",
+          label: "Search",
+          title: "Latency",
+          description: "Average latency for searching, which is time it takes to execute searches divided by number of searches submitted. This considers primary and replica shards.",
+          units: "ms",
+          format: "0,0.[00]",
+          hasCalculation: true,
+          isDerivative: false
+        },
+        data: [
+          [
+            1507235520000,
+            null
+          ],
+          [
+            1507235530000,
+            0.33333333333333337
+          ],
+          [
+            1507235540000,
+            0
+          ],
+          [
+            1507235550000,
+            0.33333333333333337
+          ],
+          [
+            1507235560000,
+            0
+          ],
+          [
+            1507235570000,
+            0.33333333333333337
+          ],
+          [
+            1507235580000,
+            0
+          ],
+          [
+            1507235590000,
+            0
+          ],
+          [
+            1507235600000,
+            0.33333333333333337
+          ],
+          [
+            1507235610000,
+            0
+          ],
+          [
+            1507235620000,
+            0
+          ],
+          [
+            1507235630000,
+            0.33333333333333337
+          ],
+          [
+            1507235640000,
+            0
+          ],
+          [
+            1507235650000,
+            0
+          ],
+          [
+            1507235660000,
+            0
+          ],
+          [
+            1507235670000,
+            0.2
+          ],
+          [
+            1507235680000,
+            0
+          ],
+          [
+            1507235690000,
+            0
+          ],
+          [
+            1507235700000,
+            0
+          ]
+        ]
+      },
+      {
+        bucket_size: "10 seconds",
+        timeRange: {
+          min: 1507235508000,
+          max: 1507235712000
+        },
+        metric: {
+          app: "elasticsearch",
+          field: "node_stats.indices.indexing.index_total",
+          metricAgg: "sum",
+          label: "Indexing",
+          title: "Latency",
+          description: "Average latency for indexing documents, which is time it takes to index documents divided by number that were indexed. This considers any shard located on this node, including replicas.",
+          units: "ms",
+          format: "0,0.[00]",
+          hasCalculation: true,
+          isDerivative: false
+        },
+        data: [
+          [
+            1507235520000,
+            null
+          ],
+          [
+            1507235530000,
+            0
+          ],
+          [
+            1507235540000,
+            0
+          ],
+          [
+            1507235550000,
+            0.888888888888889
+          ],
+          [
+            1507235560000,
+            1.1666666666666667
+          ],
+          [
+            1507235570000,
+            0
+          ],
+          [
+            1507235580000,
+            0
+          ],
+          [
+            1507235590000,
+            0
+          ],
+          [
+            1507235600000,
+            0
+          ],
+          [
+            1507235610000,
+            1.3333333333333333
+          ],
+          [
+            1507235620000,
+            1.1666666666666667
+          ],
+          [
+            1507235630000,
+            0
+          ],
+          [
+            1507235640000,
+            0
+          ],
+          [
+            1507235650000,
+            0
+          ],
+          [
+            1507235660000,
+            0
+          ],
+          [
+            1507235670000,
+            2.3333333333333335
+          ],
+          [
+            1507235680000,
+            2.8749999999999996
+          ],
+          [
+            1507235690000,
+            0
+          ],
+          [
+            1507235700000,
+            0
           ]
         ]
       }
