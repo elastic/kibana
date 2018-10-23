@@ -37,7 +37,26 @@ export default function(server /*options*/) {
   loadServerPlugins().then(() => routes(server));
   registerCanvasUsageCollector(server);
 
-  server.addSavedObjectsToSampleDataset('ecommerce', ecommerceSavedObjects);
-  server.addSavedObjectsToSampleDataset('flights', flightsSavedObjects);
-  server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);
+  const now = new Date();
+  const nowTimestamp = now.toISOString();
+  function updateCanvasWorkpadTimestamps(savedObjects) {
+    return savedObjects.map(savedObject => {
+      if (savedObject.type === 'canvas-workpad') {
+        savedObject.attributes['@timestamp'] = nowTimestamp;
+        savedObject.attributes['@created'] = nowTimestamp;
+      }
+
+      return savedObject;
+    });
+  }
+
+  server.addSavedObjectsToSampleDataset(
+    'ecommerce',
+    updateCanvasWorkpadTimestamps(ecommerceSavedObjects)
+  );
+  server.addSavedObjectsToSampleDataset(
+    'flights',
+    updateCanvasWorkpadTimestamps(flightsSavedObjects)
+  );
+  server.addSavedObjectsToSampleDataset('logs', updateCanvasWorkpadTimestamps(webLogsSavedObjects));
 }
