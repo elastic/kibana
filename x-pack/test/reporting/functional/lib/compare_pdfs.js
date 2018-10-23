@@ -105,7 +105,7 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   fs.writeFileSync(actualCopyPath, fs.readFileSync(actualPdfPath));
 
   const convertOptions = {
-    '-density': '300',
+    // '-density': '300',
   };
   const actualPdfImage = new PDFImage(actualCopyPath, { convertOptions });
   const expectedPdfImage = new PDFImage(baselineCopyPath, { convertOptions });
