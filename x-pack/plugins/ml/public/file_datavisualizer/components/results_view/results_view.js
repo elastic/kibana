@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 
 import { FileContents } from '../file_contents';
-import { Summary } from '../summary';
+import { AnalysisSummary } from '../analysis_summary';
 import { FieldsStats } from '../fields_stats';
 
 export function ResultsView({ data, results, showEditFlyout }) {
@@ -43,7 +43,7 @@ export function ResultsView({ data, results, showEditFlyout }) {
       <EuiSpacer size="m" />
 
       <EuiPanel>
-        <Summary
+        <AnalysisSummary
           results={results}
         />
 

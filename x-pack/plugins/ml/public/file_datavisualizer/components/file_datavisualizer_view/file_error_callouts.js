@@ -24,7 +24,7 @@ export function FileTooLarge({ fileSize, maxFileSize }) {
   );
 }
 
-export function FileCouldNotBeRead({ error }) {
+export function FileCouldNotBeRead({ error, loaded }) {
   return (
     <EuiCallOut
       title="File could not be read"
@@ -34,6 +34,10 @@ export function FileCouldNotBeRead({ error }) {
       {
         (error !== undefined) &&
         <p>{error}</p>
+      }
+      {
+        loaded &&
+        <p>Reverting to previous settings</p>
       }
     </EuiCallOut>
   );

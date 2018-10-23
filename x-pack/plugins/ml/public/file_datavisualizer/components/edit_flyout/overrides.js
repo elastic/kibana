@@ -25,14 +25,14 @@ import {
   getTimestampFormatOptions,
   getDelimiterOptions,
   getQuoteOptions,
-  getCharsetOptions,
+  // getCharsetOptions,
 } from './options';
 
 const formatOptions = getFormatOptions();
 const timestampFormatOptions = getTimestampFormatOptions();
 const delimiterOptions = getDelimiterOptions();
 const quoteOptions = getQuoteOptions();
-const charsetOptions = getCharsetOptions();
+// const charsetOptions = getCharsetOptions();
 
 export class Overrides extends Component {
   constructor(props) {
@@ -162,7 +162,7 @@ export class Overrides extends Component {
       quote,
       hasHeaderRow,
       shouldTrimFields,
-      charset,
+      // charset,
       columnNames,
       originalColumnNames,
       grokPattern,
@@ -271,7 +271,7 @@ export class Overrides extends Component {
           />
         </EuiFormRow>
 
-        <EuiFormRow
+        {/* <EuiFormRow
           label="Charset"
         >
           <EuiSuperSelect
@@ -279,7 +279,7 @@ export class Overrides extends Component {
             valueOfSelected={charset}
             onChange={this.onCharsetChange}
           />
-        </EuiFormRow>
+        </EuiFormRow> */}
         {
           (this.state.format === 'delimited') &&
 

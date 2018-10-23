@@ -9,15 +9,15 @@ import { CsvImporter } from './csv_importer';
 import { SstImporter } from './sst_importer';
 import { JsonImporter } from './json_importer';
 
-export function importerFactory(format, results) {
+export function importerFactory(format, results, settings) {
 
   switch (format) {
     case 'delimited':
-      return new CsvImporter(results);
+      return new CsvImporter(results, settings);
     case 'semi_structured_text':
-      return new SstImporter(results);
+      return new SstImporter(results, settings);
     case 'json':
-      return new JsonImporter(results);
+      return new JsonImporter(results, settings);
     default:
       return;
   }

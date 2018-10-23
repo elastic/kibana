@@ -84,7 +84,7 @@ function createFields(results) {
         return field;
       } else {
         return {
-          name: '',
+          name: fName,
           mean_value: 0,
           count: 0,
           cardinality: 0,

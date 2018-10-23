@@ -43,8 +43,8 @@ export function DatavisualizerSelector() {
   const startTrialVisible = (isFullLicense() === false);
 
   return (
-    <EuiPage>
-      <EuiPageBody restrictWidth={1000}>
+    <EuiPage restrictWidth={1000}>
+      <EuiPageBody>
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
