@@ -232,8 +232,13 @@ export class EsQueryParser {
               continue;
             default:
               throw new Error(i18n.translate('vega.esQueryParser.timefilterValueErrorMessage', {
-                defaultMessage: '"{timefilter}" property must be set to true, "min", or "max"',
-                values: { timefilter: TIMEFILTER },
+                defaultMessage: '"{timefilter}" property must be set to {trueValue}, {minValue}, or {maxValue}',
+                values: {
+                  timefilter: TIMEFILTER,
+                  trueValue: 'true',
+                  minValue: '"min"',
+                  maxValue: '"max"',
+                },
               }));
           }
         }

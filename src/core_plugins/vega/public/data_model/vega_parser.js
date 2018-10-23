@@ -186,8 +186,12 @@ export class VegaParser {
         delete this.spec.height;
       } else {
         this._onWarning(i18n.translate('vega.vegaParser.widthAndHeightParamsAreIngroredWithAutosizeFitWarningMessage', {
-          defaultMessage: 'The \'width\' and \'height\' params are ignored with {autosizeParam}',
-          values: { autosizeParam: 'autosize=fit' },
+          defaultMessage: 'The {widthParam} and {heightParam} params are ignored with {autosizeParam}',
+          values: {
+            autosizeParam: 'autosize=fit',
+            widthParam: '\'width\'',
+            heightParam: '\'height\'',
+          },
         }));
       }
     }
@@ -204,16 +208,16 @@ export class VegaParser {
         this.containerDir = 'column';
       } else {
         throw new Error(i18n.translate('vega.vegaParser.unrecognizedControlsLocationValueErrorMessage', {
-          defaultMessage: 'Unrecognized controlsLocation value. Expecting one of ["{locToDirMap}"]',
-          values: { locToDirMap: locToDirMap.keys().join('", "') }
+          defaultMessage: 'Unrecognized {controlsLocationParam} value. Expecting one of ["{locToDirMap}"]',
+          values: { locToDirMap: locToDirMap.keys().join('", "'), controlsLocationParam: 'controlsLocation' }
         }));
       }
     }
     const dir = this._config.controlsDirection;
     if (dir !== undefined && dir !== 'horizontal' && dir !== 'vertical') {
       throw new Error(i18n.translate('vega.vegaParser.unrecognizedDirValueErrorMessage', {
-        defaultMessage: 'Unrecognized dir value. Expecting one of [{expectedValues}]',
-        values: { expectedValues: '"horizontal", "vertical"' },
+        defaultMessage: 'Unrecognized {dirParam} value. Expecting one of [{expectedValues}]',
+        values: { expectedValues: '"horizontal", "vertical"', dirParam: 'dir' },
       }));
     }
     this.controlsDir = dir === 'horizontal' ? 'row' : 'column';
@@ -288,8 +292,8 @@ export class VegaParser {
       result.centerOnMark = result.centerOnMark ? Number.MAX_VALUE : -1;
     } else if (typeof result.centerOnMark !== 'number') {
       throw new Error(i18n.translate('vega.vegaParser.centerOnMarkConfigValueTypeErrorMessage', {
-        defaultMessage: '{configName} is expected to be true, false, or a number',
-        values: { configName: 'config.kibana.result.centerOnMark' },
+        defaultMessage: '{configName} is expected to be {trueValue}, {falseValue}, or a number',
+        values: { configName: 'config.kibana.result.centerOnMark', trueValue: 'true', falseValue: 'false' },
       }));
     }
 
@@ -315,8 +319,8 @@ export class VegaParser {
           return;
         }
         this._onWarning(i18n.translate('vega.vegaParser.someKibanaConfigurationIsNoValidWarningMessage', {
-          defaultMessage: 'config.kibana.{configName} is not valid',
-          values: { configName: name },
+          defaultMessage: '{configName} is not valid',
+          values: { configName: `config.kibana.${name}` },
         }));
       }
       if (!isZoom) res[name] = 0;
@@ -389,8 +393,8 @@ export class VegaParser {
   _parseSchema() {
     if (!this.spec.$schema) {
       this._onWarning(i18n.translate('vega.vegaParser.inputSpecDoesNotSpecifySchemaWarningMessage', {
-        defaultMessage: 'The input spec does not specify a "$schema", defaulting to "{defaultSchema}"',
-        values: { defaultSchema: DEFAULT_SCHEMA },
+        defaultMessage: 'The input spec does not specify a {schemaParam}, defaulting to "{defaultSchema}"',
+        values: { defaultSchema: DEFAULT_SCHEMA, schemaParam: '"$schema"' },
       }));
       this.spec.$schema = DEFAULT_SCHEMA;
     }
