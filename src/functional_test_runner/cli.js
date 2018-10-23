@@ -57,7 +57,8 @@ if (cmd.verbose) logLevel = 'verbose';
 
 const log = new ToolingLog({
   level: logLevel,
-  writeTo: process.stdout
+  writeTo: process.stdout,
+  includeTimestamp: cmd.debug
 });
 
 const functionalTestRunner = createFunctionalTestRunner({

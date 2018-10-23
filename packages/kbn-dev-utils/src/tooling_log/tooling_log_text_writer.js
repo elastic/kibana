@@ -18,9 +18,8 @@
  */
 
 import { format } from 'util';
-
 import { magentaBright, yellow, red, blue, green, dim } from 'chalk';
-
+import moment from 'moment';
 import { parseLogLevel } from './log_levels';
 
 const PREFIX_INDENT = ' '.repeat(6);
@@ -53,6 +52,7 @@ export class ToolingLogTextWriter {
   constructor(config) {
     this.level = parseLogLevel(config.level);
     this.writeTo = config.writeTo;
+    this.includeTimestamp = config.includeTimestamp || false;
 
     if (!this.writeTo || typeof this.writeTo.write !== 'function') {
       throw new Error(
@@ -68,6 +68,7 @@ export class ToolingLogTextWriter {
 
     const txt = type === 'error' ? stringifyError(args[0]) : format(...args);
     const prefix = MSG_PREFIXES[type] || '';
+    const timestamp = (this.includeTimestamp && ` ${moment().format('HH:mm:ss')} `) || '';
 
     (prefix + txt).split('\n').forEach((line, i) => {
       let lineIndent = '';
@@ -84,7 +85,7 @@ export class ToolingLogTextWriter {
         lineIndent += PREFIX_INDENT;
       }
 
-      this.writeTo.write(`${lineIndent}${line}\n`);
+      this.writeTo.write(`${lineIndent}${timestamp}${line}\n`);
     });
 
     return true;
