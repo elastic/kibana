@@ -21,6 +21,7 @@ export function rollup(kibana) {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
+      styleSheetPaths: `${__dirname}/public/index.scss`,
       managementSections: [
         'plugins/rollup/crud_app',
       ],
