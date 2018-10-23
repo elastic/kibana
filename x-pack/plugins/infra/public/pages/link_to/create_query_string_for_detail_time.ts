@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Location } from 'history';
+import { replaceStateKeyInQueryString } from '../../utils/url_state';
 import { getFromFromLocation, getToFromLocation } from './query_params';
 
 export const createQueryStringForDetailTime = (location: Location) => {
   const to = getToFromLocation(location);
   const from = getFromFromLocation(location);
   return to && from
-    ? `?metricTime=(autoReload:!f,time:(from:${from},interval:>%3D1m,to:${to}))`
+    ? '?' + replaceStateKeyInQueryString('metricTime', { to, from, interval: '>=1m' })('')
     : '';
 };
