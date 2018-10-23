@@ -5,8 +5,8 @@
  */
 
 import expect from 'expect.js';
-import { CapabilitiesQuery } from '../../../../plugins/infra/common/graphql/types';
-import { capabilitiesQuery } from '../../../../plugins/infra/public/containers/capabilities/capabilities.gql_query';
+import { CapabilitiesQuery } from '../../../../plugins/ingest/common/graphql/types';
+import { capabilitiesQuery } from '../../../../plugins/ingest/public/infraops/containers/capabilities/capabilities.gql_query';
 import { KbnTestProvider } from './types';
 
 const capabilitiesTests: KbnTestProvider = ({ getService }) => {
