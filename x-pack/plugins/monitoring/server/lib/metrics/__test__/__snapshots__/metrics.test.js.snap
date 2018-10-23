@@ -1796,6 +1796,7 @@ Object {
     "description": "The number of operations the follower index is lagging behind the leader.",
     "field": "",
     "format": "0,0.[00]",
+    "getFields": [Function],
     "label": "Ops delay",
     "metricAgg": "sum",
     "timestampField": "timestamp",
@@ -1954,6 +1955,47 @@ Object {
     "units": "",
     "uuidField": "source_node.uuid",
   },
+  "index_index_latency": LatencyMetric {
+    "aggs": Object {
+      "event_time_in_millis": Object {
+        "max": Object {
+          "field": "index_stats.primaries.indexing.index_time_in_millis",
+        },
+      },
+      "event_time_in_millis_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_time_in_millis",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+      "event_total": Object {
+        "max": Object {
+          "field": "index_stats.primaries.indexing.index_total",
+        },
+      },
+      "event_total_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_total",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "elasticsearch",
+    "calculation": [Function],
+    "derivative": false,
+    "description": "Average latency for indexing documents, which is time it takes to index documents divided by number that were indexed. This only considers primary shards.",
+    "field": "index_stats.primaries.indexing.index_total",
+    "format": "0,0.[00]",
+    "label": "Indexing Latency",
+    "metricAgg": "sum",
+    "timestampField": "timestamp",
+    "title": "Latency",
+    "type": "cluster",
+    "units": "ms",
+    "uuidField": "source_node.uuid",
+  },
   "index_indexing_primaries_time": ElasticsearchMetric {
     "app": "elasticsearch",
     "derivative": true,
@@ -1993,46 +2035,6 @@ Object {
     "timestampField": "timestamp",
     "title": "Request Time",
     "type": "index",
-    "units": "ms",
-    "uuidField": "source_node.uuid",
-  },
-  "index_latency": LatencyMetric {
-    "aggs": Object {
-      "event_time_in_millis": Object {
-        "max": Object {
-          "field": "index_stats.primaries.indexing.index_time_in_millis",
-        },
-      },
-      "event_time_in_millis_deriv": Object {
-        "derivative": Object {
-          "buckets_path": "event_time_in_millis",
-          "gap_policy": "skip",
-          "unit": "1s",
-        },
-      },
-      "event_total": Object {
-        "max": Object {
-          "field": "index_stats.primaries.indexing.index_total",
-        },
-      },
-      "event_total_deriv": Object {
-        "derivative": Object {
-          "buckets_path": "event_total",
-          "gap_policy": "skip",
-          "unit": "1s",
-        },
-      },
-    },
-    "app": "elasticsearch",
-    "calculation": [Function],
-    "derivative": false,
-    "description": "Average latency for indexing documents, which is time it takes to index documents divided by number that were indexed. This only considers primary shards.",
-    "field": "index_stats.primaries.indexing.index_total",
-    "format": "0,0.[00]",
-    "label": "Indexing Latency",
-    "metricAgg": "sum",
-    "timestampField": "timestamp",
-    "type": "cluster",
     "units": "ms",
     "uuidField": "source_node.uuid",
   },
@@ -2273,11 +2275,51 @@ Object {
     "units": "/s",
     "uuidField": "source_node.uuid",
   },
+  "index_query_latency": LatencyMetric {
+    "aggs": Object {
+      "event_time_in_millis": Object {
+        "max": Object {
+          "field": "index_stats.total.search.query_time_in_millis",
+        },
+      },
+      "event_time_in_millis_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_time_in_millis",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+      "event_total": Object {
+        "max": Object {
+          "field": "index_stats.total.search.query_total",
+        },
+      },
+      "event_total_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "event_total",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "elasticsearch",
+    "calculation": [Function],
+    "derivative": false,
+    "description": "Average latency for searching, which is time it takes to execute searches divided by number of searches submitted. This considers primary and replica shards.",
+    "field": "index_stats.total.search.query_total",
+    "format": "0,0.[00]",
+    "label": "Search Latency",
+    "metricAgg": "sum",
+    "timestampField": "timestamp",
+    "type": "cluster",
+    "units": "ms",
+    "uuidField": "source_node.uuid",
+  },
   "index_refresh_time": ElasticsearchMetric {
     "app": "elasticsearch",
     "derivative": true,
     "description": "Time spent on Elasticsearch refresh for primary and replica shards.",
-    "field": "total.refresh.total_time_in_millis",
+    "field": "index_stats.total.refresh.total_time_in_millis",
     "format": "0,0.[00]",
     "label": "Total Refresh Time",
     "metricAgg": "max",
@@ -4501,46 +4543,6 @@ Object {
     "timestampField": "timestamp",
     "title": "Indexing Time",
     "type": "node",
-    "units": "ms",
-    "uuidField": "source_node.uuid",
-  },
-  "query_latency": LatencyMetric {
-    "aggs": Object {
-      "event_time_in_millis": Object {
-        "max": Object {
-          "field": "index_stats.total.search.query_time_in_millis",
-        },
-      },
-      "event_time_in_millis_deriv": Object {
-        "derivative": Object {
-          "buckets_path": "event_time_in_millis",
-          "gap_policy": "skip",
-          "unit": "1s",
-        },
-      },
-      "event_total": Object {
-        "max": Object {
-          "field": "index_stats.total.search.query_total",
-        },
-      },
-      "event_total_deriv": Object {
-        "derivative": Object {
-          "buckets_path": "event_total",
-          "gap_policy": "skip",
-          "unit": "1s",
-        },
-      },
-    },
-    "app": "elasticsearch",
-    "calculation": [Function],
-    "derivative": false,
-    "description": "Average latency for searching, which is time it takes to execute searches divided by number of searches submitted. This considers primary and replica shards.",
-    "field": "index_stats.total.search.query_total",
-    "format": "0,0.[00]",
-    "label": "Search Latency",
-    "metricAgg": "sum",
-    "timestampField": "timestamp",
-    "type": "cluster",
     "units": "ms",
     "uuidField": "source_node.uuid",
   },

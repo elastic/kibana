@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SuggestionComponent Should display the suggestion and use the provided ariaId 1`] = `
+<div
+  className="typeahead-item"
+  id="suggestion-1"
+  onClick={[Function]}
+  onMouseEnter={[Function]}
+  role="option"
+>
+  <div
+    className="suggestionItem suggestionItem--value"
+  >
+    <div
+      className="suggestionItem__type"
+    >
+      <EuiIcon
+        size="m"
+        type="kqlValue"
+      />
+    </div>
+    <div
+      className="suggestionItem__text"
+    >
+      as promised, not helpful
+    </div>
+    <div
+      className="suggestionItem__description"
+      dangerouslySetInnerHTML={
+        Object {
+          "__html": "This is not a helpful suggestion",
+        }
+      }
+    />
+  </div>
+</div>
+`;
+
+exports[`SuggestionComponent Should make the element active if the selected prop is true 1`] = `
+<div
+  className="typeahead-item active"
+  id="suggestion-1"
+  onClick={[Function]}
+  onMouseEnter={[Function]}
+  role="option"
+>
+  <div
+    className="suggestionItem suggestionItem--value"
+  >
+    <div
+      className="suggestionItem__type"
+    >
+      <EuiIcon
+        size="m"
+        type="kqlValue"
+      />
+    </div>
+    <div
+      className="suggestionItem__text"
+    >
+      as promised, not helpful
+    </div>
+    <div
+      className="suggestionItem__description"
+      dangerouslySetInnerHTML={
+        Object {
+          "__html": "This is not a helpful suggestion",
+        }
+      }
+    />
+  </div>
+</div>
+`;
