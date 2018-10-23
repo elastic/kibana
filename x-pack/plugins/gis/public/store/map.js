@@ -33,7 +33,8 @@ const updateLayerInList = (state, id, attribute, newValue) => {
   const updatedLayer = {
     ...layerList[layerIdx],
     // Update layer w/ new value. If no value provided, toggle boolean value
-    [attribute]: newValue || !layerList[layerIdx][attribute]
+    // allow empty strings, 0-value
+    [attribute]: (newValue || newValue === '' || newValue === 0) ? newValue : !layerList[layerIdx][attribute]
   };
   const updatedList = [
     ...layerList.slice(0, layerIdx),

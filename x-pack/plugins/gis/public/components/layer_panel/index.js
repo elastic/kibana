@@ -8,7 +8,12 @@ import { connect } from 'react-redux';
 import { LayerPanel } from './view';
 import { getSelectedLayer } from '../../selectors/map_selectors';
 import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
-import { clearTemporaryStyles } from '../../actions/store_actions';
+import {
+  clearTemporaryStyles,
+  updateLayerLabel,
+  updateLayerMaxZoom,
+  updateLayerMinZoom
+} from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   return {
@@ -23,7 +28,10 @@ function mapDispatchToProps(dispatch) {
       //todo: needs to be a generic layer-reset, not just styles
       // e.g. filters, data-enrichment, style... all would need to revert to the original
       dispatch(clearTemporaryStyles());
-    }
+    },
+    updateLabel: (id, label) => dispatch(updateLayerLabel(id, label)),
+    updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
+    updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom))
   };
 }
 

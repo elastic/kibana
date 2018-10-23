@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { ALayer } from '../../shared/layers/layer';
 import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
 import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
 import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
@@ -25,7 +26,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiSuperSelect,
-  EuiSwitch,
+  // EuiSwitch,
   EuiRange,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
@@ -37,7 +38,7 @@ export class AddLayerPanel extends React.Component {
     this.state = {
       label: '',
       sourceType: '',
-      showAtAllZoomLevels: false,
+      // showAtAllZoomLevels: false,
       minZoom: 0,
       maxZoom: 24,
     };
@@ -75,8 +76,7 @@ export class AddLayerPanel extends React.Component {
     this.props.previewLayer(this.layer);
   }
 
-  _onLabelChange = (event) => {
-    const label = event.target.value;
+  _onLabelChange = (label) => {
     this.setState({ label });
 
     if (this.layer) {
@@ -84,16 +84,16 @@ export class AddLayerPanel extends React.Component {
     }
   }
 
-  _onShowAtAllZoomLevelsChange = (event) => {
-    const isChecked = event.target.checked;
-    this.setState({
-      showAtAllZoomLevels: isChecked,
-    });
-
-    if (this.layer) {
-      this.props.updateShowAtAllZoomLevels(this.layer.getId(), isChecked);
-    }
-  };
+  // _onShowAtAllZoomLevelsChange = (event) => {
+  //   const isChecked = event.target.checked;
+  //   this.setState({
+  //     showAtAllZoomLevels: isChecked,
+  //   });
+  //
+  //   if (this.layer) {
+  //     this.props.updateShowAtAllZoomLevels(this.layer.getId(), isChecked);
+  //   }
+  // };
 
   _onZoomRangeChange = () => {
     if (this.layer) {
@@ -102,8 +102,8 @@ export class AddLayerPanel extends React.Component {
     }
   }
 
-  _onMinZoomChange = (event) => {
-    const sanitizedValue = parseInt(event.target.value, 10);
+  _onMinZoomChange = (sanitizedValue) => {
+    // const sanitizedValue = parseInt(event.target.value, 10);
     const minZoom = sanitizedValue >= 24 ? 23 : sanitizedValue;
     this.setState((prevState) => {
       if (minZoom >= prevState.maxZoom) {
@@ -115,10 +115,10 @@ export class AddLayerPanel extends React.Component {
 
       return { minZoom };
     }, this._onZoomRangeChange);
-  }
+  };
 
-  _onMaxZoomChange = (event) => {
-    const sanitizedValue = parseInt(event.target.value, 10);
+  _onMaxZoomChange = (sanitizedValue) => {
+    // const sanitizedValue = parseInt(event.target.value, 10);
     const maxZoom = sanitizedValue <= 0 ? 1 : sanitizedValue;
     this.setState((prevState) => {
       if (maxZoom <= prevState.minZoom) {
@@ -130,7 +130,7 @@ export class AddLayerPanel extends React.Component {
 
       return { maxZoom };
     }, this._onZoomRangeChange);
-  }
+  };
 
   _onSourceTypeChange = (sourceType) => {
     this.setState({
@@ -262,9 +262,9 @@ export class AddLayerPanel extends React.Component {
   }
 
   _renderZoomSliders() {
-    if (this.state.showAtAllZoomLevels) {
-      return;
-    }
+    // if (this.state.showAtAllZoomLevels) {
+    //   return;
+    // }
 
     return (
       <Fragment>
@@ -297,29 +297,35 @@ export class AddLayerPanel extends React.Component {
     );
   }
 
+  _renderLabel() {
+    return (
+      <EuiFormRow
+        label="Label"
+        compressed
+      >
+        <EuiFieldText
+          value={this.state.label}
+          onChange={this._onLabelChange}
+          aria-label="layer display name"
+        />
+      </EuiFormRow>
+    );
+  }
+
   _renderAddLayerForm() {
+
+    const globalLayerSettings = ALayer.renderGlobalSettings({
+      label: this.state.label,
+      onLabelChange: this._onLabelChange,
+      minZoom: this.state.minZoom,
+      maxZoom: this.state.maxZoom,
+      onMinZoomChange: this._onMinZoomChange,
+      onMaxZoomChange: this._onMaxZoomChange,
+    });
+
     return (
       <EuiForm>
-        <EuiFormRow
-          label="Label"
-          compressed
-        >
-          <EuiFieldText
-            value={this.state.label}
-            onChange={this._onLabelChange}
-            aria-label="layer display name"
-          />
-        </EuiFormRow>
-
-
-        {/*<EuiFormRow compressed>*/}
-          {/*<EuiSwitch*/}
-            {/*label="Show layer at all zoom levels"*/}
-            {/*checked={this.state.showAtAllZoomLevels}*/}
-            {/*onChange={this._onShowAtAllZoomLevelsChange}*/}
-          {/*/>*/}
-        {/*</EuiFormRow>*/}
-        {this._renderZoomSliders()}
+        {globalLayerSettings}
         {this._renderSourceSelect()}
         {this._renderSourceEditor()}
       </EuiForm>

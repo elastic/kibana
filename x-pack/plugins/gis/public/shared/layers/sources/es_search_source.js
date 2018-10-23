@@ -265,6 +265,13 @@ class Editor extends React.Component {
       isLoadingIndexPattern: false,
       indexPattern: indexPattern
     });
+
+    //make default selection
+    const geoFields = indexPattern.fields.filter(Editor._filterGeoField);
+    if (geoFields[0]) {
+      this.onGeoFieldSelect(geoFields[0].name);
+    }
+
   }, 300);
 
   onGeoFieldSelect = (geoField) => {
@@ -319,7 +326,7 @@ class Editor extends React.Component {
     }
   }
 
-  filterGeoField = (field) => {
+  static _filterGeoField = (field) => {
     return ['geo_point', 'geo_shape'].includes(field.type);
   }
 
@@ -337,7 +344,7 @@ class Editor extends React.Component {
           placeholder="Select geo field"
           value={this.state.geoField}
           onChange={this.onGeoFieldSelect}
-          filterField={this.filterGeoField}
+          filterField={Editor._filterGeoField}
           fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
         />
       </EuiFormRow>
@@ -368,35 +375,48 @@ class Editor extends React.Component {
 
     return (
       <Fragment>
-        {/*<EuiFormRow compressed>*/}
-          {/*<EuiSwitch*/}
-            {/*label="Show tooltip on feature mouseover"*/}
-            {/*checked={this.state.showTooltip}*/}
-            {/*onChange={this.onShowTooltipChange}*/}
-          {/*/>*/}
-        {/*</EuiFormRow>*/}
+        {/* <EuiFormRow compressed>
+          <EuiSwitch
+            label="Show tooltip on feature mouseover"
+            checked={this.state.showTooltip}
+            onChange={this.onShowTooltipChange}
+          />
+        </EuiFormRow> */}
 
         {fieldSelectFormRow}
       </Fragment>
     );
   }
 
+  filterForGeoPointOrShape = () => {
+    return fields => {
+      let hasGeoPointOrShape = false;
+      try {
+        hasGeoPointOrShape = fields.some(({ type }) => type === 'geo_point'
+          || type === 'geo_shape');
+      } catch (error) {
+        throw new Error(error);
+      }
+      return hasGeoPointOrShape;
+    };
+  }
+
   render() {
     return (
       <Fragment>
 
-        {/*<EuiFormRow*/}
-          {/*label="Limit"*/}
-          {/*helpText="Maximum documents retrieved from elasticsearch."*/}
-          {/*compressed*/}
-        {/*>*/}
-          {/*<EuiFieldNumber*/}
-            {/*placeholder="10"*/}
-            {/*value={this.state.limit}*/}
-            {/*onChange={this.onLimitChange}*/}
-            {/*aria-label="Limit"*/}
-          {/*/>*/}
-        {/*</EuiFormRow>*/}
+        {/* <EuiFormRow
+          label="Limit"
+          helpText="Maximum documents retrieved from elasticsearch."
+          compressed
+        >
+          <EuiFieldNumber
+            placeholder="10"
+            value={this.state.limit}
+            onChange={this.onLimitChange}
+            aria-label="Limit"
+          />
+        </EuiFormRow> */}
 
         <EuiFormRow compressed>
           <EuiSwitch
@@ -414,6 +434,7 @@ class Editor extends React.Component {
             indexPatternId={this.state.indexPatternId}
             onChange={this.onIndexPatternSelect}
             placeholder="Select index pattern"
+            filterFields={this.filterForGeoPointOrShape()}
           />
         </EuiFormRow>
 

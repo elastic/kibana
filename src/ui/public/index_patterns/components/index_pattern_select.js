@@ -24,15 +24,16 @@ import chrome from 'ui/chrome';
 
 import { EuiComboBox } from '@elastic/eui';
 
-const getIndexPatterns = async (search) => {
+const getIndexPatterns = async (search, fields, filterFields) => {
   const resp = await chrome.getSavedObjectsClient().find({
     type: 'index-pattern',
-    fields: ['title'],
+    fields,
     search: `${search}*`,
     search_fields: ['title'],
     perPage: 100
   });
-  return resp.savedObjects;
+  const filteredResult = filterFields(resp.savedObjects);
+  return filteredResult;
 };
 
 const getIndexPatternTitle = async (indexPatternId) => {
@@ -100,7 +101,9 @@ export class IndexPatternSelect extends Component {
   }
 
   debouncedFetch = _.debounce(async (searchValue) => {
-    const savedObjects = await getIndexPatterns(searchValue);
+    const fields = this.getFields();
+    const filterFields = this.getFilterFieldsFunction();
+    const savedObjects = await getIndexPatterns(searchValue, fields, filterFields);
 
     if (!this._isMounted) {
       return;
@@ -127,6 +130,30 @@ export class IndexPatternSelect extends Component {
       isLoading: true,
       searchValue
     }, this.debouncedFetch.bind(null, searchValue));
+  }
+
+  getFields = () => {
+    const fieldDefaults = ['title'];
+    const fields = [...fieldDefaults, ...(this.props.fields ? this.props.fields : [])];
+    if (this.props.filterFields && !fields.includes('fields')) {
+      fields.push('fields'); // Field filter must have fields to search
+    }
+    return fields;
+  }
+
+  getFilterFieldsFunction = () => {
+    const { filterFields } = this.props;
+    return (savedObjects = []) => {
+      if (filterFields && savedObjects.length) {
+        return savedObjects.filter(savedObject => {
+          const { fields } = savedObject.attributes;
+          const parsedFields = JSON.parse(fields);
+          return filterFields(parsedFields);
+        });
+      } else {
+        return savedObjects;
+      }
+    };
   }
 
   onChange = (selectedOptions) => {
@@ -160,4 +187,6 @@ IndexPatternSelect.propTypes = {
   onChange: PropTypes.func.isRequired,
   indexPatternId: PropTypes.string,
   placeholder: PropTypes.string,
+  fields: PropTypes.arrayOf(PropTypes.string),
+  filterFields: PropTypes.func
 };

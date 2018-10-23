@@ -15,7 +15,7 @@ import {
   clearTemporaryLayers,
   promoteTemporaryLayers,
   updateLayerLabel,
-  updateLayerShowAtAllZoomLevels,
+  // updateLayerShowAtAllZoomLevels,
   updateLayerMinZoom,
   updateLayerMaxZoom,
 } from "../../actions/store_actions";
@@ -60,7 +60,7 @@ function mapDispatchToProps(dispatch) {
     removeLayer: id => dispatch(removeLayer(id)),
     addAction: () => dispatch(promoteTemporaryLayers()),
     updateLabel: (id, label) => dispatch(updateLayerLabel(id, label)),
-    updateShowAtAllZoomLevels: (id, showAtAllZoomLevels) => dispatch(updateLayerShowAtAllZoomLevels(id, showAtAllZoomLevels)),
+    // updateShowAtAllZoomLevels: (id, showAtAllZoomLevels) => dispatch(updateLayerShowAtAllZoomLevels(id, showAtAllZoomLevels)),
     updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
     updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
     clearLayerLoadToast: () => dispatch(resetLayerLoad())

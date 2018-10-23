@@ -8,7 +8,6 @@ import React, { Fragment } from 'react';
 
 import {
   EuiFieldText,
-  EuiButton
 } from '@elastic/eui';
 
 import { TMSSource } from './source';
@@ -84,10 +83,16 @@ class XYZTMSEditor extends  React.Component {
   }
 
   _handleTMSInputChange(e) {
+    const url = e.target.value;
+    const canPreview = (url.indexOf('{x}') >= 0 && url.indexOf('{y}') >= 0 && url.indexOf('{z}') >= 0);
     this.setState({
-      tmsInput: e.target.value,
-      tmsCanPreview: (e.target.value.indexOf('{x}') >= 0 && e.target.value.indexOf('{y}') >= 0 && e.target.value.indexOf('{z}') >= 0)
+      tmsInput: url,
+      tmsCanPreview: canPreview
     });
+
+    if (canPreview) {
+      this.props.previewTMS(url);
+    }
   }
 
   render() {
@@ -98,13 +103,6 @@ class XYZTMSEditor extends  React.Component {
           onChange={(e) => this._handleTMSInputChange(e)}
           aria-label="Use aria labels when no actual label is in use"
         />
-        <EuiButton
-          size="s"
-          onClick={() => this.props.previewTMS(this.state.tmsInput)}
-          isDisabled={!this.state.tmsCanPreview}
-        >
-          {this.state.tmsCanPreview ? "Preview on Map" : "Enter URL with {x}/{y}/{x} pattern." }
-        </EuiButton>
       </Fragment>
     );
   }
