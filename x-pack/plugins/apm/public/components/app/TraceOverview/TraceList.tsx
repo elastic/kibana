@@ -57,7 +57,7 @@ const traceListColumns: ITableColumn[] = [
     name: 'Avg. response time',
     sortable: true,
     dataType: 'number',
-    render: (value: number) => asMillisWithDefault(value * 1000)
+    render: (value: number) => asMillisWithDefault(value)
   },
   {
     field: 'transactionsPerMinute',
