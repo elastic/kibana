@@ -14,6 +14,10 @@ import {
 
 // Creates grouped options by grouping fields by field type
 export const getGroupedFieldOptions = (fields, filterField) => {
+  if (!fields) {
+    return undefined;
+  }
+
   const fieldsByTypeMap = new Map();
   const groupedFieldOptions = [];
 
@@ -54,10 +58,6 @@ export function SingleFieldSelect({ fields,
   placeholder,
   ...rest
 }) {
-  if (!fields) {
-    return null;
-  }
-
   const onSelection = (selectedOptions) => {
     onChange(_.get(selectedOptions, '0.value'));
   };
@@ -69,6 +69,7 @@ export function SingleFieldSelect({ fields,
       options={getGroupedFieldOptions(fields, filterField)}
       selectedOptions={value ? [{ value: value, label: value }] : []}
       onChange={onSelection}
+      isDisabled={!fields}
       {...rest}
     />
   );

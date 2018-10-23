@@ -18,6 +18,7 @@ import {
   EuiFlyoutFooter,
   EuiTitle,
   EuiSpacer,
+  EuiPanel,
 } from '@elastic/eui';
 
 export class LayerPanel  extends React.Component {
@@ -52,12 +53,11 @@ export class LayerPanel  extends React.Component {
       return (<div/>);
     }
 
-    const joinSection = selectedLayer.isJoinable() ? (<EuiFlyoutBody style={{ paddingTop: 0 }}>
-      <EuiTitle size="s"><h2><strong>Joins</strong></h2></EuiTitle>
-      <EuiSpacer size="l"/>
-      <JoinEditor layer={selectedLayer}/>
-      <EuiSpacer size="l"/>
-    </EuiFlyoutBody>) : null;
+    const joinSection = selectedLayer.isJoinable() ? (
+      <EuiPanel>
+        <JoinEditor layer={selectedLayer}/>
+      </EuiPanel>
+    ) : null;
 
 
     return (
@@ -80,9 +80,9 @@ export class LayerPanel  extends React.Component {
           <EuiHorizontalRule margin="none"/>
         </EuiFlyoutHeader>
 
-        {joinSection}
-
         <EuiFlyoutBody style={{ paddingTop: 0 }}>
+          <EuiSpacer size="l"/>
+          {joinSection}
           <EuiSpacer size="l"/>
           <StyleTabs layer={selectedLayer}/>
           <EuiSpacer size="l"/>
