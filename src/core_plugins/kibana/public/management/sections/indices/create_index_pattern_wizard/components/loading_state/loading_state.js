@@ -31,7 +31,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const LoadingState = () => (
-  <EuiPanel paddingSize="l">
+  <EuiPanel paddingSize="l" data-test="createIndexPatternNameInputLoader">
     <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
@@ -47,7 +47,7 @@ export const LoadingState = () => (
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="l"/>
+        <EuiLoadingSpinner size="l" />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
