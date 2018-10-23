@@ -22,6 +22,7 @@ import { metadata } from '../metadata';
 export const DOC_LINK_VERSION = metadata.branch;
 export const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
 const ELASTIC_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
+const PAINLESS_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/`;
 
 export const documentationLinks = {
   filebeat: {
@@ -29,8 +30,6 @@ export const documentationLinks = {
     installation: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`,
     configuration: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-configuration.html`,
     elasticsearchOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html`,
-    elasticsearchOutputAnchorParameters:
-      `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html#_parameters`,
     startup: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
     exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`
   },
@@ -76,7 +75,7 @@ export const documentationLinks = {
     scriptFields: `${ELASTIC_DOCS}search-request-script-fields.html`,
     scriptAggs: `${ELASTIC_DOCS}search-aggregations.html#_values_source`,
     painless: `${ELASTIC_DOCS}modules-scripting-painless.html`,
-    painlessApi: `${ELASTIC_DOCS}modules-scripting-painless.html#painless-api`,
+    painlessApi: `${PAINLESS_DOCS}painless-api-reference.html`,
     painlessSyntax: `${ELASTIC_DOCS}modules-scripting-painless-syntax.html`,
     luceneExpressions: `${ELASTIC_DOCS}modules-scripting-expression.html`
   },
