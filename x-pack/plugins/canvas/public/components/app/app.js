@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { routes } from '../../apps';
 import { shortcutManager } from '../../lib/shortcut_manager';
+import { getWindow } from '../../lib/get_window';
 import { Router } from '../router';
 
 export class App extends React.PureComponent {
@@ -24,6 +25,16 @@ export class App extends React.PureComponent {
 
   getChildContext() {
     return { shortcuts: shortcutManager };
+  }
+
+  componentDidMount() {
+    const win = getWindow();
+    win.canvasInitErrorHandler && win.canvasInitErrorHandler();
+  }
+
+  componentWillUnmount() {
+    const win = getWindow();
+    win.canvasRestoreErrorHandler && win.canvasRestoreErrorHandler();
   }
 
   renderError = () => {

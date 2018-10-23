@@ -17,8 +17,13 @@
  * under the License.
  */
 
-export function getUnhashableStatesProvider(getAppState, globalState) {
-  return function getUnhashableStates() {
-    return [getAppState(), globalState].filter(Boolean);
-  };
+import { fetch } from './fetch';
+
+export function makeKQLUsageCollector(server) {
+  const kqlUsageCollector = server.usage.collectorSet.makeUsageCollector({
+    type: 'kql',
+    fetch,
+  });
+
+  server.usage.collectorSet.register(kqlUsageCollector);
 }
