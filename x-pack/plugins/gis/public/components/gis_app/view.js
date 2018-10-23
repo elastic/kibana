@@ -9,6 +9,7 @@ import { MBMapContainer } from '../map/mb';
 import { LayerControl } from '../layer_control/index';
 import { LayerPanel } from '../layer_panel/index';
 import { AddLayerPanel } from '../layer_addpanel/index';
+import { Toasts } from '../toasts';
 
 
 export function GISApp(props) {
@@ -35,6 +36,7 @@ export function GISApp(props) {
       <MBMapContainer/>
       <LayerControl/>
       {currentPanel}
+      <Toasts/>
     </div>
   );
 }
