@@ -14,8 +14,7 @@ import {
 import { Span } from 'x-pack/plugins/apm/typings/Span';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
-// @ts-ignore
-import { loadSpans, loadTrace } from '../../services/rest/apm';
+import { loadSpans } from '../../services/rest/apm';
 import { IUrlParams } from '../urlParams';
 // @ts-ignore
 import { createInitialDataSelector } from './helpers';
@@ -42,7 +41,7 @@ export function WaterfallV1Request({ urlParams, transaction, render }: Props) {
       id={ID}
       fn={loadSpans}
       args={[{ serviceName, start, end, transactionId }]}
-      render={({ status, data, args }) => {
+      render={({ status, data = [], args }) => {
         const res = {
           hits: [transaction, ...data],
           services: [serviceName]

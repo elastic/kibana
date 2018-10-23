@@ -18,8 +18,6 @@ import { WaterfallV1Request } from 'x-pack/plugins/apm/public/store/reactReduxRe
 import { WaterfallV2Request } from 'x-pack/plugins/apm/public/store/reactReduxRequest/waterfallV2';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
-// @ts-ignore
-import { loadSpans, loadTrace } from '../../../../../services/rest/apm';
 import { getServiceColors } from './getServiceColors';
 import { ServiceLegends } from './ServiceLegends';
 import { Waterfall } from './Waterfall';

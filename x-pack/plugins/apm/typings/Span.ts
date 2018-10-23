@@ -37,7 +37,7 @@ export interface SpanV1 extends APMDocV1 {
     };
     name: string;
     type: string;
-    id: number; // id will be derived from hex encoded 64 bit hex_id string in v2
+    id: number; // we are manually adding span.id
     parent?: string; // only v1
     stacktrace?: Stackframe[];
   };

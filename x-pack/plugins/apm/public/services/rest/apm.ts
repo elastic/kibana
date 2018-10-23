@@ -4,9 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import { camelizeKeys } from 'humps';
+import { isEmpty } from 'lodash';
+import { IDistributionResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_distribution';
+import { Span } from 'x-pack/plugins/apm/typings/Span';
+import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { ITransactionGroup } from 'x-pack/plugins/apm/typings/TransactionGroup';
+import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
+import { IUrlParams } from '../../store/urlParams';
+// @ts-ignore
 import { convertKueryToEsQuery } from '../kuery';
+// @ts-ignore
 import { callApi } from './callApi';
+// @ts-ignore
 import { getAPMIndexPattern } from './savedObjects';
 
 export async function loadLicense() {
@@ -27,7 +38,7 @@ export async function loadAgentStatus() {
   });
 }
 
-export async function getEncodedEsQuery(kuery) {
+export async function getEncodedEsQuery(kuery?: string) {
   if (!kuery) {
     return;
   }
@@ -42,7 +53,7 @@ export async function getEncodedEsQuery(kuery) {
   return encodeURIComponent(JSON.stringify(esFilterQuery));
 }
 
-export async function loadServiceList({ start, end, kuery }) {
+export async function loadServiceList({ start, end, kuery }: IUrlParams) {
   return callApi({
     pathname: `/api/apm/services`,
     query: {
@@ -53,7 +64,12 @@ export async function loadServiceList({ start, end, kuery }) {
   });
 }
 
-export async function loadServiceDetails({ serviceName, start, end, kuery }) {
+export async function loadServiceDetails({
+  serviceName,
+  start,
+  end,
+  kuery
+}: IUrlParams) {
   return callApi({
     pathname: `/api/apm/services/${serviceName}`,
     query: {
@@ -64,7 +80,11 @@ export async function loadServiceDetails({ serviceName, start, end, kuery }) {
   });
 }
 
-export async function loadTraceList({ start, end, kuery }) {
+export async function loadTraceList({
+  start,
+  end,
+  kuery
+}: IUrlParams): Promise<ITransactionGroup[]> {
   return callApi({
     pathname: '/api/apm/traces',
     query: {
@@ -81,7 +101,7 @@ export async function loadTransactionList({
   end,
   kuery,
   transactionType
-}) {
+}: IUrlParams): Promise<ITransactionGroup[]> {
   return callApi({
     pathname: `/api/apm/services/${serviceName}/transactions`,
     query: {
@@ -99,7 +119,7 @@ export async function loadTransactionDistribution({
   end,
   transactionName,
   kuery
-}) {
+}: IUrlParams): Promise<IDistributionResponse> {
   return callApi({
     pathname: `/api/apm/services/${serviceName}/transactions/distribution`,
     query: {
@@ -111,13 +131,28 @@ export async function loadTransactionDistribution({
   });
 }
 
-function addVersion(item) {
-  item.version = item.hasOwnProperty('trace') ? 'v2' : 'v1';
+function addVersion<T extends Span | Transaction>(item: T): T {
+  if (!isEmpty(item)) {
+    item.version = item.hasOwnProperty('trace') ? 'v2' : 'v1';
+  }
+
   return item;
 }
 
-export async function loadSpans({ serviceName, start, end, transactionId }) {
-  const result = await callApi({
+function addSpanId(hit: Span, i: number) {
+  if (!hit.span.id) {
+    hit.span.id = i;
+  }
+  return hit;
+}
+
+export async function loadSpans({
+  serviceName,
+  start,
+  end,
+  transactionId
+}: IUrlParams) {
+  const hits: Span[] = await callApi({
     pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}/spans`,
     query: {
       start,
@@ -125,12 +160,11 @@ export async function loadSpans({ serviceName, start, end, transactionId }) {
     }
   });
 
-  result.hits = result.hits.map(addVersion);
-  return result;
+  return hits.map(addVersion).map(addSpanId);
 }
 
-export async function loadTrace({ traceId, start, end }) {
-  const result = await callApi(
+export async function loadTrace({ traceId, start, end }: IUrlParams) {
+  const result: WaterfallResponse = await callApi(
     {
       pathname: `/api/apm/traces/${traceId}`,
       query: {
@@ -154,7 +188,7 @@ export async function loadTransaction({
   transactionId,
   traceId,
   kuery
-}) {
+}: IUrlParams) {
   const result = await callApi(
     {
       pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
@@ -180,7 +214,7 @@ export async function loadCharts({
   kuery,
   transactionType,
   transactionName
-}) {
+}: IUrlParams) {
   return callApi({
     pathname: `/api/apm/services/${serviceName}/transactions/charts`,
     query: {
@@ -193,6 +227,12 @@ export async function loadCharts({
   });
 }
 
+interface ErrorGroupListParams extends IUrlParams {
+  size: number;
+  sortField: string;
+  sortDirection: string;
+}
+
 export async function loadErrorGroupList({
   serviceName,
   start,
@@ -201,7 +241,7 @@ export async function loadErrorGroupList({
   size,
   sortField,
   sortDirection
-}) {
+}: ErrorGroupListParams) {
   return callApi({
     pathname: `/api/apm/services/${serviceName}/errors`,
     query: {
@@ -221,7 +261,7 @@ export async function loadErrorGroupDetails({
   end,
   kuery,
   errorGroupId
-}) {
+}: IUrlParams) {
   const res = await callApi(
     {
       pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
@@ -248,7 +288,7 @@ export async function loadErrorDistribution({
   end,
   kuery,
   errorGroupId
-}) {
+}: IUrlParams) {
   return callApi({
     pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}/distribution`,
     query: {
