@@ -109,6 +109,13 @@ export class TagsLib {
     });
   }
 
+  /**
+   * This function takes an object that contains keys in the pattern of {{keyname}}, and replaces the key with the value of a matching key.
+   * Example input:
+   * { foo: 'here', '{{foo}}': 'there' }
+   * Would return:
+   * { foo: 'here', here: 'there' }
+   */
   private hydrateTokenizedObject(model: any) {
     return JSON.parse(JSON.stringify(model), (key, value) => {
       return _.isObject(value) && !_.isArray(value)
@@ -121,6 +128,13 @@ export class TagsLib {
     });
   }
 
+  /**
+   * This function takes an array of strings and object and replaces strings in the array patching the patten of {{key}} with the matching value from the object.
+   * Example input:
+   * [ '{{key}}', 'other' ], and  { key: 'here', foo: 'there' }
+   * Would return:
+   * [ 'here', 'other' ]
+   */
   private hydrateTokenArray(keys: string[], data: any) {
     return keys.map(key => {
       return key.replace(/{{[^{}]+}}/g, (token: string) => {
