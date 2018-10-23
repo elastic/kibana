@@ -17,28 +17,21 @@
  * under the License.
  */
 
-import { KBN_FIELD_TYPES } from '../../../../utils/kbn_field_types';
 
-const filterableTypes = KBN_FIELD_TYPES.filter(type => type.filterable).map(type => type.name);
 
-export function isFilterable(field) {
-  return filterableTypes.includes(field.type);
-}
+import 'ngreact';
+import { uiModules } from '../../modules';
+import { QueryBar } from '../components';
 
-export function getFromSavedObject(savedObject) {
-  if (!savedObject) {
-    return null;
-  }
+const app = uiModules.get('app/kibana', ['react']);
 
-  return {
-    fields: JSON.parse(savedObject.attributes.fields),
-    title: savedObject.attributes.title,
-  };
-}
-
-export function getFromLegacyIndexPattern(indexPatterns) {
-  return indexPatterns.map(indexPattern => ({
-    fields: indexPattern.fields.raw,
-    title: indexPattern.title,
-  }));
-}
+app.directive('queryBar', (reactDirective, localStorage) => {
+  return reactDirective(
+    QueryBar,
+    undefined,
+    {},
+    {
+      store: localStorage,
+    }
+  );
+});

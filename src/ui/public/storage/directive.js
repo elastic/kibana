@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
-const typeahead = uiModules.get('kibana/typeahead');
 
-typeahead.directive('kbnTypeaheadItem', function ($compile) {
-  return {
-    restrict: 'E',
-    scope: {
-      item: '=',
-      template: '='
-    },
-    link: (scope, element) => {
-      element.html(scope.template || '{{item}}');
-      $compile(element.contents())(scope);
-    }
+import { uiModules } from '../modules';
+import { Storage } from './storage';
+
+const createService = function (type) {
+  return function ($window) {
+    return new Storage($window[type]);
   };
-});
+};
+
+uiModules.get('kibana/storage')
+  .service('localStorage', createService('localStorage'))
+  .service('sessionStorage', createService('sessionStorage'));
