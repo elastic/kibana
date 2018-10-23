@@ -14,6 +14,7 @@ import { checkBasicLicense } from 'plugins/ml/license/check_license';
 import { checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
+import { loadIndexPatterns } from '../util/index_utils';
 import { initPromise } from 'plugins/ml/util/promise';
 
 import uiRoutes from 'ui/routes';
@@ -26,6 +27,7 @@ uiRoutes
     resolve: {
       CheckLicense: checkBasicLicense,
       privileges: checkFindFileStructurePrivilege,
+      indexPatterns: loadIndexPatterns,
       mlNodeCount: getMlNodeCount,
       loadNewJobDefaults,
       initPromise: initPromise(true)

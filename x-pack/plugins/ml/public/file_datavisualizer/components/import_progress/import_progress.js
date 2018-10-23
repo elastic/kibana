@@ -68,7 +68,7 @@ export function ImportProgress({ statuses }) {
 
   if (completedStep >= 0) {
     processFileTitle = 'Processing file';
-    statusInfo = (<p>Converting file for import</p>);
+    statusInfo = (<p>Processing file for import</p>);
   }
   if (completedStep >= 1) {
     processFileTitle = 'File processed';
@@ -142,6 +142,7 @@ export function ImportProgress({ statuses }) {
     <React.Fragment>
       <EuiStepsHorizontal
         steps={steps}
+        style={{ backgroundColor: 'transparent' }}
       />
       { statusInfo &&
         <React.Fragment>
@@ -157,7 +158,7 @@ function UploadFunctionProgress({ progress }) {
   return (
     <React.Fragment>
       <p>Uploading data</p>
-      {(progress > 0 && progress < 100) &&
+      {(progress < 100) &&
         <React.Fragment>
           <EuiSpacer size="s" />
           <EuiProgress value={progress} max={100} color="primary" size="s" />

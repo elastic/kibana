@@ -409,6 +409,14 @@ export const ml = {
     });
   },
 
+  getIndices() {
+    const tempBasePath = chrome.addBasePath('/api');
+    return http({
+      url: `${tempBasePath}/index_management/indices`,
+      method: 'GET',
+    });
+  },
+
   filters,
   results,
   jobs,

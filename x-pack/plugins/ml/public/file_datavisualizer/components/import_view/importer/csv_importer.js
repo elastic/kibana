@@ -9,8 +9,8 @@ import { Importer } from './importer';
 import Papa from 'papaparse';
 
 export class CsvImporter extends Importer {
-  constructor(results) {
-    super(results);
+  constructor(results, settings) {
+    super(settings);
 
     this.format = results.format;
     this.delimiter = results.delimiter;

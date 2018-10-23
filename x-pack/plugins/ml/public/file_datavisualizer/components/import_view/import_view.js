@@ -10,20 +10,23 @@ import React, {
 } from 'react';
 
 import {
-  EuiFieldText,
   EuiButton,
   EuiSpacer,
-  EuiFormRow,
-  EuiCheckbox,
   EuiPanel,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { importerFactory } from './importer';
-import { ResultsLinks } from './results_links';
-import { ImportProgress, IMPORT_STATUS } from './import_progress';
-import { Errors } from './errors';
+import { ResultsLinks } from '../results_links';
+import { ImportProgress, IMPORT_STATUS } from '../import_progress';
+import { ImportErrors } from '../import_errors';
+import { ImportSummary } from '../import_summary';
+import { ImportSettings } from '../import_settings';
+import { getIndexPatternNames, refreshIndexPatterns } from '../../../util/index_utils';
+import { ml } from '../../../services/ml_api_service';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
+const CONFIG_MODE = { SIMPLE: 0, ADVANCED: 1 };
 
 const DEFAULT_STATE = {
   index: '',
@@ -41,32 +44,55 @@ const DEFAULT_STATE = {
   createIndexPattern: true,
   indexPattern: '',
   indexPatternId: '',
+  ingestPipelineId: '',
   errors: [],
   importFailures: [],
+  docCount: 0,
+  configMode: CONFIG_MODE.SIMPLE,
+  indexSettingsString: '',
+  mappingsString: '',
+  pipelineString: '',
+  indexNames: [],
+  indexPatternNames: [],
+  indexNameError: '',
+  indexPatternNameError: '',
 };
 
 export class ImportView extends Component {
   constructor(props) {
     super(props);
 
-    this.state = DEFAULT_STATE;
+    this.state = getDefaultState(DEFAULT_STATE, this.props.results);
+  }
+
+  componentDidMount() {
+    this.loadIndexNames();
+    this.loadIndexPatternNames();
   }
 
   clickReset = () => {
-    this.setState(DEFAULT_STATE);
+    const state = getDefaultState(this.state, this.props.results);
+    this.setState(state, () => {
+      this.loadIndexNames();
+      this.loadIndexPatternNames();
+    });
   }
 
-  clickImport() {
+  clickImport = () => {
     this.import();
   }
 
+  // TODO - sort this function out. it's a mess
   async import() {
-    const { format } = this.props.results;
     const { fileContents, results } = this.props;
+    const { format } = results;
     const {
       index,
       indexPattern,
       createIndexPattern,
+      indexSettingsString,
+      mappingsString,
+      pipelineString,
     } = this.state;
 
     const errors = [];
@@ -81,97 +107,141 @@ export class ImportView extends Component {
         setTimeout(async () => {
           let success = false;
 
-          const importer = importerFactory(format, results);
-          if (importer !== undefined) {
+          let indexCreationSettings = {};
+          try {
+            indexCreationSettings = {
+              settings: JSON.parse(indexSettingsString),
+              mappings: JSON.parse(mappingsString),
+              pipeline: JSON.parse(pipelineString),
+            };
+            success = true;
+          } catch (error) {
+            success = false;
+            errors.push(error);
+          }
 
-            console.log('read start');
-            const readResp = await importer.read(fileContents, this.setReadProgress);
-            console.log('read end');
-            success = readResp.success;
-            this.setState({
-              readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-              reading: false,
-            });
+          if (success) {
+            const importer = importerFactory(format, results, indexCreationSettings);
+            if (importer !== undefined) {
 
-            if (readResp.success === false) {
-              console.error(readResp.error);
-              errors.push(readResp.error);
-            }
-
-            if (success) {
-              const initializeImportResp = await importer.initializeImport(index);
-
-              const indexCreated = (initializeImportResp.index !== undefined);
-              const pipelineCreated = (initializeImportResp.pipelineId !== undefined);
+              const readResp = await importer.read(fileContents, this.setReadProgress);
+              success = readResp.success;
               this.setState({
-                indexCreatedStatus: indexCreated ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                reading: false,
               });
-              if (indexCreated) {
-                this.setState({
-                  ingestPipelineCreatedStatus: pipelineCreated  ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                });
-              }
 
-              success = (indexCreated && pipelineCreated);
+              if (readResp.success === false) {
+                console.error(readResp.error);
+                errors.push(readResp.error);
+              }
 
               if (success) {
-                const importId = initializeImportResp.id;
-                const pipelineId = initializeImportResp.pipelineId;
-                const importResp = await importer.import(importId, index, pipelineId, this.setImportProgress);
-                success = importResp.success;
+                const initializeImportResp = await importer.initializeImport(index);
+
+                const indexCreated = (initializeImportResp.index !== undefined);
                 this.setState({
-                  uploadStatus: importResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                  importFailures: importResp.failures,
+                  indexCreatedStatus: indexCreated ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
                 });
 
-                if (success && createIndexPattern) {
-                  const indexPatternName = (indexPattern === '') ? index : indexPattern;
-
-                  const indexPatternResp = await this.createIndexPattern(indexPatternName);
-                  success = indexPatternResp.success;
+                const pipelineCreated = (initializeImportResp.pipelineId !== undefined);
+                if (indexCreated) {
                   this.setState({
-                    indexPatternCreatedStatus: indexPatternResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                    indexPatternId: indexPatternResp.id
+                    ingestPipelineCreatedStatus: pipelineCreated  ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                    ingestPipelineId: pipelineCreated ? initializeImportResp.pipelineId : '',
                   });
-                  if (indexPatternResp.success === false) {
-                    errors.push(indexPatternResp.error);
+                }
+
+                success = (indexCreated && pipelineCreated);
+
+                if (success) {
+                  const importId = initializeImportResp.id;
+                  const pipelineId = initializeImportResp.pipelineId;
+                  const importResp = await importer.import(importId, index, pipelineId, this.setImportProgress);
+                  success = importResp.success;
+                  this.setState({
+                    uploadStatus: importResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                    importFailures: importResp.failures,
+                    docCount: importResp.docCount,
+                  });
+
+                  if (success && createIndexPattern) {
+                    const indexPatternName = (indexPattern === '') ? index : indexPattern;
+
+                    const indexPatternResp = await createKibanaIndexPattern(indexPatternName, this.props.indexPatterns);
+                    success = indexPatternResp.success;
+                    this.setState({
+                      indexPatternCreatedStatus: indexPatternResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                      indexPatternId: indexPatternResp.id,
+                    });
+                    if (indexPatternResp.success === false) {
+                      errors.push(indexPatternResp.error);
+                    }
+                  } else {
+                    errors.push(importResp.error);
                   }
                 } else {
-                  errors.push(importResp.error);
+                  errors.push(initializeImportResp.error);
                 }
-              } else {
-                errors.push(initializeImportResp.error);
               }
             }
-
-            this.setState({
-              importing: false,
-              imported: success,
-              errors,
-            });
-          } else {
-            console.error('Unsupported file format');
           }
+
+          this.setState({
+            importing: false,
+            imported: success,
+            errors,
+          });
+
         }, 500);
       });
     }
   }
 
-  onIndexChange = (e) => {
+  onConfigModeChange = (configMode) => {
     this.setState({
-      index: e.target.value,
+      configMode,
+    });
+  }
+
+  onIndexChange = (e) => {
+    const name = e.target.value;
+    this.setState({
+      index: name,
+      indexNameError: isIndexNameValid(name, this.state.indexNames),
     });
   }
 
   onIndexPatternChange = (e) => {
+    const name = e.target.value;
+    const { indexPatternNames, index } = this.state;
     this.setState({
-      indexPattern: e.target.value,
+      indexPattern: name,
+      indexPatternNameError: isIndexPatternNameValid(name, indexPatternNames, index),
     });
   }
 
   onCreateIndexPatternChange = (e) => {
     this.setState({
       createIndexPattern: e.target.checked,
+    });
+  }
+
+  onIndexSettingsStringChange = (text) => {
+    this.setState({
+      indexSettingsString: text,
+    });
+  }
+
+  onMappingsStringChange = (text) => {
+    this.setState({
+      mappingsString: text,
+    });
+  }
+
+  onPipelineStringChange = (text) => {
+    this.setState({
+      pipelineString: text,
     });
   }
 
@@ -187,36 +257,24 @@ export class ImportView extends Component {
     });
   }
 
-  async createIndexPattern(indexPatternName, timeFieldName = DEFAULT_TIME_FIELD) {
-    try {
-      const emptyPattern = await this.props.indexPatterns.get();
-
-      Object.assign(emptyPattern, {
-        id: '',
-        title: indexPatternName,
-        timeFieldName,
-      });
-
-      const id = await emptyPattern.create();
-      return {
-        success: true,
-        id,
-      };
-    } catch (error) {
-      console.error(error);
-      return {
-        success: false,
-        error,
-      };
-    }
+  async loadIndexNames() {
+    const indices = await ml.getIndices();
+    const indexNames = indices.map(i => i.name);
+    this.setState({ indexNames });
   }
 
+  async loadIndexPatternNames() {
+    await refreshIndexPatterns();
+    const indexPatternNames = getIndexPatternNames();
+    this.setState({ indexPatternNames });
+  }
 
   render() {
     const {
       index,
       indexPattern,
       indexPatternId,
+      ingestPipelineId,
       importing,
       imported,
       reading,
@@ -229,7 +287,13 @@ export class ImportView extends Component {
       uploadStatus,
       createIndexPattern,
       errors,
-      // importFailures,
+      docCount,
+      importFailures,
+      indexSettingsString,
+      mappingsString,
+      pipelineString,
+      indexNameError,
+      indexPatternNameError,
     } = this.state;
 
     const statuses = {
@@ -243,52 +307,47 @@ export class ImportView extends Component {
       createIndexPattern,
     };
 
+    const disableImport = (
+      index === '' ||
+      indexNameError !== '' ||
+      (createIndexPattern === true && indexPatternNameError !== '') ||
+      initialized === true
+    );
+
     return (
       <React.Fragment>
 
         <EuiPanel>
 
-          <EuiFormRow
-            label="Index name"
-          >
-            <EuiFieldText
-              placeholder="index name"
-              value={index}
-              disabled={initialized === true}
-              onChange={this.onIndexChange}
-            />
-          </EuiFormRow>
+          <EuiTitle size="s">
+            <h3>Import data</h3>
+          </EuiTitle>
 
-          <EuiCheckbox
-            id="createIndexPattern"
-            label="Create index pattern"
-            checked={createIndexPattern === true}
-            disabled={initialized === true}
-            onChange={this.onCreateIndexPatternChange}
+          <ImportSettings
+            index={index}
+            indexPattern={indexPattern}
+            initialized={initialized}
+            onIndexChange={this.onIndexChange}
+            createIndexPattern={createIndexPattern}
+            onCreateIndexPatternChange={this.onCreateIndexPatternChange}
+            onIndexPatternChange={this.onIndexPatternChange}
+            indexSettingsString={indexSettingsString}
+            mappingsString={mappingsString}
+            pipelineString={pipelineString}
+            onIndexSettingsStringChange={this.onIndexSettingsStringChange}
+            onMappingsStringChange={this.onMappingsStringChange}
+            onPipelineStringChange={this.onPipelineStringChange}
+            indexNameError={indexNameError}
+            indexPatternNameError={indexPatternNameError}
           />
-
-          <EuiSpacer size="s" />
-
-          <EuiFormRow
-            label="Index pattern name"
-            disabled={(createIndexPattern === false || initialized === true)}
-          >
-            <EuiFieldText
-              disabled={(createIndexPattern === false || initialized === true)}
-              placeholder={(createIndexPattern === true) ? index : ''}
-              value={indexPattern}
-              onChange={this.onIndexPatternChange}
-            />
-          </EuiFormRow>
 
           <EuiSpacer size="m" />
 
-          {
-            (initialized === false || importing === true) &&
+          {(initialized === false || importing === true) &&
 
             <EuiButton
-              isDisabled={index === '' || initialized === true}
-              onClick={() => this.clickImport()}
+              isDisabled={disableImport}
+              onClick={this.clickImport}
               isLoading={importing}
               iconSide="right"
             >
@@ -300,7 +359,7 @@ export class ImportView extends Component {
             (initialized === true && importing === false) &&
 
             <EuiButton
-              onClick={() => this.clickReset()}
+              onClick={this.clickReset}
             >
               Reset
             </EuiButton>
@@ -317,6 +376,28 @@ export class ImportView extends Component {
 
               <ImportProgress statuses={statuses} />
 
+              {(imported === true) &&
+                <React.Fragment>
+                  <EuiSpacer size="m" />
+
+                  <ImportSummary
+                    index={index}
+                    indexPattern={((indexPattern === '') ? index : indexPattern)}
+                    ingestPipelineId={ingestPipelineId}
+                    docCount={docCount}
+                    importFailures={importFailures}
+                  />
+
+                  <EuiSpacer size="l" />
+
+                  <ResultsLinks
+                    index={(index)}
+                    indexPatternId={(indexPatternId)}
+                    timeFieldName={DEFAULT_TIME_FIELD}
+                  />
+                </React.Fragment>
+              }
+
             </EuiPanel>
 
             {
@@ -324,7 +405,7 @@ export class ImportView extends Component {
               <React.Fragment>
                 <EuiSpacer size="m" />
 
-                <Errors
+                <ImportErrors
                   errors={errors}
                   statuses={statuses}
                 />
@@ -334,26 +415,86 @@ export class ImportView extends Component {
           </React.Fragment>
         }
 
-
-        {(imported === true) &&
-          <React.Fragment>
-            <EuiSpacer size="m" />
-
-            <EuiPanel>
-
-              <ResultsLinks
-                index={(index)}
-                indexPatternId={(indexPatternId)}
-                timeFieldName={DEFAULT_TIME_FIELD}
-              />
-
-            </EuiPanel>
-          </React.Fragment>
-        }
-
       </React.Fragment>
     );
   }
+}
+
+async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFieldName = DEFAULT_TIME_FIELD) {
+  try {
+    const emptyPattern = await indexPatterns.get();
+
+    Object.assign(emptyPattern, {
+      id: '',
+      title: indexPatternName,
+      timeFieldName,
+    });
+
+    const id = await emptyPattern.create();
+    return {
+      success: true,
+      id,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      error,
+    };
+  }
+}
+
+function getDefaultState(state, results) {
+  const indexSettingsString = (state.indexSettingsString === '') ? '{}' : state.indexSettingsString;
+  const mappingsString = (state.mappingsString === '') ? JSON.stringify(results.mappings, null, 2) : state.mappingsString;
+  const pipelineString = (state.pipelineString === '') ? JSON.stringify(results.ingest_pipeline, null, 2) : state.pipelineString;
+
+  return {
+    ... DEFAULT_STATE,
+    indexSettingsString,
+    mappingsString,
+    pipelineString,
+  };
+}
+
+function isIndexNameValid(name, indexNames) {
+  if (indexNames.find(i => i === name)) {
+    return 'Index name already exists';
+  }
+
+  const reg = new RegExp('[\\\\/\*\?\"\<\>\|\\s\,\#]+');
+  if (
+    (name !== name.toLowerCase()) || // name should be lowercase
+    (name === '.' || name === '..')   || // name can't be . or ..
+    name.match(/^[-_+]/) !== null  || // name can't start with these chars
+    name.match(reg) !== null // name can't contain these chars
+  ) {
+    return 'Index name contains illegal characters';
+  }
+  return '';
+}
+
+function isIndexPatternNameValid(name, indexPatternNames, index) {
+  // if a blank name is entered, the index name will be used so avoid validation
+  if (name === '') {
+    return '';
+  }
+
+  if (indexPatternNames.find(i => i === name)) {
+    return 'Index pattern name already exists';
+  }
+
+  // escape . and + to stop the regex matching more than it should.
+  let newName = name.replace('.', '\\.');
+  newName = newName.replace('+', '\\+');
+  // replace * with .* to make the wildcard match work.
+  newName = newName.replace('*', '.*');
+  const reg = new RegExp(`^${newName}$`);
+  if (index.match(reg) === null) { // name should match index
+    return 'Index pattern does not match index name';
+  }
+
+  return '';
 }
 
 

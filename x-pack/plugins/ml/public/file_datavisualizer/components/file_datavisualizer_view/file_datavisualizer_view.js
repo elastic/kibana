@@ -51,6 +51,7 @@ export class FileDataVisualizerView extends Component {
     };
 
     this.overrides = {};
+    this.previousOverrides = {};
     this.originalSettings = {};
     this.showEditFlyout = () => {};
   }
@@ -69,13 +70,13 @@ export class FileDataVisualizerView extends Component {
       results: undefined,
     }, () => {
       if (files.length) {
-        this.analyzeFile(files[0]);
+        this.loadFile(files[0]);
       }
     });
 
   };
 
-  async analyzeFile(file) {
+  async loadFile(file) {
     if (file.size < MAX_BYTES) {
       try {
         const fileContents = await readFile(file);
@@ -107,7 +108,7 @@ export class FileDataVisualizerView extends Component {
     }
   }
 
-  async loadSettings(data, overrides) {
+  async loadSettings(data, overrides, isRetry = false) {
     try {
       console.log('overrides', overrides);
       const { analyzeFile } = ml.fileDatavisualizer;
@@ -115,6 +116,7 @@ export class FileDataVisualizerView extends Component {
       const serverSettings = processResults(resp.results);
       const serverOverrides = resp.overrides;
 
+      this.previousOverrides = this.overrides;
       this.overrides = {};
 
       if (serverSettings.format === 'xml') {
@@ -126,35 +128,32 @@ export class FileDataVisualizerView extends Component {
       if (serverOverrides === undefined) {
         this.originalSettings = serverSettings;
       } else {
-        for (const o in serverOverrides) {
-          if (serverOverrides.hasOwnProperty(o)) {
-            const camelCaseO = o.replace(/_\w/g, m => m[1].toUpperCase());
-            this.overrides[camelCaseO] = serverOverrides[o];
-          }
-        }
+        Object.keys(serverOverrides).forEach((o) => {
+          const camelCaseO = o.replace(/_\w/g, m => m[1].toUpperCase());
+          this.overrides[camelCaseO] = serverOverrides[o];
+        });
 
         // check to see if the settings from the server which haven't been overridden have changed.
         // e.g. changing the name of the time field which is also the time field
         // will cause the timestamp_field setting to change.
         // if any have changed, update the originalSettings value
-        for (const o in serverSettings) {
-          if (serverSettings.hasOwnProperty(o)) {
-            const value = serverSettings[o];
-            if (
-              this.overrides[o] === undefined &&
-              (Array.isArray(value) && (isEqual(value, this.originalSettings[o]) === false) ||
-              (value !== this.originalSettings[o]))
-            ) {
-              this.originalSettings[o] = value;
-            }
+        Object.keys(serverSettings).forEach((o) => {
+          const value = serverSettings[o];
+          if (
+            this.overrides[o] === undefined &&
+            (Array.isArray(value) && (isEqual(value, this.originalSettings[o]) === false) ||
+            (value !== this.originalSettings[o]))
+          ) {
+            this.originalSettings[o] = value;
           }
-        }
+        });
       }
 
       this.setState({
         results: resp.results,
         loaded: true,
         loading: false,
+        fileCouldNotBeRead: isRetry,
       });
     } catch (error) {
       console.error(error);
@@ -165,6 +164,16 @@ export class FileDataVisualizerView extends Component {
         fileCouldNotBeRead: true,
         serverErrorMessage: error.message,
       });
+
+      // as long as the previous overrides are different to the current overrides,
+      // reload the results with the previous overrides
+      if (overrides !== undefined && isEqual(this.previousOverrides, overrides) === false) {
+        this.setState({
+          loading: true,
+          loaded: false,
+        });
+        this.loadSettings(data, this.previousOverrides, true);
+      }
     }
   }
 
@@ -239,8 +248,14 @@ export class FileDataVisualizerView extends Component {
               />
             }
 
-            {(fileCouldNotBeRead) &&
-              <FileCouldNotBeRead error={serverErrorMessage} />
+            {(fileCouldNotBeRead && loading === false) &&
+              <React.Fragment>
+                <FileCouldNotBeRead
+                  error={serverErrorMessage}
+                  loaded={loaded}
+                />
+                <EuiSpacer size="l" />
+              </React.Fragment>
             }
 
             {(loaded) &&

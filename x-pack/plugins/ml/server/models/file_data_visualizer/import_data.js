@@ -6,7 +6,7 @@
 
 
 export function importDataProvider(callWithRequest) {
-  async function importData(id, index, mappings, ingestPipeline, data) {
+  async function importData(id, index, settings, mappings, ingestPipeline, data) {
     let createdIndex;
     let createdPipelineId;
     const docCount = data.length;
@@ -26,12 +26,11 @@ export function importDataProvider(callWithRequest) {
         // first chunk of data, create the index and id to return
         id = generateId();
 
-        await createIndex(index, mappings);
+        await createIndex(index, settings, mappings);
         createdIndex = index;
 
         const success = await createPipeline(pipelineId, pipeline);
         if (success.acknowledged !== true) {
-          console.error(success);
           throw success;
         }
         createdPipelineId = pipelineId;
@@ -45,7 +44,7 @@ export function importDataProvider(callWithRequest) {
       if (data.length && indexExits(index)) {
         const resp = await indexData(index, createdPipelineId, data);
         if (resp.success === false) {
-          if (resp.failures.length === data.length) {
+          if (resp.ingestError) {
             // all docs failed, abort
             throw resp;
           } else {
@@ -70,14 +69,15 @@ export function importDataProvider(callWithRequest) {
         id,
         index: createdIndex,
         pipelineId: createdPipelineId,
-        error,
+        error: (error.error !== undefined) ? error.error : error,
         docCount,
+        ingestError: error.ingestError,
         failures: (error.failures || [])
       };
     }
   }
 
-  async function createIndex(index, mappings) {
+  async function createIndex(index, settings, mappings) {
     if (await indexExits(index) === false) {
       const body = {
         mappings: {
@@ -86,6 +86,10 @@ export function importDataProvider(callWithRequest) {
           }
         }
       };
+
+      if (settings && Object.keys(settings).length) {
+        body.settings = settings;
+      }
 
       await callWithRequest('indices.create', { index, body });
     } else {
@@ -118,14 +122,16 @@ export function importDataProvider(callWithRequest) {
         };
       }
     } catch (error) {
+
       let failures = [];
+      let ingestError = false;
       if (error.errors !== undefined && Array.isArray(error.items)) {
         // an expected error where some or all of the bulk request
         // docs have failed to be ingested.
-        failures = getFailures(error.items);
+        failures = getFailures(error.items, data);
       } else {
-        // some other error has happened. assume all the docs have failed to be ingested
-        failures = data;
+        // some other error has happened.
+        ingestError = true;
       }
 
       return {
@@ -133,6 +139,7 @@ export function importDataProvider(callWithRequest) {
         error,
         docCount: data.length,
         failures,
+        ingestError,
       };
     }
 
@@ -146,7 +153,7 @@ export function importDataProvider(callWithRequest) {
     return await callWithRequest('ingest.putPipeline', { id, body: pipeline });
   }
 
-  function getFailures(items) {
+  function getFailures(items, data) {
     const failures = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
@@ -154,6 +161,7 @@ export function importDataProvider(callWithRequest) {
         failures.push({
           item: i,
           reason: item.index.error.reason,
+          doc: data[i],
         });
       }
     }

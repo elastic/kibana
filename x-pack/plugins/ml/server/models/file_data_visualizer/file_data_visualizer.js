@@ -20,9 +20,11 @@ export function fileDataVisualizerProvider(callWithRequest) {
 
     try {
       results = await callWithRequest('ml.fileStructure', { body: data, ...overrides });
-      cached = await cacheData(data);
+      if (false) {
+        // disabling caching for now
+        cached = await cacheData(data);
+      }
     } catch (error) {
-      console.error(error);
       const err = (error.message !== undefined) ? error.message : error;
       throw Boom.badRequest(err);
     }

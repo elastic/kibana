@@ -13,17 +13,21 @@ const CHUNK_SIZE = 10000;
 const IMPORT_RETRIES = 5;
 
 export class Importer {
-  constructor(results) {
-    this.results = results;
+  constructor({ settings, mappings, pipeline }) {
+    this.settings = settings;
+    this.mappings = mappings;
+    this.pipeline = pipeline;
+
     this.data = [];
     this.docArray = [];
   }
 
   async initializeImport(index) {
-
-    const mappings = this.results.mappings;
-    const pipeline = this.results.ingest_pipeline;
+    const settings = this.settings;
+    const mappings = this.mappings;
+    const pipeline = this.pipeline;
     updatePipelineTimezone(pipeline);
+
     const ingestPipeline = {
       id: `${index}-pipeline`,
       pipeline,
@@ -33,6 +37,7 @@ export class Importer {
       id: undefined,
       index,
       data: [],
+      settings,
       mappings,
       ingestPipeline
     });
@@ -41,12 +46,10 @@ export class Importer {
   }
 
   async import(id, index, pipelineId, setImportProgress) {
-    console.log('create index and ingest');
-    console.time('create index and ingest');
     if (!id || !index) {
       return {
         success: false,
-        error: 'no id ot index supplied'
+        error: 'no ID or index supplied'
       };
     }
 
@@ -65,6 +68,7 @@ export class Importer {
         id,
         index,
         data: chunks[i],
+        settings: {},
         mappings: {},
         ingestPipeline
       };
@@ -92,26 +96,17 @@ export class Importer {
         console.error(resp);
         success = false;
         error = resp.error;
+        populateFailures(resp, failures, i);
         break;
       }
 
-      if (resp.failures && resp.failures.length) {
-        // update the item value to include the chunk count
-        // e.g. item 3 in chunk 2 is actually item 20003
-        for (let f = 0; f < resp.failures.length; f++) {
-          const failure = resp.failures[f];
-          failure.item = failure.item + (CHUNK_SIZE * i);
-        }
-        failures.push(...resp.failures);
-      }
+      populateFailures(resp, failures, i);
     }
-
-    console.log('total failures', failures);
-    console.timeEnd('create index and ingest');
 
     const result = {
       success,
       failures,
+      docCount: this.docArray.length,
     };
 
     if (success) {
@@ -121,6 +116,18 @@ export class Importer {
     }
 
     return result;
+  }
+}
+
+function populateFailures(error, failures, chunkCount) {
+  if (error.failures && error.failures.length) {
+    // update the item value to include the chunk count
+    // e.g. item 3 in chunk 2 is actually item 20003
+    for (let f = 0; f < error.failures.length; f++) {
+      const failure = error.failures[f];
+      failure.item = failure.item + (CHUNK_SIZE * chunkCount);
+    }
+    failures.push(...error.failures);
   }
 }
 

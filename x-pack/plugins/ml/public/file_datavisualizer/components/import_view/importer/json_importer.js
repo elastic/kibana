@@ -8,31 +8,29 @@
 import { Importer } from './importer';
 
 export class JsonImporter extends Importer {
-  constructor(results) {
-    super(results);
+  constructor(results, settings) {
+    super(settings);
   }
 
   async read(json) {
-    console.log('read json file');
-    console.time('read json file');
-
     try {
       const splitJson = json.split(/}\s*\n/);
 
       const ndjson = [];
       for (let i = 0; i < splitJson.length; i++) {
-        ndjson.push(`${splitJson[i]}}`);
+        if (splitJson[i] !== '') {
+          // note the extra } at the end of the line, adding back
+          // the one that was eaten in the split
+          ndjson.push(`${splitJson[i]}}`);
+        }
       }
 
       this.docArray = ndjson;
 
-      console.timeEnd('read json file');
       return {
         success: true,
       };
     } catch (error) {
-      console.error(error);
-      console.timeEnd('read json file');
       return {
         success: false,
         error,
