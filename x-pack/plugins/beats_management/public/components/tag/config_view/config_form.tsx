@@ -119,11 +119,6 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
         : value;
     });
 
-    this.props.schema.forEach(s => {
-      if (s.ui.transform && s.ui.transform === 'removed') {
-        delete processed[s.id];
-      }
-    });
     this.props.onSubmit(processed);
   };
   public render() {
