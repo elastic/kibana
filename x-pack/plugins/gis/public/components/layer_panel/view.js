@@ -54,11 +54,13 @@ export class LayerPanel  extends React.Component {
       onLabelChange: (label) => {
         this.props.updateLabel(this.props.selectedLayer.getId(), label);
       },
-      minZoom: 0,
-      maxZoom: 24,
-      onMinZoomChange: () => {
+      minZoom: this.props.selectedLayer.getMinZoom(),
+      maxZoom: this.props.selectedLayer.getMaxZoom(),
+      onMinZoomChange: (zoom) => {
+        this.props.updateMinZoom(this.props.selectedLayer.getId(), zoom);
       },
-      onMaxZoomChange: () => {
+      onMaxZoomChange: (zoom) => {
+        this.props.updateMaxZoom(this.props.selectedLayer.getId(), zoom);
       }
     });
 
@@ -66,7 +68,7 @@ export class LayerPanel  extends React.Component {
       <Fragment>
         <EuiTitle size="s"><h2><strong>Settings</strong></h2></EuiTitle>
         <EuiSpacer size="l"/>
-          {layerSettings}
+        {layerSettings}
         <EuiSpacer size="l"/>
       </Fragment>);
 

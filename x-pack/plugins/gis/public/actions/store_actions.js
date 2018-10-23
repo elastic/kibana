@@ -183,14 +183,14 @@ export function updateLayerLabel(id, newLabel) {
   };
 }
 
-export function updateLayerShowAtAllZoomLevels(id, showAtAllZoomLevels) {
-  return {
-    type: UPDATE_LAYER_PROP,
-    id,
-    propName: 'showAtAllZoomLevels',
-    newValue: showAtAllZoomLevels,
-  };
-}
+// export function updateLayerShowAtAllZoomLevels(id, showAtAllZoomLevels) {
+//   return {
+//     type: UPDATE_LAYER_PROP,
+//     id,
+//     propName: 'showAtAllZoomLevels',
+//     newValue: showAtAllZoomLevels,
+//   };
+// }
 
 export function updateLayerMinZoom(id, minZoom) {
   return {
@@ -301,7 +301,7 @@ export async function loadMapResources(dispatch) {
         temporary: false,
         style: {},
         type: "TILE",
-        showAtAllZoomLevels: true,
+        // showAtAllZoomLevels: true,
         minZoom: 0,
         maxZoom: 24,
       }

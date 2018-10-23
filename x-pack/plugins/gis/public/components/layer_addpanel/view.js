@@ -38,7 +38,7 @@ export class AddLayerPanel extends React.Component {
     this.state = {
       label: '',
       sourceType: '',
-      showAtAllZoomLevels: false,
+      // showAtAllZoomLevels: false,
       minZoom: 0,
       maxZoom: 24,
     };
@@ -102,8 +102,8 @@ export class AddLayerPanel extends React.Component {
     }
   }
 
-  _onMinZoomChange = (event) => {
-    const sanitizedValue = parseInt(event.target.value, 10);
+  _onMinZoomChange = (sanitizedValue) => {
+    // const sanitizedValue = parseInt(event.target.value, 10);
     const minZoom = sanitizedValue >= 24 ? 23 : sanitizedValue;
     this.setState((prevState) => {
       if (minZoom >= prevState.maxZoom) {
@@ -115,10 +115,10 @@ export class AddLayerPanel extends React.Component {
 
       return { minZoom };
     }, this._onZoomRangeChange);
-  }
+  };
 
-  _onMaxZoomChange = (event) => {
-    const sanitizedValue = parseInt(event.target.value, 10);
+  _onMaxZoomChange = (sanitizedValue) => {
+    // const sanitizedValue = parseInt(event.target.value, 10);
     const maxZoom = sanitizedValue <= 0 ? 1 : sanitizedValue;
     this.setState((prevState) => {
       if (maxZoom <= prevState.minZoom) {
@@ -130,7 +130,7 @@ export class AddLayerPanel extends React.Component {
 
       return { maxZoom };
     }, this._onZoomRangeChange);
-  }
+  };
 
   _onSourceTypeChange = (sourceType) => {
     this.setState({
@@ -262,9 +262,9 @@ export class AddLayerPanel extends React.Component {
   }
 
   _renderZoomSliders() {
-    if (this.state.showAtAllZoomLevels) {
-      return;
-    }
+    // if (this.state.showAtAllZoomLevels) {
+    //   return;
+    // }
 
     return (
       <Fragment>

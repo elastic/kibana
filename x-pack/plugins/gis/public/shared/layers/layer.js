@@ -28,6 +28,9 @@ export class ALayer {
     }
   }
 
+  static _sanitizeSliderValue(event) {
+    return parseInt(event.target.value, 10);
+  }
 
   static _renderZoomSliders(minZoom, maxZoom, onMinZoomChange, onMaxZoomChange) {
     // if (this.state.showAtAllZoomLevels) {
@@ -44,7 +47,7 @@ export class ALayer {
             min={0}
             max={24}
             value={minZoom.toString()}
-            onChange={onMinZoomChange}
+            onChange={(event) => onMinZoomChange(ALayer._sanitizeSliderValue(event))}
             showInput
           />
         </EuiFormRow>
@@ -57,7 +60,7 @@ export class ALayer {
             min={0}
             max={24}
             value={maxZoom.toString()}
-            onChange={onMaxZoomChange}
+            onChange={(event) => onMaxZoomChange(ALayer._sanitizeSliderValue(event))}
             showInput
           />
         </EuiFormRow>
@@ -96,7 +99,7 @@ export class ALayer {
     layerDescriptor.dataRequests = [];
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
-    layerDescriptor.showAtAllZoomLevels = _.get(options, 'showAtAllZoomLevels', true);
+    layerDescriptor.showAtAllZoomLevels = _.get(options, 'showAtAllZoomLevels', false);
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.source = options.source;
@@ -184,6 +187,14 @@ export class ALayer {
     }
 
     return false;
+  }
+
+  getMinZoom() {
+    return this._descriptor.minZoom;
+  }
+
+  getMaxZoom() {
+    return this._descriptor.maxZoom;
   }
 
   getZoomConfig() {
