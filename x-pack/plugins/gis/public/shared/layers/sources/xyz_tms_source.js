@@ -38,10 +38,10 @@ export class XYZTMSSource extends TMSSource {
 
   renderDetails() {
     return (
-      <EuiText className="gisLayerDetails" color="subdued" size="s">
-        <p>
-          <strong className="gisLayerDetails__label">Type: </strong> &emsp; <span>Tile</span><br/>
-          <strong className="gisLayerDetails__label">Url: </strong> &emsp;
+      <EuiText color="subdued" size="s">
+        <p className="gisLayerDetails">
+          <strong className="gisLayerDetails__label">Type: </strong><span>Tile</span><br/>
+          <strong className="gisLayerDetails__label">Url: </strong>
           <span className="eui-textBreakAll">{this._descriptor.urlTemplate}</span><br/>
         </p>
       </EuiText>

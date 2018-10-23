@@ -50,6 +50,7 @@ export class DynamicColorSelection extends React.Component {
       options={options}
       onChange={onChange}
       singleSelection={{}}
+      fullWidth
     />);
 
   }

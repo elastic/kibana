@@ -1,8 +1,10 @@
-.gisLayerDetails {
-  padding: $euiSize;
-}
-
 .gisLayerDetails__label {
   display: inline-block;
   min-width: 5.5em;
+  margin-right: $euiSizeS;
+  white-space: nowrap;
+
+  + span {
+    word-break: break-all;
+  }
 }

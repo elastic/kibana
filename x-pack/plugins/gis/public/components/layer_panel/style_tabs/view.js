@@ -9,7 +9,7 @@ import React from 'react';
 import {
   EuiTitle,
   EuiPanel,
-  EuiHorizontalRule
+  EuiSpacer
 } from '@elastic/eui';
 
 export class StyleTabs extends React.Component {
@@ -55,7 +55,7 @@ export class StyleTabs extends React.Component {
       return (
         <EuiPanel key={index}>
           {editorHeader}
-          <EuiHorizontalRule margin="m" />
+          <EuiSpacer margin="m"/>
           {styleEditor}
         </EuiPanel>
       );

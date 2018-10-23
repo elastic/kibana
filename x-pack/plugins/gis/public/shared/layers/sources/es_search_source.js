@@ -62,13 +62,13 @@ export class ESSearchSource extends VectorSource {
 
   renderDetails() {
     return (
-      <EuiText className="gisLayerDetails" color="subdued" size="s">
-        <p>
-          <strong className="gisLayerDetails__label">Type: </strong> &emsp; <span>Elasticsearch document</span><br/>
-          <strong className="gisLayerDetails__label">Index pattern: </strong> &emsp; <span>{this._descriptor.indexPatternId}</span><br/>
-          <strong className="gisLayerDetails__label">Geo field: </strong> &emsp; <span>{this._descriptor.geoField}</span><br/>
+      <EuiText color="subdued" size="s">
+        <p className="gisLayerDetails">
+          <strong className="gisLayerDetails__label">Type: </strong><span>Elasticsearch document</span><br/>
+          <strong className="gisLayerDetails__label">Index pattern: </strong><span>{this._descriptor.indexPatternId}</span><br/>
+          <strong className="gisLayerDetails__label">Geo field: </strong><span>{this._descriptor.geoField}</span><br/>
           {/*//todo : skip for now to reduce form-length for demo*/}
-          {/*<strong className="gisLayerDetails__label">Limit: </strong> &emsp; <span>{this._descriptor.limit}</span>*/}
+          {/*<strong className="gisLayerDetails__label">Limit: </strong><span>{this._descriptor.limit}</span>*/}
         </p>
       </EuiText>
     );

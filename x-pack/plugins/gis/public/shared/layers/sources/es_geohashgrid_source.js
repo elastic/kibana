@@ -78,11 +78,11 @@ export class ESGeohashGridSource extends ASource {
 
   renderDetails() {
     return (
-      <EuiText className="gisLayerDetails" color="subdued" size="s">
-        <p>
-          <strong className="gisLayerDetails__label">Type: </strong> &emsp; <span>geohash_grid</span><br/>
-          <strong className="gisLayerDetails__label">Index pattern: </strong> &emsp; <span>{this._descriptor.indexPatternId}</span><br/>
-          <strong className="gisLayerDetails__label">Point field: </strong> &emsp; <span>{this._descriptor.geoField}</span><br/>
+      <EuiText color="subdued" size="s">
+        <p className="gisLayerDetails">
+          <strong className="gisLayerDetails__label">Type: </strong><span>geohash_grid</span><br/>
+          <strong className="gisLayerDetails__label">Index pattern: </strong><span>{this._descriptor.indexPatternId}</span><br/>
+          <strong className="gisLayerDetails__label">Point field: </strong><span>{this._descriptor.geoField}</span><br/>
         </p>
       </EuiText>
     );

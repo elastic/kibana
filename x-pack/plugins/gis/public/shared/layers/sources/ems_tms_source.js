@@ -28,11 +28,11 @@ export class EMSTMSSource extends TMSSource {
 
   renderDetails() {
     return (
-      <EuiText className="gisLayerDetails" color="subdued" size="s">
-        <p>
-          <strong className="gisLayerDetails__label">Source: </strong> &emsp; <span>Elastic Maps Service</span><br/>
-          <strong className="gisLayerDetails__label">Type: </strong> &emsp; <span>Tile</span><br/>
-          <strong className="gisLayerDetails__label">Id: </strong> &emsp; <span>{this._descriptor.id}</span><br/>
+      <EuiText color="subdued" size="s">
+        <p className="gisLayerDetails">
+          <strong className="gisLayerDetails__label">Source: </strong><span>Elastic Maps Service</span><br/>
+          <strong className="gisLayerDetails__label">Type: </strong><span>Tile</span><br/>
+          <strong className="gisLayerDetails__label">Id: </strong><span>{this._descriptor.id}</span><br/>
         </p>
       </EuiText>
     );

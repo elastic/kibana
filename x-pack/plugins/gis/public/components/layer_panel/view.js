@@ -68,7 +68,7 @@ export class LayerPanel  extends React.Component {
     const frags = (
       <EuiPanel>
         <EuiTitle size="xs"><h5>Layer settings</h5></EuiTitle>
-        <EuiHorizontalRule margin="m"/>
+        <EuiSpacer margin="m"/>
         {layerSettings}
       </EuiPanel>);
 
@@ -110,7 +110,7 @@ export class LayerPanel  extends React.Component {
     return (
       <EuiFlyout
         onClose={cancelLayerPanel}
-        style={{ maxWidth: 768 }}
+        style={{ maxWidth: 432 }}
       >
         <EuiFlyoutHeader>
           <EuiTitle size="s">
