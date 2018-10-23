@@ -90,7 +90,7 @@ export class NavControlPopover extends Component<Props, State> {
         panelPaddingSize="none"
         // @ts-ignore
         repositionOnScroll={true}
-        withTitle
+        withTitle={this.props.anchorPosition.includes('down')}
         ownFocus
       >
         {element}

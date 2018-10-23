@@ -43,7 +43,7 @@ export class HeaderNavControls extends Component<Props> {
   }
 
   private renderNavControl = (navControl: NavControl) => (
-    <EuiHeaderSectionItem key={navControl.name}>
+    <EuiHeaderSectionItem key={navControl.name} border="right">
       <HeaderNavControl navControl={navControl} />
     </EuiHeaderSectionItem>
   );
