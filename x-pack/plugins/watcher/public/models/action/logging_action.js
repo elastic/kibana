@@ -6,6 +6,7 @@
 
 import { get } from 'lodash';
 import { BaseAction } from './base_action';
+import { i18n } from '@kbn/i18n';
 
 export class LoggingAction extends BaseAction {
   constructor(props = {}) {
@@ -26,25 +27,39 @@ export class LoggingAction extends BaseAction {
 
   get description() {
     const text = this.text || '';
-    return `Log message '${text}'`;
+    return i18n.translate('xpack.watcher.models.loggingAction.description', {
+      defaultMessage: 'Log message \'{text}\'',
+      values: {
+        text
+      }
+    });
   }
 
   get simulateMessage() {
-    return `Sample message logged`;
+    return i18n.translate('xpack.watcher.models.loggingAction.simulateMessage', {
+      defaultMessage: 'Sample message logged',
+    });
   }
 
   get simulateFailMessage() {
-    return `Failed to log sample message.`;
+    return i18n.translate('xpack.watcher.models.loggingAction.simulateFailMessage', {
+      defaultMessage: 'Failed to log sample message.',
+    });
   }
 
   static fromUpstreamJson(upstreamAction) {
     return new LoggingAction(upstreamAction);
   }
 
-  static typeName = 'Logging';
+  static typeName = i18n.translate('xpack.watcher.models.loggingAction.typeName', {
+    defaultMessage: 'Logging',
+  });
   static iconClass = 'kuiIcon fa-file-text-o';
-  static selectMessage = 'Add a new item to the logs.';
+  static selectMessage = i18n.translate('xpack.watcher.models.loggingAction.selectMessageText', {
+    defaultMessage: 'Add a new item to the logs.',
+  });
   static template = '<watch-logging-action></watch-logging-action>';
-  static selectMessage = 'Add a new item to the logs.';
-  static simulatePrompt = 'Log a sample message now';
+  static simulatePrompt = i18n.translate('xpack.watcher.models.loggingAction.simulateButtonLabel', {
+    defaultMessage: 'Log a sample message now',
+  });
 }
