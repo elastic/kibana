@@ -37,6 +37,7 @@ import { postgresqlLogsSpecProvider } from './postgresql_logs';
 import { rabbitmqMetricsSpecProvider } from './rabbitmq_metrics';
 import { redisLogsSpecProvider } from './redis_logs';
 import { redisMetricsSpecProvider } from './redis_metrics';
+import { suricataLogsSpecProvider } from './suricata_logs';
 import { dockerMetricsSpecProvider } from './docker_metrics';
 import { kubernetesMetricsSpecProvider } from './kubernetes_metrics';
 import { uwsgiMetricsSpecProvider } from './uwsgi_metrics';
@@ -82,6 +83,7 @@ export function registerTutorials(server) {
   server.registerTutorial(rabbitmqMetricsSpecProvider);
   server.registerTutorial(redisLogsSpecProvider);
   server.registerTutorial(redisMetricsSpecProvider);
+  server.registerTutorial(suricataLogsSpecProvider);
   server.registerTutorial(dockerMetricsSpecProvider);
   server.registerTutorial(kubernetesMetricsSpecProvider);
   server.registerTutorial(uwsgiMetricsSpecProvider);
