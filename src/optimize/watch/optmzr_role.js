@@ -26,19 +26,20 @@ import { fromRoot } from '../../utils'; // TODO: remove when merge with master
 import { WatchCache } from './watch_cache';
 
 export default async (kbnServer, kibanaHapiServer, config) => {
+  const log = (tags, data) => kibanaHapiServer.log(tags, data);
   const server = new WatchServer(
     config.get('optimize.watchHost'),
     config.get('optimize.watchPort'),
     config.get('server.basePath'),
     new WatchOptimizer({
-      log: kibanaHapiServer.log,
+      log,
       uiBundles: kbnServer.uiBundles,
       profile: config.get('optimize.profile'),
       sourceMaps: config.get('optimize.sourceMaps'),
       prebuild: config.get('optimize.watchPrebuild'),
       unsafeCache: config.get('optimize.unsafeCache'),
       watchCache: new WatchCache({
-        log: kibanaHapiServer.log,
+        log,
         outputPath: config.get('path.data'),
         dllsPath: fromRoot('./dlls'), // TODO: replace by DllCompiler.getRawDllConfig().outputPath when merge with master
         cachePath: resolve(kbnServer.uiBundles.getCacheDirectory(), '../'),

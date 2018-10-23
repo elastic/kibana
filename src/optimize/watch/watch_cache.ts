@@ -18,7 +18,7 @@
  */
 
 import { createHash } from 'crypto';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { readFile, writeFile } from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
 
@@ -28,6 +28,8 @@ import globby from 'globby';
 import mkdirp from 'mkdirp';
 
 const mkdirpAsync = promisify(mkdirp);
+const readAsync = promisify(readFile);
+const writeAsync = promisify(writeFile);
 
 interface Params {
   log: (tags: string[], data: string) => void;
@@ -46,9 +48,10 @@ export class WatchCache {
   private readonly outputPath: Params['outputPath'];
   private readonly dllsPath: Params['dllsPath'];
   private readonly cachePath: Params['cachePath'];
-  private readonly statePath: string;
   private readonly cacheState: WatchCacheStateContent;
+  private statePath: string;
   private diskCacheState: WatchCacheStateContent;
+  private isInitialized: boolean;
 
   constructor(params: Params) {
     this.log = params.log;
@@ -56,14 +59,27 @@ export class WatchCache {
     this.dllsPath = params.dllsPath;
     this.cachePath = params.cachePath;
 
-    this.statePath = resolve(this.outputPath, 'watch_optimizer_cache_state.json');
+    this.isInitialized = false;
+    this.statePath = '';
     this.cacheState = {};
-    this.diskCacheState = this.read();
-    this.cacheState.yarnLockSha = this.buildYarnLockSha();
-    this.cacheState.optimizerConfigSha = this.buildOptimizerConfigSha();
+    this.diskCacheState = {};
+    this.cacheState.yarnLockSha = '';
+    this.cacheState.optimizerConfigSha = '';
+  }
+
+  public async tryInit() {
+    if (!this.isInitialized) {
+      this.statePath = resolve(this.outputPath, 'watch_optimizer_cache_state.json');
+      this.diskCacheState = await this.read();
+      this.cacheState.yarnLockSha = await this.buildYarnLockSha();
+      this.cacheState.optimizerConfigSha = await this.buildOptimizerConfigSha();
+      this.isInitialized = true;
+    }
   }
 
   public async tryReset() {
+    await this.tryInit();
+
     if (!this.isResetNeeded()) {
       return;
     }
@@ -77,11 +93,11 @@ export class WatchCache {
     // start by deleting the state file to lower the
     // amount of time that another process might be able to
     // successfully read it once we decide to delete it
-    del.sync(this.statePath);
+    await del(this.statePath);
 
     // first delete some empty folder that left
     // from any previous cache reset action
-    deleteEmpty.sync(`${this.cachePath}`);
+    await deleteEmpty(`${this.cachePath}`);
 
     // delete everything in optimize/.cache directory
     // except ts-node
@@ -92,36 +108,42 @@ export class WatchCache {
     await mkdirpAsync(this.dllsPath);
 
     // re-write new cache state file
-    this.write();
+    await this.write();
 
     this.log(['info', 'optimize:watch_cache'], 'The optimizer watch cache has reset');
   }
 
-  private buildShaWithMultipleFiles(filePaths: string[]) {
+  private async buildShaWithMultipleFiles(filePaths: string[]) {
     const shaHash = createHash('sha1');
 
-    filePaths.forEach((filePath: string) => {
-      if (existsSync(filePath)) {
-        shaHash.update(readFileSync(filePath), 'utf8');
+    for (const filePath of filePaths) {
+      try {
+        shaHash.update(await readAsync(filePath), 'utf8');
+      } catch (e) {
+        /* no-op */
       }
-    });
+    }
 
     return shaHash.digest('hex');
   }
 
-  private buildYarnLockSha() {
+  private async buildYarnLockSha() {
     const kibanaYarnLock = resolve(__dirname, '../../../yarn.lock');
     const xpackYarnLock = resolve(__dirname, '../../../x-pack/yarn.lock');
 
-    return this.buildShaWithMultipleFiles([kibanaYarnLock, xpackYarnLock]);
+    return await this.buildShaWithMultipleFiles([kibanaYarnLock, xpackYarnLock]);
   }
 
-  private buildOptimizerConfigSha() {
+  private async buildOptimizerConfigSha() {
     const baseOptimizer = resolve(__dirname, '../base_optimizer.js');
     const dynamicDllConfigModel = resolve(__dirname, '../dynamic_dll_plugin/dll_config_model.js');
     const dynamicDllPlugin = resolve(__dirname, '../dynamic_dll_plugin/dynamic_dll_plugin.js');
 
-    return this.buildShaWithMultipleFiles([baseOptimizer, dynamicDllConfigModel, dynamicDllPlugin]);
+    return await this.buildShaWithMultipleFiles([
+      baseOptimizer,
+      dynamicDllConfigModel,
+      dynamicDllPlugin,
+    ]);
   }
 
   private isResetNeeded() {
@@ -136,14 +158,14 @@ export class WatchCache {
     return this.cacheState.optimizerConfigSha !== this.diskCacheState.optimizerConfigSha;
   }
 
-  private write() {
-    writeFileSync(this.statePath, JSON.stringify(this.cacheState, null, 2), 'utf8');
+  private async write() {
+    await writeAsync(this.statePath, JSON.stringify(this.cacheState, null, 2), 'utf8');
     this.diskCacheState = this.cacheState;
   }
 
-  private read(): WatchCacheStateContent {
+  private async read(): Promise<WatchCacheStateContent> {
     try {
-      return JSON.parse(readFileSync(this.statePath, 'utf8'));
+      return JSON.parse(await readAsync(this.statePath, 'utf8'));
     } catch (error) {
       return {};
     }

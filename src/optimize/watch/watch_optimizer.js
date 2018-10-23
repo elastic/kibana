@@ -44,6 +44,7 @@ export default class WatchOptimizer extends BaseOptimizer {
     this.initializing = true;
     this.initialBuildComplete = false;
 
+    // try reset the watch optimizer cache
     await this.watchCache.tryReset();
 
     // log status changes
