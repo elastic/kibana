@@ -82,7 +82,7 @@ export async function loadAction({ name, skipExisting, client, dataDir, log }) {
       return index;
     });
 
-  await client.indices.refresh({
+  await client.indices.flushSynced({
     index: indicesToRefresh
   });
 
