@@ -8,7 +8,7 @@ import React, {  } from 'react';
 
 import {
   EuiFlexItem,
-  EuiFlexGroup
+  EuiFlexGroup,
 } from '@elastic/eui';
 
 import { SingleFieldSelect } from '../../../../shared/components/single_field_select';
@@ -53,7 +53,7 @@ export class DataSelector extends React.Component {
   _renderSingleFieldSelect() {
 
     if (!this.state.indexPattern) {
-      return null;
+      // return null;
     }
 
     const onFieldChange = (fieldName) => {
@@ -68,13 +68,15 @@ export class DataSelector extends React.Component {
       });
     };
 
-    return (<SingleFieldSelect
-      placeholder="Select join field"
-      value={this.state.selectedStringField}
-      onChange={onFieldChange}
-      filterField={this.filterStringOrNumberFields}
-      fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
-    />);
+    return (
+      <SingleFieldSelect
+        placeholder="Select field"
+        value={this.state.selectedStringField}
+        onChange={onFieldChange}
+        filterField={this.filterStringOrNumberFields}
+        fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
+      />
+    );
   }
 
   render() {
@@ -92,12 +94,12 @@ export class DataSelector extends React.Component {
     }
 
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <IndexPatternSelect
+            placeholder="Select index pattern"
             indexPatternId={this.state.indexPatternId}
             onChange={this._onIndexPatternSelect}
-            placeholder="Select index pattern"
           />
         </EuiFlexItem>
         <EuiFlexItem>

@@ -7,9 +7,11 @@
 import React, {  } from 'react';
 
 import {
-  EuiButton,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiTitle,
+  EuiSpacer
 } from '@elastic/eui';
 
 import { Join } from './resources/join';
@@ -37,20 +39,16 @@ export class JoinEditor extends React.Component {
         }
       };
       return (
-        <EuiFlexItem key={index}>
-          <Join
-            join={joinDescriptor}
-            layer={this.props.layer}
-            onJoinSelection={onJoinSelection}
-          />
-        </EuiFlexItem>);
+        <Join
+          key={index}
+          join={joinDescriptor}
+          layer={this.props.layer}
+          onJoinSelection={onJoinSelection}
+        />
+      );
     });
 
-    return (
-      <EuiFlexGroup direction="column">
-        {joins}
-      </EuiFlexGroup>
-    );
+    return (joins);
   }
 
   render() {
@@ -74,12 +72,17 @@ export class JoinEditor extends React.Component {
 
     return (
       <div>
-        <div>
-          {this._renderJoins()}
-        </div>
-        <div>
-          <EuiButton onClick={addJoin}>Add join</EuiButton>
-        </div>
+        <EuiFlexGroup responsive={false}>
+          <EuiFlexItem>
+            <EuiTitle size="xs"><h5>Joins</h5></EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon iconType="plusInCircle" onClick={addJoin} aria-label="Add join" title="Add join" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m"  />
+
+        {this._renderJoins()}
       </div>
     );
   }

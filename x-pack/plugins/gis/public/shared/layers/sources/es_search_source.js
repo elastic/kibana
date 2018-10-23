@@ -13,6 +13,7 @@ import {
   EuiFormRow,
   // EuiFieldNumber,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../components/single_field_select';
@@ -61,21 +62,15 @@ export class ESSearchSource extends VectorSource {
 
   renderDetails() {
     return (
-      <Fragment>
-        <div>
-          <span className="bold">Type: </span><span>Elasticsearch document</span>
-        </div>
-        <div>
-          <span className="bold">Index pattern: </span><span>{this._descriptor.indexPatternId}</span>
-        </div>
-        <div>
-          <span className="bold">Geo field: </span><span>{this._descriptor.geoField}</span>
-        </div>
-        <div>
+      <EuiText color="subdued" size="s">
+        <p className="gisLayerDetails">
+          <strong className="gisLayerDetails__label">Type: </strong><span>Elasticsearch document</span><br/>
+          <strong className="gisLayerDetails__label">Index pattern: </strong><span>{this._descriptor.indexPatternId}</span><br/>
+          <strong className="gisLayerDetails__label">Geo field: </strong><span>{this._descriptor.geoField}</span><br/>
           {/*//todo : skip for now to reduce form-length for demo*/}
-          {/*<span className="bold">Limit: </span><span>{this._descriptor.limit}</span>*/}
-        </div>
-      </Fragment>
+          {/*<strong className="gisLayerDetails__label">Limit: </strong><span>{this._descriptor.limit}</span>*/}
+        </p>
+      </EuiText>
     );
   }
 
@@ -378,13 +373,13 @@ class Editor extends React.Component {
 
     return (
       <Fragment>
-        {/*<EuiFormRow compressed>*/}
-          {/*<EuiSwitch*/}
-            {/*label="Show tooltip on feature mouseover"*/}
-            {/*checked={this.state.showTooltip}*/}
-            {/*onChange={this.onShowTooltipChange}*/}
-          {/*/>*/}
-        {/*</EuiFormRow>*/}
+        {/* <EuiFormRow compressed>
+          <EuiSwitch
+            label="Show tooltip on feature mouseover"
+            checked={this.state.showTooltip}
+            onChange={this.onShowTooltipChange}
+          />
+        </EuiFormRow> */}
 
         {fieldSelectFormRow}
       </Fragment>
@@ -399,18 +394,18 @@ class Editor extends React.Component {
     return (
       <Fragment>
 
-        {/*<EuiFormRow*/}
-          {/*label="Limit"*/}
-          {/*helpText="Maximum documents retrieved from elasticsearch."*/}
-          {/*compressed*/}
-        {/*>*/}
-          {/*<EuiFieldNumber*/}
-            {/*placeholder="10"*/}
-            {/*value={this.state.limit}*/}
-            {/*onChange={this.onLimitChange}*/}
-            {/*aria-label="Limit"*/}
-          {/*/>*/}
-        {/*</EuiFormRow>*/}
+        {/* <EuiFormRow
+          label="Limit"
+          helpText="Maximum documents retrieved from elasticsearch."
+          compressed
+        >
+          <EuiFieldNumber
+            placeholder="10"
+            value={this.state.limit}
+            onChange={this.onLimitChange}
+            aria-label="Limit"
+          />
+        </EuiFormRow> */}
 
 
         <EuiFormRow

@@ -27,6 +27,7 @@ export function gis(kibana) {
         icon: 'plugins/gis/icon.svg'
       },
       home: ['plugins/gis/register_feature'],
+      styleSheetPaths: `${__dirname}/public/index.scss`,
       mappings
     },
     config(Joi) {

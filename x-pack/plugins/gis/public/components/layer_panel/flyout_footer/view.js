@@ -49,7 +49,7 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
           onClick={saveLayerEdits}
           fill
         >
-          Save &amp; Close
+          Save &amp; close
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

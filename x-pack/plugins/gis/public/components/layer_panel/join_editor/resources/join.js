@@ -10,7 +10,9 @@ import {
   EuiSuperSelect,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiIcon
+  EuiPopover,
+  EuiExpressionButton,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { DataSelector } from './data_selector';
 
@@ -21,7 +23,9 @@ export class Join extends React.Component {
     this.state = {
       stringFields: null,
       leftField: null,
-      right: null
+      right: null,
+      leftPopoverOpen: false,
+      rightPopoverOpen: false,
     };
   }
 
@@ -65,18 +69,25 @@ export class Join extends React.Component {
 
     const onChange = (field) => {
       this.setState({
-        leftField: field
+        leftField: field,
+        leftPopoverOpen: false,
       });
       this.props.onJoinSelection({
         leftField: field,
-        right: this.state.right
+        right: this.state.right,
       });
 
     };
 
     const selectedValue = this.state.leftField ? this.state.leftField : this.state.stringFields[0].name;
     return (
-      <EuiSuperSelect valueOfSelected={selectedValue} options={options}  onChange={onChange} />
+      <EuiSuperSelect
+        valueOfSelected={selectedValue}
+        options={options}
+        onChange={onChange}
+        placholder="Select join field"
+        aria-label="Select join field"
+      />
     );
   }
 
@@ -87,7 +98,8 @@ export class Join extends React.Component {
 
     const onSelection = (rightDataSelection) => {
       this.setState({
-        right: rightDataSelection
+        right: rightDataSelection,
+        rightPopoverOpen: false,
       });
       this.props.onJoinSelection({
         leftField: this.state.leftField,
@@ -97,6 +109,29 @@ export class Join extends React.Component {
 
     return (<DataSelector seedSelection={this.state.right} onSelection={onSelection}/>);
   }
+
+  toggleRightPopover = () => {
+    this.setState((prevState) => ({
+      rightPopoverOpen: !prevState.rightPopoverOpen,
+    }));
+  }
+  closeRightPopover = () => {
+    this.setState({
+      rightPopoverOpen: false,
+    });
+  }
+
+  toggleLeftPopover = () => {
+    this.setState((prevState) => ({
+      leftPopoverOpen: !prevState.leftPopoverOpen,
+    }));
+  }
+  closeLeftPopover = () => {
+    this.setState({
+      leftPopoverOpen: false,
+    });
+  }
+
 
   render() {
     if (this.props.join) {//init with default
@@ -112,19 +147,53 @@ export class Join extends React.Component {
 
     this._loadStringFields();
 
+    // console.log(this.state);
+
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          {this._renderJoinFields()}
+      <EuiFlexGroup className="gisJoinItem" responsive={false} wrap={true} gutterSize="s">
+        <EuiFlexItem grow={false}>
+
+          <EuiPopover
+            id="JoinLeftPopover"
+            isOpen={this.state.leftPopoverOpen}
+            closePopover={this.closeLeftPopover}
+            ownFocus
+            button={
+              <EuiExpressionButton
+                onClick={this.toggleLeftPopover}
+                description="Join field"
+                buttonValue={this.state.leftField ? this.state.leftField : '-- select --'}
+              />
+            }
+          >
+            <div style={{ width: 300 }}>
+              {this._renderJoinFields()}
+            </div>
+          </EuiPopover>
+
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiIcon
-            type="editorLink"
-          />
+        <EuiFlexItem grow={false}>
+
+          <EuiPopover
+            id="JoinRightPopover"
+            isOpen={this.state.rightPopoverOpen}
+            closePopover={this.closeRightPopover}
+            button={
+              <EuiExpressionButton
+                onClick={this.toggleRightPopover}
+                description="with"
+                buttonValue={this.state.right ? `${this.state.right.indexPatternTitle}: ${this.state.right.term}` : '-- select --'}
+              />
+            }
+          >
+            <div style={{ width: 300 }}>
+              {this._renderDataSelector()}
+            </div>
+          </EuiPopover>
+
         </EuiFlexItem>
-        <EuiFlexItem>
-          {this._renderDataSelector()}
-        </EuiFlexItem>
+
+        <EuiButtonIcon className="gisJoinItem__delete" iconType="trash" color="danger" aria-label="Delete join" title="Delete join" />
       </EuiFlexGroup>
     );
   }

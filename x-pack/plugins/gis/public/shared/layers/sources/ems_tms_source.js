@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React from 'react';
 import { TMSSource } from './source';
 import { TileLayer } from '../tile_layer';
+import { EuiText } from '@elastic/eui';
 
 export class EMSTMSSource extends TMSSource {
 
@@ -27,17 +28,13 @@ export class EMSTMSSource extends TMSSource {
 
   renderDetails() {
     return (
-      <Fragment>
-        <div>
-          <span className="bold">Source: </span><span>Elastic Maps Service</span>
-        </div>
-        <div>
-          <span className="bold">Type: </span><span>Tile</span>
-        </div>
-        <div>
-          <span className="bold">Id: </span><span>{this._descriptor.id}</span>
-        </div>
-      </Fragment>
+      <EuiText color="subdued" size="s">
+        <p className="gisLayerDetails">
+          <strong className="gisLayerDetails__label">Source: </strong><span>Elastic Maps Service</span><br/>
+          <strong className="gisLayerDetails__label">Type: </strong><span>Tile</span><br/>
+          <strong className="gisLayerDetails__label">Id: </strong><span>{this._descriptor.id}</span><br/>
+        </p>
+      </EuiText>
     );
   }
 

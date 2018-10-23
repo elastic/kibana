@@ -4,20 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import { StyleTabs } from './style_tabs';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
   EuiHorizontalRule,
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
+  EuiFlexItem,
   EuiTitle,
   EuiSpacer,
+  EuiPanel,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { ALayer } from '../../shared/layers/layer';
 
@@ -65,12 +64,11 @@ export class LayerPanel  extends React.Component {
     });
 
     const frags = (
-      <Fragment>
-        <EuiTitle size="s"><h2><strong>Settings</strong></h2></EuiTitle>
-        <EuiSpacer size="l"/>
+      <EuiPanel>
+        <EuiTitle size="xs"><h5>Layer settings</h5></EuiTitle>
+        <EuiSpacer margin="m"/>
         {layerSettings}
-        <EuiSpacer size="l"/>
-      </Fragment>);
+      </EuiPanel>);
 
     return frags;
 
@@ -79,12 +77,9 @@ export class LayerPanel  extends React.Component {
   _renderJoinSection() {
     return this.props.selectedLayer.isJoinable() ?
       (
-        <Fragment>
-          <EuiTitle size="s"><h2><strong>Joins</strong></h2></EuiTitle>
-          <EuiSpacer size="l"/>
+        <EuiPanel>
           <JoinEditor layer={this.props.selectedLayer}/>
-          <EuiSpacer size="l"/>
-        </Fragment>
+        </EuiPanel>
       ) : null;
   }
 
@@ -101,50 +96,41 @@ export class LayerPanel  extends React.Component {
       }
     });
 
-    const { selectedLayer, cancelLayerPanel } = this.props;
+    const { selectedLayer } = this.props;
     if (!selectedLayer) {
       //todo: temp placeholder to bypass state-bug
       return (<div/>);
     }
 
-
     const globalLayerSettings = this._renderGlobalSettings();
     const joinSection = this._renderJoinSection();
 
-
-
     return (
-      <EuiFlyout
-        onClose={cancelLayerPanel}
-        style={{ maxWidth: 768 }}
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
       >
-        <EuiFlyoutHeader>
+        <EuiFlexItem grow={false} className="gisViewPanel__header">
           <EuiTitle size="s">
             <h1>{this.state.displayName}</h1>
           </EuiTitle>
           <EuiSpacer size="m"/>
-          <EuiSpacer/>
-
-          <div>
-            {selectedLayer.renderSourceDetails()}
-          </div>
-          <EuiSpacer/>
           <EuiHorizontalRule margin="none"/>
-        </EuiFlyoutHeader>
+        </EuiFlexItem>
 
-        <EuiFlyoutBody style={{ paddingTop: 0 }}>
+        <EuiFlexItem className="gisViewPanel__body">
           {globalLayerSettings}
-          <EuiSpacer size="l"/>
           {joinSection}
-          <EuiSpacer size="l"/>
           <StyleTabs layer={selectedLayer}/>
-          <EuiSpacer size="l"/>
-        </EuiFlyoutBody>
+          {selectedLayer.renderSourceDetails()}
+        </EuiFlexItem>
 
-        <EuiFlyoutFooter>
+        <EuiFlexItem grow={false} className="gisViewPanel__footer">
+          <EuiHorizontalRule margin="none"/>
+          <EuiSpacer size="m"/>
           <FlyoutFooter/>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }

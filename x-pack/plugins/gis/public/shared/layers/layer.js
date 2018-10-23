@@ -10,6 +10,9 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiRange,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormHelpText,
 } from '@elastic/eui';
 
 
@@ -39,31 +42,37 @@ export class ALayer {
 
     return (
       <Fragment>
-        <EuiFormRow
-          label="Min zoom"
-          compressed
-        >
-          <EuiRange
-            min={0}
-            max={24}
-            value={minZoom.toString()}
-            onChange={(event) => onMinZoomChange(ALayer._sanitizeSliderValue(event))}
-            showInput
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          label="Max zoom"
-          compressed
-        >
-          <EuiRange
-            min={0}
-            max={24}
-            value={maxZoom.toString()}
-            onChange={(event) => onMaxZoomChange(ALayer._sanitizeSliderValue(event))}
-            showInput
-          />
-        </EuiFormRow>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              label="Min zoom"
+              compressed
+            >
+              <EuiRange
+                min={0}
+                max={24}
+                value={minZoom.toString()}
+                onChange={(event) => onMinZoomChange(ALayer._sanitizeSliderValue(event))}
+                showInput
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              label="Max zoom"
+              compressed
+            >
+              <EuiRange
+                min={0}
+                max={24}
+                value={maxZoom.toString()}
+                onChange={(event) => onMaxZoomChange(ALayer._sanitizeSliderValue(event))}
+                showInput
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFormHelpText>Something here about what the numbers mean.</EuiFormHelpText>
       </Fragment>
     );
   }
@@ -71,13 +80,13 @@ export class ALayer {
   static _renderLabel(seedLabel, onLabelChange) {
     return (
       <EuiFormRow
-        label="Label"
-        compressed
+        label="Layer display name"
+        fullWidth
       >
         <EuiFieldText
+          fullWidth
           value={seedLabel}
           onChange={(event) => {onLabelChange(event.target.value);}}
-          aria-label="layer display name"
         />
       </EuiFormRow>
     );

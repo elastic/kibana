@@ -14,13 +14,10 @@ import {
   EuiText,
   EuiSpacer,
   EuiButton,
-  EuiFlyout,
-  EuiFlyoutBody,
+  EuiHorizontalRule,
   EuiButtonEmpty,
-  EuiFlyoutHeader,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutFooter,
   EuiTitle,
   EuiForm,
   EuiFormRow,
@@ -28,6 +25,7 @@ import {
   EuiSuperSelect,
   // EuiSwitch,
   EuiRange,
+  EuiPanel,
 } from '@elastic/eui';
 export class AddLayerPanel extends React.Component {
 
@@ -122,13 +120,14 @@ export class AddLayerPanel extends React.Component {
 
   _renderNextBtn() {
     const { layerLoading, temporaryLayers, nextAction } = this.props;
-    const addToMapBtnText = 'Next >>';
+    const addToMapBtnText = 'Next';
     return (
       <EuiButton
         style={{ width: '9rem' }}
         disabled={!temporaryLayers || layerLoading}
         isLoading={layerLoading}
-        iconType={temporaryLayers && !layerLoading ? 'check' : undefined}
+        iconSide="right"
+        iconType={'sortRight'}
         onClick={() => {
           const layerId = this.layer.getId();
           this.layer = null;
@@ -316,18 +315,27 @@ export class AddLayerPanel extends React.Component {
 
   _renderFlyout() {
     return (
-      <EuiFlyout onClose={this.props.closeFlyout} size="s">
-        <EuiFlyoutHeader>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+      >
+        <EuiFlexItem grow={false} className="gisViewPanel__header">
           <EuiTitle size="s">
             <h1>Add layer</h1>
           </EuiTitle>
-        </EuiFlyoutHeader>
+          <EuiSpacer size="m"/>
+          <EuiHorizontalRule margin="none"/>
+        </EuiFlexItem>
 
-        <EuiFlyoutBody>
-          {this._renderAddLayerForm()}
-        </EuiFlyoutBody>
+        <EuiFlexItem className="gisViewPanel__body">
+          <EuiPanel>
+            {this._renderAddLayerForm()}
+          </EuiPanel>
+        </EuiFlexItem>
 
-        <EuiFlyoutFooter>
+        <EuiFlexItem grow={false} className="gisViewPanel__footer">
+          <EuiHorizontalRule margin="none"/>
+          <EuiSpacer size="m"/>
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -341,8 +349,8 @@ export class AddLayerPanel extends React.Component {
               {this._renderNextBtn()}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

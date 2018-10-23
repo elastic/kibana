@@ -59,7 +59,7 @@ export class TOCEntry extends React.Component {
         />
       );
     } else if (layer.isLayerLoading()) {
-      visibilityIndicator = <EuiLoadingSpinner size="s"/>;
+      visibilityIndicator = <EuiLoadingSpinner size="m"/>;
     } else if (!layer.showAtZoomLevel(zoom)) {
       const { minZoom, maxZoom } = layer.getZoomConfig();
       visibilityIndicator = (
@@ -95,6 +95,7 @@ export class TOCEntry extends React.Component {
       >
         <EuiFlexGroup
           gutterSize="s"
+          alignItems="center"
           responsive={false}
           className={layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.dataHasLoadError() ? 'visible' : 'notvisible'}
         >
@@ -103,7 +104,7 @@ export class TOCEntry extends React.Component {
           </EuiFlexItem>
           <EuiFlexItem>
             <button onClick={() => openLayerPanel(layer.getId())} >
-              <div style={{ width: 180 }} className="eui-textTruncate">
+              <div style={{ width: 180 }} className="eui-textTruncate eui-textLeft">
                 {this.state.displayName}
               </div>
             </button>

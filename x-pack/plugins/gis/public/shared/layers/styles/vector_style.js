@@ -46,7 +46,7 @@ export class VectorStyle {
   }
 
   static getDisplayName() {
-    return 'Vector Style';
+    return 'Vector style';
   }
 
   static renderEditor({ handleStyleChange, style, layer }) {
@@ -60,7 +60,7 @@ export class VectorStyle {
 
     return (
       <Fragment>
-        <EuiFlexGroup>
+        <EuiFlexGroup direction="column">
           <EuiFlexItem>
             <VectorStyleColorEditor
               property={'fillColor'}
@@ -69,6 +69,8 @@ export class VectorStyle {
               colorStyleDescriptor={properties.fillColor}
               layer={layer}
             />
+          </EuiFlexItem>
+          <EuiFlexItem>
             <VectorStyleColorEditor
               property={'lineColor'}
               name={"Line color"}

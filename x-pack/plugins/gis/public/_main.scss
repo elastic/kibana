@@ -1,0 +1,138 @@
+
+
+
+
+#gis-plugin {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+#react-gis-root {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.gisMapWrapper {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.layerToast {
+  margin-top: -150px !important;
+  pointer-events: none;
+}
+
+.mapContainer {
+  flex-grow: 1;
+}
+
+.LayerControl {
+  position: absolute;
+  z-index: 100;
+  min-width: 17rem;
+  top: $euiSizeM;
+  right: $euiSizeM;
+  max-width: 24rem;
+  padding-bottom: 8px;
+  border-color: transparent;
+
+  &.euiPanel--shadow {
+    @include euiBottomShadowLarge;
+  }
+
+  .LayerControl--header {
+    padding: 16px 16px 8px;
+  }
+}
+
+.layerEntry {
+  padding: 8px 16px;
+}
+
+.layerEntry > .visible {
+  opacity: 1;
+}
+
+.layerEntry > .notvisible { //ugh, already global classname named `invisible`
+    opacity: 0.5;
+}
+
+.layerEntry .grab:hover {
+  cursor: -webkit-grab;
+  cursor: grab;
+}
+
+.layerSettings__type {
+  .euiIcon {
+    margin-top: -2px;
+  }
+}
+
+.hidden {
+  display: none
+}
+
+.sourceSelectItem {
+  width: 400px;
+}
+
+.mapboxgl-popup {
+  z-index: 100;
+}
+
+.gisLayerPanel {
+  background-color: $euiColorLightestShade;
+  width: 0;
+  overflow: hidden;
+
+  > * {
+    width: $euiSizeXXL * 11;
+  }
+
+  &-isVisible {
+    width: $euiSizeXXL * 11;
+    transition: width $euiAnimSpeedNormal $euiAnimSlightResistance;
+  }
+}
+
+.gisViewPanel__header,
+.gisViewPanel__body,
+.gisViewPanel__footer {
+  padding: $euiSize;
+}
+
+.gisViewPanel__header {
+  padding-bottom: 0;
+  flex-shrink: 0;
+  z-index: 2;
+  box-shadow: 0 $euiSize $euiSize (-$euiSize / 2) $euiColorLightestShade;
+}
+
+.gisViewPanel__body {
+  overflow: hidden;
+  overflow-y: auto;
+  @include euiScrollBar;
+
+  > *:not(:last-child) {
+    margin-bottom: $euiSize;
+    flex: 0 0 auto;
+  }
+}
+
+.gisViewPanel__footer {
+  padding-top: 0;
+  flex-shrink: 0;
+  z-index: 2;
+  box-shadow: 0 ($euiSize *-1) $euiSize (-$euiSize / 2) $euiColorLightestShade;
+}
+
+// EUIFIXTODO:
+
+.euiColorPicker__emptySwatch {
+  position: relative;
+}

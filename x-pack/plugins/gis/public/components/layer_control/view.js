@@ -24,6 +24,7 @@ export function LayerControl(props) {
       <EuiFlexGroup
         className="LayerControl--header"
         justifyContent="spaceBetween"
+        alignItems="center"
         responsive={false}
         gutterSize="none"
       >
