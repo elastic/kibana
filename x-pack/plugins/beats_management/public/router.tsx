@@ -11,6 +11,7 @@ import { Header } from './components/layouts/header';
 import { FrontendLibs } from './lib/lib';
 import { BeatDetailsPage } from './pages/beat';
 import { MainPages } from './pages/main';
+import { NoAccessPage } from './pages/no_access';
 import { TagPage } from './pages/tag';
 
 export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
@@ -30,6 +31,10 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
           ]}
         />
         <Switch>
+          {!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
+            !libs.framework.getCurrentUser().roles.includes('superuser') && (
+              <Route render={() => <NoAccessPage />} />
+            )}
           <Route
             path="/"
             exact={true}
