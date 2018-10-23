@@ -13,11 +13,11 @@ import {
   addPreviewLayer,
   removeLayer,
   clearTemporaryLayers,
-  promoteTemporaryLayers,
   updateLayerLabel,
   // updateLayerShowAtAllZoomLevels,
   updateLayerMinZoom,
   updateLayerMaxZoom,
+  setSelectedLayer
 } from "../../actions/store_actions";
 import { resetLayerLoad } from '../../actions/ui_actions';
 import _ from 'lodash';
@@ -58,7 +58,11 @@ function mapDispatchToProps(dispatch) {
       dispatch(addPreviewLayer(layer));
     },
     removeLayer: id => dispatch(removeLayer(id)),
-    addAction: () => dispatch(promoteTemporaryLayers()),
+    nextAction: id => {
+      dispatch(setSelectedLayer(id));
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
+    },
     updateLabel: (id, label) => dispatch(updateLayerLabel(id, label)),
     // updateShowAtAllZoomLevels: (id, showAtAllZoomLevels) => dispatch(updateLayerShowAtAllZoomLevels(id, showAtAllZoomLevels)),
     updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
