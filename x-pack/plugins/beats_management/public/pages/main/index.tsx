@@ -19,6 +19,7 @@ import { ConnectedLink } from '../../components/connected_link';
 import { NoDataLayout } from '../../components/layouts/no_data';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { WalkthroughLayout } from '../../components/layouts/walkthrough';
+import { RouteWithBreadcrumb } from '../../components/route_with_breadcrumb';
 import { URLStateProps, withUrlState } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 import { ActivityPage } from './activity';
@@ -190,32 +191,33 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
       >
         <EuiTabs>{renderedTabs}</EuiTabs>
 
-        <Switch>
-          <Route
-            path="/overview/beats/:action?/:enrollmentToken?"
-            render={(props: any) => (
-              <BeatsPage
-                {...this.props}
-                libs={this.props.libs}
-                {...props}
-                loadBeats={this.loadBeats}
-                beats={this.state.beats}
-              />
-            )}
-          />
-          <Route
-            path="/overview/activity"
-            exact={true}
-            render={(props: any) => (
-              <ActivityPage {...this.props} libs={this.props.libs} {...props} />
-            )}
-          />
-          <Route
-            path="/overview/tags"
-            exact={true}
-            render={(props: any) => <TagsPage {...this.props} libs={this.props.libs} {...props} />}
-          />
-        </Switch>
+        <RouteWithBreadcrumb
+          title="Beats List"
+          path="/overview/beats/:action?/:enrollmentToken?"
+          render={(props: any) => (
+            <BeatsPage
+              {...this.props}
+              libs={this.props.libs}
+              {...props}
+              loadBeats={this.loadBeats}
+              beats={this.state.beats}
+            />
+          )}
+        />
+        <RouteWithBreadcrumb
+          title="Activity Overview"
+          path="/overview/activity"
+          exact={true}
+          render={(props: any) => (
+            <ActivityPage {...this.props} libs={this.props.libs} {...props} />
+          )}
+        />
+        <RouteWithBreadcrumb
+          title="Tags List"
+          path="/overview/tags"
+          exact={true}
+          render={(props: any) => <TagsPage {...this.props} libs={this.props.libs} {...props} />}
+        />
       </PrimaryLayout>
     );
   }
