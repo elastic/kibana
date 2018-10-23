@@ -475,6 +475,11 @@ function isIndexNameValid(name, indexNames) {
 }
 
 function isIndexPatternNameValid(name, indexPatternNames, index) {
+  // if a blank name is entered, the index name will be used so avoid validation
+  if (name === '') {
+    return '';
+  }
+
   if (indexPatternNames.find(i => i === name)) {
     return 'Index pattern name already exists';
   }
