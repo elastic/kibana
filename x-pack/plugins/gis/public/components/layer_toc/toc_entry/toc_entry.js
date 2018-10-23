@@ -95,6 +95,7 @@ export class TOCEntry extends React.Component {
       >
         <EuiFlexGroup
           gutterSize="s"
+          alignItems="center"
           responsive={false}
           className={layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.dataHasLoadError() ? 'visible' : 'notvisible'}
         >

@@ -1,36 +1,25 @@
+
+
+
+
 #gis-plugin {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
   width: 100%;
-  height: 100%;
   overflow: hidden;
-  position: absolute;
-  top: 0;
-  left: 0;
+}
+
+#react-gis-root {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
 }
 
-#gis-top-nav {
-  width: 100%;
-  height: auto;
-  flex-grow: 1;
-  flex-shrink: 1;
-  flex-basis: auto;
-}
-
-#react-gis-root {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  left: 0;
-  flex-grow: 1;
-  flex-shrink: 1;
-  flex-basis: auto;
-}
-
-#react-gis-root .wrapper {
-  width: 100%;
-  height: 100%;
-  position: absolute;
+.gisMapWrapper {
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 .layerToast {
@@ -39,9 +28,7 @@
 }
 
 .mapContainer {
-  width: 100%;
-  height: 100%;
-  position: absolute;
+  flex-grow: 1;
 }
 
 .LayerControl {
@@ -81,10 +68,6 @@
   }
 }
 
-.bold {
-  font-weight: bold;
-}
-
 .hidden {
   display: none
 }
@@ -95,4 +78,51 @@
 
 .mapboxgl-popup {
   z-index: 100;
+}
+
+.gisLayerPanel {
+  background-color: $euiColorLightestShade;
+  width: 0;
+
+  &-isVisible {
+    width: $euiSizeXXL * 11;
+    transition: width $euiAnimSpeedNormal $euiAnimSlightResistance;
+  }
+}
+
+.gisViewPanel__header,
+.gisViewPanel__body,
+.gisViewPanel__footer {
+  padding: $euiSize;
+}
+
+.gisViewPanel__header {
+  padding-bottom: 0;
+  flex-shrink: 0;
+  z-index: 2;
+  box-shadow: 0 $euiSize $euiSize (-$euiSize / 2) $euiColorLightestShade;
+}
+
+.gisViewPanel__body {
+  overflow: hidden;
+  overflow-y: auto;
+  @include euiScrollBar;
+
+  > *:not(:last-child) {
+    margin-bottom: $euiSize;
+    flex: 0 0 auto;
+  }
+}
+
+.gisViewPanel__footer {
+  padding-top: 0;
+  flex-shrink: 0;
+  z-index: 2;
+  box-shadow: 0 ($euiSize *-1) $euiSize (-$euiSize / 2) $euiColorLightestShade;
+}
+
+// EUIFIXTODO:
+
+.euiColorPicker__emptySwatch {
+  position: relative;
 }

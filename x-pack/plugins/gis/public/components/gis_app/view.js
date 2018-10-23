@@ -9,6 +9,7 @@ import { MBMapContainer } from '../map/mb';
 import { LayerControl } from '../layer_control/index';
 import { LayerPanel } from '../layer_panel/index';
 import { AddLayerPanel } from '../layer_addpanel/index';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 
 export function GISApp(props) {
@@ -19,11 +20,15 @@ export function GISApp(props) {
   } = props;
 
   let currentPanel;
+  let currentPanelClassName;
+
   if (noFlyoutVisible) {
     currentPanel = null;
   } else if (addLayerVisible) {
+    currentPanelClassName = "gisLayerPanel-isVisible";
     currentPanel = <AddLayerPanel/>;
   } else if (layerDetailsVisible) {
+    currentPanelClassName = "gisLayerPanel-isVisible";
     currentPanel = (
       <LayerPanel
         removeLayer={() => console.warn('removeLayer not implemented.')}
@@ -31,10 +36,18 @@ export function GISApp(props) {
     );
   }
   return (
-    <div className="wrapper">
-      <MBMapContainer/>
-      <LayerControl/>
-      {currentPanel}
-    </div>
+    <EuiFlexGroup className="wrapper" gutterSize="none">
+      <EuiFlexItem className="gisMapWrapper">
+        <MBMapContainer/>
+        <LayerControl/>
+      </EuiFlexItem>
+
+      <EuiFlexItem
+        className={`gisLayerPanel ${currentPanelClassName}`}
+        grow={false}
+      >
+        {currentPanel}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -11,14 +11,12 @@ import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
   EuiHorizontalRule,
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
+  EuiFlexItem,
   EuiTitle,
   EuiSpacer,
   EuiPanel,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { ALayer } from '../../shared/layers/layer';
 
@@ -98,7 +96,7 @@ export class LayerPanel  extends React.Component {
       }
     });
 
-    const { selectedLayer, cancelLayerPanel } = this.props;
+    const { selectedLayer } = this.props;
     if (!selectedLayer) {
       //todo: temp placeholder to bypass state-bug
       return (<div/>);
@@ -108,33 +106,31 @@ export class LayerPanel  extends React.Component {
     const joinSection = this._renderJoinSection();
 
     return (
-      <EuiFlyout
-        onClose={cancelLayerPanel}
-        style={{ maxWidth: 432 }}
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
       >
-        <EuiFlyoutHeader>
+        <EuiFlexItem grow={false} className="gisViewPanel__header">
           <EuiTitle size="s">
             <h1>{this.state.displayName}</h1>
           </EuiTitle>
-          <EuiSpacer/>
+          <EuiSpacer size="m"/>
           <EuiHorizontalRule margin="none"/>
-        </EuiFlyoutHeader>
+        </EuiFlexItem>
 
-        <EuiFlyoutBody style={{ paddingTop: 0 }}>
+        <EuiFlexItem className="gisViewPanel__body">
           {globalLayerSettings}
-          <EuiSpacer size="m"/>
           {joinSection}
-          <EuiSpacer size="m"/>
           <StyleTabs layer={selectedLayer}/>
-          <EuiSpacer size="m"/>
-
           {selectedLayer.renderSourceDetails()}
-        </EuiFlyoutBody>
+        </EuiFlexItem>
 
-        <EuiFlyoutFooter>
+        <EuiFlexItem grow={false} className="gisViewPanel__footer">
+          <EuiHorizontalRule margin="none"/>
+          <EuiSpacer size="m"/>
           <FlyoutFooter/>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }
