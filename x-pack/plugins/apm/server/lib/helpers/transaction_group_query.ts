@@ -12,7 +12,7 @@ import {
 import { Transaction } from '../../../typings/Transaction';
 import { ITransactionGroup } from '../../../typings/TransactionGroup';
 
-interface ITransactionGroupBucket {
+export interface ITransactionGroupBucket {
   key: string;
   doc_count: number;
   avg: {

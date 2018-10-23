@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiBadge,
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
