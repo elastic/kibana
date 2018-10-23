@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { TransactionV2 } from '../../../typings/Transaction';
+import { Transaction } from '../../../typings/Transaction';
 import { ITransactionGroup } from '../../../typings/TransactionGroup';
 import { KibanaLink, legacyEncodeURIComponent } from '../../utils/url';
 
 interface TraceLinkProps {
-  transactionDoc?: TransactionV2;
+  transactionDoc?: Transaction;
   transactionGroup?: ITransactionGroup | { [key: string]: any };
 }
 
@@ -33,7 +33,8 @@ export function getLinkProps({
   if (transactionDoc) {
     serviceName = transactionDoc.context.service.name;
     transactionType = transactionDoc.transaction.type;
-    traceId = transactionDoc.trace.id;
+    traceId =
+      transactionDoc.version === 'v2' ? transactionDoc.trace.id : undefined;
     transactionId = transactionDoc.transaction.id;
     name = transactionDoc.transaction.name;
   }

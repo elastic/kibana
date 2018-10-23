@@ -61,10 +61,10 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
         transactionId: toString(transactionId),
         traceId: toString(traceId),
         waterfallItemId: toString(waterfallItemId),
-        detailTab,
+        detailTab: toString(detailTab),
         flyoutDetailTab: toString(flyoutDetailTab),
         spanId: toNumber(spanId),
-        kuery: legacyDecodeURIComponent(kuery),
+        kuery: legacyDecodeURIComponent(kuery as string | undefined),
 
         // path params
         processorEvent,
@@ -83,14 +83,19 @@ export function urlParamsReducer(state = {}, action: AnyAction) {
   }
 }
 
-function toNumber(value: string) {
-  if (value != null) {
+function toNumber(value?: string | string[]) {
+  if (value !== undefined && !Array.isArray(value)) {
     return parseInt(value, 10);
   }
 }
 
-function toString(str: string) {
-  if (str === '' || str === 'null' || str === 'undefined') {
+function toString(str?: string | string[]) {
+  if (
+    str === '' ||
+    str === 'null' ||
+    str === 'undefined' ||
+    Array.isArray(str)
+  ) {
     return;
   }
   return str;
@@ -155,6 +160,7 @@ export interface IUrlParams {
   end?: string;
   errorGroupId?: string;
   flyoutDetailTab?: string;
+  detailTab?: string;
   kuery?: string;
   serviceName?: string;
   start?: string;

@@ -4,44 +4,54 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  EuiSpacer,
+  // @ts-ignore
+  EuiTab,
+  // @ts-ignore
+  EuiTabs
+} from '@elastic/eui';
+import { capitalize, first, get } from 'lodash';
 import React from 'react';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { capitalize, get, first } from 'lodash';
-import { SERVICE_AGENT_NAME } from '../../../../../common/constants';
-import { units, px } from '../../../../style/variables';
+import { Transaction } from '../../../../../typings/Transaction';
+import { IUrlParams } from '../../../../store/urlParams';
+import { px, units } from '../../../../style/variables';
+import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
   getPropertyTabNames,
   PropertiesTable
 } from '../../../shared/PropertiesTable';
-import { history, toQuery, fromQuery } from '../../../../utils/url';
 import { WaterfallContainer } from './WaterfallContainer';
-import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
 
 const TableContainer = styled.div`
   padding: ${px(units.plus)} ${px(units.plus)} 0;
 `;
 
 // Ensure the selected tab exists or use the first
-function getCurrentTab(tabs = [], selectedTab) {
-  return tabs.includes(selectedTab) ? selectedTab : first(tabs);
+function getCurrentTab(tabs: string[] = [], selectedTab?: string) {
+  return selectedTab && tabs.includes(selectedTab) ? selectedTab : first(tabs);
 }
 
 const TIMELINE_TAB = 'timeline';
 
-function getTabs(transactionData) {
+function getTabs(transactionData: Transaction) {
   const dynamicProps = Object.keys(transactionData.context || {});
   return [TIMELINE_TAB, ...getPropertyTabNames(dynamicProps)];
 }
 
-export function TransactionPropertiesTable({
-  location,
-  transaction,
-  urlParams
-}) {
+interface TransactionPropertiesTableProps {
+  location: any;
+  transaction: Transaction;
+  urlParams: IUrlParams;
+}
+
+export const TransactionPropertiesTable: React.SFC<
+  TransactionPropertiesTableProps
+> = ({ location, transaction, urlParams }) => {
   const tabs = getTabs(transaction);
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
-  const agentName = get(transaction, SERVICE_AGENT_NAME);
+  const agentName = transaction.context.service.agent.name;
 
   return (
     <div>
@@ -88,10 +98,4 @@ export function TransactionPropertiesTable({
       )}
     </div>
   );
-}
-
-TransactionPropertiesTable.propTypes = {
-  location: PropTypes.object.isRequired,
-  transaction: PropTypes.object.isRequired,
-  urlParams: PropTypes.object.isRequired
 };

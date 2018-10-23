@@ -39,11 +39,11 @@ function ActionMenuButton({ onClick }: { onClick: () => void }) {
 }
 
 interface ActionMenuProps {
-  transaction: Transaction;
+  readonly transaction: Transaction;
 }
 
 interface ActionMenuState {
-  isOpen: boolean;
+  readonly isOpen: boolean;
 }
 
 export class ActionMenu extends React.Component<

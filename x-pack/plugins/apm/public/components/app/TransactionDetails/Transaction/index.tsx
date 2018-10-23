@@ -14,11 +14,7 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import {
-  Transaction as ITransaction,
-  TransactionV2
-} from '../../../../../typings/Transaction';
-import { WaterfallResponse } from '../../../../../typings/waterfall';
+import { Transaction as ITransaction } from '../../../../../typings/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import EmptyMessage from '../../../shared/EmptyMessage';
 import { TraceLink } from '../../../shared/TraceLink';
@@ -28,23 +24,17 @@ import { StickyTransactionProperties } from './StickyTransactionProperties';
 import { TransactionPropertiesTable } from './TransactionPropertiesTable';
 
 function MaybeViewTraceLink({
-  waterfall,
+  root,
   transaction
 }: {
-  waterfall: WaterfallResponse | null;
+  root: ITransaction;
   transaction: ITransaction;
 }) {
-  // v1 transactions are *always* root transactions
-  // v2 transactions with a parent should not show a trace link
-  const isRoot = transaction.version === 'v1' || !transaction.parent;
+  const isRoot = transaction.transaction.id === root.transaction.id;
 
-  if (isRoot || waterfall === null) {
+  if (isRoot) {
     return null;
   }
-
-  const root = waterfall.hits.find(
-    hit => hit.version === 'v2' && !hit.parent
-  ) as TransactionV2;
 
   if (!root) {
     return null;
@@ -63,14 +53,14 @@ interface Props {
   transaction: ITransaction;
   urlParams: IUrlParams;
   location: Location;
-  waterfall: WaterfallResponse | null;
+  waterfallRoot?: ITransaction;
 }
 
 export const Transaction: React.SFC<Props> = ({
   transaction,
   urlParams,
   location,
-  waterfall
+  waterfallRoot
 }) => {
   if (isEmpty(transaction)) {
     return (
@@ -80,6 +70,8 @@ export const Transaction: React.SFC<Props> = ({
       />
     );
   }
+
+  const root = waterfallRoot || transaction;
 
   return (
     <EuiPanel paddingSize="m" hasShadow={true}>
@@ -95,17 +87,14 @@ export const Transaction: React.SFC<Props> = ({
             <EuiFlexItem grow={false}>
               <ActionMenu transaction={transaction} />
             </EuiFlexItem>
-            <MaybeViewTraceLink
-              transaction={transaction}
-              waterfall={waterfall}
-            />
+            <MaybeViewTraceLink transaction={transaction} root={root} />
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer />
 
-      <StickyTransactionProperties transaction={transaction} />
+      <StickyTransactionProperties transaction={transaction} root={root} />
 
       <EuiSpacer />
 

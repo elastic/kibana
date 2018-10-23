@@ -8,14 +8,12 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { StringMap } from '../../../../typings/common';
-// @ts-ignore
 import { legacyDecodeURIComponent } from '../../../utils/url';
 // @ts-ignore
 import ErrorGroupDetails from '../ErrorGroupDetails';
 // @ts-ignore
 import ErrorGroupOverview from '../ErrorGroupOverview';
-// @ts-ignore
-import TransactionDetails from '../TransactionDetails';
+import { TransactionDetails } from '../TransactionDetails';
 // @ts-ignore
 import TransactionOverview from '../TransactionOverview';
 import { Home } from './Home';

@@ -58,7 +58,7 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
       val: asMillis(spanDuration)
     },
     {
-      label: '% of total time',
+      label: '% of transaction',
       val: numeral(relativeDuration).format('0.00%')
     }
   ];

@@ -202,7 +202,7 @@ export function legacyEncodeURIComponent(rawUrl?: string) {
   return rawUrl && encodeURIComponent(rawUrl).replace(/%/g, '~');
 }
 
-export function legacyDecodeURIComponent(encodedUrl: string) {
+export function legacyDecodeURIComponent(encodedUrl?: string) {
   return encodedUrl && decodeURIComponent(encodedUrl.replace(/~/g, '%'));
 }
 
