@@ -116,7 +116,7 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
           >
             <p>
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.alwaysGrantReadRoleTitle"
+                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.alwaysGrantReadAccessToAllSpacesTitle"
                 defaultMessage="This role always grants read access to all spaces. To customize privileges for
                 individual spaces, you must create a new role."
               />
@@ -165,7 +165,7 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
         >
           <p>
             <FormattedMessage
-              id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.roleNeverAccessTitle"
+              id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.neverGrantReadAccessToAllSpacesTitle"
               defaultMessage="This role never grants access to any spaces within Kibana. To customize privileges for
               individual spaces, you must create a new role."
             />

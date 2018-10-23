@@ -112,18 +112,17 @@
                   ng-click="toggleSort(sort, 'name')"
                   aria-label="{{sort.reverse ? 'Sort role ascending' : 'Sort role descending'}}"
                 >
-                  <span
-                    class="kuiTableHeaderCell__liner"
-                    i18n-id="xpack.security.views.management.roles.roleTitle"
-                    i18n-default-message="Role {icon}"
-                    i18n-values="{
-                      icon: '<span
-                                aria-hidden=\'true\'
-                                class=\'kuiTableSortIcon kuiIcon\'
-                                ng-class=\'getSortArrowClass(\'name\')\'
-                              ></span>'
-                    }"
-                  ></span>
+                  <span class="kuiTableHeaderCell__liner">
+                    <span
+                      i18n-id="xpack.security.views.management.roles.roleTitle"
+                      i18n-default-message="Role"
+                    ></span>
+                    <span
+                      aria-hidden="true"
+                      class="kuiTableSortIcon kuiIcon"
+                      ng-class="getSortArrowClass('name')"
+                    ></span>
+                  </span>
                 </button>
               </th>
 

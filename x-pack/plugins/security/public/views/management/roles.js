@@ -38,7 +38,7 @@ routes.when(ROLES_PATH, {
           .then(() =>
             toastNotifications.addSuccess(
               i18n('xpack.security.views.management.roles.deleteRoleTitle', {
-                defaultMessage: 'Deleted {value, plural, one {# role} other {# roles}}',
+                defaultMessage: 'Deleted {value, plural, one {role} other {roles}}',
                 values: {
                   value: $scope.selectedRoles.length,
                 },
