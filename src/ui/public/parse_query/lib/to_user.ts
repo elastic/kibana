@@ -17,28 +17,34 @@
  * under the License.
  */
 
-import { KBN_FIELD_TYPES } from '../../../../utils/kbn_field_types';
+import angular from 'angular';
 
-const filterableTypes = KBN_FIELD_TYPES.filter(type => type.filterable).map(type => type.name);
-
-export function isFilterable(field) {
-  return filterableTypes.includes(field.type);
-}
-
-export function getFromSavedObject(savedObject) {
-  if (!savedObject) {
-    return null;
+/**
+ * Take text from the model and present it to the user as a string
+ * @param {text} model value
+ * @returns {string}
+ */
+export function toUser(text: ToUserQuery | string): string {
+  if (text == null) {
+    return '';
   }
-
-  return {
-    fields: JSON.parse(savedObject.attributes.fields),
-    title: savedObject.attributes.title,
-  };
+  if (typeof text === 'object') {
+    if (text.match_all) {
+      return '';
+    }
+    if (text.query_string) {
+      return toUser(text.query_string.query);
+    }
+    return angular.toJson(text);
+  }
+  return '' + text;
 }
 
-export function getFromLegacyIndexPattern(indexPatterns) {
-  return indexPatterns.map(indexPattern => ({
-    fields: indexPattern.fields.raw,
-    title: indexPattern.title,
-  }));
+interface ToUserQuery {
+  match_all: object;
+  query_string: ToUserQueryString;
+}
+
+interface ToUserQueryString {
+  query: string;
 }

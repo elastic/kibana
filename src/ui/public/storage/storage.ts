@@ -17,44 +17,50 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
 import angular from 'angular';
 
-export function Storage(store) {
-  const self = this;
-  self.store = store;
+// This is really silly, but I wasn't prepared to rename the kibana Storage class everywhere it is used
+// and this is the only way I could figure out how to use the type definition for a built in object
+// in a file that creates a type with the same name as that built in object.
+import { WebStorage } from './web_storage';
 
-  self.get = function (key) {
+export class Storage {
+  public store: WebStorage;
+
+  constructor(store: WebStorage) {
+    this.store = store;
+  }
+
+  public get = (key: string) => {
+    if (!this.store) {
+      return null;
+    }
+
+    const storageItem = this.store.getItem(key);
+    if (storageItem === null) {
+      return null;
+    }
+
     try {
-      return JSON.parse(self.store.getItem(key));
-    } catch (e) {
+      return JSON.parse(storageItem);
+    } catch (error) {
       return null;
     }
   };
 
-  self.set = function (key, value) {
+  public set = (key: string, value: any) => {
     try {
-      return self.store.setItem(key, angular.toJson(value));
+      return this.store.setItem(key, angular.toJson(value));
     } catch (e) {
       return false;
     }
   };
 
-  self.remove = function (key) {
-    return self.store.removeItem(key);
+  public remove = (key: string) => {
+    return this.store.removeItem(key);
   };
 
-  self.clear = function () {
-    return self.store.clear();
+  public clear = () => {
+    return this.store.clear();
   };
 }
-
-const createService = function (type) {
-  return function ($window) {
-    return new Storage($window[type]);
-  };
-};
-
-uiModules.get('kibana/storage')
-  .service('localStorage', createService('localStorage'))
-  .service('sessionStorage', createService('sessionStorage'));
