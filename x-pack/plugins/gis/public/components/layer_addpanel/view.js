@@ -27,7 +27,6 @@ import {
   EuiRange,
   EuiPanel,
 } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify';
 export class AddLayerPanel extends React.Component {
 
   constructor() {
@@ -40,27 +39,6 @@ export class AddLayerPanel extends React.Component {
       minZoom: 0,
       maxZoom: 24,
     };
-  }
-
-  shouldComponentUpdate(nextProps) {
-    this._triggerToasts(nextProps);
-    return true;
-  }
-
-  _triggerToasts({ layerLoadToast, clearLayerLoadToast }) {
-    if (layerLoadToast === 'success') {
-      toastNotifications.add({
-        title: 'Layer added',
-        className: 'layerToast'
-      }) && clearLayerLoadToast();
-    } else if (layerLoadToast === 'error') {
-      toastNotifications.addDanger({
-        title: 'Error adding layer',
-        className: 'layerToast'
-      }) && clearLayerLoadToast();
-    } else {
-      // Do nothing
-    }
   }
 
   _previewLayer = (source) => {

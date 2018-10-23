@@ -10,6 +10,7 @@ import { LayerControl } from '../layer_control/index';
 import { LayerPanel } from '../layer_panel/index';
 import { AddLayerPanel } from '../layer_addpanel/index';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { Toasts } from '../toasts';
 
 
 export function GISApp(props) {
@@ -48,6 +49,7 @@ export function GISApp(props) {
       >
         {currentPanel}
       </EuiFlexItem>
+      <Toasts/>
     </EuiFlexGroup>
   );
 }
