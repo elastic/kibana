@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { Server } from 'hapi';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
+
+interface KibanaServer extends Server {
+  savedObjects: any;
+}
 
 export interface TestConfig {
   [configKey: string]: any;
@@ -67,7 +70,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       pre = pre.mockImplementation(preCheckLicenseImpl);
     }
 
-    const server = new Server();
+    const server = new Server() as KibanaServer;
 
     const config = {
       ...baseConfig,
@@ -118,6 +121,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       delete: jest.fn((type: string, id: string) => {
         return {};
       }),
+      deleteByNamespace: jest.fn(),
     };
 
     server.savedObjects = {

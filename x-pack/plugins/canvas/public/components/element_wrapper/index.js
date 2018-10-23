@@ -6,14 +6,13 @@
 
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { getEditing } from '../../state/selectors/app';
-import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
+import { getResolvedArgs, getSelectedPage, isWriteable } from '../../state/selectors/workpad';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
 import { ElementWrapper as Component } from './element_wrapper';
 import { createHandlers as createHandlersWithDispatch } from './lib/handlers';
 
 const mapStateToProps = (state, { element }) => ({
-  isEditing: getEditing(state),
+  isWriteable: isWriteable(state),
   resolvedArg: getResolvedArgs(state, element.id, 'expressionRenderable'),
   selectedPage: getSelectedPage(state),
 });

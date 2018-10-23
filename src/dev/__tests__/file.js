@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { resolve, sep } from 'path';
 
 import expect from 'expect.js';
 
@@ -38,7 +38,7 @@ describe('dev/File', () => {
   describe('#getRelativePath()', () => {
     it('returns the path relative to the repo root', () => {
       const file = new File(HERE);
-      expect(file.getRelativePath()).to.eql('src/dev/__tests__/file.js');
+      expect(file.getRelativePath()).to.eql(['src', 'dev', '__tests__', 'file.js'].join(sep));
     });
   });
 
@@ -69,8 +69,8 @@ describe('dev/File', () => {
     it('returns the parents of a file, stopping at the repo root, in descending order', () => {
       const file = new File(HERE);
       expect(file.getRelativeParentDirs()).to.eql([
-        'src/dev/__tests__',
-        'src/dev',
+        ['src', 'dev', '__tests__'].join(sep), // src/dev/__tests__
+        ['src', 'dev'].join(sep), // src/dev
         'src',
       ]);
     });
