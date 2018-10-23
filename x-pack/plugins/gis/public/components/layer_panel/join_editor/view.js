@@ -80,7 +80,7 @@ export class JoinEditor extends React.Component {
             <EuiButtonIcon iconType="plusInCircle" onClick={addJoin} aria-label="Add join" title="Add join" />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer margin="s"/>
+        <EuiSpacer size="m"  />
 
         {this._renderJoins()}
       </div>

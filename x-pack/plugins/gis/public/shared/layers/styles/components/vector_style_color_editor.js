@@ -117,7 +117,7 @@ export class VectorStyleColorEditor extends React.Component {
 
     return (
       <div>
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={true}>
             <EuiFormLabel style={{ marginBottom: 0 }}>
               {this.props.name}
