@@ -470,7 +470,7 @@ export function heartbeatStatusCheck() {
       defaultMessage: 'Heartbeat status',
     }),
     text: i18n.translate('kbn.common.tutorials.heartbeatStatusCheck.text', {
-      defaultMessage: 'Check that data is received from the Heartbeat',
+      defaultMessage: 'Check that data is received from Heartbeat',
     }),
     btnLabel: i18n.translate('kbn.common.tutorials.heartbeatStatusCheck.buttonLabel', {
       defaultMessage: 'Check data',
