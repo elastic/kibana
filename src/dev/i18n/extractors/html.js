@@ -152,6 +152,10 @@ function trimOneTimeBindingOperator(string) {
 /**
  * Remove interpolation expressions from angular and throw on `| i18n:` substring.
  *
+ * Correct usage: `<p aria-label="{{ ::'namespace.id' | i18n: { defaultMessage: 'Message' } }}"></p>`.
+ *
+ * Incorrect usage: `ng-options="mode as ('metricVis.colorModes.' + mode | i18n: { defaultMessage: mode }) for mode in collections.metricColorMode"`
+ *
  * @param {string} string html content
  */
 function validateI18nFilterUsage(string) {
