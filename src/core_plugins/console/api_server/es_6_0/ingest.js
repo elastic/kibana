@@ -20,7 +20,7 @@
 const commonPipelineParams = {
   on_failure: [],
   if: '',
-  tag: ''  
+  tag: ''
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/append-processor.html
