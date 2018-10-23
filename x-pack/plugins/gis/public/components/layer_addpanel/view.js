@@ -143,15 +143,19 @@ export class AddLayerPanel extends React.Component {
   }
 
   _renderAddToMapBtn() {
-    const { layerLoading, temporaryLayers, addAction } = this.props;
-    const addToMapBtnText = 'Add to map';
+    const { layerLoading, temporaryLayers, nextAction } = this.props;
+    const addToMapBtnText = 'Layer Details';
     return (
       <EuiButton
-        style={{ width: '10rem' }}
+        style={{ width: '12rem' }}
         disabled={!temporaryLayers || layerLoading}
         isLoading={layerLoading}
         iconType={temporaryLayers && !layerLoading ? 'check' : undefined}
-        onClick={() => { this.layer = null; return addAction(); }}
+        onClick={() => {
+          const layerId = this.layer.getId();
+          this.layer = null;
+          return nextAction(layerId);
+        }}
         fill
       >
         {addToMapBtnText}

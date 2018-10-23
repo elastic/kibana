@@ -7,17 +7,20 @@
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
-import { promoteTemporaryStyles, clearTemporaryStyles, setSelectedLayer, removeLayer } from '../../../actions/store_actions';
+import { promoteTemporaryStyles, clearTemporaryStyles, clearTemporaryLayers,
+  setSelectedLayer, removeLayer, promoteTemporaryLayers } from '../../../actions/store_actions';
 
 const mapDispatchToProps = dispatch => {
   return {
     cancelLayerPanel: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(clearTemporaryStyles());
+      dispatch(clearTemporaryLayers());
     },
     saveLayerEdits: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(promoteTemporaryStyles());
+      dispatch(promoteTemporaryLayers());
       dispatch(setSelectedLayer(null));
     },
     removeLayer: () => {
