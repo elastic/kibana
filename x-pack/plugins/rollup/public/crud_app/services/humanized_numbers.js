@@ -34,10 +34,28 @@ const monthOrdinalToMonthNameMap = {
 };
 
 export function getOrdinalValue(number) {
-  return i18n.translate('xpack.rollupJobs.util.number.ordinal', {
-    defaultMessage: '{number, selectordinal, one{#st} two{#nd} few{#rd} other{#th}}',
-    values: { number },
-  });
+  // TODO: This is breaking reporting pdf generation. Possibly due to phantom not setting locale,
+  // which is needed by i18n (formatjs). Need to verify, fix, and restore i18n in place of static stings.
+  // return i18n.translate('xpack.rollupJobs.util.number.ordinal', {
+  //   defaultMessage: '{number, selectordinal, one{#st} two{#nd} few{#rd} other{#th}}',
+  //   values: { number },
+  // });
+
+  let lastDigit = number.toString().substr(-1);
+  if(!lastDigit) {
+    return;
+  }
+  lastDigit = parseFloat(lastDigit);
+  switch(lastDigit) {
+    case 1:
+      return 'st';
+    case 2:
+      return 'nd';
+    case 3:
+      return 'rd';
+    default:
+      return 'th';
+  }
 }
 
 export function getDayName(dayOrdinal) {
