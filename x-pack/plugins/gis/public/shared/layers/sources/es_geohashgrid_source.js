@@ -213,7 +213,7 @@ class Editor extends React.Component {
 
   static _filterGeoField = (field) => {
     return ['geo_point'].includes(field.type);
-  }
+  };
 
   constructor() {
     super();
@@ -279,7 +279,7 @@ class Editor extends React.Component {
     //make default selection
     const geoFields = indexPattern.fields.filter(Editor._filterGeoField);
     if (geoFields[0]) {
-      this.onGeoFieldSelect(geoFields[0].name);
+      this._onGeoFieldSelect(geoFields[0].name);
     }
 
   }, 300);
