@@ -17,14 +17,28 @@
  * under the License.
  */
 
+import { PersistedLog } from './persisted_log';
 
-import sinon from 'sinon';
-import expect from 'expect.js';
-import { PersistedLog } from './';
+const createMockWebStorage = () => ({
+  clear: jest.fn(),
+  getItem: jest.fn(),
+  key: jest.fn(),
+  removeItem: jest.fn(),
+  setItem: jest.fn(),
+  length: 0,
+});
+
+const createMockStorage = () => ({
+  store: createMockWebStorage(),
+  get: jest.fn(),
+  set: jest.fn(),
+  remove: jest.fn(),
+  clear: jest.fn(),
+});
 
 jest.mock('ui/chrome', () => {
   return {
-    getBasePath: () => `/some/base/path`
+    getBasePath: () => `/some/base/path`,
   };
 });
 
@@ -33,107 +47,102 @@ const historyLimit = 10;
 const payload = [
   { first: 'clark', last: 'kent' },
   { first: 'peter', last: 'parker' },
-  { first: 'bruce', last: 'wayne' }
+  { first: 'bruce', last: 'wayne' },
 ];
 
-describe('PersistedLog', function () {
-
-  let storage;
-  beforeEach(function () {
-    storage = {
-      get: sinon.stub(),
-      set: sinon.stub(),
-      remove: sinon.spy(),
-      clear: sinon.spy()
-    };
+describe('PersistedLog', () => {
+  let storage = createMockStorage();
+  beforeEach(() => {
+    storage = createMockStorage();
   });
 
-  describe('expected API', function () {
-    test('has expected methods', function () {
-      const log = new PersistedLog(historyName);
+  describe('expected API', () => {
+    test('has expected methods', () => {
+      const log = new PersistedLog(historyName, {}, storage);
 
-      expect(log.add).to.be.a('function');
-      expect(log.get).to.be.a('function');
+      expect(typeof log.add).toBe('function');
+      expect(typeof log.get).toBe('function');
     });
   });
 
-  describe('internal functionality', function () {
-    test('reads from storage', function () {
-      new PersistedLog(historyName, {}, storage);
+  describe('internal functionality', () => {
+    test('reads from storage', () => {
+      // @ts-ignore
+      const log = new PersistedLog(historyName, {}, storage);
 
-      expect(storage.get.calledOnce).to.be(true);
-      expect(storage.get.calledWith(historyName)).to.be(true);
+      expect(storage.get).toHaveBeenCalledTimes(1);
+      expect(storage.get).toHaveBeenCalledWith(historyName);
     });
 
-    test('writes to storage', function () {
+    test('writes to storage', () => {
       const log = new PersistedLog(historyName, {}, storage);
       const newItem = { first: 'diana', last: 'prince' };
 
       const data = log.add(newItem);
 
-      expect(storage.set.calledOnce).to.be(true);
-      expect(data).to.eql([newItem]);
+      expect(storage.set).toHaveBeenCalledTimes(1);
+      expect(data).toEqual([newItem]);
     });
   });
 
-  describe('persisting data', function () {
-    test('fetches records from storage', function () {
-      storage.get.returns(payload);
+  describe('persisting data', () => {
+    test('fetches records from storage', () => {
+      storage.get.mockReturnValue(payload);
       const log = new PersistedLog(historyName, {}, storage);
 
       const items = log.get();
-      expect(items.length).to.equal(3);
-      expect(items).to.eql(payload);
+      expect(items.length).toBe(3);
+      expect(items).toEqual(payload);
     });
 
-    test('prepends new records', function () {
-      storage.get.returns(payload.slice(0));
+    test('prepends new records', () => {
+      storage.get.mockReturnValue(payload.slice(0));
       const log = new PersistedLog(historyName, {}, storage);
       const newItem = { first: 'selina', last: 'kyle' };
 
       const items = log.add(newItem);
-      expect(items.length).to.equal(payload.length + 1);
-      expect(items[0]).to.eql(newItem);
+      expect(items.length).toBe(payload.length + 1);
+      expect(items[0]).toEqual(newItem);
     });
   });
 
-  describe('stack options', function () {
-    test('should observe the maxLength option', function () {
+  describe('stack options', () => {
+    test('should observe the maxLength option', () => {
       const bulkData = [];
 
       for (let i = 0; i < historyLimit; i++) {
         bulkData.push(['record ' + i]);
       }
-      storage.get.returns(bulkData);
+      storage.get.mockReturnValue(bulkData);
 
       const log = new PersistedLog(historyName, { maxLength: historyLimit }, storage);
       log.add(['new array 1']);
       const items = log.add(['new array 2']);
 
-      expect(items.length).to.equal(historyLimit);
+      expect(items.length).toBe(historyLimit);
     });
 
-    test('should observe the filterDuplicates option', function () {
-      storage.get.returns(payload.slice(0));
+    test('should observe the filterDuplicates option', () => {
+      storage.get.mockReturnValue(payload.slice(0));
       const log = new PersistedLog(historyName, { filterDuplicates: true }, storage);
       const newItem = payload[1];
 
       const items = log.add(newItem);
-      expect(items.length).to.equal(payload.length);
+      expect(items.length).toBe(payload.length);
     });
 
     test('should truncate the list upon initialization if too long', () => {
-      storage.get.returns(payload.slice(0));
+      storage.get.mockReturnValue(payload.slice(0));
       const log = new PersistedLog(historyName, { maxLength: 1 }, storage);
       const items = log.get();
-      expect(items.length).to.equal(1);
+      expect(items.length).toBe(1);
     });
 
     test('should allow a maxLength of 0', () => {
-      storage.get.returns(payload.slice(0));
+      storage.get.mockReturnValue(payload.slice(0));
       const log = new PersistedLog(historyName, { maxLength: 0 }, storage);
       const items = log.get();
-      expect(items.length).to.equal(0);
+      expect(items.length).toBe(0);
     });
   });
 });
