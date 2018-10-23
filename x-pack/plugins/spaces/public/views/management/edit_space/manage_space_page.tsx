@@ -134,12 +134,13 @@ export class ManageSpacePage extends Component<Props, State> {
 
         <EuiSpacer />
 
-        <EuiFormRow label="Name" {...this.validator.validateSpaceName(this.state.space)}>
+        <EuiFormRow label="Name" {...this.validator.validateSpaceName(this.state.space)} fullWidth>
           <EuiFieldText
             name="name"
             placeholder={'Awesome space'}
             value={name}
             onChange={this.onNameChange}
+            fullWidth
           />
         </EuiFormRow>
 
@@ -171,12 +172,14 @@ export class ManageSpacePage extends Component<Props, State> {
         <EuiFormRow
           label="Description (optional)"
           {...this.validator.validateSpaceDescription(this.state.space)}
+          fullWidth
         >
           <EuiFieldText
             name="description"
             placeholder={'This is where the magic happens'}
             value={description}
             onChange={this.onDescriptionChange}
+            fullWidth
           />
         </EuiFormRow>
 

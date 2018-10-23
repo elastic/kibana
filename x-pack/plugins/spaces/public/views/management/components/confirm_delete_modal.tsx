@@ -71,7 +71,7 @@ export class ConfirmDeleteModal extends Component<Props, State> {
 
     return (
       <EuiOverlayMask>
-        <EuiModal onClose={onCancel} className={'euiModal--confirmation'} maxWidth={432}>
+        <EuiModal onClose={onCancel} className={'spcConfirmDeleteModal'}>
           <EuiModalHeader>
             <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
               Delete space {`'${space.name}'`}
