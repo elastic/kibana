@@ -4,14 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { oc } from 'ts-optchain';
+import { TermsAggsBucket } from 'x-pack/plugins/apm/typings/elasticsearch';
 import {
+  SERVICE_AGENT_NAME,
   SERVICE_NAME,
-  TRANSACTION_TYPE,
-  SERVICE_AGENT_NAME
+  TRANSACTION_TYPE
 } from '../../../common/constants';
+import { Setup } from '../helpers/setup_request';
 
-export async function getService({ serviceName, setup }) {
+export interface ServiceResponse {
+  service_name: string;
+  types: string[];
+  agent_name?: string;
+}
+
+export async function getService(
+  serviceName: string,
+  setup: Setup
+): Promise<ServiceResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
@@ -52,11 +63,21 @@ export async function getService({ serviceName, setup }) {
     params.body.query.bool.filter.push(esFilterQuery);
   }
 
+  interface Aggs {
+    types: {
+      buckets: TermsAggsBucket[];
+    };
+    agents: {
+      buckets: TermsAggsBucket[];
+    };
+  }
+
   const resp = await client('search', params);
+  const aggs: Aggs = resp.aggregations;
 
   return {
     service_name: serviceName,
-    types: resp.aggregations.types.buckets.map(bucket => bucket.key),
-    agent_name: get(resp, 'aggregations.agents.buckets[0].key')
+    types: aggs.types.buckets.map(bucket => bucket.key),
+    agent_name: oc(aggs).agents.buckets[0].key()
   };
 }

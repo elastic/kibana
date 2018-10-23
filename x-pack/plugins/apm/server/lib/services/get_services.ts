@@ -4,15 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { oc } from 'ts-optchain';
+import { TermsAggsBucket } from 'x-pack/plugins/apm/typings/elasticsearch';
 import {
-  SERVICE_NAME,
-  TRANSACTION_DURATION,
+  PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
-  PROCESSOR_EVENT
+  SERVICE_NAME,
+  TRANSACTION_DURATION
 } from '../../../common/constants';
-import { get } from 'lodash';
+import { Setup } from '../helpers/setup_request';
 
-export async function getServices({ setup }) {
+export interface ServiceListItemResponse {
+  service_name: string;
+  agent_name: string | undefined;
+  transactions_per_minute: number;
+  errors_per_minute: number;
+  avg_response_time: number;
+}
+
+export async function getServices(
+  setup: Setup
+): Promise<ServiceListItemResponse[]> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
@@ -71,26 +83,43 @@ export async function getServices({ setup }) {
     params.body.query.bool.filter.push(esFilterQuery);
   }
 
+  interface ServiceBucket extends TermsAggsBucket {
+    avg: {
+      value: number;
+    };
+    agents: {
+      buckets: TermsAggsBucket[];
+    };
+    events: {
+      buckets: TermsAggsBucket[];
+    };
+  }
+
+  interface Aggs extends TermsAggsBucket {
+    services: {
+      buckets: ServiceBucket[];
+    };
+  }
+
   const resp = await client('search', params);
+  const aggs: Aggs = resp.aggregations;
+  const serviceBuckets = oc(aggs).services.buckets([]);
 
-  const buckets = get(resp.aggregations, 'services.buckets', []);
-  return buckets.map(bucket => {
+  return serviceBuckets.map(bucket => {
     const eventTypes = bucket.events.buckets;
-
     const transactions = eventTypes.find(e => e.key === 'transaction');
-    const totalTransactions = get(transactions, 'doc_count', 0);
+    const totalTransactions = oc(transactions).doc_count(0);
 
     const errors = eventTypes.find(e => e.key === 'error');
-    const totalErrors = get(errors, 'doc_count', 0);
+    const totalErrors = oc(errors).doc_count(0);
 
     const deltaAsMinutes = (end - start) / 1000 / 60;
-
     const transactionsPerMinute = totalTransactions / deltaAsMinutes;
     const errorsPerMinute = totalErrors / deltaAsMinutes;
 
     return {
       service_name: bucket.key,
-      agent_name: get(bucket, 'agents.buckets[0].key', null),
+      agent_name: oc(bucket).agents.buckets[0].key(),
       transactions_per_minute: transactionsPerMinute,
       errors_per_minute: errorsPerMinute,
       avg_response_time: bucket.avg.value

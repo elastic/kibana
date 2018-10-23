@@ -5,19 +5,22 @@
  */
 
 import Boom from 'boom';
-import { setupRequest } from '../lib/helpers/setup_request';
+import { IReply, Request, Server } from 'hapi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
-import { getTrace } from '../lib/traces/get_trace';
+import { setupRequest } from '../lib/helpers/setup_request';
 import { getTopTraces } from '../lib/traces/get_top_traces';
+import { getTrace } from '../lib/traces/get_trace';
 
 const pre = [{ method: setupRequest, assign: 'setup' }];
 const ROOT = '/api/apm/traces';
-const defaultErrorHandler = reply => err => {
+const defaultErrorHandler = (reply: IReply) => (err: Error) => {
+  // tslint:disable-next-line
   console.error(err.stack);
+  // @ts-ignore
   reply(Boom.wrap(err, 400));
 };
 
-export function initTracesApi(server) {
+export function initTracesApi(server: Server) {
   // Get trace list
   server.route({
     method: 'GET',
@@ -28,10 +31,10 @@ export function initTracesApi(server) {
         query: withDefaultValidators()
       }
     },
-    handler: (req, reply) => {
+    handler: (req: Request, reply: IReply) => {
       const { setup } = req.pre;
 
-      return getTopTraces({ setup })
+      return getTopTraces(setup)
         .then(reply)
         .catch(defaultErrorHandler(reply));
     }
@@ -47,7 +50,7 @@ export function initTracesApi(server) {
         query: withDefaultValidators()
       }
     },
-    handler: (req, reply) => {
+    handler: (req: Request, reply: IReply) => {
       const { traceId } = req.params;
       const { setup } = req.pre;
       return getTrace(traceId, setup)

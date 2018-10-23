@@ -5,25 +5,22 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { oc } from 'ts-optchain';
+import { get } from 'lodash';
 import {
   PARENT_ID,
   PROCESSOR_EVENT,
   TRACE_ID
 } from '../../../common/constants';
-import { StringMap } from '../../../typings/common';
 import { Transaction } from '../../../typings/Transaction';
 import { ITransactionGroup } from '../../../typings/TransactionGroup';
+import { Setup } from '../helpers/setup_request';
 import {
+  ITransactionGroupBucket,
   prepareTransactionGroups,
   TRANSACTION_GROUP_AGGREGATES
 } from '../helpers/transaction_group_query';
 
-export async function getTopTraces({
-  setup
-}: {
-  setup: StringMap<any>;
-}): Promise<ITransactionGroup[]> {
+export async function getTopTraces(setup: Setup): Promise<ITransactionGroup[]> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
@@ -70,8 +67,11 @@ export async function getTopTraces({
   }
 
   const response: SearchResponse<Transaction> = await client('search', params);
-  // @ts-ignore
-  const buckets = oc(response).aggregations.transactions.buckets([]);
+  const buckets: ITransactionGroupBucket[] = get(
+    response.aggregations,
+    'transactions.buckets',
+    []
+  );
 
   return prepareTransactionGroups({ buckets, start, end });
 }
