@@ -11,7 +11,7 @@ export const getInitialState = path => {
   const state = {
     app: {}, // Kibana stuff in here
     transient: {
-      editing: true,
+      canUserWrite: true,
       fullscreen: false,
       selectedElement: null,
       resolvedArgs: {},
