@@ -18,24 +18,13 @@
  */
 
 export function ShieldPageProvider({ getService }) {
-  const remote = getService('remote');
-  const config = getService('config');
-
-  const defaultFindTimeout = config.get('timeouts.find');
+  const testSubjects = getService('testSubjects');
 
   class ShieldPage {
-    login(user, pwd) {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findById('username')
-        .type(user)
-        .then(function () {
-          return remote.findById('password')
-            .type(pwd);
-        })
-        .then(function () {
-          return remote.findByCssSelector('button')
-            .click();
-        });
+    async login(user, pwd) {
+      await testSubjects.setValue('loginUsername', user);
+      await testSubjects.setValue('loginPassword', pwd);
+      await testSubjects.click('loginSubmit');
     }
   }
 

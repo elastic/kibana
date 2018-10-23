@@ -6,16 +6,23 @@
 
 import { parse } from 'url';
 
-export function parseNext(href, basePath = '') {
+export function parseNext(href: string, basePath = '') {
   const { query, hash } = parse(href, true);
   if (!query.next) {
     return `${basePath}/`;
   }
 
+  let next: string;
+  if (Array.isArray(query.next) && query.next.length > 0) {
+    next = query.next[0];
+  } else {
+    next = query.next as string;
+  }
+
   // validate that `next` is not attempting a redirect to somewhere
   // outside of this Kibana install
   const { protocol, hostname, port, pathname } = parse(
-    query.next,
+    next,
     false /* parseQueryString */,
     true /* slashesDenoteHost */
   );

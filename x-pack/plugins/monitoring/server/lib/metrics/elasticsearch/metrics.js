@@ -937,7 +937,7 @@ export const metrics = {
     type: 'index'
   }),
   index_refresh_time: new ElasticsearchMetric({
-    field: 'total.refresh.total_time_in_millis',
+    field: 'index_stats.total.refresh.total_time_in_millis',
     label: 'Total Refresh Time',
     description:
       'Time spent on Elasticsearch refresh for primary and replica shards.',
