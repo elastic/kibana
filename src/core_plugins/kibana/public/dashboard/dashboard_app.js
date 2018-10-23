@@ -63,7 +63,6 @@ const app = uiModules.get('app/dashboard', [
   'react',
   'kibana/courier',
   'kibana/config',
-  'kibana/typeahead',
 ]);
 
 app.directive('dashboardViewportProvider', function (reactDirective) {

@@ -33,10 +33,10 @@ import './services';
 
 import { initAngularApi } from './api/angular';
 import appsApi from './api/apps';
-import controlsApi from './api/controls';
+import { initChromeControlsApi } from './api/controls';
 import { initChromeNavApi } from './api/nav';
 import templateApi from './api/template';
-import themeApi from './api/theme';
+import { initChromeThemeApi } from './api/theme';
 import { initChromeXsrfApi } from './api/xsrf';
 import { initUiSettingsApi } from './api/ui_settings';
 import { initLoadingCountApi } from './api/loading_count';
@@ -69,9 +69,9 @@ initChromeInjectedVarsApi(chrome);
 initChromeNavApi(chrome, internals);
 initLoadingCountApi(chrome, internals);
 initAngularApi(chrome, internals);
-controlsApi(chrome, internals);
+initChromeControlsApi(chrome);
 templateApi(chrome, internals);
-themeApi(chrome, internals);
+initChromeThemeApi(chrome);
 
 const waitForBootstrap = new Promise(resolve => {
   chrome.bootstrap = function (targetDomElement) {
