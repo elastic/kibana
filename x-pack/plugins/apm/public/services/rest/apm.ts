@@ -91,13 +91,18 @@ export async function loadTraceList({
   end,
   kuery
 }: IUrlParams): Promise<ITransactionGroup[]> {
-  return callApi({
+  const groups: ITransactionGroup[] = await callApi({
     pathname: '/api/apm/traces',
     query: {
       start,
       end,
       esFilterQuery: await getEncodedEsQuery(kuery)
     }
+  });
+
+  return groups.map(group => {
+    group.sample = addVersion(group.sample);
+    return group;
   });
 }
 
@@ -108,7 +113,7 @@ export async function loadTransactionList({
   kuery,
   transactionType
 }: IUrlParams): Promise<ITransactionGroup[]> {
-  return callApi({
+  const groups: ITransactionGroup[] = await callApi({
     pathname: `/api/apm/services/${serviceName}/transactions`,
     query: {
       start,
@@ -116,6 +121,11 @@ export async function loadTransactionList({
       esFilterQuery: await getEncodedEsQuery(kuery),
       transaction_type: transactionType
     }
+  });
+
+  return groups.map(group => {
+    group.sample = addVersion(group.sample);
+    return group;
   });
 }
 

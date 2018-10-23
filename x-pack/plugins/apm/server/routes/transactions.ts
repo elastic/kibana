@@ -22,7 +22,7 @@ const defaultErrorHandler = (reply: IReply) => (err: Error) => {
   // tslint:disable-next-line
   console.error(err.stack);
   // @ts-ignore
-  reply(Boom.wrap(err, 400));
+  reply(Boom.wrap(err, err.statusCode || 400));
 };
 
 export function initTransactionsApi(server: Server) {

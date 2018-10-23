@@ -223,7 +223,7 @@ exports[`DetailView should render with data 1`] = `
     </h2>
     <a
       className="euiLink euiLink--primary"
-      href="/app/kibana#/discover?_g=&_a=(interval:auto,query:(language:lucene,query:'context.service.name:\\"opbeans-node\\" AND error.grouping_key:c00e245c2fbebaf178fc31eeb2bb0250'),sort:('@timestamp':desc))"
+      href="/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:'context.service.name:\\"opbeans-node\\" AND error.grouping_key:c00e245c2fbebaf178fc31eeb2bb0250'),sort:('@timestamp':desc))&_g="
     >
       <button
         className="euiButton euiButton--primary"

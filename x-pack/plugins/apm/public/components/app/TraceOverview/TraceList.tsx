@@ -6,22 +6,22 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { Transaction } from '../../../../typings/Transaction';
 import { ITransactionGroup } from '../../../../typings/TransactionGroup';
 import { fontSizes, truncate } from '../../../style/variables';
 // @ts-ignore
 import { asMillisWithDefault } from '../../../utils/formatters';
-// @ts-ignore
-import { legacyEncodeURIComponent, RelativeLink } from '../../../utils/url';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 // @ts-ignore
 import TooltipOverlay from '../../shared/TooltipOverlay';
+import { TraceLink } from '../../shared/TraceLink';
 
 function formatString(value: string) {
   return value || 'N/A';
 }
 
-const AppLink = styled(RelativeLink)`
+const StyledTraceLink = styled(TraceLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -33,37 +33,31 @@ interface Props {
 
 const traceListColumns: ITableColumn[] = [
   {
-    field: 'name',
+    field: 'sample',
     name: 'Name',
     width: '40%',
     sortable: true,
-    render: (
-      name: string,
-      { serviceName, transactionType }: ITransactionGroup
-    ) => (
-      <TooltipOverlay content={formatString(name)}>
-        <AppLink
-          path={`${serviceName}/transactions/${transactionType}/${legacyEncodeURIComponent(
-            name
-          )}`}
-        >
-          {formatString(name)}
-        </AppLink>
+    render: (transaction: Transaction) => (
+      <TooltipOverlay content={formatString(transaction.transaction.name)}>
+        <StyledTraceLink transaction={transaction}>
+          {formatString(transaction.transaction.name)}
+        </StyledTraceLink>
       </TooltipOverlay>
     )
   },
   {
-    field: 'serviceName',
+    field: 'sample',
     name: 'Originating service',
     sortable: true,
-    render: (serviceName: string) => formatString(serviceName)
+    render: (transaction: Transaction) =>
+      formatString(transaction.context.service.name)
   },
   {
     field: 'averageResponseTime',
     name: 'Avg. response time',
     sortable: true,
     dataType: 'number',
-    render: (value: number) => asMillisWithDefault(value * 1000)
+    render: (value: number) => asMillisWithDefault(value)
   },
   {
     field: 'transactionsPerMinute',

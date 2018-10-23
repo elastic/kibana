@@ -11,11 +11,19 @@ interface Processor {
   event: 'transaction';
 }
 
+interface ContextSystem {
+  architecture: string;
+  hostname: string;
+  ip: string;
+  platform: string;
+}
+
 interface Context {
   process?: {
     pid: number;
   };
   service: ContextService;
+  system: ContextSystem;
   request: {
     url: {
       full: string;

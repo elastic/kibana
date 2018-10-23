@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Transaction } from './Transaction';
+
 export interface ITransactionGroup {
   name: string;
-  serviceName: string;
-  id: string;
+  sample: Transaction;
   p95: number;
   averageResponseTime: number;
   transactionsPerMinute: number;
   impact: number;
-  transactionType: string;
 }

@@ -4,18 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { HeaderLarge } from '../../shared/UIComponents';
-import { Distribution } from './Distribution';
+import React from 'react';
+import { RRRRenderArgs } from 'react-redux-request';
+import { Transaction as ITransaction } from '../../../../typings/Transaction';
+// @ts-ignore
+import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
+// @ts-ignore
 import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
+import { IUrlParams } from '../../../store/urlParams';
+// @ts-ignore
 import TransactionCharts from '../../shared/charts/TransactionCharts';
+// @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
-import Transaction from './Transaction';
-import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
+// @ts-ignore
+import { HeaderLarge } from '../../shared/UIComponents';
+import { Distribution } from './Distribution';
+import { Transaction } from './Transaction';
 
-function TransactionDetails({ urlParams, location }) {
+interface Props {
+  urlParams: IUrlParams;
+  location: any;
+  waterfallRoot: ITransaction;
+}
+
+export function TransactionDetailsView({
+  urlParams,
+  location,
+  waterfallRoot
+}: Props) {
   return (
     <div>
       <HeaderLarge>{urlParams.transactionName}</HeaderLarge>
@@ -26,7 +44,7 @@ function TransactionDetails({ urlParams, location }) {
 
       <TransactionDetailsChartsRequest
         urlParams={urlParams}
-        render={({ data }) => (
+        render={({ data }: RRRRenderArgs<any>) => (
           <TransactionCharts
             charts={data}
             urlParams={urlParams}
@@ -37,7 +55,7 @@ function TransactionDetails({ urlParams, location }) {
 
       <TransactionDistributionRequest
         urlParams={urlParams}
-        render={({ data }) => (
+        render={({ data }: RRRRenderArgs<any>) => (
           <Distribution
             distribution={data}
             urlParams={urlParams}
@@ -46,14 +64,17 @@ function TransactionDetails({ urlParams, location }) {
         )}
       />
 
+      <EuiSpacer size="l" />
+
       <TransactionDetailsRequest
         urlParams={urlParams}
-        render={res => {
+        render={(res: RRRRenderArgs<any>) => {
           return (
             <Transaction
               location={location}
               transaction={res.data}
               urlParams={urlParams}
+              waterfallRoot={waterfallRoot}
             />
           );
         }}
@@ -61,5 +82,3 @@ function TransactionDetails({ urlParams, location }) {
     </div>
   );
 }
-
-export default TransactionDetails;

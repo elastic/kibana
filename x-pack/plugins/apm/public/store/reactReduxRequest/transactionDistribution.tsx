@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Request } from 'react-redux-request';
+import { Request, RRRRenderArgs } from 'react-redux-request';
 import { IDistributionResponse } from '../../../server/lib/transactions/distribution/get_distribution';
 import { loadTransactionDistribution } from '../../services/rest/apm';
 import { IReduxState } from '../rootReducer';
@@ -41,7 +41,7 @@ export function TransactionDistributionRequest({
   render
 }: {
   urlParams: IUrlParams;
-  render: () => any;
+  render: (args: RRRRenderArgs<any>) => any;
 }) {
   const { serviceName, start, end, transactionName, kuery } = urlParams;
 
