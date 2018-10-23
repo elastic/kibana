@@ -27,7 +27,7 @@ export function uptimeMonitorsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.uptimeMonitors.nameTitle', {
       defaultMessage: 'Uptime Monitors',
     }),
-    category: TUTORIAL_CATEGORY.UPTIME,
+    category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.uptimeMonitors.shortDescription', {
       defaultMessage: 'Monitor services for their availability',
     }),
