@@ -310,7 +310,7 @@ const scriptProcessorDefinition = {
     lang: 'painless',
     file: '',
     id: '',
-    inline: '',
+    source: '',
     params: {},
     ...commonPipelineParams
   }
