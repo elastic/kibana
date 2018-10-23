@@ -32,7 +32,7 @@ module.exports = function (grunt) {
 
     switch (getOsPlatform()) {
       case 'win32':
-        return 'IE';
+        return 'Chrome';
       default:
         return 'Chrome';
     }
