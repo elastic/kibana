@@ -46,8 +46,8 @@ export class DataSelector extends React.Component {
 
   };
 
-  filterStringField = (field) => {
-    return field.type === 'string';
+  filterStringOrNumberFields = (field) => {
+    return field.type === 'string' || field.type === 'number';
   };
 
   _renderSingleFieldSelect() {
@@ -73,7 +73,7 @@ export class DataSelector extends React.Component {
         placeholder="Select field"
         value={this.state.selectedStringField}
         onChange={onFieldChange}
-        filterField={this.filterStringField}
+        filterField={this.filterStringOrNumberFields}
         fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
       />
     );

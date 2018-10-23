@@ -175,9 +175,12 @@ export class ESSearchSource extends VectorSource {
   }
 
   async getStringFields() {
-    const fields = this._descriptor.tooltipProperties ? this._descriptor.tooltipProperties : [];
-    return fields.map(name => {
-      return { name: name, label: name };
+    const indexPattern = await this._getIndexPattern();
+    const stringFields = indexPattern.fields.filter(field => {
+      return field.type === 'string';
+    });
+    return stringFields.map(stringField => {
+      return { name: stringField.name, label: stringField.name };
     });
   }
 
@@ -383,17 +386,8 @@ class Editor extends React.Component {
     );
   }
 
-  filterForGeoPointOrShape = () => {
-    return fields => {
-      let hasGeoPointOrShape = false;
-      try {
-        hasGeoPointOrShape = fields.some(({ type }) => type === 'geo_point'
-          || type === 'geo_shape');
-      } catch (error) {
-        throw new Error(error);
-      }
-      return hasGeoPointOrShape;
-    };
+  filterForGeoPointOrShape = fields => {
+    return fields.some(({ type }) => type === 'geo_point' || type === 'geo_shape');
   }
 
   render() {
@@ -413,13 +407,6 @@ class Editor extends React.Component {
           />
         </EuiFormRow> */}
 
-        <EuiFormRow compressed>
-          <EuiSwitch
-            label="Filter by map bounds"
-            checked={this.state.filterByMapBounds}
-            onChange={this.onFilterByMapBoundsChange}
-          />
-        </EuiFormRow>
 
         <EuiFormRow
           label="Index pattern"
@@ -429,13 +416,22 @@ class Editor extends React.Component {
             indexPatternId={this.state.indexPatternId}
             onChange={this.onIndexPatternSelect}
             placeholder="Select index pattern"
-            filterFields={this.filterForGeoPointOrShape()}
+            filterIndexPatterns={this.filterForGeoPointOrShape}
           />
         </EuiFormRow>
 
         {this._renderGeoSelect()}
 
         {this._renderTooltipConfig()}
+
+
+        <EuiFormRow compressed>
+          <EuiSwitch
+            label="Use map extent to filter data"
+            checked={this.state.filterByMapBounds}
+            onChange={this.onFilterByMapBoundsChange}
+          />
+        </EuiFormRow>
 
       </Fragment>
     );
