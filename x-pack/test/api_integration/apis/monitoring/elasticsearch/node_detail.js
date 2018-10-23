@@ -26,7 +26,7 @@ export default function ({ getService }) {
       return esArchiver.unload(archive);
     });
 
-    it('should summarize node with metrics', async () => {
+    it.skip('should summarize node with metrics', async () => {
       const { body } = await supertest
         .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/nodes/jxcP6ue7eRCieNNitFTT0EA')
         .set('kbn-xsrf', 'xxx')
