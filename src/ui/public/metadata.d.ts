@@ -17,28 +17,11 @@
  * under the License.
  */
 
-import { KBN_FIELD_TYPES } from '../../../../utils/kbn_field_types';
-
-const filterableTypes = KBN_FIELD_TYPES.filter(type => type.filterable).map(type => type.name);
-
-export function isFilterable(field) {
-  return filterableTypes.includes(field.type);
+declare class Metadata {
+  public branch: string;
+  public version: string;
 }
 
-export function getFromSavedObject(savedObject) {
-  if (!savedObject) {
-    return null;
-  }
+declare const metadata: Metadata;
 
-  return {
-    fields: JSON.parse(savedObject.attributes.fields),
-    title: savedObject.attributes.title,
-  };
-}
-
-export function getFromLegacyIndexPattern(indexPatterns) {
-  return indexPatterns.map(indexPattern => ({
-    fields: indexPattern.fields.raw,
-    title: indexPattern.title,
-  }));
-}
+export { metadata };

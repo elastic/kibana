@@ -17,4 +17,6 @@
  * under the License.
  */
 
-import './typeahead';
+import './directive';
+
+export { Storage } from './storage';

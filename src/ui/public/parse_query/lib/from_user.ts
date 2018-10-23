@@ -17,4 +17,40 @@
  * under the License.
  */
 
-export { Storage } from './storage';
+import _ from 'lodash';
+
+/**
+ * Take userInput from the user and make it into a query object
+ * @returns {object}
+ * @param userInput
+ */
+
+export function fromUser(userInput: object | string) {
+  const matchAll = '';
+
+  if (_.isObject(userInput)) {
+    // If we get an empty object, treat it as a *
+    if (!Object.keys(userInput).length) {
+      return matchAll;
+    }
+    return userInput;
+  }
+
+  userInput = userInput || '';
+  if (typeof userInput === 'string') {
+    userInput = userInput.trim();
+    if (userInput.length === 0) {
+      return matchAll;
+    }
+
+    if (userInput[0] === '{') {
+      try {
+        return JSON.parse(userInput);
+      } catch (e) {
+        return userInput;
+      }
+    } else {
+      return userInput;
+    }
+  }
+}
