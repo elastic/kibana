@@ -49,7 +49,7 @@ export const documentationLinks = {
     percentile_ranks: `${ELASTIC_DOCS}search-aggregations-metrics-percentile-rank-aggregation.html`,
     serial_diff: `${ELASTIC_DOCS}search-aggregations-pipeline-serialdiff-aggregation.html`,
     std_dev: `${ELASTIC_DOCS}search-aggregations-metrics-extendedstats-aggregation.html`,
-    sum: `${ELASTIC_DOCS}search-aggregations-metrics-sum-aggregationn.html`,
+    sum: `${ELASTIC_DOCS}search-aggregations-metrics-sum-aggregation.html`,
     top_hits: `${ELASTIC_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
   },
   scriptedFields: {
