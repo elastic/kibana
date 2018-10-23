@@ -13,7 +13,22 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
-export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer }) => {
+export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
+  showRemoveBtn }) => {
+  const removeBtn = showRemoveBtn
+    ? (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          color="danger"
+          onClick={removeLayer}
+          flush="right"
+        >
+          Remove layer
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    )
+    : null;
+
   return (
     <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
@@ -27,15 +42,7 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer }) 
       <EuiFlexItem>
         <EuiSpacer/>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          color="danger"
-          onClick={removeLayer}
-          flush="right"
-        >
-          Remove layer
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+      {removeBtn}
       <EuiFlexItem grow={false}>
         <EuiButton
           iconType="check"

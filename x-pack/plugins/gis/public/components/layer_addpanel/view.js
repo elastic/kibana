@@ -118,12 +118,12 @@ export class AddLayerPanel extends React.Component {
     }
   }
 
-  _renderAddToMapBtn() {
+  _renderNextBtn() {
     const { layerLoading, temporaryLayers, nextAction } = this.props;
-    const addToMapBtnText = 'Layer Details';
+    const addToMapBtnText = 'Next >>';
     return (
       <EuiButton
-        style={{ width: '12rem' }}
+        style={{ width: '9rem' }}
         disabled={!temporaryLayers || layerLoading}
         isLoading={layerLoading}
         iconType={temporaryLayers && !layerLoading ? 'check' : undefined}
@@ -345,7 +345,7 @@ export class AddLayerPanel extends React.Component {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {this._renderAddToMapBtn()}
+              {this._renderNextBtn()}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

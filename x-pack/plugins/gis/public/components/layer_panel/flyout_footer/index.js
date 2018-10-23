@@ -9,6 +9,14 @@ import { FlyoutFooter } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
 import { promoteTemporaryStyles, clearTemporaryStyles, clearTemporaryLayers,
   setSelectedLayer, removeLayer, promoteTemporaryLayers } from '../../../actions/store_actions';
+import { getSelectedLayer } from '../../../selectors/map_selectors';
+
+const mapStateToProps = state => {
+  const selectedLayer = getSelectedLayer(state);
+  return {
+    showRemoveBtn: !selectedLayer.isTemporary()
+  };
+};
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -31,5 +39,5 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-const connectedFlyoutFooter = connect(null, mapDispatchToProps)(FlyoutFooter);
+const connectedFlyoutFooter = connect(mapStateToProps, mapDispatchToProps)(FlyoutFooter);
 export { connectedFlyoutFooter as FlyoutFooter };
