@@ -68,7 +68,7 @@ export function ImportProgress({ statuses }) {
 
   if (completedStep >= 0) {
     processFileTitle = 'Processing file';
-    statusInfo = (<p>Converting file for import</p>);
+    statusInfo = (<p>Processing file for import</p>);
   }
   if (completedStep >= 1) {
     processFileTitle = 'File processed';

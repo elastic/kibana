@@ -214,9 +214,10 @@ export class ImportView extends Component {
 
   onIndexPatternChange = (e) => {
     const name = e.target.value;
+    const { indexPatternNames, index } = this.state;
     this.setState({
       indexPattern: name,
-      indexPatternNameError: isIndexPatternNameValid(name, this.state.indexPatternNames),
+      indexPatternNameError: isIndexPatternNameValid(name, indexPatternNames, index),
     });
   }
 
@@ -463,9 +464,15 @@ function isIndexNameValid(name, indexNames) {
   return '';
 }
 
-function isIndexPatternNameValid(name, indexPatternNames) {
+function isIndexPatternNameValid(name, indexPatternNames, index) {
   if (indexPatternNames.find(i => i === name)) {
     return 'Index pattern name already exists';
   }
+  const newName = name.replace('*', '.*');
+  const reg = new RegExp(`^${newName}$`);
+  if (index.match(reg) === null) {
+    return 'Index pattern does not match index name';
+  }
+
   return '';
 }
