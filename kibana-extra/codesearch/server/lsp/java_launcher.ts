@@ -19,6 +19,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
   constructor(
     readonly targetHost: string,
     readonly detach: boolean,
+    readonly workspacePath: string,
     readonly server: Hapi.Server
   ) {}
 
@@ -72,7 +73,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
             '-configuration',
             path.resolve(javaLangserverPath, config),
             '-data',
-            '/tmp/data',
+            this.workspacePath,
           ],
           {
             detached: false,

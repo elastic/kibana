@@ -57,7 +57,7 @@ export class LanguageServerController implements ILanguageServerHandler {
         builtinWorkspaceFolders: true,
         languages: ['java'],
         maxWorkspace: options.maxWorkspace,
-        launcher: new JavaLauncher(this.targetHost, this.detach, this.server),
+        launcher: new JavaLauncher(this.targetHost, this.detach, options.jdtWorkspacePath, this.server),
       },
     ];
     this.languageServerMap = this.languageServers.reduce(

@@ -12,6 +12,8 @@ export class ServerOptions {
 
   public readonly repoPath = resolve(this.config.get('path.data'), 'codesearch/repos');
 
+  public readonly jdtWorkspacePath = resolve(this.config.get('path.data'), 'codesearch/jdt_ws');
+
   public readonly updateFrequencyMs: number = this.options.updateFreqencyMs;
 
   public readonly indexFrequencyMs: number = this.options.indexFrequencyMs;
