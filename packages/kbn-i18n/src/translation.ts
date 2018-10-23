@@ -23,7 +23,7 @@ export interface Translation {
   /**
    * Actual translated messages.
    */
-  messages?: Record<string, string>;
+  messages: Record<string, string>;
   /**
    * Locale of the translated messages.
    */

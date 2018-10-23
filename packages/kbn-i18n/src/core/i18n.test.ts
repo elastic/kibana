@@ -33,24 +33,28 @@ describe('I18n engine', () => {
 
   describe('addMessages', () => {
     test('should throw error if locale is not specified or empty', () => {
-      expect(() => i18n.addMessages({ messages: { foo: 'bar' } })).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.addMessages({ locale: '' })).toThrowErrorMatchingSnapshot();
+      expect(() =>
+        i18n.addTranslation({ messages: { foo: 'bar' } })
+      ).toThrowErrorMatchingSnapshot();
+      expect(() =>
+        i18n.addTranslation({ locale: '', messages: {} })
+      ).toThrowErrorMatchingSnapshot();
     });
 
     test('should throw error if locale specified in messages is different from one provided as second argument', () => {
       expect(() =>
-        i18n.addMessages({ messages: { foo: 'bar' }, locale: 'en' }, 'ru')
+        i18n.addTranslation({ messages: { foo: 'bar' }, locale: 'en' }, 'ru')
       ).toThrowErrorMatchingSnapshot();
     });
 
     test('should add messages if locale prop is passed as second argument', () => {
       const locale = 'ru';
 
-      expect(i18n.getTranslation()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({ messages: {} });
 
-      i18n.addMessages({ messages: { foo: 'bar' } }, locale);
+      i18n.addTranslation({ messages: { foo: 'bar' } }, locale);
 
-      expect(i18n.getTranslation()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({ messages: {} });
 
       i18n.setLocale(locale);
 
@@ -60,16 +64,16 @@ describe('I18n engine', () => {
     test('should add messages if locale prop is passed as messages property', () => {
       const locale = 'ru';
 
-      expect(i18n.getTranslation()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({ messages: {} });
 
-      i18n.addMessages({
+      i18n.addTranslation({
         locale,
         messages: {
           foo: 'bar',
         },
       });
 
-      expect(i18n.getTranslation()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({ messages: {} });
 
       i18n.setLocale(locale);
 
@@ -85,7 +89,7 @@ describe('I18n engine', () => {
       const locale = 'ru';
 
       i18n.setLocale(locale);
-      i18n.addMessages({
+      i18n.addTranslation({
         locale,
         messages: {
           ['a.b.c']: 'foo',
@@ -99,7 +103,7 @@ describe('I18n engine', () => {
         },
       });
 
-      i18n.addMessages({
+      i18n.addTranslation({
         locale,
         messages: {
           ['d.e.f']: 'bar',
@@ -119,7 +123,7 @@ describe('I18n engine', () => {
       const locale = 'ru';
 
       i18n.setLocale(locale);
-      i18n.addMessages({
+      i18n.addTranslation({
         locale,
         messages: {
           ['a.b.c']: 'foo',
@@ -133,7 +137,7 @@ describe('I18n engine', () => {
         },
       });
 
-      i18n.addMessages({
+      i18n.addTranslation({
         locale,
         messages: {
           ['a.b.c']: 'bar',
@@ -152,7 +156,7 @@ describe('I18n engine', () => {
       const locale = 'en-us';
       i18n.setLocale(locale);
 
-      i18n.addMessages(
+      i18n.addTranslation(
         {
           messages: {
             ['a.b.c']: 'bar',
@@ -172,13 +176,13 @@ describe('I18n engine', () => {
 
   describe('getTranslation', () => {
     test('should return messages for the current language', () => {
-      i18n.addMessages({
+      i18n.addTranslation({
         locale: 'ru',
         messages: {
           foo: 'bar',
         },
       });
-      i18n.addMessages({
+      i18n.addTranslation({
         locale: 'en',
         messages: {
           bar: 'foo',
@@ -203,13 +207,13 @@ describe('I18n engine', () => {
     });
 
     test('should return an empty object if messages for current locale are not specified', () => {
-      expect(i18n.getTranslation()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({ messages: {} });
 
       i18n.setLocale('fr');
-      expect(i18n.getTranslation()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({ messages: {} });
 
       i18n.setLocale('en');
-      expect(i18n.getTranslation()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({ messages: {} });
     });
   });
 
@@ -384,22 +388,25 @@ describe('I18n engine', () => {
     });
 
     test('should return array of registered locales', () => {
-      i18n.addMessages({
+      i18n.addTranslation({
         locale: 'en',
+        messages: {},
       });
 
       expect(i18n.getRegisteredLocales()).toEqual(['en']);
 
-      i18n.addMessages({
+      i18n.addTranslation({
         locale: 'ru',
+        messages: {},
       });
 
       expect(i18n.getRegisteredLocales()).toContain('en');
       expect(i18n.getRegisteredLocales()).toContain('ru');
       expect(i18n.getRegisteredLocales().length).toBe(2);
 
-      i18n.addMessages({
+      i18n.addTranslation({
         locale: 'fr',
+        messages: {},
       });
 
       expect(i18n.getRegisteredLocales()).toContain('en');
@@ -720,6 +727,7 @@ describe('I18n engine', () => {
             usd: { style: 'currency', currency: 'USD' },
           },
         },
+        messages: {},
       });
       i18n.setDefaultLocale('en');
 
@@ -795,12 +803,12 @@ describe('I18n engine', () => {
   describe('init', () => {
     test('should not initialize the engine if messages are not specified', () => {
       i18n.init();
-      expect(i18n.getTranslation()).toEqual({});
+      expect(i18n.getTranslation()).toEqual({ messages: {} });
     });
 
     test('should throw error if messages are empty', () => {
-      expect(() => i18n.init({})).toThrow();
-      expect(i18n.getTranslation()).toEqual({});
+      expect(() => i18n.init({ messages: {} })).toThrow();
+      expect(i18n.getTranslation()).toEqual({ messages: {} });
     });
 
     test('should add messages if locale is specified', () => {
@@ -820,7 +828,7 @@ describe('I18n engine', () => {
     });
 
     test('should set the current locale', () => {
-      i18n.init({ locale: 'ru' });
+      i18n.init({ locale: 'ru', messages: {} });
       expect(i18n.getLocale()).toBe('ru');
     });
 
@@ -836,6 +844,7 @@ describe('I18n engine', () => {
             },
           },
         },
+        messages: {},
       });
 
       expect((i18n.getFormats().date as any).custom).toEqual({

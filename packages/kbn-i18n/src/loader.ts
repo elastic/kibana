@@ -22,6 +22,7 @@ import * as JSON5 from 'json5';
 import * as path from 'path';
 import { promisify } from 'util';
 
+import { Formats } from './core/formats';
 import { unique } from './core/helper';
 import { Translation } from './translation';
 
@@ -135,19 +136,21 @@ export async function getTranslationsByLocale(locale: string): Promise<Translati
     await loadAndCacheFiles(notLoadedFiles);
   }
 
-  return files.length
-    ? files.reduce(
-        (messages: { locale: string; messages?: Translation['messages'] }, file) => ({
-          ...messages,
-          ...loadedFiles[file],
-          messages: {
-            ...(loadedFiles[file].messages || {}),
-            ...(messages.messages || {}),
-          },
-        }),
-        { locale }
-      )
-    : {};
+  if (!files.length) {
+    return { messages: {} };
+  }
+
+  return files.reduce(
+    (messages: { locale: string; messages: Translation['messages']; formats?: Formats }, file) => ({
+      locale: loadedFiles[file].locale || messages.locale,
+      formats: loadedFiles[file].formats || messages.formats,
+      messages: {
+        ...loadedFiles[file].messages,
+        ...messages.messages,
+      },
+    }),
+    { locale, messages: {} }
+  );
 }
 
 /**
