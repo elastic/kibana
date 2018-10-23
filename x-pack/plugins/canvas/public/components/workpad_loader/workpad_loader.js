@@ -274,7 +274,6 @@ export class WorkpadLoader extends React.PureComponent {
 
     let deleteButton = (
       <EuiButton
-        size="s"
         color="danger"
         iconType="trash"
         onClick={this.openRemoveConfirm}
@@ -285,7 +284,7 @@ export class WorkpadLoader extends React.PureComponent {
     );
 
     const downloadButton = (
-      <EuiButton size="s" color="secondary" onClick={this.downloadWorkpads} iconType="sortDown">
+      <EuiButton color="secondary" onClick={this.downloadWorkpads} iconType="sortDown">
         {`Download (${selectedWorkpads.length})`}
       </EuiButton>
     );
