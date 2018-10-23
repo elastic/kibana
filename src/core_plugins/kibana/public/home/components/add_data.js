@@ -226,7 +226,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
               </strong>
               <EuiLink
                 style={{ display: 'block', textAlign: 'center' }}
-                href={`${basePath}/app/ml#/datavisualizer`}
+                href={`${basePath}/app/ml#/filedatavisualizer`}
               >
                 <FormattedMessage
                   id="kbn.home.addData.uploadFileLink"
