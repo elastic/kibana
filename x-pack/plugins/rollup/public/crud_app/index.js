@@ -82,7 +82,7 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'rollup_jobs',
     title: 'Rollups',
-    description: 'Preserve historical data for analysis with a smaller storage footprint.',
+    description: 'Roll up your data in a smaller index that still lets you analyze the data.',
     icon: 'indexRollupApp',
     path: `#${CRUD_APP_BASE_PATH}/job_list`,
     showOnHomePage: true,
