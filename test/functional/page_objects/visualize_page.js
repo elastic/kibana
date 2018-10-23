@@ -1116,9 +1116,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async filterPieSlice(name) {
       const slice = await this.getPieSlice(name);
-      const event = document.createEvent('SVGEvents');
-      event.initEvent('click', true, true);
-      slice.dispatchEvent(event);
+      // Since slice is an SVG element we can't simply use .click() for it
+      await remote.moveMouseTo(slice);
+      await remote.clickMouseButton();
     }
 
     async getPieSlice(name) {
