@@ -18,7 +18,7 @@
  */
 
 import get from 'lodash.get';
-import AggConfigResult from '../../vis/agg_config_result';
+import AggConfigResult from 'ui/vis/agg_config_result';
 
 /**
  * Takes an array of tabified rows and splits them by column value:

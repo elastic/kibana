@@ -26,7 +26,7 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import tableVisTemplate from './table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { legacyTableResponseHandler } from 'ui/vis/response_handlers/legacy_table';
+import { legacyTableResponseHandler } from './legacy_response_handler';
 
 // we need to load the css ourselves
 
