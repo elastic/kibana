@@ -48,7 +48,6 @@ function mapDispatchToProps(dispatch) {
     removeLayer: id => dispatch(removeLayer(id)),
     nextAction: id => {
       dispatch(setSelectedLayer(id));
-      dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
     updateLabel: (id, label) => dispatch(updateLayerLabel(id, label)),
