@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get, findLastIndex } from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 
 /**
@@ -63,8 +63,22 @@ export function splitTable(columns, rows, $parent) {
   const splitColumnIndex = columns.findIndex(column => column.id === splitColumn.id);
   const splitRows = splitRowsOnColumn(rows, splitColumn.id);
 
+  // Check if there are buckets after the first metric.
+  const firstMetricsColumnIndex = columns.findIndex(column => get(column, 'aggConfig.type.type') === 'metrics');
+  const lastBucketsColumnIndex = findLastIndex(columns, column => get(column, 'aggConfig.type.type') === 'buckets');
+  const metricsAtAllLevels = firstMetricsColumnIndex < lastBucketsColumnIndex;
+
+  // Calculate metrics:bucket ratio.
+  const numberOfMetrics = columns.filter(column => get(column, 'aggConfig.type.type') === 'metrics').length;
+  const numberOfBuckets = columns.filter(column => get(column, 'aggConfig.type.type') === 'buckets').length;
+  const metricsPerBucket = numberOfMetrics / numberOfBuckets;
+
   const filteredColumns = columns
-    .filter((column, i) => i !== splitColumnIndex)
+    .filter((column, i) => {
+      const isSplitColumn = i === splitColumnIndex;
+      const isSplitMetric = metricsAtAllLevels && i > splitColumnIndex && i <= splitColumnIndex + metricsPerBucket;
+      return !isSplitColumn && !isSplitMetric;
+    })
     .map(column => ({ title: column.name, ...column }));
 
   return splitRows.results.map(splitValue => {
