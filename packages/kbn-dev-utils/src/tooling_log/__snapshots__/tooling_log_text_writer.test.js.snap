@@ -9,6 +9,15 @@ exports[`formats %s patterns and indents multi-line messages correctly 1`] = `
 "
 `;
 
+exports[`formats log line with timestamp 1`] = `
+" 02:02:02  02:02:02  02:02:02  02:02:02  02:02:02   02:02:02           │ [32msucc[39m foo bar
+  02:02:02           │      { foo: { bar: { '1': [Array] } },
+  02:02:02           │        bar: { bar: { '1': [Array] } } }
+  02:02:02           │
+  02:02:02           │      Infinity
+"
+`;
+
 exports[`level:debug/type:debug snapshots: is written 1`] = `true`;
 
 exports[`level:debug/type:debug snapshots: output 1`] = `

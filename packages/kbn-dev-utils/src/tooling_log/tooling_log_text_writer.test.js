@@ -18,6 +18,11 @@
  */
 
 import { ToolingLogTextWriter } from './tooling_log_text_writer';
+import moment from 'moment';
+
+jest.mock('moment', () => () => ({
+  format: jest.fn().mockImplementation(() => ' 02:02:02 '),
+}));
 
 it('throws error if created with invalid level', () => {
   expect(
@@ -94,5 +99,30 @@ it('formats %s patterns and indents multi-line messages correctly', () => {
   });
 
   const output = write.mock.calls.reduce((acc, chunk) => `${acc}${chunk}`, '');
+  expect(output).toMatchSnapshot();
+});
+
+it('formats log line with timestamp', () => {
+  const write = jest.fn();
+  const writer = new ToolingLogTextWriter({
+    level: 'debug',
+    writeTo: {
+      write,
+    },
+    includeTimestamp: true,
+  });
+
+  writer.write({
+    type: 'success',
+    indent: 10,
+    args: [
+      '%s\n%O\n\n%d',
+      'foo bar',
+      { foo: { bar: { 1: [1, 2, 3] } }, bar: { bar: { 1: [1, 2, 3] } } },
+      Infinity,
+    ],
+  });
+
+  const output = write.mock.calls.reduce((acc, chunk) => `${moment().format()}${acc}${chunk}`, '');
   expect(output).toMatchSnapshot();
 });
