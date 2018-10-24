@@ -26,7 +26,12 @@ export function TraceOverview(props: Props) {
       <EuiCallOut title="New feature: Distributed Tracing">
         <EuiText>
           The APM UI now supports distributed tracing as a beta feature.{' '}
-          <EuiLink>Learn more about it in our blog post.</EuiLink>
+          <EuiLink
+            href="https://www.elastic.co/guide/en/apm/get-started/6.5/distributed-tracing.html"
+            target="_blank"
+          >
+            Learn more about APM distributed tracing.
+          </EuiLink>
         </EuiText>
       </EuiCallOut>
       <EuiSpacer />
