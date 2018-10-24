@@ -77,8 +77,9 @@
   display: none
 }
 
+// HOTFIX coming from EUI
 .sourceSelectItem {
-  width: 400px;
+  width: 374px;
 }
 
 .mapboxgl-popup {
@@ -216,5 +217,10 @@
     + .visibilityToggle__body > .visibilityToggle__eyeClosed {
       opacity: 1;
     }
+  }
+}
+.euiComboBox {
+  .euiComboBox__inputWrap {
+    display: flex;
   }
 }

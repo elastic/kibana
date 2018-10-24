@@ -336,7 +336,6 @@ class Editor extends React.Component {
     return (
       <EuiFormRow
         label="Geospatial field"
-        compressed
       >
         <SingleFieldSelect
           placeholder="Select geo field"
@@ -359,7 +358,6 @@ class Editor extends React.Component {
       fieldSelectFormRow = (
         <EuiFormRow
           label="Fields displayed in tooltip"
-          compressed
         >
           <MultiFieldSelect
             placeholder="Select field(s)"
@@ -410,7 +408,6 @@ class Editor extends React.Component {
 
         <EuiFormRow
           label="Index pattern"
-          compressed
         >
           <IndexPatternSelect
             indexPatternId={this.state.indexPatternId}
@@ -425,7 +422,7 @@ class Editor extends React.Component {
         {this._renderTooltipConfig()}
 
 
-        <EuiFormRow compressed>
+        <EuiFormRow>
           <EuiSwitch
             label="Use map extent to filter data"
             checked={this.state.filterByMapBounds}

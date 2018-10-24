@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import {
   EuiFieldText,
   EuiText,
+  EuiFormRow,
 } from '@elastic/eui';
 
 import { TMSSource } from './source';
@@ -97,13 +98,12 @@ class XYZTMSEditor extends  React.Component {
 
   render() {
     return (
-      <Fragment>
+      <EuiFormRow label="Url">
         <EuiFieldText
           placeholder="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
           onChange={(e) => this._handleTMSInputChange(e)}
-          aria-label="Use aria labels when no actual label is in use"
         />
-      </Fragment>
+      </EuiFormRow>
     );
   }
 }

@@ -5,11 +5,11 @@
  */
 
 import { VectorSource } from './source';
-import React, { Fragment } from 'react';
+import React from 'react';
 import {
   EuiText,
   EuiSelect,
-  EuiSpacer
+  EuiFormRow
 } from '@elastic/eui';
 import { GIS_API_PATH } from '../../../../common/constants';
 
@@ -40,15 +40,13 @@ export class EMSFileSource extends VectorSource {
       onPreviewSource(emsFileSource);
     };
     return (
-      <Fragment>
-        <EuiSpacer size="m"/>
+      <EuiFormRow label="Layer">
         <EuiSelect
           hasNoInitialSelection
           options={emsVectorOptions}
           onChange={onChange}
-          aria-label="Use aria labels when no actual label is in use"
         />
-      </Fragment>
+      </EuiFormRow>
     );
   }
 

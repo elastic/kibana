@@ -15,7 +15,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'gis',
     title: 'GIS',
     description: 'Map and analyze the geo-data from Elasticsearch and the Elastic Maps Service',
-    icon: 'wrench', //no gis logo yet
+    icon: 'gisApp', //no gis logo yet
     path: '/app/gis',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.OTHER

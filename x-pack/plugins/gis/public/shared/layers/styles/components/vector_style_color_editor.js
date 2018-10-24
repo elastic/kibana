@@ -14,7 +14,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
-  EuiFormLabel
+  EuiFormLabel,
+  EuiSpacer
 } from '@elastic/eui';
 
 
@@ -131,11 +132,10 @@ export class VectorStyleColorEditor extends React.Component {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={true}>
-            {colorSelector}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+
+        {colorSelector}
       </div>
     );
   }

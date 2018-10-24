@@ -5,11 +5,11 @@
  */
 
 import { VectorSource } from './source';
-import React, { Fragment } from 'react';
+import React from 'react';
 import {
   EuiText,
   EuiSelect,
-  EuiSpacer
+  EuiFormRow
 } from '@elastic/eui';
 
 export class KibanaRegionmapSource extends VectorSource {
@@ -42,15 +42,13 @@ export class KibanaRegionmapSource extends VectorSource {
     };
 
     return (
-      <Fragment>
-        <EuiSpacer size="m"/>
+      <EuiFormRow label="File">
         <EuiSelect
           hasNoInitialSelection
           options={regionmapOptions}
           onChange={onChange}
-          aria-label="Use aria labels when no actual label is in use"
         />
-      </Fragment>
+      </EuiFormRow>
     );
   };
 
