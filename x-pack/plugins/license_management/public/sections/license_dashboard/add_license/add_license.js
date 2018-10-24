@@ -14,11 +14,11 @@ export const AddLicense = ({ uploadPath = `#${BASE_PATH}upload_license` }) => {
   return (
     <EuiCard
       title={(<FormattedMessage
-        id="xpack.licenseMgmt.licenseDashboard.addLicenseTitle"
+        id="xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseTitle"
         defaultMessage="Update your license"
       />)}
       description={(<FormattedMessage
-        id="xpack.licenseMgmt.licenseDashboard.addLicenseDescription"
+        id="xpack.licenseMgmt.licenseDashboard.addLicense.useAvailableLicenseDescription"
         defaultMessage="If you already have a new license, upload it now."
       />)}
       footer={

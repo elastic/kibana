@@ -16,7 +16,7 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
   const description = (
     <span>
       <FormattedMessage
-        id="xpack.licenseMgmt.licenseDashboard.requestTrialExtensionDescription"
+        id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.howToContinueUsingPluginsDescription"
         defaultMessage="If you’d like to continuing using security, machine learning, and our
         other awesome {platinumLicenseFeaturesLinkText}, request an extension now."
         values={{
@@ -26,7 +26,7 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
               target="_blank"
             >
               <FormattedMessage
-                id="xpack.licenseMgmt.licenseDashboard.requestTrialExtensionDescription.platinumLicenseFeaturesLinkText"
+                id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.platinumLicenseFeaturesLinkText"
                 defaultMessage="Platinum features"
               />
             </EuiLink>
@@ -39,7 +39,7 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
     <EuiFlexItem>
       <EuiCard
         title={(<FormattedMessage
-          id="xpack.licenseMgmt.licenseDashboard.requestTrialExtensionTitle"
+          id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.extendYourTrialTitle"
           defaultMessage="Extend your trial"
         />)}
         description={description}

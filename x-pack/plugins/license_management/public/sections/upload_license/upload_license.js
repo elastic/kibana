@@ -97,12 +97,12 @@ export class UploadLicense extends React.PureComponent {
   };
   submit = event => {
     event.preventDefault();
-    if (!this.file) {
+    if (this.file) {
       this.send();
     } else {
       this.props.addUploadErrorMessage(
         <FormattedMessage
-          id="xpack.licenseMgmt.uploadLicense.uploadWrongFileTypeErrorMessage"
+          id="xpack.licenseMgmt.uploadLicense.licenseFileNotSelectedErrorMessage"
           defaultMessage="You must select a license file."
         />
       );
@@ -115,7 +115,7 @@ export class UploadLicense extends React.PureComponent {
         <EuiTitle className="eui-textCenter" size="l">
           <h1>
             <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.pageTitle"
+              id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
               defaultMessage="Upload your license"
             />
           </h1>
@@ -136,7 +136,7 @@ export class UploadLicense extends React.PureComponent {
               </p>
               <p>
                 <FormattedMessage
-                  id="xpack.licenseMgmt.uploadLicense.overwriteCurrentLicenseDescription"
+                  id="xpack.licenseMgmt.uploadLicense.replacingCurrentLicenseWarningMessage"
                   defaultMessage="Uploading a license will replace your current {currentLicenseType} license."
                   values={{
                     currentLicenseType: (
@@ -152,7 +152,7 @@ export class UploadLicense extends React.PureComponent {
                 <EuiFilePicker
                   id="licenseFile"
                   initialPromptText={<FormattedMessage
-                    id="xpack.licenseMgmt.uploadLicense.filePickerDescription"
+                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
                     defaultMessage="Select or drag your license file"
                   />}
                   onChange={this.handleFile}
@@ -183,7 +183,7 @@ export class UploadLicense extends React.PureComponent {
                   >
                     {applying ?
                       <FormattedMessage
-                        id="xpack.licenseMgmt.uploadLicense.uploadProcessingButtonLabel"
+                        id="xpack.licenseMgmt.uploadLicense.uploadingButtonLabel"
                         defaultMessage="Uploading…"
                       />
                       : <FormattedMessage

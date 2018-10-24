@@ -63,7 +63,7 @@ export class TelemetryOptIn extends React.Component {
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.licenseMgmt.telemetryOptIn.opportunitiesDescription"
+                id="xpack.licenseMgmt.telemetryOptIn.customersHelpSupportDescription"
                 defaultMessage="Gold and platinum customers: help support give you better service."
               />
             </p>
@@ -76,7 +76,7 @@ export class TelemetryOptIn extends React.Component {
     const readMoreButton = (
       <EuiLink onClick={this.onClickReadMore}>
         <FormattedMessage
-          id="xpack.licenseMgmt.telemetryOptIn.readMoreButtonLabel"
+          id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
           defaultMessage="Read more"
         />
       </EuiLink>
@@ -94,7 +94,7 @@ export class TelemetryOptIn extends React.Component {
         <EuiText className="licManagement__narrowText" >
           <p>
             <FormattedMessage
-              id="xpack.licenseMgmt.telemetryOptIn.readMore.popoverTextDescription"
+              id="xpack.licenseMgmt.telemetryOptIn.featureUsageWarningMessage"
               defaultMessage="This feature periodically sends basic feature usage statistics.
               This information will not be shared outside of Elastic.
               See an {exampleLink} or read our {telemetryPrivacyStatementLink}.
@@ -103,7 +103,7 @@ export class TelemetryOptIn extends React.Component {
                 exampleLink: (
                   <EuiLink onClick={this.onClickExample}>
                     <FormattedMessage
-                      id="xpack.licenseMgmt.telemetryOptIn.readMore.popoverTextDescription.exampleText"
+                      id="xpack.licenseMgmt.telemetryOptIn.exampleLinkText"
                       defaultMessage="example"
                     />
                   </EuiLink>),
@@ -113,7 +113,7 @@ export class TelemetryOptIn extends React.Component {
                     target="_blank"
                   >
                     <FormattedMessage
-                      id="xpack.licenseMgmt.telemetryOptIn.readMore.popoverTextDescription.telemetryPrivacyStatementText"
+                      id="xpack.licenseMgmt.telemetryOptIn.telemetryPrivacyStatementLinkText"
                       defaultMessage="telemetry privacy statement"
                     />
                   </EuiLink>
@@ -133,7 +133,7 @@ export class TelemetryOptIn extends React.Component {
           label={
             <span>
               <FormattedMessage
-                id="xpack.licenseMgmt.telemetryOptIn.sendStatisticsLabel"
+                id="xpack.licenseMgmt.telemetryOptIn.sendBasicFeatureStatisticsLabel"
                 defaultMessage="Send basic feature usage statistics to Elastic periodically."
               />
               {popover}

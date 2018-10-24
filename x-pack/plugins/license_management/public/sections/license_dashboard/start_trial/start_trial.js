@@ -124,7 +124,7 @@ export class StartTrial extends React.PureComponent {
                   </ul>
                   <p>
                     <FormattedMessage
-                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.authenticationDescription"
+                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityFeaturesConfigurationDescription"
                       defaultMessage="Security features, such as authentication ({authenticationTypeList}),
                       role-based access control, and auditing, require configuration.
                       See the {securityDocumentationLinkText} for instructions."
@@ -137,7 +137,7 @@ export class StartTrial extends React.PureComponent {
                           >
                             <FormattedMessage
                               // eslint-disable-next-line max-len
-                              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.authenticationDescription.securityDocumentationLinkText"
+                              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityDocumentationLinkText"
                               defaultMessage="documentation"
                             />
                           </EuiLink>
@@ -157,7 +157,7 @@ export class StartTrial extends React.PureComponent {
                           >
                             <FormattedMessage
                               // eslint-disable-next-line max-len
-                              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.termsAndConditionsDescription.linkText"
+                              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.termsAndConditionsLinkText"
                               defaultMessage="terms and conditions"
                             />
                           </EuiLink>
@@ -220,7 +220,7 @@ export class StartTrial extends React.PureComponent {
     const description = (
       <span>
         <FormattedMessage
-          id="xpack.licenseMgmt.licenseDashboard.startTrialDescription"
+          id="xpack.licenseMgmt.licenseDashboard.startTrial.platinumFeaturesExperienceDescription"
           defaultMessage="Experience what security, machine learning, and all our other {platinumLicenseFeaturesLinkText} have to offer."
           values={{
             platinumLicenseFeaturesLinkText: (
@@ -229,7 +229,7 @@ export class StartTrial extends React.PureComponent {
                 target="_blank"
               >
                 <FormattedMessage
-                  id="xpack.licenseMgmt.licenseDashboard.startTrialDescription.platinumLicenseFeaturesLinkText"
+                  id="xpack.licenseMgmt.licenseDashboard.startTrial.platinumLicenseFeaturesLinkText"
                   defaultMessage="Platinum features"
                 />
               </EuiLink>

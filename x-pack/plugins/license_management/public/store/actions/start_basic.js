@@ -37,7 +37,7 @@ export const startBasicLicense = (currentLicenseType, ack) => async (
     const messages = Object.values(acknowledge).slice(1).map((item) => {
       return item[0];
     });
-    const first = i18n.translate('xpack.licenseMgmt.startBasicDescription', {
+    const first = i18n.translate('xpack.licenseMgmt.replacingCurrentLicenseWithBasicLicenseWarningMessage', {
       //eslint-disable-next-line
       defaultMessage: 'Some functionality will be lost if you replace your {currentLicenseType} license with a BASIC license. Review the list of features below.',
       values: {

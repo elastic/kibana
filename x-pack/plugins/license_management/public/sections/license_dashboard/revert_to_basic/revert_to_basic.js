@@ -75,7 +75,7 @@ export class RevertToBasic extends React.PureComponent {
     const description = (
       <span>
         <FormattedMessage
-          id="xpack.licenseMgmt.licenseDashboard.revertToBasicDescription"
+          id="xpack.licenseMgmt.licenseDashboard.revertToBasic.revertToFreeFeaturesDescription"
           defaultMessage="You’ll revert to our free features and lose access to security,
           machine learning and other {platinumLicenseFeaturesLinkText}."
           values={{
@@ -85,7 +85,7 @@ export class RevertToBasic extends React.PureComponent {
                 target="_blank"
               >
                 <FormattedMessage
-                  id="xpack.licenseMgmt.licenseDashboard.revertToBasicDescription.platinumLicenseFeaturesLinkText"
+                  id="xpack.licenseMgmt.licenseDashboard.revertToBasic.platinumLicenseFeaturesLinkText"
                   defaultMessage="Platinum features"
                 />
               </EuiLink>
