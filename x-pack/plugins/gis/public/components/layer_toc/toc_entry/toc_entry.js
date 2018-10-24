@@ -10,7 +10,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
-  EuiCheckbox,
   EuiToolTip,
   EuiIconTip,
 } from '@elastic/eui';
@@ -32,9 +31,22 @@ export class TOCEntry extends React.Component {
     this._isMounted = false;
   }
 
+  _renderVisibilityToggle() {
+    const { layer, toggleVisible } = this.props;
+    return (
+      <VisibilityToggle
+        id={layer.getId()}
+        checked={layer.isVisible()}
+        onChange={() => toggleVisible(layer.getId())}
+      >
+        {layer.getIcon()}
+      </VisibilityToggle>
+    );
+  }
+
   render() {
 
-    const { layer, openLayerPanel, toggleVisible, zoom } = this.props;
+    const { layer, openLayerPanel, zoom } = this.props;
 
     const displayName = layer.getDisplayName();
     Promise.resolve(displayName).then(label => {
@@ -68,24 +80,11 @@ export class TOCEntry extends React.Component {
           content={`Map is at zoom level ${zoom}.
           This layer is only visible between zoom levels ${minZoom} to ${maxZoom}.`}
         >
-          <EuiCheckbox
-            id={layer.getId()}
-            checked={layer.isVisible()}
-            onChange={() => {}}
-            disabled
-          />
+          {this._renderVisibilityToggle()}
         </EuiToolTip>
       );
     } else {
-      visibilityIndicator = (
-        <VisibilityToggle
-          id={layer.getId()}
-          checked={layer.isVisible()}
-          onChange={() => toggleVisible(layer.getId())}
-        >
-          {layer.getIcon()}
-        </VisibilityToggle>
-      );
+      visibilityIndicator = this._renderVisibilityToggle();
     }
 
 
