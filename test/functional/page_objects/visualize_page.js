@@ -50,6 +50,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async clickVisType(type) {
+      await testSubjects.click(`visType-${type}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async clickAreaChart() {
       await find.clickByPartialLinkText('Area');
       await PageObjects.header.waitUntilLoadingHasFinished();
