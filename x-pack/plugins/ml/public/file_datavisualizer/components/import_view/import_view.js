@@ -104,6 +104,7 @@ export class ImportView extends Component {
         reading: true,
         initialized: true,
       }, () => {
+        this.props.hideBottomBar();
         setTimeout(async () => {
           let success = false;
 
@@ -187,6 +188,7 @@ export class ImportView extends Component {
             }
           }
 
+          this.props.showBottomBar();
           this.setState({
             importing: false,
             imported: success,
@@ -350,6 +352,7 @@ export class ImportView extends Component {
               onClick={this.clickImport}
               isLoading={importing}
               iconSide="right"
+              fill
             >
               Import
             </EuiButton>

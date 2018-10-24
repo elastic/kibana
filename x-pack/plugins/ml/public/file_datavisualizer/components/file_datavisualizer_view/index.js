@@ -5,4 +5,4 @@
  */
 
 
-export { FileDataVisualizerView } from './file_datavisualizer_view';
+export { FileDataVisualizerView, MODE } from './file_datavisualizer_view';

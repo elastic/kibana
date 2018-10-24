@@ -4,5 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export function getRequest(server, { headers }) {
+  const basePath = server.config().get('server.basePath') || '/';
 
-export { AboutPanel, LoadingPanel } from './about_panel';
+  return server
+    .inject({
+      method: 'GET',
+      url: basePath,
+      headers,
+    })
+    .then(res => res.request);
+}
