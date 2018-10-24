@@ -24,10 +24,10 @@ import { WelcomeContent } from './welcome_content';
 
 export function AboutPanel({ onFilePickerChange }) {
   return (
-    <EuiPage>
-      <EuiPageBody restrictWidth={1000}>
+    <EuiPage restrictWidth={1000}>
+      <EuiPageBody>
         <EuiFlexGroup gutterSize="xl">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={true}>
             <EuiPanel paddingSize="l">
               <WelcomeContent />
 
@@ -52,8 +52,8 @@ export function AboutPanel({ onFilePickerChange }) {
 
 export function LoadingPanel() {
   return (
-    <EuiPage>
-      <EuiPageBody restrictWidth={200}>
+    <EuiPage restrictWidth={200}>
+      <EuiPageBody>
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
             <EuiPanel paddingSize="l" style={{ textAlign: 'center' }} >
