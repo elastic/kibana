@@ -311,6 +311,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
      */
     async saveDashboard(dashName, saveOptions = {}) {
+      log.info(`\n\n${(new Date()).getTime()} saveDashboard\n\n`);
       await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
       if (saveOptions.needsConfirm) {
@@ -320,8 +321,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // Confirm that the Dashboard has actually been saved
+      log.info(`\n\n${(new Date()).getTime()} saveDashboard existOrFail\n\n`);
       await testSubjects.existOrFail('saveDashboardSuccess');
 
+      log.info(`\n\n${(new Date()).getTime()} saveDashboard waitForSaveModalToClose\n\n`);
       await this.waitForSaveModalToClose();
     }
 
