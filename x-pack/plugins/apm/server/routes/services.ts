@@ -24,7 +24,7 @@ export function initServicesApi(server: Server) {
   server.route({
     method: 'GET',
     path: ROOT,
-    config: {
+    options: {
       pre,
       validate: {
         query: withDefaultValidators()
@@ -39,7 +39,7 @@ export function initServicesApi(server: Server) {
   server.route({
     method: 'GET',
     path: `${ROOT}/{serviceName}`,
-    config: {
+    options: {
       pre,
       validate: {
         query: withDefaultValidators()

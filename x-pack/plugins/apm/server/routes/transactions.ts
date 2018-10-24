@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { IReply, Request, Server } from 'hapi';
+import { Server } from 'hapi';
 import Joi from 'joi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -29,7 +29,7 @@ export function initTransactionsApi(server: Server) {
   server.route({
     method: 'GET',
     path: ROOT,
-    config: {
+    options: {
       pre,
       validate: {
         query: withDefaultValidators({
@@ -40,7 +40,9 @@ export function initTransactionsApi(server: Server) {
     },
     handler: req => {
       const { serviceName } = req.params;
-      const { transaction_type: transactionType } = req.query;
+      const { transaction_type: transactionType } = req.query as {
+        transaction_type: string;
+      };
       const { setup } = req.pre;
 
       return getTopTransactions({
@@ -54,7 +56,7 @@ export function initTransactionsApi(server: Server) {
   server.route({
     method: 'GET',
     path: `${ROOT}/{transactionId}`,
-    config: {
+    options: {
       pre,
       validate: {
         query: withDefaultValidators({
@@ -64,7 +66,7 @@ export function initTransactionsApi(server: Server) {
     },
     handler: req => {
       const { transactionId } = req.params;
-      const { traceId } = req.query;
+      const { traceId } = req.query as { traceId: string };
       const { setup } = req.pre;
       return getTransaction(transactionId, traceId, setup).catch(
         defaultErrorHandler
@@ -75,7 +77,7 @@ export function initTransactionsApi(server: Server) {
   server.route({
     method: 'GET',
     path: `${ROOT}/{transactionId}/spans`,
-    config: {
+    options: {
       pre,
       validate: {
         query: withDefaultValidators()
@@ -91,7 +93,7 @@ export function initTransactionsApi(server: Server) {
   server.route({
     method: 'GET',
     path: `${ROOT}/charts`,
-    config: {
+    options: {
       pre,
       validate: {
         query: withDefaultValidators({
@@ -104,8 +106,12 @@ export function initTransactionsApi(server: Server) {
     handler: req => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
-      const transactionType = req.query.transaction_type;
-      const transactionName = req.query.transaction_name;
+      const { transaction_type: transactionType } = req.query as {
+        transaction_type: string;
+      };
+      const { transaction_name: transactionName } = req.query as {
+        transaction_name: string;
+      };
 
       return getTimeseriesData({
         serviceName,
@@ -119,7 +125,7 @@ export function initTransactionsApi(server: Server) {
   server.route({
     method: 'GET',
     path: `${ROOT}/distribution`,
-    config: {
+    options: {
       pre,
       validate: {
         query: withDefaultValidators({
@@ -130,7 +136,9 @@ export function initTransactionsApi(server: Server) {
     handler: req => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
-      const { transaction_name: transactionName } = req.query;
+      const { transaction_name: transactionName } = req.query as {
+        transaction_name: string;
+      };
       return getDistribution(serviceName, transactionName, setup).catch(
         defaultErrorHandler
       );
