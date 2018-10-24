@@ -6,8 +6,8 @@
 
 import expect from 'expect.js';
 import { first, last } from 'lodash';
-import { MetricsQuery } from '../../../../plugins/infra/common/graphql/types';
-import { metricsQuery } from '../../../../plugins/infra/public/containers/metrics/metrics.gql_query';
+import { MetricsQuery } from '../../../../plugins/ingest/common/graphql/types';
+import { metricsQuery } from '../../../../plugins/ingest/public/infraops/containers/metrics/metrics.gql_query';
 import { KbnTestProvider } from './types';
 
 const metricTests: KbnTestProvider = ({ getService }) => {

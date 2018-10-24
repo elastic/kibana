@@ -9,4 +9,4 @@
 /.aws-config.json
 /.env
 /.kibana-plugin-helpers.dev.*
-!/plugins/infra/**/target
+!/plugins/ingest/**/target
