@@ -13,6 +13,7 @@ import { wrapEsError } from '../../utils/error_wrappers';
 export const createListAgentsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/agents/{listByAndValue*}',
+  requiredRoles: ['beats_admin'],
   validate: {
     headers: Joi.object({
       'kbn-beats-enrollment-token': Joi.string().required(),
