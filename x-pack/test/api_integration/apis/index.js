@@ -6,13 +6,15 @@
 
 export default function ({ loadTestFile }) {
   describe('apis', () => {
-    loadTestFile(require.resolve('./es'));
-    loadTestFile(require.resolve('./security'));
-    loadTestFile(require.resolve('./monitoring'));
-    loadTestFile(require.resolve('./xpack_main'));
-    loadTestFile(require.resolve('./logstash'));
-    loadTestFile(require.resolve('./kibana'));
+    // These commented out lines should never be checked into master
+    // These are only meant for the development of the secops branch
+    // loadTestFile(require.resolve('./es'));
+    // loadTestFile(require.resolve('./security'));
+    // loadTestFile(require.resolve('./monitoring'));
+    // loadTestFile(require.resolve('./xpack_main'));
+    // loadTestFile(require.resolve('./logstash'));
+    // loadTestFile(require.resolve('./kibana'));
     loadTestFile(require.resolve('./infra'));
-    loadTestFile(require.resolve('./beats'));
+    // loadTestFile(require.resolve('./beats'));
   });
 }
