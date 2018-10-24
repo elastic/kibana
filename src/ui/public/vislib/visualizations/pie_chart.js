@@ -60,9 +60,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
      */
     _validatePieData(charts) {
       const isAllZeros = charts.every((chart) => {
-        if (chart.slices.children.length === 0) {
-          return true;
-        }
+        return chart.slices.children.length === 0;
       });
 
       if (isAllZeros) {
