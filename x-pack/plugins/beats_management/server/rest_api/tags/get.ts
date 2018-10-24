@@ -11,6 +11,7 @@ import { wrapEsError } from '../../utils/error_wrappers';
 export const createGetTagsWithIdsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/tags/{tagIds}',
+  requiredRoles: ['beats_admin'],
   licenseRequired: true,
   handler: async (request: any) => {
     const tagIdString: string = request.params.tagIds;

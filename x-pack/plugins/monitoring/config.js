@@ -75,7 +75,8 @@ export const config = (Joi) => {
         certificateAuthorities: Joi.array().single().items(Joi.string()),
         certificate: Joi.string(),
         key: Joi.string(),
-        keyPassphrase: Joi.string()
+        keyPassphrase: Joi.string(),
+        alwaysPresentCertificate: Joi.boolean().default(false),
       }).default(),
       apiVersion: Joi.string().default('master')
     }).default()

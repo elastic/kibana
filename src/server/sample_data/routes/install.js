@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Boom from 'boom';
 import Joi from 'joi';
 
 import { loadData } from './lib/load_data';
@@ -135,7 +136,13 @@ export const createInstallRoute = () => ({
         }
       }
 
-      const createResults = await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
+      let createResults;
+      try {
+        createResults = await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
+      }  catch (err) {
+        server.log(['warning'], `bulkCreate failed, error: ${err.message}`);
+        return Boom.badImplementation(`Unable to load kibana saved objects, see kibana logs for details`);
+      }
       const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
         return savedObjectCreateResult.hasOwnProperty('error');
       });

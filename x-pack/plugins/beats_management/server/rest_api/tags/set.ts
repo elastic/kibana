@@ -16,6 +16,7 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
   method: 'PUT',
   path: '/api/beats/tag/{tag}',
   licenseRequired: true,
+  requiredRoles: ['beats_admin'],
   config: {
     validate: {
       params: Joi.object({

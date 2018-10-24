@@ -14,6 +14,7 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
   method: 'PUT',
   path: '/api/beats/agent/{beatId}',
   licenseRequired: true,
+  requiredRoles: ['beats_admin'],
   config: {
     validate: {
       headers: Joi.object({
