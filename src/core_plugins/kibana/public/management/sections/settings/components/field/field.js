@@ -463,7 +463,7 @@ class FieldUI extends PureComponent {
         <EuiText size="xs">
           <FormattedMessage
             id="kbn.management.settings.field.helpText"
-            defaultMessage="This setting is overriden by the Kibana server and can not be changed."
+            defaultMessage="This setting is overridden by the Kibana server and can not be changed."
           />
         </EuiText>
       );

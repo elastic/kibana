@@ -396,8 +396,8 @@ export ELASTIC_APM_SERVER_URL=
 export ELASTIC_APM_SECRET_TOKEN=
 `.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.goClient.configure.textPost', {
-      defaultMessage: 'See the [documentation]({documenationLink}) for advanced configuration.',
-      values: { documenationLink: '{config.docs.base_url}guide/en/apm/agent/go/current/configuration.html' },
+      defaultMessage: 'See the [documentation]({documentaionLink}) for advanced configuration.',
+      values: { documentaionLink: '{config.docs.base_url}guide/en/apm/agent/go/current/configuration.html' },
     }),
   },
   {
@@ -457,9 +457,9 @@ Do **not** add the agent as a dependency to your application.',
      -Delastic.apm.application_packages=org.example \\
      -jar my-application.jar`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.javaClient.startApplication.textPost', {
-      defaultMessage: 'See the [documentation]({documenationLink}) for configuration options and advanced \
+      defaultMessage: 'See the [documentation]({documentaionLink}) for configuration options and advanced \
 usage.\n\n**Warning: The Java agent is currently in Beta and not meant for production use.**',
-      values: { documenationLink: '{config.docs.base_url}guide/en/apm/agent/java/current/index.html' },
+      values: { documentaionLink: '{config.docs.base_url}guide/en/apm/agent/java/current/index.html' },
     }),
   },
 ];
