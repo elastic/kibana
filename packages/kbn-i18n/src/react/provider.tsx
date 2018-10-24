@@ -22,6 +22,7 @@ import * as React from 'react';
 import { IntlProvider, intlShape } from 'react-intl';
 
 import * as i18n from '../core';
+import { isPseudoLocale, translateUsingPseudoLocale } from '../core/pseudo_locale';
 
 /**
  * The library uses the provider pattern to scope an i18n context to a tree
@@ -34,10 +35,14 @@ export class I18nProvider extends React.PureComponent {
   public static childContextTypes = { intl: intlShape };
 
   public getChildContext() {
-    if (this.context.intl && i18n.isPseudoLocale()) {
+    /**
+     * if pseudo locale is set, default intl.formatMessage should be decorated
+     * with the pseudo localization function
+     */
+    if (this.context.intl && isPseudoLocale(i18n.getLocale())) {
       const formatMessage = this.context.intl.formatMessage;
       this.context.intl.formatMessage = (...args: any[]) => {
-        return i18n.translateUsingPseudoLocale(formatMessage.apply(this.context.intl, args));
+        return translateUsingPseudoLocale(formatMessage.apply(this.context.intl, args));
       };
     }
 
@@ -47,6 +52,10 @@ export class I18nProvider extends React.PureComponent {
   public render() {
     const child = React.Children.only(this.props.children);
     if (this.context.intl) {
+      /**
+       * We can have IntlProvider somewhere within ancestors so we just reuse it
+       * and don't recreate with another IntlProvider
+       */
       return child;
     }
 
@@ -59,7 +68,12 @@ export class I18nProvider extends React.PureComponent {
         defaultFormats={i18n.getFormats()}
         textComponent={React.Fragment}
       >
-        {i18n.isPseudoLocale() ? <I18nProvider>{child}</I18nProvider> : child}
+        {/*
+          We use `<I18nProvider>{child}</I18nProvider>` trick to decorate intl.formatMessage
+          in `getChildContext()` method. I18nProdiver will have `this.context.intl` so the
+          recursion won't be infinite
+        */}
+        {isPseudoLocale(i18n.getLocale()) ? <I18nProvider>{child}</I18nProvider> : child}
       </IntlProvider>
     );
   }

@@ -24,16 +24,10 @@ import IntlRelativeFormat from 'intl-relativeformat';
 import { Messages, PlainMessages } from '../messages';
 import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
-import { charMap } from './pseudo_locale';
+import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 
 // Add all locale data to `IntlMessageFormat`.
 import './locales.js';
-
-/**
- * Matches every single [A-Za-z] character, `<tag attr="any > text">` and `](markdown-link-address)`
- */
-const CHARS_FOR_PSEUDO_LOCALIZATION_REGEX = /[A-Za-z]|(\]\([\s\S]*?\))|(<([^"<>]|("[^"]*?"))*?>)/g;
-const PSEUDO_LOCALE = 'en-xa';
 
 const EN_LOCALE = 'en';
 const LOCALE_DELIMITER = '-';
@@ -170,31 +164,6 @@ interface TranslateArguments {
   context?: string;
 }
 
-export function isPseudoLocale() {
-  return currentLocale.toLowerCase() === PSEUDO_LOCALE;
-}
-
-export function translateUsingPseudoLocale(message: string) {
-  /**
-   * Replaces every latin char by pseudo char and repeats every third char twice.
-   */
-  function replacer() {
-    let count = 0;
-
-    return (match: string) => {
-      // if `match.length !== 1`, then `match` is html tag or markdown link address, so it should be ignored
-      if (match.length !== 1) {
-        return match;
-      }
-
-      const pseudoChar = charMap[match] || match;
-      return ++count % 3 === 0 ? pseudoChar.repeat(2) : pseudoChar;
-    };
-  }
-
-  return message.replace(CHARS_FOR_PSEUDO_LOCALIZATION_REGEX, replacer());
-}
-
 /**
  * Translate message by id
  * @param id - translation id to be translated
@@ -209,7 +178,7 @@ export function translate(
     defaultMessage: '',
   }
 ) {
-  const shouldUsePseudoLocale = isPseudoLocale();
+  const shouldUsePseudoLocale = isPseudoLocale(currentLocale);
 
   if (!id || !isString(id)) {
     throw new Error('[I18n] An `id` must be a non-empty string to translate a message.');
@@ -223,11 +192,11 @@ export function translate(
 
   if (message) {
     try {
-      const msg = getMessageFormat(message, getLocale(), getFormats());
+      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(values);
 
       return shouldUsePseudoLocale
-        ? translateUsingPseudoLocale(msg.format(values))
-        : msg.format(values);
+        ? translateUsingPseudoLocale(formattedMessage)
+        : formattedMessage;
     } catch (e) {
       throw new Error(
         `[I18n] Error formatting message: "${id}" for locale: "${getLocale()}".\n${e}`

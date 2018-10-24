@@ -17,7 +17,38 @@
  * under the License.
  */
 
-export const charMap: { [key: string]: string | undefined } = {
+/**
+ * Matches every single [A-Za-z] character, `<tag attr="any > text">` and `](markdown-link-address)`
+ */
+const CHARS_FOR_PSEUDO_LOCALIZATION_REGEX = /[A-Za-z]|(\]\([\s\S]*?\))|(<([^"<>]|("[^"]*?"))*?>)/g;
+const PSEUDO_ACCENTS_LOCALE = 'en-xa';
+
+export function isPseudoLocale(locale: string) {
+  return locale.toLowerCase() === PSEUDO_ACCENTS_LOCALE;
+}
+
+/**
+ * Replaces every latin char by pseudo char and repeats every third char twice.
+ */
+function replacer() {
+  let count = 0;
+
+  return (match: string) => {
+    // if `match.length !== 1`, then `match` is html tag or markdown link address, so it should be ignored
+    if (match.length !== 1) {
+      return match;
+    }
+
+    const pseudoChar = pseudoAccentCharMap[match] || match;
+    return ++count % 3 === 0 ? pseudoChar.repeat(2) : pseudoChar;
+  };
+}
+
+export function translateUsingPseudoLocale(message: string) {
+  return message.replace(CHARS_FOR_PSEUDO_LOCALIZATION_REGEX, replacer());
+}
+
+const pseudoAccentCharMap: Record<string, string> = {
   a: 'à',
   b: 'ƀ',
   c: 'ç',
