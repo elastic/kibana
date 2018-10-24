@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAccordion, EuiButtonIcon, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiAccordion, EuiButtonIcon, EuiLoadingKibana, EuiPanel, EuiTitle } from '@elastic/eui';
 import { entries, groupBy } from 'lodash';
 import { IPosition } from 'monaco-editor';
 import queryString from 'query-string';
@@ -28,6 +28,8 @@ export class ReferencesPanel extends React.Component<Props> {
   };
 
   public render() {
+    const body = this.props.isLoading ? <EuiLoadingKibana size="xl" /> : this.renderGroupByRepo();
+
     return (
       <EuiPanel grow={false} className="referencesPanel">
         <EuiButtonIcon
@@ -40,18 +42,14 @@ export class ReferencesPanel extends React.Component<Props> {
         <EuiTitle size="s">
           <h3>{this.props.title}</h3>
         </EuiTitle>
-        {this.renderGroupByRepo()}
+        <div className="autoOverflow">{body}</div>
       </EuiPanel>
     );
   }
 
   private renderGroupByRepo() {
     const groups = groupBy(this.props.references, 'repo');
-    return (
-      <div className="autoOverflow">
-        {entries(groups).map((entry: any) => this.renderReferences(entry[0], entry[1]))}
-      </div>
-    );
+    return entries(groups).map((entry: any) => this.renderReferences(entry[0], entry[1]));
   }
 
   private renderReferences(repo: string, references: CodeAndLocation[]) {

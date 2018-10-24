@@ -38,6 +38,7 @@ export const editor = handleActions(
         draft.refPayload = action.payload;
         draft.showing = true;
         draft.loading = true;
+        draft.references = initialState.references;
         draft.hover = state.currentHover;
       }),
     [String(findReferencesSuccess)]: (state: EditorState, action: any) =>
