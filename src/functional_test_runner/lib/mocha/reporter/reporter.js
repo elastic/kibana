@@ -34,6 +34,7 @@ export function MochaReporterProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
   let originalLogWriters;
+  let reporterCaptureStartTime;
 
   return class MochaReporter extends Mocha.reporters.Base {
     constructor(runner, options) {
@@ -61,7 +62,10 @@ export function MochaReporterProvider({ getService }) {
     onStart = () => {
       if (config.get('mochaReporter.captureLogOutput')) {
         log.warning('debug logs are being captured, only error logs will be written to the console');
+
+        reporterCaptureStartTime = moment();
         originalLogWriters = log.getWriters();
+
         log.setWriters([
           new ToolingLogTextWriter({
             level: 'error',
@@ -81,11 +85,14 @@ export function MochaReporterProvider({ getService }) {
                   ? this.runner.test.parent
                   : this.runner.suite;
 
-                // We are registering the current time in order to be able
-                // to extend the log line with it so we can have the test
-                // results log lines labeled with such info
-                const currentTime = `${moment().format('HH:mm:ss')}`;
-                recordLog(currentSuite, `${currentTime} ${line}`);
+                // We are computing the difference between the time when this
+                // reporter has started and the time when each line are being
+                // logged in order to be able to label the test results log lines
+                // with this relative time information
+                const diffTimeSinceStart = moment().diff(reporterCaptureStartTime);
+                const readableDiffTimeSinceStart = `[${moment(diffTimeSinceStart).format('HH:mm:ss')}] `;
+
+                recordLog(currentSuite, `${readableDiffTimeSinceStart} ${line}`);
               }
             }
           })
