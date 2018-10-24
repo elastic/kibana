@@ -18,7 +18,6 @@
  */
 
 import { ToolingLogTextWriter } from './tooling_log_text_writer';
-import moment from 'moment';
 
 jest.mock('moment', () => () => ({
   format: jest.fn().mockImplementation(() => ' 02:02:02 '),
@@ -123,6 +122,6 @@ it('formats log line with timestamp', () => {
     ],
   });
 
-  const output = write.mock.calls.reduce((acc, chunk) => `${moment().format()}${acc}${chunk}`, '');
+  const output = write.mock.calls.reduce((acc, chunk) => `${acc}${chunk}`, '');
   expect(output).toMatchSnapshot();
 });
