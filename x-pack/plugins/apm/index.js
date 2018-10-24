@@ -9,6 +9,7 @@ import { initTransactionsApi } from './server/routes/transactions';
 import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
 import { initStatusApi } from './server/routes/status_check';
+import { initTracesApi } from './server/routes/traces';
 
 export function apm(kibana) {
   return new kibana.Plugin({
@@ -55,6 +56,7 @@ export function apm(kibana) {
 
     init(server) {
       initTransactionsApi(server);
+      initTracesApi(server);
       initServicesApi(server);
       initErrorsApi(server);
       initStatusApi(server);

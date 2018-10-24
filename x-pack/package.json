@@ -22,7 +22,8 @@
     }
   },
   "resolutions": {
-    "**/@types/node": "8.10.21"
+    "**/@types/node": "8.10.21",
+    "@types/react": "16.3.14"
   },
   "devDependencies": {
     "@kbn/dev-utils": "link:../packages/kbn-dev-utils",
@@ -36,7 +37,7 @@
     "@types/d3-shape": "^1.2.2",
     "@types/d3-time": "^1.0.7",
     "@types/d3-time-format": "^2.1.0",
-    "@types/elasticsearch": "^5.0.22",
+    "@types/elasticsearch": "^5.0.26",
     "@types/expect.js": "^0.3.29",
     "@types/graphql": "^0.13.1",
     "@types/hapi": "15.0.1",
@@ -48,11 +49,11 @@
     "@types/mocha": "^5.2.5",
     "@types/pngjs": "^3.3.1",
     "@types/prop-types": "^15.5.3",
-    "@types/react": "^16.3.14",
+    "@types/react": "16.3.14",
     "@types/react-datepicker": "^1.1.5",
     "@types/react-dom": "^16.0.5",
     "@types/react-redux": "^6.0.6",
-    "@types/react-router-dom": "4.2.6",
+    "@types/react-router-dom": "^4.3.1",
     "@types/reduce-reducers": "^0.1.3",
     "@types/sinon": "^5.0.1",
     "@types/supertest": "^2.0.5",
@@ -130,7 +131,6 @@
     "@samverschueren/stream-to-observable": "^0.3.0",
     "@scant/router": "^0.1.0",
     "@slack/client": "^4.2.2",
-    "@types/moment-timezone": "^0.5.8",
     "angular-resource": "1.4.9",
     "angular-sanitize": "1.4.9",
     "angular-ui-ace": "0.2.3",
@@ -226,7 +226,7 @@
     "react-redux": "^5.0.7",
     "react-redux-request": "^1.5.6",
     "react-router-breadcrumbs-hoc": "1.1.2",
-    "react-router-dom": "^4.2.2",
+    "react-router-dom": "^4.3.1",
     "react-select": "^1.2.1",
     "react-shortcuts": "^2.0.0",
     "react-sticky": "^6.0.1",
