@@ -18,7 +18,9 @@
  */
 
 import { format } from 'util';
+
 import { magentaBright, yellow, red, blue, green, dim } from 'chalk';
+
 import { parseLogLevel } from './log_levels';
 
 const PREFIX_INDENT = ' '.repeat(6);
