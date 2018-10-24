@@ -51,8 +51,22 @@ reports, you might need to change the following settings.
 How often the index that stores reporting jobs rolls over to a new index.
 Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
 
+`xpack.reporting.queue.pollEnabled`::
+Set to `true` (default) to enable the Kibana instance to to poll the index for
+pending jobs and claim them for execution. Setting this to `false` allows the
+Kibana instance to only add new jobs to the reporting queue, list jobs, and
+provide the downloads to completed report through the UI.
+
+[NOTE]
+============
+Running multiple instances of Kibana in a cluster for load balancing of
+reporting requires identical values for `xpack.reporting.encryptionKey` and, if
+security is enabled, `xpack.security.encryptionKey`.
+============
+
 `xpack.reporting.queue.pollInterval`::
-How often idle workers poll the index for pending jobs. Defaults to `3000` (3 seconds).
+Specifies the number of milliseconds that idle workers wait between polling the
+index for pending jobs. Defaults to `3000` (3 seconds).
 
 [[xpack-reporting-q-timeout]]`xpack.reporting.queue.timeout`::
 How long each worker has to produce a report. If your machine is slow or under
