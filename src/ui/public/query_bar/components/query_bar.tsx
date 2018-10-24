@@ -242,10 +242,9 @@ export class QueryBar extends Component<Props, State> {
     if (!this.persistedLog) {
       return [];
     }
-    const recentSearches = this.persistedLog.get();
+    const recentSearches = this.persistedLog.get().map(toUser);
     const matchingRecentSearches = recentSearches.filter(recentQuery => {
-      const recentQueryString = typeof recentQuery === 'object' ? toUser(recentQuery) : recentQuery;
-      return recentQueryString.includes(query);
+      return recentQuery.includes(query);
     });
     return matchingRecentSearches.map(recentSearch => {
       const text = recentSearch;
