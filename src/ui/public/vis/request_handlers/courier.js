@@ -98,7 +98,7 @@ const CourierRequestHandlerProvider = function () {
       });
 
       requestSearchSource.setField('aggs', function () {
-        return aggs.toDsl();
+        return aggs.toDsl(vis.isHierarchical());
       });
 
       requestSearchSource.onRequestStart((searchSource, searchRequest) => {
