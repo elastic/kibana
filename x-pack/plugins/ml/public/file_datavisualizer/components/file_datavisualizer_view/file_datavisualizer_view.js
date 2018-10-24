@@ -10,17 +10,14 @@ import React, {
 } from 'react';
 
 import {
-  EuiFilePicker,
   EuiSpacer,
-  EuiLoadingSpinner,
-  EuiButton,
-  EuiPanel,
 } from '@elastic/eui';
 
 import { isEqual } from 'lodash';
 
 import { ml } from '../../../services/ml_api_service';
-import { AboutPanel } from '../about_panel';
+import { AboutPanel, LoadingPanel } from '../about_panel';
+import { BottomBar } from '../bottom_bar';
 import { ResultsView } from '../results_view';
 import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { EditFlyout } from '../edit_flyout';
@@ -28,7 +25,7 @@ import { ImportView } from '../import_view';
 import { MAX_BYTES } from '../../../../common/constants/file_datavisualizer';
 import { readFile, createUrlOverrides, processResults } from './utils';
 
-const MODE = {
+export const MODE = {
   READ: 0,
   IMPORT: 1,
 };
@@ -48,19 +45,21 @@ export class FileDataVisualizerView extends Component {
       loaded: false,
       results: undefined,
       mode: MODE.READ,
+      isEditFlyoutVisible: false,
+      bottomBarVisible: false,
     };
 
     this.overrides = {};
     this.previousOverrides = {};
     this.originalSettings = {};
-    this.showEditFlyout = () => {};
   }
 
-  onChange = (files) => {
+  onFilePickerChange = (files) => {
     this.overrides = {};
 
     this.setState({
       loading: (files.length > 0),
+      bottomBarVisible: (files.length > 0),
       loaded: false,
       fileContents: '',
       fileSize: 0,
@@ -73,7 +72,6 @@ export class FileDataVisualizerView extends Component {
         this.loadFile(files[0]);
       }
     });
-
   };
 
   async loadFile(file) {
@@ -177,11 +175,22 @@ export class FileDataVisualizerView extends Component {
     }
   }
 
-  setShowEditFlyoutFunction = (func) => {
-    this.showEditFlyout = func;
+  closeEditFlyout = () => {
+    this.setState({ isEditFlyoutVisible: false });
+    this.showBottomBar();
   }
-  unsetShowEditFlyoutFunction = () => {
-    this.showEditFlyout = () => {};
+
+  showEditFlyout = () => {
+    this.setState({ isEditFlyoutVisible: true });
+    this.hideBottomBar();
+  }
+
+  showBottomBar = () => {
+    this.setState({ bottomBarVisible: true });
+  }
+
+  hideBottomBar = () => {
+    this.setState({ bottomBarVisible: false });
   }
 
   setOverrides = (overrides) => {
@@ -199,6 +208,11 @@ export class FileDataVisualizerView extends Component {
     this.setState({ mode });
   }
 
+  onCancel = () => {
+    this.changeMode(MODE.READ);
+    this.onFilePickerChange([]);
+  }
+
   render() {
     const {
       loading,
@@ -210,6 +224,8 @@ export class FileDataVisualizerView extends Component {
       fileCouldNotBeRead,
       serverErrorMessage,
       mode,
+      isEditFlyoutVisible,
+      bottomBarVisible,
     } = this.state;
 
     const fields = (results !== undefined && results.field_stats !== undefined) ? Object.keys(results.field_stats) : [];
@@ -218,27 +234,18 @@ export class FileDataVisualizerView extends Component {
       <React.Fragment>
         {(mode === MODE.READ) &&
           <React.Fragment>
-            <div style={{ textAlign: 'center' }} >
-              <EuiFilePicker
-                id="filePicker"
-                initialPromptText="Select or drag and drop a file"
-                onChange={files => this.onChange(files)}
-              />
-            </div>
 
-            <EuiSpacer size="l" />
+
+            {/* <EuiSpacer size="l" /> */}
 
             {(!loading && !loaded) &&
-              <React.Fragment>
-                <AboutPanel />
-                <EuiSpacer size="l" />
-              </React.Fragment>
+              <AboutPanel
+                onFilePickerChange={this.onFilePickerChange}
+              />
             }
 
             {(loading) &&
-              <div style={{ textAlign: 'center' }} >
-                <EuiLoadingSpinner size="xl"/>
-              </div>
+              <LoadingPanel />
             }
 
             {(fileTooLarge) &&
@@ -259,34 +266,29 @@ export class FileDataVisualizerView extends Component {
             }
 
             {(loaded) &&
-              <React.Fragment>
-                <ResultsView
-                  results={results}
-                  data={fileContents}
-                  showEditFlyout={() => this.showEditFlyout()}
-                />
-              </React.Fragment>
+              <ResultsView
+                results={results}
+                data={fileContents}
+                showEditFlyout={() => this.showEditFlyout()}
+              />
             }
             <EditFlyout
-              setShowFunction={this.setShowEditFlyoutFunction}
               setOverrides={this.setOverrides}
+              closeEditFlyout={this.closeEditFlyout}
+              isFlyoutVisible={isEditFlyoutVisible}
               originalSettings={this.originalSettings}
               overrides={this.overrides}
               fields={fields}
             />
 
-            {(loaded) &&
-              <React.Fragment>
-                <EuiSpacer size="m" />
-                <EuiPanel>
-                  <EuiButton
-                    onClick={() => this.changeMode(MODE.IMPORT)}
-                  >
-                    Import
-                  </EuiButton>
-                </EuiPanel>
-              </React.Fragment>
-            }
+            <BottomBar
+              showBar={(bottomBarVisible && loaded)}
+              mode={MODE.READ}
+              changeMode={this.changeMode}
+              onCancel={this.onCancel}
+            />
+
+            <BottomPadding />
           </React.Fragment>
         }
         {(mode === MODE.IMPORT) &&
@@ -296,20 +298,32 @@ export class FileDataVisualizerView extends Component {
               fileContents={fileContents}
               fileSize={fileSize}
               indexPatterns={this.props.indexPatterns}
+              showBottomBar={this.showBottomBar}
+              hideBottomBar={this.hideBottomBar}
             />
 
-            <EuiSpacer size="m" />
+            <BottomBar
+              showBar={bottomBarVisible}
+              mode={MODE.IMPORT}
+              changeMode={this.changeMode}
+              onCancel={this.onCancel}
+            />
 
-            <EuiPanel>
-              <EuiButton
-                onClick={() => this.changeMode(MODE.READ)}
-              >
-                Back
-              </EuiButton>
-            </EuiPanel>
+            <BottomPadding />
           </React.Fragment>
         }
       </React.Fragment>
     );
   }
+}
+
+function BottomPadding() {
+  // padding for the BottomBar
+  return (
+    <React.Fragment>
+      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
+      <EuiSpacer size="l" />
+    </React.Fragment>
+  );
 }
