@@ -44,7 +44,7 @@ export function assertValidInterval(interval: string) {
   }
 
   throw new Error(
-    `Invalid interval "${interval}". Intervals must be of the form {numbrer}m. Example: 5m.`
+    `Invalid interval "${interval}". Intervals must be of the form {number}m. Example: 5m.`
   );
 }
 

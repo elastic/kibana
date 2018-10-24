@@ -15,10 +15,10 @@ describe('taskIntervals', () => {
 
     test('it rejects intervals are not of the form `Nm`', () => {
       expect(() => assertValidInterval(`5m 2s`)).toThrow(
-        /Invalid interval "5m 2s"\. Intervals must be of the form {numbrer}m. Example: 5m/
+        /Invalid interval "5m 2s"\. Intervals must be of the form {number}m. Example: 5m/
       );
       expect(() => assertValidInterval(`hello`)).toThrow(
-        /Invalid interval "hello"\. Intervals must be of the form {numbrer}m. Example: 5m/
+        /Invalid interval "hello"\. Intervals must be of the form {number}m. Example: 5m/
       );
     });
   });
@@ -33,10 +33,10 @@ describe('taskIntervals', () => {
 
     test('it rejects intervals are not of the form `Nm`', () => {
       expect(() => intervalFromNow(`5m 2s`)).toThrow(
-        /Invalid interval "5m 2s"\. Intervals must be of the form {numbrer}m. Example: 5m/
+        /Invalid interval "5m 2s"\. Intervals must be of the form {number}m. Example: 5m/
       );
       expect(() => intervalFromNow(`hello`)).toThrow(
-        /Invalid interval "hello"\. Intervals must be of the form {numbrer}m. Example: 5m/
+        /Invalid interval "hello"\. Intervals must be of the form {number}m. Example: 5m/
       );
     });
   });
