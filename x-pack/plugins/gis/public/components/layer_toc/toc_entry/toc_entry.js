@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   EuiIconTip,
 } from '@elastic/eui';
+import { VisibilityToggle } from '../../../shared/components/visibility_toggle';
 
 export class TOCEntry extends React.Component {
 
@@ -77,11 +78,13 @@ export class TOCEntry extends React.Component {
       );
     } else {
       visibilityIndicator = (
-        <EuiCheckbox
+        <VisibilityToggle
           id={layer.getId()}
           checked={layer.isVisible()}
           onChange={() => toggleVisible(layer.getId())}
-        />
+        >
+          {layer.getIcon()}
+        </VisibilityToggle>
       );
     }
 
@@ -100,9 +103,6 @@ export class TOCEntry extends React.Component {
         >
           <EuiFlexItem grow={false} className="layerEntry--visibility">
             {visibilityIndicator}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {layer.getIcon()}
           </EuiFlexItem>
           <EuiFlexItem>
             <button onClick={() => openLayerPanel(layer.getId())} >
