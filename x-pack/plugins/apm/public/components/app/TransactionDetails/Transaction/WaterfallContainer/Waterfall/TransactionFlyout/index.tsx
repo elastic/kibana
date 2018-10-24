@@ -15,7 +15,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
-import { TraceLink } from 'x-pack/plugins/apm/public/components/shared/TraceLink';
+import { TransactionLink } from 'x-pack/plugins/apm/public/components/shared/TransactionLink';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { ActionMenu } from '../../../ActionMenu';
@@ -58,11 +58,11 @@ export function TransactionFlyout({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <TraceLink transaction={transactionDoc}>
+            <TransactionLink transaction={transactionDoc}>
               <EuiButton iconType="visLine">
                 View transaction group details
               </EuiButton>
-            </TraceLink>
+            </TransactionLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>

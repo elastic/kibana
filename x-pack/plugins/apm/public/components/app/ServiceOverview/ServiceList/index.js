@@ -7,11 +7,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import numeral from '@elastic/numeral';
 import { RelativeLink } from '../../../../utils/url';
 import { fontSizes, truncate } from '../../../../style/variables';
 import TooltipOverlay from '../../../shared/TooltipOverlay';
-import { asMillisWithDefault } from '../../../../utils/formatters';
+import { asMillisWithDefault, asDecimal } from '../../../../utils/formatters';
 import { ManagedTable } from '../../../shared/ManagedTable';
 
 // TODO: Consolidate these formatting helpers centrally
@@ -19,7 +18,7 @@ function formatNumber(value) {
   if (value === 0) {
     return '0';
   }
-  const formatted = numeral(value).format('0.0');
+  const formatted = asDecimal(value);
   return formatted <= 0.1 ? '< 0.1' : formatted;
 }
 

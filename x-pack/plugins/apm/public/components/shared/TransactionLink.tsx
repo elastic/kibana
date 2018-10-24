@@ -8,7 +8,7 @@ import React from 'react';
 import { Transaction } from '../../../typings/Transaction';
 import { KibanaLink, legacyEncodeURIComponent } from '../../utils/url';
 
-interface TraceLinkProps {
+interface TransactionLinkProps {
   transaction: Transaction;
 }
 
@@ -35,7 +35,7 @@ export function getLinkProps(transaction: Transaction) {
   };
 }
 
-export const TraceLink: React.SFC<TraceLinkProps> = ({
+export const TransactionLink: React.SFC<TransactionLinkProps> = ({
   transaction,
   children
 }) => {

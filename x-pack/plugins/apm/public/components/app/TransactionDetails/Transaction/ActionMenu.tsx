@@ -80,6 +80,35 @@ export class ActionMenu extends React.Component<
     this.setState({ isOpen: false });
   };
 
+  public getInfraActions(transaction: Transaction) {
+    const { system } = transaction.context;
+
+    if (!system || !system.hostname) {
+      return [];
+    }
+
+    return [
+      <EuiContextMenuItem icon="infraApp" key="infra-host-metrics">
+        <KibanaLink
+          pathname="/app/infra"
+          hash={`/link-to/host-detail/${system.hostname}`}
+          query={getInfraMetricsQuery(transaction)}
+        >
+          <span>View host metrics (beta)</span>
+        </KibanaLink>
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem icon="infraApp" key="infra-host-logs">
+        <KibanaLink
+          pathname="/app/infra"
+          hash={`/link-to/host-logs/${system.hostname}`}
+          query={{ time: new Date(transaction['@timestamp']).getTime() }}
+        >
+          <span>View host logs (beta)</span>
+        </KibanaLink>
+      </EuiContextMenuItem>
+    ];
+  }
+
   public render() {
     const { transaction } = this.props;
 
@@ -96,24 +125,7 @@ export class ActionMenu extends React.Component<
           View sample document
         </KibanaLink>
       </EuiContextMenuItem>,
-      <EuiContextMenuItem icon="infraApp" key="infra-host-metrics">
-        <KibanaLink
-          pathname="/app/infra"
-          hash={`/link-to/host-detail/${transaction.context.system.hostname}`}
-          query={getInfraMetricsQuery(transaction)}
-        >
-          <span>View host metrics (beta)</span>
-        </KibanaLink>
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem icon="infraApp" key="infra-host-logs">
-        <KibanaLink
-          pathname="/app/infra"
-          hash={`/link-to/host-logs/${transaction.context.system.hostname}`}
-          query={{ time: new Date(transaction['@timestamp']).getTime() }}
-        >
-          <span>View host logs (beta)</span>
-        </KibanaLink>
-      </EuiContextMenuItem>
+      ...this.getInfraActions(transaction)
     ];
 
     return (
