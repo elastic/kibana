@@ -40,7 +40,7 @@ import { matchPairs } from '../lib/match_pairs';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import { EuiFieldText, EuiOutsideClickDetector } from '@elastic/eui';
+import { EuiButton, EuiFieldText, EuiOutsideClickDetector } from '@elastic/eui';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -136,6 +136,10 @@ export class QueryBar extends Component<Props, State> {
 
   private componentIsUnmounting = false;
   private persistedLog: PersistedLog | null = null;
+
+  public isDirty = () => {
+    return this.state.query.query !== this.props.query.query;
+  };
 
   public increaseLimit = () => {
     this.setState({
@@ -263,6 +267,10 @@ export class QueryBar extends Component<Props, State> {
     if (event.target instanceof HTMLInputElement) {
       this.onInputChange(event.target.value);
     }
+  };
+
+  public onClickSubmitButton = (event: React.MouseEvent<HTMLButtonElement>) => {
+    this.onSubmit(() => event.preventDefault());
   };
 
   public onClickSuggestion = (suggestion: AutocompleteSuggestion) => {
@@ -484,6 +492,16 @@ export class QueryBar extends Component<Props, State> {
                   />
                 </div>
               </div>
+
+              <EuiButton
+                aria-label="Search"
+                data-test-subj="querySubmitButton"
+                color="secondary"
+                fill
+                onClick={this.onClickSubmitButton}
+              >
+                {this.isDirty() ? '*Update' : 'Update'}
+              </EuiButton>
             </div>
           </form>
 
