@@ -111,8 +111,13 @@ export class LayerPanel  extends React.Component {
         gutterSize="none"
       >
         <EuiFlexItem grow={false} className="gisViewPanel__header">
-          <EuiTitle size="s">
-            <h1>{this.state.displayName}</h1>
+          <EuiTitle size="s" className="gisViewPanel__title">
+            <p>
+              <h1>
+                {selectedLayer.getIcon()}
+                {this.state.displayName}
+              </h1>
+            </p>
           </EuiTitle>
           <EuiSpacer size="m"/>
           <EuiHorizontalRule margin="none"/>

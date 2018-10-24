@@ -113,6 +113,12 @@
   box-shadow: 0 $euiSize $euiSize (-$euiSize / 2) $euiColorLightestShade;
 }
 
+.gisViewPanel__title {
+  svg {
+    margin: -.1em .5em 0 0;
+  }
+}
+
 .gisViewPanel__body {
   overflow: hidden;
   overflow-y: auto;
