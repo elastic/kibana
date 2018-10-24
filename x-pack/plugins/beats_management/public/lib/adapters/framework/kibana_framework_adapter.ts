@@ -83,7 +83,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
   public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
     this.register(this.uiModule);
-
     this.hookAngular(() => {
       if (this.hadValidLicense() && this.securityEnabled()) {
         const registerSection = () =>
