@@ -31,6 +31,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const flyout = getService('flyout');
   const renderable = getService('renderable');
+  const table = getService('table');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -595,9 +596,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setSize(newValue) {
-      const input = await find.byCssSelector('input[name="size"]');
+      const input = await find.byCssSelector(`vis-editor-agg-params[aria-hidden="false"] input[name="size"]`);
       await input.clearValue();
-      await input.type(newValue);
+      await input.type(String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
@@ -940,9 +941,43 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await rect.getAttribute('height');
     }
 
+    /**
+     * If you are writing new tests, you should rather look into getTableVisContent method instead.
+     */
     async getTableVisData() {
       const dataTable = await testSubjects.find('paginated-table-body');
       return await dataTable.getVisibleText();
+    }
+
+    /**
+     * This function is the newer function to retrieve data from within a table visualization.
+     * It uses a better return format, than the old getTableVisData, by properly splitting
+     * cell values into arrays. Please use this function for newer tests.
+     */
+    async getTableVisContent({ stripEmptyRows = true } = { }) {
+      const container = await testSubjects.find('tableVis');
+      const allTables = await testSubjects.findAllDescendant('paginated-table-body', container);
+
+      if (allTables.length === 0) {
+        return [];
+      }
+
+      const allData = await Promise.all(allTables.map(async (t) => {
+        let data = await table.getDataFromElement(t);
+        if (stripEmptyRows) {
+          data = data.filter(row => row.length > 0 && row.some(cell => cell.trim().length > 0));
+        }
+        return data;
+      }));
+
+      if (allTables.length === 1) {
+        // If there was only one table we return only the data for that table
+        // This prevents an unnecessary array around that single table, which
+        // is the case we have in most tests.
+        return allData[0];
+      }
+
+      return allData;
     }
 
     async getInspectorTableData() {
