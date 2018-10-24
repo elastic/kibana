@@ -11,6 +11,7 @@ import { JsonWatch } from './json_watch';
 import { MonitoringWatch } from './monitoring_watch';
 import { ThresholdWatch } from './threshold_watch';
 import { getWatchType } from './lib/get_watch_type';
+import { i18n } from '@kbn/i18n';
 
 const WatchTypes = {};
 set(WatchTypes, WATCH_TYPES.JSON, JsonWatch);
@@ -25,12 +26,24 @@ export class Watch {
   // from Kibana
   static fromDownstreamJson(json) {
     if (!json.type) {
-      throw badRequest('json argument must contain an type property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.watch.absenceOfTypePropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {type} property',
+          values: {
+            type: 'type'
+          }
+        }),
+      );
     }
 
     const WatchType = WatchTypes[json.type];
     if (!WatchType) {
-      throw badRequest(`Attempted to load unknown type ${json.type}`);
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.watch.unknownJsonTypeAttemptedToLoadBadRequestMessage', {
+          defaultMessage: 'Attempted to load unknown type {jsonType}',
+          values: { jsonType: json.type }
+        }),
+      );
     }
 
     return WatchType.fromDownstreamJson(json);
@@ -39,7 +52,14 @@ export class Watch {
   // from Elasticsearch
   static fromUpstreamJson(json) {
     if (!json.watchJson) {
-      throw badRequest('json argument must contain a watchJson property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.watch.absenceOfWatchJsonPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain a {watchJson} property',
+          values: {
+            watchJson: 'watchJson'
+          }
+        }),
+      );
     }
 
     const type = getWatchType(json.watchJson);

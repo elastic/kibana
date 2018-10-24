@@ -17,6 +17,10 @@ You might see "There was an error generating your report" or one of the followin
 an explanation of why the failure occurred and what you can do to fix it.
 
 [float]
+=== Data Table Visualization does not show all data in PDF reports
+There is currently a known limitation with the Data Table visualization that only the first page of data rows, which are the only data visible on the screen, are shown in PDF reports.
+
+[float]
 ==== `You must install fontconfig and freetype for Reporting to work'`
 Reporting using PhantomJS, the default browser, relies on system packages. Install the appropriate fontconfig and freetype
 packages for your distribution.

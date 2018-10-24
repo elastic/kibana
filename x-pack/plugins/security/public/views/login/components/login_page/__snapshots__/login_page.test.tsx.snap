@@ -1,0 +1,463 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoginPage disabled form states renders as expected when a connection to ES is not available 1`] = `
+<I18nProvider>
+  <div
+    className="loginWelcome login-form"
+  >
+    <header
+      className="loginWelcome__header"
+    >
+      <div
+        className="loginWelcome__content eui-textCenter loginWelcome__contentDisabledForm"
+      >
+        <EuiSpacer
+          size="xxl"
+        />
+        <span
+          className="loginWelcome__logo"
+        >
+          <EuiIcon
+            size="xxl"
+            type="logoKibana"
+          />
+        </span>
+        <EuiTitle
+          className="loginWelcome__title"
+          size="l"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Welcome to Kibana"
+              id="kbn.login.welcomeTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiText
+          className="loginWelcome__subtitle"
+          color="subdued"
+          grow={true}
+          size="s"
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="Your window into the Elastic Stack"
+              id="kbn.login.welcomeDescription"
+              values={Object {}}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="xl"
+        />
+      </div>
+    </header>
+    <div
+      className="loginWelcome__content loginWelcome-body loginWelcome__contentDisabledForm"
+    >
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="row"
+        gutterSize="l"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <DisabledLoginForm
+            message={
+              <FormattedMessage
+                defaultMessage="See the Kibana logs for details and try reloading the page."
+                id="kbn.login.esUnavailableMessage"
+                values={Object {}}
+              />
+            }
+            title={
+              <FormattedMessage
+                defaultMessage="Cannot connect to the Elastiscearch cluster"
+                id="kbn.login.esUnavailableTitle"
+                values={Object {}}
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</I18nProvider>
+`;
+
+exports[`LoginPage disabled form states renders as expected when an unknown loginState layout is provided 1`] = `
+<I18nProvider>
+  <div
+    className="loginWelcome login-form"
+  >
+    <header
+      className="loginWelcome__header"
+    >
+      <div
+        className="loginWelcome__content eui-textCenter loginWelcome__contentDisabledForm"
+      >
+        <EuiSpacer
+          size="xxl"
+        />
+        <span
+          className="loginWelcome__logo"
+        >
+          <EuiIcon
+            size="xxl"
+            type="logoKibana"
+          />
+        </span>
+        <EuiTitle
+          className="loginWelcome__title"
+          size="l"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Welcome to Kibana"
+              id="kbn.login.welcomeTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiText
+          className="loginWelcome__subtitle"
+          color="subdued"
+          grow={true}
+          size="s"
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="Your window into the Elastic Stack"
+              id="kbn.login.welcomeDescription"
+              values={Object {}}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="xl"
+        />
+      </div>
+    </header>
+    <div
+      className="loginWelcome__content loginWelcome-body loginWelcome__contentDisabledForm"
+    >
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="row"
+        gutterSize="l"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <DisabledLoginForm
+            message={
+              <FormattedMessage
+                defaultMessage="Refer to the Kibana logs for more details and refresh to try again."
+                id="kbn.login.unknownLayoutMessage"
+                values={Object {}}
+              />
+            }
+            title={
+              <FormattedMessage
+                defaultMessage="Unsupported login form layout."
+                id="kbn.login.unknownLayoutTitle"
+                values={Object {}}
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</I18nProvider>
+`;
+
+exports[`LoginPage disabled form states renders as expected when secure cookies are required but not present 1`] = `
+<I18nProvider>
+  <div
+    className="loginWelcome login-form"
+  >
+    <header
+      className="loginWelcome__header"
+    >
+      <div
+        className="loginWelcome__content eui-textCenter loginWelcome__contentDisabledForm"
+      >
+        <EuiSpacer
+          size="xxl"
+        />
+        <span
+          className="loginWelcome__logo"
+        >
+          <EuiIcon
+            size="xxl"
+            type="logoKibana"
+          />
+        </span>
+        <EuiTitle
+          className="loginWelcome__title"
+          size="l"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Welcome to Kibana"
+              id="kbn.login.welcomeTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiText
+          className="loginWelcome__subtitle"
+          color="subdued"
+          grow={true}
+          size="s"
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="Your window into the Elastic Stack"
+              id="kbn.login.welcomeDescription"
+              values={Object {}}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="xl"
+        />
+      </div>
+    </header>
+    <div
+      className="loginWelcome__content loginWelcome-body loginWelcome__contentDisabledForm"
+    >
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="row"
+        gutterSize="l"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <DisabledLoginForm
+            message={
+              <FormattedMessage
+                defaultMessage="Contact your system administrator."
+                id="kbn.login.requiresSecureConnectionMessage"
+                values={Object {}}
+              />
+            }
+            title={
+              <FormattedMessage
+                defaultMessage="A secure connection is required for log in"
+                id="kbn.login.requiresSecureConnectionTitle"
+                values={Object {}}
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</I18nProvider>
+`;
+
+exports[`LoginPage disabled form states renders as expected when xpack is not available 1`] = `
+<I18nProvider>
+  <div
+    className="loginWelcome login-form"
+  >
+    <header
+      className="loginWelcome__header"
+    >
+      <div
+        className="loginWelcome__content eui-textCenter loginWelcome__contentDisabledForm"
+      >
+        <EuiSpacer
+          size="xxl"
+        />
+        <span
+          className="loginWelcome__logo"
+        >
+          <EuiIcon
+            size="xxl"
+            type="logoKibana"
+          />
+        </span>
+        <EuiTitle
+          className="loginWelcome__title"
+          size="l"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Welcome to Kibana"
+              id="kbn.login.welcomeTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiText
+          className="loginWelcome__subtitle"
+          color="subdued"
+          grow={true}
+          size="s"
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="Your window into the Elastic Stack"
+              id="kbn.login.welcomeDescription"
+              values={Object {}}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="xl"
+        />
+      </div>
+    </header>
+    <div
+      className="loginWelcome__content loginWelcome-body loginWelcome__contentDisabledForm"
+    >
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="row"
+        gutterSize="l"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <DisabledLoginForm
+            message={
+              <FormattedMessage
+                defaultMessage="To use the full set of free features in this distribution of Kibana, please update Elasticsearch to the default distribution."
+                id="kbn.login.xpackUnavailableMessage"
+                values={Object {}}
+              />
+            }
+            title={
+              <FormattedMessage
+                defaultMessage="Cannot connect to the Elasticsearch cluster currently configured for Kibana."
+                id="kbn.login.xpackUnavailableTitle"
+                values={Object {}}
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</I18nProvider>
+`;
+
+exports[`LoginPage enabled form state renders as expected 1`] = `
+<I18nProvider>
+  <div
+    className="loginWelcome login-form"
+  >
+    <header
+      className="loginWelcome__header"
+    >
+      <div
+        className="loginWelcome__content eui-textCenter"
+      >
+        <EuiSpacer
+          size="xxl"
+        />
+        <span
+          className="loginWelcome__logo"
+        >
+          <EuiIcon
+            size="xxl"
+            type="logoKibana"
+          />
+        </span>
+        <EuiTitle
+          className="loginWelcome__title"
+          size="l"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Welcome to Kibana"
+              id="kbn.login.welcomeTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiText
+          className="loginWelcome__subtitle"
+          color="subdued"
+          grow={true}
+          size="s"
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="Your window into the Elastic Stack"
+              id="kbn.login.welcomeDescription"
+              values={Object {}}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="xl"
+        />
+      </div>
+    </header>
+    <div
+      className="loginWelcome__content loginWelcome-body"
+    >
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        direction="row"
+        gutterSize="l"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <BasicLoginForm
+            http={
+              Object {
+                "post": [MockFunction],
+              }
+            }
+            isSecureConnection={false}
+            loginState={
+              Object {
+                "allowLogin": true,
+                "layout": "form",
+                "loginMessage": "",
+              }
+            }
+            next=""
+            requiresSecureConnection={false}
+            window={Object {}}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</I18nProvider>
+`;

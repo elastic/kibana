@@ -211,7 +211,7 @@ describe('KibanaLinkComponent', () => {
 
   it('should have correct url', () => {
     expect(wrapper.find('a').prop('href')).toBe(
-      "myBasePath/app/kibana#/discover?_g=&_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))"
+      "myBasePath/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))&_g="
     );
   });
 

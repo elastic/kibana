@@ -16,6 +16,7 @@ export const createTokensRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/enrollment_tokens',
   licenseRequired: true,
+  requiredRoles: ['beats_admin'],
   config: {
     validate: {
       payload: Joi.object({

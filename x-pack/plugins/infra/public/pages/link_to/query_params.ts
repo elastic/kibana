@@ -12,3 +12,13 @@ export const getTimeFromLocation = (location: Location) => {
   const timeParam = getParamFromQueryString(getQueryStringFromLocation(location), 'time');
   return timeParam ? parseFloat(timeParam) : NaN;
 };
+
+export const getToFromLocation = (location: Location) => {
+  const timeParam = getParamFromQueryString(getQueryStringFromLocation(location), 'to');
+  return timeParam ? parseFloat(timeParam) : NaN;
+};
+
+export const getFromFromLocation = (location: Location) => {
+  const timeParam = getParamFromQueryString(getQueryStringFromLocation(location), 'from');
+  return timeParam ? parseFloat(timeParam) : NaN;
+};
