@@ -378,7 +378,7 @@ export class QueryBar extends Component<Props, State> {
       preventDefault();
     }
 
-    if (this.persistedLog) {
+    if (this.persistedLog && this.state.query.query.trim() !== '') {
       this.persistedLog.add(this.state.query.query);
     }
 
