@@ -36,7 +36,7 @@ FeatureCatalogueRegistryProvider.register(() => ({
 FeatureCatalogueRegistryProvider.register(() => ({
   id: 'secops',
   title: 'SecOps',
-  description: 'Someone smarter than me should say something here.',
+  description: 'Explore security metrics and logs for events and alerts',
   icon: 'securityApp',
   path: `/app/${APP_ID}#/secops`,
   showOnHomePage: true,
