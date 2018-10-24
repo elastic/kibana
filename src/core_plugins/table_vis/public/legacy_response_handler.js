@@ -32,7 +32,7 @@ import AggConfigResult from 'ui/vis/agg_config_result';
  * splitRows.results; // ['X', 50];
  * splitRows.rowsGroupedByResult; // { X: [{ col-1: 'foo' }, { col-1: 'baz' }], 50: [{ col-1: 'bar' }] }
  */
-function splitRowsOnColumn(rows, columnId) {
+export function splitRowsOnColumn(rows, columnId) {
   const resultsMap = {}; // Used to preserve types, since object keys are always converted to strings.
   return {
     rowsGroupedByResult: rows.reduce((acc, row) => {
@@ -45,7 +45,7 @@ function splitRowsOnColumn(rows, columnId) {
   };
 }
 
-function splitTable(columns, rows, $parent) {
+export function splitTable(columns, rows, $parent) {
   const splitColumn = columns.find(column => get(column, 'aggConfig.schema.name') === 'split');
 
   if (!splitColumn) {
