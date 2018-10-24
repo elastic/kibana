@@ -4,6 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid/v4';
+export function getRequest(server, { headers }) {
+  const basePath = server.config().get('server.basePath') || '/';
 
-export const insecureAuthRoute = `/api/canvas/ar-${uuid()}`;
+  return server
+    .inject({
+      method: 'GET',
+      url: basePath,
+      headers,
+    })
+    .then(res => res.request);
+}
