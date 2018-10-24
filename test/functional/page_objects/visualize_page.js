@@ -917,7 +917,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
       return await Promise.all(getChartTypesPromises);
     }
-    async hasPieChartError() {
+    async expectPieChartError() {
       return await testSubjects.existOrFail('visLibVisualizeError');
     }
 

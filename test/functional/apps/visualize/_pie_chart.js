@@ -194,7 +194,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('Switch to a different time range from \"' + emptyFromTime + '\" to \"' + emptyToTime + '\"');
         await PageObjects.header.setAbsoluteRange(emptyFromTime, emptyToTime);
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.hasPieChartError();
+        await PageObjects.visualize.expectPieChartError();
       });
     });
   });
