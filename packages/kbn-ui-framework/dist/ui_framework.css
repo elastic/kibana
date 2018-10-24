@@ -2792,7 +2792,8 @@ main {
   -webkit-flex: 1 1 100%;
       -ms-flex: 1 1 100%;
           flex: 1 1 100%;
-  position: relative; }
+  position: relative;
+  margin-right: 8px; }
 
 /**
    * 1. Vertically center the assistance, regardless of its height.

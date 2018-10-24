@@ -459,6 +459,7 @@ export class QueryBar extends Component<Props, State> {
             <div className="kuiLocalSearch" role="search">
               <div className="kuiLocalSearchAssistedInput">
                 <EuiFieldText
+                  className="kuiLocalSearchAssistedInput__input"
                   placeholder="Search... (e.g. status:200 AND extension:PHP)"
                   value={this.state.query.query}
                   onKeyDown={this.onKeyDown}
