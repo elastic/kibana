@@ -459,7 +459,6 @@ class IndexActionsContextMenuUi extends Component {
           panelPaddingSize="none"
           withTitle
           anchorPosition={anchorPosition}
-
         >
           <EuiContextMenu initialPanelId={0} panels={panels} />
         </EuiPopover>
