@@ -2722,7 +2722,7 @@ main {
   display: -ms-flexbox;
   display: flex;
   width: 100%;
-  margin-bottom: 10px; }
+  margin-bottom: 8px; }
 
 .kuiLocalSearchInput {
   -webkit-appearance: none;
@@ -2792,8 +2792,7 @@ main {
   -webkit-flex: 1 1 100%;
       -ms-flex: 1 1 100%;
           flex: 1 1 100%;
-  position: relative;
-  margin-right: 8px; }
+  position: relative; }
 
 /**
    * 1. Vertically center the assistance, regardless of its height.

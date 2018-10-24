@@ -40,7 +40,13 @@ import { matchPairs } from '../lib/match_pairs';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import { EuiButton, EuiFieldText, EuiOutsideClickDetector } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiOutsideClickDetector,
+} from '@elastic/eui';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -446,76 +452,81 @@ export class QueryBar extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
-        {/* position:relative required on container so the suggestions appear under the query bar*/}
-        <div
-          style={{ position: 'relative' }}
-          role="combobox"
-          aria-haspopup="true"
-          aria-expanded={this.state.isSuggestionsVisible}
-          aria-owns="typeahead-items"
-        >
-          <form role="form" name="queryBarForm">
-            <div className="kuiLocalSearch" role="search">
-              <div className="kuiLocalSearchAssistedInput">
-                <EuiFieldText
-                  className="kuiLocalSearchAssistedInput__input"
-                  placeholder="Search... (e.g. status:200 AND extension:PHP)"
-                  value={this.state.query.query}
-                  onKeyDown={this.onKeyDown}
-                  onKeyUp={this.onKeyUp}
-                  onChange={this.onChange}
-                  onClick={this.onClickInput}
-                  fullWidth
-                  autoFocus={!this.props.disableAutoFocus}
-                  inputRef={node => {
-                    if (node) {
-                      this.inputRef = node;
-                    }
-                  }}
-                  autoComplete="off"
-                  spellCheck={false}
-                  icon="console"
-                  aria-label="Search input"
-                  type="text"
-                  data-test-subj="queryInput"
-                  aria-autocomplete="list"
-                  aria-controls="typeahead-items"
-                  aria-activedescendant={
-                    this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
-                  }
-                  role="textbox"
-                />
-                <div className="kuiLocalSearchAssistedInput__assistance">
-                  <QueryLanguageSwitcher
-                    language={this.state.query.language}
-                    onSelectLanguage={this.onSelectLanguage}
-                  />
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexItem>
+          <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
+            {/* position:relative required on container so the suggestions appear under the query bar*/}
+            <div
+              style={{ position: 'relative' }}
+              role="combobox"
+              aria-haspopup="true"
+              aria-expanded={this.state.isSuggestionsVisible}
+              aria-owns="typeahead-items"
+            >
+              <form role="form" name="queryBarForm">
+                <div className="kuiLocalSearch" role="search">
+                  <div className="kuiLocalSearchAssistedInput">
+                    <EuiFieldText
+                      className="kuiLocalSearchAssistedInput__input"
+                      placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                      value={this.state.query.query}
+                      onKeyDown={this.onKeyDown}
+                      onKeyUp={this.onKeyUp}
+                      onChange={this.onChange}
+                      onClick={this.onClickInput}
+                      fullWidth
+                      autoFocus={!this.props.disableAutoFocus}
+                      inputRef={node => {
+                        if (node) {
+                          this.inputRef = node;
+                        }
+                      }}
+                      autoComplete="off"
+                      spellCheck={false}
+                      icon="console"
+                      aria-label="Search input"
+                      type="text"
+                      data-test-subj="queryInput"
+                      aria-autocomplete="list"
+                      aria-controls="typeahead-items"
+                      aria-activedescendant={
+                        this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
+                      }
+                      role="textbox"
+                    />
+                    <div className="kuiLocalSearchAssistedInput__assistance">
+                      <QueryLanguageSwitcher
+                        language={this.state.query.language}
+                        onSelectLanguage={this.onSelectLanguage}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </form>
 
-              <EuiButton
-                aria-label="Search"
-                data-test-subj="querySubmitButton"
-                color={this.isDirty() ? 'secondary' : 'primary'}
-                fill
-                onClick={this.onClickSubmitButton}
-              >
-                {this.isDirty() ? 'Update' : 'Refresh'}
-              </EuiButton>
+              <SuggestionsComponent
+                show={this.state.isSuggestionsVisible}
+                suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
+                index={this.state.index}
+                onClick={this.onClickSuggestion}
+                onMouseEnter={this.onMouseEnterSuggestion}
+                loadMore={this.increaseLimit}
+              />
             </div>
-          </form>
-
-          <SuggestionsComponent
-            show={this.state.isSuggestionsVisible}
-            suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
-            index={this.state.index}
-            onClick={this.onClickSuggestion}
-            onMouseEnter={this.onMouseEnterSuggestion}
-            loadMore={this.increaseLimit}
-          />
-        </div>
-      </EuiOutsideClickDetector>
+          </EuiOutsideClickDetector>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            aria-label="Search"
+            data-test-subj="querySubmitButton"
+            color={this.isDirty() ? 'secondary' : 'primary'}
+            fill
+            onClick={this.onClickSubmitButton}
+          >
+            {this.isDirty() ? 'Update' : 'Refresh'}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }
