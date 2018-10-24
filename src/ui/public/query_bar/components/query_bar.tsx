@@ -500,7 +500,7 @@ export class QueryBar extends Component<Props, State> {
                 fill
                 onClick={this.onClickSubmitButton}
               >
-                {this.isDirty() ? '*Update' : 'Update'}
+                {this.isDirty() ? 'Update' : 'Refresh'}
               </EuiButton>
             </div>
           </form>
