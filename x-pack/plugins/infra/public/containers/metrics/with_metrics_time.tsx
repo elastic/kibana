@@ -35,7 +35,7 @@ export const WithMetricsTime = asChildFunctionRenderer(withMetricsTime, {
  */
 
 interface MetricTimeUrlState {
-  timeRange?: ReturnType<typeof metricTimeSelectors.selectRangeTime>;
+  time?: ReturnType<typeof metricTimeSelectors.selectRangeTime>;
   autoReload?: ReturnType<typeof metricTimeSelectors.selectIsAutoReloading>;
 }
 
@@ -47,8 +47,8 @@ export const WithMetricsTimeUrlState = () => (
         urlStateKey="metricTime"
         mapToUrlState={mapToUrlState}
         onChange={newUrlState => {
-          if (newUrlState && newUrlState.timeRange) {
-            setRangeTime(newUrlState.timeRange);
+          if (newUrlState && newUrlState.time) {
+            setRangeTime(newUrlState.time);
           }
           if (newUrlState && newUrlState.autoReload) {
             startMetricsAutoReload();
@@ -61,8 +61,8 @@ export const WithMetricsTimeUrlState = () => (
           }
         }}
         onInitialize={initialUrlState => {
-          if (initialUrlState && initialUrlState.timeRange) {
-            setRangeTime(initialUrlState.timeRange);
+          if (initialUrlState && initialUrlState.time) {
+            setRangeTime(initialUrlState.time);
           }
           if (initialUrlState && initialUrlState.autoReload) {
             startMetricsAutoReload();
@@ -85,7 +85,7 @@ const selectTimeUrlState = createSelector(
 const mapToUrlState = (value: any): MetricTimeUrlState | undefined =>
   value
     ? {
-        timeRange: mapToTimeUrlState(value.timeRange),
+        time: mapToTimeUrlState(value.time),
         autoReload: mapToAutoReloadUrlState(value.autoReload),
       }
     : undefined;
