@@ -40,6 +40,7 @@ describe('home', () => {
       recentlyAccessed: [],
       directories: [],
       apmUiEnabled: true,
+      mlEnabled: true,
       kibanaVersion: '99.2.1',
       addBasePath(url) {
         return `base_path/${url}`;
