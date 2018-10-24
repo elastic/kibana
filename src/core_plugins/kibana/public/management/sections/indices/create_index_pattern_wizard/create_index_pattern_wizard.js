@@ -65,13 +65,13 @@ export class CreateIndexPatternWizard extends Component {
       remoteClustersExist: false
     });
 
-    const [allIndicies, remoteClusters] = await ensureMinimumTime([
+    const [allIndices, remoteClusters] = await ensureMinimumTime([
       getIndices(services.es, `*`, MAX_SEARCH_SIZE),
       getRemoteClusters(services.$http)
     ]);
 
     this.setState({
-      allIndicies,
+      allIndices,
       isInitiallyLoadingIndices: false,
       remoteClustersExist: remoteClusters.length !== 0
     });
@@ -140,7 +140,7 @@ export class CreateIndexPatternWizard extends Component {
 
     const hasDataIndices = allIndices.some(({ name }) => !name.startsWith('.'));
     if (!hasDataIndices &&
-      !isIncludingSystemIndices &
+      !isIncludingSystemIndices &&
       !remoteClustersExist) {
       return <EmptyState onRefresh={this.fetchData} />;
     }
