@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiProgress, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiProgress, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -17,6 +17,7 @@ interface LogTextStreamLoadingItemViewProps {
   isLoading: boolean;
   isStreaming: boolean;
   lastStreamingUpdate: number | null;
+  onLoadMore?: () => void;
 }
 
 export class LogTextStreamLoadingItemView extends React.PureComponent<
@@ -31,6 +32,7 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
       isLoading,
       isStreaming,
       lastStreamingUpdate,
+      onLoadMore,
     } = this.props;
 
     if (isStreaming) {
@@ -64,6 +66,11 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
           isLoading={false}
         >
           <ProgressMessage>No additional entries found</ProgressMessage>
+          {onLoadMore ? (
+            <EuiButtonEmpty size="xs" onClick={onLoadMore} iconType="refresh">
+              Load again
+            </EuiButtonEmpty>
+          ) : null}
         </ProgressEntry>
       );
     } else {
