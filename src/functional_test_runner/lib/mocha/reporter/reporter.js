@@ -64,7 +64,8 @@ export function MochaReporterProvider({ getService }) {
         log.setWriters([
           new ToolingLogTextWriter({
             level: 'error',
-            writeTo: process.stdout
+            writeTo: process.stdout,
+            includeTimestamp: true
           }),
           new ToolingLogTextWriter({
             level: 'debug',
@@ -82,7 +83,8 @@ export function MochaReporterProvider({ getService }) {
 
                 recordLog(currentSuite, chunk);
               }
-            }
+            },
+            includeTimestamp: true
           })
         ]);
       }

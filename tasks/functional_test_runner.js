@@ -30,8 +30,7 @@ export default function (grunt) {
 
     const log = new ToolingLog({
       level: logLevel,
-      writeTo: process.stdout,
-      includeTimestamp: grunt.option('debug') || grunt.option('verbose')
+      writeTo: process.stdout
     });
 
     const functionalTestRunner = createFunctionalTestRunner({
