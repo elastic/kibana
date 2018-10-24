@@ -15,9 +15,9 @@ import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 // @ts-ignore
 import TooltipOverlay from '../../shared/TooltipOverlay';
-import { TraceLink } from '../../shared/TraceLink';
+import { TransactionLink } from '../../shared/TransactionLink';
 
-const StyledTraceLink = styled(TraceLink)`
+const StyledTransactionLink = styled(TransactionLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -36,9 +36,9 @@ const traceListColumns: ITableColumn[] = [
     sortable: true,
     render: (transaction: Transaction) => (
       <TooltipOverlay content={transaction.transaction.name}>
-        <StyledTraceLink transaction={transaction}>
+        <StyledTransactionLink transaction={transaction}>
           {transaction.transaction.name}
-        </StyledTraceLink>
+        </StyledTransactionLink>
       </TooltipOverlay>
     )
   },

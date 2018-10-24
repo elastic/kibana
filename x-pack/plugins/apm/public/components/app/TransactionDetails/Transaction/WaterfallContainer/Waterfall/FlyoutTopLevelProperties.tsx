@@ -11,11 +11,8 @@ import {
 } from 'x-pack/plugins/apm/common/constants';
 // @ts-ignore
 import { StickyProperties } from 'x-pack/plugins/apm/public/components/shared/StickyProperties';
-import { TraceLink } from 'x-pack/plugins/apm/public/components/shared/TraceLink';
-import {
-  KibanaLink,
-  legacyEncodeURIComponent
-} from 'x-pack/plugins/apm/public/utils/url';
+import { TransactionLink } from 'x-pack/plugins/apm/public/components/shared/TransactionLink';
+import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 
 interface Props {
@@ -41,9 +38,9 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       label: 'Transaction',
       fieldName: TRANSACTION_NAME,
       val: (
-        <TraceLink transaction={transaction}>
+        <TransactionLink transaction={transaction}>
           {transaction.transaction.name}
-        </TraceLink>
+        </TransactionLink>
       ),
       width: '50%'
     }
