@@ -47,9 +47,8 @@ export default (kibana: any) =>
         title: 'Code',
         description: 'Code Search Plugin',
         main: 'plugins/codesearch/app',
-        styleSheetPath: resolve(__dirname, 'public/styles.scss'),
       },
-
+      styleSheetPaths: resolve(__dirname, 'public/styles.scss'),
       hacks: ['plugins/codesearch/hack'],
 
       mappings,
