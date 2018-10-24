@@ -42,6 +42,7 @@ import {
   EuiCode,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class TablePanelConfig extends Component {
 
@@ -78,15 +79,23 @@ class TablePanelConfig extends Component {
             <EuiPanel>
               <EuiText>
                 <p>
-                  For the table visualization you need to define a field to
-                  group by using a terms aggregation.
+                  <FormattedMessage
+                    id="metrics.table.dataTab.defineFieldDescription"
+                    defaultMessage="For the table visualization you need to define a field to group by using a terms aggregation."
+                  />
                 </p>
               </EuiText>
               <EuiSpacer size="m" />
 
               <EuiFlexGroup responsive={false} wrap={true}>
                 <EuiFlexItem data-test-subj="groupByField">
-                  <EuiFormRow id={htmlId('field')} label="Group by field">
+                  <EuiFormRow
+                    id={htmlId('field')}
+                    label={(<FormattedMessage
+                      id="metrics.table.dataTab.groupByFieldLabel"
+                      defaultMessage="Group by field"
+                    />)}
+                  >
                     <FieldSelect
                       fields={this.props.fields}
                       value={model.pivot_id}
@@ -99,7 +108,10 @@ class TablePanelConfig extends Component {
                 <EuiFlexItem>
                   <EuiFormRow
                     id={htmlId('pivotLabelInput')}
-                    label="Column label"
+                    label={(<FormattedMessage
+                      id="metrics.table.dataTab.columnLabel"
+                      defaultMessage="Column label"
+                    />)}
                     fullWidth
                   >
                     <EuiFieldText
@@ -113,7 +125,10 @@ class TablePanelConfig extends Component {
                 <EuiFlexItem grow={false}>
                   <EuiFormRow
                     id={htmlId('pivotRowsInput')}
-                    label="Rows"
+                    label={(<FormattedMessage
+                      id="metrics.table.dataTab.rowsLabel"
+                      defaultMessage="Rows"
+                    />)}
                   >
                     {/*
                       EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -143,15 +158,28 @@ class TablePanelConfig extends Component {
       view = (
         <div className="tvbPanelConfig__container">
           <EuiPanel>
-            <EuiTitle size="s"><span>Data</span></EuiTitle>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="metrics.table.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
+              </span>
+            </EuiTitle>
             <EuiSpacer size="m" />
             <EuiFormRow
               id={htmlId('drilldownInput')}
-              label="Item url"
+              label={(<FormattedMessage
+                id="metrics.table.optionsTab.itemUrlLabel"
+                defaultMessage="Item url"
+              />)}
               helpText={
                 <span>
-                  This supports mustache templating.
-                  <EuiCode>{'{{key}}'}</EuiCode> is set to the term.
+                  <FormattedMessage
+                    id="metrics.table.optionsTab.itemUrlDescription"
+                    defaultMessage="This supports mustache templating. {key} is set to the term."
+                    values={{ key: (<EuiCode>{'{{key}}'}</EuiCode>) }}
+                  />
                 </span>
               }
             >
@@ -175,7 +203,10 @@ class TablePanelConfig extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilterInput')}
-                  label="Panel filter"
+                  label={(<FormattedMessage
+                    id="metrics.table.optionsTab.panelFilterLabel"
+                    defaultMessage="Panel filter"
+                  />)}
                   fullWidth
                 >
                   <EuiFieldText
@@ -186,7 +217,12 @@ class TablePanelConfig extends Component {
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel htmlFor={htmlId('globalFilterOption')}>Ignore global filter?</EuiFormLabel>
+                <EuiFormLabel htmlFor={htmlId('globalFilterOption')}>
+                  <FormattedMessage
+                    id="metrics.table.optionsTab.ignoreGlobalFilterLabel"
+                    defaultMessage="Ignore global filter?"
+                  />
+                </EuiFormLabel>
                 <EuiSpacer size="s" />
                 <YesNo
                   id={htmlId('globalFilterOption')}
@@ -207,13 +243,19 @@ class TablePanelConfig extends Component {
             isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
-            Columns
+            <FormattedMessage
+              id="metrics.table.dataTab.columnsButtonLabel"
+              defaultMessage="Columns"
+            />
           </EuiTab>
           <EuiTab
             isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
           >
-            Panel options
+            <FormattedMessage
+              id="metrics.table.optionsTab.panelOptionsButtonLabel"
+              defaultMessage="Panel options"
+            />
           </EuiTab>
         </EuiTabs>
         {view}

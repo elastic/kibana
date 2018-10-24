@@ -19,6 +19,8 @@
 
 import { parseInterval } from 'ui/utils/parse_interval';
 import { GTE_INTERVAL_RE } from '../../common/interval_regexp';
+import { i18n } from '@kbn/i18n';
+
 export function validateInterval(bounds, panel, maxBuckets) {
   const { interval } = panel;
   const { min, max } = bounds;
@@ -32,7 +34,10 @@ export function validateInterval(bounds, panel, maxBuckets) {
     const span = max.valueOf() - min.valueOf();
     const buckets = Math.floor(span / duration.asMilliseconds());
     if (buckets > maxBuckets) {
-      throw new Error(`Max buckets exceeded: ${buckets} is greater than ${maxBuckets}, try a larger time interval in the panel options.`);
+      throw new Error(i18n.translate('metrics.validateInterval.notifier.maxBucketsExceededErrorMessage', {
+        defaultMessage: 'Max buckets exceeded: {buckets} is greater than {maxBuckets}, try a larger time interval in the panel options.',
+        values: { buckets, maxBuckets }
+      }));
     }
   }
 }
