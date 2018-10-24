@@ -134,14 +134,13 @@ export class SpacesMenu extends Component<Props, State> {
 
   private renderManageButton = () => {
     return (
-      <div key="manageSpacesButton" className="spcMenu__manageButtonWrapper">
-        <ManageSpacesButton
-          size="s"
-          style={{ width: `100%` }}
-          userProfile={this.props.userProfile}
-          onClick={this.props.onManageSpacesClick}
-        />
-      </div>
+      <ManageSpacesButton
+        key="manageSpacesButton"
+        className="spcMenu__manageButton"
+        size="s"
+        userProfile={this.props.userProfile}
+        onClick={this.props.onManageSpacesClick}
+      />
     );
   };
 
