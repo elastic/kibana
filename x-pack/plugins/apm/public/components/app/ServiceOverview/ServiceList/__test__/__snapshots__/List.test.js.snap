@@ -557,7 +557,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
-              46.1 err.
+              46 err.
             </div>
           </td>
         </tr>
@@ -611,7 +611,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
-              86.9 tpm
+              87 tpm
             </div>
           </td>
           <td
@@ -621,7 +621,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
-              12.6 err.
+              13 err.
             </div>
           </td>
         </tr>
