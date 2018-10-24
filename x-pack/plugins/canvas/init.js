@@ -15,7 +15,7 @@ import {
   webLogsSavedObjects,
 } from './server/sample_data';
 
-export default function(server /*options*/) {
+export default async function(server /*options*/) {
   server.injectUiAppVars('canvas', () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
@@ -34,7 +34,8 @@ export default function(server /*options*/) {
   // There are some common functions that use private APIs, load them here
   commonFunctions.forEach(func => functionsRegistry.register(func));
 
-  loadServerPlugins().then(() => routes(server));
+  await loadServerPlugins();
+  routes(server);
   registerCanvasUsageCollector(server);
 
   const now = new Date();
