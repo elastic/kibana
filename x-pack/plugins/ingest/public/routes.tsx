@@ -12,6 +12,7 @@ import { NotFoundPage } from './components/404';
 import { InfraOpsApp } from './infraops/app';
 import { LinkToPage } from './link_to';
 import { LogsApp } from './logs/app';
+import { SecOpsApp } from './secops/app';
 
 interface RouterProps {
   history: History;
@@ -25,6 +26,7 @@ export const PageRouter: React.SFC<RouterProps> = ({ history }) => {
         <Route path="/logs" component={LogsApp} />
         <Route path="/infraops" component={InfraOpsApp} />
         <Route path="/link-to" component={LinkToPage} />
+        <Route path="/secops" component={SecOpsApp} />
         <Route component={NotFoundPage} />
       </Switch>
     </Router>

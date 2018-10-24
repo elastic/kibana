@@ -32,3 +32,13 @@ FeatureCatalogueRegistryProvider.register(() => ({
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 }));
+
+FeatureCatalogueRegistryProvider.register(() => ({
+  id: 'secops',
+  title: 'SecOps',
+  description: 'Explore security metrics and logs for events and alerts',
+  icon: 'securityApp',
+  path: `/app/${APP_ID}#/secops`,
+  showOnHomePage: true,
+  category: FeatureCatalogueCategory.DATA,
+}));

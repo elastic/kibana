@@ -47,6 +47,14 @@ export function ingest(kibana: any) {
           title: 'Logs',
           url: `/app/${APP_ID}#/logs`,
         },
+        {
+          description: 'Explore your security operations',
+          euiIconType: 'securityApp',
+          id: 'secops:home',
+          order: 8002,
+          title: 'SecOps',
+          url: `/app/${APP_ID}#/secops`,
+        },
       ],
     },
     config(Joi: typeof JoiNamespace) {
