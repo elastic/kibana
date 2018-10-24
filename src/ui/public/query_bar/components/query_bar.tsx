@@ -23,7 +23,7 @@ declare module '@elastic/eui' {
   export const EuiOutsideClickDetector: SFC<any>;
 }
 
-import { debounce } from 'lodash';
+import { debounce, uniq } from 'lodash';
 import React, { Component, SFC } from 'react';
 import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
 import { kfetch } from 'ui/kfetch';
@@ -242,10 +242,9 @@ export class QueryBar extends Component<Props, State> {
     if (!this.persistedLog) {
       return [];
     }
-    const recentSearches = this.persistedLog.get();
+    const recentSearches = uniq(this.persistedLog.get().map(toUser));
     const matchingRecentSearches = recentSearches.filter(recentQuery => {
-      const recentQueryString = typeof recentQuery === 'object' ? toUser(recentQuery) : recentQuery;
-      return recentQueryString.includes(query);
+      return recentQuery.includes(query);
     });
     return matchingRecentSearches.map(recentSearch => {
       const text = recentSearch;
@@ -379,7 +378,7 @@ export class QueryBar extends Component<Props, State> {
       preventDefault();
     }
 
-    if (this.persistedLog) {
+    if (this.persistedLog && this.state.query.query.trim() !== '') {
       this.persistedLog.add(this.state.query.query);
     }
 
