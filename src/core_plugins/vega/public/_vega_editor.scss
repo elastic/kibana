@@ -1,6 +1,8 @@
 .visEditor--vega {
   .visEditorSidebar__config {
     padding: 0;
+    // Makes sure the vega options dropdown menu is visible
+    overflow: inherit;
   }
 
   // The following is necessary for the Vega editor to expand to full height of the editor panel

@@ -16,7 +16,7 @@ import { GroupName } from './group_name';
 import { GroupOfNodes } from './group_of_nodes';
 
 interface Props {
-  onDrilldown: () => void;
+  onDrilldown: (filter: string) => void;
   options: InfraWaffleMapOptions;
   group: InfraWaffleMapGroupOfGroups;
   formatter: (val: number) => string;
@@ -27,7 +27,7 @@ interface Props {
 export const GroupOfGroups: React.SFC<Props> = props => {
   return (
     <GroupOfGroupsContainer>
-      <GroupName group={props.group} onDrilldown={props.onDrilldown} />
+      <GroupName group={props.group} onDrilldown={props.onDrilldown} options={props.options} />
       <Groups>
         {props.group.groups.map(group => (
           <GroupOfNodes

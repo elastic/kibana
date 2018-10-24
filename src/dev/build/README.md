@@ -24,7 +24,7 @@ The majority of this logic is extracted from the grunt build that has existed fo
 
 **Config**: [lib/config.js] defines the config used to execute tasks. It is mostly used to determine absolute paths to specific locations, and to get access to the Platforms.
 
-**Platform**: [lib/platform.js] defines the Platform objects, which define the different platforms we build for. Use `config.getPlatforms()` to get the list of platforms, or `config.getLinux/Windows/MacPlatform()` to get a specific platform
+**Platform**: [lib/platform.js] defines the Platform objects, which define the different platforms we build for. Use `config.getTargetPlatforms()` to get the list of platforms we are targeting in this build, `config.getNodePlatforms()` to get the list of platform we will download node for, or `config.getLinux/Windows/MacPlatform()` to get a specific platform.
 
 **Log**: We uses the `ToolingLog` defined in [../tooling_log/tooling_log.js]
 

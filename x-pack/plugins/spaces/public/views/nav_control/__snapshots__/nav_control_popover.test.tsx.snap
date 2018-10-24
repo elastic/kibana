@@ -2,40 +2,25 @@
 
 exports[`NavControlPopover renders without crashing 1`] = `
 <EuiPopover
-  anchorPosition="rightCenter"
+  anchorPosition="downRight"
   button={
-    <div
-      className="global-nav-link"
-    >
-      <a
-        className="global-nav-link__anchor"
-        onClick={[Function]}
-      >
-        <div
-          className="global-nav-link__icon"
-        >
-           
-          <Unknown
-            className="spaceNavGraphic"
-            size="s"
-            space={
-              Object {
-                "id": "",
-                "name": "foo",
-              }
+    <SpacesGlobalNavButton
+      linkIcon={
+        <Unknown
+          className="spaceNavGraphic"
+          size="s"
+          space={
+            Object {
+              "id": "",
+              "name": "foo",
             }
-          />
-           
-        </div>
-        <div
-          className="global-nav-link__title"
-        >
-           
-          foo
-           
-        </div>
-      </a>
-    </div>
+          }
+        />
+      }
+      linkTitle="foo"
+      spaceSelectorShown={false}
+      toggleSpaceSelector={[Function]}
+    />
   }
   closePopover={[Function]}
   data-test-subj="spacesNavSelector"
@@ -45,6 +30,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
   ownFocus={true}
   panelPaddingSize="none"
   repositionOnScroll={true}
+  withTitle={true}
 >
   <Component
     onManageSpacesClick={[Function]}
