@@ -7,4 +7,4 @@
 	url = ../eclipse.jdt.ls
 [submodule "kibana"]
 	path = kibana
-	url = https://github.com/elastic/kibana
+	url = ../kibana
