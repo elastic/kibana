@@ -9,7 +9,7 @@
       },
       "metric": {
         "app": "elasticsearch",
-        "field": "ccr_stats.time_since_last_fetch_millis",
+        "field": "ccr_stats.time_since_last_read_millis",
         "metricAgg": "max",
         "label": "Fetch delay",
         "title": "Fetch delay",
@@ -63,13 +63,13 @@
     "total_index_time_millis": 1096,
     "number_of_successful_bulk_operations": 86,
     "number_of_failed_bulk_operations": 0,
-    "number_of_operations_indexed": 86,
-    "fetch_exceptions": [],
-    "time_since_last_fetch_millis": 19886
+    "operations_read": 86,
+    "read_exceptions": [],
+    "time_since_last_read_millis": 19886
   },
   "timestamp": "2018-09-19T20:01:00.440Z",
   "oldestStat": {
     "number_of_failed_fetches": 0,
-    "number_of_operations_indexed": 1
+    "operations_read": 1
   }
 }

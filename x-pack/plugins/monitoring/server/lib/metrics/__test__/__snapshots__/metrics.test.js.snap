@@ -1810,7 +1810,7 @@ Object {
     "calculation": [Function],
     "derivative": false,
     "description": "The amount of time the follower index is lagging behind the leader.",
-    "field": "ccr_stats.time_since_last_fetch_millis",
+    "field": "ccr_stats.time_since_last_read_millis",
     "format": "0.[00]",
     "label": "Fetch delay",
     "metricAgg": "max",

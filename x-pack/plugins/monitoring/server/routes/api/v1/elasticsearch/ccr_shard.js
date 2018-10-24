@@ -32,7 +32,7 @@ async function getCcrStat(req, esIndexPattern, filters) {
     filterPath: [
       'hits.hits._source.ccr_stats',
       'hits.hits._source.timestamp',
-      'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.number_of_operations_indexed',
+      'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.operations_read',
       'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.number_of_failed_fetches',
     ],
     body: {

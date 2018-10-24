@@ -12,12 +12,12 @@ export function Status({ stat, formattedLeader, oldestStat }) {
   const {
     follower_index: followerIndex,
     shard_id: shardId,
-    number_of_operations_indexed: operationsReceived,
+    operations_read: operationsReceived,
     number_of_failed_fetches: failedFetches
   } = stat;
 
   const {
-    number_of_operations_indexed: oldestOperationsReceived,
+    operations_read: oldestOperationsReceived,
     number_of_failed_fetches: oldestFailedFetches
   } = oldestStat;
 

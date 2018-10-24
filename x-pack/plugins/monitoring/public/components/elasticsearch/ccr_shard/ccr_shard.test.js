@@ -13,7 +13,7 @@ describe('CcrShard', () => {
     formattedLeader: 'leader on remote',
     metrics: [],
     stat: {
-      fetch_exceptions: [],
+      read_exceptions: [],
       follower_global_checkpoint: 3049,
       follower_index: 'follower',
       follower_max_seq_no: 3049,
@@ -26,20 +26,20 @@ describe('CcrShard', () => {
       number_of_concurrent_writes: 0,
       number_of_failed_bulk_operations: 0,
       number_of_failed_fetches: 0,
-      number_of_operations_indexed: 3050,
+      operations_read: 3050,
       number_of_queued_writes: 0,
       number_of_successful_bulk_operations: 3050,
       number_of_successful_fetches: 3050,
       operations_received: 3050,
       shard_id: 0,
-      time_since_last_fetch_millis: 9402,
+      time_since_last_read_millis: 9402,
       total_fetch_time_millis: 44128980,
       total_index_time_millis: 41827,
       total_transferred_bytes: 234156,
     },
     oldestStat: {
       number_of_failed_fetches: 0,
-      number_of_operations_indexed: 2976
+      operations_read: 2976
     },
     timestamp: '2018-09-27T13:32:09.412Z'
   };
@@ -54,7 +54,7 @@ describe('CcrShard', () => {
       ...props,
       stat: {
         ...props.stat,
-        fetch_exceptions: [
+        read_exceptions: [
           {
             type: 'something_is_wrong',
             reason: 'not sure but something happened'
