@@ -1,0 +1,465 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overrides render overrides 1`] = `
+<EuiForm>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Data format"
+  >
+    <EuiSuperSelect
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "inputDisplay": <span>
+              json
+            </span>,
+            "value": "json",
+          },
+          Object {
+            "inputDisplay": <span>
+              delimited
+            </span>,
+            "value": "delimited",
+          },
+          Object {
+            "inputDisplay": <span>
+              semi_structured_text
+            </span>,
+            "value": "semi_structured_text",
+          },
+          Object {
+            "inputDisplay": <span>
+              xml
+            </span>,
+            "value": "xml",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Timestamp format"
+  >
+    <EuiSuperSelect
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "inputDisplay": <span>
+              dd/MMM/YYYY:HH:mm:ss Z
+            </span>,
+            "value": "dd/MMM/YYYY:HH:mm:ss Z",
+          },
+          Object {
+            "inputDisplay": <span>
+              EEE MMM dd HH:mm zzz YYYY
+            </span>,
+            "value": "EEE MMM dd HH:mm zzz YYYY",
+          },
+          Object {
+            "inputDisplay": <span>
+              EEE MMM dd HH:mm:ss YYYY
+            </span>,
+            "value": "EEE MMM dd HH:mm:ss YYYY",
+          },
+          Object {
+            "inputDisplay": <span>
+              EEE MMM dd HH:mm:ss zzz YYYY
+            </span>,
+            "value": "EEE MMM dd HH:mm:ss zzz YYYY",
+          },
+          Object {
+            "inputDisplay": <span>
+              EEE MMM dd YYYY HH:mm zzz
+            </span>,
+            "value": "EEE MMM dd YYYY HH:mm zzz",
+          },
+          Object {
+            "inputDisplay": <span>
+              EEE MMM dd YYYY HH:mm:ss zzz
+            </span>,
+            "value": "EEE MMM dd YYYY HH:mm:ss zzz",
+          },
+          Object {
+            "inputDisplay": <span>
+              EEE, dd MMM YYYY HH:mm Z
+            </span>,
+            "value": "EEE, dd MMM YYYY HH:mm Z",
+          },
+          Object {
+            "inputDisplay": <span>
+              EEE, dd MMM YYYY HH:mm ZZ
+            </span>,
+            "value": "EEE, dd MMM YYYY HH:mm ZZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              EEE, dd MMM YYYY HH:mm:ss Z
+            </span>,
+            "value": "EEE, dd MMM YYYY HH:mm:ss Z",
+          },
+          Object {
+            "inputDisplay": <span>
+              EEE, dd MMM YYYY HH:mm:ss ZZ
+            </span>,
+            "value": "EEE, dd MMM YYYY HH:mm:ss ZZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              ISO8601
+            </span>,
+            "value": "ISO8601",
+          },
+          Object {
+            "inputDisplay": <span>
+              MMM dd HH:mm:ss
+            </span>,
+            "value": "MMM dd HH:mm:ss",
+          },
+          Object {
+            "inputDisplay": <span>
+              MMM dd HH:mm:ss,SSS
+            </span>,
+            "value": "MMM dd HH:mm:ss,SSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              MMM dd HH:mm:ss,SSSSSS
+            </span>,
+            "value": "MMM dd HH:mm:ss,SSSSSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              MMM dd HH:mm:ss,SSSSSSSSS
+            </span>,
+            "value": "MMM dd HH:mm:ss,SSSSSSSSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              MMM dd HH:mm:ss.SSS
+            </span>,
+            "value": "MMM dd HH:mm:ss.SSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              MMM dd HH:mm:ss.SSSSSS
+            </span>,
+            "value": "MMM dd HH:mm:ss.SSSSSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              MMM dd HH:mm:ss.SSSSSSSSS
+            </span>,
+            "value": "MMM dd HH:mm:ss.SSSSSSSSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              MMM dd HH:mm:ss:SSS
+            </span>,
+            "value": "MMM dd HH:mm:ss:SSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              MMM dd HH:mm:ss:SSSSSS
+            </span>,
+            "value": "MMM dd HH:mm:ss:SSSSSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              MMM dd HH:mm:ss:SSSSSSSSS
+            </span>,
+            "value": "MMM dd HH:mm:ss:SSSSSSSSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              MMM dd YYYY HH:mm:ss
+            </span>,
+            "value": "MMM dd YYYY HH:mm:ss",
+          },
+          Object {
+            "inputDisplay": <span>
+              MMM dd, YYYY h:mm:ss a
+            </span>,
+            "value": "MMM dd, YYYY h:mm:ss a",
+          },
+          Object {
+            "inputDisplay": <span>
+              TAI64N
+            </span>,
+            "value": "TAI64N",
+          },
+          Object {
+            "inputDisplay": <span>
+              UNIX
+            </span>,
+            "value": "UNIX",
+          },
+          Object {
+            "inputDisplay": <span>
+              UNIX_MS
+            </span>,
+            "value": "UNIX_MS",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss,SSS
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss,SSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss,SSSSSS
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss,SSSSSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss,SSSSSSSSS
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss,SSSSSSSSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss.SSS
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss.SSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss.SSSSSS
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss.SSSSSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss.SSSSSSSSS
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss.SSSSSSSSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss:SSS
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss:SSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss:SSSSSS
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss:SSSSSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss:SSSSSSSSS
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss:SSSSSSSSS",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss,SSS Z
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss,SSS Z",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss,SSSSSS Z
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss,SSSSSS Z",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss,SSSSSSSSS Z
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss,SSSSSSSSS Z",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss.SSS Z
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss.SSS Z",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss.SSSSSS Z
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss.SSSSSS Z",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss.SSSSSSSSS Z
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss.SSSSSSSSS Z",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss:SSS Z
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss:SSS Z",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss:SSSSSS Z
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss:SSSSSS Z",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss:SSSSSSSSS Z
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss:SSSSSSSSS Z",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss,SSSZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss,SSSZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss,SSSSSSZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss,SSSSSSZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss,SSSSSSSSSZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss,SSSSSSSSSZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss.SSSZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss.SSSZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss.SSSSSSZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss.SSSSSSZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss.SSSSSSSSSZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss.SSSSSSSSSZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss:SSSZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss:SSSZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss:SSSSSSZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss:SSSSSSZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss:SSSSSSSSSZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss:SSSSSSSSSZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss,SSSZZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss,SSSZZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss,SSSSSSZZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss,SSSSSSZZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss,SSSSSSSSSZZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss,SSSSSSSSSZZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss.SSSZZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss.SSSZZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss.SSSSSSZZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss.SSSSSSZZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss.SSSSSSSSSZZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss.SSSSSSSSSZZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss:SSSZZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss:SSSZZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss:SSSSSSZZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss:SSSSSSZZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ss:SSSSSSSSSZZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ss:SSSSSSSSSZZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ssZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ssZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYY-MM-dd HH:mm:ssZZ
+            </span>,
+            "value": "YYYY-MM-dd HH:mm:ssZZ",
+          },
+          Object {
+            "inputDisplay": <span>
+              YYYYMMddHHmmss
+            </span>,
+            "value": "YYYYMMddHHmmss",
+          },
+        ]
+      }
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    label="Time field"
+  >
+    <EuiSuperSelect
+      onChange={[Function]}
+      options={Array []}
+    />
+  </EuiFormRow>
+</EuiForm>
+`;

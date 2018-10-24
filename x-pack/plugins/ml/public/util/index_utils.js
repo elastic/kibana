@@ -14,6 +14,8 @@ let fullIndexPatterns = [];
 let currentIndexPattern = null;
 let currentSavedSearch = null;
 
+export let refreshIndexPatterns = null;
+
 export function loadIndexPatterns(Private, indexPatterns) {
   fullIndexPatterns = indexPatterns;
   const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -23,12 +25,31 @@ export function loadIndexPatterns(Private, indexPatterns) {
     perPage: 10000
   }).then((response) => {
     indexPatternCache = response.savedObjects;
+
+    if (refreshIndexPatterns === null) {
+      refreshIndexPatterns = () => {
+        return new Promise((resolve, reject) => {
+          loadIndexPatterns(Private, indexPatterns)
+          	.then((resp) => {
+              resolve(resp);
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        });
+      };
+    }
+
     return indexPatternCache;
   });
 }
 
 export function getIndexPatterns() {
   return indexPatternCache;
+}
+
+export function getIndexPatternNames() {
+  return indexPatternCache.map(i => (i.attributes && i.attributes.title));
 }
 
 export function getIndexPatternIdFromName(name) {
