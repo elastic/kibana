@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('security/dlstest');
       remote.setWindowSize(1600, 1000);
 
-      await new Promise(resolve => setTimeout(resolve, 10000));
       await PageObjects.settings.createIndexPattern('dlstest', null);
 
       await PageObjects.settings.navigateTo();
