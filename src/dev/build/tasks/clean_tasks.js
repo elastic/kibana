@@ -155,7 +155,7 @@ export const CleanExtraBinScriptsTask = {
   description: 'Cleaning extra bin/* scripts from platform-specific builds',
 
   async run(config, log, build) {
-    for (const platform of config.getPlatforms()) {
+    for (const platform of config.getNodePlatforms()) {
       if (platform.isWindows()) {
         await deleteAll(log, [
           build.resolvePathForPlatform(platform, 'bin', '*'),
@@ -202,7 +202,7 @@ export const CleanExtraBrowsersTask = {
         return paths;
       };
     };
-    for (const platform of config.getPlatforms()) {
+    for (const platform of config.getNodePlatforms()) {
       const getBrowserPaths = getBrowserPathsForPlatform(platform);
       if (platform.isWindows()) {
         await deleteAll(log, getBrowserPaths({ linux: true, darwin: true }));
