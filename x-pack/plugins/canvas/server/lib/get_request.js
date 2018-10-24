@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import boom from 'boom';
 
 export function getRequest(server, { headers }) {
   const basePath = server.config().get('server.basePath') || '/';
@@ -13,5 +14,12 @@ export function getRequest(server, { headers }) {
       url: basePath,
       headers,
     })
-    .then(res => res.request);
+    .then(res => {
+      if (res.statusCode !== 200) {
+        console.error(new Error(`Auth request failed: [${res.statusCode}] ${res.result.message}`));
+        throw boom.unauthorized('Failed to authenticate socket connection');
+      }
+
+      return res.request;
+    });
 }
