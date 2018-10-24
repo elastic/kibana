@@ -21,6 +21,7 @@ import { format } from 'util';
 
 import Mocha from 'mocha';
 import { ToolingLogTextWriter } from '@kbn/dev-utils';
+import moment from 'moment';
 
 import { setupJUnitReportGeneration } from '../../../../dev';
 import * as colors from './colors';
@@ -64,8 +65,7 @@ export function MochaReporterProvider({ getService }) {
         log.setWriters([
           new ToolingLogTextWriter({
             level: 'error',
-            writeTo: process.stdout,
-            includeTimestamp: true
+            writeTo: process.stdout
           }),
           new ToolingLogTextWriter({
             level: 'debug',
@@ -81,10 +81,13 @@ export function MochaReporterProvider({ getService }) {
                   ? this.runner.test.parent
                   : this.runner.suite;
 
-                recordLog(currentSuite, chunk);
+                // We are registering the current time in order to extend the
+                // current chunk with it so we can have the test results
+                // log lines with that information
+                const currentTime = `${moment().format('HH:mm:ss')}`;
+                recordLog(currentSuite, `${currentTime} ${chunk}`);
               }
-            },
-            includeTimestamp: true
+            }
           })
         ]);
       }
