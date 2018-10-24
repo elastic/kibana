@@ -168,6 +168,7 @@ export class LspIndexer extends AbstractIndexer {
     const response = await this.lspService.sendRequest('textDocument/full', {
       textDocument: {
         uri: lspDocUri,
+        reference: this.options.enableGlobalReference,
       },
     });
 

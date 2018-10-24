@@ -26,6 +26,8 @@ export class ServerOptions {
   public readonly isAdmin: boolean = this.options.isAdmin;
   public readonly disableScheduler: boolean = this.options.disableScheduler;
 
+  public readonly enableGlobalReference: boolean = this.options.enableGlobalReference;
+
   public readonly repoConfigs: RepoConfigs = (this.options.repos as RepoConfig[]).reduce(
     (previous, current) => {
       previous[current.repo] = current;
