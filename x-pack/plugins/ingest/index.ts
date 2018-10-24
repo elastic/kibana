@@ -48,10 +48,10 @@ export function ingest(kibana: any) {
           url: `/app/${APP_ID}#/logs`,
         },
         {
-          description: 'Security Operations',
+          description: 'Explore your security operations',
           euiIconType: 'securityApp',
           id: 'secops:home',
-          order: 8001,
+          order: 8002,
           title: 'SecOps',
           url: `/app/${APP_ID}#/secops`,
         },
