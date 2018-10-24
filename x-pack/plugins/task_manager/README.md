@@ -226,7 +226,7 @@ const task = await taskManager.schedule({
 });
 
 // Removes the specified task
-await manager.remove({ id: task.id });
+await manager.remove(task.id);
 
 // Fetches tasks, supports pagination, via the search-after API:
 // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-search-after.html
