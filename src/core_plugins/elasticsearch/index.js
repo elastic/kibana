@@ -42,7 +42,8 @@ export default function (kibana) {
         certificateAuthorities: array().single().items(string()),
         certificate: string(),
         key: string(),
-        keyPassphrase: string()
+        keyPassphrase: string(),
+        alwaysPresentCertificate: boolean().default(false),
       }).default();
 
       return object({
