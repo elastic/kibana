@@ -298,7 +298,7 @@ export class VectorLayer extends ALayer {
       if (!this._descriptor.showAtAllZoomLevels) {
         mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
       }
-      this._addToolipListeners(mbMap, pointLayerId);
+      this._addTooltipListeners(mbMap, pointLayerId);
     } else {
       const fillLayerId = this.getId() + '_fill';
       const strokeLayerId = this.getId() + '_line';
@@ -309,7 +309,7 @@ export class VectorLayer extends ALayer {
         mbMap.setLayerZoomRange(strokeLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
         mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
       }
-      this._addToolipListeners(mbMap, fillLayerId);
+      this._addTooltipListeners(mbMap, fillLayerId);
     }
   }
 
@@ -338,14 +338,12 @@ export class VectorLayer extends ALayer {
     });
   }
 
-  _addToolipListeners(mbMap, mbLayerId) {
-    this.removeAllListenersForMbLayer(mbMap, mbLayerId);
-
+  _addTooltipListeners(mbMap, mbLayerId) {
     if (!this._source.areFeatureTooltipsEnabled()) {
       return;
     }
 
-    this.addEventListenerForMbLayer(mbMap, mbLayerId, 'mouseenter', async (e) => {
+    mbMap.on('mouseenter', mbLayerId, async (e) => {
       mbMap.getCanvas().style.cursor = 'pointer';
 
       const feature = e.features[0];
@@ -380,7 +378,7 @@ export class VectorLayer extends ALayer {
         .addTo(mbMap);
     });
 
-    this.addEventListenerForMbLayer(mbMap, mbLayerId, 'mouseleave', () => {
+    mbMap.on('mouseleave', mbLayerId, () => {
       mbMap.getCanvas().style.cursor = '';
       VectorLayer.popup.remove();
       ReactDOM.unmountComponentAtNode(VectorLayer.tooltipContainer);

@@ -22,7 +22,6 @@ export class ALayer {
     this._descriptor = layerDescriptor;
     this._source = source;
     this._style = style;
-    this._listenersMap = new Map(); // key is mbLayerId, value eventHandlers map
 
     if (this._descriptor.dataRequests) {
       this._dataRequests = this._descriptor.dataRequests.map(dataRequest => new DataRequest(dataRequest));
@@ -117,45 +116,6 @@ export class ALayer {
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
     return layerDescriptor;
-  }
-
-  destroy(mbMap) {
-    this.removeAllListeners(mbMap);
-  }
-
-  removeAllListeners(mbMap) {
-    this._listenersMap.forEach((value, mbLayerId) => {
-      this.removeAllListenersForMbLayer(mbMap, mbLayerId);
-    });
-  }
-
-  removeAllListenersForMbLayer(mbMap, mbLayerId) {
-    if (this._listenersMap.has(mbLayerId)) {
-      const eventHandlersMap = this._listenersMap.get(mbLayerId);
-      eventHandlersMap.forEach((value, eventType) => {
-        this.removeEventListenerForMbLayer(mbMap, mbLayerId, eventType);
-      });
-      this._listenersMap.delete(mbLayerId);
-    }
-  }
-
-  removeEventListenerForMbLayer(mbMap, mbLayerId, eventType) {
-    if (this._listenersMap.has(mbLayerId)) {
-      const eventHandlersMap = this._listenersMap.get(mbLayerId);
-      if (eventHandlersMap.has(eventType)) {
-        mbMap.off(eventType, mbLayerId, eventHandlersMap.get(eventType));
-      }
-    }
-  }
-
-  addEventListenerForMbLayer(mbMap, mbLayerId, eventType, handler) {
-    mbMap.on(eventType, mbLayerId, handler);
-
-    const eventHandlersMap = !this._listenersMap.has(mbLayerId)
-      ? new Map()
-      : this._listenersMap.get(mbLayerId);
-    eventHandlersMap.set(eventType, handler);
-    this._listenersMap.set(mbLayerId, eventHandlersMap);
   }
 
   isJoinable() {

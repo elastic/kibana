@@ -18,43 +18,20 @@ import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_sou
 import { ESSearchSource } from '../shared/layers/sources/es_search_source';
 import { VectorStyle } from '../shared/layers/styles/vector_style';
 import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
-import { getMbMap } from '../components/map/mb/global_mb_map';
 
-/*
- * TODO move all mapbox state management out of selectors and into map box react component.
- * Need a way to track layer instances to ensure `destroy` is called on old instances.
- * For example, layer instances need to un-register mapbox event listeners.
- */
-const layersMap = new Map();
-
-function createLayerInstance(layerDescriptor, dataSources, mbMap) {
+function createLayerInstance(layerDescriptor, dataSources) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, dataSources);
   const style = createStyleInstance(layerDescriptor.style);
-
-  // Clean up old layer instance
-  if (layersMap.has(layerDescriptor.id)) {
-    const oldLayer = layersMap.get(layerDescriptor.id);
-    oldLayer.destroy(mbMap);
-    layersMap.delete(layerDescriptor.id);
-  }
-
-  let layer;
   switch (layerDescriptor.type) {
     case TileLayer.type:
-      layer = new TileLayer({ layerDescriptor, source, style });
-      break;
+      return new TileLayer({ layerDescriptor, source, style });
     case VectorLayer.type:
-      layer = new VectorLayer({ layerDescriptor, source, style });
-      break;
+      return new VectorLayer({ layerDescriptor, source, style });
     case GeohashGridLayer.type:
-      layer = new GeohashGridLayer({ layerDescriptor, source, style });
-      break;
+      return new GeohashGridLayer({ layerDescriptor, source, style });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
-
-  layersMap.set(layerDescriptor.id, layer);
-  return layer;
 }
 
 function createSourceInstance(sourceDescriptor, dataSources) {
@@ -150,17 +127,15 @@ export const getSelectedLayer = createSelector(
   getLayerListRaw,
   getDataSources,
   (selectedLayerId, layerList, dataSources) => {
-    const mbMap = getMbMap();
     const selectedLayer = layerList.find(layerDescriptor => layerDescriptor.id === selectedLayerId);
-    return createLayerInstance(selectedLayer, dataSources, mbMap);
+    return createLayerInstance(selectedLayer, dataSources);
   });
 
 export const getLayerList = createSelector(
   getLayerListRaw,
   getDataSources,
   (layerList, dataSources) => {
-    const mbMap = getMbMap();
-    return layerList.map(layerDescriptor => createLayerInstance(layerDescriptor, dataSources, mbMap));
+    return layerList.map(layerDescriptor => createLayerInstance(layerDescriptor, dataSources));
   });
 
 export const getTemporaryLayers = createSelector(getLayerList, (layerList) => layerList.filter(layer => layer.isTemporary()));

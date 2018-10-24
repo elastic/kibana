@@ -4,15 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSelector } from 'reselect';
-import { getLayerList, getMapState, getMapReady } from "../../../selectors/map_selectors";
-import { getMbMap } from './global_mb_map';
 import _ from 'lodash';
+import mapboxgl from 'mapbox-gl';
 
+export async function createMbMapInstance(node) {
+  return new Promise((resolve) => {
+    const mbMap = new mapboxgl.Map({
+      container: node,
+      style: {
+        version: 8,
+        sources: {},
+        layers: [],
+      },
+    });
+    mbMap.dragRotate.disable();
+    mbMap.touchZoomRotate.disableRotation();
+    mbMap.on('load', () => {
+      resolve(mbMap);
+    });
+  });
+}
 
-
-function removeOrphanedSourcesAndLayers(mbMap, layerList) {
-
+export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
   const layerIds = layerList.map((layer) => layer.getId());
   const mbStyle = mbMap.getStyle();
   const mbSourcesToRemove = [];
@@ -36,7 +49,7 @@ function removeOrphanedSourcesAndLayers(mbMap, layerList) {
 
 }
 
-function syncLayerOrder(mbMap, layerList) {
+export function syncLayerOrder(mbMap, layerList) {
   if (layerList && layerList.length) {
     const mbLayers = mbMap.getStyle().layers.slice();
     const currentLayerOrder = _.uniq( // Consolidate layers and remove suffix
@@ -64,43 +77,3 @@ function syncLayerOrder(mbMap, layerList) {
     });
   }
 }
-
-// Selectors
-const getMbMapAndSyncWithMapState = createSelector(
-  getMapReady,
-  getMapState,
-  (mapReady, mapState) => {
-
-    if (!mapReady) {
-      return;
-    }
-
-    const mbMap = getMbMap();
-    const mbCenter = mbMap.getCenter();
-    const zoom = mbMap.getZoom();
-    if (typeof mapState.zoom === 'number' && mapState.zoom !== zoom) {
-      mbMap.setZoom(mapState.zoom);
-    }
-    if (mapState.center && !_.isEqual(mapState.center, { lon: mbCenter.lng, lat: mbCenter.lat })) {
-      mbMap.setCenter({
-        lng: mapState.center.lon,
-        lat: mapState.center.lat
-      });
-    }
-
-    return mbMap;
-  }
-);
-
-export const syncMBState = createSelector(getMapReady, getMbMapAndSyncWithMapState, getLayerList,
-  (mapReady, mbMap, layerList) => {
-    if (!mapReady) {
-      return;
-    }
-    removeOrphanedSourcesAndLayers(mbMap, layerList);
-    layerList.forEach((layer) => {
-      layer.syncLayerWithMB(mbMap);
-    });
-    syncLayerOrder(mbMap, layerList);
-  }
-);
