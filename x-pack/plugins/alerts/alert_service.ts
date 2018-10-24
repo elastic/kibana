@@ -13,10 +13,38 @@ interface AlertCondition {
 
 export class AlertService {
   private conditions: AlertCondition[] = [];
-  private condMap: any = {};
+  private condMap = new Map<string, AlertCondition>();
   private alerts: any = {};
   private kbnServer: any;
   private taskManager: TaskManager;
+  private alertIndexProperties: any = {
+    type: { type: 'keyword' },
+    alert: {
+      properties: {
+        task: {
+          properties: {
+            id: { type: 'keyword' },
+            type: { type: 'keyword' },
+          },
+        },
+        condition: {
+          properties: {
+            name: { type: 'keyword' },
+          },
+        },
+        actions: [
+          {
+            name: { type: 'keyword' },
+            params: { type: 'object' },
+          },
+        ],
+        interval: { type: 'text' },
+        state: { type: 'keyword' },
+        user: { type: 'keyword' },
+        scope: { type: 'keyword' },
+      },
+    },
+  };
 
   constructor(kbnServer: any) {
     this.kbnServer = kbnServer;
@@ -67,8 +95,12 @@ export class AlertService {
   }
 
   public registerCondition(cond: AlertCondition) {
-    this.conditions.push(cond);
-    this.condMap[cond.name] = cond;
+    if (!this.condMap.has(cond.name)) {
+      this.conditions.push(cond);
+      this.condMap[cond.name] = cond;
+    } else {
+      throw new Error('Condition name already taken');
+    }
   }
 
   public registerAlert(condName: string, params: any): string {
@@ -102,6 +134,13 @@ export class AlertService {
         throw err;
       }
     }
+    es('indices.putMapping', {
+      index: '.alerts',
+      type: '_doc',
+      body: {
+        properties: this.alertIndexProperties,
+      },
+    });
 
     const tasks = await this.taskManager.fetch({
       query: {
@@ -110,6 +149,7 @@ export class AlertService {
         },
       },
     });
+
     if (tasks !== undefined) {
       this.info(`We got ${tasks.docs.length} tasks from task manager.`);
       tasks.docs.map((task: any) => {
