@@ -59,6 +59,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async clickVisType(type) {
+      await testSubjects.click(`visType-${type}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async clickAreaChart() {
       await find.clickByPartialLinkText('Area');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -236,11 +241,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getVegaViewContainer() {
-      return await find.byCssSelector('div.vega-view-container');
+      return await find.byCssSelector('div.vgaVis__view');
     }
 
     async getVegaControlContainer() {
-      return await find.byCssSelector('div.vega-controls-container');
+      return await find.byCssSelector('div.vgaVis__controls');
     }
 
     async setFromTime(timeString) {
@@ -432,6 +437,21 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(500);
     }
 
+    /**
+     * Set the test for a filter aggregation.
+     * @param {*} filterValue the string value of the filter
+     * @param {*} filterIndex used when multiple filters are configured on the same aggregation
+     * @param {*} aggregationId the ID if the aggregation. On Tests, it start at from 2
+     */
+    async setFilterAggregationValue(filterValue, filterIndex = 0, aggregationId = 2) {
+      const inputField = await testSubjects.find(`visEditorFilterInput_${aggregationId}_${filterIndex}`);
+      await inputField.type(filterValue);
+    }
+
+    async addNewFilterAggregation() {
+      return await testSubjects.click('visEditorAddFilterButton');
+    }
+
     async toggleOpenEditor(index, toState = 'true') {
       // index, see selectYAxisAggregation
       const toggle = await find.byCssSelector(`button[aria-controls="visAggEditorParams${index}"]`);
@@ -584,13 +604,17 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
+    async toggleAggegationEditor(agg) {
+      await testSubjects.click(`aggregationEditor${agg} toggleEditor`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
 
     async toggleOtherBucket() {
-      return await find.clickByCssSelector('input[name="showOther"]');
+      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showOther"]');
     }
 
     async toggleMissingBucket() {
-      return await find.clickByCssSelector('input[name="showMissing"]');
+      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showMissing"]');
     }
 
     async isApplyEnabled() {
@@ -902,6 +926,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
       return await Promise.all(getChartTypesPromises);
     }
+    async expectPieChartError() {
+      return await testSubjects.existOrFail('visLibVisualizeError');
+    }
 
     async getChartAreaWidth() {
       const rect = await retry.try(async () => find.byCssSelector('clipPath rect'));
@@ -1112,6 +1139,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async selectBucketType(type) {
       const bucketType = await find.byCssSelector(`[data-test-subj="${type}"]`);
       return await bucketType.click();
+    }
+
+    async filterPieSlice(name) {
+      const slice = await this.getPieSlice(name);
+      // Since slice is an SVG element we can't simply use .click() for it
+      await remote.moveMouseTo(slice);
+      await remote.clickMouseButton();
     }
 
     async getPieSlice(name) {

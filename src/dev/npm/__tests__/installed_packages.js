@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { resolve, sep } from 'path';
 
 import { uniq } from 'lodash';
 import expect from 'expect.js';
@@ -62,7 +62,7 @@ describe('src/dev/npm/installed_packages', () => {
           licenses: [ 'Apache-2.0' ],
           repository: 'https://github.com/mycorp/dep1',
           directory: resolve(FIXTURE1_ROOT, 'node_modules/dep1'),
-          relative: 'node_modules/dep1',
+          relative: ['node_modules', 'dep1'].join(sep),
           isDevOnly: false,
         },
         {
@@ -71,7 +71,7 @@ describe('src/dev/npm/installed_packages', () => {
           repository: 'https://github.com/mycorp/privatedep',
           licenses: [ 'Apache-2.0' ],
           directory: resolve(FIXTURE1_ROOT, 'node_modules/privatedep'),
-          relative: 'node_modules/privatedep',
+          relative: ['node_modules', 'privatedep'].join(sep),
           isDevOnly: false,
         },
         {
@@ -80,9 +80,9 @@ describe('src/dev/npm/installed_packages', () => {
           licenses: [ 'Apache-2.0' ],
           repository: 'https://github.com/mycorp/dep2',
           directory: resolve(FIXTURE1_ROOT, 'node_modules/dep2'),
-          relative: 'node_modules/dep2',
+          relative: ['node_modules', 'dep2'].join(sep),
           isDevOnly: true,
-        },
+        }
       ]);
     });
 

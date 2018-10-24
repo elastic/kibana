@@ -7,7 +7,6 @@
 // TODO: Remove once typescript definitions are in EUI
 declare module '@elastic/eui' {
   export const EuiBasicTable: React.SFC<any>;
-  export const EuiTextColor: React.SFC<any>;
 }
 
 import moment from 'moment';
@@ -78,7 +77,7 @@ export class ReportListing extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage className="repReportListing__page">
+      <EuiPage>
         <EuiPageBody restrictWidth>
           <EuiPageContent horizontalPosition="center">
             <EuiTitle>
@@ -146,21 +145,36 @@ export class ReportListing extends Component<Props, State> {
         field: 'status',
         name: 'Status',
         render: (status: string, record: Job) => {
+          if (status === 'pending') {
+            return <div>pending - waiting for job to be processed</div>;
+          }
+
           let maxSizeReached;
           if (record.max_size_reached) {
             maxSizeReached = <span> - max size reached</span>;
           }
+
           let statusTimestamp;
           if (status === 'processing' && record.started_at) {
             statusTimestamp = this.formatDate(record.started_at);
           } else if (record.completed_at && (status === 'completed' || status === 'failed')) {
             statusTimestamp = this.formatDate(record.completed_at);
           }
+          if (statusTimestamp) {
+            return (
+              <div>
+                {status}
+                {' at '}
+                <span className="eui-textNoWrap">{statusTimestamp}</span>
+                {maxSizeReached}
+              </div>
+            );
+          }
+
+          // unknown status
           return (
             <div>
               {status}
-              {' at '}
-              <span className="eui-textNoWrap">{statusTimestamp}</span>
               {maxSizeReached}
             </div>
           );

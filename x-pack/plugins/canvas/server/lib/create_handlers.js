@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { partial } from 'lodash';
+import boom from 'boom';
 
 export const createHandlers = (request, server) => {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -17,6 +17,14 @@ export const createHandlers = (request, server) => {
         ? `${server.info.uri}${config.get('server.basePath')}`
         : server.info.uri,
     httpHeaders: request.headers,
-    elasticsearchClient: partial(callWithRequest, request),
+    elasticsearchClient: async (...args) => {
+      // check if the session is valid because continuing to use it
+      if (server.plugins.security) {
+        const authenticationResult = await server.plugins.security.authenticate(request);
+        if (!authenticationResult.succeeded()) throw boom.unauthorized(authenticationResult.error);
+      }
+
+      return callWithRequest(request, ...args);
+    },
   };
 };

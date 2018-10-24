@@ -28,12 +28,13 @@ import { initPromise } from 'plugins/ml/util/promise';
 import template from './explorer.html';
 
 import uiRoutes from 'ui/routes';
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
 import { IntervalHelperProvider, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { mlExplorerDashboardService } from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
@@ -50,7 +51,7 @@ uiRoutes
   .when('/explorer/?', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
       initPromise: initPromise(true)
@@ -76,11 +77,11 @@ module.controller('MlExplorerController', function (
   AppState,
   Private,
   mlCheckboxShowChartsService,
-  mlExplorerDashboardService,
   mlSelectLimitService,
   mlSelectIntervalService,
   mlSelectSeverityService) {
 
+  $scope.anomalyChartRecords = [];
   $scope.timeFieldName = 'timestamp';
   $scope.loading = true;
   timefilter.enableTimeRangeSelector();
@@ -360,7 +361,6 @@ module.controller('MlExplorerController', function (
       MlTimeBuckets: TimeBuckets,
       swimlaneData: getSwimlaneData(swimlaneType),
       swimlaneType,
-      mlExplorerDashboardService,
       selection: $scope.appState.mlExplorerSwimlane
     };
   }

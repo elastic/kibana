@@ -184,6 +184,7 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
   const lastUsableBucketIndex = findLastUsableBucketIndex(buckets, max, firstUsableBucketIndex, bucketSizeInSeconds * 1000);
   let data = [];
 
+
   if (firstUsableBucketIndex <= lastUsableBucketIndex) {
     // map buckets to values for charts
     const key = derivative ? 'metric_deriv.normalized_value' : 'metric.value';

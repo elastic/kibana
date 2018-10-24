@@ -41,15 +41,18 @@ management.register('data', {
 
 management.register('elasticsearch', {
   display: 'Elasticsearch',
-  order: 20
+  order: 20,
+  icon: 'logoElasticsearch'
 });
 
 management.register('kibana', {
   display: 'Kibana',
   order: 30,
+  icon: 'logoKibana',
 });
 
 management.register('logstash', {
   display: 'Logstash',
   order: 30,
+  icon: 'logoLogstash',
 });

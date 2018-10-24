@@ -1,6 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`dev/i18n/extractors/pug extracts messages from pug template 1`] = `
+exports[`dev/i18n/extractors/pug extracts messages from pug template with interpolation 1`] = `
+Array [
+  "message-id",
+  Object {
+    "context": "Message context",
+    "message": "Default message",
+  },
+]
+`;
+
+exports[`dev/i18n/extractors/pug extracts messages from pug template without interpolation 1`] = `
 Array [
   "message-id",
   Object {

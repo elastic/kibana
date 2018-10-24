@@ -62,6 +62,7 @@ export async function buildDistributables(options) {
     createArchives,
     createRpmPackage,
     createDebPackage,
+    targetAllPlatforms,
   } = options;
 
   log.verbose('building distributables with options:', {
@@ -76,6 +77,7 @@ export async function buildDistributables(options) {
 
   const config = await getConfig({
     isRelease,
+    targetAllPlatforms
   });
 
   const run = createRunner({

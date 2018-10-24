@@ -1,5 +1,7 @@
 @import 'ui/public/styles/styling_constants';
 
+@import 'ui/public/query_bar/index';
+
 // Context styles
 @import './context/index';
 
@@ -15,6 +17,9 @@
 // Visualize styles
 @import './visualize/index';
 @import 'ui/public/vis/index';
+
+// Management styles
+@import './management/index';
 
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
