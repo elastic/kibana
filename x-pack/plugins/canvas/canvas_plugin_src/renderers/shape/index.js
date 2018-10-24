@@ -41,22 +41,20 @@ export const shape = () => ({
 
       // adjust viewBox based on border width
       let [minX, minY, shapeWidth, shapeHeight] = initialViewBox;
-      const borderOffset = strokeWidth / 2;
+      const borderOffset = strokeWidth;
 
       if (width) {
-        const xScale = (shapeWidth - minX) / width;
-        const xOffset = borderOffset * xScale;
-        minX -= xOffset; // min-x
-        shapeWidth += xOffset * 2; // width
+        const xOffset = (shapeWidth / width) * borderOffset;
+        minX -= xOffset;
+        shapeWidth += xOffset * 2;
       } else {
         shapeWidth = 0;
       }
 
       if (height) {
-        const yScale = (shapeHeight - minY) / height;
-        const yOffset = borderOffset * yScale;
-        minY -= yOffset; // min-y
-        shapeHeight += yOffset * 2; // height
+        const yOffset = (shapeHeight / height) * borderOffset;
+        minY -= yOffset;
+        shapeHeight += yOffset * 2;
       } else {
         shapeHeight = 0;
       }
