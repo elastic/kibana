@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiProgress, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiProgress, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -36,21 +36,23 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
     if (isStreaming) {
       return (
         <ProgressEntry alignment={alignment} className={className} color="primary" isLoading={true}>
-          <EuiText color="subdued">
-            Streaming new entries
-            {lastStreamingUpdate ? (
-              <>
-                : last updated <RelativeTime time={lastStreamingUpdate} refreshInterval={1000} />{' '}
-                ago
-              </>
-            ) : null}
-          </EuiText>
+          <ProgressMessage>
+            <EuiText color="subdued">Streaming new entries</EuiText>
+          </ProgressMessage>
+          {lastStreamingUpdate ? (
+            <ProgressMessage>
+              <EuiText color="subdued">
+                <EuiIcon type="clock" /> last updated{' '}
+                <RelativeTime time={lastStreamingUpdate} refreshInterval={1000} /> ago
+              </EuiText>
+            </ProgressMessage>
+          ) : null}
         </ProgressEntry>
       );
     } else if (isLoading) {
       return (
         <ProgressEntry alignment={alignment} className={className} color="subdued" isLoading={true}>
-          Loading additional entries
+          <ProgressMessage>Loading additional entries</ProgressMessage>
         </ProgressEntry>
       );
     } else if (!hasMore) {
@@ -61,7 +63,7 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
           color="subdued"
           isLoading={false}
         >
-          No additional entries found
+          <ProgressMessage>No additional entries found</ProgressMessage>
         </ProgressEntry>
       );
     } else {
@@ -92,17 +94,20 @@ class ProgressEntry extends React.PureComponent<ProgressEntryProps, {}> {
           value={isLoading ? undefined : 1}
           position="absolute"
         />
-        <ProgressTextDiv>{children}</ProgressTextDiv>
+        {children}
       </ProgressEntryWrapper>
     );
   }
 }
 
 const ProgressEntryWrapper = styled.div`
+  align-items: center;
+  display: flex;
+  min-height: ${props => props.theme.eui.euiSizeXxl};
   position: relative;
 `;
 
-const ProgressTextDiv = styled.div`
+const ProgressMessage = styled.div`
   padding: 8px 16px;
 `;
 
