@@ -20,7 +20,6 @@ const initialState = {
 type State = Readonly<typeof initialState>;
 
 interface Props {
-  onDrilldown: () => void;
   squareSize: number;
   options: InfraWaffleMapOptions;
   node: InfraWaffleMapNode;

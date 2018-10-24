@@ -43,7 +43,7 @@ const LegacyResponseHandlerProvider = function () {
           const splitMap = {};
           let splitIndex = 0;
 
-          table.rows.forEach(row => {
+          table.rows.forEach((row, rowIndex) => {
             const splitValue = row[splitColumn.id];
             const splitColumnIndex = table.columns.findIndex(column => column === splitColumn);
 
@@ -74,6 +74,11 @@ const LegacyResponseHandlerProvider = function () {
             const newRow = _.map(converted.tables[tableIndex].tables[0].columns, column => {
               const value = row[column.id];
               const aggConfigResult = new AggConfigResult(column.aggConfig, previousSplitAgg, value, value);
+              aggConfigResult.rawData = {
+                table: table,
+                columnIndex: table.columns.findIndex(c => c.id === column.id),
+                rowIndex: rowIndex,
+              };
               if (column.aggConfig.type.type === 'buckets') {
                 previousSplitAgg = aggConfigResult;
               }
@@ -86,11 +91,16 @@ const LegacyResponseHandlerProvider = function () {
 
           converted.tables.push({
             columns: table.columns.map(column => ({ title: column.name, ...column })),
-            rows: table.rows.map(row => {
+            rows: table.rows.map((row, rowIndex) => {
               let previousSplitAgg;
-              return table.columns.map(column => {
+              return table.columns.map((column, columnIndex) => {
                 const value = row[column.id];
                 const aggConfigResult = new AggConfigResult(column.aggConfig, previousSplitAgg, value, value);
+                aggConfigResult.rawData = {
+                  table: table,
+                  column: columnIndex,
+                  row: rowIndex,
+                };
                 if (column.aggConfig.type.type === 'buckets') {
                   previousSplitAgg = aggConfigResult;
                 }

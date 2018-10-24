@@ -10,6 +10,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import template from './nav_menu.html';
 import uiRouter from 'ui/routes';
+import { isFullLicense } from '../../license/check_license';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -21,12 +22,16 @@ module.directive('mlNavMenu', function (breadcrumbState, config) {
     template,
     link: function (scope, el, attrs) {
 
+
+
       // Tabs
       scope.name = attrs.name;
 
       scope.showTabs = false;
       if (scope.name === 'jobs' ||
         scope.name === 'settings' ||
+        scope.name === 'datavisualizer' ||
+        scope.name === 'filedatavisualizer' ||
         scope.name === 'timeseriesexplorer' ||
         scope.name === 'explorer') {
         scope.showTabs = true;
@@ -34,6 +39,8 @@ module.directive('mlNavMenu', function (breadcrumbState, config) {
       scope.isActiveTab = function (path) {
         return scope.name === path;
       };
+
+      scope.disableLinks = (isFullLicense() === false);
 
       // Breadcrumbs
       const crumbNames = {
@@ -44,6 +51,7 @@ module.directive('mlNavMenu', function (breadcrumbState, config) {
         population: { label: 'Population job', url: '' },
         advanced: { label: 'Advanced Job Configuration', url: '' },
         datavisualizer: { label: 'Data Visualizer', url: '' },
+        filedatavisualizer: { label: 'File Data Visualizer', url: '' },
         explorer: { label: 'Anomaly Explorer', url: '#/explorer' },
         timeseriesexplorer: { label: 'Single Metric Viewer', url: '#/timeseriesexplorer' },
         settings: { label: 'Settings', url: '#/settings' },
