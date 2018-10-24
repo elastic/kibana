@@ -25,16 +25,20 @@ export function rollup(kibana) {
       managementSections: [
         'plugins/rollup/crud_app',
       ],
-      indexManagement: [
-        'plugins/rollup/index_pattern_creation',
-        'plugins/rollup/index_pattern_list',
-      ],
-      visualize: [
-        'plugins/rollup/visualize',
-      ],
-      search: [
-        'plugins/rollup/search',
-      ],
+      // NOTE: These extension points are temporarily disabled until we've resolved issues
+      // with auto-scaling the interval for date histogram visualizations.
+      // See https://github.com/elastic/kibana/pull/24428 for more info.
+      //
+      // indexManagement: [
+      //   'plugins/rollup/index_pattern_creation',
+      //   'plugins/rollup/index_pattern_list',
+      // ],
+      // visualize: [
+      //   'plugins/rollup/visualize',
+      // ],
+      // search: [
+      //   'plugins/rollup/search',
+      // ],
       migrations: {
         'index-pattern': {
           '6.5.0': (doc) => {
