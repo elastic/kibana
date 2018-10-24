@@ -1,0 +1,217 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true 1`] = `
+<EuiOutsideClickDetector
+  onOutsideClick={[Function]}
+>
+  <div
+    aria-expanded={false}
+    aria-haspopup="true"
+    aria-owns="typeahead-items"
+    role="combobox"
+    style={
+      Object {
+        "position": "relative",
+      }
+    }
+  >
+    <form
+      name="queryBarForm"
+      role="form"
+    >
+      <div
+        className="kuiLocalSearch"
+        role="search"
+      >
+        <div
+          className="kuiLocalSearchAssistedInput"
+        >
+          <EuiFieldText
+            aria-activedescendant=""
+            aria-autocomplete="list"
+            aria-controls="typeahead-items"
+            aria-label="Search input"
+            autoComplete="off"
+            autoFocus={false}
+            compressed={false}
+            data-test-subj="queryInput"
+            fullWidth={true}
+            icon="console"
+            inputRef={[Function]}
+            isLoading={false}
+            onChange={[Function]}
+            onClick={[Function]}
+            onKeyDown={[Function]}
+            onKeyUp={[Function]}
+            placeholder="Search... (e.g. status:200 AND extension:PHP)"
+            role="textbox"
+            spellCheck={false}
+            type="text"
+            value="response:200"
+          />
+          <div
+            className="kuiLocalSearchAssistedInput__assistance"
+          >
+            <QueryLanguageSwitcher
+              language="kuery"
+              onSelectLanguage={[Function]}
+            />
+          </div>
+        </div>
+      </div>
+    </form>
+    <SuggestionsComponent
+      index={null}
+      loadMore={[Function]}
+      onClick={[Function]}
+      onMouseEnter={[Function]}
+      show={false}
+      suggestions={Array []}
+    />
+  </div>
+</EuiOutsideClickDetector>
+`;
+
+exports[`QueryBar Should pass the query language to the language switcher 1`] = `
+<EuiOutsideClickDetector
+  onOutsideClick={[Function]}
+>
+  <div
+    aria-expanded={false}
+    aria-haspopup="true"
+    aria-owns="typeahead-items"
+    role="combobox"
+    style={
+      Object {
+        "position": "relative",
+      }
+    }
+  >
+    <form
+      name="queryBarForm"
+      role="form"
+    >
+      <div
+        className="kuiLocalSearch"
+        role="search"
+      >
+        <div
+          className="kuiLocalSearchAssistedInput"
+        >
+          <EuiFieldText
+            aria-activedescendant=""
+            aria-autocomplete="list"
+            aria-controls="typeahead-items"
+            aria-label="Search input"
+            autoComplete="off"
+            autoFocus={true}
+            compressed={false}
+            data-test-subj="queryInput"
+            fullWidth={true}
+            icon="console"
+            inputRef={[Function]}
+            isLoading={false}
+            onChange={[Function]}
+            onClick={[Function]}
+            onKeyDown={[Function]}
+            onKeyUp={[Function]}
+            placeholder="Search... (e.g. status:200 AND extension:PHP)"
+            role="textbox"
+            spellCheck={false}
+            type="text"
+            value="response:200"
+          />
+          <div
+            className="kuiLocalSearchAssistedInput__assistance"
+          >
+            <QueryLanguageSwitcher
+              language="lucene"
+              onSelectLanguage={[Function]}
+            />
+          </div>
+        </div>
+      </div>
+    </form>
+    <SuggestionsComponent
+      index={null}
+      loadMore={[Function]}
+      onClick={[Function]}
+      onMouseEnter={[Function]}
+      show={false}
+      suggestions={Array []}
+    />
+  </div>
+</EuiOutsideClickDetector>
+`;
+
+exports[`QueryBar Should render the given query 1`] = `
+<EuiOutsideClickDetector
+  onOutsideClick={[Function]}
+>
+  <div
+    aria-expanded={false}
+    aria-haspopup="true"
+    aria-owns="typeahead-items"
+    role="combobox"
+    style={
+      Object {
+        "position": "relative",
+      }
+    }
+  >
+    <form
+      name="queryBarForm"
+      role="form"
+    >
+      <div
+        className="kuiLocalSearch"
+        role="search"
+      >
+        <div
+          className="kuiLocalSearchAssistedInput"
+        >
+          <EuiFieldText
+            aria-activedescendant=""
+            aria-autocomplete="list"
+            aria-controls="typeahead-items"
+            aria-label="Search input"
+            autoComplete="off"
+            autoFocus={true}
+            compressed={false}
+            data-test-subj="queryInput"
+            fullWidth={true}
+            icon="console"
+            inputRef={[Function]}
+            isLoading={false}
+            onChange={[Function]}
+            onClick={[Function]}
+            onKeyDown={[Function]}
+            onKeyUp={[Function]}
+            placeholder="Search... (e.g. status:200 AND extension:PHP)"
+            role="textbox"
+            spellCheck={false}
+            type="text"
+            value="response:200"
+          />
+          <div
+            className="kuiLocalSearchAssistedInput__assistance"
+          >
+            <QueryLanguageSwitcher
+              language="kuery"
+              onSelectLanguage={[Function]}
+            />
+          </div>
+        </div>
+      </div>
+    </form>
+    <SuggestionsComponent
+      index={null}
+      loadMore={[Function]}
+      onClick={[Function]}
+      onMouseEnter={[Function]}
+      show={false}
+      suggestions={Array []}
+    />
+  </div>
+</EuiOutsideClickDetector>
+`;

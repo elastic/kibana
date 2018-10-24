@@ -8,11 +8,13 @@ import { EuiIcon } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+
+import { StringMap } from '../../../../typings/common';
 import { colors, fontSize, px, unit, units } from '../../../style/variables';
-import { getFeatureDocs } from '../../../utils/documentation';
+import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
 // @ts-ignore
 import { ExternalLink } from '../../../utils/url';
-import { NestedKeyValueTable } from './NestedKeyValueTable';
+import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
 import PROPERTY_CONFIG from './propertyConfig.json';
 
 const indexedPropertyConfig = _.indexBy(PROPERTY_CONFIG, 'key');
@@ -36,28 +38,36 @@ export function getPropertyTabNames(selected: string[]): string[] {
   ).map(({ key }: { key: string }) => key);
 }
 
+function getAgentFeatureText(featureName: string) {
+  switch (featureName) {
+    case 'user':
+      return 'You can configure your agent to add contextual information about your users.';
+    case 'tags':
+      return 'You can configure your agent to add filterable tags on transactions.';
+    case 'custom':
+      return 'You can configure your agent to add custom contextual information on transactions.';
+  }
+}
+
 export function AgentFeatureTipMessage({
   featureName,
   agentName
 }: {
   featureName: string;
-  agentName: string;
-}): JSX.Element | null {
-  const docs = getFeatureDocs(featureName, agentName);
-
-  if (!docs) {
+  agentName?: string;
+}) {
+  const docsUrl = getAgentFeatureDocsUrl(featureName, agentName);
+  if (!docsUrl) {
     return null;
   }
 
   return (
     <TableInfo>
       <EuiIcon type="iInCircle" />
-      {docs.text}{' '}
-      {docs.url && (
-        <ExternalLink href={docs.url}>
-          Learn more in the documentation.
-        </ExternalLink>
-      )}
+      {getAgentFeatureText(featureName)}{' '}
+      <ExternalLink href={docsUrl}>
+        Learn more in the documentation.
+      </ExternalLink>
     </TableInfo>
   );
 }
@@ -78,7 +88,7 @@ export function PropertiesTable({
 }: {
   propData: StringMap<any>;
   propKey: string;
-  agentName: string;
+  agentName?: string;
 }) {
   if (_.isEmpty(propData)) {
     return (
@@ -98,10 +108,7 @@ export function PropertiesTable({
         keySorter={sortKeysByConfig}
         depth={1}
       />
-      <AgentFeatureTipMessage
-        featureName={`context-${propKey}`}
-        agentName={agentName}
-      />
+      <AgentFeatureTipMessage featureName={propKey} agentName={agentName} />
     </TableContainer>
   );
 }

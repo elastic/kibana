@@ -1,0 +1,13 @@
+.spcMenu {
+  max-width: $euiSizeL * 10;
+}
+
+.spcMenu__spacesList {
+  max-height: $euiSizeXL * 10;
+  overflow-y: auto;
+}
+
+.spcMenu__searchFieldWrapper,
+.spcMenu__manageButtonWrapper {
+  padding: $euiSizeM;
+}
