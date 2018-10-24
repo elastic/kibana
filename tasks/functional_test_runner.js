@@ -30,7 +30,7 @@ export default function (grunt) {
 
     const log = new ToolingLog({
       level: logLevel,
-      writeTo: process.stdout
+      writeTo: process.stdout,
     });
 
     const functionalTestRunner = createFunctionalTestRunner({
