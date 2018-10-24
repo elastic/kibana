@@ -5,6 +5,8 @@
 @import '@elastic/eui/src/components/panel/variables';
 @import '@elastic/eui/src/components/panel/mixins';
 
+@import '@elastic/eui/src/global_styling/variables/size';
+
 @import 'datavisualizer/index';
 @import 'file_datavisualizer/index';
 @import 'components/nav_menu/index';
