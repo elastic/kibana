@@ -247,6 +247,28 @@ export default function ({ getService, getPageObjects }) {
         ]);
       });
 
+      it('should show metrics other than count on each level', async () => {
+        await PageObjects.visualize.clickData();
+        await PageObjects.visualize.clickAddMetric();
+        await PageObjects.visualize.clickBucket('Metric', 'metric');
+        await PageObjects.visualize.selectAggregation('Average', 'metrics');
+        await PageObjects.visualize.selectField('bytes', 'metrics');
+        await PageObjects.visualize.clickGo();
+        const data = await PageObjects.visualize.getTableVisContent();
+        expect(data).to.be.eql([
+          [ 'jpg', '9,109', '5.469KB', 'CN', '1,718', '5.477KB' ],
+          [ 'jpg', '9,109', '5.469KB', 'IN', '1,511', '5.456KB' ],
+          [ 'jpg', '9,109', '5.469KB', 'US', '770', '5.371KB' ],
+          [ 'jpg', '9,109', '5.469KB', 'ID', '314', '5.424KB' ],
+          [ 'jpg', '9,109', '5.469KB', 'PK', '244', '5.41KB' ],
+          [ 'css', '2,159', '5.566KB', 'CN', '422', '5.712KB' ],
+          [ 'css', '2,159', '5.566KB', 'IN', '346', '5.754KB' ],
+          [ 'css', '2,159', '5.566KB', 'US', '189', '5.333KB' ],
+          [ 'css', '2,159', '5.566KB', 'ID', '68', '4.82KB' ],
+          [ 'css', '2,159', '5.566KB', 'BR', '58', '5.915KB' ],
+        ]);
+      });
+
     });
 
     describe('split tables', () => {
