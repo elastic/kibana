@@ -178,6 +178,31 @@ export class Worker extends events.EventEmitter {
       });
   }
 
+  _cancelJob(job) {
+    this.debug(`Cancelling job ${job._id}`);
+
+    const completedTime = moment().toISOString();
+    const doc = {
+      status: constants.JOB_STATUS_CANCELLED,
+      completed_at: completedTime,
+    }
+
+    return this.client.update({
+      index: job._index,
+      type: job._type,
+      id: job._id,
+      version: job._version,
+      body: { doc }
+    })
+      .then(() => true)
+      .catch((err) => {
+        if (err.statusCode === 409) return true;
+        this.debug(`_cancelJob failed to update job ${job._id}`, err);
+        this.emit(constants.EVENT_WORKER_FAIL_UPDATE_ERROR, this._formatErrorParams(err, job));
+        return false;
+      });
+  }
+
   _formatOutput(output) {
     const unknownMime = false;
     const defaultOutput = null;
@@ -202,6 +227,9 @@ export class Worker extends events.EventEmitter {
       // run the worker's workerFn
       let isResolved = false;
       const cancellationToken = new CancellationToken();
+      cancellationToken.on(() => {
+        this._cancelJob(job);
+      });
       Promise.resolve(this.workerFn.call(null, job._source.payload, cancellationToken))
         .then((res) => {
           isResolved = true;

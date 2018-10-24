@@ -59,18 +59,19 @@ export class IndexWorker extends AbstractWorker {
       }
     };
 
-    for (const indexerFactory of this.indexerFactories) {
-      this.cancellationService.cancelIndexJob(uri);
-      // TODO: make indexers run in parallel.
+    // Binding the index cancellation logic
+    this.cancellationService.cancelIndexJob(uri);
+    const indexPromises = this.indexerFactories.map(indexerFactory => {
       const indexer = indexerFactory.create(uri, revision);
-      indexer.start(progressReporter);
       if (cancellationToken) {
         cancellationToken.on(() => {
           indexer.cancel();
         });
         this.cancellationService.registerIndexJobToken(uri, cancellationToken);
       }
-    }
+      return indexer.start(progressReporter);
+    });
+    await Promise.all(indexPromises);
 
     // TODO: populate the actual index result
     const res: IndexWorkerResult = {
