@@ -10,109 +10,65 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
   EuiSpacer,
+  EuiPage,
+  EuiPageBody,
   EuiPanel,
-  EuiText,
+  EuiHorizontalRule,
+  EuiFilePicker,
+  EuiLoadingSpinner,
   EuiTitle,
 } from '@elastic/eui';
 
-export function AboutPanel() {
+import { WelcomeContent } from './welcome_content';
 
+export function AboutPanel({ onFilePickerChange }) {
   return (
-    <EuiPanel paddingSize="l">
-      <EuiFlexGroup gutterSize="xl" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon size="xxl" type="addDataApp" className="file-datavisualizer-about-panel__icon" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="m">
-            <h3>
-              Visualize data from a log file
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              The Machine Learning Data Visualizer helps you understand the fields and metrics
-              in a log file as preparation for further analysis. After analyzing the data in the
-              file you can then choose to import the data into an elasticsearch index.
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              Select the file to visualize using the button at the top of the page,
-              and we will then attempt to analyze its structure.
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              The log file formats we currently support are:
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem grow={false}>
-              <EuiIcon size="l" type="document" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                <p>
-                  JSON
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem grow={false}>
-              <EuiIcon size="l" type="document" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                <p>
-                  Delimited text files such as CSV and TSV
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem grow={false}>
-              <EuiIcon size="l" type="document" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                <p>
-                  Log files consisting of semi-structured text with the timestamp in each message having a common format
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <EuiText>
-            <p>
-              Files up to 100MB in size can be uploaded.
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              This is an experimental feature. For any feedback please create an issue in&nbsp;
-              <EuiLink
-                href="https://github.com/elastic/kibana/issues/new"
-                target="_blank"
-              >
-                GitHub
-              </EuiLink>.
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiPage>
+      <EuiPageBody restrictWidth={1000}>
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem grow={false}>
+            <EuiPanel paddingSize="l">
+              <WelcomeContent />
 
-    </EuiPanel>
+              <EuiHorizontalRule margin="l" />
+
+              <div style={{ textAlign: 'center' }} >
+                <EuiFilePicker
+                  id="filePicker"
+                  initialPromptText="Select or drag and drop a file"
+                  onChange={files => onFilePickerChange(files)}
+                  className="file-datavisualizer-file-picker"
+                />
+              </div>
+            </EuiPanel>
+            <EuiSpacer size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageBody>
+    </EuiPage>
+  );
+}
+
+export function LoadingPanel() {
+  return (
+    <EuiPage>
+      <EuiPageBody restrictWidth={200}>
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem grow={false}>
+            <EuiPanel paddingSize="l" style={{ textAlign: 'center' }} >
+              <EuiTitle size="s">
+                <h3>Analyzing data</h3>
+              </EuiTitle>
+
+              <EuiSpacer size="l" />
+
+              <EuiLoadingSpinner size="xl"/>
+
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageBody>
+    </EuiPage>
   );
 }

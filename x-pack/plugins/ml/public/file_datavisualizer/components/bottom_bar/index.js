@@ -5,4 +5,4 @@
  */
 
 
-export { AboutPanel, LoadingPanel } from './about_panel';
+export { BottomBar } from './bottom_bar';
