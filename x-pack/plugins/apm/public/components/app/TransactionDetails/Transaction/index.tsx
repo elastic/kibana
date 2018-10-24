@@ -18,7 +18,7 @@ import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import EmptyMessage from '../../../shared/EmptyMessage';
-import { TraceLink } from '../../../shared/TraceLink';
+import { TransactionLink } from '../../../shared/TransactionLink';
 import { ActionMenu } from './ActionMenu';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
 // @ts-ignore
@@ -48,7 +48,7 @@ function MaybeViewTraceLink({
 
   return (
     <EuiFlexItem grow={false}>
-      <TraceLink transaction={root}>{button}</TraceLink>
+      <TransactionLink transaction={root}>{button}</TransactionLink>
     </EuiFlexItem>
   );
 }
