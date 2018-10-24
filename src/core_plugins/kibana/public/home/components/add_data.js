@@ -220,7 +220,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
               <strong style={{ height: 38 }}>
                 <FormattedMessage
                   id="kbn.home.addData.uploadFileTitle"
-                  defaultMessage="Upload data from file"
+                  defaultMessage="Upload data from log file"
                 />
               </strong>
               <EuiLink
@@ -229,7 +229,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
               >
                 <FormattedMessage
                   id="kbn.home.addData.uploadFileLink"
-                  defaultMessage="Import a JSON, CSV, or text file"
+                  defaultMessage="Import a JSON, CSV, or log file"
                 />
               </EuiLink>
             </EuiText>
@@ -241,7 +241,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             <strong style={{ height: 38 }}>
               <FormattedMessage
                 id="kbn.home.addData.yourDataTitle"
-                defaultMessage="Use Elastisearch data"
+                defaultMessage="Use Elasticsearch data"
               />
             </strong>
             <EuiLink

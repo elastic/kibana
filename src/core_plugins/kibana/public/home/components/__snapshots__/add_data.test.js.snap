@@ -265,7 +265,7 @@ exports[`apmUiEnabled 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Use Elastisearch data"
+            defaultMessage="Use Elasticsearch data"
             id="kbn.home.addData.yourDataTitle"
             values={Object {}}
           />
@@ -522,7 +522,7 @@ exports[`isNewKibanaInstance 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Use Elastisearch data"
+            defaultMessage="Use Elasticsearch data"
             id="kbn.home.addData.yourDataTitle"
             values={Object {}}
           />
@@ -815,7 +815,7 @@ exports[`mlEnabled 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Upload data from file"
+            defaultMessage="Upload data from log file"
             id="kbn.home.addData.uploadFileTitle"
             values={Object {}}
           />
@@ -832,7 +832,7 @@ exports[`mlEnabled 1`] = `
           type="button"
         >
           <FormattedMessage
-            defaultMessage="Import a JSON, CSV, or text file"
+            defaultMessage="Import a JSON, CSV, or log file"
             id="kbn.home.addData.uploadFileLink"
             values={Object {}}
           />
@@ -855,7 +855,7 @@ exports[`mlEnabled 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Use Elastisearch data"
+            defaultMessage="Use Elasticsearch data"
             id="kbn.home.addData.yourDataTitle"
             values={Object {}}
           />
@@ -1112,7 +1112,7 @@ exports[`render 1`] = `
           }
         >
           <FormattedMessage
-            defaultMessage="Use Elastisearch data"
+            defaultMessage="Use Elasticsearch data"
             id="kbn.home.addData.yourDataTitle"
             values={Object {}}
           />
