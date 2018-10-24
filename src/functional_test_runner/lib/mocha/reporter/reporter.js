@@ -70,7 +70,7 @@ export function MochaReporterProvider({ getService }) {
           new ToolingLogTextWriter({
             level: 'debug',
             writeTo: {
-              write: (chunk) => {
+              write: (line) => {
                 // if the current runnable is a beforeEach hook then
                 // `runner.suite` is set to the suite that defined the
                 // hook, rather than the suite executing, so instead we
@@ -82,10 +82,10 @@ export function MochaReporterProvider({ getService }) {
                   : this.runner.suite;
 
                 // We are registering the current time in order to be able
-                // to extend the log chunk with it so we can have the test
+                // to extend the log line with it so we can have the test
                 // results log lines labeled with such info
                 const currentTime = `${moment().format('HH:mm:ss')}`;
-                recordLog(currentSuite, `${currentTime} ${chunk}`);
+                recordLog(currentSuite, `${currentTime} ${line}`);
               }
             }
           })
