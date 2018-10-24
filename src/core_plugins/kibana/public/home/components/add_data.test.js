@@ -26,7 +26,6 @@ jest.mock(
   'ui/chrome',
   () => ({
     getBasePath: jest.fn(() => 'path'),
-    getInjected: jest.fn(() => ''),
   }),
   { virtual: true }
 );
@@ -34,6 +33,17 @@ jest.mock(
 test('render', () => {
   const component = shallowWithIntl(<AddData.WrappedComponent
     apmUiEnabled={false}
+    mlEnabled={false}
+    isNewKibanaInstance={false}
+  />);
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(chrome.getBasePath).toHaveBeenCalledTimes(1);
+});
+
+test('mlEnabled', () => {
+  const component = shallowWithIntl(<AddData.WrappedComponent
+    apmUiEnabled={true}
+    mlEnabled={true}
     isNewKibanaInstance={false}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -43,6 +53,7 @@ test('render', () => {
 test('apmUiEnabled', () => {
   const component = shallowWithIntl(<AddData.WrappedComponent
     apmUiEnabled={true}
+    mlEnabled={false}
     isNewKibanaInstance={false}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -52,6 +63,7 @@ test('apmUiEnabled', () => {
 test('isNewKibanaInstance', () => {
   const component = shallowWithIntl(<AddData.WrappedComponent
     apmUiEnabled={false}
+    mlEnabled={false}
     isNewKibanaInstance={true}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line

@@ -40,9 +40,8 @@ import {
 
 /* istanbul ignore next */
 const basePath = chrome.getBasePath();
-const mlEnabled = chrome.getInjected('mlEnabled', true);
 
-const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
+const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
 
   const renderCards = () => {
     const apmTitle = intl.formatMessage({
@@ -263,6 +262,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
 
 AddDataUi.propTypes = {
   apmUiEnabled: PropTypes.bool.isRequired,
+  mlEnabled: PropTypes.bool.isRequired,
   isNewKibanaInstance: PropTypes.bool.isRequired,
 };
 
