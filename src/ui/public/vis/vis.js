@@ -34,7 +34,7 @@ import { AggConfigs } from './agg_configs';
 import { PersistedState } from '../persisted_state';
 import { onBrushEvent } from '../utils/brush_event';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
-import { FilterBarClickHandlerProvider } from '../filter_bar/filter_bar_click_handler';
+import { FilterBarPushFiltersProvider } from '../filter_bar/push_filters';
 import { updateVisualizationConfig } from './vis_update';
 import { SearchSourceProvider } from '../courier/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
@@ -54,7 +54,7 @@ const getTerms = (table, columnIndex, rowIndex) => {
       return row[column.id] === table.rows[rowIndex][column.id] || i >= columnIndex;
     });
   });
-  const terms = rows.map(row => row[columnIndex]);
+  const terms = rows.map(row => row[table.columns[columnIndex].id]);
 
   return [...new Set(terms.filter(term => {
     const notOther = term !== '__other__';
@@ -66,9 +66,9 @@ const getTerms = (table, columnIndex, rowIndex) => {
 export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
   const SearchSource = Private(SearchSourceProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
+  const filterBarPushFilters = Private(FilterBarPushFiltersProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState) {
@@ -99,14 +99,22 @@ export function VisProvider(Private, indexPatterns, getAppState) {
           // the filter method will be removed in the near feature
           // you should rather use addFilter method below
           filter: (event) => {
+            let data = event.datum.aggConfigResult;
+            const filters = [];
+            while (data.$parent) {
+              const { key, rawData } = data.$parent;
+              const { table, column, row } = rawData;
+              filters.push(this.API.events.createFilter(table, column, row, key));
+              data = data.$parent;
+            }
             const appState = getAppState();
-            filterBarClickHandler(appState)(event);
+            filterBarPushFilters(appState)(_.flatten(filters));
           },
-          addFilter: (data, columnIndex, rowIndex, cellValue) => {
+          createFilter: (data, columnIndex, rowIndex, cellValue) => {
             const { aggConfig, id: columnId } = data.columns[columnIndex];
             let filter = [];
             const value = rowIndex > -1 ? data.rows[rowIndex][columnId] : cellValue;
-            if (!value) {
+            if (value === null || value === undefined) {
               return;
             }
             if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
@@ -115,6 +123,10 @@ export function VisProvider(Private, indexPatterns, getAppState) {
             } else {
               filter = aggConfig.createFilter(value);
             }
+            return filter;
+          },
+          addFilter: (data, columnIndex, rowIndex, cellValue) => {
+            const filter = this.API.events.createFilter(data, columnIndex, rowIndex, cellValue);
             queryFilter.addFilters(filter);
           }, brush: (event) => {
             onBrushEvent(event, getAppState());

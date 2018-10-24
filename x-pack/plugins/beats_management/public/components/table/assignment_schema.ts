@@ -56,6 +56,19 @@ export const beatsListAssignmentOptions: AssignmentControlSchema[] = [
   },
 ];
 
+export const tagListAssignmentOptions: AssignmentControlSchema[] = [
+  {
+    type: AssignmentComponentType.Action,
+    danger: true,
+    grow: false,
+    name: 'Remove tag(s)',
+    showWarning: true,
+    warningHeading: 'Remove tag(s)',
+    warningMessage: 'Remove the tag?',
+    action: AssignmentActionType.Delete,
+  },
+];
+
 export const tagConfigAssignmentOptions: AssignmentControlSchema[] = [
   {
     type: AssignmentComponentType.Action,

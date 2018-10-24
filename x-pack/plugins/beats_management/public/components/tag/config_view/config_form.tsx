@@ -109,22 +109,8 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
     if (!this.props.onSubmit) {
       return;
     }
-    const processed = JSON.parse(JSON.stringify(model), (key, value) => {
-      return _.isObject(value) && !_.isArray(value)
-        ? _.mapKeys(value, (v, k: string) => {
-            return k.replace(/{{[^{}]+}}/g, (token: string) => {
-              return model[token.replace(/[{}]+/g, '')] || 'error';
-            });
-          })
-        : value;
-    });
 
-    this.props.schema.forEach(s => {
-      if (s.ui.transform && s.ui.transform === 'removed') {
-        delete processed[s.id];
-      }
-    });
-    this.props.onSubmit(processed);
+    this.props.onSubmit(model);
   };
   public render() {
     return (

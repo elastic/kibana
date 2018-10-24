@@ -8,24 +8,13 @@ exports[`AgentFeatureTipMessage component should render when docs are returned 1
     size="m"
     type="iInCircle"
   />
-  Mock Docs Text
+  You can configure your agent to add contextual information about your users.
    
   <ExternalLink
     href="mock-url"
   >
     Learn more in the documentation.
   </ExternalLink>
-</styled.div>
-`;
-
-exports[`AgentFeatureTipMessage component should render when docs are returned, but missing a url 1`] = `
-<styled.div>
-  <EuiIcon
-    size="m"
-    type="iInCircle"
-  />
-  Mock Docs Text
-   
 </styled.div>
 `;
 
@@ -68,7 +57,7 @@ exports[`PropertiesTable component should render with data 1`] = `
   />
   <AgentFeatureTipMessage
     agentName="testAgentName"
-    featureName="context-testPropKey"
+    featureName="testPropKey"
   />
 </styled.div>
 `;
