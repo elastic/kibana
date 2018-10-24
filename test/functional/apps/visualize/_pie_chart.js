@@ -197,5 +197,35 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.expectPieChartError();
       });
     });
+    describe('multi series slice', () => {
+      it('should still showing pie chart when a subseries have zero data', async function () {
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickPieChart');
+        await PageObjects.visualize.clickPieChart();
+        await PageObjects.visualize.clickNewSearch();
+        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        log.debug('select bucket Split Slices');
+        await PageObjects.visualize.clickBucket('Split Slices');
+        log.debug('Click aggregation Filters');
+        await PageObjects.visualize.selectAggregation('Filters');
+        log.debug('Set the 1st filter value');
+        await PageObjects.visualize.setFilterAggregationValue('geo.dest:"US"');
+        log.debug('Toggle previous editor');
+        await PageObjects.visualize.toggleAggegationEditor(2);
+        log.debug('Add a new series');
+        await PageObjects.visualize.clickAddBucket();
+        log.debug('select bucket Split Slices');
+        await PageObjects.visualize.clickBucket('Split Slices');
+        log.debug('Click aggregation Filters');
+        await PageObjects.visualize.selectAggregation('Filters');
+        log.debug('Set the 1st filter value of the aggregation id 3');
+        await PageObjects.visualize.setFilterAggregationValue('geo.dest:"UX"', 0, 3);
+        await PageObjects.visualize.clickGo();
+        const legends = await PageObjects.visualize.getLegendEntries();
+        const expectedLegends = ['geo.dest:"US"', 'geo.dest:"UX"'];
+        expect(legends).to.eql(expectedLegends);
+      });
+    });
   });
 }

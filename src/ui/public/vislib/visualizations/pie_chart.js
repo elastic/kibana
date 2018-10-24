@@ -48,10 +48,8 @@ export function VislibVisualizationsPieChartProvider(Private) {
   class PieChart extends Chart {
     constructor(handler, chartEl, chartData) {
       super(handler, chartEl, chartData);
-
       const charts = this.handler.data.getVisData();
       this._validatePieData(charts);
-
       this._attr = _.defaults(handler.visConfig.get('chart', {}), defaults);
     }
 
@@ -65,11 +63,6 @@ export function VislibVisualizationsPieChartProvider(Private) {
         if (chart.slices.children.length === 0) {
           return true;
         }
-        // checking also if the first tree level has size 0
-        // This because of current mutation of data that happen because of
-        // Data.pieNames and subsequent call to _removeZeroSlices request
-        // for the visualization legend.
-        return chart.slices.children.every((child) => child.size === 0);
       });
 
       if (isAllZeros) {
