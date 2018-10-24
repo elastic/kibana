@@ -72,24 +72,24 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
           render={(props: any) => <TagPage {...props} libs={libs} />}
         />
 
-          {!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
-            !libs.framework.getCurrentUser().roles.includes('superuser') && (
-              <Route render={() => <NoAccessPage />} />
-            )}
-          <Route
-            path="/"
-            exact={true}
-            render={() => <Redirect from="/" exact={true} to="/overview/beats" />}
-          />
-          <Route path="/overview" render={(props: any) => <MainPages {...props} libs={libs} />} />
-          <Route
-            path="/beat/:beatId"
-            render={(props: any) => <BeatDetailsPage {...props} libs={libs} />}
-          />
-          <Route
-            path="/tag/:action/:tagid?"
-            render={(props: any) => <TagPage {...props} libs={libs} />}
-          />
+        {!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
+          !libs.framework.getCurrentUser().roles.includes('superuser') && (
+            <Route render={() => <NoAccessPage />} />
+          )}
+        <Route
+          path="/"
+          exact={true}
+          render={() => <Redirect from="/" exact={true} to="/overview/beats" />}
+        />
+        <Route path="/overview" render={(props: any) => <MainPages {...props} libs={libs} />} />
+        <Route
+          path="/beat/:beatId"
+          render={(props: any) => <BeatDetailsPage {...props} libs={libs} />}
+        />
+        <Route
+          path="/tag/:action/:tagid?"
+          render={(props: any) => <TagPage {...props} libs={libs} />}
+        />
       </div>
     </HashRouter>
   );
