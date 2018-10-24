@@ -8,6 +8,7 @@
 import React from 'react';
 
 import {
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -27,7 +28,8 @@ export function WelcomeContent() {
       <EuiFlexItem>
         <EuiTitle size="m">
           <h3>
-            Visualize data from a log file
+            Visualize data from a log file &nbsp;
+            <EuiBetaBadge label="Experimental" tooltipContent="Experimental feature. We'd love to hear your feedback." />
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />

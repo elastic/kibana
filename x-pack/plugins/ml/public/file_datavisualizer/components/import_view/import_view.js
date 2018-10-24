@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiSpacer,
   EuiPanel,
@@ -322,7 +323,10 @@ export class ImportView extends Component {
         <EuiPanel>
 
           <EuiTitle size="s">
-            <h3>Import data</h3>
+            <h3>
+              Import data &nbsp;
+              <EuiBetaBadge label="Experimental" tooltipContent="Experimental feature. We'd love to hear your feedback." />
+            </h3>
           </EuiTitle>
 
           <ImportSettings
