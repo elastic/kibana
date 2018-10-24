@@ -22,7 +22,7 @@ export function InfraOpsGraphQLProvider({ getService }) {
       headers: {
         'kbn-xsrf': 'xxx',
       },
-      uri: `${kbnURL}/api/infra/graphql`,
+      uri: `${kbnURL}/api/ingest/graphql`,
     }),
   });
 
