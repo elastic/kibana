@@ -4,15 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiLink,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiLink, EuiTitle } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
+import { FlyoutSession, openFlyout } from 'ui/flyout';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 
 import { Space } from '../../../../../../../../spaces/common/model/space';
@@ -34,6 +28,8 @@ interface State {
 }
 
 export class ImpactedSpacesFlyout extends Component<Props, State> {
+  private session: null | FlyoutSession = null;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -46,19 +42,36 @@ export class ImpactedSpacesFlyout extends Component<Props, State> {
     return (
       <Fragment>
         <div className="showImpactedSpaces">
-          <EuiLink onClick={this.toggleShowImpactedSpaces}>
-            View summary of spaces privileges
-          </EuiLink>
+          <EuiLink onClick={this.toggleImpactedSpaces}>View summary of spaces privileges</EuiLink>
         </div>
         {flyout}
       </Fragment>
     );
   }
 
-  public toggleShowImpactedSpaces = () => {
-    this.setState({
-      showImpactedSpaces: !this.state.showImpactedSpaces,
+  public toggleImpactedSpaces = () => {
+    if (this.session) {
+      this.hideImpactedSpaces();
+    } else {
+      this.showImpactedSpaces();
+    }
+  };
+
+  public showImpactedSpaces = () => {
+    const session = openFlyout(this.getFlyout(), {
+      onClose: this.hideImpactedSpaces,
+      // @ts-ignore
+      size: 's',
     });
+
+    this.session = session;
+  };
+
+  public hideImpactedSpaces = () => {
+    if (this.session) {
+      this.session.close();
+      this.session = null;
+    }
   };
 
   public getHighestPrivilege(...privileges: KibanaPrivilege[]): KibanaPrivilege {
@@ -72,10 +85,6 @@ export class ImpactedSpacesFlyout extends Component<Props, State> {
   }
 
   public getFlyout = () => {
-    if (!this.state.showImpactedSpaces) {
-      return null;
-    }
-
     const { role, spaces } = this.props;
 
     const assignedPrivileges = role.kibana;
@@ -100,11 +109,7 @@ export class ImpactedSpacesFlyout extends Component<Props, State> {
     );
 
     return (
-      <EuiFlyout
-        onClose={this.toggleShowImpactedSpaces}
-        aria-labelledby="showImpactedSpacesTitle"
-        size="s"
-      >
+      <Fragment>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h1 id="showImpactedSpacesTitle">Summary of space privileges</h1>
@@ -122,7 +127,7 @@ export class ImpactedSpacesFlyout extends Component<Props, State> {
           {/* TODO: Hide footer if button is not available */}
           <ManageSpacesButton userProfile={this.props.userProfile} />
         </EuiFlyoutFooter>
-      </EuiFlyout>
+      </Fragment>
     );
   };
 }
