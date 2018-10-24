@@ -288,8 +288,6 @@ function discoverController(
     timeRangeSearchSource.setField('filter', () => {
       return timefilter.createFilter($scope.indexPattern);
     });
-  } else {
-    delete $scope.indexPattern.timeFieldName;
   }
 
   $scope.searchSource.setParent(timeRangeSearchSource);
