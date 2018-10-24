@@ -119,7 +119,7 @@ const CourierRequestHandlerProvider = function () {
       const queryHash = calculateObjectHash(reqBody);
       // We only need to reexecute the query, if forceFetch was true or the hash of the request body has changed
       // since the last request.
-      const shouldQuery = forceFetch || searchSource.lastQuery !== queryHash;
+      const shouldQuery = forceFetch || (searchSource.lastQuery !== queryHash);
 
       if (shouldQuery) {
         const lastAggConfig = aggs;
@@ -174,7 +174,7 @@ const CourierRequestHandlerProvider = function () {
 
       const tabifyCacheHash = calculateObjectHash({ tabifyAggs, ...tabifyParams });
       // We only need to reexecute tabify, if either we did a new request or some input params to tabify changed
-      const shouldCalculateNewTabify = shouldQuery || searchSource.lastTabifyHash !== tabifyCacheHash;
+      const shouldCalculateNewTabify = shouldQuery || (searchSource.lastTabifyHash !== tabifyCacheHash);
 
       if (shouldCalculateNewTabify) {
         searchSource.lastTabifyHash = tabifyCacheHash;
