@@ -108,7 +108,6 @@ export class TaskStore {
     try {
       return await this.callCluster('indices.putTemplate', {
         name: this.index,
-        create: true,
         body: {
           index_patterns: [this.index],
           mappings: {
