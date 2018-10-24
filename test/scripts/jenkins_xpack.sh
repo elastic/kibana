@@ -12,16 +12,16 @@ export XPACK_DIR="$(cd "$(dirname "$0")/../../x-pack"; pwd)"
 echo "-> XPACK_DIR ${XPACK_DIR}"
 
 
-echo " -> Running mocha tests"
+echo " -> Skipping Running mocha tests"
 cd "$XPACK_DIR"
-xvfb-run yarn test
+# xvfb-run yarn test
 echo ""
 echo ""
 
 
-echo " -> Running jest tests"
+echo " -> Running jest tests (only for infra/ingest)"
 cd "$XPACK_DIR"
-node scripts/jest --ci --no-cache --verbose
+node scripts/jest --ci --no-cache --verbose infra
 echo ""
 echo ""
 
@@ -37,6 +37,6 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 export TEST_ES_FROM=${TEST_ES_FROM:-source}
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
-xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir"
+xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --grep InfraOps
 echo ""
 echo ""
