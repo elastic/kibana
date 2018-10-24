@@ -19,9 +19,9 @@ echo ""
 echo ""
 
 
-echo " -> Running jest tests (only for infra/ingest)"
+echo " -> Running jest tests (only for ingest)"
 cd "$XPACK_DIR"
-node scripts/jest --ci --no-cache --verbose infra
+node scripts/jest --ci --no-cache --verbose ingest
 echo ""
 echo ""
 
