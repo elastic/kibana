@@ -496,7 +496,7 @@ export class QueryBar extends Component<Props, State> {
               <EuiButton
                 aria-label="Search"
                 data-test-subj="querySubmitButton"
-                color="secondary"
+                color={this.isDirty() ? 'secondary' : 'primary'}
                 fill
                 onClick={this.onClickSubmitButton}
               >
