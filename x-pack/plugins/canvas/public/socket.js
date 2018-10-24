@@ -10,13 +10,37 @@ import { getBrowserRegistries } from './lib/browser_registries';
 
 let socket;
 
-export function createSocket(basePath) {
-  socket = io(undefined, { path: `${basePath}/socket.io` });
+export async function createSocket(basePath) {
+  if (socket != null) return socket;
+
+  const status = {};
+
+  socket = io({ path: `${basePath}/socket.io` });
 
   socket.on('getFunctionList', () => {
     const pluginsLoaded = getBrowserRegistries();
 
     pluginsLoaded.then(() => socket.emit('functionList', functionsRegistry.toJS()));
+  });
+
+  socket.on('open', () => {
+    status.resolve();
+  });
+
+  socket.on('connectionFailed', ({ reason }) => {
+    status.reject(new Error(reason));
+  });
+
+  socket.on('error', err => {
+    status.reject(err);
+  });
+
+  return new Promise((resolve, reject) => {
+    status.resolve = resolve;
+    status.reject = p => {
+      socket = null;
+      reject(p);
+    };
   });
 }
 
