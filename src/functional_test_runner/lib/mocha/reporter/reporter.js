@@ -81,9 +81,9 @@ export function MochaReporterProvider({ getService }) {
                   ? this.runner.test.parent
                   : this.runner.suite;
 
-                // We are registering the current time in order to extend the
-                // current chunk with it so we can have the test results
-                // log lines with that information
+                // We are registering the current time in order to be able
+                // to extend the log chunk with it so we can have the test
+                // results log lines labeled with such info
                 const currentTime = `${moment().format('HH:mm:ss')}`;
                 recordLog(currentSuite, `${currentTime} ${chunk}`);
               }
