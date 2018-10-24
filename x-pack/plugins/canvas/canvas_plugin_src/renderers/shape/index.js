@@ -39,22 +39,30 @@ export const shape = () => ({
       const height = domNode.offsetHeight;
 
       // adjust viewBox based on border width
-      let [minX, minY, maxX, maxY] = initialViewBox;
+      let [minX, minY, shapeWidth, shapeHeight] = initialViewBox;
+      const borderOffset = Math.max(borderWidth, 0) / 2;
 
-      const xScale = (maxX - minX) / width;
-      const yScale = (maxY - minY) / height;
-      const borderOffset = borderWidth / 2;
-      const xOffset = borderOffset * xScale;
-      const yOffset = borderOffset * yScale;
+      if (width) {
+        const xScale = (shapeWidth - minX) / width;
+        const xOffset = borderOffset * xScale;
+        minX -= xOffset; // min-x
+        shapeWidth += xOffset * 2; // width
+      } else {
+        shapeWidth = 0;
+      }
 
-      minX -= xOffset; // min-x
-      minY -= yOffset; // min-y
-      maxX += xOffset * 2; // width
-      maxY += yOffset * 2; // height
+      if (height) {
+        const yScale = (shapeHeight - minY) / height;
+        const yOffset = borderOffset * yScale;
+        minY -= yOffset; // min-y
+        shapeHeight += yOffset * 2; // height
+      } else {
+        shapeHeight = 0;
+      }
 
       shapeSvg.setAttribute('width', width);
       shapeSvg.setAttribute('height', height);
-      shapeSvg.setAttribute('viewBox', [minX, minY, maxX, maxY].join(' '));
+      shapeSvg.setAttribute('viewBox', [minX, minY, shapeWidth, shapeHeight].join(' '));
 
       const oldShape = domNode.firstElementChild;
       if (oldShape) domNode.removeChild(oldShape);
