@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { cloneDeep, has } from 'lodash';
 
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 import { calculateObjectHash } from '../lib/calculate_object_hash';
@@ -139,9 +139,9 @@ const CourierRequestHandlerProvider = function () {
 
         searchSource.rawResponse = response;
 
-        let resp = _.cloneDeep(response);
+        let resp = cloneDeep(response);
         for (const agg of aggs) {
-          if (_.has(agg, 'type.postFlightRequest')) {
+          if (has(agg, 'type.postFlightRequest')) {
             resp = await agg.type.postFlightRequest(
               resp,
               aggs,
