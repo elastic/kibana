@@ -5,15 +5,12 @@
  */
 
 import React from 'react';
+import { pure } from 'recompose';
 
 import { ColumnarPage } from '../../../components/page';
 
-export class HomePage extends React.PureComponent {
-  public render() {
-    return (
-      <ColumnarPage>
-        <h1>Hello SecOps</h1>
-      </ColumnarPage>
-    );
-  }
-}
+export const HomePage: React.SFC = pure(() => (
+  <ColumnarPage>
+    <h1>Hello SecOps</h1>
+  </ColumnarPage>
+));

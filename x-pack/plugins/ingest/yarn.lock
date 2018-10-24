@@ -38,12 +38,37 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.11.4.tgz#e8bd933c3f78795d580ae41d86590bfc1f4f389d"
   integrity sha512-ojnbBiKkZFYRfQpmtnnWTMw+rzGp/JiystjluW9jgN3VzRwilXddJ6aGQ9V/7iuDG06SBgn7ozW9k3zcAnYjYQ==
 
+"@types/prop-types@*":
+  version "15.5.6"
+  resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.5.6.tgz#9c03d3fed70a8d517c191b7734da2879b50ca26c"
+  integrity sha512-ZBFR7TROLVzCkswA3Fmqq+IIJt62/T7aY/Dmz+QkU7CaW2QFqAitCE8Ups7IzmGhcN1YWMBT4Qcoc07jU9hOJQ==
+
+"@types/react@*":
+  version "16.4.18"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.4.18.tgz#2e28a2e7f92d3fa7d6a65f2b73275c3e3138a13d"
+  integrity sha512-eFzJKEg6pdeaukVLVZ8Xb79CTl/ysX+ExmOfAAqcFlCCK5TgFDD9kWR0S18sglQ3EmM8U+80enjUqbfnUyqpdA==
+  dependencies:
+    "@types/prop-types" "*"
+    csstype "^2.2.0"
+
+"@types/recompose@^0.27.0":
+  version "0.27.0"
+  resolved "https://registry.yarnpkg.com/@types/recompose/-/recompose-0.27.0.tgz#66955b8ea4d477c3c03f09a571380ca82549cdac"
+  integrity sha512-p92Unulom3aSdgWCFXrKIpd6obaO3gOKJhEBJUBohlcC21aDXnsnu1BbYL42GeV5qcXezeRXM1SXiyKpnFSGlA==
+  dependencies:
+    "@types/react" "*"
+
 boom@3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/boom/-/boom-3.1.1.tgz#b6424f01ed8d492b2b12ae86047c24e8b6a7c937"
   integrity sha1-tkJPAe2NSSsrEq6GBHwk6LanyTc=
   dependencies:
     hoek "3.x.x"
+
+csstype@^2.2.0:
+  version "2.5.7"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.5.7.tgz#bf9235d5872141eccfb2d16d82993c6b149179ff"
+  integrity sha512-Nt5VDyOTIIV4/nRFswoCKps1R5CD1hkiyjBE9/thNaNZILLEviVw9yWQw15+O+CpNjQKB/uvdcxFFOrSflY3Yw==
 
 hoek@3.x.x:
   version "3.0.4"

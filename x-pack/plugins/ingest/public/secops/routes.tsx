@@ -6,15 +6,14 @@
 
 import React from 'react';
 import { Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
+import { pure } from 'recompose';
 
 import { HomePage } from './pages/home';
 
-const routes: React.SFC<RouteComponentProps<any>> = ({ match }) => {
-  return (
-    <Switch>
-      <Route exact path={`${match.path}`} component={HomePage} />
-    </Switch>
-  );
-};
+const routes: React.SFC<RouteComponentProps<any>> = ({ match }) => (
+  <Switch>
+    <Route exact path={`${match.path}`} component={HomePage} />
+  </Switch>
+);
 
-export const SecOpsRoutes = withRouter(routes);
+export const SecOpsRoutes = pure(withRouter(routes));

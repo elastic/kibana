@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-
+import { pure } from 'recompose';
 import { SecOpsRoutes } from './routes';
 
-export const SecOpsApp: React.SFC = () => <SecOpsRoutes />;
+export const SecOpsApp: React.SFC = pure(() => <SecOpsRoutes />);
