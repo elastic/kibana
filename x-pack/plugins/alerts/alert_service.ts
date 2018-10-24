@@ -32,12 +32,12 @@ export class AlertService {
             name: { type: 'keyword' },
           },
         },
-        actions: [
-          {
+        actions: {
+          properties: {
             name: { type: 'keyword' },
             params: { type: 'object' },
           },
-        ],
+        },
         interval: { type: 'text' },
         state: { type: 'keyword' },
         user: { type: 'keyword' },
@@ -127,15 +127,15 @@ export class AlertService {
   private async initAfterPlugins() {
     const es = this.kbnServer.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
     try {
-      const index = await es('indices.create', { index: '.alerts' });
+      const index = await es('indices.create', { index: '.kibana-alerts' });
       this.info(`Index is ${JSON.stringify(index, null, 2)}`);
     } catch (err) {
-      if ('resource_already_exists_exception' !== err.body.error.type) {
+      if (err.body && 'resource_already_exists_exception' !== err.body.error.type) {
         throw err;
       }
     }
     es('indices.putMapping', {
-      index: '.alerts',
+      index: '.kibana-alerts',
       type: '_doc',
       body: {
         properties: this.alertIndexProperties,
