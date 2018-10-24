@@ -14,7 +14,7 @@ import { getSelectedLayer } from '../../../selectors/map_selectors';
 const mapStateToProps = state => {
   const selectedLayer = getSelectedLayer(state);
   return {
-    showRemoveBtn: !selectedLayer.isTemporary()
+    isNewLayer: selectedLayer.isTemporary()
   };
 };
 
@@ -25,10 +25,12 @@ const mapDispatchToProps = dispatch => {
       dispatch(clearTemporaryStyles());
       dispatch(clearTemporaryLayers());
     },
-    saveLayerEdits: () => {
+    saveLayerEdits: isNewLayer => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(promoteTemporaryStyles());
-      dispatch(promoteTemporaryLayers());
+      if (isNewLayer) {
+        dispatch(promoteTemporaryLayers());
+      }
       dispatch(setSelectedLayer(null));
     },
     removeLayer: () => {
