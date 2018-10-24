@@ -324,7 +324,7 @@
     "gulp-babel": "^7.0.1",
     "gulp-sourcemaps": "1.7.3",
     "has-ansi": "^3.0.0",
-    "husky": "0.8.1",
+    "husky": "^0.14.3",
     "image-diff": "1.6.0",
     "istanbul-instrumenter-loader": "3.0.0",
     "jest": "^23.5.0",
