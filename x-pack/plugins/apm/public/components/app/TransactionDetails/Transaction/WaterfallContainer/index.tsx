@@ -13,13 +13,7 @@ import {
 } from '../../../../../../common/constants';
 import { Transaction } from '../../../../../../typings/Transaction';
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiToolTip
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { RRRRender } from 'react-redux-request';
 import { WaterfallV1Request } from 'x-pack/plugins/apm/public/store/reactReduxRequest/waterfallV1';
 import { WaterfallV2Request } from 'x-pack/plugins/apm/public/store/reactReduxRequest/waterfallV2';
