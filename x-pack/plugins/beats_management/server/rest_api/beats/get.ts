@@ -11,7 +11,7 @@ import { wrapEsError } from '../../utils/error_wrappers';
 export const createGetBeatRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/agent/{beatId}/{token?}',
-
+  requiredRoles: ['beats_admin'],
   handler: async (request: any, reply: any) => {
     const beatId = request.params.beatId;
 

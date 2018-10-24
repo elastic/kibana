@@ -1,0 +1,189 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
+<EuiPopover
+  anchorPosition="downRight"
+  button={
+    <EuiButtonEmpty
+      color="primary"
+      iconSide="left"
+      onClick={[Function]}
+      size="xs"
+      type="button"
+    >
+      Options
+    </EuiButtonEmpty>
+  }
+  closePopover={[Function]}
+  hasArrow={true}
+  id="popover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="m"
+  withTitle={true}
+>
+  <EuiPopoverTitle>
+    Syntax options
+  </EuiPopoverTitle>
+  <div
+    style={
+      Object {
+        "width": "350px",
+      }
+    }
+  >
+    <EuiText
+      grow={true}
+    >
+      <p>
+        Our experimental autocomplete and simple syntax features can help you create your queries. Just start typing and you’ll see matches related to your data. See docs
+         
+        <EuiLink
+          color="primary"
+          href="https://www.elastic.co/guide/en/kibana/foo/kuery-query.html"
+          target="_blank"
+          type="button"
+        >
+          here
+        </EuiLink>
+        .
+      </p>
+    </EuiText>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiSwitch
+          checked={false}
+          data-test-subj="languageToggle"
+          id="queryEnhancementOptIn"
+          label="Turn on query features"
+          name="popswitch"
+          onChange={[Function]}
+        />
+      </EuiFormRow>
+    </EuiForm>
+    <EuiHorizontalRule
+      margin="s"
+      size="full"
+    />
+    <EuiText
+      grow={true}
+      size="xs"
+    >
+      <p>
+        Not ready yet? Find our lucene docs
+         
+        <EuiLink
+          color="primary"
+          href="https://www.elastic.co/guide/en/elasticsearch/reference/foo/query-dsl-query-string-query.html#query-string-syntax"
+          target="_blank"
+          type="button"
+        >
+          here
+        </EuiLink>
+        .
+      </p>
+    </EuiText>
+  </div>
+</EuiPopover>
+`;
+
+exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
+<EuiPopover
+  anchorPosition="downRight"
+  button={
+    <EuiButtonEmpty
+      color="primary"
+      iconSide="left"
+      onClick={[Function]}
+      size="xs"
+      type="button"
+    >
+      Options
+    </EuiButtonEmpty>
+  }
+  closePopover={[Function]}
+  hasArrow={true}
+  id="popover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="m"
+  withTitle={true}
+>
+  <EuiPopoverTitle>
+    Syntax options
+  </EuiPopoverTitle>
+  <div
+    style={
+      Object {
+        "width": "350px",
+      }
+    }
+  >
+    <EuiText
+      grow={true}
+    >
+      <p>
+        Our experimental autocomplete and simple syntax features can help you create your queries. Just start typing and you’ll see matches related to your data. See docs
+         
+        <EuiLink
+          color="primary"
+          href="https://www.elastic.co/guide/en/kibana/foo/kuery-query.html"
+          target="_blank"
+          type="button"
+        >
+          here
+        </EuiLink>
+        .
+      </p>
+    </EuiText>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiSwitch
+          checked={true}
+          data-test-subj="languageToggle"
+          id="queryEnhancementOptIn"
+          label="Turn on query features"
+          name="popswitch"
+          onChange={[Function]}
+        />
+      </EuiFormRow>
+    </EuiForm>
+    <EuiHorizontalRule
+      margin="s"
+      size="full"
+    />
+    <EuiText
+      grow={true}
+      size="xs"
+    >
+      <p>
+        Not ready yet? Find our lucene docs
+         
+        <EuiLink
+          color="primary"
+          href="https://www.elastic.co/guide/en/elasticsearch/reference/foo/query-dsl-query-string-query.html#query-string-syntax"
+          target="_blank"
+          type="button"
+        >
+          here
+        </EuiLink>
+        .
+      </p>
+    </EuiText>
+  </div>
+</EuiPopover>
+`;

@@ -17,6 +17,14 @@ export interface BackendFrameworkAdapter {
 export interface FrameworkAuthenticatedUser<AuthDataType = any> {
   kind: 'authenticated';
   [internalAuthData]: AuthDataType;
+  username: string;
+  roles: string[];
+  full_name: string | null;
+  email: string | null;
+  metadata: {
+    [key: string]: any;
+  };
+  enabled: boolean;
 }
 
 export interface FrameworkUnAuthenticatedUser {
@@ -31,7 +39,6 @@ export type FrameworkUser<AuthDataType = any> =
   | FrameworkAuthenticatedUser<AuthDataType>
   | FrameworkUnAuthenticatedUser
   | FrameworkInternalUser;
-
 export interface FrameworkRequest<
   InternalRequest extends FrameworkWrappableRequest = FrameworkWrappableRequest
 > {
@@ -51,6 +58,7 @@ export interface FrameworkRouteOptions<
   method: string | string[];
   vhost?: string;
   licenseRequired?: boolean;
+  requiredRoles?: string[];
   handler: FrameworkRouteHandler<RouteRequest, RouteResponse>;
   config?: {};
 }
