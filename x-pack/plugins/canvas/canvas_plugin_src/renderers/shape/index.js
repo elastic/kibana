@@ -22,7 +22,8 @@ export const shape = () => ({
 
     if (fill) shapeContent.setAttribute('fill', fill);
     if (border) shapeContent.setAttribute('stroke', border);
-    if (borderWidth >= 0) shapeContent.setAttribute('stroke-width', borderWidth);
+    const strokeWidth = Math.max(borderWidth, 0);
+    shapeContent.setAttribute('stroke-width', strokeWidth);
     shapeContent.setAttribute('stroke-miterlimit', 999);
     shapeContent.setAttribute('vector-effect', 'non-scaling-stroke');
 
@@ -40,7 +41,7 @@ export const shape = () => ({
 
       // adjust viewBox based on border width
       let [minX, minY, shapeWidth, shapeHeight] = initialViewBox;
-      const borderOffset = Math.max(borderWidth, 0) / 2;
+      const borderOffset = strokeWidth / 2;
 
       if (width) {
         const xScale = (shapeWidth - minX) / width;
