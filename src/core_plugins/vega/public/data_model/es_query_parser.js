@@ -69,10 +69,10 @@ export class EsQueryParser {
     if (legacyContext !== undefined) {
       if (body.query !== undefined) {
         throw new Error(i18n.translate('vega.esQueryParser.dataUrlMustNotHaveLegacyAndBodyQueryValuesAtTheSameTimeErrorMessage', {
-          defaultMessage: 'Data {urlParam} must not have legacy "{legacyContext}" and "{bodyQueryConfigName}" values at the same time',
+          defaultMessage: 'Data {urlParam} must not have legacy "{legacyContext}" and {bodyQueryConfigName} values at the same time',
           values: {
             legacyContext: LEGACY_CONTEXT,
-            bodyQueryConfigName: 'body.query',
+            bodyQueryConfigName: '"body.query"',
             urlParam: 'url',
           },
         }));
@@ -89,8 +89,8 @@ export class EsQueryParser {
       } else if (legacyContext !== true && (typeof legacyContext !== 'string' || legacyContext.length === 0)) {
         throw new Error(i18n.translate('vega.esQueryParser.legacyContextCanBeTrueErrorMessage', {
           // eslint-disable-next-line max-len
-          defaultMessage: 'Legacy "{legacyContext}" can either be {trueValue} (ignores time range picker), or it can be the name of the time field, e.g. "@timestamp"',
-          values: { legacyContext: LEGACY_CONTEXT, trueValue: 'true' },
+          defaultMessage: 'Legacy "{legacyContext}" can either be {trueValue} (ignores time range picker), or it can be the name of the time field, e.g. {timestampParam}',
+          values: { legacyContext: LEGACY_CONTEXT, trueValue: 'true', timestampParam: '"@timestamp"' },
         }));
       }
 
