@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiSpacer,
   EuiPanel,
@@ -104,6 +105,7 @@ export class ImportView extends Component {
         reading: true,
         initialized: true,
       }, () => {
+        this.props.hideBottomBar();
         setTimeout(async () => {
           let success = false;
 
@@ -187,6 +189,7 @@ export class ImportView extends Component {
             }
           }
 
+          this.props.showBottomBar();
           this.setState({
             importing: false,
             imported: success,
@@ -320,7 +323,10 @@ export class ImportView extends Component {
         <EuiPanel>
 
           <EuiTitle size="s">
-            <h3>Import data</h3>
+            <h3>
+              Import data &nbsp;
+              <EuiBetaBadge label="Experimental" tooltipContent="Experimental feature. We'd love to hear your feedback." />
+            </h3>
           </EuiTitle>
 
           <ImportSettings
@@ -350,6 +356,7 @@ export class ImportView extends Component {
               onClick={this.clickImport}
               isLoading={importing}
               iconSide="right"
+              fill
             >
               Import
             </EuiButton>

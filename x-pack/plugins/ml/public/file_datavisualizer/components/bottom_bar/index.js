@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid/v4';
 
-export const insecureAuthRoute = `/api/canvas/ar-${uuid()}`;
+export { BottomBar } from './bottom_bar';

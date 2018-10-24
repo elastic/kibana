@@ -27,36 +27,12 @@ export class EditFlyout extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      isFlyoutVisible: false,
-    };
-
     this.applyOverrides = () => {};
-  }
-
-  componentDidMount() {
-    if (typeof this.props.setShowFunction === 'function') {
-      this.props.setShowFunction(this.showFlyout);
-    }
-  }
-
-  componentWillUnmount() {
-    if (typeof this.props.unsetShowFunction === 'function') {
-      this.props.unsetShowFunction();
-    }
-  }
-
-  closeFlyout = () => {
-    this.setState({ isFlyoutVisible: false });
-  }
-
-  showFlyout = () => {
-    this.setState({ isFlyoutVisible: true });
   }
 
   applyAndClose = () => {
     this.applyOverrides();
-    this.closeFlyout();
+    this.props.closeEditFlyout();
   }
 
   setApplyOverrides = (applyOverrides) => {
@@ -67,7 +43,7 @@ export class EditFlyout extends Component {
   }
 
   render() {
-    const { isFlyoutVisible } = this.state;
+    const { isFlyoutVisible, closeEditFlyout } = this.props;
     const {
       setOverrides,
       overrides,
@@ -81,7 +57,7 @@ export class EditFlyout extends Component {
 
           <EuiFlyout
             // ownFocus
-            onClose={this.closeFlyout}
+            onClose={closeEditFlyout}
             size="m"
           >
             <EuiFlyoutHeader>
@@ -113,7 +89,7 @@ export class EditFlyout extends Component {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     iconType="cross"
-                    onClick={this.closeFlyout}
+                    onClick={closeEditFlyout}
                     flush="left"
                   >
                     Close
