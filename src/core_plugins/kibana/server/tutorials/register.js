@@ -60,6 +60,7 @@ import { golangMetricsSpecProvider } from './golang_metrics';
 import { logstashMetricsSpecProvider } from './logstash_metrics';
 import { prometheusMetricsSpecProvider } from './prometheus_metrics';
 import { zookeeperMetricsSpecProvider } from './zookeeper_metrics';
+import { uptimeMonitorsSpecProvider } from './uptime_monitors';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -105,4 +106,5 @@ export function registerTutorials(server) {
   server.registerTutorial(logstashMetricsSpecProvider);
   server.registerTutorial(prometheusMetricsSpecProvider);
   server.registerTutorial(zookeeperMetricsSpecProvider);
+  server.registerTutorial(uptimeMonitorsSpecProvider);
 }
