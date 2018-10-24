@@ -1464,7 +1464,8 @@ function getEventDistributionData(
             {
               random_score: {
                 // static seed to get same randomized results on every request
-                seed: 'ml'
+                seed: 10,
+                field: '_seq_no'
               }
             }
           ]
