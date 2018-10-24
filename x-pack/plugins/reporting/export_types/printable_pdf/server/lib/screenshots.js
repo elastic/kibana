@@ -29,11 +29,11 @@ export function screenshotsObservableFactory(server) {
     return result;
   };
 
-  const openUrl = async (browser, url, headers) => {
+  const openUrl = async (browser, url, sessionCookie) => {
     const waitForSelector = '.application';
 
     await browser.open(url, {
-      headers,
+      sessionCookie,
       waitForSelector,
     });
   };
@@ -137,7 +137,10 @@ export function screenshotsObservableFactory(server) {
         // we wait for the event loop to flush before telling reporting to continue. This
         // seems to correct a timing issue that was causing reporting to occasionally
         // capture the first visualization before it was actually in the DOM.
-        const hackyWaitForVisualizations = () => new Promise(r => setTimeout(r, 100));
+        // Note: 100 proved too short, see https://github.com/elastic/kibana/issues/22581,
+        // bumping to 250.
+        const hackyWaitForVisualizations = () => new Promise(r => setTimeout(r, 250));
+
 
         return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
       },
@@ -223,7 +226,7 @@ export function screenshotsObservableFactory(server) {
     return screenshots;
   };
 
-  return function screenshotsObservable(url, headers, layout, browserTimezone) {
+  return function screenshotsObservable(url, sessionCookie, layout, browserTimezone) {
 
     return Rx.defer(async () => await getPort()).pipe(
       mergeMap(bridgePort => {
@@ -251,7 +254,7 @@ export function screenshotsObservableFactory(server) {
         const screenshot$ = driver$.pipe(
           tap(() => logger.debug(`opening ${url}`)),
           mergeMap(
-            browser => openUrl(browser, url, headers),
+            browser => openUrl(browser, url, sessionCookie),
             browser => browser
           ),
           tap(() => logger.debug('injecting custom css')),

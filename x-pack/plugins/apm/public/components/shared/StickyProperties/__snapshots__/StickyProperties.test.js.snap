@@ -2,46 +2,25 @@
 
 exports[`StickyProperties should render 1`] = `
 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  padding: 0 24px;
-  width: 100%;
-  -webkit-box-pack: start;
-  -webkit-justify-content: flex-start;
-  -ms-flex-pack: start;
-  justify-content: flex-start;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-}
-
-.c1 {
-  width: 33%;
-  margin-bottom: 16px;
-}
-
-.c2 {
   margin-bottom: 8px;
   font-size: 12px;
   color: #999999;
 }
 
-.c2 span {
+.c0 span {
   cursor: help;
 }
 
-.c4 {
+.c2 {
   color: #999999;
 }
 
-.c3 {
+.c1 {
   display: inline-block;
   line-height: 16px;
 }
 
-.c5 {
+.c3 {
   display: inline-block;
   line-height: 16px;
   max-width: 100%;
@@ -51,13 +30,25 @@ exports[`StickyProperties should render 1`] = `
 }
 
 <div
-  className="c0"
+  className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  style={
+    Object {
+      "marginBottom": "-1em",
+      "marginTop": "-1em",
+    }
+  }
 >
   <div
-    className="c1"
+    className="euiFlexItem"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
   >
     <div
-      className="c2"
+      className="c0"
     >
       <span
         aria-describedby="overlay1"
@@ -68,12 +59,12 @@ exports[`StickyProperties should render 1`] = `
       </span>
     </div>
     <div
-      className="c3"
+      className="c1"
     >
       1337 minutes ago (mocking 1536405447)
        
       <span
-        className="c4"
+        className="c2"
       >
         (
         1st of January (mocking 1536405447)
@@ -82,10 +73,16 @@ exports[`StickyProperties should render 1`] = `
     </div>
   </div>
   <div
-    className="c1"
+    className="euiFlexItem"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
   >
     <div
-      className="c2"
+      className="c0"
     >
       <span
         aria-describedby="overlay2"
@@ -97,7 +94,7 @@ exports[`StickyProperties should render 1`] = `
     </div>
     <span
       aria-describedby="overlay3"
-      className="c5"
+      className="c3"
       onMouseOut={[Function]}
       onMouseOver={[Function]}
     >
@@ -105,10 +102,16 @@ exports[`StickyProperties should render 1`] = `
     </span>
   </div>
   <div
-    className="c1"
+    className="euiFlexItem"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
   >
     <div
-      className="c2"
+      className="c0"
     >
       <span
         aria-describedby="overlay4"
@@ -119,16 +122,22 @@ exports[`StickyProperties should render 1`] = `
       </span>
     </div>
     <div
-      className="c3"
+      className="c1"
     >
       GET
     </div>
   </div>
   <div
-    className="c1"
+    className="euiFlexItem"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
   >
     <div
-      className="c2"
+      className="c0"
     >
       <span
         aria-describedby="overlay5"
@@ -139,16 +148,22 @@ exports[`StickyProperties should render 1`] = `
       </span>
     </div>
     <div
-      className="c3"
+      className="c1"
     >
       true
     </div>
   </div>
   <div
-    className="c1"
+    className="euiFlexItem"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
   >
     <div
-      className="c2"
+      className="c0"
     >
       <span
         aria-describedby="overlay6"
@@ -159,7 +174,7 @@ exports[`StickyProperties should render 1`] = `
       </span>
     </div>
     <div
-      className="c3"
+      className="c1"
     >
       1337
     </div>

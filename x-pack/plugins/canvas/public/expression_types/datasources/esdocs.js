@@ -115,7 +115,7 @@ EsdocsDatasource.propTypes = {
 
 export const esdocs = () => ({
   name: 'esdocs',
-  displayName: 'Elasticsearch Raw Documents',
+  displayName: 'Elasticsearch raw documents',
   help: 'Pull back raw documents from elasticsearch',
   image: 'logoElasticsearch',
   template: templateFromReactComponent(EsdocsDatasource),

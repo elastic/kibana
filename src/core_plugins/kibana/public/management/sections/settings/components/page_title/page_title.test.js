@@ -17,12 +17,12 @@
  * under the License.
  */
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { PageTitle } from './page_title';
 
 describe('PageTitle', () => {
   it('should render normally', () => {
-    expect(shallow(<PageTitle />)).toMatchSnapshot();
+    expect(shallowWithIntl(<PageTitle />)).toMatchSnapshot();
   });
 });
