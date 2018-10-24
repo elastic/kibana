@@ -40,7 +40,7 @@ interface State {
   deleteInProgress: boolean;
 }
 
-export class ConfirmDeleteModalUI extends Component<Props, State> {
+class ConfirmDeleteModalUI extends Component<Props, State> {
   public state = {
     confirmSpaceName: '',
     error: null,
@@ -61,7 +61,7 @@ export class ConfirmDeleteModalUI extends Component<Props, State> {
         <EuiCallOut color="warning">
           <EuiText>
             <FormattedMessage
-              id="xpack.spaces.view.management.confirmDeleteButton.redirectTitle"
+              id="xpack.spaces.view.management.confirmDeleteModal.redirectTitle"
               defaultMessage="You are about to delete your current space {name}. You will be redirected to choose a different space if you continue."
               values={{ name }}
             />
@@ -79,7 +79,7 @@ export class ConfirmDeleteModalUI extends Component<Props, State> {
           <EuiModalHeader>
             <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
               <FormattedMessage
-                id="xpack.spaces.view.management.confirmDeleteButton.confirmDeletingButton"
+                id="xpack.spaces.view.management.confirmDeleteModal.confirmDeletingButtonLabel"
                 defaultMessage="Delete space {spaceName}"
                 values={{
                   spaceName: "'" + space.name + "'",
@@ -91,13 +91,13 @@ export class ConfirmDeleteModalUI extends Component<Props, State> {
             <EuiText data-test-subj="confirmModalBodyText">
               <p>
                 <FormattedMessage
-                  id="xpack.spaces.view.management.confirmDeleteButton.permanentlyRemovingAllSpacesTitle"
+                  id="xpack.spaces.view.management.confirmDeleteModal.permanentlyRemovingAllSpacesTitle"
                   defaultMessage="Deleting a space permanently removes the space and {allContents}. You can't undo this action."
                   values={{
                     allContents: (
                       <strong>
                         <FormattedMessage
-                          id="xpack.spaces.view.management.confirmDeleteButton.allContentsTitle"
+                          id="xpack.spaces.view.management.confirmDeleteModal.allContentsTitle"
                           defaultMessage="all of its contents"
                         />
                       </strong>
@@ -108,12 +108,12 @@ export class ConfirmDeleteModalUI extends Component<Props, State> {
 
               <EuiFormRow
                 label={intl.formatMessage({
-                  id: 'xpack.spaces.view.management.confirmDeleteButton.confirmSpaceNameTitle',
+                  id: 'xpack.spaces.view.management.confirmDeleteModal.confirmSpaceNameTitle',
                   defaultMessage: 'Confirm space name',
                 })}
                 isInvalid={!!this.state.error}
                 error={intl.formatMessage({
-                  id: 'xpack.spaces.view.management.confirmDeleteButton.dontMatchSpaceNamesTitle',
+                  id: 'xpack.spaces.view.management.confirmDeleteModal.dontMatchSpaceNamesTitle',
                   defaultMessage: 'Space names do not match.',
                 })}
               >
@@ -134,7 +134,7 @@ export class ConfirmDeleteModalUI extends Component<Props, State> {
               isDisabled={this.state.deleteInProgress}
             >
               <FormattedMessage
-                id="xpack.spaces.view.management.confirmDeleteButton.cancellationTitle"
+                id="xpack.spaces.view.management.confirmDeleteModal.cancellationTitle"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -147,7 +147,7 @@ export class ConfirmDeleteModalUI extends Component<Props, State> {
               isLoading={this.state.deleteInProgress}
             >
               <FormattedMessage
-                id="xpack.spaces.view.management.confirmDeleteButton.deletingAllContentTitle"
+                id="xpack.spaces.view.management.confirmDeleteModal.deletingAllContentTitle"
                 defaultMessage=" Delete space and all contents"
               />
             </EuiButton>

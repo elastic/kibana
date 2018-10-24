@@ -27,7 +27,7 @@ interface State {
   showConfirmRedirectModal: boolean;
 }
 
-export class DeleteSpacesButtonUI extends Component<Props, State> {
+class DeleteSpacesButtonUI extends Component<Props, State> {
   public state = {
     showConfirmDeleteModal: false,
     showConfirmRedirectModal: false,
@@ -36,7 +36,7 @@ export class DeleteSpacesButtonUI extends Component<Props, State> {
   public render() {
     const buttonText = (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.deleteSpaceButton.deleteSpaceTitle"
+        id="xpack.spaces.view.management.editSpace.deleteSpacesButton.deleteSpaceTitle"
         defaultMessage="Delete space"
       />
     );
@@ -57,7 +57,7 @@ export class DeleteSpacesButtonUI extends Component<Props, State> {
           color={'danger'}
           onClick={this.onDeleteClick}
           aria-label={intl.formatMessage({
-            id: 'xpack.spaces.view.management.editSpace.deleteSpaceButton.deleteSpaceAriaLabel',
+            id: 'xpack.spaces.view.management.editSpace.deleteSpacesButton.deleteSpaceAriaLabel',
             defaultMessage: 'Delete this space',
           })}
           {...extraProps}
@@ -108,7 +108,7 @@ export class DeleteSpacesButtonUI extends Component<Props, State> {
       toastNotifications.addDanger(
         intl.formatMessage(
           {
-            id: 'xpack.spaces.view.management.editSpace.deleteSpaceButton.deleteSpaceErrorTitle',
+            id: 'xpack.spaces.view.management.editSpace.deleteSpacesButton.deleteSpaceErrorTitle',
             defaultMessage: 'Error deleting space: {errorMessage}',
           },
           {
@@ -124,7 +124,7 @@ export class DeleteSpacesButtonUI extends Component<Props, State> {
 
     const message = intl.formatMessage(
       {
-        id: 'xpack.spaces.view.management.editSpace.deleteSpaceButton.deleteSpaceNameTitle',
+        id: 'xpack.spaces.view.management.editSpace.deleteSpacesButton.deleteSpaceNameTitle',
         defaultMessage: 'Deleted {spaceName} space.',
       },
       {

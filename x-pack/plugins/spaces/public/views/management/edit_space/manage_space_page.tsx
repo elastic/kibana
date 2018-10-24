@@ -57,7 +57,7 @@ interface State {
   };
 }
 
-export class ManageSpacePageUI extends Component<Props, State> {
+class ManageSpacePageUI extends Component<Props, State> {
   private readonly validator: SpaceValidator;
 
   constructor(props: Props) {
@@ -163,7 +163,7 @@ export class ManageSpacePageUI extends Component<Props, State> {
                 name="name"
                 placeholder={intl.formatMessage({
                   id:
-                    'xpack.spaces.view.management.editSpace.manageSpacePage.awesomeSpacePlaceHolder',
+                    'xpack.spaces.view.management.editSpace.manageSpacePage.awesomeSpacePlaceholder',
                   defaultMessage: 'Awesome space',
                 })}
                 value={name}
@@ -209,7 +209,7 @@ export class ManageSpacePageUI extends Component<Props, State> {
             name="description"
             placeholder={intl.formatMessage({
               id:
-                'xpack.spaces.view.management.editSpace.manageSpacePage.hereMagicHappensPlaceHolder',
+                'xpack.spaces.view.management.editSpace.manageSpacePage.hereMagicHappensPlaceholder',
               defaultMessage: 'This is where the magic happens',
             })}
             value={description}
@@ -238,14 +238,14 @@ export class ManageSpacePageUI extends Component<Props, State> {
     if (this.editingExistingSpace()) {
       return (
         <FormattedMessage
-          id="xpack.spaces.view.management.editSpace.manageSpacePage.editSpaceButton"
+          id="xpack.spaces.view.management.editSpace.manageSpacePage.editSpaceButtonLabel"
           defaultMessage="Edit space"
         />
       );
     }
     return (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.manageSpacePage.createSpaceButton"
+        id="xpack.spaces.view.management.editSpace.manageSpacePage.createSpaceButtonLabel"
         defaultMessage="Create space"
       />
     );
@@ -261,12 +261,12 @@ export class ManageSpacePageUI extends Component<Props, State> {
   public getFormButtons = () => {
     const saveText = this.editingExistingSpace() ? (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.manageSpacePage.updateSpaceButton"
+        id="xpack.spaces.view.management.editSpace.manageSpacePage.updateSpaceButtonLabel"
         defaultMessage="Update space"
       />
     ) : (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.manageSpacePage.createSpaceButton"
+        id="xpack.spaces.view.management.editSpace.manageSpacePage.createSpaceButtonLabel"
         defaultMessage="Create space"
       />
     );
@@ -280,7 +280,7 @@ export class ManageSpacePageUI extends Component<Props, State> {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={this.backToSpacesList} data-test-subj="cancel-space-button">
             <FormattedMessage
-              id="xpack.spaces.view.management.editSpace.manageSpacePage.cancelButton"
+              id="xpack.spaces.view.management.editSpace.manageSpacePage.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>

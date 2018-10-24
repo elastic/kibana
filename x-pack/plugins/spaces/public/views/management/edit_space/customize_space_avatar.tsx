@@ -22,7 +22,7 @@ interface State {
   pendingInitials?: string | null;
 }
 
-export class CustomizeSpaceAvatarUI extends Component<Props, State> {
+class CustomizeSpaceAvatarUI extends Component<Props, State> {
   private initialsRef: HTMLInputElement | null = null;
 
   constructor(props: Props) {

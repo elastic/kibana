@@ -25,7 +25,7 @@ interface State {
   editing: boolean;
 }
 
-export class SpaceIdentifierUI extends Component<Props, State> {
+class SpaceIdentifierUI extends Component<Props, State> {
 
   private textFieldRef: HTMLInputElement | null = null;
 

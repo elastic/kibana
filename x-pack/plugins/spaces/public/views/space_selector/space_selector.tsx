@@ -36,7 +36,7 @@ interface State {
   spaces: Space[];
 }
 
-export class SpaceSelectorUI extends Component<Props, State> {
+class SpaceSelectorUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
@@ -118,7 +118,7 @@ export class SpaceSelectorUI extends Component<Props, State> {
                   <p>
                     <FormattedMessage
                       id="xpack.spaces.view.spaceSelector.spaceSelector.youCanChangeSpaceAnytimeTitle"
-                      defaultMessage="You can change your spacasdasdasde at anytime."
+                      defaultMessage="You can change your space at anytime."
                     />
                   </p>
                 </EuiText>

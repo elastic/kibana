@@ -33,7 +33,7 @@ export class ManageSpacesButton extends Component<Props, {}> {
         style={this.props.style}
       >
         <FormattedMessage
-          id="xpack.spaces.managementSpacesButton.manageSpacesButton"
+          id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"
           defaultMessage="Manage spaces"
         />
       </EuiButton>

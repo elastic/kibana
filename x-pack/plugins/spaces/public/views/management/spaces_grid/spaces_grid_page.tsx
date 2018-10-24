@@ -47,7 +47,7 @@ interface State {
   error: Error | null;
 }
 
-export class SpacesGridPageUI extends Component<Props, State> {
+class SpacesGridPageUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -107,7 +107,7 @@ export class SpacesGridPageUI extends Component<Props, State> {
           search={{
             box: {
               placeholder: intl.formatMessage({
-                id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.searchPlaceHolder',
+                id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.searchPlaceholder',
                 defaultMessage: 'Search',
               }),
             },
@@ -137,7 +137,7 @@ export class SpacesGridPageUI extends Component<Props, State> {
         }}
       >
         <FormattedMessage
-          id="xpack.spaces.view.management.spacesGrid.spacesGridPage.createSpaceButton"
+          id="xpack.spaces.view.management.spacesGrid.spacesGridPage.createSpaceButtonLabel"
           defaultMessage="Create space"
         />
       </EuiButton>

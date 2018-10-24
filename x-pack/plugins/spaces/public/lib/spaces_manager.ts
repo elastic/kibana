@@ -67,10 +67,10 @@ export class SpacesManager extends EventEmitter {
 
   public _displayError() {
     toastNotifications.addDanger({
-      title: i18n.translate('xpack.spaces.lib.spacesManagement.unableChangeSpaceTitle', {
+      title: i18n.translate('xpack.spaces.lib.spacesManager.unableToChangeSpaceWarningTitle', {
         defaultMessage: 'Unable to change your Space',
       }),
-      text: i18n.translate('xpack.spaces.lib.spacesManagement.retryChangeLaterTitle', {
+      text: i18n.translate('xpack.spaces.lib.spacesManager.unableToChangeSpaceWarningDescription', {
         defaultMessage: 'please try again later',
       }),
     });

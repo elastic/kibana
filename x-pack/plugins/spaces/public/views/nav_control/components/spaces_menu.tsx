@@ -25,7 +25,7 @@ interface State {
   allowSpacesListFocus: boolean;
 }
 
-export class SpacesMenuUI extends Component<Props, State> {
+class SpacesMenuUI extends Component<Props, State> {
   public state = {
     searchTerm: '',
     allowSpacesListFocus: false,
