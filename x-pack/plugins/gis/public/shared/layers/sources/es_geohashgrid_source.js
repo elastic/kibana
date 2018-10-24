@@ -309,7 +309,6 @@ class Editor extends React.Component {
     return (
       <EuiFormRow
         label="Geospatial field"
-        compressed
       >
         <SingleFieldSelect
           placeholder="Select geo field"
@@ -332,7 +331,6 @@ class Editor extends React.Component {
 
         <EuiFormRow
           label="Index pattern"
-          compressed
         >
           <IndexPatternSelect
             indexPatternId={this.state.indexPatternId}

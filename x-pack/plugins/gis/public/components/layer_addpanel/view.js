@@ -202,10 +202,7 @@ export class AddLayerPanel extends React.Component {
     ];
 
     return (
-      <EuiFormRow
-        label="Source"
-        compressed
-      >
+      <EuiFormRow label="Source">
         <EuiSuperSelect
           itemClassName="sourceSelectItem"
           options={this.sourceOptions}

@@ -77,8 +77,9 @@
   display: none
 }
 
+// HOTFIX coming from EUI
 .sourceSelectItem {
-  width: 400px;
+  width: 374px;
 }
 
 .mapboxgl-popup {
@@ -141,4 +142,10 @@
 
 .euiColorPicker__emptySwatch {
   position: relative;
+}
+
+.euiComboBox {
+  .euiComboBox__inputWrap {
+    display: flex;
+  }
 }

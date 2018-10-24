@@ -80,10 +80,8 @@ export class ALayer {
     return (
       <EuiFormRow
         label="Layer display name"
-        fullWidth
       >
         <EuiFieldText
-          fullWidth
           value={seedLabel}
           onChange={(event) => {onLabelChange(event.target.value);}}
         />
