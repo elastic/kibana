@@ -8,7 +8,6 @@ import { constant } from 'lodash';
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 // @ts-ignore
 import template from 'plugins/spaces/views/nav_control/nav_control.html';
-import 'plugins/spaces/views/nav_control/nav_control.less';
 import { NavControlPopover } from 'plugins/spaces/views/nav_control/nav_control_popover';
 import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
 import React from 'react';
