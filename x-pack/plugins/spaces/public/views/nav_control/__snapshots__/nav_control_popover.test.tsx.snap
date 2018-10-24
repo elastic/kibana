@@ -25,11 +25,12 @@ exports[`NavControlPopover renders without crashing 1`] = `
   closePopover={[Function]}
   data-test-subj="spacesNavSelector"
   hasArrow={true}
-  id="spacesMenuPopover"
+  id="spcMenuPopover"
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
   repositionOnScroll={true}
+  withTitle={true}
 >
   <Component
     onManageSpacesClick={[Function]}
