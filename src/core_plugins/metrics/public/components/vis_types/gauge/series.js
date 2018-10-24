@@ -28,8 +28,9 @@ import { EuiToolTip } from '@elastic/eui';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
 import { createUpDownHandler } from '../../lib/sort_keyhandler';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-function GaugeSeries(props) {
+function GaugeSeriesUi(props) {
   const {
     panel,
     fields,
@@ -39,7 +40,8 @@ function GaugeSeries(props) {
     disableDelete,
     disableAdd,
     selectedTab,
-    visible
+    visible,
+    intl
   } = props;
 
   const defaults = { label: '' };
@@ -103,7 +105,11 @@ function GaugeSeries(props) {
             aria-selected={selectedTab === 'metrics'}
             className={metricsClassName}
             onClick={() => props.switchTab('metrics')}
-          >Metrics
+          >
+            <FormattedMessage
+              id="metrics.gauge.dataTab.metricsButtonLabel"
+              defaultMessage="Metrics"
+            />
           </button>
           <button
             role="tab"
@@ -111,7 +117,11 @@ function GaugeSeries(props) {
             aria-selected={selectedTab === 'options'}
             className={optionsClassname}
             onClick={() => props.switchTab('options')}
-          >Options
+          >
+            <FormattedMessage
+              id="metrics.gauge.optionsTab.optionsButtonLabel"
+              defaultMessage="Options"
+            />
           </button>
         </div>
         {seriesBody}
@@ -131,10 +141,16 @@ function GaugeSeries(props) {
   let dragHandle;
   if (!props.disableDelete) {
     dragHandle = (
-      <EuiToolTip content="Sort">
+      <EuiToolTip content={
+        (<FormattedMessage
+          id="metrics.gauge.sort.sortTooltip"
+          defaultMessage="Sort"
+        />)
+      }
+      >
         <button
           className="vis_editor__sort thor__button-outlined-default sm"
-          aria-label="Sort series by pressing up/down"
+          aria-label={intl.formatMessage({ id: 'metrics.gauge.sort.sortAriaLabel', defaultMessage: 'Sort series by pressing up/down' })}
           onKeyDown={createUpDownHandler(props.onShouldSortItem)}
         >
           <i className="fa fa-sort" />
@@ -155,7 +171,7 @@ function GaugeSeries(props) {
           <button
             className="vis_editor__series-visibility-toggle"
             onClick={props.toggleVisible}
-            aria-label="Toggle series editor"
+            aria-label={intl.formatMessage({ id: 'metrics.gauge.editor.toggleEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
             aria-expanded={props.visible}
           >
             <i className={caretClassName}/>
@@ -165,15 +181,15 @@ function GaugeSeries(props) {
             <input
               className="vis_editor__input-grows"
               onChange={handleChange('label')}
-              placeholder="Label"
+              placeholder={intl.formatMessage({ id: 'metrics.gauge.editor.labelPlaceholder', defaultMessage: 'Label' })}
               value={model.label}
             />
           </div>
           { dragHandle }
           <AddDeleteButtons
-            addTooltip="Add Series"
-            deleteTooltip="Delete Series"
-            cloneTooltip="Clone Series"
+            addTooltip={intl.formatMessage({ id: 'metrics.gauge.editor.addSeriesTooltip', defaultMessage: 'Add Series' })}
+            deleteTooltip={intl.formatMessage({ id: 'metrics.gauge.editor.deleteSeriesTooltip', defaultMessage: 'Delete Series' })}
+            cloneTooltip={intl.formatMessage({ id: 'metrics.gauge.editor.cloneSeriesTooltip', defaultMessage: 'Clone Series' })}
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
@@ -188,7 +204,7 @@ function GaugeSeries(props) {
 
 }
 
-GaugeSeries.propTypes = {
+GaugeSeriesUi.propTypes = {
   className: PropTypes.string,
   colorPicker: PropTypes.bool,
   disableAdd: PropTypes.bool,
@@ -213,4 +229,5 @@ GaugeSeries.propTypes = {
   visible: PropTypes.bool
 };
 
+const GaugeSeries = injectI18n(GaugeSeriesUi);
 export default GaugeSeries;

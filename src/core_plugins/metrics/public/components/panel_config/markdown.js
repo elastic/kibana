@@ -34,8 +34,9 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 const lessC = less(window, { env: 'production' });
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-class MarkdownPanelConfig extends Component {
+class MarkdownPanelConfigUi extends Component {
 
   constructor(props) {
     super(props);
@@ -67,13 +68,23 @@ class MarkdownPanelConfig extends Component {
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
+    const { intl } = this.props;
 
     const htmlId = htmlIdGenerator();
 
     const alignOptions = [
-      { label: 'Top', value: 'top' },
-      { label: 'Middle', value: 'middle' },
-      { label: 'Bottom', value: 'bottom' }
+      {
+        label: intl.formatMessage({ id: 'metrics.markdown.alignOptions.topLabel', defaultMessage: 'Top' }),
+        value: 'top'
+      },
+      {
+        label: intl.formatMessage({ id: 'metrics.markdown.alignOptions.middleLabel', defaultMessage: 'Middle' }),
+        value: 'middle'
+      },
+      {
+        label: intl.formatMessage({ id: 'metrics.markdown.alignOptions.bottomLabel', defaultMessage: 'Bottom' }),
+        value: 'bottom'
+      }
     ];
     const selectedAlignOption = alignOptions.find(option => {
       return model.markdown_vertical_align === option.value;
@@ -100,14 +111,22 @@ class MarkdownPanelConfig extends Component {
             onChange={this.props.onChange}
           />
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Background Color</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.markdown.optionsTab.backgroundColorLabel"
+                defaultMessage="Background Color"
+              />
+            </div>
             <ColorPicker
               onChange={this.props.onChange}
               name="background_color"
               value={model.background_color}
             />
             <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
-              Panel Filter
+              <FormattedMessage
+                id="metrics.markdown.optionsTab.panelFilterLabel"
+                defaultMessage="Panel Filter"
+              />
             </label>
             <input
               id={htmlId('panelFilter')}
@@ -116,7 +135,12 @@ class MarkdownPanelConfig extends Component {
               onChange={handleTextChange('filter')}
               value={model.filter}
             />
-            <div className="vis_editor__label">Ignore Global Filter</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.markdown.optionsTab.ignoreGlobalFilterLabel"
+                defaultMessage="Ignore Global Filter"
+              />
+            </div>
             <YesNo
               value={model.ignore_global_filter}
               name="ignore_global_filter"
@@ -124,14 +148,22 @@ class MarkdownPanelConfig extends Component {
             />
           </div>
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Show Scrollbars</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.markdown.optionsTab.showScrollbarsLabel"
+                defaultMessage="Show Scrollbars"
+              />
+            </div>
             <YesNo
               value={model.markdown_scrollbars}
               name="markdown_scrollbars"
               onChange={this.props.onChange}
             />
             <label className="vis_editor__label" htmlFor={htmlId('valign')}>
-              Vertical Alignment
+              <FormattedMessage
+                id="metrics.markdown.optionsTab.verticalAlignmentLabel"
+                defaultMessage="Vertical Alignment"
+              />
             </label>
             <div className="vis_editor__row_item">
               <EuiComboBox
@@ -145,7 +177,12 @@ class MarkdownPanelConfig extends Component {
             </div>
           </div>
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Custom CSS (supports Less)</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.markdown.optionsTab.custoCSSLabel"
+                defaultMessage="Custom CSS (supports Less)"
+              />
+            </div>
           </div>
           <div className="vis_editor__ace-editor">
             <KuiCodeEditor
@@ -169,7 +206,11 @@ class MarkdownPanelConfig extends Component {
             aria-selected={selectedTab === 'markdown'}
             className={`kbnTabs__tab${selectedTab === 'markdown' && '-active' || ''}`}
             onClick={() => this.switchTab('markdown')}
-          >Markdown
+          >
+            <FormattedMessage
+              id="metrics.markdown.markdownTab.markdownButtonLabel"
+              defaultMessage="Markdown"
+            />
           </button>
           <button
             data-test-subj="markdownDataBtn"
@@ -177,14 +218,22 @@ class MarkdownPanelConfig extends Component {
             aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
-          >Data
+          >
+            <FormattedMessage
+              id="metrics.markdown.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </button>
           <button
             role="tab"
             aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
-          >Panel Options
+          >
+            <FormattedMessage
+              id="metrics.markdown.optionsTab.panelOptionsButtonLabel"
+              defaultMessage="Panel Options"
+            />
           </button>
         </div>
         {view}
@@ -193,7 +242,7 @@ class MarkdownPanelConfig extends Component {
   }
 }
 
-MarkdownPanelConfig.propTypes = {
+MarkdownPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
@@ -201,4 +250,5 @@ MarkdownPanelConfig.propTypes = {
   dateFormat: PropTypes.string
 };
 
+const MarkdownPanelConfig = injectI18n(MarkdownPanelConfigUi);
 export default MarkdownPanelConfig;

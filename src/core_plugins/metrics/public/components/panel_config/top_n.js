@@ -27,6 +27,7 @@ import ColorPicker from '../color_picker';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
 import { htmlIdGenerator } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class TopNPanelConfig extends Component {
 
@@ -70,8 +71,11 @@ class TopNPanelConfig extends Component {
         <div className="vis_editor__container">
           <div className="vis_editor__vis_config-row">
             <label className="vis_editor__label" htmlFor={htmlId('itemUrl')}>
-              Item Url (This supports mustache templating.
-              <code>{'{{key}}'}</code> is set to the term)
+              <FormattedMessage
+                id="metrics.topN.optionsTab.itemUrlLabel"
+                defaultMessage="Item Url (This supports mustache templating. {key} is set to the term)"
+                values={{ key: (<code>{'{{key}}'}</code>) }}
+              />
             </label>
             <input
               id={htmlId('itemUrl')}
@@ -86,14 +90,22 @@ class TopNPanelConfig extends Component {
             onChange={this.props.onChange}
           />
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Background Color</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.topN.optionsTab.backgroundColorLabel"
+                defaultMessage="Background Color"
+              />
+            </div>
             <ColorPicker
               onChange={this.props.onChange}
               name="background_color"
               value={model.background_color}
             />
             <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
-              Panel Filter
+              <FormattedMessage
+                id="metrics.topN.optionsTab.panelFilterLabel"
+                defaultMessage="Panel Filter"
+              />
             </label>
             <input
               id={htmlId('panelFilter')}
@@ -102,7 +114,12 @@ class TopNPanelConfig extends Component {
               onChange={handleTextChange('filter')}
               value={model.filter}
             />
-            <div className="vis_editor__label">Ignore Global Filter</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.topN.optionsTab.ignoreGlobalFilterLabel"
+                defaultMessage="Ignore Global Filter"
+              />
+            </div>
             <YesNo
               value={model.ignore_global_filter}
               name="ignore_global_filter"
@@ -110,7 +127,12 @@ class TopNPanelConfig extends Component {
             />
           </div>
           <div>
-            <div className="vis_editor__label">Color Rules</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.topN.optionsTab.colorRulesLabel"
+                defaultMessage="Color Rules"
+              />
+            </div>
           </div>
           <div className="vis_editor__vis_config-row">
             <ColorRules
@@ -133,14 +155,22 @@ class TopNPanelConfig extends Component {
             aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
-          >Data
+          >
+            <FormattedMessage
+              id="metrics.topN.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </button>
           <button
             role="tab"
             aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
-          >Panel Options
+          >
+            <FormattedMessage
+              id="metrics.topN.optionsTab.panelOptionsButtonLabel"
+              defaultMessage="Panel Options"
+            />
           </button>
         </div>
         {view}

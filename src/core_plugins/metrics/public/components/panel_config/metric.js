@@ -26,6 +26,7 @@ import ColorRules from '../color_rules';
 import YesNo from '../yes_no';
 import uuid from 'uuid';
 import { htmlIdGenerator } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class MetricPanelConfig extends Component {
 
@@ -75,7 +76,10 @@ class MetricPanelConfig extends Component {
           />
           <div className="vis_editor__vis_config-row">
             <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
-              Panel Filter
+              <FormattedMessage
+                id="metrics.metric.optionsTab.panelFilterLabel"
+                defaultMessage="Panel Filter"
+              />
             </label>
             <input
               id={htmlId('panelFilter')}
@@ -84,7 +88,12 @@ class MetricPanelConfig extends Component {
               onChange={handleTextChange('filter')}
               value={model.filter}
             />
-            <div className="vis_editor__label">Ignore Global Filter</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.metric.optionsTab.ignoreGlobalFilterLabel"
+                defaultMessage="Ignore Global Filter"
+              />
+            </div>
             <YesNo
               value={model.ignore_global_filter}
               name="ignore_global_filter"
@@ -92,7 +101,12 @@ class MetricPanelConfig extends Component {
             />
           </div>
           <div>
-            <div className="vis_editor__label">Color Rules</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.metric.optionsTab.colorRulesLabel"
+                defaultMessage="Color Rules"
+              />
+            </div>
           </div>
           <div className="vis_editor__vis_config-row">
             <ColorRules
@@ -112,14 +126,22 @@ class MetricPanelConfig extends Component {
             aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
-          >Data
+          >
+            <FormattedMessage
+              id="metrics.metric.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </button>
           <button
             role="tab"
             aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
-          >Panel Options
+          >
+            <FormattedMessage
+              id="metrics.metric.optionsTab.panelOptionsButtonLabel"
+              defaultMessage="Panel Options"
+            />
           </button>
         </div>
         {view}

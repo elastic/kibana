@@ -22,6 +22,7 @@ import createSelectHandler from '../lib/create_select_handler';
 import GroupBySelect from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SplitByFilter = props => {
   const { onChange } = props;
@@ -31,14 +32,24 @@ export const SplitByFilter = props => {
   const handleSelectChange = createSelectHandler(onChange);
   return (
     <div className="vis_editor__split-container">
-      <div className="vis_editor__label">Group By</div>
+      <div className="vis_editor__label">
+        <FormattedMessage
+          id="metrics.splits.filter.groupByLabel"
+          defaultMessage="Group By"
+        />
+      </div>
       <div className="vis_editor__split-selects">
         <GroupBySelect
           value={model.split_mode}
           onChange={handleSelectChange('split_mode')}
         />
       </div>
-      <div className="vis_editor__label">Query String</div>
+      <div className="vis_editor__label">
+        <FormattedMessage
+          id="metrics.splits.filter.queryStringLabel"
+          defaultMessage="Query String"
+        />
+      </div>
       <input
         className="vis_editor__split-filter"
         value={model.filter}

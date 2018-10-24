@@ -17,8 +17,8 @@
  * under the License.
  */
 
-const FetchFieldsProvider = (Notifier, $http) => {
-  const notify = new Notifier({ location: 'Metrics' });
+const FetchFieldsProvider = (Notifier, $http, i18n) => {
+  const notify = new Notifier({ location: i18n('metrics.fetchFields.notifier.locationNameTitle', { defaultMessage: 'Metrics' }) });
   return (indexPatterns = ['*']) => {
     if (!Array.isArray(indexPatterns)) indexPatterns = [indexPatterns];
     return new Promise((resolve, reject) => {

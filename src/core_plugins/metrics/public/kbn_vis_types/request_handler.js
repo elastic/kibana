@@ -22,9 +22,9 @@ import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_con
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
 
-const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http) {
+const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http, i18n) {
   const dashboardContext = Private(dashboardContextProvider);
-  const notify = new Notifier({ location: 'Metrics' });
+  const notify = new Notifier({ location: i18n('metrics.requestHandler.notifier.locationNameTitle', { defaultMessage: 'Metrics' }) });
 
   return {
     name: 'metrics',

@@ -22,13 +22,20 @@ import GroupBySelect from './group_by_select';
 import FilterItems from './filter_items';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 function SplitByFilters(props) {
   const { onChange, model } = props;
   const handleSelectChange = createSelectHandler(onChange);
   return(
     <div className="vis_editor__item">
       <div className="vis_editor__split-container">
-        <div className="vis_editor__label">Group By</div>
+        <div className="vis_editor__label">
+          <FormattedMessage
+            id="metrics.splits.filters.groupByLabel"
+            defaultMessage="Group By"
+          />
+        </div>
         <div className="vis_editor__split-selects">
           <GroupBySelect
             value={model.split_mode}

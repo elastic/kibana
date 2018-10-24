@@ -27,20 +27,33 @@ import MetricSelect from '../aggs/metric_select';
 import {
   EuiComboBox,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const SplitByTerms = props => {
+const SplitByTermsUi = props => {
   const handleTextChange = createTextHandler(props.onChange);
   const handleSelectChange = createSelectHandler(props.onChange);
-  const { indexPattern } = props;
+  const { indexPattern, intl } = props;
   const defaults = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
   const model = { ...defaults, ...props.model };
   const { metrics } = model;
-  const defaultCount = { value: '_count', label: 'Doc Count (default)' };
-  const terms = { value: '_term', label: 'Terms' };
+  const defaultCount = {
+    value: '_count',
+    label: intl.formatMessage({ id: 'metrics.splits.terms.defaultCountLabel', defaultMessage: 'Doc Count (default)' })
+  };
+  const terms = {
+    value: '_term',
+    label: intl.formatMessage({ id: 'metrics.splits.terms.termsLabel', defaultMessage: 'Terms' })
+  };
 
   const dirOptions = [
-    { value: 'desc', label: 'Descending' },
-    { value: 'asc', label: 'Ascending' },
+    {
+      value: 'desc',
+      label: intl.formatMessage({ id: 'metrics.splits.terms.dirOptions.descendingLabel', defaultMessage: 'Descending' })
+    },
+    {
+      value: 'asc',
+      label: intl.formatMessage({ id: 'metrics.splits.terms.dirOptions.ascendingLabel', defaultMessage: 'Ascending' })
+    },
   ];
   const selectedDirectionOption = dirOptions.find(option => {
     return model.terms_direction === option.value;
@@ -48,14 +61,24 @@ export const SplitByTerms = props => {
 
   return (
     <div className="vis_editor__split-container">
-      <div className="vis_editor__label">Group By</div>
+      <div className="vis_editor__label">
+        <FormattedMessage
+          id="metrics.splits.terms.groupByLabel"
+          defaultMessage="Group By"
+        />
+      </div>
       <div className="vis_editor__split-selects">
         <GroupBySelect
           value={model.split_mode}
           onChange={handleSelectChange('split_mode')}
         />
       </div>
-      <div className="vis_editor__label">By</div>
+      <div className="vis_editor__label">
+        <FormattedMessage
+          id="metrics.splits.terms.byLabel"
+          defaultMessage="By"
+        />
+      </div>
       <div className="vis_editor__item">
         <FieldSelect
           indexPattern={indexPattern}
@@ -64,15 +87,25 @@ export const SplitByTerms = props => {
           fields={props.fields}
         />
       </div>
-      <div className="vis_editor__label">Top</div>
+      <div className="vis_editor__label">
+        <FormattedMessage
+          id="metrics.splits.terms.topLabel"
+          defaultMessage="Top"
+        />
+      </div>
       <input
-        placeholder="Size..."
+        placeholder={intl.formatMessage({ id: 'metrics.splits.terms.top.sizePlaceholder', defaultMessage: 'Size…' })}
         type="number"
         value={model.terms_size}
         className="vis_editor__split-term_count"
         onChange={handleTextChange('terms_size')}
       />
-      <div className="vis_editor__label">Order By</div>
+      <div className="vis_editor__label">
+        <FormattedMessage
+          id="metrics.splits.terms.orderByLabel"
+          defaultMessage="Order By"
+        />
+      </div>
       <div className="vis_editor__split-aggs">
         <MetricSelect
           metrics={metrics}
@@ -83,7 +116,12 @@ export const SplitByTerms = props => {
           value={model.terms_order_by}
         />
       </div>
-      <div className="vis_editor__label">Direction</div>
+      <div className="vis_editor__label">
+        <FormattedMessage
+          id="metrics.splits.terms.directionLabel"
+          defaultMessage="Direction"
+        />
+      </div>
       <div className="vis_editor__split-aggs">
         <EuiComboBox
           isClearable={false}
@@ -97,9 +135,11 @@ export const SplitByTerms = props => {
   );
 };
 
-SplitByTerms.propTypes = {
+SplitByTermsUi.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   indexPattern: PropTypes.string,
   fields: PropTypes.object
 };
+
+export const SplitByTerms = injectI18n(SplitByTermsUi);

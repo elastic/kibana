@@ -30,8 +30,9 @@ import {
   htmlIdGenerator,
   EuiComboBox,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-class TimeseriesPanelConfig extends Component {
+class TimeseriesPanelConfigUi extends Component {
 
   constructor(props) {
     super(props);
@@ -55,24 +56,46 @@ class TimeseriesPanelConfig extends Component {
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
+    const { intl } = this.props;
+
     const positionOptions = [
-      { label: 'Right', value: 'right' },
-      { label: 'Left', value: 'left' }
+      {
+        label: intl.formatMessage({ id: 'metrics.timeseries.positionOptions.rightLabel', defaultMessage: 'Right' }),
+        value: 'right'
+      },
+      {
+        label: intl.formatMessage({ id: 'metrics.timeseries.positionOptions.leftLabel', defaultMessage: 'Left' }),
+        value: 'left'
+      }
     ];
     const selectedPositionOption = positionOptions.find(option => {
       return model.axis_position === option.value;
     });
     const scaleOptions = [
-      { label: 'Normal', value: 'normal' },
-      { label: 'Log', value: 'log' }
+      {
+        label: intl.formatMessage({ id: 'metrics.timeseries.scaleOptions.normalLabel', defaultMessage: 'Normal' }),
+        value: 'normal'
+      },
+      {
+        label: intl.formatMessage({ id: 'metrics.timeseries.scaleOptions.logLabel', defaultMessage: 'Log' }),
+        value: 'log' }
     ];
     const selectedAxisScaleOption = scaleOptions.find(option => {
       return model.axis_scale === option.value;
     });
     const legendPositionOptions = [
-      { label: 'Right', value: 'right' },
-      { label: 'Left', value: 'left' },
-      { label: 'Bottom', value: 'bottom' }
+      {
+        label: intl.formatMessage({ id: 'metrics.timeseries.legendPositionOptions.rightLabel', defaultMessage: 'Right' }),
+        value: 'right'
+      },
+      {
+        label: intl.formatMessage({ id: 'metrics.timeseries.legendPositionOptions.leftLabel', defaultMessage: 'Left' }),
+        value: 'left'
+      },
+      {
+        label: intl.formatMessage({ id: 'metrics.timeseries.legendPositionOptions.bottomLabel', defaultMessage: 'Bottom' }),
+        value: 'bottom'
+      }
     ];
     const selectedLegendPosOption = legendPositionOptions.find(option => {
       return model.legend_position === option.value;
@@ -106,7 +129,12 @@ class TimeseriesPanelConfig extends Component {
             onChange={this.props.onChange}
           />
           <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('axisMin')}>Axis Min</label>
+            <label className="vis_editor__label" htmlFor={htmlId('axisMin')}>
+              <FormattedMessage
+                id="metrics.timeseries.optionsTab.axisMinLabel"
+                defaultMessage="Axis Min"
+              />
+            </label>
             <input
               id={htmlId('axisMin')}
               className="vis_editor__input-grows"
@@ -114,7 +142,12 @@ class TimeseriesPanelConfig extends Component {
               onChange={handleTextChange('axis_min')}
               value={model.axis_min}
             />
-            <label className="vis_editor__label" htmlFor={htmlId('axisMax')}>Axis Max</label>
+            <label className="vis_editor__label" htmlFor={htmlId('axisMax')}>
+              <FormattedMessage
+                id="metrics.timeseries.optionsTab.axisMaxLabel"
+                defaultMessage="Axis Max"
+              />
+            </label>
             <input
               id={htmlId('axisMax')}
               className="vis_editor__input-grows"
@@ -122,7 +155,12 @@ class TimeseriesPanelConfig extends Component {
               onChange={handleTextChange('axis_max')}
               value={model.axis_max}
             />
-            <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>Axis Position</label>
+            <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>
+              <FormattedMessage
+                id="metrics.timeseries.optionsTab.axisPositionLabel"
+                defaultMessage="Axis Position"
+              />
+            </label>
             <div className="vis_editor__row_item">
               <EuiComboBox
                 isClearable={false}
@@ -133,7 +171,12 @@ class TimeseriesPanelConfig extends Component {
                 singleSelection={true}
               />
             </div>
-            <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>Axis Scale</label>
+            <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>
+              <FormattedMessage
+                id="metrics.timeseries.optionsTab.axisScaleLabel"
+                defaultMessage="Axis Scale"
+              />
+            </label>
             <div className="vis_editor__row_item">
               <EuiComboBox
                 isClearable={false}
@@ -146,19 +189,34 @@ class TimeseriesPanelConfig extends Component {
             </div>
           </div>
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Background Color</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.timeseries.optionsTab.backgroundColorLabel"
+                defaultMessage="Background Color"
+              />
+            </div>
             <ColorPicker
               onChange={this.props.onChange}
               name="background_color"
               value={model.background_color}
             />
-            <div className="vis_editor__label">Show Legend</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.timeseries.optionsTab.showLegendLabel"
+                defaultMessage="Show Legend"
+              />
+            </div>
             <YesNo
               value={model.show_legend}
               name="show_legend"
               onChange={this.props.onChange}
             />
-            <label className="vis_editor__label" htmlFor={htmlId('legendPos')}>Legend Position</label>
+            <label className="vis_editor__label" htmlFor={htmlId('legendPos')}>
+              <FormattedMessage
+                id="metrics.timeseries.optionsTab.legendPositionLabel"
+                defaultMessage="Legend Position"
+              />
+            </label>
             <div className="vis_editor__row_item">
               <EuiComboBox
                 isClearable={false}
@@ -169,7 +227,12 @@ class TimeseriesPanelConfig extends Component {
                 singleSelection={true}
               />
             </div>
-            <div className="vis_editor__label">Display Grid</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.timeseries.optionsTab.displayGridnLabel"
+                defaultMessage="Display Grid"
+              />
+            </div>
             <YesNo
               value={model.show_grid}
               name="show_grid"
@@ -177,7 +240,12 @@ class TimeseriesPanelConfig extends Component {
             />
           </div>
           <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>Panel Filter</label>
+            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
+              <FormattedMessage
+                id="metrics.timeseries.optionsTab.panelFilterLabel"
+                defaultMessage="Panel Filter"
+              />
+            </label>
             <input
               id={htmlId('panelFilter')}
               className="vis_editor__input-grows"
@@ -185,7 +253,12 @@ class TimeseriesPanelConfig extends Component {
               onChange={handleTextChange('filter')}
               value={model.filter}
             />
-            <div className="vis_editor__label">Ignore Global Filter</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.timeseries.optionsTab.ignoreGlobalFilterLabel"
+                defaultMessage="Ignore Global Filter"
+              />
+            </div>
             <YesNo
               value={model.ignore_global_filter}
               name="ignore_global_filter"
@@ -203,21 +276,33 @@ class TimeseriesPanelConfig extends Component {
             aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
-          >Data
+          >
+            <FormattedMessage
+              id="metrics.timeseries.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </button>
           <button
             role="tab"
             aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
-          >Panel Options
+          >
+            <FormattedMessage
+              id="metrics.timeseries.optionsTab.panelOptionsButtonLabel"
+              defaultMessage="Panel Options"
+            />
           </button>
           <button
             role="tab"
             aria-selected={selectedTab === 'annotations'}
             className={`kbnTabs__tab${selectedTab === 'annotations' && '-active' || ''}`}
             onClick={() => this.switchTab('annotations')}
-          >Annotations
+          >
+            <FormattedMessage
+              id="metrics.timeseries.annotationsTab.annotationsButtonLabel"
+              defaultMessage="Annotations"
+            />
           </button>
         </div>
         {view}
@@ -228,11 +313,12 @@ class TimeseriesPanelConfig extends Component {
 
 }
 
-TimeseriesPanelConfig.propTypes = {
+TimeseriesPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
   visData: PropTypes.object,
 };
 
+const TimeseriesPanelConfig = injectI18n(TimeseriesPanelConfigUi);
 export default TimeseriesPanelConfig;

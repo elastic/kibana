@@ -27,6 +27,7 @@ import createSelectHandler from '../lib/create_select_handler';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
 import { htmlIdGenerator } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class TablePanelConfig extends Component {
 
@@ -63,12 +64,19 @@ class TablePanelConfig extends Component {
             <div className="vis_editor__container">
               <div className="vis_editor__vis_config-row">
                 <p>
-                  For the table visualization you need to define a field to
-                  group by using a terms aggregation.
+                  <FormattedMessage
+                    id="metrics.table.dataTab.defineFieldDescription"
+                    defaultMessage="For the table visualization you need to define a field to group by using a terms aggregation."
+                  />
                 </p>
               </div>
               <div className="vis_editor__vis_config-row">
-                <label className="vis_editor__label" htmlFor={htmlId('field')}>Group By Field</label>
+                <label className="vis_editor__label" htmlFor={htmlId('field')}>
+                  <FormattedMessage
+                    id="metrics.table.dataTab.groupByFieldLabel"
+                    defaultMessage="Group By Field"
+                  />
+                </label>
                 <div className="vis_editor__row_item" data-test-subj="groupByField">
                   <FieldSelect
                     id={htmlId('field')}
@@ -78,7 +86,12 @@ class TablePanelConfig extends Component {
                     onChange={handleSelectChange('pivot_id')}
                   />
                 </div>
-                <label className="vis_editor__label" htmlFor={htmlId('pivotLabelInput')}>Column Label</label>
+                <label className="vis_editor__label" htmlFor={htmlId('pivotLabelInput')}>
+                  <FormattedMessage
+                    id="metrics.table.dataTab.columnLabel"
+                    defaultMessage="Column Label"
+                  />
+                </label>
                 <input
                   id={htmlId('pivotLabelInput')}
                   className="vis_editor__input-grows"
@@ -87,7 +100,12 @@ class TablePanelConfig extends Component {
                   onChange={handleTextChange('pivot_label')}
                   value={model.pivot_label}
                 />
-                <label className="vis_editor__label" htmlFor={htmlId('pivotRowsInput')}>Rows</label>
+                <label className="vis_editor__label" htmlFor={htmlId('pivotRowsInput')}>
+                  <FormattedMessage
+                    id="metrics.table.dataTab.rowsLabel"
+                    defaultMessage="Rows"
+                  />
+                </label>
                 <input
                   id={htmlId('pivotRowsInput')}
                   className="vis_editor__input-number"
@@ -110,8 +128,12 @@ class TablePanelConfig extends Component {
       view = (
         <div className="vis_editor__container">
           <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('drilldownInput')}>Item Url (This supports mustache templating.
-              <code>{'{{key}}'}</code> is set to the term)
+            <label className="vis_editor__label" htmlFor={htmlId('drilldownInput')}>
+              <FormattedMessage
+                id="metrics.table.optionsTab.itemUrlLabel"
+                defaultMessage="Item Url (This supports mustache templating. {key} is set to the term)"
+                values={{ key: (<code>{'{{key}}'}</code>) }}
+              />
             </label>
             <input
               id={htmlId('drilldownInput')}
@@ -126,7 +148,12 @@ class TablePanelConfig extends Component {
             onChange={this.props.onChange}
           />
           <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('panelFilterInput')}>Panel Filter</label>
+            <label className="vis_editor__label" htmlFor={htmlId('panelFilterInput')}>
+              <FormattedMessage
+                id="metrics.table.optionsTab.panelFilterLabel"
+                defaultMessage="Panel Filter"
+              />
+            </label>
             <input
               id={htmlId('panelFilterInput')}
               className="vis_editor__input-grows"
@@ -134,7 +161,12 @@ class TablePanelConfig extends Component {
               onChange={handleTextChange('filter')}
               value={model.filter}
             />
-            <label className="vis_editor__label" htmlFor={htmlId('globalFilterOption')}>Ignore Global Filter</label>
+            <label className="vis_editor__label" htmlFor={htmlId('globalFilterOption')}>
+              <FormattedMessage
+                id="metrics.table.optionsTab.ignoreGlobalFilterLabel"
+                defaultMessage="Ignore Global Filter"
+              />
+            </label>
             <YesNo
               id={htmlId('globalFilterOption')}
               value={model.ignore_global_filter}
@@ -152,13 +184,19 @@ class TablePanelConfig extends Component {
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
           >
-            Columns
+            <FormattedMessage
+              id="metrics.table.dataTab.columnsButtonLabel"
+              defaultMessage="Columns"
+            />
           </div>
           <div
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
           >
-            Panel Options
+            <FormattedMessage
+              id="metrics.table.optionsTab.panelOptionsButtonLabel"
+              defaultMessage="Panel Options"
+            />
           </div>
         </div>
         {view}

@@ -31,8 +31,9 @@ import {
   htmlIdGenerator,
   EuiComboBox,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-class GaugePanelConfig extends Component {
+class GaugePanelConfigUi extends Component {
 
   constructor(props) {
     super(props);
@@ -58,6 +59,7 @@ class GaugePanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
+    const { intl } = this.props;
     const defaults = {
       gauge_max: '',
       filter: '',
@@ -69,8 +71,16 @@ class GaugePanelConfig extends Component {
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const styleOptions = [
-      { label: 'Circle', value: 'circle' },
-      { label: 'Half Circle', value: 'half' }
+      {
+        label: intl.formatMessage({
+          id: 'metrics.gauge.styleOptions.circleLabel', defaultMessage: 'Circle' }),
+        value: 'circle'
+      },
+      {
+        label: intl.formatMessage({
+          id: 'metrics.gauge.styleOptions.halfCircleLabel', defaultMessage: 'Half Circle' }),
+        value: 'half'
+      }
     ];
     const htmlId = htmlIdGenerator();
     const selectedGaugeStyleOption = styleOptions.find(option => {
@@ -98,7 +108,10 @@ class GaugePanelConfig extends Component {
           />
           <div className="vis_editor__vis_config-row">
             <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
-              Panel Filter
+              <FormattedMessage
+                id="metrics.gauge.optionsTab.panelFilterLabel"
+                defaultMessage="Panel Filter"
+              />
             </label>
             <input
               id={htmlId('panelFilter')}
@@ -107,7 +120,12 @@ class GaugePanelConfig extends Component {
               onChange={handleTextChange('filter')}
               value={model.filter}
             />
-            <div className="vis_editor__label">Ignore Global Filter</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.gauge.optionsTab.ignoreGlobalFilterLabel"
+                defaultMessage="Ignore Global Filter"
+              />
+            </div>
             <YesNo
               value={model.ignore_global_filter}
               name="ignore_global_filter"
@@ -115,14 +133,22 @@ class GaugePanelConfig extends Component {
             />
           </div>
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Background Color</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.gauge.optionsTab.backgroundColorLabel"
+                defaultMessage="Background Color"
+              />
+            </div>
             <ColorPicker
               onChange={this.props.onChange}
               name="background_color"
               value={model.background_color}
             />
             <label className="vis_editor__label" htmlFor={htmlId('gaugeMax')}>
-              Gauge Max (empty for auto)
+              <FormattedMessage
+                id="metrics.gauge.optionsTab.gaugeMaxLabel"
+                defaultMessage="Gauge Max (empty for auto)"
+              />
             </label>
             <input
               id={htmlId('gaugeMax')}
@@ -132,7 +158,10 @@ class GaugePanelConfig extends Component {
               value={model.gauge_max}
             />
             <label className="vis_editor__label" htmlFor={htmlId('gaugeStyle')}>
-              Gauge Style
+              <FormattedMessage
+                id="metrics.gauge.optionsTab.gaugeStyleLabel"
+                defaultMessage="Gauge Style"
+              />
             </label>
             <EuiComboBox
               isClearable={false}
@@ -145,14 +174,22 @@ class GaugePanelConfig extends Component {
 
           </div>
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Inner Color</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.gauge.optionsTab.innerColorLabel"
+                defaultMessage="Inner Color"
+              />
+            </div>
             <ColorPicker
               onChange={this.props.onChange}
               name="gauge_inner_color"
               value={model.gauge_inner_color}
             />
             <label className="vis_editor__label" htmlFor={htmlId('innerLine')}>
-              Inner Line Width
+              <FormattedMessage
+                id="metrics.gauge.optionsTab.innerLineWidthLabel"
+                defaultMessage="Inner Line Width"
+              />
             </label>
             <input
               id={htmlId('innerLine')}
@@ -162,7 +199,10 @@ class GaugePanelConfig extends Component {
               value={model.gauge_inner_width}
             />
             <label className="vis_editor__label" htmlFor={htmlId('gaugeLine')}>
-              Gauge Line Width
+              <FormattedMessage
+                id="metrics.gauge.optionsTab.gaugerLineWidthLabel"
+                defaultMessage="Gauge Line Width"
+              />
             </label>
             <input
               id={htmlId('gaugeLine')}
@@ -173,7 +213,12 @@ class GaugePanelConfig extends Component {
             />
           </div>
           <div>
-            <div className="vis_editor__label">Color Rules</div>
+            <div className="vis_editor__label">
+              <FormattedMessage
+                id="metrics.gauge.optionsTab.colorRulesLabel"
+                defaultMessage="Color Rules"
+              />
+            </div>
           </div>
           <div className="vis_editor__vis_config-row">
             <ColorRules
@@ -197,14 +242,22 @@ class GaugePanelConfig extends Component {
             aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
-          >Data
+          >
+            <FormattedMessage
+              id="metrics.gauge.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </button>
           <button
             role="tab"
             aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
-          >Panel Options
+          >
+            <FormattedMessage
+              id="metrics.gauge.optionsTab.panelOptionsButtonLabel"
+              defaultMessage="Panel Options"
+            />
           </button>
         </div>
         {view}
@@ -214,11 +267,12 @@ class GaugePanelConfig extends Component {
 
 }
 
-GaugePanelConfig.propTypes = {
+GaugePanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
   visData: PropTypes.object,
 };
 
+const GaugePanelConfig = injectI18n(GaugePanelConfigUi);
 export default GaugePanelConfig;

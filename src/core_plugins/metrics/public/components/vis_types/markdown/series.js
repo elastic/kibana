@@ -25,8 +25,9 @@ import Sortable from 'react-anything-sortable';
 import Split from '../../split';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-function MarkdownSeries(props) {
+function MarkdownSeriesUi(props) {
   const {
     panel,
     fields,
@@ -36,7 +37,8 @@ function MarkdownSeries(props) {
     disableDelete,
     disableAdd,
     selectedTab,
-    visible
+    visible,
+    intl
   } = props;
 
   const defaults = { label: '', var_name: '' };
@@ -100,7 +102,11 @@ function MarkdownSeries(props) {
             aria-selected={selectedTab === 'metrics'}
             className={metricsClassName}
             onClick={() => props.switchTab('metrics')}
-          >Metrics
+          >
+            <FormattedMessage
+              id="metrics.markdown.dataTab.metricsButtonLabel"
+              defaultMessage="Metrics"
+            />
           </button>
           <button
             role="tab"
@@ -108,7 +114,11 @@ function MarkdownSeries(props) {
             aria-selected={selectedTab === 'metrics'}
             className={optionsClassname}
             onClick={() => props.switchTab('options')}
-          >Options
+          >
+            <FormattedMessage
+              id="metrics.markdown.optionsTab.optionsButtonLabel"
+              defaultMessage="Options"
+            />
           </button>
         </div>
         {seriesBody}
@@ -128,7 +138,7 @@ function MarkdownSeries(props) {
           <button
             className="vis_editor__series-visibility-toggle"
             onClick={props.toggleVisible}
-            aria-label="Toggle series editor"
+            aria-label={intl.formatMessage({ id: 'metrics.markdown.editor.toggleEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
             aria-expanded={props.visible}
           >
             <i className={caretClassName}/>
@@ -137,20 +147,20 @@ function MarkdownSeries(props) {
             <input
               className="vis_editor__input-grows vis_editor__row_item"
               onChange={handleChange('label')}
-              placeholder="Label"
+              placeholder={intl.formatMessage({ id: 'metrics.markdown.editor.labelPlaceholder', defaultMessage: 'Label' })}
               value={model.label}
             />
             <input
               className="vis_editor__input-grows"
               onChange={handleChange('var_name')}
-              placeholder="Variable Name"
+              placeholder={intl.formatMessage({ id: 'metrics.markdown.editor.variableNamePlaceholder', defaultMessage: 'Variable Name' })}
               value={model.var_name}
             />
           </div>
           <AddDeleteButtons
-            addTooltip="Add Series"
-            deleteTooltip="Delete Series"
-            cloneTooltip="Clone Series"
+            addTooltip={intl.formatMessage({ id: 'metrics.markdown.editor.addSeriesTooltip', defaultMessage: 'Add Series' })}
+            deleteTooltip={intl.formatMessage({ id: 'metrics.markdown.editor.deleteSeriesTooltip', defaultMessage: 'Delete Series' })}
+            cloneTooltip={intl.formatMessage({ id: 'metrics.markdown.editor.cloneSeriesTooltip', defaultMessage: 'Clone Series' })}
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
@@ -165,7 +175,7 @@ function MarkdownSeries(props) {
 
 }
 
-MarkdownSeries.propTypes = {
+MarkdownSeriesUi.propTypes = {
   className: PropTypes.string,
   colorPicker: PropTypes.bool,
   disableAdd: PropTypes.bool,
@@ -190,4 +200,5 @@ MarkdownSeries.propTypes = {
   visible: PropTypes.bool
 };
 
+const MarkdownSeries = injectI18n(MarkdownSeriesUi);
 export default MarkdownSeries;

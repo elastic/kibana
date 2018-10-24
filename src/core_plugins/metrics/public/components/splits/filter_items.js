@@ -24,7 +24,9 @@ import * as collectionActions from '../lib/collection_actions';
 import AddDeleteButtons from '../add_delete_buttons';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
-class FilterItems extends Component {
+import { injectI18n } from '@kbn/i18n/react';
+
+class FilterItemsUi extends Component {
 
   constructor(props) {
     super(props);
@@ -52,6 +54,8 @@ class FilterItems extends Component {
       .bind(null, this.props, newFilter);
     const handleDelete = collectionActions.handleDelete
       .bind(null, this.props, model);
+    const { intl } = this.props;
+
     return  (
       <div className="vis_editor__split-filter-row" key={model.id}>
         <div className="vis_editor__split-filter-color">
@@ -64,7 +68,7 @@ class FilterItems extends Component {
         </div>
         <div className="vis_editor__split-filter-item">
           <input
-            placeholder="Filter"
+            placeholder={intl.formatMessage({ id: 'metrics.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
             className="vis_editor__input-grows-100"
             type="text"
             onChange={this.handleChange(model, 'filter')}
@@ -73,7 +77,7 @@ class FilterItems extends Component {
         </div>
         <div className="vis_editor__split-filter-item">
           <input
-            placeholder="Label"
+            placeholder={intl.formatMessage({ id: 'metrics.splits.filterItems.labelPlaceholder', defaultMessage: 'Label' })}
             className="vis_editor__input-grows-100"
             type="text"
             onChange={this.handleChange(model, 'label')}
@@ -104,10 +108,11 @@ class FilterItems extends Component {
 
 }
 
-FilterItems.propTypes = {
+FilterItemsUi.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
   onChange: PropTypes.func
 };
 
+const FilterItems = injectI18n(FilterItemsUi);
 export default FilterItems;
