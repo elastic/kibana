@@ -17,7 +17,6 @@ import {
 
 export class TOCEntry extends React.Component {
 
-
   constructor() {
     super();
     this.state = {
@@ -101,6 +100,9 @@ export class TOCEntry extends React.Component {
         >
           <EuiFlexItem grow={false} className="layerEntry--visibility">
             {visibilityIndicator}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {layer.getIcon()}
           </EuiFlexItem>
           <EuiFlexItem>
             <button onClick={() => openLayerPanel(layer.getId())} >

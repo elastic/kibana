@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { ALayer } from './layer';
+import { EuiIcon } from '@elastic/eui';
 import { HeatmapStyle } from './styles/heatmap_style';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
@@ -196,4 +198,13 @@ export class GeohashGridLayer extends ALayer {
       onLoadError('source', requestToken, error.message);
     }
   }
+
+  getIcon() {
+    return (
+      <EuiIcon
+        type={'heatmap'}
+      />
+    );
+  }
+
 }

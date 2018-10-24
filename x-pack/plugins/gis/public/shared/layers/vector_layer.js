@@ -7,6 +7,7 @@
 import mapboxgl from 'mapbox-gl';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { EuiIcon } from '@elastic/eui';
 import _ from 'lodash';
 
 import { ALayer } from './layer';
@@ -77,6 +78,14 @@ export class VectorLayer extends ALayer {
 
   getSupportedStyles() {
     return [VectorStyle];
+  }
+
+  getIcon() {
+    return (
+      <EuiIcon
+        type={'vector'}
+      />
+    );
   }
 
   async getStringFields() {

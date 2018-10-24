@@ -174,6 +174,10 @@ export class ALayer {
     return this._descriptor.label;
   }
 
+  getIcon() {
+    console.log('Icon not available for this layer type');
+  }
+
   getId() {
     return this._descriptor.id;
   }

@@ -5,6 +5,8 @@
  */
 
 import { ALayer } from './layer';
+import React from 'react';
+import { EuiIcon } from '@elastic/eui';
 
 export class TileLayer extends ALayer {
 
@@ -44,6 +46,14 @@ export class TileLayer extends ALayer {
       mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     }
 
+  }
+
+  getIcon() {
+    return (
+      <EuiIcon
+        type={'grid'}
+      />
+    );
   }
 
 }
