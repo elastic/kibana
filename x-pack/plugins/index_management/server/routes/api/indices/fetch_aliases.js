@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default async function fetchAliases(callWithRequest) {
+export async function fetchAliases(callWithRequest) {
   const catAliases = await callWithRequest('cat.aliases', { format: 'json' });
   return catAliases.reduce((hash, val) => {
     (hash[val.index] = hash[val.index] || []).push(val.alias);
