@@ -45,7 +45,7 @@ if [[ "$OS" == "win" ]]; then
   nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
 else
   nodeBin="$nodeDir/bin"
-  nodeUrl="https://nodejs.org/download/release/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
+  nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
 fi
 
 echo " -- node: version=v${nodeVersion} dir=$nodeDir"
@@ -84,28 +84,7 @@ fi
 ### downloading yarn
 ###
 yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
-if [[ "$OS" == "win" ]]; then
-    npm install -g yarn@^${yarnVersion}
-else
-    yarnUrl="https://github.com/yarnpkg/yarn/releases/download/v$yarnVersion/yarn-$yarnVersion.js"
-    yarnDir="$cacheDir/yarn/$yarnVersion"
-    if [ -z "$yarnVersion" ]; then
-      echo " ${RED}!! missing engines.yarn in package.json${RESET_C}";
-      exit 1
-    elif [ -x "$yarnDir/bin/yarn" ] && [ "$($yarnDir/bin/yarn --version)" == "$yarnVersion" ]; then
-      echo " -- reusing yarn install"
-    else
-      if [ -d "$yarnDir" ]; then
-        echo " -- clearing previous yarn install"
-        rm -rf "$yarnDir"
-      fi
-
-      echo " -- downloading yarn from $yarnUrl"
-      mkdir -p "$yarnDir/bin"
-      curl -L --silent "$yarnUrl" > "$yarnDir/bin/yarn"
-      chmod +x "$yarnDir/bin/yarn"
-    fi
-fi
+npm install -g yarn@^${yarnVersion}
 
 ###
 ### "install" yarn into this shell
