@@ -62,7 +62,7 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
           return h.response({ message: 'Invalid access token', success: false }).code(401);
       }
 
-      h.response({ success: true }).code(204);
+      return h.response({ success: true }).code(204);
     } catch (err) {
       return wrapEsError(err);
     }
