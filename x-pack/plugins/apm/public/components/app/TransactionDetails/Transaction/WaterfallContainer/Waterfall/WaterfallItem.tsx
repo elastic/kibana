@@ -12,6 +12,7 @@ import {
   colors,
   fontFamily,
   fontFamilyCode,
+  fontSize,
   fontSizes,
   px,
   unit,
@@ -44,14 +45,13 @@ const SpanLabel = styled<{ left: number }, any>('div')`
   text-align: left;
   margin: ${px(units.quarter)} 0 0;
   font-family: ${fontFamilyCode};
-  font-size: ${fontSizes.tiny};
+  font-size: ${fontSizes.small};
 `;
 
 const TransactionLabel = styled(SpanLabel)`
   font-weight: 600;
   font-family: ${fontFamily};
-  font-size: ${fontSizes.small};
-  line-height: 1.5;
+  font-size: ${fontSize};
 `;
 
 interface IContainerProps {
