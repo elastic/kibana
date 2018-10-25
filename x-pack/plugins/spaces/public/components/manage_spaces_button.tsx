@@ -11,9 +11,11 @@ import { MANAGE_SPACES_URL } from '../lib/constants';
 
 interface Props {
   isDisabled?: boolean;
+  className?: string;
   size?: 's' | 'l';
   style?: CSSProperties;
   userProfile: UserProfile;
+  onClick?: () => void;
 }
 
 export class ManageSpacesButton extends Component<Props, {}> {
@@ -25,7 +27,7 @@ export class ManageSpacesButton extends Component<Props, {}> {
     return (
       <EuiButton
         size={this.props.size || 's'}
-        className="manage-spaces-button"
+        className={this.props.className}
         isDisabled={this.props.isDisabled}
         onClick={this.navigateToManageSpaces}
         style={this.props.style}
@@ -36,6 +38,9 @@ export class ManageSpacesButton extends Component<Props, {}> {
   }
 
   private navigateToManageSpaces = () => {
+    if (this.props.onClick) {
+      this.props.onClick();
+    }
     window.location.replace(MANAGE_SPACES_URL);
   };
 }

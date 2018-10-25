@@ -8,6 +8,7 @@ import { badRequest } from 'boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { get, cloneDeep } from 'lodash';
 import { WatchStatus } from '../watch_status';
+import { i18n } from '@kbn/i18n';
 
 export class WatchHistoryItem {
   constructor(props) {
@@ -37,13 +38,34 @@ export class WatchHistoryItem {
   // generate object from elasticsearch response
   static fromUpstreamJson(json, opts) {
     if (!json.id) {
-      throw badRequest('json argument must contain a id property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.watchHistoryItem.absenceOfIdPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {id} property',
+          values: {
+            id: 'id'
+          }
+        }),
+      );
     }
     if (!json.watchId) {
-      throw badRequest('json argument must contain a watchId property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.watchHistoryItem.absenceOfWatchIdPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain a {watchId} property',
+          values: {
+            watchId: 'watchId'
+          }
+        }),
+      );
     }
     if (!json.watchHistoryItemJson) {
-      throw badRequest('json argument must contain a watchHistoryItemJson property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.watchHistoryItem.absenceOfWatchHistoryItemJsonPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain a {watchHistoryItemJson} property',
+          values: {
+            watchHistoryItemJson: 'watchHistoryItemJson'
+          }
+        }),
+      );
     }
 
     const props = { ...json, ...opts };

@@ -28,6 +28,7 @@ export const demodata = () => ({
         defaultMessage: 'The name of the demo data set to use',
       }),
       default: 'ci',
+      options: ['ci', 'shirts'],
     },
   },
   fn: (context, args) => {

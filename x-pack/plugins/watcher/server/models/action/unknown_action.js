@@ -7,6 +7,7 @@
 import { badRequest } from 'boom';
 import { BaseAction } from './base_action';
 import { ACTION_TYPES } from '../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 export class UnknownAction extends BaseAction {
   constructor(props) {
@@ -52,7 +53,14 @@ export class UnknownAction extends BaseAction {
     const props = super.getPropsFromUpstreamJson(json);
 
     if (!json.actionJson) {
-      throw badRequest('json argument must contain an actionJson property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.unknownAction.absenceOfActionJsonPropertyBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJson} property',
+          values: {
+            actionJson: 'actionJson'
+          }
+        }),
+      );
     }
 
     Object.assign(props, {
