@@ -90,7 +90,7 @@ function createFields(results) {
           ML_JOB_FIELD_TYPES.TEXT : ML_JOB_FIELD_TYPES.UNKNOWN;
 
         return {
-          name: name,
+          name,
           type,
           mean_value: 0,
           count: 0,
