@@ -25,8 +25,8 @@ describe('CcrShard', () => {
       number_of_concurrent_reads: 1,
       number_of_concurrent_writes: 0,
       number_of_failed_bulk_operations: 0,
-      number_of_failed_fetches: 0,
-      operations_read: 3050,
+      failed_read_requests: 0,
+      operations_written: 3050,
       number_of_queued_writes: 0,
       number_of_successful_bulk_operations: 3050,
       number_of_successful_fetches: 3050,
@@ -38,8 +38,8 @@ describe('CcrShard', () => {
       total_transferred_bytes: 234156,
     },
     oldestStat: {
-      number_of_failed_fetches: 0,
-      operations_read: 2976
+      failed_read_requests: 0,
+      operations_written: 2976
     },
     timestamp: '2018-09-27T13:32:09.412Z'
   };

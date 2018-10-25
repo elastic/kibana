@@ -29,12 +29,12 @@ function buildRequest(req, config, esIndexPattern) {
   const aggs = {
     ops_synced_max: {
       max: {
-        field: 'ccr_stats.operations_read'
+        field: 'ccr_stats.operations_written'
       }
     },
     ops_synced_min: {
       min: {
-        field: 'ccr_stats.operations_read'
+        field: 'ccr_stats.operations_written'
       }
     },
     lag_ops_leader_max: {

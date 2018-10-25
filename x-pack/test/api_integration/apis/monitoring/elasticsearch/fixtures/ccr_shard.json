@@ -57,19 +57,19 @@
     "mapping_version": 2,
     "total_fetch_time_millis": 1265908,
     "number_of_successful_fetches": 86,
-    "number_of_failed_fetches": 0,
+    "failed_read_requests": 0,
     "operations_received": 86,
     "total_transferred_bytes": 6602,
     "total_index_time_millis": 1096,
     "number_of_successful_bulk_operations": 86,
     "number_of_failed_bulk_operations": 0,
-    "operations_read": 86,
+    "operations_written": 86,
     "read_exceptions": [],
     "time_since_last_read_millis": 19886
   },
   "timestamp": "2018-09-19T20:01:00.440Z",
   "oldestStat": {
-    "number_of_failed_fetches": 0,
-    "operations_read": 1
+    "failed_read_requests": 0,
+    "operations_written": 1
   }
 }
