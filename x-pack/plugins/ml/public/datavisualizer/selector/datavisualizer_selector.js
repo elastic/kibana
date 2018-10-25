@@ -25,14 +25,14 @@ import { isFullLicense } from '../../license/check_license';
 function startTrialDescription() {
   return (
     <span>
-      To experience what the full Machine Learning features of a {' '}
+      To experience the full Machine Learning features that a {' '}
       <EuiLink
         href="https://www.elastic.co/subscriptions"
         target="_blank"
       >
         Platinum subscription
       </EuiLink>{' '}
-      have to offer, start a 30-day trial from the license management page.
+      offers, start a 30-day trial.
     </span>
   );
 }
@@ -67,7 +67,7 @@ export function DatavisualizerSelector() {
             <EuiCard
               icon={<EuiIcon size="xxl" type="addDataApp" />}
               title="Import data"
-              description="Visualize data from a log file. Supported for files up to 100MB in size."
+              description="Import data from a log file. You can upload files up to 100 MB."
               betaBadgeLabel="Experimental"
               betaBadgeTooltipContent="Experimental feature. We'd love to hear your feedback."
               footer={
@@ -75,7 +75,7 @@ export function DatavisualizerSelector() {
                   target="_self"
                   href="#/filedatavisualizer"
                 >
-                  Select file
+                  Upload file
                 </EuiButton>
               }
             />
@@ -83,8 +83,8 @@ export function DatavisualizerSelector() {
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type="dataVisualizer" />}
-              title="Pick index pattern"
-              description="Visualize data in an existing Elasticsearch index."
+              title="Select an index pattern"
+              description="Visualize the data in an existing Elasticsearch index."
               footer={
                 <EuiButton
                   target="_self"

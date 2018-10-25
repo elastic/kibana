@@ -13,8 +13,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-export function FormattedMessage({ prefix, suffix, message, metadata, changeUrl }) {
-  const formattedMessage = (() => {
+export function FormattedAlert({ prefix, suffix, message, metadata, changeUrl }) {
+  const formattedAlert = (() => {
     if (metadata && metadata.link) {
       if (metadata.link.startsWith('https')) {
         return (
@@ -60,7 +60,7 @@ export function FormattedMessage({ prefix, suffix, message, metadata, changeUrl 
   return (
     <span data-test-subj="alertText">
       { formattedPrefix }
-      { formattedMessage }
+      { formattedAlert }
       { formattedSuffix }
     </span>
   );
