@@ -12,8 +12,8 @@ interface ContractConfig {
 }
 
 export const contractTests = (testName: string, config: ContractConfig) => {
-  describe.skip(testName, () => {
-    // let frameworkAdapter: BackendFrameworkAdapter;
+  describe(testName, () => {
+    let frameworkAdapter: any;
     beforeAll(async () => {
       jest.setTimeout(100000); // 1 second
 
@@ -24,11 +24,13 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     afterAll(async () => config.after && (await config.after()));
     beforeEach(async () => {
       // FIXME: one of these always should exist, type ContractConfig as such
-      // const frameworkAdapter = config.adapterSetup();
+      frameworkAdapter = config.adapterSetup();
     });
 
     it('Should have tests here', () => {
-      expect(true).toEqual(true);
+      expect(frameworkAdapter).toHaveProperty('server');
+      expect(frameworkAdapter.server).toHaveProperty('plugins');
+      expect(frameworkAdapter.server.plugins).toHaveProperty('security');
     });
   });
 };

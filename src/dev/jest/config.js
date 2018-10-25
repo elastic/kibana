@@ -31,6 +31,7 @@ export default {
     '<rootDir>/src/utils',
     '<rootDir>/src/setup_node_env',
     '<rootDir>/packages',
+    '<rootDir>/x-pack',
   ],
   collectCoverageFrom: [
     'packages/kbn-ui-framework/src/components/**/*.js',
@@ -43,7 +44,8 @@ export default {
   moduleNameMapper: {
     '^ui/(.*)': '<rootDir>/src/ui/public/$1',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/src/dev/jest/mocks/file_mock.js',
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
+      '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/src/dev/jest/mocks/style_mock.js',
   },
   setupFiles: [
@@ -53,31 +55,19 @@ export default {
     '<rootDir>/src/dev/jest/setup/throw_on_console_error.js',
   ],
   coverageDirectory: '<rootDir>/target/jest-coverage',
-  coverageReporters: [
-    'html',
-  ],
+  coverageReporters: ['html'],
   globals: {
     'ts-jest': {
       skipBabel: true,
     },
   },
-  moduleFileExtensions: [
-    'js',
-    'json',
-    'ts',
-    'tsx',
-  ],
-  modulePathIgnorePatterns: [
-    '__fixtures__/',
-    'target/',
-  ],
-  testMatch: [
-    '**/*.test.{js,ts,tsx}'
-  ],
+  moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
+  modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
+  testMatch: ['**/*.test.{js,ts,tsx}'],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/dist/',
-    'integration_tests/'
+    'integration_tests/',
   ],
   transform: {
     '^.+\\.js$': '<rootDir>/src/dev/jest/babel_transform.js',
@@ -85,15 +75,7 @@ export default {
     '^.+\\.txt?$': 'jest-raw-loader',
     '^.+\\.html?$': 'jest-raw-loader',
   },
-  transformIgnorePatterns: [
-    '[/\\\\]node_modules[/\\\\].+\\.js$',
-    'packages/kbn-pm/dist/index.js'
-  ],
-  snapshotSerializers: [
-    '<rootDir>/node_modules/enzyme-to-json/serializer',
-  ],
-  reporters: [
-    'default',
-    '<rootDir>/src/dev/jest/junit_reporter.js',
-  ],
+  transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.js$', 'packages/kbn-pm/dist/index.js'],
+  snapshotSerializers: ['<rootDir>/node_modules/enzyme-to-json/serializer'],
+  reporters: ['default', '<rootDir>/src/dev/jest/junit_reporter.js'],
 };
