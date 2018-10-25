@@ -8,10 +8,10 @@ import { handleActions } from 'redux-actions';
 import { Hover, TextDocumentPositionParams } from 'vscode-languageserver';
 import {
   closeReferences,
-  CodeAndLocation,
   findReferences,
   findReferencesFailed,
   findReferencesSuccess,
+  GroupedRepoReferences,
   hoverResult,
   revealPosition,
 } from '../actions';
@@ -19,7 +19,7 @@ import {
 export interface EditorState {
   loading: boolean;
   showing: boolean;
-  references: CodeAndLocation[];
+  references: GroupedRepoReferences[];
   hover?: Hover;
   currentHover?: Hover;
   refPayload?: TextDocumentPositionParams;

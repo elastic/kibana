@@ -5,19 +5,19 @@
  */
 
 import { EuiAccordion, EuiButtonIcon, EuiLoadingKibana, EuiPanel, EuiTitle } from '@elastic/eui';
-import { entries, groupBy } from 'lodash';
-import { IPosition } from 'monaco-editor';
+import { range } from 'lodash';
+import { IPosition, IRange } from 'monaco-editor';
 import queryString from 'query-string';
 import React from 'react';
 import { parseSchema } from '../../../common/uri_util';
-import { CodeAndLocation } from '../../actions';
+import { CodeAndLocation, GroupedFileReferences, GroupedRepoReferences } from '../../actions';
 import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';
 
 interface Props {
   isLoading: boolean;
   title: string;
-  references: CodeAndLocation[];
+  references: GroupedRepoReferences[];
   refUrl?: string;
   onClose(): void;
 }
@@ -48,11 +48,12 @@ export class ReferencesPanel extends React.Component<Props> {
   }
 
   private renderGroupByRepo() {
-    const groups = groupBy(this.props.references, 'repo');
-    return entries(groups).map((entry: any) => this.renderReferences(entry[0], entry[1]));
+    return this.props.references.map((ref: GroupedRepoReferences) => {
+      return this.renderReferenceRepo(ref);
+    });
   }
 
-  private renderReferences(repo: string, references: CodeAndLocation[]) {
+  private renderReferenceRepo({ repo, files }: GroupedRepoReferences) {
     return (
       <EuiAccordion
         id={repo}
@@ -62,38 +63,73 @@ export class ReferencesPanel extends React.Component<Props> {
         paddingSize="l"
         initialIsOpen={true}
       >
-        {references.map(ref => this.renderReference(ref))}
+        {files.map(file => this.renderReference(file))}
       </EuiAccordion>
     );
   }
 
-  private renderReference(ref: CodeAndLocation) {
-    const key = `${ref.location.uri}?L${ref.location.range.start.line}:${
-      ref.location.range.start.character
-    }`;
+  private renderReference(file: GroupedFileReferences) {
+    const key = `${file.path}`;
+    let text: string = '';
+    let lineMappings: string[] = [];
+    const highlightRanges: IRange[] = [];
+    const pushCodes = (code: CodeAndLocation) => {
+      text = text + code.code + '\n';
+      const lines = range(code.lineRange.startLine + 1, code.lineRange.endLine + 1).map(
+        v => `${v}`
+      );
+      lineMappings = lineMappings.concat(lines);
+      for (const l of code.locations) {
+        const startLineNumber = lineMappings.indexOf(`${l.range.start.line + 1}`) + 1;
+        const endLineNumber = lineMappings.indexOf(`${l.range.end.line + 1}`) + 1;
+        highlightRanges.push({
+          startLineNumber,
+          endLineNumber,
+          startColumn: l.range.start.character + 1,
+          endColumn: l.range.end.character + 1,
+        });
+      }
+    };
+    const pushPlaceholder = () => {
+      text = text + '\n';
+      lineMappings.push('...');
+    };
+    for (const code of file.codes) {
+      if (!(text === '' && code.lineRange.startLine === 0)) {
+        pushPlaceholder();
+      }
+      pushCodes(code);
+    }
+    pushPlaceholder();
+    const lineNumberFn = (l: number) => {
+      return lineMappings[l - 1];
+    };
     return (
       <CodeBlock
         key={key}
-        language={ref.language}
-        startLine={ref.startLine}
-        code={ref.code}
-        file={ref.path}
-        onClick={this.onCodeClick.bind(this, ref.location.uri)}
-      >
-        {ref.code}
-      </CodeBlock>
+        language={file.language}
+        startLine={0}
+        code={text}
+        file={file.path}
+        folding={false}
+        lineNumbersFunc={lineNumberFn}
+        highlightRanges={highlightRanges}
+        onClick={this.onCodeClick.bind(this, lineMappings, file.codes[0].locations[0].uri)}
+      />
     );
   }
 
-  private onCodeClick(url: string, pos: IPosition) {
+  private onCodeClick(lineNumbers: string[], url: string, pos: IPosition) {
     const { uri } = parseSchema(url)!;
-
-    const queries = queryString.parse(history.location.search);
-    const query = queryString.stringify({
-      ...queries,
-      tab: 'references',
-      refUrl: this.props.refUrl,
-    });
-    history.push(`${uri}!L${pos.lineNumber}:0?${query}`);
+    const line = lineNumbers[pos.lineNumber - 1];
+    if (line !== '...') {
+      const queries = queryString.parse(history.location.search);
+      const query = queryString.stringify({
+        ...queries,
+        tab: 'references',
+        refUrl: this.props.refUrl,
+      });
+      history.push(`${uri}!L${line}:0?${query}`);
+    }
   }
 }

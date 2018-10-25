@@ -7,18 +7,32 @@
 import { createAction } from 'redux-actions';
 import { Hover, Location, Position, TextDocumentPositionParams } from 'vscode-languageserver';
 
-export interface CodeAndLocation {
+export interface LineRange {
+  startLine: number;
+  endLine: number;
+}
+
+export interface GroupedRepoReferences {
   repo: string;
+  files: GroupedFileReferences[];
+}
+
+export interface GroupedFileReferences {
   path: string;
-  code: string;
   language?: string;
-  location: Location;
-  startLine?: number;
-  endLine?: number;
+  codes: CodeAndLocation[];
+}
+
+export interface CodeAndLocation {
+  lineRange: LineRange;
+  code: string;
+  locations: Location[];
 }
 
 export const findReferences = createAction<TextDocumentPositionParams>('FIND REFERENCES');
-export const findReferencesSuccess = createAction<CodeAndLocation[]>('FIND REFERENCES SUCCESS');
+export const findReferencesSuccess = createAction<GroupedRepoReferences[]>(
+  'FIND REFERENCES SUCCESS'
+);
 export const findReferencesFailed = createAction<Error>('FIND REFERENCES ERROR');
 export const closeReferences = createAction('CLOSE REFERENCES');
 export const hoverResult = createAction<Hover>('HOVER RESULT');
