@@ -77,6 +77,7 @@ describe('server createHandlers', () => {
     });
 
     it('rejects when authentication check fails', () => {
+      const internalErrorMessage = 'Authentication failed';
       securityMode = 'fail';
       return handlers
         .elasticsearchClient('endpoint', 'payload')
@@ -84,7 +85,7 @@ describe('server createHandlers', () => {
           throw new Error('elasticsearchClient should fail when authentication fails');
         })
         .catch(err => {
-          expect(err.message).to.be.equal(authError.message);
+          expect(err.message).to.be.equal(internalErrorMessage);
         });
     });
 
