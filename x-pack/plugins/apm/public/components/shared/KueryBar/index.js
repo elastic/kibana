@@ -5,8 +5,8 @@
  */
 
 import { connect } from 'react-redux';
-import view from './view';
 import { getUrlParams } from '../../../store/urlParams';
+import view from './view';
 
 function mapStateToProps(state = {}) {
   return {

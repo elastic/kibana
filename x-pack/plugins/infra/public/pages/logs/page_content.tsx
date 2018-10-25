@@ -39,6 +39,7 @@ export const LogsPageContent: React.SFC = () => (
                       isReloading,
                       items,
                       lastLoadedTime,
+                      loadNewerEntries,
                     }) => (
                       <ScrollableLogTextStreamView
                         hasMoreAfterEnd={hasMoreAfterEnd}
@@ -50,6 +51,7 @@ export const LogsPageContent: React.SFC = () => (
                         items={items}
                         jumpToTarget={jumpToTargetPosition}
                         lastLoadedTime={lastLoadedTime}
+                        loadNewerItems={loadNewerEntries}
                         reportVisibleInterval={reportVisiblePositions}
                         scale={textScale}
                         target={targetPosition}

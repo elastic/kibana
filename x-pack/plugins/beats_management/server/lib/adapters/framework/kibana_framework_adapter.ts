@@ -6,10 +6,12 @@
 
 // @ts-ignore
 import Boom from 'boom';
+import { difference } from 'lodash';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
 import { PLUGIN } from '../../../../common/constants/plugin';
 import { wrapRequest } from '../../../utils/wrap_request';
+import { FrameworkRequest } from './adapter_types';
 import {
   BackendFrameworkAdapter,
   FrameworkInternalUser,
@@ -47,7 +49,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
         .registerLicenseCheckResultsGenerator(this.checkLicense);
     });
   }
-
+  // TODO make base path a constructor level param
   public getSetting(settingPath: string) {
     // TODO type check server properly
     if (settingPath === 'xpack.beats.encryptionKey') {
@@ -76,21 +78,50 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public registerRoute<RouteRequest extends FrameworkWrappableRequest, RouteResponse>(
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ) {
-    const wrappedHandler = (licenseRequired: boolean) => (request: any, reply: any) => {
+    const wrappedHandler = (licenseRequired: boolean, requiredRoles?: string[]) => async (
+      request: any,
+      reply: any
+    ) => {
       const xpackMainPlugin = this.server.plugins.xpack_main;
       const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN.ID).getLicenseCheckResults();
       if (licenseRequired && !licenseCheckResults.licenseValid) {
         reply(Boom.forbidden(licenseCheckResults.message));
       }
-      return route.handler(wrapRequest(request), reply);
+      const wrappedRequest = wrapRequest(request);
+      if (requiredRoles) {
+        if (wrappedRequest.user.kind !== 'authenticated') {
+          return reply().code(403);
+        }
+        wrappedRequest.user = {
+          ...wrappedRequest.user,
+          ...(await this.getUser(request)),
+        };
+
+        if (
+          wrappedRequest.user.kind === 'authenticated' &&
+          !wrappedRequest.user.roles.includes('superuser') &&
+          difference(requiredRoles, wrappedRequest.user.roles).length !== 0
+        ) {
+          return reply().code(403);
+        }
+      }
+      return route.handler(wrappedRequest, reply);
     };
 
     this.server.route({
-      handler: wrappedHandler(route.licenseRequired || false),
+      handler: wrappedHandler(route.licenseRequired || false, route.requiredRoles),
       method: route.method,
       path: route.path,
       config: route.config,
     });
+  }
+
+  private async getUser(request: FrameworkRequest) {
+    try {
+      return await this.server.plugins.security.getUser(request);
+    } catch (e) {
+      return null;
+    }
   }
 
   private isSecurityEnabled = () => {
@@ -100,6 +131,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     );
   };
 
+  // TODO make key a param
   private validateConfig() {
     // @ts-ignore
     const config = this.server.config();
@@ -113,6 +145,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     }
   }
 
+  // TODO this should NOT be in an adapter, break up and move validation to a lib
   private checkLicense(xPackInfo: any) {
     // If, for some reason, we cannot get the license information
     // from Elasticsearch, assume worst case and disable the Logstash pipeline UI

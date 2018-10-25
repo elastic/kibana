@@ -3,7 +3,7 @@
 exports[`KibanaLinkComponent should render correct markup 1`] = `
 <a
   className="euiLink euiLink--primary"
-  href="myBasePath/app/kibana#/discover?_g=&_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))"
+  href="myBasePath/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))&_g="
 >
   Go to Discover
 </a>
