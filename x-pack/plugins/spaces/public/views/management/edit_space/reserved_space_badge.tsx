@@ -23,7 +23,7 @@ export const ReservedSpaceBadge = (props: Props) => {
       <EuiToolTip
         content={
           <FormattedMessage
-            id="xpack.spaces.view.management.editSpace.reversedSpaceBadge.reversedSpacesOnlyInPartiallyModifiedTitle"
+            id="xpack.spaces.view.management.editSpace.reversedSpaceBadge.reversedSpacesCanBePartiallyModifiedTooltip"
             defaultMessage="Reserved spaces are built-in and can only be partially modified."
           />
         }

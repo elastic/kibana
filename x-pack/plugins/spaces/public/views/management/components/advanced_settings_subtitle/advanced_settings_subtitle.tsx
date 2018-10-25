@@ -22,10 +22,10 @@ export const AdvancedSettingsSubtitle = (props: Props) => (
       title={
         <p>
           <FormattedMessage
-            id="xpack.spaces.view.management.advancedSettingsSubtitle.settingsOnThisPageTitle"
-            defaultMessage="The settings on this page apply to the {message} space, unless otherwise specified."
+            id="xpack.spaces.view.management.advancedSettingsSubtitle.applyingSettingsOnPageToSpaceDescription"
+            defaultMessage="The settings on this page apply to the {spaceName} space, unless otherwise specified."
             values={{
-              message: <strong>{props.space.name}</strong>,
+              spaceName: <strong>{props.space.name}</strong>,
             }}
           />
         </p>

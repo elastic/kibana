@@ -20,6 +20,7 @@ interface Props {
   spacesManager: SpacesManager;
   spacesNavState: SpacesNavState;
   onDelete: () => void;
+  intl: any;
 }
 
 interface State {
@@ -36,7 +37,7 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
   public render() {
     const buttonText = (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.deleteSpacesButton.deleteSpaceTitle"
+        id="xpack.spaces.view.management.editSpace.deleteSpacesButton.deleteSpaceButtonLabel"
         defaultMessage="Delete space"
       />
     );
@@ -124,7 +125,8 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
 
     const message = intl.formatMessage(
       {
-        id: 'xpack.spaces.view.management.editSpace.deleteSpacesButton.deleteSpaceNameTitle',
+        id:
+          'xpack.spaces.view.management.editSpace.deleteSpacesButton.spaceSuccessfullyDeletedNotificationMessage',
         defaultMessage: 'Deleted {spaceName} space.',
       },
       {

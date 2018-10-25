@@ -21,13 +21,13 @@ export const SecureSpaceMessage = (props: Props) => {
         <EuiText className="eui-textCenter">
           <p>
             <FormattedMessage
-              id="xpack.spaces.view.management.secureSpaceMessage.settingsTitle"
-              defaultMessage="Want to assign a role to a space? Go to Management and select {button}."
+              id="xpack.spaces.view.management.secureSpaceMessage.howToAssignRoleToSpaceDescription"
+              defaultMessage="Want to assign a role to a space? Go to Management and select {rolesLink}."
               values={{
-                button: (
+                rolesLink: (
                   <EuiLink href="#/management/security/roles">
                     <FormattedMessage
-                      id="xpack.spaces.view.management.secureSpaceMessage.rolesTitle"
+                      id="xpack.spaces.view.management.secureSpaceMessage.rolesLinkText"
                       defaultMessage="Roles"
                     />
                   </EuiLink>

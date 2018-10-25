@@ -19,6 +19,7 @@ interface Props {
   editable: boolean;
   validator: SpaceValidator;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  intl: any;
 }
 
 interface State {
@@ -55,7 +56,8 @@ class SpaceIdentifierUI extends Component<Props, State> {
               this.state.editing || !this.props.editable
                 ? undefined
                 : intl.formatMessage({
-                    id: 'xpack.spaces.view.management.editSpace.spaceIdentifier.generateIdentifierFromSpaceNameTitle',
+                    id:
+                      'xpack.spaces.view.management.editSpace.spaceIdentifier.urlIdentifierGeneratedFromSpaceNameTooltip',
                     defaultMessage: 'The URL identifier is generated from the space name.',
                   })
             }
@@ -73,7 +75,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
       return (
       <p>
         <FormattedMessage
-          id="xpack.spaces.view.management.editSpace.spaceIdentifier.URLIdentifierTitle"
+          id="xpack.spaces.view.management.editSpace.spaceIdentifier.urlIdentifierTitle"
           defaultMessage="URL identifier"
         />
       </p>);
@@ -81,19 +83,19 @@ class SpaceIdentifierUI extends Component<Props, State> {
 
     const editLinkText = this.state.editing ? (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.spaceIdentifier.stopEditingSpaceNameTitle"
+        id="xpack.spaces.view.management.editSpace.spaceIdentifier.stopEditingSpaceNameLinkText"
         defaultMessage="[stop editing]"
       />
     ) : (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.spaceIdentifier.editSpaceNameTitle"
+        id="xpack.spaces.view.management.editSpace.spaceIdentifier.editSpaceLinkText"
         defaultMessage="[edit]"
       />
     );
     return (
       <p>
         <FormattedMessage
-          id="xpack.spaces.view.management.editSpace.spaceIdentifier.URLIdentifierButton"
+          id="xpack.spaces.view.management.editSpace.spaceIdentifier.urlIdentifierLabel"
           defaultMessage="URL identifier"
         />
         <EuiLink onClick={this.onEditClick}>{editLinkText}</EuiLink>
@@ -105,27 +107,24 @@ class SpaceIdentifierUI extends Component<Props, State> {
     return (
       <p>
         <FormattedMessage
-          id="xpack.spaces.view.management.editSpace.spaceIdentifier.kibanaURLTitle"
-          defaultMessage="If the identifier is {exampleMessage}, the Kibana URL is{nextLine}
-          https://my-kibana.example{examoleURL}app/kibana."
+          id="xpack.spaces.view.management.editSpace.spaceIdentifier.kibanaURLForEngineeringIdentifierDescription"
+          defaultMessage="If the identifier is {engineeringIdentifier}, the Kibana URL is{nextLine}
+          {engineeringKibanaUrl}."
           values={{
-            exampleMessage: (
+            engineeringIdentifier: (
               <strong>
                 <FormattedMessage
-                  id="xpack.spaces.view.management.editSpace.spaceIdentifier.engineeringTitle"
+                  id="xpack.spaces.view.management.editSpace.spaceIdentifier.engineeringText"
                   defaultMessage="engineering"
                 />
               </strong>
             ),
-            examoleURL: (
-              <strong>
-                <FormattedMessage
-                  id="xpack.spaces.view.management.editSpace.spaceIdentifier.engineeringURLTitle"
-                  defaultMessage="/s/engineering/"
-                />
-              </strong>
+            nextLine: <br />,
+            engineeringKibanaUrl: (
+              <React.Fragment>
+                https://my-kibana.example<strong>/s/engineering/</strong>app/kibana
+              </React.Fragment>
             ),
-            nextLine: <br />
           }}
         />
       </p>

@@ -46,6 +46,7 @@ interface Props {
   spaceId?: string;
   userProfile: UserProfile;
   spacesNavState: SpacesNavState;
+  intl: any;
 }
 
 interface State {
@@ -154,7 +155,7 @@ class ManageSpacePageUI extends Component<Props, State> {
           <EuiFlexItem style={{ maxWidth: '400px' }}>
             <EuiFormRow
               label={intl.formatMessage({
-                id: 'xpack.spaces.view.management.editSpace.manageSpacePage.nameTitle',
+                id: 'xpack.spaces.view.management.editSpace.manageSpacePage.nameFormRowLabel',
                 defaultMessage: 'Name',
               })}
               {...this.validator.validateSpaceName(this.state.space)}
@@ -200,7 +201,8 @@ class ManageSpacePageUI extends Component<Props, State> {
 
         <EuiFormRow
           label={intl.formatMessage({
-            id: 'xpack.spaces.view.management.editSpace.manageSpacePage.optionalDescriptionTitle',
+            id:
+              'xpack.spaces.view.management.editSpace.manageSpacePage.optionalDescriptionFormRowLabel',
             defaultMessage: 'Description (optional)',
           })}
           {...this.validator.validateSpaceDescription(this.state.space)}
@@ -238,14 +240,14 @@ class ManageSpacePageUI extends Component<Props, State> {
     if (this.editingExistingSpace()) {
       return (
         <FormattedMessage
-          id="xpack.spaces.view.management.editSpace.manageSpacePage.editSpaceButtonLabel"
+          id="xpack.spaces.view.management.editSpace.manageSpacePage.editSpaceTitle"
           defaultMessage="Edit space"
         />
       );
     }
     return (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.manageSpacePage.createSpaceButtonLabel"
+        id="xpack.spaces.view.management.editSpace.manageSpacePage.createSpaceTitle"
         defaultMessage="Create space"
       />
     );
@@ -400,11 +402,12 @@ class ManageSpacePageUI extends Component<Props, State> {
         toastNotifications.addSuccess(
           intl.formatMessage(
             {
-              id: 'xpack.spaces.view.management.editSpace.manageSpacePage.savesNameTitle',
+              id:
+                'xpack.spaces.view.management.editSpace.manageSpacePage.spaceSuccessfullySavedNotificationMessage',
               defaultMessage: '{name} was saved',
             },
             {
-              name,
+              name: '"' + name + '"',
             }
           )
         );

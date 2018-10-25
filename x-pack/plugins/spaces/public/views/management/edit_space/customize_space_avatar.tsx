@@ -14,6 +14,7 @@ import { getSpaceColor, getSpaceInitials } from '../../../../common/space_attrib
 interface Props {
   space: Partial<Space>;
   onChange: (space: Partial<Space>) => void;
+  intl: any;
 }
 
 interface State {
@@ -47,7 +48,8 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={intl.formatMessage({
-              id: 'xpack.spaces.view.management.editSpace.customizeSpaceAvatar.initialItemsTitle',
+              id:
+                'xpack.spaces.view.management.editSpace.customizeSpaceAvatar.initialItemsFormRowLabel',
               defaultMessage: 'Initials (2 max)',
             })}
           >
@@ -64,7 +66,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={intl.formatMessage({
-              id: 'xpack.spaces.view.management.editSpace.customizeSpaceAvatar.colorTitle',
+              id: 'xpack.spaces.view.management.editSpace.customizeSpaceAvatar.colorFormRowLabel',
               defaultMessage: 'Color',
             })}
           >
@@ -109,7 +111,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
         <EuiFormRow hasEmptyLabelSpace={true}>
           <EuiLink name="customize_space_link" onClick={this.showFields}>
             <FormattedMessage
-              id="xpack.spaces.view.management.editSpace.customizeSpaceAvatar.customizeTitle"
+              id="xpack.spaces.view.management.editSpace.customizeSpaceAvatar.customizeLinkText"
               defaultMessage="Customize"
             />
           </EuiLink>

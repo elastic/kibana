@@ -37,6 +37,7 @@ interface Props {
   spacesManager: SpacesManager;
   spacesNavState: SpacesNavState;
   userProfile: UserProfile;
+  intl: any;
 }
 
 interface State {
@@ -184,7 +185,8 @@ class SpacesGridPageUI extends Component<Props, State> {
       toastNotifications.addDanger(
         intl.formatMessage(
           {
-            id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.errorDeletingSpaceTitle',
+            id:
+              'xpack.spaces.view.management.spacesGrid.spacesGridPage.errorDeletingSpaceErrorMessage',
             defaultMessage: 'Error deleting space: {errorMessage}',
           },
           {
@@ -202,7 +204,8 @@ class SpacesGridPageUI extends Component<Props, State> {
 
     const message = intl.formatMessage(
       {
-        id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.deletingSpaceTitle',
+        id:
+          'xpack.spaces.view.management.spacesGrid.spacesGridPage.spaceSuccessfullyDeletedNotificationMessage',
         defaultMessage: 'Deleted "{spaceName}" space.',
       },
       {
@@ -266,7 +269,7 @@ class SpacesGridPageUI extends Component<Props, State> {
       {
         field: 'name',
         name: intl.formatMessage({
-          id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.spaceColumnNameTitle',
+          id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.spaceColumnName',
           defaultMessage: 'Space',
         }),
         sortable: true,
@@ -285,7 +288,7 @@ class SpacesGridPageUI extends Component<Props, State> {
       {
         field: 'id',
         name: intl.formatMessage({
-          id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.identifierColumnNameTitle',
+          id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.identifierColumnName',
           defaultMessage: 'Identifier',
         }),
         sortable: true,
@@ -293,24 +296,26 @@ class SpacesGridPageUI extends Component<Props, State> {
       {
         field: 'description',
         name: intl.formatMessage({
-          id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.descriptionColumnNameTitle',
+          id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.descriptionColumnName',
           defaultMessage: 'Description',
         }),
         sortable: true,
       },
       {
         name: intl.formatMessage({
-          id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.ActionsColumnNameTitle',
+          id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.actionsColumnName',
           defaultMessage: 'Actions',
         }),
         actions: [
           {
             name: intl.formatMessage({
-              id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.editNameTitle',
+              id:
+                'xpack.spaces.view.management.spacesGrid.spacesGridPage.actions.editSpaceActionName',
               defaultMessage: 'Edit',
             }),
             description: intl.formatMessage({
-              id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.editSpaceTitle',
+              id:
+                'xpack.spaces.view.management.spacesGrid.spacesGridPage.actions.editSpaceActionDescription',
               defaultMessage: 'Edit this space.',
             }),
             onClick: this.onEditSpaceClick,
@@ -321,11 +326,12 @@ class SpacesGridPageUI extends Component<Props, State> {
           {
             available: (record: Space) => !isReservedSpace(record),
             name: intl.formatMessage({
-              id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.deleteNameTitle',
+              id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.actions.deleteActionName',
               defaultMessage: 'Delete',
             }),
             description: intl.formatMessage({
-              id: 'xpack.spaces.view.management.spacesGrid.spacesGridPage.deleteThisSpaceTitle',
+              id:
+                'xpack.spaces.view.management.spacesGrid.spacesGridPage.actions.deleteThisSpaceActionDescription',
               defaultMessage: 'Delete this space.',
             }),
             onClick: this.onDeleteSpaceClick,

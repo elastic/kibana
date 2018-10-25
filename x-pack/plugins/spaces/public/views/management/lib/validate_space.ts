@@ -34,7 +34,7 @@ export class SpaceValidator {
 
     if (!space.name || !space.name.trim()) {
       return invalid(
-        i18n.translate('xpack.spaces.view.management.lib.validateSpace.requireNameTitle', {
+        i18n.translate('xpack.spaces.view.management.lib.validateSpace.requiredNameErrorMessage', {
           defaultMessage: 'Name is required',
         })
       );
@@ -42,7 +42,7 @@ export class SpaceValidator {
 
     if (space.name.length > 1024) {
       return invalid(
-        i18n.translate('xpack.spaces.view.management.lib.validateSpace.nameMaxLengthTitle', {
+        i18n.translate('xpack.spaces.view.management.lib.validateSpace.nameMaxLengthErrorMessage', {
           defaultMessage: 'Name must not exceed 1024 characters',
         })
       );
@@ -58,9 +58,12 @@ export class SpaceValidator {
 
     if (space.description && space.description.length > 2000) {
       return invalid(
-        i18n.translate('xpack.spaces.view.management.lib.validateSpace.describeMaxLengthTitle', {
-          defaultMessage: 'Description must not exceed 2000 characters',
-        })
+        i18n.translate(
+          'xpack.spaces.view.management.lib.validateSpace.describeMaxLengthErrorMessage',
+          {
+            defaultMessage: 'Description must not exceed 2000 characters',
+          }
+        )
       );
     }
 
@@ -78,18 +81,24 @@ export class SpaceValidator {
 
     if (!space.id) {
       return invalid(
-        i18n.translate('xpack.spaces.view.management.lib.validateSpace.requireIdentifierTitle', {
-          defaultMessage: 'URL identifier is required',
-        })
+        i18n.translate(
+          'xpack.spaces.view.management.lib.validateSpace.urlIdentifierRequiredErrorMessage',
+          {
+            defaultMessage: 'URL identifier is required',
+          }
+        )
       );
     }
 
     if (!isValidSpaceIdentifier(space.id)) {
       return invalid(
-        i18n.translate('xpack.spaces.view.management.lib.validateSpace.allowedCharacterNameTitle', {
-          defaultMessage:
-            'URL identifier can only contain a-z, 0-9, and the characters "_" and "-"',
-        })
+        i18n.translate(
+          'xpack.spaces.view.management.lib.validateSpace.urlIdentifierAllowedCharactersErrorMessage',
+          {
+            defaultMessage:
+              'URL identifier can only contain a-z, 0-9, and the characters "_" and "-"',
+          }
+        )
       );
     }
 

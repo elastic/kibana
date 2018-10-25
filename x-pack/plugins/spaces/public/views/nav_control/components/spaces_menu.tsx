@@ -5,7 +5,7 @@
  */
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiFieldSearch, EuiText } from '@elastic/eui';
-import { FormattedMessage, injectI18n, intlShape } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../common/constants';
@@ -18,6 +18,7 @@ interface Props {
   onSelectSpace: (space: Space) => void;
   onManageSpacesClick: () => void;
   userProfile: UserProfile;
+  intl: any;
 }
 
 interface State {

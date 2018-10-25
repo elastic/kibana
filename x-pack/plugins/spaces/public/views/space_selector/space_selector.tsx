@@ -28,6 +28,7 @@ import { SpaceCards } from '../components/space_cards';
 interface Props {
   spaces?: Space[];
   spacesManager: SpacesManager;
+  intl: any;
 }
 
 interface State {
@@ -117,7 +118,7 @@ class SpaceSelectorUI extends Component<Props, State> {
                 <EuiText size="xs">
                   <p>
                     <FormattedMessage
-                      id="xpack.spaces.view.spaceSelector.spaceSelector.youCanChangeSpaceAnytimeTitle"
+                      id="xpack.spaces.view.spaceSelector.spaceSelector.changingSpaceDescription"
                       defaultMessage="You can change your space at anytime."
                     />
                   </p>
@@ -138,7 +139,7 @@ class SpaceSelectorUI extends Component<Props, State> {
                   textAlign="center"
                 >
                   <FormattedMessage
-                    id="xpack.spaces.view.spaceSelector.spaceSelector.noSpacesMatchSearchTitle"
+                    id="xpack.spaces.view.spaceSelector.spaceSelector.noSpacesMatchSearchCriteriaDescription"
                     defaultMessage="No spaces match search criteria"
                   />
                 </EuiText>
@@ -160,7 +161,7 @@ class SpaceSelectorUI extends Component<Props, State> {
         <EuiFieldSearch
           className="spaceSelector__searchField"
           placeholder={intl.formatMessage({
-            id: 'xpack.spaces.view.spaceSelector.spaceSelector.findSpaceTitle',
+            id: 'xpack.spaces.view.spaceSelector.spaceSelector.findSpacePlaceholder',
             defaultMessage: 'Find a space',
           })}
           incremental={true}
