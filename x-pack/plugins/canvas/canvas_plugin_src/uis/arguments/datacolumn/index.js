@@ -52,20 +52,23 @@ class DatacolumnArgInput extends Component {
     const valueNotSet = val => !val || val.length === 0;
 
     const updateFunctionValue = () => {
+      const fn = this.inputRefs.fn.value;
+      const column = this.inputRefs.column.value;
+
       // if setting size, auto-select the first column if no column is already set
-      if (this.inputRefs.fn.value === 'size') {
-        const col = this.inputRefs.column.value || (columns[0] && columns[0].name);
-        if (col) return onValueChange(`${this.inputRefs.fn.value}(${maybeQuoteValue(col)})`);
+      if (fn === 'size') {
+        const col = column || (columns[0] && columns[0].name);
+        if (col) return onValueChange(`${fn}(${maybeQuoteValue(col)})`);
       }
 
       // this.inputRefs.column is the column selection, if there is no value, do nothing
-      if (valueNotSet(this.inputRefs.column.value)) return setMathFunction(this.inputRefs.fn.value);
+      if (valueNotSet(column)) return setMathFunction(fn);
 
       // this.inputRefs.fn is the math function to use, if it's not set, just use the value input
-      if (valueNotSet(this.inputRefs.fn.value)) return onValueChange(this.inputRefs.column.value);
+      if (valueNotSet(fn)) return onValueChange(column);
 
       // this.inputRefs.fn has a value, so use it as a math.js expression
-      onValueChange(`${this.inputRefs.fn.value}(${maybeQuoteValue(this.inputRefs.column.value)})`);
+      onValueChange(`${fn}(${maybeQuoteValue(column)})`);
     };
 
     const column = columns.map(col => col.name).find(colName => colName === mathValue.column) || '';
@@ -92,7 +95,7 @@ class DatacolumnArgInput extends Component {
           <EuiSelect
             compressed
             options={options}
-            defaultValue={column}
+            value={column}
             inputRef={ref => (this.inputRefs.column = ref)}
             onChange={updateFunctionValue}
           />
