@@ -234,7 +234,7 @@ deploying Functionbeat'
   return {
     OSX_LINUX: {
       title: defaultTitle,
-      textPre: i18n.translate('kbn.common.tutorials.functionbeatEnableOnPremInstructions.textPre', {
+      textPre: i18n.translate('kbn.common.tutorials.functionbeatEnableOnPremInstructionsOSXLinux.textPre', {
         defaultMessage: 'Modify the settings in the `functionbeat.yml` file.',
       }),
       commands: defaultCommands,
