@@ -402,7 +402,6 @@ export function heartbeatEnableInstructionsOnPrem() {
       title: defaultTitle,
       textPre: i18n.translate('kbn.common.tutorials.heartbeatEnableOnPremInstructions.windowsTextPre', {
         defaultMessage: 'Modify the monitors in the `/etc/heartbeat/heartbeat.yml` file.',
-        values: { path: `C:\\Program Files\\Heartbeat` },
       }),
       commands: defaultCommands,
       textPost: defaultTextPost
