@@ -25,20 +25,19 @@ export function registerLoadRoute(server) {
   server.route({
     path: '/api/watcher/settings',
     method: 'GET',
-    handler: (request, reply) => {
+    handler: () => {
       return fetchClusterSettings(callWithInternalUser)
         .then((settings) => {
-          reply(Settings.fromUpstreamJson(settings).downstreamJson);
+          return Settings.fromUpstreamJson(settings).downstreamJson;
         })
         .catch(err => {
-
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
-            return reply(wrapEsError(err));
+            throw wrapEsError(err);
           }
 
           // Case: default
-          reply(wrapUnknownError(err));
+          throw wrapUnknownError(err);
         });
     },
     config: {

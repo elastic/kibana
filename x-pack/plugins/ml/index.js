@@ -66,12 +66,12 @@ export const ml = (kibana) => {
       // Add server routes and initialize the plugin here
       const commonRouteConfig = {
         pre: [
-          function forbidApiAccess(request, reply) {
+          function forbidApiAccess() {
             const licenseCheckResults = xpackMainPlugin.info.feature(thisPlugin.id).getLicenseCheckResults();
             if (licenseCheckResults.isAvailable) {
-              reply();
+              return null;
             } else {
-              reply(Boom.forbidden(licenseCheckResults.message));
+              throw Boom.forbidden(licenseCheckResults.message);
             }
           }
         ]
