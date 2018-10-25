@@ -21,6 +21,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import uiRoutes from 'ui/routes';
 import angularTemplate from './angular_template.html';
 import 'ui/index_patterns';
+import { IndexPatternCreationFactory } from 'ui/management/index_pattern_creation';
 
 import { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } from './render';
 
@@ -29,13 +30,17 @@ uiRoutes.when('/management/kibana/index', {
   controller: function ($scope, $injector) {
     // Wait for the directives to execute
     const kbnUrl = $injector.get('kbnUrl');
+    const Private = $injector.get('Private');
     $scope.$$postDigest(() => {
       const $routeParams = $injector.get('$routeParams');
+      const indexPatternCreationProvider = Private(IndexPatternCreationFactory)($routeParams.type);
+      const indexPatternCreationType = indexPatternCreationProvider.getType();
       const services = {
         config: $injector.get('config'),
         es: $injector.get('es'),
         indexPatterns: $injector.get('indexPatterns'),
-        savedObjectsClient: $injector.get('Private')(SavedObjectsClientProvider),
+        savedObjectsClient: Private(SavedObjectsClientProvider),
+        indexPatternCreationType,
         changeUrl: url => {
           $scope.$evalAsync(() => kbnUrl.changePath(url));
         },

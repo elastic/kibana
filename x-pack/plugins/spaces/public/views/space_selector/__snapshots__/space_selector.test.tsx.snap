@@ -2,7 +2,7 @@
 
 exports[`it renders without crashing 1`] = `
 <EuiPage
-  className="spaceSelector__page"
+  className="spcSpaceSelector"
   data-test-subj="kibanaSpaceSelector"
   restrictWidth={false}
 >
@@ -10,35 +10,39 @@ exports[`it renders without crashing 1`] = `
     restrictWidth={false}
   >
     <EuiPageHeader
-      className="spaceSelector__heading"
+      className="spcSpaceSelector__heading"
       responsive={true}
     >
-      <EuiPageHeaderSection
-        className="spaceSelector__logoHeader"
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="spcSpaceSelector__logo"
       >
-        <div
-          className="spaceSelector__logoCircle"
-        >
-          <EuiIcon
-            size="xxl"
-            type="logoKibana"
-          />
-        </div>
-        <EuiSpacer
-          size="l"
+        <EuiIcon
+          size="xxl"
+          type="logoKibana"
         />
-        <EuiTitle
-          className="euiTextColor--ghost"
-          size="l"
-        >
-          <p>
-            Select your space
-          </p>
-        </EuiTitle>
-      </EuiPageHeaderSection>
+      </span>
+      <EuiTitle
+        size="l"
+      >
+        <h1>
+          Select your space
+        </h1>
+      </EuiTitle>
+      <EuiText
+        color="subdued"
+        grow={true}
+        size="s"
+      >
+        <p>
+          You can change your space at anytime
+        </p>
+      </EuiText>
     </EuiPageHeader>
     <EuiPageContent
-      className="spaceSelector__pageContent"
+      className="spcSpaceSelector__pageContent"
       panelPaddingSize="l"
     >
       <EuiFlexGroup
@@ -49,21 +53,7 @@ exports[`it renders without crashing 1`] = `
         justifyContent="flexStart"
         responsive={false}
         wrap={false}
-      >
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
-          <EuiText
-            grow={true}
-            size="xs"
-          >
-            <p>
-              You can change your space at anytime.
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      />
       <EuiSpacer
         size="xl"
       />
