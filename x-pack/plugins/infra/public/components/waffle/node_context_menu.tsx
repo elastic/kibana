@@ -35,7 +35,6 @@ export const NodeContextMenu: React.SFC<Props> = ({
 }) => {
   const nodeLogsUrl = getNodeLogsUrl(nodeType, node);
   const nodeDetailUrl = getNodeDetailUrl(nodeType, node);
-  const nodeField = options.fields ? options.fields[nodeType] : null;
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
@@ -54,14 +53,6 @@ export const NodeContextMenu: React.SFC<Props> = ({
               {
                 name: `View metrics`,
                 href: nodeDetailUrl,
-              },
-            ]
-          : []),
-        ...(nodeField
-          ? [
-              {
-                name: `View APM Traces`,
-                href: `../app/apm#/?_g=()&kuery=${nodeField}~20~3A~20~22${node.name}~22`,
               },
             ]
           : []),
