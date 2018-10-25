@@ -23,6 +23,11 @@ function readFile(file: string) {
   );
 }
 
+export function detectLanguageByFilename(filename: string) {
+  const lang = detect.filename(filename);
+  return lang && lang.toLowerCase();
+}
+
 export async function detectLanguage(file: string, fileContent?: Buffer | string) {
   let lang = detect.filename(file);
   if (!lang) {

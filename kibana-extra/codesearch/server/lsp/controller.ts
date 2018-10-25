@@ -126,6 +126,10 @@ export class LanguageServerController implements ILanguageServerHandler {
     }
   }
 
+  public supportLanguage(lang: string) {
+    return this.languageServerMap[lang] !== undefined;
+  }
+
   private async findOrCreateHandler(
     languageServer: LanguageServer,
     request: LspRequest

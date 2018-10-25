@@ -39,4 +39,8 @@ export class LspService {
     // TODO read from config which LSP should be used
     await this.controller.launchServers();
   }
+
+  public supportLanguage(lang: string) {
+    return this.controller.supportLanguage(lang);
+  }
 }

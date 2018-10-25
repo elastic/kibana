@@ -15,7 +15,7 @@ import { GitOperations } from '../git_operations';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';
-import { detectLanguage } from '../utils/detect_language';
+import { detectLanguage, detectLanguageByFilename } from '../utils/detect_language';
 import { AbstractIndexer } from './abstract_indexer';
 import { IndexCreationRequest } from './index_creation_request';
 import {
@@ -92,15 +92,20 @@ export class LspIndexer extends AbstractIndexer {
       const workspaceDir = workspaceRepo.workdir();
       const gitOperator = new GitOperations(this.options.repoPath);
       const fileTree = await gitOperator.fileTree(this.repoUri, '');
-      return RepositoryUtils.getAllFiles(fileTree).map((filePath: string) => {
-        const req: LspIndexRequest = {
-          repoUri: this.repoUri,
-          localRepoPath: workspaceDir,
-          filePath,
-          revision: workspaceRevision,
-        };
-        return req;
-      });
+      return RepositoryUtils.getAllFiles(fileTree)
+        .filter((filePath: string) => {
+          const lang = detectLanguageByFilename(filePath);
+          return lang && this.lspService.supportLanguage(lang);
+        })
+        .map((filePath: string) => {
+          const req: LspIndexRequest = {
+            repoUri: this.repoUri,
+            localRepoPath: workspaceDir,
+            filePath,
+            revision: workspaceRevision,
+          };
+          return req;
+        });
     } catch (e) {
       this.log.error(`Prepare lsp indexing requests error: ${e}`);
       throw e;
