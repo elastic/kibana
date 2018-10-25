@@ -4,11 +4,10 @@ exports[`AgentFeatureTipMessage component should render null empty string when n
 
 exports[`AgentFeatureTipMessage component should render when docs are returned 1`] = `
 <styled.div>
-  <EuiIcon
-    size="m"
+  <Styled(EuiIcon)
     type="iInCircle"
   />
-  Mock Docs Text
+  You can configure your agent to add contextual information about your users.
    
   <ExternalLink
     href="mock-url"
@@ -18,38 +17,27 @@ exports[`AgentFeatureTipMessage component should render when docs are returned 1
 </styled.div>
 `;
 
-exports[`AgentFeatureTipMessage component should render when docs are returned, but missing a url 1`] = `
-<styled.div>
-  <EuiIcon
-    size="m"
-    type="iInCircle"
-  />
-  Mock Docs Text
-   
-</styled.div>
-`;
-
 exports[`PropertiesTable component should render empty when data has no keys 1`] = `
 <styled.div>
-  <styled.div>
-    <EuiIcon
-      size="m"
-      type="iInCircle"
-    />
-     No data available
-  </styled.div>
+  <Styled(styled.div)>
+    No data available
+  </Styled(styled.div)>
+  <AgentFeatureTipMessage
+    agentName="testAgentName"
+    featureName="testPropKey"
+  />
 </styled.div>
 `;
 
 exports[`PropertiesTable component should render empty when data isn't present 1`] = `
 <styled.div>
-  <styled.div>
-    <EuiIcon
-      size="m"
-      type="iInCircle"
-    />
-     No data available
-  </styled.div>
+  <Styled(styled.div)>
+    No data available
+  </Styled(styled.div)>
+  <AgentFeatureTipMessage
+    agentName="testAgentName"
+    featureName="testPropKey"
+  />
 </styled.div>
 `;
 
@@ -68,7 +56,7 @@ exports[`PropertiesTable component should render with data 1`] = `
   />
   <AgentFeatureTipMessage
     agentName="testAgentName"
-    featureName="context-testPropKey"
+    featureName="testPropKey"
   />
 </styled.div>
 `;

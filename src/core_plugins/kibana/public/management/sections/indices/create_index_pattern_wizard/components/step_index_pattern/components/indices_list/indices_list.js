@@ -22,6 +22,7 @@ import PropTypes from 'prop-types';
 import { PER_PAGE_INCREMENTS } from '../../../../constants';
 
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -184,6 +185,13 @@ export class IndicesList extends Component {
         <EuiTableRow key={key}>
           <EuiTableRowCell>
             {this.highlightIndexName(index.name, queryWithoutWildcard)}
+          </EuiTableRowCell>
+          <EuiTableRowCell>
+            {index.tags.map(tag => {
+              return (
+                <EuiBadge key={`index_${key}_tag_${tag.key}`} color="primary">{tag.name}</EuiBadge>
+              );
+            })}
           </EuiTableRowCell>
         </EuiTableRow>
       );

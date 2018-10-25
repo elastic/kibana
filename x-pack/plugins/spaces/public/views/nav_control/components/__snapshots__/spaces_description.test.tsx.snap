@@ -2,13 +2,13 @@
 
 exports[`SpacesDescription renders without crashing 1`] = `
 <EuiContextMenuPanel
-  className="spacesDescription"
+  className="spcDescription"
   hasFocus={true}
   items={Array []}
   title="Spaces"
 >
   <EuiText
-    className="spacesDescription__text"
+    className="spcDescription__text"
     grow={true}
   >
     <p>
@@ -16,7 +16,7 @@ exports[`SpacesDescription renders without crashing 1`] = `
     </p>
   </EuiText>
   <div
-    className="spacesDescription__manageButtonWrapper"
+    className="spcDescription__manageButtonWrapper"
     key="manageSpacesButton"
   >
     <ManageSpacesButton
