@@ -30,8 +30,8 @@ interface ItemBarProps {
 const ItemBar = styled<ItemBarProps, any>('div')`
   box-sizing: border-box;
   position: relative;
-  height: px(unit);
-  left: ${props => `${props.left}%`};
+  height: ${px(unit)};
+  left: ${props => props.left}%;
   width: ${props => props.width}%;
   min-width: '2px';
   background-color: ${props => props.color};
