@@ -72,6 +72,8 @@ export const seriesStyle = () => ({
       help: i18n.translate('xpack.canvas.functions.seriesStyle.args.fillHelpText', {
         defaultMessage: 'Should we fill points?',
       }),
+      default: false,
+      options: [true, false],
     },
     stack: {
       types: ['number', 'null'],
@@ -97,6 +99,7 @@ export const seriesStyle = () => ({
           defaultMessage: 'Sets the orientation of bars in the chart to horizontal',
         }
       ),
+      options: [true, false],
     },
   },
   fn: (context, args) => ({ type: name, ...args }),

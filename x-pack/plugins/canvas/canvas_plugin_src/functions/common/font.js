@@ -8,6 +8,23 @@ import inlineStyle from 'inline-style';
 import { i18n } from '@kbn/i18n';
 import { openSans } from '../../../common/lib/fonts';
 
+const weights = [
+  'normal',
+  'bold',
+  'bolder',
+  'lighter',
+  '100',
+  '200',
+  '300',
+  '400',
+  '500',
+  '600',
+  '700',
+  '800',
+  '900',
+];
+const alignments = ['center', 'left', 'right', 'justify'];
+
 export const font = () => ({
   name: 'font',
   aliases: [],
@@ -56,6 +73,7 @@ export const font = () => ({
         },
       }),
       default: 'normal',
+      options: weights,
     },
     underline: {
       types: ['boolean'],
@@ -63,6 +81,7 @@ export const font = () => ({
       help: i18n.translate('xpack.canvas.functions.font.args.underlineHelpText', {
         defaultMessage: 'Underline the text, true or false',
       }),
+      options: [true, false],
     },
     italic: {
       types: ['boolean'],
@@ -70,6 +89,7 @@ export const font = () => ({
       help: i18n.translate('xpack.canvas.functions.font.args.italicHelpText', {
         defaultMessage: 'Italicize, true or false',
       }),
+      options: [true, false],
     },
     align: {
       types: ['string'],
@@ -77,26 +97,10 @@ export const font = () => ({
         defaultMessage: 'Horizontal text alignment',
       }),
       default: 'left',
+      options: alignments,
     },
   },
   fn: (context, args) => {
-    const weights = [
-      'normal',
-      'bold',
-      'bolder',
-      'lighter',
-      '100',
-      '200',
-      '300',
-      '400',
-      '500',
-      '600',
-      '700',
-      '800',
-      '900',
-    ];
-    const alignments = ['center', 'left', 'right', 'justified'];
-
     if (!weights.includes(args.weight)) {
       throw new Error(
         i18n.translate('xpack.canvas.functions.font.invalidWeightErrorMessage', {

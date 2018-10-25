@@ -30,6 +30,7 @@ export const timefilterControl = () => ({
         defaultMessage: 'Show the time filter as a button that triggers a popover',
       }),
       default: true,
+      options: [true, false],
     },
   },
   fn: (context, args) => {

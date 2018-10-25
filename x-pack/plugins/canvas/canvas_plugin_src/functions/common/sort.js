@@ -32,6 +32,7 @@ export const sort = () => ({
         defaultMessage:
           'Reverse the sort order. If reverse is not specified, the datatable will be sorted in ascending order.',
       }),
+      options: [true, false],
     },
   },
   fn: (context, args) => {

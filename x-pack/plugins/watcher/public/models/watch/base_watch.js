@@ -10,6 +10,7 @@ import { Action } from '../action';
 import { WatchStatus } from '../watch_status';
 import { createActionId } from './lib/create_action_id';
 import { checkActionIdCollision } from './lib/check_action_id_collision';
+import { i18n } from '@kbn/i18n';
 
 export class BaseWatch {
   /**
@@ -44,7 +45,12 @@ export class BaseWatch {
     const ActionType = ActionTypes[type];
 
     if (!Boolean(ActionType)) {
-      throw new Error(`Attempted to create unknown action type ${type}.`);
+      throw new Error(
+        i18n.translate('xpack.watcher.models.baseWatch.createUnknownActionTypeErrorMessage', {
+          defaultMessage: 'Attempted to create unknown action type {type}.',
+          values: { type }
+        })
+      );
     }
 
     const id = createActionId(this.actions, type);
@@ -72,7 +78,9 @@ export class BaseWatch {
 
   get displayName() {
     if (this.isNew) {
-      return 'New Watch';
+      return i18n.translate('xpack.watcher.models.baseWatch.displayName', {
+        defaultMessage: 'New Watch',
+      });
     } else if (this.name) {
       return this.name;
     } else {
@@ -122,9 +130,13 @@ export class BaseWatch {
     return isEqual(cleanWatch, cleanOtherWatch);
   }
 
-  static typeName = 'Watch';
+  static typeName = i18n.translate('xpack.watcher.models.baseWatch.typeName', {
+    defaultMessage: 'Watch',
+  });
   static iconClass = '';
-  static selectMessage = 'Set up a new watch.';
+  static selectMessage = i18n.translate('xpack.watcher.models.baseWatch.selectMessageText', {
+    defaultMessage: 'Set up a new watch.',
+  });
   static isCreatable = true;
   static selectSortOrder = 0;
 }

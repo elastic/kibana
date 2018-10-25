@@ -31,6 +31,7 @@ export const table = () => ({
         defaultMessage:
           'Show pagination controls. If set to false only the first page will be displayed',
       }),
+      options: [true, false],
     },
     perPage: {
       types: ['number'],
@@ -46,6 +47,7 @@ export const table = () => ({
       help: i18n.translate('xpack.canvas.functions.table.args.showHeaderHelpText', {
         defaultMessage: 'Show or hide the header row with titles for each column',
       }),
+      options: [true, false],
     },
   },
   fn: (context, args) => {

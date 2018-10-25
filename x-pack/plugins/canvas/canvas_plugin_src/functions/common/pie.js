@@ -56,6 +56,7 @@ export const pie = () => ({
       help: i18n.translate('xpack.canvas.functions.pie.args.labelsHelpText', {
         defaultMessage: 'Show pie labels',
       }),
+      options: [true, false],
     },
     labelRadius: {
       types: ['number'],
@@ -77,6 +78,7 @@ export const pie = () => ({
         defaultMessage: 'Legend position, nw, sw, ne, se or false',
       }),
       default: false,
+      options: ['nw', 'sw', 'ne', 'se', false],
     },
     tilt: {
       types: ['number'],

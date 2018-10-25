@@ -7,7 +7,17 @@
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { openSans } from '../../../common/lib/fonts';
-import { shapes } from '../../renderers/progress/shapes';
+
+const shapes = [
+  'gauge',
+  'horizontalBar',
+  'horizontalPill',
+  'semicircle',
+  'unicorn',
+  'verticalBar',
+  'verticalPill',
+  'wheel',
+];
 
 export const progress = () => ({
   name: 'progress',
@@ -38,6 +48,7 @@ export const progress = () => ({
             .join(', '),
         },
       }),
+      options: shapes,
       default: 'gauge',
     },
     max: {

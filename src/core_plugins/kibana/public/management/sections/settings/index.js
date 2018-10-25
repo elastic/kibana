@@ -26,6 +26,7 @@ import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/r
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { AdvancedSettings } from './advanced_settings';
+import { i18n } from '@kbn/i18n';
 
 const REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID = 'reactAdvancedSettings';
 
@@ -75,7 +76,9 @@ uiModules.get('apps/management')
   });
 
 management.getSection('kibana').register('settings', {
-  display: 'Advanced Settings',
+  display: i18n.translate('kbn.management.settings.sectionLabel', {
+    defaultMessage: 'Advanced Settings',
+  }),
   order: 20,
   url: '#/management/kibana/settings'
 });

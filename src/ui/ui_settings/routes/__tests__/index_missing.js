@@ -56,7 +56,7 @@ export function indexMissingSuite() {
   }
 
   describe('get route', () => {
-    it('returns a 200 and with just overridden values', async () => {
+    it('returns a 200 and creates doc, upgrades old value', async () => {
       const { kbnServer } = await setup();
 
       const { statusCode, result } = await kbnServer.inject({
@@ -65,8 +65,11 @@ export function indexMissingSuite() {
       });
 
       expect(statusCode).to.be(200);
-      expect(result).to.eql({
+      assertSinonMatch(result, {
         settings: {
+          buildNum: {
+            userValue: sinon.match.number,
+          },
           foo: {
             userValue: 'bar',
             isOverridden: true

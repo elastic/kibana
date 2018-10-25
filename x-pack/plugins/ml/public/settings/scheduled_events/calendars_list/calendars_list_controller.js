@@ -13,7 +13,7 @@ import 'ui/pager';
 import 'ui/sortable_column';
 
 import uiRoutes from 'ui/routes';
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount, mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { buttonsEnabledChecks } from 'plugins/ml/settings/scheduled_events/calendars_list/buttons_enabled_checks';
@@ -28,7 +28,7 @@ uiRoutes
   .when('/settings/calendars_list', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
       initPromise: initPromise(true)

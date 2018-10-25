@@ -33,6 +33,7 @@ export const palette = () => ({
       help: i18n.translate('xpack.canvas.functions.palette.args.gradientHelpText', {
         defaultMessage: 'Prefer to make a gradient where supported and useful?',
       }),
+      options: [true, false],
     },
     reverse: {
       type: ['boolean'],
@@ -40,6 +41,7 @@ export const palette = () => ({
       help: i18n.translate('xpack.canvas.functions.palette.args.reverseHelpText', {
         defaultMessage: 'Reverse the palette',
       }),
+      options: [true, false],
     },
   },
   fn: (context, args) => {
