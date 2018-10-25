@@ -51,11 +51,17 @@ exports[`StickyProperties should render 1`] = `
       className="c0"
     >
       <span
-        aria-describedby="overlay1"
+        className="euiToolTipAnchor"
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
-        Timestamp
+        <span
+          aria-describedby="5dvz8k9m"
+          onBlur={[Function]}
+          onFocus={[Function]}
+        >
+          Timestamp
+        </span>
       </span>
     </div>
     <div
@@ -85,20 +91,32 @@ exports[`StickyProperties should render 1`] = `
       className="c0"
     >
       <span
-        aria-describedby="overlay2"
+        className="euiToolTipAnchor"
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
-        URL
+        <span
+          aria-describedby="biwa7uz2"
+          onBlur={[Function]}
+          onFocus={[Function]}
+        >
+          URL
+        </span>
       </span>
     </div>
     <span
-      aria-describedby="overlay3"
-      className="c3"
+      className="euiToolTipAnchor"
       onMouseOut={[Function]}
       onMouseOver={[Function]}
     >
-      https://www.elastic.co/test
+      <span
+        aria-describedby="im9ylbc7"
+        className="c3"
+        onBlur={[Function]}
+        onFocus={[Function]}
+      >
+        https://www.elastic.co/test
+      </span>
     </span>
   </div>
   <div
@@ -114,11 +132,17 @@ exports[`StickyProperties should render 1`] = `
       className="c0"
     >
       <span
-        aria-describedby="overlay4"
+        className="euiToolTipAnchor"
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
-        Request method
+        <span
+          aria-describedby="28zqzxi9"
+          onBlur={[Function]}
+          onFocus={[Function]}
+        >
+          Request method
+        </span>
       </span>
     </div>
     <div
@@ -140,11 +164,17 @@ exports[`StickyProperties should render 1`] = `
       className="c0"
     >
       <span
-        aria-describedby="overlay5"
+        className="euiToolTipAnchor"
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
-        Handled
+        <span
+          aria-describedby="buqtslzd"
+          onBlur={[Function]}
+          onFocus={[Function]}
+        >
+          Handled
+        </span>
       </span>
     </div>
     <div
@@ -166,11 +196,17 @@ exports[`StickyProperties should render 1`] = `
       className="c0"
     >
       <span
-        aria-describedby="overlay6"
+        className="euiToolTipAnchor"
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
-        User ID
+        <span
+          aria-describedby="43bewuyo"
+          onBlur={[Function]}
+          onFocus={[Function]}
+        >
+          User ID
+        </span>
       </span>
     </div>
     <div

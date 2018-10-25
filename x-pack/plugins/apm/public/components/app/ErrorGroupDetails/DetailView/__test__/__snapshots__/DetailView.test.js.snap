@@ -288,11 +288,17 @@ exports[`DetailView should render with data 1`] = `
           className="c4"
         >
           <span
-            aria-describedby="overlay1"
+            className="euiToolTipAnchor"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
-            Timestamp
+            <span
+              aria-describedby="vdsdxsjs"
+              onBlur={[Function]}
+              onFocus={[Function]}
+            >
+              Timestamp
+            </span>
           </span>
         </div>
         <div
@@ -322,20 +328,32 @@ exports[`DetailView should render with data 1`] = `
           className="c4"
         >
           <span
-            aria-describedby="overlay2"
+            className="euiToolTipAnchor"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
-            URL
+            <span
+              aria-describedby="y0ehutfd"
+              onBlur={[Function]}
+              onFocus={[Function]}
+            >
+              URL
+            </span>
           </span>
         </div>
         <span
-          aria-describedby="overlay3"
-          className="c7"
+          className="euiToolTipAnchor"
           onMouseOut={[Function]}
           onMouseOver={[Function]}
         >
-          N/A
+          <span
+            aria-describedby="x87cj4gb"
+            className="c7"
+            onBlur={[Function]}
+            onFocus={[Function]}
+          >
+            N/A
+          </span>
         </span>
       </div>
       <div
@@ -351,11 +369,17 @@ exports[`DetailView should render with data 1`] = `
           className="c4"
         >
           <span
-            aria-describedby="overlay4"
+            className="euiToolTipAnchor"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
-            Request method
+            <span
+              aria-describedby="89toixxn"
+              onBlur={[Function]}
+              onFocus={[Function]}
+            >
+              Request method
+            </span>
           </span>
         </div>
         <div
@@ -377,11 +401,17 @@ exports[`DetailView should render with data 1`] = `
           className="c4"
         >
           <span
-            aria-describedby="overlay5"
+            className="euiToolTipAnchor"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
-            Handled
+            <span
+              aria-describedby="efrlehmf"
+              onBlur={[Function]}
+              onFocus={[Function]}
+            >
+              Handled
+            </span>
           </span>
         </div>
         <div
@@ -403,11 +433,17 @@ exports[`DetailView should render with data 1`] = `
           className="c4"
         >
           <span
-            aria-describedby="overlay6"
+            className="euiToolTipAnchor"
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
-            User ID
+            <span
+              aria-describedby="z94t2wr7"
+              onBlur={[Function]}
+              onFocus={[Function]}
+            >
+              User ID
+            </span>
           </span>
         </div>
         <div
