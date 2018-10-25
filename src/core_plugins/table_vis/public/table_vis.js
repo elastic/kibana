@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './table_vis.less';
 import './table_vis_controller';
 import './table_vis_params';
 import 'ui/agg_table';
@@ -27,6 +26,8 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import tableVisTemplate from './table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { legacyTableResponseHandler } from './legacy_response_handler';
+
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
@@ -95,7 +96,7 @@ function TableVisTypeProvider(Private) {
         }
       ])
     },
-    responseHandler: 'legacy',
+    responseHandler: legacyTableResponseHandler,
     responseHandlerConfig: {
       asAggConfigResults: true
     },

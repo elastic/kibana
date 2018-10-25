@@ -19,16 +19,20 @@
 
 import cheerio from 'cheerio';
 import { parse } from '@babel/parser';
-import { isDirectiveLiteral, isObjectExpression, isStringLiteral } from '@babel/types';
+import { isDirectiveLiteral, isObjectExpression } from '@babel/types';
 
 import {
   isPropertyWithKey,
   formatHTMLString,
   formatJSString,
   traverseNodes,
+  checkValuesProperty,
   createParserErrorMessage,
+  extractMessageValueFromNode,
+  extractValuesKeysFromNode,
+  extractContextValueFromNode,
 } from '../utils';
-import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY } from '../constants';
+import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY, VALUES_KEY } from '../constants';
 import { createFailError } from '../../run';
 
 /**
@@ -41,9 +45,10 @@ const I18N_FILTER_MARKER = '| i18n: ';
 /**
  * Extract default message from an angular filter expression argument
  * @param {string} expression JavaScript code containing a filter object
- * @returns {string} Default message
+ * @param {string} messageId id of the message
+ * @returns {{ message?: string, context?: string, valuesKeys: string[]] }}
  */
-function parseFilterObjectExpression(expression) {
+function parseFilterObjectExpression(expression, messageId) {
   let ast;
 
   try {
@@ -60,34 +65,33 @@ function parseFilterObjectExpression(expression) {
     throw error;
   }
 
-  for (const node of traverseNodes(ast.program.body)) {
-    if (!isObjectExpression(node)) {
-      continue;
-    }
+  const objectExpressionNode = [...traverseNodes(ast.program.body)].find(node =>
+    isObjectExpression(node)
+  );
 
-    let message;
-    let context;
-
-    for (const property of node.properties) {
-      if (isPropertyWithKey(property, DEFAULT_MESSAGE_KEY)) {
-        if (!isStringLiteral(property.value)) {
-          throw createFailError(`defaultMessage value should be a string literal.`);
-        }
-
-        message = formatJSString(property.value.value);
-      } else if (isPropertyWithKey(property, CONTEXT_KEY)) {
-        if (!isStringLiteral(property.value)) {
-          throw createFailError(`context value should be a string literal.`);
-        }
-
-        context = formatJSString(property.value.value);
-      }
-    }
-
-    return { message, context };
+  if (!objectExpressionNode) {
+    return {};
   }
 
-  return null;
+  const [messageProperty, contextProperty, valuesProperty] = [
+    DEFAULT_MESSAGE_KEY,
+    CONTEXT_KEY,
+    VALUES_KEY,
+  ].map(key => objectExpressionNode.properties.find(property => isPropertyWithKey(property, key)));
+
+  const message = messageProperty
+    ? formatJSString(extractMessageValueFromNode(messageProperty.value, messageId))
+    : undefined;
+
+  const context = contextProperty
+    ? formatJSString(extractContextValueFromNode(contextProperty.value, messageId))
+    : undefined;
+
+  const valuesKeys = valuesProperty
+    ? extractValuesKeysFromNode(valuesProperty.value, messageId)
+    : [];
+
+  return { message, context, valuesKeys };
 }
 
 function parseIdExpression(expression) {
@@ -106,17 +110,42 @@ function parseIdExpression(expression) {
     throw error;
   }
 
-  for (const node of traverseNodes(ast.program.directives)) {
-    if (isDirectiveLiteral(node)) {
-      return formatJSString(node.value);
-    }
-  }
-
-  return null;
+  const stringNode = [...traverseNodes(ast.program.directives)].find(node =>
+    isDirectiveLiteral(node)
+  );
+  return stringNode ? formatJSString(stringNode.value) : null;
 }
 
 function trimCurlyBraces(string) {
   return string.slice(2, -2).trim();
+}
+
+/**
+ * Removes parentheses from the start and the end of a string.
+ *
+ * Example: `('id' | i18n: { defaultMessage: 'Message' })`
+ * @param {string} string string to trim
+ */
+function trimParentheses(string) {
+  if (string.startsWith('(') && string.endsWith(')')) {
+    return string.slice(1, -1);
+  }
+
+  return string;
+}
+
+/**
+ * Removes one-time binding operator `::` from the start of a string.
+ *
+ * Example: `::'id' | i18n: { defaultMessage: 'Message' }`
+ * @param {string} string string to trim
+ */
+function trimOneTimeBindingOperator(string) {
+  if (string.startsWith('::')) {
+    return string.slice(2);
+  }
+
+  return string;
 }
 
 function* getFilterMessages(htmlContent) {
@@ -126,7 +155,10 @@ function* getFilterMessages(htmlContent) {
 
   for (const expression of expressions) {
     const filterStart = expression.indexOf(I18N_FILTER_MARKER);
-    const idExpression = expression.slice(0, filterStart).trim();
+    const idExpression = trimParentheses(
+      trimOneTimeBindingOperator(expression.slice(0, filterStart).trim())
+    );
+
     const filterObjectExpression = expression.slice(filterStart + I18N_FILTER_MARKER.length).trim();
 
     if (!filterObjectExpression || !idExpression) {
@@ -139,13 +171,18 @@ function* getFilterMessages(htmlContent) {
       throw createFailError(`Empty "id" value in angular filter expression is not allowed.`);
     }
 
-    const { message, context } = parseFilterObjectExpression(filterObjectExpression) || {};
+    const { message, context, valuesKeys } = parseFilterObjectExpression(
+      filterObjectExpression,
+      messageId
+    );
 
     if (!message) {
       throw createFailError(
         `Empty defaultMessage in angular filter expression is not allowed ("${messageId}").`
       );
     }
+
+    checkValuesProperty(valuesKeys, message, messageId);
 
     yield [messageId, { message, context }];
   }
@@ -154,14 +191,17 @@ function* getFilterMessages(htmlContent) {
 function* getDirectiveMessages(htmlContent) {
   const $ = cheerio.load(htmlContent);
 
-  const elements = $('[i18n-id]').map(function (idx, el) {
-    const $el = $(el);
-    return {
-      id: $el.attr('i18n-id'),
-      defaultMessage: $el.attr('i18n-default-message'),
-      context: $el.attr('i18n-context'),
-    };
-  }).toArray();
+  const elements = $('[i18n-id]')
+    .map(function (idx, el) {
+      const $el = $(el);
+      return {
+        id: $el.attr('i18n-id'),
+        defaultMessage: $el.attr('i18n-default-message'),
+        context: $el.attr('i18n-context'),
+        values: $el.attr('i18n-values'),
+      };
+    })
+    .toArray();
 
   for (const element of elements) {
     const messageId = formatHTMLString(element.id);
@@ -174,6 +214,16 @@ function* getDirectiveMessages(htmlContent) {
       throw createFailError(
         `Empty defaultMessage in angular directive is not allowed ("${messageId}").`
       );
+    }
+
+    if (element.values) {
+      const nodes = parse(`+${element.values}`).program.body;
+      const valuesObjectNode = [...traverseNodes(nodes)].find(node => isObjectExpression(node));
+      const valuesKeys = extractValuesKeysFromNode(valuesObjectNode);
+
+      checkValuesProperty(valuesKeys, message, messageId);
+    } else {
+      checkValuesProperty([], message, messageId);
     }
 
     yield [messageId, { message, context: formatHTMLString(element.context) || undefined }];

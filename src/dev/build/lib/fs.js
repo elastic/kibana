@@ -129,9 +129,22 @@ export async function copyAll(sourceDir, destination, options = {}) {
       base: sourceDir,
       dot,
     }),
-    vfs.dest(destination),
-    ...(Boolean(time) ? [createMapStream(file => utimesAsync(file.path, time, time))] : []),
+    vfs.dest(destination)
   ]);
+
+  // we must update access and modified file times after the file copy
+  // has completed, otherwise the copy action can effect modify times.
+  if (Boolean(time)) {
+    await createPromiseFromStreams([
+      vfs.src(select, {
+        buffer: false,
+        cwd: destination,
+        base: destination,
+        dot,
+      }),
+      createMapStream(file => utimesAsync(file.path, time, time))
+    ]);
+  }
 }
 
 export async function getFileHash(path, algo) {
