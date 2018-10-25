@@ -7,18 +7,14 @@
 import { getServerRegistries } from '../server_registries';
 import { interpretProvider } from '../../../common/interpreter/interpret';
 import { createHandlers } from '../create_handlers';
-import { getAuthHeader } from '../../routes/get_auth/get_auth_header';
+import { getRequest } from '../../lib/get_request';
 
 export const server = ({ onFunctionNotFound, server, socket }) => {
   const pluginsReady = getServerRegistries(['serverFunctions', 'types']);
 
-  const request = socket.handshake;
-  const authHeader = getAuthHeader(request, server);
-
-  return Promise.all([pluginsReady, authHeader]).then(
-    ([{ serverFunctions, types }, authHeader]) => {
-      if (server.plugins.security) request.headers.authorization = authHeader;
-
+  return Promise.all([pluginsReady, getRequest(server, socket.handshake)]).then(
+    ([{ serverFunctions, types }, request]) => {
+      // 'request' is the modified hapi request object
       return {
         interpret: (ast, context) => {
           const interpret = interpretProvider({

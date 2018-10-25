@@ -55,7 +55,7 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           <EuiFormRow label={'Color'}>
             <EuiColorPicker color={getSpaceColor(space)} onChange={this.onColorChange} />
           </EuiFormRow>

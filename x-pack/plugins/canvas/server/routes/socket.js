@@ -17,8 +17,6 @@ export function socketApi(server) {
   const io = socket(server.listener, { path: '/socket.io' });
 
   io.on('connection', socket => {
-    // This is the HAPI request object
-
     const types = typesRegistry.toJS();
     const { serialize, deserialize } = serializeProvider(types);
 

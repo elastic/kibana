@@ -9,8 +9,9 @@ import { functionsRegistry } from './common/lib/functions_registry';
 import { commonFunctions } from './common/functions';
 import { populateServerRegistries } from './server/lib/server_registries';
 import { registerCanvasUsageCollector } from './server/usage';
+import { loadSampleData } from './server/sample_data';
 
-export default function(server /*options*/) {
+export default async function(server /*options*/) {
   server.injectUiAppVars('canvas', () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
@@ -30,7 +31,9 @@ export default function(server /*options*/) {
   commonFunctions.forEach(func => functionsRegistry.register(func));
 
   registerCanvasUsageCollector(server);
+  loadSampleData(server);
 
   // Do not initialize the app until the registries are populated
-  return populateServerRegistries(['serverFunctions', 'types']).then(() => routes(server));
+  await populateServerRegistries(['serverFunctions', 'types']);
+  routes(server);
 }
