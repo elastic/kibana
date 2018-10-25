@@ -4,25 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const timeUnits = {
   'second': {
-    labelPlural: 'seconds',
-    labelSingular: 'second',
+    labelPlural: i18n.translate('xpack.watcher.thresholdWatchExpression.timeUnits.secondPluralLabel', {
+      defaultMessage: 'seconds',
+    }),
+    labelSingular: i18n.translate('xpack.watcher.thresholdWatchExpression.timeUnits.secondSingularLabel', {
+      defaultMessage: 'second',
+    }),
     value: 's'
   },
   'minute': {
-    labelPlural: 'minutes',
-    labelSingular: 'minute',
+    labelPlural: i18n.translate('xpack.watcher.thresholdWatchExpression.timeUnits.minutePluralLabel', {
+      defaultMessage: 'minutes',
+    }),
+    labelSingular: i18n.translate('xpack.watcher.thresholdWatchExpression.timeUnits.minuteSingularLabel', {
+      defaultMessage: 'minute',
+    }),
     value: 'm'
   },
   'hour': {
-    labelPlural: 'hours',
-    labelSingular: 'hour',
+    labelPlural: i18n.translate('xpack.watcher.thresholdWatchExpression.timeUnits.hourPluralLabel', {
+      defaultMessage: 'hours',
+    }),
+    labelSingular: i18n.translate('xpack.watcher.thresholdWatchExpression.timeUnits.hourSingularLabel', {
+      defaultMessage: 'hour',
+    }),
     value: 'h'
   },
   'day': {
-    labelPlural: 'days',
-    labelSingular: 'day',
+    labelPlural: i18n.translate('xpack.watcher.thresholdWatchExpression.timeUnits.dayPluralLabel', {
+      defaultMessage: 'days',
+    }),
+    labelSingular: i18n.translate('xpack.watcher.thresholdWatchExpression.timeUnits.daySingularLabel', {
+      defaultMessage: 'day',
+    }),
     value: 'd'
   }
 };

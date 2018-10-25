@@ -179,11 +179,18 @@
   },
   "mml_value_invalid": {
     "status": "ERROR",
-    "text": "{{mml}} is not a valid value for model memory limit. The value should be specified in bytes e.g. 10MB"
+    "text": "{{mml}} is not a valid value for model memory limit. The value needs to be at least 1MB and should be specified in bytes e.g. 10MB.",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#model-memory-limits"
+  },
+  "half_estimated_mml_greater_than_mml": {
+    "status": "WARNING",
+    "text": "The specified model memory limit is less than half of the estimated model memory limit and will likely hit the hard limit.",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#model-memory-limits"
   },
   "estimated_mml_greater_than_mml": {
     "status": "INFO",
-    "text": "The estimated model memory limit is greater than the model memory limit you have configured."
+    "text": "The estimated model memory limit is greater than the model memory limit you have configured.",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#model-memory-limits"
   },
   "success_mml": {
     "status": "SUCCESS",
