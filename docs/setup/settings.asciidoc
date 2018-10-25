@@ -49,6 +49,11 @@ certificate and key files. These files are used to verify the identity of Kibana
 `elasticsearch.ssl.verificationMode:`:: *Default: full* Controls the verification of certificates presented by Elasticsearch. Valid values are `none`, `certificate`, and `full`.
 `full` performs hostname verification, and `certificate` does not.
 
+`elasticsearch.ssl.alwaysPresentCertificate:`:: *Default: false* Controls whether to always present the certificate specified
+by `elasticsearch.ssl.certificate` when requested. This applies to all requests to Elasticsearch, including requests that are
+proxied for end-users. Setting this to `true` when Elasticsearch is using certificates to authenticate users can lead to proxied
+requests for end-users being executed as the identity tied to the configured certificate.
+
 `elasticsearch.startupTimeout:`:: *Default: 5000* Time in milliseconds to wait for Elasticsearch at Kibana startup before
 retrying.
 

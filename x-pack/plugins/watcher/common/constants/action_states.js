@@ -4,21 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const ACTION_STATES = {
 
   // Action is not being executed because conditions haven't been met
-  OK: 'OK',
+  OK: i18n.translate('xpack.watcher.constants.actionStates.okStateText', {
+    defaultMessage: 'OK'
+  }),
 
   // Action has been acknowledged by user
-  ACKNOWLEDGED: 'Acked',
+  ACKNOWLEDGED: i18n.translate('xpack.watcher.constants.actionStates.acknowledgedStateText', {
+    defaultMessage: 'Acked'
+  }),
 
   // Action has been throttled (time-based) by the system
-  THROTTLED: 'Throttled',
+  THROTTLED: i18n.translate('xpack.watcher.constants.actionStates.throttledStateText', {
+    defaultMessage: 'Throttled'
+  }),
 
   // Action has been completed
-  FIRING: 'Firing',
+  FIRING: i18n.translate('xpack.watcher.constants.actionStates.firingStateText', {
+    defaultMessage: 'Firing'
+  }),
 
   // Action has failed
-  ERROR: 'Error'
+  ERROR: i18n.translate('xpack.watcher.constants.actionStates.errorStateText', {
+    defaultMessage: 'Error'
+  }),
 
 };

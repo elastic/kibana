@@ -8,9 +8,14 @@ import React from 'react';
 import { KibanaLink } from '../../utils/url';
 import { EuiButton } from '@elastic/eui';
 
-function DiscoverButton({ query, children }) {
+function DiscoverButton({ query, children, ...rest }) {
   return (
-    <KibanaLink pathname={'/app/kibana'} hash={'/discover'} query={query}>
+    <KibanaLink
+      pathname={'/app/kibana'}
+      hash={'/discover'}
+      query={query}
+      {...rest}
+    >
       <EuiButton iconType="discoverApp">
         {children || 'View in Discover'}
       </EuiButton>

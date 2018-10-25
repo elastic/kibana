@@ -22,8 +22,8 @@ import { IndicesList } from '../indices_list';
 import { shallow } from 'enzyme';
 
 const indices = [
-  { name: 'kibana' },
-  { name: 'es' }
+  { name: 'kibana', tags: [] },
+  { name: 'es', tags: []   }
 ];
 
 describe('IndicesList', () => {
