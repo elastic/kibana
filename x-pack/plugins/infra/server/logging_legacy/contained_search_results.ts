@@ -67,7 +67,7 @@ export const initContainedSearchResultsRoutes = (framework: InfraBackendFramewor
           timings,
         };
       } catch (requestError) {
-        throw Boom.wrap(requestError);
+        throw Boom.boomify(requestError);
       }
     },
     method: 'POST',

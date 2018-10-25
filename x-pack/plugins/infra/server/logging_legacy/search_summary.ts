@@ -71,7 +71,7 @@ export const initSearchSummaryRoutes = (framework: InfraBackendFrameworkAdapter)
           timings,
         };
       } catch (requestError) {
-        throw Boom.wrap(requestError);
+        throw Boom.boomify(requestError);
       }
     },
     method: 'POST',

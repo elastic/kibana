@@ -17,7 +17,7 @@ const defaultErrorHandler = (err: Error) => {
   // tslint:disable-next-line
   console.error(err.stack);
   // @ts-ignore
-  return Boom.wrap(err, 400);
+  return Boom.boomify(err, { statusCode: 400 });
 };
 
 export function initServicesApi(server: Server) {

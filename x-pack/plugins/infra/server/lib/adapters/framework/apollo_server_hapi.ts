@@ -44,7 +44,7 @@ export const graphqlHapi: Plugin<HapiGraphQLPluginOptions> = {
           return h.response(gqlResponse).type('application/json');
         } catch (error) {
           if ('HttpQueryError' !== error.name) {
-            const queryError = Boom.wrap(error);
+            const queryError = Boom.boomify(error);
 
             queryError.output.payload.message = error.message;
 
@@ -58,7 +58,7 @@ export const graphqlHapi: Plugin<HapiGraphQLPluginOptions> = {
               .type('application/json');
           }
 
-          const genericError = Boom.create(error.statusCode, error.message);
+          const genericError = new Boom(error.message, { statusCode: error.statusCode });
 
           if (error.headers) {
             Object.keys(error.headers).forEach(header => {
