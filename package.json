@@ -186,7 +186,7 @@
     "style-loader": "0.19.0",
     "tar": "2.2.0",
     "tinygradient": "0.3.0",
-    "tinymath": "^1.0.0",
+    "tinymath": "1.1.0",
     "topojson-client": "3.0.0",
     "trunc-html": "1.0.2",
     "trunc-text": "1.0.2",
