@@ -72,7 +72,7 @@ exports[`CcrShard that it renders normally 1`] = `
       }
       stat={
         Object {
-          "read_exceptions": Array [],
+          "failed_read_requests": 0,
           "follower_global_checkpoint": 3049,
           "follower_index": "follower",
           "follower_max_seq_no": 3049,
@@ -84,12 +84,12 @@ exports[`CcrShard that it renders normally 1`] = `
           "number_of_concurrent_reads": 1,
           "number_of_concurrent_writes": 0,
           "number_of_failed_bulk_operations": 0,
-          "failed_read_requests": 0,
-          "operations_written": 3050,
           "number_of_queued_writes": 0,
           "number_of_successful_bulk_operations": 3050,
           "number_of_successful_fetches": 3050,
           "operations_received": 3050,
+          "operations_written": 3050,
+          "read_exceptions": Array [],
           "shard_id": 0,
           "time_since_last_read_millis": 9402,
           "total_fetch_time_millis": 44128980,
