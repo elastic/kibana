@@ -17,11 +17,20 @@
  * under the License.
  */
 
-import { parseEntries, dependenciesParseStrategy } from '@kbn/babel-code-parser';
-
-export async function getDependencies(cwd, entries) {
-  // Return the dependencies retrieve from the
-  // provided code entries (sanitized) and
-  // parseStrategy (dependencies one)
-  return Object.keys(await parseEntries(cwd, entries, dependenciesParseStrategy, {}));
+export function canRequire(cwd, entry) {
+  try {
+    // We will try to test if we can resolve
+    // this entry through the require.resolve
+    // setting as the start looking path the
+    // given cwd. Require.resolve will keep
+    // looking recursively as normal starting
+    // from that location.
+    return require.resolve(entry, {
+      paths: [
+        cwd
+      ]
+    });
+  } catch (e) {
+    return false;
+  }
 }

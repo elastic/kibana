@@ -17,22 +17,17 @@
  * under the License.
  */
 
-export function canRequire(build, entry) {
-  try {
-    const resolvedEntry = require.resolve(entry);
-
-    if (resolvedEntry !== entry) {
-      // The entry is resolved and we can
-      // just return it
-      return resolvedEntry;
-    }
-
-    // We will try to test if we can resolve
-    // this entry against the node_modules path.
-    // An error will be thrown and we'll return false
-    // in case the entry wasn't found on node_modules
-    return require.resolve(build.resolvePath('node_modules', entry));
-  } catch (e) {
-    return false;
-  }
-}
+// The @babel/parser options documentation can be found here:
+// https://babeljs.io/docs/en/babel-parser#options
+module.exports = {
+  sourceType: 'unambiguous',
+  plugins: [
+    'asyncGenerators',
+    'classProperties',
+    'dynamicImport',
+    'exportDefaultFrom',
+    'exportNamespaceFrom',
+    'objectRestSpread',
+    'throwExpressions'
+  ],
+};

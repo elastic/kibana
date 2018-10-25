@@ -24,7 +24,7 @@ import webpack from 'webpack';
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
-import { paperwork } from 'precinct';
+import { parseSingleFileSync, dependenciesVisitorsGenerator } from '@kbn/babel-code-parser';
 
 const realPathAsync = promisify(fs.realpath);
 const DLL_ENTRY_STUB_MODULE_TYPE = 'javascript/dll-entry-stub';
@@ -254,7 +254,7 @@ export class DynamicDllPlugin {
     const resolvedShimDependencies = {};
 
     // Discover the requires inside the webpackShims
-    const shimsDependencies = paperwork(requiredModulePath, { includeCore: true, es6: { mixedImports: true } });
+    const shimsDependencies = parseSingleFileSync(requiredModulePath, dependenciesVisitorsGenerator);
 
     // Resolve webpackShims dependencies with alias
     shimsDependencies.forEach((dep) => {

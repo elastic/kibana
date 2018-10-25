@@ -17,27 +17,20 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { readFile } from 'fs';
 import { canRequire } from './can_require';
-import { read } from '../../../lib';
-import { _parseSingleFile } from './code_parser';
+import { parseSingleFile } from './code_parser';
 import { _calculateTopLevelDependency, dependenciesParseStrategy } from './strategies';
 
 jest.mock('./can_require', () => ({
   canRequire: jest.fn()
 }));
 
-jest.mock('../../../lib', () => ({
-  read: jest.fn()
+jest.mock('fs', () => ({
+  readFile: jest.fn()
 }));
 
-const mockProjectDir = '/tmp/project/dir/';
-
-const mockBuild = {
-  resolvePath: jest.fn().mockImplementation((...args) => {
-    return resolve(mockProjectDir, ...args);
-  })
-};
+const mockCwd = '/tmp/project/dir/';
 
 describe('Code Parser Strategies', () => {
   it('should calculate the top level dependencies correctly', () => {
@@ -51,50 +44,50 @@ describe('Code Parser Strategies', () => {
   });
 
   it('should exclude native modules', async () => {
-    read.mockImplementationOnce(async () => {
-      return `require('fs')`;
+    readFile.mockImplementationOnce((path, options, cb) => {
+      cb(null, `require('fs')`);
     });
 
     const results = [];
-    await dependenciesParseStrategy(mockBuild, _parseSingleFile, 'dep1/file.js', {}, results);
+    await dependenciesParseStrategy(mockCwd, parseSingleFile, 'dep1/file.js', {}, results);
 
     expect(results.length).toBe(0);
   });
 
   it('should return a dep from_modules', async () => {
-    read.mockImplementationOnce(async () => {
-      return `require('dep_from_node_modules')`;
+    readFile.mockImplementationOnce((path, options, cb) => {
+      cb(null, `require('dep_from_node_modules')`);
     });
 
-    canRequire.mockImplementation((build, entry) => {
-      if (entry === `${mockProjectDir}dep1/dep_from_node_modules`) {
+    canRequire.mockImplementation((mockCwd, entry) => {
+      if (entry === `${mockCwd}dep1/dep_from_node_modules`) {
         return false;
       }
 
       if (entry === 'dep_from_node_modules') {
-        return `${mockProjectDir}node_modules/dep_from_node_modules/index.js`;
+        return `${mockCwd}node_modules/dep_from_node_modules/index.js`;
       }
     });
 
-    const results = await dependenciesParseStrategy(mockBuild, _parseSingleFile, 'dep1/file.js', {}, {});
-    expect(results[0]).toBe(`${mockProjectDir}node_modules/dep_from_node_modules/index.js`);
+    const results = await dependenciesParseStrategy(mockCwd, parseSingleFile, 'dep1/file.js', {}, {});
+    expect(results[0]).toBe(`${mockCwd}node_modules/dep_from_node_modules/index.js`);
   });
 
   it('should return a relative dep file', async () => {
-    read.mockImplementationOnce(async () => {
-      return `require('./relative_dep')`;
+    readFile.mockImplementationOnce((path, options, cb) => {
+      cb(null, `require('./relative_dep')`);
     });
 
-    canRequire.mockImplementation((build, entry) => {
-      if (entry === `${mockProjectDir}dep1/relative_dep`) {
+    canRequire.mockImplementation((mockCwd, entry) => {
+      if (entry === `${mockCwd}dep1/relative_dep`) {
         return `${entry}/index.js`;
       }
 
       return false;
     });
 
-    const results = await dependenciesParseStrategy(mockBuild, _parseSingleFile, 'dep1/file.js', {}, {});
-    expect(results[0]).toBe(`${mockProjectDir}dep1/relative_dep/index.js`);
+    const results = await dependenciesParseStrategy(mockCwd, parseSingleFile, 'dep1/file.js', {}, {});
+    expect(results[0]).toBe(`${mockCwd}dep1/relative_dep/index.js`);
   });
 
   afterAll(() => {

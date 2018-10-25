@@ -18,4 +18,5 @@
  */
 
 export { dependenciesParseStrategy } from './strategies';
-export { parseEntries } from './code_parser';
+export { dependenciesVisitorsGenerator } from './visitors';
+export { parseSingleFile, parseSingleFileSync, parseEntries } from './code_parser';

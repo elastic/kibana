@@ -19,7 +19,7 @@
 
 import { canRequire } from './can_require';
 import { dependenciesVisitorsGenerator } from './visitors';
-import { dirname, isAbsolute } from 'path';
+import { dirname, isAbsolute, resolve } from 'path';
 
 export function _calculateTopLevelDependency(inputDep, outputDep = '') {
   // The path separator will be always the forward slash
@@ -48,7 +48,7 @@ export function _calculateTopLevelDependency(inputDep, outputDep = '') {
   return _calculateTopLevelDependency(depSplitPaths.join(pathSeparator), outputDep);
 }
 
-export async function dependenciesParseStrategy(build, parseSingleFile, mainEntry, wasParsed, results) {
+export async function dependenciesParseStrategy(cwd, parseSingleFile, mainEntry, wasParsed, results) {
   // Retrieve native nodeJS modules
   const natives = process.binding('natives');
 
@@ -61,9 +61,9 @@ export async function dependenciesParseStrategy(build, parseSingleFile, mainEntr
   // the current mainEntry that we could use to look for
   // new dependencies
   return dependencies.reduce((filteredEntries, entry) => {
-    const absEntryPath = build.resolvePath(dirname(mainEntry), entry);
-    const requiredPath = canRequire(build, absEntryPath);
-    const requiredRelativePath = canRequire(build, entry);
+    const absEntryPath = resolve(cwd, dirname(mainEntry), entry);
+    const requiredPath = canRequire(cwd, absEntryPath);
+    const requiredRelativePath = canRequire(cwd, entry);
     const isRelativeFile = !isAbsolute(entry);
     const isNodeModuleDep = isRelativeFile && !requiredPath && requiredRelativePath;
     const isNewEntry = isRelativeFile && requiredPath;
