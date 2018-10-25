@@ -39,8 +39,8 @@ export async function loadPolicies(withIndices) {
   return response.data;
 }
 
-export async function deletePolicies(policyNames) {
-  const response = await httpClient.delete(`${apiPrefix}/policies/${policyNames.join(',')}`);
+export async function deletePolicy(policyName) {
+  const response = await httpClient.delete(`${apiPrefix}/policies/${policyName}`);
   return response.data;
 }
 

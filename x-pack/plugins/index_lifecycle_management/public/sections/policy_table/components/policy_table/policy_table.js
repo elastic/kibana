@@ -13,7 +13,7 @@ import { BASE_PATH } from '../../../../../common/constants';
 import {
   EuiButton,
   EuiLink,
-  EuiCheckbox,
+  EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,11 +23,9 @@ import {
   EuiTableBody,
   EuiTableHeader,
   EuiTableHeaderCell,
-  EuiTableHeaderCellCheckbox,
   EuiTablePagination,
   EuiTableRow,
   EuiTableRowCell,
-  EuiTableRowCellCheckbox,
   EuiTitle,
   EuiText,
   EuiPageBody,
@@ -51,24 +49,6 @@ const HEADERS = {
 };
 
 export class PolicyTableUi extends Component {
-  static getDerivedStateFromProps(props, state) {
-    // Deselect any policies which no longer exist, e.g. they've been deleted.
-    const { selectedPoliciesMap } = state;
-    const policyNames = props.policies.map(policy => policy.name);
-    const selectedPolicyNames = Object.keys(selectedPoliciesMap);
-    const missingPolicyNames = selectedPolicyNames.filter(selectedpolicyName => {
-      return !policyNames.includes(selectedpolicyName);
-    });
-
-    if (missingPolicyNames.length) {
-      const newMap = { ...selectedPoliciesMap };
-      missingPolicyNames.forEach(missingPolicyName => delete newMap[missingPolicyName]);
-      return { selectedPoliciesMap: newMap };
-    }
-
-    return null;
-  }
-
   constructor(props) {
     super(props);
 
@@ -81,19 +61,21 @@ export class PolicyTableUi extends Component {
     this.props.fetchPolicies(true);
   }
   deleteConfirmation() {
-    if (!this.state.showDeleteConfirmation) {
+    const { policyToDelete } = this.state;
+    if (!policyToDelete) {
       return null;
     }
     return (
       <ConfirmDelete
-        policiesToDelete={this.getSelectedPolicies()}
+        policyToDelete={policyToDelete}
         callback={this.handleDelete}
+        onCancel={() => this.setState({ policyToDelete: null })}
       />
     );
   }
   handleDelete = () => {
     this.props.fetchPolicies(true);
-    this.setState({ showDeleteConfirmation: false });
+    this.setState({ policyToDelete: null });
   }
   onSort = column => {
     const { sortField, isSortAscending, policySortChanged } = this.props;
@@ -101,54 +83,9 @@ export class PolicyTableUi extends Component {
     policySortChanged(column, newIsSortAscending);
   };
 
-  toggleAll = () => {
-    const allSelected = this.areAllItemsSelected();
-    if (allSelected) {
-      return this.setState({ selectedPoliciesMap: {} });
-    }
-    const { policies } = this.props;
-    const selectedPoliciesMap = {};
-    policies.forEach(({ name }) => {
-      selectedPoliciesMap[name] = true;
-    });
-    this.setState({
-      selectedPoliciesMap
-    });
-  };
-
-  toggleItem = name => {
-    this.setState(({ selectedPoliciesMap }) => {
-      const newMap = { ...selectedPoliciesMap };
-      if (newMap[name]) {
-        delete newMap[name];
-      } else {
-        newMap[name] = true;
-      }
-      return {
-        selectedPoliciesMap: newMap
-      };
-    });
-  };
-
-  isItemSelected = name => {
-    return !!this.state.selectedPoliciesMap[name];
-  };
-  getSelectedPolicies() {
-    return this.props.policies.filter(({ name }) => {
-      return this.isItemSelected(name);
-    });
-  }
-  areAllItemsSelected = () => {
-    const { policies } = this.props;
-    const unselectedItem = policies.find(
-      policy => !this.isItemSelected(policy.name)
-    );
-    return !unselectedItem;
-  };
-
   buildHeader() {
     const { sortField, isSortAscending } = this.props;
-    return Object.entries(HEADERS).map(([fieldName, label]) => {
+    const headers =  Object.entries(HEADERS).map(([fieldName, label]) => {
       const isSorted = sortField === fieldName;
       return (
         <EuiTableHeaderCell
@@ -163,6 +100,14 @@ export class PolicyTableUi extends Component {
         </EuiTableHeaderCell>
       );
     });
+    headers.push(
+      <EuiTableHeaderCell
+        key="deleteHeader"
+        data-test-subj="policyTableHeaderCell-delete"
+        style={{ width: 100 }}
+      />
+    );
+    return headers;
   }
 
   buildRowCell(fieldName, value) {
@@ -189,8 +134,8 @@ export class PolicyTableUi extends Component {
   }
 
   buildRowCells(policy) {
-    return Object.keys(HEADERS).map(fieldName => {
-      const { name } = policy;
+    const { name } = policy;
+    const cells = Object.keys(HEADERS).map(fieldName => {
       const value = policy[fieldName];
       return (
         <EuiTableRowCell
@@ -202,30 +147,32 @@ export class PolicyTableUi extends Component {
         </EuiTableRowCell>
       );
     });
+    cells.push(
+      <EuiTableRowCell
+        key={`delete-${name}`}
+        truncateText={false}
+        data-test-subj={`policyTableCell-delete-${name}`}
+        style={{ width: 100 }}
+      >
+        <EuiButtonIcon
+          aria-label={'Delete policy'}
+          color={'danger'}
+          onClick={() => this.setState({ policyToDelete: policy })}
+          iconType="trash"
+        />
+      </EuiTableRowCell>
+    );
+    return cells;
   }
 
   buildRows() {
-    const { policies = [], detailPanelpolicyName } = this.props;
+    const { policies = [] } = this.props;
     return policies.map(policy => {
       const { name } = policy;
       return (
         <EuiTableRow
-          isSelected={
-            this.isItemSelected(name) || name === detailPanelpolicyName
-          }
           key={`${name}-row`}
         >
-          <EuiTableRowCellCheckbox key={`checkbox-${name}`}>
-            <EuiCheckbox
-              type="inList"
-              id={`checkboxSelectpolicy-${name}`}
-              checked={this.isItemSelected(name)}
-              onChange={() => {
-                this.toggleItem(name);
-              }}
-              data-test-subj="policyTableRowCheckbox"
-            />
-          </EuiTableRowCellCheckbox>
           {this.buildRowCells(policy)}
         </EuiTableRow>
       );
@@ -271,7 +218,7 @@ export class PolicyTableUi extends Component {
                   <h1>
                     <FormattedMessage
                       id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-                      defaultMessage="Lifecycle policy management"
+                      defaultMessage="Index lifecycle policy management"
                     />
                   </h1>
                 </EuiTitle>
@@ -280,7 +227,7 @@ export class PolicyTableUi extends Component {
                   <p>
                     <FormattedMessage
                       id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
-                      defaultMessage="Update your index lifecycle policies individually or in bulk"
+                      defaultMessage="Create, update, or delete your index lifecycle policies."
                     />
                   </p>
                 </EuiText>
@@ -331,14 +278,6 @@ export class PolicyTableUi extends Component {
             {policies.length > 0 ? (
               <EuiTable>
                 <EuiTableHeader>
-                  <EuiTableHeaderCellCheckbox>
-                    <EuiCheckbox
-                      id="selectAllPolicies"
-                      checked={this.areAllItemsSelected()}
-                      onChange={this.toggleAll}
-                      type="inList"
-                    />
-                  </EuiTableHeaderCellCheckbox>
                   {this.buildHeader()}
                 </EuiTableHeader>
                 <EuiTableBody>{this.buildRows()}</EuiTableBody>
