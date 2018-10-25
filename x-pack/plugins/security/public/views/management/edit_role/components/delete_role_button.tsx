@@ -17,7 +17,6 @@ import React, { Component, Fragment } from 'react';
 interface Props {
   canDelete: boolean;
   onDelete: () => void;
-  intl: any;
 }
 
 interface State {
@@ -48,7 +47,6 @@ export class DeleteRoleButton extends Component<Props, State> {
   }
 
   public maybeShowModal = () => {
-    const { intl } = this.props;
     if (!this.state.showModal) {
       return null;
     }
