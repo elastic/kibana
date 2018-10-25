@@ -73,6 +73,7 @@ module.directive('mlEnableModelPlotCheckbox', function () {
 
       $scope.handleCheckboxChange = (isChecked) => {
         if (isChecked) {
+          $scope.formConfig.enableModelPlot = true;
           validateCardinality();
         } else {
           $scope.formConfig.enableModelPlot = false;
