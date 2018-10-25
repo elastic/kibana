@@ -7,7 +7,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { EuiIcon, EuiText } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import {
   colors,
   fontFamily,

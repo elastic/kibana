@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import d3 from 'd3';
 import React, { Component } from 'react';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
@@ -15,10 +16,6 @@ import { fromQuery, history, toQuery } from '../../../../utils/url';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import EmptyMessage from '../../../shared/EmptyMessage';
-// @ts-ignore
-import { HeaderSmall } from '../../../shared/UIComponents';
-// @ts-ignore
-import SamplingTooltip from './SamplingTooltip';
 
 interface IChartPoint {
   sample?: IBucket['sample'];
@@ -87,15 +84,28 @@ export class Distribution extends Component<Props> {
 
     return (
       <div>
-        <HeaderSmall
-          css={`
-            display: flex;
-            align-items: center;
-          `}
-        >
-          <span>Response time distribution</span>
-          <SamplingTooltip />
-        </HeaderSmall>
+        <EuiTitle size="s">
+          <h5>
+            Response time distribution{' '}
+            <EuiToolTip
+              content={
+                <div>
+                  <EuiText>
+                    <strong>Sampling</strong>
+                  </EuiText>
+                  <EuiText>
+                    Each bucket will show a sample transaction. If there&apos;s
+                    no sample available, it&apos;s most likely because of the
+                    sampling limit set in the agent configuration.
+                  </EuiText>
+                </div>
+              }
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          </h5>
+        </EuiTitle>
+
         <Histogram
           buckets={buckets}
           bucketSize={distribution.bucketSize}
