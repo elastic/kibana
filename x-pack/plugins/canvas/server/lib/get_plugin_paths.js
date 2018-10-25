@@ -13,31 +13,61 @@ import { pluginPaths } from './plugin_paths';
 const lstat = promisify(fs.lstat);
 const readdir = promisify(fs.readdir);
 
-const kibanaPluginPath = path.resolve(__dirname, '..', '..', '..');
 const canvasPluginDirectoryName = 'canvas_plugin';
+
+const isDirectory = path =>
+  lstat(path)
+    .then(stat => stat.isDirectory())
+    .catch(() => false);
+
+const isDirname = (p, name) => path.basename(p) === name;
+
+const getKibanaPluginsPath = () => {
+  const basePluginPath = path.resolve(__dirname, '..', '..', '..', '..', '..');
+
+  // find the kibana path in dev mode
+  if (isDirname(basePluginPath, 'kibana')) return path.join(basePluginPath, 'plugins');
+
+  // find the kibana path in the build, which lives in node_modules and requires going 1 path up
+  const buildPluginPath = path.join(basePluginPath, '..');
+  if (isDirname(basePluginPath, 'node_modules') && isDirname(buildPluginPath, 'kibana'))
+    return path.join(buildPluginPath, 'plugins');
+
+  return false;
+};
+
+// These must all exist
+const paths = [
+  path.resolve(__dirname, '..', '..', '..'), // Canvas core plugins
+  getKibanaPluginsPath(), // Kibana plugin directory
+].filter(Boolean);
 
 export const getPluginPaths = type => {
   const typePath = pluginPaths[type];
   if (!typePath) throw new Error(`Unknown type: ${type}`);
 
-  return readdir(kibanaPluginPath) // Get names of everything in Kibana plugin path
-    .then(names => names.filter(name => name[0] !== '.')) // Filter out names that start with .
-    .then(names => {
-      // Get full paths to stuff that might have a canvas plugin of the provided type
-      return names.map(name =>
-        path.resolve(kibanaPluginPath, name, canvasPluginDirectoryName, ...typePath)
-      );
-    })
+  async function findPlugins(directory) {
+    const isDir = await isDirectory(directory);
+    if (!isDir) return;
+
+    const names = await readdir(directory); // Get names of everything in the directory
+    return names
+      .filter(name => name[0] !== '.')
+      .map(name => path.resolve(directory, name, canvasPluginDirectoryName, ...typePath));
+  }
+
+  return Promise.all(paths.map(findPlugins))
+    .then(dirs =>
+      dirs.reduce((list, dir) => {
+        if (!dir) return list;
+        return list.concat(dir);
+      }, [])
+    )
     .then(possibleCanvasPlugins => {
       // Check how many are directories. If lstat fails it doesn't exist anyway.
       return Promise.all(
         // An array
-        possibleCanvasPlugins.map(
-          pluginPath =>
-            lstat(pluginPath)
-              .then(stat => stat.isDirectory()) // Exists and is a directory
-              .catch(() => false) // I guess it doesn't exist, so whaevs
-        )
+        possibleCanvasPlugins.map(pluginPath => isDirectory(pluginPath))
       ).then(isDirectory => possibleCanvasPlugins.filter((pluginPath, i) => isDirectory[i]));
     })
     .then(canvasPluginDirectories => {

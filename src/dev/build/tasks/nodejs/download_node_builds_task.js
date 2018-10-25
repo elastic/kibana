@@ -26,9 +26,8 @@ export const DownloadNodeBuildsTask = {
   description: 'Downloading node.js builds for all platforms',
   async run(config, log) {
     const shasums = await getNodeShasums(config.getNodeVersion());
-
     await Promise.all(
-      config.getPlatforms().map(async platform => {
+      config.getNodePlatforms().map(async platform => {
         const { url, downloadPath, downloadName } = getNodeDownloadInfo(config, platform);
         await download({
           log,
