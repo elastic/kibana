@@ -1,45 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`StickyProperties should render 1`] = `
-.c0 {
-  margin-bottom: 8px;
-  font-size: 12px;
-  color: #999999;
-}
-
-.c0 span {
-  cursor: help;
-}
-
-.c2 {
-  color: #999999;
-}
-
-.c1 {
-  display: inline-block;
-  line-height: 16px;
-}
-
-.c3 {
-  display: inline-block;
-  line-height: 16px;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-<div
-  className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  direction="row"
+  gutterSize="none"
+  justifyContent="flexStart"
+  responsive={true}
   style={
     Object {
       "marginBottom": "-1em",
       "marginTop": "-1em",
     }
   }
+  wrap={true}
 >
-  <div
-    className="euiFlexItem"
+  <EuiFlexItem
+    component="div"
+    grow={true}
+    key="0"
     style={
       Object {
         "minWidth": 0,
@@ -47,39 +27,29 @@ exports[`StickyProperties should render 1`] = `
       }
     }
   >
-    <div
-      className="c0"
-    >
-      <span
-        className="euiToolTipAnchor"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+    <styled.div>
+      <EuiToolTip
+        content={
+          <styled.span>
+            @timestamp
+          </styled.span>
+        }
+        delay="regular"
+        position="top"
       >
-        <span
-          aria-describedby="huttyqqn"
-          onBlur={[Function]}
-          onFocus={[Function]}
-        >
+        <span>
           Timestamp
         </span>
-      </span>
-    </div>
-    <div
-      className="c1"
-    >
-      1337 minutes ago (mocking 1536405447)
-       
-      <span
-        className="c2"
-      >
-        (
-        1st of January (mocking 1536405447)
-        )
-      </span>
-    </div>
-  </div>
-  <div
-    className="euiFlexItem"
+      </EuiToolTip>
+    </styled.div>
+    <TimestampValue
+      timestamp={1536405447640}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+    key="1"
     style={
       Object {
         "minWidth": 0,
@@ -87,40 +57,35 @@ exports[`StickyProperties should render 1`] = `
       }
     }
   >
-    <div
-      className="c0"
-    >
-      <span
-        className="euiToolTipAnchor"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+    <styled.div>
+      <EuiToolTip
+        content={
+          <styled.span>
+            context.request.url.full
+          </styled.span>
+        }
+        delay="regular"
+        position="top"
       >
-        <span
-          aria-describedby="2t5okoag"
-          onBlur={[Function]}
-          onFocus={[Function]}
-        >
+        <span>
           URL
         </span>
-      </span>
-    </div>
-    <span
-      className="euiToolTipAnchor"
-      onMouseOut={[Function]}
-      onMouseOver={[Function]}
+      </EuiToolTip>
+    </styled.div>
+    <EuiToolTip
+      content="https://www.elastic.co/test"
+      delay="regular"
+      position="top"
     >
-      <span
-        aria-describedby="3if5pfcm"
-        className="c3"
-        onBlur={[Function]}
-        onFocus={[Function]}
-      >
+      <styled.span>
         https://www.elastic.co/test
-      </span>
-    </span>
-  </div>
-  <div
-    className="euiFlexItem"
+      </styled.span>
+    </EuiToolTip>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+    key="2"
     style={
       Object {
         "minWidth": 0,
@@ -128,31 +93,29 @@ exports[`StickyProperties should render 1`] = `
       }
     }
   >
-    <div
-      className="c0"
-    >
-      <span
-        className="euiToolTipAnchor"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+    <styled.div>
+      <EuiToolTip
+        content={
+          <styled.span>
+            context.request.method
+          </styled.span>
+        }
+        delay="regular"
+        position="top"
       >
-        <span
-          aria-describedby="694dzd7w"
-          onBlur={[Function]}
-          onFocus={[Function]}
-        >
+        <span>
           Request method
         </span>
-      </span>
-    </div>
-    <div
-      className="c1"
-    >
+      </EuiToolTip>
+    </styled.div>
+    <styled.div>
       GET
-    </div>
-  </div>
-  <div
-    className="euiFlexItem"
+    </styled.div>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+    key="3"
     style={
       Object {
         "minWidth": 0,
@@ -160,31 +123,29 @@ exports[`StickyProperties should render 1`] = `
       }
     }
   >
-    <div
-      className="c0"
-    >
-      <span
-        className="euiToolTipAnchor"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+    <styled.div>
+      <EuiToolTip
+        content={
+          <styled.span>
+            error.exception.handled
+          </styled.span>
+        }
+        delay="regular"
+        position="top"
       >
-        <span
-          aria-describedby="4lds0z2t"
-          onBlur={[Function]}
-          onFocus={[Function]}
-        >
+        <span>
           Handled
         </span>
-      </span>
-    </div>
-    <div
-      className="c1"
-    >
+      </EuiToolTip>
+    </styled.div>
+    <styled.div>
       true
-    </div>
-  </div>
-  <div
-    className="euiFlexItem"
+    </styled.div>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+    key="4"
     style={
       Object {
         "minWidth": 0,
@@ -192,28 +153,24 @@ exports[`StickyProperties should render 1`] = `
       }
     }
   >
-    <div
-      className="c0"
-    >
-      <span
-        className="euiToolTipAnchor"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+    <styled.div>
+      <EuiToolTip
+        content={
+          <styled.span>
+            context.user.id
+          </styled.span>
+        }
+        delay="regular"
+        position="top"
       >
-        <span
-          aria-describedby="hdiy0w6c"
-          onBlur={[Function]}
-          onFocus={[Function]}
-        >
+        <span>
           User ID
         </span>
-      </span>
-    </div>
-    <div
-      className="c1"
-    >
+      </EuiToolTip>
+    </styled.div>
+    <styled.div>
       1337
-    </div>
-  </div>
-</div>
+    </styled.div>
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;

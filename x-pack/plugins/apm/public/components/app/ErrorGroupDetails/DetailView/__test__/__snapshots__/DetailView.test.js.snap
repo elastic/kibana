@@ -293,7 +293,7 @@ exports[`DetailView should render with data 1`] = `
             onMouseOver={[Function]}
           >
             <span
-              aria-describedby="7wlnz6q9"
+              aria-describedby="75eo8rqp"
               onBlur={[Function]}
               onFocus={[Function]}
             >
@@ -333,7 +333,7 @@ exports[`DetailView should render with data 1`] = `
             onMouseOver={[Function]}
           >
             <span
-              aria-describedby="l08ls7s3"
+              aria-describedby="yavep928"
               onBlur={[Function]}
               onFocus={[Function]}
             >
@@ -347,7 +347,7 @@ exports[`DetailView should render with data 1`] = `
           onMouseOver={[Function]}
         >
           <span
-            aria-describedby="aubbiyli"
+            aria-describedby="8z4ntuqe"
             className="c7"
             onBlur={[Function]}
             onFocus={[Function]}
@@ -374,7 +374,7 @@ exports[`DetailView should render with data 1`] = `
             onMouseOver={[Function]}
           >
             <span
-              aria-describedby="tkz65xzd"
+              aria-describedby="xq9rcn8w"
               onBlur={[Function]}
               onFocus={[Function]}
             >
@@ -406,7 +406,7 @@ exports[`DetailView should render with data 1`] = `
             onMouseOver={[Function]}
           >
             <span
-              aria-describedby="7tx7eqsg"
+              aria-describedby="32wfhej5"
               onBlur={[Function]}
               onFocus={[Function]}
             >
@@ -438,7 +438,7 @@ exports[`DetailView should render with data 1`] = `
             onMouseOver={[Function]}
           >
             <span
-              aria-describedby="ewoacr4o"
+              aria-describedby="wzdd181x"
               onBlur={[Function]}
               onFocus={[Function]}
             >
