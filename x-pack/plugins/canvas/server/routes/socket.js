@@ -13,6 +13,7 @@ import { browser } from '../lib/route_expression/browser';
 import { thread } from '../lib/route_expression/thread';
 import { server as serverEnv } from '../lib/route_expression/server';
 import { getRequest } from '../lib/get_request';
+import { API_ROUTE } from '../../common/lib/constants';
 
 async function getModifiedRequest(server, socket) {
   try {
@@ -26,6 +27,14 @@ async function getModifiedRequest(server, socket) {
 }
 
 export function socketApi(server) {
+  // add a POST ping route for `getRequest` to use
+  // TODO: remove this once we have upstream socket support
+  server.route({
+    method: 'POST',
+    path: `${API_ROUTE}/ping`,
+    handler: () => 'pong',
+  });
+
   const io = socket(server.listener, { path: '/socket.io' });
 
   io.on('connection', async socket => {

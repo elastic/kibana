@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import boom from 'boom';
+import { API_ROUTE } from '../../common/lib/constants';
 
 export function getRequest(server, { headers }) {
-  const basePath = server.config().get('server.basePath') || '/';
+  const url = `${API_ROUTE}/ping`;
 
   return server
     .inject({
-      method: 'GET',
-      url: basePath,
+      method: 'POST',
+      url,
       headers,
     })
     .then(res => {
