@@ -23,15 +23,16 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import gaugeTemplate from './editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
-export default function GaugeVisType(Private) {
+export default function GaugeVisType(Private, i18n) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'gauge',
-    title: 'Gauge',
+    title: i18n('kbnVislibVisTypes.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
     icon: 'visGauge',
-    description: `Gauges indicate the status of a metric. Use it to show how a metric's value relates
-      to reference threshold values.`,
+    description: i18n('kbnVislibVisTypes.gauge.gaugeDescription', {
+      defaultMessage: 'Gauges indicate the status of a metric. Use it to show how a metric\'s value relates to reference threshold values.'
+    }),
     category: CATEGORY.DATA,
     visConfig: {
       defaults: {
@@ -91,7 +92,7 @@ export default function GaugeVisType(Private) {
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Metric',
+          title: i18n('kbnVislibVisTypes.gauge.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
           aggFilter: [
             '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
@@ -103,7 +104,7 @@ export default function GaugeVisType(Private) {
         {
           group: 'buckets',
           name: 'group',
-          title: 'Split Group',
+          title: i18n('kbnVislibVisTypes.gauge.groupTitle', { defaultMessage: 'Split Group' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!filter']

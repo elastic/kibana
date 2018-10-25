@@ -67,15 +67,6 @@ export class Ccr extends Component {
               render: () => null
             },
             {
-              field: 'opsSynced',
-              name: 'Ops synced'
-            },
-            {
-              field: 'syncLagTime',
-              name: 'Last fetch time',
-              render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
-            },
-            {
               field: 'syncLagOps',
               name: 'Sync Lag (ops)',
               render: (syncLagOps, data) => (
@@ -96,6 +87,15 @@ export class Ccr extends Component {
                   />
                 </span>
               )
+            },
+            {
+              field: 'syncLagTime',
+              name: 'Last fetch time',
+              render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
+            },
+            {
+              field: 'opsSynced',
+              name: 'Ops synced'
             },
             {
               field: 'error',
@@ -160,9 +160,9 @@ export class Ccr extends Component {
             name: 'Follows'
           },
           {
-            field: 'opsSynced',
+            field: 'syncLagOps',
             sortable: true,
-            name: 'Ops synced'
+            name: 'Sync Lag (ops)',
           },
           {
             field: 'syncLagTime',
@@ -171,9 +171,9 @@ export class Ccr extends Component {
             render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
           },
           {
-            field: 'syncLagOps',
+            field: 'opsSynced',
             sortable: true,
-            name: 'Sync Lag (ops)',
+            name: 'Ops synced'
           },
           {
             field: 'error',

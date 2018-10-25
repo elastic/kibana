@@ -5,4 +5,4 @@
  */
 
 
-export { MLJobEditor } from './ml_job_editor';
+export { MLJobEditor, EDITOR_MODE } from './ml_job_editor';
