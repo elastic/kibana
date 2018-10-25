@@ -84,7 +84,7 @@ fi
 ### downloading yarn
 ###
 yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
-if [[ $OS == 'win' ]]; then
+if [[ "$OS" == "win" ]]; then
     npm install -g yarn@^${yarnVersion}
 else
     yarnUrl="https://github.com/yarnpkg/yarn/releases/download/v$yarnVersion/yarn-$yarnVersion.js"
