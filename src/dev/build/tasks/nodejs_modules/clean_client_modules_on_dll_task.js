@@ -47,7 +47,7 @@ export const CleanClientModulesOnDLLTask = {
 
     // Get the dependencies found searching through the server
     // side code entries that were provided
-    const serverDependencies = await getDependencies(config.resolveFromRepo(), serverEntries);
+    const serverDependencies = await getDependencies(config.resolveFromRepo('.'), serverEntries);
 
     // Consider this as our whiteList for the modules we can't delete
     const whiteListedModules = [
