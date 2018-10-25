@@ -80,7 +80,7 @@ uiRoutes
 
         return savedObjectsClient.find({
           type: 'index-pattern',
-          fields: ['title'],
+          fields: ['title', 'type'],
           perPage: 10000
         }).then(response => response.savedObjects);
       },
@@ -112,7 +112,7 @@ uiRoutes
 
         return savedObjectsClient.find({
           type: 'index-pattern',
-          fields: ['title'],
+          fields: ['title', 'type'],
           perPage: 10000
         }).then(response => response.savedObjects);
       },
@@ -657,7 +657,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
     }
   }
 
-  $scope.indices = $route.current.locals.indexPatterns;
+  $scope.indices = $route.current.locals.indexPatterns.filter(indexPattern => !indexPattern.get('type'));
 
 
   $scope.setDetail = function (data) {

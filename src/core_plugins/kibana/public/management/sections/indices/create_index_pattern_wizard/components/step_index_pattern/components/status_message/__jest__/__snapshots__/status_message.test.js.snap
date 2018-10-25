@@ -174,8 +174,8 @@ exports[`StatusMessage should show that system indices exist 1`] = `
   >
     <span>
       <FormattedMessage
-        defaultMessage="No Elasticsearch indices match your pattern. To view the matching system indices, toggle the switch in the upper right."
-        id="kbn.management.createIndexPattern.step.status.noSystemIndicesWithPromptLabel"
+        defaultMessage="No Elasticsearch indices match your pattern."
+        id="kbn.management.createIndexPattern.step.status.noSystemIndicesLabel"
         values={Object {}}
       />
     </span>

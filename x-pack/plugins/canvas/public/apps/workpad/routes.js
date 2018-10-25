@@ -12,6 +12,7 @@ import { setWorkpad } from '../../state/actions/workpad';
 import { setAssets, resetAssets } from '../../state/actions/assets';
 import { gotoPage } from '../../state/actions/pages';
 import { getWorkpad } from '../../state/selectors/workpad';
+import { setCanUserWrite } from '../../state/actions/transient';
 import { WorkpadApp } from './workpad_app';
 
 export const routes = [
@@ -34,6 +35,10 @@ export const routes = [
                 defaultMessage: "Couldn't create workpad",
               }),
             });
+            // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
+            // https://github.com/elastic/kibana/issues/20277
+            if (err.response.status === 403) dispatch(setCanUserWrite(false));
+            router.redirectTo('home');
           }
         },
         meta: {
@@ -53,6 +58,13 @@ export const routes = [
               const { assets, ...workpad } = fetchedWorkpad;
               dispatch(setWorkpad(workpad));
               dispatch(setAssets(assets));
+
+              // tests if user has permissions to write to workpads
+              // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
+              // https://github.com/elastic/kibana/issues/20277
+              workpadService.update(params.id, fetchedWorkpad).catch(err => {
+                if (err.response.status === 403) dispatch(setCanUserWrite(false));
+              });
             } catch (err) {
               notify.error(err, {
                 title: i18n.translate(

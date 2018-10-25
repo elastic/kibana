@@ -5,7 +5,7 @@
  */
 import Joi from 'joi';
 import { omit } from 'lodash';
-import { BeatTag, ConfigurationBlock } from '../../../common/domain_types';
+import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/lib';
 import { wrapEsError } from '../../utils/error_wrappers';
 import { ReturnedConfigurationBlock } from './../../../common/domain_types';
@@ -18,6 +18,9 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
       headers: Joi.object({
         'kbn-beats-access-token': Joi.string().required(),
       }).options({ allowUnknown: true }),
+      query: Joi.object({
+        validSetting: Joi.boolean().default(true),
+      }),
     },
     auth: false,
   },
@@ -37,6 +40,16 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
       if (!isAccessTokenValid) {
         return reply({ message: 'Invalid access token' }).code(401);
       }
+
+      let newStatus: CMBeat['config_status'] = 'OK';
+      if (!request.query.validSetting) {
+        newStatus = 'ERROR';
+      }
+
+      await libs.beats.update(libs.framework.internalUser, beat.id, {
+        config_status: newStatus,
+        last_checkin: new Date(),
+      });
 
       tags = await libs.tags.getTagsWithIds(libs.framework.internalUser, beat.tags || []);
     } catch (err) {

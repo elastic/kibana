@@ -7,7 +7,7 @@
       "shardId": 0,
       "error": null,
       "opsSynced": 52,
-      "syncLagTime": 59881,
+      "syncLagTime": 4900,
       "syncLagOps": 0,
       "syncLagOpsLeader": 0,
       "syncLagOpsFollower": 0
@@ -15,7 +15,7 @@
       "shardId": 1,
       "error": null,
       "opsSynced": 47,
-      "syncLagTime": 59959,
+      "syncLagTime": 9919,
       "syncLagOps": 0,
       "syncLagOpsLeader": 0,
       "syncLagOpsFollower": 0
@@ -23,7 +23,7 @@
       "shardId": 2,
       "error": null,
       "opsSynced": 51,
-      "syncLagTime": 55229,
+      "syncLagTime": 14929,
       "syncLagOps": 0,
       "syncLagOpsLeader": 0,
       "syncLagOpsFollower": 0
@@ -31,7 +31,7 @@
       "shardId": 3,
       "error": null,
       "opsSynced": 50,
-      "syncLagTime": 50483,
+      "syncLagTime": 39933,
       "syncLagOps": 0,
       "syncLagOpsLeader": 0,
       "syncLagOpsFollower": 0
@@ -39,13 +39,13 @@
       "shardId": 4,
       "error": null,
       "opsSynced": 55,
-      "syncLagTime": 55554,
+      "syncLagTime": 49923,
       "syncLagOps": 0,
       "syncLagOpsLeader": 0,
       "syncLagOpsFollower": 0
     }],
     "opsSynced": 255,
-    "syncLagTime": 59959,
+    "syncLagTime": 49923,
     "syncLagOps": 0
   }, {
     "id": "follower",
@@ -55,7 +55,7 @@
       "shardId": 0,
       "error": null,
       "opsSynced": 85,
-      "syncLagTime": 45513,
+      "syncLagTime": 19886,
       "syncLagOps": 0,
       "syncLagOpsLeader": 0,
       "syncLagOpsFollower": 0
@@ -63,7 +63,7 @@
       "shardId": 1,
       "error": null,
       "opsSynced": 94,
-      "syncLagTime": 55205,
+      "syncLagTime": 4901,
       "syncLagOps": 0,
       "syncLagOpsLeader": 0,
       "syncLagOpsFollower": 0
@@ -71,13 +71,13 @@
       "shardId": 2,
       "error": null,
       "opsSynced": 76,
-      "syncLagTime": 50003,
+      "syncLagTime": 14899,
       "syncLagOps": 0,
       "syncLagOpsLeader": 0,
       "syncLagOpsFollower": 0
     }],
     "opsSynced": 255,
-    "syncLagTime": 55205,
+    "syncLagTime": 19886,
     "syncLagOps": 0
   }]
 }

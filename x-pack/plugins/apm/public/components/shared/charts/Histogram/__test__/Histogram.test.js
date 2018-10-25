@@ -16,7 +16,7 @@ import {
   timeUnit
 } from '../../../../../utils/formatters';
 import { toJson } from '../../../../../utils/testHelpers';
-import { getFormattedBuckets } from '../../../../app/TransactionDetails/Distribution/view';
+import { getFormattedBuckets } from '../../../../app/TransactionDetails/Distribution/index';
 
 describe('Histogram', () => {
   let wrapper;
@@ -98,9 +98,10 @@ describe('Histogram', () => {
     it('should update state with "hoveredBucket"', () => {
       expect(wrapper.state()).toEqual({
         hoveredBucket: {
-          sampled: true,
+          sample: {
+            transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
+          },
           style: { cursor: 'pointer' },
-          transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192',
           x: 869010,
           x0: 811076,
           y: 49
@@ -124,9 +125,10 @@ describe('Histogram', () => {
 
     it('should call onClick with bucket', () => {
       expect(onClick).toHaveBeenCalledWith({
-        sampled: true,
+        sample: {
+          transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192'
+        },
         style: { cursor: 'pointer' },
-        transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192',
         x: 869010,
         x0: 811076,
         y: 49

@@ -1,9 +1,24 @@
 <table class="kuiTable kuiTable--fluid">
   <thead>
     <tr>
-      <th scope="col" class="kuiTableHeaderCell">Action</th>
-      <th scope="col" class="kuiTableHeaderCell">Type</th>
-      <th scope="col" class="kuiTableHeaderCell">Mode</th>
+      <th
+        scope="col"
+        class="kuiTableHeaderCell"
+        i18n-id="xpack.watcher.sections.watchEdit.watchActionModeTable.actionColumnLabel"
+        i18n-default-message="Action"
+      ></th>
+      <th
+        scope="col"
+        class="kuiTableHeaderCell"
+        i18n-id="xpack.watcher.sections.watchEdit.watchActionModeTable.typeColumnLabel"
+        i18n-default-message="Type"
+      ></th>
+      <th
+        scope="col"
+        class="kuiTableHeaderCell"
+        i18n-id="xpack.watcher.sections.watchEdit.watchActionModeTable.modeColumnLabel"
+        i18n-default-message="Mode"
+      ></th>
     </tr>
   </thead>
   <tr ng-repeat="actionOption in watchActionModeTable.actionOptions">
