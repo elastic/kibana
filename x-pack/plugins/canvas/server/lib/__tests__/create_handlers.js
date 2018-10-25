@@ -71,8 +71,7 @@ describe('server createHandlers', () => {
           throw new Error('elasticsearchClient should fail when authentication fails');
         })
         .catch(err => {
-          // note: boom pre-pends error messages with "Error: "
-          expect(err.message).to.be.equal(`Error: ${authError.message}`);
+          expect(err.message).to.be.equal(authError.message);
         });
     });
 

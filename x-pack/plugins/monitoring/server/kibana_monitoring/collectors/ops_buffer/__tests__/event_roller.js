@@ -27,7 +27,7 @@ const events = [
       heapUsed: 318428400,
       external: 5172252
     },
-    concurrents: { '5601': 6 },
+    concurrent_connections: 6,
     psdelay: 0.4091129992157221
   },
   {
@@ -53,7 +53,7 @@ const events = [
       heapUsed: 315669840,
       external: 5083177
     },
-    concurrents: { '5601': 6 },
+    concurrent_connections: 6,
     psdelay: 0.6715770000591874
   }
 ];
