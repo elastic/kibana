@@ -1,0 +1,274 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getWaterfallRoot 1`] = `
+Object {
+  "itemsById": Object {
+    "a": Object {
+      "children": Array [
+        Object {
+          "children": Array [],
+          "docType": "span",
+          "duration": 4694,
+          "id": "b2",
+          "name": "GET [0:0:0:0:0:0:0:1]",
+          "offset": 1000,
+          "parentId": "a",
+          "parentTransaction": Object {},
+          "serviceName": "opbeans-java",
+          "span": Object {
+            "transaction": Object {
+              "id": "a",
+            },
+          },
+          "timestamp": 1536763736367000,
+        },
+        Object {
+          "children": Array [
+            Object {
+              "children": Array [
+                Object {
+                  "children": Array [],
+                  "docType": "span",
+                  "duration": 210,
+                  "id": "d",
+                  "name": "SELECT",
+                  "offset": 5000,
+                  "parentId": "c",
+                  "parentTransaction": Object {},
+                  "serviceName": "opbeans-java",
+                  "span": Object {
+                    "transaction": Object {
+                      "id": "c",
+                    },
+                  },
+                  "timestamp": 1536763736371000,
+                },
+              ],
+              "docType": "transaction",
+              "duration": 3581,
+              "id": "c",
+              "name": "APIRestController#productsRemote",
+              "offset": 3000,
+              "parentId": "b",
+              "serviceName": "opbeans-java",
+              "timestamp": 1536763736369000,
+              "transaction": Object {},
+            },
+          ],
+          "docType": "span",
+          "duration": 4694,
+          "id": "b",
+          "name": "GET [0:0:0:0:0:0:0:1]",
+          "offset": 2000,
+          "parentId": "a",
+          "parentTransaction": Object {},
+          "serviceName": "opbeans-java",
+          "span": Object {
+            "transaction": Object {
+              "id": "a",
+            },
+          },
+          "timestamp": 1536763736368000,
+        },
+      ],
+      "docType": "transaction",
+      "duration": 9480,
+      "id": "a",
+      "name": "APIRestController#products",
+      "offset": 0,
+      "serviceName": "opbeans-java",
+      "timestamp": 1536763736366000,
+      "transaction": Object {},
+    },
+    "b": Object {
+      "children": Array [
+        Object {
+          "children": Array [
+            Object {
+              "children": Array [],
+              "docType": "span",
+              "duration": 210,
+              "id": "d",
+              "name": "SELECT",
+              "offset": 5000,
+              "parentId": "c",
+              "parentTransaction": Object {},
+              "serviceName": "opbeans-java",
+              "span": Object {
+                "transaction": Object {
+                  "id": "c",
+                },
+              },
+              "timestamp": 1536763736371000,
+            },
+          ],
+          "docType": "transaction",
+          "duration": 3581,
+          "id": "c",
+          "name": "APIRestController#productsRemote",
+          "offset": 3000,
+          "parentId": "b",
+          "serviceName": "opbeans-java",
+          "timestamp": 1536763736369000,
+          "transaction": Object {},
+        },
+      ],
+      "docType": "span",
+      "duration": 4694,
+      "id": "b",
+      "name": "GET [0:0:0:0:0:0:0:1]",
+      "offset": 2000,
+      "parentId": "a",
+      "parentTransaction": Object {},
+      "serviceName": "opbeans-java",
+      "span": Object {
+        "transaction": Object {
+          "id": "a",
+        },
+      },
+      "timestamp": 1536763736368000,
+    },
+    "b2": Object {
+      "children": Array [],
+      "docType": "span",
+      "duration": 4694,
+      "id": "b2",
+      "name": "GET [0:0:0:0:0:0:0:1]",
+      "offset": 1000,
+      "parentId": "a",
+      "parentTransaction": Object {},
+      "serviceName": "opbeans-java",
+      "span": Object {
+        "transaction": Object {
+          "id": "a",
+        },
+      },
+      "timestamp": 1536763736367000,
+    },
+    "c": Object {
+      "children": Array [
+        Object {
+          "children": Array [],
+          "docType": "span",
+          "duration": 210,
+          "id": "d",
+          "name": "SELECT",
+          "offset": 5000,
+          "parentId": "c",
+          "parentTransaction": Object {},
+          "serviceName": "opbeans-java",
+          "span": Object {
+            "transaction": Object {
+              "id": "c",
+            },
+          },
+          "timestamp": 1536763736371000,
+        },
+      ],
+      "docType": "transaction",
+      "duration": 3581,
+      "id": "c",
+      "name": "APIRestController#productsRemote",
+      "offset": 3000,
+      "parentId": "b",
+      "serviceName": "opbeans-java",
+      "timestamp": 1536763736369000,
+      "transaction": Object {},
+    },
+    "d": Object {
+      "children": Array [],
+      "docType": "span",
+      "duration": 210,
+      "id": "d",
+      "name": "SELECT",
+      "offset": 5000,
+      "parentId": "c",
+      "parentTransaction": Object {},
+      "serviceName": "opbeans-java",
+      "span": Object {
+        "transaction": Object {
+          "id": "c",
+        },
+      },
+      "timestamp": 1536763736371000,
+    },
+  },
+  "root": Object {
+    "children": Array [
+      Object {
+        "children": Array [],
+        "docType": "span",
+        "duration": 4694,
+        "id": "b2",
+        "name": "GET [0:0:0:0:0:0:0:1]",
+        "offset": 1000,
+        "parentId": "a",
+        "parentTransaction": Object {},
+        "serviceName": "opbeans-java",
+        "span": Object {
+          "transaction": Object {
+            "id": "a",
+          },
+        },
+        "timestamp": 1536763736367000,
+      },
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": Array [],
+                "docType": "span",
+                "duration": 210,
+                "id": "d",
+                "name": "SELECT",
+                "offset": 5000,
+                "parentId": "c",
+                "parentTransaction": Object {},
+                "serviceName": "opbeans-java",
+                "span": Object {
+                  "transaction": Object {
+                    "id": "c",
+                  },
+                },
+                "timestamp": 1536763736371000,
+              },
+            ],
+            "docType": "transaction",
+            "duration": 3581,
+            "id": "c",
+            "name": "APIRestController#productsRemote",
+            "offset": 3000,
+            "parentId": "b",
+            "serviceName": "opbeans-java",
+            "timestamp": 1536763736369000,
+            "transaction": Object {},
+          },
+        ],
+        "docType": "span",
+        "duration": 4694,
+        "id": "b",
+        "name": "GET [0:0:0:0:0:0:0:1]",
+        "offset": 2000,
+        "parentId": "a",
+        "parentTransaction": Object {},
+        "serviceName": "opbeans-java",
+        "span": Object {
+          "transaction": Object {
+            "id": "a",
+          },
+        },
+        "timestamp": 1536763736368000,
+      },
+    ],
+    "docType": "transaction",
+    "duration": 9480,
+    "id": "a",
+    "name": "APIRestController#products",
+    "offset": 0,
+    "serviceName": "opbeans-java",
+    "timestamp": 1536763736366000,
+    "transaction": Object {},
+  },
+}
+`;

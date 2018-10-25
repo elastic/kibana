@@ -8,6 +8,7 @@
     "@kbn/dev-utils": "link:../kbn-dev-utils",
     "chalk": "^2.4.1",
     "dedent": "^0.7.0",
+    "del": "^3.0.0",
     "execa": "^0.10.0",
     "getopts": "^2.0.6",
     "glob": "^7.1.2",
@@ -16,6 +17,7 @@
     "node-fetch": "^2.0.0",
     "simple-git": "^1.91.0",
     "tar-fs": "^1.16.0",
+    "tree-kill": "^1.1.0",
     "yauzl": "^2.10.0",
     "zlib": "^1.0.5"
   }

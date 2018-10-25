@@ -11,6 +11,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
+      mlEnabled={true}
     />
     <EuiSpacer
       size="l"
@@ -145,6 +146,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
+      mlEnabled={true}
     />
     <EuiSpacer
       size="l"
@@ -298,6 +300,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
+      mlEnabled={true}
     />
     <EuiSpacer
       size="l"
@@ -451,6 +454,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
+      mlEnabled={true}
     />
     <EuiSpacer
       size="l"
@@ -585,6 +589,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
+      mlEnabled={true}
     />
     <EuiSpacer
       size="l"
@@ -719,6 +724,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={true}
+      mlEnabled={true}
     />
     <EuiSpacer
       size="l"
@@ -853,6 +859,7 @@ exports[`home should not contain RecentlyAccessed panel when there is no recentl
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
+      mlEnabled={true}
     />
     <EuiSpacer
       size="l"
@@ -1003,6 +1010,7 @@ exports[`home should render home component 1`] = `
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
+      mlEnabled={true}
     />
     <EuiSpacer
       size="l"
@@ -1137,6 +1145,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
+      mlEnabled={true}
     />
     <EuiSpacer
       size="l"
@@ -1271,6 +1280,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={false}
+      mlEnabled={true}
     />
     <EuiSpacer
       size="l"
@@ -1412,6 +1422,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
     <InjectIntl(AddDataUi)
       apmUiEnabled={true}
       isNewKibanaInstance={true}
+      mlEnabled={true}
     />
     <EuiSpacer
       size="l"

@@ -56,6 +56,8 @@ export class DifferenceMetric extends ElasticsearchMetric {
       },
     };
 
+    this.getFields = () => [`${fieldSource}.${metric}`, `${fieldSource}.${metric2}`];
+
     this.calculation = (bucket) => {
       return _.get(bucket, 'metric_max.value') - _.get(bucket, 'metric2_max.value');
     };

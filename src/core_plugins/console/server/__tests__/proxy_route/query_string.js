@@ -66,7 +66,7 @@ describe('Console Proxy Route', () => {
           await request('GET', 'http://evil.com/test');
           sinon.assert.calledOnce(Wreck.request);
           const args = Wreck.request.getCall(0).args;
-          expect(args[1]).to.be('http://localhost:9200/http://evil.com/test');
+          expect(args[1]).to.be('http://localhost:9200/http://evil.com/test?pretty');
         });
       });
       describe('is missing', () => {
@@ -87,14 +87,14 @@ describe('Console Proxy Route', () => {
         it('combines well with the base url', async () => {
           await request('GET', '/index/type/id');
           sinon.assert.calledOnce(Wreck.request);
-          expect(Wreck.request.getCall(0).args[1]).to.be('http://localhost:9200/index/type/id');
+          expect(Wreck.request.getCall(0).args[1]).to.be('http://localhost:9200/index/type/id?pretty');
         });
       });
       describe(`doesn't start with a slash`, () => {
         it('combines well with the base url', async () => {
           await request('GET', 'index/type/id');
           sinon.assert.calledOnce(Wreck.request);
-          expect(Wreck.request.getCall(0).args[1]).to.be('http://localhost:9200/index/type/id');
+          expect(Wreck.request.getCall(0).args[1]).to.be('http://localhost:9200/index/type/id?pretty');
         });
       });
     });
