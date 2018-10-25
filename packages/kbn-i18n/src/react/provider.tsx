@@ -35,10 +35,8 @@ export class I18nProvider extends React.PureComponent {
   public static childContextTypes = { intl: intlShape };
 
   public getChildContext() {
-    /**
-     * if pseudo locale is set, default intl.formatMessage should be decorated
-     * with the pseudo localization function
-     */
+    // if pseudo locale is set, default intl.formatMessage should be decorated
+    // with the pseudo localization function
     if (this.context.intl && isPseudoLocale(i18n.getLocale())) {
       const formatMessage = this.context.intl.formatMessage;
       this.context.intl.formatMessage = (...args: any[]) => {
@@ -52,10 +50,8 @@ export class I18nProvider extends React.PureComponent {
   public render() {
     const child = React.Children.only(this.props.children);
     if (this.context.intl) {
-      /**
-       * We can have IntlProvider somewhere within ancestors so we just reuse it
-       * and don't recreate with another IntlProvider
-       */
+      // We can have IntlProvider somewhere within ancestors so we just reuse it
+      // and don't recreate with another IntlProvider
       return child;
     }
 
@@ -68,11 +64,11 @@ export class I18nProvider extends React.PureComponent {
         defaultFormats={i18n.getFormats()}
         textComponent={React.Fragment}
       >
-        {/*
-          We use `<I18nProvider>{child}</I18nProvider>` trick to decorate intl.formatMessage
-          in `getChildContext()` method. I18nProdiver will have `this.context.intl` so the
-          recursion won't be infinite
-        */}
+        {
+          // We use `<I18nProvider>{child}</I18nProvider>` trick to decorate intl.formatMessage
+          // in `getChildContext()` method. I18nProdiver will have `this.context.intl` so the
+          // recursion won't be infinite
+        }
         {isPseudoLocale(i18n.getLocale()) ? <I18nProvider>{child}</I18nProvider> : child}
       </IntlProvider>
     );
