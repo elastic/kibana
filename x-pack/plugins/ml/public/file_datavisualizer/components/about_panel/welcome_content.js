@@ -36,7 +36,7 @@ export function WelcomeContent() {
         <EuiText>
           <p>
             The File Data Visualizer helps you understand the fields and metrics in a log file.
-            Upload your file, analyze its data, and then choose which data to import into your Elasticsearch index.
+            Upload your file, analyze its data, and then choose whether to import the data into an Elasticsearch index.
           </p>
         </EuiText>
         <EuiSpacer size="s" />
