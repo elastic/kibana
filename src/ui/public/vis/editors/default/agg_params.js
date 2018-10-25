@@ -51,9 +51,12 @@ uiModules
 
         // We set up this watch prior to adding the controls below, because when the controls are added,
         // there is a possibility that the agg type can be automatically selected (if there is only one)
-        $scope.$watch('agg.type', updateAggParamEditor);
+        $scope.$watch('agg.type', () => {
+          updateAggParamEditor();
+          updateEditorConfig('default');
+        });
 
-        function updateEditorConfig() {
+        function updateEditorConfig(property = 'fixedValue') {
           $scope.editorConfig = editorConfigProviders.getConfigForAgg(
             aggTypes.byType[$scope.groupName],
             $scope.indexPattern,
@@ -62,17 +65,21 @@ uiModules
 
           Object.keys($scope.editorConfig).forEach(param => {
             const config = $scope.editorConfig[param];
+            const paramOptions = $scope.agg.type.params.find((paramOption) => paramOption.name === param);
             // If the parameter has a fixed value in the config, set this value.
             // Also for all supported configs we should freeze the editor for this param.
-            if (config.hasOwnProperty('fixedValue')) {
-              $scope.agg.params[param] = config.fixedValue;
+            if (config.hasOwnProperty(property)) {
+              if(paramOptions && paramOptions.deserialize) {
+                $scope.agg.params[param] = paramOptions.deserialize(config[property]);
+              } else {
+                $scope.agg.params[param] = config[property];
+              }
             }
           });
         }
 
-        $scope.$watchCollection('agg.params', updateEditorConfig);
-
         updateEditorConfig();
+        $scope.$watchCollection('agg.params', updateEditorConfig);
 
         // this will contain the controls for the schema (rows or columns?), which are unrelated to
         // controls for the agg, which is why they are first
