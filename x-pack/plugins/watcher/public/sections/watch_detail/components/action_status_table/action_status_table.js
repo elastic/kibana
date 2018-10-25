@@ -31,10 +31,7 @@ app.directive('actionStatusTable', function ($injector, i18n) {
         const total = errors.length;
 
         const label = i18n('xpack.watcher.sections.watchDetail.actionStatusTotalErrors', {
-          defaultMessage: `{total, number} {total, plural,
-            one {error}
-            other {errors}
-          }`,
+          defaultMessage: '{total, number} {total, plural, one {error} other {errors}}',
           values: {
             total,
           }
