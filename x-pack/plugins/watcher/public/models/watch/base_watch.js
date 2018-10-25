@@ -159,22 +159,17 @@ export class BaseWatch {
     }
 
     // Concatenate their message
-    const errorActionsFragment = actionsErrors.reduce((message, error) => (
+    const warningMessage = actionsErrors.reduce((message, error) => (
       !!message
         ? `${message}, ${error.message}`
         : error.message
     ), '');
 
     // We are not doing any *blocking* validation in the client,
-    // so for now we return the errors as a warning
+    // so we return the errors as a _warning_
     return {
       warning: {
-        message: i18n.translate('xpack.watcher.models.baseWatch.invalidWatchWarningMessageText', {
-          defaultMessage: 'Warning: {errorActionsFragment} Are you sure you want to save the watch in its current state?',
-          values: {
-            errorActionsFragment,
-          }
-        })
+        message: warningMessage,
       }
     };
   }

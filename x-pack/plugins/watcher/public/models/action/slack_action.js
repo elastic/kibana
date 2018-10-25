@@ -24,7 +24,7 @@ export class SlackAction extends BaseAction {
       errors.push({
         message: i18n.translate('xpack.watcher.sections.watchEdit.json.warningPossibleInvalidSlackAction.description', {
           // eslint-disable-next-line max-len
-          defaultMessage: 'You are about to save a watch with a "Slack" action without a "to" property. Unless you have specified a "to" property in the Slack message_default setting in Elasticsearch, this will result in an invalid watch.'
+          defaultMessage: 'This watch has a Slack action without a "to" property.  This watch will only be valid if you specified the "to" property in the Slack "message_default" setting in Elasticsearch.'
         })
       });
     }

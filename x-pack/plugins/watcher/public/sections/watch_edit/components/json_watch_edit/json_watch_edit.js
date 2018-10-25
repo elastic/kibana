@@ -165,7 +165,7 @@ app.directive('jsonWatchEdit', function ($injector, i18n) {
         const confirmModalOptions = {
           onConfirm: this.saveWatch,
           confirmButtonText: i18n('xpack.watcher.sections.watchEdit.json.watchErrorsWarning.confirmSaveWatch', {
-            defaultMessage: 'Yes',
+            defaultMessage: 'Save watch',
           }),
         };
 
