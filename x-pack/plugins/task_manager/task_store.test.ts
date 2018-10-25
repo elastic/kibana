@@ -48,9 +48,9 @@ describe('TaskStore', () => {
 
       await store.init();
 
-      sinon.assert.calledTwice(callCluster);
+      sinon.assert.calledOnce(callCluster);
 
-      callCluster.calledOnceWith('indices.putMapping', {
+      callCluster.calledOnceWith('indices.putTemplate', {
         index: 'taskalicious',
       });
     });
