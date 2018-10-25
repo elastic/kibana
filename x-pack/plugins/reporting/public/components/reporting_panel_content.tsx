@@ -105,7 +105,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
         <EuiText size="s">
           <FormattedMessage
-            id="xpack.reporting.panelContent.generationWayDescription"
+            id="xpack.reporting.panelContent.howToCallGenerationDescription"
             defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
           />
         </EuiText>
@@ -189,14 +189,14 @@ class ReportingPanelContentUi extends Component<Props, State> {
         toastNotifications.addSuccess({
           title: intl.formatMessage(
             {
-              id: 'xpack.reporting.panelContent.notification.successTitle',
+              id: 'xpack.reporting.panelContent.successfullyQueuedReportNotificationTitle',
               defaultMessage: 'Queued report for {objectType}',
             },
             { objectType: this.props.objectType }
           ),
           text: (
             <FormattedMessage
-              id="xpack.reporting.panelContent.notification.successDescription"
+              id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
               defaultMessage="Track its progress in Management"
             />
           ),
@@ -209,14 +209,14 @@ class ReportingPanelContentUi extends Component<Props, State> {
           return toastNotifications.addWarning({
             title: intl.formatMessage(
               {
-                id: 'xpack.reporting.panelContent.notification.notExportableTitle',
+                id: 'xpack.reporting.panelContent.whatCanBeExportedWarningTitle',
                 defaultMessage: 'Only saved {objectType} can be exported',
               },
               { objectType: this.props.objectType }
             ),
             text: (
               <FormattedMessage
-                id="xpack.reporting.panelContent.notification.notExportableDescription"
+                id="xpack.reporting.panelContent.whatCanBeExportedWarningDescription"
                 defaultMessage="Please save your work first"
               />
             ),
@@ -226,7 +226,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
         const defaultMessage =
           kfetchError.res.status === 403 ? (
             <FormattedMessage
-              id="xpack.reporting.panelContent.notification.noPermissionDescription"
+              id="xpack.reporting.panelContent.noPermissionToGenerateReportDescription"
               defaultMessage="You don't have permission to generate this report."
             />
           ) : (

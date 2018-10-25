@@ -34,7 +34,7 @@ function executeJobFn(server) {
     try {
       decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
     } catch (e) {
-      throw new Error(i18n.translate('xpack.reporting.exportTypes.csv.executeJob.failedToDecryptErrorMessage', {
+      throw new Error(i18n.translate('xpack.reporting.exportTypes.csv.executeJob.failedToDecryptReportJobDataErrorMessage', {
         defaultMessage: 'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report.',
         values: { encryptionKey: 'xpack.reporting.encryptionKey' }
       }));

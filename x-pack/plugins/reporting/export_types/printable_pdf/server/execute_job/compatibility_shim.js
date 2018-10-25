@@ -19,7 +19,7 @@ export function compatibilityShimFactory(server) {
       const decryptedHeaders = await crypto.decrypt(job.headers);
       return decryptedHeaders;
     } catch (err) {
-      throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptErrorMessage', {
+      throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptReportJobDataErrorMessage', {
         defaultMessage: 'Failed to decrypt report job data. Please re-generate this report.'
       }));
     }
@@ -39,7 +39,7 @@ export function compatibilityShimFactory(server) {
       return savedObject.url;
     }
 
-    throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.unableToGenerateErrorMessage', {
+    throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.unableToGenerateReportErrorMessage', {
       defaultMessage: 'Unable to generate report for url {savedObjUrl}, it\'s not a Kibana URL',
       values: { savedObjUrl: savedObject.url }
     }));
@@ -54,7 +54,7 @@ export function compatibilityShimFactory(server) {
       try {
         return await crypto.decrypt(jobSession);
       } catch (err) {
-        throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptDataErrorMessage', {
+        throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptReportJobDataErrorMessage', {
           defaultMessage: 'Failed to decrypt report job data. Please re-generate this report.'
         }));
       }
@@ -67,7 +67,7 @@ export function compatibilityShimFactory(server) {
 
     const cookieName = server.plugins.security.getSessionCookieOptions().name;
     if (!cookieName) {
-      throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.noSessionCookieNameErrorMessage', {
+      throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.undeterminedSessionCookieNameErrorMessage', {
         defaultMessage: 'Unable to determine the session cookie name'
       }));
     }

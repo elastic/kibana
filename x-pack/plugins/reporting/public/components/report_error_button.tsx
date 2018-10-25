@@ -31,7 +31,7 @@ class ReportErrorButtonUi extends Component<Props, State> {
       isLoading: false,
       isPopoverOpen: false,
       calloutTitle: props.intl.formatMessage({
-        id: 'xpack.reporting.errorButton.unableToGenerateTitle',
+        id: 'xpack.reporting.errorButton.unableToGenerateReportTitle',
         defaultMessage: 'Unable to generate report',
       }),
     };
@@ -99,7 +99,7 @@ class ReportErrorButtonUi extends Component<Props, State> {
         this.setState({
           isLoading: false,
           calloutTitle: this.props.intl.formatMessage({
-            id: 'xpack.reporting.errorButton.unableToFetchContentTitle',
+            id: 'xpack.reporting.errorButton.unableToFetchReportContentTitle',
             defaultMessage: 'Unable to fetch report content',
           }),
           error: kfetchError.message,

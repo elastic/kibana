@@ -134,7 +134,7 @@ class PdfMaker {
   getBuffer() {
     if (!this._pdfDoc) {
       throw new Error(
-        i18n.translate('xpack.reporting.exportTypes.printablePdf.bufferErrorMessage', {
+        i18n.translate('xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage', {
           defaultMessage: 'Document stream has not been generated'
         })
       );
@@ -153,7 +153,7 @@ class PdfMaker {
   getStream() {
     if (!this._pdfDoc) {
       throw new Error(
-        i18n.translate('xpack.reporting.exportTypes.printablePdf.streamErrorMessage', {
+        i18n.translate('xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage', {
           defaultMessage: 'Document stream has not been generated'
         })
       );
@@ -217,8 +217,8 @@ function getTemplate(layout, logo, title) {
             }, {
               alignment: 'center',
               text: i18n.translate('xpack.reporting.exportTypes.printablePdf.pagingDescription', {
-                defaultMessage: 'Page {currentString} of {pageCount}',
-                values: { currentString: currentPage.toString(), pageCount }
+                defaultMessage: 'Page {currentPage} of {pageCount}',
+                values: { currentPage: currentPage.toString(), pageCount }
               }),
               style: {
                 color: '#aaa'

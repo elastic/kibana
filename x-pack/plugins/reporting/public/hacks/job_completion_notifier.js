@@ -48,7 +48,7 @@ uiModules.get('kibana')
         return toastNotifications.addDanger({
           title: (
             <FormattedMessage
-              id="xpack.reporting.jobCompletionNotifier.error.couldnotCreateReportTitle"
+              id="xpack.reporting.jobCompletionNotifier.couldNotCreateReportTitle"
               defaultMessage="Couldn't create report for {reportObjectType} '{reportObjectTitle}'"
               values={{ reportObjectType, reportObjectTitle }}
             />
@@ -67,7 +67,7 @@ uiModules.get('kibana')
         seeReportLink = (
           <p>
             <FormattedMessage
-              id="xpack.reporting.jobCompletionNotifier.reportLink.pickItUpFromDescription"
+              id="xpack.reporting.jobCompletionNotifier.reportLink.pickItUpFromPathDescription"
               defaultMessage="Pick it up from {path}."
               values={{ path: (
                 <a href={reportingSectionUrl}>
@@ -124,7 +124,7 @@ uiModules.get('kibana')
       toastNotifications.addSuccess({
         title: (
           <FormattedMessage
-            id="xpack.reporting.jobCompletionNotifier.createdReportTitle"
+            id="xpack.reporting.jobCompletionNotifier.successfullyCreatedReportNotificationTitle"
             defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
             values={{ reportObjectType, reportObjectTitle }}
           />

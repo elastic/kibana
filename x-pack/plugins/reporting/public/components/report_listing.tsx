@@ -15,7 +15,7 @@ import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { Poller } from '../../../../common/poller';
-import { JobStatuses } from '../constants/job_statuses';
+import { jobStatuses } from '../constants/job_statuses';
 import { downloadReport } from '../lib/download_report';
 import { jobQueueClient, JobQueueEntry } from '../lib/job_queue_client';
 import { ReportErrorButton } from './report_error_button';
@@ -166,12 +166,11 @@ class ReportListingUi extends Component<Props, State> {
         }),
         render: (status: string, record: Job) => {
           let statusTimestamp;
-          if (status === JobStatuses.JOB_STATUS_PROCESSING && record.started_at) {
+          if (status === jobStatuses.PROCESSING && record.started_at) {
             statusTimestamp = this.formatDate(record.started_at);
           } else if (
             record.completed_at &&
-            (status === JobStatuses.JOB_STATUS_COMPLETED ||
-              status === JobStatuses.JOB_STATUS_FAILED)
+            (status === jobStatuses.COMPLETED || status === jobStatuses.FAILED)
           ) {
             statusTimestamp = this.formatDate(record.completed_at);
           }
@@ -181,7 +180,7 @@ class ReportListingUi extends Component<Props, State> {
                 id="xpack.reporting.listing.tableValue.createdAtDetail"
                 defaultMessage="{status} at {time}{maxSizeReached}"
                 values={{
-                  status: record.statusLabel,
+                  status,
                   time: <span className="eui-textNoWrap">{statusTimestamp}</span>,
                   maxSizeReached: record.max_size_reached ? (
                     <span>
@@ -239,7 +238,7 @@ class ReportListingUi extends Component<Props, State> {
                 defaultMessage: 'Loading reports',
               })
             : intl.formatMessage({
-                id: 'xpack.reporting.listing.table.noReportsDescription',
+                id: 'xpack.reporting.listing.table.noCreatedReportsDescription',
                 defaultMessage: 'No reports have been created',
               })
         }
@@ -250,7 +249,7 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   private renderDownloadButton = (record: Job) => {
-    if (record.status !== JobStatuses.JOB_STATUS_COMPLETED) {
+    if (record.status !== jobStatuses.COMPLETED) {
       return;
     }
 
@@ -271,7 +270,7 @@ class ReportListingUi extends Component<Props, State> {
         <EuiToolTip
           position="top"
           content={intl.formatMessage({
-            id: 'xpack.reporting.listing.table.downloadReportTooltip',
+            id: 'xpack.reporting.listing.table.maxSizeReachedTooltip',
             defaultMessage: 'Max size reached, contains partial data.',
           })}
         >
@@ -284,7 +283,7 @@ class ReportListingUi extends Component<Props, State> {
   };
 
   private renderReportErrorButton = (record: Job) => {
-    if (record.status !== JobStatuses.JOB_STATUS_FAILED) {
+    if (record.status !== jobStatuses.FAILED) {
       return;
     }
 
@@ -340,29 +339,29 @@ class ReportListingUi extends Component<Props, State> {
       const { intl } = this.props;
       const getStatusLabel = (statusString: string) => {
         switch (statusString) {
-          case JobStatuses.JOB_STATUS_PENDING:
+          case jobStatuses.PENDING:
             return intl.formatMessage({
-              id: 'xpack.reporting.JobStatuses.pendingText',
+              id: 'xpack.reporting.jobStatuses.pendingText',
               defaultMessage: 'pending',
             });
-          case JobStatuses.JOB_STATUS_PROCESSING:
+          case jobStatuses.PROCESSING:
             return intl.formatMessage({
-              id: 'xpack.reporting.JobStatuses.processingText',
+              id: 'xpack.reporting.jobStatuses.processingText',
               defaultMessage: 'processing',
             });
-          case JobStatuses.JOB_STATUS_COMPLETED:
+          case jobStatuses.COMPLETED:
             return intl.formatMessage({
-              id: 'xpack.reporting.JobStatuses.completedText',
+              id: 'xpack.reporting.jobStatuses.completedText',
               defaultMessage: 'completed',
             });
-          case JobStatuses.JOB_STATUS_FAILED:
+          case jobStatuses.FAILED:
             return intl.formatMessage({
-              id: 'xpack.reporting.JobStatuses.failedText',
+              id: 'xpack.reporting.jobStatuses.failedText',
               defaultMessage: 'failed',
             });
-          case JobStatuses.JOB_STATUS_CANCELLED:
+          case jobStatuses.CANCELLED:
             return intl.formatMessage({
-              id: 'xpack.reporting.JobStatuses.cancelledText',
+              id: 'xpack.reporting.jobStatuses.cancelledText',
               defaultMessage: 'cancelled',
             });
           default:
