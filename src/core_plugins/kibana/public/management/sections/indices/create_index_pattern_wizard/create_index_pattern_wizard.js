@@ -73,7 +73,7 @@ export class CreateIndexPatternWizard extends Component {
     });
 
     const [allIndices, remoteClusters] = await ensureMinimumTime([
-      getIndices(services.es, this.indexPatternCreationType,`*`, MAX_SEARCH_SIZE),
+      getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE),
       getRemoteClusters(services.$http)
     ]);
 
