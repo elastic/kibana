@@ -23,17 +23,22 @@ export async function createSocket(basePath) {
     pluginsLoaded.then(() => socket.emit('functionList', functionsRegistry.toJS()));
   });
 
-  socket.on('open', () => {
+  socket.on('connect', () => {
     status.resolve();
   });
 
-  socket.on('connectionFailed', ({ reason }) => {
-    status.reject(new Error(reason));
-  });
+  function errorHandler(err) {
+    if (!err instanceof Error) {
+      const { reason } = err;
+      if (reason) status.reject(new Error(reason));
+    }
 
-  socket.on('error', err => {
     status.reject(err);
-  });
+  }
+
+  socket.on('connectionFailed', errorHandler);
+  socket.on('connect_error', errorHandler);
+  socket.on('connect_timeout', errorHandler);
 
   return new Promise((resolve, reject) => {
     status.resolve = resolve;
