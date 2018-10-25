@@ -32,11 +32,16 @@ export class SstImporter extends Importer {
         const char = text[i];
         if (char === '\n') {
           if (line.match(this.multilineStartPattern) !== null) {
+            // the line buffer matches the start of a new message.
+            // so push the last message to the list and clear the variable.
             data.push({ message });
             message = '';
           } else {
+            // looks like this \n char is in the middle of a field.
+            // so add the \n to end of the last message and keep going.
             message += char;
           }
+          // move the line buffer to the message variable and clear the buffer
           message += line;
           line = '';
         } else {
@@ -44,9 +49,27 @@ export class SstImporter extends Importer {
         }
       }
 
-      // add the last line of the file to the list
+      // add the last message to the list
       if (message !== '') {
         data.push({ message });
+      }
+
+      // add any left over line buffer to the data
+      // needed in case the last line does not end with a \n character.
+      // note, this could be a partial message
+      if (line !== '') {
+        if (line.match(this.multilineStartPattern) !== null) {
+          // line starts with the multilineStartPattern, it looks like a complete line
+          data.push({ message: line });
+        }
+        else {
+          // line looks like the end of the last message
+          // add it with a \n to preserve the one that
+          // would have been lost when the loop ended
+          if (data.length) {
+            data[data.length - 1].message += `\n${line}`;
+          }
+        }
       }
 
       // remove first line if it is blank
