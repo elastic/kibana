@@ -30,6 +30,7 @@ import {
   getSelectedPrimaryShardCount,
   getSaveAsNewPolicy,
   getSelectedOriginalPolicyName,
+  getPolicies
 } from '.';
 
 export const validatePhase = (type, phase, errors) => {
@@ -106,12 +107,12 @@ export const validateLifecycle = state => {
     errors[STRUCTURE_POLICY_NAME].push('The policy name must be different');
   }
 
-  // if (getSaveAsNewPolicy(state)) {
-  //   const policyNames = getAllPolicyNamesFromTemplates(state);
-  //   if (policyNames.includes(getSelectedPolicyName(state))) {
-  //     errors[STRUCTURE_POLICY_NAME].push('That policy name is already used.');
-  //   }
-  // }
+  if (getSaveAsNewPolicy(state)) {
+    const policyNames = getPolicies(state).map(policy => policy.name);
+    if (policyNames.includes(getSelectedPolicyName(state))) {
+      errors[STRUCTURE_POLICY_NAME].push('That policy name is already used.');
+    }
+  }
 
   const hotPhase = getPhase(state, PHASE_HOT);
   const warmPhase = getPhase(state, PHASE_WARM);

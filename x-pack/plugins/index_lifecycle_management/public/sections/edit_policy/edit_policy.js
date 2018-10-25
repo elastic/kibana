@@ -115,6 +115,7 @@ export class EditPolicy extends Component {
       setSaveAsNewPolicy,
       saveAsNewPolicy,
       setSelectedPolicyName,
+      isNewPolicy,
     } = this.props;
     const selectedPolicyName = selectedPolicy.name;
     const { isShowingErrors } = this.state;
@@ -129,9 +130,9 @@ export class EditPolicy extends Component {
           >
             <EuiTitle>
               <h4>
-                {!selectedPolicyName
-                  ? 'Create a lifecycle policy'
-                  : `Edit lifecycle policy ${selectedPolicyName}`}
+                {isNewPolicy
+                  ? 'Create an index lifecycle policy'
+                  : `Edit index lifecycle policy ${selectedPolicyName}`}
               </h4>
             </EuiTitle>
             <div className="euiAnimateContentLoad">
