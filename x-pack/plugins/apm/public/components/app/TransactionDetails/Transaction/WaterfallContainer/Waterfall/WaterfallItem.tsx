@@ -7,8 +7,10 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { EuiIcon, EuiText } from '@elastic/eui';
 import {
   colors,
+  fontFamily,
   fontFamilyCode,
   fontSizes,
   px,
@@ -17,29 +19,54 @@ import {
 } from '../../../../../../style/variables';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
-const ItemBar = styled.div`
+interface ItemBarProps {
+  type: 'transaction' | 'span';
+  left: number;
+  width: number;
+  color: string;
+}
+
+const ItemBar = styled<ItemBarProps, any>('div')`
+  box-sizing: border-box;
   position: relative;
-  height: ${unit}px;
+  height: ${props => (props.type === 'transaction' ? unit : unit)}px;
+  left: ${props => `${props.left}%`};
+  width: ${props => props.width}%;
+  min-width: '2px';
+  background-color: ${props => props.color};
 `;
-const ItemLabel = styled.div`
+
+const SpanLabel = styled<{ left: number }, any>('div')`
   white-space: nowrap;
   position: relative;
-  direction: rtl;
+  left: ${props => `${props.left}%`};
+  width: ${props => `${100 - props.left}%`};
   text-align: left;
   margin: ${px(units.quarter)} 0 0;
   font-family: ${fontFamilyCode};
-  font-size: ${fontSizes.small};
+  font-size: ${fontSizes.tiny};
 `;
 
-const Container = styled<
-  { timelineMargins: TimelineMargins; isSelected: boolean },
-  'div'
->('div')`
+const TransactionLabel = styled(SpanLabel)`
+  font-weight: 600;
+  font-family: ${fontFamily};
+  font-size: ${fontSizes.small};
+  line-height: 1.5;
+`;
+
+interface IContainerProps {
+  item: IWaterfallItem;
+  timelineMargins: ITimelineMargins;
+  isSelected: boolean;
+}
+
+const Container = styled<IContainerProps, 'div'>('div')`
   position: relative;
   display: block;
   user-select: none;
   padding: ${px(units.half)} ${props => px(props.timelineMargins.right)}
-    ${px(units.eighth)} ${props => px(props.timelineMargins.left)};
+    ${props => px(props.item.docType === 'span' ? units.half : units.quarter)}
+    ${props => px(props.timelineMargins.left)};
   border-top: 1px solid ${colors.gray4};
   background-color: ${props => (props.isSelected ? colors.gray5 : 'initial')};
   cursor: pointer;
@@ -48,20 +75,32 @@ const Container = styled<
   }
 `;
 
-interface TimelineMargins {
+interface ITimelineMargins {
   right: number;
   left: number;
   top: number;
   bottom: number;
 }
 
-interface Props {
-  timelineMargins: TimelineMargins;
+interface IWaterfallItemProps {
+  timelineMargins: ITimelineMargins;
   totalDuration: number;
   item: IWaterfallItem;
   color: string;
   isSelected: boolean;
   onClick: () => any;
+}
+
+function Prefix({ item }: { item: IWaterfallItem }) {
+  if (item.docType !== 'transaction') {
+    return null;
+  }
+
+  return (
+    <React.Fragment>
+      <EuiIcon type="merge" />{' '}
+    </React.Fragment>
+  );
 }
 
 export function WaterfallItem({
@@ -71,34 +110,23 @@ export function WaterfallItem({
   color,
   isSelected,
   onClick
-}: Props) {
+}: IWaterfallItemProps) {
   const width = (item.duration / totalDuration) * 100;
   const left = (item.offset / totalDuration) * 100;
+  const Label = item.docType === 'transaction' ? TransactionLabel : SpanLabel;
 
   return (
     <Container
-      onClick={onClick}
+      item={item}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
+      onClick={onClick}
     >
-      <ItemBar
-        style={{
-          left: `${left}%`,
-          width: `${width}%`,
-          minWidth: '2px',
-          backgroundColor: color
-        }}
-      />
-      <ItemLabel
-        style={{
-          left: `${left}%`,
-          width: `${100 - left}%`
-        }}
-      >
-        &lrm;
+      <ItemBar left={left} width={width} color={color} type={item.docType} />
+      <Label left={left}>
+        <Prefix item={item} />
         {item.name}
-        &lrm;
-      </ItemLabel>
+      </Label>
     </Container>
   );
 }

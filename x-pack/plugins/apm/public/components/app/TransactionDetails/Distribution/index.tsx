@@ -11,7 +11,6 @@ import { IBucket } from 'x-pack/plugins/apm/server/lib/transactions/distribution
 import { IDistributionResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_distribution';
 // @ts-ignore
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
-// @ts-ignore
 import { fromQuery, history, toQuery } from '../../../../utils/url';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
