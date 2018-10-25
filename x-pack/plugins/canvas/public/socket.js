@@ -15,7 +15,19 @@ export async function createSocket(basePath) {
 
   const status = {};
 
-  socket = io({ path: `${basePath}/socket.io` });
+  socket = io({
+    path: `${basePath}/socket.io`,
+    transports: ['polling', 'websocket'],
+    transportOptions: {
+      polling: {
+        extraHeaders: {
+          'kbn-xsrf': 'professionally-crafted-string-of-text',
+        },
+      },
+    },
+    rememberUpgrade: false,
+    timeout: 5000,
+  });
 
   socket.on('getFunctionList', () => {
     const pluginsLoaded = getBrowserRegistries();
