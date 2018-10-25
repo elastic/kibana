@@ -7,7 +7,7 @@
 :blog-ref:       https://www.elastic.co/blog/
 :wikipedia:      https://en.wikipedia.org/wiki
 
-include::{asciidoc-dir}/../../shared/versions65.asciidoc[]
+include::{asciidoc-dir}/../../shared/versions66.asciidoc[]
 
 :docker-repo:    docker.elastic.co/kibana/kibana
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
