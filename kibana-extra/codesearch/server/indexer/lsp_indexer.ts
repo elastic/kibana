@@ -177,27 +177,33 @@ export class LspIndexer extends AbstractIndexer {
       },
     });
 
-    const { symbols, references } = response.result[0];
     const symbolNames = new Set<string>();
-    for (const symbol of symbols) {
-      await this.client.index({
-        index: SymbolIndexName(repoUri),
-        type: SymbolTypeName,
-        id: `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${symbol.symbolInformation.name}`,
-        body: symbol,
-      });
-      symbolNames.add(symbol.symbolInformation.name);
-    }
+    if (response && response.result.length > 0) {
+      const { symbols, references } = response.result[0];
+      for (const symbol of symbols) {
+        await this.client.index({
+          index: SymbolIndexName(repoUri),
+          type: SymbolTypeName,
+          id: `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${
+            symbol.symbolInformation.name
+          }`,
+          body: symbol,
+        });
+        symbolNames.add(symbol.symbolInformation.name);
+      }
 
-    for (const ref of references) {
-      await this.client.index({
-        index: ReferenceIndexName(repoUri),
-        type: ReferenceTypeName,
-        id: `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${ref.location.uri}:${
-          ref.location.range.start.line
-        }:${ref.location.range.start.character}`,
-        body: ref,
-      });
+      for (const ref of references) {
+        await this.client.index({
+          index: ReferenceIndexName(repoUri),
+          type: ReferenceTypeName,
+          id: `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${ref.location.uri}:${
+            ref.location.range.start.line
+          }:${ref.location.range.start.character}`,
+          body: ref,
+        });
+      }
+    } else {
+      this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
     }
 
     const localFilePath = `${localRepoPath}${filePath}`;

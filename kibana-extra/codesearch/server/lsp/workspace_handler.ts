@@ -135,7 +135,7 @@ export class WorkspaceHandler {
                 symbol.repoUri = parsedLocation.repoUri;
                 symbol.revision = parsedLocation.revision;
               }
-              if (symbol.contents) {
+              if (symbol.contents !== null || symbol.contents !== undefined) {
                 this.handleHoverContents(symbol);
               }
             }

@@ -63,6 +63,7 @@ export abstract class AbstractIndexer implements Indexer {
         await this.processRequest(req);
         successCount += 1;
       } catch (error) {
+        this.log.debug(`Process index request error. ${error}`);
         failCount += 1;
       }
 
