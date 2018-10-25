@@ -234,8 +234,7 @@ app.directive('jsonWatchEdit', function ($injector, i18n) {
 
       /**
        * Actions instances are not automatically added to the Watch _actions_ Array
-       * when we add them in the Json editor.
-       * This method takes takes care of it.
+       * when we add them in the Json editor. This method takes takes care of it.
        *
        * @param watchModel Watch instance
        * @return Watch instance

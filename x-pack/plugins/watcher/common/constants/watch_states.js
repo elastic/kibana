@@ -24,5 +24,8 @@ export const WATCH_STATES = {
     defaultMessage: 'Error!'
   }),
 
-  CONFIG_ERROR: 'Config Error!',
+  CONFIG_ERROR: i18n.translate('xpack.watcher.constants.watchStates.configErrorStateText', {
+    defaultMessage: 'Config error'
+  }),
+
 };

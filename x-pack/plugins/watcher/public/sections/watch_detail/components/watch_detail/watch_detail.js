@@ -140,7 +140,7 @@ app.directive('watchDetail', function ($injector, i18n) {
             params: function () {
               return {
                 title: i18n('xpack.watcher.sections.watchDetail.errorDisplayModalTitleText', {
-                  defaultMessage: 'Errors in the "{actionId}" Action',
+                  defaultMessage: 'Errors in the "{actionId}" action',
                   values: { actionId } }
                 ),
                 errors,

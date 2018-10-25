@@ -34,6 +34,8 @@ export const ACTION_STATES = {
   }),
 
   // Action has a configuration error
-  CONFIG_ERROR: 'Config Error'
+  CONFIG_ERROR: i18n.translate('xpack.watcher.constants.actionStates.configErrorStateText', {
+    defaultMessage: 'Config error'
+  }),
 
 };

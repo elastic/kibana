@@ -11,7 +11,7 @@ export class WatchErrors {
     this.actionErrors = get(props, 'actions');
   }
 
-  static fromUpstreamJson(upstreamWatchStatus) {
-    return new WatchErrors(upstreamWatchStatus);
+  static fromUpstreamJson(upstreamWatchErrors) {
+    return new WatchErrors(upstreamWatchErrors);
   }
 }

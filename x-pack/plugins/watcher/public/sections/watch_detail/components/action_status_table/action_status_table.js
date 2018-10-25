@@ -9,7 +9,7 @@ import template from './action_status_table.html';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('actionStatusTable', function () {
+app.directive('actionStatusTable', function ($injector, i18n) {
   return {
     restrict: 'E',
     replace: true,
@@ -30,10 +30,15 @@ app.directive('actionStatusTable', function () {
         const errors = this.actionErrors[actionId];
         const total = errors.length;
 
-        let label = `${total} error`;
-        if (total > 1) {
-          label += 's';
-        }
+        const label = i18n('xpack.watcher.sections.watchDetail.actionStatusTotalErrors', {
+          defaultMessage: `{total, number} {total, plural,
+            one {error}
+            other {errors}
+          }`,
+          values: {
+            total,
+          }
+        });
 
         return label;
       }
