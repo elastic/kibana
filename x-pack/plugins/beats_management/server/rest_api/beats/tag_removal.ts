@@ -14,6 +14,7 @@ export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/agents_tags/removals',
   licenseRequired: true,
+  requiredRoles: ['beats_admin'],
   config: {
     validate: {
       payload: Joi.object({

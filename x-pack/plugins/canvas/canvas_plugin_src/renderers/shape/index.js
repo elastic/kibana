@@ -27,7 +27,8 @@ export const shape = () => ({
 
     if (fill) shapeContent.setAttribute('fill', fill);
     if (border) shapeContent.setAttribute('stroke', border);
-    if (borderWidth >= 0) shapeContent.setAttribute('stroke-width', borderWidth);
+    const strokeWidth = Math.max(borderWidth, 0);
+    shapeContent.setAttribute('stroke-width', strokeWidth);
     shapeContent.setAttribute('stroke-miterlimit', 999);
     shapeContent.setAttribute('vector-effect', 'non-scaling-stroke');
 
@@ -44,22 +45,28 @@ export const shape = () => ({
       const height = domNode.offsetHeight;
 
       // adjust viewBox based on border width
-      let [minX, minY, maxX, maxY] = initialViewBox;
+      let [minX, minY, shapeWidth, shapeHeight] = initialViewBox;
+      const borderOffset = strokeWidth;
 
-      const xScale = (maxX - minX) / width;
-      const yScale = (maxY - minY) / height;
-      const borderOffset = borderWidth / 2;
-      const xOffset = borderOffset * xScale;
-      const yOffset = borderOffset * yScale;
+      if (width) {
+        const xOffset = (shapeWidth / width) * borderOffset;
+        minX -= xOffset;
+        shapeWidth += xOffset * 2;
+      } else {
+        shapeWidth = 0;
+      }
 
-      minX -= xOffset; // min-x
-      minY -= yOffset; // min-y
-      maxX += xOffset * 2; // width
-      maxY += yOffset * 2; // height
+      if (height) {
+        const yOffset = (shapeHeight / height) * borderOffset;
+        minY -= yOffset;
+        shapeHeight += yOffset * 2;
+      } else {
+        shapeHeight = 0;
+      }
 
       shapeSvg.setAttribute('width', width);
       shapeSvg.setAttribute('height', height);
-      shapeSvg.setAttribute('viewBox', [minX, minY, maxX, maxY].join(' '));
+      shapeSvg.setAttribute('viewBox', [minX, minY, shapeWidth, shapeHeight].join(' '));
 
       const oldShape = domNode.firstElementChild;
       if (oldShape) domNode.removeChild(oldShape);
