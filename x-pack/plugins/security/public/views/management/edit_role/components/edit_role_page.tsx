@@ -49,6 +49,7 @@ interface Props {
   spaces?: Space[];
   spacesEnabled: boolean;
   userProfile: UserProfile;
+  intl: any;
 }
 
 interface State {

@@ -28,6 +28,7 @@ interface Props {
   role: Role;
   spaces: Space[];
   userProfile: UserProfile;
+  intl: any;
 }
 
 interface State {

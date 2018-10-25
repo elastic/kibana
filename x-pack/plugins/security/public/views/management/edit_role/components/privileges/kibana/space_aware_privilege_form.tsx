@@ -41,6 +41,7 @@ interface Props {
   editable: boolean;
   validator: RoleValidator;
   userProfile: UserProfile;
+  intl: any;
 }
 
 interface PrivilegeForm {

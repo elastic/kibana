@@ -176,7 +176,6 @@ export class RoleValidator {
     if (privilege) {
       return valid();
     }
-    // return invalid('Privilege is required');
     return invalid(
       i18n.translate(
         'xpack.security.views.management.editRoles.lib.validateRole.privilegeRequiredWarningMessage',

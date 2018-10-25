@@ -17,6 +17,7 @@ import React, { Component, Fragment } from 'react';
 interface Props {
   canDelete: boolean;
   onDelete: () => void;
+  intl: any;
 }
 
 interface State {

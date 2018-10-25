@@ -37,6 +37,7 @@ interface Props {
   indexPatterns: string[];
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
+  intl: any;
 }
 
 export class ElasticsearchPrivilegesUI extends Component<Props, {}> {

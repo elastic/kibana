@@ -26,6 +26,7 @@ interface Props {
   spacePrivileges: any;
   onChange?: (privs: { [spaceId: string]: KibanaPrivilege[] }) => void;
   readonly?: boolean;
+  intl: any;
 }
 
 interface State {
@@ -159,7 +160,6 @@ export class PrivilegeSpaceTableUI extends Component<Props, State> {
     ];
     if (!this.props.readonly) {
       columns.push({
-        // name: 'Actions',
         name: intl.formatMessage({
           id:
             'xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceTable.actionsName',
