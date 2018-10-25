@@ -2,6 +2,7 @@
   {
     "cluster_uuid": "fOt6KT9KTICAMm2ncRhsMg",
     "cluster_name": "proddy1",
+    "ccs": "proddy1",
     "version": "7.0.0-alpha1",
     "license": {
       "status": "active",

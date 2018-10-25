@@ -12,6 +12,8 @@ const filebeatInputConfig: YamlConfigSchema[] = [
     ui: {
       label: 'Paths',
       type: 'multi-input',
+      helpText: 'Put each of the paths on a seperate line',
+      placeholder: `first/path/to/file.json                   second/path/to/otherfile.json`,
     },
     validations: 'isPaths',
     error: 'One file path per line',
@@ -22,9 +24,10 @@ const filebeatInputConfig: YamlConfigSchema[] = [
     ui: {
       label: 'Other Config',
       type: 'code',
+      helpText: 'Use YAML format to specify other settings for the Filebeat Input',
     },
     validations: 'isYaml',
-    error: 'Config entered must be in valid YAML format',
+    error: 'Use valid YAML format',
   },
 ];
 
@@ -113,9 +116,10 @@ const filebeatModuleConfig: YamlConfigSchema[] = [
     ui: {
       label: 'Other Config',
       type: 'code',
+      helpText: 'Use YAML format to specify other settings for the Filebeat Module',
     },
     validations: 'isYaml',
-    error: 'Config entered must be in valid YAML format',
+    error: 'Use valid YAML format',
   },
 ];
 
@@ -276,6 +280,8 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
     ui: {
       label: 'Hosts',
       type: 'multi-input',
+      helpText: 'Put each of the paths on a seperate line',
+      placeholder: `somehost.local                                                             otherhost.local`,
     },
     validations: 'isHosts',
     error: 'One file host per line',
@@ -297,9 +303,10 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
     ui: {
       label: 'Other Config',
       type: 'code',
+      helpText: 'Use YAML format to specify other settings for the Metricbeat Module',
     },
     validations: 'isYaml',
-    error: 'Config entered must be in valid YAML format',
+    error: 'Use valid YAML format',
   },
 ];
 
@@ -309,7 +316,6 @@ const outputConfig: YamlConfigSchema[] = [
     ui: {
       label: 'Output Type',
       type: 'select',
-      transform: 'removed',
     },
     options: [
       {

@@ -159,7 +159,7 @@ export class JobsList extends Component {
       }, {
         name: 'Latest timestamp',
         truncateText: false,
-        field: 'latestTimeStampSortValue',
+        field: 'latestTimestampSortValue',
         sortable: true,
         render: (time, item) => (
           <span className="euiTableCellContent__text">
