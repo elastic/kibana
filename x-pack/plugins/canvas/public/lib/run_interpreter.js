@@ -33,7 +33,7 @@ export function runInterpreter(ast, context = null, options = {}) {
 
       return new Error(
         i18n.translate('xpack.canvas.runInterpreter.unknownTypeForRenderErrorMessage', {
-          defaultMessage: "Ack! I don't know how to render a '{getType)}",
+          defaultMessage: "Unknown type '{getType}' for render",
           values: { getType: getType(renderable) },
         })
       );

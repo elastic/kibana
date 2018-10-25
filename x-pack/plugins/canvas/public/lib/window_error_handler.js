@@ -23,13 +23,13 @@ function showError(err) {
   notice.appendChild(close);
 
   const uncaughtErrorMessage = i18n.translate(
-    'xpack.canvas.windowErrorHandler.uncaughtErrorSwallowedInDevModeMessage',
+    'xpack.canvas.windowErrorHandler.uncaughtErrorIgnoredInDevModeMessage',
     {
-      defaultMessage: 'Uncaught error swallowed in dev mode',
+      defaultMessage: 'Uncaught error ignored in dev mode',
     }
   );
 
-  // eslint-disable-next-line
+  // eslint-disable-next-line no-unsanitized/method
   notice.insertAdjacentHTML('beforeend', `<h3>${uncaughtErrorMessage}</h3>`);
 
   const message = document.createElement('p');
@@ -56,7 +56,7 @@ function showError(err) {
     }
   );
 
-  // eslint-disable-next-line
+  // eslint-disable-next-line no-unsanitized/method
   notice.insertAdjacentHTML('beforeend', `<p>${checkConsoleMessage}</p>`);
   body.appendChild(notice);
 }
