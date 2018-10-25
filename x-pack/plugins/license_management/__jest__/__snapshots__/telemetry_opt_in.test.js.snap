@@ -9,7 +9,15 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
       className="euiText"
     >
       <p>
-        Gold and platinum customers: help support give you better service.
+        <FormattedMessage
+          defaultMessage="Gold and platinum customers: help support give you better service."
+          id="xpack.licenseMgmt.telemetryOptIn.customersHelpSupportDescription"
+          values={Object {}}
+        >
+          <span>
+            Gold and platinum customers: help support give you better service.
+          </span>
+        </FormattedMessage>
       </p>
     </div>
   </EuiText>
@@ -28,7 +36,11 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
     indeterminate={false}
     label={
       <span>
-        Send basic feature usage statistics to Elastic periodically. 
+        <FormattedMessage
+          defaultMessage="Send basic feature usage statistics to Elastic periodically."
+          id="xpack.licenseMgmt.telemetryOptIn.sendBasicFeatureStatisticsLabel"
+          values={Object {}}
+        />
         <EuiPopover
           anchorPosition="downCenter"
           button={
@@ -37,7 +49,11 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
               onClick={[Function]}
               type="button"
             >
-              Read more
+              <FormattedMessage
+                defaultMessage="Read more"
+                id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
+                values={Object {}}
+              />
             </EuiLink>
           }
           className="eui-AlignBaseline"
@@ -53,26 +69,37 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
             grow={true}
           >
             <p>
-              This feature periodically sends basic feature usage statistics. This information will not be shared outside of Elastic. See an 
-              <EuiLink
-                color="primary"
-                onClick={[Function]}
-                type="button"
-              >
-                example
-              </EuiLink>
-               
-              or read our
-               
-              <EuiLink
-                color="primary"
-                href="https://www.elastic.co/legal/telemetry-privacy-statement"
-                target="_blank"
-                type="button"
-              >
-                telemetry privacy statement
-              </EuiLink>
-              . You can disable this feature any time.
+              <FormattedMessage
+                defaultMessage="This feature periodically sends basic feature usage statistics. This information will not be shared outside of Elastic. See an {exampleLink} or read our {telemetryPrivacyStatementLink}. You can disable this feature any time."
+                id="xpack.licenseMgmt.telemetryOptIn.featureUsageWarningMessage"
+                values={
+                  Object {
+                    "exampleLink": <EuiLink
+                      color="primary"
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <FormattedMessage
+                        defaultMessage="example"
+                        id="xpack.licenseMgmt.telemetryOptIn.exampleLinkText"
+                        values={Object {}}
+                      />
+                    </EuiLink>,
+                    "telemetryPrivacyStatementLink": <EuiLink
+                      color="primary"
+                      href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                      target="_blank"
+                      type="button"
+                    >
+                      <FormattedMessage
+                        defaultMessage="telemetry privacy statement"
+                        id="xpack.licenseMgmt.telemetryOptIn.telemetryPrivacyStatementLinkText"
+                        values={Object {}}
+                      />
+                    </EuiLink>,
+                  }
+                }
+              />
             </p>
           </EuiText>
         </EuiPopover>
@@ -99,7 +126,15 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
         htmlFor="isOptingInToTelemetry"
       >
         <span>
-          Send basic feature usage statistics to Elastic periodically. 
+          <FormattedMessage
+            defaultMessage="Send basic feature usage statistics to Elastic periodically."
+            id="xpack.licenseMgmt.telemetryOptIn.sendBasicFeatureStatisticsLabel"
+            values={Object {}}
+          >
+            <span>
+              Send basic feature usage statistics to Elastic periodically.
+            </span>
+          </FormattedMessage>
           <EuiPopover
             anchorPosition="downCenter"
             button={
@@ -108,7 +143,11 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                 onClick={[Function]}
                 type="button"
               >
-                Read more
+                <FormattedMessage
+                  defaultMessage="Read more"
+                  id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
+                  values={Object {}}
+                />
               </EuiLink>
             }
             className="eui-AlignBaseline"
@@ -141,7 +180,15 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                       onClick={[Function]}
                       type="button"
                     >
-                      Read more
+                      <FormattedMessage
+                        defaultMessage="Read more"
+                        id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
+                        values={Object {}}
+                      >
+                        <span>
+                          Read more
+                        </span>
+                      </FormattedMessage>
                     </button>
                   </EuiLink>
                 </div>
