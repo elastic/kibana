@@ -41,6 +41,7 @@ export class MBMapContainer extends React.Component {
   }
 
   componentWillUnmount() {
+    this._checker.destroy();
     if (this._mbMap) {
       this._mbMap.remove();
       this._mbMap = null;
@@ -111,13 +112,13 @@ export class MBMapContainer extends React.Component {
   }
 
   assignSizeWatch() {
-    const checker = new ResizeChecker(this.refs.mapContainer);
-    checker.on('resize', (() => {
+    this._checker = new ResizeChecker(this.refs.mapContainer);
+    this._checker.on('resize', (() => {
       let lastWidth = window.innerWidth;
       let lastHeight = window.innerHeight;
       return () => {
         if (lastWidth === window.innerWidth
-          && lastHeight === window.innerHeight) {
+          && lastHeight === window.innerHeight && this._mbMap) {
           this._mbMap.resize();
         }
         lastWidth = window.innerWidth;

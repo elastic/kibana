@@ -16,7 +16,7 @@ export const inspectorAdapters = {
   requests: new MappedRequestAdapter()
 };
 
-uiModules.get('gis').run(($injector) => {
+uiModules.get('app/gis').run(($injector) => {
   indexPatternService = $injector.get('indexPatterns');
   const Private = $injector.get('Private');
   SearchSource = Private(SearchSourceProvider);

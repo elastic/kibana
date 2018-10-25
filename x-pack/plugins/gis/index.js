@@ -24,7 +24,8 @@ export function gis(kibana) {
         title: 'GIS',
         description: 'Map application',
         main: 'plugins/gis/index',
-        icon: 'plugins/gis/icon.svg'
+        icon: 'plugins/gis/icon.svg',
+        euiIconType: 'gisApp',
       },
       home: ['plugins/gis/register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,

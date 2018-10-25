@@ -16,32 +16,70 @@ import 'uiExports/search';
 import 'ui/agg_types';
 
 import chrome from 'ui/chrome';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import { getStore } from './store/store';
+import routes from 'ui/routes';
+import { uiModules } from 'ui/modules';
 import 'ui/autoload/styles';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
-import { initGisApp } from './init_gis_app';
 
 import "mapbox-gl/dist/mapbox-gl.css";
 
-import gisAppTemplate from './gis_app.html';
-import { GISApp } from './components/gis_app';
 import 'ui/vis/map/service_settings';
+import './angular/services/saved_gis_workspaces';
+import './angular/workspace_controller';
+import listingTemplate from './angular/listing_ng_wrapper.html';
+import workspaceTemplate from './angular/workspace.html';
+import { GisWorkspaceListing } from './shared/components/listing';
 
-chrome.setRootTemplate(gisAppTemplate);
+const app = uiModules.get('app/gis', ['ngRoute', 'react']);
 
-async function init(store) {
-  const root = document.getElementById('react-gis-root');
-  ReactDOM.render(
-    <Provider store={store}>
-      <GISApp/>
-    </Provider>,
-    root);
-}
+app.directive('gisWorkspaceListing', function (reactDirective) {
+  return reactDirective(GisWorkspaceListing);
+});
 
-new Promise(initGisApp)
-  .then(getStore)
-  .then(store => init(store));
+routes.enable();
+
+routes
+  .when('/', {
+    template: listingTemplate,
+    resolve: {
+      hasWorkspaces: function (kbnUrl) {
+        chrome.getSavedObjectsClient().find({ type: 'gis-workspace', perPage: 1 }).then(resp => {
+          // Do not show empty listing page, just redirect to a new workspace
+          if (resp.savedObjects.length === 0) {
+            kbnUrl.redirect('/workspace');
+          }
+
+          return true;
+        });
+      }
+    }
+  })
+  .when('/workspace', {
+    template: workspaceTemplate,
+    controller: 'GisWorkspaceController',
+    resolve: {
+      workspace: function (savedGisWorkspaces, redirectWhenMissing) {
+        return savedGisWorkspaces.get()
+          .catch(redirectWhenMissing({
+            'workspace': '/'
+          }));
+      }
+    }
+  })
+  .when('/workspace/:id', {
+    template: workspaceTemplate,
+    controller: 'GisWorkspaceController',
+    resolve: {
+      workspace: function (savedGisWorkspaces, redirectWhenMissing, $route) {
+        const id = $route.current.params.id;
+        return savedGisWorkspaces.get(id)
+          .catch(redirectWhenMissing({
+            'workspace': '/'
+          }));
+      }
+    }
+  })
+  .otherwise({
+    redirectTo: '/'
+  });
