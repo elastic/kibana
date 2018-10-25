@@ -130,6 +130,7 @@ module
       formValid: false,
       bucketSpanValid: true,
       bucketSpanEstimator: { status: 0, message: '' },
+      cardinalityValidator: { status: 0, message: '' },
       aggTypeOptions: filterAggTypes(aggTypes.byType[METRIC_AGG_TYPE]),
       fields: [],
       splitFields: [],
@@ -202,6 +203,7 @@ module
       description: '',
       jobGroups: [],
       useDedicatedIndex: false,
+      enableModelPlot: false, // here default to false to start
       isSparseData: false,
       modelMemoryLimit: DEFAULT_MODEL_MEMORY_LIMIT
     };
@@ -512,6 +514,9 @@ module
           });
       }
     };
+
+    // expose this function so it can be used in the enable model plot checkbox directive
+    $scope.getJobFromConfig = mlMultiMetricJobService.getJobFromConfig;
 
     addJobValidationMethods($scope, mlMultiMetricJobService);
 

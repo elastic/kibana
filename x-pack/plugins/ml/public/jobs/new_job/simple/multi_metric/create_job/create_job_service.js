@@ -173,6 +173,11 @@ export function MultiMetricJobServiceProvider() {
       const job = mlJobService.getBlankJob();
       job.data_description.time_field = formConfig.timeField;
 
+      // TODO: double check this
+      if (formConfig.enableModelPlot === true) {
+        job.model_plot_config = { 'enabled': true };
+      }
+
       _.each(formConfig.fields, (field, key) => {
         let func = field.agg.type.mlName;
         if (formConfig.isSparseData) {
