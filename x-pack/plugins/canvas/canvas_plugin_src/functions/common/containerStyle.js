@@ -55,6 +55,7 @@ export const containerStyle = () => ({
         defaultMessage: 'Valid CSS background size string',
       }),
       default: 'contain',
+      options: ['contain', 'cover', 'auto'],
     },
     backgroundRepeat: {
       types: ['string'],
@@ -62,6 +63,7 @@ export const containerStyle = () => ({
         defaultMessage: 'Valid CSS background repeat string',
       }),
       default: 'no-repeat',
+      options: ['repeat-x', 'repeat', 'space', 'round', 'no-repeat', 'space'],
     },
     opacity: {
       types: ['number', 'null'],
@@ -75,6 +77,7 @@ export const containerStyle = () => ({
       help: i18n.translate('xpack.canvas.functions.containerStyle.args.overflowHelpText', {
         defaultMessage: 'Sets overflow of the container',
       }),
+      options: ['visible', 'hidden', 'scroll', 'auto'],
     },
   },
   fn: (context, args) => {

@@ -38,6 +38,7 @@ export const compare = () => ({
           gteOperator: '{gte}',
         },
       }),
+      options: ['eq', 'ne', 'lt', 'gt', 'lte', 'gte'],
     },
     to: {
       aliases: ['this', 'b'],

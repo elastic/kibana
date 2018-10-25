@@ -60,6 +60,7 @@ export const plot = () => ({
         defaultMessage: 'Legend position, nw, sw, ne, se or false',
       }),
       default: 'ne',
+      options: ['nw', 'sw', 'ne', 'se', false],
     },
     yaxis: {
       types: ['boolean', 'axisConfig'],

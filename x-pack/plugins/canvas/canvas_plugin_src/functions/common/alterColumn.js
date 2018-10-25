@@ -31,6 +31,7 @@ export const alterColumn = () => ({
         defaultMessage: 'The type to convert the column to. Leave blank to not change type',
       }),
       default: null,
+      options: ['null', 'boolean', 'number', 'string'],
     },
     name: {
       types: ['string'],

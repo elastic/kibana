@@ -37,6 +37,7 @@ import { postgresqlLogsSpecProvider } from './postgresql_logs';
 import { rabbitmqMetricsSpecProvider } from './rabbitmq_metrics';
 import { redisLogsSpecProvider } from './redis_logs';
 import { redisMetricsSpecProvider } from './redis_metrics';
+import { suricataLogsSpecProvider } from './suricata_logs';
 import { dockerMetricsSpecProvider } from './docker_metrics';
 import { kubernetesMetricsSpecProvider } from './kubernetes_metrics';
 import { uwsgiMetricsSpecProvider } from './uwsgi_metrics';
@@ -60,6 +61,7 @@ import { golangMetricsSpecProvider } from './golang_metrics';
 import { logstashMetricsSpecProvider } from './logstash_metrics';
 import { prometheusMetricsSpecProvider } from './prometheus_metrics';
 import { zookeeperMetricsSpecProvider } from './zookeeper_metrics';
+import { uptimeMonitorsSpecProvider } from './uptime_monitors';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -82,6 +84,7 @@ export function registerTutorials(server) {
   server.registerTutorial(rabbitmqMetricsSpecProvider);
   server.registerTutorial(redisLogsSpecProvider);
   server.registerTutorial(redisMetricsSpecProvider);
+  server.registerTutorial(suricataLogsSpecProvider);
   server.registerTutorial(dockerMetricsSpecProvider);
   server.registerTutorial(kubernetesMetricsSpecProvider);
   server.registerTutorial(uwsgiMetricsSpecProvider);
@@ -105,4 +108,5 @@ export function registerTutorials(server) {
   server.registerTutorial(logstashMetricsSpecProvider);
   server.registerTutorial(prometheusMetricsSpecProvider);
   server.registerTutorial(zookeeperMetricsSpecProvider);
+  server.registerTutorial(uptimeMonitorsSpecProvider);
 }

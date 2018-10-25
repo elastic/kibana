@@ -30,6 +30,7 @@ export const axisConfig = () => ({
       help: i18n.translate('xpack.canvas.functions.axisConfig.args.positionHelpText', {
         defaultMessage: 'Position of the axis labels. Eg, top, bottom, left, and right',
       }),
+      options: ['top', 'bottom', 'left', 'right'],
       default: '',
     },
     min: {
