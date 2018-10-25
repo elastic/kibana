@@ -85,13 +85,17 @@
 
   .global-nav-link__title {
     display: none;
-    width: calc(@global-nav-open-width - @global-nav-closed-width);
+    width: calc(@global-nav-open-width - @global-nav-closed-width - 3px);
     float: right;
     font-size: 0.9em;
     text-align: left;
     padding-left: 3px;
+    padding-right: 3px;
     line-height: @app-icon-height;
     white-space: nowrap;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
 
     .is-global-nav-open & {
       display: inline-block;
