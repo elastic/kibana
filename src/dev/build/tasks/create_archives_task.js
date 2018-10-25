@@ -25,7 +25,7 @@ export const CreateArchivesTask = {
   description: 'Creating the archives for each platform',
 
   async run(config, log, build) {
-    await Promise.all(config.getPlatforms().map(async platform => {
+    await Promise.all(config.getTargetPlatforms().map(async platform => {
       const source = build.resolvePathForPlatform(platform, '.');
       const destination = build.getPlatformArchivePath(platform);
 

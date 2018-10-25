@@ -7,13 +7,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFilePicker } from '@elastic/eui';
-import { get } from 'lodash';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { getId } from '../../lib/get_id';
-import { notify } from '../../lib/notify';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { uploadWorkpad } from './upload_workpad';
 
-const WorkpadUploadUI = ({ onUpload, intl }) => (
+export const WorkpadUpload = ({ onUpload, ...rest }) => (
   <EuiFilePicker
+    {...rest}
     compressed
     initialPromptText={
       <FormattedMessage
@@ -21,72 +20,10 @@ const WorkpadUploadUI = ({ onUpload, intl }) => (
         defaultMessage="Import workpad JSON file"
       />
     }
-    onChange={([file]) => {
-      if (get(file, 'type') !== 'application/json') {
-        return notify.warning(
-          intl.formatMessage({
-            id: 'xpack.canvas.workpadLoader.workpadUpload.fileTypeErrorMessage',
-            defaultMessage: 'Only JSON files are accepted',
-          }),
-          {
-            title: intl.formatMessage(
-              {
-                id:
-                  'xpack.canvas.workpadLoader.workpadUpload.fileTypeErrorMessageTitle.fileErrorDetail',
-                defaultMessage: "Couldn't upload '{fileName}'",
-              },
-              {
-                fileName:
-                  file.name ||
-                  intl.formatMessage({
-                    id:
-                      'xpack.canvas.workpadLoader.workpadUpload.fileTypeErrorMessageTitle.fileNameText',
-                    defaultMessage: 'file',
-                  }),
-              }
-            ),
-          }
-        );
-      }
-      // TODO: Clean up this file, this loading stuff can, and should be, abstracted
-      const reader = new FileReader();
-
-      // handle reading the uploaded file
-      reader.onload = () => {
-        try {
-          const workpad = JSON.parse(reader.result);
-          workpad.id = getId('workpad');
-          onUpload(workpad);
-        } catch (e) {
-          notify.error(e, {
-            title: intl.formatMessage(
-              {
-                id:
-                  'xpack.canvas.workpadLoader.workpadUpload.readingFileErrorMessageTitle.fileErrorDetail',
-                defaultMessage: "Couldn't upload '{fileName}'",
-              },
-              {
-                fileName:
-                  file.name ||
-                  intl.formatMessage({
-                    id:
-                      'xpack.canvas.workpadLoader.workpadUpload.readingFileErrorMessageTitle.fileNameText',
-                    defaultMessage: 'file',
-                  }),
-              }
-            ),
-          });
-        }
-      };
-
-      // read the uploaded file
-      reader.readAsText(file);
-    }}
+    onChange={([file]) => uploadWorkpad(file, onUpload)}
   />
 );
 
-WorkpadUploadUI.propTypes = {
+WorkpadUpload.propTypes = {
   onUpload: PropTypes.func.isRequired,
 };
-
-export const WorkpadUpload = injectI18n(WorkpadUploadUI);

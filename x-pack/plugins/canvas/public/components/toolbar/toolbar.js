@@ -25,7 +25,6 @@ import { Tray } from './tray';
 
 const ToolbarUI = props => {
   const {
-    editing,
     selectedElement,
     tray,
     setTray,
@@ -68,7 +67,7 @@ const ToolbarUI = props => {
     expression: !elementIsSelected ? null : <Expression done={done} />,
   };
 
-  return !editing ? null : (
+  return (
     <div className="canvasToolbar hide-for-sharing">
       {trays[tray] && <Tray done={done}>{trays[tray]}</Tray>}
       <Navbar>
@@ -147,7 +146,6 @@ const ToolbarUI = props => {
 
 ToolbarUI.propTypes = {
   workpadName: PropTypes.string,
-  editing: PropTypes.bool,
   tray: PropTypes.node,
   setTray: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,

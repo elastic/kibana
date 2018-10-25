@@ -9,8 +9,15 @@ import PropTypes from 'prop-types';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const WorkpadCreate = ({ createPending, onCreate }) => (
-  <EuiButton iconType="plusInCircle" size="s" fill onClick={onCreate} isLoading={createPending}>
+export const WorkpadCreate = ({ createPending, onCreate, ...rest }) => (
+  <EuiButton
+    {...rest}
+    iconType="plusInCircle"
+    size="s"
+    fill
+    onClick={onCreate}
+    isLoading={createPending}
+  >
     <FormattedMessage
       id="xpack.canvas.workpadLoader.createWorkpadButtonLabel"
       defaultMessage="Create workpad"

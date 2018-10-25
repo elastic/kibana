@@ -53,6 +53,7 @@ const ElementTypesUI = ({ elements, onClick, search, setSearch, intl }) => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFieldSearch
+              className="canvasElements__filter"
               placeholder={intl.formatMessage({
                 id: 'xpack.canvas.elementTypes.searchInputPlaceholder',
                 defaultMessage: 'Filter elements',

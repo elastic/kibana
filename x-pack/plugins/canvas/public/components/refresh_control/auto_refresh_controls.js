@@ -27,6 +27,7 @@ import { timeDurationString } from '../../lib/time_duration';
 
 export class AutoRefreshControls extends Component {
   static propTypes = {
+    inFlight: PropTypes.bool.isRequired,
     refreshInterval: PropTypes.number,
     setRefresh: PropTypes.func.isRequired,
     disableInterval: PropTypes.func.isRequired,
@@ -36,7 +37,7 @@ export class AutoRefreshControls extends Component {
   refreshInput = null;
 
   render() {
-    const { refreshInterval, setRefresh, doRefresh, disableInterval } = this.props;
+    const { inFlight, refreshInterval, setRefresh, doRefresh, disableInterval } = this.props;
 
     return (
       <div>
@@ -80,7 +81,7 @@ export class AutoRefreshControls extends Component {
             </EuiDescriptionList>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" fill iconType="refresh" onClick={doRefresh}>
+            <EuiButton size="s" fill iconType="refresh" onClick={doRefresh} isDisabled={inFlight}>
               <FormattedMessage
                 id="xpack.canvas.refreshControl.refreshButtonLabel"
                 defaultMessage="Refresh"

@@ -6,12 +6,14 @@
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { InfraWaffleMapGroup } from '../../lib/lib';
+import { InfraPathType } from '../../../common/graphql/types';
+import { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../lib/lib';
 
 interface Props {
-  onDrilldown: () => void;
+  onDrilldown: (filter: string) => void;
   group: InfraWaffleMapGroup;
   isChild?: boolean;
+  options: InfraWaffleMapOptions;
 }
 
 export class GroupName extends React.PureComponent<Props, {}> {
@@ -37,9 +39,22 @@ export class GroupName extends React.PureComponent<Props, {}> {
   }
 
   private handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    // TODO: fill this in with group click handler
     event.preventDefault();
-    this.props.onDrilldown();
+    const { groupBy } = this.props.options;
+    // When groupBy is empty that means there is nothing todo so let's just do nothing.
+    if (groupBy.length === 0) {
+      return;
+    }
+    const currentPath = this.props.isChild && groupBy.length > 1 ? groupBy[1] : groupBy[0];
+    if (currentPath.type === InfraPathType.terms && currentPath.field) {
+      this.props.onDrilldown(`${currentPath.field}: "${this.props.group.name}"`);
+    }
+    if (currentPath.type === InfraPathType.filters && currentPath.filters) {
+      const currentFilter = currentPath.filters.find(f => f.label === this.props.group.name);
+      if (currentFilter) {
+        this.props.onDrilldown(currentFilter.query);
+      }
+    }
   };
 }
 

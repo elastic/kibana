@@ -25,8 +25,9 @@ import { FullscreenControl } from '../fullscreen_control';
 import { RefreshControl } from '../refresh_control';
 
 const WorkpadHeaderUI = ({
-  editing,
-  toggleEditing,
+  isWriteable,
+  canUserWrite,
+  toggleWriteable,
   hasAssets,
   addElement,
   setShowElementModal,
@@ -34,7 +35,7 @@ const WorkpadHeaderUI = ({
   intl,
 }) => {
   const keyHandler = action => {
-    if (action === 'EDITING') toggleEditing();
+    if (action === 'EDITING') toggleWriteable();
   };
 
   const elementAdd = (
@@ -43,6 +44,7 @@ const WorkpadHeaderUI = ({
         onClose={() => setShowElementModal(false)}
         className="canvasModal--fixedSize"
         maxWidth="1000px"
+        initialFocus=".canvasElements__filter"
       >
         <ElementTypes
           onClick={element => {
@@ -61,6 +63,29 @@ const WorkpadHeaderUI = ({
       </EuiModal>
     </EuiOverlayMask>
   );
+
+  let readOnlyToolTip = '';
+
+  if (!canUserWrite) {
+    readOnlyToolTip = (
+      <FormattedMessage
+        id="xpack.canvas.workpadHeader.noPermissionToEditWorkpadTooltip"
+        defaultMessage="You don't have permission to edit this workpad"
+      />
+    );
+  } else {
+    readOnlyToolTip = isWriteable ? (
+      <FormattedMessage
+        id="xpack.canvas.workpadHeader.editorOpenButtonTooltip"
+        defaultMessage="Hide editing controls"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.canvas.workpadHeader.editorCloseButtonTooltip"
+        defaultMessage="Show editing controls"
+      />
+    );
+  }
 
   return (
     <div>
@@ -99,46 +124,24 @@ const WorkpadHeaderUI = ({
               <WorkpadExport />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
-              <EuiToolTip
-                position="bottom"
-                content={
-                  editing ? (
-                    <FormattedMessage
-                      id="xpack.canvas.workpadHeader.editorOpenButtonTooltip"
-                      defaultMessage="Hide editing controls"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.canvas.workpadHeader.editorCloseButtonTooltip"
-                      defaultMessage="Show editing controls"
-                    />
-                  )
-                }
-              >
+              {!canUserWrite && (
+                <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
+              )}
+              <EuiToolTip position="bottom" content={readOnlyToolTip}>
                 <EuiButtonIcon
-                  iconType={editing ? 'eye' : 'eyeClosed'}
+                  iconType={isWriteable ? 'lockOpen' : 'lock'}
                   onClick={() => {
-                    toggleEditing();
+                    toggleWriteable();
                   }}
                   size="s"
-                  aria-label={
-                    editing
-                      ? intl.formatMessage({
-                          id: 'xpack.canvas.workpadHeader.editorOpenButtonAriaLabel',
-                          defaultMessage: 'Hide editing controls',
-                        })
-                      : intl.formatMessage({
-                          id: 'xpack.canvas.workpadHeader.editorCloseButtonAriaLabel',
-                          defaultMessage: 'Show editing controls',
-                        })
-                  }
+                  aria-label={readOnlyToolTip}
+                  isDisabled={!canUserWrite}
                 />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {editing ? (
+        {isWriteable ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               {hasAssets && (
@@ -168,8 +171,8 @@ const WorkpadHeaderUI = ({
 };
 
 WorkpadHeaderUI.propTypes = {
-  editing: PropTypes.bool,
-  toggleEditing: PropTypes.func,
+  isWriteable: PropTypes.bool,
+  toggleWriteable: PropTypes.func,
   hasAssets: PropTypes.bool,
   addElement: PropTypes.func.isRequired,
   showElementModal: PropTypes.bool,

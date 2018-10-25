@@ -36,6 +36,7 @@ const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
 class WorkpadLoaderUI extends React.PureComponent {
   static propTypes = {
     workpadId: PropTypes.string.isRequired,
+    canUserWrite: PropTypes.bool.isRequired,
     createWorkpad: PropTypes.func.isRequired,
     findWorkpads: PropTypes.func.isRequired,
     downloadWorkpad: PropTypes.func.isRequired,
@@ -134,7 +135,7 @@ class WorkpadLoaderUI extends React.PureComponent {
 
   renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
     const { sortField, sortDirection } = this.state;
-    const { intl } = this.props;
+    const { canUserWrite, createPending, intl } = this.props;
 
     const actions = [
       {
@@ -162,10 +163,17 @@ class WorkpadLoaderUI extends React.PureComponent {
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
-                  <FormattedMessage
-                    id="xpack.canvas.workpadLoader.cloneWorkpadButtonTooltip"
-                    defaultMessage="Clone"
-                  />
+                  canUserWrite ? (
+                    <FormattedMessage
+                      id="xpack.canvas.workpadLoader.cloneWorkpadButtonTooltip"
+                      defaultMessage="Clone"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.canvas.workpadHeader.noPermissionToCloneWorkpadTooltip"
+                      defaultMessage="You don't have permission to clone workpads"
+                    />
+                  )
                 }
               >
                 <EuiButtonIcon
@@ -175,6 +183,7 @@ class WorkpadLoaderUI extends React.PureComponent {
                     id: 'xpack.canvas.workpadLoader.cloneWorkpadButtonAriaLabel',
                     defaultMessage: 'Clone Workpad',
                   })}
+                  disabled={!canUserWrite}
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -276,7 +285,7 @@ class WorkpadLoaderUI extends React.PureComponent {
 
     return (
       <Fragment>
-        <WorkpadDropzone onUpload={this.uploadWorkpad}>
+        <WorkpadDropzone onUpload={this.uploadWorkpad} disabled={createPending || !canUserWrite}>
           <EuiBasicTable
             compressed
             items={rows}
@@ -308,8 +317,86 @@ class WorkpadLoaderUI extends React.PureComponent {
       sortField,
       sortDirection,
     } = this.state;
-    const { intl } = this.props;
+    const { canUserWrite, intl } = this.props;
     const isLoading = this.props.workpads == null;
+
+    let createButton = (
+      <WorkpadCreate
+        createPending={createPending}
+        onCreate={this.createWorkpad}
+        disabled={!canUserWrite}
+      />
+    );
+
+    let deleteButton = (
+      <EuiButton
+        size="s"
+        color="danger"
+        iconType="trash"
+        onClick={this.openRemoveConfirm}
+        disabled={!canUserWrite}
+      >
+        <FormattedMessage
+          id="xpack.canvas.workpadLoader.deleteButtonTitle"
+          defaultMessage="Delete ({workpadCount})"
+          values={{ workpadCount: selectedWorkpads.length }}
+        />
+      </EuiButton>
+    );
+
+    const downloadButton = (
+      <EuiButton size="s" color="secondary" onClick={this.downloadWorkpads} iconType="sortDown">
+        <FormattedMessage
+          id="xpack.canvas.workpadLoader.downloadButtonLabel"
+          defaultMessage="Download ({workpadCount})"
+          values={{ workpadCount: selectedWorkpads.length }}
+        />
+      </EuiButton>
+    );
+
+    let uploadButton = (
+      <WorkpadUpload onUpload={this.uploadWorkpad} disabled={createPending || !canUserWrite} />
+    );
+
+    if (!canUserWrite) {
+      createButton = (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.canvas.workpadLoader.noPermissionToCreateWorkpadsTooltip"
+              defaultMessage="You don't have permission to create workpads"
+            />
+          }
+        >
+          {createButton}
+        </EuiToolTip>
+      );
+      deleteButton = (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.canvas.workpadLoader.noPermissionToDeleteWorkpadsTooltip"
+              defaultMessage="You don't have permission to delete workpads"
+            />
+          }
+        >
+          {deleteButton}
+        </EuiToolTip>
+      );
+      uploadButton = (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.canvas.workpadLoader.noPermissionToUploadWorkpadsTooltip"
+              defaultMessage="You don't have permission to upload workpads"
+            />
+          }
+        >
+          {uploadButton}
+        </EuiToolTip>
+      );
+    }
+
     const modalTitle =
       selectedWorkpads.length === 1
         ? intl.formatMessage(
@@ -373,34 +460,8 @@ class WorkpadLoaderUI extends React.PureComponent {
                     <EuiFlexGroup gutterSize="s">
                       {selectedWorkpads.length > 0 && (
                         <Fragment>
-                          <EuiFlexItem grow={false}>
-                            <EuiButton
-                              size="s"
-                              color="secondary"
-                              onClick={this.downloadWorkpads}
-                              iconType="sortDown"
-                            >
-                              <FormattedMessage
-                                id="xpack.canvas.workpadLoader.downloadButtonLabel"
-                                defaultMessage="Download ({workpadCount})"
-                                values={{ workpadCount: selectedWorkpads.length }}
-                              />
-                            </EuiButton>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiButton
-                              size="s"
-                              color="danger"
-                              iconType="trash"
-                              onClick={this.openRemoveConfirm}
-                            >
-                              <FormattedMessage
-                                id="xpack.canvas.workpadLoader.deleteButtonTitle"
-                                defaultMessage="Delete ({workpadCount})"
-                                values={{ workpadCount: selectedWorkpads.length }}
-                              />
-                            </EuiButton>
-                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>{downloadButton}</EuiFlexItem>
+                          <EuiFlexItem grow={false}>{deleteButton}</EuiFlexItem>
                         </Fragment>
                       )}
                       <EuiFlexItem grow={1}>
@@ -415,18 +476,8 @@ class WorkpadLoaderUI extends React.PureComponent {
                   </EuiFlexItem>
                   <EuiFlexItem grow={2}>
                     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" wrap>
-                      <EuiFlexItem grow={false}>
-                        <WorkpadUpload
-                          createPending={createPending}
-                          onUpload={this.uploadWorkpad}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <WorkpadCreate
-                          createPending={createPending}
-                          onCreate={this.createWorkpad}
-                        />
-                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{uploadButton}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>

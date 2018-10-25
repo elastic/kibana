@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiCode,
   // @ts-ignore
   EuiTab,
   // @ts-ignore
@@ -20,6 +19,7 @@ import { ConnectedLink } from '../../components/connected_link';
 import { NoDataLayout } from '../../components/layouts/no_data';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { WalkthroughLayout } from '../../components/layouts/walkthrough';
+import { RouteWithBreadcrumb } from '../../components/route_with_breadcrumb';
 import { URLStateProps, withUrlState } from '../../containers/with_url_state';
 import { FrontendLibs } from '../../lib/lib';
 import { ActivityPage } from './activity';
@@ -78,7 +78,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
     const tabs = [
       {
         id: '/overview/beats',
-        name: 'Beats List',
+        name: 'Enrolled Beats',
         disabled: false,
       },
       // {
@@ -88,7 +88,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
       // },
       {
         id: '/overview/tags',
-        name: 'Configuration Tags',
+        name: 'Configuration tags',
         disabled: false,
       },
     ];
@@ -102,7 +102,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
       },
       {
         id: '/overview/initial/tag',
-        name: 'Create Configuration Tag',
+        name: 'Create tag',
         disabled: false,
         page: CreateTagPageFragment,
       },
@@ -117,7 +117,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
     if (this.props.location.pathname === '/overview/initial/help') {
       return (
         <NoDataLayout
-          title="Welcome to Beats Central Management"
+          title="Beats central management"
           actionSection={
             <ConnectedLink path="/overview/initial/beats">
               <EuiButton color="primary" fill>
@@ -126,10 +126,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
             </ConnectedLink>
           }
         >
-          <p>
-            You don’t have any Beat configured to use Central Management, click on{' '}
-            <EuiCode>Enroll Beat</EuiCode> to add one now.
-          </p>
+          <p>Manage your configurations in a central location.</p>
         </NoDataLayout>
       );
     }
@@ -137,7 +134,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
     if (this.props.location.pathname.includes('/overview/initial')) {
       return (
         <WalkthroughLayout
-          title="Get Started With Beats Centeral Management"
+          title="Get started with Beats central management"
           walkthroughSteps={walkthroughSteps}
           goTo={this.props.goTo}
           activePath={this.props.location.pathname}
@@ -194,32 +191,33 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
       >
         <EuiTabs>{renderedTabs}</EuiTabs>
 
-        <Switch>
-          <Route
-            path="/overview/beats/:action?/:enrollmentToken?"
-            render={(props: any) => (
-              <BeatsPage
-                {...this.props}
-                libs={this.props.libs}
-                {...props}
-                loadBeats={this.loadBeats}
-                beats={this.state.beats}
-              />
-            )}
-          />
-          <Route
-            path="/overview/activity"
-            exact={true}
-            render={(props: any) => (
-              <ActivityPage {...this.props} libs={this.props.libs} {...props} />
-            )}
-          />
-          <Route
-            path="/overview/tags"
-            exact={true}
-            render={(props: any) => <TagsPage {...this.props} libs={this.props.libs} {...props} />}
-          />
-        </Switch>
+        <RouteWithBreadcrumb
+          title="Beats List"
+          path="/overview/beats/:action?/:enrollmentToken?"
+          render={(props: any) => (
+            <BeatsPage
+              {...this.props}
+              libs={this.props.libs}
+              {...props}
+              loadBeats={this.loadBeats}
+              beats={this.state.beats}
+            />
+          )}
+        />
+        <RouteWithBreadcrumb
+          title="Activity Overview"
+          path="/overview/activity"
+          exact={true}
+          render={(props: any) => (
+            <ActivityPage {...this.props} libs={this.props.libs} {...props} />
+          )}
+        />
+        <RouteWithBreadcrumb
+          title="Tags List"
+          path="/overview/tags"
+          exact={true}
+          render={(props: any) => <TagsPage {...this.props} libs={this.props.libs} {...props} />}
+        />
       </PrimaryLayout>
     );
   }

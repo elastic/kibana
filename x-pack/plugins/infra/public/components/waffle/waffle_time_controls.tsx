@@ -38,7 +38,7 @@ export class WaffleTimeControls extends React.Component<WaffleTimeControlsProps>
     );
 
     return (
-      <EuiFormControlLayout append={liveStreamingButton}>
+      <EuiFormControlLayout append={liveStreamingButton} data-test-subj="waffleDatePicker">
         <EuiDatePicker
           className="euiFieldText--inGroup"
           dateFormat="L LTS"

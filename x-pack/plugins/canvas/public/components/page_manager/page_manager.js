@@ -15,6 +15,7 @@ import { PagePreview } from '../page_preview';
 
 class PageManagerUI extends React.PureComponent {
   static propTypes = {
+    isWriteable: PropTypes.bool.isRequired,
     pages: PropTypes.array.isRequired,
     workpadId: PropTypes.string.isRequired,
     addPage: PropTypes.func.isRequired,
@@ -103,11 +104,11 @@ class PageManagerUI extends React.PureComponent {
   };
 
   renderPage = (page, i) => {
-    const { selectedPage, workpadId, movePage, duplicatePage, intl } = this.props;
+    const { isWriteable, selectedPage, workpadId, movePage, duplicatePage, intl } = this.props;
     const pageNumber = i + 1;
 
     return (
-      <Draggable key={page.id} draggableId={page.id} index={i}>
+      <Draggable key={page.id} draggableId={page.id} index={i} isDragDisabled={!isWriteable}>
         {provided => (
           <div
             key={page.id}
@@ -140,6 +141,7 @@ class PageManagerUI extends React.PureComponent {
                   )}
                 >
                   <PagePreview
+                    isWriteable={isWriteable}
                     page={page}
                     height={100}
                     pageNumber={pageNumber}
@@ -158,7 +160,7 @@ class PageManagerUI extends React.PureComponent {
   };
 
   render() {
-    const { pages, addPage, deleteId, intl } = this.props;
+    const { pages, addPage, deleteId, isWriteable, intl } = this.props;
     const { showTrayPop } = this.state;
 
     return (
@@ -185,22 +187,24 @@ class PageManagerUI extends React.PureComponent {
               </Droppable>
             </DragDropContext>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              anchorClassName="canvasPageManager__addPageTip"
-              content={
-                <FormattedMessage
-                  id="xpack.canvas.pageManager.addPageButtonTooltip"
-                  defaultMessage="Add a new page to this workpad"
-                />
-              }
-              position="left"
-            >
-              <button onClick={addPage} className="canvasPageManager__addPage">
-                <EuiIcon color="ghost" type="plusInCircle" size="l" />
-              </button>
-            </EuiToolTip>
-          </EuiFlexItem>
+          {isWriteable && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                anchorClassName="canvasPageManager__addPageTip"
+                content={
+                  <FormattedMessage
+                    id="xpack.canvas.pageManager.addPageButtonTooltip"
+                    defaultMessage="Add a new page to this workpad"
+                  />
+                }
+                position="left"
+              >
+                <button onClick={addPage} className="canvasPageManager__addPage">
+                  <EuiIcon color="ghost" type="plusInCircle" size="l" />
+                </button>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <ConfirmModal
           isOpen={deleteId != null}
