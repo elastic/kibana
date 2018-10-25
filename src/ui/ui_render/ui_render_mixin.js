@@ -77,8 +77,7 @@ export function uiRenderMixin(kbnServer, server, config) {
             regularBundlePath,
             dllBundlePath,
             styleSheetPaths,
-          },
-          translations: await server.getUiTranslations()
+          }
         });
 
         const body = await bootstrap.getJsFile();

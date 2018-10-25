@@ -1,0 +1,8 @@
+{
+  "name": "custom_visualziations",
+  "version": "kibana",
+  "dependencies": {
+    "@elastic/eui": "^4.0.1",
+    "react": "^16.3.1"
+  }
+}

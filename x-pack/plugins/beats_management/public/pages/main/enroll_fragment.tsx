@@ -117,15 +117,15 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
-                      <h3>Select your beat type:</h3>
+                      <h3>Beat type:</h3>
                     </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSelect
                   value={this.state.beatType}
                   options={[
-                    { value: 'filebeat', label: 'Filebeat' },
-                    { value: 'metricbeat', label: 'Metricbeat' },
+                    { value: 'filebeat', text: 'Filebeat' },
+                    { value: 'metricbeat', text: 'Metricbeat' },
                   ]}
                   onChange={(e: any) => this.setState({ beatType: e.target.value })}
                   fullWidth={true}
@@ -140,7 +140,7 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
-                      <h3>Select your platform:</h3>
+                      <h3>Platform:</h3>
                     </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -149,17 +149,17 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                   options={[
                     {
                       value: `sudo ${this.state.beatType}`,
-                      label: 'DEB / RPM',
+                      text: 'DEB / RPM',
                     },
                     {
                       value: `PS C:\\Program Files\\${capitalize(this.state.beatType)}> ${
                         this.state.beatType
                       }.exe`,
-                      label: 'Windows',
+                      text: 'Windows',
                     },
                     {
                       value: `./${this.state.beatType}`,
-                      label: 'MacOS',
+                      text: 'MacOS',
                     },
                   ]}
                   onChange={(e: any) => this.setState({ command: e.target.value })}
@@ -175,7 +175,10 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                   <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="xs">
-                        <h3>Run the following command to enroll your beat</h3>
+                        <h3>
+                          On the host where your {capitalize(this.state.beatType)} is installed,
+                          run:
+                        </h3>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -200,7 +203,7 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                       <EuiFlexGroup gutterSize="s" alignItems="center">
                         <EuiFlexItem grow={false}>
                           <EuiTitle size="xs">
-                            <h3>Waiting for enroll command to be run...</h3>
+                            <h3>Waiting for {capitalize(this.state.beatType)} to enroll...</h3>
                           </EuiTitle>
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -214,8 +217,8 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
           </React.Fragment>
         )}
         {this.state.enrolledBeat && (
-          <EuiModalBody style={{ textAlign: 'center' }}>
-            A Beat was enrolled with the following data:
+          <EuiModalBody>
+            The Beat is now enrolled in central management:
             <br />
             <br />
             <br />

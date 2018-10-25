@@ -31,14 +31,16 @@ export function infra(kibana: any) {
         {
           description: 'Explore your infrastructure',
           icon: 'plugins/infra/images/infra_mono_white.svg',
+          euiIconType: 'infraApp',
           id: 'infra:home',
           order: 8000,
-          title: 'InfraOps',
+          title: 'Infra Ops',
           url: `/app/${APP_ID}#/home`,
         },
         {
           description: 'Explore your logs',
           icon: 'plugins/infra/images/logging_mono_white.svg',
+          euiIconType: 'loggingApp',
           id: 'infra:logs',
           order: 8001,
           title: 'Logs',

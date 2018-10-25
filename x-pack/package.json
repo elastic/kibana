@@ -7,6 +7,7 @@
   "scripts": {
     "preinstall": "node ../preinstall_check",
     "kbn": "node ../scripts/kbn",
+    "kbn:bootstrap": "gulp canvas:plugins:build",
     "start": "gulp dev",
     "build": "gulp build",
     "testonly": "gulp testonly",
@@ -21,7 +22,8 @@
     }
   },
   "resolutions": {
-    "**/@types/node": "8.10.21"
+    "**/@types/node": "8.10.21",
+    "@types/react": "16.3.14"
   },
   "devDependencies": {
     "@kbn/dev-utils": "link:../packages/kbn-dev-utils",
@@ -34,16 +36,13 @@
     "@types/d3-shape": "^1.2.2",
     "@types/d3-time": "^1.0.7",
     "@types/d3-time-format": "^2.1.0",
-    "@types/elasticsearch": "^5.0.22",
     "@types/expect.js": "^0.3.29",
     "@types/graphql": "^0.13.1",
     "@types/history": "^4.6.2",
     "@types/jsonwebtoken": "^7.2.7",
     "@types/mocha": "^5.2.5",
-    "@types/moment-timezone": "^0.5.8",
     "@types/pngjs": "^3.3.1",
     "@types/react-datepicker": "^1.1.5",
-    "@types/react-router-dom": "4.2.6",
     "@types/reduce-reducers": "^0.1.3",
     "abab": "^1.0.4",
     "ansi-colors": "^3.0.5",
@@ -73,7 +72,7 @@
     "graphql-codegen-introspection-template": "^0.10.5",
     "graphql-codegen-typescript-template": "^0.10.1",
     "gulp": "3.9.1",
-    "gulp-mocha": "2.2.0",
+    "gulp-mocha": "^6.0.0",
     "gulp-multi-process": "^1.3.1",
     "gulp-pegjs": "^0.1.0",
     "hapi": "14.2.0",
@@ -81,7 +80,7 @@
     "jest-cli": "^23.5.0",
     "jest-styled-components": "^6.1.1",
     "jsdom": "^12.0.0",
-    "mocha": "3.3.0",
+    "mocha": "^5.2.0",
     "mustache": "^2.3.0",
     "mutation-observer": "^1.0.3",
     "node-fetch": "^2.1.2",
@@ -108,7 +107,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "^4.0.2",
-    "@elastic/eui": "4.4.1",
+    "@elastic/eui": "4.5.1",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
@@ -142,6 +141,7 @@
     "concat-stream": "1.5.1",
     "cookie": "^0.3.1",
     "copy-to-clipboard": "^3.0.8",
+    "cronstrue": "^1.51.0",
     "d3": "3.5.6",
     "d3-scale": "1.0.6",
     "dataloader": "^1.4.0",
@@ -213,7 +213,7 @@
     "react-redux": "^5.0.7",
     "react-redux-request": "^1.5.6",
     "react-router-breadcrumbs-hoc": "1.1.2",
-    "react-router-dom": "^4.2.2",
+    "react-router-dom": "^4.3.1",
     "react-select": "^1.2.1",
     "react-shortcuts": "^2.0.0",
     "react-sticky": "^6.0.1",
