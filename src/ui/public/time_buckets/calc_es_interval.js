@@ -18,6 +18,7 @@
  */
 
 import dateMath from '@kbn/datemath';
+import { parseEsInterval } from 'ui/utils/parse_es_interval';
 
 const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('M');
@@ -30,7 +31,7 @@ const largeMax = unitsDesc.indexOf('M');
  * @param  {moment.duration} duration
  * @return {object}
  */
-export function calcEsInterval(duration) {
+export function convertDurationToNormalizedEsInterval(duration) {
   for (let i = 0; i < unitsDesc.length; i++) {
     const unit = unitsDesc[i];
     const val = duration.as(unit);
@@ -57,5 +58,14 @@ export function calcEsInterval(duration) {
     value: ms,
     unit: 'ms',
     expression: ms + 'ms'
+  };
+}
+
+export function convertIntervalToEsInterval(interval) {
+  const { value, unit } = parseEsInterval(interval);
+  return {
+    value,
+    unit,
+    expression: interval,
   };
 }

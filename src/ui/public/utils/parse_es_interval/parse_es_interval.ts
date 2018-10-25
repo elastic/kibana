@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import dateMath from '@kbn/datemath';
+
+import { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
+import { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';
 
 const ES_INTERVAL_STRING_REGEX = new RegExp(
   '^([1-9][0-9]*)\\s*(' + dateMath.units.join('|') + ')$'
@@ -47,7 +51,7 @@ export function parseEsInterval(interval: string): { value: number; unit: string
     .match(ES_INTERVAL_STRING_REGEX);
 
   if (!matches) {
-    throw Error(`Invalid interval format: ${interval}`);
+    throw new InvalidEsIntervalFormatError(interval);
   }
 
   const value = matches && parseFloat(matches[1]);
@@ -55,7 +59,7 @@ export function parseEsInterval(interval: string): { value: number; unit: string
   const type = unit && dateMath.unitsMap[unit].type;
 
   if (type === 'calendar' && value !== 1) {
-    throw Error(`Invalid calendar interval: ${interval}, value must be 1`);
+    throw new InvalidEsCalendarIntervalError(interval, value, unit, type);
   }
 
   return {
