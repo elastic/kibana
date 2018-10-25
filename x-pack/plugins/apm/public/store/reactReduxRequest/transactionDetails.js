@@ -18,7 +18,7 @@ export function getTransactionDetails(state) {
 }
 
 export function TransactionDetailsRequest({ urlParams, render }) {
-  const { serviceName, start, end, transactionId, kuery } = urlParams;
+  const { serviceName, start, end, transactionId, traceId, kuery } = urlParams;
 
   if (!(serviceName && start && end && transactionId)) {
     return null;
@@ -29,7 +29,7 @@ export function TransactionDetailsRequest({ urlParams, render }) {
       id={ID}
       fn={loadTransaction}
       selector={getTransactionDetails}
-      args={[{ serviceName, start, end, transactionId, kuery }]}
+      args={[{ serviceName, start, end, transactionId, traceId, kuery }]}
       render={render}
     />
   );

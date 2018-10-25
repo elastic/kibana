@@ -31,7 +31,7 @@ import {
   EuiLink
 } from '@elastic/eui';
 
-import { ELASTIC_DOCS } from '../../../../utils/documentation';
+import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
 
 import { KibanaLink } from '../../../../utils/url';
 import { createErrorGroupWatch } from './createErrorGroupWatch';
@@ -226,10 +226,7 @@ export default class WatcherFlyout extends Component {
           This form will assist in creating a Watch that can notify you of error
           occurrences from this service. To learn more about Watcher, please
           read our{' '}
-          <EuiLink
-            target="_blank"
-            href={_.get(ELASTIC_DOCS, 'watcher-get-started.url')}
-          >
+          <EuiLink target="_blank" href={XPACK_DOCS.xpackWatcher}>
             documentation
           </EuiLink>
           .
@@ -344,10 +341,7 @@ export default class WatcherFlyout extends Component {
               helpText={
                 <span>
                   If you have not configured email, please see the{' '}
-                  <EuiLink
-                    target="_blank"
-                    href={_.get(ELASTIC_DOCS, 'x-pack-emails.url')}
-                  >
+                  <EuiLink target="_blank" href={XPACK_DOCS.xpackEmails}>
                     documentation
                   </EuiLink>
                   .

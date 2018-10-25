@@ -13,7 +13,7 @@ import { WorkpadHeader } from '../../../components/workpad_header';
 
 export class WorkpadApp extends React.PureComponent {
   static propTypes = {
-    editing: PropTypes.bool,
+    isWriteable: PropTypes.bool.isRequired,
     deselectElement: PropTypes.func,
     initializeWorkpad: PropTypes.func.isRequired,
   };
@@ -23,7 +23,7 @@ export class WorkpadApp extends React.PureComponent {
   }
 
   render() {
-    const { editing, deselectElement } = this.props;
+    const { isWriteable, deselectElement } = this.props;
 
     return (
       <div className="canvasLayout">
@@ -42,18 +42,16 @@ export class WorkpadApp extends React.PureComponent {
               </div>
             </div>
 
-            {editing && (
+            {isWriteable && (
               <div className="canvasLayout__sidebar hide-for-sharing">
                 <Sidebar />
               </div>
             )}
           </div>
 
-          {editing ? (
-            <div className="canvasLayout__footer hide-for-sharing">
-              <Toolbar />
-            </div>
-          ) : null}
+          <div className="canvasLayout__footer hide-for-sharing">
+            <Toolbar />
+          </div>
         </div>
       </div>
     );
