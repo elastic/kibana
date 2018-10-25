@@ -84,8 +84,8 @@ function createFields(results) {
         return field;
       } else {
         // field is not in the field stats
-        // this could be a text field or a field which the endpoint has
-        // not been able to work out any information for
+        // this could be the message field for a semi-structured log file or a
+        // field which the endpoint has not been able to work out any information for
         const type = (mappings[name] && mappings[name].type === ML_JOB_FIELD_TYPES.TEXT) ?
           ML_JOB_FIELD_TYPES.TEXT : ML_JOB_FIELD_TYPES.UNKNOWN;
 
