@@ -3,8 +3,10 @@
 exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
 <div>
   <Header
+    indexPatternName="name"
     isIncludingSystemIndices={false}
     onChangeIncludingSystemIndices={[Function]}
+    showSystemIndices={false}
   />
   <LoadingState />
 </div>
@@ -13,8 +15,10 @@ exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
 exports[`CreateIndexPatternWizard renders index pattern step when there are indices 1`] = `
 <div>
   <Header
+    indexPatternName="name"
     isIncludingSystemIndices={false}
     onChangeIncludingSystemIndices={[Function]}
+    showSystemIndices={false}
   />
   <StepIndexPattern
     allIndices={
@@ -26,6 +30,16 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
     }
     esService={Object {}}
     goToNextStep={[Function]}
+    indexPatternCreationType={
+      Object {
+        "checkIndicesForErrors": [Function],
+        "getIndexPatternMappings": [Function],
+        "getIndexPatternName": [Function],
+        "getIndexPatternType": [Function],
+        "getShowSystemIndices": [Function],
+        "renderPrompt": [Function],
+      }
+    }
     initialQuery=""
     isIncludingSystemIndices={false}
     savedObjectsClient={Object {}}
@@ -36,8 +50,10 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
 exports[`CreateIndexPatternWizard renders the empty state when there are no indices 1`] = `
 <div>
   <Header
+    indexPatternName="name"
     isIncludingSystemIndices={false}
     onChangeIncludingSystemIndices={[Function]}
+    showSystemIndices={false}
   />
   <EmptyState
     onRefresh={[Function]}
@@ -48,13 +64,25 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
 exports[`CreateIndexPatternWizard renders time field step when step is set to 2 1`] = `
 <div>
   <Header
+    indexPatternName="name"
     isIncludingSystemIndices={false}
     onChangeIncludingSystemIndices={[Function]}
+    showSystemIndices={false}
   />
   <StepTimeField
     createIndexPattern={[Function]}
     goToPreviousStep={[Function]}
     indexPattern=""
+    indexPatternCreationType={
+      Object {
+        "checkIndicesForErrors": [Function],
+        "getIndexPatternMappings": [Function],
+        "getIndexPatternName": [Function],
+        "getIndexPatternType": [Function],
+        "getShowSystemIndices": [Function],
+        "renderPrompt": [Function],
+      }
+    }
     indexPatternsService={Object {}}
   />
 </div>
@@ -80,8 +108,10 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
 exports[`CreateIndexPatternWizard shows system indices even if there are no other indices if the include system indices is toggled 1`] = `
 <div>
   <Header
+    indexPatternName="name"
     isIncludingSystemIndices={true}
     onChangeIncludingSystemIndices={[Function]}
+    showSystemIndices={false}
   />
   <StepIndexPattern
     allIndices={
@@ -93,6 +123,16 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
     }
     esService={Object {}}
     goToNextStep={[Function]}
+    indexPatternCreationType={
+      Object {
+        "checkIndicesForErrors": [Function],
+        "getIndexPatternMappings": [Function],
+        "getIndexPatternName": [Function],
+        "getIndexPatternType": [Function],
+        "getShowSystemIndices": [Function],
+        "renderPrompt": [Function],
+      }
+    }
     initialQuery=""
     isIncludingSystemIndices={true}
     savedObjectsClient={Object {}}

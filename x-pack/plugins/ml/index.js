@@ -44,6 +44,12 @@ export const ml = (kibana) => {
       styleSheetPaths: `${__dirname}/public/index.scss`,
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
       home: ['plugins/ml/register_feature'],
+      injectDefaultVars(server) {
+        const config = server.config();
+        return {
+          mlEnabled: config.get('xpack.ml.enabled'),
+        };
+      },
     },
 
 

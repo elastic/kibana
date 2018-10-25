@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { ensureMinimumTime, getIndices, getRemoteClusters } from './lib';
+
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
@@ -27,6 +27,11 @@ import { LoadingState } from './components/loading_state';
 import { EmptyState } from './components/empty_state';
 
 import { MAX_SEARCH_SIZE } from './constants';
+import {
+  ensureMinimumTime,
+  getIndices,
+  getRemoteClusters
+} from './lib';
 
 export class CreateIndexPatternWizard extends Component {
   static propTypes = {
@@ -35,6 +40,7 @@ export class CreateIndexPatternWizard extends Component {
       es: PropTypes.object.isRequired,
       indexPatterns: PropTypes.object.isRequired,
       savedObjectsClient: PropTypes.object.isRequired,
+      indexPatternCreationType: PropTypes.object.isRequired,
       config: PropTypes.object.isRequired,
       changeUrl: PropTypes.func.isRequired,
     }).isRequired,
@@ -42,6 +48,7 @@ export class CreateIndexPatternWizard extends Component {
 
   constructor(props) {
     super(props);
+    this.indexPatternCreationType = this.props.services.indexPatternCreationType;
     this.state = {
       step: 1,
       indexPattern: '',
@@ -66,7 +73,7 @@ export class CreateIndexPatternWizard extends Component {
     });
 
     const [allIndices, remoteClusters] = await ensureMinimumTime([
-      getIndices(services.es, `*`, MAX_SEARCH_SIZE),
+      getIndices(services.es, this.indexPatternCreationType,`*`, MAX_SEARCH_SIZE),
       getRemoteClusters(services.$http)
     ]);
 
@@ -87,6 +94,7 @@ export class CreateIndexPatternWizard extends Component {
       id: indexPatternId,
       title: indexPattern,
       timeFieldName,
+      ...this.indexPatternCreationType.getIndexPatternMappings()
     });
 
     const createdId = await emptyPattern.create();
@@ -118,8 +126,11 @@ export class CreateIndexPatternWizard extends Component {
 
     return (
       <Header
+        prompt={this.indexPatternCreationType.renderPrompt()}
+        showSystemIndices={this.indexPatternCreationType.getShowSystemIndices()}
         isIncludingSystemIndices={isIncludingSystemIndices}
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
+        indexPatternName={this.indexPatternCreationType.getIndexPatternName()}
       />
     );
   }
@@ -154,6 +165,7 @@ export class CreateIndexPatternWizard extends Component {
           isIncludingSystemIndices={isIncludingSystemIndices}
           esService={services.es}
           savedObjectsClient={services.savedObjectsClient}
+          indexPatternCreationType={this.indexPatternCreationType}
           goToNextStep={this.goToTimeFieldStep}
         />
       );
@@ -167,6 +179,7 @@ export class CreateIndexPatternWizard extends Component {
           indexPatternsService={services.indexPatterns}
           goToPreviousStep={this.goToIndexPatternStep}
           createIndexPattern={this.createIndexPattern}
+          indexPatternCreationType={this.indexPatternCreationType}
         />
       );
     }

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
+import { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';
 import { parseEsInterval } from './parse_es_interval';
 
 describe('parseEsInterval', () => {
@@ -39,16 +41,29 @@ describe('parseEsInterval', () => {
     expect(parseEsInterval('7d')).toEqual({ value: 7, unit: 'd', type: 'fixed' });
   });
 
-  it('should throw an error for intervals containing calendar unit and multiple value', () => {
-    expect(() => parseEsInterval('4w')).toThrowError();
-    expect(() => parseEsInterval('12M')).toThrowError();
-    expect(() => parseEsInterval('10y')).toThrowError();
+  it('should throw a InvalidEsCalendarIntervalError for intervals containing calendar unit and multiple value', () => {
+    const intervals = ['4w', '12M', '10y'];
+    expect.assertions(intervals.length);
+
+    intervals.forEach(interval => {
+      try {
+        parseEsInterval(interval);
+      } catch (error) {
+        expect(error instanceof InvalidEsCalendarIntervalError).toBe(true);
+      }
+    });
   });
 
-  it('should throw an error for invalid interval formats', () => {
-    expect(() => parseEsInterval('1')).toThrowError();
-    expect(() => parseEsInterval('h')).toThrowError();
-    expect(() => parseEsInterval('0m')).toThrowError();
-    expect(() => parseEsInterval('0.5h')).toThrowError();
+  it('should throw a InvalidEsIntervalFormatError for invalid interval formats', () => {
+    const intervals = ['1', 'h', '0m', '0.5h'];
+    expect.assertions(intervals.length);
+
+    intervals.forEach(interval => {
+      try {
+        parseEsInterval(interval);
+      } catch (error) {
+        expect(error instanceof InvalidEsIntervalFormatError).toBe(true);
+      }
+    });
   });
 });

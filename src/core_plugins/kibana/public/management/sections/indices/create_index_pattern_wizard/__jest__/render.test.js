@@ -52,7 +52,8 @@ describe('CreateIndexPatternWizardRender', () => {
         indexPatterns: {},
         savedObjectsClient: {},
         config: {},
-        changeUrl: () => { },
+        changeUrl: () => {},
+        indexPatternCreationType: {},
       }
     );
 

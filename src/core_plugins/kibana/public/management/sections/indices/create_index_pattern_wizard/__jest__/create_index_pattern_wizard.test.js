@@ -21,7 +21,14 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { CreateIndexPatternWizard } from '../create_index_pattern_wizard';
-
+const mockIndexPatternCreationType = {
+  getIndexPatternType: () => 'default',
+  getIndexPatternName: () => 'name',
+  checkIndicesForErrors: () => false,
+  getShowSystemIndices: () => false,
+  renderPrompt: () => {},
+  getIndexPatternMappings: () => { return {}; }
+};
 jest.mock('../components/step_index_pattern', () => ({ StepIndexPattern: 'StepIndexPattern' }));
 jest.mock('../components/step_time_field', () => ({ StepTimeField: 'StepTimeField' }));
 jest.mock('../components/header', () => ({ Header: 'Header' }));
@@ -45,8 +52,9 @@ const services = {
   indexPatterns: {},
   savedObjectsClient: {},
   config: {},
-  changeUrl: () => { },
-  scopeApply: () => { },
+  changeUrl: () => {},
+  scopeApply: () => {},
+  indexPatternCreationType: mockIndexPatternCreationType,
 };
 
 describe('CreateIndexPatternWizard', () => {
@@ -177,6 +185,7 @@ describe('CreateIndexPatternWizard', () => {
             cache: { clear }
           },
           changeUrl,
+          indexPatternCreationType: mockIndexPatternCreationType
         }}
       />
     );

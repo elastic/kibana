@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { HashRouter, Redirect, Route } from 'react-router-dom';
+import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 
 import { Header } from './components/layouts/header';
 import { BreadcrumbConsumer, RouteWithBreadcrumb } from './components/route_with_breadcrumb';
@@ -36,60 +36,47 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
             />
           )}
         </BreadcrumbConsumer>
-        <Route
-          path="/"
-          exact={true}
-          render={() => <Redirect from="/" exact={true} to="/overview/beats" />}
-        />
-        <Route path="/overview" render={(props: any) => <MainPages {...props} libs={libs} />} />
-        <RouteWithBreadcrumb
-          title={params => {
-            return `Beats: ${params.beatId}`;
-          }}
-          parentBreadcrumbs={[
-            {
-              text: 'Beats List',
-              href: '#/management/beats_management/overview/beats',
-            },
-          ]}
-          path="/beat/:beatId"
-          render={(props: any) => <BeatDetailsPage {...props} libs={libs} />}
-        />
-        <RouteWithBreadcrumb
-          title={params => {
-            if (params.action === 'create') {
-              return 'Create Tag';
-            }
-            return `Tag: ${params.tagid}`;
-          }}
-          parentBreadcrumbs={[
-            {
-              text: 'Tags List',
-              href: '#/management/beats_management/overview/tags',
-            },
-          ]}
-          path="/tag/:action/:tagid?"
-          render={(props: any) => <TagPage {...props} libs={libs} />}
-        />
-
-        {!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
-          !libs.framework.getCurrentUser().roles.includes('superuser') && (
-            <Route render={() => <NoAccessPage />} />
-          )}
-        <Route
-          path="/"
-          exact={true}
-          render={() => <Redirect from="/" exact={true} to="/overview/beats" />}
-        />
-        <Route path="/overview" render={(props: any) => <MainPages {...props} libs={libs} />} />
-        <Route
-          path="/beat/:beatId"
-          render={(props: any) => <BeatDetailsPage {...props} libs={libs} />}
-        />
-        <Route
-          path="/tag/:action/:tagid?"
-          render={(props: any) => <TagPage {...props} libs={libs} />}
-        />
+        <Switch>
+          {!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
+            !libs.framework.getCurrentUser().roles.includes('superuser') && (
+              <Route render={() => <NoAccessPage />} />
+            )}
+          <Route
+            path="/"
+            exact={true}
+            render={() => <Redirect from="/" exact={true} to="/overview/beats" />}
+          />
+          <Route path="/overview" render={(props: any) => <MainPages {...props} libs={libs} />} />
+          <RouteWithBreadcrumb
+            title={params => {
+              return `Beats: ${params.beatId}`;
+            }}
+            parentBreadcrumbs={[
+              {
+                text: 'Beats List',
+                href: '#/management/beats_management/overview/beats',
+              },
+            ]}
+            path="/beat/:beatId"
+            render={(props: any) => <BeatDetailsPage {...props} libs={libs} />}
+          />
+          <RouteWithBreadcrumb
+            title={params => {
+              if (params.action === 'create') {
+                return 'Create Tag';
+              }
+              return `Tag: ${params.tagid}`;
+            }}
+            parentBreadcrumbs={[
+              {
+                text: 'Tags List',
+                href: '#/management/beats_management/overview/tags',
+              },
+            ]}
+            path="/tag/:action/:tagid?"
+            render={(props: any) => <TagPage {...props} libs={libs} />}
+          />
+        </Switch>
       </div>
     </HashRouter>
   );

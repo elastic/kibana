@@ -25,6 +25,10 @@ export function TableProvider({ getService }) {
 
     async getDataFromTestSubj(testSubj) {
       const table = await testSubjects.find(testSubj);
+      return await this.getDataFromElement(table);
+    }
+
+    async getDataFromElement(table) {
       // Convert the data into a nested array format:
       // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
       const rows = await table.findAllByTagName('tr');

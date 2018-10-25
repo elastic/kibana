@@ -33,7 +33,11 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => { },
 }));
 
-const noop = () => { };
+const mockIndexPatternCreationType = {
+  getIndexPatternType: () => 'default',
+  getIndexPatternName: () => 'name'
+};
+const noop = () => {};
 const indexPatternsService = {
   fieldsFetcher: {
     fetchForWildcard: noop,
@@ -48,6 +52,7 @@ describe('StepTimeField', () => {
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={noop}
+        indexPatternCreationType={mockIndexPatternCreationType}
       />
     );
 
@@ -61,6 +66,7 @@ describe('StepTimeField', () => {
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={noop}
+        indexPatternCreationType={mockIndexPatternCreationType}
       />
     );
 
@@ -81,6 +87,7 @@ describe('StepTimeField', () => {
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={noop}
+        indexPatternCreationType={mockIndexPatternCreationType}
       />
     );
 
@@ -103,6 +110,7 @@ describe('StepTimeField', () => {
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={noop}
+        indexPatternCreationType={mockIndexPatternCreationType}
       />
     );
 
@@ -131,6 +139,7 @@ describe('StepTimeField', () => {
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={noop}
+        indexPatternCreationType={mockIndexPatternCreationType}
       />
     );
 
@@ -154,6 +163,7 @@ describe('StepTimeField', () => {
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={noop}
+        indexPatternCreationType={mockIndexPatternCreationType}
       />
     );
 
@@ -177,6 +187,7 @@ describe('StepTimeField', () => {
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={noop}
+        indexPatternCreationType={mockIndexPatternCreationType}
       />
     );
 
@@ -192,6 +203,7 @@ describe('StepTimeField', () => {
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={noop}
+        indexPatternCreationType={mockIndexPatternCreationType}
       />
     );
 
@@ -210,6 +222,7 @@ describe('StepTimeField', () => {
         indexPatternsService={indexPatternsService}
         goToPreviousStep={noop}
         createIndexPattern={noop}
+        indexPatternCreationType={mockIndexPatternCreationType}
       />
     );
 

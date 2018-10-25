@@ -308,6 +308,7 @@
     "has-ansi": "^3.0.0",
     "husky": "^0.14.3",
     "image-diff": "1.6.0",
+    "intl-messageformat-parser": "^1.4.0",
     "istanbul-instrumenter-loader": "3.0.0",
     "jest": "^23.5.0",
     "jest-cli": "^23.5.0",
