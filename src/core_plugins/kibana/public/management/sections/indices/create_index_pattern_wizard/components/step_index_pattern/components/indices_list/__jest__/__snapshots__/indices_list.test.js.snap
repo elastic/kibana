@@ -15,6 +15,10 @@ exports[`IndicesList should change pages 1`] = `
         >
           kibana
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
       <EuiTableRow
         key="1"
@@ -25,6 +29,10 @@ exports[`IndicesList should change pages 1`] = `
         >
           es
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
     </EuiTableBody>
   </EuiTable>
@@ -134,6 +142,10 @@ exports[`IndicesList should change per page 1`] = `
         >
           kibana
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
     </EuiTableBody>
   </EuiTable>
@@ -258,6 +270,10 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
             bana
           </span>
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
       <EuiTableRow
         key="1"
@@ -268,6 +284,10 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
         >
           es
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
     </EuiTableBody>
   </EuiTable>
@@ -377,6 +397,10 @@ exports[`IndicesList should render normally 1`] = `
         >
           kibana
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
       <EuiTableRow
         key="1"
@@ -387,6 +411,10 @@ exports[`IndicesList should render normally 1`] = `
         >
           es
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
     </EuiTableBody>
   </EuiTable>
@@ -496,6 +524,10 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         >
           kibana
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
       <EuiTableRow
         key="1"
@@ -506,6 +538,10 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         >
           es
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
       <EuiTableRow
         key="2"
@@ -516,6 +552,10 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         >
           kibana
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
       <EuiTableRow
         key="3"
@@ -526,6 +566,10 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         >
           es
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
       <EuiTableRow
         key="4"
@@ -536,6 +580,10 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         >
           kibana
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
       <EuiTableRow
         key="5"
@@ -546,6 +594,10 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         >
           es
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
       <EuiTableRow
         key="6"
@@ -556,6 +608,10 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         >
           kibana
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
       <EuiTableRow
         key="7"
@@ -566,6 +622,10 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         >
           es
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
       <EuiTableRow
         key="8"
@@ -576,6 +636,10 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         >
           kibana
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
       <EuiTableRow
         key="9"
@@ -586,6 +650,10 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         >
           es
         </EuiTableRowCell>
+        <EuiTableRowCell
+          align="left"
+          textOnly={true}
+        />
       </EuiTableRow>
     </EuiTableBody>
   </EuiTable>
