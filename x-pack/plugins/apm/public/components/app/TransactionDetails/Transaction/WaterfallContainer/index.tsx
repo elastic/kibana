@@ -13,6 +13,7 @@ import {
 } from '../../../../../../common/constants';
 import { Transaction } from '../../../../../../typings/Transaction';
 
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { RRRRender } from 'react-redux-request';
 import { WaterfallV1Request } from 'x-pack/plugins/apm/public/store/reactReduxRequest/waterfallV1';
 import { WaterfallV2Request } from 'x-pack/plugins/apm/public/store/reactReduxRequest/waterfallV2';
@@ -80,7 +81,19 @@ export function WaterfallContainer({
 
         return (
           <div>
-            <ServiceLegends serviceColors={serviceColors} />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <ServiceLegends serviceColors={serviceColors} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content="Distributed tracing is now supported as a beta feature of the APM UI timeline visualisation."
+                  position="left"
+                >
+                  <EuiBadge color="hollow">Beta</EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <Waterfall
               agentMarks={agentMarks}
               location={location}

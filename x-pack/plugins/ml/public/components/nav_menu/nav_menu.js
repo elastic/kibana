@@ -51,7 +51,7 @@ module.directive('mlNavMenu', function (breadcrumbState, config) {
         population: { label: 'Population job', url: '' },
         advanced: { label: 'Advanced Job Configuration', url: '' },
         datavisualizer: { label: 'Data Visualizer', url: '' },
-        filedatavisualizer: { label: 'File Data Visualizer', url: '' },
+        filedatavisualizer: { label: 'File Data Visualizer (Experimental)', url: '' },
         explorer: { label: 'Anomaly Explorer', url: '#/explorer' },
         timeseriesexplorer: { label: 'Single Metric Viewer', url: '#/timeseriesexplorer' },
         settings: { label: 'Settings', url: '#/settings' },
