@@ -40,7 +40,7 @@ import { ErrableFormRow } from './form_errors';
 
 export class EditPolicy extends Component {
   static propTypes = {
-    selectedPolicy: PropTypes.string.isRequired,
+    selectedPolicy: PropTypes.object.isRequired,
     errors: PropTypes.object.isRequired,
   };
 
@@ -214,11 +214,11 @@ export class EditPolicy extends Component {
                 isShowingErrors={isShowingErrors && hasErrors(errors[PHASE_DELETE])}
               />
               <EuiHorizontalRule className="ilmHrule" />
-              <EuiButtonEmpty iconSide="left" iconType="sortLeft" onClick={this.backToPolicyList}>
-                Back
+              <EuiButtonEmpty onClick={this.backToPolicyList}>
+                Cancel
               </EuiButtonEmpty>
               &nbsp;&nbsp;
-              <EuiButton fill iconSide="right" iconType="sortRight" onClick={this.submit}>
+              <EuiButton fill onClick={this.submit}>
                 Save your policy
               </EuiButton>
               {this.state.isShowingNodeDetailsFlyout ? (
