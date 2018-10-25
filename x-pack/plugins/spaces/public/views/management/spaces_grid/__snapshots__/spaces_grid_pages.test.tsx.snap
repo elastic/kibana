@@ -2,7 +2,7 @@
 
 exports[`SpacesGridPage renders as expected 1`] = `
 <EuiPage
-  className="spacesGridPage"
+  className="spcGridPage"
   restrictWidth={true}
 >
   <EuiPageBody

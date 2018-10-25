@@ -16,9 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register((i18n) => {
+import {
+  FeatureCatalogueRegistryProvider,
+  FeatureCatalogueCategory,
+} from 'ui/registry/feature_catalogue';
+
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'timelion',
     title: 'Timelion',
@@ -28,7 +32,7 @@ FeatureCatalogueRegistryProvider.register((i18n) => {
     }),
     icon: 'timelionApp',
     path: '/app/timelion',
-    showOnHomePage: true,
-    category: FeatureCatalogueCategory.DATA
+    showOnHomePage: false,
+    category: FeatureCatalogueCategory.DATA,
   };
 });

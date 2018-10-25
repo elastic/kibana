@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Storage } from 'ui/storage';
 import { connect } from 'react-redux';
 import {
   compose,
@@ -15,14 +16,19 @@ import {
   renderComponent,
 } from 'recompose';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
+import { getFunctionDefinitions } from '../../state/selectors/app';
 import { setExpression, flushContext } from '../../state/actions/elements';
 import { fromExpression } from '../../../common/lib/ast';
+import { getWindow } from '../../lib/get_window';
 import { ElementNotSelected } from './element_not_selected';
 import { Expression as Component } from './expression';
+
+const storage = new Storage(getWindow().localStorage);
 
 const mapStateToProps = state => ({
   pageId: getSelectedPage(state),
   element: getSelectedElement(state),
+  functionDefinitions: getFunctionDefinitions(state),
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -71,7 +77,15 @@ export const Expression = compose(
     expression,
     dirty: false,
   })),
+  withState('isAutocompleteEnabled', 'setIsAutocompleteEnabled', () => {
+    const setting = storage.get('kibana.canvas.isAutocompleteEnabled');
+    return setting === null ? true : setting;
+  }),
   withHandlers({
+    toggleAutocompleteEnabled: ({ isAutocompleteEnabled, setIsAutocompleteEnabled }) => () => {
+      storage.set('kibana.canvas.isAutocompleteEnabled', !isAutocompleteEnabled);
+      setIsAutocompleteEnabled(!isAutocompleteEnabled);
+    },
     updateValue: ({ setFormState }) => expression => {
       setFormState({
         expression,

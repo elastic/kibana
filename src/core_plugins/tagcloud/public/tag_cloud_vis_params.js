@@ -31,7 +31,7 @@ uiModules.get('kibana/table_vis')
       template: tagCloudVisParamsTemplate,
       link: function ($scope, $element) {
         const sliderContainer = $element[0];
-        const slider = sliderContainer.querySelector('.tag-cloud-fontsize-slider');
+        const slider = sliderContainer.querySelector('.tgcFontSizeSlider');
         $scope.config = $scope.vis.type.editorConfig;
         noUiSlider.create(slider, {
           start: [$scope.editorState.params.minFontSize, $scope.editorState.params.maxFontSize],
