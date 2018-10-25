@@ -113,6 +113,15 @@ app.controller('timelion', function (
   const defaultExpression = '.es(*)';
   const savedSheet = $route.current.locals.savedSheet;
 
+  $scope.translations = {
+    sheetOptionsColumnsHelpText: i18n('timelion.topNavMenu.options.columnsCountHelpText', {
+      defaultMessage: 'Column count must divide evenly into 12',
+    }),
+    sheetOptionsRowsHelpText: i18n('timelion.topNavMenu.options.rowsCountHelpText', {
+      defaultMessage: 'This is a target based on the current window height',
+    }),
+  };
+
   $scope.topNavMenu = [{
     key: 'new',
     description: i18n('timelion.topNavMenu.newDescription', {

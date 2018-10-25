@@ -9,22 +9,21 @@
       <p
         i18n-id="timelion.help.welcome.content.paragraph1"
         i18n-default-message="Timelion is the clawing, gnashing, zebra killing, pluggable time
-                              series interface for {openEmTag}everything{closeEmTag}. If your datastore can
+                              series interface for {emphasizedEverything}. If your datastore can
                               produce a time series, then you have all of the awesome power of
                               Timelion at your disposal. Timelion lets you compare, combine, and
                               combobulate datasets across multiple datasources with one
                               easy-to-master expression syntax. This tutorial focuses on
                               Elasticsearch, but you'll quickly discover that what you learn here
                               applies to any datasource Timelion supports."
-        i18n-values="{ openEmTag: '<em>', closeEmTag: '</em>' }"
+        i18n-values="{ emphasizedEverything: '<em>' + translations.emphasizedEverythingText + '</em>' }"
       ></p>
       <p
         i18n-id="timelion.help.welcome.content.paragraph2"
-        i18n-default-message="Ready to get started? Click {openStrongTag}Next{closeStrongTag}.
+        i18n-default-message="Ready to get started? Click {strongNext}.
                               Want to skip the tutorial and view the docs? {functionReferenceLink}."
         i18n-values="{
-          openStrongTag: '<strong>',
-          closeStrongTag: '</strong>',
+          strongNext: '<strong>' + translations.strongNextText + '</strong>',
           functionReferenceLink: '<a ng-click=&quot;setPage(0)&quot;>' + translations.welcomeFunctionReferenceLinkText + '</a>',
         }"
       ></p>
@@ -59,12 +58,10 @@
           i18n-id="timelion.help.configuration.notValid.paragraph1"
           i18n-default-message="If you're using Logstash, you don't need to configure anything to
                                 start exploring your log data with Timelion. To search other
-                                indices, go to {openStrongTag}Management / Kibana / Advanced Settings
-                                {closeStrongTag} and configure the {esDefaultIndex}
+                                indices, go to {advancedSettingsPath} and configure the {esDefaultIndex}
                                 and {esTimefield} settings to match your indices."
           i18n-values="{
-            openStrongTag: '<strong>',
-            closeStrongTag: '</strong>',
+            advancedSettingsPath: '<strong>' + translations.notValidAdvancedSettingsPath + '</strong>',
             esDefaultIndex: '<code>timelion:es.default_index</code>',
             esTimefield: '<code>timelion:es.timefield</code>',
           }"
@@ -143,12 +140,11 @@
                                     If Timelion thinks your combination of time range and interval
                                     will produce too many data points, it throws an error.
                                     You can adjust that limit by configuring {maxBuckets} in
-                                    {openStrongTag}Management/Kibana/Advanced Settings{closeStrongTag}."
+                                    {advancedSettingsPath}."
               i18n-values="{
                 interval: '<code>' + state.interval + '</code>',
                 maxBuckets: '<code>timelion:max_buckets</code>',
-                openStrongTag: '<strong>',
-                closeStrongTag: '</strong>',
+                advancedSettingsPath: '<strong>' + translations.validAdvancedSettingsPath + '</strong>',
                 intervalIsAutoMessage: '<span ng-show=&quot;state.interval == \'auto\'&quot;><strong>' + translations.intervalIsAutoMessage + '</strong></span>',
                 intervalIsNotAutoMessage: '<span ng-show=&quot;state.interval != \'auto\'&quot;>' + translations.intervalIsNotAutoMessage + '</span>',
               }"
@@ -211,16 +207,14 @@
       ></p>
       <p
         i18n-id="timelion.help.querying.paragraph2"
-        i18n-default-message="This says {openEmTag}hey Elasticsearch, find everything in my default
-                              index{closeEmTag}. If you want to find a subset, you could enter something
+        i18n-default-message="This says {esAsteriskQueryDescription}. If you want to find a subset, you could enter something
                               like {htmlQuery} to count events that match {html}, or {bobQuery}
                               to find events that contain {bob} in the {user} field and have a {bytes}
                               field that is greater than 100. Note that this query is enclosed in single
                               quotes&mdash;that's because it contains spaces. You can enter any
                               {luceneQueryLink} as the first argument to the {esQuery} function."
         i18n-values="{
-          openEmTag: '<em>',
-          closeEmTag: '</em>',
+          esAsteriskQueryDescription: '<em>' + translations.esAsteriskQueryDescription + '</em>',
           html: '<em>html</em>',
           htmlQuery: '<code>.es(html)</code>',
           bobQuery: '<code>.es(\'user:bob AND bytes:>100\')</code>',
@@ -248,13 +242,12 @@
                               For example, {esEmptyQuery} and {esStarQuery} do the same thing.
                               Arguments also have names, so you don't have to specify them in a specific order.
                               For example, you can enter {esLogstashQuery} to tell the Elasticsearch datasource
-                              {openEmTag}use * as the q (query) for the logstash-* index{closeEmTag}."
+                              {esIndexQueryDescription}."
         i18n-values="{
           esEmptyQuery: '<code>.es()</code>',
           esStarQuery: '<code>.es(*)</code>',
           esLogstashQuery: '<code>.es(index=\'logstash-*\', q=\'*\')</code>',
-          openEmTag: '<em>',
-          closeEmTag: '</em>',
+          esIndexQueryDescription: '<em>' + translations.esIndexQueryDescription + '</em>',
         }"
       ></p>
       <h4
@@ -327,13 +320,12 @@
       ></p>
       <p
         i18n-id="timelion.help.expressions.paragraph3"
-        i18n-default-message="We're going to experiment, so click {openStrongTag}Add{closeStrongTag}
-                              in the Kibana toolbar to add another chart or three. Then, select a chart,
+        i18n-default-message="We're going to experiment, so click {strongAdd} in the Kibana toolbar
+                              to add another chart or three. Then, select a chart,
                               copy one of the following expressions, paste it into the input bar,
                               and hit enter. Rinse, repeat to try out the other expressions."
         i18n-values="{
-          openStrongTag: '<strong>',
-          closeStrongTag: '</strong>',
+          strongAdd: '<strong>' + translations.strongAddText + '</strong>',
         }"
       ></p>
       <table class="table table-condensed table-striped">
@@ -341,11 +333,9 @@
           <td><code>.es(*), .es(US)</code></td>
           <td
             i18n-id="timelion.help.expressions.examples.twoExpressionsDescription"
-            i18n-default-message="{openStrongTag}Double the fun.{closeStrongTag}
-                                  Two expressions on the same chart."
+            i18n-default-message="{descriptionTitle} Two expressions on the same chart."
             i18n-values="{
-              openStrongTag: '<strong>',
-              closeStrongTag: '</strong>',
+              descriptionTitle: '<strong>' + translations.twoExpressionsDescriptionTitle + '</strong>',
             }"
           ></td>
         </tr>
@@ -353,11 +343,10 @@
           <td><code>.es(*).color(#f66), .es(US).bars(1)</code></td>
           <td
             i18n-id="timelion.help.expressions.examples.customStylingDescription"
-            i18n-default-message="{openStrongTag}Custom styling.{closeStrongTag} Colorizes the first
-                                  series red and uses 1 pixel wide bars for the second series."
+            i18n-default-message="{descriptionTitle} Colorizes the first series red and
+                                  uses 1 pixel wide bars for the second series."
             i18n-values="{
-              openStrongTag: '<strong>',
-              closeStrongTag: '</strong>',
+              descriptionTitle: '<strong>' + translations.customStylingDescriptionTitle + '</strong>',
             }"
           ></td>
         </tr>
@@ -368,12 +357,11 @@
           </td>
           <td
             i18n-id="timelion.help.expressions.examples.namedArgumentsDescription"
-            i18n-default-message="{openStrongTag}Named arguments.{closeStrongTag} Forget trying to
-                                  remember what order you need to specify arguments in, use named
-                                  arguments to make the expressions easier to read and write."
+            i18n-default-message="{descriptionTitle} Forget trying to remember what order you need
+                                  to specify arguments in, use named arguments to make
+                                  the expressions easier to read and write."
             i18n-values="{
-              openStrongTag: '<strong>',
-              closeStrongTag: '</strong>',
+              descriptionTitle: '<strong>' + translations.namedArgumentsDescriptionTitle + '</strong>',
             }"
           ></td>
         </tr>
@@ -381,12 +369,10 @@
           <td><code>(.es(*), .es(GB)).points()</code></td>
           <td
             i18n-id="timelion.help.expressions.examples.groupedExpressionsDescription"
-            i18n-default-message="{openStrongTag}Grouped expressions.{closeStrongTag} You can also
-                                  chain groups of expressions to functions. Here, both series are
-                                  shown as points instead of lines."
+            i18n-default-message="{descriptionTitle} You can also chain groups of expressions to
+                                  functions. Here, both series are shown as points instead of lines."
             i18n-values="{
-              openStrongTag: '<strong>',
-              closeStrongTag: '</strong>',
+              descriptionTitle: '<strong>' + translations.groupedExpressionsDescriptionTitle + '</strong>',
             }"
           ></td>
         </tr>
@@ -584,7 +570,7 @@
                     <em
                       i18n-id="timelion.help.mainPage.functionReference.noArgumentsFunctionErrorMessage"
                       i18n-default-message="This function does not accept any arguments.
-                      Well that's simple, isn't it?"
+                                            Well that's simple, isn't it?"
                     ></em>
                   </div>
                 </div>

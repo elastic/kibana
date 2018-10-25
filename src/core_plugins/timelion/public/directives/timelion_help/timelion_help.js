@@ -83,6 +83,39 @@ app.directive('timelionHelp', function ($http, i18n) {
           welcomePageLinkText: i18n('timelion.help.mainPage.functionReference.welcomePageLinkText', {
             defaultMessage: 'Check out the tutorial',
           }),
+          strongNextText: i18n('timelion.help.welcome.content.strongNextText', {
+            defaultMessage: 'Next',
+          }),
+          emphasizedEverythingText: i18n('timelion.help.welcome.content.emphasizedEverythingText', {
+            defaultMessage: 'everything',
+          }),
+          notValidAdvancedSettingsPath: i18n('timelion.help.configuration.notValid.advancedSettingsPathText', {
+            defaultMessage: 'Management / Kibana / Advanced Settings'
+          }),
+          validAdvancedSettingsPath: i18n('timelion.help.configuration.valid.advancedSettingsPathText', {
+            defaultMessage: 'Management/Kibana/Advanced Settings',
+          }),
+          esAsteriskQueryDescription: i18n('timelion.help.querying.esAsteriskQueryDescriptionText', {
+            defaultMessage: 'hey Elasticsearch, find everything in my default index',
+          }),
+          esIndexQueryDescription: i18n('timelion.help.querying.esIndexQueryDescriptionText', {
+            defaultMessage: 'use * as the q (query) for the logstash-* index',
+          }),
+          strongAddText: i18n('timelion.help.expressions.strongAddText', {
+            defaultMessage: 'Add',
+          }),
+          twoExpressionsDescriptionTitle: i18n('timelion.help.expressions.examples.twoExpressionsDescriptionTitle', {
+            defaultMessage: 'Double the fun.',
+          }),
+          customStylingDescriptionTitle: i18n('timelion.help.expressions.examples.customStylingDescriptionTitle', {
+            defaultMessage: 'Custom styling.',
+          }),
+          namedArgumentsDescriptionTitle: i18n('timelion.help.expressions.examples.namedArgumentsDescriptionTitle', {
+            defaultMessage: 'Named arguments.',
+          }),
+          groupedExpressionsDescriptionTitle: i18n('timelion.help.expressions.examples.groupedExpressionsDescriptionTitle', {
+            defaultMessage: 'Grouped expressions.',
+          }),
         };
 
         getFunctions();

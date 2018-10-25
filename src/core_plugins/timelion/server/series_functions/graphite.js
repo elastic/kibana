@@ -38,8 +38,7 @@ export default new Datasource ('graphite', {
   ],
   help: i18n.translate('timelion.help.functions.graphiteHelpText', {
     defaultMessage:
-      '[experimental] Pull data from graphite. Configure your graphite server in \
-Kibana\'s Advanced Settings',
+      '[experimental] Pull data from graphite. Configure your graphite server in Kibana\'s Advanced Settings',
   }),
   fn: function graphite(args, tlConfig) {
 

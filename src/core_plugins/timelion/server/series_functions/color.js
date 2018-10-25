@@ -61,7 +61,11 @@ colors, and have multiple series, you will get a gradient, e.g., "#00B1CC:#00FF9
       } else if (colors.length === 1) {
         eachSeries.color = colors[0];
       } else {
-        throw new Error('color not provided');
+        throw new Error(
+          i18n.translate('timelion.serverSideErrors.colorFunction.colorNotProvidedErrorMessage', {
+            defaultMessage: 'color not provided',
+          })
+        );
       }
 
       return eachSeries;
