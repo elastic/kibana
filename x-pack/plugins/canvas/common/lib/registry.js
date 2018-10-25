@@ -12,7 +12,10 @@ export class Registry {
     if (typeof prop !== 'string') {
       throw new Error(
         i18n.translate('xpack.canvas.registry.registryPropertyNameTypeErrorMessage', {
-          defaultMessage: 'Registry property name must be a string',
+          defaultMessage: 'Registry property name must be a string; found {foundType}',
+          values: {
+            foundType: typeof prop,
+          },
         })
       );
     }
@@ -30,7 +33,10 @@ export class Registry {
         i18n.translate(
           'xpack.canvas.registry.functionsMustReturnObjectWithSpecificProprtyErrorMessage',
           {
-            defaultMessage: 'Register requires an function',
+            defaultMessage: 'Register requires an function; found {foundType}',
+            values: {
+              foundType: typeof fn,
+            },
           }
         )
       );

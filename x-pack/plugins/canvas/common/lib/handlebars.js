@@ -13,7 +13,10 @@ import { pivotObjectArray } from './pivot_object_array';
 Hbars.registerHelper('math', (rows, expression, precision) => {
   if (!Array.isArray(rows)) {
     return i18n.translate('xpack.canvas.handlebars.firstArgumentTypeErrorMessage', {
-      defaultMessage: 'MATH ERROR: first argument must be an array',
+      defaultMessage: 'MATH ERROR: first argument must be an array; found {rowsType}',
+      values: {
+        rowsType: typeof rows,
+      },
     });
   }
   const value = evaluate(expression, pivotObjectArray(rows));

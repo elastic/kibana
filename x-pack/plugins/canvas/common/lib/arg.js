@@ -11,7 +11,7 @@ export function Arg(config) {
   if (config.name === '_') {
     throw Error(
       i18n.translate('xpack.canvas.args.undercoreIsNotAllowedInArgNameErrorMessage', {
-        defaultMessage: 'Arg names must not be _. Use it in aliases instead.',
+        defaultMessage: '_ is not allowed as an argument name. Use it in aliases instead.',
       })
     );
   }

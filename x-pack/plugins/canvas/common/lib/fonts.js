@@ -8,10 +8,7 @@ export const americanTypewriter = {
   label: 'American Typewriter',
   value: `'American Typewriter', 'Courier New', Courier, Monaco, mono`,
 };
-export const arial = {
-  label: 'Arial',
-  value: `Arial, sans-serif`,
-};
+export const arial = { label: 'Arial', value: `Arial, sans-serif` };
 export const baskerville = {
   label: 'Baskerville',
   value: `Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif`,
@@ -24,18 +21,12 @@ export const brushScript = {
   label: 'Brush Script',
   value: `'Brush Script MT', 'Comic Sans', sans-serif`,
 };
-export const chalkboard = {
-  label: 'Chalkboard',
-  value: `Chalkboard, 'Comic Sans', sans-serif`,
-};
+export const chalkboard = { label: 'Chalkboard', value: `Chalkboard, 'Comic Sans', sans-serif` };
 export const didot = {
   label: 'Didot',
   value: `Didot, Georgia, Garamond, 'Times New Roman', Times, serif`,
 };
-export const futura = {
-  label: 'Futura',
-  value: `Futura, Impact, Helvetica, Arial, sans-serif`,
-};
+export const futura = { label: 'Futura', value: `Futura, Impact, Helvetica, Arial, sans-serif` };
 export const gillSans = {
   label: 'Gill Sans',
   value: `'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif`,
@@ -52,14 +43,8 @@ export const lucidaGrande = {
   label: 'Lucida Grande',
   value: `'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif`,
 };
-export const myriad = {
-  label: 'Myriad',
-  value: `Myriad, Helvetica, Arial, sans-serif`,
-};
-export const openSans = {
-  label: 'Open Sans',
-  value: `'Open Sans', Helvetica, Arial, sans-serif`,
-};
+export const myriad = { label: 'Myriad', value: `Myriad, Helvetica, Arial, sans-serif` };
+export const openSans = { label: 'Open Sans', value: `'Open Sans', Helvetica, Arial, sans-serif` };
 export const optima = {
   label: 'Optima',
   value: `Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif`,
