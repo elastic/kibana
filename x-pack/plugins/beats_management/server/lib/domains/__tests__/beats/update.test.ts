@@ -74,6 +74,7 @@ describe('Beats Domain lib', () => {
     it('should return an invalid message if token validation fails', async () => {
       const beatToFind: CMBeat = {
         id: beatId,
+        config_status: 'OK',
         enrollment_token: '',
         active: true,
         access_token: token.token || '',
@@ -93,6 +94,7 @@ describe('Beats Domain lib', () => {
     it('should update the beat when a valid token is provided', async () => {
       const beatToFind: CMBeat = {
         id: beatId,
+        config_status: 'OK',
         enrollment_token: '',
         active: true,
         access_token: token.token || '',
