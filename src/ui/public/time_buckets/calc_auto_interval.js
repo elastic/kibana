@@ -81,8 +81,4 @@ export const calcAutoInterval = {
   lessThan: find(revRoundingRules, function (bound, interval, target) {
     if (interval < target) return interval;
   }),
-
-  atLeast: find(revRoundingRules, function atLeast(bound, interval, target) {
-    if (interval <= target) return interval;
-  }),
 };
