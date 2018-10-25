@@ -18,8 +18,8 @@ export function registerRefreshRoute(server) {
   server.route({
     path: '/api/watcher/license/refresh',
     method: 'GET',
-    handler: (request, reply) => {
-      reply({ success: true });
+    handler: () => {
+      return { success: true };
     },
     config: {
       pre: [ licensePreRouting ]

@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
-import { IRouteAdditionalConfigurationOptions, IStrictReply } from 'hapi';
+import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
 import { InfraMetricModel } from '../metrics/adapter_types';
 
 export * from '../../../../common/graphql/typed_resolvers';
@@ -18,7 +18,7 @@ export interface InfraBackendFrameworkAdapter {
   version: string;
   exposeStaticDir(urlPath: string, dir: string): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
-  registerRoute<RouteRequest extends InfraWrappableRequest, RouteResponse>(
+  registerRoute<RouteRequest extends InfraWrappableRequest, RouteResponse extends InfraResponse>(
     route: InfraFrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;
   callWithRequest<Hit = {}, Aggregation = undefined>(
@@ -75,6 +75,8 @@ export interface InfraWrappableRequest<Payload = any, Params = any, Query = any>
   query: Query;
 }
 
+export type InfraResponse = Lifecycle.ReturnValue;
+
 export interface InfraFrameworkPluginOptions {
   register: any;
   options: any;
@@ -82,22 +84,19 @@ export interface InfraFrameworkPluginOptions {
 
 export interface InfraFrameworkRouteOptions<
   RouteRequest extends InfraWrappableRequest,
-  RouteResponse
+  RouteResponse extends InfraResponse
 > {
   path: string;
   method: string | string[];
   vhost?: string;
   handler: InfraFrameworkRouteHandler<RouteRequest, RouteResponse>;
-  config?: Pick<
-    IRouteAdditionalConfigurationOptions,
-    Exclude<keyof IRouteAdditionalConfigurationOptions, 'handler'>
-  >;
+  options?: Pick<RouteOptions, Exclude<keyof RouteOptions, 'handler'>>;
 }
 
 export type InfraFrameworkRouteHandler<
   RouteRequest extends InfraWrappableRequest,
-  RouteResponse
-> = (request: InfraFrameworkRequest<RouteRequest>, reply: IStrictReply<RouteResponse>) => void;
+  RouteResponse extends InfraResponse
+> = (request: InfraFrameworkRequest<RouteRequest>, h: ResponseToolkit) => RouteResponse;
 
 export interface InfraDatabaseResponse {
   took: number;
