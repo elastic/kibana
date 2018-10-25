@@ -42,6 +42,7 @@ export const pie = () => ({
       types: ['boolean'],
       default: true,
       help: 'Show pie labels',
+      options: [true, false],
     },
     labelRadius: {
       types: ['number'],
@@ -57,6 +58,7 @@ export const pie = () => ({
       types: ['string', 'boolean'],
       help: 'Legend position, nw, sw, ne, se or false',
       default: false,
+      options: ['nw', 'sw', 'ne', 'se', false],
     },
     tilt: {
       types: ['number'],

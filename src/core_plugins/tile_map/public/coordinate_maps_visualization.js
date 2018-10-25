@@ -21,7 +21,6 @@ import _ from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { AggConfig } from 'ui/vis/agg_config';
-import './styles/_tilemap.less';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 import { toastNotifications } from 'ui/notify';
 

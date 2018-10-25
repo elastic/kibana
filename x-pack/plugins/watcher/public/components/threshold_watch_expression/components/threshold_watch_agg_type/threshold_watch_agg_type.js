@@ -12,7 +12,7 @@ import 'plugins/watcher/components/xpack_aria_describes';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('thresholdWatchAggType', function ($injector) {
+app.directive('thresholdWatchAggType', function ($injector, i18n) {
   const htmlIdGeneratorFactory = $injector.get('xpackWatcherHtmlIdGeneratorFactory');
 
   return {
@@ -43,7 +43,9 @@ app.directive('thresholdWatchAggType', function ($injector) {
         $scope.$watch('thresholdWatchAggType.form.$valid', this.checkValidity);
         $scope.$watch('thresholdWatchAggType.form.$dirty', this.checkDirty);
 
-        this.itemDescription = 'When';
+        this.itemDescription = i18n('xpack.watcher.thresholdWatchExpression.aggType.itemDescription', {
+          defaultMessage: 'When',
+        });
       }
 
       get itemValue() {

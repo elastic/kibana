@@ -45,7 +45,7 @@ describe('src/dev/build/tasks/node_extract_node_builds_task', () => {
     };
 
     const config = {
-      getPlatforms: () => [platform]
+      getTargetPlatforms: () => [platform]
     };
 
     await ExtractNodeBuildsTask.run(config);
@@ -73,7 +73,7 @@ describe('src/dev/build/tasks/node_extract_node_builds_task', () => {
     };
 
     const config = {
-      getPlatforms: () => [platform]
+      getTargetPlatforms: () => [platform]
     };
 
     await ExtractNodeBuildsTask.run(config);

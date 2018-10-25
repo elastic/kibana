@@ -6,7 +6,7 @@
 
 Canvas is included with X-Pack and requires a Basic license or better to use.
 
-To run Canvas from dev mode, you'll need to build the Canvas plugins at least once. To do so, use the following command:
+Canvas has its own build pipeline that gets triggered as part of `yarn kbn bootstrap`. However, should you ever need to run the build manually, like if you updated one of the plugins, you can do so with the following command:
 
 ```bash
 yarn kbn run build:plugins --include canvas
@@ -14,9 +14,9 @@ yarn kbn run build:plugins --include canvas
 
 ### Developing in Canvas
 
-Canvas has its plugin build process, so if you are planning to work on any of the plugin code, you'll need to use the plugin build process.
+As mentioned above, Canvas has its plugin build process, so if you are planning to work on any of the plugin code, you'll need to use the plugin build process.
 
-**If you are not working on Canvas plugins, you can just start Kibana like normal, as long as you ran the build command above at least once**.
+**If you are not working on Canvas plugins, you can just start Kibana like normal, as long as you've used `yarn kbn bootstrap`**.
 
 The easiest way to do develop on Canvas and have the plugins built automatically is to cd into the canvas plugin path and start the process from there:
 
@@ -28,9 +28,9 @@ yarn start
 
 There are several other scripts available once you are in that path as well.
 
-- `yarn build:plugins` - local alias to build Canvas plugins, an alternative to use `kbn`.
+- `yarn build:plugins` - local alias to build Canvas plugins, an alternative to using `kbn`.
 - `yarn lint` - local linter setup, can also be used with the `--fix` flag for automatic fixes.
-- `yarn test` - local test runner, does not require a real Kibana instance. Runs all the same unit tests the normal runner does, just limited to Canvas, and *waaaaaay* faster.
+- `yarn test` - local test runner, does not require a real Kibana instance. Runs all the same unit tests the normal runner does, just limited to Canvas, and *waaaaaay* faster (currently 12 seconds or less).
 - `yarn test:dev` - Same as above, but watches for changes and only runs tests for the given scope (browser, server, or common).
 
 ## Feature Questions
