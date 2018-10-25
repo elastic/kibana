@@ -39,7 +39,9 @@ class AppUI extends React.PureComponent {
   }
 
   renderError = () => {
-    console.error(this.props.appState);
+    const { appState } = this.props;
+
+    console.error(appState);
 
     return (
       <div>
@@ -53,7 +55,7 @@ class AppUI extends React.PureComponent {
           <FormattedMessage
             id="xpack.canvas.app.canvasLoadFailDescription"
             defaultMessage="Message: {message}"
-            values={{ message: this.props.appState.message }}
+            values={{ message: appState.message }}
           />
         </div>
       </div>
@@ -61,14 +63,16 @@ class AppUI extends React.PureComponent {
   };
 
   render() {
-    if (this.props.appState instanceof Error) return this.renderError();
+    const { appState, intl } = this.props;
+
+    if (appState instanceof Error) return this.renderError();
 
     return (
       <div className="canvas canvasContainer">
         <Router
           routes={routes}
-          showLoading={this.props.appState.ready === false}
-          loadingMessage={this.props.intl.formatMessage({
+          showLoading={appState.ready === false}
+          loadingMessage={intl.formatMessage({
             id: 'xpack.canvas.app.canvasLoadingTitle',
             defaultMessage: 'Canvas is loading',
           })}

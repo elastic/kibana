@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, injectI18nProvider } from '@kbn/i18n/react';
 import { FontPicker } from '../font_picker';
 import { ColorPickerMini } from '../color_picker_mini';
 import { fontSizes } from './font_sizes';
@@ -178,4 +178,4 @@ TextStylePickerUI.defaultProps = {
   align: 'left',
 };
 
-export const TextStylePicker = injectI18n(TextStylePickerUI);
+export const TextStylePicker = injectI18nProvider(injectI18n(TextStylePickerUI));

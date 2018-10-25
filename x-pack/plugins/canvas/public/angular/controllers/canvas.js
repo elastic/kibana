@@ -13,12 +13,16 @@ import { App } from '../../components/app';
 export function CanvasRootController(canvasStore, $scope, $element) {
   const domNode = $element[0];
 
-  render(
+  const CanvasProvider = props => (
     <I18nProvider>
-      <Provider store={canvasStore}>
-        <App />
-      </Provider>
-    </I18nProvider>,
+      <Provider store={props.store}>{props.children}</Provider>
+    </I18nProvider>
+  );
+
+  render(
+    <CanvasProvider store={canvasStore}>
+      <App />
+    </CanvasProvider>,
     domNode
   );
 
