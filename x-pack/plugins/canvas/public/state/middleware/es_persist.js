@@ -55,7 +55,7 @@ export const esPersistMiddleware = ({ getState }) => {
         if (err.response.status === 400) {
           return notify.error(err.response, {
             title: i18n.translate(
-              'xpack.canvas.state.esPersist.saveChangesToElasticsearch.400ErrorMessageTitle',
+              'xpack.canvas.state.esPersist.saveChangesToElasticsearch.400ErrorTitle',
               {
                 defaultMessage: "Couldn't save your changes to Elasticsearch",
               }
@@ -74,7 +74,7 @@ export const esPersistMiddleware = ({ getState }) => {
             ),
             {
               title: i18n.translate(
-                'xpack.canvas.state.esPersist.saveChangesToElasticsearch.413ErrorMessageTitle',
+                'xpack.canvas.state.esPersist.saveChangesToElasticsearch.413ErrorTitle',
                 {
                   defaultMessage: "Couldn't save your changes to Elasticsearch",
                 }
@@ -85,7 +85,7 @@ export const esPersistMiddleware = ({ getState }) => {
 
         return notify.error(err.response, {
           title: i18n.translate(
-            'xpack.canvas.state.esPersist.saveChangesToElasticsearch.commonErrorMessageTitle',
+            'xpack.canvas.state.esPersist.saveChangesToElasticsearch.commonErrorTitle',
             {
               defaultMessage: "Couldn't update workpad",
             }
