@@ -43,7 +43,6 @@ import { filterItems, sortTable } from '../../services';
 
 export const getPolicies = state => state.policies.policies;
 export const getIsNewPolicy = state => state.policies.selectedPolicy.isNew;
-
 export const getSelectedPolicy = state => state.policies.selectedPolicy;
 export const getIsSelectedPolicySet = state => state.policies.selectedPolicySet;
 export const getSelectedOriginalPolicyName = state => state.policies.originalPolicyName;
@@ -51,6 +50,7 @@ export const getPolicyFilter = (state) => state.policies.filter;
 export const getPolicySort = (state) => state.policies.sort;
 export const getPolicyCurrentPage = (state) => state.policies.currentPage;
 export const getPolicyPageSize = (state) => state.policies.pageSize;
+export const isPolicyListLoaded = (state) => state.policies.isLoaded;
 
 const getFilteredPolicies = createSelector(
   getPolicies,

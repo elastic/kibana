@@ -31,7 +31,7 @@ const renderReact = async (elem) => {
   );
 };
 
-routes.when(`${BASE_PATH}:view?/:id?`, {
+routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
   template: template,
   controllerAs: 'indexManagement',
   controller: class IndexManagementController {

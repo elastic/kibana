@@ -14,14 +14,10 @@ import thunk from 'redux-thunk';
 import {
   indexLifecycleManagement
 } from './reducers/';
-import {
-  autoEnablePhase,
-  setSelectedPolicyFromSelectedTemplate,
-  autoSetNodeAttrs
-} from './middleware';
+
 
 export const indexLifecycleManagementStore = (initialState = {}) => {
-  const enhancers = [applyMiddleware(thunk, autoEnablePhase, setSelectedPolicyFromSelectedTemplate, autoSetNodeAttrs)];
+  const enhancers = [applyMiddleware(thunk)];
 
   window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
   return createStore(

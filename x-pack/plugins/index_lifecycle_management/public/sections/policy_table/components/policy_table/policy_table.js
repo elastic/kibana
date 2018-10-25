@@ -9,6 +9,7 @@ import moment from 'moment-timezone';
 import { i18n }  from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { NoMatch } from '../no_match';
+import { BASE_PATH } from '../../../../../common/constants';
 import {
   EuiButton,
   EuiLink,
@@ -170,9 +171,7 @@ export class PolicyTableUi extends Component {
         <EuiLink
           className="policyTable__link"
           data-test-subj="policyTablePolicyNameLink"
-          onClick={() => {
-
-          }}
+          href={`#${BASE_PATH}policies/edit/${value}`}
         >
           {value}
         </EuiLink>
@@ -316,6 +315,14 @@ export class PolicyTableUi extends Component {
                   }
                   aria-label="Search policies"
                 />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="createUserButton"
+                  href={`#${BASE_PATH}policies/edit`}
+                >
+                  Create new policy
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
 

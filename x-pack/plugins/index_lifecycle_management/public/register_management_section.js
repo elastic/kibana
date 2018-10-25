@@ -12,6 +12,6 @@ esSection.register('index_lifecycle_management', {
   visible: true,
   display: 'Index Lifecycle Management',
   order: 1,
-  url: `#${BASE_PATH}wizard`
+  url: `#${BASE_PATH}policies`
 });
 

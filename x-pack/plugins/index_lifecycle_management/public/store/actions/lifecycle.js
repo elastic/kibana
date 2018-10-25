@@ -4,24 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createAction } from 'redux-actions';
 import { toastNotifications } from 'ui/notify';
 import { saveLifecycle as saveLifecycleApi } from '../../api';
 
 
-export const savedLifecycle = createAction('SAVED_LIFECYCLE');
-export const saveLifecycle = (lifecycle, indexTemplatePatch) => async dispatch => {
-  let saved;
+export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {
   try {
-    saved = await saveLifecycleApi(lifecycle, indexTemplatePatch);
+    await saveLifecycleApi(lifecycle);
   }
   catch (err) {
     toastNotifications.addDanger(err.data.message);
     return false;
   }
-
-  toastNotifications.addSuccess(`Successfully created lifecycle policy '${lifecycle.name}'`);
-
-  dispatch(savedLifecycle(saved));
+  const verb = isNew ? 'created' : 'updated';
+  toastNotifications.addSuccess(`Successfully ${verb} lifecycle policy '${lifecycle.name}'`);
   return true;
 };

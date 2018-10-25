@@ -49,6 +49,7 @@ export const defaultPolicy = {
 
 const defaultState = {
   isLoading: false,
+  isLoaded: false,
   originalPolicyName: undefined,
   selectedPolicySet: false,
   selectedPolicy: defaultPolicy,
@@ -68,6 +69,7 @@ export const policies = handleActions(
       return {
         ...state,
         isLoading: false,
+        isLoaded: true,
         policies
       };
     },

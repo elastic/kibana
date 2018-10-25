@@ -11,7 +11,6 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
-import { merge } from 'lodash';
 
 async function createLifecycle(callWithRequest, lifecycle) {
   const body = {
@@ -29,44 +28,6 @@ async function createLifecycle(callWithRequest, lifecycle) {
   return await callWithRequest('transport.request', params);
 }
 
-async function getIndexTemplate(callWithRequest, indexTemplate) {
-  const response = await callWithRequest('indices.getTemplate', { name: indexTemplate });
-  return response[indexTemplate];
-}
-
-async function updateIndexTemplate(callWithRequest, indexTemplatePatch) {
-  // Fetch existing template
-  const template = await getIndexTemplate(callWithRequest, indexTemplatePatch.indexTemplate);
-  merge(template, {
-    settings: {
-      index: {
-        number_of_shards: indexTemplatePatch.primaryShardCount,
-        number_of_replicas: indexTemplatePatch.replicaCount,
-        lifecycle: {
-          name: indexTemplatePatch.lifecycleName,
-          rollover_alias: indexTemplatePatch.rolloverAlias
-        },
-        routing: {
-          allocation: {
-            include: {
-              sattr_name: indexTemplatePatch.nodeAttrs,
-            }
-          }
-        }
-      }
-    }
-  });
-
-  const params = {
-    method: 'PUT',
-    path: `/_template/${indexTemplatePatch.indexTemplate}`,
-    ignore: [ 404 ],
-    body: template,
-  };
-
-  return await callWithRequest('transport.request', params);
-}
-
 export function registerCreateRoute(server) {
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
@@ -79,8 +40,7 @@ export function registerCreateRoute(server) {
 
       try {
         const response = await createLifecycle(callWithRequest, request.payload.lifecycle);
-        const response2 = await updateIndexTemplate(callWithRequest, request.payload.indexTemplatePatch);
-        reply([response, response2]);
+        reply(response);
       } catch (err) {
         if (isEsError(err)) {
           return reply(wrapEsError(err));

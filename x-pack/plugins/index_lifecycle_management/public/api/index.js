@@ -44,15 +44,11 @@ export async function deletePolicies(policyNames) {
   return response.data;
 }
 
-export async function saveLifecycle(lifecycle, indexTemplatePatch) {
-  const response = await httpClient.post(`${apiPrefix}/lifecycle`, { lifecycle, indexTemplatePatch });
+export async function saveLifecycle(lifecycle) {
+  const response = await httpClient.post(`${apiPrefix}/lifecycle`, { lifecycle });
   return response.data;
 }
 
-export async function bootstrap(indexName, aliasName) {
-  const response = await httpClient.post(`${apiPrefix}/indices/bootstrap`, { indexName, aliasName });
-  return response.status === 200;
-}
 
 export async function getAffectedIndices(indexTemplateName, policyName) {
   const path = policyName

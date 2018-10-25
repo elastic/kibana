@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { autoEnablePhase } from './auto_enable_phase';
-export { setSelectedPolicyFromSelectedTemplate } from './set_selected_policy_from_selected_template';
-export { autoSetNodeAttrs } from './auto_set_node_attrs';
+export { HotPhase } from './hot_phase.container';
