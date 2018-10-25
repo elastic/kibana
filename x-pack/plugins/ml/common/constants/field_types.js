@@ -53,6 +53,6 @@ export const ML_JOB_FIELD_TYPES = {
   KEYWORD: 'keyword',
   NUMBER: 'number',
   TEXT: 'text',
-  UNKNOWN_TYPE: 'unknown-type',
+  UNKNOWN: 'unknown',
 };
 

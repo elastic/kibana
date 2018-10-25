@@ -87,7 +87,7 @@ function createFields(results) {
         // this could be a text field or a field which the endpoint has
         // not been able to work out any information for
         const type = (mappings[name] && mappings[name].type === ML_JOB_FIELD_TYPES.TEXT) ?
-          ML_JOB_FIELD_TYPES.TEXT : ML_JOB_FIELD_TYPES.UNKNOWN_TYPE;
+          ML_JOB_FIELD_TYPES.TEXT : ML_JOB_FIELD_TYPES.UNKNOWN;
 
         return {
           name: name,

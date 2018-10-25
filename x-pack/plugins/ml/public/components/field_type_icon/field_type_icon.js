@@ -47,7 +47,7 @@ export function FieldTypeIcon({ tooltipEnabled = false, type }) {
       ariaLabel = 'IP type';
       iconClass = 'fa-laptop';
       break;
-    case ML_JOB_FIELD_TYPES.UNKNOWN_TYPE:
+    case ML_JOB_FIELD_TYPES.UNKNOWN:
       ariaLabel = 'Unknown type';
       iconChar = '?';
       break;
