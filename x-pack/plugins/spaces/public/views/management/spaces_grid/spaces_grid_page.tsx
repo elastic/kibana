@@ -66,7 +66,7 @@ class SpacesGridPageUI extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage restrictWidth className="spacesGridPage">
+      <EuiPage restrictWidth className="spcGridPage">
         <EuiPageBody>
           <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
           <SecureSpaceMessage userProfile={this.props.userProfile} />

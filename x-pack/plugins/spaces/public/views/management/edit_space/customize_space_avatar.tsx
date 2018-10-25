@@ -63,7 +63,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           <EuiFormRow
             label={intl.formatMessage({
               id: 'xpack.spaces.view.management.editSpace.customizeSpaceAvatar.colorFormRowLabel',

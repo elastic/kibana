@@ -13,7 +13,6 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -85,27 +84,32 @@ class SpaceSelectorUI extends Component<Props, State> {
     }
 
     return (
-      <EuiPage className="spaceSelector__page" data-test-subj="kibanaSpaceSelector">
+      <EuiPage className="spcSpaceSelector" data-test-subj="kibanaSpaceSelector">
         <EuiPageBody>
-          <EuiPageHeader className="spaceSelector__heading">
-            <EuiPageHeaderSection className="spaceSelector__logoHeader">
-              <div className="spaceSelector__logoCircle">
-                <EuiIcon size="xxl" type={`logoKibana`} />
-              </div>
+          <EuiPageHeader className="spcSpaceSelector__heading">
+            <EuiSpacer size="xxl" />
+            <span className="spcSpaceSelector__logo">
+              <EuiIcon size="xxl" type={`logoKibana`} />
+            </span>
 
-              <EuiSpacer />
-
-              <EuiTitle size="l" className="euiTextColor--ghost">
-                <p>
-                  <FormattedMessage
-                    id="xpack.spaces.view.spaceSelector.spaceSelector.selectSpacesTitle"
-                    defaultMessage="Select your space"
-                  />
-                </p>
-              </EuiTitle>
-            </EuiPageHeaderSection>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage
+                  id="xpack.spaces.view.spaceSelector.spaceSelector.selectSpacesTitle"
+                  defaultMessage="Select your space"
+                />
+              </h1>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.spaces.view.spaceSelector.spaceSelector.changeSpaceAnytimeAvailabilityText"
+                  defaultMessage="You can change your space at anytime"
+                />
+              </p>
+            </EuiText>
           </EuiPageHeader>
-          <EuiPageContent className="spaceSelector__pageContent">
+          <EuiPageContent className="spcSpaceSelector__pageContent">
             <EuiFlexGroup
               // @ts-ignore
               direction="column"
@@ -113,17 +117,6 @@ class SpaceSelectorUI extends Component<Props, State> {
               responsive={false}
             >
               {this.getSearchField()}
-
-              <EuiFlexItem>
-                <EuiText size="xs">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.spaces.view.spaceSelector.spaceSelector.changingSpaceDescription"
-                      defaultMessage="You can change your space at anytime."
-                    />
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
             </EuiFlexGroup>
 
             <EuiSpacer size="xl" />
@@ -157,9 +150,9 @@ class SpaceSelectorUI extends Component<Props, State> {
       return null;
     }
     return (
-      <EuiFlexItem className="spaceSelector__searchHolder">
+      <EuiFlexItem className="spcSpaceSelector__searchHolder">
         <EuiFieldSearch
-          className="spaceSelector__searchField"
+          className="spcSpaceSelector__searchField"
           placeholder={intl.formatMessage({
             id: 'xpack.spaces.view.spaceSelector.spaceSelector.findSpacePlaceholder',
             defaultMessage: 'Find a space',

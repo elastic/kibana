@@ -109,9 +109,9 @@ class ManageSpacePageUI extends Component<Props, State> {
     const content = this.state.isLoading ? this.getLoadingIndicator() : this.getForm();
 
     return (
-      <EuiPage className="manageSpacePage">
+      <EuiPage className="spcManagePage">
         <EuiPageBody>
-          <EuiPageContent className="manageSpacePage__content">
+          <EuiPageContent className="spcManagePage__content">
             <EuiPageContentBody>{content}</EuiPageContentBody>
           </EuiPageContent>
           {this.maybeGetSecureSpacesMessage()}
@@ -151,42 +151,38 @@ class ManageSpacePageUI extends Component<Props, State> {
 
         <EuiSpacer />
 
-        <EuiFlexGroup>
-          <EuiFlexItem style={{ maxWidth: '400px' }}>
-            <EuiFormRow
-              label={intl.formatMessage({
-                id: 'xpack.spaces.view.management.editSpace.manageSpacePage.nameFormRowLabel',
-                defaultMessage: 'Name',
-              })}
-              {...this.validator.validateSpaceName(this.state.space)}
-            >
-              <EuiFieldText
-                name="name"
-                placeholder={intl.formatMessage({
-                  id:
-                    'xpack.spaces.view.management.editSpace.manageSpacePage.awesomeSpacePlaceholder',
-                  defaultMessage: 'Awesome space',
-                })}
-                value={name}
-                onChange={this.onNameChange}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          {name && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow hasEmptyLabelSpace={true}>
-                    <SpaceAvatar space={this.state.space} />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-
-        <EuiSpacer />
+        <EuiFormRow
+          label={intl.formatMessage({
+            id: 'xpack.spaces.view.management.editSpace.manageSpacePage.nameFormRowLabel',
+            defaultMessage: 'Name',
+          })}
+          {...this.validator.validateSpaceName(this.state.space)}
+          fullWidth
+        >
+          <EuiFieldText
+            name="name"
+            placeholder={intl.formatMessage({
+              id: 'xpack.spaces.view.management.editSpace.manageSpacePage.awesomeSpacePlaceholder',
+              defaultMessage: 'Awesome space',
+            })}
+            value={name}
+            onChange={this.onNameChange}
+            fullWidth
+          />
+        </EuiFormRow>
+        {name && (
+          <Fragment>
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow label="Avatar">
+                  <SpaceAvatar space={this.state.space} size="l" />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
+            </EuiFlexGroup>
+            <EuiSpacer />
+          </Fragment>
+        )}
 
         {this.state.space && isReservedSpace(this.state.space) ? null : (
           <Fragment>
@@ -206,6 +202,7 @@ class ManageSpacePageUI extends Component<Props, State> {
             defaultMessage: 'Description (optional)',
           })}
           {...this.validator.validateSpaceDescription(this.state.space)}
+          fullWidth
         >
           <EuiFieldText
             name="description"
@@ -216,6 +213,7 @@ class ManageSpacePageUI extends Component<Props, State> {
             })}
             value={description}
             onChange={this.onDescriptionChange}
+            fullWidth
           />
         </EuiFormRow>
 

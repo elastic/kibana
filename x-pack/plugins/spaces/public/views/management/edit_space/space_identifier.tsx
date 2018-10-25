@@ -49,6 +49,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
           label={this.getLabel()}
           helpText={this.getHelpText()}
           {...this.props.validator.validateURLIdentifier(this.props.space)}
+          fullWidth
         >
           <EuiFieldText
             readOnly={!this.state.editing}
@@ -64,6 +65,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
             value={id}
             onChange={this.onChange}
             inputRef={(ref) => this.textFieldRef = ref}
+            fullWidth
           />
         </EuiFormRow>
       </Fragment>

@@ -76,7 +76,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
 
     return (
       <EuiOverlayMask>
-        <EuiModal onClose={onCancel} className={'euiModal--confirmation'}>
+        <EuiModal onClose={onCancel} className={'spcConfirmDeleteModal'}>
           <EuiModalHeader>
             <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
               <FormattedMessage
