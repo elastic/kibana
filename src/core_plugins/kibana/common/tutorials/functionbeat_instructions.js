@@ -242,7 +242,7 @@ deploying Functionbeat'
     },
     WINDOWS: {
       title: defaultTitle,
-      textPre: i18n.translate('kbn.common.tutorials.functionbeatEnableOnPremInstructions.textPre', {
+      textPre: i18n.translate('kbn.common.tutorials.functionbeatEnableOnPremInstructionsWindows.textPre', {
         defaultMessage: 'Modify the settings in the {path} file.',
         values: {
           path: '`C:\\Program Files\\Functionbeat\\functionbeat.yml`',
