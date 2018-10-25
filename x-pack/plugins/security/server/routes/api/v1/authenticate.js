@@ -18,10 +18,10 @@ export function initAuthenticateApi(server) {
     config: {
       auth: false,
       validate: {
-        payload: {
+        payload: Joi.object({
           username: Joi.string().required(),
           password: Joi.string().required()
-        }
+        })
       },
       response: {
         emptyStatusCode: 204,
@@ -58,10 +58,10 @@ export function initAuthenticateApi(server) {
     config: {
       auth: false,
       validate: {
-        payload: {
+        payload: Joi.object({
           SAMLResponse: Joi.string().required(),
           RelayState: Joi.string().allow('')
-        }
+        })
       }
     },
     async handler(request, reply) {
