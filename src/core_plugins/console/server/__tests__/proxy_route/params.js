@@ -126,7 +126,7 @@ describe('Console Proxy Route', () => {
         expect(args[0]).to.have.property('path', '/api/console/proxy');
         expect(args[0]).to.have.property('method', 'post');
         expect(args[0]).to.have.property('query').eql({ method: 'HEAD', path: '/index/type/id' });
-        expect(args[1]).to.be('/index/type/id');
+        expect(args[1]).to.be('/index/type/id?pretty');
       });
 
       it('sends the returned timeout, rejectUnauthorized, agent, and base headers to Wreck', async () => {
