@@ -48,6 +48,14 @@
     </div>
     <div class='advanced-group' ng-show="ui.showAdvanced">
       <div class="form-group">
+        <ml-enable-model-plot-checkbox
+          form-config='formConfig'
+          ui='ui'
+          get-job-from-config='getJobFromConfig'>
+        </ml-enable-model-plot-checkbox>
+        <ml-warning-callout ui='ui'></ml-warning-callout> <!-- here -->
+      </div>
+      <div class="form-group">
       <label class='kuiCheckBoxLabel kuiVerticalRhythm'>
         <input type="checkbox"
           aria-labelledby="ml_aria_label_new_job_dedicated_index"
@@ -59,11 +67,6 @@
           <i ml-info-icon="new_job_dedicated_index" ></i>
         </span>
       </label>
-        <ml-enable-model-plot-checkbox
-          form-config='formConfig'
-          ui='ui'
-          get-job-from-config='getJobFromConfig'>
-        </ml-enable-model-plot-checkbox>
       </div>
       <div class="form-group">
         <label class='kuiFormLabel kuiVerticalRhythm'>

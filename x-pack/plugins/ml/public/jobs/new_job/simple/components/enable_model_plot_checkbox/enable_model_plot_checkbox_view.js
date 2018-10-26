@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
+
 
 import PropTypes from 'prop-types';
 import React, { Fragment, Component } from 'react';
 
 import {
+  EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,7 +18,6 @@ import {
 } from '@elastic/eui';
 
 
-// onChange we change the props passed in as the label and content
 export class EnableModelPlotCheckbox extends Component {
   constructor(props) {
     super(props);
@@ -31,8 +27,10 @@ export class EnableModelPlotCheckbox extends Component {
     };
   }
 
-  tooltipContent = `Select to enable model plot. Stores model information along with the results.
+  tooltipContent = `Select to enable model plot. Stores model information along with results.
                   Can add considerable overhead to the performance of the system.`;
+
+  warningTitle = 'Proceed with caution!';
 
   onChange = e => {
     this.setState({
@@ -41,6 +39,24 @@ export class EnableModelPlotCheckbox extends Component {
 
     this.props.onCheckboxChange(e.target.checked);
   };
+
+  renderWarningCallout = () => (
+    <Fragment>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            title={this.warningTitle}
+            color="warning"
+            iconType="help"
+          >
+            <p>
+              {this.props.warningContent}
+            </p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Fragment>
+  );
 
   render() {
     return (
@@ -63,6 +79,7 @@ export class EnableModelPlotCheckbox extends Component {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        { this.props.warningStatus && this.renderWarningCallout() }
       </Fragment>
     );
   }
@@ -72,6 +89,8 @@ EnableModelPlotCheckbox.propTypes = {
   checkboxDisabled: PropTypes.bool,
   checkboxText: PropTypes.string.isRequired,
   onCheckboxChange: PropTypes.func.isRequired,
+  warningStatus: PropTypes.bool.isRequired,
+  warningContent: PropTypes.string.isRequired,
 };
 
 EnableModelPlotCheckbox.defaultProps = {

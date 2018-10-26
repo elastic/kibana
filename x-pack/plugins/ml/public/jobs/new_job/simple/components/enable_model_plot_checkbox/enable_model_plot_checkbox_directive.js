@@ -27,48 +27,79 @@ module.directive('mlEnableModelPlotCheckbox', function () {
         FAILED: -1,
         NOT_RUNNING: 0,
         RUNNING: 1,
-        FINISHED: 2
+        FINISHED: 2,
+        WARNING: 3,
       };
-      console.log('function?', $scope.getJobFromConfig); // remove
       const errorHandler = (error) => {
         console.log('Cardinality could not be validated', error);
         $scope.ui.cardinalityValidator.status = STATUS.FAILED;
         $scope.ui.cardinalityValidator.message = 'Cardinality could not be validated';
       };
 
+      // [{id:"cardinality_model_plot_high",modelPlotCardinality:11405}, {id:"cardinality_partition_field",fieldName:"clientip"}]
+      // Model plot cardinality is the only thing we care about
+      const getModelPlotCardinality = (data) => {
+        let cardinality;
+
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].id === 'cardinality_model_plot_high') {
+            cardinality = data[i].modelPlotCardinality;
+            break;
+          }
+        }
+
+        return cardinality;
+      };
+
+      // Successful validation: [{ id: 'success_cardinality' }]
+      const hasSuccessMessage = (data) => {
+        return (
+          Array.isArray(data) &&
+          (data.length === 1) &&
+          (data[0].id === 'success_cardinality')
+        );
+      };
+
+      const isSuccessfulValidation = (data) => {
+        const highModelPlotCardinality = getModelPlotCardinality(data);
+
+        return {
+          success: hasSuccessMessage(data),
+          highCardinality: highModelPlotCardinality,
+        };
+      };
+
       const validateCardinality = function () {
         $scope.ui.cardinalityValidator.status = STATUS.RUNNING;
         $scope.ui.cardinalityValidator.message = '';
 
-        // create temporary job since cardinality validation expects that format -> Note: Do I need to clear out tempJob somewhere?
+        // create temporary job since cardinality validation expects that format -> Note: need to clear out tempJob somewhere?
         const tempJob = $scope.getJobFromConfig($scope.formConfig);
 
         ml.validateCardinality(tempJob)
           .then((response) => {
             console.log(response); // remove
-            if (response.error) {
-              errorHandler(response.message);
-              return;
-            }
-            // Successful validation: [{ id: 'success_cardinality' }]
-            const successfulValidation = (
-              Array.isArray(response) &&
-              (response.length === 1) &&
-              (response[0].id === 'success_cardinality')
-            );
+            const validationResult = isSuccessfulValidation(response);
 
-            if (successfulValidation) {
+            if (validationResult.success === true && validationResult.highCardinality === undefined) {
               $scope.formConfig.enableModelPlot = true;
+              $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
             } else {
-              console.log('Validation not successful', response);
-              // TODO: show are you sure message + response message if cardinality > 100
-              // 0:{id:"cardinality_model_plot_high",modelPlotCardinality:11405},
-              // 1:{id:"cardinality_partition_field",fieldName:"clientip"}
+              console.log('Validation not successful', response); // remove
+              $scope.ui.cardinalityValidator.message = `The estimated cardinality of ${validationResult.highCardinality}
+                of fields relevant to creating model plots might result in resource intensive jobs.`;
+              $scope.ui.cardinalityValidator.status = STATUS.WARNING;
             }
-
-            $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
           })
           .catch(errorHandler);
+      };
+
+      // Re-validate cardinality for updated fields/splitField
+      // when enable model plot is checked and form valid
+      const revalidateCardinalityOnFieldChange = () => {
+        if ($scope.formConfig.enableModelPlot === true && $scope.ui.formValid === true) {
+          validateCardinality();
+        }
       };
 
       $scope.handleCheckboxChange = (isChecked) => {
@@ -76,13 +107,18 @@ module.directive('mlEnableModelPlotCheckbox', function () {
           $scope.formConfig.enableModelPlot = true;
           validateCardinality();
         } else {
+          $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+          $scope.ui.cardinalityValidator.message = '';
           $scope.formConfig.enableModelPlot = false;
         }
       };
 
-      // watch for these changes
+      // Update checkbox on these changes
       $scope.$watch('ui.formValid', updateCheckbox, true);
       $scope.$watch('ui.cardinalityValidator.status', updateCheckbox, true);
+      // Fire off cardinality validatation when fields and/or split by field is updated
+      $scope.$watch('formConfig.fields', revalidateCardinalityOnFieldChange, true);
+      $scope.$watch('formConfig.splitField', revalidateCardinalityOnFieldChange, true);
 
       function updateCheckbox() {
         const checkboxDisabled = (
@@ -90,12 +126,15 @@ module.directive('mlEnableModelPlotCheckbox', function () {
           $scope.ui.formValid !== true
         );
         const validatorRunning = ($scope.ui.cardinalityValidator.status === STATUS.RUNNING);
+        const warningStatus = ($scope.ui.cardinalityValidator.status === STATUS.WARNING);
         const checkboxText = (validatorRunning) ? 'Validating cardinality...' : 'Enable model plot';
 
         const props = {
           checkboxDisabled,
           checkboxText,
           onCheckboxChange: $scope.handleCheckboxChange,
+          warningContent: $scope.ui.cardinalityValidator.message,
+          warningStatus,
         };
 
         ReactDOM.render(
