@@ -10,35 +10,43 @@
   </div>
 
   <div class="checkbox">
-    <label
-      i18n-id="tableVis.params.showMetricsLabel"
-      i18n-default-message="{input} Show metrics for every bucket/level"
-      i18n-values="{ input: '<input type=\'checkbox\' ng-model=\'editorState.params.showMetricsAtAllLevels\' data-test-subj=\'showMetricsAtAllLevels\'>' }"
-    ></label>
+    <label>
+      <input type="checkbox" ng-model="editorState.params.showMetricsAtAllLevels" data-test-subj="showMetricsAtAllLevels">
+      <span
+        i18n-id="tableVis.params.showMetricsLabel"
+        i18n-default-message="Show metrics for every bucket/level"
+      ></span>
+    </label>
   </div>
 
   <div class="checkbox">
-    <label
-      i18n-id="tableVis.params.showPartialRowsLabel"
-      i18n-default-message="{input} Show partial rows"
-      i18n-values="{ input: '<input type=\'checkbox\' ng-model=\'editorState.params.showPartialRows\'>' }"
-    ></label>
+    <label>
+      <input type="checkbox" ng-model="editorState.params.showPartialRows">
+      <span
+        i18n-id="tableVis.params.showPartialRowsLabel"
+        i18n-default-message="Show partial rows"
+      ></span>
+    </label>
   </div>
 
   <div class="checkbox">
-    <label
-      i18n-id="tableVis.params.calculateMetricsLabel"
-      i18n-default-message="{input} Calculate metrics for every bucket/level"
-      i18n-values="{ input: '<input type=\'checkbox\' ng-model=\'metricsAtAllLevels\' disabled>' }"
-    ></label>
+    <label>
+      <input type="checkbox" ng-model="metricsAtAllLevels" disabled>
+      <span
+        i18n-id="tableVis.params.calculateMetricsLabel"
+        i18n-default-message="Calculate metrics for every bucket/level"
+      ></span>
+    </label>
   </div>
 
   <div class="checkbox">
-    <label
-      i18n-id="tableVis.params.showTotalLabel"
-      i18n-default-message="{input} Show total"
-      i18n-values="{ input: '<input type=\'checkbox\' ng-model=\'editorState.params.showTotal\'>' }"
-    ></label>
+    <label>
+      <input type="checkbox" ng-model="editorState.params.showTotal">
+      <span
+        i18n-id="tableVis.params.showTotalLabel"
+        i18n-default-message="Show total"
+      ></span>
+    </label>
   </div>
 
   <div>
