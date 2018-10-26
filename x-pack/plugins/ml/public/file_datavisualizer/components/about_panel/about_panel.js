@@ -52,7 +52,7 @@ export function AboutPanel({ onFilePickerChange }) {
 
 export function LoadingPanel() {
   return (
-    <EuiPage restrictWidth={200}>
+    <EuiPage restrictWidth={400}>
       <EuiPageBody>
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
