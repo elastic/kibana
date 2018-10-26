@@ -107,7 +107,7 @@ function ResponsiveGrid({
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 
-export class DashboardGridUi extends React.Component {
+class DashboardGridUi extends React.Component {
   constructor(props) {
     super(props);
     // A mapping of panelIndexes to grid items so we can set the zIndex appropriately on the last focused

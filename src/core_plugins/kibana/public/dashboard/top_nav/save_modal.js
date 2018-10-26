@@ -66,7 +66,7 @@ class DashboardSaveModalUi extends React.Component {
       <Fragment>
         <EuiFormRow
           label={<FormattedMessage
-            id="kbn.dashboard.topNav.saveModal.descriptionFormRowLabel"
+            id="kbn.dashboard.topNav.saveModal.options.descriptionFormRowLabel"
             defaultMessage="Description"
           />}
         >
@@ -80,11 +80,11 @@ class DashboardSaveModalUi extends React.Component {
 
         <EuiFormRow
           label={<FormattedMessage
-            id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+            id="kbn.dashboard.topNav.saveModal.options.storeTimeWithDashboardFormRowLabel"
             defaultMessage="Store time with dashboard"
           />}
           helpText={<FormattedMessage
-            id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
+            id="kbn.dashboard.topNav.saveModal.options.storeTimeWithDashboardFormRowHelpText"
             defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
           />}
         >

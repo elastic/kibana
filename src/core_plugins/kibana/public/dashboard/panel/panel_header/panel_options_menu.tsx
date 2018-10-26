@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -33,6 +33,7 @@ export interface PanelOptionsMenuProps {
   closeContextMenu: () => void;
   panels: EuiContextMenuPanelDescriptor[];
   isViewMode: boolean;
+  intl: InjectedIntl;
 }
 
 function PanelOptionsMenuUi({
@@ -49,7 +50,7 @@ function PanelOptionsMenuUi({
       color="text"
       className={isViewMode && !isPopoverOpen ? 'dshPanel_optionsMenuButton' : ''}
       aria-label={intl.formatMessage({
-        id: 'kbn.dashboard.panel.optionsMenu.panelOptionsButton.ariaLabel',
+        id: 'kbn.dashboard.panel.optionsMenu.panelOptionsButtonAriaLabel',
         defaultMessage: 'Panel options',
       })}
       data-test-subj="dashboardPanelToggleMenuIcon"

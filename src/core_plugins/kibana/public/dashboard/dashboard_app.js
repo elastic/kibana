@@ -270,7 +270,7 @@ app.directive('dashboardApp', function ($injector) {
         }
 
         confirmModal(
-          i18n('kbn.dashboard.app.changeViewModeConfirmModal.description',
+          i18n('kbn.dashboard.app.changeViewModeConfirmModal.discardChangesDescription',
             { defaultMessage: 'Once you discard your changes, there\'s no getting them back.' }
           ),
           {
@@ -283,7 +283,7 @@ app.directive('dashboardApp', function ($injector) {
               { defaultMessage: 'Continue editing' }
             ),
             defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
-            title: i18n('kbn.dashboard.app.changeViewModeConfirmModal.title',
+            title: i18n('kbn.dashboard.app.changeViewModeConfirmModal.discardChangesTitle',
               { defaultMessage: 'Discard changes to dashboard?' }
             )
           }

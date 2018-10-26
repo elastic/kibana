@@ -112,9 +112,12 @@ class DashboardListingUi extends React.Component {
       await this.props.delete(this.state.selectedIds);
     } catch (error) {
       toastNotifications.addDanger({
-        title: this.props.intl.formatMessage('kbn.dashboard.listing.unableToDeleteDashboardsDangerMessage', {
-          defaultMessage: 'Unable to delete dashboard(s)',
-        }),
+        title: (
+          <FormattedMessage
+            id="kbn.dashboard.listing.unableToDeleteDashboardsDangerMessage"
+            defaultMessage="Unable to delete dashboard(s)"
+          />
+        ),
         text: `${error}`,
       });
     }
@@ -197,18 +200,25 @@ class DashboardListingUi extends React.Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={this.props.intl.formatMessage('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.title', {
-            defaultMessage: 'Delete selected dashboards?',
-          })}
+          title={
+            <FormattedMessage
+              id="kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.title"
+              defaultMessage="Delete selected dashboards?"
+            />
+          }
           onCancel={this.closeDeleteModal}
           onConfirm={this.deleteSelectedItems}
-          cancelButtonText={this.props.intl.formatMessage('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.cancelButtonLabel', {
-            defaultMessage: 'Cancel',
-          })}
+          cancelButtonText={
+            <FormattedMessage
+              id="kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
           confirmButtonText={
-            this.props.intl.formatMessage('kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.confirmButtonLabel', {
-              defaultMessage: 'Delete',
-            })
+            <FormattedMessage
+              id="kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.confirmButtonLabel"
+              defaultMessage="Delete"
+            />
           }
           defaultFocusedButton="cancel"
         >
@@ -228,35 +238,41 @@ class DashboardListingUi extends React.Component {
       return (
         <React.Fragment>
           <EuiCallOut
-            title={this.props.intl.formatMessage('kbn.dashboard.listing.listingLimitExceeded.title', {
-              defaultMessage: 'Listing limit exceeded',
-            })}
+            title={
+              <FormattedMessage
+                id="kbn.dashboard.listing.listingLimitExceeded.title"
+                defaultMessage="Listing limit exceeded"
+              />
+            }
             color="warning"
             iconType="help"
           >
             <p>
-              {this.props.intl.formatMessage('kbn.dashboard.listing.listingLimitExceeded.description', {
-                defaultMessage: 'You have {totalDashboards} dashboards, \
-but your {listingLimitText} setting prevents the table below from displaying more than {listingLimitValue}. \
-You can change this setting under {advancedSettingsLink}.',
-                values: {
+              <FormattedMessage
+                id="kbn.dashboard.listing.listingLimitExceeded.description"
+                // eslint-disable-next-line max-len
+                defaultMessage="You have {totalDashboards} dashboards, but your {listingLimitText} setting prevents the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
+                values={{
                   totalDashboards: this.state.totalDashboards,
                   listingLimitValue: this.props.listingLimit,
                   listingLimitText: (
-                    <strong>{this.props.intl.formatMessage('kbn.dashboard.listing.listingLimitExceeded.listingLimitText', {
-                      defaultMessage: 'listingLimit',
-                    })}
+                    <strong>
+                      <FormattedMessage
+                        id="kbn.dashboard.listing.listingLimitExceeded.listingLimitText"
+                        defaultMessage="listingLimit"
+                      />
                     </strong>
                   ),
                   advancedSettingsLink: (
                     <EuiLink href="#/management/kibana/settings">
-                      {this.props.intl.formatMessage('kbn.dashboard.listing.listingLimitExceeded.advancedSettingsLinkText', {
-                        defaultMessage: 'Advanced Settings',
-                      })}
+                      <FormattedMessage
+                        id="kbn.dashboard.listing.listingLimitExceeded.advancedSettingsLinkText"
+                        defaultMessage="Advanced Settings"
+                      />
                     </EuiLink>
                   )
-                },
-              })}
+                }}
+              />
             </p>
           </EuiCallOut>
           <EuiSpacer size="m" />
@@ -270,9 +286,12 @@ You can change this setting under {advancedSettingsLink}.',
       return '';
     }
 
-    return this.props.intl.formatMessage('kbn.dashboard.listing.noMatchedDashboardsMessage', {
-      defaultMessage: 'No dashboards matched your search.',
-    });
+    return (
+      <FormattedMessage
+        id="kbn.dashboard.listing.noMatchedDashboardsMessage"
+        defaultMessage="No dashboards matched your search."
+      />
+    );
   }
 
   renderNoItemsMessage() {
@@ -350,6 +369,7 @@ You can change this setting under {advancedSettingsLink}.',
   }
 
   renderSearchBar() {
+    const { intl } = this.props;
     let deleteBtn;
     if (this.state.selectedIds.length > 0) {
       deleteBtn = (
@@ -374,9 +394,13 @@ You can change this setting under {advancedSettingsLink}.',
         {deleteBtn}
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
-            aria-label="Filter dashboards"
-            placeholder={this.props.intl.formatMessage('kbn.dashboard.listing.searchBar.searchField.placeholder', {
-              defaultMessage: 'Search...',
+            aria-label={intl.formatMessage({
+              id: 'kbn.dashboard.listing.searchBar.searchFieldAriaLabel',
+              defaultMessage: 'Filter dashboards',
+            })}
+            placeholder={intl.formatMessage({
+              id: 'kbn.dashboard.listing.searchBar.searchFieldPlaceholder',
+              defaultMessage: 'Search…',
             })}
             fullWidth
             value={this.state.filter}
@@ -393,10 +417,12 @@ You can change this setting under {advancedSettingsLink}.',
   }
 
   renderTable() {
+    const { intl } = this.props;
     const tableColumns = [
       {
         field: 'title',
-        name: this.props.intl.formatMessage('kbn.dashboard.listing.table.titleColumn.title', {
+        name: intl.formatMessage({
+          id: 'kbn.dashboard.listing.table.titleColumnName',
           defaultMessage: 'Title',
         }),
         sortable: true,
@@ -411,7 +437,8 @@ You can change this setting under {advancedSettingsLink}.',
       },
       {
         field: 'description',
-        name: this.props.intl.formatMessage('kbn.dashboard.listing.table.descriptionColumn.title', {
+        name: intl.formatMessage({
+          id: 'kbn.dashboard.listing.table.descriptionColumnName',
           defaultMessage: 'Description',
         }),
         dataType: 'string',
@@ -420,7 +447,8 @@ You can change this setting under {advancedSettingsLink}.',
     ];
     if (!this.props.hideWriteControls) {
       tableColumns.push({
-        name: this.props.intl.formatMessage('kbn.dashboard.listing.table.actionsColumn.title', {
+        name: intl.formatMessage({
+          id: 'kbn.dashboard.listing.table.actionsColumnName',
           defaultMessage: 'Actions',
         }),
         actions: [

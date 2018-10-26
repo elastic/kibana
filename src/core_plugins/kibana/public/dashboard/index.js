@@ -165,10 +165,10 @@ uiRoutes
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'dashboard',
-    title: i18n.translate('kbn.dashboard.featureCatalogue.dashboard.title', {
+    title: i18n.translate('kbn.dashboard.featureCatalogue.dashboardTitle', {
       defaultMessage: 'Dashboard',
     }),
-    description: i18n.translate('kbn.dashboard.featureCatalogue.dashboard.description', {
+    description: i18n.translate('kbn.dashboard.featureCatalogue.dashboardDescription', {
       defaultMessage: 'Display and share a collection of visualizations and saved searches.',
     }),
     icon: 'dashboardApp',

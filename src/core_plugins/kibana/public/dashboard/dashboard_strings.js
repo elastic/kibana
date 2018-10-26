@@ -31,20 +31,20 @@ export function getDashboardTitle(title, viewMode, isDirty) {
   const isEditMode = viewMode === DashboardViewMode.EDIT;
   let displayTitle;
 
-  if (isEditMode && isDirty && isEditMode) {
+  if (isEditMode && isDirty) {
     displayTitle = i18n.translate('kbn.dashboard.strings.dashboardUnsavedEditTitle', {
       defaultMessage: 'Editing {title} (unsaved)',
-      title,
+      values: { title },
     });
   } else if (isEditMode && isDirty) {
     displayTitle = i18n.translate('kbn.dashboard.strings.dashboardUnsavedTitle', {
       defaultMessage: '{title} (unsaved)',
-      title,
+      values: { title },
     });
   } else if (isEditMode) {
     displayTitle = i18n.translate('kbn.dashboard.strings.dashboardEditTitle', {
       defaultMessage: 'Editing {title}',
-      title,
+      values: { title },
     });
   } else {
     displayTitle = title;

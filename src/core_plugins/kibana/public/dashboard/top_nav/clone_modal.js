@@ -92,7 +92,7 @@ class DashboardCloneModalUi extends React.Component {
       <Fragment>
         <EuiCallOut
           title={this.props.intl.formatMessage({
-            id: 'kbn.dashboard.topNav.cloneModal.dashboardWithTitleExistsTitle',
+            id: 'kbn.dashboard.topNav.cloneModal.dashboardExistsTitle',
             defaultMessage: 'A Dashboard with the title {newDashboardName} already exists.',
             values: {
               newDashboardName: this.state.newDashboardName,
@@ -101,21 +101,22 @@ class DashboardCloneModalUi extends React.Component {
           color="warning"
           data-test-subj="titleDupicateWarnMsg"
         >
-          <FormattedMessage
-            id="kbn.dashboard.topNav.cloneModal.clickToCloneDashboardWithDuplicateTitleDescription"
-            defaultMessage="Click {confirmClone} to clone the dashboard with the duplicate title."
-            values={{
-              confirmClone: (
-                <strong>
-                  <FormattedMessage
-                    id="kbn.dashboard.topNav.cloneModal.confirmCloneTDescription"
-                    defaultMessage="Confirm Clone"
-                  />
-                </strong>
-              ),
-            }}
-            tagName="p"
-          />
+          <p>
+            <FormattedMessage
+              id="kbn.dashboard.topNav.cloneModal.dashboardExistsDescription"
+              defaultMessage="Click {confirmClone} to clone the dashboard with the duplicate title."
+              values={{
+                confirmClone: (
+                  <strong>
+                    <FormattedMessage
+                      id="kbn.dashboard.topNav.cloneModal.confirmCloneTDescription"
+                      defaultMessage="Confirm Clone"
+                    />
+                  </strong>
+                ),
+              }}
+            />
+          </p>
         </EuiCallOut>
         <EuiSpacer />
       </Fragment>

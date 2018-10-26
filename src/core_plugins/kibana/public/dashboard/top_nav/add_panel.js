@@ -132,7 +132,7 @@ class DashboardAddPanelUi extends React.Component {
 
     this.lastToast = toastNotifications.addSuccess({
       title: this.props.intl.formatMessage({
-        id: 'kbn.dashboard.topNav.addPanel.toastNotifications.selectedTadAddedToDashboardSuccessMessageTitle',
+        id: 'kbn.dashboard.topNav.addPanel.toastNotifications.selectedTabAddedToDashboardSuccessMessageTitle',
         defaultMessage: '{selectedTabName} was added to your dashboard',
         values: {
           selectedTabName: this.state.selectedTab.name,

@@ -20,13 +20,14 @@
 import React, { ChangeEvent, KeyboardEvent } from 'react';
 
 import { EuiButtonEmpty, EuiFieldText, EuiFormRow, keyCodes } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 export interface PanelOptionsMenuFormProps {
   title?: string;
   onReset: () => void;
   onUpdatePanelTitle: (newPanelTitle: string) => void;
   onClose: () => void;
+  intl: InjectedIntl;
 }
 
 function PanelOptionsMenuFormUi({
@@ -63,7 +64,7 @@ function PanelOptionsMenuFormUi({
           onChange={onInputChange}
           onKeyDown={onKeyDown}
           aria-label={intl.formatMessage({
-            id: 'kbn.dashboard.panel.optionsMenuForm.titleInput.ariaLabel',
+            id: 'kbn.dashboard.panel.optionsMenuForm.panelTitleInputAriaLabel',
             defaultMessage: 'Changes to this input are applied immediately. Press enter to exit.',
           })}
         />
