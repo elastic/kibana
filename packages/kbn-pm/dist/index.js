@@ -33185,7 +33185,7 @@ exports.main = function commonjsMain(args) {
     var source = __webpack_require__(17).readFileSync(__webpack_require__(8).normalize(args[1]), "utf8");
     return exports.parser.parse(source);
 };
-if (typeof module !== 'undefined' && __webpack_require__.c[__webpack_require__.s] === module) {
+if ( true && __webpack_require__.c[__webpack_require__.s] === module) {
   exports.main(process.argv.slice(1));
 }
 }
