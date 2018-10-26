@@ -141,9 +141,11 @@ export const request: Record<
 export async function startTestServers({
   adjustTimeout,
   settings = {},
+  license = 'oss',
 }: {
   adjustTimeout: (timeout: number) => void;
   settings: Record<string, any>;
+  license?: 'oss' | 'basic' | 'trial';
 }) {
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
@@ -158,7 +160,7 @@ export async function startTestServers({
   log.info('starting elasticsearch');
   log.indent(4);
 
-  const es = createEsTestCluster({ log });
+  const es = createEsTestCluster({ log, license });
 
   log.indent(-4);
 

@@ -6,13 +6,14 @@
 // file.skip
 
 // @ts-ignore
-import { createEsTestCluster } from '@kbn/test';
+import { esTestConfig, kbnTestConfig, OPTIMIZE_BUNDLE_DIR } from '@kbn/test';
 import { resolve } from 'path';
+import { format as formatUrl } from 'url';
 // @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
 import { contractTests } from './test_contract';
 
-const root = kbnTestServer.createRootWithCorePlugins({
+const kbnSettings = {
   plugins: { paths: [resolve(__dirname, '../../../../../../../../node_modules/x-pack')] },
   xpack: {
     reporting: { enabled: false },
@@ -26,29 +27,33 @@ const root = kbnTestServer.createRootWithCorePlugins({
 
     rollup: { enabled: false },
   },
-  optimize: {
-    enabled: false,
+  elasticsearch: {
+    url: formatUrl(esTestConfig.getUrlParts()),
+    username: esTestConfig.getUrlParts().username,
+    password: esTestConfig.getUrlParts().password,
   },
 
   logging: { verbose: true, silent: false },
-});
+};
 
-let legacyServer: any;
+let servers: any;
 contractTests('Kibana  Framework Adapter', {
-  before: async () => {
-    await root.start();
-
-    legacyServer = kbnTestServer.getKbnServer(root);
+  async before(timeout: any) {
+    servers = await kbnTestServer.startTestServers({
+      adjustTimeout: timeout,
+      settings: kbnSettings,
+      license: 'trial',
+    });
 
     // const config = legacyServer.server.config();
     // config.extendSchema(beatsPluginConfig, {}, configPrefix);
 
     // config.set('xpack.beats.encryptionKey', 'foo');
   },
-  after: async () => {
-    await root.shutdown();
+  async after() {
+    await servers.stop();
   },
   adapterSetup: () => {
-    return legacyServer; // new KibanaBackendFrameworkAdapter(legacyServer.server);
+    return servers.kbnServer; // new KibanaBackendFrameworkAdapter(legacyServer.server);
   },
 });

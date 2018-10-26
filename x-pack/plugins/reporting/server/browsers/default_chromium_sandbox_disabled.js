@@ -5,11 +5,11 @@
  */
 
 import getosSync from 'getos';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 
 const getos = promisify(getosSync);
 
-const distroSupportsUnprivilegedUsernamespaces = (distro) => {
+const distroSupportsUnprivilegedUsernamespaces = distro => {
   // Debian 7 and 8 don't support usernamespaces by default
   // this should be reevaluated when Debian 9 is available
   if (distro.toLowerCase() === 'debian') {
