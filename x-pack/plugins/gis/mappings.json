@@ -10,7 +10,16 @@
       "version": {
         "type": "integer"
       },
-      "data": {
+      "bounds": {
+        "type": "geo_shape"
+      },
+      "mapStateJSON": {
+        "type": "text"
+      },
+      "layerListJSON": {
+        "type": "text"
+      },
+      "uiStateJSON": {
         "type": "text"
       }
     }

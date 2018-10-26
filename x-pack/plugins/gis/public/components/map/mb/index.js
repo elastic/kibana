@@ -10,6 +10,7 @@ import { mapExtentChanged, mapReady, mapDestroyed } from '../../../actions/store
 import { getLayerList, getMapState, getMapReady } from "../../../selectors/map_selectors";
 
 function mapStateToProps(state = {}) {
+  console.log('state', state);
   return {
     isMapReady: getMapReady(state),
     mapState: getMapState(state),

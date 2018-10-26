@@ -72,28 +72,33 @@ app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbStat
   ]);
   config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
-  function doSave(saveOptions) {
-    return savedWorkspace.save(saveOptions)
-      .then(function (id) {
-        if (id) {
-          toastNotifications.addSuccess({
-            title: `Saved '${savedWorkspace.title}'`,
-            'data-test-subj': 'saveWorkspaceSuccess',
-          });
+  async function doSave(saveOptions) {
+    const store = await  getStore();
+    savedWorkspace.syncWithStore(store.getState());
 
-          if (savedWorkspace.id !== $route.current.params.id) {
-            kbnUrl.change(`workspace/{{id}}`, { id: savedWorkspace.id });
-          }
-        }
-        return { id };
-      }, (err) => {
-        toastNotifications.addDanger({
-          title: `Error on saving '${savedWorkspace.title}'`,
-          text: err.message,
-          'data-test-subj': 'saveWorkspaceError',
-        });
-        return { error: err };
+    let id;
+    try {
+      id = await savedWorkspace.save(saveOptions);
+    } catch(err) {
+      toastNotifications.addDanger({
+        title: `Error on saving '${savedWorkspace.title}'`,
+        text: err.message,
+        'data-test-subj': 'saveWorkspaceError',
       });
+      return { error: err };
+    }
+
+    if (id) {
+      toastNotifications.addSuccess({
+        title: `Saved '${savedWorkspace.title}'`,
+        'data-test-subj': 'saveWorkspaceSuccess',
+      });
+
+      if (savedWorkspace.id !== $route.current.params.id) {
+        kbnUrl.change(`workspace/{{id}}`, { id: savedWorkspace.id });
+      }
+    }
+    return { id };
   }
 
   $scope.topNavMenu = [{
@@ -160,8 +165,6 @@ app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbStat
       isDarkTheme = getIsDarkTheme(store.getState());
       updateTheme();
     }
-
-    // TODO sync savedWorkspace with store
   }
 
   function updateTheme() {

@@ -7,6 +7,14 @@
 import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/courier';
+import {
+  getTimeFilters,
+  getMapZoom,
+  getMapCenter,
+  getLayerListRaw,
+  getMapExtent,
+} from '../../selectors/map_selectors';
+import { getIsDarkTheme } from '../../store/ui';
 
 const module = uiModules.get('app/gis');
 
@@ -34,9 +42,16 @@ module.factory('SavedGisWorkspace', function (Private) {
 
   SavedGisWorkspace.type = 'gis-workspace';
 
+  // Mappings are used to place object properties into saved object _source
   SavedGisWorkspace.mapping = {
     title: 'text',
     description: 'text',
+    mapStateJSON: 'text',
+    layerListJSON: 'text',
+    uiStateJSON: 'text',
+    bounds: {
+      type: 'object'
+    }
   };
 
   SavedGisWorkspace.fieldOrder = ['title', 'description'];
@@ -45,6 +60,33 @@ module.factory('SavedGisWorkspace', function (Private) {
 
   SavedGisWorkspace.prototype.getFullPath = function () {
     return `/app/gis#workspace/${this.id}`;
+  };
+
+  SavedGisWorkspace.prototype.syncWithStore = function (state) {
+    const layerList = getLayerListRaw(state);
+    // Layer list from store contains requested data.
+    // We do not want to store this in the saved object so it is getting removed
+    const layerListConfigOnly = layerList.map(layer => {
+      delete layer.dataRequests;
+      return layer;
+    });
+    this.layerListJSON = JSON.stringify(layerListConfigOnly);
+
+    this.mapStateJSON = JSON.stringify({
+      zoom: getMapZoom(state),
+      center: getMapCenter(state),
+      timeFilters: getTimeFilters(state),
+    });
+
+    this.uiStateJSON = JSON.stringify({
+      isDarkMode: getIsDarkTheme(state),
+    });
+
+    const mapExtent = getMapExtent(state);
+    this.bounds = {
+      "type": "envelope",
+      "coordinates": [ [mapExtent.min_lon, mapExtent.max_lat], [mapExtent.max_lon, mapExtent.min_lat] ]
+    };
   };
 
   return SavedGisWorkspace;

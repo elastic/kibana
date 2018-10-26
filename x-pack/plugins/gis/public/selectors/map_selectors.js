@@ -84,13 +84,16 @@ const getSelectedLayerId = ({ map }) => {
   return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;
 };
 
-const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
+export const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
 
 export const getMapExtent = ({ map }) => map.mapState.extent ?
   map.mapState.extent : {};
 
 export const getMapZoom = ({ map }) => map.mapState.zoom ?
   map.mapState.zoom : 0;
+
+export const getMapCenter = ({ map }) => map.mapState.center ?
+  map.mapState.center : { lat: 0, lon: 0 };
 
 export const getMapColors = ({ map }) => {
   return map.layerList.reduce((accu, layer) => {
