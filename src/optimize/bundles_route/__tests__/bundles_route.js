@@ -48,7 +48,6 @@ describe('optimizer/bundle route', () => {
     } = options;
 
     const server = new Hapi.Server();
-    server.connection({ port: 0 });
     server.register([Inert]);
 
     server.route(createBundlesRoute({
@@ -229,18 +228,18 @@ describe('optimizer/bundle route', () => {
   });
 
   describe('js file outside regularBundlesPath', () => {
-    it('responds with a 403', async () => {
+    it('responds with a 404', async () => {
       const server = createServer();
 
       const response = await server.inject({
         url: '/bundles/../outside_output.js'
       });
 
-      expect(response.statusCode).to.be(403);
+      expect(response.statusCode).to.be(404);
       expect(response.result).to.eql({
-        error: 'Forbidden',
-        message: 'Forbidden',
-        statusCode: 403
+        error: 'Not Found',
+        message: 'Not Found',
+        statusCode: 404
       });
     });
   });

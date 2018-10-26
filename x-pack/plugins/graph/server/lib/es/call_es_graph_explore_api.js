@@ -35,6 +35,6 @@ export async function callEsGraphExploreApi({ callCluster, index, query }) {
       throw Boom.badRequest(relevantCause.reason);
     }
 
-    throw Boom.wrap(error);
+    throw Boom.boomify(error);
   }
 }

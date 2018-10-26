@@ -953,7 +953,7 @@ export const metrics = {
   ccr_sync_lag_time: new MillisecondsToSecondsMetric({
     title: 'Fetch delay', // title to use for the chart
     type: 'ccr',
-    field: 'ccr_stats.time_since_last_fetch_millis',
+    field: 'ccr_stats.time_since_last_read_millis',
     label: 'Fetch delay',
     description: 'The amount of time the follower index is lagging behind the leader.',
     format: SMALL_FLOAT,

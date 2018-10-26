@@ -34,7 +34,7 @@ export function registerFieldsForWildcardRoute(server) {
         }).default()
       }
     },
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const {
         meta_fields: metaFields,
         fields,
@@ -87,15 +87,15 @@ export function registerFieldsForWildcardRoute(server) {
               })
           );
         });
-        return reply({
-          fields: rollupFields
-        });
 
+        return {
+          fields: rollupFields
+        };
       } catch(err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     }
   });

@@ -293,6 +293,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('geo.src');
         await PageObjects.visualize.setSize(3);
+        await PageObjects.visualize.toggleOpenEditor(4, 'false');
         await PageObjects.visualize.clickGo();
       });
 
@@ -353,6 +354,21 @@ export default function ({ getService, getPageObjects }) {
             [ 'US', '189', 'US', '13' ],
           ]
         ]);
+      });
+
+      it('should allow nesting multiple splits', async () => {
+        // This test can be removed as soon as we remove the nested split table
+        // feature (https://github.com/elastic/kibana/issues/24560).
+        await PageObjects.visualize.clickData();
+        await PageObjects.visualize.clickAddBucket();
+        await PageObjects.visualize.clickBucket('Split Table');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.clickSplitDirection('column');
+        await PageObjects.visualize.selectField('machine.os.raw');
+        await PageObjects.visualize.setSize(2);
+        await PageObjects.visualize.clickGo();
+        const splitCount = await PageObjects.visualize.countNestedTables();
+        expect(splitCount).to.be.eql([ 12, 10, 8 ]);
       });
     });
 
