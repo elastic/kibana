@@ -27,6 +27,15 @@ const mockServer = {
         callWithRequest: (...args) => Promise.resolve(args),
       }),
     },
+    // TODO: remove this when we use the method exposed by security https://github.com/elastic/kibana/pull/24616
+    xpack_main: {
+      info: {
+        feature: () => ({
+          isAvailable: () => true,
+          isEnabled: () => true,
+        }),
+      },
+    },
   },
   config: () => ({
     has: () => false,

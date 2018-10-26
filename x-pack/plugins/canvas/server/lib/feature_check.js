@@ -5,13 +5,8 @@
  */
 
 export const isSecurityEnabled = server => {
-  const securityPlugin = server.plugins.security;
-  const xpackInfo = server.plugins.xpack_main.info;
+  const kibanaSecurity = server.plugins.security;
+  const esSecurity = server.plugins.xpack_main.info.feature('security');
 
-  return (
-    securityPlugin &&
-    xpackInfo.isAvailable() &&
-    xpackInfo.feature('security').isEnabled() &&
-    !xpackInfo.license.isOneOf('basic')
-  );
+  return kibanaSecurity && esSecurity.isAvailable() && esSecurity.isEnabled();
 };
