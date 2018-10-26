@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from 'expect.js';
 import sinon from 'sinon';
 
 import { xpackInfoRoute } from '../xpack_info';
 
 describe('XPackInfo routes', () => {
   let serverStub;
-  let replyStub;
   beforeEach(() => {
     serverStub = {
       route: sinon.stub(),
@@ -20,8 +20,6 @@ describe('XPackInfo routes', () => {
         }
       }
     };
-
-    replyStub = sinon.stub();
 
     xpackInfoRoute(serverStub);
   });
@@ -38,16 +36,11 @@ describe('XPackInfo routes', () => {
     serverStub.plugins.xpack_main.info.isAvailable.returns(false);
 
     const onRouteHandler = serverStub.route.firstCall.args[0].handler;
-    onRouteHandler({}, replyStub);
+    const response = onRouteHandler();
 
-    sinon.assert.calledWithExactly(
-      replyStub,
-      sinon.match({
-        isBoom: true,
-        message: 'Not Found',
-        output: { statusCode: 404 },
-      })
-    );
+    expect(response.isBoom).to.be(true);
+    expect(response.message).to.be('Not Found');
+    expect(response.output.statusCode).to.be(404);
   });
 
   it('replies with pre-processed `xpackInfo` if it is available.', () => {
@@ -71,27 +64,24 @@ describe('XPackInfo routes', () => {
     });
 
     const onRouteHandler = serverStub.route.firstCall.args[0].handler;
-    onRouteHandler({}, replyStub);
+    const response = onRouteHandler();
 
-    sinon.assert.calledWithExactly(
-      replyStub,
-      {
-        license: {
-          type: 'gold',
-          is_active: true,
-          expiry_date_in_millis: 1509368280381
-        },
-        features: {
-          security: {
-            show_login: true,
-            allow_login: true,
-            show_links: false,
-            allow_role_document_level_security: false,
-            allow_role_field_level_security: false,
-            links_message: 'Message'
-          }
+    expect(response).to.eql({
+      license: {
+        type: 'gold',
+        is_active: true,
+        expiry_date_in_millis: 1509368280381
+      },
+      features: {
+        security: {
+          show_login: true,
+          allow_login: true,
+          show_links: false,
+          allow_role_document_level_security: false,
+          allow_role_field_level_security: false,
+          links_message: 'Message'
         }
       }
-    );
+    });
   });
 });
