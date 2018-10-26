@@ -15,7 +15,7 @@ import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { Poller } from '../../../../common/poller';
-import { jobStatuses } from '../constants/job_statuses';
+import { JobStatuses } from '../constants/job_statuses';
 import { downloadReport } from '../lib/download_report';
 import { jobQueueClient, JobQueueEntry } from '../lib/job_queue_client';
 import { ReportErrorButton } from './report_error_button';
@@ -184,11 +184,11 @@ class ReportListingUi extends Component<Props, State> {
             );
           }
           let statusTimestamp;
-          if (status === jobStatuses.PROCESSING && record.started_at) {
+          if (status === JobStatuses.PROCESSING && record.started_at) {
             statusTimestamp = this.formatDate(record.started_at);
           } else if (
             record.completed_at &&
-            (status === jobStatuses.COMPLETED || status === jobStatuses.FAILED)
+            (status === JobStatuses.COMPLETED || status === JobStatuses.FAILED)
           ) {
             statusTimestamp = this.formatDate(record.completed_at);
           }
@@ -263,7 +263,7 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   private renderDownloadButton = (record: Job) => {
-    if (record.status !== jobStatuses.COMPLETED) {
+    if (record.status !== JobStatuses.COMPLETED) {
       return;
     }
 
@@ -297,7 +297,7 @@ class ReportListingUi extends Component<Props, State> {
   };
 
   private renderReportErrorButton = (record: Job) => {
-    if (record.status !== jobStatuses.FAILED) {
+    if (record.status !== JobStatuses.FAILED) {
       return;
     }
 
@@ -353,27 +353,27 @@ class ReportListingUi extends Component<Props, State> {
       const { intl } = this.props;
       const getStatusLabel = (statusString: string) => {
         switch (statusString) {
-          case jobStatuses.PENDING:
+          case JobStatuses.PENDING:
             return intl.formatMessage({
               id: 'xpack.reporting.jobStatuses.pendingText',
               defaultMessage: 'pending',
             });
-          case jobStatuses.PROCESSING:
+          case JobStatuses.PROCESSING:
             return intl.formatMessage({
               id: 'xpack.reporting.jobStatuses.processingText',
               defaultMessage: 'processing',
             });
-          case jobStatuses.COMPLETED:
+          case JobStatuses.COMPLETED:
             return intl.formatMessage({
               id: 'xpack.reporting.jobStatuses.completedText',
               defaultMessage: 'completed',
             });
-          case jobStatuses.FAILED:
+          case JobStatuses.FAILED:
             return intl.formatMessage({
               id: 'xpack.reporting.jobStatuses.failedText',
               defaultMessage: 'failed',
             });
-          case jobStatuses.CANCELLED:
+          case JobStatuses.CANCELLED:
             return intl.formatMessage({
               id: 'xpack.reporting.jobStatuses.cancelledText',
               defaultMessage: 'cancelled',
