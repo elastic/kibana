@@ -14,48 +14,45 @@ let socket;
 export async function createSocket(basePath) {
   if (socket != null) return socket;
 
-  const status = {};
+  return new Promise((resolve, rej) => {
+    // status.resolve = resolve;
+    const reject = p => {
+      socket = null; // reset the socket on errors
+      rej(p);
+    };
 
-  socket = io({
-    path: `${basePath}/socket.io`,
-    transports: ['polling', 'websocket'],
-    transportOptions: {
-      polling: {
-        extraHeaders: {
-          'kbn-xsrf': 'professionally-crafted-string-of-text',
+    socket = io({
+      path: `${basePath}/socket.io`,
+      transports: ['polling', 'websocket'],
+      transportOptions: {
+        polling: {
+          extraHeaders: {
+            'kbn-xsrf': 'professionally-crafted-string-of-text',
+          },
         },
       },
-    },
-    rememberUpgrade: false,
-    timeout: SOCKET_CONNETION_TIMEOUT,
-  });
+      rememberUpgrade: false,
+      timeout: SOCKET_CONNETION_TIMEOUT,
+    });
 
-  socket.on('getFunctionList', () => {
-    const pluginsLoaded = getBrowserRegistries();
+    socket.on('getFunctionList', () => {
+      const pluginsLoaded = getBrowserRegistries();
+      pluginsLoaded.then(() => socket.emit('functionList', functionsRegistry.toJS()));
+    });
 
-    pluginsLoaded.then(() => socket.emit('functionList', functionsRegistry.toJS()));
-  });
+    socket.on('connect', () => {
+      resolve();
+    });
 
-  socket.on('connect', () => {
-    status.resolve();
-  });
+    function errorHandler(err) {
+      // 'connectionFailed' returns an object with a reason prop
+      // other error cases provide their own error
+      reject(err.reason ? new Error(err.reason) : err);
+    }
 
-  function errorHandler(err) {
-    // 'connectionFailed' returns an object with a reason prop
-    // other error cases provide their own error
-    status.reject(err.reason ? new Error(err.reason) : err);
-  }
-
-  socket.on('connectionFailed', errorHandler);
-  socket.on('connect_error', errorHandler);
-  socket.on('connect_timeout', errorHandler);
-
-  return new Promise((resolve, reject) => {
-    status.resolve = resolve;
-    status.reject = p => {
-      socket = null;
-      reject(p);
-    };
+    socket.on('connectionFailed', errorHandler);
+    socket.on('connect_error', errorHandler);
+    socket.on('connect_timeout', errorHandler);
   });
 }
 
