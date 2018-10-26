@@ -36,27 +36,71 @@ export class List extends Component {
 
   renderList() {
     const { indexPatterns } = this.props;
-    return indexPatterns && indexPatterns.length ? (
-      <div>
-        {
-          indexPatterns.map(pattern => {
-            return (
-              <div key={pattern.id} >
-                <EuiButtonEmpty size="xs" href={pattern.url} data-test-subj="indexPatternLink">
-                  {pattern.default ? <Fragment><em aria-label="Default index pattern" className="fa fa-star" /> </Fragment> : ''}
-                  {pattern.active ? <strong>{pattern.title}</strong> : pattern.title} {pattern.tag ? (
-                    <Fragment key={pattern.tag.key}>
-                      {<EuiBadge color={pattern.tag.color || 'primary'}>{pattern.tag.name}</EuiBadge> }
-                    </Fragment>
-                  ) : null}
-                </EuiButtonEmpty>
-                <EuiSpacer size="xs"/>
-              </div>
-            );
-          })
-        }
-      </div>
-    ) : null;
+
+    if (indexPatterns && indexPatterns.length) {
+      return (
+        <div>
+          {
+            indexPatterns.map(pattern => {
+              const { id, default: isDefault, active, url, title, tag } = pattern;
+
+              let icon;
+
+              if (isDefault) {
+                icon = (
+                  <Fragment>
+                    <em
+                      aria-label={(
+                        <FormattedMessage
+                          id="kbn.management.indexPatternList.defaultIndexPatternIconAriaLabel"
+                          defaultMessage="Default index pattern"
+                        />
+                      )}
+                      className="fa fa-star"
+                    />
+                    {' '}
+                  </Fragment>
+                );
+              }
+
+              let titleElement;
+
+              if (active) {
+                titleElement = <strong>{title}</strong>;
+              } else {
+                titleElement = title;
+              }
+
+              let tagElement;
+
+              if (tag) {
+                const { key, color, name } = tag;
+
+                tagElement = (
+                  <Fragment key={key}>
+                    {' '}
+                    <EuiBadge color={color || 'primary'}>{name}</EuiBadge>
+                  </Fragment>
+                );
+              }
+
+              return (
+                <div key={id}>
+                  <EuiButtonEmpty size="xs" href={url} data-test-subj="indexPatternLink">
+                    {icon}
+                    {titleElement}
+                    {tagElement}
+                  </EuiButtonEmpty>
+                  <EuiSpacer size="xs"/>
+                </div>
+              );
+            })
+          }
+        </div>
+      );
+    }
+
+    return null;
   }
 
   renderNoDefaultMessage() {

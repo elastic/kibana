@@ -161,7 +161,7 @@ export class StepLogisticsUi extends Component {
               <p>
                 <EuiLink href={cronUrl} target="_blank">
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.link"
+                    id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLinkLabel"
                     defaultMessage="Learn more about cron syntax"
                   />
                 </EuiLink>
