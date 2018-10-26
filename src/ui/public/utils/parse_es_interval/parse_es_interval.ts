@@ -39,7 +39,7 @@ export type ParsedInterval = ReturnType<typeof parseEsInterval>;
  * | -------- | ---------------- | ------------------- |
  * | ms       | fixed            | fixed               |
  * | s        | fixed            | fixed               |
- * | m        | fixed            | fixed               |
+ * | m        | calendar         | fixed               |
  * | h        | calendar         | fixed               |
  * | d        | calendar         | fixed               |
  * | w        | calendar         | N/A - disallowed    |
@@ -67,6 +67,9 @@ export function parseEsInterval(interval: string) {
   return {
     value,
     unit,
-    type: (type === 'mixed' && value === 1) || type === 'calendar' ? 'calendar' : 'fixed',
+    type:
+      (type === 'mixed' && value === 1) || type === 'calendar'
+        ? ('calendar' as 'calendar')
+        : ('fixed' as 'fixed'),
   };
 }

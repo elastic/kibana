@@ -26,7 +26,6 @@ describe('leastCommonInterval', () => {
     expect(leastCommonInterval('1000ms', '1s')).toBe('1s');
     expect(leastCommonInterval('1500ms', '1s')).toBe('3s');
     expect(leastCommonInterval('1234ms', '1s')).toBe('617s');
-    expect(leastCommonInterval('1s', '2m')).toBe('2m');
     expect(leastCommonInterval('300s', '2m')).toBe('10m');
     expect(leastCommonInterval('1234ms', '7m')).toBe('4319m');
     expect(leastCommonInterval('45m', '2h')).toBe('6h');
@@ -47,6 +46,12 @@ describe('leastCommonInterval', () => {
   it('should throw an error for intervals of different types', () => {
     expect(() => {
       leastCommonInterval('60 s', '1m');
+    }).toThrowError();
+    expect(() => {
+      leastCommonInterval('1m', '2m');
+    }).toThrowError();
+    expect(() => {
+      leastCommonInterval('1h', '2h');
     }).toThrowError();
     expect(() => {
       leastCommonInterval('1d', '7d');

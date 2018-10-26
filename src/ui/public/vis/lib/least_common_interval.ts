@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import dateMath, { FixedUnit, MixedUnit } from '@kbn/datemath';
+import dateMath from '@kbn/datemath';
 import { leastCommonMultiple } from '../../utils/math';
 import { parseEsInterval } from '../../utils/parse_es_interval';
 
@@ -46,12 +46,12 @@ export function leastCommonInterval(a: string, b: string): string {
   const bUnit = unitsMap[bInt.unit];
 
   // If intervals aren't the same type, throw error
-  if (aUnit.type !== bUnit.type) {
+  if (aInt.type !== bInt.type) {
     throw Error(`Incompatible intervals: ${a} (${aInt.type}), ${b} (${bInt.type})`);
   }
 
   // If intervals are calendar units, pick the larger one (calendar value is always 1)
-  if (aUnit.type === 'calendar' || bUnit.type === 'calendar') {
+  if (aInt.type === 'calendar' || bInt.type === 'calendar') {
     return aUnit.weight > bUnit.weight ? `${aInt.value}${aInt.unit}` : `${bInt.value}${bInt.unit}`;
   }
 
@@ -72,7 +72,7 @@ export function leastCommonInterval(a: string, b: string): string {
   const lcmUnit = unitsDesc.find(unit => {
     const unitInfo = unitsMap[unit];
     return !!(unitInfo.type !== 'calendar' && lcmMs % unitInfo.base === 0);
-  }) as FixedUnit | MixedUnit;
+  });
 
   // Throw error in case we couldn't divide evenly, theoretically we never get here as everything is
   // divisible by 1 millisecond

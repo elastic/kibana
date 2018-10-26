@@ -18,32 +18,16 @@
  */
 
 import moment from 'moment';
-export type FixedUnit = 'ms';
-export type MixedUnit = 's' | 'm' | 'h' | 'd';
-export type CalendarUnit = 'w' | 'M' | 'y';
-export type Unit = FixedUnit | MixedUnit | CalendarUnit;
-
-interface FixedUnitInfo {
-  weight: number;
-  type: 'fixed';
-  base: number;
-}
-
-interface MixedUnitInfo {
-  weight: number;
-  type: 'mixed';
-  base: number;
-}
-
-interface CalendarUnitInfo {
-  weight: number;
-  type: 'calendar';
-}
+export type Unit = 'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'M' | 'y';
 
 declare const datemath: {
-  unitsMap: { [k in FixedUnit]: FixedUnitInfo } &
-    { [k in MixedUnit]: MixedUnitInfo } &
-    { [k in CalendarUnit]: CalendarUnitInfo };
+  unitsMap: {
+    [k in Unit]: {
+      weight: number;
+      type: 'calendar' | 'fixed' | 'mixed';
+      base: number;
+    }
+  };
   units: Unit[];
   unitsAsc: Unit[];
   unitsDesc: Unit[];
