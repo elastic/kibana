@@ -30,6 +30,14 @@ export function readFile(file) {
   });
 }
 
+export function getLessData(data, mb) {
+  // assuming 1 char is 1 byte
+  // TODO -  change this with other non UTF-8 formats are
+  // supported for the read data
+  const size = mb * 1048576;
+  return (data.length >= size) ? data.slice(0, size) : data;
+}
+
 export function createUrlOverrides(overrides, originalSettings) {
   const formattedOverrides = {};
   for (const o in overrideDefaults) {
