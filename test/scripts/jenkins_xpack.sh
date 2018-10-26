@@ -6,15 +6,15 @@ source src/dev/ci_setup/checkout_sibling_es.sh
 
 export TEST_BROWSER_HEADLESS=1
 
-echo " -> Running mocha tests"
+echo " -> Skipping Running mocha tests (for secops only)"
 cd "$XPACK_DIR"
-yarn test
+# yarn test
 echo ""
 echo ""
 
 
-echo " -> Running jest tests"
+echo " -> Running jest tests (for secops only)"
 cd "$XPACK_DIR"
-node scripts/jest --ci --no-cache --verbose
+node scripts/jest --ci --no-cache --verbose secops
 echo ""
 echo ""
