@@ -5,13 +5,16 @@
  */
 
 // tslint:disable-next-line  no-var-requires
-const numeral = require('@elastic/numeral');
 import React from 'react';
 
 import { first } from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
+import {
+  asMillis,
+  getDurationPercent
 // @ts-ignore
-import { asMillis } from '../../../../../../../utils/formatters';
+} from '../../../../../../../utils/formatters';
+// @ts-ignore
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
 function getSpanLabel(type: string) {
@@ -41,7 +44,6 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
 
   const spanName = span.span.name;
   const spanDuration = span.span.duration.us;
-  const relativeDuration = spanDuration / totalDuration;
   const spanTypeLabel = getSpanLabel(getPrimaryType(span.span.type));
 
   const stickyProperties = [
@@ -67,7 +69,7 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
     },
     {
       label: '% of transaction',
-      val: numeral(relativeDuration).format('0.00%'),
+      val: getDurationPercent(spanDuration, totalDuration, ''),
       width: '50%'
     }
   ];

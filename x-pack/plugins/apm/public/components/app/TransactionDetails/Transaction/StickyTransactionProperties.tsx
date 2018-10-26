@@ -14,21 +14,11 @@ import {
 } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/Transaction';
 // @ts-ignore
-import { asTime } from '../../../../utils/formatters';
+import { asTime, getDurationPercent } from '../../../../utils/formatters';
 import {
   IStickyProperty,
   StickyProperties
 } from '../../../shared/StickyProperties';
-
-function getDurationPercent(
-  transactionDuration: number,
-  totalDuration?: number
-) {
-  if (!totalDuration) {
-    return '';
-  }
-  return ((transactionDuration / totalDuration) * 100).toFixed(2) + '%';
-}
 
 interface Props {
   transaction: Transaction;

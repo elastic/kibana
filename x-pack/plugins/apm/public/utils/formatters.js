@@ -52,3 +52,14 @@ export function asInteger(value) {
 export function tpmUnit(type) {
   return type === 'request' ? 'rpm' : 'tpm';
 }
+
+export function getDurationPercent(
+  itemDuration,
+  totalDuration,
+  fallbackResult
+) {
+  if (totalDuration === undefined || totalDuration === 0) {
+    return fallbackResult || '';
+  }
+  return numeral(itemDuration / totalDuration).format('0.00%');
+}
