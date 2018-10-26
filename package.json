@@ -12,7 +12,7 @@
   ],
   "private": false,
   "version": "6.5.0",
-  "branch": "6.x",
+  "branch": "6.5",
   "types": "./target/types/type_exports.d.ts",
   "build": {
     "number": 8467,
