@@ -36,8 +36,6 @@ export async function capabilityDecorator(
   return {
     ...capabilities,
     ...result.privileges,
-    'ui:kibana:discover/read': false,
-    'ui:canvas/read': false,
   };
 }
 
@@ -49,7 +47,7 @@ function isAuthenticatedRoute(request: AnyObject) {
 function getPrivilegedActions(server: AnyObject, actions: AnyObject) {
   const uiApps = server.getAllUiApps();
 
-  const navLinkSpecs = server.getAllUiNavLinks();
+  const navLinkSpecs = server.getUiNavLinks();
 
   const uiCapabilityActions = [...uiApps, ...navLinkSpecs].map(entry => `ui:${entry._id}/read`);
 

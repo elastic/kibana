@@ -72,20 +72,6 @@ const app = uiModules.get('apps/discover', [
   'kibana/index_patterns'
 ]);
 
-uiModules.get('kibana')
-  .provider('discoverConfig', () => {
-    return {
-      $get() {
-        return {
-          getHideWriteControls() {
-            return false;
-          }
-        };
-      }
-    };
-  });
-
-
 uiRoutes
   .defaults(/discover/, {
     requireDefaultIndex: true

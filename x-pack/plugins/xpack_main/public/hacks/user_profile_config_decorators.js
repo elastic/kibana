@@ -35,4 +35,18 @@ uiModules.get('kibana')
         };
       });
     }
+
+    if ($injector.has('chromeConfig')) {
+      $provide.decorator('chromeConfig', function ($delegate, userProfile) {
+        return {
+          shouldHideNavLink(navLink) {
+            if (!userProfile.canAccessFeature(navLink.id)) {
+              return true;
+            }
+
+            return $delegate.shouldHideNavLink(navLink);
+          }
+        };
+      });
+    }
   });

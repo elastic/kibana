@@ -69,12 +69,13 @@ uiModules
       },
       template: appSwitcherTemplate,
       controllerAs: 'switcher',
-      controller($scope, appSwitcherEnsureNavigation, globalNavState) {
+      controller($scope, appSwitcherEnsureNavigation, globalNavState, chromeConfig) {
         if (!$scope.chrome || !$scope.chrome.getNavLinks) {
           throw new TypeError('appSwitcher directive requires the "chrome" config-object');
         }
 
-        this.links = $scope.chrome.getNavLinks();
+        this.links = $scope.chrome.getNavLinks()
+          .filter(navLink => !chromeConfig.shouldHideNavLink(navLink));
 
         // links don't cause full-navigation events in certain scenarios
         // so we force them when needed
