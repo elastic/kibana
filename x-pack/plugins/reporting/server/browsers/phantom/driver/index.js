@@ -18,11 +18,14 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
     if (page === false || browser === false) throw new Error('Phantom instance is closed');
   };
 
-  const configurePage = () => {
+  const configurePage = (pageOptions) => {
     const RESOURCE_TIMEOUT = 5000;
     return fromCallback(cb => page.set('resourceTimeout', RESOURCE_TIMEOUT, cb))
       .then(() => {
         if (zoom) return fromCallback(cb => page.set('zoomFactor', zoom, cb));
+      })
+      .then(() => {
+        if (pageOptions.headers) return fromCallback(cb => page.set('customHeaders', pageOptions.headers, cb));
       });
   };
 
@@ -30,26 +33,9 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
     open(url, pageOptions) {
       validateInstance();
 
-      return configurePage()
+      return configurePage(pageOptions)
         .then(() => logger.debug('Configured page'))
         .then(() => fromCallback(cb => page.open(url, cb)))
-        .then(async (status) => {
-          const { sessionCookie } =  pageOptions;
-          if (sessionCookie) {
-            await fromCallback(cb => page.clearCookies(cb));
-            // phantom doesn't support the SameSite option for the cookie, so we aren't setting it
-            await fromCallback(cb => page.addCookie({
-              name: sessionCookie.name,
-              value: sessionCookie.value,
-              path: sessionCookie.path,
-              httponly: sessionCookie.httpOnly,
-              secure: sessionCookie.secure,
-            }, cb));
-            return await fromCallback(cb => page.open(url, cb));
-          } else {
-            return status;
-          }
-        })
         .then(status => {
           logger.debug(`Page opened with status ${status}`);
           if (status !== 'success') throw new Error('URL open failed. Is the server running?');
