@@ -8,6 +8,8 @@ import expect from 'expect.js';
 import { createHandlers } from '../create_handlers';
 
 let securityMode = 'pass';
+let license = 'trial';
+let securityEnabled = true;
 const authError = new Error('auth error');
 
 const mockRequest = {
@@ -31,8 +33,8 @@ const mockServer = {
     xpack_main: {
       info: {
         feature: () => ({
-          isAvailable: () => true,
-          isEnabled: () => true,
+          isAvailable: () => license !== 'basic',
+          isEnabled: () => securityEnabled,
         }),
       },
     },
@@ -51,6 +53,8 @@ describe('server createHandlers', () => {
 
   beforeEach(() => {
     securityMode = 'pass';
+    securityEnabled = true;
+    license = 'trial';
     handlers = createHandlers(mockRequest, mockServer);
   });
 
@@ -84,7 +88,7 @@ describe('server createHandlers', () => {
         });
     });
 
-    it('works without security', async () => {
+    it('works without security plugin in kibana', async () => {
       // create server without security plugin
       const mockServerClone = {
         ...mockServer,
@@ -99,6 +103,42 @@ describe('server createHandlers', () => {
 
       // make sure the method still works
       handlers = createHandlers(mockRequest, mockServerClone);
+      const [request, endpoint, payload] = await handlers.elasticsearchClient(
+        'endpoint',
+        'payload'
+      );
+      expect(request).to.equal(mockRequest);
+      expect(endpoint).to.equal('endpoint');
+      expect(payload).to.equal('payload');
+    });
+
+    it('works without security on basic license', async () => {
+      // create server with a basic license
+      license = 'basic';
+
+      // this shouldn't do anything
+      securityMode = 'fail';
+
+      // make sure the method still works
+      handlers = createHandlers(mockRequest, mockServer);
+      const [request, endpoint, payload] = await handlers.elasticsearchClient(
+        'endpoint',
+        'payload'
+      );
+      expect(request).to.equal(mockRequest);
+      expect(endpoint).to.equal('endpoint');
+      expect(payload).to.equal('payload');
+    });
+
+    it('works with security disabled in elasticsearch', async () => {
+      // create server with security disabled
+      securityEnabled = false;
+
+      // this shouldn't do anything
+      securityMode = 'fail';
+
+      // make sure the method still works
+      handlers = createHandlers(mockRequest, mockServer);
       const [request, endpoint, payload] = await handlers.elasticsearchClient(
         'endpoint',
         'payload'
