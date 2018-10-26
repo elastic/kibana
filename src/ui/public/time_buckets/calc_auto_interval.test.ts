@@ -22,6 +22,16 @@ import moment from 'moment';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 
 describe('calcAutoIntervalNear', () => {
+  test('0 buckets/1h = 0ms buckets', () => {
+    const interval = calcAutoIntervalNear(0, moment.duration(1, 'h'));
+    expect(interval.asMilliseconds()).toBe(0);
+  });
+
+  test('100 buckets/undefined = 0ms buckets', () => {
+    const interval = calcAutoIntervalNear(0, undefined as any);
+    expect(interval.asMilliseconds()).toBe(0);
+  });
+
   test('100 buckets/1ms = 1ms buckets', () => {
     const interval = calcAutoIntervalNear(100, moment.duration(1, 'ms'));
     expect(interval.asMilliseconds()).toBe(1);
@@ -69,6 +79,16 @@ describe('calcAutoIntervalNear', () => {
 });
 
 describe('calcAutoIntervalLessThan', () => {
+  test('0 buckets/1h = 0ms buckets', () => {
+    const interval = calcAutoIntervalLessThan(0, moment.duration(1, 'h'));
+    expect(interval.asMilliseconds()).toBe(0);
+  });
+
+  test('100 buckets/undefined = 0ms buckets', () => {
+    const interval = calcAutoIntervalLessThan(0, undefined as any);
+    expect(interval.asMilliseconds()).toBe(0);
+  });
+
   test('100 buckets/1ms = 1ms buckets', () => {
     const interval = calcAutoIntervalLessThan(100, moment.duration(1, 'ms'));
     expect(interval.asMilliseconds()).toBe(1);

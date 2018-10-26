@@ -86,8 +86,13 @@ const rules = [
   },
 ];
 
+function estimateBucketMs(count: number, duration: Duration) {
+  const ms = Number(duration) / count;
+  return isFinite(ms) ? ms : NaN;
+}
+
 function defaultInterval(targetMs: number) {
-  return moment.duration(Math.max(Math.floor(targetMs), 1), 'ms');
+  return moment.duration(isNaN(targetMs) ? 0 : Math.max(Math.floor(targetMs), 1), 'ms');
 }
 
 /**
@@ -98,7 +103,7 @@ function defaultInterval(targetMs: number) {
  * @param duration time range the agg covers
  */
 export function calcAutoIntervalNear(targetBucketCount: number, duration: Duration) {
-  const targetMs = Number(duration) / targetBucketCount;
+  const targetMs = estimateBucketMs(targetBucketCount, duration);
 
   for (let i = 0; i < rules.length - 1; i++) {
     if (Number(rules[i + 1].bound) <= targetMs) {
@@ -117,7 +122,7 @@ export function calcAutoIntervalNear(targetBucketCount: number, duration: Durati
  * @param duration amount of time covered by the agg
  */
 export function calcAutoIntervalLessThan(maxBucketCount: number, duration: Duration) {
-  const maxMs = Number(duration) / maxBucketCount;
+  const maxMs = estimateBucketMs(maxBucketCount, duration);
 
   for (const { interval } of rules) {
     if (Number(interval) <= maxMs) {
