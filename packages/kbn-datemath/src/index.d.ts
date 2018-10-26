@@ -17,13 +17,29 @@
  * under the License.
  */
 
-declare module '@kbn/datemath' {
-  const dateMath: {
-    parse: any;
-    unitsMap: any;
-    units: string[];
-    unitsAsc: string[];
-    unitsDesc: string[];
+import moment from 'moment';
+export type Unit = 'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'M' | 'y';
+
+declare const datemath: {
+  unitsMap: {
+    [u in Unit]: {
+      weight: number;
+      type: 'fixed' | 'mixed' | 'calendar';
+      base?: number;
+    }
   };
-  export default dateMath;
-}
+  units: Unit[];
+  unitsAsc: Unit[];
+  unitsDesc: Unit[];
+
+  parse(
+    input: string,
+    options?: {
+      roundUp?: boolean;
+      forceNow?: boolean;
+      momentInstance?: typeof moment;
+    }
+  ): moment.Moment | undefined;
+};
+
+export default datemath;
