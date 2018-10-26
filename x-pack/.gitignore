@@ -10,3 +10,4 @@
 /.env
 /.kibana-plugin-helpers.dev.*
 !/plugins/infra/**/target
+!/plugins/secops/**/target
