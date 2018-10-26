@@ -26,13 +26,17 @@ export const selectWaterfall: ParametricSelector<
   const waterfall =
     state.reactReduxRequest[v1ID] || state.reactReduxRequest[v2ID];
 
-  return waterfall && waterfall.data ? waterfall.data : null;
+  if (!waterfall || !waterfall.data) {
+    return null;
+  }
+
+  return waterfall.data;
 };
 
 export const selectWaterfallRoot = createSelector(
   [selectWaterfall],
   waterfall => {
-    if (!waterfall) {
+    if (!waterfall || !waterfall.hits) {
       return;
     }
 
