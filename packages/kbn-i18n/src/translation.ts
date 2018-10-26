@@ -17,16 +17,19 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { Formats } from './core/formats';
 
-export function keysToSnakeCaseShallow(object) {
-  return _.mapKeys(object, (value, key) => {
-    return _.snakeCase(key);
-  });
-}
-
-export function keysToCamelCaseShallow(object) {
-  return _.mapKeys(object, (value, key) => {
-    return _.camelCase(key);
-  });
+export interface Translation {
+  /**
+   * Actual translated messages.
+   */
+  messages: Record<string, string>;
+  /**
+   * Locale of the translated messages.
+   */
+  locale?: string;
+  /**
+   * Set of options to the underlying formatter.
+   */
+  formats?: Formats;
 }

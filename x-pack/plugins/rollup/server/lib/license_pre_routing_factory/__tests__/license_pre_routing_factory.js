@@ -40,15 +40,12 @@ describe('license_pre_routing_factory', () => {
         };
       });
 
-      it ('replies with 403', (done) => {
+      it ('replies with 403', () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
-        const stubRequest = {};
-        licensePreRouting(stubRequest, (response) => {
-          expect(response).to.be.an(Error);
-          expect(response.isBoom).to.be(true);
-          expect(response.output.statusCode).to.be(403);
-          done();
-        });
+        const response = licensePreRouting();
+        expect(response).to.be.an(Error);
+        expect(response.isBoom).to.be(true);
+        expect(response.output.statusCode).to.be(403);
       });
     });
 
@@ -59,13 +56,10 @@ describe('license_pre_routing_factory', () => {
         };
       });
 
-      it ('replies with nothing', (done) => {
+      it ('replies with nothing', () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
-        const stubRequest = {};
-        licensePreRouting(stubRequest, (response) => {
-          expect(response).to.be(undefined);
-          done();
-        });
+        const response = licensePreRouting();
+        expect(response).to.be(null);
       });
     });
   });

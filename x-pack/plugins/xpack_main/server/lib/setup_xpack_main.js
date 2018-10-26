@@ -22,7 +22,7 @@ export function setupXPackMain(server) {
 
   server.expose('info', info);
   server.expose('createXPackInfo', (options) => new XPackInfo(server, options));
-  server.ext('onPreResponse', (request, reply) => injectXPackInfoSignature(info, request, reply));
+  server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));
 
   const setPluginStatus = () => {
     if (info.isAvailable()) {
