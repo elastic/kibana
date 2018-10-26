@@ -65,7 +65,7 @@ export function createUrlOverrides(overrides, originalSettings) {
     }
   }
 
-  if (formattedOverrides.format === 'json' || originalSettings.format === 'json') {
+  if (formattedOverrides.format === 'ndjson' || originalSettings.format === 'ndjson') {
     formattedOverrides.should_trim_fields = '';
     formattedOverrides.has_header_row = '';
     formattedOverrides.delimiter = '';
