@@ -6,60 +6,59 @@
 
 import * as GraphiQL from 'apollo-server-module-graphiql';
 import Boom from 'boom';
-import { IReply, Request, Server } from 'hapi';
+import { Plugin, Request, ResponseToolkit, RouteOptions, Server } from 'hapi';
 
 import { GraphQLOptions, runHttpQuery } from 'apollo-server-core';
 
-export interface IRegister {
-  (server: Server, options: any, next: () => void): void;
-  attributes: {
-    name: string;
-    version?: string;
-  };
-}
+export type HapiOptionsFunction = (req: Request) => GraphQLOptions | Promise<GraphQLOptions>;
 
-export type HapiOptionsFunction = (req?: Request) => GraphQLOptions | Promise<GraphQLOptions>;
-
-export interface HapiPluginOptions {
+export interface HapiGraphQLPluginOptions {
   path: string;
   vhost?: string;
-  route?: any;
+  route?: RouteOptions;
   graphqlOptions: GraphQLOptions | HapiOptionsFunction;
 }
 
-export const graphqlHapi: IRegister = Object.assign(
-  (server: Server, options: HapiPluginOptions, next: () => void) => {
+export const graphqlHapi: Plugin<HapiGraphQLPluginOptions> = {
+  name: 'graphql-secops',
+  register: (server: Server, options: HapiGraphQLPluginOptions) => {
     if (!options || !options.graphqlOptions) {
       throw new Error('Apollo Server requires options.');
     }
 
     server.route({
-      config: options.route || {},
-      handler: async (request: Request, reply: IReply) => {
+      options: options.route || {},
+      handler: async (request: Request, h: ResponseToolkit) => {
         try {
+          const query =
+            request.method === 'post'
+              ? (request.payload as Record<string, any>)
+              : (request.query as Record<string, any>);
+
           const gqlResponse = await runHttpQuery([request], {
             method: request.method.toUpperCase(),
             options: options.graphqlOptions,
-            query: request.method === 'post' ? request.payload : request.query,
+            query,
           });
 
-          return reply(gqlResponse).type('application/json');
+          return h.response(gqlResponse).type('application/json');
         } catch (error) {
           if ('HttpQueryError' !== error.name) {
-            const queryError = Boom.wrap(error);
+            const queryError = Boom.boomify(error);
 
             queryError.output.payload.message = error.message;
 
-            return reply(queryError);
+            return queryError;
           }
 
           if (error.isGraphQLError === true) {
-            return reply(error.message)
+            return h
+              .response(error.message)
               .code(error.statusCode)
               .type('application/json');
           }
 
-          const genericError = Boom.create(error.statusCode, error.message);
+          const genericError = new Boom(error.message, { statusCode: error.statusCode });
 
           if (error.headers) {
             Object.keys(error.headers).forEach(header => {
@@ -78,15 +77,8 @@ export const graphqlHapi: IRegister = Object.assign(
       path: options.path || '/graphql',
       vhost: options.vhost || undefined,
     });
-
-    return next();
   },
-  {
-    attributes: {
-      name: 'graphql-secops',
-    },
-  }
-);
+};
 
 export type HapiGraphiQLOptionsFunction = (
   req?: Request
@@ -100,30 +92,26 @@ export interface HapiGraphiQLPluginOptions {
   graphiqlOptions: GraphiQL.GraphiQLData | HapiGraphiQLOptionsFunction;
 }
 
-export const graphiqlHapi: IRegister = Object.assign(
-  (server: Server, options: HapiGraphiQLPluginOptions) => {
+export const graphiqlHapi: Plugin<HapiGraphiQLPluginOptions> = {
+  name: 'graphiql-secops',
+  register: (server: Server, options: HapiGraphiQLPluginOptions) => {
     if (!options || !options.graphiqlOptions) {
       throw new Error('Apollo Server GraphiQL requires options.');
     }
 
     server.route({
-      config: options.route || {},
-      handler: async (request: Request, reply: IReply) => {
+      options: options.route || {},
+      handler: async (request: Request, h: ResponseToolkit) => {
         const graphiqlString = await GraphiQL.resolveGraphiQLString(
           request.query,
           options.graphiqlOptions,
           request
         );
 
-        return reply(graphiqlString).type('text/html');
+        return h.response(graphiqlString).type('text/html');
       },
       method: 'GET',
       path: options.path || '/graphiql',
     });
   },
-  {
-    attributes: {
-      name: 'graphiql-secops',
-    },
-  }
-);
+};

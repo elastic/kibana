@@ -13,7 +13,19 @@ import {
   internalFrameworkRequest,
   WrappableRequest,
 } from './adapter_types';
-import { graphiqlHapi, graphqlHapi } from './apollo_server_hapi';
+import {
+  graphiqlHapi,
+  graphqlHapi,
+  HapiGraphiQLPluginOptions,
+  HapiGraphQLPluginOptions,
+} from './apollo_server_hapi';
+
+declare module 'hapi' {
+  interface PluginProperties {
+    elasticsearch: any;
+    kibana: any;
+  }
+}
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
@@ -37,7 +49,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.server.register({
+    this.server.register<HapiGraphQLPluginOptions>({
       options: {
         graphqlOptions: (req: Request) => ({
           context: { req: wrapRequest(req) },
@@ -45,10 +57,10 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
         }),
         path: routePath,
       },
-      register: graphqlHapi,
+      plugin: graphqlHapi,
     });
 
-    this.server.register({
+    this.server.register<HapiGraphiQLPluginOptions>({
       options: {
         graphiqlOptions: {
           endpointURL: routePath,
@@ -56,7 +68,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
         },
         path: `${routePath}/graphiql`,
       },
-      register: graphiqlHapi,
+      plugin: graphiqlHapi,
     });
   }
 }
