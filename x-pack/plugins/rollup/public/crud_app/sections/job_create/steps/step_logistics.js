@@ -180,7 +180,7 @@ export class StepLogisticsUi extends Component {
           <EuiText size="s">
             <EuiLink onClick={this.hideAdvancedCron}>
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvancedLabel"
+                id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonBasicLabel"
                 defaultMessage="Create basic interval"
               />
             </EuiLink>
@@ -462,7 +462,7 @@ export class StepLogisticsUi extends Component {
               <EuiTitle size="xs">
                 <h5>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeTitle"
+                    id="xpack.rollupJobs.create.stepLogistics.sectionDelayTitle"
                     defaultMessage="How long should the rollup job wait before rolling up new data?"
                   />
                 </h5>

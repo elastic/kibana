@@ -67,7 +67,7 @@ export function validateRollupIndex(rollupIndex, indexPattern) {
   if (rollupIndex[0] === '.') {
     return [(
       <FormattedMessage
-        id="xpack.rollupJobs.create.errors.rollupIndexSpaces"
+        id="xpack.rollupJobs.create.errors.rollupIndexBeginningPeriod"
         defaultMessage="Index names can't begin with periods"
       />
     )];
