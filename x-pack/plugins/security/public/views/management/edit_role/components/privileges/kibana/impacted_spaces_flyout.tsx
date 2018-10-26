@@ -66,24 +66,24 @@ export class ImpactedSpacesFlyoutUI extends Component<Props, State> {
     });
   };
 
-  public getHighestPrivilege(...privileges: KibanaPrivilege[]): string {
+  public getHighestPrivilege(...privileges: KibanaPrivilege[]): KibanaPrivilege {
     const { intl } = this.props;
     if (privileges.indexOf('all') >= 0) {
       return intl.formatMessage({
         id: 'xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.allLabel',
         defaultMessage: 'all',
-      });
+      }) as KibanaPrivilege;
     }
     if (privileges.indexOf('read') >= 0) {
       return intl.formatMessage({
         id: 'xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.readLabel',
         defaultMessage: 'read',
-      });
+      }) as KibanaPrivilege;
     }
     return intl.formatMessage({
       id: 'xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.noneLabel',
       defaultMessage: 'none',
-    });
+    }) as KibanaPrivilege;
   }
 
   public getFlyout = () => {
