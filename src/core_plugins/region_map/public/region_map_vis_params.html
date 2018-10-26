@@ -37,10 +37,13 @@
           defaultMessage: 'Preview {selectedLayerName} on the Elastic Maps Service',
           values: { selectedLayerName: editorState.params.selectedLayer.name }
         } }}"
-        i18n-id="regionMap.visParams.previewOnEMSLinkText"
-        i18n-default-message="{icon} Preview on EMS"
-        i18n-values="{ icon: '<icon aria-hidden size=&quot;\'s\'&quot; type=&quot;\'link\'&quot;></icon>' }"
-      ></a>
+      >
+        <icon aria-hidden size="'s'" type="'link'" />
+        <span
+          i18n-id="regionMap.visParams.previewOnEMSLinkText"
+          i18n-default-message="Preview on EMS"
+        ></span>
+      </a>
     </div>
 
     <div class="kuiSideBarFormRow">
