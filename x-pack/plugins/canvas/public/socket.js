@@ -8,6 +8,7 @@ import io from 'socket.io-client';
 import { functionsRegistry } from '../common/lib/functions_registry';
 import { getBrowserRegistries } from './lib/browser_registries';
 
+const SOCKET_CONNETION_TIMEOUT = 5000; // timeout in ms
 let socket;
 
 export async function createSocket(basePath) {
@@ -26,7 +27,7 @@ export async function createSocket(basePath) {
       },
     },
     rememberUpgrade: false,
-    timeout: 5000,
+    timeout: SOCKET_CONNETION_TIMEOUT,
   });
 
   socket.on('getFunctionList', () => {

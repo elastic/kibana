@@ -5,6 +5,7 @@
  */
 
 import boom from 'boom';
+import { SECURITY_AUTH_MESSAGE } from '../../common/lib/constants';
 import { isSecurityEnabled } from './feature_check';
 
 export const createHandlers = (request, server) => {
@@ -33,7 +34,7 @@ export const createHandlers = (request, server) => {
           }
 
           // hide all failure information from the user
-          throw boom.unauthorized('Authentication failed');
+          throw boom.unauthorized(SECURITY_AUTH_MESSAGE);
         }
       }
 
