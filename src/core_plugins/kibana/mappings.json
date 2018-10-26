@@ -21,6 +21,12 @@
       },
       "title": {
         "type": "text"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "typeMeta": {
+        "type": "keyword"
       }
     }
   },

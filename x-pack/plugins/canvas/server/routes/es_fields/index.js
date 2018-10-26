@@ -14,11 +14,11 @@ export function esFields(server) {
   server.route({
     method: 'GET',
     path: '/api/canvas/es_fields',
-    handler: function(request, reply) {
+    handler: function(request, h) {
       const { index, fields } = request.query;
-      if (!index) return reply({ error: '"index" query is required' }).code(400);
+      if (!index) return h.response({ error: '"index" query is required' }).code(400);
 
-      reply(getESFieldTypes(index, fields, partial(callWithRequest, request)));
+      return getESFieldTypes(index, fields, partial(callWithRequest, request));
     },
   });
 }

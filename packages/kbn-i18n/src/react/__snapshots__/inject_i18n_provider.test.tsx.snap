@@ -66,62 +66,7 @@ Object {
   "formatPlural": [Function],
   "formatRelative": [Function],
   "formatTime": [Function],
-  "formats": Object {
-    "date": Object {
-      "full": Object {
-        "day": "numeric",
-        "month": "long",
-        "weekday": "long",
-        "year": "numeric",
-      },
-      "long": Object {
-        "day": "numeric",
-        "month": "long",
-        "year": "numeric",
-      },
-      "medium": Object {
-        "day": "numeric",
-        "month": "short",
-        "year": "numeric",
-      },
-      "short": Object {
-        "day": "numeric",
-        "month": "numeric",
-        "year": "2-digit",
-      },
-    },
-    "number": Object {
-      "currency": Object {
-        "style": "currency",
-      },
-      "percent": Object {
-        "style": "percent",
-      },
-    },
-    "time": Object {
-      "full": Object {
-        "hour": "numeric",
-        "minute": "numeric",
-        "second": "numeric",
-        "timeZoneName": "short",
-      },
-      "long": Object {
-        "hour": "numeric",
-        "minute": "numeric",
-        "second": "numeric",
-        "timeZoneName": "short",
-      },
-      "medium": Object {
-        "hour": "numeric",
-        "minute": "numeric",
-        "second": "numeric",
-      },
-      "short": Object {
-        "hour": "numeric",
-        "minute": "numeric",
-      },
-    },
-  },
+  "formats": Object {},
   "formatters": Object {
     "getDateTimeFormat": [Function],
     "getMessageFormat": [Function],
