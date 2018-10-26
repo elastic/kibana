@@ -42,7 +42,11 @@ exports[`it renders without blowing up 1`] = `
         onClick={[Function]}
         type="button"
       >
-        hide
+        <FormattedMessage
+          defaultMessage="hide"
+          id="xpack.security.views.management.editRoles.components.collapsiblePanel.hideLinkText"
+          values={Object {}}
+        />
       </EuiLink>
     </EuiFlexItem>
   </EuiFlexGroup>

@@ -19,7 +19,13 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={false}
-      label="Spaces"
+      label={
+        <FormattedMessage
+          defaultMessage="Spaces"
+          id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceForm.spacesFormRowLabel"
+          values={Object {}}
+        />
+      }
     >
       <SpaceSelector
         onChange={[Function]}
@@ -51,7 +57,13 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={false}
-      label="Privilege"
+      label={
+        <FormattedMessage
+          defaultMessage="Privilege"
+          id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeSpaceForm.privilegeFormRowLabel"
+          values={Object {}}
+        />
+      }
     >
       <PrivilegeSelector
         availablePrivileges={
