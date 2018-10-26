@@ -31,6 +31,7 @@ describe('check_license', function () {
 
     const licenseCheckResults = checkLicense(mockXPackInfo);
     expect(licenseCheckResults).to.be.eql({
+      authenticate: true,
       showLogin: true,
       allowLogin: false,
       showLinks: false,
@@ -47,6 +48,7 @@ describe('check_license', function () {
 
     const licenseCheckResults = checkLicense(mockXPackInfo);
     expect(licenseCheckResults).to.be.eql({
+      authenticate: true,
       showLogin: true,
       allowLogin: false,
       showLinks: false,
@@ -66,6 +68,7 @@ describe('check_license', function () {
 
     const licenseCheckResults = checkLicense(mockXPackInfo);
     expect(licenseCheckResults).to.be.eql({
+      authenticate: false,
       showLogin: false,
       allowLogin: false,
       showLinks: false,
@@ -84,6 +87,7 @@ describe('check_license', function () {
 
     const licenseCheckResults = checkLicense(mockXPackInfo);
     expect(licenseCheckResults).to.be.eql({
+      authenticate: false,
       showLogin: false,
       allowLogin: false,
       showLinks: false,
@@ -103,6 +107,7 @@ describe('check_license', function () {
     });
 
     expect(checkLicense(mockXPackInfo)).to.be.eql({
+      authenticate: true,
       showLogin: true,
       allowLogin: true,
       showLinks: true,
@@ -121,6 +126,7 @@ describe('check_license', function () {
     });
 
     expect(checkLicense(mockXPackInfo)).to.be.eql({
+      authenticate: true,
       showLogin: true,
       allowLogin: true,
       showLinks: true,

@@ -34,6 +34,7 @@ export function serverFixture() {
 
       security: {
         getUser: stub(),
+        shouldAuthenticate: stub(),
         authenticate: stub(),
         deauthenticate: stub(),
         authorization: {

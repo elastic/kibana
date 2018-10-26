@@ -27,6 +27,7 @@ export function checkLicense(xPackInfo) {
   // assume worst-case and lock user at login screen.
   if (!xPackInfo.isAvailable()) {
     return {
+      authenticate: true,
       showLogin: true,
       allowLogin: false,
       showLinks: false,
@@ -41,6 +42,7 @@ export function checkLicense(xPackInfo) {
   const isEnabledInES = xPackInfo.feature('security').isEnabled();
   if (!isEnabledInES || isLicenseBasic) {
     return {
+      authenticate: false,
       showLogin: false,
       allowLogin: false,
       showLinks: false,
@@ -56,6 +58,7 @@ export function checkLicense(xPackInfo) {
 
   const isLicensePlatinumOrTrial = xPackInfo.license.isOneOf(['platinum', 'trial']);
   return {
+    authenticate: true,
     showLogin: true,
     allowLogin: true,
     showLinks: true,

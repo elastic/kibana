@@ -79,6 +79,36 @@ describe('Authenticator', () => {
     });
   });
 
+  describe('`shouldAuthenticate` method', () => {
+    beforeEach(() => {
+      config.get.withArgs('xpack.security.authProviders').returns(['basic']);
+    });
+
+    const getShouldAuthenticate = async () => {
+      await initAuthenticator(server, authorizationMode);
+
+      return server.expose.withArgs('shouldAuthenticate').firstCall.args[1];
+    };
+
+    it(`returns true if xpackInfo.feature('security').getLicenseCheckResults().authenticate is true`, async () => {
+      server.plugins.xpack_main.info.feature.withArgs('security').returns({
+        getLicenseCheckResults: sinon.stub().returns({ authenticate: true })
+      });
+
+      const shouldAuthenticate = await getShouldAuthenticate();
+      expect(shouldAuthenticate()).to.be(true);
+    });
+
+    it(`returns false if xpackInfo.feature('security').authenticate is false`, async () => {
+      server.plugins.xpack_main.info.feature.withArgs('security').returns({
+        getLicenseCheckResults: sinon.stub().returns({ authenticate: false })
+      });
+
+      const shouldAuthenticate = await getShouldAuthenticate();
+      expect(shouldAuthenticate()).to.be(false);
+    });
+  });
+
   describe('`authenticate` method', () => {
     let authenticate;
     beforeEach(async () => {

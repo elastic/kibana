@@ -297,6 +297,13 @@ export async function initAuthenticator(server, authorizationMode) {
   const authScope = new AuthScopeService();
   const authenticator = new Authenticator(server, authScope, session, authorizationMode);
 
+  server.expose('shouldAuthenticate', () => {
+    // If security is disabled or license is basic, continue with no user credentials
+    // and delete the client cookie as well.
+    const xpackInfo = server.plugins.xpack_main.info;
+    const xpackInfoFeature = xpackInfo.feature('security');
+    return xpackInfoFeature.getLicenseCheckResults().authenticate;
+  });
   server.expose('authenticate', (request) => authenticator.authenticate(request));
   server.expose('deauthenticate', (request) => authenticator.deauthenticate(request));
   server.expose('registerAuthScopeGetter', (scopeExtender) => authScope.registerGetter(scopeExtender));

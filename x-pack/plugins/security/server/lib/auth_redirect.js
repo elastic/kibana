@@ -16,11 +16,7 @@ import { wrapError } from './errors';
  */
 export function authenticateFactory(server) {
   return async function authenticate(request, h) {
-    // If security is disabled or license is basic, continue with no user credentials
-    // and delete the client cookie as well.
-    const xpackInfo = server.plugins.xpack_main.info;
-    if (xpackInfo.isAvailable()
-        && (!xpackInfo.feature('security').isEnabled() || xpackInfo.license.isOneOf('basic'))) {
+    if (!server.plugins.security.shouldAuthenticate()) {
       return h.authenticated({ credentials: {} });
     }
 
