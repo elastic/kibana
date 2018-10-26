@@ -13,21 +13,19 @@ export function workpad(server) {
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('data');
   const routePrefix = API_ROUTE_WORKPAD;
 
-  function formatResponse(reply, returnResponse = false) {
-    return resp => {
-      if (resp.isBoom) return reply(resp); // can't wrap it if it's already a boom error
+  function formatResponse(resp) {
+    if (resp.isBoom) return resp; // can't wrap it if it's already a boom error
 
-      if (resp instanceof esErrors['400']) return reply(boom.badRequest(resp));
+    if (resp instanceof esErrors['400']) return boom.badRequest(resp);
 
-      if (resp instanceof esErrors['401']) return reply(boom.unauthorized());
+    if (resp instanceof esErrors['401']) return boom.unauthorized();
 
-      if (resp instanceof esErrors['403'])
-        return reply(boom.forbidden("Sorry, you don't have access to that"));
+    if (resp instanceof esErrors['403'])
+      return boom.forbidden("Sorry, you don't have access to that");
 
-      if (resp instanceof esErrors['404']) return reply(boom.wrap(resp, 404));
+    if (resp instanceof esErrors['404']) return boom.boomify(resp, { statusCode: 404 });
 
-      return returnResponse ? resp : reply(resp);
-    };
+    return resp;
   }
 
   function createWorkpad(req, id) {
@@ -94,15 +92,15 @@ export function workpad(server) {
   server.route({
     method: 'GET',
     path: `${routePrefix}/{id}`,
-    handler: function(req, reply) {
+    handler: function(req) {
       const savedObjectsClient = req.getSavedObjectsClient();
       const { id } = req.params;
 
       return savedObjectsClient
         .get(CANVAS_TYPE, id)
         .then(obj => obj.attributes)
-        .then(formatResponse(reply))
-        .catch(formatResponse(reply));
+        .then(formatResponse)
+        .catch(formatResponse);
     },
   });
 
@@ -111,10 +109,10 @@ export function workpad(server) {
     method: 'POST',
     path: routePrefix,
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
-    handler: function(request, reply) {
-      createWorkpad(request)
-        .then(() => reply({ ok: true }))
-        .catch(formatResponse(reply));
+    handler: function(request) {
+      return createWorkpad(request)
+        .then(() => ({ ok: true }))
+        .catch(formatResponse);
     },
   });
 
@@ -123,10 +121,10 @@ export function workpad(server) {
     method: 'PUT',
     path: `${routePrefix}/{id}`,
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
-    handler: function(request, reply) {
-      updateWorkpad(request)
-        .then(() => reply({ ok: true }))
-        .catch(formatResponse(reply));
+    handler: function(request) {
+      return updateWorkpad(request)
+        .then(() => ({ ok: true }))
+        .catch(formatResponse);
     },
   });
 
@@ -134,10 +132,10 @@ export function workpad(server) {
   server.route({
     method: 'DELETE',
     path: `${routePrefix}/{id}`,
-    handler: function(request, reply) {
-      deleteWorkpad(request)
-        .then(() => reply({ ok: true }))
-        .catch(formatResponse(reply));
+    handler: function(request) {
+      return deleteWorkpad(request)
+        .then(() => ({ ok: true }))
+        .catch(formatResponse);
     },
   });
 
@@ -145,20 +143,20 @@ export function workpad(server) {
   server.route({
     method: 'GET',
     path: `${routePrefix}/find`,
-    handler: function(request, reply) {
-      findWorkpad(request)
-        .then(formatResponse(reply, true))
+    handler: function(request) {
+      return findWorkpad(request)
+        .then(formatResponse)
         .then(resp => {
-          reply({
+          return {
             total: resp.total,
             workpads: resp.saved_objects.map(hit => hit.attributes),
-          });
+          };
         })
         .catch(() => {
-          reply({
+          return {
             total: 0,
             workpads: [],
-          });
+          };
         });
     },
   });

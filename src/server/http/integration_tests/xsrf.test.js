@@ -44,8 +44,8 @@ describe('xsrf request filter', () => {
     kbnServer.server.route({
       path: testPath,
       method: 'GET',
-      handler: function (req, reply) {
-        reply(null, 'ok');
+      handler: async function () {
+        return 'ok';
       }
     });
 
@@ -58,8 +58,8 @@ describe('xsrf request filter', () => {
           parse: false
         }
       },
-      handler: function (req, reply) {
-        reply(null, 'ok');
+      handler: async function () {
+        return 'ok';
       }
     });
 
@@ -72,8 +72,8 @@ describe('xsrf request filter', () => {
           parse: false
         }
       },
-      handler: function (req, reply) {
-        reply(null, 'ok');
+      handler: async function () {
+        return 'ok';
       }
     });
   }, 30000);
