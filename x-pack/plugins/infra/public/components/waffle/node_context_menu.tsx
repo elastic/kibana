@@ -6,7 +6,7 @@
 
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import React from 'react';
-import { InfraNodeType } from '../../../common/graphql/types';
+import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import {
   getContainerDetailUrl,
@@ -19,6 +19,7 @@ import {
 
 interface Props {
   options: InfraWaffleMapOptions;
+  timeRange: InfraTimerangeInput;
   node: InfraWaffleMapNode;
   nodeType: InfraNodeType;
   isPopoverOpen: boolean;
@@ -27,14 +28,15 @@ interface Props {
 
 export const NodeContextMenu: React.SFC<Props> = ({
   options,
+  timeRange,
   children,
   node,
   isPopoverOpen,
   closePopover,
   nodeType,
 }) => {
-  const nodeLogsUrl = getNodeLogsUrl(nodeType, node);
   const nodeDetailUrl = getNodeDetailUrl(nodeType, node);
+  const nodeLogsUrl = getNodeLogsUrl(nodeType, node, timeRange.to);
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
@@ -75,7 +77,8 @@ export const NodeContextMenu: React.SFC<Props> = ({
 
 const getNodeLogsUrl = (
   nodeType: 'host' | 'container' | 'pod',
-  { path }: InfraWaffleMapNode
+  { path }: InfraWaffleMapNode,
+  time: number
 ): string | undefined => {
   if (path.length <= 0) {
     return undefined;
@@ -85,11 +88,11 @@ const getNodeLogsUrl = (
 
   switch (nodeType) {
     case 'host':
-      return getHostLogsUrl({ hostname: lastPathSegment.value });
+      return getHostLogsUrl({ hostname: lastPathSegment.value, time });
     case 'container':
-      return getContainerLogsUrl({ containerId: lastPathSegment.value });
+      return getContainerLogsUrl({ containerId: lastPathSegment.value, time });
     case 'pod':
-      return getPodLogsUrl({ podId: lastPathSegment.value });
+      return getPodLogsUrl({ podId: lastPathSegment.value, time });
     default:
       return undefined;
   }
