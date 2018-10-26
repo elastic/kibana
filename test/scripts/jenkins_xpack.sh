@@ -12,16 +12,16 @@ export XPACK_DIR="$(cd "$(dirname "$0")/../../x-pack"; pwd)"
 echo "-> XPACK_DIR ${XPACK_DIR}"
 
 
-echo " -> Running mocha tests"
+echo " -> Skipping Running mocha tests (for secops only)"
 cd "$XPACK_DIR"
-xvfb-run yarn test
+# xvfb-run yarn test
 echo ""
 echo ""
 
 
-echo " -> Running jest tests"
+echo " -> Running jest tests (for secops only)"
 cd "$XPACK_DIR"
-node scripts/jest --ci --no-cache --verbose
+node scripts/jest --ci --no-cache --verbose secops
 echo ""
 echo ""
 
