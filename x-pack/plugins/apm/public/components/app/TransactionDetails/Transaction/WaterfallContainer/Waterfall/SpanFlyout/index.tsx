@@ -55,7 +55,7 @@ function getDiscoverQuery(span: Span) {
 
 interface Props {
   span?: Span;
-  parentTransaction: Transaction;
+  parentTransaction?: Transaction;
   totalDuration: number;
   onClose: () => void;
 }
@@ -70,7 +70,7 @@ export function SpanFlyout({
     return null;
   }
   const stackframes = span.span.stacktrace;
-  const codeLanguage = get(span, SERVICE_LANGUAGE_NAME);
+  const codeLanguage: string = get(span, SERVICE_LANGUAGE_NAME);
   const dbContext = span.context.db;
 
   return (

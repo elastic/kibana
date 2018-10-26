@@ -12,7 +12,6 @@ import { first } from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
 // @ts-ignore
 import { asMillis } from '../../../../../../../utils/formatters';
-// @ts-ignore
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
 function getSpanLabel(type: string) {

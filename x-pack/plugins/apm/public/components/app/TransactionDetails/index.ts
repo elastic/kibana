@@ -6,7 +6,6 @@
 
 import { connect } from 'react-redux';
 import { TransactionDetailsView } from 'x-pack/plugins/apm/public/components/app/TransactionDetails/view';
-import { selectWaterfallRoot } from 'x-pack/plugins/apm/public/store/selectors/waterfall';
 import {
   getUrlParams,
   IUrlParams
@@ -22,8 +21,7 @@ interface Props {
 function mapStateToProps(state: any = {}, props: Partial<Props>) {
   return {
     location: state.location,
-    urlParams: getUrlParams(state),
-    waterfallRoot: selectWaterfallRoot(state, props)
+    urlParams: getUrlParams(state)
   };
 }
 
