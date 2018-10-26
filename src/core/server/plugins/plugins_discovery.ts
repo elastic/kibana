@@ -37,36 +37,36 @@ export interface PluginManifest {
   /**
    * Identifier of the plugin.
    */
-  id: string;
+  readonly id: string;
 
   /**
    * Version of the plugin.
    */
-  version: string;
+  readonly version: string;
 
   /**
    * The version of Kibana the plugin is compatible with, defaults to "version".
    */
-  kibanaVersion?: string;
+  readonly kibanaVersion: string;
 
   /**
    * An optional list of the other plugins that **must be** installed and enabled
    * for this plugin to function properly.
    */
-  requiredPlugins: string[];
+  readonly requiredPlugins: ReadonlyArray<string>;
 
   /**
    * An optional list of the other plugins that if installed and enabled **may be**
    * leveraged by this plugin for some additional functionality but otherwise are
    * not required for this plugin to work properly.
    */
-  optionalPlugins: string[];
+  readonly optionalPlugins: ReadonlyArray<string>;
 
   /**
    * Specifies whether plugin includes some client/browser specific functionality
    * that should be included into client bundle via `public/ui_plugin.js` file.
    */
-  ui: boolean;
+  readonly ui: boolean;
 }
 
 interface DiscoveryResult {
