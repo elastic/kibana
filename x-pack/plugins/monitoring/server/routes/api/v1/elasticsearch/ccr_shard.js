@@ -32,8 +32,8 @@ async function getCcrStat(req, esIndexPattern, filters) {
     filterPath: [
       'hits.hits._source.ccr_stats',
       'hits.hits._source.timestamp',
-      'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.number_of_operations_indexed',
-      'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.number_of_failed_fetches',
+      'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.operations_written',
+      'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.failed_read_requests',
     ],
     body: {
       sort: [{ timestamp: { order: 'desc' } }],
@@ -87,7 +87,7 @@ export function ccrShardRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const index = req.params.index;
       const shardId = req.params.shardId;
@@ -134,15 +134,15 @@ export function ccrShardRoute(server) {
         const stat = get(ccrResponse, 'hits.hits[0]._source.ccr_stats', {});
         const oldestStat = get(ccrResponse, 'hits.hits[0].inner_hits.oldest.hits.hits[0]._source.ccr_stats', {});
 
-        reply({
+        return {
           metrics,
           stat,
           formattedLeader: getFormattedLeaderIndex(stat.leader_index),
           timestamp: get(ccrResponse, 'hits.hits[0]._source.timestamp'),
           oldestStat,
-        });
+        };
       } catch(err) {
-        reply(handleError(err, req));
+        return handleError(err, req);
       }
     }
   });

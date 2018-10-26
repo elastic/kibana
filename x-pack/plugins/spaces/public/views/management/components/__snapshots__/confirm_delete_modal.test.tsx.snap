@@ -3,7 +3,7 @@
 exports[`ConfirmDeleteModal renders as expected 1`] = `
 <EuiOverlayMask>
   <EuiModal
-    className="euiModal--confirmation"
+    className="spcConfirmDeleteModal"
     maxWidth={true}
     onClose={[MockFunction]}
   >

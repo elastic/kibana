@@ -23,7 +23,16 @@ import Wreck from 'wreck';
 import { trimLeft, trimRight } from 'lodash';
 
 function resolveUri(base, path) {
-  return `${trimRight(base, '/')}/${trimLeft(path, '/')}`;
+  let pathToUse = `${trimRight(base, '/')}/${trimLeft(path, '/')}`;
+  const questionMarkIndex = pathToUse.indexOf('?');
+  // no query string in pathToUse, append '?pretty'
+  if (questionMarkIndex === -1) {
+    pathToUse = `${pathToUse}?pretty`;
+  } else {
+    // pathToUse has query string, append '&pretty'
+    pathToUse = `${pathToUse}&pretty`;
+  }
+  return pathToUse;
 }
 
 function extendCommaList(obj, property, value) {
@@ -37,7 +46,7 @@ function getProxyHeaders(req) {
     // see https://git.io/vytQ7
     extendCommaList(headers, 'x-forwarded-for', req.info.remoteAddress);
     extendCommaList(headers, 'x-forwarded-port', req.info.remotePort);
-    extendCommaList(headers, 'x-forwarded-proto', req.connection.info.protocol);
+    extendCommaList(headers, 'x-forwarded-proto', req.server.info.protocol);
     extendCommaList(headers, 'x-forwarded-host', req.info.host);
   }
 
@@ -73,21 +82,21 @@ export const createProxyRoute = ({
     },
 
     pre: [
-      function filterPath(req, reply) {
+      function filterPath(req) {
         const { path } = req.query;
 
-        if (!pathFilters.some(re => re.test(path))) {
-          const err = Boom.forbidden();
-          err.output.payload = `Error connecting to '${path}':\n\nUnable to send requests to that path.`;
-          err.output.headers['content-type'] = 'text/plain';
-          reply(err);
-        } else {
-          reply();
+        if (pathFilters.some(re => re.test(path))) {
+          return null;
         }
+
+        const err = Boom.forbidden();
+        err.output.payload = `Error connecting to '${path}':\n\nUnable to send requests to that path.`;
+        err.output.headers['content-type'] = 'text/plain';
+        throw err;
       },
     ],
 
-    handler(req, reply) {
+    handler: async (req, h) => {
       const { payload, query } = req;
       const { path, method } = query;
       const uri = resolveUri(baseUrl, path);
@@ -110,23 +119,18 @@ export const createProxyRoute = ({
         },
       };
 
-      Wreck.request(method, uri, wreckOptions, (err, esResponse) => {
-        if (err) {
-          return reply(err);
-        }
+      const esResponse = await Wreck.request(method, uri, wreckOptions);
 
-        if (method.toUpperCase() !== 'HEAD') {
-          reply(esResponse)
-            .code(esResponse.statusCode)
-            .header('warning', esResponse.headers.warning);
-          return;
-        }
-
-        reply(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
+      if (method.toUpperCase() !== 'HEAD') {
+        return h.response(esResponse)
           .code(esResponse.statusCode)
-          .type('text/plain')
           .header('warning', esResponse.headers.warning);
-      });
+      }
+
+      return h.response(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
+        .code(esResponse.statusCode)
+        .type('text/plain')
+        .header('warning', esResponse.headers.warning);
     }
   }
 });

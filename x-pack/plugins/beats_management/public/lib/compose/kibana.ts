@@ -14,8 +14,6 @@ import chrome from 'ui/chrome';
 import { management } from 'ui/management';
 // @ts-ignore: path dynamic for kibana
 import { uiModules } from 'ui/modules';
-// @ts-ignore
-import { Notifier } from 'ui/notify';
 // @ts-ignore: path dynamic for kibana
 import routes from 'ui/routes';
 
@@ -54,8 +52,7 @@ export function compose(): FrontendLibs {
     management,
     routes,
     chrome,
-    XPackInfoProvider,
-    Notifier
+    XPackInfoProvider
   );
 
   const libs: FrontendLibs = {
