@@ -47,3 +47,5 @@ Error: The intl string context variable 'numPhotos' was not provided to the stri
                              other {# photos.}
                           }'"
 `;
+
+exports[`I18n engine translateUsingPseudoLocale should translate message using pseudo-locale 1`] = `"Ṁéšššàĝĝé ŵîîţĥ àà [ɱàŕŕķðôôŵñ ļļîñķķ](http://localhost:5601/url) àñðð àñ <strong>ĥĥţɱļļ éļééɱéññţ</strong>"`;

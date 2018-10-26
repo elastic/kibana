@@ -24,6 +24,7 @@ import IntlRelativeFormat from 'intl-relativeformat';
 import { Messages, PlainMessages } from '../messages';
 import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
+import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 
 // Add all locale data to `IntlMessageFormat`.
 import './locales.js';
@@ -177,25 +178,28 @@ export function translate(
     defaultMessage: '',
   }
 ) {
+  const shouldUsePseudoLocale = isPseudoLocale(currentLocale);
+
   if (!id || !isString(id)) {
     throw new Error('[I18n] An `id` must be a non-empty string to translate a message.');
   }
 
-  const message = getMessageById(id);
+  const message = shouldUsePseudoLocale ? defaultMessage : getMessageById(id);
 
   if (!message && !defaultMessage) {
     throw new Error(`[I18n] Cannot format message: "${id}". Default message must be provided.`);
   }
 
-  if (!hasValues(values)) {
-    return message || defaultMessage;
-  }
-
   if (message) {
     try {
-      const msg = getMessageFormat(message, getLocale(), getFormats());
+      // We should call `format` even for messages without any value references
+      // to let it handle escaped curly braces `\\{` that are the part of the text itself
+      // and not value reference boundaries.
+      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(values);
 
-      return msg.format(values);
+      return shouldUsePseudoLocale
+        ? translateUsingPseudoLocale(formattedMessage)
+        : formattedMessage;
     } catch (e) {
       throw new Error(
         `[I18n] Error formatting message: "${id}" for locale: "${getLocale()}".\n${e}`
