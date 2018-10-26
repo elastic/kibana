@@ -28,6 +28,7 @@ import { kueryAutocomplete } from './plugins/kuery_autocomplete';
 import { canvas } from './plugins/canvas';
 import { infra } from './plugins/infra';
 import { taskManager } from './plugins/task_manager';
+import { rollup } from './plugins/rollup';
 
 module.exports = function (kibana) {
   return [
@@ -55,5 +56,6 @@ module.exports = function (kibana) {
     kueryAutocomplete(kibana),
     infra(kibana),
     taskManager(kibana),
+    rollup(kibana),
   ];
 };

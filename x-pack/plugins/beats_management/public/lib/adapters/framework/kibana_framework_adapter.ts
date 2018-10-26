@@ -26,6 +26,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private XPackInfoProvider: any;
   private xpackInfo: null | any;
   private chrome: any;
+  private shieldUser: any;
 
   constructor(
     uiModule: IModule,
@@ -72,9 +73,16 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     return this.xpackInfo.get('features.beats_management.securityEnabled', false);
   }
 
+  public getCurrentUser() {
+    try {
+      return this.shieldUser;
+    } catch (e) {
+      return null;
+    }
+  }
+
   public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
     this.register(this.uiModule);
-
     this.hookAngular(() => {
       if (this.hadValidLicense() && this.securityEnabled()) {
         const registerSection = () =>
@@ -119,11 +127,13 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   private hookAngular(done: () => any) {
-    this.chrome.dangerouslyGetActiveInjector().then(($injector: any) => {
+    this.chrome.dangerouslyGetActiveInjector().then(async ($injector: any) => {
       const Private = $injector.get('Private');
       const xpackInfo = Private(this.XPackInfoProvider);
 
       this.xpackInfo = xpackInfo;
+      this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+
       done();
     });
   }
