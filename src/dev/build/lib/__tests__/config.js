@@ -26,106 +26,152 @@ import { getConfig } from '../config';
 import { getVersionInfo } from '../version_info';
 
 describe('dev/build/lib/config', () => {
-  let config;
-  let buildInfo;
-  before(async () => {
+  const setup = async function ({ targetAllPlatforms = true } = {}) {
     const isRelease = Boolean(Math.round(Math.random()));
-    config = await getConfig({
+    const config = await getConfig({
       isRelease,
+      targetAllPlatforms
     });
-    buildInfo = await getVersionInfo({
+    const buildInfo = await getVersionInfo({
       isRelease,
       pkg
     });
-  });
-  after(() => {
-    config = null;
-  });
+    return { config, buildInfo };
+  };
 
   describe('#getKibanaPkg()', () => {
-    it('returns the parsed package.json from the Kibana repo', () => {
+    it('returns the parsed package.json from the Kibana repo', async () => {
+      const { config } = await setup();
       expect(config.getKibanaPkg()).to.eql(pkg);
     });
   });
 
   describe('#getNodeVersion()', () => {
-    it('returns the node version from the kibana package.json', () => {
+    it('returns the node version from the kibana package.json', async () => {
+      const { config } = await setup();
       expect(config.getNodeVersion()).to.eql(pkg.engines.node);
     });
   });
 
   describe('#getRepoRelativePath()', () => {
-    it('converts an absolute path to relative path, from the root of the repo', () => {
+    it('converts an absolute path to relative path, from the root of the repo', async () => {
+      const { config } = await setup();
       expect(config.getRepoRelativePath(__dirname)).to.match(/^src[\/\\]dev[\/\\]build/);
     });
   });
 
   describe('#resolveFromRepo()', () => {
-    it('resolves a relative path', () => {
+    it('resolves a relative path', async () => {
+      const { config } = await setup();
       expect(config.resolveFromRepo('src/dev/build/lib/__tests__'))
         .to.be(__dirname);
     });
 
-    it('resolves a series of relative paths', () => {
+    it('resolves a series of relative paths', async () => {
+      const { config } = await setup();
       expect(config.resolveFromRepo('src', 'dev', 'build', 'lib', '__tests__'))
         .to.be(__dirname);
     });
   });
 
-  describe('#getPlatforms()', () => {
-    it('returns an array of platform objects', () => {
-      const platforms = config.getPlatforms();
+  describe('#getTargetPlatforms()', () => {
+    it('returns an array of all platform objects', async () => {
+      const { config } = await setup();
+      expect(config.getTargetPlatforms().map(p => p.getName()).sort()).to.eql([
+        'darwin',
+        'linux',
+        'windows'
+      ]);
+    });
+
+    it('returns just this platform when targetAllPlatforms = false', async () => {
+      const { config } = await setup({ targetAllPlatforms: false });
+      const platforms = config.getTargetPlatforms();
+
       expect(platforms).to.be.an('array');
-      for (const platform of platforms) {
-        expect(['windows', 'linux', 'darwin']).to.contain(platform.getName());
+      expect(platforms).to.have.length(1);
+      expect(platforms[0]).to.be(config.getPlatformForThisOs());
+    });
+  });
+
+  describe('#getNodePlatforms()', () => {
+    it('returns all platforms', async () => {
+      const { config } = await setup();
+      expect(config.getTargetPlatforms().map(p => p.getName()).sort()).to.eql([
+        'darwin',
+        'linux',
+        'windows'
+      ]);
+    });
+
+    it('returns this platform and linux, when targetAllPlatforms = false', async () => {
+      const { config } = await setup({ targetAllPlatforms: false });
+      const platforms = config.getNodePlatforms();
+      expect(platforms).to.be.an('array');
+      expect(platforms).to.have.length(process.platform === 'linux');
+      if (process.platform !== 'linux') {
+        expect(platforms).to.have.length(2);
+        expect(platforms[0]).to.be(config.getPlatformForThisOs());
+        expect(platforms[1]).to.be(config.getLinuxPlatform());
+      } else {
+        expect(platforms).to.have.length(1);
+        expect(platforms[0]).to.be(config.getLinuxPlatform());
       }
     });
   });
 
   describe('#getLinuxPlatform()', () => {
-    it('returns the linux platform', () => {
+    it('returns the linux platform', async () => {
+      const { config } = await setup();
       expect(config.getLinuxPlatform().getName()).to.be('linux');
     });
   });
 
   describe('#getWindowsPlatform()', () => {
-    it('returns the windows platform', () => {
+    it('returns the windows platform', async () => {
+      const { config } = await setup();
       expect(config.getWindowsPlatform().getName()).to.be('windows');
     });
   });
 
   describe('#getMacPlatform()', () => {
-    it('returns the mac platform', () => {
+    it('returns the mac platform', async () => {
+      const { config } = await setup();
       expect(config.getMacPlatform().getName()).to.be('darwin');
     });
   });
 
   describe('#getPlatformForThisOs()', () => {
-    it('returns the platform that matches the arch of this machine', () => {
+    it('returns the platform that matches the arch of this machine', async () => {
+      const { config } = await setup();
       expect(config.getPlatformForThisOs().getName()).to.be(process.platform);
     });
   });
 
   describe('#getBuildVersion()', () => {
-    it('returns the version from the build info', () => {
+    it('returns the version from the build info', async () => {
+      const { config, buildInfo } = await setup();
       expect(config.getBuildVersion()).to.be(buildInfo.buildVersion);
     });
   });
 
   describe('#getBuildNumber()', () => {
-    it('returns the number from the build info', () => {
+    it('returns the number from the build info', async () => {
+      const { config, buildInfo } = await setup();
       expect(config.getBuildNumber()).to.be(buildInfo.buildNumber);
     });
   });
 
   describe('#getBuildSha()', () => {
-    it('returns the sha from the build info', () => {
+    it('returns the sha from the build info', async () => {
+      const { config, buildInfo } = await setup();
       expect(config.getBuildSha()).to.be(buildInfo.buildSha);
     });
   });
 
   describe('#resolveFromTarget()', () => {
-    it('resolves a relative path, from the target directory', () => {
+    it('resolves a relative path, from the target directory', async () => {
+      const { config } = await setup();
       expect(config.resolveFromTarget()).to.be(resolve(__dirname, '../../../../../target'));
     });
   });

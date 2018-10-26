@@ -50,6 +50,7 @@
           tooltip="{{ getVisTypeTooltip(type) }}"
           tooltip-placement="{{ getVisTypeTooltipPosition($parent.$index) }}"
           aria-describedby="visDescription_{{ ::getVisTypeId(type) }}"
+          data-test-subj="visType-{{::type.name}}"
         >
           <div class="kuiGalleryItem__image">
             <img

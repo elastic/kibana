@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
 import { LoginState } from '../../../../../common/login_state';
 
 interface Props {
@@ -73,7 +73,6 @@ export class BasicLoginForm extends Component<Props, State> {
               color="primary"
               onClick={this.submit}
               isLoading={this.state.isLoading}
-              isDisabled={!this.isFormValid()}
               data-test-subj="loginSubmit"
             >
               Log in
@@ -141,7 +140,9 @@ export class BasicLoginForm extends Component<Props, State> {
     });
   };
 
-  private submit = () => {
+  private submit = (e: MouseEvent<HTMLButtonElement> | FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     if (!this.isFormValid()) {
       return;
     }

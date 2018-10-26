@@ -529,7 +529,7 @@ describe('Authenticator', () => {
 
     it('throw non-401 boom errors.', async () => {
       const request = requestFixture();
-      const non401Error = Boom.wrap(new TypeError());
+      const non401Error = Boom.boomify(new TypeError());
       server.plugins.security.getUser
         .withArgs(request)
         .returns(Promise.reject(non401Error));
