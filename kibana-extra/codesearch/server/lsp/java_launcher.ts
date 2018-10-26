@@ -7,10 +7,10 @@
 import { spawn } from 'child_process';
 import getPort from 'get-port';
 import * as glob from 'glob';
-import * as Hapi from 'hapi';
 import { platform as getOsPlatform } from 'os';
 import path from 'path';
-import { Log } from '../log';
+import { ServerOptions } from '../server_options';
+import { LoggerFactory } from '../utils/log_factory';
 import { ILanguageServerLauncher } from './language_server_launcher';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
@@ -19,8 +19,8 @@ export class JavaLauncher implements ILanguageServerLauncher {
   constructor(
     readonly targetHost: string,
     readonly detach: boolean,
-    readonly workspacePath: string,
-    readonly server: Hapi.Server
+    readonly options: ServerOptions,
+    readonly loggerFactory: LoggerFactory
   ) {}
 
   public async launch(builtinWorkspace: boolean, maxWorkspace: number) {
@@ -29,7 +29,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     if (!this.detach) {
       port = await getPort();
     }
-    const log = new Log(this.server, ['LSP', `java@${this.targetHost}:${port}`]);
+    const log = this.loggerFactory.getLogger(['LSP', `java@${this.targetHost}:${port}`]);
     const proxy = new LanguageServerProxy(port, this.targetHost, log);
     proxy.awaitServerConnection();
     const javaLangserverPath = path.resolve(
@@ -73,7 +73,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
             '-configuration',
             path.resolve(javaLangserverPath, config),
             '-data',
-            this.workspacePath,
+            this.options.jdtWorkspacePath,
           ],
           {
             detached: false,
@@ -83,13 +83,19 @@ export class JavaLauncher implements ILanguageServerLauncher {
         );
       };
       let child = spawnJava();
-      log.info(`Launch Java Language Server at port ${process.env.CLIENT_PORT}, pid:${child.pid}, JAVA_HOME:${process.env.JAVA_HOME}`);
+      log.info(
+        `Launch Java Language Server at port ${process.env.CLIENT_PORT}, pid:${
+          child.pid
+        }, JAVA_HOME:${process.env.JAVA_HOME}`
+      );
       proxy.onDisconnected(() => {
         if (!proxy.isClosed) {
           child.kill();
           proxy.awaitServerConnection();
           log.warn('language server disconnected, restarting it');
           child = spawnJava();
+        } else {
+          child.kill();
         }
       });
     } else {
@@ -100,6 +106,6 @@ export class JavaLauncher implements ILanguageServerLauncher {
       });
     }
     proxy.listen();
-    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace);
+    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options);
   }
 }

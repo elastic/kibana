@@ -34,6 +34,7 @@ export interface ILanguageServerHandler {
   lastAccess?: number;
   handleRequest(request: LspRequest): Promise<ResponseMessage>;
   exit(): Promise<any>;
+  unloadWorkspace(workspaceDir: string): Promise<void>;
 }
 
 export class LanguageServerProxy implements ILanguageServerHandler {
@@ -229,6 +230,10 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       this.socket.connect(this.targetPort, this.targetHost);
     }
     return this.connectingPromise;
+  }
+
+  public unloadWorkspace(workspaceDir: string): Promise<void> {
+    return Promise.reject('should not hit here');
   }
 
   private onSocketClosed() {

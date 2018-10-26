@@ -7,6 +7,7 @@
 import Hapi from 'hapi';
 import { inspect } from 'util';
 import { Logger } from 'vscode-jsonrpc';
+export { Logger } from 'vscode-jsonrpc';
 
 export class Log implements Logger {
   constructor(private server: Hapi.Server, private baseTags: string[] = ['codesearch']) {}

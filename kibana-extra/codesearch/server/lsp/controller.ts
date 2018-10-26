@@ -3,19 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as Hapi from 'hapi';
+import fs from 'fs';
 import { ErrorCodes, ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { LspRequest } from '../../model';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { detectLanguage } from '../utils/detect_language';
+import { LoggerFactory } from '../utils/log_factory';
 import { JavaLauncher } from './java_launcher';
 import { ILanguageServerLauncher } from './language_server_launcher';
 import { ILanguageServerHandler } from './proxy';
 import { TypescriptServerLauncher } from './ts_launcher';
 
-interface WorkspaceHandlerMap {
+interface LanguageServerHandlerMap {
   [workspaceUri: string]: ILanguageServerHandler;
 }
 
@@ -24,7 +25,7 @@ interface LanguageServer {
   maxWorkspace: number;
   languages: string[];
   launcher: ILanguageServerLauncher;
-  workspaceHandlers?: ILanguageServerHandler | WorkspaceHandlerMap;
+  languageServerHandlers?: ILanguageServerHandler | LanguageServerHandlerMap;
 }
 
 /**
@@ -36,28 +37,33 @@ export class LanguageServerController implements ILanguageServerHandler {
   private readonly languageServers: LanguageServer[];
   // a { lang -> server } map from above list
   private readonly languageServerMap: { [lang: string]: LanguageServer };
-  private log: Log;
+  private log: Logger;
   private readonly detach: boolean = process.env.LSP_DETACH === 'true';
 
   constructor(
     readonly options: ServerOptions,
     readonly targetHost: string,
-    readonly server: Hapi.Server
+    readonly loggerFactory: LoggerFactory
   ) {
-    this.log = new Log(server);
+    this.log = loggerFactory.getLogger([]);
     this.languageServers = [
       {
         builtinWorkspaceFolders: false,
         languages: ['typescript', 'javascript', 'html'],
         maxWorkspace: options.maxWorkspace,
-        workspaceHandlers: {},
-        launcher: new TypescriptServerLauncher(this.targetHost, this.detach, this.server),
+        languageServerHandlers: {},
+        launcher: new TypescriptServerLauncher(
+          this.targetHost,
+          this.detach,
+          options,
+          loggerFactory
+        ),
       },
       {
         builtinWorkspaceFolders: true,
         languages: ['java'],
         maxWorkspace: options.maxWorkspace,
-        launcher: new JavaLauncher(this.targetHost, this.detach, options.jdtWorkspacePath, this.server),
+        launcher: new JavaLauncher(this.targetHost, this.detach, options, loggerFactory),
       },
     ];
     this.languageServerMap = this.languageServers.reduce(
@@ -85,9 +91,9 @@ export class LanguageServerController implements ILanguageServerHandler {
   public async dispatchRequest(lang: string, request: LspRequest): Promise<ResponseMessage> {
     if (lang) {
       const languageServer = this.languageServerMap[lang];
-      if (languageServer && languageServer.workspaceHandlers) {
+      if (languageServer && languageServer.languageServerHandlers) {
         if (languageServer.builtinWorkspaceFolders) {
-          const handler = languageServer.workspaceHandlers as ILanguageServerHandler;
+          const handler = languageServer.languageServerHandlers as ILanguageServerHandler;
           return handler.handleRequest(request);
         } else {
           const handler = await this.findOrCreateHandler(languageServer, request);
@@ -109,8 +115,22 @@ export class LanguageServerController implements ILanguageServerHandler {
     }
   }
 
+  /**
+   * shutdown all language servers
+   */
   public async exit() {
-    // Shouldn't be use here
+    for (const ls of this.languageServers) {
+      if (ls.builtinWorkspaceFolders) {
+        if (ls.languageServerHandlers) {
+          await (ls.languageServerHandlers as ILanguageServerHandler).exit();
+        }
+      } else {
+        const handlers = ls.languageServerHandlers as LanguageServerHandlerMap;
+        for (const handler of Object.values(handlers)) {
+          await handler.exit();
+        }
+      }
+    }
   }
 
   public async launchServers() {
@@ -118,9 +138,28 @@ export class LanguageServerController implements ILanguageServerHandler {
       // for those language server has builtin workspace support, we can launch them during kibana startup
       if (ls.builtinWorkspaceFolders) {
         try {
-          ls.workspaceHandlers = await ls.launcher.launch(true, ls.maxWorkspace);
+          ls.languageServerHandlers = await ls.launcher.launch(true, ls.maxWorkspace);
         } catch (e) {
           this.log.error(e);
+        }
+      }
+    }
+  }
+
+  public async unloadWorkspace(workspaceDir: string) {
+    for (const languageServer of this.languageServers) {
+      if (languageServer.languageServerHandlers) {
+        if (languageServer.builtinWorkspaceFolders) {
+          const handler = languageServer.languageServerHandlers as ILanguageServerHandler;
+          await handler.unloadWorkspace(workspaceDir);
+        } else {
+          const handlers = languageServer.languageServerHandlers as LanguageServerHandlerMap;
+          const realPath = fs.realpathSync(workspaceDir);
+          const handler = handlers[realPath];
+          if (handler) {
+            await handler.unloadWorkspace(realPath);
+            delete handlers[realPath];
+          }
         }
       }
     }
@@ -134,11 +173,12 @@ export class LanguageServerController implements ILanguageServerHandler {
     languageServer: LanguageServer,
     request: LspRequest
   ): Promise<ILanguageServerHandler> {
-    const handlers = languageServer.workspaceHandlers as WorkspaceHandlerMap;
+    const handlers = languageServer.languageServerHandlers as LanguageServerHandlerMap;
     if (!request.workspacePath) {
       throw new ResponseError(ErrorCodes.UnknownErrorCode, `no workspace in request?`);
     }
-    let handler = handlers[request.workspacePath];
+    const realPath = fs.realpathSync(request.workspacePath);
+    let handler = handlers[realPath];
     if (handler) {
       return handler;
     } else {
@@ -149,7 +189,7 @@ export class LanguageServerController implements ILanguageServerHandler {
           languageServer.builtinWorkspaceFolders,
           maxWorkspace
         );
-        handlers[request.workspacePath!] = handler;
+        handlers[realPath] = handler;
         return handler;
       } else {
         let [oldestWorkspace, oldestHandler] = handlerArray[0];

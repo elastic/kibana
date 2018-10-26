@@ -6,9 +6,9 @@
 
 import { spawn } from 'child_process';
 import getPort from 'get-port';
-import * as Hapi from 'hapi';
 import path from 'path';
-import { Log } from '../log';
+import { ServerOptions } from '../server_options';
+import { LoggerFactory } from '../utils/log_factory';
 import { promiseTimeout } from '../utils/timeout';
 import { ILanguageServerLauncher } from './language_server_launcher';
 import { LanguageServerProxy } from './proxy';
@@ -18,7 +18,8 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
   constructor(
     readonly targetHost: string,
     readonly detach: boolean,
-    readonly server: Hapi.Server
+    readonly options: ServerOptions,
+    readonly loggerFactory: LoggerFactory
   ) {}
 
   public async launch(builtinWorkspace: boolean, maxWorkspace: number) {
@@ -27,7 +28,7 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
     if (!this.detach) {
       port = await getPort();
     }
-    const log = new Log(this.server, ['LSP', `ts@${this.targetHost}:${port}`]);
+    const log = this.loggerFactory.getLogger(['LSP', `ts@${this.targetHost}:${port}`]);
     const proxy = new LanguageServerProxy(port, this.targetHost, log);
 
     if (this.detach) {
@@ -78,11 +79,13 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
         if (!proxy.isClosed) {
           log.warn('language server disconnected, reconnecting');
           setTimeout(reconnect, 1000);
+        } else {
+          child.kill();
         }
       });
     }
     proxy.listen();
     await proxy.connect();
-    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace);
+    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options);
   }
 }

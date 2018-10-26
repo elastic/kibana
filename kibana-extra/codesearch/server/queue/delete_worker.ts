@@ -17,6 +17,7 @@ import { DeleteWorkerResult, WorkerProgress } from '../../model/repository';
 import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from '../indexer/schema';
 import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
+import { LspService } from '../lsp/lsp_service';
 import { RepositoryService } from '../repository_service';
 import { AbstractWorker } from './abstract_worker';
 import { CancellationSerivce } from './cancellation_service';
@@ -30,7 +31,8 @@ export class DeleteWorker extends AbstractWorker {
     protected readonly log: Log,
     private readonly objectsClient: SavedObjectsClient,
     protected readonly client: EsClient,
-    private readonly cancellationService: CancellationSerivce
+    private readonly cancellationService: CancellationSerivce,
+    private readonly lspService: LspService
   ) {
     super(queue, log);
   }
@@ -78,6 +80,8 @@ export class DeleteWorker extends AbstractWorker {
       uri
     );
 
+    const deleteWorkspacePromise = this.lspService.deleteWorkspace(uri);
+
     await Promise.all([
       deleteRepoPromise,
       deleteCloneStatusPromise,
@@ -85,6 +89,7 @@ export class DeleteWorker extends AbstractWorker {
       deleteIndexStatusPromise,
       deleteSymbolESIndexPromise,
       deleteReferenceESIndexPromise,
+      deleteWorkspacePromise,
     ]);
 
     // 4. Delete the document index where the repository document resides, so

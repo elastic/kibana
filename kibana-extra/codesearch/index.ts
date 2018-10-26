@@ -35,6 +35,7 @@ import { IndexScheduler, UpdateScheduler } from './server/scheduler';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from './server/search';
 import { ServerOptions } from './server/server_options';
 import { SocketService } from './server/socket_service';
+import { ServerLoggerFactory } from './server/utils/server_logger_factory';
 
 // tslint:disable-next-line no-default-export
 export default (kibana: any) =>
@@ -91,7 +92,12 @@ export default (kibana: any) =>
       const objectsClient = new server.savedObjects.SavedObjectsClient(repository);
 
       // Initialize indexing factories.
-      const lspService = new LspService('127.0.0.1', server, serverOptions, objectsClient);
+      const lspService = new LspService(
+        '127.0.0.1',
+        serverOptions,
+        objectsClient,
+        new ServerLoggerFactory(server)
+      );
       const lspIndexerFactory = new LspIndexerFactory(
         lspService,
         serverOptions,
@@ -133,7 +139,8 @@ export default (kibana: any) =>
         log,
         objectsClient,
         adminCluster.getClient(),
-        cancellationService
+        cancellationService,
+        lspService
       ).bind();
       const updateWorker = new UpdateWorker(
         queue,

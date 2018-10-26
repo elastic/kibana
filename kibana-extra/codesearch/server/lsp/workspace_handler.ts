@@ -14,26 +14,30 @@ import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserv
 import { Full } from '@codesearch/lsp-extension';
 import { DetailSymbolInformation } from '@codesearch/lsp-extension';
 
+import rimraf from 'rimraf';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
 import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneWorkerProgress, LspRequest } from '../../model';
 import { getDefaultBranch, GitOperations } from '../git_operations';
-import { Log } from '../log';
+import { Logger } from '../log';
+import { LoggerFactory } from '../utils/log_factory';
 
 export const MAX_RESULT_COUNT = 20;
 
 export class WorkspaceHandler {
   private git: GitOperations;
   private revisionMap: { [uri: string]: string } = {};
+  private log: Logger;
 
   constructor(
     readonly repoPath: string,
     private readonly workspacePath: string,
     private readonly objectsClient: any,
-    private readonly log: Log
+    loggerFactory: LoggerFactory
   ) {
     this.git = new GitOperations(repoPath);
+    this.log = loggerFactory.getLogger(['LSP', 'workspace']);
   }
 
   /**
@@ -77,6 +81,24 @@ export class WorkspaceHandler {
     }
     this.setWorkspaceRevision(workspaceRepo, workspaceHeadCommit);
     return { workspaceRepo, workspaceRevision: workspaceHeadCommit.sha().substring(0, 7) };
+  }
+
+  public listWorkspaceFolders(repoUri: string) {
+    const workspaceDir = path.join(this.workspacePath, repoUri);
+    const isDir = (source: string) => fs.lstatSync(source).isDirectory();
+    return fs
+      .readdirSync(workspaceDir)
+      .map(name => path.join(workspaceDir, name))
+      .filter(isDir);
+  }
+
+  public clearWorkspace(repoUri: string, revision?: string) {
+    const workspaceDir = path.join(this.workspacePath, repoUri);
+    if (revision) {
+      rimraf.sync(path.join(workspaceDir, revision));
+    } else {
+      rimraf.sync(path.join(workspaceDir));
+    }
   }
 
   public async handleRequest(request: LspRequest): Promise<void> {
