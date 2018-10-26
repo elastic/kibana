@@ -36,37 +36,30 @@ module.directive('mlEnableModelPlotCheckbox', function () {
         $scope.ui.cardinalityValidator.message = 'Cardinality could not be validated';
       };
 
-      // [{id:"cardinality_model_plot_high",modelPlotCardinality:11405}, {id:"cardinality_partition_field",fieldName:"clientip"}]
-      // Model plot cardinality is the only thing we care about
-      const getModelPlotCardinality = (data) => {
-        let cardinality;
+      // Only model plot cardinality relevant
+      // format:[{id:"cardinality_model_plot_high",modelPlotCardinality:11405}, {id:"cardinality_partition_field",fieldName:"clientip"}]
+      const checkCardinalitySuccess = (data) => {
+        const response = {
+          success: true,
+        };
+        // There were no fields to run cardinality on.
+        if (Array.isArray(data) && data.length === 0) {
+          return response;
+        }
 
         for (let i = 0; i < data.length; i++) {
+          if (data[i].id === 'success_cardinality') {
+            break;
+          }
+
           if (data[i].id === 'cardinality_model_plot_high') {
-            cardinality = data[i].modelPlotCardinality;
+            response.success = false;
+            response.highCardinality = data[i].modelPlotCardinality;
             break;
           }
         }
 
-        return cardinality;
-      };
-
-      // Successful validation: [{ id: 'success_cardinality' }]
-      const hasSuccessMessage = (data) => {
-        return (
-          Array.isArray(data) &&
-          (data.length === 1) &&
-          (data[0].id === 'success_cardinality')
-        );
-      };
-
-      const isSuccessfulValidation = (data) => {
-        const highModelPlotCardinality = getModelPlotCardinality(data);
-
-        return {
-          success: hasSuccessMessage(data),
-          highCardinality: highModelPlotCardinality,
-        };
+        return response;
       };
 
       const validateCardinality = function () {
@@ -78,17 +71,17 @@ module.directive('mlEnableModelPlotCheckbox', function () {
 
         ml.validateCardinality(tempJob)
           .then((response) => {
-            console.log(response); // remove
-            const validationResult = isSuccessfulValidation(response);
+            const validationResult = checkCardinalitySuccess(response);
 
-            if (validationResult.success === true && validationResult.highCardinality === undefined) {
+            if (validationResult.success === true) {
               $scope.formConfig.enableModelPlot = true;
               $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
             } else {
-              console.log('Validation not successful', response); // remove
               $scope.ui.cardinalityValidator.message = `The estimated cardinality of ${validationResult.highCardinality}
                 of fields relevant to creating model plots might result in resource intensive jobs.`;
               $scope.ui.cardinalityValidator.status = STATUS.WARNING;
+              // show the advanced section so the warning message is visible since validation failed
+              $scope.ui.showAdvanced = true;
             }
           })
           .catch(errorHandler);
@@ -116,9 +109,12 @@ module.directive('mlEnableModelPlotCheckbox', function () {
       // Update checkbox on these changes
       $scope.$watch('ui.formValid', updateCheckbox, true);
       $scope.$watch('ui.cardinalityValidator.status', updateCheckbox, true);
-      // Fire off cardinality validatation when fields and/or split by field is updated
+      // MultiMetric: Fire off cardinality validatation when fields and/or split by field is updated
       $scope.$watch('formConfig.fields', revalidateCardinalityOnFieldChange, true);
       $scope.$watch('formConfig.splitField', revalidateCardinalityOnFieldChange, true);
+      // Population: Fire off cardinality validatation when overField is updated
+      $scope.$watch('formConfig.overField', revalidateCardinalityOnFieldChange, true);
+      $scope.$watch('tempSelectedField.field', revalidateCardinalityOnFieldChange, true);
 
       function updateCheckbox() {
         const checkboxDisabled = (
