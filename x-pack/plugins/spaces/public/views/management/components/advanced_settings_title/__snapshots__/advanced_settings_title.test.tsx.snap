@@ -38,7 +38,11 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
       <h1
         data-test-subj="managementSettingsTitle"
       >
-        Settings
+        <FormattedMessage
+          defaultMessage="Settings"
+          id="xpack.spaces.view.management.advancedSettingsTitle.settingsTitle"
+          values={Object {}}
+        />
       </h1>
     </EuiText>
   </EuiFlexItem>

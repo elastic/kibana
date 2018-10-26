@@ -11,11 +11,17 @@ exports[`AdvancedSettingsSubtitle renders as expected 1`] = `
     size="m"
     title={
       <p>
-        The settings on this page apply to the 
-        <strong>
-          My Space
-        </strong>
-         space, unless otherwise specified.
+        <FormattedMessage
+          defaultMessage="The settings on this page apply to the {spaceName} space, unless otherwise specified."
+          id="xpack.spaces.view.management.advancedSettingsSubtitle.applyingSettingsOnPageToSpaceDescription"
+          values={
+            Object {
+              "spaceName": <strong>
+                My Space
+              </strong>,
+            }
+          }
+        />
       </p>
     }
   />
