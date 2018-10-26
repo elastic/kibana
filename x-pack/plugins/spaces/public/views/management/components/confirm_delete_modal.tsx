@@ -20,7 +20,7 @@ import {
   EuiOverlayMask,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { ChangeEvent, Component } from 'react';
 import { Space } from '../../../../common/model/space';
@@ -32,7 +32,7 @@ interface Props {
   spacesNavState: SpacesNavState;
   onCancel: () => void;
   onConfirm: () => void;
-  intl: any;
+  intl: InjectedIntl;
 }
 
 interface State {

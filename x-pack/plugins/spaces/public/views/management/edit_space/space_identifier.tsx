@@ -9,7 +9,7 @@ import {
   EuiFormRow,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { Space } from '../../../../common/model/space';
 import { SpaceValidator } from '../lib';
@@ -19,7 +19,7 @@ interface Props {
   editable: boolean;
   validator: SpaceValidator;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  intl: any;
+  intl: InjectedIntl;
 }
 
 interface State {

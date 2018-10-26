@@ -21,7 +21,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
@@ -46,7 +46,7 @@ interface Props {
   spaceId?: string;
   userProfile: UserProfile;
   spacesNavState: SpacesNavState;
-  intl: any;
+  intl: InjectedIntl;
 }
 
 interface State {

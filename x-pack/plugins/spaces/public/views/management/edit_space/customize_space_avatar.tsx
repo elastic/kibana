@@ -5,7 +5,7 @@
  */
 // @ts-ignore
 import { EuiColorPicker, EuiFieldText, EuiFlexItem, EuiFormRow, EuiLink } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { MAX_SPACE_INITIALS } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
@@ -14,7 +14,7 @@ import { getSpaceColor, getSpaceInitials } from '../../../../common/space_attrib
 interface Props {
   space: Partial<Space>;
   onChange: (space: Partial<Space>) => void;
-  intl: any;
+  intl: InjectedIntl;
 }
 
 interface State {

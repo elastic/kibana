@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
 
@@ -37,7 +37,7 @@ interface Props {
   spacesManager: SpacesManager;
   spacesNavState: SpacesNavState;
   userProfile: UserProfile;
-  intl: any;
+  intl: InjectedIntl;
 }
 
 interface State {

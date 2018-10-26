@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { Component, Fragment } from 'react';
 // @ts-ignore
@@ -20,7 +20,7 @@ interface Props {
   spacesManager: SpacesManager;
   spacesNavState: SpacesNavState;
   onDelete: () => void;
-  intl: any;
+  intl: InjectedIntl;
 }
 
 interface State {

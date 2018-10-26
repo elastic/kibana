@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { SpacesManager } from 'plugins/spaces/lib';
 import React, { Component, Fragment } from 'react';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common/constants';
@@ -27,7 +27,7 @@ import { SpaceCards } from '../components/space_cards';
 interface Props {
   spaces?: Space[];
   spacesManager: SpacesManager;
-  intl: any;
+  intl: InjectedIntl;
 }
 
 interface State {
