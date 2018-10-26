@@ -30,14 +30,14 @@ interface Props {
 
 const traceListColumns: ITableColumn[] = [
   {
-    field: 'sample',
+    field: 'name',
     name: 'Name',
     width: '40%',
     sortable: true,
-    render: (transaction: Transaction) => (
-      <TooltipOverlay content={transaction.transaction.name}>
-        <StyledTransactionLink transaction={transaction}>
-          {transaction.transaction.name}
+    render: (_, group: ITransactionGroup) => (
+      <TooltipOverlay content={group.sample.transaction.name}>
+        <StyledTransactionLink transaction={group.sample}>
+          {group.sample.transaction.name}
         </StyledTransactionLink>
       </TooltipOverlay>
     )
