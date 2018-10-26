@@ -9,7 +9,7 @@ import { mergeMap } from 'rxjs/operators';
 import phantom from '@elastic/node-phantom-simple';
 import { getPhantomOptions } from './phantom_options';
 import { PhantomDriver } from '../driver';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 import { safeChildProcess, exitCodeSuggestion } from '../../safe_child_process';
 
 export class PhantomDriverFactory {
@@ -28,7 +28,7 @@ export class PhantomDriverFactory {
       (async () => {
         const phantomOptions = getPhantomOptions({
           phantomPath: this.binaryPath,
-          bridgePort
+          bridgePort,
         });
 
         try {
@@ -66,7 +66,11 @@ export class PhantomDriverFactory {
         }
 
         const exit$ = Rx.fromEvent(browser.process, 'exit').pipe(
-          mergeMap(([code]) => Rx.throwError(new Error(`Phantom exited with code: ${code}. ${exitCodeSuggestion(code)}`)))
+          mergeMap(([code]) =>
+            Rx.throwError(
+              new Error(`Phantom exited with code: ${code}. ${exitCodeSuggestion(code)}`)
+            )
+          )
         );
 
         const driver = new PhantomDriver({
@@ -77,11 +81,14 @@ export class PhantomDriverFactory {
         });
         const driver$ = Rx.of(driver);
 
-        const consoleMessage$ = Rx.fromEventPattern(handler => {
-          page.onConsoleMessage = handler;
-        }, () => {
-          page.onConsoleMessage = null;
-        });
+        const consoleMessage$ = Rx.fromEventPattern(
+          handler => {
+            page.onConsoleMessage = handler;
+          },
+          () => {
+            page.onConsoleMessage = null;
+          }
+        );
 
         const message$ = Rx.never();
 
@@ -89,7 +96,7 @@ export class PhantomDriverFactory {
           driver$,
           message$,
           consoleMessage$,
-          exit$
+          exit$,
         });
       })();
 

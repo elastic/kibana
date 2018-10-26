@@ -6,7 +6,7 @@
 import { BackendFrameworkAdapter } from '../adapter_types';
 
 interface ContractConfig {
-  before(timeout: any): Promise<void>;
+  before(): Promise<void>;
   after(): Promise<void>;
   adapterSetup(): BackendFrameworkAdapter;
 }
@@ -14,10 +14,8 @@ interface ContractConfig {
 export const contractTests = (testName: string, config: ContractConfig) => {
   describe(testName, () => {
     let frameworkAdapter: any;
-    beforeAll(async () => {
-      await config.before((t: number) => jest.setTimeout(t + 10000000));
-    });
-    afterAll(async () => await config.after());
+    beforeAll(config.before);
+    afterAll(config.after);
     beforeEach(async () => {
       // FIXME: one of these always should exist, type ContractConfig as such
       frameworkAdapter = config.adapterSetup();

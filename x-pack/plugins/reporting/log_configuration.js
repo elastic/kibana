@@ -5,7 +5,7 @@
  */
 
 import getosSync from 'getos';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 
 const getos = promisify(getosSync);
 
@@ -14,7 +14,11 @@ export async function logConfiguration(config, log) {
   log(`Browser type: ${browserType}`);
 
   if (browserType === 'chromium') {
-    log(`Chromium sandbox disabled: ${config.get('xpack.reporting.capture.browser.chromium.disableSandbox')}`);
+    log(
+      `Chromium sandbox disabled: ${config.get(
+        'xpack.reporting.capture.browser.chromium.disableSandbox'
+      )}`
+    );
   }
 
   const os = await getos();

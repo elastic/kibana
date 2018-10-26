@@ -8,11 +8,11 @@ import * as Rx from 'rxjs';
 import { first, tap, mergeMap } from 'rxjs/operators';
 import fs from 'fs';
 import getPort from 'get-port';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 import { LevelLogger } from '../../../../server/lib/level_logger';
 
 const fsp = {
-  readFile: promisify(fs.readFile, fs)
+  readFile: promisify(fs.readFile, fs),
 };
 
 export function screenshotsObservableFactory(server) {
@@ -44,7 +44,7 @@ export function screenshotsObservableFactory(server) {
     await browser.evaluate({
       fn: function (css) {
         const node = document.createElement('style');
-        node.type = "text/css";
+        node.type = 'text/css';
         node.innerHTML = css; // eslint-disable-line no-unsanitized/property
         document.getElementsByTagName('head')[0].appendChild(node);
       },
@@ -56,10 +56,12 @@ export function screenshotsObservableFactory(server) {
     // the dashboard is using the `itemsCountAttribute` attribute to let us
     // know how many items to expect since gridster incrementally adds panels
     // we have to use this hint to wait for all of them
-    await browser.waitForSelector(`${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`);
+    await browser.waitForSelector(
+      `${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`
+    );
   };
 
-  const waitForNotFoundError = async (browser) => {
+  const waitForNotFoundError = async browser => {
     await browser.waitForSelector(`.toast.alert.alert-danger`);
     throw new Error('Reporting subject could not be loaded to take a screenshot.');
   };
@@ -87,7 +89,7 @@ export function screenshotsObservableFactory(server) {
         return document.querySelectorAll(selector).length;
       },
       args: [layout.selectors.renderComplete],
-      toEqual: itemsCount
+      toEqual: itemsCount,
     });
   };
 
@@ -141,7 +143,6 @@ export function screenshotsObservableFactory(server) {
         // bumping to 250.
         const hackyWaitForVisualizations = () => new Promise(r => setTimeout(r, 250));
 
-
         return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
       },
       args: [layout.selectors.renderComplete, captureConfig.loadDelay],
@@ -193,18 +194,17 @@ export function screenshotsObservableFactory(server) {
               },
               scroll: {
                 x: window.scrollX,
-                y: window.scrollY
-              }
+                y: window.scrollY,
+              },
             },
             attributes: Object.keys(attributes).reduce((result, key) => {
               const attribute = attributes[key];
               result[key] = element.getAttribute(attribute);
               return result;
-            }, {})
+            }, {}),
           });
         }
         return results;
-
       },
       args: [layout.selectors.screenshot, { title: 'data-title', description: 'data-description' }],
       returnByValue: true,
@@ -215,19 +215,21 @@ export function screenshotsObservableFactory(server) {
   const getScreenshots = async ({ browser, elementsPositionAndAttributes }) => {
     const screenshots = [];
     for (const item of elementsPositionAndAttributes) {
-      const base64EncodedData = await asyncDurationLogger('screenshot', browser.screenshot(item.position));
+      const base64EncodedData = await asyncDurationLogger(
+        'screenshot',
+        browser.screenshot(item.position)
+      );
 
       screenshots.push({
         base64EncodedData,
         title: item.attributes.title,
-        description: item.attributes.description
+        description: item.attributes.description,
       });
     }
     return screenshots;
   };
 
   return function screenshotsObservable(url, sessionCookie, layout, browserTimezone) {
-
     return Rx.defer(async () => await getPort()).pipe(
       mergeMap(bridgePort => {
         logger.debug(`Creating browser driver factory`);
@@ -241,7 +243,6 @@ export function screenshotsObservableFactory(server) {
       }),
       tap(() => logger.debug('Driver factory created')),
       mergeMap(({ driver$, exit$, message$, consoleMessage$ }) => {
-
         message$.subscribe(line => {
           logger.debug(line, ['browser']);
         });
@@ -250,24 +251,20 @@ export function screenshotsObservableFactory(server) {
           logger.debug(line, ['browserConsole']);
         });
 
-
         const screenshot$ = driver$.pipe(
           tap(() => logger.debug(`opening ${url}`)),
-          mergeMap(
-            browser => openUrl(browser, url, sessionCookie),
-            browser => browser
-          ),
+          mergeMap(browser => openUrl(browser, url, sessionCookie), browser => browser),
           tap(() => logger.debug('injecting custom css')),
-          mergeMap(
-            browser => injectCustomCss(browser, layout),
-            browser => browser
+          mergeMap(browser => injectCustomCss(browser, layout), browser => browser),
+          tap(() =>
+            logger.debug('waiting for elements or items count attribute; or not found to interrupt')
           ),
-          tap(() => logger.debug('waiting for elements or items count attribute; or not found to interrupt')),
           mergeMap(
-            browser => Rx.race(
-              Rx.from(waitForElementOrItemsCountAttribute(browser, layout)),
-              Rx.from(waitForNotFoundError(browser))
-            ),
+            browser =>
+              Rx.race(
+                Rx.from(waitForElementOrItemsCountAttribute(browser, layout)),
+                Rx.from(waitForNotFoundError(browser))
+              ),
             browser => browser
           ),
           tap(() => logger.debug('determining how many items we have')),
@@ -278,7 +275,7 @@ export function screenshotsObservableFactory(server) {
           tap(() => logger.debug('setting viewport')),
           mergeMap(
             ({ browser, itemsCount }) => setViewport(browser, itemsCount, layout),
-            ({ browser, itemsCount }) => ({ browser, itemsCount }),
+            ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
           tap(({ itemsCount }) => logger.debug(`waiting for ${itemsCount} to be in the DOM`)),
           mergeMap(
@@ -286,21 +283,19 @@ export function screenshotsObservableFactory(server) {
             ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
           tap(() => logger.debug('positioning elements')),
-          mergeMap(
-            ({ browser }) => positionElements(browser, layout),
-            ({ browser }) => browser
-          ),
+          mergeMap(({ browser }) => positionElements(browser, layout), ({ browser }) => browser),
           tap(() => logger.debug('waiting for rendering to complete')),
-          mergeMap(
-            browser => waitForRenderComplete(browser, layout),
-            browser => browser
-          ),
+          mergeMap(browser => waitForRenderComplete(browser, layout), browser => browser),
           tap(() => logger.debug('rendering is complete')),
           mergeMap(
             browser => getTimeRange(browser, layout),
             (browser, timeRange) => ({ browser, timeRange })
           ),
-          tap(({ timeRange }) => logger.debug(timeRange ? `timeRange from ${timeRange.from} to ${timeRange.to}` : 'no timeRange')),
+          tap(({ timeRange }) =>
+            logger.debug(
+              timeRange ? `timeRange from ${timeRange.from} to ${timeRange.to}` : 'no timeRange'
+            )
+          ),
           mergeMap(
             ({ browser }) => getElementPositionAndAttributes(browser, layout),
             ({ browser, timeRange }, elementsPositionAndAttributes) => {
@@ -309,7 +304,8 @@ export function screenshotsObservableFactory(server) {
           ),
           tap(() => logger.debug(`taking screenshots`)),
           mergeMap(
-            ({ browser, elementsPositionAndAttributes }) => getScreenshots({ browser, elementsPositionAndAttributes }),
+            ({ browser, elementsPositionAndAttributes }) =>
+              getScreenshots({ browser, elementsPositionAndAttributes }),
             ({ timeRange }, screenshots) => ({ timeRange, screenshots })
           )
         );

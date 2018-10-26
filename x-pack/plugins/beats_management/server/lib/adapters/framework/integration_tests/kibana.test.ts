@@ -15,18 +15,7 @@ import { contractTests } from './test_contract';
 
 const kbnSettings = {
   plugins: { paths: [resolve(__dirname, '../../../../../../../../node_modules/x-pack')] },
-  xpack: {
-    reporting: { enabled: false },
-    monitoring: { enabled: false },
-    cloud: { enabled: false },
-    apm: { enabled: false },
 
-    infra: { enabled: false },
-
-    watcher: { enabled: false },
-
-    rollup: { enabled: false },
-  },
   elasticsearch: {
     url: formatUrl(esTestConfig.getUrlParts()),
     username: esTestConfig.getUrlParts().username,
@@ -38,12 +27,14 @@ const kbnSettings = {
 
 let servers: any;
 contractTests('Kibana  Framework Adapter', {
-  async before(timeout: any) {
+  async before() {
     servers = await kbnTestServer.startTestServers({
-      adjustTimeout: timeout,
+      adjustTimeout: t => jest.setTimeout(t),
       settings: kbnSettings,
       license: 'trial',
     });
+
+    await servers.kbnServer.server.plugins.elasticsearch.waitUntilReady();
 
     // const config = legacyServer.server.config();
     // config.extendSchema(beatsPluginConfig, {}, configPrefix);
