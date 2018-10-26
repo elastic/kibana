@@ -22,12 +22,12 @@ import { AppKibanaObservableApiAdapter } from '../adapters/observable_api/kibana
 import { AppFrontendLibs } from '../lib';
 
 export function compose(): AppFrontendLibs {
-  const infraModule = uiModules.get('app/infa');
+  const appModule = uiModules.get('app/secops');
   const observableApi = new AppKibanaObservableApiAdapter({
     basePath: chrome.getBasePath(),
     xsrfToken: chrome.getXsrfToken(),
   });
-  const framework = new AppKibanaFrameworkAdapter(infraModule, uiRoutes, timezoneProvider);
+  const framework = new AppKibanaFrameworkAdapter(appModule, uiRoutes, timezoneProvider);
   const typeDefs = `
   Query {}
 `;

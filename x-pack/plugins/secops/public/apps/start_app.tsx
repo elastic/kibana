@@ -12,10 +12,11 @@ import { ThemeProvider } from 'styled-components';
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+
 import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 
-export async function startApp(libs: AppFrontendLibs) {
+export const startApp = async (libs: AppFrontendLibs) => {
   const history = createHashHistory();
 
   libs.framework.render(
@@ -27,4 +28,4 @@ export async function startApp(libs: AppFrontendLibs) {
       </ApolloProvider>
     </EuiErrorBoundary>
   );
-}
+};

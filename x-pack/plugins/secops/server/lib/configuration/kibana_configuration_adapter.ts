@@ -27,7 +27,7 @@ export class KibanaConfigurationAdapter<Configuration>
       throw new Error('Failed to access configuration of server.');
     }
 
-    const configuration = config.get('xpack.infra') || {};
+    const configuration = config.get('xpack.secops') || {};
     const configurationWithDefaults = {
       enabled: true,
       query: {

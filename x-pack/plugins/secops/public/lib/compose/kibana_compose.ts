@@ -56,9 +56,9 @@ export function compose(): AppFrontendLibs {
 
   const apolloClient = new ApolloClient(graphQLOptions);
 
-  const infraModule = uiModules.get('app/secops');
+  const appModule = uiModules.get('app/secops');
 
-  const framework = new AppKibanaFrameworkAdapter(infraModule, uiRoutes, timezoneProvider);
+  const framework = new AppKibanaFrameworkAdapter(appModule, uiRoutes, timezoneProvider);
 
   const libs: AppFrontendLibs = {
     apolloClient,

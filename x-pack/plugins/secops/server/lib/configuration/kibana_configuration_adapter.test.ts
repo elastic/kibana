@@ -7,7 +7,7 @@
 import { KibanaConfigurationAdapter } from './kibana_configuration_adapter';
 
 describe('the KibanaConfigurationAdapter', () => {
-  test('queries the xpack.infra configuration of the server', async () => {
+  test('queries the xpack.secops configuration of the server', async () => {
     const mockConfig = {
       get: jest.fn(),
     };
@@ -18,7 +18,7 @@ describe('the KibanaConfigurationAdapter', () => {
 
     await configurationAdapter.get();
 
-    expect(mockConfig.get).toBeCalledWith('xpack.infra');
+    expect(mockConfig.get).toBeCalledWith('xpack.secops');
   });
 
   test('applies the query defaults', async () => {

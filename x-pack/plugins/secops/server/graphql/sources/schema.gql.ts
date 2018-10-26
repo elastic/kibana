@@ -8,9 +8,9 @@ import gql from 'graphql-tag';
 
 export const sourcesSchema = gql`
   extend type Query {
-    "Get an infrastructure data source by id"
+    "Get a security data source by id"
     source("The id of the source" id: ID!): Source!
-    "Get a list of all infrastructure data sources"
+    "Get a list of all security data sources"
     allSources: [Source!]!
   }
 
@@ -21,7 +21,7 @@ export const sourcesSchema = gql`
     configuration: SourceConfiguration!
   }
 
-  "A set of configuration options for an infrastructure data source"
+  "A set of configuration options for a security data source"
   type SourceConfiguration {
     "The field mapping to use for this source"
     fields: SourceFields!

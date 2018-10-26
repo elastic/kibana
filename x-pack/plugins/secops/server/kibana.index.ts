@@ -21,7 +21,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
 export const getConfigSchema = (Joi: typeof JoiNamespace) => {
   const DefaultSourceConfigSchema = Joi.object({});
 
-  const InfraRootConfigSchema = Joi.object({
+  const AppRootConfigSchema = Joi.object({
     enabled: Joi.boolean().default(true),
     query: Joi.object({
       partitionSize: Joi.number(),
@@ -35,5 +35,5 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
       .default(),
   }).default();
 
-  return InfraRootConfigSchema;
+  return AppRootConfigSchema;
 };
