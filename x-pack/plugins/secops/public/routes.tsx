@@ -6,7 +6,7 @@
 
 import { History } from 'history';
 import React from 'react';
-import { Redirect, Route, Router, Switch } from 'react-router-dom';
+import { Route, Router, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
 import { NotFoundPage } from './pages/404';
@@ -19,8 +19,7 @@ interface RouterProps {
 export const PageRouter = pure<RouterProps>(({ history }) => (
   <Router history={history}>
     <Switch>
-      <Redirect from="/" exact={true} to="/home" />
-      <Route path="/home" component={HomePage} />
+      <Route path="/" component={HomePage} />
       <Route component={NotFoundPage} />
     </Switch>
   </Router>

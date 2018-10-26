@@ -24,7 +24,7 @@ export function secops(kibana: any) {
         euiIconType: 'securityApp',
         title: 'Sec Ops',
         listed: false,
-        url: `/app/${APP_ID}#/home`,
+        url: `/app/${APP_ID}`,
       },
       home: ['plugins/secops/register_feature'],
       links: [
@@ -34,7 +34,7 @@ export function secops(kibana: any) {
           id: 'secops',
           order: 9000,
           title: 'Sec Ops',
-          url: `/app/${APP_ID}#/home`,
+          url: `/app/${APP_ID}`,
         },
       ],
     },

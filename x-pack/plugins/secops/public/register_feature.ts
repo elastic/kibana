@@ -16,7 +16,7 @@ FeatureCatalogueRegistryProvider.register(() => ({
   title: 'Sec Ops',
   description: 'Explore security metrics and logs for events and alerts',
   icon: 'securityApp',
-  path: `/app/${APP_ID}#home`,
+  path: `/app/${APP_ID}`,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 }));
