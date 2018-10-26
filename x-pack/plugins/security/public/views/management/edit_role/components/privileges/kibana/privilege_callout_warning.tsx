@@ -36,14 +36,14 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
             iconType="iInCircle"
             title={
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.notPossibleToCustomizeReservedRoleSpacePrivilegesTitle"
+                id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.notPossibleToCustomizeReservedRoleSpacePrivilegesTitle"
                 defaultMessage="Cannot customize a reserved role's space privileges"
               />
             }
           >
             <p>
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.howToCustomizePrivilegesDescription"
+                id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.howToCustomizePrivilegesDescription"
                 defaultMessage="This role always grants full access to all spaces. To customize privileges for
                 individual spaces, you must create a new role."
               />
@@ -57,14 +57,14 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
             iconType="iInCircle"
             title={
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.minimumPrivilegeTitle"
+                id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.minimumPrivilegeTitle"
                 defaultMessage="Minimum privilege is too high to customize individual spaces"
               />
             }
           >
             <p>
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.howToCustomizePrivilegesForIndividualSpacesDescription"
+                id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.howToCustomizePrivilegesForIndividualSpacesDescription"
                 defaultMessage="Setting the minimum privilege to {allText} grants full access to all
                 spaces. To customize privileges for individual spaces, the minimum privilege must be
                 either {readText} or {noneText}."
@@ -72,7 +72,7 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
                   allText: (
                     <strong>
                       <FormattedMessage
-                        id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.allText"
+                        id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.allText"
                         defaultMessage="all"
                       />
                     </strong>
@@ -80,7 +80,7 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
                   readText: (
                     <strong>
                       <FormattedMessage
-                        id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.readText"
+                        id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.readText"
                         defaultMessage="read"
                       />
                     </strong>
@@ -88,7 +88,7 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
                   noneText: (
                     <strong>
                       <FormattedMessage
-                        id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.noneText"
+                        id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.noneText"
                         defaultMessage="none"
                       />
                     </strong>
@@ -109,14 +109,14 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
             iconType="iInCircle"
             title={
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.notPossibleToCustomizeReservedRoleSpacePrivilegesTitle"
+                id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.notPossibleToCustomizeReservedRoleSpacePrivilegesTitle"
                 defaultMessage="Cannot customize a reserved role's space privileges"
               />
             }
           >
             <p>
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.alwaysGrantReadAccessToAllSpacesTitle"
+                id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.alwaysGrantReadAccessToAllSpacesTitle"
                 defaultMessage="This role always grants read access to all spaces. To customize privileges for
                 individual spaces, you must create a new role."
               />
@@ -131,13 +131,13 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
             title={
               <span>
                 <FormattedMessage
-                  id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.minimalPossiblePrivilageTitle"
+                  id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.minimalPossiblePrivilageTitle"
                   defaultMessage="The minimal possible privilege is {readText}."
                   values={{
                     readText: (
                       <strong>
                         <FormattedMessage
-                          id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.readText"
+                          id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.readText"
                           defaultMessage="read"
                         />
                       </strong>
@@ -158,14 +158,14 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
           iconType="iInCircle"
           title={
             <FormattedMessage
-              id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.notPossibleToCustomizeReservedRoleSpacePrivilegesTitle"
+              id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.notPossibleToCustomizeReservedRoleSpacePrivilegesTitle"
               defaultMessage="Cannot customize a reserved role's space privileges"
             />
           }
         >
           <p>
             <FormattedMessage
-              id="xpack.security.views.management.editRoles.components.privileges.kibana.privilegeCalloutWarning.neverGrantReadAccessToAllSpacesTitle"
+              id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.neverGrantReadAccessToAllSpacesTitle"
               defaultMessage="This role never grants access to any spaces within Kibana. To customize privileges for
               individual spaces, you must create a new role."
             />

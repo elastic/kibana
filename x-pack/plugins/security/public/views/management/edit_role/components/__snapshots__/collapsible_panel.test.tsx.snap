@@ -44,7 +44,7 @@ exports[`it renders without blowing up 1`] = `
       >
         <FormattedMessage
           defaultMessage="hide"
-          id="xpack.security.views.management.editRoles.components.collapsiblePanel.hideLinkText"
+          id="xpack.security.management.editRoles.collapsiblePanel.hideLinkText"
           values={Object {}}
         />
       </EuiLink>

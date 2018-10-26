@@ -37,7 +37,7 @@ routes.when(ROLES_PATH, {
         $q.all($scope.selectedRoles.map(role => role.$delete()))
           .then(() =>
             toastNotifications.addSuccess(
-              i18n('xpack.security.views.management.roles.deleteRoleTitle', {
+              i18n('xpack.security.management.roles.deleteRoleTitle', {
                 defaultMessage: 'Deleted {value, plural, one {role} other {roles}}',
                 values: {
                   value: $scope.selectedRoles.length,
@@ -54,13 +54,13 @@ routes.when(ROLES_PATH, {
           });
       };
       const confirmModalOptions = {
-        confirmButtonText: i18n('xpack.security.views.management.roles.deleteRoleConfirmButtonLabel', {
+        confirmButtonText: i18n('xpack.security.management.roles.deleteRoleConfirmButtonLabel', {
           defaultMessage: 'Delete role(s)',
         }),
         onConfirm: doDelete,
       };
       confirmModal(
-        i18n('xpack.security.views.management.roles.deletingRolesWarningMessage', {
+        i18n('xpack.security.management.roles.deletingRolesWarningMessage', {
           defaultMessage:
             'Are you sure you want to delete the selected role(s)? This action is irreversible!',
         }),
@@ -100,15 +100,15 @@ routes.when(ROLES_PATH, {
       return $scope.roles.filter(role => !role.metadata._reserved);
     }
 
-    $scope.noFoundMatches = i18n('xpack.security.views.management.roles.matchingText', {
+    $scope.noFoundMatches = i18n('xpack.security.management.roles.matchingText', {
       defaultMessage: 'matching',
     });
 
-    $scope.reversedTooltip = i18n('xpack.security.views.management.roles.reversedTooltip', {
+    $scope.reversedTooltip = i18n('xpack.security.management.roles.reversedTooltip', {
       defaultMessage: 'Reserved roles are built-in and cannot be removed or modified. Only the password may be changed.',
     });
 
-    $scope.reversedAriaLabel = i18n('xpack.security.views.management.roles.reversedAriaLabel', {
+    $scope.reversedAriaLabel = i18n('xpack.security.management.roles.reversedAriaLabel', {
       defaultMessage: 'Reserved roles are built-in and cannot be removed or modified. Only the password may be changed.',
     });
 

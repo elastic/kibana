@@ -5,7 +5,7 @@
         <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
         <span
           class="kuiInfoPanelHeader__title"
-          i18n-id="xpack.security.views.management.roles.noPermissionToManageRolesDescription"
+          i18n-id="xpack.security.management.roles.noPermissionToManageRolesDescription"
           i18n-default-message="You do not have permission to manage roles."
         ></span>
       </div>
@@ -13,7 +13,7 @@
       <div class="kuiInfoPanelBody">
         <div
           class="kuiInfoPanelBody__message"
-          i18n-id="xpack.security.views.management.roles.contactAdministratorDescription"
+          i18n-id="xpack.security.management.roles.contactAdministratorDescription"
           i18n-default-message="Please contact your administrator."
         ></div>
       </div>
@@ -47,7 +47,7 @@
               <span class="kuiButton__inner">
                 <span class="kuiButton__icon kuiIcon fa-trash"></span>
                 <span
-                  i18n-id="xpack.security.views.management.roles.deleteButtonLabel"
+                  i18n-id="xpack.security.management.roles.deleteButtonLabel"
                   i18n-default-message="Delete"
                 ></span>
               </span>
@@ -63,7 +63,7 @@
             >
               <span class="kuiButton__icon kuiIcon fa-plus"></span>
               <span
-                i18n-id="xpack.security.views.management.roles.createRoleButtonLabel"
+                i18n-id="xpack.security.management.roles.createRoleButtonLabel"
                 i18n-default-message="Create role"
               ></span>
             </a>
@@ -78,7 +78,7 @@
         <div class="kuiPanel kuiPanel--centered" ng-show="!(roles | filter:query).length">
           <div
             class="kuiNoItems"
-            i18n-id="xpack.security.views.management.roles.noFoundMatchingRolesDescription"
+            i18n-id="xpack.security.management.roles.noFoundMatchingRolesDescription"
             i18n-default-message="No {message} roles found"
             i18n-values="{
               message: '<span ng-show=\'query\'>' + noFoundMatches+ '</span>'
@@ -114,7 +114,7 @@
                 >
                   <span class="kuiTableHeaderCell__liner">
                     <span
-                      i18n-id="xpack.security.views.management.roles.roleTitle"
+                      i18n-id="xpack.security.management.roles.roleTitle"
                       i18n-default-message="Role"
                     ></span>
                     <span
@@ -129,7 +129,7 @@
               <th scope="col" class="kuiTableHeaderCell">
                 <span
                   class="kuiTableHeaderCell__liner"
-                  i18n-id="xpack.security.views.management.roles.reversedTitle"
+                  i18n-id="xpack.security.management.roles.reversedTitle"
                   i18n-default-message="Reserved {icon}"
                   i18n-values="{
                     icon: '<span
@@ -174,7 +174,7 @@
                       class="kuiBadge kuiBadge--default"
                       tooltip="This role is currently disabled. You may only view or delete it."
                       aria-label="This role is currently disabled. You may only view or delete it."
-                      i18n-id="xpack.security.views.management.roles.disableTitle"
+                      i18n-id="xpack.security.management.roles.disableTitle"
                       i18n-default-message="{icon} Disabled"
                       i18n-values="{
                         icon: '<span class=\'kuiIcon fa-warning\'></span>'
@@ -205,7 +205,7 @@
             <div
               class="kuiToolBarText"
               ng-hide="selectedRoles.length === 0"
-              i18n-id="xpack.security.views.management.roles.selectedRolesTitle"
+              i18n-id="xpack.security.management.roles.selectedRolesTitle"
               i18n-default-message="{selectedRolesLength} roles selected"
               i18n-values="{ selectedRolesLength:  selectedRoles.length }"
             ></div>

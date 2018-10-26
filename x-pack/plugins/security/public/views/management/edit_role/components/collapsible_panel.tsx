@@ -60,12 +60,12 @@ export class CollapsiblePanel extends Component<Props, State> {
           <EuiLink onClick={this.toggleCollapsed}>
             {this.state.collapsed ? (
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.collapsiblePanel.showLinkText"
+                id="xpack.security.management.editRoles.collapsiblePanel.showLinkText"
                 defaultMessage="show"
               />
             ) : (
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.collapsiblePanel.hideLinkText"
+                id="xpack.security.management.editRoles.collapsiblePanel.hideLinkText"
                 defaultMessage="hide"
               />
             )}

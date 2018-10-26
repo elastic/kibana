@@ -50,7 +50,7 @@ export class ImpactedSpacesFlyoutUI extends Component<Props, State> {
         <div className="showImpactedSpaces">
           <EuiLink onClick={this.toggleShowImpactedSpaces}>
             <FormattedMessage
-              id="xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.viewSpacesPrivilegesSummaryLinkText"
+              id="xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.viewSpacesPrivilegesSummaryLinkText"
               defaultMessage="View summary of spaces privileges"
             />
           </EuiLink>
@@ -70,21 +70,18 @@ export class ImpactedSpacesFlyoutUI extends Component<Props, State> {
     const { intl } = this.props;
     if (privileges.indexOf('all') >= 0) {
       return intl.formatMessage({
-        id:
-          'xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.allLabel',
+        id: 'xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.allLabel',
         defaultMessage: 'all',
       });
     }
     if (privileges.indexOf('read') >= 0) {
       return intl.formatMessage({
-        id:
-          'xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.readLabel',
+        id: 'xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.readLabel',
         defaultMessage: 'read',
       });
     }
     return intl.formatMessage({
-      id:
-        'xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.noneLabel',
+      id: 'xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.noneLabel',
       defaultMessage: 'none',
     });
   }
@@ -127,7 +124,7 @@ export class ImpactedSpacesFlyoutUI extends Component<Props, State> {
           <EuiTitle size="m">
             <h1 id="showImpactedSpacesTitle">
               <FormattedMessage
-                id="xpack.security.views.management.editRoles.components.privileges.kibana.impactedSpacesFlyout.spacePrivilegesSummaryTitle"
+                id="xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.spacePrivilegesSummaryTitle"
                 defaultMessage="Summary of space privileges"
               />
             </h1>

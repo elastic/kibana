@@ -58,7 +58,7 @@ export class LoginPage extends Component<Props, {}> {
               <EuiTitle size="l" className="loginWelcome__title">
                 <h1>
                   <FormattedMessage
-                    id="xpack.security.views.login.loginPage.welcomeTitle"
+                    id="xpack.security.login.loginPage.welcomeTitle"
                     defaultMessage="Welcome to Kibana"
                   />
                 </h1>
@@ -66,7 +66,7 @@ export class LoginPage extends Component<Props, {}> {
               <EuiText size="s" color="subdued" className="loginWelcome__subtitle">
                 <p>
                   <FormattedMessage
-                    id="xpack.security.views.login.loginPage.welcomeDescription"
+                    id="xpack.security.login.loginPage.welcomeDescription"
                     defaultMessage="Your window into the Elastic Stack"
                   />
                 </p>
@@ -98,13 +98,13 @@ export class LoginPage extends Component<Props, {}> {
         <DisabledLoginForm
           title={
             <FormattedMessage
-              id="xpack.security.views.login.loginPage.requiresSecureConnectionTitle"
+              id="xpack.security.login.loginPage.requiresSecureConnectionTitle"
               defaultMessage="A secure connection is required for log in"
             />
           }
           message={
             <FormattedMessage
-              id="xpack.security.views.login.loginPage.requiresSecureConnectionMessage"
+              id="xpack.security.login.loginPage.requiresSecureConnectionMessage"
               defaultMessage="Contact your system administrator."
             />
           }
@@ -121,13 +121,13 @@ export class LoginPage extends Component<Props, {}> {
           <DisabledLoginForm
             title={
               <FormattedMessage
-                id="xpack.security.views.login.loginPage.esUnavailableTitle"
+                id="xpack.security.login.loginPage.esUnavailableTitle"
                 defaultMessage="Cannot connect to the Elastiscearch cluster"
               />
             }
             message={
               <FormattedMessage
-                id="xpack.security.views.login.loginPage.esUnavailableMessage"
+                id="xpack.security.login.loginPage.esUnavailableMessage"
                 defaultMessage="See the Kibana logs for details and try reloading the page."
               />
             }
@@ -138,13 +138,13 @@ export class LoginPage extends Component<Props, {}> {
           <DisabledLoginForm
             title={
               <FormattedMessage
-                id="xpack.security.views.login.loginPage.xpackUnavailableTitle"
+                id="xpack.security.login.loginPage.xpackUnavailableTitle"
                 defaultMessage="Cannot connect to the Elasticsearch cluster currently configured for Kibana."
               />
             }
             message={
               <FormattedMessage
-                id="xpack.security.views.login.loginPage.xpackUnavailableMessage"
+                id="xpack.security.login.loginPage.xpackUnavailableMessage"
                 defaultMessage="To use the full set of free features in this distribution of Kibana, please update Elasticsearch to the default distribution."
               />
             }
@@ -155,13 +155,13 @@ export class LoginPage extends Component<Props, {}> {
           <DisabledLoginForm
             title={
               <FormattedMessage
-                id="xpack.security.views.login.loginPage.unknownLayoutTitle"
+                id="xpack.security.login.loginPage.unknownLayoutTitle"
                 defaultMessage="Unsupported login form layout."
               />
             }
             message={
               <FormattedMessage
-                id="xpack.security.views.login.loginPage.unknownLayoutMessage"
+                id="xpack.security.login.loginPage.unknownLayoutMessage"
                 defaultMessage="Refer to the Kibana logs for more details and refresh to try again."
               />
             }
