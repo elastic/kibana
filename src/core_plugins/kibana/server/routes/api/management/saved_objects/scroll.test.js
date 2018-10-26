@@ -20,8 +20,15 @@ import Hapi from 'hapi';
 import { registerScrollForExportRoute } from './scroll';
 
 const createMockServer = () => {
-  const mockServer = new Hapi.Server({ debug: false });
-  mockServer.connection({ port: 8080 });
+  const mockServer = new Hapi.Server({
+    debug: false,
+    port: 8080,
+    routes: {
+      validate: {
+        failAction: (r, h, err) => { throw err; }
+      }
+    }
+  });
   return mockServer;
 };
 

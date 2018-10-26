@@ -1,4 +1,6 @@
 {
-  "a.b.c.custom": "foo.custom",
-  "d.e.f.custom": "bar.custom"
+  "messages": {
+    "a.b.c.custom": "foo.custom",
+    "d.e.f.custom": "bar.custom"
+  }
 }
