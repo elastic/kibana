@@ -25,16 +25,16 @@ import 'react-vis/dist/style.css';
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import 'ui/vis/map/service_settings';
-import './angular/services/saved_gis_workspaces';
+import './angular/services/workspace_saved_object_loader';
 import './angular/workspace_controller';
 import listingTemplate from './angular/listing_ng_wrapper.html';
 import workspaceTemplate from './angular/workspace.html';
-import { GisWorkspaceListing } from './shared/components/listing';
+import { WorkspaceListing } from './shared/components/workspace_listing';
 
 const app = uiModules.get('app/gis', ['ngRoute', 'react']);
 
-app.directive('gisWorkspaceListing', function (reactDirective) {
-  return reactDirective(GisWorkspaceListing);
+app.directive('workspaceListing', function (reactDirective) {
+  return reactDirective(WorkspaceListing);
 });
 
 routes.enable();
@@ -42,6 +42,15 @@ routes.enable();
 routes
   .when('/', {
     template: listingTemplate,
+    controller($scope, gisWorkspaceSavedObjectLoader, config) {
+      $scope.listingLimit = config.get('savedObjects:listingLimit');
+      $scope.find = (search) => {
+        return gisWorkspaceSavedObjectLoader.find(search, $scope.listingLimit);
+      };
+      $scope.delete = (ids) => {
+        return gisWorkspaceSavedObjectLoader.delete(ids);
+      };
+    },
     resolve: {
       hasWorkspaces: function (kbnUrl) {
         chrome.getSavedObjectsClient().find({ type: 'gis-workspace', perPage: 1 }).then(resp => {
@@ -59,8 +68,8 @@ routes
     template: workspaceTemplate,
     controller: 'GisWorkspaceController',
     resolve: {
-      workspace: function (savedGisWorkspaces, redirectWhenMissing) {
-        return savedGisWorkspaces.get()
+      workspace: function (gisWorkspaceSavedObjectLoader, redirectWhenMissing) {
+        return gisWorkspaceSavedObjectLoader.get()
           .catch(redirectWhenMissing({
             'workspace': '/'
           }));
@@ -71,9 +80,9 @@ routes
     template: workspaceTemplate,
     controller: 'GisWorkspaceController',
     resolve: {
-      workspace: function (savedGisWorkspaces, redirectWhenMissing, $route) {
+      workspace: function (gisWorkspaceSavedObjectLoader, redirectWhenMissing, $route) {
         const id = $route.current.params.id;
-        return savedGisWorkspaces.get(id)
+        return gisWorkspaceSavedObjectLoader.get(id)
           .catch(redirectWhenMissing({
             'workspace': '/'
           }));

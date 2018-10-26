@@ -46,6 +46,7 @@ export class MBMapContainer extends React.Component {
       this._mbMap.remove();
       this._mbMap = null;
     }
+    this.props.onMapDestroyed();
   }
 
   async _initializeMap() {
@@ -78,7 +79,7 @@ export class MBMapContainer extends React.Component {
     this._mbMap.on('moveend', () => {
       this.props.extentChanged(this._getMapState());
     });
-    this.props.mapReady();
+    this.props.onMapReady();
   }
 
   _addListener(eventType, mbLayerId, handler) {

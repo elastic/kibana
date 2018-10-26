@@ -15,12 +15,12 @@ const module = uiModules.get('app/gis');
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
 SavedObjectRegistryProvider.register({
-  service: 'savedGisWorkspaces',
+  service: 'gisWorkspaceSavedObjectLoader',
   title: 'gisWorkspaces'
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedGisWorkspaces', function (Private, SavedGisWorkspace, kbnIndex, kbnUrl, $http, chrome) {
+module.service('gisWorkspaceSavedObjectLoader', function (Private, SavedGisWorkspace, kbnIndex, kbnUrl, $http, chrome) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
   return new SavedObjectLoader(SavedGisWorkspace, kbnIndex, kbnUrl, $http, chrome, savedObjectClient);
 });

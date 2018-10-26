@@ -26,7 +26,7 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 
 const app = uiModules.get('app/gis', []);
 
-app.controller('GisWorkspaceController', ($scope, $route, savedGisWorkspaces, config, breadcrumbState, kbnUrl) => {
+app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbState, kbnUrl) => {
 
   const savedWorkspace = $scope.workspace = $route.current.locals.workspace;
   let isDarkTheme;

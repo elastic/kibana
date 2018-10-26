@@ -17,6 +17,7 @@ export const SET_META = 'SET_META';
 export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
 export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
 export const MAP_READY = 'MAP_READY';
+export const MAP_DESTROYED = 'MAP_DESTROYED';
 export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
 export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const LAYER_DATA_LOAD_ERROR = 'LAYER_DATA_LOAD_ERROR';
@@ -113,6 +114,12 @@ export function clearTemporaryLayers() {
 export function mapReady() {
   return {
     type: MAP_READY
+  };
+}
+
+export function mapDestroyed() {
+  return {
+    type: MAP_DESTROYED
   };
 }
 
