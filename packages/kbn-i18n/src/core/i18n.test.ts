@@ -787,4 +787,19 @@ describe('I18n engine', () => {
       });
     });
   });
+
+  describe('translateUsingPseudoLocale', () => {
+    test('should translate message using pseudo-locale', () => {
+      i18n.setLocale('en-xa');
+      const message = i18n.translate('namespace.id', {
+        defaultMessage:
+          'Message with a [markdown link](http://localhost:5601/url) and an {htmlElement}',
+        values: {
+          htmlElement: '<strong>html element</strong>',
+        },
+      });
+
+      expect(message).toMatchSnapshot();
+    });
+  });
 });

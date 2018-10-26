@@ -22,6 +22,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
   public async getAll(user: FrameworkUser, ESQuery?: any) {
     const params = {
       _source: true,
+      size: 10000,
       index: INDEX_NAMES.BEATS,
       type: '_doc',
       body: {

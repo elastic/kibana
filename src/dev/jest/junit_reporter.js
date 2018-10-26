@@ -23,6 +23,8 @@ import { writeFileSync } from 'fs';
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
+import { escapeCdata } from '../xml';
+
 const ROOT_DIR = dirname(require.resolve('../../../package.json'));
 
 /**
@@ -95,7 +97,7 @@ export default class JestJUnitReporter {
         });
 
         test.failureMessages.forEach((message) => {
-          testEl.ele('failure').dat(message);
+          testEl.ele('failure').dat(escapeCdata(message));
         });
 
         if (test.status === 'pending') {

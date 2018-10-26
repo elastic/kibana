@@ -11,42 +11,40 @@
  * @return {Object} config schema
  */
 export const config = (Joi) => {
-  const { array, boolean, number, object, string } = Joi;
-
-  return object({
-    enabled: boolean().default(true),
-    email: object({
-      enabled: boolean().default(false),
-      smtp: object({
-        host: string().default('localhost'),
-        port: number().default(25),
-        require_tls: boolean().default(false),
-        pool: boolean().default(false),
-        auth: object({
-          username: string(),
-          password: string()
+  return Joi.object({
+    enabled: Joi.boolean().default(true),
+    email: Joi.object({
+      enabled: Joi.boolean().default(false),
+      smtp: Joi.object({
+        host: Joi.string().default('localhost'),
+        port: Joi.number().default(25),
+        require_tls: Joi.boolean().default(false),
+        pool: Joi.boolean().default(false),
+        auth: Joi.object({
+          username: Joi.string(),
+          password: Joi.string()
         }).default(),
       }).default(),
-      defaults: object({
-        from: string(),
-        to: array().single().items(string()),
-        cc: array().single().items(string()),
-        bcc: array().single().items(string()),
+      defaults: Joi.object({
+        from: Joi.string(),
+        to: Joi.array().single().items(Joi.string()),
+        cc: Joi.array().single().items(Joi.string()),
+        bcc: Joi.array().single().items(Joi.string()),
       }).default(),
     }).default(),
-    slack: object({
-      enabled: boolean().default(false),
-      token: string().required(),
-      defaults: object({
-        channel: string(),
-        as_user: boolean().default(false),
-        icon_emoji: string(),
-        icon_url: string(),
-        link_names: boolean().default(true),
-        mrkdwn: boolean().default(true),
-        unfurl_links: boolean().default(true),
-        unfurl_media: boolean().default(true),
-        username: string(),
+    slack: Joi.object({
+      enabled: Joi.boolean().default(false),
+      token: Joi.string().required(),
+      defaults: Joi.object({
+        channel: Joi.string(),
+        as_user: Joi.boolean().default(false),
+        icon_emoji: Joi.string(),
+        icon_url: Joi.string(),
+        link_names: Joi.boolean().default(true),
+        mrkdwn: Joi.boolean().default(true),
+        unfurl_links: Joi.boolean().default(true),
+        unfurl_media: Joi.boolean().default(true),
+        username: Joi.string(),
       }).default(),
     })
   }).default();
