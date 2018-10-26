@@ -39,9 +39,9 @@ export class I18nProvider extends React.PureComponent {
     return (
       <IntlProvider
         locale={i18n.getLocale()}
-        messages={i18n.getMessages()}
+        messages={i18n.getTranslation().messages}
         defaultLocale={i18n.getDefaultLocale()}
-        formats={i18n.getFormats()}
+        formats={i18n.getTranslation().formats}
         defaultFormats={i18n.getFormats()}
         textComponent={React.Fragment}
       >

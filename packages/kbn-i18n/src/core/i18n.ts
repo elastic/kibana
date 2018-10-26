@@ -21,7 +21,7 @@ import memoizeIntlConstructor from 'intl-format-cache';
 import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
 
-import { Messages, PlainMessages } from '../messages';
+import { Translation } from '../translation';
 import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
 
@@ -30,7 +30,7 @@ import './locales.js';
 
 const EN_LOCALE = 'en';
 const LOCALE_DELIMITER = '-';
-const messages: Messages = {};
+const translationsForLocale: Record<string, Translation> = {};
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
 let defaultLocale = EN_LOCALE;
@@ -44,8 +44,9 @@ IntlRelativeFormat.defaultLocale = defaultLocale;
  * Returns message by the given message id.
  * @param id - path to the message
  */
-function getMessageById(id: string): string {
-  return getMessages()[id];
+function getMessageById(id: string): string | undefined {
+  const translation = getTranslation();
+  return translation.messages ? translation.messages[id] : undefined;
 }
 
 /**
@@ -58,33 +59,38 @@ function normalizeLocale(locale: string) {
 
 /**
  * Provides a way to register translations with the engine
- * @param newMessages
+ * @param newTranslation
  * @param [locale = messages.locale]
  */
-export function addMessages(newMessages: PlainMessages = {}, locale = newMessages.locale) {
+export function addTranslation(newTranslation: Translation, locale = newTranslation.locale) {
   if (!locale || !isString(locale)) {
     throw new Error('[I18n] A `locale` must be a non-empty string to add messages.');
   }
 
-  if (newMessages.locale && newMessages.locale !== locale) {
+  if (newTranslation.locale && newTranslation.locale !== locale) {
     throw new Error(
-      '[I18n] A `locale` in the messages object is different from the one provided as a second argument.'
+      '[I18n] A `locale` in the translation object is different from the one provided as a second argument.'
     );
   }
 
   const normalizedLocale = normalizeLocale(locale);
+  const existingTranslation = translationsForLocale[normalizedLocale] || { messages: {} };
 
-  messages[normalizedLocale] = {
-    ...messages[normalizedLocale],
-    ...newMessages,
+  translationsForLocale[normalizedLocale] = {
+    formats: newTranslation.formats || existingTranslation.formats,
+    locale: newTranslation.locale || existingTranslation.locale,
+    messages: {
+      ...existingTranslation.messages,
+      ...newTranslation.messages,
+    },
   };
 }
 
 /**
  * Returns messages for the current language
  */
-export function getMessages(): PlainMessages {
-  return messages[currentLocale] || {};
+export function getTranslation(): Translation {
+  return translationsForLocale[currentLocale] || { messages: {} };
 }
 
 /**
@@ -154,7 +160,7 @@ export function getFormats() {
  * Returns array of locales having translations
  */
 export function getRegisteredLocales() {
-  return Object.keys(messages);
+  return Object.keys(translationsForLocale);
 }
 
 interface TranslateArguments {
@@ -214,20 +220,20 @@ export function translate(
 
 /**
  * Initializes the engine
- * @param newMessages
+ * @param newTranslation
  */
-export function init(newMessages?: PlainMessages) {
-  if (!newMessages) {
+export function init(newTranslation?: Translation) {
+  if (!newTranslation) {
     return;
   }
 
-  addMessages(newMessages);
+  addTranslation(newTranslation);
 
-  if (newMessages.locale) {
-    setLocale(newMessages.locale);
+  if (newTranslation.locale) {
+    setLocale(newTranslation.locale);
   }
 
-  if (newMessages.formats) {
-    setFormats(newMessages.formats);
+  if (newTranslation.formats) {
+    setFormats(newTranslation.formats);
   }
 }
