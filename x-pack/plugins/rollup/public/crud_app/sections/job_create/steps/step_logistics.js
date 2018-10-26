@@ -471,10 +471,9 @@ export class StepLogisticsUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionDelayDescription"
-                defaultMessage={
-                  "Waiting will yield a higher-fidelity rollup by adjusting for variable ingest latency." +
-                  " By default, the rollup job attempts to roll up all data that is available."
-                }
+                defaultMessage=// eslint-disable-line react/jsx-equals-spacing
+                  "Waiting will yield a higher-fidelity rollup by adjusting for variable ingest latency.
+                  By default, the rollup job attempts to roll up all data that is available."
               />
             )}
             fullWidth

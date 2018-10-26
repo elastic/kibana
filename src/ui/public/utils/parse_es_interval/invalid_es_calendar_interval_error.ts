@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export class InvalidEsCalendarIntervalError extends Error {
   constructor(
     public readonly interval: string,

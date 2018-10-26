@@ -141,9 +141,9 @@ export class JobListUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.rollupJobs.jobList.emptyPromptDescription"
-                defaultMessage={`
-                  Rollup jobs summarize and store historical data in a smaller index for future analysis.
-                `}
+                defaultMessage=// eslint-disable-line react/jsx-equals-spacing
+                  "Rollup jobs summarize and store historical data in a smaller index
+                  for future analysis."
               />
             </p>
           </Fragment>
