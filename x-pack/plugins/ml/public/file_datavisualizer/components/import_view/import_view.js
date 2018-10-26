@@ -22,6 +22,7 @@ import { ImportProgress, IMPORT_STATUS } from '../import_progress';
 import { ImportErrors } from '../import_errors';
 import { ImportSummary } from '../import_summary';
 import { ImportSettings } from '../import_settings';
+import { ExperimentalBadge } from '../experimental_badge';
 import { getIndexPatternNames, refreshIndexPatterns } from '../../../util/index_utils';
 import { ml } from '../../../services/ml_api_service';
 
@@ -322,7 +323,12 @@ export class ImportView extends Component {
         <EuiPanel>
 
           <EuiTitle size="s">
-            <h3>Import data</h3>
+            <h3>
+              Import data &nbsp;
+              <ExperimentalBadge
+                tooltipContent="Experimental feature. We'd love to hear your feedback."
+              />
+            </h3>
           </EuiTitle>
 
           <ImportSettings

@@ -45,21 +45,27 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
     {
       label: 'Name',
       fieldName: 'span.name',
-      val: spanName || 'N/A'
+      val: spanName || 'N/A',
+      truncated: true,
+      width: '50%'
     },
     {
       fieldName: 'span.type',
       label: 'Type',
-      val: spanTypeLabel
+      val: spanTypeLabel,
+      truncated: true,
+      widht: '16.6%'
     },
     {
       fieldName: 'span.duration.us',
       label: 'Duration',
-      val: asMillis(spanDuration)
+      val: asMillis(spanDuration),
+      width: '16.6%'
     },
     {
       label: '% of transaction',
-      val: numeral(relativeDuration).format('0.00%')
+      val: numeral(relativeDuration).format('0.00%'),
+      width: '16.6%'
     }
   ];
 

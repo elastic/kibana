@@ -17,6 +17,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { ExperimentalBadge } from '../experimental_badge';
+
 export function WelcomeContent() {
 
   return (
@@ -27,14 +29,17 @@ export function WelcomeContent() {
       <EuiFlexItem>
         <EuiTitle size="m">
           <h3>
-            Visualize data from a log file
+            Visualize data from a log file &nbsp;
+            <ExperimentalBadge
+              tooltipContent="Experimental feature. We'd love to hear your feedback."
+            />
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText>
           <p>
             The File Data Visualizer helps you understand the fields and metrics in a log file.
-            Upload your file, analyze its data, and then choose which data to import into your Elasticsearch index.
+            Upload your file, analyze its data, and then choose whether to import the data into an Elasticsearch index.
           </p>
         </EuiText>
         <EuiSpacer size="s" />

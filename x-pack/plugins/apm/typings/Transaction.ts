@@ -12,10 +12,10 @@ interface Processor {
 }
 
 interface ContextSystem {
-  architecture: string;
-  hostname: string;
-  ip: string;
-  platform: string;
+  architecture?: string;
+  hostname?: string;
+  ip?: string;
+  platform?: string;
 }
 
 interface Context {
@@ -23,7 +23,7 @@ interface Context {
     pid: number;
   };
   service: ContextService;
-  system: ContextSystem;
+  system?: ContextSystem;
   request: {
     url: {
       full: string;
