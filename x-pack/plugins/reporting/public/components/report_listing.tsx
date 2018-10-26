@@ -165,6 +165,24 @@ class ReportListingUi extends Component<Props, State> {
           defaultMessage: 'Status',
         }),
         render: (status: string, record: Job) => {
+          if (status === 'pending') {
+            return (
+              <FormattedMessage
+                id="xpack.reporting.listing.tableValue.createdAtDetail.pendingStatusReachedText"
+                defaultMessage="pending - waiting for job to be processed"
+              />
+            );
+          }
+
+          let maxSizeReached;
+          if (record.max_size_reached) {
+            maxSizeReached = (
+              <FormattedMessage
+                id="xpack.reporting.listing.tableValue.createdAtDetail.maxSizeReachedText"
+                defaultMessage=" - max size reached"
+              />
+            );
+          }
           let statusTimestamp;
           if (status === jobStatuses.PROCESSING && record.started_at) {
             statusTimestamp = this.formatDate(record.started_at);
@@ -174,26 +192,22 @@ class ReportListingUi extends Component<Props, State> {
           ) {
             statusTimestamp = this.formatDate(record.completed_at);
           }
+          if (statusTimestamp) {
+            return (
+              <div>
+                {status}
+                {' at '}
+                <span className="eui-textNoWrap">{statusTimestamp}</span>
+                {maxSizeReached}
+              </div>
+            );
+          }
+
+          // unknown status
           return (
             <div>
-              <FormattedMessage
-                id="xpack.reporting.listing.tableValue.createdAtDetail"
-                defaultMessage="{status} at {time}{maxSizeReached}"
-                values={{
-                  status,
-                  time: <span className="eui-textNoWrap">{statusTimestamp}</span>,
-                  maxSizeReached: record.max_size_reached ? (
-                    <span>
-                      <FormattedMessage
-                        id="xpack.reporting.listing.tableValue.createdAtDetail.maxSizeReachedText"
-                        defaultMessage=" - max size reached"
-                      />
-                    </span>
-                  ) : (
-                    ''
-                  ),
-                }}
-              />
+              {status}
+              {maxSizeReached}
             </div>
           );
         },

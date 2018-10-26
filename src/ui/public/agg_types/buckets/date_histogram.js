@@ -105,6 +105,11 @@ export const dateHistogramBucketAgg = new BucketAggType({
       write: _.noop,
     },
     {
+      name: 'useNormalizedEsInterval',
+      default: true,
+      write: _.noop,
+    },
+    {
       name: 'interval',
       type: 'optioned',
       deserialize: function (state) {
@@ -124,8 +129,8 @@ export const dateHistogramBucketAgg = new BucketAggType({
       write: function (agg, output, aggs) {
         setBounds(agg, true);
         agg.buckets.setInterval(getInterval(agg));
-
-        const interval = agg.buckets.getInterval();
+        const { useNormalizedEsInterval } = agg.params;
+        const interval = agg.buckets.getInterval(useNormalizedEsInterval);
         output.bucketInterval = interval;
         output.params.interval = interval.expression;
 

@@ -31,6 +31,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const flyout = getService('flyout');
   const renderable = getService('renderable');
+  const table = getService('table');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -57,6 +58,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
           throw new Error('wait for visualization select page');
         }
       });
+    }
+
+    async clickVisType(type) {
+      await testSubjects.click(`visType-${type}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickAreaChart() {
@@ -432,6 +438,21 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(500);
     }
 
+    /**
+     * Set the test for a filter aggregation.
+     * @param {*} filterValue the string value of the filter
+     * @param {*} filterIndex used when multiple filters are configured on the same aggregation
+     * @param {*} aggregationId the ID if the aggregation. On Tests, it start at from 2
+     */
+    async setFilterAggregationValue(filterValue, filterIndex = 0, aggregationId = 2) {
+      const inputField = await testSubjects.find(`visEditorFilterInput_${aggregationId}_${filterIndex}`);
+      await inputField.type(filterValue);
+    }
+
+    async addNewFilterAggregation() {
+      return await testSubjects.click('visEditorAddFilterButton');
+    }
+
     async toggleOpenEditor(index, toState = 'true') {
       // index, see selectYAxisAggregation
       const toggle = await find.byCssSelector(`button[aria-controls="visAggEditorParams${index}"]`);
@@ -575,13 +596,17 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setSize(newValue) {
-      const input = await find.byCssSelector('input[name="size"]');
+      const input = await find.byCssSelector(`vis-editor-agg-params[aria-hidden="false"] input[name="size"]`);
       await input.clearValue();
-      await input.type(newValue);
+      await input.type(String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
       await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+    async toggleAggegationEditor(agg) {
+      await testSubjects.click(`aggregationEditor${agg} toggleEditor`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -902,6 +927,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
       return await Promise.all(getChartTypesPromises);
     }
+    async expectPieChartError() {
+      return await testSubjects.existOrFail('visLibVisualizeError');
+    }
 
     async getChartAreaWidth() {
       const rect = await retry.try(async () => find.byCssSelector('clipPath rect'));
@@ -913,9 +941,43 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await rect.getAttribute('height');
     }
 
+    /**
+     * If you are writing new tests, you should rather look into getTableVisContent method instead.
+     */
     async getTableVisData() {
       const dataTable = await testSubjects.find('paginated-table-body');
       return await dataTable.getVisibleText();
+    }
+
+    /**
+     * This function is the newer function to retrieve data from within a table visualization.
+     * It uses a better return format, than the old getTableVisData, by properly splitting
+     * cell values into arrays. Please use this function for newer tests.
+     */
+    async getTableVisContent({ stripEmptyRows = true } = { }) {
+      const container = await testSubjects.find('tableVis');
+      const allTables = await testSubjects.findAllDescendant('paginated-table-body', container);
+
+      if (allTables.length === 0) {
+        return [];
+      }
+
+      const allData = await Promise.all(allTables.map(async (t) => {
+        let data = await table.getDataFromElement(t);
+        if (stripEmptyRows) {
+          data = data.filter(row => row.length > 0 && row.some(cell => cell.trim().length > 0));
+        }
+        return data;
+      }));
+
+      if (allTables.length === 1) {
+        // If there was only one table we return only the data for that table
+        // This prevents an unnecessary array around that single table, which
+        // is the case we have in most tests.
+        return allData[0];
+      }
+
+      return allData;
     }
 
     async getInspectorTableData() {
@@ -1158,6 +1220,29 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await this.selectAggregation(metric, 'groupName');
       await this.selectField(field, 'groupName');
     }
+
+    async clickSplitDirection(direction) {
+      const activeParamPanel = await find.byCssSelector('vis-editor-agg-params[aria-hidden="false"]');
+      const button = await testSubjects.findDescendant(`splitBy-${direction}`, activeParamPanel);
+      await button.click();
+    }
+
+    async countNestedTables() {
+      const vis = await testSubjects.find('tableVis');
+      const result = [];
+
+      for (let i = 1; true; i++) {
+        const selector = new Array(i).fill('.agg-table-group').join(' ');
+        const tables = await vis.findAllByCssSelector(selector);
+        if (tables.length === 0) {
+          break;
+        }
+        result.push(tables.length);
+      }
+
+      return result;
+    }
+
   }
 
   return new VisualizePage();
