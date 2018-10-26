@@ -16,13 +16,12 @@ interface RouterProps {
   history: History;
 }
 
-const Routes: React.SFC<RouterProps> = ({ history }) => (
+export const PageRouter = pure<RouterProps>(({ history }) => (
   <Router history={history}>
     <Switch>
-      <Route path="/" component={HomePage} />
+      <Redirect from="/" exact={true} to="/home" />
+      <Route path="/home" component={HomePage} />
       <Route component={NotFoundPage} />
     </Switch>
   </Router>
-);
-
-export PageRouter = pure(Routes);
+));
