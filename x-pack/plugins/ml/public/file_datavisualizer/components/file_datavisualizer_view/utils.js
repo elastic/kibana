@@ -30,7 +30,7 @@ export function readFile(file) {
   });
 }
 
-export function getLessData(data, mb) {
+export function reduceData(data, mb) {
   // assuming 1 char is 1 byte
   // TODO -  change this with other non UTF-8 formats are
   // supported for the read data

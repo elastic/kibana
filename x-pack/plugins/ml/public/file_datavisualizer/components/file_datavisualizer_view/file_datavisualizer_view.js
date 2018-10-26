@@ -27,7 +27,7 @@ import {
   readFile,
   createUrlOverrides,
   processResults,
-  getLessData,
+  reduceData,
 } from './utils';
 
 export const MODE = {
@@ -117,7 +117,7 @@ export class FileDataVisualizerView extends Component {
     try {
       // reduce the amount of data being sent to the endpoint
       // 5MB should be enough to contain 1000 lines
-      const lessData = getLessData(data, UPLOAD_SIZE_MB);
+      const lessData = reduceData(data, UPLOAD_SIZE_MB);
       console.log('overrides', overrides);
       const { analyzeFile } = ml.fileDatavisualizer;
       const resp = await analyzeFile(lessData, overrides);
