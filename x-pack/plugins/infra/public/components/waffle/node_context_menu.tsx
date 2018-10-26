@@ -35,7 +35,7 @@ export const NodeContextMenu: React.SFC<Props> = ({
   closePopover,
   nodeType,
 }) => {
-  const nodeDetailUrl = getNodeDetailUrl(nodeType, node);
+  const nodeDetailUrl = getNodeDetailUrl(nodeType, node, timeRange);
   const nodeLogsUrl = getNodeLogsUrl(nodeType, node, timeRange.to);
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -100,7 +100,8 @@ const getNodeLogsUrl = (
 
 const getNodeDetailUrl = (
   nodeType: 'host' | 'container' | 'pod',
-  { path }: InfraWaffleMapNode
+  { path }: InfraWaffleMapNode,
+  { from, to }: InfraTimerangeInput
 ): string | undefined => {
   if (path.length <= 0) {
     return undefined;
@@ -110,11 +111,11 @@ const getNodeDetailUrl = (
 
   switch (nodeType) {
     case 'host':
-      return getHostDetailUrl({ name: lastPathSegment.value });
+      return getHostDetailUrl({ name: lastPathSegment.value, from, to });
     case 'container':
-      return getContainerDetailUrl({ name: lastPathSegment.value });
+      return getContainerDetailUrl({ name: lastPathSegment.value, from, to });
     case 'pod':
-      return getPodDetailUrl({ name: lastPathSegment.value });
+      return getPodDetailUrl({ name: lastPathSegment.value, from, to });
     default:
       return undefined;
   }
