@@ -21,14 +21,12 @@ export type AppTimezoneProvider = () => string;
 export type AppApolloClient = ApolloClient<NormalizedCacheObject>;
 
 export interface AppFrameworkAdapter {
-  // Insstance vars
   appState?: object;
   dateFormat?: string;
   kbnVersion?: string;
   scaledDateFormat?: string;
   timezone?: string;
 
-  // Methods
   setUISettings(key: string, value: any): void;
   render(component: React.ReactElement<any>): void;
   renderBreadcrumbs(component: React.ReactElement<any>): void;

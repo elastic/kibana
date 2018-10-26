@@ -23,7 +23,6 @@ const ROOT_ELEMENT_ID = 'react-secops-root';
 const BREADCRUMBS_ELEMENT_ID = 'react-secops-breadcrumbs';
 
 export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
-  public appState: object;
   public dateFormat?: string;
   public kbnVersion?: string;
   public scaledDateFormat?: string;
@@ -37,7 +36,6 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
   constructor(uiModule: IModule, uiRoutes: KibanaUIRoutes, timezoneProvider: AppTimezoneProvider) {
     this.adapterService = new KibanaAdapterServiceProvider();
     this.timezoneProvider = timezoneProvider;
-    this.appState = {};
     this.register(uiModule, uiRoutes);
   }
 
@@ -122,7 +120,7 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
       config: AppKibanaUIConfig,
       kbnVersion: string,
       Private: <Provider>(provider: Provider) => Provider,
-      // @ts-ignore: inject kibanaAdapter to force eager instatiation
+      // @ts-ignore: inject kibanaAdapter to force eager instaliation
       kibanaAdapter: any
     ) => {
       this.timezone = Private(this.timezoneProvider)();
