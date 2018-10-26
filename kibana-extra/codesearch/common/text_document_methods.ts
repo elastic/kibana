@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SymbolLocator } from '@codesearch/lsp-extension';
 import { TextDocumentPositionParams } from 'vscode-languageserver';
 import {
   Definition,
@@ -19,6 +20,7 @@ export class TextDocumentMethods {
   public documentSymbol: LspMethod<DocumentSymbolParams, SymbolInformation[]>;
   public hover: LspMethod<TextDocumentPositionParams, Hover>;
   public definition: LspMethod<TextDocumentPositionParams, Definition>;
+  public edefinition: LspMethod<TextDocumentPositionParams, SymbolLocator[]>;
   public references: LspMethod<TextDocumentPositionParams, Location[]>;
 
   private readonly client: LspClient;
@@ -28,6 +30,7 @@ export class TextDocumentMethods {
     this.documentSymbol = new LspMethod('textDocument/documentSymbol', this.client);
     this.hover = new LspMethod('textDocument/hover', this.client);
     this.definition = new LspMethod('textDocument/definition', this.client);
+    this.edefinition = new LspMethod('textDocument/edefinition', this.client);
     this.references = new LspMethod('textDocument/references', this.client);
   }
 }

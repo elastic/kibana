@@ -104,6 +104,7 @@ export class WorkspaceHandler {
   public async handleRequest(request: LspRequest): Promise<void> {
     const { method, params } = request;
     switch (method) {
+      case 'textDocument/edefinition':
       case 'textDocument/definition':
       case 'textDocument/hover':
       case 'textDocument/references':
@@ -131,6 +132,13 @@ export class WorkspaceHandler {
       case 'textDocument/hover': {
         const result = response.result as Hover;
         this.handleHoverContents(result);
+        return response;
+      }
+      case 'textDocument/edefinition': {
+        const result = response.result;
+        for (const def of result) {
+          this.convertLocation(def.location);
+        }
         return response;
       }
       case 'textDocument/definition': {

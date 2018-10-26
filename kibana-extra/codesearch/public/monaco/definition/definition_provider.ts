@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SymbolLocator } from '@codesearch/lsp-extension';
 import { Monaco } from 'init-monaco';
 import { editor, languages } from 'monaco-editor';
-import { Definition, Location } from 'vscode-languageserver-types';
+import { Location } from 'vscode-languageserver-types';
 import { LspRestClient, TextDocumentMethods } from '../../../common/lsp_client';
 
 export function provideDefinition(monaco: Monaco, model: editor.ITextModel, position: any) {
@@ -24,7 +25,7 @@ export function provideDefinition(monaco: Monaco, model: editor.ITextModel, posi
     };
   }
 
-  return lspMethods.definition
+  return lspMethods.edefinition
     .send({
       position: {
         line: position.lineNumber - 1,
@@ -35,13 +36,9 @@ export function provideDefinition(monaco: Monaco, model: editor.ITextModel, posi
       },
     })
     .then(
-      (definition: Definition) => {
-        if (definition) {
-          if (Array.isArray(definition)) {
-            return definition.map(l => handleLocation(l));
-          } else {
-            return [handleLocation(definition)];
-          }
+      (result: SymbolLocator[]) => {
+        if (result) {
+          return result.filter(l => l.location !== undefined).map(l => handleLocation(l.location!));
         } else {
           return [];
         }
