@@ -35,7 +35,7 @@ export class ConfirmDelete extends Component {
           cancelButtonText="Cancel"
           confirmButtonText="Delete"
           buttonColor="danger"
-          onClose={() => {}}
+          onClose={onCancel}
         >
           <div>
             <p>This operation cannot be undone.</p>
