@@ -132,7 +132,7 @@ export class DataRecognizer {
       dirName = manifestFile.dirName;
     }
     else {
-      return Boom.notFound(`Module with the id "${id}" not found`);
+      throw Boom.notFound(`Module with the id "${id}" not found`);
     }
 
     const jobs = [];
@@ -213,7 +213,7 @@ export class DataRecognizer {
       manifestFile && manifestFile.json &&
       manifestFile.json.defaultIndexPattern === undefined) {
 
-      return Boom.badRequest(`No index pattern configured in "${moduleId}" configuration file and no index pattern passed to the endpoint`);
+      throw Boom.badRequest(`No index pattern configured in "${moduleId}" configuration file and no index pattern passed to the endpoint`);
     }
     this.indexPatternName = (indexPatternName === undefined) ? manifestFile.json.defaultIndexPattern : indexPatternName;
     this.indexPatternId = this.getIndexPatternId(this.indexPatternName);
