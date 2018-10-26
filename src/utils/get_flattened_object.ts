@@ -17,8 +17,7 @@
  * under the License.
  */
 
-
-function shouldReadKeys(value) {
+function shouldReadKeys(value: unknown): value is Record<string, any> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
@@ -34,21 +33,21 @@ function shouldReadKeys(value) {
  *  @param {Object} rootValue
  *  @returns {Object}
  */
-export function getFlattenedObject(rootValue) {
+export function getFlattenedObject(rootValue: unknown) {
   if (!shouldReadKeys(rootValue)) {
     throw new TypeError(`Root value is not flatten-able, received ${rootValue}`);
   }
 
-  return (function flatten(acc, prefix, object) {
-    return Object.keys(object).reduce((acc, key) => {
-      const value = object[key];
+  return (function flatten<T extends Record<string, any>>(acc: T, prefix: string, object: T): T {
+    for (const [key, value] of Object.entries(object)) {
       const path = prefix ? `${prefix}.${key}` : key;
-
       if (shouldReadKeys(value)) {
-        return flatten(acc, path, value);
+        flatten(acc, path, value);
       } else {
-        return { ...acc, [path]: value };
+        acc[path] = value;
       }
-    }, acc);
-  }({}, '', rootValue));
+    }
+
+    return acc;
+  })({}, '', rootValue);
 }

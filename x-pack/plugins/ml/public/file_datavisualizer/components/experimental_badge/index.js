@@ -4,12 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { spy } from 'sinon';
 
-export function replyFixture() {
-  const reply = spy();
-  reply.redirect = spy();
-  reply.continue = spy();
-  reply.unstate = spy();
-  return reply;
-}
+export { ExperimentalBadge } from './experimental_badge';
