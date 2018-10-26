@@ -199,10 +199,16 @@ export function extractMessageIdFromNode(node) {
 }
 
 function parseTemplateLiteral(node, messageId) {
+  // TemplateLiteral consists of quasis (strings) and expressions.
+  // If we have at least one expression in template literal, then quasis length
+  // will be greater than 1
   if (node.quasis.length > 1) {
     throw createFailError(`expressions are not allowed in template literals ("${messageId}").`);
   }
 
+  // Babel reads 'cooked' and 'raw' versions of a string.
+  // 'cooked' acts like a normal StringLiteral value and interprets backslashes
+  // 'raw' is primarily designed for TaggedTemplateLiteral and escapes backslashes
   return node.quasis[0].value.cooked;
 }
 
@@ -216,7 +222,7 @@ export function extractMessageValueFromNode(node, messageId) {
   }
 
   throw createFailError(
-    `defaultMessage value should be a string literal or a template literal ("${messageId}").`
+    `defaultMessage value should be a string or template literal ("${messageId}").`
   );
 }
 
@@ -230,7 +236,7 @@ export function extractContextValueFromNode(node, messageId) {
   }
 
   throw createFailError(
-    `context value should be a string literal or a template literal ("${messageId}").`
+    `context value should be a string or template literal ("${messageId}").`
   );
 }
 
