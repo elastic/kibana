@@ -24,7 +24,7 @@ export function registerLoadRoute(server) {
   server.route({
     path: '/api/watcher/watch/{id}',
     method: 'GET',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       const id = request.params.id;
@@ -44,8 +44,9 @@ export function registerLoadRoute(server) {
               Action: false,
             },
           });
-
-          reply({ watch: watch.downstreamJson });
+          return {
+            watch: watch.downstreamJson
+          };
         })
         .catch(err => {
           // Case: Error from Elasticsearch JS client
@@ -53,11 +54,11 @@ export function registerLoadRoute(server) {
             const statusCodeToMessageMap = {
               404: `Watch with id = ${id} not found`,
             };
-            return reply(wrapEsError(err, statusCodeToMessageMap));
+            throw wrapEsError(err, statusCodeToMessageMap);
           }
 
           // Case: default
-          reply(wrapUnknownError(err));
+          throw wrapUnknownError(err);
         });
     },
     config: {

@@ -13,22 +13,21 @@ export function translate(server) {
   server.route({
     method: 'GET',
     path: '/api/canvas/ast',
-    handler: function(request, reply) {
+    handler: function(request, h) {
       if (!request.query.expression)
-        return reply({ error: '"expression" query is required' }).code(400);
-      reply(fromExpression(request.query.expression));
+        return h.response({ error: '"expression" query is required' }).code(400);
+      return fromExpression(request.query.expression);
     },
   });
 
   server.route({
     method: 'POST',
     path: '/api/canvas/expression',
-    handler: function(request, reply) {
+    handler: function(request, h) {
       try {
-        const exp = toExpression(request.payload);
-        reply(exp);
+        return toExpression(request.payload);
       } catch (e) {
-        reply({ error: e.message }).code(400);
+        return h.response({ error: e.message }).code(400);
       }
     },
   });
