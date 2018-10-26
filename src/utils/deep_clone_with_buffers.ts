@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { cloneDeep } from 'lodash';
 
-export function keysToSnakeCaseShallow(object) {
-  return _.mapKeys(object, (value, key) => {
-    return _.snakeCase(key);
-  });
+// We should add `any` return type to overcome bug in lodash types, customizer
+// in lodash 3.* can return `undefined` if cloning is handled by the lodash, but
+// type of the customizer function doesn't expect that.
+function cloneBuffersCustomizer(val: unknown): any {
+  if (Buffer.isBuffer(val)) {
+    return new Buffer(val);
+  }
 }
 
-export function keysToCamelCaseShallow(object) {
-  return _.mapKeys(object, (value, key) => {
-    return _.camelCase(key);
-  });
+export function deepCloneWithBuffers<T>(val: T): T {
+  return cloneDeep(val, cloneBuffersCustomizer);
 }

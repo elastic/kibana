@@ -17,15 +17,9 @@
  * under the License.
  */
 
-import { BinderBase } from './binder';
+import { resolve } from 'path';
+import { pkg } from './package_json';
 
-export class BinderFor extends BinderBase {
-  constructor(emitter) {
-    super();
-    this.emitter = emitter;
-  }
-
-  on(...args) {
-    super.on(this.emitter, ...args);
-  }
+export function fromRoot(...args: string[]) {
+  return resolve(pkg.__dirname, ...args);
 }

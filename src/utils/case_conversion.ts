@@ -17,22 +17,16 @@
  * under the License.
  */
 
-export class BinderBase {
-  constructor() {
-    this.disposal = [];
-  }
+import _ from 'lodash';
 
-  on(emitter, ...args) {
-    const on = emitter.on || emitter.addListener;
-    const off = emitter.off || emitter.removeListener;
+export function keysToSnakeCaseShallow(object: Record<string, any>) {
+  return _.mapKeys(object, (value, key) => {
+    return _.snakeCase(key);
+  });
+}
 
-    on.apply(emitter, args);
-    this.disposal.push(() => off.apply(emitter, args));
-  }
-
-  destroy() {
-    const destroyers = this.disposal;
-    this.disposal = [];
-    destroyers.forEach(fn => fn());
-  }
+export function keysToCamelCaseShallow(object: Record<string, any>) {
+  return _.mapKeys(object, (value, key) => {
+    return _.camelCase(key);
+  });
 }
