@@ -7,6 +7,8 @@
 import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+
+import { StringMap } from '../../../../typings/common';
 import {
   colors,
   fontFamilyCode,
@@ -14,6 +16,8 @@ import {
   px,
   units
 } from '../../../style/variables';
+
+export type KeySorter = (data: StringMap<any>, parentKey?: string) => string[];
 
 const Table = styled.table`
   font-family: ${fontFamilyCode};
