@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "6.5.0",
+  "version": "6.6.0",
   "branch": "6.x",
   "types": "./target/types/type_exports.d.ts",
   "build": {
