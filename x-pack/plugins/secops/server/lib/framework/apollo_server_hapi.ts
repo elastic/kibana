@@ -83,7 +83,7 @@ export const graphqlHapi: IRegister = Object.assign(
   },
   {
     attributes: {
-      name: 'graphql',
+      name: 'graphql-secops',
     },
   }
 );
@@ -123,7 +123,7 @@ export const graphiqlHapi: IRegister = Object.assign(
   },
   {
     attributes: {
-      name: 'graphiql',
+      name: 'graphiql-secops',
     },
   }
 );

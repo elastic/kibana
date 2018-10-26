@@ -7,9 +7,9 @@
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { schemas } from './graphql';
 import { createSourcesResolvers } from './graphql/sources';
-import { BackendLibs } from './lib/types';
+import { AppBackendLibs } from './lib/types';
 
-export const initServer = (libs: BackendLibs) => {
+export const initServer = (libs: AppBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [createSourcesResolvers(libs) as IResolvers],
     typeDefs: schemas,

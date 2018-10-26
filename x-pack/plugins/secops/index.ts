@@ -21,19 +21,20 @@ export function secops(kibana: any) {
       app: {
         description: 'Explore your security operations',
         main: 'plugins/secops/app',
+        euiIconType: 'securityApp',
         title: 'Sec Ops',
         listed: false,
-        url: `/app/${APP_ID}`,
+        url: `/app/${APP_ID}#/home`,
       },
       home: ['plugins/secops/register_feature'],
       links: [
         {
           description: 'Explore your security operations',
-          euiIconType: 'SecurityApp',
+          euiIconType: 'securityApp',
           id: 'secops',
           order: 9000,
           title: 'Sec Ops',
-          url: `/app/${APP_ID}`,
+          url: `/app/${APP_ID}#/home`,
         },
       ],
     },

@@ -9,14 +9,14 @@ import {
   FeatureCatalogueRegistryProvider,
 } from 'ui/registry/feature_catalogue';
 
-const APP_ID = 'infra';
+const APP_ID = 'secops';
 
 FeatureCatalogueRegistryProvider.register(() => ({
   id: 'secops',
   title: 'Sec Ops',
   description: 'Explore security metrics and logs for events and alerts',
   icon: 'securityApp',
-  path: `/app/${APP_ID}`,
+  path: `/app/${APP_ID}#home`,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 }));

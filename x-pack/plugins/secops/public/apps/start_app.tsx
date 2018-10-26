@@ -7,36 +7,24 @@
 import { createHashHistory } from 'history';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import { BehaviorSubject } from 'rxjs';
-import { pluck } from 'rxjs/operators';
 import { ThemeProvider } from 'styled-components';
 
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
-import { InfraFrontendLibs } from '../lib/lib';
+import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
-import { createStore } from '../store';
 
-export async function startApp(libs: InfraFrontendLibs) {
+export async function startApp(libs: AppFrontendLibs) {
   const history = createHashHistory();
-
-  const libs$ = new BehaviorSubject(libs);
-  const store = createStore({
-    apolloClient: libs$.pipe(pluck('apolloClient')),
-    observableApi: libs$.pipe(pluck('observableApi')),
-  });
 
   libs.framework.render(
     <EuiErrorBoundary>
-      <ReduxStoreProvider store={store}>
-        <ApolloProvider client={libs.apolloClient}>
-          <ThemeProvider theme={{ eui: euiVars }}>
-            <PageRouter history={history} />
-          </ThemeProvider>
-        </ApolloProvider>
-      </ReduxStoreProvider>
+      <ApolloProvider client={libs.apolloClient}>
+        <ThemeProvider theme={{ eui: euiVars }}>
+          <PageRouter history={history} />
+        </ThemeProvider>
+      </ApolloProvider>
     </EuiErrorBoundary>
   );
 }
