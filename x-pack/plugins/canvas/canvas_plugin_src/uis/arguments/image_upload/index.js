@@ -108,7 +108,7 @@ class ImageUpload extends React.Component {
       <EuiSelect
         compressed
         options={this.urlTypeOptions}
-        defaultValue={urlType}
+        value={urlType}
         onChange={this.changeUrlType}
       />
     );
@@ -126,7 +126,7 @@ class ImageUpload extends React.Component {
       <form onSubmit={this.setSrcUrl} className="eui-textRight">
         <EuiFieldText
           compressed
-          defaultValue={this.state.url}
+          value={this.state.url}
           inputRef={ref => (this.inputRefs.srcUrlText = ref)}
           placeholder="Image URL"
           aria-label="Image URL"

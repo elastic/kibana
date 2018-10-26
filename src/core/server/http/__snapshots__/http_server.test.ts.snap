@@ -10,12 +10,15 @@ Object {
       "maxBytes": 1024,
     },
     "validate": Object {
+      "failAction": [Function],
       "options": Object {
         "abortEarly": false,
       },
     },
   },
   "state": Object {
+    "isHttpOnly": true,
+    "isSameSite": false,
     "strictHeader": false,
   },
 }

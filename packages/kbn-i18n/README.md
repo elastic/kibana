@@ -287,10 +287,14 @@ import { injectI18n, intlShape } from '@kbn/i18n/react';
 const MyComponentContent = ({ intl }) => (
   <input
     type="text"
-    placeholder={intl.formatMessage({
-      id: 'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER',
-      defaultMessage: 'Search',
-    })}
+    placeholder={intl.formatMessage(
+      {
+        id: 'welcome',
+        defaultMessage: 'Hello {name}, you have {unreadCount, number}\
+{unreadCount, plural, one {message} other {messages}}',
+      },
+      { name, unreadCount }
+    )}
   />
 );
 

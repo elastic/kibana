@@ -44,10 +44,10 @@ export function main(server) {
   server.route({
     path: `${mainEntry}/{p*}`,
     method: 'GET',
-    handler: (request, reply) => {
+    handler: () => {
       const err = boom.methodNotAllowed('GET is not allowed');
       err.output.headers.allow = 'POST';
-      reply(err);
+      return err;
     },
     config: getRouteConfig(),
   });
@@ -57,7 +57,7 @@ export function main(server) {
     server.route({
       path: path,
       method: 'POST',
-      handler: async (request, reply) => {
+      handler: async (request, h) => {
         const message = `The following URL is deprecated and will stop working in the next major version: ${request.url.path}`;
         server.log(['warning', 'reporting', 'deprecation'], message);
 
@@ -65,13 +65,13 @@ export function main(server) {
           const savedObjectId = request.params.savedId;
           const queryString = querystring.stringify(request.query);
 
-          await handler(exportTypeId, {
+          return await handler(exportTypeId, {
             objectType,
             savedObjectId,
             queryString
-          }, request, reply);
+          }, request, h);
         } catch (err) {
-          handleError(exportTypeId, reply, err);
+          throw handleError(exportTypeId, err);
         }
       },
       config: getStaticFeatureConfig(exportTypeId),
@@ -96,19 +96,19 @@ export function main(server) {
   server.route({
     path: `${mainEntry}/{exportType}`,
     method: 'POST',
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       const exportType = request.params.exportType;
       try {
         const jobParams = rison.decode(request.query.jobParams);
-        await handler(exportType, jobParams, request, reply);
+        return await handler(exportType, jobParams, request, h);
       } catch (err) {
-        handleError(exportType, reply, err);
+        throw handleError(exportType, err);
       }
     },
     config: getRouteConfig(request => request.params.exportType),
   });
 
-  async function handler(exportTypeId, jobParams, request, reply) {
+  async function handler(exportTypeId, jobParams, request, h) {
     const user = request.pre.user;
     const headers = {
       authorization: request.headers.authorization,
@@ -120,17 +120,17 @@ export function main(server) {
     // return the queue's job information
     const jobJson = job.toJSON();
 
-    const response = reply({
+    return h.response({
       path: `${DOWNLOAD_BASE_URL}/${jobJson.id}`,
       job: jobJson,
-    });
-    response.type('application/json');
+    })
+      .type('application/json');
   }
 
-  function handleError(exportType, reply, err) {
-    if (err instanceof esErrors['401']) return reply(boom.unauthorized(`Sorry, you aren't authenticated`));
-    if (err instanceof esErrors['403']) return reply(boom.forbidden(`Sorry, you are not authorized to create ${exportType} reports`));
-    if (err instanceof esErrors['404']) return reply(boom.wrap(err, 404));
-    reply(err);
+  function handleError(exportType, err) {
+    if (err instanceof esErrors['401']) return boom.unauthorized(`Sorry, you aren't authenticated`);
+    if (err instanceof esErrors['403']) return boom.forbidden(`Sorry, you are not authorized to create ${exportType} reports`);
+    if (err instanceof esErrors['404']) return boom.boomify(err, { statusCode: 404 });
+    return err;
   }
 }
