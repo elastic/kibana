@@ -25,7 +25,60 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
         if (zoom) return fromCallback(cb => page.set('zoomFactor', zoom, cb));
       })
       .then(() => {
-        if (pageOptions.headers) return fromCallback(cb => page.set('customHeaders', pageOptions.headers, cb));
+        if (pageOptions.conditionalHeaders) {
+          const headers = pageOptions.conditionalHeaders.headers;
+          const conditions = pageOptions.conditionalHeaders.conditions;
+
+          const escape = (str) => {
+            return str.replace(/'/g, "\\'");
+          };
+
+          const fn = `function (requestData, networkRequest) {
+            var log = function (msg) {
+              if (!page.onConsoleMessage) {
+                return;
+              }
+              page.onConsoleMessage(msg);
+            };
+
+            var parseUrl = function (url) {
+              var link = document.createElement('a');
+              link.href = url;
+              return {
+                protocol: link.protocol,
+                port: link.port,
+                hostname: link.hostname,
+                pathname: link.pathname,
+              };
+            };
+
+            var shouldUseCustomHeadersForPort = function (port) {
+              if ('${escape(conditions.protocol)}' === 'http' && ${conditions.port} === 80) {
+                return port === undefined || port === null || port === '' || port === '${conditions.port}';
+              }
+
+              if ('${escape(conditions.protocol)}' === 'https' && ${conditions.port} === 443) {
+                return port === undefined || port === null || port === '' || port === '${conditions.port}';
+              }
+
+              return port === '${conditions.port}';
+            };
+
+            var url = parseUrl(requestData.url);
+            if (
+              url.hostname === '${escape(conditions.hostname)}' &&
+              url.protocol === '${escape(conditions.protocol)}:' &&
+              shouldUseCustomHeadersForPort(url.port) &&
+              url.pathname.indexOf('${escape(conditions.basePath)}/') === 0
+            ) {
+              log('Using custom headers for ' + requestData.url);
+              ${Object.keys(headers).map(key => `networkRequest.setHeader('${escape(key)}', '${escape(headers[key])}');`).join('\n')}
+            } else {
+              log('No custom headers for ' + requestData.url);
+            }
+          }`;
+          return fromCallback(cb => page.setFn('onResourceRequested', fn, cb));
+        }
       });
   };
 

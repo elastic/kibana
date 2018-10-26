@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse as parseUrl } from 'url';
 import * as Chrome from 'puppeteer';
 import {
+  ConditionalHeaders,
+  ConditionalHeadersConditions,
   ElementPosition,
   EvalArgs,
   EvalFn,
@@ -31,11 +34,29 @@ export class HeadlessChromiumDriver {
 
   public async open(
     url: string,
-    { headers, waitForSelector }: { headers: Record<string, string>; waitForSelector: string }
+    {
+      conditionalHeaders,
+      waitForSelector,
+    }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string }
   ) {
-    this.logger.debug(`HeadlessChromiumDriver:opening url ${url}`);
 
-    await this.page.setExtraHTTPHeaders(headers);
+    this.logger.debug(`HeadlessChromiumDriver:opening url ${url}`);
+    await this.page.setRequestInterception(true);
+    this.page.on('request', (interceptedRequest: any) => {
+      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
+        this.logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
+        interceptedRequest.continue({
+          headers: {
+            ...interceptedRequest.headers(),
+            ...conditionalHeaders.headers,
+          },
+        });
+      } else {
+        this.logger.debug(`No custom headers for ${interceptedRequest.url()}`);
+        interceptedRequest.continue();
+      }
+    });
+
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
     await this.page.waitFor(waitForSelector);
   }
@@ -88,5 +109,31 @@ export class HeadlessChromiumDriver {
       deviceScaleFactor: zoom,
       isMobile: false,
     });
+  }
+
+  private _shouldUseCustomHeaders(conditions: ConditionalHeadersConditions, url: string) {
+    const { hostname, protocol, port, pathname = '' } = parseUrl(url);
+
+    return (
+      hostname === conditions.hostname &&
+      protocol === `${conditions.protocol}:` &&
+      this._shouldUseCustomHeadersForPort(conditions, port) &&
+      pathname.startsWith(`${conditions.basePath}/`)
+    );
+  }
+
+  private _shouldUseCustomHeadersForPort(
+    conditions: ConditionalHeadersConditions,
+    port: string | undefined
+  ) {
+    if (conditions.protocol === 'http' && conditions.port === 80) {
+      return port === undefined || port === null || port === conditions.port.toString();
+    }
+
+    if (conditions.protocol === 'https' && conditions.port === 443) {
+      return port === undefined || port === null || port === conditions.port.toString();
+    }
+
+    return port === conditions.port.toString();
   }
 }

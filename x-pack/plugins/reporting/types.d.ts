@@ -53,3 +53,15 @@ export interface ElementPosition {
 export interface HeadlessElementInfo {
   position: ElementPosition;
 }
+
+export interface ConditionalHeaders {
+  headers: Record<string, string>;
+  conditions: ConditionalHeadersConditions;
+}
+
+export interface ConditionalHeadersConditions {
+  protocol: string;
+  hostname: string;
+  port: number;
+  basePath: string;
+}
