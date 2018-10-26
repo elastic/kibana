@@ -13,7 +13,21 @@ uiModules.get('kibana')
         return {
           getHideWriteControls() {
             if (!userProfile.canWriteSavedObject('dashboard')) {
-              return false;
+              return true;
+            }
+
+            return $delegate.getHideWriteControls();
+          }
+        };
+      });
+    }
+
+    if ($injector.has('discoverConfig')) {
+      $provide.decorator('discoverConfig', function ($delegate, userProfile) {
+        return {
+          getHideWriteControls() {
+            if (!userProfile.canWriteSavedObject('search')) {
+              return true;
             }
 
             return $delegate.getHideWriteControls();

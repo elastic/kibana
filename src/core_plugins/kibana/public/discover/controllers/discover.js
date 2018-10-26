@@ -72,6 +72,20 @@ const app = uiModules.get('apps/discover', [
   'kibana/index_patterns'
 ]);
 
+uiModules.get('kibana')
+  .provider('discoverConfig', () => {
+    return {
+      $get() {
+        return {
+          getHideWriteControls() {
+            return false;
+          }
+        };
+      }
+    };
+  });
+
+
 uiRoutes
   .defaults(/discover/, {
     requireDefaultIndex: true
@@ -157,7 +171,7 @@ function discoverController(
   kbnUrl,
   localStorage,
   breadcrumbState,
-  userProfile,
+  discoverConfig,
 ) {
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
@@ -279,12 +293,12 @@ function discoverController(
       }
     };
 
-    const canSave = userProfile.canWriteSavedObject('search', false);
+    const hideSave = discoverConfig.getHideWriteControls();
 
-    if (canSave) {
-      return [newSearch, saveSearch, openSearch, shareSearch, inspectSearch];
+    if (hideSave) {
+      return [newSearch, openSearch, shareSearch, inspectSearch];
     }
-    return [newSearch, openSearch, shareSearch, inspectSearch];
+    return [newSearch, saveSearch, openSearch, shareSearch, inspectSearch];
   };
 
   $scope.topNavMenu = getTopNavLinks();

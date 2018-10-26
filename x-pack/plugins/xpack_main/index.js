@@ -105,6 +105,7 @@ export const xpackMain = (kibana) => {
         'plugins/xpack_main/hacks/telemetry_trigger',
         'plugins/xpack_main/hacks/user_profile',
         'plugins/xpack_main/hacks/user_profile_config',
+        'plugins/xpack_main/hacks/user_profile_config_decorators',
       ],
       replaceInjectedVars,
       __webpackPluginProvider__(webpack) {
