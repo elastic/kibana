@@ -61,7 +61,18 @@ const encrypt = async (headers) => {
   return await crypto.encrypt(headers);
 };
 
+describe('headers', () => {
+  test(`it fails if it can't decrypt the headers`, async () => {
+    const encryptedHeaders = 'imnotencryptedgrimacingface';
+    const executeJob = executeJobFactory(mockServer);
+
+    await expect(executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken)).rejects.toThrowErrorMatchingSnapshot();
+
+  });
+});
+
 describe(`sessionCookie`, () => {
+
   test(`if serializedSession doesn't exist it doesn't pass sessionCookie to generatePdfObservable`, async () => {
     mockServer.plugins.security = {};
     const headers = {};
@@ -74,6 +85,37 @@ describe(`sessionCookie`, () => {
     await executeJob({ objects: [], headers: encryptedHeaders, session: null }, cancellationToken);
 
     expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, null, undefined, undefined);
+  });
+
+  test(`it fails if it can't decrypt the session`, async () => {
+    mockServer.plugins.security = {};
+    const headers = {};
+    const encryptedHeaders = await encrypt(headers);
+
+    const generatePdfObservable = generatePdfObservableFactory();
+    generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+    const session = 'thisoldesession';
+
+    const executeJob = executeJobFactory(mockServer);
+    await expect(executeJob({ objects: [], headers: encryptedHeaders, session }, cancellationToken)).rejects.toThrowErrorMatchingSnapshot();
+
+  });
+
+  test(`it fails if if cookie name can't be determined`, async () => {
+    mockServer.plugins.security = {};
+    const headers = {
+      'cookie': 'foo=bar;',
+    };
+    const encryptedHeaders = await encrypt(headers);
+
+    const generatePdfObservable = generatePdfObservableFactory();
+    generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+    const executeJob = executeJobFactory(mockServer);
+    await expect(executeJob({ objects: [], headers: encryptedHeaders, session: null },
+      cancellationToken)).rejects.toThrowErrorMatchingSnapshot();
+
   });
 
   test(`if uses xpack.reporting.kibanaServer.hostname for domain of sessionCookie passed to generatePdfObservable`, async () => {

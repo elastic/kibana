@@ -89,7 +89,7 @@ function executeJobFn(server) {
     const jobUrl = getSavedObjectAbsoluteUrl(job, job.relativeUrl);
 
     if (!job.forceNow) {
-      return jobUrl;
+      return { job, sessionCookie, hashUrl: jobUrl };
     }
 
     const parsed = url.parse(jobUrl, true);

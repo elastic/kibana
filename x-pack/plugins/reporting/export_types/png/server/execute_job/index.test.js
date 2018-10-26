@@ -17,7 +17,17 @@ const cancellationToken = {
 };
 
 let mockServer;
+let config;
 beforeEach(() => {
+  config = {
+    'xpack.security.cookieName': 'sid',
+    'xpack.reporting.encryptionKey': 'testencryptionkey',
+    'xpack.reporting.kibanaServer.protocol': 'http',
+    'xpack.reporting.kibanaServer.hostname': 'localhost',
+    'xpack.reporting.kibanaServer.port': 5601,
+    'server.basePath': '/sbp'
+  };
+
   mockServer = {
     expose: () => { },
     config: memoize(() => ({ get: jest.fn() })),
@@ -28,7 +38,8 @@ beforeEach(() => {
             callWithRequest: jest.fn()
           };
         })
-      }
+      },
+      security: null,
     },
     savedObjects: {
       getScopedSavedObjectsClient: jest.fn(),
@@ -37,13 +48,7 @@ beforeEach(() => {
   };
 
   mockServer.config().get.mockImplementation((key) => {
-    return {
-      'xpack.reporting.encryptionKey': 'testencryptionkey',
-      'xpack.reporting.kibanaServer.protocol': 'http',
-      'xpack.reporting.kibanaServer.hostname': 'localhost',
-      'xpack.reporting.kibanaServer.port': 5601,
-      'server.basePath': ''
-    }[key];
+    return config[key];
   });
 
   generatePngObservableFactory.mockReturnValue(jest.fn());
@@ -51,93 +56,126 @@ beforeEach(() => {
 
 afterEach(() => generatePngObservableFactory.mockReset());
 
-const encryptHeaders = async (headers) => {
+const encrypt = async (headers) => {
   const crypto = cryptoFactory(mockServer);
   return await crypto.encrypt(headers);
 };
 
+describe(`sessionCookie`, () => {
+  test(`Fails if no relativeURL is passed in`, async () => {
+    const executeJob = executeJobFactory(mockServer);
+    const encryptedHeaders = await encrypt({});
 
-test(`fails if it can't decrypt headers`, async () => {
-  const executeJob = executeJobFactory(mockServer);
-  await expect(executeJob({ objects: [], timeRange: {} }, cancellationToken)).rejects.toBeDefined();
-});
+    const generatePngObservable = generatePngObservableFactory();
+    generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-test(`passes in decrypted headers to generatePng`, async () => {
-  const headers = {
-    foo: 'bar',
-    baz: 'quix',
-  };
-
-  const generatePngObservable = generatePngObservableFactory();
-  generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
-
-  const encryptedHeaders = await encryptHeaders(headers);
-  const executeJob = executeJobFactory(mockServer);
-  await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
-
-  expect(generatePngObservable).toBeCalledWith(undefined, [], undefined, headers, undefined, undefined);
-});
-
-test(`omits blacklisted headers`, async () => {
-  const permittedHeaders = {
-    foo: 'bar',
-    baz: 'quix',
-  };
-
-  const blacklistedHeaders = {
-    'accept-encoding': '',
-    'content-length': '',
-    'content-type': '',
-    'host': '',
-    'transfer-encoding': '',
-  };
-
-  const encryptedHeaders = await encryptHeaders({
-    ...permittedHeaders,
-    ...blacklistedHeaders
+    await expect(executeJob({ headers: encryptedHeaders }, cancellationToken))
+      .rejects
+      .toThrowErrorMatchingSnapshot();
   });
 
-  const generatePngObservable = generatePngObservableFactory();
-  generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
+  test(`if serializedSession doesn't exist it doesn't pass sessionCookie to generatePngObservable`, async () => {
+    mockServer.plugins.security = {};
+    const headers = {};
+    const encryptedHeaders = await encrypt(headers);
 
-  const executeJob = executeJobFactory(mockServer);
-  await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
+    const generatePngObservable = generatePngObservableFactory();
+    generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  expect(generatePngObservable).toBeCalledWith(undefined, [], undefined, permittedHeaders, undefined, undefined);
-});
+    const executeJob = executeJobFactory(mockServer);
+    await executeJob({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders, session: null }, cancellationToken);
 
-test(`gets logo from uiSettings`, async () => {
-  const encryptedHeaders = await encryptHeaders({});
+    expect(generatePngObservable).toBeCalledWith('http://localhost:5601/sbp/app/kibana#/something', undefined, null, undefined);
+  });
 
-  const logo = 'custom-logo';
-  mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
+  test(`if uses xpack.reporting.kibanaServer.hostname for domain of sessionCookie passed to generatePngObservable`, async () => {
+    const sessionCookieOptions = {
+      httpOnly: true,
+      name: 'foo',
+      path: '/bar',
+      secure: false,
+    };
+    mockServer.plugins.security = {
+      getSessionCookieOptions() {
+        return sessionCookieOptions;
+      },
+    };
+    const headers = {};
+    const encryptedHeaders = await encrypt(headers);
 
-  const generatePngObservable = generatePngObservableFactory();
-  generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
+    const session = 'thisoldesession';
+    const encryptedSession = await encrypt(session);
 
-  const executeJob = executeJobFactory(mockServer);
-  await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
+    const generatePngObservable = generatePngObservableFactory();
+    generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPngLogo');
-  expect(generatePngObservable).toBeCalledWith(undefined, [], undefined, {}, undefined, logo);
+    const executeJob = executeJobFactory(mockServer);
+    await executeJob({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders, session: encryptedSession }, cancellationToken);
+
+    expect(generatePngObservable).toBeCalledWith('http://localhost:5601/sbp/app/kibana#/something', undefined, {
+      domain: config['xpack.reporting.kibanaServer.hostname'],
+      httpOnly: sessionCookieOptions.httpOnly,
+      name: sessionCookieOptions.name,
+      path: sessionCookieOptions.path,
+      sameSite: 'Strict',
+      secure: sessionCookieOptions.secure,
+      value: session
+    }, undefined);
+  });
+
+  test(`if uses server.host and reporting config isn't set for domain of sessionCookie passed to generatePngObservable`, async () => {
+    config['xpack.reporting.kibanaServer.hostname'] = undefined;
+    config['server.host'] = 'something.com';
+    const sessionCookieOptions = {
+      httpOnly: true,
+      name: 'foo',
+      path: '/bar',
+      secure: false,
+    };
+    mockServer.plugins.security = {
+      getSessionCookieOptions() {
+        return sessionCookieOptions;
+      },
+    };
+    const headers = {};
+    const encryptedHeaders = await encrypt(headers);
+
+    const session = 'thisoldesession';
+    const encryptedSession = await encrypt(session);
+
+    const generatePngObservable = generatePngObservableFactory();
+    generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+    const executeJob = executeJobFactory(mockServer);
+    await executeJob({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders, session: encryptedSession }, cancellationToken);
+
+    expect(generatePngObservable).toBeCalledWith('http://something.com:5601/sbp/app/kibana#/something', undefined, {
+      domain: config['server.host'],
+      httpOnly: sessionCookieOptions.httpOnly,
+      name: sessionCookieOptions.name,
+      path: sessionCookieOptions.path,
+      sameSite: 'Strict',
+      secure: sessionCookieOptions.secure,
+      value: session
+    }, undefined);
+  });
 });
 
 test(`passes browserTimezone to generatePng`, async () => {
-  const encryptedHeaders = await encryptHeaders({});
+  const encryptedHeaders = await encrypt({});
 
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
   const browserTimezone = 'UTC';
-  await executeJob({ objects: [], browserTimezone, headers: encryptedHeaders }, cancellationToken);
+  await executeJob({ relativeUrl: '/app/kibana#/something', browserTimezone, headers: encryptedHeaders }, cancellationToken);
 
-  expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPngLogo');
-  expect(generatePngObservable).toBeCalledWith(undefined, [], browserTimezone, {}, undefined, undefined);
+  expect(generatePngObservable).toBeCalledWith('http://localhost:5601/sbp/app/kibana#/something', browserTimezone, null, undefined);
 });
 
 test(`adds forceNow to hash's query, if it exists`, async () => {
-  const encryptedHeaders = await encryptHeaders({});
+  const encryptedHeaders = await encrypt({});
 
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
@@ -145,13 +183,13 @@ test(`adds forceNow to hash's query, if it exists`, async () => {
   const executeJob = executeJobFactory(mockServer);
   const forceNow = '2000-01-01T00:00:00.000Z';
 
-  await executeJob({ objects: [{ relativeUrl: 'app/kibana#/something' }], forceNow, headers: encryptedHeaders }, cancellationToken);
+  await executeJob({ relativeUrl: '/app/kibana#/something', forceNow, headers: encryptedHeaders }, cancellationToken);
 
-  expect(generatePngObservable).toBeCalledWith(undefined, ['http://localhost:5601/app/kibana#/something?forceNow=2000-01-01T00%3A00%3A00.000Z'], undefined, {}, undefined, undefined);
+  expect(generatePngObservable).toBeCalledWith('http://localhost:5601/sbp/app/kibana#/something?forceNow=2000-01-01T00%3A00%3A00.000Z', undefined, null, undefined);
 });
 
 test(`appends forceNow to hash's query, if it exists`, async () => {
-  const encryptedHeaders = await encryptHeaders({});
+  const encryptedHeaders = await encrypt({});
 
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
@@ -160,36 +198,37 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
 
   await executeJob({
-    objects: [{ relativeUrl: 'app/kibana#/something?_g=something' }],
+    relativeUrl: '/app/kibana#/something?_g=something',
     forceNow,
     headers: encryptedHeaders
   }, cancellationToken);
 
-  expect(generatePngObservable).toBeCalledWith(undefined, ['http://localhost:5601/app/kibana#/something?_g=something&forceNow=2000-01-01T00%3A00%3A00.000Z'], undefined, {}, undefined, undefined);
+  expect(generatePngObservable).toBeCalledWith('http://localhost:5601/sbp/app/kibana#/something?_g=something&forceNow=2000-01-01T00%3A00%3A00.000Z', undefined, null, undefined);
 });
 
 test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
-  const encryptedHeaders = await encryptHeaders({});
+  const encryptedHeaders = await encrypt({});
 
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
   const executeJob = executeJobFactory(mockServer);
 
-  await executeJob({ objects: [{ relativeUrl: 'app/kibana#/something' }], headers: encryptedHeaders }, cancellationToken);
+  await executeJob({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }, cancellationToken);
 
-  expect(generatePngObservable).toBeCalledWith(undefined, ['http://localhost:5601/app/kibana#/something'], undefined, {}, undefined, undefined);
+  expect(generatePngObservable).toBeCalledWith('http://localhost:5601/sbp/app/kibana#/something', undefined, null, undefined);
 });
 
-test(`returns content_type of application/Png`, async () => {
+test(`returns content_type of image/png`, async () => {
   const executeJob = executeJobFactory(mockServer);
-  const encryptedHeaders = await encryptHeaders({});
+  const encryptedHeaders = await encrypt({});
 
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const { content_type: contentType } = await executeJob({ objects: [], timeRange: {}, headers: encryptedHeaders }, cancellationToken);
-  expect(contentType).toBe('application/Png');
+  const { content_type: contentType } = await executeJob({ relativeUrl: '/app/kibana#/something',
+    timeRange: {}, headers: encryptedHeaders }, cancellationToken);
+  expect(contentType).toBe('image/png');
 });
 
 test(`returns content of generatePng getBuffer base64 encoded`, async () => {
@@ -199,8 +238,9 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
 
   const executeJob = executeJobFactory(mockServer);
-  const encryptedHeaders = await encryptHeaders({});
-  const { content } = await executeJob({ objects: [], timeRange: {}, headers: encryptedHeaders }, cancellationToken);
+  const encryptedHeaders = await encrypt({});
+  const { content } = await executeJob({ relativeUrl: '/app/kibana#/something',
+    timeRange: {}, headers: encryptedHeaders }, cancellationToken);
 
   expect(content).toEqual(Buffer.from(testContent).toString('base64'));
 });
