@@ -29,6 +29,9 @@ export interface PanelHeaderProps {
   embeddable?: Embeddable;
   isViewOnlyMode: boolean;
   hidePanelTitles: boolean;
+}
+
+interface PanelHeaderUiProps extends PanelHeaderProps {
   intl: InjectedIntl;
 }
 
@@ -39,7 +42,7 @@ function PanelHeaderUi({
   isViewOnlyMode,
   hidePanelTitles,
   intl,
-}: PanelHeaderProps) {
+}: PanelHeaderUiProps) {
   if (isViewOnlyMode && (!title || hidePanelTitles)) {
     return (
       <div className="dshPanel__header--floater">

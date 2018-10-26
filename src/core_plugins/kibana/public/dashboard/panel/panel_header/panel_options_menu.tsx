@@ -33,6 +33,9 @@ export interface PanelOptionsMenuProps {
   closeContextMenu: () => void;
   panels: EuiContextMenuPanelDescriptor[];
   isViewMode: boolean;
+}
+
+interface PanelOptionsMenuUiProps extends PanelOptionsMenuProps {
   intl: InjectedIntl;
 }
 
@@ -43,7 +46,7 @@ function PanelOptionsMenuUi({
   panels,
   isViewMode,
   intl,
-}: PanelOptionsMenuProps) {
+}: PanelOptionsMenuUiProps) {
   const button = (
     <EuiButtonIcon
       iconType={isViewMode ? 'boxesHorizontal' : 'gear'}

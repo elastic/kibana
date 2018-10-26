@@ -27,6 +27,9 @@ export interface PanelOptionsMenuFormProps {
   onReset: () => void;
   onUpdatePanelTitle: (newPanelTitle: string) => void;
   onClose: () => void;
+}
+
+interface PanelOptionsMenuFormUiProps extends PanelOptionsMenuFormProps {
   intl: InjectedIntl;
 }
 
@@ -36,7 +39,7 @@ function PanelOptionsMenuFormUi({
   onUpdatePanelTitle,
   onClose,
   intl,
-}: PanelOptionsMenuFormProps) {
+}: PanelOptionsMenuFormUiProps) {
   function onInputChange(event: ChangeEvent<HTMLInputElement>) {
     onUpdatePanelTitle(event.target.value);
   }
