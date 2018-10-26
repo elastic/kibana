@@ -7,15 +7,39 @@
 import gql from 'graphql-tag';
 
 export const sourcesSchema = gql`
-  type Source {
-    "The id of the source"
-    id: ID!
-  }
-
   extend type Query {
     "Get an infrastructure data source by id"
     source("The id of the source" id: ID!): Source!
     "Get a list of all infrastructure data sources"
     allSources: [Source!]!
+  }
+
+  type Source {
+    "The id of the source"
+    id: ID!
+    "The raw configuration of the source"
+    configuration: SourceConfiguration!
+  }
+
+  "A set of configuration options for an infrastructure data source"
+  type SourceConfiguration {
+    "The field mapping to use for this source"
+    fields: SourceFields!
+  }
+
+  "A mapping of semantic fields to their document counterparts"
+  type SourceFields {
+    "The field to identify a container by"
+    container: String!
+    "The fields to identify a host by"
+    host: String!
+    "The fields that may contain the log event message. The first field found win."
+    message: [String!]!
+    "The field to identify a pod by"
+    pod: String!
+    "The field to use as a tiebreaker for log events that have identical timestamps"
+    tiebreaker: String!
+    "The field to use as a timestamp for metrics and logs"
+    timestamp: String!
   }
 `;

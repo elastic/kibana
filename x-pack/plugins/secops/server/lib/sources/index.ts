@@ -34,8 +34,6 @@ export interface SourceConfigurations {
 }
 
 export interface SourceConfiguration {
-  metricAlias: string;
-  logAlias: string;
   fields: {
     container: string;
     host: string;
