@@ -56,6 +56,7 @@ export const security = (kibana) => new kibana.Plugin({
   uiExports: {
     chromeNavControls: ['plugins/security/views/nav_control'],
     managementSections: ['plugins/security/views/management'],
+    styleSheetPaths: `${__dirname}/public/index.scss`,
     apps: [{
       id: 'login',
       title: 'Login',
@@ -101,9 +102,11 @@ export const security = (kibana) => new kibana.Plugin({
     // Create a Hapi auth scheme that should be applied to each request.
     server.auth.scheme('login', () => ({ authenticate: authenticateFactory(server) }));
 
-    // The `required` means that the `session` strategy that is based on `login` schema defined above will be
+    server.auth.strategy('session', 'login');
+
+    // The default means that the `session` strategy that is based on `login` schema defined above will be
     // automatically assigned to all routes that don't contain an auth config.
-    server.auth.strategy('session', 'login', 'required');
+    server.auth.default('session');
 
     // exposes server.plugins.security.authorization
     const authorization = createAuthorizationService(server, xpackInfoFeature);

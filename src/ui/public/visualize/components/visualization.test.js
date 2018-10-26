@@ -79,6 +79,13 @@ describe('<Visualization/>', () => {
     expect(wrapper.text()).toBe('No results found');
   });
 
+  it('should display error message when there is a request error that should be shown and no data', () => {
+    const errorVis = { ...vis, requestError: { message: 'Request error' }, showRequestError: true };
+    const data = null;
+    const wrapper = render(<Visualization vis={errorVis} visData={data} listenOnChange={true} uiState={uiState} />);
+    expect(wrapper.text()).toBe('Request error');
+  });
+
   it('should render chart when data is present', () => {
     const wrapper = render(<Visualization vis={vis} visData={visData} uiState={uiState} listenOnChange={true} />);
     expect(wrapper.text()).not.toBe('No results found');

@@ -60,8 +60,10 @@ Array [
       }
     }
   },
-  \\"plugin-1.message-id-1\\": \\"Translated text 1\\",
-  \\"plugin-1.message-id-2\\": \\"Translated text 2\\"
+  \\"messages\\": {
+    \\"plugin-1.message-id-1\\": \\"Translated text 1\\",
+    \\"plugin-1.message-id-2\\": \\"Translated text 2\\"
+  }
 }",
 ]
 `;
@@ -126,7 +128,9 @@ Array [
       }
     }
   },
-  \\"plugin-2.message-id\\": \\"Translated text\\"
+  \\"messages\\": {
+    \\"plugin-2.message-id\\": \\"Translated text\\"
+  }
 }",
 ]
 `;

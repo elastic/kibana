@@ -1,0 +1,12 @@
+// Should import both the EUI constants and any Kibana ones that are considered global
+@import 'ui/public/styles/styling_constants';
+
+// ML needs EUI card styling till it fully adopts React components
+@import '@elastic/eui/src/components/panel/variables';
+@import '@elastic/eui/src/components/panel/mixins';
+
+@import '@elastic/eui/src/global_styling/variables/size';
+
+@import 'datavisualizer/index';
+@import 'file_datavisualizer/index';
+@import 'components/nav_menu/index';

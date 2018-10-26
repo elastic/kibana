@@ -78,21 +78,20 @@ export const testHarnes = {
   },
   getServerLibs: async () => {
     if (!serverLibs) {
-      const server = new Hapi.Server();
-      server.connection({ port: 111111 });
+      const server = new Hapi.Server({ port: 111111 });
       const versionHeader = 'kbn-version';
       const xsrfHeader = 'kbn-xsrf';
 
-      server.ext('onPostAuth', (req: any, reply: any) => {
+      server.ext('onPostAuth', (req: any, h: any) => {
         const isSafeMethod = req.method === 'get' || req.method === 'head';
         const hasVersionHeader = versionHeader in req.headers;
         const hasXsrfHeader = xsrfHeader in req.headers;
 
         if (!isSafeMethod && !hasVersionHeader && !hasXsrfHeader) {
-          return reply(badRequest(`Request must contain a ${xsrfHeader} header.`));
+          throw badRequest(`Request must contain a ${xsrfHeader} header.`);
         }
 
-        return reply.continue();
+        return h.continue;
       });
 
       serverLibs = compose(server);

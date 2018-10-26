@@ -23,8 +23,12 @@ import { i18n } from '@kbn/i18n';
 const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
 
 export function serializeToJson5(messages, formats = i18n.formats) {
-  // .slice(0, -1): remove closing curly brace from json to append messages
-  let jsonBuffer = Buffer.from(JSON5.stringify({ formats }, { quote: `'`, space: 2 }).slice(0, -1));
+  // .slice(0, -4): remove closing curly braces from json to append messages
+  let jsonBuffer = Buffer.from(
+    JSON5.stringify({ formats, messages: {} }, { quote: `'`, space: 2 })
+      .slice(0, -4)
+      .concat('\n')
+  );
 
   for (const [mapKey, mapValue] of Array.isArray(messages) ? messages : Object.entries(messages)) {
     const formattedMessage = mapValue.message.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2');
@@ -34,13 +38,13 @@ export function serializeToJson5(messages, formats = i18n.formats) {
 
     jsonBuffer = Buffer.concat([
       jsonBuffer,
-      Buffer.from(`  '${mapKey}': '${formattedMessage}',`),
+      Buffer.from(`    '${mapKey}': '${formattedMessage}',`),
       Buffer.from(formattedContext ? ` // ${formattedContext}\n` : '\n'),
     ]);
   }
 
-  // append previously removed closing curly brace
-  jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
+  // append previously removed closing curly braces
+  jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('  },\n}\n')]);
 
   return jsonBuffer;
 }

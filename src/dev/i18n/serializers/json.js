@@ -20,13 +20,13 @@
 import { i18n } from '@kbn/i18n';
 
 export function serializeToJson(messages, formats = i18n.formats) {
-  const resultJsonObject = { formats };
+  const resultJsonObject = { formats, messages: {} };
 
   for (const [mapKey, mapValue] of Array.isArray(messages) ? messages : Object.entries(messages)) {
     if (mapValue.context) {
-      resultJsonObject[mapKey] = { text: mapValue.message, comment: mapValue.context };
+      resultJsonObject.messages[mapKey] = { text: mapValue.message, comment: mapValue.context };
     } else {
-      resultJsonObject[mapKey] = mapValue.message;
+      resultJsonObject.messages[mapKey] = mapValue.message;
     }
   }
 
