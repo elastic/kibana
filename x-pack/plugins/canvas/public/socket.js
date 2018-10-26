@@ -41,12 +41,9 @@ export async function createSocket(basePath) {
   });
 
   function errorHandler(err) {
-    if (!err instanceof Error) {
-      const { reason } = err;
-      if (reason) status.reject(new Error(reason));
-    }
-
-    status.reject(err);
+    // 'connectionFailed' returns an object with a reason prop
+    // other error cases provide their own error
+    status.reject(err.reason ? new Error(err.reason) : err);
   }
 
   socket.on('connectionFailed', errorHandler);
