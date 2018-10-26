@@ -427,7 +427,7 @@ export default class BaseOptimizer {
       Stats.presetToOptions('minimal')
     ));
 
-    throw Boom.internal(
+    return Boom.internal(
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
       stats.toJson(Stats.presetToOptions('detailed'))
     );
