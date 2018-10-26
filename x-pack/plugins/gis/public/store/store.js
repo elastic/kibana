@@ -8,9 +8,10 @@ import { combineReducers, applyMiddleware, createStore, compose } from 'redux';
 import thunk from 'redux-thunk';
 import ui from './ui';
 import { map } from './map';
-import { loadMapResources, loadMetaResources } from "../actions/store_actions";
+import { loadMetaResources } from "../actions/store_actions";
 import config from './config';
 
+// TODO this should not be exported and all access to the store be via getStore
 export let store;
 
 const rootReducer = combineReducers({
@@ -23,25 +24,17 @@ const enhancers = [ applyMiddleware(thunk) ];
 window.__REDUX_DEVTOOLS_EXTENSION
   && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 
-let storePromise;
 export const getStore = async function () {
-  if (storePromise) return storePromise;
-  storePromise = new Promise(resolve => {
-    const handle = setInterval(() => {
-      clearInterval(handle);
-      const storeConfig = {};
-      const createdStore = createStore(
-        rootReducer,
-        storeConfig,
-        compose(...enhancers)
-      );
-      store = createdStore;
-      resolve(createdStore);
-      loadMetaResources(store.dispatch).then(()=> {
-        //store.dispatch(replaceLayerList(initConfig.layerList));
-        loadMapResources(store.dispatch);
-      });
-    }, 10);
-  });
-  return storePromise;
+  if (store) {
+    return store;
+  }
+
+  const storeConfig = {};
+  store = createStore(
+    rootReducer,
+    storeConfig,
+    compose(...enhancers)
+  );
+  await loadMetaResources(store.dispatch);
+  return store;
 };

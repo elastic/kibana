@@ -296,23 +296,3 @@ export async function loadMetaResources(dispatch) {
   const metaJson = await meta.json();
   await dispatch(setMeta(metaJson));
 }
-
-export async function loadMapResources(dispatch) {
-  await dispatch(replaceLayerList(
-    [
-      {
-        id: "0hmz5",
-        label: 'light theme tiles',
-        sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
-        visible: true,
-        temporary: false,
-        style: {},
-        type: "TILE",
-        // showAtAllZoomLevels: true,
-        minZoom: 0,
-        maxZoom: 24,
-      }
-    ]
-  ));
-
-}

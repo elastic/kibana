@@ -34,6 +34,19 @@ module.factory('SavedGisWorkspace', function (Private) {
       defaults: {
         title: 'New Workspace',
         description: '',
+        layerListJSON: JSON.stringify([
+          {
+            id: "0hmz5",
+            label: 'EMS base layer (road_map)',
+            sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
+            visible: true,
+            temporary: false,
+            style: {},
+            type: "TILE",
+            minZoom: 0,
+            maxZoom: 24,
+          }
+        ])
       },
     });
 

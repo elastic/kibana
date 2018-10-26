@@ -13,7 +13,7 @@ import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { getStore } from '../store/store';
 import { GISApp } from '../components/gis_app';
-import { setTimeFilters } from '../actions/store_actions';
+import { setTimeFilters, mapExtentChanged, replaceLayerList } from '../actions/store_actions';
 import { getIsDarkTheme } from '../store/ui';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters } from '../kibana_services';
@@ -21,6 +21,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { showOptionsPopover } from '../components/top_nav/show_options_popover';
 import { toastNotifications } from 'ui/notify';
+import { getMapReady } from "../selectors/map_selectors";
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 
@@ -28,6 +29,7 @@ const app = uiModules.get('app/gis', []);
 
 app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbState, kbnUrl) => {
 
+  let isLayersListInitializedFromSavedObject = false;
   const savedWorkspace = $scope.workspace = $route.current.locals.workspace;
   let isDarkTheme;
   let unsubscribe;
@@ -38,7 +40,15 @@ app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbStat
       handleStoreChanges(store);
     });
 
-    // TODO dispatch actions to sync store with savedWorkspace
+    // sync store with savedWorkspace mapState
+    // layerList is synced after map has initialized and extent is known.
+    if (savedWorkspace.mapStateJSON) {
+      const mapState = JSON.parse(savedWorkspace.mapStateJSON);
+      store.dispatch(mapExtentChanged({
+        zoom: mapState.zoom,
+        center: mapState.center,
+      }));
+    }
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
@@ -47,6 +57,21 @@ app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbStat
       </Provider>,
       root);
   });
+
+  function handleStoreChanges(store) {
+    if (isDarkTheme !== getIsDarkTheme(store.getState())) {
+      isDarkTheme = getIsDarkTheme(store.getState());
+      updateTheme();
+    }
+
+    // Part of initial syncing of store from saved object
+    // Delayed until after map is ready so map extent is known
+    if (!isLayersListInitializedFromSavedObject && getMapReady(store.getState())) {
+      isLayersListInitializedFromSavedObject = true;
+      const layerList = savedWorkspace.layerListJSON ? JSON.parse(savedWorkspace.layerListJSON) : [];
+      store.dispatch(replaceLayerList(layerList));
+    }
+  }
 
   timefilter.on('timeUpdate', dispatchTimeUpdate);
 
@@ -158,13 +183,6 @@ app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbStat
     const timeFilters = timefilter.getTime();
     const store = await getStore();
     store.dispatch(setTimeFilters(timeFilters));
-  }
-
-  function handleStoreChanges(store) {
-    if (isDarkTheme !== getIsDarkTheme(store.getState())) {
-      isDarkTheme = getIsDarkTheme(store.getState());
-      updateTheme();
-    }
   }
 
   function updateTheme() {

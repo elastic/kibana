@@ -10,7 +10,6 @@ import { mapExtentChanged, mapReady, mapDestroyed } from '../../../actions/store
 import { getLayerList, getMapState, getMapReady } from "../../../selectors/map_selectors";
 
 function mapStateToProps(state = {}) {
-  console.log('state', state);
   return {
     isMapReady: getMapReady(state),
     mapState: getMapState(state),
@@ -23,7 +22,8 @@ function mapDispatchToProps(dispatch) {
     extentChanged: (e) => {
       dispatch(mapExtentChanged(e));
     },
-    onMapReady: () => {
+    onMapReady: (e) => {
+      dispatch(mapExtentChanged(e));
       dispatch(mapReady());
     },
     onMapDestroyed: () => {

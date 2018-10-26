@@ -50,7 +50,9 @@ export class MBMapContainer extends React.Component {
   }
 
   async _initializeMap() {
-    this._mbMap = await createMbMapInstance(this.refs.mapContainer);
+    const initialZoom = this.props.mapState.zoom;
+    const initialCenter = this.props.mapState.center;
+    this._mbMap = await createMbMapInstance(this.refs.mapContainer, initialZoom, initialCenter);
 
     // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
     // Tracked layer listerners are used to clean up event handlers
@@ -79,7 +81,7 @@ export class MBMapContainer extends React.Component {
     this._mbMap.on('moveend', () => {
       this.props.extentChanged(this._getMapState());
     });
-    this.props.onMapReady();
+    this.props.onMapReady(this._getMapState());
   }
 
   _addListener(eventType, mbLayerId, handler) {
