@@ -32,11 +32,12 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
-import { injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { NavLink } from '../';
 
 interface Props {
   navLinks: NavLink[];
+  intl: InjectedIntl;
 }
 
 interface State {

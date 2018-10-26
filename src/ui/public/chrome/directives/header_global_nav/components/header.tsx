@@ -36,7 +36,7 @@ import { HeaderAppMenu } from './header_app_menu';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderNavControls } from './header_nav_controls';
 
-import { injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { Breadcrumb, NavControlSide, NavLink } from '../';
 
@@ -47,6 +47,7 @@ interface Props {
   isVisible: boolean;
   navLinks: NavLink[];
   navControls: ChromeHeaderNavControlsRegistry;
+  intl: InjectedIntl;
 }
 
 class HeaderUI extends Component<Props> {
