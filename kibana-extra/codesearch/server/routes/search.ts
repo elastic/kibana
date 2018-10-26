@@ -6,15 +6,18 @@
 
 import Boom from 'boom';
 
+import hapi from 'hapi';
 import { DocumentSearchRequest, RepositorySearchRequest, SymbolSearchRequest } from '../../model';
-import { Server } from '../kibana_types';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from '../search';
 
-export function repositorySearchRoute(server: Server, repoSearchClient: RepositorySearchClient) {
+export function repositorySearchRoute(
+  server: hapi.Server,
+  repoSearchClient: RepositorySearchClient
+) {
   server.route({
     path: '/api/cs/search/repo',
     method: 'GET',
-    async handler(req, reply) {
+    async handler(req) {
       let page = 1;
       if (req.query.p) {
         page = parseInt(req.query.p, 10);
@@ -25,19 +28,19 @@ export function repositorySearchRoute(server: Server, repoSearchClient: Reposito
       };
       try {
         const res = await repoSearchClient.search(searchReq);
-        reply(res);
+        return res;
       } catch (error) {
-        reply(Boom.internal(`Search Exception ${error}`));
+        return Boom.internal(`Search Exception ${error}`);
       }
     },
   });
 }
 
-export function documentSearchRoute(server: Server, docSearchClient: DocumentSearchClient) {
+export function documentSearchRoute(server: hapi.Server, docSearchClient: DocumentSearchClient) {
   server.route({
     path: '/api/cs/search/doc',
     method: 'GET',
-    async handler(req, reply) {
+    async handler(req) {
       let page = 1;
       if (req.query.p) {
         page = parseInt(req.query.p, 10);
@@ -50,19 +53,19 @@ export function documentSearchRoute(server: Server, docSearchClient: DocumentSea
       };
       try {
         const res = await docSearchClient.search(searchReq);
-        reply(res);
+        return res;
       } catch (error) {
-        reply(Boom.internal(`Search Exception ${error}`));
+        return Boom.internal(`Search Exception ${error}`);
       }
     },
   });
 }
 
-export function symbolSearchRoute(server: Server, symbolSearchClient: SymbolSearchClient) {
+export function symbolSearchRoute(server: hapi.Server, symbolSearchClient: SymbolSearchClient) {
   server.route({
     path: '/api/cs/search/symbol',
     method: 'GET',
-    async handler(req, reply) {
+    async handler(req: hapi.Request) {
       let page = 1;
       if (req.query.p) {
         page = parseInt(req.query.p, 10);
@@ -73,9 +76,9 @@ export function symbolSearchRoute(server: Server, symbolSearchClient: SymbolSear
       };
       try {
         const res = await symbolSearchClient.search(searchReq);
-        reply(res);
+        return res;
       } catch (error) {
-        reply(Boom.internal(`Search Exception ${error}`));
+        return Boom.internal(`Search Exception ${error}`);
       }
     },
   });

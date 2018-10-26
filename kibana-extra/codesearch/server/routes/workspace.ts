@@ -5,30 +5,30 @@
  */
 
 import Boom from 'boom';
-import { SavedObjectsClient, Server } from '../kibana_types';
+import hapi from 'hapi';
+import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { WorkspaceCommand } from '../lsp/workspace_command';
 import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
 
 export function workspaceRoute(
-  server: Server,
+  server: hapi.Server,
   serverOptions: ServerOptions,
   objectsClient: SavedObjectsClient
 ) {
   server.route({
     path: '/api/cs/workspace',
     method: 'GET',
-    async handler(req, reply) {
-      const repoConfigs = serverOptions.repoConfigs;
-      reply(repoConfigs);
+    async handler() {
+      return serverOptions.repoConfigs;
     },
   });
 
   server.route({
     path: '/api/cs/workspace/{uri*3}/{revision}',
     method: 'POST',
-    async handler(req, reply) {
+    async handler(req: hapi.Request, reply) {
       const repoUri = req.params.uri as string;
       const revision = req.params.revision as string;
       const repoConfig = serverOptions.repoConfigs[repoUri];
@@ -53,15 +53,15 @@ export function workspaceRoute(
             log
           );
           workspaceCmd.runInit(force).then(() => {
-            reply('');
+            return '';
           });
         } catch (e) {
           if (e.isBoom) {
-            reply(e);
+            return e;
           }
         }
       } else {
-        reply(Boom.notFound(`repo config for ${repoUri} not found.`));
+        return Boom.notFound(`repo config for ${repoUri} not found.`);
       }
     },
   });

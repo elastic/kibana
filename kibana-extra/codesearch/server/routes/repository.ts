@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 
+import hapi from 'hapi';
 import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
@@ -17,13 +18,12 @@ import {
   RepositoryReservedField,
   RepositoryTypeName,
 } from '../indexer/schema';
-import { Server } from '../kibana_types';
 import { Log } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
 import { ServerOptions } from '../server_options';
 
 export function repositoryRoute(
-  server: Server,
+  server: hapi.Server,
   options: ServerOptions,
   cloneWorker: CloneWorker,
   deleteWorker: DeleteWorker,
@@ -34,14 +34,13 @@ export function repositoryRoute(
   server.route({
     path: '/api/cs/repo',
     method: 'POST',
-    async handler(req, reply) {
+    async handler(req, h) {
       const repoUrl: string = req.payload.url;
       const log = new Log(req.server);
 
       // Reject the request if the url is an invalid git url.
       if (!isValidGitUrl(repoUrl)) {
-        reply(Boom.badRequest('Invalid git url.'));
-        return;
+        return Boom.badRequest('Invalid git url.');
       }
 
       const repo = RepositoryUtils.buildRepository(repoUrl);
@@ -56,7 +55,7 @@ export function repositoryRoute(
         });
         const msg = `Repository ${repoUrl} already exists. Skip clone.`;
         log.info(msg);
-        reply(msg).code(304); // Not Modified
+        return h.response(msg).code(304); // Not Modified
       } catch (error) {
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
@@ -79,11 +78,11 @@ export function repositoryRoute(
             dataPath: options.repoPath,
           };
           await cloneWorker.enqueueJob(payload, {});
-          reply(repo);
+          return repo;
         } catch (error) {
           const msg = `Issue repository clone request for ${repoUrl} error: ${error}`;
           log.error(msg);
-          reply(Boom.badRequest(msg));
+          return Boom.badRequest(msg);
         }
       }
     },
@@ -93,7 +92,7 @@ export function repositoryRoute(
   server.route({
     path: '/api/cs/repo/{uri*3}',
     method: 'DELETE',
-    async handler(req, reply) {
+    async handler(req) {
       const repoUri: string = req.params.uri as string;
       const log = new Log(req.server);
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
@@ -112,11 +111,11 @@ export function repositoryRoute(
         };
         await deleteWorker.enqueueJob(payload, {});
 
-        reply({});
+        return {};
       } catch (error) {
         const msg = `Issue repository delete request for ${repoUri} error: ${error}`;
         log.error(msg);
-        reply(Boom.notFound(msg));
+        return Boom.notFound(msg);
       }
     },
   });
@@ -125,7 +124,7 @@ export function repositoryRoute(
   server.route({
     path: '/api/cs/repo/{uri*3}',
     method: 'GET',
-    async handler(req, reply) {
+    async handler(req) {
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
@@ -136,11 +135,11 @@ export function repositoryRoute(
           id: repoUri,
         });
         const repo: Repository = response._source[RepositoryReservedField];
-        reply(repo);
+        return repo;
       } catch (error) {
         const msg = `Get repository ${repoUri} error: ${error}`;
         log.error(msg);
-        reply(Boom.notFound(msg));
+        return Boom.notFound(msg);
       }
     },
   });
@@ -148,7 +147,7 @@ export function repositoryRoute(
   server.route({
     path: '/api/cs/repoCloneStatus/{uri*3}',
     method: 'GET',
-    async handler(req, reply) {
+    async handler(req) {
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
       const objectClient = req.getSavedObjectsClient();
@@ -156,11 +155,11 @@ export function repositoryRoute(
       try {
         const response = await objectClient.get(REPOSITORY_GIT_STATUS_INDEX_TYPE, repoUri);
         const status: CloneWorkerProgress = response.attributes;
-        reply(status);
+        return status;
       } catch (error) {
         const msg = `Get repository clone status ${repoUri} error: ${error}`;
         log.error(msg);
-        reply(Boom.notFound(msg));
+        return Boom.notFound(msg);
       }
     },
   });
@@ -169,7 +168,7 @@ export function repositoryRoute(
   server.route({
     path: '/api/cs/repos',
     method: 'GET',
-    async handler(req, reply) {
+    async handler(req) {
       const log = new Log(req.server);
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
       try {
@@ -191,11 +190,11 @@ export function repositoryRoute(
           const repo: Repository = hit._source[RepositoryReservedField];
           return repo;
         });
-        reply(repos);
+        return repos;
       } catch (error) {
         const msg = `Get all repositories error: ${error}`;
         log.error(msg);
-        reply(Boom.notFound(msg));
+        return Boom.notFound(msg);
       }
     },
   });
@@ -206,7 +205,7 @@ export function repositoryRoute(
   server.route({
     path: '/api/cs/repo/index/{uri*3}',
     method: 'POST',
-    async handler(req, reply) {
+    async handler(req) {
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
       const objectClient = req.getSavedObjectsClient();
@@ -221,11 +220,11 @@ export function repositoryRoute(
           dataPath: options.repoPath,
         };
         await indexWorker.enqueueJob(payload, {});
-        reply({});
+        return {};
       } catch (error) {
         const msg = `Index repository ${repoUri} error: ${error}`;
         log.error(msg);
-        reply(Boom.notFound(msg));
+        return Boom.notFound(msg);
       }
     },
   });

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from '../kibana_types';
+import hapi from 'hapi';
 
 import Path from 'path';
 
-export function monacoRoute(server: Server) {
+export function monacoRoute(server: hapi.Server) {
   server.route({
     method: 'GET',
     path: '/monaco/{param*}',

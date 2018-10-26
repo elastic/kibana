@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from '../kibana_types';
+import hapi from 'hapi';
 import { ServerOptions } from '../server_options';
 
-export function userRoute(server: Server, serverOptions: ServerOptions) {
+export function userRoute(server: hapi.Server, serverOptions: ServerOptions) {
   server.route({
     path: '/api/cs/user/config',
     method: 'GET',
-    async handler(req, reply) {
-      reply({
+    async handler() {
+      return {
         isAdmin: serverOptions.isAdmin,
-      });
+      };
     },
   });
 }

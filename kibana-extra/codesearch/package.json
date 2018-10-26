@@ -54,7 +54,7 @@
     "@types/get-port": "^3.2.0 ",
     "@types/git-url-parse": "^9.0.0",
     "@types/glob": "^5.0.35",
-    "@types/hapi": "^15.0.0",
+    "@types/hapi": "^17.6.2",
     "@types/jest": "^23.3.1",
     "@types/node": "^10.5.3",
     "@types/nodegit": "^0.22.1",

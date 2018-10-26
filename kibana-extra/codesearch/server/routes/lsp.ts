@@ -5,18 +5,22 @@
  */
 
 import Boom from 'boom';
+import hapi from 'hapi';
 import { ResponseError } from 'vscode-jsonrpc';
-import { Server } from '../kibana_types';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { SymbolSearchClient } from '../search';
 import { ServerOptions } from '../server_options';
 import { promiseTimeout } from '../utils/timeout';
 
-export function lspRoute(server: Server, lspService: LspService, serverOptions: ServerOptions) {
+export function lspRoute(
+  server: hapi.Server,
+  lspService: LspService,
+  serverOptions: ServerOptions
+) {
   server.route({
     path: '/api/lsp/textDocument/{method}',
-    async handler(req, reply) {
+    async handler(req, h: hapi.ResponseToolkit) {
       if (typeof req.payload === 'object' && req.payload != null) {
         const method = req.params.method;
         if (method) {
@@ -25,29 +29,29 @@ export function lspRoute(server: Server, lspService: LspService, serverOptions: 
               serverOptions.lspRequestTimeout * 1000,
               lspService.sendRequest(`textDocument/${method}`, req.payload)
             );
-            reply.response(result);
+            return result;
           } catch (error) {
             const log = new Log(server);
             log.error(error);
             if (error instanceof ResponseError) {
-              reply
+              return h
                 .response(error.toJson())
                 .type('json')
                 .code(503); // different code for LS errors and other internal errors.
             } else if (error.isBoom) {
-              reply(error);
+              return error;
             } else {
-              reply
+              return h
                 .response(JSON.stringify(error))
                 .type('json')
                 .code(500);
             }
           }
         } else {
-          reply.response('missing `method` in request').code(400);
+          return h.response('missing `method` in request').code(400);
         }
       } else {
-        reply.response('json body required').code(400); // bad request
+        return h.response('json body required').code(400); // bad request
       }
     },
     method: 'POST',
@@ -59,16 +63,16 @@ export function lspRoute(server: Server, lspService: LspService, serverOptions: 
   });
 }
 
-export function symbolByQnameRoute(server: Server, symbolSearchClient: SymbolSearchClient) {
+export function symbolByQnameRoute(server: hapi.Server, symbolSearchClient: SymbolSearchClient) {
   server.route({
     path: '/api/lsp/symbol/{qname}',
     method: 'GET',
     async handler(req, reply) {
       try {
         const res = await symbolSearchClient.findByQname(req.params.qname);
-        reply(res);
+        return res;
       } catch (error) {
-        reply(Boom.internal(`Search Exception ${error}`));
+        return Boom.internal(`Search Exception ${error}`);
       }
     },
   });

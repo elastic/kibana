@@ -118,10 +118,20 @@
   resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.51.tgz#a67515b0ba6a2ff68894a39405c1343cbf9c36d4"
   integrity sha1-pnUVsLpqL/aIlKOUBcE0PL+cNtQ=
 
+"@types/boom@*":
+  version "7.2.1"
+  resolved "http://registry.npm.taobao.org/@types/boom/download/@types/boom-7.2.1.tgz#a21e21ba08cc49d17b26baef98e1a77ee4d6cdb0"
+  integrity sha1-oh4hugjMSdF7JrrvmOGnfuTWzbA=
+
 "@types/boom@^7.2.0":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@types/boom/-/boom-7.2.0.tgz#19c36cbb5811a7493f0f2e37f31d42b28df1abc1"
   integrity sha1-GcNsu1gRp0k/Dy438x1Cso3xq8E=
+
+"@types/catbox@*":
+  version "10.0.2"
+  resolved "http://registry.npm.taobao.org/@types/catbox/download/@types/catbox-10.0.2.tgz#1ed8e29461935f22493e9e1e457de0238e836c00"
+  integrity sha1-HtjilGGTXyJJPp4eRX3gI46DbAA=
 
 "@types/elasticsearch@^5.0.24":
   version "5.0.26"
@@ -168,22 +178,53 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
-"@types/hapi@^15.0.0":
-  version "15.0.2"
-  resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-15.0.2.tgz#59c77434e6e3fe96e7153c14981219b6a2f0326c"
-  integrity sha1-Wcd0NObj/pbnFTwUmBIZtqLwMmw=
+"@types/hapi@^17.6.2":
+  version "17.6.2"
+  resolved "http://registry.npm.taobao.org/@types/hapi/download/@types/hapi-17.6.2.tgz#9de9e98f508975a1e4c04ee7e58b6aae565453c9"
+  integrity sha1-nenpj1CJdaHkwE7n5YtqrlZUU8k=
   dependencies:
+    "@types/boom" "*"
+    "@types/catbox" "*"
+    "@types/iron" "*"
+    "@types/joi" "*"
+    "@types/mimos" "*"
     "@types/node" "*"
+    "@types/podium" "*"
+    "@types/shot" "*"
 
 "@types/history@*":
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/@types/history/-/history-4.7.0.tgz#2fac51050c68f7d6f96c5aafc631132522f4aa3f"
   integrity sha1-L6xRBQxo99b5bFqvxjETJSL0qj8=
 
+"@types/iron@*":
+  version "5.0.1"
+  resolved "http://registry.npm.taobao.org/@types/iron/download/@types/iron-5.0.1.tgz#5420bbda8623c48ee51b9a78ebad05d7305b4b24"
+  integrity sha1-VCC72oYjxI7lG5p4660F1zBbSyQ=
+  dependencies:
+    "@types/node" "*"
+
 "@types/jest@^23.3.1":
   version "23.3.2"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.2.tgz#07b90f6adf75d42c34230c026a2529e56c249dbb"
   integrity sha1-B7kPat911Cw0IwwCaiUp5Wwknbs=
+
+"@types/joi@*":
+  version "13.6.1"
+  resolved "http://registry.npm.taobao.org/@types/joi/download/@types/joi-13.6.1.tgz#325486a397504f8e22c8c551dc8b0e1d41d5d5ae"
+  integrity sha1-MlSGo5dQT44iyMVR3IsOHUHV1a4=
+
+"@types/mime-db@*":
+  version "1.27.0"
+  resolved "http://registry.npm.taobao.org/@types/mime-db/download/@types/mime-db-1.27.0.tgz#9bc014a1fd1fdf47649c1a54c6dd7966b8284792"
+  integrity sha1-m8AUof0f30dknBpUxt15ZrgoR5I=
+
+"@types/mimos@*":
+  version "3.0.1"
+  resolved "http://registry.npm.taobao.org/@types/mimos/download/@types/mimos-3.0.1.tgz#59d96abe1c9e487e7463fe41e8d86d76b57a441a"
+  integrity sha1-WdlqvhyeSH50Y/5B6NhtdrV6RBo=
+  dependencies:
+    "@types/mime-db" "*"
 
 "@types/minimatch@*":
   version "3.0.3"
@@ -202,6 +243,11 @@
   dependencies:
     "@types/events" "*"
     "@types/node" "*"
+
+"@types/podium@*":
+  version "1.0.0"
+  resolved "http://registry.npm.taobao.org/@types/podium/download/@types/podium-1.0.0.tgz#bfaa2151be2b1d6109cc69f7faa9dac2cba3bb20"
+  integrity sha1-v6ohUb4rHWEJzGn3+qnawsujuyA=
 
 "@types/prop-types@*":
   version "15.5.5"
@@ -272,6 +318,13 @@
   integrity sha1-fw/Dzw/wrSqZu3I64XZPMKyvi24=
   dependencies:
     "@types/glob" "*"
+    "@types/node" "*"
+
+"@types/shot@*":
+  version "4.0.0"
+  resolved "http://registry.npm.taobao.org/@types/shot/download/@types/shot-4.0.0.tgz#7545500c489b65c69b5bc5446ba4fef3bd26af92"
+  integrity sha1-dUVQDEibZcabW8VEa6T+870mr5I=
+  dependencies:
     "@types/node" "*"
 
 "@types/socket.io@^1.4.38":
