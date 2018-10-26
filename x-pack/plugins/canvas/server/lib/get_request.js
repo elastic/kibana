@@ -17,7 +17,11 @@ export function getRequest(server, { headers }) {
     })
     .then(res => {
       if (res.statusCode !== 200) {
-        console.error(new Error(`Auth request failed: [${res.statusCode}] ${res.result.message}`));
+        if (process.env.NODE_ENV !== 'production') {
+          console.error(
+            new Error(`Auth request failed: [${res.statusCode}] ${res.result.message}`)
+          );
+        }
         throw boom.unauthorized('Failed to authenticate socket connection');
       }
 
