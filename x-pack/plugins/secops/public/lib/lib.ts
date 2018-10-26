@@ -32,7 +32,7 @@ export interface AppFrameworkAdapter {
   renderBreadcrumbs(component: React.ReactElement<any>): void;
 }
 
-export interface AppFramworkAdapterConstructable {
+export interface AppFrameworkAdapterConstructible {
   new (uiModule: IModule, timezoneProvider: AppTimezoneProvider): AppFrameworkAdapter;
 }
 

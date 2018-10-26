@@ -11,7 +11,7 @@
         "fields": [
           {
             "name": "source",
-            "description": "Get an infrastructure data source by id",
+            "description": "Get a security data source by id",
             "args": [
               {
                 "name": "id",
@@ -34,7 +34,7 @@
           },
           {
             "name": "allSources",
-            "description": "Get a list of all infrastructure data sources",
+            "description": "Get a list of all security data sources",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -106,7 +106,7 @@
       {
         "kind": "OBJECT",
         "name": "SourceConfiguration",
-        "description": "A set of configuration options for an infrastructure data source",
+        "description": "A set of configuration options for a security data source",
         "fields": [
           {
             "name": "fields",

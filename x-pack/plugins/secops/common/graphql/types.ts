@@ -4,6 +4,7 @@
      * or more contributor license agreements. Licensed under the Elastic License;
      * you may not use this file except in compliance with the Elastic License.
      */
+
 import { GraphQLResolveInfo } from 'graphql';
 
 export type Resolver<Result, Parent = any, Context = any, Args = any> = (
@@ -29,15 +30,15 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = any
 };
 
 export interface Query {
-  source: Source /** Get an infrastructure data source by id */;
-  allSources: Source[] /** Get a list of all infrastructure data sources */;
+  source: Source /** Get a security data source by id */;
+  allSources: Source[] /** Get a list of all security data sources */;
 }
 
 export interface Source {
   id: string /** The id of the source */;
   configuration: SourceConfiguration /** The raw configuration of the source */;
 }
-/** A set of configuration options for an infrastructure data source */
+/** A set of configuration options for a security data source */
 export interface SourceConfiguration {
   fields: SourceFields /** The field mapping to use for this source */;
 }
@@ -56,12 +57,12 @@ export interface SourceQueryArgs {
 
 export namespace QueryResolvers {
   export interface Resolvers<Context = any> {
-    source?: SourceResolver<Source, any, Context> /** Get an infrastructure data source by id */;
+    source?: SourceResolver<Source, any, Context> /** Get a security data source by id */;
     allSources?: AllSourcesResolver<
       Source[],
       any,
       Context
-    > /** Get a list of all infrastructure data sources */;
+    > /** Get a list of all security data sources */;
   }
 
   export type SourceResolver<R = Source, Parent = any, Context = any> = Resolver<
@@ -98,7 +99,7 @@ export namespace SourceResolvers {
     Context = any
   > = Resolver<R, Parent, Context>;
 }
-/** A set of configuration options for an infrastructure data source */
+/** A set of configuration options for a security data source */
 export namespace SourceConfigurationResolvers {
   export interface Resolvers<Context = any> {
     fields?: FieldsResolver<
