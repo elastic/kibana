@@ -10,7 +10,7 @@ import {
   EuiInMemoryTable,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../spaces/public/components';
@@ -26,7 +26,7 @@ interface Props {
   spacePrivileges: any;
   onChange?: (privs: { [spaceId: string]: KibanaPrivilege[] }) => void;
   readonly?: boolean;
-  intl: any;
+  intl: InjectedIntl;
 }
 
 interface State {

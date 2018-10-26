@@ -12,7 +12,7 @@ import {
   EuiLink,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 
@@ -28,7 +28,7 @@ interface Props {
   role: Role;
   spaces: Space[];
   userProfile: UserProfile;
-  intl: any;
+  intl: InjectedIntl;
 }
 
 interface State {

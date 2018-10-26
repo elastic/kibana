@@ -20,7 +20,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
 import { toastNotifications } from 'ui/notify';
@@ -49,7 +49,7 @@ interface Props {
   spaces?: Space[];
   spacesEnabled: boolean;
   userProfile: UserProfile;
-  intl: any;
+  intl: InjectedIntl;
 }
 
 interface State {

@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, I18nProvider, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Role } from '../../../../../../../common/model/role';
 // @ts-ignore
@@ -37,7 +37,7 @@ interface Props {
   indexPatterns: string[];
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
-  intl: any;
+  intl: InjectedIntl;
 }
 
 export class ElasticsearchPrivilegesUI extends Component<Props, {}> {

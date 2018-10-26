@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { UserProfile } from '../../../../../../../../xpack_main/public/services/user_profile';
@@ -41,7 +41,7 @@ interface Props {
   editable: boolean;
   validator: RoleValidator;
   userProfile: UserProfile;
-  intl: any;
+  intl: InjectedIntl;
 }
 
 interface PrivilegeForm {
