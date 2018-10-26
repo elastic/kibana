@@ -66,7 +66,7 @@ export class ImpactedSpacesFlyoutUI extends Component<Props, State> {
     });
   };
 
-  public getHighestPrivilege(...privileges: KibanaPrivilege[]): KibanaPrivilege {
+  public getHighestPrivilege(...privileges: KibanaPrivilege[]): string {
     const { intl } = this.props;
     if (privileges.indexOf('all') >= 0) {
       return intl.formatMessage({
