@@ -90,7 +90,7 @@ class ManageSpacePageUI extends Component<Props, State> {
           toastNotifications.addDanger(
             intl.formatMessage(
               {
-                id: 'xpack.spaces.view.management.editSpace.manageSpacePage.errorLoadingSpaceTitle',
+                id: 'xpack.spaces.management.editSpace.manageSpacePage.errorLoadingSpaceTitle',
                 defaultMessage: 'Error loading space: {message}',
               },
               {
@@ -127,7 +127,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         <EuiTitle>
           <h1>
             <FormattedMessage
-              id="xpack.spaces.view.management.editSpace.manageSpacePage.loadingTitle"
+              id="xpack.spaces.management.editSpace.manageSpacePage.loadingTitle"
               defaultMessage="Loading…"
             />
           </h1>
@@ -153,7 +153,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
         <EuiFormRow
           label={intl.formatMessage({
-            id: 'xpack.spaces.view.management.editSpace.manageSpacePage.nameFormRowLabel',
+            id: 'xpack.spaces.management.editSpace.manageSpacePage.nameFormRowLabel',
             defaultMessage: 'Name',
           })}
           {...this.validator.validateSpaceName(this.state.space)}
@@ -162,7 +162,7 @@ class ManageSpacePageUI extends Component<Props, State> {
           <EuiFieldText
             name="name"
             placeholder={intl.formatMessage({
-              id: 'xpack.spaces.view.management.editSpace.manageSpacePage.awesomeSpacePlaceholder',
+              id: 'xpack.spaces.management.editSpace.manageSpacePage.awesomeSpacePlaceholder',
               defaultMessage: 'Awesome space',
             })}
             value={name}
@@ -197,8 +197,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
         <EuiFormRow
           label={intl.formatMessage({
-            id:
-              'xpack.spaces.view.management.editSpace.manageSpacePage.optionalDescriptionFormRowLabel',
+            id: 'xpack.spaces.management.editSpace.manageSpacePage.optionalDescriptionFormRowLabel',
             defaultMessage: 'Description (optional)',
           })}
           {...this.validator.validateSpaceDescription(this.state.space)}
@@ -207,8 +206,7 @@ class ManageSpacePageUI extends Component<Props, State> {
           <EuiFieldText
             name="description"
             placeholder={intl.formatMessage({
-              id:
-                'xpack.spaces.view.management.editSpace.manageSpacePage.hereMagicHappensPlaceholder',
+              id: 'xpack.spaces.management.editSpace.manageSpacePage.hereMagicHappensPlaceholder',
               defaultMessage: 'This is where the magic happens',
             })}
             value={description}
@@ -238,14 +236,14 @@ class ManageSpacePageUI extends Component<Props, State> {
     if (this.editingExistingSpace()) {
       return (
         <FormattedMessage
-          id="xpack.spaces.view.management.editSpace.manageSpacePage.editSpaceTitle"
+          id="xpack.spaces.management.editSpace.manageSpacePage.editSpaceTitle"
           defaultMessage="Edit space"
         />
       );
     }
     return (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.manageSpacePage.createSpaceTitle"
+        id="xpack.spaces.management.editSpace.manageSpacePage.createSpaceTitle"
         defaultMessage="Create space"
       />
     );
@@ -261,12 +259,12 @@ class ManageSpacePageUI extends Component<Props, State> {
   public getFormButtons = () => {
     const saveText = this.editingExistingSpace() ? (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.manageSpacePage.updateSpaceButtonLabel"
+        id="xpack.spaces.management.editSpace.manageSpacePage.updateSpaceButtonLabel"
         defaultMessage="Update space"
       />
     ) : (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.manageSpacePage.createSpaceButtonLabel"
+        id="xpack.spaces.management.editSpace.manageSpacePage.createSpaceButtonLabel"
         defaultMessage="Create space"
       />
     );
@@ -280,7 +278,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={this.backToSpacesList} data-test-subj="cancel-space-button">
             <FormattedMessage
-              id="xpack.spaces.view.management.editSpace.manageSpacePage.cancelButtonLabel"
+              id="xpack.spaces.management.editSpace.manageSpacePage.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
@@ -401,7 +399,7 @@ class ManageSpacePageUI extends Component<Props, State> {
           intl.formatMessage(
             {
               id:
-                'xpack.spaces.view.management.editSpace.manageSpacePage.spaceSuccessfullySavedNotificationMessage',
+                'xpack.spaces.management.editSpace.manageSpacePage.spaceSuccessfullySavedNotificationMessage',
               defaultMessage: '{name} was saved',
             },
             {
@@ -417,7 +415,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         toastNotifications.addDanger(
           intl.formatMessage(
             {
-              id: 'xpack.spaces.view.management.editSpace.manageSpacePage.errorSavingSpaceTitle',
+              id: 'xpack.spaces.management.editSpace.manageSpacePage.errorSavingSpaceTitle',
               defaultMessage: 'Error saving space: {message}',
             },
             {

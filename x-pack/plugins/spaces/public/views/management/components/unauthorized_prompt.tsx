@@ -15,7 +15,7 @@ export const UnauthorizedPrompt = () => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.spaces.view.management.unauthorizedPrompt.permissionDeniedTitle"
+          id="xpack.spaces.management.unauthorizedPrompt.permissionDeniedTitle"
           defaultMessage="Permission denied"
         />
       </h2>
@@ -23,7 +23,7 @@ export const UnauthorizedPrompt = () => (
     body={
       <p data-test-subj="permissionDeniedMessage">
         <FormattedMessage
-          id="xpack.spaces.view.management.unauthorizedPrompt.permissionDeniedDescription"
+          id="xpack.spaces.management.unauthorizedPrompt.permissionDeniedDescription"
           defaultMessage="You do not have permission to manage spaces."
         />
       </p>

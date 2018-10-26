@@ -37,7 +37,7 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
   public render() {
     const buttonText = (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.deleteSpacesButton.deleteSpaceButtonLabel"
+        id="xpack.spaces.management.editSpace.deleteSpacesButton.deleteSpaceButtonLabel"
         defaultMessage="Delete space"
       />
     );
@@ -58,7 +58,7 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
           color={'danger'}
           onClick={this.onDeleteClick}
           aria-label={intl.formatMessage({
-            id: 'xpack.spaces.view.management.editSpace.deleteSpacesButton.deleteSpaceAriaLabel',
+            id: 'xpack.spaces.management.editSpace.deleteSpacesButton.deleteSpaceAriaLabel',
             defaultMessage: 'Delete this space',
           })}
           {...extraProps}
@@ -109,7 +109,7 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
       toastNotifications.addDanger(
         intl.formatMessage(
           {
-            id: 'xpack.spaces.view.management.editSpace.deleteSpacesButton.deleteSpaceErrorTitle',
+            id: 'xpack.spaces.management.editSpace.deleteSpacesButton.deleteSpaceErrorTitle',
             defaultMessage: 'Error deleting space: {errorMessage}',
           },
           {
@@ -126,7 +126,7 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
     const message = intl.formatMessage(
       {
         id:
-          'xpack.spaces.view.management.editSpace.deleteSpacesButton.spaceSuccessfullyDeletedNotificationMessage',
+          'xpack.spaces.management.editSpace.deleteSpacesButton.spaceSuccessfullyDeletedNotificationMessage',
         defaultMessage: 'Deleted {spaceName} space.',
       },
       {

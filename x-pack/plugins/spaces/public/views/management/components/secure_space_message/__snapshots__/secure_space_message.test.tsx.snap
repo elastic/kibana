@@ -14,7 +14,7 @@ exports[`SecureSpaceMessage renders if user profile allows security to be manage
     <p>
       <FormattedMessage
         defaultMessage="Want to assign a role to a space? Go to Management and select {rolesLink}."
-        id="xpack.spaces.view.management.secureSpaceMessage.howToAssignRoleToSpaceDescription"
+        id="xpack.spaces.management.secureSpaceMessage.howToAssignRoleToSpaceDescription"
         values={
           Object {
             "rolesLink": <EuiLink
@@ -24,7 +24,7 @@ exports[`SecureSpaceMessage renders if user profile allows security to be manage
             >
               <FormattedMessage
                 defaultMessage="Roles"
-                id="xpack.spaces.view.management.secureSpaceMessage.rolesLinkText"
+                id="xpack.spaces.management.secureSpaceMessage.rolesLinkText"
                 values={Object {}}
               />
             </EuiLink>,

@@ -23,7 +23,7 @@ export const AdvancedSettingsTitle = (props: Props) => (
       <EuiText>
         <h1 data-test-subj="managementSettingsTitle">
           <FormattedMessage
-            id="xpack.spaces.view.management.advancedSettingsTitle.settingsTitle"
+            id="xpack.spaces.management.advancedSettingsTitle.settingsTitle"
             defaultMessage="Settings"
           />
         </h1>

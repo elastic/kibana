@@ -14,7 +14,7 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
     component="div"
     grow={false}
   >
-    <Component
+    <Componentadvanced_settings_title.tsx
       space={
         Object {
           "id": "my-space",
@@ -40,7 +40,7 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
       >
         <FormattedMessage
           defaultMessage="Settings"
-          id="xpack.spaces.view.management.advancedSettingsTitle.settingsTitle"
+          id="xpack.spaces.management.advancedSettingsTitle.settingsTitle"
           values={Object {}}
         />
       </h1>

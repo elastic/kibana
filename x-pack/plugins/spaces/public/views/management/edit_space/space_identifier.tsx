@@ -58,7 +58,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
                 ? undefined
                 : intl.formatMessage({
                     id:
-                      'xpack.spaces.view.management.editSpace.spaceIdentifier.urlIdentifierGeneratedFromSpaceNameTooltip',
+                      'xpack.spaces.management.editSpace.spaceIdentifier.urlIdentifierGeneratedFromSpaceNameTooltip',
                     defaultMessage: 'The URL identifier is generated from the space name.',
                   })
             }
@@ -77,7 +77,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
       return (
       <p>
         <FormattedMessage
-          id="xpack.spaces.view.management.editSpace.spaceIdentifier.urlIdentifierTitle"
+          id="xpack.spaces.management.editSpace.spaceIdentifier.urlIdentifierTitle"
           defaultMessage="URL identifier"
         />
       </p>);
@@ -85,19 +85,19 @@ class SpaceIdentifierUI extends Component<Props, State> {
 
     const editLinkText = this.state.editing ? (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.spaceIdentifier.stopEditingSpaceNameLinkText"
+        id="xpack.spaces.management.editSpace.spaceIdentifier.stopEditingSpaceNameLinkText"
         defaultMessage="[stop editing]"
       />
     ) : (
       <FormattedMessage
-        id="xpack.spaces.view.management.editSpace.spaceIdentifier.editSpaceLinkText"
+        id="xpack.spaces.management.editSpace.spaceIdentifier.editSpaceLinkText"
         defaultMessage="[edit]"
       />
     );
     return (
       <p>
         <FormattedMessage
-          id="xpack.spaces.view.management.editSpace.spaceIdentifier.urlIdentifierLabel"
+          id="xpack.spaces.management.editSpace.spaceIdentifier.urlIdentifierLabel"
           defaultMessage="URL identifier"
         />
         <EuiLink onClick={this.onEditClick}>{editLinkText}</EuiLink>
@@ -109,14 +109,14 @@ class SpaceIdentifierUI extends Component<Props, State> {
     return (
       <p>
         <FormattedMessage
-          id="xpack.spaces.view.management.editSpace.spaceIdentifier.kibanaURLForEngineeringIdentifierDescription"
+          id="xpack.spaces.management.editSpace.spaceIdentifier.kibanaURLForEngineeringIdentifierDescription"
           defaultMessage="If the identifier is {engineeringIdentifier}, the Kibana URL is{nextLine}
           {engineeringKibanaUrl}."
           values={{
             engineeringIdentifier: (
               <strong>
                 <FormattedMessage
-                  id="xpack.spaces.view.management.editSpace.spaceIdentifier.engineeringText"
+                  id="xpack.spaces.management.editSpace.spaceIdentifier.engineeringText"
                   defaultMessage="engineering"
                 />
               </strong>

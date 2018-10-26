@@ -62,7 +62,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
         <EuiCallOut color="warning">
           <EuiText>
             <FormattedMessage
-              id="xpack.spaces.view.management.confirmDeleteModal.redirectAfterDeletingCurrentSpaceWarningMessage"
+              id="xpack.spaces.management.confirmDeleteModal.redirectAfterDeletingCurrentSpaceWarningMessage"
               defaultMessage="You are about to delete your current space {name}. You will be redirected to choose a different space if you continue."
               values={{ name }}
             />
@@ -80,7 +80,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
           <EuiModalHeader>
             <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
               <FormattedMessage
-                id="xpack.spaces.view.management.confirmDeleteModal.confirmDeleteSpaceButtonLabel"
+                id="xpack.spaces.management.confirmDeleteModal.confirmDeleteSpaceButtonLabel"
                 defaultMessage="Delete space {spaceName}"
                 values={{
                   spaceName: "'" + space.name + "'",
@@ -92,13 +92,13 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
             <EuiText data-test-subj="confirmModalBodyText">
               <p>
                 <FormattedMessage
-                  id="xpack.spaces.view.management.confirmDeleteModal.deletingSpaceWarningMessage"
+                  id="xpack.spaces.management.confirmDeleteModal.deletingSpaceWarningMessage"
                   defaultMessage="Deleting a space permanently removes the space and {allContents}. You can't undo this action."
                   values={{
                     allContents: (
                       <strong>
                         <FormattedMessage
-                          id="xpack.spaces.view.management.confirmDeleteModal.allContentsText"
+                          id="xpack.spaces.management.confirmDeleteModal.allContentsText"
                           defaultMessage="all of its contents"
                         />
                       </strong>
@@ -109,14 +109,12 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
 
               <EuiFormRow
                 label={intl.formatMessage({
-                  id:
-                    'xpack.spaces.view.management.confirmDeleteModal.confirmSpaceNameFormRowLabel',
+                  id: 'xpack.spaces.management.confirmDeleteModal.confirmSpaceNameFormRowLabel',
                   defaultMessage: 'Confirm space name',
                 })}
                 isInvalid={!!this.state.error}
                 error={intl.formatMessage({
-                  id:
-                    'xpack.spaces.view.management.confirmDeleteModal.spaceNamesDoNoMatchErrorMessage',
+                  id: 'xpack.spaces.management.confirmDeleteModal.spaceNamesDoNoMatchErrorMessage',
                   defaultMessage: 'Space names do not match.',
                 })}
               >
@@ -137,7 +135,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
               isDisabled={this.state.deleteInProgress}
             >
               <FormattedMessage
-                id="xpack.spaces.view.management.confirmDeleteModal.cancelButtonLabel"
+                id="xpack.spaces.management.confirmDeleteModal.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -150,7 +148,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
               isLoading={this.state.deleteInProgress}
             >
               <FormattedMessage
-                id="xpack.spaces.view.management.confirmDeleteModal.deleteSpaceAndAllContentsButtonLabel"
+                id="xpack.spaces.management.confirmDeleteModal.deleteSpaceAndAllContentsButtonLabel"
                 defaultMessage=" Delete space and all contents"
               />
             </EuiButton>

@@ -40,7 +40,7 @@ class SpacesMenuUI extends Component<Props, State> {
     const panelProps = {
       className: 'spcMenu',
       title: intl.formatMessage({
-        id: 'xpack.spaces.view.navControl.spacesMenu.changeCurrentSpaceTitle',
+        id: 'xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle',
         defaultMessage: 'Change current space',
       }),
       watchedItemProps: ['data-search-term'],
@@ -83,7 +83,7 @@ class SpacesMenuUI extends Component<Props, State> {
       return (
         <EuiText color="subdued" className="eui-textCenter">
           <FormattedMessage
-            id="xpack.spaces.view.navControl.spacesMenu.noSpacesFoundTitle"
+            id="xpack.spaces.navControl.spacesMenu.noSpacesFoundTitle"
             defaultMessage=" no spaces found "
           />
         </EuiText>
@@ -108,7 +108,7 @@ class SpacesMenuUI extends Component<Props, State> {
       <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
         <EuiFieldSearch
           placeholder={intl.formatMessage({
-            id: 'xpack.spaces.view.navControl.spacesMenu.findSpacePlaceholder',
+            id: 'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
             defaultMessage: 'Find a space',
           })}
           incremental={true}

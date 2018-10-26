@@ -8,7 +8,7 @@ exports[`UnauthorizedPrompt renders as expected 1`] = `
     >
       <FormattedMessage
         defaultMessage="You do not have permission to manage spaces."
-        id="xpack.spaces.view.management.unauthorizedPrompt.permissionDeniedDescription"
+        id="xpack.spaces.management.unauthorizedPrompt.permissionDeniedDescription"
         values={Object {}}
       />
     </p>
@@ -19,7 +19,7 @@ exports[`UnauthorizedPrompt renders as expected 1`] = `
     <h2>
       <FormattedMessage
         defaultMessage="Permission denied"
-        id="xpack.spaces.view.management.unauthorizedPrompt.permissionDeniedTitle"
+        id="xpack.spaces.management.unauthorizedPrompt.permissionDeniedTitle"
         values={Object {}}
       />
     </h2>
