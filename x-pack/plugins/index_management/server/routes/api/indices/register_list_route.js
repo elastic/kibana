@@ -43,20 +43,20 @@ export function registerListRoute(server) {
   server.route({
     path: '/api/index_management/indices',
     method: 'GET',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
         const aliases = await fetchAliases(callWithRequest);
         const hits = await fetchIndices(callWithRequest);
         const response = formatHits(hits, aliases);
-        reply(response);
+        return response;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          throw wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        throw wrapUnknownError(err);
       }
     },
     config: {

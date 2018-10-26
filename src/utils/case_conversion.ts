@@ -17,14 +17,16 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import _ from 'lodash';
 
-function cloneBuffersCustomizer(val) {
-  if (Buffer.isBuffer(val)) {
-    return new Buffer(val);
-  }
+export function keysToSnakeCaseShallow(object: Record<string, any>) {
+  return _.mapKeys(object, (value, key) => {
+    return _.snakeCase(key);
+  });
 }
 
-export function deepCloneWithBuffers(vals) {
-  return cloneDeep(vals, cloneBuffersCustomizer);
+export function keysToCamelCaseShallow(object: Record<string, any>) {
+  return _.mapKeys(object, (value, key) => {
+    return _.camelCase(key);
+  });
 }

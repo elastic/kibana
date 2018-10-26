@@ -12,9 +12,9 @@ import { setupRequest } from '../lib/helpers/setup_request';
 
 const ROOT = '/api/apm/status';
 const pre = [{ method: setupRequest, assign: 'setup' }];
-const defaultErrorHandler = reply => err => {
+const defaultErrorHandler = err => {
   console.error(err.stack);
-  reply(Boom.wrap(err, 400));
+  throw Boom.boomify(err, { statusCode: 400 });
 };
 
 export function initStatusApi(server) {
@@ -29,11 +29,9 @@ export function initStatusApi(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: req => {
       const { setup } = req.pre;
-      return getServerStatus({ setup })
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      return getServerStatus({ setup }).catch(defaultErrorHandler);
     }
   });
 
@@ -48,11 +46,9 @@ export function initStatusApi(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: req => {
       const { setup } = req.pre;
-      return getAgentStatus({ setup })
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      return getAgentStatus({ setup }).catch(defaultErrorHandler);
     }
   });
 }

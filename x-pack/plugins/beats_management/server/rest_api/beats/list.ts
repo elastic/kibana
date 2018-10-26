@@ -25,7 +25,7 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
     }),
   },
   licenseRequired: true,
-  handler: async (request: FrameworkRequest, reply: any) => {
+  handler: async (request: FrameworkRequest) => {
     const listByAndValueParts = request.params.listByAndValue
       ? request.params.listByAndValue.split('/')
       : [];
@@ -54,10 +54,10 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
           break;
       }
 
-      reply({ beats });
+      return { beats };
     } catch (err) {
       // TODO move this to kibana route thing in adapter
-      return reply(wrapEsError(err));
+      return wrapEsError(err);
     }
   },
 });
