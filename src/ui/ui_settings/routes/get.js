@@ -27,7 +27,7 @@ async function handleRequest(request) {
 export const getRoute = {
   path: '/api/kibana/settings',
   method: 'GET',
-  handler: function (request, reply) {
-    reply(handleRequest(request));
+  handler: function (request) {
+    return handleRequest(request);
   }
 };
