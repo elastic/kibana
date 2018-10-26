@@ -65,7 +65,7 @@ class RangeControl extends Control {
     try {
       resp = await searchSource.fetch();
     } catch(error) {
-      this.disable(i18n.translate('inputControl.rangeControl.unableToFetchTootip', {
+      this.disable(i18n.translate('inputControl.rangeControl.unableToFetchTooltip', {
         defaultMessage: 'Unable to fetch range min and max, error: {errorMessage}',
         values: { errorMessage: error.message }
       }));

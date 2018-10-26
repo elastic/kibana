@@ -19,6 +19,7 @@ import {
   InfraWaffleMapGroup,
   InfraWaffleMapOptions,
 } from '../../lib/lib';
+import { KueryFilterQuery } from '../../store/local/waffle_filter';
 import { createFormatter } from '../../utils/formatters';
 import { AutoSizer } from '../auto_sizer';
 import { InfraLoadingPanel } from '../loading';
@@ -33,6 +34,7 @@ interface Props {
   map: InfraWaffleData;
   loading: boolean;
   reload: () => void;
+  onDrilldown: (filter: KueryFilterQuery) => void;
 }
 
 interface MetricFormatter {
@@ -109,6 +111,7 @@ export class Waffle extends React.Component<Props, {}> {
               Check for new data
             </EuiButton>
           }
+          data-test-subj="noMetricsDataPrompt"
         />
       );
     }
@@ -124,7 +127,10 @@ export class Waffle extends React.Component<Props, {}> {
         {({ measureRef, content: { width = 0, height = 0 } }) => {
           const groupsWithLayout = applyWaffleMapLayout(map, width, height);
           return (
-            <WaffleMapOuterContiner innerRef={(el: any) => measureRef(el)}>
+            <WaffleMapOuterContiner
+              innerRef={(el: any) => measureRef(el)}
+              data-test-subj="waffleMap"
+            >
               <WaffleMapInnerContainer>
                 {groupsWithLayout.map(this.renderGroup(bounds))}
               </WaffleMapInnerContainer>
@@ -155,9 +161,13 @@ export class Waffle extends React.Component<Props, {}> {
     return formatter(val);
   };
 
-  private handleDrilldown() {
+  private handleDrilldown = (filter: string) => {
+    this.props.onDrilldown({
+      kind: 'kuery',
+      expression: filter,
+    });
     return;
-  }
+  };
 
   private renderGroup = (bounds: InfraWaffleMapBounds) => (group: InfraWaffleMapGroup) => {
     if (isWaffleMapGroupWithGroups(group)) {
