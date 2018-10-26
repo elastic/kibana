@@ -6,6 +6,7 @@
 
 require('@kbn/plugin-helpers').babelRegister();
 require('@kbn/test').runTestsCli([
+// These commented out tests are only for within the secops branch and should not be merged into master
 //  require.resolve('../test/reporting/configs/chromium_api.js'),
 //  require.resolve('../test/reporting/configs/chromium_functional.js'),
 //  require.resolve('../test/reporting/configs/phantom_api.js'),

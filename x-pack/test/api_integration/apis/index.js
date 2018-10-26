@@ -6,6 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('apis', () => {
+    // These commented out tests are only for within the secops branch and should not be merged into master
     // loadTestFile(require.resolve('./es'));
     // loadTestFile(require.resolve('./security'));
     // loadTestFile(require.resolve('./monitoring'));
