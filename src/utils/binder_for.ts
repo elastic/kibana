@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { BinderBase, Emitter } from './binder';
 
-function cloneBuffersCustomizer(val) {
-  if (Buffer.isBuffer(val)) {
-    return new Buffer(val);
+export class BinderFor extends BinderBase {
+  constructor(private readonly emitter: Emitter) {
+    super();
   }
-}
 
-export function deepCloneWithBuffers(vals) {
-  return cloneDeep(vals, cloneBuffersCustomizer);
+  public on(...args: any[]) {
+    super.on(this.emitter, ...args);
+  }
 }
