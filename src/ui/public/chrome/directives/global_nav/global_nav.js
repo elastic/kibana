@@ -27,7 +27,7 @@ import { uiModules } from '../../../modules';
 
 const module = uiModules.get('kibana');
 
-module.directive('globalNav', (globalNavState, chrome) => {
+module.directive('globalNav', (globalNavState, chrome, i18n) => {
   return {
     restrict: 'E',
     replace: true,
@@ -46,8 +46,12 @@ module.directive('globalNav', (globalNavState, chrome) => {
         scope.isGlobalNavOpen = isOpen;
         scope.globalNavToggleButton = {
           classes: isOpen ? 'global-nav-link--close' : undefined,
-          title: isOpen ? 'Collapse' : 'Expand',
-          tooltipContent: isOpen ? 'Collapse side bar' : 'Expand side bar',
+          title: isOpen ?
+            i18n('common.ui.chrome.globalNav.navToggleButtonCollapseTitle', { defaultMessage: 'Collapse' })
+            : i18n('common.ui.chrome.globalNav.navToggleButtonExpandTitle', { defaultMessage: 'Expand' }),
+          tooltipContent: isOpen ?
+            i18n('common.ui.chrome.globalNav.navToggleButtonCollapseTooltip', { defaultMessage: 'Collapse side bar' })
+            : i18n('common.ui.chrome.globalNav.navToggleButtonExpandTooltip', { defaultMessage: 'Expand side bar' }),
         };
 
         // Notify visualizations, e.g. the dashboard, that they should re-render.
