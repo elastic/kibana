@@ -32,7 +32,7 @@ export function readFile(file) {
 
 export function reduceData(data, mb) {
   // assuming 1 char is 1 byte
-  // TODO -  change this with other non UTF-8 formats are
+  // TODO -  change this when other non UTF-8 formats are
   // supported for the read data
   const size = mb * Math.pow(2, 20);
   return (data.length >= size) ? data.slice(0, size) : data;
