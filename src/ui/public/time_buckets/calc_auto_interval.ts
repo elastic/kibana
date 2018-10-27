@@ -17,82 +17,83 @@
  * under the License.
  */
 
-import moment, { Duration } from 'moment';
+import moment from 'moment';
 
-const rules = [
+const boundsDescending = [
   {
     bound: Infinity,
-    interval: moment.duration(1, 'year'),
+    interval: Number(moment.duration(1, 'year')),
   },
   {
-    bound: moment.duration(1, 'year'),
-    interval: moment.duration(1, 'month'),
+    bound: Number(moment.duration(1, 'year')),
+    interval: Number(moment.duration(1, 'month')),
   },
   {
-    bound: moment.duration(3, 'week'),
-    interval: moment.duration(1, 'week'),
+    bound: Number(moment.duration(3, 'week')),
+    interval: Number(moment.duration(1, 'week')),
   },
   {
-    bound: moment.duration(1, 'week'),
-    interval: moment.duration(1, 'd'),
+    bound: Number(moment.duration(1, 'week')),
+    interval: Number(moment.duration(1, 'd')),
   },
   {
-    bound: moment.duration(24, 'hour'),
-    interval: moment.duration(12, 'hour'),
+    bound: Number(moment.duration(24, 'hour')),
+    interval: Number(moment.duration(12, 'hour')),
   },
   {
-    bound: moment.duration(6, 'hour'),
-    interval: moment.duration(3, 'hour'),
+    bound: Number(moment.duration(6, 'hour')),
+    interval: Number(moment.duration(3, 'hour')),
   },
   {
-    bound: moment.duration(2, 'hour'),
-    interval: moment.duration(1, 'hour'),
+    bound: Number(moment.duration(2, 'hour')),
+    interval: Number(moment.duration(1, 'hour')),
   },
   {
-    bound: moment.duration(45, 'minute'),
-    interval: moment.duration(30, 'minute'),
+    bound: Number(moment.duration(45, 'minute')),
+    interval: Number(moment.duration(30, 'minute')),
   },
   {
-    bound: moment.duration(20, 'minute'),
-    interval: moment.duration(10, 'minute'),
+    bound: Number(moment.duration(20, 'minute')),
+    interval: Number(moment.duration(10, 'minute')),
   },
   {
-    bound: moment.duration(9, 'minute'),
-    interval: moment.duration(5, 'minute'),
+    bound: Number(moment.duration(9, 'minute')),
+    interval: Number(moment.duration(5, 'minute')),
   },
   {
-    bound: moment.duration(3, 'minute'),
-    interval: moment.duration(1, 'minute'),
+    bound: Number(moment.duration(3, 'minute')),
+    interval: Number(moment.duration(1, 'minute')),
   },
   {
-    bound: moment.duration(45, 'second'),
-    interval: moment.duration(30, 'second'),
+    bound: Number(moment.duration(45, 'second')),
+    interval: Number(moment.duration(30, 'second')),
   },
   {
-    bound: moment.duration(15, 'second'),
-    interval: moment.duration(10, 'second'),
+    bound: Number(moment.duration(15, 'second')),
+    interval: Number(moment.duration(10, 'second')),
   },
   {
-    bound: moment.duration(7.5, 'second'),
-    interval: moment.duration(5, 'second'),
+    bound: Number(moment.duration(7.5, 'second')),
+    interval: Number(moment.duration(5, 'second')),
   },
   {
-    bound: moment.duration(5, 'second'),
-    interval: moment.duration(1, 'second'),
+    bound: Number(moment.duration(5, 'second')),
+    interval: Number(moment.duration(1, 'second')),
   },
   {
-    bound: moment.duration(500, 'ms'),
-    interval: moment.duration(100, 'ms'),
+    bound: Number(moment.duration(500, 'ms')),
+    interval: Number(moment.duration(100, 'ms')),
   },
 ];
 
-function estimateBucketMs(count: number, duration: Duration) {
-  const ms = Number(duration) / count;
+function getPerBucketMs(count: number, duration: number) {
+  const ms = duration / count;
   return isFinite(ms) ? ms : NaN;
 }
 
-function defaultInterval(targetMs: number) {
-  return moment.duration(isNaN(targetMs) ? 0 : Math.max(Math.floor(targetMs), 1), 'ms');
+function normalizeMinimumInterval(targetMs: number) {
+  const value = isNaN(targetMs) ? 0 : Math.max(Math.floor(targetMs), 1);
+  return moment.duration(value);
 }
 
 /**
@@ -102,16 +103,24 @@ function defaultInterval(targetMs: number) {
  * @param targetBucketCount desired number of buckets
  * @param duration time range the agg covers
  */
-export function calcAutoIntervalNear(targetBucketCount: number, duration: Duration) {
-  const targetMs = estimateBucketMs(targetBucketCount, duration);
+export function calcAutoIntervalNear(targetBucketCount: number, duration: number) {
+  const targetPerBucketMs = getPerBucketMs(targetBucketCount, duration);
 
-  for (let i = 0; i < rules.length - 1; i++) {
-    if (Number(rules[i + 1].bound) <= targetMs) {
-      return rules[i].interval.clone();
-    }
+  // Find the first bound which is smaller than our target.
+  const lowerBoundIndex = boundsDescending.findIndex(({ bound }) => {
+    const boundMs = Number(bound);
+    return boundMs <= targetPerBucketMs;
+  });
+
+  // The bound immediately preceeding that lower bound contains the
+  // interval most closely matching our target.
+  if (lowerBoundIndex !== -1) {
+    const nearestInterval = boundsDescending[lowerBoundIndex - 1].interval;
+    return moment.duration(nearestInterval);
   }
 
-  return defaultInterval(targetMs);
+  // If the target is smaller than any of our bounds, then we'll use it for the interval as-is.
+  return normalizeMinimumInterval(targetPerBucketMs);
 }
 
 /**
@@ -121,14 +130,16 @@ export function calcAutoIntervalNear(targetBucketCount: number, duration: Durati
  * @param maxBucketCount maximum number of buckets to create
  * @param duration amount of time covered by the agg
  */
-export function calcAutoIntervalLessThan(maxBucketCount: number, duration: Duration) {
-  const maxMs = estimateBucketMs(maxBucketCount, duration);
+export function calcAutoIntervalLessThan(maxBucketCount: number, duration: number) {
+  const maxPerBucketMs = getPerBucketMs(maxBucketCount, duration);
 
-  for (const { interval } of rules) {
-    if (Number(interval) <= maxMs) {
-      return interval.clone();
+  for (const { interval } of boundsDescending) {
+    // Find the highest interval which meets our per bucket limitation.
+    if (interval <= maxPerBucketMs) {
+      return moment.duration(interval);
     }
   }
 
-  return defaultInterval(maxMs);
+  // If the max is smaller than any of our intervals, then we'll use it for the interval as-is.
+  return normalizeMinimumInterval(maxPerBucketMs);
 }

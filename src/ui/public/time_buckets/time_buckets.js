@@ -231,7 +231,7 @@ TimeBuckets.prototype.getInterval = function (useNormalizedEsInterval = true) {
   function readInterval() {
     const interval = self._i;
     if (moment.isDuration(interval)) return interval;
-    return calcAutoIntervalNear(config.get('histogram:barTarget'), duration);
+    return calcAutoIntervalNear(config.get('histogram:barTarget'), Number(duration));
   }
 
   // check to see if the interval should be scaled, and scale it if so
@@ -243,7 +243,7 @@ TimeBuckets.prototype.getInterval = function (useNormalizedEsInterval = true) {
     let scaled;
 
     if (approxLen > maxLength) {
-      scaled = calcAutoIntervalLessThan(maxLength, duration);
+      scaled = calcAutoIntervalLessThan(maxLength, Number(duration));
     } else {
       return interval;
     }
