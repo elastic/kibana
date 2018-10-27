@@ -31,7 +31,7 @@ export function readFile(file) {
 }
 
 export function reduceData(data, mb) {
-  // assuming 1 char is 1 byte
+  // assuming ascii characters in the file where 1 char is 1 byte
   // TODO -  change this when other non UTF-8 formats are
   // supported for the read data
   const size = mb * Math.pow(2, 20);
