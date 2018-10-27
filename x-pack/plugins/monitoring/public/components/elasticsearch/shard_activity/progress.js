@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const FilesProgress = ({ filesPercent, filesDone, filesTotal }) => {
   return (
@@ -30,6 +31,11 @@ export const TranslogProgress = ({ hasTranslog, translogPercent, translogDone, t
       {translogPercent}<br />
       {translogDone} / {translogTotal}
     </Fragment>
-  ) : 'n/a';
+  ) : (
+    <FormattedMessage
+        id="xpack.monitoring.elasticsearch.shardActivity.progress.noTranslogProgressLabel"
+        defaultMessage="n/a"
+      />
+  );
 };
 

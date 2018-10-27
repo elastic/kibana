@@ -14,25 +14,71 @@ import { MonitoringTable } from '../../table';
 import { MetricCell, OfflineCell } from './cells';
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { KuiTableRowCell, KuiTableRow } from '@kbn/ui-framework/components';
+import { i18n } from '@kbn/i18n';
 
 const filterFields = ['name'];
 const getColumns = showCgroupMetricsElasticsearch => {
   const cols = [];
-  cols.push({ title: 'Name', sortKey: 'name', sortOrder: SORT_ASCENDING });
-  cols.push({ title: 'Status', sortKey: 'isOnline' });
+  cols.push({
+    title: i18n.translate('xpack.monitoring.elasticsearch.nodes.nameColumnTitle', {
+      defaultMessage: 'Name',
+    }),
+    sortKey: 'name',
+    sortOrder: SORT_ASCENDING
+  });
+  cols.push({
+    title: i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumnTitle', {
+      defaultMessage: 'Status',
+    }),
+    sortKey: 'isOnline'
+  });
+  const cpuUsageColumnTitle = i18n.translate('xpack.monitoring.elasticsearch.nodes.cpuUsageColumnTitle', {
+    defaultMessage: 'CPU Usage',
+  });
   if (showCgroupMetricsElasticsearch) {
-    cols.push({ title: 'CPU Usage', sortKey: 'node_cgroup_quota' });
     cols.push({
-      title: 'CPU Throttling',
+      title: cpuUsageColumnTitle,
+      sortKey: 'node_cgroup_quota'
+    });
+    cols.push({
+      title: i18n.translate('xpack.monitoring.elasticsearch.nodes.cpuThrottlingColumnTitle', {
+        defaultMessage: 'CPU Throttling',
+      }),
       sortKey: 'node_cgroup_throttled'
     });
   } else {
-    cols.push({ title: 'CPU Usage', sortKey: 'node_cpu_utilization' });
-    cols.push({ title: 'Load Average', sortKey: 'node_load_average' });
+    cols.push({
+      title: cpuUsageColumnTitle,
+      sortKey: 'node_cpu_utilization'
+    });
+    cols.push({
+      title: i18n.translate('xpack.monitoring.elasticsearch.nodes.loadAverageColumnTitle', {
+        defaultMessage: 'Load Average',
+      }),
+      sortKey: 'node_load_average'
+    });
   }
-  cols.push({ title: 'JVM Memory', sortKey: 'node_jvm_mem_percent' });
-  cols.push({ title: 'Disk Free Space', sortKey: 'node_free_space' });
-  cols.push({ title: 'Shards', sortKey: 'shardCount' });
+  cols.push({
+    title: i18n.translate('xpack.monitoring.elasticsearch.nodes.jvmMemoryColumnTitle', {
+      defaultMessage: '{javaVirtulalMachine} Memory',
+      values: {
+        javaVirtulalMachine: 'JVM'
+      }
+    }),
+    sortKey: 'node_jvm_mem_percent'
+  });
+  cols.push({
+    title: i18n.translate('xpack.monitoring.elasticsearch.nodes.diskFreeSpaceColumnTitle', {
+      defaultMessage: 'Disk Free Space',
+    }),
+    sortKey: 'node_free_space'
+  });
+  cols.push({
+    title: i18n.translate('xpack.monitoring.elasticsearch.nodes.shardsColumnTitle', {
+      defaultMessage: 'Shards',
+    }),
+    sortKey: 'shardCount'
+  });
   return cols;
 };
 

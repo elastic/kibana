@@ -8,6 +8,7 @@ import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { KibanaStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
+import { i18n } from '@kbn/i18n';
 
 export function ClusterStatus({ stats }) {
   const {
@@ -22,27 +23,37 @@ export function ClusterStatus({ stats }) {
 
   const metrics = [
     {
-      label: 'Instances',
+      label: i18n.translate('xpack.monitoring.kibana.clusterStatus.instancesLabel', {
+        defaultMessage: 'Instances'
+      }),
       value: instances,
       dataTestSubj: 'instances'
     },
     {
-      label: 'Memory',
+      label:  i18n.translate('xpack.monitoring.kibana.clusterStatus.memoryLabel', {
+        defaultMessage: 'Memory'
+      }),
       value: formatMetric(memSize, 'byte') + ' / ' + formatMetric(memLimit, 'byte'),
       dataTestSubj: 'memory'
     },
     {
-      label: 'Requests',
+      label:  i18n.translate('xpack.monitoring.kibana.clusterStatus.requestsLabel', {
+        defaultMessage: 'Requests'
+      }),
       value: requests,
       dataTestSubj: 'requests'
     },
     {
-      label: 'Connections',
+      label:  i18n.translate('xpack.monitoring.kibana.clusterStatus.connectionsLabel', {
+        defaultMessage: 'Connections'
+      }),
       value: connections,
       dataTestSubj: 'connections'
     },
     {
-      label: 'Max. Response Time',
+      label:  i18n.translate('xpack.monitoring.kibana.clusterStatus.maxResponseTimeLabel', {
+        defaultMessage: 'Max. Response Time'
+      }),
       value: formatMetric(maxResponseTime, '0', 'ms'),
       dataTestSubj: 'maxResponseTime'
     }

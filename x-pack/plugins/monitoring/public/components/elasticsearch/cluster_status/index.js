@@ -8,6 +8,7 @@ import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { ElasticsearchStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
+import { i18n } from '@kbn/i18n';
 
 export function ClusterStatus({ stats }) {
   const {
@@ -24,37 +25,51 @@ export function ClusterStatus({ stats }) {
 
   const metrics = [
     {
-      label: 'Nodes',
+      label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.nodesLabel', {
+        defaultMessage: 'Nodes',
+      }),
       value: nodesCount,
       dataTestSubj: 'nodesCount'
     },
     {
-      label: 'Indices',
+      label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.indicesLabel', {
+        defaultMessage: 'Indices',
+      }),
       value: indicesCount,
       dataTestSubj: 'indicesCount'
     },
     {
-      label: 'Memory',
+      label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.memoryLabel', {
+        defaultMessage: 'Memory',
+      }),
       value: formatMetric(memUsed, 'byte') + ' / ' + formatMetric(memMax, 'byte'),
       dataTestSubj: 'memory'
     },
     {
-      label: 'Total Shards',
+      label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.totalShardsLabel', {
+        defaultMessage: 'Total Shards',
+      }),
       value: totalShards,
       dataTestSubj: 'totalShards'
     },
     {
-      label: 'Unassigned Shards',
+      label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.unassignedShardsLabel', {
+        defaultMessage: 'Unassigned Shards',
+      }),
       value: unassignedShards,
       dataTestSubj: 'unassignedShards'
     },
     {
-      label: 'Documents',
+      label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.documentsLabel', {
+        defaultMessage: 'Documents',
+      }),
       value: formatMetric(documentCount, 'int_commas'),
       dataTestSubj: 'documentCount'
     },
     {
-      label: 'Data',
+      label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.dataLabel', {
+        defaultMessage: 'Data',
+      }),
       value: formatMetric(dataSize, 'byte'),
       dataTestSubj: 'dataSize'
     }

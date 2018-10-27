@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { StatusIcon } from '../status_icon';
+import { FormatedMessage } from '@kbn/i18n/react';
 
 export function ElasticsearchStatusIcon({ status }) {
   const type = (() => {
@@ -14,6 +15,17 @@ export function ElasticsearchStatusIcon({ status }) {
   })();
 
   return (
-    <StatusIcon type={type} label={`Health: ${status}`} />
+    <StatusIcon
+      type={type}
+      label={
+        <FormattedMessage
+          id="xpack.monitoring.elasticsearch.healthStatusLabel"
+          defaultMessage="Health: {status}"
+          values={{
+            status
+          }}
+        />
+        }
+    />
   );
 }

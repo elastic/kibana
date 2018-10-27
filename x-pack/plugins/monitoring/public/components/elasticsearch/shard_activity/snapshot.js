@@ -5,11 +5,19 @@
  */
 
 import React, { Fragment } from 'react';
+import { FormatedMessage } from '@kbn/i18n/react';
 
 export const Snapshot = ({ isSnapshot, repo, snapshot }) => {
   return isSnapshot ? (
     <Fragment>
-      Repo: {repo} / Snapshot: {snapshot}
+      <FormattedMessage
+        id="xpack.monitoring.elasticsearch.shardActivity.snapshotTitle"
+        defaultMessage="Repo: {repo} / Snapshot: {snapshot}"
+        values={{
+          repo,
+          snapshot
+        }}
+      />
     </Fragment>
   ) : null;
 };

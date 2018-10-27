@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { StatusIcon } from 'plugins/monitoring/components/status_icon';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function MachineLearningJobStatusIcon({ status }) {
   const type = (() => {
@@ -24,6 +25,17 @@ export function MachineLearningJobStatusIcon({ status }) {
   })();
 
   return (
-    <StatusIcon type={type} label={`Job Status: ${status}`} />
+    <StatusIcon
+      type={type}
+      label={(
+        <FormattedMessage
+          id="xpack.monitoring.elasticsearch.mlJobListing.statusIconLabel"
+          defaultMessage="Job Status: {status}"
+          values={{
+            status
+          }}
+        />
+      )}
+    />
   );
 }

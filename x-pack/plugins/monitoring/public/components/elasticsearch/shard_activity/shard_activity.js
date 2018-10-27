@@ -18,15 +18,52 @@ import { TotalTime } from './total_time';
 import { SourceDestination } from './source_destination';
 import { FilesProgress, BytesProgress, TranslogProgress } from './progress';
 import { parseProps } from './parse_props';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const columns = [
-  { title: 'Index', sortKey: null },
-  { title: 'Stage', sortKey: null },
-  { title: 'Total Time', sortKey: null },
-  { title: 'Source / Destination', sortKey: null },
-  { title: 'Files', sortKey: null },
-  { title: 'Bytes', sortKey: null },
-  { title: 'Translog', sortKey: null }
+  {
+    title: i18n.translate('xpack.monitoring.kibana.shardActivity.indexTitle', {
+      defaultMessage: 'Index'
+    }),
+    sortKey: null
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.shardActivity.stageTitle', {
+      defaultMessage: 'Stage'
+    }),
+    sortKey: null
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.shardActivity.totalTimeTitle', {
+      defaultMessage: 'Total Time'
+    }),
+    sortKey: null
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.shardActivity.sourceDestinationTitle', {
+      defaultMessage: 'Source / Destination'
+    }),
+    sortKey: null
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.shardActivity.filesTitle', {
+      defaultMessage: 'Files'
+    }),
+    sortKey: null
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.shardActivity.bytesTitle', {
+      defaultMessage: 'Bytes'
+    }),
+    sortKey: null
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.shardActivity.translogTitle', {
+      defaultMessage: 'Translog'
+    }),'Translog',
+    sortKey: null
+  }
 ];
 const ActivityRow = props => (
   <KuiTableRow>
@@ -57,7 +94,12 @@ const ToggleCompletedSwitch = ({ toggleHistory, showHistory }) => (
     <KuiToolBarText>
       <EuiSwitch
         id="monitoring_completed_recoveries"
-        label="Completed recoveries"
+        label={(
+          <FormattedMessage
+            id="xpack.monitoring.elasticsearch.shardActivity.completedRecoveriesLabel"
+            defaultMessage="Completed recoveries"
+          />
+        )}
         onChange={toggleHistory}
         checked={showHistory}
       />
@@ -65,7 +107,7 @@ const ToggleCompletedSwitch = ({ toggleHistory, showHistory }) => (
   </KuiToolBarSection>
 );
 
-export class ShardActivity extends React.Component {
+class ShardActivityUI extends React.Component {
   constructor(props) {
     super(props);
     this.getNoDataMessage = this.getNoDataMessage.bind(this);
@@ -73,12 +115,23 @@ export class ShardActivity extends React.Component {
 
   getNoDataMessage() {
     if (this.props.showShardActivityHistory) {
-      return 'There are no historical shard activity records for the selected time range.';
+      return this.props.intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.shardActivity.noDataMessage',
+        defaultMesage: 'There are no historical shard activity records for the selected time range.'
+      });
     }
     return (
       <Fragment>
-        There are no active shard recoveries for this cluster.<br />
-        Try viewing <EuiLink onClick={this.props.toggleShardActivityHistory}>completed recoveries</EuiLink>.
+        <FormattedMessage
+          id="xpack.monitoring.elasticsearch.shardActivity.noActiveShardRecoveriesMessage"
+          defaultMessage=" There are no active shard recoveries for this cluster.<br />
+          Try viewing {shardActivityHistoryLink}."
+          values={{
+            shardActivityHistoryLink: (
+              <EuiLink onClick={this.props.toggleShardActivityHistory}>completed recoveries</EuiLink>
+            )
+          }}
+        />
       </Fragment>
     );
   }
@@ -102,7 +155,12 @@ export class ShardActivity extends React.Component {
       <Fragment>
         <EuiText>
           <EuiTitle size="s">
-            <h2>Shard Activity</h2>
+          <h2>
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.shardActivityTitle"
+              defaultMessage="Shard Activity"
+            />
+          </h2>
           </EuiTitle>
         </EuiText>
         <EuiSpacer />
@@ -120,3 +178,5 @@ export class ShardActivity extends React.Component {
     );
   }
 }
+
+export const ShardActivity = injectI18n(ShardActivityUI);

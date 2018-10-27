@@ -8,6 +8,8 @@ import React, { Fragment } from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { ElasticsearchStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function IndexDetailStatus({ stats }) {
   const {
@@ -20,27 +22,37 @@ export function IndexDetailStatus({ stats }) {
 
   const metrics = [
     {
-      label: 'Total',
+      label: i18n.translate('xpack.monitoring.elasticsearch.indexDetailStatus.totalLabel', {
+        defaultMessage: 'Total',
+      }),
       value: formatMetric(dataSize.total, '0.0 b'),
       dataTestSubj: 'dataSize'
     },
     {
-      label: 'Primaries',
+      label: i18n.translate('xpack.monitoring.elasticsearch.indexDetailStatus.primariesTitle', {
+        defaultMessage: 'Primaries',
+      }),
       value: formatMetric(dataSize.primaries, '0.0 b'),
       dataTestSubj: 'dataSizePrimaries'
     },
     {
-      label: 'Documents',
+      label: i18n.translate('xpack.monitoring.elasticsearch.indexDetailStatus.documentsTitle', {
+        defaultMessage: 'Documents',
+      }),
       value: formatMetric(documentCount, '0.[0]a'),
       dataTestSubj: 'documentCount'
     },
     {
-      label: 'Total Shards',
+      label: i18n.translate('xpack.monitoring.elasticsearch.indexDetailStatus.totalShardsTitle', {
+        defaultMessage: 'Total Shards',
+      }),
       value: formatMetric(totalShards, 'int_commas'),
       dataTestSubj: 'totalShards'
     },
     {
-      label: 'Unassigned Shards',
+      label: i18n.translate('xpack.monitoring.elasticsearch.indexDetailStatus.unassignedShardsTitle', {
+        defaultMessage: 'Unassigned Shards',
+      }),
       value: formatMetric(unassignedShards, 'int_commas'),
       dataTestSubj: 'unassignedShards'
     }
@@ -48,7 +60,15 @@ export function IndexDetailStatus({ stats }) {
 
   const IconComponent = ({ status }) => (
     <Fragment>
-      Health: <ElasticsearchStatusIcon status={status} />
+      <FormattedMessage
+        id="xpack.monitoring.elasticsearch.indexDetailStatus.iconStatusLabel"
+        defaultMessage="Health: {elasticsearchStatusIcon}"
+        values={{
+          elasticsearchStatusIcon: (
+            <ElasticsearchStatusIcon status={status} />
+          )
+        }}
+      />
     </Fragment>
   );
 

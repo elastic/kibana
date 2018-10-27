@@ -8,6 +8,7 @@ import React, { Fragment } from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { NodeStatusIcon } from '../node';
 import { formatMetric } from '../../../lib/format_number';
+import { i18n } from '@kbn/i18n';
 
 export function NodeDetailStatus({ stats }) {
   const {
@@ -29,37 +30,54 @@ export function NodeDetailStatus({ stats }) {
       dataTestSubj: 'transportAddress'
     },
     {
-      label: 'JVM Heap',
+      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.jvmHeapLabel', {
+        defaultMessage: '{javaVirtualMachine} Heap',
+        values: {
+          javaVirtualMachine: 'JVM'
+        }
+      }),
       value: formatMetric(usedHeap, '0,0.[00]', '%', { prependSpace: false }),
       dataTestSubj: 'jvmHeap'
     },
     {
-      label: 'Free Disk Space',
+      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.freeDiskSpaceLabel', {
+        defaultMessage: 'Free Disk Space',
+      }),
       value: formatMetric(freeSpace, '0.0 b'),
       dataTestSubj: 'freeDiskSpace'
     },
     {
-      label: 'Documents',
+      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.documentsLabel', {
+        defaultMessage: 'Documents',
+      }),
       value: formatMetric(documents, '0.[0]a'),
       dataTestSubj: 'documentCount'
     },
     {
-      label: 'Data',
+      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.dataLabel', {
+        defaultMessage: 'Data',
+      }),
       value: formatMetric(dataSize, '0.0 b'),
       dataTestSubj: 'dataSize'
     },
     {
-      label: 'Indices',
+      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.indicesLabel', {
+        defaultMessage: 'Indices',
+      }),
       value: formatMetric(indexCount, 'int_commas'),
       dataTestSubj: 'indicesCount'
     },
     {
-      label: 'Shards',
+      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.shardsLabel', {
+        defaultMessage: 'Shards',
+      }),
       value: formatMetric(totalShards, 'int_commas'),
       dataTestSubj: 'shardsCount'
     },
     {
-      label: 'Type',
+      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.typeLabel', {
+        defaultMessage: 'Type',
+      }),
       value: nodeTypeLabel,
       dataTestSubj: 'nodeType'
     }

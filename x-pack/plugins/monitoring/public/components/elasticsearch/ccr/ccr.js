@@ -18,12 +18,13 @@ import {
 } from '@elastic/eui';
 
 import './ccr.css';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 function toSeconds(ms) {
   return Math.floor(ms / 1000) + 's';
 }
 
-export class Ccr extends Component {
+class CcrUI extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -32,6 +33,7 @@ export class Ccr extends Component {
   }
 
   toggleShards(index, shards) {
+    const { intl } = this.props;
     const itemIdToExpandedRowMap = {
       ...this.state.itemIdToExpandedRowMap
     };
@@ -54,7 +56,10 @@ export class Ccr extends Component {
           columns={[
             {
               field: 'shardId',
-              name: 'Shard',
+              name: intl.formatMessage({
+                id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.shardColumnTitle',
+                defaultMesage: 'Shard'
+              }),
               render: shardId => {
                 return (
                   <EuiLink href={`#/elasticsearch/ccr/${index}/shard/${shardId}`}>
@@ -68,7 +73,10 @@ export class Ccr extends Component {
             },
             {
               field: 'syncLagOps',
-              name: 'Sync Lag (ops)',
+              name: intl.formatMessage({
+                id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.syncLagOpsColumnTitle',
+                defaultMesage: 'Sync Lag (ops)'
+              }),
               render: (syncLagOps, data) => (
                 <span>
                   {syncLagOps}
@@ -78,9 +86,25 @@ export class Ccr extends Component {
                     type="iInCircle"
                     content={(
                       <Fragment>
-                        <span>Leader lag: {data.syncLagOpsLeader}</span>
+                        <span>
+                          <FormattedMessage
+                            id="xpack.monitoring.elasticsearch.ccr.shardsTable.syncLagOpsColumn.leaderLagTooltip"
+                            defaultMessage="Leader lag: {syncLagOpsLeader}"
+                            values={{
+                              syncLagOpsLeader: data.syncLagOpsLeader
+                            }}
+                          />
+                        </span>
                         <br/>
-                        <span>Follower lag: {data.syncLagOpsFollower}</span>
+                        <span>
+                        <FormattedMessage
+                            id="xpack.monitoring.elasticsearch.ccr.shardsTable.syncLagOpsColumn.followerLagTooltip"
+                            defaultMessage="Follower lag: {syncLagOpsFollower}"
+                            values={{
+                              syncLagOpsFollower: data.syncLagOpsFollower
+                            }}
+                          />
+                        </span>
                       </Fragment>
                     )}
                     position="right"
@@ -90,16 +114,25 @@ export class Ccr extends Component {
             },
             {
               field: 'syncLagTime',
-              name: 'Last fetch time',
+              name: intl.formatMessage({
+                id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.lastFetchTimeColumnTitle',
+                defaultMesage: 'Last fetch time'
+              }),
               render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
             },
             {
               field: 'opsSynced',
-              name: 'Ops synced'
+              name: intl.formatMessage({
+                id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.opsSyncedColumnTitle',
+                defaultMesage: 'Ops synced'
+              }),
             },
             {
               field: 'error',
-              name: 'Error',
+              name: intl.formatMessage({
+                id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.errorColumnTitle',
+                defaultMesage: 'Error'
+              }),
               render: error => (
                 <EuiTextColor color="danger">
                   {error}
@@ -116,7 +149,7 @@ export class Ccr extends Component {
   }
 
   renderTable() {
-    const { data } = this.props;
+    const { data, intl } = this.props;
     const items = data;
 
     let pagination = {
@@ -141,7 +174,10 @@ export class Ccr extends Component {
         columns={[
           {
             field: 'index',
-            name: 'Index',
+            name: intl.formatMessage({
+              id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.indexColumnTitle',
+              defaultMesage: 'Index'
+            }),
             sortable: true,
             render: (index, { shards }) => {
               const expanded = !!this.state.itemIdToExpandedRowMap[index];
@@ -157,28 +193,43 @@ export class Ccr extends Component {
           {
             field: 'follows',
             sortable: true,
-            name: 'Follows'
+            name: intl.formatMessage({
+              id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.followsColumnTitle',
+              defaultMesage: 'Follows'
+            }),
           },
           {
             field: 'syncLagOps',
             sortable: true,
-            name: 'Sync Lag (ops)',
+            name: intl.formatMessage({
+              id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.syncLagOpsColumnTitle',
+              defaultMesage: 'Sync Lag (ops)'
+            }),
           },
           {
             field: 'syncLagTime',
             sortable: true,
-            name: 'Last fetch time',
+            name: intl.formatMessage({
+              id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.lastFetchTimeColumnTitle',
+              defaultMesage: 'Last fetch time'
+            }),
             render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
           },
           {
             field: 'opsSynced',
             sortable: true,
-            name: 'Ops synced'
+            name: intl.formatMessage({
+              id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.opsSyncedColumnTitle',
+              defaultMesage: 'Ops synced'
+            }),
           },
           {
             field: 'error',
             sortable: true,
-            name: 'Error',
+            name: intl.formatMessage({
+              id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.errorColumnTitle',
+              defaultMesage: 'Error'
+            }),
             render: error => (
               <EuiTextColor color="danger">
                 {error}
@@ -209,3 +260,5 @@ export class Ccr extends Component {
     );
   }
 }
+
+export const Ccr = injectI18n(CcrUI);

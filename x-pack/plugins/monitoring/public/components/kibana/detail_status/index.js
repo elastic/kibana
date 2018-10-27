@@ -8,6 +8,7 @@ import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { KibanaStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
+import { i18n } from '@kbn/i18n';
 
 export function DetailStatus({ stats }) {
   const {
@@ -24,17 +25,23 @@ export function DetailStatus({ stats }) {
       dataTestSubj: 'transportAddress'
     },
     {
-      label: 'OS Free Memory',
+      label: i18n.translate('xpack.monitoring.kibana.detailStatus.osFreeMemoryLabel', {
+        defaultMessage: 'OS Free Memory'
+      }),
       value: formatMetric(osFreeMemory, 'byte'),
       dataTestSubj: 'osFreeMemory'
     },
     {
-      label: 'Version',
+      label:  i18n.translate('xpack.monitoring.kibana.detailStatus.versionLabel', {
+        defaultMessage: 'Version'
+      }),
       value: version,
       dataTestSubj: 'version'
     },
     {
-      label: 'Uptime',
+      label:  i18n.translate('xpack.monitoring.kibana.detailStatus.uptimeLabel', {
+        defaultMessage: 'Uptime'
+      }),
       value: formatMetric(uptime, 'time_since'),
       dataTestSubj: 'uptime'
     }

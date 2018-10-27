@@ -15,16 +15,55 @@ import { MonitoringTable } from '../../table';
 import { EuiLink } from '@elastic/eui';
 import { KuiTableRowCell, KuiTableRow } from '@kbn/ui-framework/components';
 import { SystemIndicesCheckbox } from './system_indices_checkbox';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const filterFields = ['name', 'status'];
 const columns = [
-  { title: 'Name', sortKey: 'name', secondarySortOrder: SORT_ASCENDING },
-  { title: 'Status', sortKey: 'status_sort', sortOrder: SORT_DESCENDING }, // default sort: red, then yellow, then green
-  { title: 'Document Count', sortKey: 'doc_count' },
-  { title: 'Data', sortKey: 'data_size' },
-  { title: 'Index Rate', sortKey: 'index_rate' },
-  { title: 'Search Rate', sortKey: 'search_rate' },
-  { title: 'Unassigned Shards', sortKey: 'unassigned_shards' }
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.indices.nameTitle', {
+      defaultMessage: 'Name',
+    }),
+    sortKey: 'name',
+    secondarySortOrder: SORT_ASCENDING
+  },
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.indices.statusTitle', {
+      defaultMessage: 'Status',
+    }),
+    sortKey: 'status_sort',
+    sortOrder: SORT_DESCENDING // default sort: red, then yellow, then green
+  },
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.indices.documentCountTitle', {
+      defaultMessage: 'Document Count',
+    }),
+    sortKey: 'doc_count'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.indices.dataTitle', {
+      defaultMessage: 'Data',
+    }),
+    sortKey: 'data_size'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.indices.indexRateTitle', {
+      defaultMessage: 'Index Rate',
+    }),
+    sortKey: 'index_rate'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.indices.searchRateTitle', {
+      defaultMessage: 'Search Rate',
+    }),
+    sortKey: 'search_rate'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.indices.unassignedShardsTitle', {
+      defaultMessage: 'Unassigned Shards',
+    }),
+    sortKey: 'unassigned_shards'
+  }
 ];
 const IndexRow = ({ status, ...props }) => (
   <KuiTableRow>
@@ -37,7 +76,17 @@ const IndexRow = ({ status, ...props }) => (
       </EuiLink>
     </KuiTableRowCell>
     <KuiTableRowCell>
-      <div title={`Index status: ${status}`}>
+      <div
+        title={(
+          <FormattedMessage
+            id="xpack.monitoring.elasticsearch.indices.indexStatusTitle"
+            defaultMessage="Index status: {status}"
+            values={{
+              status
+            }}
+          />
+        )}
+      >
         <ElasticsearchStatusIcon status={status} />&nbsp;
         {capitalize(status)}
       </div>
@@ -61,23 +110,46 @@ const IndexRow = ({ status, ...props }) => (
 );
 
 const getNoDataMessage = filterText => {
+  const howToShowSystemIndicesDescription = (
+    <FormattedMessage
+      id="xpack.monitoring.elasticsearch.indices.howToShowSystemIndicesDescription"
+      defaultMessage="If you are looking for system indices (e.g., .kibana), try checking {leftSingleQuote}Show system indices{rightSingleQuote}."
+      values={{
+        leftSingleQuote: '&lsquo;',
+        rightSingleQuote: '&rsquo;'
+      }}
+    />
+  );
   if (filterText) {
     return (
       <div>
         <p>
-          There are no indices that match your selection with the filter [{filterText.trim()}].
-          Try changing the filter or the time range selection.
+          <FormattedMessage
+              id="xpack.monitoring.elasticsearch.indices.noIndicesMatchYourSelectionWithTextFilterDescription"
+              defaultMessage="There are no indices that match your selection with the filter [{filterText}].
+              Try changing the filter or the time range selection."
+              values={{
+                filterText: filterText.trim()
+              }}
+            />
         </p>
         <p>
-          If you are looking for system indices (e.g., .kibana), try checking &lsquo;Show system indices&rsquo;.
+          {howToShowSystemIndicesDescription}
         </p>
       </div>
     );
   }
   return (
     <div>
-      <p>There are no indices that match your selections. Try changing the time range selection.</p>
-      <p>If you are looking for system indices (e.g., .kibana), try checking &lsquo;Show system indices&rsquo;.</p>
+      <p>
+        <FormattedMessage
+          id="xpack.monitoring.elasticsearch.indices.noIndicesMatchYourSelectionDescription"
+          defaultMessage="There are no indices that match your selections. Try changing the time range selection."
+        />
+      </p>
+      <p>
+        {howToShowSystemIndicesDescription}
+      </p>
     </div>
   );
 };

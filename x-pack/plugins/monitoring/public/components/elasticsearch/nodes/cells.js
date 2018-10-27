@@ -13,7 +13,10 @@ function OfflineCell() {
   return (
     <KuiTableRowCell>
       <div className="monTableCell__number monTableCell__offline">
-        N/A
+        <FormattedMessage
+          id="xpack.monitoring.elasticsearch.nodes.noDataInCellLabel"
+          defaultMessage="N/A"
+        />
       </div>
     </KuiTableRowCell>
   );

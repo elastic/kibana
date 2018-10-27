@@ -7,6 +7,7 @@
 import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
+import { i18n } from '@kbn/i18n';
 
 export function Status({ stat, formattedLeader, oldestStat }) {
   const {
@@ -23,27 +24,37 @@ export function Status({ stat, formattedLeader, oldestStat }) {
 
   const metrics = [
     {
-      label: 'Follower Index',
+      label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.followerIndexLabel', {
+        defaultMessage: 'Follower Index',
+      }),
       value: followerIndex,
       dataTestSubj: 'followerIndex'
     },
     {
-      label: 'Shard Id',
+      label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.shardIdLabel', {
+        defaultMessage: 'Shard Id',
+      }),
       value: shardId,
       dataTestSubj: 'shardId'
     },
     {
-      label: 'Leader Index',
+      label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.leaderIndexLabel', {
+        defaultMessage: 'Leader Index',
+      }),
       value: formattedLeader,
       dataTestSubj: 'leaderIndex'
     },
     {
-      label: 'Ops Synced',
+      label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.opsSyncedLabel', {
+        defaultMessage: 'Ops Synced',
+      }),
       value: formatMetric(operationsReceived - oldestOperationsReceived, 'int_commas'),
       dataTestSubj: 'operationsReceived'
     },
     {
-      label: 'Failed Fetches',
+      label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.failedFetchesLabel', {
+        defaultMessage: 'Failed Fetches',
+      }),
       value: formatMetric(failedFetches - oldestFailedFetches, 'int_commas'),
       dataTestSubj: 'failedFetches'
     },

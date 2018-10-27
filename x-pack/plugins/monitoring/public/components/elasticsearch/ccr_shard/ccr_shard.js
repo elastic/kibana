@@ -22,8 +22,9 @@ import {
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
 import { formatDateTimeLocal } from '../../../../common/formatting';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class CcrShard extends PureComponent {
+class CcrShard extends PureComponent {
   renderCharts() {
     const { metrics } = this.props;
     const seriesToShow = [
@@ -49,14 +50,19 @@ export class CcrShard extends PureComponent {
   }
 
   renderErrors() {
-    const { stat } = this.props;
+    const { stat, intl } = this.props;
     if (stat.fetch_exceptions && stat.fetch_exceptions.length > 0) {
       return (
         <Fragment>
           <EuiPanel>
             <EuiTitle size="s" color="danger">
               <h3>
-                <EuiTextColor color="danger">Errors</EuiTextColor>
+                <EuiTextColor color="danger">
+                  <FormattedMessage
+                    id="xpack.monitoring.elasticsearch.ccrShard.errorsTableTitle"
+                    defaultMessage=">Errors"
+                  />
+                </EuiTextColor>
               </h3>
             </EuiTitle>
             <EuiSpacer size="s"/>
@@ -64,11 +70,17 @@ export class CcrShard extends PureComponent {
               items={stat.fetch_exceptions}
               columns={[
                 {
-                  name: 'Type',
+                  name: intl.formatMessage({
+                    id: 'xpack.monitoring.elasticsearch.ccrShard.errorsTable.typeColumnTitle',
+                    defaultMesage: 'Type'
+                  }),
                   field: 'exception.type'
                 },
                 {
-                  name: 'Reason',
+                  name: intl.formatMessage({
+                    id: 'xpack.monitoring.elasticsearch.ccrShard.errorsTable.reasonColumnTitle',
+                    defaultMesage: 'Reason'
+                  }),
                   field: 'exception.reason',
                   width: '75%'
                 }
@@ -88,7 +100,16 @@ export class CcrShard extends PureComponent {
     return (
       <EuiAccordion
         id="ccrLatestStat"
-        buttonContent={<EuiTitle><h2>Advanced</h2></EuiTitle>}
+        buttonContent={(
+          <EuiTitle>
+            <h2>
+              <FormattedMessage
+                id="xpack.monitoring.elasticsearch.ccrShard.latestStateAdvancedButtonLabel"
+                defaultMessage="Advanced"
+              />
+            </h2>
+          </EuiTitle>
+        )}
         paddingSize="l"
       >
         <Fragment>
@@ -123,3 +144,5 @@ export class CcrShard extends PureComponent {
     );
   }
 }
+
+export const CcrShard = injectI18n(CcrShardUI);
