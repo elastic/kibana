@@ -54,16 +54,32 @@ export class ChartTarget extends React.Component {
       xaxisOptions.min = _.get(timeRange, 'min');
       xaxisOptions.max = _.get(timeRange, 'max');
 
-      const anyValuesBelowZero = _.get(newProps, 'series').reduce((anyBelowZero, { data }) => {
-        if (anyBelowZero) {
-          return true;
-        }
-        return !!data.find(item => item[1] < 0);
-      }, false);
+      /* obtain lowest and highest values from series data to calculate
+       * fudge factor*/
+      let lowestValue = Number.MAX_SAFE_INTEGER;
+      let highestValue = 0;
+      let hasData = false;
 
-      if (!anyValuesBelowZero) {
+      for (const { data } of series) {
+        for (const item of data) {
+          if (item[1] === null) {
+            continue;
+          }
+          hasData = true;
+
+          if (item[1] < lowestValue) {
+            lowestValue = item[1];
+          }
+          if (item[1] > highestValue) {
+            highestValue = item[1];
+          }
+        }
+      }
+
+      if (hasData) {
+        const fudgeFactor = (highestValue - lowestValue) / 2;
         const yaxisOptions = this.plot.getAxes().yaxis.options;
-        yaxisOptions.min = 0;
+        yaxisOptions.min = Math.max(0, lowestValue - fudgeFactor);
       }
 
       this.plot.setData(this.filterData(series, newProps.seriesToShow));
