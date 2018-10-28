@@ -40,6 +40,7 @@ import { createFailError } from '../../run';
  */
 const ANGULAR_EXPRESSION_REGEX = /\{\{+([\s\S]*?)\}\}+/g;
 
+const LINEBREAK_REGEX = /\n/g;
 const I18N_FILTER_MARKER = '| i18n: ';
 
 /**
@@ -53,7 +54,7 @@ function parseFilterObjectExpression(expression, messageId) {
 
   try {
     // parse an object expression instead of block statement
-    ast = parse(`+${expression}`);
+    ast = parse(`+${expression}`.replace(LINEBREAK_REGEX, ' '));
   } catch (error) {
     if (error instanceof SyntaxError) {
       const errorWithContext = createParserErrorMessage(` ${expression}`, error);
@@ -98,7 +99,7 @@ function parseIdExpression(expression) {
   let ast;
 
   try {
-    ast = parse(expression);
+    ast = parse(expression.replace(LINEBREAK_REGEX, ' '));
   } catch (error) {
     if (error instanceof SyntaxError) {
       const errorWithContext = createParserErrorMessage(expression, error);
@@ -217,7 +218,22 @@ function* getDirectiveMessages(htmlContent) {
     }
 
     if (element.values) {
-      const nodes = parse(`+${element.values}`).program.body;
+      let ast;
+
+      try {
+        ast = parse(`+${element.values}`.replace(LINEBREAK_REGEX, ' '));
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          const errorWithContext = createParserErrorMessage(` ${element.values}`, error);
+          throw createFailError(
+            `Couldn't parse i18n-values attribute expression:\n${errorWithContext}`
+          );
+        }
+
+        throw error;
+      }
+
+      const nodes = ast.program.body;
       const valuesObjectNode = [...traverseNodes(nodes)].find(node => isObjectExpression(node));
       const valuesKeys = extractValuesKeysFromNode(valuesObjectNode);
 
