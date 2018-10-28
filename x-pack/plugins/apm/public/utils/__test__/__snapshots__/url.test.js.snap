@@ -10,8 +10,6 @@ exports[`RelativeLinkComponent should render correct markup 1`] = `
 </a>
 `;
 
-exports[`UnconnectedKibanaComponent should render correct markup 1`] = `undefined`;
-
 exports[`UnconnectedKibanaLink should render correct markup 1`] = `
 <a
   className="euiLink euiLink--primary"
