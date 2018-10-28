@@ -28,7 +28,8 @@ export default function AgentMarker({ agentMark, x }) {
     <div
       style={{
         position: 'absolute',
-        left: px(x - legendWidth / 2)
+        left: px(x - legendWidth / 2),
+        bottom: '-6px'
       }}
     >
       <EuiToolTip
@@ -37,7 +38,7 @@ export default function AgentMarker({ agentMark, x }) {
         content={
           <div>
             <NameContainer>{agentMark.name}</NameContainer>
-            <TimeContainer>{asTime(agentMark.timeLabel)}</TimeContainer>
+            <TimeContainer>{asTime(agentMark.us)}</TimeContainer>
           </div>
         }
       >

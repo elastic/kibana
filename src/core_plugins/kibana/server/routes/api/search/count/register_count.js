@@ -24,22 +24,20 @@ export default function registerCount(server) {
   server.route({
     path: '/api/kibana/{id}/_count',
     method: ['POST', 'GET'],
-    handler: function (req, reply) {
+    handler: async function (req) {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
       const boundCallWithRequest = _.partial(callWithRequest, req);
 
-      boundCallWithRequest('count', {
-        allowNoIndices: false,
-        index: req.params.id
-      })
-        .then(
-          function (res) {
-            reply({ count: res.count });
-          },
-          function (error) {
-            reply(handleESError(error));
-          }
-        );
+      try {
+        const res = await boundCallWithRequest('count', {
+          allowNoIndices: false,
+          index: req.params.id
+        });
+
+        return { count: res.count };
+      } catch (err) {
+        throw handleESError(err);
+      }
     }
   });
 }
