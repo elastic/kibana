@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiPopover,
   EuiContextMenuPanel,
@@ -28,6 +30,7 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  rgbToHex,
 } from '@elastic/eui';
 
 export class CreateButton extends Component {
@@ -57,6 +60,13 @@ export class CreateButton extends Component {
       isPopoverOpen: false,
     });
   }
+
+  renderBetaIcon = () => {
+    const color = rgbToHex(euiVars.euiColorAccent);
+    return (
+      <EuiBadge color={color}>Beta</EuiBadge>
+    );
+  };
 
   render() {
     const { options, children } =  this.props;
@@ -113,6 +123,12 @@ export class CreateButton extends Component {
                   <EuiDescriptionList style={{ whiteSpace: 'nowrap' }}>
                     <EuiDescriptionListTitle>
                       {option.text}
+                      { option.beta ? (
+                        <Fragment>
+                          {' '}
+                          {this.renderBetaIcon()}
+                        </Fragment>
+                      ) : null }
                     </EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
                       {option.description}

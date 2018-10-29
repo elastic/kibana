@@ -35,11 +35,13 @@ export class IndexPatternCreationConfig {
     name = indexPatternTypeName,
     showSystemIndices = true,
     httpClient = null,
+    beta = false,
   }) {
     this.type = type;
     this.name = name;
     this.showSystemIndices = showSystemIndices;
     this.httpClient = httpClient;
+    this.beta = beta;
   }
 
   async getIndexPatternCreationOption(urlHandler) {
@@ -59,6 +61,10 @@ export class IndexPatternCreationConfig {
 
   getIndexPatternName = () => {
     return this.name;
+  }
+
+  getIsBeta = () => {
+    return this.beta;
   }
 
   getShowSystemIndices = () => {

@@ -18,6 +18,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       type: 'rollup',
       name: 'rollup index pattern',
       showSystemIndices: false,
+      beta: true,
       ...options,
     });
 
@@ -40,6 +41,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       text: `Rollup index pattern`,
       description: `Can perform limited aggregations against summarized data`,
       testSubj: `createRollupIndexPatternButton`,
+      beta: this.beta,
       onClick: () => {
         urlHandler('/management/kibana/index?type=rollup');
       },
