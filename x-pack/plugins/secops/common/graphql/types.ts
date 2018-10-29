@@ -37,6 +37,7 @@ export interface Query {
 export interface Source {
   id: string /** The id of the source */;
   configuration: SourceConfiguration /** The raw configuration of the source */;
+  whoAmI?: SayMyName | null;
 }
 /** A set of configuration options for a security data source */
 export interface SourceConfiguration {
@@ -50,6 +51,10 @@ export interface SourceFields {
   pod: string /** The field to identify a pod by */;
   tiebreaker: string /** The field to use as a tiebreaker for log events that have identical timestamps */;
   timestamp: string /** The field to use as a timestamp for metrics and logs */;
+}
+
+export interface SayMyName {
+  appName: string /** The id of the source */;
 }
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
@@ -90,6 +95,7 @@ export namespace SourceResolvers {
       any,
       Context
     > /** The raw configuration of the source */;
+    whoAmI?: WhoAmIResolver<SayMyName | null, any, Context>;
   }
 
   export type IdResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;
@@ -98,6 +104,11 @@ export namespace SourceResolvers {
     Parent = any,
     Context = any
   > = Resolver<R, Parent, Context>;
+  export type WhoAmIResolver<R = SayMyName | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
 }
 /** A set of configuration options for a security data source */
 export namespace SourceConfigurationResolvers {
@@ -160,4 +171,37 @@ export namespace SourceFieldsResolvers {
     Parent,
     Context
   >;
+}
+
+export namespace SayMyNameResolvers {
+  export interface Resolvers<Context = any> {
+    appName?: AppNameResolver<string, any, Context> /** The id of the source */;
+  }
+
+  export type AppNameResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace WhoAmIQuery {
+  export type Variables = {
+    sourceId: string;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+    whoAmI?: WhoAmI | null;
+  };
+
+  export type WhoAmI = {
+    __typename?: 'SayMyName';
+    appName: string;
+  };
 }

@@ -9,8 +9,9 @@ import sourceMock from '../graphql/sources/source.mock';
 import sourcesMock from '../graphql/sources/sources.mock';
 import { Logger } from '../utils/logger';
 import { sourcesSchema } from './sources/schema.gql';
+import { whoAmISchema } from './who_am_i/schema.gql';
 
-export const schemas = [rootSchema, sourcesSchema];
+export const schemas = [rootSchema, sourcesSchema, whoAmISchema];
 
 // The types from graphql-tools/src/mock.ts 'any' based. I add slightly
 // stricter types here, but these should go away when graphql-tools using something
