@@ -17,25 +17,28 @@
  * under the License.
  */
 
-import { UiNavLink } from './ui_nav_link';
+import { uiNavLinkProvider } from './ui_nav_link_provider';
 
 export function uiNavLinksMixin(kbnServer, server) {
-  const uiApps = server.getAllUiApps();
+  const defaultProvider = uiNavLinkProvider;
+  let activeProvider = defaultProvider;
 
-  const { navLinkSpecs = [] } = kbnServer.uiExports;
+  server.decorate('server', 'setUiNavLinksProvider', (provider) => {
+    if (typeof provider !== 'function') {
+      throw new TypeError('provider must be a function');
+    }
+    if (activeProvider !== defaultProvider) {
+      throw new Error('UI Nav Link Provider has already been set, and cannot be changed.');
+    }
+    activeProvider = provider;
+  });
 
-  const fromSpecs = navLinkSpecs
-    .map(navLinkSpec => new UiNavLink(navLinkSpec));
-
-  const fromApps = uiApps
-    .map(app => app.getNavLink())
-    .filter(Boolean);
-
-  const uiNavLinks = fromSpecs
-    .concat(fromApps)
-    .sort((a, b) => a.getOrder() - b.getOrder());
-
-  server.decorate('server', 'getUiNavLinks', () => (
-    uiNavLinks.slice(0)
+  server.decorate('server', 'getAllUiNavLinks', () => (
+    defaultProvider(kbnServer, server)
   ));
+
+  server.decorate('request', 'getUiNavLinks', async function getUiNavLinks() {
+    const request = this;
+    return await activeProvider(kbnServer, server, request);
+  });
 }
