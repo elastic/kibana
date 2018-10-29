@@ -7,3 +7,24 @@
   background: lightblue;
 	width: 5px;
 }
+
+.monaco-editor-hover {
+  border: 1px solid #c8c8c8;
+  background-color: #efeff2;
+  cursor: default;
+  position: absolute;
+  overflow: hidden;
+  z-index: 5;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+  -moz-user-select: text;
+  -o-user-select: text;
+  user-select: text;
+  box-sizing: initial;
+  animation: fadein .1s linear;
+  line-height: 1.5em;
+}
+
+.monaco-editor-hover .hover-row {
+  padding: 4px 5px;
+}

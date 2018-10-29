@@ -6,12 +6,21 @@
 
 'use strict';
 
-import { editor as Editor, IRange, languages } from 'monaco-editor';
+import { editor as Editor, languages, Range as EditorRange } from 'monaco-editor';
+import DocumentHighlight = languages.DocumentHighlight;
+// @ts-ignore
+import { renderMarkdown } from 'monaco-editor/esm/vs/base/browser/htmlContentRenderer';
+// @ts-ignore
+import { createCancelablePromise } from 'monaco-editor/esm/vs/base/common/async';
+// @ts-ignore
+import { tokenizeToString } from 'monaco-editor/esm/vs/editor/common/modes/textToHtmlTokenizer';
+// @ts-ignore
+import { getOccurrencesAtPosition } from 'monaco-editor/esm/vs/editor/contrib/wordHighlighter/wordHighlighter';
+
 import { Hover, MarkedString, Range } from 'vscode-languageserver-types';
 import { ContentWidget } from '../content_widget';
 import { Operation } from '../operation';
 import { HoverComputer } from './hover_computer';
-import DocumentHighlight = languages.DocumentHighlight;
 
 export class ContentHoverWidget extends ContentWidget {
   public static ID = 'editor.contrib.contentHoverWidget';
@@ -20,7 +29,7 @@ export class ContentHoverWidget extends ContentWidget {
   };
   private hoverOperation: Operation<Hover>;
   private computer: HoverComputer;
-  private lastRange: IRange | null = null;
+  private lastRange: EditorRange | null = null;
   private shouldFocus: boolean = false;
   private eventsBound: boolean = false;
   private hoverResultAction?: (hover: Hover) => void = undefined;
@@ -82,7 +91,7 @@ export class ContentHoverWidget extends ContentWidget {
     }
   }
 
-  private renderMessages(renderRange: IRange, result: Hover) {
+  private renderMessages(renderRange: EditorRange, result: Hover) {
     const fragment = document.createDocumentFragment();
     let contents = [];
     if (Array.isArray(result.contents)) {
@@ -103,11 +112,11 @@ export class ContentHoverWidget extends ContentWidget {
       } else {
         markdown = markedString.value;
       }
-      const renderedContents = window.monaco.renderer.renderMarkdown(
+      const renderedContents = renderMarkdown(
         { value: markdown },
         {
           codeBlockRenderer: (language: string, value: string) => {
-            const code = window.monaco.tokenizer.tokenizeToString(value, language);
+            const code = tokenizeToString(value, language);
             return `<span style="font-family: ${
               this.editor.getConfiguration().fontInfo.fontFamily
             }">${code}</span>`;
@@ -136,7 +145,7 @@ export class ContentHoverWidget extends ContentWidget {
     this.updateContents(fragment);
   }
 
-  private toMonacoRange(r: Range): IRange {
+  private toMonacoRange(r: Range): EditorRange {
     return new window.monaco.Range(
       r.start.line + 1,
       r.start.character + 1,
@@ -212,12 +221,11 @@ export class ContentHoverWidget extends ContentWidget {
     }
   }
 
-  private highlightOccurrences(range: IRange) {
+  private highlightOccurrences(range: EditorRange) {
     const pos = new window.monaco.Position(range.startLineNumber, range.startColumn);
-    return window.monaco.async.createCancelablePromise(token =>
-      window.monaco.wordHighlighter
-        .getOccurrencesAtPosition(this.editor.getModel(), pos, token)
-        .then((data: DocumentHighlight[]) => {
+    return createCancelablePromise((token: any) =>
+      getOccurrencesAtPosition(this.editor.getModel(), pos, token).then(
+        (data: DocumentHighlight[]) => {
           if (data) {
             if (this.isVisible) {
               const decorations = data.map(h => ({
@@ -238,7 +246,8 @@ export class ContentHoverWidget extends ContentWidget {
               },
             ]);
           }
-        })
+        }
+      )
     );
   }
 }

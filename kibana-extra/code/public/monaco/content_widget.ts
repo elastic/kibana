@@ -5,6 +5,8 @@
  */
 
 import { editor as Editor } from 'monaco-editor';
+// @ts-ignore
+import { DomScrollableElement } from 'monaco-editor/esm/vs/base/browser/ui/scrollbar/scrollableElement';
 import { Disposable } from './disposable';
 
 export function toggleClass(node: HTMLElement, clazzName: string, toggle: boolean) {
@@ -31,7 +33,7 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
     super();
     this.containerDomNode = document.createElement('div');
     this.domNode = document.createElement('div');
-    this.scrollbar = new window.monaco.scrollable.DomScrollableElement(this.domNode, {});
+    this.scrollbar = new DomScrollableElement(this.domNode, {});
     this.disposables.push(this.scrollbar);
     this.containerDomNode.appendChild(this.scrollbar.getDomNode());
 

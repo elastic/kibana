@@ -5,10 +5,10 @@
  */
 
 import { EuiPanel, EuiText } from '@elastic/eui';
-import { initMonaco, Monaco } from 'init-monaco';
 import { editor, IPosition, IRange } from 'monaco-editor';
 import React from 'react';
 import { ResizeChecker } from 'ui/resize_checker';
+import { monaco } from '../../monaco/monaco';
 
 interface Props {
   code: string;
@@ -29,58 +29,56 @@ export class CodeBlock extends React.PureComponent<Props> {
 
   public componentDidMount(): void {
     if (this.el) {
-      initMonaco((monaco: Monaco) => {
-        this.ed = monaco.editor.create(this.el!, {
-          value: this.props.code,
-          language: this.props.language,
-          lineNumbers: this.lineNumbersFunc.bind(this),
-          readOnly: true,
-          folding: this.props.folding,
-          minimap: {
-            enabled: false,
-          },
-          scrollbar: {
-            vertical: 'hidden',
-            handleMouseWheel: false,
-            verticalScrollbarSize: 0,
-          },
-          hover: {
-            enabled: false, // disable default hover;
-          },
-          contextmenu: false,
-          selectOnLineNumbers: false,
-          selectionHighlight: false,
-          renderLineHighlight: 'none',
-        });
-        this.ed.onMouseDown((e: editor.IEditorMouseEvent) => {
-          if (
-            this.props.onClick &&
-            (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS ||
-              e.target.type === monaco.editor.MouseTargetType.CONTENT_TEXT)
-          ) {
-            const lineNumber = (this.props.startLine || 0) + e.target.position.lineNumber;
-            this.props.onClick({
-              lineNumber,
-              column: e.target.position.column,
-            });
-          }
-        });
-        if (this.props.highlightRanges) {
-          const decorations = this.props.highlightRanges.map((range: IRange) => {
-            return {
-              range,
-              options: {
-                inlineClassName: 'searchHighlight',
-              },
-            };
+      this.ed = monaco.editor.create(this.el!, {
+        value: this.props.code,
+        language: this.props.language,
+        lineNumbers: this.lineNumbersFunc.bind(this),
+        readOnly: true,
+        folding: this.props.folding,
+        minimap: {
+          enabled: false,
+        },
+        scrollbar: {
+          vertical: 'hidden',
+          handleMouseWheel: false,
+          verticalScrollbarSize: 0,
+        },
+        hover: {
+          enabled: false, // disable default hover;
+        },
+        contextmenu: false,
+        selectOnLineNumbers: false,
+        selectionHighlight: false,
+        renderLineHighlight: 'none',
+      });
+      this.ed.onMouseDown((e: editor.IEditorMouseEvent) => {
+        if (
+          this.props.onClick &&
+          (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS ||
+            e.target.type === monaco.editor.MouseTargetType.CONTENT_TEXT)
+        ) {
+          const lineNumber = (this.props.startLine || 0) + e.target.position.lineNumber;
+          this.props.onClick({
+            lineNumber,
+            column: e.target.position.column,
           });
-          this.currentHighlightDecorations = this.ed.deltaDecorations([], decorations);
         }
-        this.resizeChecker = new ResizeChecker(this.el!);
-        this.resizeChecker.on('resize', () => {
-          setTimeout(() => {
-            this.ed!.layout();
-          });
+      });
+      if (this.props.highlightRanges) {
+        const decorations = this.props.highlightRanges.map((range: IRange) => {
+          return {
+            range,
+            options: {
+              inlineClassName: 'searchHighlight',
+            },
+          };
+        });
+        this.currentHighlightDecorations = this.ed.deltaDecorations([], decorations);
+      }
+      this.resizeChecker = new ResizeChecker(this.el!);
+      this.resizeChecker.on('resize', () => {
+        setTimeout(() => {
+          this.ed!.layout();
         });
       });
     }

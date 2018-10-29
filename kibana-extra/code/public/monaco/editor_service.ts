@@ -5,19 +5,21 @@
  */
 
 import { editor, IRange, Uri } from 'monaco-editor';
+import ICodeEditor = editor.ICodeEditor;
+// @ts-ignore
+import { StandaloneCodeEditorServiceImpl } from 'monaco-editor/esm/vs/editor/standalone/browser/standaloneCodeServiceImpl.js';
 import { kfetch } from 'ui/kfetch';
 import { ResponseError } from 'vscode-jsonrpc/lib/messages';
 import { parseSchema } from '../../common/uri_util';
 import { SymbolSearchResult } from '../../model';
 import { history } from '../utils/url';
-import ICodeEditor = editor.ICodeEditor;
-
+import { MonacoHelper } from './monaco_helper';
 interface IResourceInput {
   resource: Uri;
   options?: { selection?: IRange };
 }
 
-export class EditorService {
+export class EditorService extends StandaloneCodeEditorServiceImpl {
   public static async handleSymbolUri(qname: string) {
     const result = await EditorService.findSymbolByQname(qname);
     if (result.symbols.length > 0) {
@@ -43,6 +45,7 @@ export class EditorService {
       throw new ResponseError<any>(error.code, error.message, error.data);
     }
   }
+  private helper?: MonacoHelper;
   public async openCodeEditor(input: IResourceInput, source: ICodeEditor, sideBySide?: boolean) {
     const { scheme, authority, path } = input.resource;
     if (scheme === 'symbol') {
@@ -52,9 +55,18 @@ export class EditorService {
       if (input.options && input.options.selection) {
         const { startColumn, startLineNumber } = input.options.selection;
         const url = uri + `!L${startLineNumber}:${startColumn}`;
-        history.push(url);
+        const lastPath = history.location.pathname;
+        if (lastPath === url) {
+          this.helper!.revealPosition(startLineNumber, startColumn);
+        } else {
+          history.push(url);
+        }
       }
     }
     return source;
+  }
+
+  public setMonacoHelper(helper: MonacoHelper) {
+    this.helper = helper;
   }
 }

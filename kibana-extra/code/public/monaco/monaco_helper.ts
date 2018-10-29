@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { initMonaco, Monaco } from 'init-monaco';
 import { editor } from 'monaco-editor';
 import { ResizeChecker } from 'ui/resize_checker';
 import { EditorActions } from '../components/editor/editor';
@@ -14,6 +13,7 @@ import { parseSchema, toCanonicalUrl } from '../../common/uri_util';
 import { history } from '../utils/url';
 import { EditorService } from './editor_service';
 import { HoverController } from './hover/hover_controller';
+import { monaco } from './monaco';
 import { registerReferencesAction } from './references/references_action';
 import { TextModelResolverService } from './textmodel_resolver';
 
@@ -22,7 +22,7 @@ export class MonacoHelper {
     return this.monaco !== null;
   }
   public decorations: string[] = [];
-  private monaco: Monaco | null = null;
+  private monaco: any | null = null;
   private editor: editor.IStandaloneCodeEditor | null = null;
   private resizeChecker: ResizeChecker | null = null;
 
@@ -34,59 +34,56 @@ export class MonacoHelper {
   }
   public init() {
     return new Promise(resolve => {
-      initMonaco((monaco: Monaco) => {
-        this.monaco = monaco;
-        // @ts-ignore  a hack to replace function in monaco editor.
-        monaco.StandaloneCodeEditorServiceImpl.prototype.openCodeEditor =
-          EditorService.prototype.openCodeEditor;
-        //  @ts-ignore another hack to replace function
-        this.monaco!.typescript.DefinitionAdapter.prototype.provideDefinition = (model, position) =>
-          provideDefinition(monaco, model, position);
-        this.monaco.languages.registerDefinitionProvider('java', {
-          provideDefinition(model, position) {
-            return provideDefinition(monaco, model, position);
+      this.monaco = monaco;
+      const definitionProvider = {
+        provideDefinition(model: any, position: any) {
+          return provideDefinition(monaco, model, position);
+        },
+      };
+      this.monaco.languages.registerDefinitionProvider('java', definitionProvider);
+      this.monaco.languages.registerDefinitionProvider('typescript', definitionProvider);
+      const codeEditorService = new EditorService();
+      codeEditorService.setMonacoHelper(this);
+      this.editor = monaco.editor.create(
+        this.container!,
+        {
+          readOnly: true,
+          minimap: {
+            enabled: false,
           },
-        });
-        this.editor = monaco.editor.create(
-          this.container!,
-          {
-            readOnly: true,
-            minimap: {
-              enabled: false,
-            },
-            hover: {
-              enabled: false, // disable default hover;
-            },
-            occurrencesHighlight: false,
-            selectionHighlight: false,
-            renderLineHighlight: 'none',
-            contextmenu: false,
-            folding: false,
+          hover: {
+            enabled: false, // disable default hover;
           },
-          {
-            textModelService: new TextModelResolverService(monaco),
-          }
-        );
-        this.resizeChecker = new ResizeChecker(this.container);
-        this.resizeChecker.on('resize', () => {
-          setTimeout(() => {
-            this.editor!.layout();
-          });
+          occurrencesHighlight: false,
+          selectionHighlight: false,
+          renderLineHighlight: 'none',
+          contextmenu: false,
+          folding: false,
+        },
+        {
+          textModelService: new TextModelResolverService(monaco),
+          codeEditorService,
+        }
+      );
+      this.resizeChecker = new ResizeChecker(this.container);
+      this.resizeChecker.on('resize', () => {
+        setTimeout(() => {
+          this.editor!.layout();
         });
-        registerReferencesAction(this.editor);
-        this.editor.onMouseDown((e: editor.IEditorMouseEvent) => {
-          if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
-            const { uri } = parseSchema(this.editor!.getModel().uri.toString())!;
-            history.push(`${uri}!L${e.target.position.lineNumber}:0`);
-          }
-          this.container.focus();
-        });
-        const hoverController: HoverController = new HoverController(this.editor);
-        hoverController.setReduxActions(this.editorActions);
-        document.addEventListener('copy', this.handleCopy);
-        document.addEventListener('cut', this.handleCopy);
-        resolve(this.editor);
       });
+      registerReferencesAction(this.editor);
+      this.editor.onMouseDown((e: editor.IEditorMouseEvent) => {
+        if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
+          const { uri } = parseSchema(this.editor!.getModel().uri.toString())!;
+          history.push(`${uri}!L${e.target.position.lineNumber}:0`);
+        }
+        this.container.focus();
+      });
+      const hoverController: HoverController = new HoverController(this.editor);
+      hoverController.setReduxActions(this.editorActions);
+      document.addEventListener('copy', this.handleCopy);
+      document.addEventListener('cut', this.handleCopy);
+      resolve(this.editor);
     });
   }
 
@@ -166,7 +163,7 @@ export class MonacoHelper {
     this.editor!.setPosition(position);
   }
 
-  private handleCopy(e) {
+  private handleCopy(e: any) {
     if (
       this.editor &&
       this.editor.hasTextFocus() &&

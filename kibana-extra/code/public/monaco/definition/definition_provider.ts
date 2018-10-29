@@ -5,12 +5,11 @@
  */
 
 import { SymbolLocator } from '@code/lsp-extension';
-import { Monaco } from 'init-monaco';
 import { editor, languages } from 'monaco-editor';
 import { Location } from 'vscode-languageserver-types';
 import { LspRestClient, TextDocumentMethods } from '../../../common/lsp_client';
 
-export function provideDefinition(monaco: Monaco, model: editor.ITextModel, position: any) {
+export function provideDefinition(monaco: any, model: editor.ITextModel, position: any) {
   const lspClient = new LspRestClient('../api/lsp');
   const lspMethods = new TextDocumentMethods(lspClient);
   function handleLocation(location: Location): languages.Location {

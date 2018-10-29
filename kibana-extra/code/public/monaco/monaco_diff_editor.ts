@@ -3,11 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { editor, initMonaco } from 'init-monaco';
-
+import { monaco } from './monaco';
 export class MonacoDiffEditor {
-  public diffEditor: editor.IStandaloneDiffEditor | null = null;
+  public diffEditor: monaco.editor.IStandaloneDiffEditor | null = null;
   constructor(
     private readonly container: HTMLElement,
     private readonly originCode: string,
@@ -18,20 +16,18 @@ export class MonacoDiffEditor {
 
   public init() {
     return new Promise(resolve => {
-      initMonaco(monaco => {
-        const originalModel = monaco.editor.createModel(this.originCode, this.language);
-        const modifiedModel = monaco.editor.createModel(this.modifiedCode, this.language);
+      const originalModel = monaco.editor.createModel(this.originCode, this.language);
+      const modifiedModel = monaco.editor.createModel(this.modifiedCode, this.language);
 
-        const diffEditor = monaco.editor.createDiffEditor(this.container, {
-          enableSplitViewResizing: false,
-          renderSideBySide: this.renderSideBySide,
-        });
-        diffEditor.setModel({
-          original: originalModel,
-          modified: modifiedModel,
-        });
-        this.diffEditor = diffEditor;
+      const diffEditor = monaco.editor.createDiffEditor(this.container, {
+        enableSplitViewResizing: false,
+        renderSideBySide: this.renderSideBySide,
       });
+      diffEditor.setModel({
+        original: originalModel,
+        modified: modifiedModel,
+      });
+      this.diffEditor = diffEditor;
     });
   }
 }

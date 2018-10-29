@@ -5,7 +5,6 @@
  */
 
 import ITextModel = Editor.ITextModel;
-import { Monaco } from 'init-monaco';
 import { editor as Editor, IDisposable, Uri } from 'monaco-editor';
 import { ImmortalReference } from './immortal_reference';
 
@@ -27,7 +26,7 @@ export interface ITextModelService {
 }
 
 export class TextModelResolverService implements ITextModelService {
-  constructor(private readonly monaco: Monaco) {}
+  constructor(private readonly monaco: any) {}
 
   public async createModelReference(resource: Uri): Promise<IReference<any>> {
     let model = this.monaco.editor.getModel(resource);
