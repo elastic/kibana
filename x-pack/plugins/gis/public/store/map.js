@@ -17,6 +17,7 @@ import {
   TOGGLE_LAYER_VISIBLE,
   MAP_EXTENT_CHANGED,
   MAP_READY,
+  MAP_DESTROYED,
   REPLACE_LAYERLIST,
   SET_TIME_FILTERS,
   UPDATE_LAYER_PROP,
@@ -87,6 +88,8 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, layerList: newLayerList };
     case MAP_READY:
       return { ...state, ready: true };
+    case MAP_DESTROYED:
+      return { ...state, ready: false };
     case MAP_EXTENT_CHANGED:
       const newMapState = {
         center: action.mapState.center,

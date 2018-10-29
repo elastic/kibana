@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { MBMapContainer } from './view';
-import { mapExtentChanged, mapReady } from '../../../actions/store_actions';
+import { mapExtentChanged, mapReady, mapDestroyed } from '../../../actions/store_actions';
 import { getLayerList, getMapState, getMapReady } from "../../../selectors/map_selectors";
 
 function mapStateToProps(state = {}) {
@@ -22,8 +22,12 @@ function mapDispatchToProps(dispatch) {
     extentChanged: (e) => {
       dispatch(mapExtentChanged(e));
     },
-    mapReady: () => {
+    onMapReady: (e) => {
+      dispatch(mapExtentChanged(e));
       dispatch(mapReady());
+    },
+    onMapDestroyed: () => {
+      dispatch(mapDestroyed());
     }
   };
 }

@@ -7,16 +7,26 @@
 import _ from 'lodash';
 import mapboxgl from 'mapbox-gl';
 
-export async function createMbMapInstance(node) {
+export async function createMbMapInstance(node, initialZoom, initialCenter) {
   return new Promise((resolve) => {
-    const mbMap = new mapboxgl.Map({
+    const options = {
       container: node,
       style: {
         version: 8,
         sources: {},
         layers: [],
       },
-    });
+    };
+    if (initialZoom) {
+      options.zoom = initialZoom;
+    }
+    if (initialCenter) {
+      options.center = {
+        lng: initialCenter.lon,
+        lat: initialCenter.lat
+      };
+    }
+    const mbMap = new mapboxgl.Map(options);
     mbMap.dragRotate.disable();
     mbMap.touchZoomRotate.disableRotation();
     mbMap.on('load', () => {

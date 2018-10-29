@@ -7,6 +7,7 @@
 import { resolve } from 'path';
 import { initRoutes } from './server/routes';
 import { kySaltTrucksSpecProvider } from './server/sample_data/ky_salt_trucks';
+import webLogsSavedObjects from './server/sample_data/web_logs_saved_objects.json';
 import mappings from './mappings.json';
 import { checkLicense } from './check_license';
 import { watchStatusAndLicenseToInitialize } from
@@ -24,7 +25,8 @@ export function gis(kibana) {
         title: 'GIS',
         description: 'Map application',
         main: 'plugins/gis/index',
-        icon: 'plugins/gis/icon.svg'
+        icon: 'plugins/gis/icon.svg',
+        euiIconType: 'gisApp',
       },
       home: ['plugins/gis/register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
@@ -58,6 +60,7 @@ export function gis(kibana) {
 
       initRoutes(server);
       server.registerSampleDataset(kySaltTrucksSpecProvider);
+      server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);
       server.injectUiAppVars('gis', async () => {
         return await server.getInjectedUiAppVars('kibana');
       });

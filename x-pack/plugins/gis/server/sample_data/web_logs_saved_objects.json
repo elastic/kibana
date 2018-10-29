@@ -1,0 +1,28 @@
+[
+  {
+    "id" : "gis-workspace:01392550-d955-11e8-978a-91956e08b85e",
+    "type": "gis-workspace",
+    "updated_at" : "2018-10-22T12:41:57.071Z",
+    "version": 1,
+    "attributes" : {
+      "title" : "[Logs] Web Traffic",
+      "description" : "",
+      "mapStateJSON" : "{\"zoom\":3.7920882405813368,\"center\":{\"lon\":-100.98476481346984,\"lat\":37.69602546657626},\"timeFilters\":{\"from\":\"now-24h\",\"to\":\"now\"}}",
+      "layerListJSON" : "[{\"id\":\"0hmz5\",\"label\":\"EMS base layer (road_map)\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"gaeah\",\"label\":\"[Logs] heatmap\",\"showAtAllZoomLevels\":false,\"minZoom\":0,\"maxZoom\":8,\"sourceDescriptor\":{\"type\":\"ES_GEOHASH_GRID\",\"indexPatternId\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"geoField\":\"geo.coordinates\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"HEATMAP\",\"refinement\":\"coarse\",\"previousStyle\":null},\"type\":\"GEOHASH_GRID\"},{\"id\":\"kpxkm\",\"label\":\"[Logs] documents\",\"showAtAllZoomLevels\":false,\"minZoom\":6,\"maxZoom\":24,\"sourceDescriptor\":{\"type\":\"ES_SEARCH\",\"indexPatternId\":\"90943e30-9a47-11e8-b64d-95841ca0b247\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[\"clientip\",\"bytes\",\"url\"]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+      "uiStateJSON" : "{\"isDarkMode\":false}",
+      "bounds" : {
+        "type" : "envelope",
+        "coordinates" : [
+          [
+            -137.9869831550837,
+            51.82442414096974
+          ],
+          [
+            -63.98254647185405,
+            20.267143834399732
+          ]
+        ]
+      }
+    }
+  }
+]

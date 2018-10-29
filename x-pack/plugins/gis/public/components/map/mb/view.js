@@ -41,14 +41,18 @@ export class MBMapContainer extends React.Component {
   }
 
   componentWillUnmount() {
+    this._checker.destroy();
     if (this._mbMap) {
       this._mbMap.remove();
       this._mbMap = null;
     }
+    this.props.onMapDestroyed();
   }
 
   async _initializeMap() {
-    this._mbMap = await createMbMapInstance(this.refs.mapContainer);
+    const initialZoom = this.props.mapState.zoom;
+    const initialCenter = this.props.mapState.center;
+    this._mbMap = await createMbMapInstance(this.refs.mapContainer, initialZoom, initialCenter);
 
     // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
     // Tracked layer listerners are used to clean up event handlers
@@ -77,7 +81,7 @@ export class MBMapContainer extends React.Component {
     this._mbMap.on('moveend', () => {
       this.props.extentChanged(this._getMapState());
     });
-    this.props.mapReady();
+    this.props.onMapReady(this._getMapState());
   }
 
   _addListener(eventType, mbLayerId, handler) {
@@ -111,13 +115,13 @@ export class MBMapContainer extends React.Component {
   }
 
   assignSizeWatch() {
-    const checker = new ResizeChecker(this.refs.mapContainer);
-    checker.on('resize', (() => {
+    this._checker = new ResizeChecker(this.refs.mapContainer);
+    this._checker.on('resize', (() => {
       let lastWidth = window.innerWidth;
       let lastHeight = window.innerHeight;
       return () => {
         if (lastWidth === window.innerWidth
-          && lastHeight === window.innerHeight) {
+          && lastHeight === window.innerHeight && this._mbMap) {
           this._mbMap.resize();
         }
         lastWidth = window.innerWidth;
