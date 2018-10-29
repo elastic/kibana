@@ -6,7 +6,10 @@
     "kbnVislibVisTypes": "src/core_plugins/kbn_vislib_vis_types",
     "markdownVis": "src/core_plugins/markdown_vis",
     "metricVis": "src/core_plugins/metric_vis",
+<<<<<<< HEAD
     "tableVis": "src/core_plugins/table_vis",
+=======
+>>>>>>> Translations for Region Map (#23875)
     "regionMap": "src/core_plugins/region_map",
     "statusPage": "src/core_plugins/status_page",
     "tileMap": "src/core_plugins/tile_map",
