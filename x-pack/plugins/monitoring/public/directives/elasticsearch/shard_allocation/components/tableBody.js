@@ -9,6 +9,7 @@
 import React from 'react';
 import { Unassigned } from './unassigned';
 import { Assigned } from './assigned';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const ShardRow = props => {
   let unassigned;
@@ -33,8 +34,11 @@ const ShardRow = props => {
   );
 };
 
-export class TableBody extends React.Component {
-  static displayName = 'TableBody';
+class TableBodyUI extends React.Component {
+  static displayName = this.props.intl.formatMessage({
+    id: 'xpack.monitoring.elasticsearch.shardAllocation.tableBodyDisplayName',
+    defaultMessage: 'TableBody',
+  });
 
   createRow = (data, index) => {
     return (
@@ -55,7 +59,10 @@ export class TableBody extends React.Component {
             <td colSpan={this.props.cols}>
               <div>
                 <p style={{ margin: '10px 0' }} className="text-center lead">
-                  There are no shards allocated.
+                  <FormattedMessage
+                    id="xpack.monitoring.elasticsearch.shardAllocation.tableBody.noShardsAllocatedDescription"
+                    defaultMessage="There are no shards allocated."
+                  />
                 </p>
               </div>
             </td>
@@ -84,3 +91,5 @@ export class TableBody extends React.Component {
 
   }
 }
+
+export const TableBody = injectI18n(TableBodyUI);

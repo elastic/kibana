@@ -1,19 +1,49 @@
 <div class="page-row">
   <div class="monCluster">
-    <h1 class="monClusterTitle">Shard Legend</h1>
+    <h1
+      class="monClusterTitle"
+      i18n-id="xpack.monitoring.elasticsearch.shardAllocation.shardLegendTitle"
+      i18n-default-message="Shard Legend"
+    ></h1>
     <div class="legend">
       <span class="shard">&nbsp;</span>
-      <span class="shard-label">Primary</span>
+      <span
+        class="shard-label"
+        i18n-id="xpack.monitoring.elasticsearch.shardAllocation.primaryLabel"
+        i18n-default-message="Primary"
+      ></span>
       <span class="shard replica">&nbsp;</span>
-      <span class="shard-label">Replica</span>
+      <span
+        class="shard-label"
+        i18n-id="xpack.monitoring.elasticsearch.shardAllocation.replicaLabel"
+        i18n-default-message="Replica"
+      ></span>
       <span class="shard relocating">&nbsp;</span>
-      <span class="shard-label">Relocating</span>
+      <span
+        class="shard-label"
+        i18n-id="xpack.monitoring.elasticsearch.shardAllocation.relocatingLabel"
+        i18n-default-message="Relocating"
+      ></span>
       <span class="shard initializing">&nbsp;</span>
-      <span class="shard-label">Initializing</span>
+      <span
+        class="shard-label"
+        i18n-id="xpack.monitoring.elasticsearch.shardAllocation.initializingLabel"
+        i18n-default-message="Initializing"
+      ></span>
       <span class="shard emergency" ng-if="isIndexView">&nbsp;</span>
-      <span class="shard-label" ng-if="isIndexView">Unassigned Primary</span>
+      <span
+        class="shard-label"
+        ng-if="isIndexView"
+        i18n-id="xpack.monitoring.elasticsearch.shardAllocation.unassignedPrimaryLabel"
+        i18n-default-message="Unassigned Primary"
+      ></span>
       <span class="shard unassigned replica" ng-if="isIndexView">&nbsp;</span>
-      <span class="shard-label" ng-if="isIndexView">Unassigned Replica</span>
+      <span
+        class="shard-label"
+        ng-if="isIndexView"
+        i18n-id="xpack.monitoring.elasticsearch.shardAllocation.>unassignedReplicaLabel"
+        i18n-default-message=">Unassigned Replica"
+      ></span>
     </div>
     <cluster-view
       shard-stats="shardStats"

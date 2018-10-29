@@ -22,15 +22,47 @@ import {
 import {
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 const filterFields = [ 'kibana.name', 'kibana.host', 'kibana.status', 'kibana.transport_address' ];
 const columns = [
-  { title: 'Name', sortKey: 'kibana.name', sortOrder: SORT_ASCENDING },
-  { title: 'Status', sortKey: 'kibana.status' },
-  { title: 'Load Average', sortKey: 'os.load.1m' },
-  { title: 'Memory Size', sortKey: 'process.memory.resident_set_size_in_bytes' },
-  { title: 'Requests', sortKey: 'requests.total' },
-  { title: 'Response Times', sortKey: 'response_times.average' }
+  {
+    title: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
+      defaultMessage: 'Name'
+    }),
+    sortKey: 'kibana.name',
+    sortOrder: SORT_ASCENDING
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.listing.statusColumnTitle', {
+      defaultMessage: 'Status'
+    }),
+    sortKey: 'kibana.status'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.listing.loadAverageColumnTitle', {
+      defaultMessage: 'Load Average'
+    }),
+    sortKey: 'os.load.1m'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.listing.memorySizeColumnTitle', {
+      defaultMessage: 'Memory Size'
+    }),
+    sortKey: 'process.memory.resident_set_size_in_bytes'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.listing.requestsColumnTitle', {
+      defaultMessage: 'Requests'
+    }),
+    sortKey: 'requests.total'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.kibana.listing.responseTimeColumnTitle', {
+      defaultMessage: 'Response Times'
+    }),
+    sortKey: 'response_times.average'
+  },
 ];
 const instanceRowFactory = (scope, kbnUrl) => {
   const goToInstance = uuid => {

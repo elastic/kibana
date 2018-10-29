@@ -9,9 +9,13 @@
 import React from 'react';
 import { calculateClass } from '../lib/calculateClass';
 import { vents } from '../lib/vents';
+import { injectI18n } from '@kbn/i18n/react';
 
-export class Shard extends React.Component {
-  static displayName = 'Shard';
+class ShardUI extends React.Component {
+  static displayName = this.props.intl.formatMessage({
+    id: 'xpack.monitoring.elasticsearch.shardAllocation.shardDisplayName',
+    defaultMessage: 'Shard',
+  });
   state = { tooltipVisible: false };
 
   componentDidMount() {
@@ -85,3 +89,5 @@ export class Shard extends React.Component {
     );
   }
 }
+
+export const Shard = injectI18n(ShardUI);

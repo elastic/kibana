@@ -10,6 +10,7 @@
     "statusPage": "src/core_plugins/status_page",
     "tagCloud": "src/core_plugins/tagcloud",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
+    "xpack.monitoring": "x-pack/plugins/monitoring",
     "xpack.watcher": "x-pack/plugins/watcher"
   },
   "exclude": [
