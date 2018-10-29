@@ -9,7 +9,7 @@ import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class ConfirmDeleteUI extends Component {
+class ConfirmDeleteUI extends Component {
   deleteUsers = () => {
     const { usersToDelete, apiClient, callback } = this.props;
     const errors = [];
@@ -18,7 +18,7 @@ export class ConfirmDeleteUI extends Component {
         await apiClient.deleteUser(username);
         toastNotifications.addSuccess(
           this.props.intl.formatMessage({
-            id: "xpack.security.components.management.users.confirmDelete.userSuccessfullyDeletedNotificationMessage",
+            id: "xpack.security.management.users.confirmDelete.userSuccessfullyDeletedNotificationMessage",
             defaultMessage: "Deleted user {username}"
           }, { username })
         );
@@ -26,7 +26,7 @@ export class ConfirmDeleteUI extends Component {
         errors.push(username);
         toastNotifications.addDanger(
           this.props.intl.formatMessage({
-            id: "xpack.security.components.management.users.confirmDelete.userDeletingErrorNotificationMessage",
+            id: "xpack.security.management.users.confirmDelete.userDeletingErrorNotificationMessage",
             defaultMessage: "Error deleting user {username}"
           }, { username })
         );
@@ -41,11 +41,11 @@ export class ConfirmDeleteUI extends Component {
     const moreThanOne = usersToDelete.length > 1;
     const title = moreThanOne
       ? intl.formatMessage({
-        id: "xpack.security.components.management.users.confirmDelete.deleteMultipleUsersTitle",
+        id: "xpack.security.management.users.confirmDelete.deleteMultipleUsersTitle",
         defaultMessage: "Delete {userLength} users"
       }, { userLength: usersToDelete.length })
       : intl.formatMessage({
-        id: "xpack.security.components.management.users.confirmDelete.deleteOneUserTitle",
+        id: "xpack.security.management.users.confirmDelete.deleteOneUserTitle",
         defaultMessage: "Delete user {userLength}"
       }, { userLength: usersToDelete[0] });
     return (
@@ -55,11 +55,11 @@ export class ConfirmDeleteUI extends Component {
           onCancel={onCancel}
           onConfirm={this.deleteUsers}
           cancelButtonText={intl.formatMessage({
-            id: "xpack.security.components.management.users.confirmDelete.cancelButtonLabel",
+            id: "xpack.security.management.users.confirmDelete.cancelButtonLabel",
             defaultMessage: "Cancel"
           })}
           confirmButtonText={intl.formatMessage({
-            id: "xpack.security.components.management.users.confirmDelete.confirmButtonLabel",
+            id: "xpack.security.management.users.confirmDelete.confirmButtonLabel",
             defaultMessage: "Delete"
           })}
           buttonColor="danger"
@@ -69,7 +69,7 @@ export class ConfirmDeleteUI extends Component {
               <Fragment>
                 <p>
                   <FormattedMessage
-                    id="xpack.security.components.management.users.confirmDelete.removingUsersDescription"
+                    id="xpack.security.management.users.confirmDelete.removingUsersDescription"
                     defaultMessage="You are about to delete these users:"
                   />
                 </p>
@@ -78,7 +78,7 @@ export class ConfirmDeleteUI extends Component {
             ) : null}
             <p>
               <FormattedMessage
-                id="xpack.security.components.management.users.confirmDelete.removingUsersWarningMessage"
+                id="xpack.security.management.users.confirmDelete.removingUsersWarningMessage"
                 defaultMessage="This operation cannot be undone."
               />
             </p>
