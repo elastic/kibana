@@ -27,18 +27,18 @@ export function registerIndicesRoute(server) {
     config: {
       pre: [ licensePreRouting ]
     },
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       try {
         const data = await callWithRequest('rollup.rollupIndexCapabilities', {
           indexPattern: '_all'
         });
-        reply(getCapabilitiesForRollupIndices(data));
+        return getCapabilitiesForRollupIndices(data);
       } catch(err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     }
   });
@@ -55,7 +55,7 @@ export function registerIndicesRoute(server) {
     config: {
       pre: [ licensePreRouting ]
     },
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
@@ -89,30 +89,30 @@ export function registerIndicesRoute(server) {
           }
         });
 
-        reply({
+        return {
           doesMatchIndices,
           doesMatchRollupIndices,
           dateFields,
           numericFields,
           keywordFields,
-        });
+        };
       } catch(err) {
         // 404s are still valid results.
         if (err.statusCode === 404) {
-          return reply({
+          return {
             doesMatchIndices: false,
             doesMatchRollupIndices: false,
             dateFields: [],
             numericFields: [],
             keywordFields: [],
-          });
+          };
         }
 
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        wrapUnknownError(err);
       }
     }
   });

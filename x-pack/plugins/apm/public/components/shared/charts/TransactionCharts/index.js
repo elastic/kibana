@@ -5,11 +5,12 @@
  */
 
 import React, { Component } from 'react';
+import { EuiTitle } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import CustomPlot from '../CustomPlot';
 import { asMillis, tpmUnit, asInteger } from '../../../../utils/formatters';
 import styled from 'styled-components';
-import { units, unit, px, fontSizes } from '../../../../style/variables';
+import { units, unit, px } from '../../../../style/variables';
 import { timefilter } from 'ui/timefilter';
 import moment from 'moment';
 
@@ -39,11 +40,6 @@ const ChartHeader = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: ${px(units.half)};
-`;
-
-const ChartTitle = styled.div`
-  font-weight: 600;
-  font-size: ${fontSizes.large};
 `;
 
 export class Charts extends Component {
@@ -92,7 +88,9 @@ export class Charts extends Component {
       <ChartsWrapper>
         <Chart>
           <ChartHeader>
-            <ChartTitle>{responseTimeLabel(transactionType)}</ChartTitle>
+            <EuiTitle size="s">
+              <h5>{responseTimeLabel(transactionType)}</h5>
+            </EuiTitle>
             {this.props.ChartHeaderContent}
           </ChartHeader>
           <CustomPlot
@@ -109,7 +107,9 @@ export class Charts extends Component {
 
         <Chart>
           <ChartHeader>
-            <ChartTitle>{tpmLabel(transactionType)}</ChartTitle>
+            <EuiTitle size="s">
+              <h5>{tpmLabel(transactionType)}</h5>
+            </EuiTitle>
           </ChartHeader>
           <CustomPlot
             noHits={noHits}

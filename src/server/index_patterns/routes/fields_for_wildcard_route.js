@@ -30,20 +30,19 @@ export const createFieldsForWildcardRoute = pre => ({
         meta_fields: Joi.array().items(Joi.string()).default([]),
       }).default()
     },
-    handler(req, reply) {
+    async handler(req) {
       const { indexPatterns } = req.pre;
       const {
         pattern,
         meta_fields: metaFields,
       } = req.query;
 
-      reply(
-        indexPatterns.getFieldsForWildcard({
-          pattern,
-          metaFields
-        })
-          .then(fields => ({ fields }))
-      );
+      const fields = await indexPatterns.getFieldsForWildcard({
+        pattern,
+        metaFields
+      });
+
+      return { fields };
     }
   }
 });
