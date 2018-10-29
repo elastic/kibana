@@ -1,0 +1,649 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ErrorGroupOverview -> List should render empty state 1`] = `
+<div
+  className="euiBasicTable"
+>
+  <div>
+    <div
+      className="euiTableHeaderMobile"
+    >
+      <div
+        className="euiTableSortMobile"
+      >
+        <div
+          className="euiPopover euiPopover--anchorDownRight"
+          id="sortPopover"
+          onClick={[Function]}
+          onKeyDown={[Function]}
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiButtonEmpty__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                  focusable="false"
+                  height="16"
+                  style={
+                    Object {
+                      "fill": undefined,
+                    }
+                  }
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                >
+                  <defs>
+                    <path
+                      d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                      id="arrow_down-a"
+                    />
+                  </defs>
+                  <use
+                    fillRule="nonzero"
+                    xlinkHref="#arrow_down-a"
+                  />
+                </svg>
+                <span
+                  className="euiButtonEmpty__text"
+                >
+                  Sorting
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <table
+      className="euiTable euiTable--responsive"
+    >
+      <caption
+        aria-live="polite"
+        aria-relevant="text"
+        className="euiScreenReaderOnly"
+        role="status"
+      >
+        Below is a table of 
+        0
+         items.
+      </caption>
+      <thead>
+        <tr>
+          <th
+            className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_serviceName_0"
+            scope="col"
+            width="50%"
+          >
+            <button
+              aria-label="Sort Name descending"
+              className="euiTableHeaderButton euiTableHeaderButton-isSorted"
+              data-test-subj="tableHeaderSortButton"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Name
+                </span>
+                <svg
+                  className="euiIcon euiIcon--medium euiTableSortIcon"
+                  focusable="false"
+                  height="16"
+                  style={
+                    Object {
+                      "fill": undefined,
+                    }
+                  }
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                >
+                  <defs>
+                    <path
+                      d="M8.93 4.244l5.061 4.599c.231.21.605.21.836 0 .23-.21.23-.55 0-.76l-5.075-4.61c-.694-.631-1.811-.63-2.504 0l-5.075 4.61c-.23.21-.23.55 0 .76.23.21.605.21.836 0l5.062-4.6A.498.498 0 0 0 8 4.5v8a.5.5 0 1 0 1 0v-8a.498.498 0 0 0-.07-.256z"
+                      id="sort_up-a"
+                    />
+                  </defs>
+                  <use
+                    fillRule="nonzero"
+                    xlinkHref="#sort_up-a"
+                  />
+                </svg>
+              </span>
+            </button>
+          </th>
+          <th
+            className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_agentName_1"
+            scope="col"
+          >
+            <button
+              aria-label="Sort Agent ascending"
+              className="euiTableHeaderButton"
+              data-test-subj="tableHeaderSortButton"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Agent
+                </span>
+              </span>
+            </button>
+          </th>
+          <th
+            className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_avgResponseTime_2"
+            scope="col"
+          >
+            <button
+              aria-label="Sort Avg. response time ascending"
+              className="euiTableHeaderButton"
+              data-test-subj="tableHeaderSortButton"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Avg. response time
+                </span>
+              </span>
+            </button>
+          </th>
+          <th
+            className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_transactionsPerMinute_3"
+            scope="col"
+          >
+            <button
+              aria-label="Sort Trans. per minute ascending"
+              className="euiTableHeaderButton"
+              data-test-subj="tableHeaderSortButton"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Trans. per minute
+                </span>
+              </span>
+            </button>
+          </th>
+          <th
+            className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_errorsPerMinute_4"
+            scope="col"
+          >
+            <button
+              aria-label="Sort Errors per minute ascending"
+              className="euiTableHeaderButton"
+              data-test-subj="tableHeaderSortButton"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Errors per minute
+                </span>
+              </span>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          className="euiTableRow"
+        >
+          <td
+            className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+            colSpan={5}
+          >
+            <div
+              className="euiTableCellContent euiTableCellContent--alignCenter"
+            >
+              <span
+                className="euiTableCellContent__text"
+              >
+                No items found
+              </span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div>
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      />
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <span />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ErrorGroupOverview -> List should render with data 1`] = `
+.c0 {
+  font-size: 16px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+<div
+  className="euiBasicTable"
+>
+  <div>
+    <div
+      className="euiTableHeaderMobile"
+    >
+      <div
+        className="euiTableSortMobile"
+      >
+        <div
+          className="euiPopover euiPopover--anchorDownRight"
+          id="sortPopover"
+          onClick={[Function]}
+          onKeyDown={[Function]}
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiButtonEmpty__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                  focusable="false"
+                  height="16"
+                  style={
+                    Object {
+                      "fill": undefined,
+                    }
+                  }
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                >
+                  <defs>
+                    <path
+                      d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                      id="arrow_down-a"
+                    />
+                  </defs>
+                  <use
+                    fillRule="nonzero"
+                    xlinkHref="#arrow_down-a"
+                  />
+                </svg>
+                <span
+                  className="euiButtonEmpty__text"
+                >
+                  Sorting
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <table
+      className="euiTable euiTable--responsive"
+    >
+      <caption
+        aria-live="polite"
+        aria-relevant="text"
+        className="euiScreenReaderOnly"
+        role="status"
+      >
+        Below is a table of 
+        2
+         items.
+      </caption>
+      <thead>
+        <tr>
+          <th
+            className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_serviceName_0"
+            scope="col"
+            width="50%"
+          >
+            <button
+              aria-label="Sort Name descending"
+              className="euiTableHeaderButton euiTableHeaderButton-isSorted"
+              data-test-subj="tableHeaderSortButton"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Name
+                </span>
+                <svg
+                  className="euiIcon euiIcon--medium euiTableSortIcon"
+                  focusable="false"
+                  height="16"
+                  style={
+                    Object {
+                      "fill": undefined,
+                    }
+                  }
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                >
+                  <defs>
+                    <path
+                      d="M8.93 4.244l5.061 4.599c.231.21.605.21.836 0 .23-.21.23-.55 0-.76l-5.075-4.61c-.694-.631-1.811-.63-2.504 0l-5.075 4.61c-.23.21-.23.55 0 .76.23.21.605.21.836 0l5.062-4.6A.498.498 0 0 0 8 4.5v8a.5.5 0 1 0 1 0v-8a.498.498 0 0 0-.07-.256z"
+                      id="sort_up-a"
+                    />
+                  </defs>
+                  <use
+                    fillRule="nonzero"
+                    xlinkHref="#sort_up-a"
+                  />
+                </svg>
+              </span>
+            </button>
+          </th>
+          <th
+            className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_agentName_1"
+            scope="col"
+          >
+            <button
+              aria-label="Sort Agent ascending"
+              className="euiTableHeaderButton"
+              data-test-subj="tableHeaderSortButton"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Agent
+                </span>
+              </span>
+            </button>
+          </th>
+          <th
+            className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_avgResponseTime_2"
+            scope="col"
+          >
+            <button
+              aria-label="Sort Avg. response time ascending"
+              className="euiTableHeaderButton"
+              data-test-subj="tableHeaderSortButton"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Avg. response time
+                </span>
+              </span>
+            </button>
+          </th>
+          <th
+            className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_transactionsPerMinute_3"
+            scope="col"
+          >
+            <button
+              aria-label="Sort Trans. per minute ascending"
+              className="euiTableHeaderButton"
+              data-test-subj="tableHeaderSortButton"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Trans. per minute
+                </span>
+              </span>
+            </button>
+          </th>
+          <th
+            className="euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_errorsPerMinute_4"
+            scope="col"
+          >
+            <button
+              aria-label="Sort Errors per minute ascending"
+              className="euiTableHeaderButton"
+              data-test-subj="tableHeaderSortButton"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Errors per minute
+                </span>
+              </span>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          className="euiTableRow"
+        >
+          <td
+            className="euiTableRowCell"
+            data-header="Name"
+            width="50%"
+          >
+            <div
+              className="euiTableCellContent euiTableCellContent--overflowingContent"
+            >
+              <a
+                aria-describedby="overlay1"
+                className="euiLink euiLink--primary c0"
+                href="#/opbeans-node/transactions"
+                onClick={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                opbeans-node
+              </a>
+            </div>
+          </td>
+          <td
+            className="euiTableRowCell"
+            data-header="Agent"
+          >
+            <div
+              className="euiTableCellContent euiTableCellContent--overflowingContent"
+            >
+              nodejs
+            </div>
+          </td>
+          <td
+            className="euiTableRowCell"
+            data-header="Avg. response time"
+          >
+            <div
+              className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+            >
+              N/A
+            </div>
+          </td>
+          <td
+            className="euiTableRowCell"
+            data-header="Trans. per minute"
+          >
+            <div
+              className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+            >
+              0 tpm
+            </div>
+          </td>
+          <td
+            className="euiTableRowCell"
+            data-header="Errors per minute"
+          >
+            <div
+              className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+            >
+              46.1 err.
+            </div>
+          </td>
+        </tr>
+        <tr
+          className="euiTableRow"
+        >
+          <td
+            className="euiTableRowCell"
+            data-header="Name"
+            width="50%"
+          >
+            <div
+              className="euiTableCellContent euiTableCellContent--overflowingContent"
+            >
+              <a
+                aria-describedby="overlay2"
+                className="euiLink euiLink--primary c0"
+                href="#/opbeans-python/transactions"
+                onClick={[Function]}
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                opbeans-python
+              </a>
+            </div>
+          </td>
+          <td
+            className="euiTableRowCell"
+            data-header="Agent"
+          >
+            <div
+              className="euiTableCellContent euiTableCellContent--overflowingContent"
+            >
+              python
+            </div>
+          </td>
+          <td
+            className="euiTableRowCell"
+            data-header="Avg. response time"
+          >
+            <div
+              className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+            >
+              92 ms
+            </div>
+          </td>
+          <td
+            className="euiTableRowCell"
+            data-header="Trans. per minute"
+          >
+            <div
+              className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+            >
+              86.9 tpm
+            </div>
+          </td>
+          <td
+            className="euiTableRowCell"
+            data-header="Errors per minute"
+          >
+            <div
+              className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+            >
+              12.6 err.
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div>
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      />
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <span />
+      </div>
+    </div>
+  </div>
+</div>
+`;

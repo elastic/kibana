@@ -17,14 +17,22 @@
  * under the License.
  */
 
-const Hapi = require('hapi');
+import Hapi from 'hapi';
+import { defaultValidationErrorHandler } from '../../../core/server/http/http_tools';
+
 const defaultConfig = {
   'kibana.index': '.kibana'
 };
 
 export function MockServer(config = defaultConfig) {
-  const server = new Hapi.Server();
-  server.connection({ port: 8080 });
+  const server = new Hapi.Server({
+    port: 0,
+    routes: {
+      validate: {
+        failAction: defaultValidationErrorHandler
+      }
+    }
+  });
   server.config = function () {
     return {
       get: (key) => {

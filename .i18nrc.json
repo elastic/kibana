@@ -6,9 +6,14 @@
     "kbnVislibVisTypes": "src/core_plugins/kbn_vislib_vis_types",
     "markdownVis": "src/core_plugins/markdown_vis",
     "metricVis": "src/core_plugins/metric_vis",
+    "tableVis": "src/core_plugins/table_vis",
+    "regionMap": "src/core_plugins/region_map",
     "statusPage": "src/core_plugins/status_page",
+    "tileMap": "src/core_plugins/tile_map",
     "tagCloud": "src/core_plugins/tagcloud",
-    "xpack.idxMgmt": "x-pack/plugins/index_management"
+    "xpack.idxMgmt": "x-pack/plugins/index_management",
+    "xpack.watcher": "x-pack/plugins/watcher",
+    "xpack.security": "x-pack/plugins/security"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",
