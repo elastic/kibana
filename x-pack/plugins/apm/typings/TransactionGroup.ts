@@ -8,7 +8,6 @@ import { Transaction } from './Transaction';
 
 export interface ITransactionGroup {
   name: string;
-  sample4Name: Transaction;
   sample: Transaction;
   p95: number;
   averageResponseTime: number;
