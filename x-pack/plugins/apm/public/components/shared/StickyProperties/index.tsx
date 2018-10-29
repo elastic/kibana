@@ -5,19 +5,27 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
+import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
-import TooltipOverlay from '../../shared/TooltipOverlay';
 import {
-  unit,
-  units,
-  px,
+  colors,
   fontFamilyCode,
   fontSizes,
-  colors,
-  truncate
+  px,
+  truncate,
+  unit,
+  units
 } from '../../../style/variables';
+
+export interface IStickyProperty {
+  val: any;
+  label: string;
+  fieldName?: string;
+  width?: 0 | string;
+  truncated?: boolean;
+}
 
 const TooltipFieldName = styled.span`
   font-family: ${fontFamilyCode};
@@ -48,16 +56,7 @@ const PropertyValueTruncated = styled.span`
   ${truncate('100%')};
 `;
 
-function fieldNameHelper(name) {
-  return (
-    <span>
-      Field name: <br />
-      <TooltipFieldName>{name}</TooltipFieldName>
-    </span>
-  );
-}
-
-function TimestampValue({ timestamp }) {
+function TimestampValue({ timestamp }: { timestamp: Date }) {
   const time = moment(timestamp);
   const timeAgo = timestamp ? time.fromNow() : 'N/A';
   const timestampFull = timestamp
@@ -71,13 +70,13 @@ function TimestampValue({ timestamp }) {
   );
 }
 
-function getPropertyLabel({ fieldName, label }) {
+function getPropertyLabel({ fieldName, label }: Partial<IStickyProperty>) {
   if (fieldName) {
     return (
       <PropertyLabel>
-        <TooltipOverlay content={fieldNameHelper(fieldName)}>
+        <EuiToolTip content={<TooltipFieldName>{fieldName}</TooltipFieldName>}>
           <span>{label}</span>
-        </TooltipOverlay>
+        </EuiToolTip>
       </PropertyLabel>
     );
   }
@@ -85,23 +84,31 @@ function getPropertyLabel({ fieldName, label }) {
   return <PropertyLabel>{label}</PropertyLabel>;
 }
 
-function getPropertyValue({ val, fieldName, truncated = false }) {
+function getPropertyValue({
+  val,
+  fieldName,
+  truncated = false
+}: Partial<IStickyProperty>) {
   if (fieldName === '@timestamp') {
     return <TimestampValue timestamp={val} />;
   }
 
   if (truncated) {
     return (
-      <TooltipOverlay content={String(val)}>
+      <EuiToolTip content={String(val)}>
         <PropertyValueTruncated>{String(val)}</PropertyValueTruncated>
-      </TooltipOverlay>
+      </EuiToolTip>
     );
   }
 
   return <PropertyValue>{val}</PropertyValue>;
 }
 
-export function StickyProperties({ stickyProperties }) {
+export function StickyProperties({
+  stickyProperties
+}: {
+  stickyProperties: IStickyProperty[];
+}) {
   /**
    * Note: the padding and margin styles here are strange because
    * EUI flex groups and items have a default "gutter" applied that

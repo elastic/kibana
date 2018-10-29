@@ -6,23 +6,26 @@
 
 /* tslint:disable no-console */
 import { SearchParams, SearchResponse } from 'elasticsearch';
-import { Request, Server } from 'hapi';
+import { Request } from 'hapi';
 import moment from 'moment';
 
 function decodeEsQuery(esQuery?: string): object {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
 }
 
-interface KibanaServer extends Server {
-  config: () => KibanaConfig;
-}
-
-interface KibanaRequest extends Request {
-  server: KibanaServer;
-}
-
 interface KibanaConfig {
   get: (key: string) => any;
+}
+
+// Extend the defaults with the plugins and server methods we need.
+declare module 'hapi' {
+  interface PluginProperties {
+    elasticsearch: any;
+  }
+
+  interface Server {
+    config: () => KibanaConfig;
+  }
 }
 
 type Client<T> = (type: string, params: SearchParams) => SearchResponse<T>;
@@ -35,18 +38,23 @@ export interface Setup<T = any> {
   config: KibanaConfig;
 }
 
-export function setupRequest(
-  req: KibanaRequest,
-  reply: (setup: Setup) => void
-) {
+interface APMRequestQuery {
+  _debug: string;
+  start: string;
+  end: string;
+  esFilterQuery: string;
+}
+
+export function setupRequest(req: Request) {
+  const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
 
   function client<T>(type: string, params: SearchParams): SearchResponse<T> {
-    if (req.query._debug) {
+    if (query._debug) {
       console.log(`DEBUG ES QUERY:`);
       console.log(
         `${req.method.toUpperCase()} ${req.url.pathname} ${JSON.stringify(
-          req.query
+          query
         )}`
       );
       console.log(`GET ${params.index}/_search`);
@@ -55,13 +63,11 @@ export function setupRequest(
     return cluster.callWithRequest(req, type, params);
   }
 
-  const setup = {
-    start: moment.utc(req.query.start).valueOf(),
-    end: moment.utc(req.query.end).valueOf(),
-    esFilterQuery: decodeEsQuery(req.query.esFilterQuery),
+  return {
+    start: moment.utc(query.start).valueOf(),
+    end: moment.utc(query.end).valueOf(),
+    esFilterQuery: decodeEsQuery(query.esFilterQuery),
     client,
     config: req.server.config()
   };
-
-  reply(setup);
 }

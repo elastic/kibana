@@ -17,9 +17,17 @@
  * under the License.
  */
 
-import { pkg } from './package_json';
-import { resolve } from 'path';
+import { cloneDeep } from 'lodash';
 
-export function fromRoot(...args) {
-  return resolve(pkg.__dirname, ...args);
+// We should add `any` return type to overcome bug in lodash types, customizer
+// in lodash 3.* can return `undefined` if cloning is handled by the lodash, but
+// type of the customizer function doesn't expect that.
+function cloneBuffersCustomizer(val: unknown): any {
+  if (Buffer.isBuffer(val)) {
+    return new Buffer(val);
+  }
+}
+
+export function deepCloneWithBuffers<T>(val: T): T {
+  return cloneDeep(val, cloneBuffersCustomizer);
 }

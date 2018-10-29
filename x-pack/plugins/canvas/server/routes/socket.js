@@ -5,51 +5,45 @@
  */
 
 import socket from 'socket.io';
-import { createHandlers } from '../lib/create_handlers';
-import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
 import { serializeProvider } from '../../common/lib/serialize';
-import { functionsRegistry } from '../../common/lib/functions_registry';
 import { typesRegistry } from '../../common/lib/types_registry';
-import { loadServerPlugins } from '../lib/load_server_plugins';
-import { getRequest } from '../lib/get_request';
+import { getServerRegistries } from '../lib/server_registries';
+import { routeExpressionProvider } from '../lib/route_expression';
+import { browser } from '../lib/route_expression/browser';
+import { thread } from '../lib/route_expression/thread';
+import { server as serverEnv } from '../lib/route_expression/server';
 
 export function socketApi(server) {
   const io = socket(server.listener, { path: '/socket.io' });
 
   io.on('connection', socket => {
-    // Create the function list
-    socket.emit('getFunctionList');
-    const getClientFunctions = new Promise(resolve => socket.once('functionList', resolve));
+    const types = typesRegistry.toJS();
+    const { serialize, deserialize } = serializeProvider(types);
+
+    // I'd love to find a way to generalize all of these, but they each need a different set of things
+    // Note that ORDER MATTERS here. The environments will be tried in this order. Do not reorder this array.
+    const routeExpression = routeExpressionProvider([
+      thread({ onFunctionNotFound, serialize, deserialize }),
+      serverEnv({ onFunctionNotFound, socket, server }),
+      browser({ onFunctionNotFound, socket, serialize, deserialize }),
+    ]);
+
+    function onFunctionNotFound(ast, context) {
+      return routeExpression(ast, context);
+    }
 
     socket.on('getFunctionList', () => {
-      loadServerPlugins().then(() => socket.emit('functionList', functionsRegistry.toJS()));
+      getServerRegistries().then(({ serverFunctions }) =>
+        socket.emit('functionList', serverFunctions.toJS())
+      );
     });
 
     const handler = ({ ast, context, id }) => {
-      Promise.all([getClientFunctions, getRequest(server, socket.handshake)]).then(
-        ([clientFunctions, request]) => {
-          // request is the modified hapi request object
-          const types = typesRegistry.toJS();
-          const interpret = socketInterpreterProvider({
-            types,
-            functions: functionsRegistry.toJS(),
-            handlers: createHandlers(request, server),
-            referableFunctions: clientFunctions,
-            socket: socket,
-          });
-
-          const { serialize, deserialize } = serializeProvider(types);
-          return interpret(ast, deserialize(context))
-            .then(value => {
-              socket.emit(`resp:${id}`, { value: serialize(value) });
-            })
-            .catch(e => {
-              socket.emit(`resp:${id}`, {
-                error: e.message,
-                stack: e.stack,
-              });
-            });
-        }
+      return (
+        routeExpression(ast, deserialize(context))
+          .then(value => socket.emit(`resp:${id}`, { type: 'msgSuccess', value: serialize(value) }))
+          // TODO: I don't think it is possible to hit this right now? Maybe ever?
+          .catch(e => socket.emit(`resp:${id}`, { type: 'msgError', value: e }))
       );
     };
 

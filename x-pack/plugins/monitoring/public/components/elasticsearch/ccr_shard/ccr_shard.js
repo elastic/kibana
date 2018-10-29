@@ -24,7 +24,7 @@ import { Status } from './status';
 import { formatDateTimeLocal } from '../../../../common/formatting';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-class CcrShard extends PureComponent {
+class CcrShardUI extends PureComponent {
   renderCharts() {
     const { metrics } = this.props;
     const seriesToShow = [
@@ -51,7 +51,7 @@ class CcrShard extends PureComponent {
 
   renderErrors() {
     const { stat, intl } = this.props;
-    if (stat.fetch_exceptions && stat.fetch_exceptions.length > 0) {
+    if (stat.read_exceptions && stat.read_exceptions.length > 0) {
       return (
         <Fragment>
           <EuiPanel>
@@ -67,7 +67,7 @@ class CcrShard extends PureComponent {
             </EuiTitle>
             <EuiSpacer size="s"/>
             <EuiBasicTable
-              items={stat.fetch_exceptions}
+              items={stat.read_exceptions}
               columns={[
                 {
                   name: intl.formatMessage({

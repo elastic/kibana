@@ -43,7 +43,7 @@ export function wrapEsError(err, statusCodeToMessageMap = {}) {
   // If no custom message if specified for the error's status code, just
   // wrap the error as a Boom error response and return it
   if (!statusCodeToMessageMap[statusCode]) {
-    const boomError = Boom.wrap(err, statusCode);
+    const boomError = Boom.boomify(err, { statusCode });
 
     // The caused_by chain has the most information so use that if it's available. If not then
     // settle for the root_cause.
@@ -57,5 +57,5 @@ export function wrapEsError(err, statusCodeToMessageMap = {}) {
   // Otherwise, use the custom message to create a Boom error response and
   // return it
   const message = statusCodeToMessageMap[statusCode];
-  return Boom.create(statusCode, message);
+  return new Boom(message, { statusCode });
 }
