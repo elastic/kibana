@@ -33,13 +33,7 @@ async function getBuildNumber() {
 }
 
 export async function getVersionInfo({ isRelease, versionQualifier, pkg }) {
-  // TODO: revert after snapshot builds drop version qualifier
-  // kibana fetches elasticsearch's version based on kibana's version
-  // if we drop alpha1 before elasticsearch does we won't have a build to run
-  // tests against
-  const version = pkg.version.replace('-alpha1', '');
-
-  const buildVersion = version.concat(
+  const buildVersion = pkg.version.concat(
     versionQualifier ? `-${versionQualifier}` : '',
     isRelease ? '' : '-SNAPSHOT'
   );
