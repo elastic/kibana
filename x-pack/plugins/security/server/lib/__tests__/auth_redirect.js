@@ -118,7 +118,7 @@ describe('lib/auth_redirect', function () {
     });
   });
 
-  describe('when server.plugins.security.shouldAuthenticate() is true', () => {
+  describe('when server.plugins.security.shouldAuthenticate() is false', () => {
     beforeEach(() => {
       server.plugins.security.shouldAuthenticate.returns(false);
     });
