@@ -10,7 +10,6 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFlexGroup,
@@ -31,6 +30,7 @@ import {
 
 import {
   FieldChooser,
+  StepError,
 } from './components';
 
 export class StepHistogramUi extends Component {
@@ -98,7 +98,7 @@ export class StepHistogramUi extends Component {
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepHistogramDescription"
                   defaultMessage={`
-                    Select the fields you want to bucket using numeric histogram intervals.
+                    Select the fields you want to bucket using numeric intervals.
                   `}
                 />
               </p>
@@ -230,21 +230,7 @@ export class StepHistogramUi extends Component {
       return null;
     }
 
-    return (
-      <Fragment>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={(
-            <FormattedMessage
-              id="xpack.rollupJobs.create.stepGroups.stepErrorTitle"
-              defaultMessage="Fix errors before going to next step"
-            />
-          )}
-          color="danger"
-          iconType="cross"
-        />
-      </Fragment>
-    );
+    return <StepError />;
   }
 }
 

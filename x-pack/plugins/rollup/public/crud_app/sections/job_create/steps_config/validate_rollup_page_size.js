@@ -12,7 +12,7 @@ export function validateRollupPageSize(rollupPageSize) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.rollupPageSizeMissing"
-        defaultMessage="You must provide a page size"
+        defaultMessage="Page size is required."
       />
     )];
   }
@@ -21,7 +21,7 @@ export function validateRollupPageSize(rollupPageSize) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.rollupPageSizeGreaterThanZero"
-        defaultMessage="Page size must be greater than zero"
+        defaultMessage="Page size must be greater than zero."
       />
     )];
   }
