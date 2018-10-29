@@ -45,12 +45,6 @@ app.directive('dashboardListing', function (reactDirective) {
   return reactDirective(DashboardListing);
 });
 
-uiModules.get('kibana').config((dashboardConfigProvider, userProfileProvider) => {
-  if (!userProfileProvider.$get().canWriteSavedObject('dashboard')) {
-    dashboardConfigProvider.turnHideWriteControlsOn();
-  }
-});
-
 uiRoutes
   .defaults(/dashboard/, {
     requireDefaultIndex: true

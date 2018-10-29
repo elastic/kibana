@@ -5,8 +5,8 @@
  */
 
 import { mount } from 'enzyme';
+import { UserProfile } from 'plugins/xpack_main/services/user_profile';
 import React from 'react';
-import { UserProfileProvider } from '../../../../../xpack_main/public/services/user_profile';
 import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
 import { ManageSpacePage } from './manage_space_page';
@@ -22,7 +22,7 @@ const buildMockChrome = () => {
 };
 
 const buildUserProfile = (canManageSpaces: boolean) => {
-  return UserProfileProvider({ manageSpaces: canManageSpaces });
+  return new UserProfile({ manageSpaces: canManageSpaces });
 };
 
 describe('ManageSpacePage', () => {

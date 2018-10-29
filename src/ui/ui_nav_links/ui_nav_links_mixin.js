@@ -40,11 +40,7 @@ export function uiNavLinksMixin(kbnServer, server) {
   ));
 
   server.decorate('request', 'getUiNavLinks', async function getUiNavLinks() {
-    const request = this;
-    const userProfile = await request.getUserProfile();
-
-    return uiNavLinks.filter(navLink => {
-      return userProfile.canAccessFeature(navLink._id);
-    });
+    // TODO: re-impelment to allow links to be hidden on a per-request basis
+    return uiNavLinks.slice(0);
   });
 }

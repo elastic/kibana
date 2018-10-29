@@ -5,6 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
+import { UserProfile } from 'plugins/xpack_main/services/user_profile';
 import React from 'react';
 import { KibanaPrivilege } from '../../../../../../../../security/common/model/kibana_privilege';
 import { RoleValidator } from '../../../lib/validate_role';
@@ -38,7 +39,7 @@ const buildProps = (customProps = {}) => {
         name: 'Marketing',
       },
     ],
-    userProfile: { hasCapability: () => true },
+    userProfile: new UserProfile(),
     editable: true,
     kibanaAppPrivileges: ['all' as KibanaPrivilege],
     onChange: jest.fn(),

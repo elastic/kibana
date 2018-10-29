@@ -25,6 +25,7 @@ import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
 import { capabilityDecorator } from './server/lib/capability_decorator';
+import { registerUserProfileCapabilityDecorator } from '../xpack_main/server/lib/user_profile';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -60,12 +61,6 @@ export const security = (kibana) => new kibana.Plugin({
     chromeNavControls: ['plugins/security/views/nav_control'],
     managementSections: ['plugins/security/views/management'],
     styleSheetPaths: `${__dirname}/public/index.scss`,
-    userProfile: {
-      capabilityDecorators: [{
-        priority: Number.MAX_SAFE_INTEGER,
-        decorator: capabilityDecorator
-      }],
-    },
     apps: [{
       id: 'login',
       title: 'Login',
@@ -131,6 +126,8 @@ export const security = (kibana) => new kibana.Plugin({
         await registerPrivilegesWithCluster(server);
       }
     });
+
+    registerUserProfileCapabilityDecorator(Number.MIN_SAFE_INTEGER, capabilityDecorator);
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
 

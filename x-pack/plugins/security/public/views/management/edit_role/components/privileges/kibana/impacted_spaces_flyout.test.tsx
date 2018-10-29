@@ -6,6 +6,7 @@
 
 import { EuiFlyout, EuiLink } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
+import { UserProfile } from 'plugins/xpack_main/services/user_profile';
 import React from 'react';
 import { ImpactedSpacesFlyout } from './impacted_spaces_flyout';
 import { PrivilegeSpaceTable } from './privilege_space_table';
@@ -35,9 +36,7 @@ const buildProps = (customProps = {}) => {
         name: 'Marketing',
       },
     ],
-    userProfile: {
-      hasCapability: () => true,
-    },
+    userProfile: new UserProfile(),
     kibanaAppPrivileges: [
       {
         name: 'all',

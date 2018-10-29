@@ -5,6 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
+import { UserProfile } from 'plugins/xpack_main/services/user_profile';
 import React from 'react';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
@@ -52,7 +53,7 @@ describe('NavControlPopover', () => {
       <NavControlPopover
         activeSpace={activeSpace}
         spacesManager={spacesManager}
-        userProfile={{ hasCapability: () => true }}
+        userProfile={new UserProfile()}
         anchorPosition={'downRight'}
         buttonClass={SpacesGlobalNavButton}
       />
@@ -74,7 +75,7 @@ describe('NavControlPopover', () => {
       <NavControlPopover
         activeSpace={activeSpace}
         spacesManager={spacesManager}
-        userProfile={{ hasCapability: () => true }}
+        userProfile={new UserProfile()}
         anchorPosition={'rightCenter'}
         buttonClass={SpacesGlobalNavButton}
       />

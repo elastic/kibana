@@ -54,4 +54,3 @@ import '../courier/saved_object/ui/saved_object_save_as_checkbox';
 import '../react_components';
 import '../i18n';
 import '../query_bar/directive';
-import '../user_profile';
