@@ -36,6 +36,7 @@ import { HeaderAppMenu } from './header_app_menu';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderNavControls } from './header_nav_controls';
 
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { Breadcrumb, NavControlSide, NavLink } from '../';
 
@@ -46,12 +47,22 @@ interface Props {
   isVisible: boolean;
   navLinks: NavLink[];
   navControls: ChromeHeaderNavControlsRegistry;
+  intl: InjectedIntl;
 }
 
-export class Header extends Component<Props> {
+class HeaderUI extends Component<Props> {
   public renderLogo() {
-    const { homeHref } = this.props;
-    return <EuiHeaderLogo iconType="logoKibana" href={homeHref} aria-label="Go to home page" />;
+    const { homeHref, intl } = this.props;
+    return (
+      <EuiHeaderLogo
+        iconType="logoKibana"
+        href={homeHref}
+        aria-label={intl.formatMessage({
+          id: 'common.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel',
+          defaultMessage: 'Go to home page',
+        })}
+      />
+    );
   }
 
   public render() {
@@ -85,3 +96,5 @@ export class Header extends Component<Props> {
     );
   }
 }
+
+export const Header = injectI18n(HeaderUI);
