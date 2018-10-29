@@ -37,7 +37,7 @@ export class BaseAction {
   static getPropsFromUpstreamJson(json) {
     if (!json.id) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.baseAction.absenceOfIdPropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.baseAction.idPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain an {id} property',
           values: {
             id: 'id'

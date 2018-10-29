@@ -80,7 +80,7 @@ export class SlackAction extends BaseAction {
     if (!json.slack) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.slackAction.absenceOfActionJsonSlackPropertyBadRequestMessage', {
+        message: i18n.translate('xpack.watcher.models.slackAction.actionJsonSlackPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain an {actionJsonSlack} property',
           values: {
             actionJsonSlack: 'actionJson.slack'
@@ -94,7 +94,7 @@ export class SlackAction extends BaseAction {
     if (!json.slack.message) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.slackAction.absenceOfActionJsonSlackMessagePropertyBadRequestMessage', {
+        message: i18n.translate('xpack.watcher.models.slackAction.actionJsonSlackMessagePropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain an {actionJsonSlackMessage} property',
           values: {
             actionJsonSlackMessage: 'actionJson.slack.message'
