@@ -196,7 +196,7 @@ export const security = (kibana) => new kibana.Plugin({
     });
 
 
-    server.ext('onPostAuth', async function (req, reply) {
+    server.ext('onPostAuth', async function (req, h) {
       const path = req.path;
 
       // Enforce app restrictions
@@ -204,7 +204,7 @@ export const security = (kibana) => new kibana.Plugin({
         const appId = path.split('/', 3)[2];
         const userProfile = await req.getUserProfile();
         if (!userProfile.canAccessFeature(appId)) {
-          return reply(Boom.notFound());
+          return Boom.notFound();
         }
       }
 
@@ -223,12 +223,12 @@ export const security = (kibana) => new kibana.Plugin({
           const canExecute = await checkPrivileges.globally(actions);
 
           if (!canExecute.hasAllRequested) {
-            return reply(Boom.notFound());
+            return Boom.notFound();
           }
         }
       }
 
-      return reply.continue();
+      return h.continue;
     });
   }
 });
