@@ -9,11 +9,10 @@
 import _ from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-class UnassignedUI extends React.Component {
-  static displayName = this.props.intl.formatMessage({
-    id: 'xpack.monitoring.elasticsearch.shardAllocation.unassignedDisplayName',
+export class Unassigned extends React.Component {
+  static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.unassignedDisplayName', {
     defaultMessage: 'Unassigned',
   });
 
@@ -33,5 +32,3 @@ class UnassignedUI extends React.Component {
     );
   }
 }
-
-export const Unassigned = injectI18n(UnassignedUI);

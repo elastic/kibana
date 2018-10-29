@@ -9,11 +9,10 @@
 import React from 'react';
 import { TableHead } from './tableHead';
 import { TableBody } from './tableBody';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-class ClusterViewUI extends React.Component {
-  static displayName = this.props.intl.formatMessage({
-    id: 'xpack.monitoring.elasticsearch.shardAllocation.clusterViewDisplayName',
+export class ClusterView extends React.Component {
+  static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.clusterViewDisplayName', {
     defaultMessage: 'ClusterView',
   });
 
@@ -75,5 +74,3 @@ class ClusterViewUI extends React.Component {
     );
   }
 }
-
-export const ClusterView = injectI18n(ClusterViewUI);

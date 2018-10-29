@@ -9,7 +9,8 @@
 import React from 'react';
 import { Unassigned } from './unassigned';
 import { Assigned } from './assigned';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const ShardRow = props => {
   let unassigned;
@@ -34,9 +35,8 @@ const ShardRow = props => {
   );
 };
 
-class TableBodyUI extends React.Component {
-  static displayName = this.props.intl.formatMessage({
-    id: 'xpack.monitoring.elasticsearch.shardAllocation.tableBodyDisplayName',
+export class TableBody extends React.Component {
+  static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.tableBodyDisplayName', {
     defaultMessage: 'TableBody',
   });
 
@@ -91,5 +91,3 @@ class TableBodyUI extends React.Component {
 
   }
 }
-
-export const TableBody = injectI18n(TableBodyUI);
