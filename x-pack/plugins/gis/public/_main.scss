@@ -151,7 +151,7 @@
   color: $euiColorMediumShade;
 
   .visibilityToggle__body {
-    line-height: $euiSizeL;
+    line-height: 19px;
 
     > * {
       vertical-align: baseline;
@@ -193,6 +193,13 @@
     cursor: pointer;
   }
 
+  .visibilityToggle__body {
+    display: block;
+    display: block;
+    height: 16px;
+    width: 16px;
+  }
+
   &:hover,
   &:focus {
     cursor: pointer;
@@ -207,15 +214,14 @@
         opacity: 1;
       }
     }
-  }
 
-  .euiSwitch__input:not(:checked) {
-    + .visibilityToggle__body > .visibilityToggle__content {
-      opacity: 0;
-    }
-
-    + .visibilityToggle__body > .visibilityToggle__eyeClosed {
-      opacity: 1;
+    .euiSwitch__input:not(:checked) {
+      + .visibilityToggle__body > .visibilityToggle__content {
+        opacity: 0;
+      }
+      + .visibilityToggle__body > .visibilityToggle__eyeClosed {
+        opacity: 1;
+      }
     }
   }
 }

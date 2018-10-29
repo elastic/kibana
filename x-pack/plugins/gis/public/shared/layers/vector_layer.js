@@ -7,7 +7,7 @@
 import mapboxgl from 'mapbox-gl';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiIcon } from '@elastic/eui';
+import { FillableCircle, FillableVector } from '../icons/additional_layer_icons';
 import _ from 'lodash';
 
 import { ALayer } from './layer';
@@ -80,13 +80,28 @@ export class VectorLayer extends ALayer {
     return [VectorStyle];
   }
 
-  getIcon() {
-    return (
-      <EuiIcon
-        type={'vector'}
-      />
-    );
-  }
+  getIcon= (() => {
+    const defaultStroke = 'grey';
+    const strokeWidth = '1px';
+    return () => {
+      const { fillColor, lineColor } = _.get(this.getCurrentStyle(),
+        '_descriptor.properties');
+      const stroke = _.get(lineColor, 'options.color');
+      const fill = _.get(fillColor, 'options.color');
+
+      const style = {
+        ...stroke && { stroke } || { stroke: defaultStroke },
+        strokeWidth,
+        ...fill && { fill },
+      };
+
+      return (
+        this._isPointsOnly()
+          ? <FillableCircle style={style}/>
+          : <FillableVector style={style}/>
+      );
+    };
+  })();
 
   async getStringFields() {
     return await this._source.getStringFields();
