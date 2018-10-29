@@ -41,22 +41,19 @@ export function jobValidationRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/validate/estimate_bucket_span',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       try {
         return estimateBucketSpanFactory(callWithRequest, server)(request.payload)
-          .then(reply)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
           // this doesn't return a HTTP error but an object with an error message
           // which the client is then handling. triggering a HTTP error would be
           // too severe for this case.
-          .catch((resp) => {
-            reply({
-              error: true,
-              message: resp
-            });
-          });
+          .catch((resp) => ({
+            error: true,
+            message: resp
+          }));
       // this catch gets triggered when an actual error gets thrown when running
       // the estimation code, for example when the request payload is malformed
       } catch(error) {
@@ -71,13 +68,10 @@ export function jobValidationRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/validate/calculate_model_memory_limit',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return calculateModelMemoryLimit(callWithRequest, request.payload)
-        .then(reply)
-        .catch((resp) => {
-          reply(wrapError(resp));
-        });
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -87,15 +81,12 @@ export function jobValidationRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/validate/job',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       // pkg.branch corresponds to the version used in documentation links.
       const version = server.config().get('pkg.branch');
       return validateJob(callWithRequest, request.payload, version, server)
-        .then(reply)
-        .catch((resp) => {
-          reply(wrapError(resp));
-        });
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

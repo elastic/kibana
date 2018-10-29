@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import ServiceOverview from './view';
+import { ServiceOverview as View } from './view';
 import { getServiceList } from '../../../store/reactReduxRequest/serviceList';
 import { getUrlParams } from '../../../store/urlParams';
 
@@ -17,7 +17,7 @@ function mapStateToProps(state = {}) {
 }
 
 const mapDispatchToProps = {};
-export default connect(
+export const ServiceOverview = connect(
   mapStateToProps,
   mapDispatchToProps
-)(ServiceOverview);
+)(View);
