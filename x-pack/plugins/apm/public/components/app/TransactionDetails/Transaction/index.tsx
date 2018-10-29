@@ -78,11 +78,11 @@ export const Transaction: React.SFC<Props> = ({
   const root = waterfallRoot || transaction;
 
   return (
-    <EuiPanel paddingSize="m" hasShadow={true}>
+    <EuiPanel paddingSize="m">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <span>Transaction sample</span>
+            <h5>Transaction sample</h5>
           </EuiTitle>
         </EuiFlexItem>
 
