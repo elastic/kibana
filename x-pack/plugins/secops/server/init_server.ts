@@ -4,16 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IResolvers, makeExecutableSchema } from 'graphql-tools';
+import { addMockFunctionsToSchema, IResolvers, makeExecutableSchema } from 'graphql-tools';
+
 import { schemas } from './graphql';
+import { createMocks } from './graphql';
 import { createSourcesResolvers } from './graphql/sources';
 import { AppBackendLibs } from './lib/types';
+import { Logger } from './utils/logger';
 
-export const initServer = (libs: AppBackendLibs) => {
+export interface Config {
+  mocking: boolean;
+  logger: Logger;
+}
+
+export const initServer = (libs: AppBackendLibs, config: Config) => {
+  const { logger, mocking } = config;
   const schema = makeExecutableSchema({
     resolvers: [createSourcesResolvers(libs) as IResolvers],
     typeDefs: schemas,
   });
 
+  if (mocking) {
+    const mocks = createMocks(logger);
+    addMockFunctionsToSchema({ mocks, schema });
+  }
   libs.framework.registerGraphQLEndpoint('/api/secops/graphql', schema);
 };
