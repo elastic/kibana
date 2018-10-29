@@ -34,7 +34,7 @@ export function parse(str, withData = false) {
   };
 }
 
-export function isValid(str) {
+export function isValidDataUrl(str) {
   return dataurlRegex.test(str);
 }
 
