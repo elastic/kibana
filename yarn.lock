@@ -651,6 +651,13 @@
   resolved "https://registry.yarnpkg.com/@types/dedent/-/dedent-0.7.0.tgz#155f339ca404e6dd90b9ce46a3f78fd69ca9b050"
   integrity sha512-EGlKlgMhnLt/cM4DbUSafFdrkeJoC9Mvnj0PUCU7tFmTjMjNRT957kXCx0wYm3JuEq4o4ZsS5vG+NlkM2DMd2A==
 
+"@types/del@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@types/del/-/del-3.0.1.tgz#4712da8c119873cbbf533ad8dbf1baac5940ac5d"
+  integrity sha512-y6qRq6raBuu965clKgx6FHuiPu3oHdtmzMPXi8Uahsjdq1L6DL5fS/aY5/s71YwM7k6K1QIWvem5vNwlnNGIkQ==
+  dependencies:
+    "@types/glob" "*"
+
 "@types/delay@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/delay/-/delay-2.0.1.tgz#61bcf318a74b61e79d1658fbf054f984c90ef901"
@@ -715,6 +722,15 @@
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/getopts/-/getopts-2.0.0.tgz#8a603370cb367d3192bd8012ad39ab2320b5b476"
   integrity sha512-/WJ73/6+Ffulo6LDm0P11Y0uGDaitJBJyVhXr4Eg+/Bqi0epRLOnGDNOgplhMBFy7NLBMlZ5UQcukSABqaV5Kg==
+
+"@types/glob@*":
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/@types/glob/-/glob-7.1.1.tgz#aa59a1c6e3fbc421e07ccd31a944c30eba521575"
+  integrity sha512-1Bh06cbWJUHMC97acuD6UMG29nMt0Aqz1vF3guLfG+kHHJhy3AyohZFFxYk2f7Q1SQIrNwvncxAE0N/9s70F2w==
+  dependencies:
+    "@types/events" "*"
+    "@types/minimatch" "*"
+    "@types/node" "*"
 
 "@types/glob@^5.0.35":
   version "5.0.35"
