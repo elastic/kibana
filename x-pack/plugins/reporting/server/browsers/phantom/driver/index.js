@@ -30,7 +30,16 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
           const conditions = pageOptions.conditionalHeaders.conditions;
 
           const escape = (str) => {
-            return str.replace(/'/g, "\\'");
+            return str
+              .replace(/'/g, `\\'`)
+              .replace(/\\/g, `\\\\`)
+              .replace(/\r?\n/g, '\\n');
+          };
+
+          // we're using base64 encoding for any user generated values that we need to eval
+          // to be sure that we're handling these properly
+          const btoa = (str) => {
+            return Buffer.from(str).toString('base64');
           };
 
           const fn = `function (requestData, networkRequest) {
@@ -72,7 +81,8 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
               url.pathname.indexOf('${escape(conditions.basePath)}/') === 0
             ) {
               log('Using custom headers for ' + requestData.url);
-              ${Object.keys(headers).map(key => `networkRequest.setHeader('${escape(key)}', '${escape(headers[key])}');`).join('\n')}
+              ${Object.keys(headers).map(key => `networkRequest.setHeader(atob('${btoa(key)}'), atob('${btoa(headers[key])}'));`)
+    .join('\n')}
             } else {
               log('No custom headers for ' + requestData.url);
             }
