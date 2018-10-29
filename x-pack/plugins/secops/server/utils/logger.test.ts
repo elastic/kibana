@@ -7,7 +7,6 @@
 import { createLogger, HapiLogger } from './logger';
 
 const APP_ID = 'secops';
-const createMockServer = () => ({ log: jest.fn() });
 
 const createMockHapiLogger = () => jest.fn();
 
