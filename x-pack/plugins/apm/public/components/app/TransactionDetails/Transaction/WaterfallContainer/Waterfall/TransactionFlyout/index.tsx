@@ -5,7 +5,7 @@
  */
 
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -56,9 +56,9 @@ export function TransactionFlyout({
 
             <EuiFlexItem grow={false}>
               <DiscoverTransactionLink transaction={transactionDoc}>
-                <EuiButton iconType="discoverApp">
+                <EuiButtonEmpty iconType="discoverApp">
                   View transaction in Discover
-                </EuiButton>
+                </EuiButtonEmpty>
               </DiscoverTransactionLink>
             </EuiFlexItem>
           </EuiFlexGroup>

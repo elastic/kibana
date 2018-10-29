@@ -6,6 +6,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -90,9 +91,9 @@ export const Transaction: React.SFC<Props> = ({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <DiscoverTransactionLink transaction={transaction}>
-                <EuiButton iconType="discoverApp">
+                <EuiButtonEmpty iconType="discoverApp">
                   View transaction in Discover
-                </EuiButton>
+                </EuiButtonEmpty>
               </DiscoverTransactionLink>
             </EuiFlexItem>
             <MaybeViewTraceLink transaction={transaction} root={root} />
