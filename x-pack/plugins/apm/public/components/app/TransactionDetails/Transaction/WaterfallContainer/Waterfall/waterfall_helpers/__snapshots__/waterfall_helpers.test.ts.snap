@@ -13,6 +13,7 @@ Array [
     "name": "APIRestController#products",
     "offset": 0,
     "serviceName": "opbeans-java",
+    "skew": 0,
     "timestamp": 1536763736366000,
     "transaction": Object {},
   },
@@ -25,6 +26,7 @@ Array [
     "offset": 1000,
     "parentId": "a",
     "serviceName": "opbeans-java",
+    "skew": 0,
     "span": Object {
       "transaction": Object {
         "id": "a",
@@ -43,6 +45,7 @@ Array [
     "offset": 2000,
     "parentId": "a",
     "serviceName": "opbeans-java",
+    "skew": 0,
     "span": Object {
       "transaction": Object {
         "id": "a",
@@ -61,6 +64,7 @@ Array [
     "offset": 3000,
     "parentId": "b",
     "serviceName": "opbeans-java",
+    "skew": 0,
     "timestamp": 1536763736369000,
     "transaction": Object {},
   },
@@ -73,6 +77,7 @@ Array [
     "offset": 5000,
     "parentId": "c",
     "serviceName": "opbeans-java",
+    "skew": 0,
     "span": Object {
       "transaction": Object {
         "id": "c",

@@ -116,7 +116,7 @@ export function WaterfallItem({
   }
 
   const width = (item.duration / totalDuration) * 100;
-  const left = (item.offset / totalDuration) * 100;
+  const left = ((item.offset + item.skew) / totalDuration) * 100;
   const Label = item.docType === 'transaction' ? TransactionLabel : SpanLabel;
 
   return (

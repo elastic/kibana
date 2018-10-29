@@ -42,6 +42,7 @@ interface IWaterfallItemBase {
   duration: number;
   timestamp: number;
   offset: number;
+  skew: number;
   childIds?: Array<IWaterfallItemBase['id']>;
 }
 
@@ -68,6 +69,7 @@ function getTransactionItem(
       duration: transaction.transaction.duration.us,
       timestamp: new Date(transaction['@timestamp']).getTime() * 1000,
       offset: 0,
+      skew: 0,
       docType: 'transaction',
       transaction
     };
@@ -81,6 +83,7 @@ function getTransactionItem(
     duration: transaction.transaction.duration.us,
     timestamp: transaction.timestamp.us,
     offset: 0,
+    skew: 0,
     docType: 'transaction',
     transaction
   };
@@ -97,6 +100,7 @@ function getSpanItem(span: Span): IWaterfallItemSpan {
       timestamp:
         new Date(span['@timestamp']).getTime() * 1000 + span.span.start.us,
       offset: 0,
+      skew: 0,
       docType: 'span',
       span
     };
@@ -110,26 +114,61 @@ function getSpanItem(span: Span): IWaterfallItemSpan {
     duration: span.span.duration.us,
     timestamp: span.timestamp.us,
     offset: 0,
+    skew: 0,
     docType: 'span',
     span
   };
 }
 
+function getClockSkew(
+  item: IWaterfallItem,
+  itemsById: IWaterfallIndex,
+  parentTransactionSkew: number
+) {
+  // calculate clock skew for transactions with parents
+  if (item.docType === 'transaction' && item.parentId) {
+    const parentItem = itemsById[item.parentId];
+
+    // determine if child starts before the parent, and in that case how much
+    const diff = parentItem.timestamp + parentItem.skew - item.timestamp;
+
+    // If child transaction starts after parent span there is no clock skew
+    if (diff < 0) {
+      return 0;
+    }
+
+    // latency can only be calculated if parent duration is larger than child duration
+    const latency = Math.max(parentItem.duration - item.duration, 0);
+    const skew = diff + latency / 2;
+    return skew;
+  }
+
+  return parentTransactionSkew;
+}
+
 export function getWaterfallItems(
   childrenByParentId: IWaterfallGroup,
+  itemsById: IWaterfallIndex,
   entryTransactionItem: IWaterfallItem
 ) {
-  function getSortedChildren(item: IWaterfallItem): IWaterfallItem[] {
+  function getSortedChildren(
+    item: IWaterfallItem,
+    parentTransactionSkew: number
+  ): IWaterfallItem[] {
+    const skew = getClockSkew(item, itemsById, parentTransactionSkew);
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
     item.childIds = children.map(child => child.id);
     item.offset = item.timestamp - entryTransactionItem.timestamp;
+    item.skew = skew;
 
-    const deepChildren = flatten(children.map(getSortedChildren));
+    const deepChildren = flatten(
+      children.map(child => getSortedChildren(child, skew))
+    );
     return [item, ...deepChildren];
   }
 
-  return getSortedChildren(entryTransactionItem);
+  return getSortedChildren(entryTransactionItem, 0);
 }
 
 function getTraceRoot(childrenByParentId: IWaterfallGroup) {
@@ -179,9 +218,13 @@ export function getWaterfall(
     hit => (hit.parentId ? hit.parentId : 'root')
   );
   const entryTransactionItem = getTransactionItem(entryTransaction);
-  const items = getWaterfallItems(childrenByParentId, entryTransactionItem);
+  const itemsById: IWaterfallIndex = indexBy(filteredHits, 'id');
+  const items = getWaterfallItems(
+    childrenByParentId,
+    itemsById,
+    entryTransactionItem
+  );
   const traceRoot = getTraceRoot(childrenByParentId);
-  const itemsById: IWaterfallIndex = indexBy(items, 'id');
 
   const getTransactionById = (id?: IWaterfallItem['id']) => {
     if (!id) {
