@@ -14,6 +14,7 @@ export class ActionStatus {
   constructor(props) {
     this.id = props.id;
     this.actionStatusJson = props.actionStatusJson;
+    this.errors = props.errors;
 
     this.lastAcknowledged = getMoment(get(this.actionStatusJson, 'ack.timestamp'));
     this.lastExecution = getMoment(get(this.actionStatusJson, 'last_execution.timestamp'));
@@ -29,6 +30,10 @@ export class ActionStatus {
 
     if (this.lastExecutionSuccessful === false) {
       return ACTION_STATES.ERROR;
+    }
+
+    if (this.errors) {
+      return ACTION_STATES.CONFIG_ERROR;
     }
 
     if (ackState === 'awaits_successful_execution') {
