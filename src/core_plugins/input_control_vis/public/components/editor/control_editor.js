@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './control_editor.less';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { RangeControlEditor } from './range_control_editor';
@@ -152,7 +151,7 @@ class ControlEditorUi extends Component {
 
   render() {
     return (
-      <EuiPanel grow={false} className="controlEditorPanel">
+      <EuiPanel grow={false} className="icvControlEditor__panel">
 
         <EuiAccordion
           id="controlEditorAccordion"

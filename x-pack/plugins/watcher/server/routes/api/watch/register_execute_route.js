@@ -29,7 +29,7 @@ export function registerExecuteRoute(server) {
   server.route({
     path: '/api/watcher/watch/execute',
     method: 'PUT',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const executeDetails = ExecuteDetails.fromDownstreamJson(request.payload.executeDetails);
       const watch = Watch.fromDownstreamJson(request.payload.watch);
@@ -47,17 +47,19 @@ export function registerExecuteRoute(server) {
           };
 
           const watchHistoryItem = WatchHistoryItem.fromUpstreamJson(json);
-          reply({ watchHistoryItem: watchHistoryItem.downstreamJson });
+          ({
+            watchHistoryItem: watchHistoryItem.downstreamJson
+          });
         })
         .catch(err => {
 
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
-            return reply(wrapEsError(err));
+            throw wrapEsError(err);
           }
 
           // Case: default
-          reply(wrapUnknownError(err));
+          wrapUnknownError(err);
         });
     },
     config: {

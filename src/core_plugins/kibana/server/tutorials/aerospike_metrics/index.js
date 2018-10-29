@@ -40,6 +40,7 @@ export function aerospikeMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-aerospike.html',
       },
     }),
+    euiIconType: 'logoAerospike',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.aerospikeMetrics.artifacts.application.label', {

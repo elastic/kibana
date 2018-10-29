@@ -18,13 +18,14 @@
  */
 
 export class SearchError extends Error {
-  constructor({ status, title, message, path }) {
+  constructor({ status, title, message, path, type }) {
     super(message);
     this.name = 'SearchError';
     this.status = status;
     this.title = title;
     this.message = message;
     this.path = path;
+    this.type = type;
 
     // captureStackTrace is only available in the V8 engine, so any browser using
     // a different JS engine won't have access to this method.
@@ -35,5 +36,12 @@ export class SearchError extends Error {
     // Babel doesn't support traditional `extends` syntax for built-in classes.
     // https://babeljs.io/docs/en/caveats/#classes
     Object.setPrototypeOf(this, SearchError.prototype);
+  }
+}
+
+export function getSearchErrorType({ message }) {
+  const msg = message.toLowerCase();
+  if(msg.indexOf('unsupported query') > -1) {
+    return 'UNSUPPORTED_QUERY';
   }
 }
