@@ -53,7 +53,7 @@ export function WelcomeContent() {
           <EuiFlexItem>
             <EuiText>
               <p>
-                JSON
+                Delimited text files, such as CSV and TSV
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -66,7 +66,7 @@ export function WelcomeContent() {
           <EuiFlexItem>
             <EuiText>
               <p>
-                Delimited text files, such as CSV and TSV
+                Newline-delimited JSON
               </p>
             </EuiText>
           </EuiFlexItem>
