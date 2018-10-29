@@ -104,13 +104,13 @@ app.directive('jsonWatchEdit', function ($injector, i18n) {
         this.createActionsForWatch(this.watch);
 
         if (!this.watch.isNew) {
-          return this.validateWatch();
+          return this.validateAndSaveWatch();
         }
 
         return this.isExistingWatch()
           .then(existingWatch => {
             if (!existingWatch) {
-              return this.validateWatch();
+              return this.validateAndSaveWatch();
             }
 
             const confirmModalOptions = {
@@ -155,21 +155,21 @@ app.directive('jsonWatchEdit', function ($injector, i18n) {
           });
       }
 
-      validateWatch = () => {
+      validateAndSaveWatch = () => {
         const { warning } = this.watch.validate();
 
-        if (!warning) {
-          return this.saveWatch();
+        if (warning) {
+          const confirmModalOptions = {
+            onConfirm: this.saveWatch,
+            confirmButtonText: i18n('xpack.watcher.sections.watchEdit.json.watchErrorsWarning.confirmSaveWatch', {
+              defaultMessage: 'Save watch',
+            }),
+          };
+
+          return confirmModal(warning.message, confirmModalOptions);
         }
 
-        const confirmModalOptions = {
-          onConfirm: this.saveWatch,
-          confirmButtonText: i18n('xpack.watcher.sections.watchEdit.json.watchErrorsWarning.confirmSaveWatch', {
-            defaultMessage: 'Save watch',
-          }),
-        };
-
-        return confirmModal(warning.message, confirmModalOptions);
+        return this.saveWatch();
       }
 
       saveWatch = () => {
