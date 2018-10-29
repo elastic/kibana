@@ -9,6 +9,7 @@ import moment from 'moment';
 import { get } from 'lodash';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
 import { ClusterItemContainer, BytesPercentageUsage } from './helpers';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiFlexGrid,
@@ -23,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { formatTimestampToDuration } from '../../../../common';
 
-export function ApmPanel(props) {
+function ApmPanelUi(props) {
   if (!get(props, 'apms.total', 0) > 0) {
     return null;
   }
@@ -32,7 +33,11 @@ export function ApmPanel(props) {
   const goToInstances = () => props.changeUrl('apm/instances');
 
   return (
-    <ClusterItemContainer {...props} url="apm" title="APM">
+    <ClusterItemContainer
+      {...props}
+      url="apm"
+      title={props.intl.formatMessage({ id: 'xpack.monitoring.cluster.overview.apmPanel.apmTitle', defaultMessage: 'APM' })}
+    >
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
@@ -40,20 +45,34 @@ export function ApmPanel(props) {
               <h3>
                 <EuiLink
                   onClick={goToApm}
-                  aria-label="APM Overview"
+                  aria-label={props.intl.formatMessage({
+                    id: 'xpack.monitoring.cluster.overview.apmPanel.apmOverviewLinkAriaLabel', defaultMessage: 'APM Overview' })}
                   data-test-subj="apmOverview"
                 >
-                  Overview
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.apmPanel.overviewLinkLabel"
+                    defaultMessage="Overview"
+                  />
                 </EuiLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>Processed Events</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.apmPanel.processedEventsLabel"
+                  defaultMessage="Processed Events"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="apmsTotalEvents">
                 {formatMetric(props.totalEvents, '0.[0]a')}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>Last Event</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.apmPanel.lastEventsLabel"
+                  defaultMessage="Last Event"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="apmsBytesSent">
                 {formatTimestampToDuration(+moment(props.timeOfLastEvent), 'since') + ' ago'}
               </EuiDescriptionListDescription>
@@ -66,16 +85,28 @@ export function ApmPanel(props) {
               <h3>
                 <EuiLink
                   onClick={goToInstances}
-                  aria-label={`Apm Instances: ${props.apms.total}`}
+                  aria-label={props.intl.formatMessage({
+                    id: 'xpack.monitoring.cluster.overview.apmPanel.apmInstancesLinkAriaLabel',
+                    defaultMessage: 'Apm Instances: {apmsTotal}' },
+                  { apmsTotal: props.apms.total })}
                   data-test-subj="apmListing"
                 >
-                  APM Servers: <span data-test-subj="apmsTotal">{props.apms.total}</span>
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.apmPanel.apmServersLinkLabel"
+                    defaultMessage="APM Servers: {apmsTotal}"
+                    values={{ apmsTotal: (<span data-test-subj="apmsTotal">{props.apms.total}</span>) }}
+                  />
                 </EuiLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>Memory Usage</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.apmPanel.memoryUsageLabel"
+                  defaultMessage="Memory Usage"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="apmMemoryUsage">
                 <BytesPercentageUsage usedBytes={props.memRss} maxBytes={props.memTotal} />
               </EuiDescriptionListDescription>
@@ -86,3 +117,5 @@ export function ApmPanel(props) {
     </ClusterItemContainer>
   );
 }
+
+export const ApmPanel = injectI18n(ApmPanelUi);

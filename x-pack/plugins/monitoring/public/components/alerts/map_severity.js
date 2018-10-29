@@ -29,24 +29,41 @@ import { capitalize } from 'lodash';
  * @param {Number} severity The number representing the severity. Higher is "worse".
  * @return {Object} An object containing details about the severity.
  */
+
+import { i18n } from '@kbn/i18n';
+
 export function mapSeverity(severity) {
   const floor = Math.floor(severity / 1000);
   let mapped;
 
   switch (floor) {
     case 0:
-      mapped = { value: 'low', color: 'warning', iconType: 'dot' };
+      mapped = {
+        value: i18n.translate('xpack.monitoring.alerts.lowSeverityName', { defaultMessage: 'low' }),
+        color: 'warning',
+        iconType: 'dot'
+      };
       break;
     case 1:
-      mapped = { value: 'medium', color: 'warning', iconType: 'dot' };
+      mapped = {
+        value: i18n.translate('xpack.monitoring.alerts.mediumSeverityName', { defaultMessage: 'medium' }),
+        color: 'warning',
+        iconType: 'dot'
+      };
       break;
     default: // severity >= 2000
-      mapped = { value: 'high', color: 'danger', iconType: 'dot' };
+      mapped = {
+        value: i18n.translate('xpack.monitoring.alerts.highSeverityName', { defaultMessage: 'high' }),
+        color: 'danger',
+        iconType: 'dot'
+      };
       break;
   }
 
   return {
-    title: `${capitalize(mapped.value)} severity alert`,
+    title: i18n.translate('xpack.monitoring.alerts.severityTitle',
+      { defaultMessage: '{severity} severity alert', values: { severity: capitalize(mapped.value) } }
+    ),
     ...mapped
   };
 }

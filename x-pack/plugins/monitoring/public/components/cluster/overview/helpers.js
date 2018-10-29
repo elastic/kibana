@@ -16,6 +16,7 @@ import {
   EuiHealth,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function HealthStatusIndicator(props) {
 
@@ -29,7 +30,11 @@ export function HealthStatusIndicator(props) {
 
   return (
     <EuiHealth color={statusColor} data-test-subj="statusIcon">
-      Health is {props.status}
+      <FormattedMessage
+        id="xpack.monitoring.cluster.overview.healthDescription"
+        defaultMessage="Health is {status}"
+        values={{ status: props.status }}
+      />
     </EuiHealth>
   );
 }

@@ -19,8 +19,9 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { ClusterItemContainer } from './helpers';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export function BeatsPanel(props) {
+function BeatsPanelUi(props) {
   if (!get(props, 'beats.total', 0) > 0) {
     return null;
   }
@@ -46,7 +47,11 @@ export function BeatsPanel(props) {
   });
 
   return (
-    <ClusterItemContainer {...props} url="beats" title="Beats">
+    <ClusterItemContainer
+      {...props}
+      url="beats"
+      title={props.intl.formatMessage({ id: 'xpack.monitoring.cluster.overview.beatsPanel.beatsTitle', defaultMessage: 'Beats' })}
+    >
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
@@ -54,20 +59,34 @@ export function BeatsPanel(props) {
               <h3>
                 <EuiLink
                   onClick={goToBeats}
-                  aria-label="Beats Overview"
+                  aria-label={props.intl.formatMessage({
+                    id: 'xpack.monitoring.cluster.overview.beatsPanel.beatsLinkAriaLabel', defaultMessage: 'Beats Overview' })}
                   data-test-subj="beatsOverview"
                 >
-                  Overview
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.beatsPanel.overviewLinkLabel"
+                    defaultMessage="Overview"
+                  />
                 </EuiLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>Total Events</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.beatsPanel.totalEventsLabel"
+                  defaultMessage="Total Events"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="beatsTotalEvents">
                 {formatMetric(props.totalEvents, '0.[0]a')}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>Bytes Sent</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.beatsPanel.bytesSentLabel"
+                  defaultMessage="Bytes Sent"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="beatsBytesSent">
                 {formatMetric(props.bytesSent, 'byte')}
               </EuiDescriptionListDescription>
@@ -80,10 +99,17 @@ export function BeatsPanel(props) {
               <h3>
                 <EuiLink
                   onClick={goToInstances}
-                  aria-label={`Beats Instances: ${props.beats.total}`}
+                  aria-label={props.intl.formatMessage({
+                    id: 'xpack.monitoring.cluster.overview.beatsPanel.beatsInstancesLinkAriaLabel',
+                    defaultMessage: 'Beats Instances: {beatsTotal}' },
+                  { beatsTotal: props.beats.total })}
                   data-test-subj="beatsListing"
                 >
-                  Beats: <span data-test-subj="beatsTotal">{props.beats.total}</span>
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.beatsPanel.bytesSentLinkLabel"
+                    defaultMessage="Beats: {beatsTotal}"
+                    values={{ beatsTotal: (<span data-test-subj="beatsTotal">{props.beats.total}</span>) }}
+                  />
                 </EuiLink>
               </h3>
             </EuiTitle>
@@ -97,3 +123,5 @@ export function BeatsPanel(props) {
     </ClusterItemContainer>
   );
 }
+
+export const BeatsPanel = injectI18n(BeatsPanelUi);

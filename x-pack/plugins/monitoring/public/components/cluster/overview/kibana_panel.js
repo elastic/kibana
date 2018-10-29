@@ -19,8 +19,9 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export function KibanaPanel(props) {
+function KibanaPanelUi(props) {
   if (!props.count) {
     return null;
   }
@@ -33,7 +34,13 @@ export function KibanaPanel(props) {
   const goToInstances = () => props.changeUrl('kibana/instances');
 
   return (
-    <ClusterItemContainer {...props} statusIndicator={statusIndicator} url="kibana" title="Kibana">
+    <ClusterItemContainer
+      {...props}
+      statusIndicator={statusIndicator}
+      url="kibana"
+      title={props.intl.formatMessage({
+        id: 'xpack.monitoring.cluster.overview.kibanaPanel.kibanaTitle', defaultMessage: 'Kibana' })}
+    >
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
@@ -41,22 +48,40 @@ export function KibanaPanel(props) {
               <h3>
                 <EuiLink
                   onClick={goToKibana}
-                  aria-label="Kibana Overview"
+                  aria-label={props.intl.formatMessage({
+                    id: 'xpack.monitoring.cluster.overview.kibanaPanel.overviewLinkAriaLabel', defaultMessage: 'Kibana Overview' })}
                   data-test-subj="kbnOverview"
                 >
-                  Overview
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.kibanaPanel.overviewLinkLabel"
+                    defaultMessage="Overview"
+                  />
                 </EuiLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column" data-test-subj="kibana_overview" data-overview-status={props.status}>
-              <EuiDescriptionListTitle>Requests</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.kibanaPanel.requestsLabel"
+                  defaultMessage="Requests"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="kbnRequests">
                 { props.requests_total }
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>Max. Response Time</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.kibanaPanel.maxResponseTimeLabel"
+                  defaultMessage="Max. Response Time"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="kbnMaxResponseTime">
-                { props.response_time_max } ms
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.kibanaPanel.maxResponseTimeText"
+                  defaultMessage="{maxTime} ms"
+                  values={{ maxTime: props.response_time_max }}
+                />
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
@@ -68,19 +93,36 @@ export function KibanaPanel(props) {
                 <EuiLink
                   onClick={goToInstances}
                   data-test-subj="kbnInstances"
-                  aria-label={`Kibana Instances: ${ props.count }`}
+                  aria-label={props.intl.formatMessage({
+                    id: 'xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkAriaLabel',
+                    defaultMessage: 'Instances: {instancesCount}' },
+                  { instancesCount: props.count })}
                 >
-                  Instances: <span data-test-subj="number_of_kibana_instances">{ props.count }</span>
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkLabel"
+                    defaultMessage="Instances: {instancesCount}"
+                    values={{ instancesCount: (<span data-test-subj="number_of_kibana_instances">{ props.count }</span>) }}
+                  />
                 </EuiLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>Connections</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.kibanaPanel.connectionsLabel"
+                  defaultMessage="Connections"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="kbnConnections">
                 { formatNumber(props.concurrent_connections, 'int_commas') }
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>Memory Usage</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.kibanaPanel.memoryUsageLabel"
+                  defaultMessage="Memory Usage"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="kbnMemoryUsage">
                 <BytesPercentageUsage usedBytes={props.memory_size} maxBytes={props.memory_limit} />
               </EuiDescriptionListDescription>
@@ -91,3 +133,5 @@ export function KibanaPanel(props) {
     </ClusterItemContainer>
   );
 }
+
+export const KibanaPanel = injectI18n(KibanaPanelUi);

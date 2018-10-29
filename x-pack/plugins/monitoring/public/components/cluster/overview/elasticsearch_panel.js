@@ -20,6 +20,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { LicenseText } from './license_text';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const calculateShards = shards => {
   const total = get(shards, 'total', 0);
@@ -39,7 +40,7 @@ const calculateShards = shards => {
   };
 };
 
-export function ElasticsearchPanel(props) {
+function ElasticsearchPanelUi(props) {
 
   const clusterStats = props.cluster_stats || {};
   const nodes = clusterStats.nodes;
@@ -59,7 +60,12 @@ export function ElasticsearchPanel(props) {
     // if license doesn't support ML, then `ml === null`
     if (props.ml) {
       return [
-        <EuiDescriptionListTitle key="mlJobsListTitle">Jobs</EuiDescriptionListTitle>,
+        <EuiDescriptionListTitle key="mlJobsListTitle">
+          <FormattedMessage
+            id="xpack.monitoring.cluster.overview.esPanel.jobLabel"
+            defaultMessage="Job"
+          />
+        </EuiDescriptionListTitle>,
         <EuiDescriptionListDescription key="mlJobsCount" data-test-subj="esMlJobs">{ props.ml.jobs }</EuiDescriptionListDescription>
       ];
     }
@@ -69,7 +75,14 @@ export function ElasticsearchPanel(props) {
   const licenseText = <LicenseText license={props.license} showLicenseExpiration={props.showLicenseExpiration} />;
 
   return (
-    <ClusterItemContainer {...props} statusIndicator={statusIndicator} url="elasticsearch" title="Elasticsearch" extras={licenseText}>
+    <ClusterItemContainer
+      {...props}
+      statusIndicator={statusIndicator}
+      url="elasticsearch"
+      title={props.intl.formatMessage({
+        id: 'xpack.monitoring.cluster.overview.esPanel.elasticsearchTitle', defaultMessage: 'Elasticsearch' })}
+      extras={licenseText}
+    >
       <EuiFlexGrid columns={3}>
 
         <EuiFlexItem>
@@ -78,20 +91,35 @@ export function ElasticsearchPanel(props) {
               <h3>
                 <EuiLink
                   onClick={goToElasticsearch}
-                  aria-label="Elasticsearch Overview"
+                  aria-label={props.intl.formatMessage({
+                    id: 'xpack.monitoring.cluster.overview.esPanel.overviewLinkAriaLabel', defaultMessage: 'Elasticsearch Overview' })}
                   data-test-subj="esOverview"
                 >
-                  Overview
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.esPanel.overviewLinkLabel"
+                    defaultMessage="Overview"
+                  />
                 </EuiLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>Version</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.esPanel.versionLabel"
+                  defaultMessage="Version"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esVersion">
-                { props.version || 'N/A' }
+                { props.version || props.intl.formatMessage({
+                  id: 'xpack.monitoring.cluster.overview.esPanel.versionNotAvailableDescription', defaultMessage: 'N/A' }) }
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>Uptime</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.esPanel.uptimeLabel"
+                  defaultMessage="Uptime"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esUptime">
                 { formatNumber(get(nodes, 'jvm.max_uptime_in_millis'), 'time_since') }
               </EuiDescriptionListDescription>
@@ -108,20 +136,34 @@ export function ElasticsearchPanel(props) {
                   data-test-subj="esNumberOfNodes"
                   onClick={goToNodes}
                 >
-                  Nodes: { formatNumber(get(nodes, 'count.total'), 'int_commas') }
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.esPanel.nodesLinkLabel"
+                    defaultMessage="Nodes: {nodesTotal}"
+                    values={{ nodesTotal: formatNumber(get(nodes, 'count.total'), 'int_commas') }}
+                  />
                 </EuiLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>Disk Available</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.esPanel.diskAvailableLabel"
+                  defaultMessage="Disk Available"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDiskAvailable">
                 <BytesUsage
                   usedBytes={get(nodes, 'fs.available_in_bytes')}
                   maxBytes={get(nodes, 'fs.total_in_bytes')}
                 />
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>JVM Heap</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.esPanel.jvmHeapLabel"
+                  defaultMessage="JVM Heap"
+                />
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esJvmHeap">
                 <BytesPercentageUsage
                   usedBytes={get(nodes, 'jvm.mem.heap_used_in_bytes')}
@@ -139,37 +181,56 @@ export function ElasticsearchPanel(props) {
                 <EuiLink
                   onClick={goToIndices}
                   data-test-subj="esNumberOfIndices"
-                  aria-label={`Elasticsearch Indices: ${ formatNumber(get(indices, 'count'), 'int_commas') }`}
+                  aria-label={props.intl.formatMessage({
+                    id: 'xpack.monitoring.cluster.overview.esPanel.indicesCountLinkAriaLabel',
+                    defaultMessage: 'Elasticsearch Indices: {indicesCount}' },
+                  { indicesCount: formatNumber(get(indices, 'count'), 'int_commas') })}
                 >
-                  Indices: { formatNumber(get(indices, 'count'), 'int_commas') }
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.esPanel.indicesCountLinkLabel"
+                    defaultMessage="Indices: {indicesCount}"
+                    values={{ indicesCount: formatNumber(get(indices, 'count'), 'int_commas') }}
+                  />
                 </EuiLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
               <EuiDescriptionListTitle>
-                Documents
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.esPanel.documentsLabel"
+                  defaultMessage="Documents"
+                />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDocumentsCount">
                 { formatNumber(get(indices, 'docs.count'), 'int_commas') }
               </EuiDescriptionListDescription>
 
               <EuiDescriptionListTitle>
-                Disk Usage
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.esPanel.diskUsageLabel"
+                  defaultMessage="Disk Usage"
+                />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDiskUsage">
                 { formatNumber(get(indices, 'store.size_in_bytes'), 'byte') }
               </EuiDescriptionListDescription>
 
               <EuiDescriptionListTitle>
-                Primary Shards
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.esPanel.primaryShardsLabel"
+                  defaultMessage="Primary Shards"
+                />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esPrimaryShards">
                 { primaries }
               </EuiDescriptionListDescription>
 
               <EuiDescriptionListTitle>
-                Replica Shards
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.esPanel.replicaShardsLabel"
+                  defaultMessage="Replica Shards"
+                />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esReplicaShards">
                 { replicas }
@@ -182,3 +243,5 @@ export function ElasticsearchPanel(props) {
     </ClusterItemContainer>
   );
 }
+
+export const ElasticsearchPanel = injectI18n(ElasticsearchPanelUi);
