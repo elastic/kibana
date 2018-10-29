@@ -99,7 +99,7 @@
           },
           {
             "name": "whoAmI",
-            "description": "",
+            "description": "Just a simple example to get the app name",
             "args": [],
             "type": { "kind": "OBJECT", "name": "SayMyName", "ofType": null },
             "isDeprecated": false,

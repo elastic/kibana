@@ -37,7 +37,7 @@ export interface Query {
 export interface Source {
   id: string /** The id of the source */;
   configuration: SourceConfiguration /** The raw configuration of the source */;
-  whoAmI?: SayMyName | null;
+  whoAmI?: SayMyName | null /** Just a simple example to get the app name */;
 }
 /** A set of configuration options for a security data source */
 export interface SourceConfiguration {
@@ -95,7 +95,11 @@ export namespace SourceResolvers {
       any,
       Context
     > /** The raw configuration of the source */;
-    whoAmI?: WhoAmIResolver<SayMyName | null, any, Context>;
+    whoAmI?: WhoAmIResolver<
+      SayMyName | null,
+      any,
+      Context
+    > /** Just a simple example to get the app name */;
   }
 
   export type IdResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;

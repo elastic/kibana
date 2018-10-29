@@ -6,7 +6,10 @@
 
 /* tslint:disable */
 
-export default
+import { Logger } from '../../utils/logger';
+import { Context } from '../index';
+
+export const sourcesDataMock =
 [
   {
     "id": "default",
@@ -21,4 +24,21 @@ export default
       }
     }
   }
-]
+];
+
+export const getAllSourcesQueryMock = (logger: Logger) => ({ allSources: (root: unknown, args: unknown, context: Context) => {
+  logger.info('Mock allSources');
+  const operationName = context.req.payload.operationName.toLowerCase();
+  switch (operationName) {
+    case 'test': {
+      logger.info(`Using mock for test ${sourcesDataMock}`);
+      return sourcesDataMock;
+    }
+    default: {
+      logger.error(`Could not find a mock for: ${operationName}`);
+      return [];
+    }
+  }
+}
+});
+
