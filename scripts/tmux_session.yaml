@@ -6,12 +6,14 @@ windows:
 - window_name: kibana
   panes:
     - shell_command:
-        - ./gradlew startKibana
+        - cd kibana-extra/codesearch
+        - yarn start
 - window_name: deps
   layout: even-horizontal
   panes:
     - shell_command:
-        - ./gradlew startDeps
+        - cd kibana-extra/codesearch
+        - yarn start-deps
 
 #- window_name: backend
 #  layout: even-horizontal
@@ -24,6 +26,6 @@ windows:
   layout: even-horizontal
   panes:
     - shell_command:
-        -
+        - cd lsp/
     - shell_command:
         -
