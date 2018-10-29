@@ -72,14 +72,14 @@ class CcrShardUI extends PureComponent {
                 {
                   name: intl.formatMessage({
                     id: 'xpack.monitoring.elasticsearch.ccrShard.errorsTable.typeColumnTitle',
-                    defaultMesage: 'Type'
+                    defaultMessage: 'Type'
                   }),
                   field: 'exception.type'
                 },
                 {
                   name: intl.formatMessage({
                     id: 'xpack.monitoring.elasticsearch.ccrShard.errorsTable.reasonColumnTitle',
-                    defaultMesage: 'Reason'
+                    defaultMessage: 'Reason'
                   }),
                   field: 'exception.reason',
                   width: '75%'

@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { Tooltip } from 'plugins/monitoring/components/tooltip';
-import { FormatedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SourceTooltip = ({ isCopiedFromPrimary, sourceTransportAddress, children }) => {
   if (!sourceTransportAddress) {
@@ -23,17 +23,17 @@ export const SourceTooltip = ({ isCopiedFromPrimary, sourceTransportAddress, chi
         defaultMessage="Copied from {copiedFrom} shard"
         values={{
           copiedFrom: isCopiedFromPrimary ?
-              (
-                <FormattedMessage
+            (
+              <FormattedMessage
                 id="xpack.monitoring.elasticsearch.shardActivity.sourceTooltip.primarySourceText"
                 defaultMessage="primary"
-                />
-              ): (
-                <FormattedMessage
-                  id="xpack.monitoring.elasticsearch.shardActivity.sourceTooltip.replicaSourceText"
-                  defaultMessage="replica"
-                />
-              ),
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.monitoring.elasticsearch.shardActivity.sourceTooltip.replicaSourceText"
+                defaultMessage="replica"
+              />
+            ),
         }}
       />
     </Fragment>

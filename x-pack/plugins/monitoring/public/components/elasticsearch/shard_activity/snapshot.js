@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { FormatedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Snapshot = ({ isSnapshot, repo, snapshot }) => {
   return isSnapshot ? (

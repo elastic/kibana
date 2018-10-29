@@ -61,7 +61,7 @@ const columns = [
   {
     title: i18n.translate('xpack.monitoring.kibana.shardActivity.translogTitle', {
       defaultMessage: 'Translog'
-    }),'Translog',
+    }),
     sortKey: null
   }
 ];
@@ -117,7 +117,7 @@ class ShardActivityUI extends React.Component {
     if (this.props.showShardActivityHistory) {
       return this.props.intl.formatMessage({
         id: 'xpack.monitoring.elasticsearch.shardActivity.noDataMessage',
-        defaultMesage: 'There are no historical shard activity records for the selected time range.'
+        defaultMessage: 'There are no historical shard activity records for the selected time range.'
       });
     }
     return (
@@ -155,12 +155,12 @@ class ShardActivityUI extends React.Component {
       <Fragment>
         <EuiText>
           <EuiTitle size="s">
-          <h2>
-            <FormattedMessage
-              id="xpack.monitoring.elasticsearch.shardActivityTitle"
-              defaultMessage="Shard Activity"
-            />
-          </h2>
+            <h2>
+              <FormattedMessage
+                id="xpack.monitoring.elasticsearch.shardActivityTitle"
+                defaultMessage="Shard Activity"
+              />
+            </h2>
           </EuiTitle>
         </EuiText>
         <EuiSpacer />

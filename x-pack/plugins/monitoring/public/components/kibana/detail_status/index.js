@@ -32,14 +32,14 @@ export function DetailStatus({ stats }) {
       dataTestSubj: 'osFreeMemory'
     },
     {
-      label:  i18n.translate('xpack.monitoring.kibana.detailStatus.versionLabel', {
+      label: i18n.translate('xpack.monitoring.kibana.detailStatus.versionLabel', {
         defaultMessage: 'Version'
       }),
       value: version,
       dataTestSubj: 'version'
     },
     {
-      label:  i18n.translate('xpack.monitoring.kibana.detailStatus.uptimeLabel', {
+      label: i18n.translate('xpack.monitoring.kibana.detailStatus.uptimeLabel', {
         defaultMessage: 'Uptime'
       }),
       value: formatMetric(uptime, 'time_since'),

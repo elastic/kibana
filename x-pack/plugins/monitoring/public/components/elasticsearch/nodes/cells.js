@@ -8,6 +8,7 @@ import React from 'react';
 import { get } from 'lodash';
 import { formatMetric } from '../../../lib/format_number';
 import { KuiTableRowCell } from '@kbn/ui-framework/components';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function OfflineCell() {
   return (

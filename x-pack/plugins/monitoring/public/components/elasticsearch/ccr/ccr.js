@@ -58,7 +58,7 @@ class CcrUI extends Component {
               field: 'shardId',
               name: intl.formatMessage({
                 id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.shardColumnTitle',
-                defaultMesage: 'Shard'
+                defaultMessage: 'Shard'
               }),
               render: shardId => {
                 return (
@@ -75,7 +75,7 @@ class CcrUI extends Component {
               field: 'syncLagOps',
               name: intl.formatMessage({
                 id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.syncLagOpsColumnTitle',
-                defaultMesage: 'Sync Lag (ops)'
+                defaultMessage: 'Sync Lag (ops)'
               }),
               render: (syncLagOps, data) => (
                 <span>
@@ -97,7 +97,7 @@ class CcrUI extends Component {
                         </span>
                         <br/>
                         <span>
-                        <FormattedMessage
+                          <FormattedMessage
                             id="xpack.monitoring.elasticsearch.ccr.shardsTable.syncLagOpsColumn.followerLagTooltip"
                             defaultMessage="Follower lag: {syncLagOpsFollower}"
                             values={{
@@ -116,7 +116,7 @@ class CcrUI extends Component {
               field: 'syncLagTime',
               name: intl.formatMessage({
                 id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.lastFetchTimeColumnTitle',
-                defaultMesage: 'Last fetch time'
+                defaultMessage: 'Last fetch time'
               }),
               render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
             },
@@ -124,14 +124,14 @@ class CcrUI extends Component {
               field: 'opsSynced',
               name: intl.formatMessage({
                 id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.opsSyncedColumnTitle',
-                defaultMesage: 'Ops synced'
+                defaultMessage: 'Ops synced'
               }),
             },
             {
               field: 'error',
               name: intl.formatMessage({
                 id: 'xpack.monitoring.elasticsearch.ccr.shardsTable.errorColumnTitle',
-                defaultMesage: 'Error'
+                defaultMessage: 'Error'
               }),
               render: error => (
                 <EuiTextColor color="danger">
@@ -176,7 +176,7 @@ class CcrUI extends Component {
             field: 'index',
             name: intl.formatMessage({
               id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.indexColumnTitle',
-              defaultMesage: 'Index'
+              defaultMessage: 'Index'
             }),
             sortable: true,
             render: (index, { shards }) => {
@@ -195,7 +195,7 @@ class CcrUI extends Component {
             sortable: true,
             name: intl.formatMessage({
               id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.followsColumnTitle',
-              defaultMesage: 'Follows'
+              defaultMessage: 'Follows'
             }),
           },
           {
@@ -203,7 +203,7 @@ class CcrUI extends Component {
             sortable: true,
             name: intl.formatMessage({
               id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.syncLagOpsColumnTitle',
-              defaultMesage: 'Sync Lag (ops)'
+              defaultMessage: 'Sync Lag (ops)'
             }),
           },
           {
@@ -211,7 +211,7 @@ class CcrUI extends Component {
             sortable: true,
             name: intl.formatMessage({
               id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.lastFetchTimeColumnTitle',
-              defaultMesage: 'Last fetch time'
+              defaultMessage: 'Last fetch time'
             }),
             render: syncLagTime => <span>{toSeconds(syncLagTime)}</span>
           },
@@ -220,7 +220,7 @@ class CcrUI extends Component {
             sortable: true,
             name: intl.formatMessage({
               id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.opsSyncedColumnTitle',
-              defaultMesage: 'Ops synced'
+              defaultMessage: 'Ops synced'
             }),
           },
           {
@@ -228,7 +228,7 @@ class CcrUI extends Component {
             sortable: true,
             name: intl.formatMessage({
               id: 'xpack.monitoring.elasticsearch.ccr.ccrListingTable.errorColumnTitle',
-              defaultMesage: 'Error'
+              defaultMessage: 'Error'
             }),
             render: error => (
               <EuiTextColor color="danger">

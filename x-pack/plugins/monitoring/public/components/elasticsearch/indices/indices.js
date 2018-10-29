@@ -113,6 +113,7 @@ const getNoDataMessage = filterText => {
   const howToShowSystemIndicesDescription = (
     <FormattedMessage
       id="xpack.monitoring.elasticsearch.indices.howToShowSystemIndicesDescription"
+      //eslint-disable-next-line max-len
       defaultMessage="If you are looking for system indices (e.g., .kibana), try checking {leftSingleQuote}Show system indices{rightSingleQuote}."
       values={{
         leftSingleQuote: '&lsquo;',
@@ -125,13 +126,13 @@ const getNoDataMessage = filterText => {
       <div>
         <p>
           <FormattedMessage
-              id="xpack.monitoring.elasticsearch.indices.noIndicesMatchYourSelectionWithTextFilterDescription"
-              defaultMessage="There are no indices that match your selection with the filter [{filterText}].
-              Try changing the filter or the time range selection."
-              values={{
-                filterText: filterText.trim()
-              }}
-            />
+            id="xpack.monitoring.elasticsearch.indices.noIndicesMatchYourSelectionWithTextFilterDescription"
+            defaultMessage="There are no indices that match your selection with the filter [{filterText}].
+            Try changing the filter or the time range selection."
+            values={{
+              filterText: filterText.trim()
+            }}
+          />
         </p>
         <p>
           {howToShowSystemIndicesDescription}

@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { Tooltip } from 'plugins/monitoring/components/tooltip';
-import { FormatedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const TotalTime = ({ startTime, totalTime }) => {
   return (
@@ -22,7 +22,8 @@ export const TotalTime = ({ startTime, totalTime }) => {
         />
       }
       placement="bottom"
-      trigger="hover">
+      trigger="hover"
+    >
       <EuiLink>{totalTime}</EuiLink>
     </Tooltip>
   );

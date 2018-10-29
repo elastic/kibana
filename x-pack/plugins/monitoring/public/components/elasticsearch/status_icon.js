@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { StatusIcon } from '../status_icon';
-import { FormatedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function ElasticsearchStatusIcon({ status }) {
   const type = (() => {
@@ -25,7 +25,7 @@ export function ElasticsearchStatusIcon({ status }) {
             status
           }}
         />
-        }
+      }
     />
   );
 }

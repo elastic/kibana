@@ -30,28 +30,28 @@ export function ClusterStatus({ stats }) {
       dataTestSubj: 'instances'
     },
     {
-      label:  i18n.translate('xpack.monitoring.kibana.clusterStatus.memoryLabel', {
+      label: i18n.translate('xpack.monitoring.kibana.clusterStatus.memoryLabel', {
         defaultMessage: 'Memory'
       }),
       value: formatMetric(memSize, 'byte') + ' / ' + formatMetric(memLimit, 'byte'),
       dataTestSubj: 'memory'
     },
     {
-      label:  i18n.translate('xpack.monitoring.kibana.clusterStatus.requestsLabel', {
+      label: i18n.translate('xpack.monitoring.kibana.clusterStatus.requestsLabel', {
         defaultMessage: 'Requests'
       }),
       value: requests,
       dataTestSubj: 'requests'
     },
     {
-      label:  i18n.translate('xpack.monitoring.kibana.clusterStatus.connectionsLabel', {
+      label: i18n.translate('xpack.monitoring.kibana.clusterStatus.connectionsLabel', {
         defaultMessage: 'Connections'
       }),
       value: connections,
       dataTestSubj: 'connections'
     },
     {
-      label:  i18n.translate('xpack.monitoring.kibana.clusterStatus.maxResponseTimeLabel', {
+      label: i18n.translate('xpack.monitoring.kibana.clusterStatus.maxResponseTimeLabel', {
         defaultMessage: 'Max. Response Time'
       }),
       value: formatMetric(maxResponseTime, '0', 'ms'),

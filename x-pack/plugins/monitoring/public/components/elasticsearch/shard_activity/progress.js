@@ -33,9 +33,9 @@ export const TranslogProgress = ({ hasTranslog, translogPercent, translogDone, t
     </Fragment>
   ) : (
     <FormattedMessage
-        id="xpack.monitoring.elasticsearch.shardActivity.progress.noTranslogProgressLabel"
-        defaultMessage="n/a"
-      />
+      id="xpack.monitoring.elasticsearch.shardActivity.progress.noTranslogProgressLabel"
+      defaultMessage="n/a"
+    />
   );
 };
 
