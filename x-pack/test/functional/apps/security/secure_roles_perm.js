@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }) {
 
 
 
-  describe('security', function () {
+  describe('secure roles and permissions', function () {
     before(async () => {
       await remote.setWindowSize(1600, 1000);
       log.debug('users');
@@ -32,20 +32,27 @@ export default function ({ getService, getPageObjects }) {
     it('should add new role logstash_reader', async function () {
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('logstash_reader', {
-        "indices": [{
-          "names": [ "logstash-*" ],
-          "privileges": [ "read", "view_index_metadata" ]
-        }]
+        elasticsearch: {
+          "indices": [{
+            "names": ["logstash-*"],
+            "privileges": ["read", "view_index_metadata"]
+          }]
+        },
+        kibana: {
+          global: ['all']
+        }
       });
     });
 
     it('should add new user', async function () {
       await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
-      await PageObjects.security.addUser({ username: 'Rashmi', password: 'changeme',
+      await PageObjects.security.addUser({
+        username: 'Rashmi', password: 'changeme',
         confirmPassword: 'changeme', fullname: 'RashmiFirst RashmiLast',
         email: 'rashmi@myEmail.com', save: true,
-        roles: ['logstash_reader', 'kibana_user'] });
+        roles: ['logstash_reader', 'kibana_user']
+      });
       log.debug('After Add user: , userObj.userName');
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
@@ -78,7 +85,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.loadSavedSearch('A Saved Search');
       log.debug('click Reporting button');
-      await PageObjects.reporting.openReportingPanel();
+      await PageObjects.reporting.openCsvReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
       const queueReportError = await PageObjects.reporting.getQueueReportError();
       expect(queueReportError).to.be(true);

@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Field for array setting should render custom setting icon if it is custom 1`] = `
+exports[`Field for array setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -16,9 +16,9 @@ exports[`Field for array setting should render custom setting icon if it is cust
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -26,7 +26,114 @@ exports[`Field for array setting should render custom setting icon if it is cust
               }
             }
           />
-        </UNDEFINED>
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        default_value
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="array:test:setting-aria"
+      title={
+        <h3>
+          Array test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "array:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            grow={true}
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="kbn.management.settings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="array:test:setting"
+      >
+        <EuiFieldText
+          aria-label="array test setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-array:test:setting"
+          disabled={true}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="user, value"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for array setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="mgtAdvancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Array test setting",
+              }
+            }
+          />
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -37,7 +144,13 @@ exports[`Field for array setting should render custom setting icon if it is cust
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content="Custom setting"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="kbn.management.settings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
             type="asterisk"
           />
         </h3>
@@ -55,15 +168,10 @@ exports[`Field for array setting should render custom setting icon if it is cust
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="array test setting"
-          >
-            array:test:setting
-          </span>
-        }
+        label="array:test:setting"
       >
         <EuiFieldText
+          aria-label="array test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={false}
@@ -86,7 +194,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
 exports[`Field for array setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -99,9 +207,9 @@ exports[`Field for array setting should render default value if there is no user
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -109,7 +217,7 @@ exports[`Field for array setting should render default value if there is no user
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -133,15 +241,10 @@ exports[`Field for array setting should render default value if there is no user
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="array test setting"
-          >
-            array:test:setting
-          </span>
-        }
+        label="array:test:setting"
       >
         <EuiFieldText
+          aria-label="array test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={false}
@@ -164,7 +267,7 @@ exports[`Field for array setting should render default value if there is no user
 exports[`Field for array setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -177,9 +280,9 @@ exports[`Field for array setting should render user value if there is user value
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -187,7 +290,7 @@ exports[`Field for array setting should render user value if there is user value
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -195,15 +298,22 @@ exports[`Field for array setting should render user value if there is user value
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  default_value
-                </EuiCode>
-              </UNDEFINED>
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        default_value
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -229,28 +339,27 @@ exports[`Field for array setting should render user value if there is user value
           <span>
             <span>
               <EuiLink
-                aria-label="Reset array test setting to default"
+                aria-label="Reset {ariaName} to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-array:test:setting"
                 onClick={[Function]}
                 type="button"
               >
-                Reset to default
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
               </EuiLink>
                  
             </span>
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="array test setting"
-          >
-            array:test:setting
-          </span>
-        }
+        label="array:test:setting"
       >
         <EuiFieldText
+          aria-label="array test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={false}
@@ -270,10 +379,10 @@ exports[`Field for array setting should render user value if there is user value
 </EuiFlexGroup>
 `;
 
-exports[`Field for boolean setting should render custom setting icon if it is custom 1`] = `
+exports[`Field for boolean setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -286,9 +395,9 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -296,7 +405,112 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
               }
             }
           />
-        </UNDEFINED>
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        true
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="boolean:test:setting-aria"
+      title={
+        <h3>
+          Boolean test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "boolean:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            grow={true}
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="kbn.management.settings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="boolean:test:setting"
+      >
+        <EuiSwitch
+          aria-label="boolean test setting"
+          checked={false}
+          data-test-subj="advancedSetting-editField-boolean:test:setting"
+          disabled={true}
+          label="Off"
+          onChange={[Function]}
+          onKeyDown={[Function]}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for boolean setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="mgtAdvancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Boolean test setting",
+              }
+            }
+          />
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -307,7 +521,13 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content="Custom setting"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="kbn.management.settings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
             type="asterisk"
           />
         </h3>
@@ -325,15 +545,10 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="boolean test setting"
-          >
-            boolean:test:setting
-          </span>
-        }
+        label="boolean:test:setting"
       >
         <EuiSwitch
+          aria-label="boolean test setting"
           checked={true}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
@@ -354,7 +569,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
 exports[`Field for boolean setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -367,9 +582,9 @@ exports[`Field for boolean setting should render default value if there is no us
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -377,7 +592,7 @@ exports[`Field for boolean setting should render default value if there is no us
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -401,15 +616,10 @@ exports[`Field for boolean setting should render default value if there is no us
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="boolean test setting"
-          >
-            boolean:test:setting
-          </span>
-        }
+        label="boolean:test:setting"
       >
         <EuiSwitch
+          aria-label="boolean test setting"
           checked={true}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
@@ -430,7 +640,7 @@ exports[`Field for boolean setting should render default value if there is no us
 exports[`Field for boolean setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -443,9 +653,9 @@ exports[`Field for boolean setting should render user value if there is user val
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -453,7 +663,7 @@ exports[`Field for boolean setting should render user value if there is user val
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -461,15 +671,22 @@ exports[`Field for boolean setting should render user value if there is user val
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  true
-                </EuiCode>
-              </UNDEFINED>
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        true
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -495,28 +712,27 @@ exports[`Field for boolean setting should render user value if there is user val
           <span>
             <span>
               <EuiLink
-                aria-label="Reset boolean test setting to default"
+                aria-label="Reset {ariaName} to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-boolean:test:setting"
                 onClick={[Function]}
                 type="button"
               >
-                Reset to default
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
               </EuiLink>
                  
             </span>
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="boolean test setting"
-          >
-            boolean:test:setting
-          </span>
-        }
+        label="boolean:test:setting"
       >
         <EuiSwitch
+          aria-label="boolean test setting"
           checked={false}
           data-test-subj="advancedSetting-editField-boolean:test:setting"
           disabled={false}
@@ -534,10 +750,10 @@ exports[`Field for boolean setting should render user value if there is user val
 </EuiFlexGroup>
 `;
 
-exports[`Field for image setting should render custom setting icon if it is custom 1`] = `
+exports[`Field for image setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -550,9 +766,9 @@ exports[`Field for image setting should render custom setting icon if it is cust
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -560,7 +776,111 @@ exports[`Field for image setting should render custom setting icon if it is cust
               }
             }
           />
-        </UNDEFINED>
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        null
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="image:test:setting-aria"
+      title={
+        <h3>
+          Image test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "image:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            grow={true}
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="kbn.management.settings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="image:test:setting"
+      >
+        <EuiImage
+          allowFullScreen={true}
+          alt="image:test:setting"
+          aria-label="image test setting"
+          fullScreenIconColor="light"
+          size="original"
+          url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for image setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="mgtAdvancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Image test setting",
+              }
+            }
+          />
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -571,7 +891,13 @@ exports[`Field for image setting should render custom setting icon if it is cust
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content="Custom setting"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="kbn.management.settings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
             type="asterisk"
           />
         </h3>
@@ -589,13 +915,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="image test setting"
-          >
-            image:test:setting
-          </span>
-        }
+        label="image:test:setting"
       >
         <EuiFilePicker
           accept=".jpg,.jpeg,.png"
@@ -619,7 +939,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
 exports[`Field for image setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -632,9 +952,9 @@ exports[`Field for image setting should render default value if there is no user
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -642,7 +962,7 @@ exports[`Field for image setting should render default value if there is no user
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -666,13 +986,7 @@ exports[`Field for image setting should render default value if there is no user
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="image test setting"
-          >
-            image:test:setting
-          </span>
-        }
+        label="image:test:setting"
       >
         <EuiFilePicker
           accept=".jpg,.jpeg,.png"
@@ -696,7 +1010,7 @@ exports[`Field for image setting should render default value if there is no user
 exports[`Field for image setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -709,9 +1023,9 @@ exports[`Field for image setting should render user value if there is user value
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -719,7 +1033,7 @@ exports[`Field for image setting should render user value if there is user value
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -727,15 +1041,22 @@ exports[`Field for image setting should render user value if there is user value
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  null
-                </EuiCode>
-              </UNDEFINED>
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        null
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -761,41 +1082,44 @@ exports[`Field for image setting should render user value if there is user value
           <span>
             <span>
               <EuiLink
-                aria-label="Reset image test setting to default"
+                aria-label="Reset {ariaName} to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-image:test:setting"
                 onClick={[Function]}
                 type="button"
               >
-                Reset to default
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
               </EuiLink>
                  
             </span>
             <span>
               <EuiLink
-                aria-label="Change image test setting"
+                aria-label="Change {ariaName}"
                 color="primary"
                 data-test-subj="advancedSetting-changeImage-image:test:setting"
                 onClick={[Function]}
                 type="button"
               >
-                Change image
+                <FormattedMessage
+                  defaultMessage="Change image"
+                  id="kbn.management.settings.field.changeImageLinkText"
+                  values={Object {}}
+                />
               </EuiLink>
             </span>
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="image test setting"
-          >
-            image:test:setting
-          </span>
-        }
+        label="image:test:setting"
       >
         <EuiImage
           allowFullScreen={true}
           alt="image:test:setting"
+          aria-label="image test setting"
           fullScreenIconColor="light"
           size="original"
           url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
@@ -810,10 +1134,10 @@ exports[`Field for image setting should render user value if there is user value
 </EuiFlexGroup>
 `;
 
-exports[`Field for json setting should render custom setting icon if it is custom 1`] = `
+exports[`Field for json setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -826,9 +1150,9 @@ exports[`Field for json setting should render custom setting icon if it is custo
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -836,7 +1160,134 @@ exports[`Field for json setting should render custom setting icon if it is custo
               }
             }
           />
-        </UNDEFINED>
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueTypeJsonText"
+                  values={
+                    Object {
+                      "value": <EuiCodeBlock
+                        language="json"
+                        overflowHeight={null}
+                        paddingSize="s"
+                      >
+                        {}
+                      </EuiCodeBlock>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="json:test:setting-aria"
+      title={
+        <h3>
+          Json test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "json:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            grow={true}
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="kbn.management.settings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="json:test:setting"
+      >
+        <div
+          data-test-subj="advancedSetting-editField-json:test:setting"
+        >
+          <EuiCodeEditor
+            aria-label="json test setting"
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            isReadOnly={true}
+            maxLines={30}
+            minLines={6}
+            mode="json"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value="{\\"hello\\": \\"world\\"}"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for json setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="mgtAdvancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Json test setting",
+              }
+            }
+          />
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -847,7 +1298,13 @@ exports[`Field for json setting should render custom setting icon if it is custo
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content="Custom setting"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="kbn.management.settings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
             type="asterisk"
           />
         </h3>
@@ -865,24 +1322,20 @@ exports[`Field for json setting should render custom setting icon if it is custo
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="json test setting"
-          >
-            json:test:setting
-          </span>
-        }
+        label="json:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-json:test:setting"
         >
           <EuiCodeEditor
+            aria-label="json test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
               }
             }
             height="auto"
+            isReadOnly={false}
             maxLines={30}
             minLines={6}
             mode="json"
@@ -911,7 +1364,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
 exports[`Field for json setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -924,9 +1377,9 @@ exports[`Field for json setting should render default value if there is no user 
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -934,7 +1387,7 @@ exports[`Field for json setting should render default value if there is no user 
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -942,19 +1395,26 @@ exports[`Field for json setting should render default value if there is no user 
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default:
-                <EuiCodeBlock
-                  language="json"
-                  overflowHeight={null}
-                  paddingSize="s"
-                >
-                  {}
-                </EuiCodeBlock>
-              </UNDEFINED>
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueTypeJsonText"
+                  values={
+                    Object {
+                      "value": <EuiCodeBlock
+                        language="json"
+                        overflowHeight={null}
+                        paddingSize="s"
+                      >
+                        {}
+                      </EuiCodeBlock>,
+                    }
+                  }
+                />
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -980,37 +1440,37 @@ exports[`Field for json setting should render default value if there is no user 
           <span>
             <span>
               <EuiLink
-                aria-label="Reset json test setting to default"
+                aria-label="Reset {ariaName} to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-json:test:setting"
                 onClick={[Function]}
                 type="button"
               >
-                Reset to default
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
               </EuiLink>
                  
             </span>
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="json test setting"
-          >
-            json:test:setting
-          </span>
-        }
+        label="json:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-json:test:setting"
         >
           <EuiCodeEditor
+            aria-label="json test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
               }
             }
             height="auto"
+            isReadOnly={false}
             maxLines={30}
             minLines={6}
             mode="json"
@@ -1039,7 +1499,7 @@ exports[`Field for json setting should render default value if there is no user 
 exports[`Field for json setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1052,9 +1512,9 @@ exports[`Field for json setting should render user value if there is user value 
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1062,7 +1522,7 @@ exports[`Field for json setting should render user value if there is user value 
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -1070,19 +1530,26 @@ exports[`Field for json setting should render user value if there is user value 
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default:
-                <EuiCodeBlock
-                  language="json"
-                  overflowHeight={null}
-                  paddingSize="s"
-                >
-                  {}
-                </EuiCodeBlock>
-              </UNDEFINED>
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueTypeJsonText"
+                  values={
+                    Object {
+                      "value": <EuiCodeBlock
+                        language="json"
+                        overflowHeight={null}
+                        paddingSize="s"
+                      >
+                        {}
+                      </EuiCodeBlock>,
+                    }
+                  }
+                />
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1108,37 +1575,37 @@ exports[`Field for json setting should render user value if there is user value 
           <span>
             <span>
               <EuiLink
-                aria-label="Reset json test setting to default"
+                aria-label="Reset {ariaName} to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-json:test:setting"
                 onClick={[Function]}
                 type="button"
               >
-                Reset to default
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
               </EuiLink>
                  
             </span>
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="json test setting"
-          >
-            json:test:setting
-          </span>
-        }
+        label="json:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-json:test:setting"
         >
           <EuiCodeEditor
+            aria-label="json test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
               }
             }
             height="auto"
+            isReadOnly={false}
             maxLines={30}
             minLines={6}
             mode="json"
@@ -1164,10 +1631,10 @@ exports[`Field for json setting should render user value if there is user value 
 </EuiFlexGroup>
 `;
 
-exports[`Field for markdown setting should render custom setting icon if it is custom 1`] = `
+exports[`Field for markdown setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1180,9 +1647,9 @@ exports[`Field for markdown setting should render custom setting icon if it is c
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1190,7 +1657,130 @@ exports[`Field for markdown setting should render custom setting icon if it is c
               }
             }
           />
-        </UNDEFINED>
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        null
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="markdown:test:setting-aria"
+      title={
+        <h3>
+          Markdown test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "markdown:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            grow={true}
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="kbn.management.settings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="markdown:test:setting"
+      >
+        <div
+          data-test-subj="advancedSetting-editField-markdown:test:setting"
+        >
+          <EuiCodeEditor
+            aria-label="markdown test setting"
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            isReadOnly={true}
+            maxLines={30}
+            minLines={6}
+            mode="markdown"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value="**bold**"
+            width="100%"
+          />
+        </div>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for markdown setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="mgtAdvancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Markdown test setting",
+              }
+            }
+          />
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1201,7 +1791,13 @@ exports[`Field for markdown setting should render custom setting icon if it is c
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content="Custom setting"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="kbn.management.settings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
             type="asterisk"
           />
         </h3>
@@ -1219,24 +1815,20 @@ exports[`Field for markdown setting should render custom setting icon if it is c
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="markdown test setting"
-          >
-            markdown:test:setting
-          </span>
-        }
+        label="markdown:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
         >
           <EuiCodeEditor
+            aria-label="markdown test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
               }
             }
             height="auto"
+            isReadOnly={false}
             maxLines={30}
             minLines={6}
             mode="markdown"
@@ -1265,7 +1857,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
 exports[`Field for markdown setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1278,9 +1870,9 @@ exports[`Field for markdown setting should render default value if there is no u
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1288,7 +1880,7 @@ exports[`Field for markdown setting should render default value if there is no u
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1312,24 +1904,20 @@ exports[`Field for markdown setting should render default value if there is no u
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="markdown test setting"
-          >
-            markdown:test:setting
-          </span>
-        }
+        label="markdown:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
         >
           <EuiCodeEditor
+            aria-label="markdown test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
               }
             }
             height="auto"
+            isReadOnly={false}
             maxLines={30}
             minLines={6}
             mode="markdown"
@@ -1358,7 +1946,7 @@ exports[`Field for markdown setting should render default value if there is no u
 exports[`Field for markdown setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1371,9 +1959,9 @@ exports[`Field for markdown setting should render user value if there is user va
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1381,7 +1969,7 @@ exports[`Field for markdown setting should render user value if there is user va
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -1389,15 +1977,22 @@ exports[`Field for markdown setting should render user value if there is user va
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  null
-                </EuiCode>
-              </UNDEFINED>
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        null
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1423,37 +2018,37 @@ exports[`Field for markdown setting should render user value if there is user va
           <span>
             <span>
               <EuiLink
-                aria-label="Reset markdown test setting to default"
+                aria-label="Reset {ariaName} to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-markdown:test:setting"
                 onClick={[Function]}
                 type="button"
               >
-                Reset to default
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
               </EuiLink>
                  
             </span>
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="markdown test setting"
-          >
-            markdown:test:setting
-          </span>
-        }
+        label="markdown:test:setting"
       >
         <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
         >
           <EuiCodeEditor
+            aria-label="markdown test setting"
             editorProps={
               Object {
                 "$blockScrolling": Infinity,
               }
             }
             height="auto"
+            isReadOnly={false}
             maxLines={30}
             minLines={6}
             mode="markdown"
@@ -1479,10 +2074,10 @@ exports[`Field for markdown setting should render user value if there is user va
 </EuiFlexGroup>
 `;
 
-exports[`Field for number setting should render custom setting icon if it is custom 1`] = `
+exports[`Field for number setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1495,9 +2090,9 @@ exports[`Field for number setting should render custom setting icon if it is cus
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1505,7 +2100,114 @@ exports[`Field for number setting should render custom setting icon if it is cus
               }
             }
           />
-        </UNDEFINED>
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        5
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="number:test:setting-aria"
+      title={
+        <h3>
+          Number test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "number:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            grow={true}
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="kbn.management.settings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="number:test:setting"
+      >
+        <EuiFieldNumber
+          aria-label="number test setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-number:test:setting"
+          disabled={true}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value={10}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for number setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="mgtAdvancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Number test setting",
+              }
+            }
+          />
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1516,7 +2218,13 @@ exports[`Field for number setting should render custom setting icon if it is cus
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content="Custom setting"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="kbn.management.settings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
             type="asterisk"
           />
         </h3>
@@ -1534,15 +2242,10 @@ exports[`Field for number setting should render custom setting icon if it is cus
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="number test setting"
-          >
-            number:test:setting
-          </span>
-        }
+        label="number:test:setting"
       >
         <EuiFieldNumber
+          aria-label="number test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={false}
@@ -1565,7 +2268,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
 exports[`Field for number setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1578,9 +2281,9 @@ exports[`Field for number setting should render default value if there is no use
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1588,7 +2291,7 @@ exports[`Field for number setting should render default value if there is no use
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1612,15 +2315,10 @@ exports[`Field for number setting should render default value if there is no use
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="number test setting"
-          >
-            number:test:setting
-          </span>
-        }
+        label="number:test:setting"
       >
         <EuiFieldNumber
+          aria-label="number test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={false}
@@ -1643,7 +2341,7 @@ exports[`Field for number setting should render default value if there is no use
 exports[`Field for number setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1656,9 +2354,9 @@ exports[`Field for number setting should render user value if there is user valu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1666,7 +2364,7 @@ exports[`Field for number setting should render user value if there is user valu
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -1674,15 +2372,22 @@ exports[`Field for number setting should render user value if there is user valu
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  5
-                </EuiCode>
-              </UNDEFINED>
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        5
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1708,28 +2413,27 @@ exports[`Field for number setting should render user value if there is user valu
           <span>
             <span>
               <EuiLink
-                aria-label="Reset number test setting to default"
+                aria-label="Reset {ariaName} to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-number:test:setting"
                 onClick={[Function]}
                 type="button"
               >
-                Reset to default
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
               </EuiLink>
                  
             </span>
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="number test setting"
-          >
-            number:test:setting
-          </span>
-        }
+        label="number:test:setting"
       >
         <EuiFieldNumber
+          aria-label="number test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-number:test:setting"
           disabled={false}
@@ -1749,10 +2453,10 @@ exports[`Field for number setting should render user value if there is user valu
 </EuiFlexGroup>
 `;
 
-exports[`Field for select setting should render custom setting icon if it is custom 1`] = `
+exports[`Field for select setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1765,9 +2469,9 @@ exports[`Field for select setting should render custom setting icon if it is cus
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1775,7 +2479,131 @@ exports[`Field for select setting should render custom setting icon if it is cus
               }
             }
           />
-        </UNDEFINED>
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        orange
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="select:test:setting-aria"
+      title={
+        <h3>
+          Select test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "select:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            grow={true}
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="kbn.management.settings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="select:test:setting"
+      >
+        <EuiSelect
+          aria-label="select test setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-select:test:setting"
+          disabled={true}
+          fullWidth={false}
+          hasNoInitialSelection={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "apple",
+                "value": "apple",
+              },
+              Object {
+                "text": "orange",
+                "value": "orange",
+              },
+              Object {
+                "text": "banana",
+                "value": "banana",
+              },
+            ]
+          }
+          value="banana"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for select setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="mgtAdvancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for Select test setting",
+              }
+            }
+          />
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1786,7 +2614,13 @@ exports[`Field for select setting should render custom setting icon if it is cus
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content="Custom setting"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="kbn.management.settings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
             type="asterisk"
           />
         </h3>
@@ -1804,15 +2638,10 @@ exports[`Field for select setting should render custom setting icon if it is cus
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="select test setting"
-          >
-            select:test:setting
-          </span>
-        }
+        label="select:test:setting"
       >
         <EuiSelect
+          aria-label="select test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={false}
@@ -1852,7 +2681,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
 exports[`Field for select setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1865,9 +2694,9 @@ exports[`Field for select setting should render default value if there is no use
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1875,7 +2704,7 @@ exports[`Field for select setting should render default value if there is no use
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -1899,15 +2728,10 @@ exports[`Field for select setting should render default value if there is no use
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="select test setting"
-          >
-            select:test:setting
-          </span>
-        }
+        label="select:test:setting"
       >
         <EuiSelect
+          aria-label="select test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={false}
@@ -1947,7 +2771,7 @@ exports[`Field for select setting should render default value if there is no use
 exports[`Field for select setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -1960,9 +2784,9 @@ exports[`Field for select setting should render user value if there is user valu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -1970,7 +2794,7 @@ exports[`Field for select setting should render user value if there is user valu
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -1978,15 +2802,22 @@ exports[`Field for select setting should render user value if there is user valu
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  orange
-                </EuiCode>
-              </UNDEFINED>
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        orange
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2012,28 +2843,27 @@ exports[`Field for select setting should render user value if there is user valu
           <span>
             <span>
               <EuiLink
-                aria-label="Reset select test setting to default"
+                aria-label="Reset {ariaName} to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-select:test:setting"
                 onClick={[Function]}
                 type="button"
               >
-                Reset to default
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
               </EuiLink>
                  
             </span>
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="select test setting"
-          >
-            select:test:setting
-          </span>
-        }
+        label="select:test:setting"
       >
         <EuiSelect
+          aria-label="select test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={false}
@@ -2070,10 +2900,10 @@ exports[`Field for select setting should render user value if there is user valu
 </EuiFlexGroup>
 `;
 
-exports[`Field for string setting should render custom setting icon if it is custom 1`] = `
+exports[`Field for string setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2086,9 +2916,9 @@ exports[`Field for string setting should render custom setting icon if it is cus
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2096,7 +2926,114 @@ exports[`Field for string setting should render custom setting icon if it is cus
               }
             }
           />
-        </UNDEFINED>
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              grow={true}
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        null
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test:setting-aria"
+      title={
+        <h3>
+          String test setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        describedByIds={
+          Array [
+            "string:test:setting-aria",
+          ]
+        }
+        error={null}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            grow={true}
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="kbn.management.settings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="string:test:setting"
+      >
+        <EuiFieldText
+          aria-label="string test setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test:setting"
+          disabled={true}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for string setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  className="mgtAdvancedSettings__field"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test setting",
+              }
+            }
+          />
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2107,7 +3044,13 @@ exports[`Field for string setting should render custom setting icon if it is cus
           <EuiIconTip
             aria-label="Custom setting"
             color="primary"
-            content="Custom setting"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="kbn.management.settings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
             type="asterisk"
           />
         </h3>
@@ -2125,15 +3068,10 @@ exports[`Field for string setting should render custom setting icon if it is cus
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="string test setting"
-          >
-            string:test:setting
-          </span>
-        }
+        label="string:test:setting"
       >
         <EuiFieldText
+          aria-label="string test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={false}
@@ -2156,7 +3094,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
 exports[`Field for string setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2169,9 +3107,9 @@ exports[`Field for string setting should render default value if there is no use
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2179,7 +3117,7 @@ exports[`Field for string setting should render default value if there is no use
               }
             }
           />
-        </UNDEFINED>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2203,15 +3141,10 @@ exports[`Field for string setting should render default value if there is no use
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
-        label={
-          <span
-            aria-label="string test setting"
-          >
-            string:test:setting
-          </span>
-        }
+        label="string:test:setting"
       >
         <EuiFieldText
+          aria-label="string test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={false}
@@ -2234,7 +3167,7 @@ exports[`Field for string setting should render default value if there is no use
 exports[`Field for string setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
-  className="advancedSettings__field"
+  className="mgtAdvancedSettings__field"
   component="div"
   direction="row"
   gutterSize="l"
@@ -2247,9 +3180,9 @@ exports[`Field for string setting should render user value if there is user valu
     grow={false}
   >
     <EuiDescribedFormGroup
-      className="advancedSettings__field__wrapper"
+      className="mgtAdvancedSettings__fieldWrapper"
       description={
-        <UNDEFINED>
+        <React.Fragment>
           <div
             dangerouslySetInnerHTML={
               Object {
@@ -2257,7 +3190,7 @@ exports[`Field for string setting should render user value if there is user valu
               }
             }
           />
-          <UNDEFINED>
+          <React.Fragment>
             <EuiSpacer
               size="s"
             />
@@ -2265,15 +3198,22 @@ exports[`Field for string setting should render user value if there is user valu
               grow={true}
               size="xs"
             >
-              <UNDEFINED>
-                Default: 
-                <EuiCode>
-                  null
-                </EuiCode>
-              </UNDEFINED>
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        null
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
             </EuiText>
-          </UNDEFINED>
-        </UNDEFINED>
+          </React.Fragment>
+        </React.Fragment>
       }
       fullWidth={false}
       gutterSize="l"
@@ -2299,28 +3239,27 @@ exports[`Field for string setting should render user value if there is user valu
           <span>
             <span>
               <EuiLink
-                aria-label="Reset string test setting to default"
+                aria-label="Reset {ariaName} to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-string:test:setting"
                 onClick={[Function]}
                 type="button"
               >
-                Reset to default
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
               </EuiLink>
                  
             </span>
           </span>
         }
         isInvalid={false}
-        label={
-          <span
-            aria-label="string test setting"
-          >
-            string:test:setting
-          </span>
-        }
+        label="string:test:setting"
       >
         <EuiFieldText
+          aria-label="string test setting"
           compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={false}

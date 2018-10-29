@@ -18,10 +18,11 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 export function IndicesEditSectionsProvider() {
 
-  return function (indexPattern) {
+  return function (indexPattern, indexPatternListProvider) {
     const fieldCount = _.countBy(indexPattern.fields, function (field) {
       return (field.scripted) ? 'scripted' : 'indexed';
     });
@@ -32,22 +33,28 @@ export function IndicesEditSectionsProvider() {
       sourceFilters: indexPattern.sourceFilters ? indexPattern.sourceFilters.length : 0,
     });
 
-    return [
-      {
-        title: 'Fields',
-        index: 'indexedFields',
-        count: fieldCount.indexed
-      },
-      {
-        title: 'Scripted fields',
+    const editSections = [];
+
+    editSections.push({
+      title: i18n.translate('kbn.management.editIndexPattern.tabs.fieldsHeader', { defaultMessage: 'Fields' }),
+      index: 'indexedFields',
+      count: fieldCount.indexed
+    });
+
+    if(indexPatternListProvider.areScriptedFieldsEnabled(indexPattern)) {
+      editSections.push({
+        title: i18n.translate('kbn.management.editIndexPattern.tabs.scriptedHeader', { defaultMessage: 'Scripted fields' }),
         index: 'scriptedFields',
         count: fieldCount.scripted
-      },
-      {
-        title: 'Source filters',
-        index: 'sourceFilters',
-        count: fieldCount.sourceFilters
-      }
-    ];
+      });
+    }
+
+    editSections.push({
+      title: i18n.translate('kbn.management.editIndexPattern.tabs.sourceHeader', { defaultMessage: 'Source filters' }),
+      index: 'sourceFilters',
+      count: fieldCount.sourceFilters
+    });
+
+    return editSections;
   };
 }

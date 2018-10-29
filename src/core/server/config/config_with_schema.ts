@@ -18,8 +18,8 @@
  */
 
 // TODO inline all of these
+import { Type, TypeOf } from '@kbn/config-schema';
 import { Env } from './env';
-import { AnyType, TypeOf } from './schema';
 
 /**
  * Interface that defines the static side of a config class.
@@ -31,7 +31,7 @@ import { AnyType, TypeOf } from './schema';
  * in TypeScript, but it can be used to ensure we have a config class that
  * matches whenever it's used.
  */
-export interface ConfigWithSchema<S extends AnyType, Config> {
+export interface ConfigWithSchema<S extends Type<any>, Config> {
   /**
    * Any config class must define a schema that validates the config, based on
    * the injected `schema` helper.

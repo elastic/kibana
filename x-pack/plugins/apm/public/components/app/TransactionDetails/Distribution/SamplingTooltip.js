@@ -29,7 +29,8 @@ const SamplingTooltip = () => (
         <Tooltip>
           <TooltipTitle>Sampling</TooltipTitle>
           Each bucket will show a sample transaction. If there&apos;s no sample
-          available,<br />
+          available,
+          <br />
           it&apos;s most likely because of the sampling limit set in the agent
           configuration.
         </Tooltip>

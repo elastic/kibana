@@ -20,7 +20,7 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { createRunner } from '../runner';
 import { isErrorLogged, markErrorLogged } from '../errors';
 
@@ -29,9 +29,13 @@ describe('dev/build/lib/runner', () => {
 
   const config = {};
 
-  const log = createToolingLog('verbose');
   const onLogLine = sandbox.stub();
-  log.on('data', onLogLine);
+  const log = new ToolingLog({
+    level: 'verbose',
+    writeTo: {
+      write: onLogLine
+    }
+  });
 
   const buildMatcher = sinon.match({
     isOss: sinon.match.func,

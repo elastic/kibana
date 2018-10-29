@@ -30,13 +30,27 @@ fi
 ###
 ### download node
 ###
+UNAME=$(uname)
+OS='linux'
+if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
+  OS='win'
+fi
+echo " -- Running on OS: $OS"
+
 nodeVersion="$(cat $dir/.node-version)"
-nodeUrl="https://nodejs.org/download/release/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
 nodeDir="$cacheDir/node/$nodeVersion"
+if [[ $OS == 'win' ]]; then
+  nodeBin="$nodeDir"
+  nodeUrl="https://nodejs.org/download/release/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
+else 
+  nodeBin="$nodeDir/bin"
+  nodeUrl="https://nodejs.org/download/release/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
+fi
+
 echo " -- node: version=v${nodeVersion} dir=$nodeDir"
 
 echo " -- setting up node.js"
-if [ -x "$nodeDir/bin/node" ] && [ "$($nodeDir/bin/node --version)" == "v$nodeVersion" ]; then
+if [ -x "$nodeBin/node" ] && [ "$($nodeBin/node --version)" == "v$nodeVersion" ]; then
   echo " -- reusing node.js install"
 else
   if [ -d "$nodeDir" ]; then
@@ -46,14 +60,21 @@ else
 
   echo " -- downloading node.js from $nodeUrl"
   mkdir -p "$nodeDir"
-  curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
+  if [[ $OS == 'win' ]]; then
+    nodePkg="$nodeDir/${nodeUrl##*/}"
+    curl --silent -o $nodePkg $nodeUrl
+    unzip -jqo $nodePkg -d $nodeDir
+  else
+    curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
+  fi
+
 fi
 
 
 ###
 ### "install" node into this shell
 ###
-export PATH="$nodeDir/bin:$PATH"
+export PATH="$nodeBin:$PATH"
 hash -r
 
 

@@ -1,0 +1,7 @@
+@import '../../../../lib/eui.scss';
+
+.canvasDateTimeCal {
+  display: inline-grid;
+  height: 100%;
+  border: $euiBorderThin;
+}

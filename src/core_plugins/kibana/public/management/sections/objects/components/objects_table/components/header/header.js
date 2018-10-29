@@ -18,6 +18,7 @@
  */
 
 import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
 
 import {
   EuiSpacer,
@@ -28,29 +29,27 @@ import {
   EuiTextColor,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Header = ({
   onExportAll,
   onImport,
   onRefresh,
-  totalCount,
+  filteredCount,
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h1>Saved Objects</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTextColor color="subdued">
-              <p>{totalCount} in total</p>
-            </EuiTextColor>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle>
+          <h1>
+            <FormattedMessage
+              id="kbn.management.objects.objectsTable.header.savedObjectsTitle"
+              defaultMessage="Saved Objects"
+            />
+          </h1>
+        </EuiTitle>
       </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -60,7 +59,13 @@ export const Header = ({
               data-test-subj="exportAllObjects"
               onClick={onExportAll}
             >
-              Export Everything
+              <FormattedMessage
+                id="kbn.management.objects.objectsTable.header.exportButtonLabel"
+                defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
+                values={{
+                  filteredCount
+                }}
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -70,7 +75,10 @@ export const Header = ({
               data-test-subj="importObjects"
               onClick={onImport}
             >
-              Import
+              <FormattedMessage
+                id="kbn.management.objects.objectsTable.header.importButtonLabel"
+                defaultMessage="Import"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -79,7 +87,10 @@ export const Header = ({
               iconType="refresh"
               onClick={onRefresh}
             >
-              Refresh
+              <FormattedMessage
+                id="kbn.management.objects.objectsTable.header.refreshButtonLabel"
+                defaultMessage="Refresh"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -89,13 +100,23 @@ export const Header = ({
     <EuiText>
       <p>
         <EuiTextColor color="subdued">
-          From here you can delete saved objects, such as saved searches.
-          You can also edit the raw data of saved objects.
-          Typically objects are only modified via their associated application,
-          which is probably what you should use instead of this screen.
+          <FormattedMessage
+            id="kbn.management.objects.objectsTable.howToDeleteSavedObjectsDescription"
+            defaultMessage="From here you can delete saved objects, such as saved searches.
+            You can also edit the raw data of saved objects.
+            Typically objects are only modified via their associated application,
+            which is probably what you should use instead of this screen."
+          />
         </EuiTextColor>
       </p>
     </EuiText>
     <EuiSpacer size="m"/>
   </Fragment>
 );
+
+Header.propTypes = {
+  onExportAll: PropTypes.func.isRequired,
+  onImport: PropTypes.func.isRequired,
+  onRefresh: PropTypes.func.isRequired,
+  filteredCount: PropTypes.number.isRequired,
+};

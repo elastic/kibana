@@ -25,6 +25,7 @@ import {
 } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
+import { i18n } from '@kbn/i18n';
 
 const minMaxAgg = (field) => {
   const aggBody = {};
@@ -64,12 +65,15 @@ class RangeControl extends Control {
     try {
       resp = await searchSource.fetch();
     } catch(error) {
-      this.disable(`Unable to fetch range min and max, error: ${error.message}`);
+      this.disable(i18n.translate('inputControl.rangeControl.unableToFetchTooltip', {
+        defaultMessage: 'Unable to fetch range min and max, error: {errorMessage}',
+        values: { errorMessage: error.message }
+      }));
       return;
     }
 
-    const min = _.get(resp, 'aggregations.minAgg.value');
-    const max = _.get(resp, 'aggregations.maxAgg.value');
+    const min = _.get(resp, 'aggregations.minAgg.value', null);
+    const max = _.get(resp, 'aggregations.maxAgg.value', null);
 
     if (min === null || max === null) {
       this.disable(noValuesDisableMsg(fieldName, indexPattern.title));

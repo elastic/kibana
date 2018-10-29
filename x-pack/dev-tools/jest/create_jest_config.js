@@ -28,7 +28,8 @@ export function createJestConfig({
     },
     setupFiles: [
       `${kibanaDirectory}/src/dev/jest/setup/babel_polyfill.js`,
-      `<rootDir>/dev-tools/jest/setup/enzyme.js`
+      `<rootDir>/dev-tools/jest/setup/polyfills.js`,
+      `<rootDir>/dev-tools/jest/setup/enzyme.js`,
     ],
     testMatch: [
       "**/*.test.{js,ts,tsx}"
@@ -49,6 +50,6 @@ export function createJestConfig({
         reportName: 'X-Pack Jest Tests',
         rootDirectory: xPackKibanaDirectory,
       }]
-    ]
+    ],
   };
 }

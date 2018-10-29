@@ -1,0 +1,15 @@
+// Should import both the EUI constants and any Kibana ones that are considered global
+@import 'ui/public/styles/styling_constants';
+
+/* Timelion plugin styles */
+
+// Prefix all styles with "tim" to avoid conflicts.
+// Examples
+//   timChart
+//   timChart__legend
+//   timChart__legend--small
+//   timChart__legend-isLoading
+
+@import './app';
+@import './directives/index';
+@import './vis/index'

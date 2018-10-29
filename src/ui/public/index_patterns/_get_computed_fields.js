@@ -25,7 +25,13 @@ export function getComputedFields() {
   const scriptFields = {};
   let docvalueFields = [];
 
-  docvalueFields = _.map(_.reject(self.fields.byType.date, 'scripted'), 'name');
+  docvalueFields = _.reject(self.fields.byType.date, 'scripted')
+    .map((dateField) => {
+      return {
+        field: dateField.name,
+        format: 'date_time',
+      };
+    });
 
   _.each(self.getScriptedFields(), function (field) {
     scriptFields[field.name] = {

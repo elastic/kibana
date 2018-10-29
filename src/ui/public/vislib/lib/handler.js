@@ -217,20 +217,10 @@ export function VisHandlerProvider(Private) {
         .append('div')
         // class name needs `chart` in it for the polling checkSize function
         // to continuously call render on resize
-        .attr('class', 'visualize-error chart error');
+        .attr('class', 'visualize-error chart error')
+        .attr('data-test-subj', 'visLibVisualizeError');
 
-      if (message === 'No results found') {
-        div.append('div')
-          .attr('class', 'text-center visualize-error visualize-chart')
-          .append('div').attr('class', 'item top')
-          .append('div').attr('class', 'item')
-          .append('h2').html('<i class="fa fa-meh-o"></i>')
-          .append('h4').text(message);
-
-        div.append('div').attr('class', 'item bottom');
-      } else {
-        div.append('h4').text(markdownIt.renderInline(message));
-      }
+      div.append('h4').text(markdownIt.renderInline(message));
 
       dispatchRenderComplete(this.el);
       return div;

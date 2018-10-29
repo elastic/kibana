@@ -6,9 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { first, tap, mergeMap } from 'rxjs/operators';
-import path from 'path';
 import fs from 'fs';
-import moment from 'moment';
 import getPort from 'get-port';
 import { promisify } from 'bluebird';
 import { LevelLogger } from '../../../../server/lib/level_logger';
@@ -24,8 +22,6 @@ export function screenshotsObservableFactory(server) {
   const browserDriverFactory = server.plugins.reporting.browserDriverFactory;
   const captureConfig = config.get('xpack.reporting.capture');
 
-  const dataDirectory = config.get('path.data');
-
   const asyncDurationLogger = async (description, promise) => {
     const start = new Date();
     const result = await promise;
@@ -33,21 +29,11 @@ export function screenshotsObservableFactory(server) {
     return result;
   };
 
-  const startRecording = (browser) => {
-    if (captureConfig.record) {
-      if (!browser.record) {
-        throw new Error('Unable to record capture with current browser');
-      }
-
-      browser.record(path.join(dataDirectory, `recording-${moment().utc().format().replace(/:/g, '_')}`));
-    }
-  };
-
-  const openUrl = async (browser, url, headers) => {
+  const openUrl = async (browser, url, sessionCookie) => {
     const waitForSelector = '.application';
 
     await browser.open(url, {
-      headers,
+      sessionCookie,
       waitForSelector,
     });
   };
@@ -147,7 +133,16 @@ export function screenshotsObservableFactory(server) {
           }
         }
 
-        return Promise.all(renderedTasks);
+        // The renderComplete fires before the visualizations are in the DOM, so
+        // we wait for the event loop to flush before telling reporting to continue. This
+        // seems to correct a timing issue that was causing reporting to occasionally
+        // capture the first visualization before it was actually in the DOM.
+        // Note: 100 proved too short, see https://github.com/elastic/kibana/issues/22581,
+        // bumping to 250.
+        const hackyWaitForVisualizations = () => new Promise(r => setTimeout(r, 250));
+
+
+        return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
       },
       args: [layout.selectors.renderComplete, captureConfig.loadDelay],
       awaitPromise: true,
@@ -231,7 +226,7 @@ export function screenshotsObservableFactory(server) {
     return screenshots;
   };
 
-  return function screenshotsObservable(url, headers, layout) {
+  return function screenshotsObservable(url, sessionCookie, layout, browserTimezone) {
 
     return Rx.defer(async () => await getPort()).pipe(
       mergeMap(bridgePort => {
@@ -241,6 +236,7 @@ export function screenshotsObservableFactory(server) {
           viewport: layout.getBrowserViewport(),
           zoom: layout.getBrowserZoom(),
           logger,
+          browserTimezone,
         });
       }),
       tap(() => logger.debug('Driver factory created')),
@@ -256,10 +252,9 @@ export function screenshotsObservableFactory(server) {
 
 
         const screenshot$ = driver$.pipe(
-          tap(browser => startRecording(browser)),
           tap(() => logger.debug(`opening ${url}`)),
           mergeMap(
-            browser => openUrl(browser, url, headers),
+            browser => openUrl(browser, url, sessionCookie),
             browser => browser
           ),
           tap(() => logger.debug('injecting custom css')),
@@ -280,20 +275,20 @@ export function screenshotsObservableFactory(server) {
             browser => getNumberOfItems(browser, layout),
             (browser, itemsCount) => ({ browser, itemsCount })
           ),
+          tap(() => logger.debug('setting viewport')),
+          mergeMap(
+            ({ browser, itemsCount }) => setViewport(browser, itemsCount, layout),
+            ({ browser, itemsCount }) => ({ browser, itemsCount }),
+          ),
           tap(({ itemsCount }) => logger.debug(`waiting for ${itemsCount} to be in the DOM`)),
           mergeMap(
             ({ browser, itemsCount }) => waitForElementsToBeInDOM(browser, itemsCount, layout),
             ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
-          tap(() => logger.debug('setting viewport')),
-          mergeMap(
-            ({ browser, itemsCount }) => setViewport(browser, itemsCount, layout),
-            ({ browser }) => browser
-          ),
           tap(() => logger.debug('positioning elements')),
           mergeMap(
-            browser => positionElements(browser, layout),
-            browser => browser
+            ({ browser }) => positionElements(browser, layout),
+            ({ browser }) => browser
           ),
           tap(() => logger.debug('waiting for rendering to complete')),
           mergeMap(

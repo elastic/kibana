@@ -21,6 +21,7 @@ import './saved_dashboard';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 const module = uiModules.get('app/dashboard');
 
@@ -32,6 +33,7 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedDashboards', function (SavedDashboard, kbnIndex, kbnUrl, $http, chrome) {
-  return new SavedObjectLoader(SavedDashboard, kbnIndex, kbnUrl, $http, chrome);
+module.service('savedDashboards', function (Private, SavedDashboard, kbnIndex, kbnUrl, $http, chrome) {
+  const savedObjectClient = Private(SavedObjectsClientProvider);
+  return new SavedObjectLoader(SavedDashboard, kbnIndex, kbnUrl, $http, chrome, savedObjectClient);
 });

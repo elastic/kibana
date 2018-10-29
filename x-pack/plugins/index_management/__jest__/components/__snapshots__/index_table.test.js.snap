@@ -90,51 +90,51 @@ Array [
 
 exports[`index table should show the right context menu options when more than one closed index is selected 1`] = `
 Array [
-  "Open indices",
-  "Delete indices",
+  "Open {entity}",
+  "Delete {entity}",
 ]
 `;
 
 exports[`index table should show the right context menu options when more than one open index is selected 1`] = `
 Array [
-  "Close indices",
-  "Force merge indices",
-  "Refresh indices",
-  "Clear indices cache",
-  "Flush indices",
-  "Delete indices",
+  "Close {entity}",
+  "Force merge {entity}",
+  "Refresh {entity}",
+  "Clear {entity} cache",
+  "Flush {entity}",
+  "Delete {entity}",
 ]
 `;
 
 exports[`index table should show the right context menu options when one index is selected and closed 1`] = `
 Array [
-  "Show index settings",
-  "Show index mapping",
-  "Edit index settings",
-  "Open index",
-  "Delete index",
+  "Show {entity} settings",
+  "Show {entity} mapping",
+  "Edit {entity} settings",
+  "Open {entity}",
+  "Delete {entity}",
 ]
 `;
 
 exports[`index table should show the right context menu options when one index is selected and open 1`] = `
 Array [
-  "Show index settings",
-  "Show index mapping",
-  "Show index stats",
-  "Edit index settings",
-  "Close index",
-  "Force merge index",
-  "Refresh index",
-  "Clear index cache",
-  "Flush index",
-  "Delete index",
+  "Show {entity} settings",
+  "Show {entity} mapping",
+  "Show {entity} stats",
+  "Edit {entity} settings",
+  "Close {entity}",
+  "Force merge {entity}",
+  "Refresh {entity}",
+  "Clear {entity} cache",
+  "Flush {entity}",
+  "Delete {entity}",
 ]
 `;
 
 exports[`index table should show the right context menu options when one open and one closed index is selected 1`] = `
 Array [
-  "Open indices",
-  "Delete indices",
+  "Open {entity}",
+  "Delete {entity}",
 ]
 `;
 

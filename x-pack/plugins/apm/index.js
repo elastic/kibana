@@ -9,10 +9,11 @@ import { initTransactionsApi } from './server/routes/transactions';
 import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
 import { initStatusApi } from './server/routes/status_check';
+import { initTracesApi } from './server/routes/traces';
 
 export function apm(kibana) {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
     id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),
@@ -22,15 +23,15 @@ export function apm(kibana) {
         title: 'APM',
         description: 'APM for the Elastic Stack',
         main: 'plugins/apm/index',
-        icon: 'plugins/apm/icon.svg'
+        icon: 'plugins/apm/icon.svg',
+        euiIconType: 'apmApp'
       },
       home: ['plugins/apm/register_feature'],
       injectDefaultVars(server) {
         const config = server.config();
         return {
-          mlEnabled: config.get('xpack.ml.enabled'),
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
-          apmIndexPattern: config.get('xpack.apm.indexPattern')
+          apmIndexPattern: config.get('apm_oss.indexPattern')
         };
       },
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav']
@@ -38,11 +39,15 @@ export function apm(kibana) {
 
     config(Joi) {
       return Joi.object({
+        // display menu item
         ui: Joi.object({
           enabled: Joi.boolean().default(true)
         }).default(),
+
+        // enable plugin
         enabled: Joi.boolean().default(true),
-        indexPattern: Joi.string().default('apm*'),
+
+        // buckets
         minimumBucketSize: Joi.number().default(15),
         bucketTargetCount: Joi.number().default(27)
       }).default();
@@ -50,6 +55,7 @@ export function apm(kibana) {
 
     init(server) {
       initTransactionsApi(server);
+      initTracesApi(server);
       initServicesApi(server);
       initErrorsApi(server);
       initStatusApi(server);

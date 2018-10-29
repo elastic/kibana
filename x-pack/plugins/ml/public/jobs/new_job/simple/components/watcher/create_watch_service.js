@@ -8,7 +8,7 @@
 
 import chrome from 'ui/chrome';
 import _ from 'lodash';
-import { http } from 'plugins/ml/services/http_service';
+import { http } from '../../../../../services/http_service';
 
 import emailBody from './email.html';
 import emailInfluencersBody from './email-influencers.html';
@@ -124,7 +124,10 @@ class CreateWatchService {
               this.status.watch = this.STATUS.SAVED;
               this.config.watcherEditURL =
               `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/watcher/watches/watch/${id}/edit?_g=()`;
-              resolve();
+              resolve({
+                id,
+                url: this.config.watcherEditURL,
+              });
             })
             .catch((resp) => {
               this.status.watch = this.STATUS.SAVE_FAILED;
@@ -150,4 +153,3 @@ class CreateWatchService {
 }
 
 export const mlCreateWatchService =  new CreateWatchService();
-

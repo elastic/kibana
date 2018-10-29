@@ -85,8 +85,9 @@ You can manage privileges on the *Management / Security / Roles* page in {kib}.
 
 If you're using the native realm with Basic Authentication, you can assign roles
 using the *Management / Security / Users* page in {kib} or the
-{ref}/security-api-users.html[User Management API]. For example, the following
-creates a user named `jacknich` and assigns it the `kibana_user` role:
+{ref}/security-api.html#security-user-apis[user management APIs]. For example, 
+the following creates a user named `jacknich` and assigns it the `kibana_user` 
+role:
 
 [source,js]
 --------------------------------------------------------------------------------
@@ -124,4 +125,5 @@ NOTE: This must be a user who has been assigned the `kibana_user` role.
 
 include::authentication/index.asciidoc[]
 include::securing-communications/index.asciidoc[]
+include::audit-logging.asciidoc[]
 include::{kib-repo-dir}/settings/security-settings.asciidoc[]

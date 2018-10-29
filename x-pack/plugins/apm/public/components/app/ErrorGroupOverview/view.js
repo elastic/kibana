@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import { HeaderContainer } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
 import List from './List';
@@ -35,7 +36,7 @@ class ErrorGroupOverview extends Component {
       <div>
         <HeaderContainer>
           <h1>{serviceName}</h1>
-          {license.data.features.watcher.isAvailable && (
+          {get(license.data, 'features.watcher.isAvailable') && (
             <WatcherButton onOpenFlyout={this.onOpenFlyout} />
           )}
         </HeaderContainer>
@@ -52,6 +53,7 @@ class ErrorGroupOverview extends Component {
         />
 
         <WatcherFlyout
+          location={location}
           serviceName={serviceName}
           isOpen={this.state.isFlyoutOpen}
           onClose={this.onCloseFlyout}

@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BasicLoginForm renders as expected 1`] = `
+<React.Fragment>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="m"
+  >
+    <form
+      onSubmit={[Function]}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        label="Username"
+      >
+        <EuiFieldText
+          aria-required={true}
+          compressed={false}
+          data-test-subj="loginUsername"
+          disabled={false}
+          fullWidth={false}
+          id="username"
+          inputRef={[Function]}
+          isInvalid={false}
+          isLoading={false}
+          name="username"
+          onChange={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        label="Password"
+      >
+        <EuiFieldText
+          aria-required={true}
+          compressed={false}
+          data-test-subj="loginPassword"
+          disabled={false}
+          fullWidth={false}
+          id="password"
+          isInvalid={false}
+          isLoading={false}
+          name="password"
+          onChange={[Function]}
+          type="password"
+          value=""
+        />
+      </EuiFormRow>
+      <EuiButton
+        color="primary"
+        data-test-subj="loginSubmit"
+        fill={true}
+        iconSide="left"
+        isLoading={false}
+        onClick={[Function]}
+        type="submit"
+      >
+        Log in
+      </EuiButton>
+    </form>
+  </EuiPanel>
+</React.Fragment>
+`;

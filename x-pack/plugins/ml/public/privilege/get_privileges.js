@@ -20,8 +20,13 @@ export function getPrivileges() {
     canUpdateJob: false,
     canUpdateDatafeed: false,
     canPreviewDatafeed: false,
+    canGetCalendars: false,
     canCreateCalendar: false,
     canDeleteCalendar: false,
+    canGetFilters: false,
+    canCreateFilter: false,
+    canDeleteFilter: false,
+    canFindFileStructure: false,
   };
 
   return new Promise((resolve, reject) => {
@@ -53,14 +58,14 @@ export function getPrivileges() {
         'cluster:admin/xpack/ml/filters/get',
         'cluster:admin/xpack/ml/filters/update',
         'cluster:admin/xpack/ml/filters/delete',
+        'cluster:monitor/xpack/ml/findfilestructure',
       ]
     };
 
     ml.checkPrivilege(priv)
       .then((resp) => {
-
-      // if security has been disabled, securityDisabled is returned from the endpoint
-      // therefore set all privileges to true
+        // if security has been disabled, securityDisabled is returned from the endpoint
+        // therefore set all privileges to true
         if (resp.securityDisabled) {
           Object.keys(privileges).forEach(k => privileges[k] = true);
         } else {
@@ -141,6 +146,10 @@ export function getPrivileges() {
 
           if (resp.cluster['cluster:admin/xpack/ml/filters/delete']) {
             privileges.canDeleteFilter = true;
+          }
+
+          if (resp.cluster['cluster:monitor/xpack/ml/findfilestructure']) {
+            privileges.canFindFileStructure = true;
           }
 
         }

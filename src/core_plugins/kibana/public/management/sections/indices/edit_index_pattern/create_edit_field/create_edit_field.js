@@ -27,6 +27,8 @@ import template from './create_edit_field.html';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FieldEditor } from 'ui/field_editor';
+import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
 const renderFieldEditor = ($scope, indexPattern, field, {
@@ -43,17 +45,19 @@ const renderFieldEditor = ($scope, indexPattern, field, {
     }
 
     render(
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={field}
-        helpers={{
-          Field,
-          getConfig,
-          $http,
-          fieldFormatEditors,
-          redirectAway,
-        }}
-      />,
+      <I18nProvider>
+        <FieldEditor
+          indexPattern={indexPattern}
+          field={field}
+          helpers={{
+            Field,
+            getConfig,
+            $http,
+            fieldFormatEditors,
+            redirectAway,
+          }}
+        />
+      </I18nProvider>,
       node,
     );
   });
@@ -103,7 +107,12 @@ uiRoutes
         this.field = this.indexPattern.fields.byName[fieldName];
 
         if (!this.field) {
-          toastNotifications.add(`'${this.indexPattern.title}' index pattern doesn't have a scripted field called '${fieldName}'`);
+          const message = i18n.translate('kbn.management.editIndexPattern.scripted.noFieldLabel',
+            {
+              defaultMessage: '\'{indexPatternTitle}\' index pattern doesn\'t have a scripted field called \'{fieldName}\'',
+              values: { indexPatternTitle: this.indexPattern.title, fieldName }
+            });
+          toastNotifications.add(message);
 
           kbnUrl.redirectToRoute(this.indexPattern, 'edit');
           return;
@@ -117,10 +126,17 @@ uiRoutes
         });
       }
       else {
-        throw new Error('unknown fieldSettings mode ' + this.mode);
+        const errorMessage = i18n.translate('kbn.management.editIndexPattern.scripted.unknownModeErrorMessage',
+          {
+            defaultMessage: 'unknown fieldSettings mode {mode}',
+            values: { mode: this.mode }
+          });
+        throw new Error(errorMessage);
       }
 
-      docTitle.change([this.field.name || 'New Scripted Field', this.indexPattern.title]);
+      const fieldName = this.field.name || i18n.translate('kbn.management.editIndexPattern.scripted.newFieldPlaceholder',
+        { defaultMessage: 'New Scripted Field' });
+      docTitle.change([fieldName, this.indexPattern.title]);
 
       renderFieldEditor($scope, this.indexPattern, this.field, {
         Field,

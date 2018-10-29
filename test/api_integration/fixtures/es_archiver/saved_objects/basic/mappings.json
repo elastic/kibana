@@ -188,6 +188,9 @@
               }
             }
           },
+          "namespace": {
+            "type": "keyword"
+          },
           "type": {
             "type": "keyword"
           },

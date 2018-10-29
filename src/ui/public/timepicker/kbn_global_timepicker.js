@@ -32,15 +32,9 @@ uiModules
 
     const listenForUpdates = ($scope) => {
       $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
-        globalState.refreshInterval = timefilter.getRefreshInterval();
-        globalState.time = timefilter.getTime();
-        globalState.save();
         setTimefilterValues($scope);
       });
       $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
-        globalState.refreshInterval = timefilter.getRefreshInterval();
-        globalState.time = timefilter.getTime();
-        globalState.save();
         setTimefilterValues($scope);
       });
       $scope.$listenAndDigestAsync(timefilter, 'enabledUpdated', () => {
@@ -71,6 +65,7 @@ uiModules
         listenForUpdates($scope);
 
         setTimefilterValues($scope);
+
         $scope.toggleRefresh = () => {
           timefilter.toggleRefresh();
         };

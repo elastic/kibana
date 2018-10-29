@@ -34,6 +34,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
     after(async function () {
       await remote.setWindowSize(1300, 900);
+      const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+      await PageObjects.dashboard.deleteDashboard('area', id);
     });
 
     // Skip until https://github.com/elastic/kibana/issues/19471 is fixed
@@ -51,8 +53,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      // Render complete flag doesn't handle resizes from expanding.
-      await PageObjects.common.sleep(2000);
       const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
@@ -73,8 +73,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      // Render complete flag doesn't handle resizes from expanding.
-      await PageObjects.common.sleep(2000);
       const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();

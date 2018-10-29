@@ -25,6 +25,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export const CallOuts = ({
   deprecatedLangsInUse,
   painlessDocLink,
@@ -36,14 +38,30 @@ export const CallOuts = ({
   return (
     <div>
       <EuiCallOut
-        title="Deprecation languages in use"
+        title={<FormattedMessage
+          id="kbn.management.editIndexPattern.scripted.deprecationLangHeader"
+          defaultMessage="Deprecation languages in use"
+        />}
         color="danger"
         iconType="cross"
       >
         <p>
-          The following deprecated languages are in use: {deprecatedLangsInUse.join(', ')}.
-          Support for these languages will be removed in the next major version of Kibana
-          and Elasticsearch. Convert you scripted fields to <EuiLink href={painlessDocLink}>Painless</EuiLink> to avoid any problems.
+          <FormattedMessage
+            id="kbn.management.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail"
+            defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be
+            removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
+            values={{
+              deprecatedLangsInUse: deprecatedLangsInUse.join(', '),
+              link: (
+                <EuiLink href={painlessDocLink}>
+                  <FormattedMessage
+                    id="kbn.management.editIndexPattern.scripted.deprecationLangLabel.painlessDescription"
+                    defaultMessage="Painless"
+                  />
+                </EuiLink>
+              )
+            }}
+          />
         </p>
       </EuiCallOut>
       <EuiSpacer size="m"/>

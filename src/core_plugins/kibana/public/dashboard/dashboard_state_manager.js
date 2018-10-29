@@ -37,6 +37,7 @@ import {
   clearStagedFilters,
   updateFilters,
   updateQuery,
+  closeContextMenu,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
@@ -100,6 +101,8 @@ export class DashboardStateManager {
     PanelUtils.initPanelIndexes(this.getPanels());
 
     this.createStateMonitor();
+
+    store.dispatch(closeContextMenu());
 
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
@@ -200,15 +203,21 @@ export class DashboardStateManager {
       store.dispatch(updateDescription(this.getDescription()));
     }
 
-    if (!_.isEqual(
-      FilterUtils.cleanFiltersForComparison(this.appState.filters),
-      FilterUtils.cleanFiltersForComparison(getFilters(state))
-    )) {
-      store.dispatch(updateFilters(this.appState.filters));
-    }
-
     if (getQuery(state) !== this.getQuery()) {
       store.dispatch(updateQuery(this.getQuery()));
+    }
+
+    this._pushFiltersToStore();
+  }
+
+  _pushFiltersToStore() {
+    const state = store.getState();
+    const dashboardFilters = this.getDashboardFilterBars();
+    if (!_.isEqual(
+      FilterUtils.cleanFiltersForComparison(dashboardFilters),
+      FilterUtils.cleanFiltersForComparison(getFilters(state))
+    )) {
+      store.dispatch(updateFilters(dashboardFilters));
     }
   }
 
@@ -464,10 +473,10 @@ export class DashboardStateManager {
    * @returns {boolean} True if the dashboard has changed since the last save (or, is new).
    */
   getIsDirty(timeFilter) {
-    return this.isDirty ||
-      // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
-      // changes are not tracked by the state monitor.
-      this.getFiltersChanged(timeFilter);
+    // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
+    // changes are not tracked by the state monitor.
+    const hasTimeFilterChanged = timeFilter ? this.getFiltersChanged(timeFilter) : false;
+    return this.isDirty || hasTimeFilterChanged;
   }
 
   getPanels() {
@@ -582,6 +591,8 @@ export class DashboardStateManager {
     this.savedDashboard.searchSource.setField('query', query);
     this.savedDashboard.searchSource.setField('filter', filters);
     this.saveState();
+    // pinned filters go on global state, therefore are not propagated to store via app state and have to be pushed manually.
+    this._pushFiltersToStore();
   }
 
   /**

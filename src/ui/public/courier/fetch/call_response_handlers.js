@@ -20,6 +20,7 @@
 import { toastNotifications } from '../../notify';
 import { RequestFailure } from '../../errors';
 import { RequestStatus } from './req_status';
+import { SearchError } from '../search_strategy/search_error';
 
 export function CallResponseHandlersProvider(Private, Promise) {
   const ABORTED = RequestStatus.ABORTED;
@@ -41,7 +42,7 @@ export function CallResponseHandlersProvider(Private, Promise) {
 
       if (response._shards && response._shards.failed) {
         toastNotifications.addWarning({
-          title: '${response._shards.failed} of ${response._shards.total} shards failed',
+          title: `${response._shards.failed} of ${response._shards.total} shards failed`,
         });
       }
 
@@ -58,7 +59,7 @@ export function CallResponseHandlersProvider(Private, Promise) {
         if (searchRequest.filterError(response)) {
           return progress();
         } else {
-          return searchRequest.handleFailure(new RequestFailure(null, response));
+          return searchRequest.handleFailure(response.error instanceof SearchError ? response.error : new RequestFailure(null, response));
         }
       }
 

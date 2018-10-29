@@ -56,7 +56,7 @@ module.exports = {
     'no-iterator': 'error',
     'no-loop-func': 'error',
     'no-multi-spaces': 'off',
-    'no-multi-str': 'error',
+    'no-multi-str': 'off',
     'no-nested-ternary': 'error',
     'no-new': 'off',
     'no-path-concat': 'off',

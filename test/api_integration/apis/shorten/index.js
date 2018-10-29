@@ -29,23 +29,25 @@ export default function ({ getService }) {
 
     it('generates shortened urls', async () => {
       const resp = await supertest
-        .post('/shorten')
+        .post('/api/shorten_url')
         .set('content-type', 'application/json')
         .send({ url: '/app/kibana#/visualize/create' })
         .expect(200);
 
-      expect(typeof resp.text).to.be('string');
-      expect(resp.text.length > 0).to.be(true);
+      expect(resp.body).to.have.property('urlId');
+      expect(typeof resp.body.urlId).to.be('string');
+      expect(resp.body.urlId.length > 0).to.be(true);
     });
 
     it('redirects shortened urls', async () => {
       const resp = await supertest
-        .post('/shorten')
+        .post('/api/shorten_url')
         .set('content-type', 'application/json')
         .send({ url: '/app/kibana#/visualize/create' });
 
+      const urlId = resp.body.urlId;
       await supertest
-        .get(`/goto/${resp.text}`)
+        .get(`/goto/${urlId}`)
         .expect(302)
         .expect('location', '/app/kibana#/visualize/create');
     });

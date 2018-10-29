@@ -25,6 +25,7 @@ import {
 } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
+import { i18n } from '@kbn/i18n';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
@@ -75,7 +76,11 @@ class ListControl extends Control {
     let ancestorFilters;
     if (this.hasAncestors()) {
       if (this.hasUnsetAncestor()) {
-        this.disable(`Disabled until '${this.ancestors[0].label}' is set.`);
+        this.disable(i18n.translate('inputControl.listControl.disableTooltip', {
+          defaultMessage: 'Disabled until \'{label}\' is set.',
+          values: { label: this.ancestors[0].label }
+        }));
+        this.lastAncestorValues = undefined;
         return;
       }
 
@@ -113,7 +118,10 @@ class ListControl extends Control {
     try {
       resp = await searchSource.fetch();
     } catch(error) {
-      this.disable(`Unable to fetch terms, error: ${error.message}`);
+      this.disable(i18n.translate('inputControl.listControl.unableToFetchTooltip', {
+        defaultMessage: 'Unable to fetch terms, error: {errorMessage}',
+        values: { errorMessage: error.message }
+      }));
       return;
     }
 

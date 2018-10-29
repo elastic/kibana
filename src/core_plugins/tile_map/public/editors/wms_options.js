@@ -21,27 +21,24 @@ import { uiModules } from 'ui/modules';
 import wmsOptionsTemplate from './wms_options.html';
 const module = uiModules.get('kibana');
 
-module.directive('wmsOptions', function (serviceSettings) {
+module.directive('wmsOptions', function (serviceSettings, i18n) {
   return {
     restrict: 'E',
     template: wmsOptionsTemplate,
     replace: true,
     scope: {
-      options: '='
+      options: '=',
+      collections: '=',
     },
     link: function ($scope) {
+      $scope.wmsLinkText = i18n('tileMap.wmsOptions.wmsLinkText', { defaultMessage: 'here' });
 
-      $scope.options.baseLayersAreLoaded = new Promise((resolve, reject) => {
+      new Promise((resolve, reject) => {
 
         serviceSettings
           .getTMSServices()
           .then((allTMSServices) => {
-
-            if (!$scope.options.tmsLayers) {
-              $scope.options.tmsLayers = [];
-            }
-
-            const newBaseLayers = $scope.options.tmsLayers.slice();
+            const newBaseLayers = $scope.collections.tmsLayers.slice();
             for (let i = 0; i < allTMSServices.length; i += 1) {
               const layerFromService = allTMSServices[i];
               const alreadyAdded = newBaseLayers.some((layer) => layerFromService.id === layer.id);
@@ -49,10 +46,10 @@ module.directive('wmsOptions', function (serviceSettings) {
                 newBaseLayers.push(layerFromService);
               }
             }
-            $scope.options.tmsLayers = newBaseLayers;
+            $scope.collections.tmsLayers = newBaseLayers;
 
-            if (!$scope.options.selectedTmsLayer) {
-              $scope.options.selectedTmsLayer = $scope.options.tmsLayers[0];
+            if (!$scope.options.selectedTmsLayer && $scope.collections.tmsLayers.length) {
+              $scope.options.selectedTmsLayer = $scope.collections.tmsLayers[0];
             }
             resolve(true);
 

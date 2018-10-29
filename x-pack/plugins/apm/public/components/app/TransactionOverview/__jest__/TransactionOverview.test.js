@@ -9,6 +9,34 @@ import { shallow } from 'enzyme';
 import TransactionOverview from '../view';
 import { toJson } from '../../../../utils/testHelpers';
 
+jest.mock(
+  'ui/chrome',
+  () => ({
+    getBasePath: () => `/some/base/path`,
+    getInjected: key => {
+      if (key === 'mlEnabled') {
+        return true;
+      }
+      throw new Error(`inexpected key ${key}`);
+    },
+    getUiSettingsClient: () => {
+      return {
+        get: key => {
+          switch (key) {
+            case 'timepicker:timeDefaults':
+              return { from: 'now-15m', to: 'now', mode: 'quick' };
+            case 'timepicker:refreshIntervalDefaults':
+              return { display: 'Off', pause: false, value: 0 };
+            default:
+              throw new Error(`Unexpected config key: ${key}`);
+          }
+        }
+      };
+    }
+  }),
+  { virtual: true }
+);
+
 const setup = () => {
   const props = {
     license: {

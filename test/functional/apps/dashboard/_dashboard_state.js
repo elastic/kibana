@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addVisualization(AREA_CHART_VIS_NAME);
       await PageObjects.dashboard.saveDashboard('Overridden colors');
 
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
 
       await PageObjects.visualize.openLegendOptionColors('Count');
       await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('Saved search with column changes will not update when the saved object changes', async () => {
       await PageObjects.discover.removeHeaderColumn('bytes');
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.saveDashboard('Has local edits');
 
       await PageObjects.header.clickDiscover();
@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }) {
       const tileMapData = await PageObjects.visualize.getInspectorTableData();
       await PageObjects.visualize.closeInspector();
 
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
       await dashboardPanelActions.clickEdit();
 
       await PageObjects.visualize.clickMapZoomIn();
@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.visualize.saveVisualization('Visualization TileMap');
+      await PageObjects.visualize.saveVisualizationExpectSuccess('Visualization TileMap');
 
       await PageObjects.header.clickDashboard();
 

@@ -37,7 +37,7 @@ export function initTimepicker(history, dispatch) {
 
     uiModules
       .get('app/apm', [])
-      .controller('TimePickerController', ($scope, globalState) => {
+      .controller('TimePickerController', ($scope, globalState, $rootScope) => {
         // Add APM feedback menu
         // TODO: move this somewhere else
         $scope.topNavMenu = [];
@@ -59,7 +59,7 @@ export function initTimepicker(history, dispatch) {
         );
 
         // ensure that timepicker updates when global state changes
-        registerTimefilterWithGlobalState(globalState);
+        registerTimefilterWithGlobalState(globalState, $rootScope);
 
         timefilter.enableTimeRangeSelector();
         timefilter.enableAutoRefreshSelector();

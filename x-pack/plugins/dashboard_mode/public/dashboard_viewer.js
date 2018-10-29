@@ -14,6 +14,7 @@ import routes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 
 // import the uiExports that we want to "use"
+import 'uiExports/contextMenuActions';
 import 'uiExports/visTypes';
 import 'uiExports/visResponseHandlers';
 import 'uiExports/visRequestHandlers';
@@ -25,7 +26,8 @@ import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';
 import 'uiExports/fieldFormats';
 import 'uiExports/search';
-
+import 'uiExports/autocompleteProviders';
+import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'plugins/kibana/dashboard';
@@ -33,11 +35,11 @@ import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
+import 'ui/pager';
 import 'leaflet';
 
-import { Notifier } from 'ui/notify';
+import { showAppRedirectNotification } from 'ui/notify';
 import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
-import { KibanaRootController } from 'plugins/kibana/kibana_root_controller';
 
 uiModules.get('kibana')
   .config(dashboardConfigProvider => dashboardConfigProvider.turnHideWriteControlsOn());
@@ -46,12 +48,11 @@ routes.enable();
 routes.otherwise({ redirectTo: defaultUrl() });
 
 chrome
-  .setRootController('kibana', function ($controller, $scope, courier, config) {
+  .setRootController('kibana', function () {
     chrome.showOnlyById('kibana:dashboard');
-    $controller(KibanaRootController, { $scope, courier, config });
   });
 
-uiModules.get('kibana').run(Notifier.pullMessageFromUrl);
+uiModules.get('kibana').run(showAppRedirectNotification);
 
 // If there is a configured kbnDefaultAppId, and it is a dashboard ID, we'll
 // show that dashboard, otherwise, we'll show the default dasbhoard landing page.

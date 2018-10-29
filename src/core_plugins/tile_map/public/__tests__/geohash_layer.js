@@ -22,7 +22,7 @@ import { KibanaMap } from 'ui/vis/map/kibana_map';
 import { GeohashLayer } from '../geohash_layer';
 import heatmapPng from './heatmap.png';
 import scaledCircleMarkersPng from './scaledCircleMarkers.png';
-import shadedCircleMarkersPng from './shadedCircleMarkers.png';
+// import shadedCircleMarkersPng from './shadedCircleMarkers.png';
 import { ImageComparator } from 'test_utils/image_comparator';
 import GeoHashSampleData from './dummy_es_response.json';
 
@@ -81,10 +81,11 @@ describe('geohash_layer', function () {
         options: { mapType: 'Scaled Circle Markers', colorRamp: 'Yellow to Red' },
         expected: scaledCircleMarkersPng
       },
-      {
-        options: { mapType: 'Shaded Circle Markers', colorRamp: 'Yellow to Red' },
-        expected: shadedCircleMarkersPng
-      },
+      // https://github.com/elastic/kibana/issues/19393
+      // {
+      //   options: { mapType: 'Shaded Circle Markers', colorRamp: 'Yellow to Red' },
+      //   expected: shadedCircleMarkersPng
+      // },
       {
         options: {
           mapType: 'Heatmap',

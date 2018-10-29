@@ -22,7 +22,6 @@ import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
@@ -41,7 +40,6 @@ class InspectorPanel extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isHelpPopoverOpen: false,
       selectedView: props.views[0],
       views: props.views,
       // Clone adapters array so we can validate that this prop never change
@@ -79,14 +77,11 @@ class InspectorPanel extends Component {
   }
 
   render() {
-    const { views, onClose, title } = this.props;
+    const { views, title } = this.props;
     const { selectedView } = this.state;
 
     return (
-      <EuiFlyout
-        onClose={onClose}
-        data-test-subj="inspectorPanel"
-      >
+      <React.Fragment>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup
             justifyContent="spaceBetween"
@@ -107,7 +102,7 @@ class InspectorPanel extends Component {
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         { this.renderSelectedPanel() }
-      </EuiFlyout>
+      </React.Fragment>
     );
   }
 }
@@ -125,7 +120,6 @@ InspectorPanel.propTypes = {
       );
     }
   },
-  onClose: PropTypes.func.isRequired,
   title: PropTypes.string,
 };
 

@@ -17,12 +17,34 @@
  * under the License.
  */
 
+import { get } from 'lodash';
+import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from './deep_freeze';
 
 export interface InjectedMetadataParams {
   injectedMetadata: {
+    version: string;
+    buildNumber: number;
+    basePath: string;
+    vars: {
+      [key: string]: unknown;
+    };
     legacyMetadata: {
-      [key: string]: any;
+      app: unknown;
+      translations: unknown;
+      bundleId: string;
+      nav: unknown;
+      version: string;
+      branch: string;
+      buildNum: number;
+      buildSha: string;
+      basePath: string;
+      serverName: string;
+      devMode: boolean;
+      uiSettings: {
+        defaults: UiSettingsState;
+        user?: UiSettingsState;
+      };
     };
   };
 }
@@ -34,16 +56,40 @@ export interface InjectedMetadataParams {
  * and is read from the DOM in most cases.
  */
 export class InjectedMetadataService {
+  private state = deepFreeze(this.params.injectedMetadata);
+
   constructor(private readonly params: InjectedMetadataParams) {}
 
   public start() {
-    const state = deepFreeze(this.params.injectedMetadata);
-
     return {
-      getLegacyMetadata() {
-        return state.legacyMetadata;
+      getBasePath: () => {
+        return this.state.basePath;
+      },
+
+      getKibanaVersion: () => {
+        return this.getKibanaVersion();
+      },
+
+      getLegacyMetadata: () => {
+        return this.state.legacyMetadata;
+      },
+
+      getInjectedVar: (name: string, defaultValue?: any): unknown => {
+        return get(this.state.vars, name, defaultValue);
+      },
+
+      getInjectedVars: () => {
+        return this.state.vars;
       },
     };
+  }
+
+  public getKibanaVersion() {
+    return this.state.version;
+  }
+
+  public getKibanaBuildNumber() {
+    return this.state.buildNumber;
   }
 }
 

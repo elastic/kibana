@@ -17,25 +17,37 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function uwsgiMetricsSpecProvider() {
+export function uwsgiMetricsSpecProvider(server, context) {
   const moduleName = 'uwsgi';
   return {
     id: 'uwsgiMetrics',
-    name: 'uWSGI metrics',
+    name: i18n.translate('kbn.server.tutorials.uwsgiMetrics.nameTitle', {
+      defaultMessage: 'uWSGI metrics',
+    }),
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from the uWSGI server.',
-    longDescription: 'The `uwsgi` Metricbeat module fetches internal metrics from the uWSGI server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-uwsgi.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.uwsgiMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from the uWSGI server.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.uwsgiMetrics.longDescription', {
+      defaultMessage: 'The `uwsgi` Metricbeat module fetches internal metrics from the uWSGI server. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-uwsgi.html',
+      },
+    }),
     //euiIconType: 'logouWSGI',
     isBeta: true,
     artifacts: {
       dashboards: [
         {
           id: '32fca290-f0af-11e7-b9ff-9f96241065de',
-          linkLabel: 'uWSGI metrics dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.uwsgiMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'uWSGI metrics dashboard',
+          }),
           isOverview: true
         }
       ],
@@ -45,7 +57,7 @@ export function uwsgiMetricsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/uwsgi_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

@@ -17,11 +17,11 @@
  * under the License.
  */
 
+import url from 'url';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
-import { patchKibanaIndex } from './patch_kibana_index';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 
@@ -31,12 +31,14 @@ export default function (plugin, server) {
   const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
 
   plugin.status.yellow('Waiting for Elasticsearch');
-  function waitForPong(callWithInternalUser, url) {
+  function waitForPong(callWithInternalUser, elasticsearchUrl) {
     return callWithInternalUser('ping').catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
-      plugin.status.red(`Unable to connect to Elasticsearch at ${url}.`);
 
-      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, url));
+      const displayUrl = url.format({ ...url.parse(elasticsearchUrl), auth: undefined });
+      plugin.status.red(`Unable to connect to Elasticsearch at ${displayUrl}.`);
+
+      return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, elasticsearchUrl));
     });
   }
 
@@ -60,13 +62,7 @@ export default function (plugin, server) {
   function check() {
     const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
-        .then(waitForEsVersion)
-        .then(() => patchKibanaIndex({
-          callCluster: callAdminAsKibanaUser,
-          log: (...args) => server.log(...args),
-          indexName: config.get('kibana.index'),
-          kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
-        }));
+        .then(waitForEsVersion);
 
     return healthCheck
       .then(setGreenStatus)
@@ -99,10 +95,7 @@ export default function (plugin, server) {
     return true;
   }
 
-  server.ext('onPreStop', (request, reply) => {
-    stopChecking();
-    reply();
-  });
+  server.ext('onPreStop', stopChecking);
 
   return {
     waitUntilReady: waitUntilReady,
@@ -111,5 +104,4 @@ export default function (plugin, server) {
     stop: stopChecking,
     isRunning: function () { return !!timeoutId; },
   };
-
 }

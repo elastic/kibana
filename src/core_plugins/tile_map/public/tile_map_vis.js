@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import './editors/tile_map_vis_params';
 import { supports } from 'ui/utils/supports';
@@ -24,7 +25,6 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CoordinateMapsVisualizationProvider } from './coordinate_maps_visualization';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import image from './images/icon-tilemap.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
 import { makeGeoJsonResponseHandler } from './coordinatemap_response_handler';
@@ -37,9 +37,13 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
 
   return VisFactory.createBaseVisualization({
     name: 'tile_map',
-    title: 'Coordinate Map',
-    image,
-    description: 'Plot latitude and longitude coordinates on a map',
+    title: i18n.translate('tileMap.vis.mapTitle', {
+      defaultMessage: 'Coordinate Map',
+    }),
+    icon: 'visMapCoordinate',
+    description: i18n.translate('tileMap.vis.mapDescription', {
+      defaultMessage: 'Plot latitude and longitude coordinates on a map',
+    }),
     category: CATEGORY.MAP,
     visConfig: {
       canDesaturate: !!supports.cssFilters,
@@ -57,22 +61,31 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
     responseHandler: makeGeoJsonResponseHandler(),
+    requiresPartialRows: true,
     visualization: CoordinateMapsVisualization,
     editorConfig: {
       collections: {
         colorSchemas: Object.keys(truncatedColorMaps),
         legendPositions: [{
           value: 'bottomleft',
-          text: 'bottom left',
+          text: i18n.translate('tileMap.vis.map.editorConfig.legendPositions.bottomLeftText', {
+            defaultMessage: 'bottom left',
+          }),
         }, {
           value: 'bottomright',
-          text: 'bottom right',
+          text: i18n.translate('tileMap.vis.map.editorConfig.legendPositions.bottomRightText', {
+            defaultMessage: 'bottom right',
+          }),
         }, {
           value: 'topleft',
-          text: 'top left',
+          text: i18n.translate('tileMap.vis.map.editorConfig.legendPositions.topLeftText', {
+            defaultMessage: 'top left',
+          }),
         }, {
           value: 'topright',
-          text: 'top right',
+          text: i18n.translate('tileMap.vis.map.editorConfig.legendPositions.topRightText', {
+            defaultMessage: 'top right',
+          }),
         }],
         mapTypes: [
           'Scaled Circle Markers',
@@ -80,14 +93,16 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
           'Shaded Geohash Grid',
           'Heatmap'
         ],
-        baseLayers: []
+        tmsLayers: [],
       },
       optionsTemplate: '<tile-map-vis-params></tile-map-vis-params>',
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Value',
+          title: i18n.translate('tileMap.vis.map.editorConfig.schemas.metricTitle', {
+            defaultMessage: 'Value',
+          }),
           min: 1,
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
@@ -98,7 +113,9 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
         {
           group: 'buckets',
           name: 'segment',
-          title: 'Geo Coordinates',
+          title: i18n.translate('tileMap.vis.map.editorConfig.schemas.geoCoordinatesTitle', {
+            defaultMessage: 'Geo Coordinates',
+          }),
           aggFilter: 'geohash_grid',
           min: 1,
           max: 1

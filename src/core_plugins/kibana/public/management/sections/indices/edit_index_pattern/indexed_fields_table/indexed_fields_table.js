@@ -26,6 +26,8 @@ import {
   getFieldFormat
 } from './lib';
 
+import { I18nProvider } from '@kbn/i18n/react';
+
 export class IndexedFieldsTable extends Component {
   static propTypes = {
     fields: PropTypes.array.isRequired,
@@ -34,6 +36,7 @@ export class IndexedFieldsTable extends Component {
     indexedFieldTypeFilter: PropTypes.string,
     helpers: PropTypes.shape({
       redirectToRoute: PropTypes.func.isRequired,
+      getFieldInfo: PropTypes.func,
     }),
     fieldWildcardMatcher: PropTypes.func.isRequired,
   }
@@ -55,7 +58,7 @@ export class IndexedFieldsTable extends Component {
   }
 
   mapFields(fields) {
-    const { indexPattern, fieldWildcardMatcher } = this.props;
+    const { indexPattern, fieldWildcardMatcher, helpers } = this.props;
     const sourceFilters = indexPattern.sourceFilters && indexPattern.sourceFilters.map(f => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
@@ -68,6 +71,7 @@ export class IndexedFieldsTable extends Component {
           indexPattern: field.indexPattern,
           format: getFieldFormat(indexPattern, field.name),
           excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
+          info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field.name),
         };
       }) || [];
   }
@@ -98,13 +102,15 @@ export class IndexedFieldsTable extends Component {
     const fields = this.getFilteredFields(this.state, this.props);
 
     return (
-      <div>
-        <Table
-          indexPattern={indexPattern}
-          items={fields}
-          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
-        />
-      </div>
+      <I18nProvider>
+        <div>
+          <Table
+            indexPattern={indexPattern}
+            items={fields}
+            editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+          />
+        </div>
+      </I18nProvider>
     );
   }
 }

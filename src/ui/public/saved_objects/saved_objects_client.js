@@ -50,9 +50,10 @@ export class SavedObjectsClient {
    * @param {object} [options={}]
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
+   * @property {object} [options.migrationVersion]
    * @returns {promise} - SavedObject({ id, type, version, attributes })
    */
-  create(type, attributes = {}, options = {}) {
+  create = (type, attributes = {}, options = {}) => {
     if (!type || !attributes) {
       return Promise.reject(new Error('requires type and attributes'));
     }
@@ -60,7 +61,7 @@ export class SavedObjectsClient {
     const path = this._getPath([type, options.id]);
     const query = _.pick(options, ['overwrite']);
 
-    return this._request({ method: 'POST', path, query, body: { attributes } })
+    return this._request({ method: 'POST', path, query, body: { attributes, migrationVersion: options.migrationVersion } })
       .catch(error => {
         if (isAutoCreateIndexError(error)) {
           return showAutoCreateIndexErrorPage();
@@ -74,7 +75,7 @@ export class SavedObjectsClient {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes }]
+   * @param {array} objects - [{ type, id, attributes, migrationVersion }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false]
    * @returns {promise} - { savedObjects: [{ id, type, version, attributes, error: { message } }]}
@@ -96,7 +97,7 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns {promise}
    */
-  delete(type, id) {
+  delete = (type, id) => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
@@ -117,7 +118,7 @@ export class SavedObjectsClient {
    * @property {array} options.fields
    * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
    */
-  find(options = {}) {
+  find = (options = {}) => {
     const path = this._getPath(['_find']);
     const query = keysToSnakeCaseShallow(options);
 
@@ -134,7 +135,7 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns {promise} - SavedObject({ id, type, version, attributes })
    */
-  get(type, id) {
+  get = (type, id) => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
@@ -157,7 +158,7 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  bulkGet(objects = []) {
+  bulkGet = (objects = []) => {
     const path = this._getPath(['_bulk_get']);
     const filteredObjects = objects.map(obj => _.pick(obj, ['id', 'type']));
 
@@ -172,11 +173,13 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
+   * @param {object} attributes
    * @param {object} options
-   * @param {integer} options.version - ensures version matches that of persisted object
+   * @prop {integer} options.version - ensures version matches that of persisted object
+   * @prop {object} options.migrationVersion - The optional migrationVersion of this document
    * @returns {promise}
    */
-  update(type, id, attributes, { version } = {}) {
+  update(type, id, attributes, { version, migrationVersion } = {}) {
     if (!type || !id || !attributes) {
       return Promise.reject(new Error('requires type, id and attributes'));
     }
@@ -184,6 +187,7 @@ export class SavedObjectsClient {
     const path = this._getPath([type, id]);
     const body = {
       attributes,
+      migrationVersion,
       version
     };
 

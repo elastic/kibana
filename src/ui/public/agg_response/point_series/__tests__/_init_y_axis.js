@@ -19,17 +19,10 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { PointSeriesInitYAxisProvider } from '../_init_y_axis';
+import { initYAxis } from '../_init_y_axis';
 
 describe('initYAxis', function () {
 
-  let initYAxis;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    initYAxis = Private(PointSeriesInitYAxisProvider);
-  }));
 
   function agg() {
     return {
@@ -42,12 +35,12 @@ describe('initYAxis', function () {
   const baseChart = {
     aspects: {
       y: [
-        { agg: agg(), col: { title: 'y1' } },
-        { agg: agg(), col: { title: 'y2' } },
+        { aggConfig: agg(), title: 'y1' },
+        { aggConfig: agg(), title: 'y2' },
       ],
       x: {
-        agg: agg(),
-        col: { title: 'x' }
+        aggConfig: agg(),
+        title: 'x'
       }
     }
   };
@@ -59,7 +52,7 @@ describe('initYAxis', function () {
     it('sets the yAxisFormatter the the field formats convert fn', function () {
       const chart = _.cloneDeep(singleYBaseChart);
       initYAxis(chart);
-      expect(chart).to.have.property('yAxisFormatter', chart.aspects.y.agg.fieldFormatter());
+      expect(chart).to.have.property('yAxisFormatter', chart.aspects.y.aggConfig.fieldFormatter());
     });
 
     it('sets the yAxisLabel', function () {
@@ -76,8 +69,8 @@ describe('initYAxis', function () {
 
       expect(chart).to.have.property('yAxisFormatter');
       expect(chart.yAxisFormatter)
-        .to.be(chart.aspects.y[0].agg.fieldFormatter())
-        .and.not.be(chart.aspects.y[1].agg.fieldFormatter());
+        .to.be(chart.aspects.y[0].aggConfig.fieldFormatter())
+        .and.not.be(chart.aspects.y[1].aggConfig.fieldFormatter());
     });
 
     it('does not set the yAxisLabel, it does not make sense to put multiple labels on the same axis', function () {

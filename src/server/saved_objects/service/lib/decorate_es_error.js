@@ -28,6 +28,7 @@ const {
   Conflict,
   401: NotAuthorized,
   403: Forbidden,
+  413: RequestEntityTooLarge,
   NotFound,
   BadRequest
 } = elasticsearch.errors;
@@ -36,6 +37,7 @@ import {
   decorateBadRequestError,
   decorateNotAuthorizedError,
   decorateForbiddenError,
+  decorateRequestEntityTooLargeError,
   createGenericNotFoundError,
   decorateConflictError,
   decorateEsUnavailableError,
@@ -67,6 +69,10 @@ export function decorateEsError(error) {
 
   if (error instanceof Forbidden) {
     return decorateForbiddenError(error, reason);
+  }
+
+  if (error instanceof RequestEntityTooLarge) {
+    return decorateRequestEntityTooLargeError(error, reason);
   }
 
   if (error instanceof NotFound) {

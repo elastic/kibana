@@ -9,6 +9,8 @@ The APM UI is designed to be as intuitive as possible, but you might come across
 * <<spans>>
 * <<errors>>
 * <<errors-alerts-with-watcher>>
+* <<machine-learning-integration>>
+* <<query-bar>>
 
 [[services]]
 === Services
@@ -61,3 +63,29 @@ Watches are managed separately in the dedicated Watcher UI available in Advanced
 
 [role="screenshot"]
 image::apm/images/apm-errors-watcher-assistant.png[Example view of the Watcher assistant for errors in APM UI in Kibana]
+
+[[machine-learning-integration]]
+=== Machine Learning integration
+
+The Machine Learning integration will initiate a new job predefined to calculate anomaly scores on transaction response times. The response time graph will show the expected bounds and annotate the graph when the anomaly score is 75 or above.
+
+[role="screenshot"]
+image::apm/images/apm-ml-integration.png[Example view of anomaly scores on response times in APM UI in Kibana]
+
+Jobs can be created per transaction type and based on the average response time. You can manage jobs in the Machine Learning jobs management page. It might take some time for results to appear on the graph.
+
+[[query-bar]]
+=== Query bar
+
+The query bar is a powerful data query feature. Similar to the query bar in {kibana-ref}/discover.html[Discover] it enables you to pass advanced queries on your data to filter on particular pieces of information that you're interested in. It comes with a handy autocomplete that helps find the fields and even provides suggestions to the data they include. The query bar is available on Services, Transaction and Errors views, and any input will persist as you move between them.
+
+[role="screenshot"]
+image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM UI in Kibana]
+
+==== Example queries
+
+* Exclude response times faster than 2000 ms; `transaction.duration.us > 2000000`
+* Filter by response status code; `context.response.status_code >= 400`
+* Filter by single user ID; `context.user.id : 12`
+
+Read the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] documentation to learn more about the capabilities in the Kibana query language.

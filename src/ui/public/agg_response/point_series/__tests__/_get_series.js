@@ -19,18 +19,10 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { PointSeriesGetSeriesProvider } from '../_get_series';
+import { getSeries } from '../_get_series';
 
 describe('getSeries', function () {
-  let getSeries;
-
   const agg = { fieldFormatter: _.constant(_.identity) };
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    getSeries = Private(PointSeriesGetSeriesProvider);
-  }));
 
   function wrapRows(row) {
     return row.map(function (v) {
@@ -47,11 +39,10 @@ describe('getSeries', function () {
       [1, 2, 3]
     ].map(wrapRows);
 
-    const yCol = { aggConfig: {}, title: 'y' };
     const chart = {
       aspects: {
         x: { i: 0 },
-        y: { i: 1, col: yCol, agg: { id: 'id' } },
+        y: { i: 1, title: 'y', aggConfig: { id: 'id' } },
         z: { i: 2 }
       }
     };
@@ -65,7 +56,7 @@ describe('getSeries', function () {
     const siri = series[0];
     expect(siri)
       .to.be.an('object')
-      .and.have.property('label', yCol.title)
+      .and.have.property('label', chart.aspects.y.title)
       .and.have.property('values');
 
     expect(siri.values)
@@ -93,8 +84,8 @@ describe('getSeries', function () {
       aspects: {
         x: { i: 0 },
         y: [
-          { i: 1, col: { title: '0' }, agg: { id: 1 } },
-          { i: 2, col: { title: '1' }, agg: { id: 2 } },
+          { i: 1, title: '0', aggConfig: { id: 1 } },
+          { i: 2, title: '1', aggConfig: { id: 2 } },
         ]
       }
     };
@@ -138,8 +129,8 @@ describe('getSeries', function () {
     const chart = {
       aspects: {
         x: { i: -1 },
-        series: { i: 0, agg: agg },
-        y: { i: 1, col: { title: '0' }, agg: agg }
+        series: { i: 0, aggConfig: agg },
+        y: { i: 1, title: '0', aggConfig: agg }
       }
     };
 
@@ -180,10 +171,10 @@ describe('getSeries', function () {
     const chart = {
       aspects: {
         x: { i: -1 },
-        series: { i: 0, agg: agg },
+        series: { i: 0, aggConfig: agg },
         y: [
-          { i: 1, col: { title: '0' }, agg: { id: 1 } },
-          { i: 2, col: { title: '1' }, agg: { id: 2 } }
+          { i: 1, title: '0', aggConfig: { id: 1 } },
+          { i: 2, title: '1', aggConfig: { id: 2 } }
         ]
       }
     };
@@ -230,10 +221,10 @@ describe('getSeries', function () {
     const chart = {
       aspects: {
         x: { i: -1 },
-        series: { i: 0, agg: agg },
+        series: { i: 0, aggConfig: agg },
         y: [
-          { i: 1, col: { title: '0' }, agg: { id: 1 } },
-          { i: 2, col: { title: '1' }, agg: { id: 2 } }
+          { i: 1, title: '0', aggConfig: { id: 1 } },
+          { i: 2, title: '1', aggConfig: { id: 2 } }
         ]
       }
     };

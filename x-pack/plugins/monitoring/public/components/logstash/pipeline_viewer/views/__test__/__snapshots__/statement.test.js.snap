@@ -2,10 +2,10 @@
 
 exports[`Statement component renders a CollapsibleStatement with else body for non-IfElement 1`] = `
 <li
-  className="pipelineViewer__listItem"
+  className="monPipelineViewer__listItem"
 >
   <div
-    className="pipelineViewer__spaceContainer"
+    className="monPipelineViewer__spaceContainer"
   />
   <CollapsibleStatement
     collapse={[MockFunction]}
@@ -19,6 +19,7 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
       key="statementName"
     >
       <EuiButtonEmpty
+        aria-label="else"
         color="text"
         flush="left"
         iconSide="left"
@@ -27,7 +28,7 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
         type="button"
       >
         <span
-          className="pipelineViewer__conditional"
+          className="monPipelineViewer__conditional"
         >
           else
         </span>
@@ -39,10 +40,10 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
 
 exports[`Statement component renders a CollapsibleStatement with if body for branch model 1`] = `
 <li
-  className="pipelineViewer__listItem"
+  className="monPipelineViewer__listItem"
 >
   <div
-    className="pipelineViewer__spaceContainer"
+    className="monPipelineViewer__spaceContainer"
   />
   <CollapsibleStatement
     collapse={[MockFunction]}
@@ -56,6 +57,7 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
       key="statementName"
     >
       <EuiButtonEmpty
+        aria-label="if"
         color="text"
         flush="left"
         iconSide="left"
@@ -64,7 +66,7 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
         type="button"
       >
         <span
-          className="pipelineViewer__conditional"
+          className="monPipelineViewer__conditional"
         >
           if
         </span>
@@ -87,10 +89,10 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
 
 exports[`Statement component renders a PluginStatement component for plugin model 1`] = `
 <li
-  className="pipelineViewer__listItem"
+  className="monPipelineViewer__listItem"
 >
   <div
-    className="pipelineViewer__spaceContainer"
+    className="monPipelineViewer__spaceContainer"
   />
   <PluginStatement
     onShowVertexDetails={[MockFunction]}
@@ -119,17 +121,17 @@ exports[`Statement component renders a PluginStatement component for plugin mode
 
 exports[`Statement component renders spacers for element with depth > 0 1`] = `
 <li
-  className="pipelineViewer__listItem"
+  className="monPipelineViewer__listItem"
 >
   <div
-    className="pipelineViewer__spaceContainer"
+    className="monPipelineViewer__spaceContainer"
   >
     <div
-      className="pipelineViewer__spacer"
+      className="monPipelineViewer__spacer"
       key="spacer_0"
     />
     <div
-      className="pipelineViewer__spacer"
+      className="monPipelineViewer__spacer"
       key="spacer_1"
     />
   </div>
@@ -145,6 +147,7 @@ exports[`Statement component renders spacers for element with depth > 0 1`] = `
       key="statementName"
     >
       <EuiButtonEmpty
+        aria-label="else"
         color="text"
         flush="left"
         iconSide="left"
@@ -153,7 +156,7 @@ exports[`Statement component renders spacers for element with depth > 0 1`] = `
         type="button"
       >
         <span
-          className="pipelineViewer__conditional"
+          className="monPipelineViewer__conditional"
         >
           else
         </span>

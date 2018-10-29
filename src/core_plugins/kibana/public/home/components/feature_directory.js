@@ -33,6 +33,9 @@ import {
 
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 const ALL_TAB_ID = 'all';
 const OTHERS_TAB_ID = 'others';
 
@@ -47,18 +50,18 @@ export class FeatureDirectory extends React.Component {
 
     this.tabs = [{
       id: ALL_TAB_ID,
-      name: 'All',
+      name: i18n.translate('kbn.home.directory.tabs.allTitle', { defaultMessage: 'All' }),
     }, {
       id: FeatureCatalogueCategory.DATA,
-      name: 'Data Exploration & Visualization',
+      name: i18n.translate('kbn.home.directory.tabs.dataTitle', { defaultMessage: 'Data Exploration & Visualization' }),
     }, {
       id: FeatureCatalogueCategory.ADMIN,
-      name: 'Administrative',
+      name: i18n.translate('kbn.home.directory.tabs.administrativeTitle', { defaultMessage: 'Administrative' }),
     }];
     if (props.directories.some(isOtherCategory)) {
       this.tabs.push({
         id: OTHERS_TAB_ID,
-        name: 'Other',
+        name: i18n.translate('kbn.home.directory.tabs.otherTitle', { defaultMessage: 'Other' }),
       });
     }
 
@@ -76,7 +79,6 @@ export class FeatureDirectory extends React.Component {
   renderTabs = () => {
     return this.tabs.map((tab, index) => (
       <EuiTab
-        className="homeDirectoryTab"
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}
@@ -114,11 +116,14 @@ export class FeatureDirectory extends React.Component {
 
   render() {
     return (
-      <EuiPage className="home">
+      <EuiPage className="homPage">
         <EuiPageBody>
           <EuiTitle size="l">
             <h1>
-              Directory
+              <FormattedMessage
+                id="kbn.home.directory.directoryTitle"
+                defaultMessage="Directory"
+              />
             </h1>
           </EuiTitle>
           <EuiSpacer size="m" />

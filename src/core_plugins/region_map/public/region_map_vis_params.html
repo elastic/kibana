@@ -1,15 +1,20 @@
 <div class="kuiSideBarSection">
   <div class="form-group">
     <div class="kuiSideBarSectionTitle">
-      <div class="kuiSideBarSectionTitle__text">
-        Layer Settings
-      </div>
+      <div
+        class="kuiSideBarSectionTitle__text"
+        i18n-id="regionMap.visParams.layerSettingsTitle"
+        i18n-default-message="Layer Settings"
+      ></div>
     </div>
 
     <div class="kuiSideBarFormRow">
-      <label class="kuiSideBarFormRow__label" for="regionMap">
-        Vector map
-      </label>
+      <label
+        class="kuiSideBarFormRow__label"
+        for="regionMap"
+        i18n-id="regionMap.visParams.vectorMapLabel"
+        i18n-default-message="Vector map"
+      ></label>
       <div class="kuiSideBarFormRow__control">
         <select
           id="regionMap"
@@ -21,42 +26,80 @@
       </div>
     </div>
 
+    <div class="form-group clearfix" ng-hide="!editorState.params.emsHotLink">
+      <a
+        class="rgmEMSLink pull-right"
+        target="_blank"
+        rel="noopener noreferrer"
+        ng-href="{{editorState.params.emsHotLink}}"
+        target="_blank"
+        title="{{'regionMap.visParams.previewOnEMSLinkTitle' | i18n: {
+          defaultMessage: 'Preview {selectedLayerName} on the Elastic Maps Service',
+          values: { selectedLayerName: editorState.params.selectedLayer.name }
+        } }}"
+      >
+        <icon aria-hidden size="'s'" type="'link'" />
+        <span
+          i18n-id="regionMap.visParams.previewOnEMSLinkText"
+          i18n-default-message="Preview on EMS"
+        ></span>
+      </a>
+    </div>
+
     <div class="kuiSideBarFormRow">
-      <label class="kuiSideBarFormRow__label" for="joinField">
-        Join field
-      </label>
+      <label
+        class="kuiSideBarFormRow__label"
+        for="joinField"
+        i18n-id="regionMap.visParams.joinFieldLabel"
+        i18n-default-message="Join field"
+      ></label>
       <div class="kuiSideBarFormRow__control">
         <select id="joinField"
           class="kuiSelect kuiSideBarSelect"
           ng-model="editorState.params.selectedJoinField"
           ng-options="field.description for field in editorState.params.selectedLayer.fields track by field.name"
         >
-          <option value=''>Select</option></select>
+          <option
+            value=''
+            i18n-id="regionMap.visParams.selectOptionLabel"
+            i18n-default-message="Select"
+          ></option>
+        </select>
       </div>
     </div>
     <div class="kuiSideBarFormRow">
-      <label class="kuiSideBarFormRow__label" for="displayWarnings">
-        Display warnings
-      </label>
+      <label
+        class="kuiSideBarFormRow__label"
+        for="displayWarnings"
+        i18n-id="regionMap.visParams.displayWarningsLabel"
+        i18n-default-message="Display warnings"
+      ></label>
 
       <div class="kuiSideBarFormRow__control">
         <input id="displayWarnings" type="checkbox" ng-model="editorState.params.isDisplayWarning">
         &nbsp;
         <icon-tip
-          content="'Turns on/off warnings. When turned on, warning will be shown for each term that cannot be matched to a shape in the vector layer based on the join field. When turned off, these warnings will be turned off.'"
+          content="{{::'regionMap.visParams.switchWarningsTipText' | i18n: {
+            defaultMessage: '&quot;Turns on/off warnings. When turned on, warning will be shown for each term that cannot be matched to a shape in the vector layer based on the join field. When turned off, these warnings will be turned off.&quot;'
+          } }}"
           position="'right'"
         ></icon-tip>
       </div>
     </div>
     <div class="kuiSideBarFormRow">
-      <label class="kuiSideBarFormRow__label" for="onlyShowMatchingShapes">
-        Show all shapes
-      </label>
+      <label
+        class="kuiSideBarFormRow__label"
+        for="onlyShowMatchingShapes"
+        i18n-id="regionMap.visParams.showAllShapesLabel"
+        i18n-default-message="Show all shapes"
+      ></label>
       <div class="kuiSideBarFormRow__control">
         <input id="onlyShowMatchingShapes" type="checkbox" ng-model="editorState.params.showAllShapes">
         &nbsp;
         <icon-tip
-          content="'Turning this off only shows the shapes that were matched with a corresponding term'"
+          content="{{::'regionMap.visParams.turnOffShowingAllShapesTipText' | i18n: {
+            defaultMessage: '&quot;Turning this off only shows the shapes that were matched with a corresponding term&quot;'
+          } }}"
           position="'right'"
         ></icon-tip>
       </div>
@@ -67,12 +110,19 @@
 <div class="kuiSideBarSection">
 
   <div class="kuiSideBarSectionTitle">
-    <div class="kuiSideBarSectionTitle__text">Style settings</div>
+    <div
+      class="kuiSideBarSectionTitle__text"
+      i18n-id="regionMap.visParams.styleSettingsLabel"
+      i18n-default-message="Style settings"
+    ></div>
   </div>
   <div class="kuiSideBarFormRow" >
-    <label class="kuiSideBarFormRow__label" for="colorSchema">
-      Color Schema
-    </label>
+    <label
+      class="kuiSideBarFormRow__label"
+      for="colorSchema"
+      i18n-id="regionMap.visParams.colorSchemaLabel"
+      i18n-default-message="Color Schema"
+    ></label>
     <div class="kuiSideBarFormRow__control">
       <select
         id="colorSchema"
@@ -83,9 +133,12 @@
     </div>
   </div>
   <div class="kuiSideBarFormRow" >
-    <label class="kuiSideBarFormRow__label" for="outlineWeight">
-      Outline weight
-    </label>
+    <label
+      class="kuiSideBarFormRow__label"
+      for="outlineWeight"
+      i18n-id="regionMap.visParams.outlineWeightLabel"
+      i18n-default-message="Outline weight"
+    ></label>
     <div class="kuiSideBarFormRow__control">
       <input
         id="outlineWeight"

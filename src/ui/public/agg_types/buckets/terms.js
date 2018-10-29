@@ -29,7 +29,6 @@ import otherBucketTemplate from '../controls/other_bucket.html';
 
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
-import { toastNotifications } from '../../notify';
 
 const aggFilter = [
   '!top_hits', '!percentiles', '!median', '!std_dev',
@@ -127,6 +126,7 @@ export const termsBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
     },
     {
@@ -147,7 +147,7 @@ export const termsBucketAgg = new BucketAggType({
       makeOrderAgg: function (termsAgg, state) {
         state = state || {};
         state.schema = orderAggSchema;
-        const orderAgg = new AggConfig(termsAgg.vis, state);
+        const orderAgg = termsAgg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
         orderAgg.id = termsAgg.id + '-orderAgg';
         return orderAgg;
       },
@@ -235,9 +235,6 @@ export const termsBucketAgg = new BucketAggType({
         }
 
         if (orderAgg.type.name === 'count') {
-          if (dir === 'asc') {
-            toastNotifications.addWarning('Sorting in Ascending order by Count in Terms aggregations is deprecated');
-          }
           order._count = dir;
           return;
         }

@@ -24,7 +24,7 @@ export async function getErrorGroups({
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
-    index: config.get('xpack.apm.indexPattern'),
+    index: config.get('apm_oss.errorIndices'),
     body: {
       size: 0,
       query: {

@@ -16,17 +16,26 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const remote = getService('remote');
-  const find = getService('find');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
   describe('Management', () => {
     before(async () => {
-      await PageObjects.security.login('elastic', 'changeme');
+      // await PageObjects.security.login('elastic', 'changeme');
       await PageObjects.security.initTests();
       await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
+      await PageObjects.settings.navigateTo();
+
+      // Create logstash-readonly role
+      await PageObjects.settings.clickLinkText('Roles');
+      await PageObjects.security.clickCreateNewRole();
+      await testSubjects.setValue('roleFormNameInput', 'logstash-readonly');
+      await PageObjects.security.addIndexToRole('logstash-*');
+      await PageObjects.security.addPrivilegeToRole('read');
+      await PageObjects.security.clickSaveEditRole();
+
       await PageObjects.settings.navigateTo();
     });
 
@@ -125,7 +134,7 @@ export default function ({ getService, getPageObjects }) {
           await testSubjects.setValue('userFormFullNameInput', 'dashuser');
           await testSubjects.setValue('userFormEmailInput', 'example@example.com');
           await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
-          await PageObjects.security.assignRoleToUser('logstash-data');
+          await PageObjects.security.assignRoleToUser('logstash-readonly');
 
           await PageObjects.security.clickSaveEditUser();
 
@@ -134,23 +143,6 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
           const currentUrl = await remote.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
-        });
-
-        it('Reserved roles are not editable', async () => {
-          // wait for role tab to finish loading from previous test
-          await PageObjects.header.waitUntilLoadingHasFinished();
-
-          const allInputs = await find.allByCssSelector('input');
-          for (let i = 0; i < allInputs.length; i++) {
-            const input = allInputs[i];
-            expect(await input.getProperty('disabled')).to.be(true);
-          }
-
-          const allCheckboxes = await find.allByCssSelector('checkbox');
-          for (let i = 0; i < allCheckboxes.length; i++) {
-            const checkbox = allCheckboxes[i];
-            expect(await checkbox.getProperty('disabled')).to.be(true);
-          }
         });
       });
     });

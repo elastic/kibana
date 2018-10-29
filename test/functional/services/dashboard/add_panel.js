@@ -24,6 +24,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
+  const find = getService('find');
 
   return new class DashboardAddPanel {
     async clickOpenAddPanel() {
@@ -93,6 +94,13 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       }
     }
 
+    async waitForEuiTableLoading() {
+      await retry.waitFor('dashboard add panel loading to complete', async () => {
+        const table = await find.byClassName('euiBasicTable');
+        return !((await table.getAttribute('class')).includes('loading'));
+      });
+    }
+
     async closeAddPanel() {
       log.debug('DashboardAddPanel.closeAddPanel');
       const isOpen = await this.isAddPanelOpen();
@@ -143,7 +151,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await this.clickSavedSearchTab();
       await this.filterEmbeddableNames(searchName);
 
-      await testSubjects.click(`addPanel${searchName.split(' ').join('-')}`);
+      await testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
       await testSubjects.exists('addSavedSearchToDashboardSuccess');
       await this.closeAddPanel();
     }
@@ -164,14 +172,14 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async addVisualization(vizName) {
       log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
       await this.ensureAddPanelIsShowing();
-      // workaround for timing issue with slideout animation
-      await PageObjects.common.sleep(500);
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
-      await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
+      await testSubjects.click(`savedObjectTitle${vizName.split(' ').join('-')}`);
       await this.closeAddPanel();
     }
 
     async filterEmbeddableNames(name) {
+      // The search input field may be disabled while the table is loading so wait for it
+      await this.waitForEuiTableLoading();
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -180,7 +188,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       log.debug(`DashboardAddPanel.panelAddLinkExists(${name})`);
       await this.ensureAddPanelIsShowing();
       await this.filterEmbeddableNames(`"${name}"`);
-      return await testSubjects.exists(`addPanel${name.split(' ').join('-')}`);
+      return await testSubjects.exists(`savedObjectTitle${name.split(' ').join('-')}`);
     }
   };
 }

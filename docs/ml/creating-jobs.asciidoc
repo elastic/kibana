@@ -1,6 +1,6 @@
 [role="xpack"]
 [[ml-jobs]]
-== Creating Machine Learning Jobs
+== Creating machine learning jobs
 
 Machine learning jobs contain the configuration information and metadata
 necessary to perform an analytics task.

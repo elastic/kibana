@@ -17,27 +17,39 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function logstashLogsSpecProvider() {
+export function logstashLogsSpecProvider(server, context) {
   const moduleName = 'logstash';
   const geoipRequired = false;
   const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'logstashLogs',
-    name: 'Logstash logs',
+    name: i18n.translate('kbn.server.tutorials.logstashLogs.nameTitle', {
+      defaultMessage: 'Logstash logs',
+    }),
     category: TUTORIAL_CATEGORY.LOGGING,
-    shortDescription: 'Collect and parse debug and slow logs created by Logstash itself.',
-    longDescription: 'The `logstash` Filebeat module parses debug and slow logs created by Logstash itself.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-logstash.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.logstashLogs.shortDescription', {
+      defaultMessage: 'Collect and parse debug and slow logs created by Logstash itself.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.logstashLogs.longDescription', {
+      defaultMessage: 'The `logstash` Filebeat module parses debug and slow logs created by Logstash itself. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-logstash.html',
+      },
+    }),
     euiIconType: 'logoLogstash',
     artifacts: {
       dashboards: [
         {
           id: 'Filebeat-Logstash-Log-Dashboard',
-          linkLabel: 'Logstash logs dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.logstashLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Logstash logs dashboard',
+          }),
           isOverview: true
         }
       ],
@@ -47,7 +59,7 @@ export function logstashLogsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/logstash_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

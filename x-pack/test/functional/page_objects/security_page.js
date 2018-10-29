@@ -16,19 +16,31 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const defaultFindTimeout = config.get('timeouts.find');
-  const PageObjects = getPageObjects(['common', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class LoginPage {
-    async login(username, password) {
+    async login(username, password, options = {}) {
       const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
 
       username = username || superUsername;
       password = password || superPassword;
 
+      const expectSpaceSelector = options.expectSpaceSelector || false;
+      const expectSuccess = options.expectSuccess;
+
       await PageObjects.common.navigateToApp('login');
       await testSubjects.setValue('loginUsername', username);
       await testSubjects.setValue('loginPassword', password);
       await testSubjects.click('loginSubmit');
+
+      // wait for either space selector, kibanaChrome or loginErrorMessage
+      if (expectSpaceSelector) {
+        await retry.try(() => testSubjects.find('kibanaSpaceSelector'));
+        log.debug(`Finished login process, landed on space selector. currentUrl = ${await remote.getCurrentUrl()}`);
+      } else if (expectSuccess) {
+        await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ');
+        log.debug(`Finished login process currentUrl = ${await remote.getCurrentUrl()}`);
+      }
     }
 
     async getErrorMessage() {
@@ -58,8 +70,12 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       remote.setWindowSize(1600, 1000);
     }
 
-    async login(username, password) {
-      await this.loginPage.login(username, password);
+    async login(username, password, options = {}) {
+      await this.loginPage.login(username, password, options);
+
+      if (options.expectSpaceSelector) {
+        return;
+      }
 
       await retry.try(async () => {
         const logoutLinkExists = await find.existsByLinkText('Logout');
@@ -72,17 +88,36 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async logout() {
       log.debug('SecurityPage.logout');
 
-      const logoutLinkExists = await find.existsByLinkText('Logout');
+      const [isWelcomeShowing, logoutLinkExists] = await Promise.all([
+        PageObjects.home.isWelcomeShowing(),
+        find.existsByLinkText('Logout'),
+      ]);
+
       if (!logoutLinkExists) {
         log.debug('Logout not found');
         return;
       }
 
+      // This sometimes happens when hitting the home screen on a brand new / empty
+      // Kibana instance. It may not *always* happen, depending on how
+      // long it takes the home screen to query Elastic to see if it's a
+      // new Kibana instance.
+      if (isWelcomeShowing) {
+        log.debug('welcome screen showing when attempting logout');
+        await PageObjects.home.hideWelcomeScreen();
+      }
+
       await find.clickByLinkText('Logout');
 
       await retry.try(async () => {
-        const logoutLinkExists = await find.existsByDisplayedByCssSelector('.login-form');
-        if (!logoutLinkExists) {
+        const loginFormExists = await find.existsByDisplayedByCssSelector('.login-form');
+
+        const logoutLinkExists = await find.existsByLinkText('Logout');
+        if (logoutLinkExists) {
+          await find.clickByLinkText('Logout');
+        }
+
+        if (!loginFormExists) {
           throw new Error('Logout is not completed yet');
         }
       });
@@ -130,7 +165,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
     async addIndexToRole(index) {
       log.debug(`Adding index ${index} to role`);
-      const indexInput = await retry.try(() => find.byCssSelector('[data-test-subj="indicesInput0"] > div > input'));
+      const indexInput = await retry.try(() => find.byCssSelector('[data-test-subj="indicesInput0"] input'));
       await indexInput.type(index);
       await indexInput.type('\n');
     }
@@ -138,9 +173,18 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async addPrivilegeToRole(privilege) {
       log.debug(`Adding privilege ${privilege} to role`);
       const privilegeInput =
-        await retry.try(() => find.byCssSelector('[data-test-subj="privilegesInput0"] > div > input'));
+        await retry.try(() => find.byCssSelector('[data-test-subj="privilegesInput0"] input'));
       await privilegeInput.type(privilege);
-      await privilegeInput.type('\n');
+
+      const btn = await find.byButtonText(privilege);
+      await btn.click();
+
+      // const options = await find.byCssSelector(`.euiComboBoxOption`);
+      // Object.entries(options).forEach(([key, prop]) => {
+      //   console.log({ key, proto: prop.__proto__ });
+      // });
+
+      // await options.click();
     }
 
     async assignRoleToUser(role) {
@@ -175,19 +219,16 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       return mapAsync(users, async user => {
         const fullnameElement = await user.findByCssSelector('[data-test-subj="userRowFullName"]');
         const usernameElement = await user.findByCssSelector('[data-test-subj="userRowUserName"]');
+        const emailElement = await user.findByCssSelector('[data-header="Email Address"]');
         const rolesElement = await user.findByCssSelector('[data-test-subj="userRowRoles"]');
-        let reserved = false;
-        try {
-          reserved = !!(await user.findByCssSelector('[data-test-subj="reservedUser"]'));
-        } catch(e) {
-          //ignoring, just means user is not reserved
-        }
+        const isReservedElementVisible = await user.findByCssSelector('td:last-child');
 
         return {
           username: await usernameElement.getVisibleText(),
           fullname: await fullnameElement.getVisibleText(),
+          email: await emailElement.getVisibleText(),
           roles: (await rolesElement.getVisibleText()).split(',').map(role => role.trim()),
-          reserved
+          reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('reservedUser')
         };
       });
     }
@@ -196,9 +237,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const users = await testSubjects.findAll('roleRow');
       return mapAsync(users, async role => {
         const rolenameElement = await role.findByCssSelector('[data-test-subj="roleRowName"]');
-        const isReservedElementVisible =  await role.findByCssSelector('td:nth-child(3)');
+        const isReservedElementVisible = await role.findByCssSelector('td:nth-child(3)');
 
-        return  {
+        return {
           rolename: await rolenameElement.getVisibleText(),
           reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('roleRowReserved')
         };
@@ -216,11 +257,12 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async addUser(userObj) {
       const self = this;
       await this.clickNewUser();
+      log.debug('username = ' + userObj.username);
       await testSubjects.setValue('userFormUserNameInput', userObj.username);
       await testSubjects.setValue('passwordInput', userObj.password);
       await testSubjects.setValue('passwordConfirmationInput', userObj.confirmPassword);
       await testSubjects.setValue('userFormFullNameInput', userObj.fullname);
-      await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+      await testSubjects.setValue('userFormEmailInput', userObj.email);
       log.debug('Add roles: ', userObj.roles);
       const rolesToAdd = userObj.roles || [];
       for (let i = 0; i < rolesToAdd.length; i++) {
@@ -235,54 +277,60 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     addRole(roleName, userObj) {
+      const self = this;
+
       return this.clickNewRole()
         .then(function () {
           // We have to use non-test-subject selectors because this markup is generated by ui-select.
-          log.debug('userObj.indices[0].names = ' + userObj.indices[0].names);
+          log.debug('userObj.indices[0].names = ' + userObj.elasticsearch.indices[0].names);
           return testSubjects.append('roleFormNameInput', roleName);
         })
         .then(function () {
           return remote.setFindTimeout(defaultFindTimeout)
-          // We have to use non-test-subject selectors because this markup is generated by ui-select.
-            .findByCssSelector('[data-test-subj="indicesInput0"] .ui-select-search')
-            .type(userObj.indices[0].names);
+            .findByCssSelector('[data-test-subj="indicesInput0"] input')
+            .type(userObj.elasticsearch.indices[0].names + '\n');
         })
         .then(function () {
-          return remote.setFindTimeout(defaultFindTimeout)
-          // We have to use non-test-subject selectors because this markup is generated by ui-select.
-            .findByCssSelector('span.ui-select-choices-row-inner > div[ng-bind-html="indexPattern"]')
-            .click();
+          return testSubjects.click('restrictDocumentsQuery0');
         })
         .then(function () {
-          if (userObj.indices[0].query) {
-            return testSubjects.setValue('queryInput0', userObj.indices[0].query);
+          if (userObj.elasticsearch.indices[0].query) {
+            return testSubjects.setValue('queryInput0', userObj.elasticsearch.indices[0].query);
           }
         })
+
+        //KibanaPriv
+        .then(function () {
+
+          function addKibanaPriv(priv) {
+
+            return priv.reduce(function (promise, privName) {
+              // We have to use non-test-subject selectors because this markup is generated by ui-select.
+              return promise
+
+                .then(async function () {
+                  log.debug('priv item = ' + privName);
+                  return find.byCssSelector(`[data-test-subj="kibanaMinimumPrivilege"] option[value="${privName}"]`);
+                })
+                .then(function (element) {
+                  return element.click();
+                });
+
+            }, Promise.resolve());
+          }
+          return userObj.kibana.global ? addKibanaPriv(userObj.kibana.global) : Promise.resolve();
+        })
+
         .then(function () {
 
           function addPriv(priv) {
 
             return priv.reduce(function (promise, privName) {
               // We have to use non-test-subject selectors because this markup is generated by ui-select.
-              return promise
-                .then(function () {
-                  return remote.setFindTimeout(defaultFindTimeout)
-                    .findByCssSelector('[data-test-subj="privilegesInput0"] .ui-select-search')
-                    .click();
-                })
-                .then(function () {
-                  log.debug('priv item = ' + privName);
-                  remote.setFindTimeout(defaultFindTimeout)
-                    .findByCssSelector(`[data-test-subj="privilegeOption-${privName}"]`)
-                    .click();
-                })
-                .then(function () {
-                  return PageObjects.common.sleep(500);
-                });
-
+              return promise.then(() => self.addPrivilegeToRole(privName)).then(() => PageObjects.common.sleep(250));
             }, Promise.resolve());
           }
-          return addPriv(userObj.indices[0].privileges);
+          return addPriv(userObj.elasticsearch.indices[0].privileges);
         })
         //clicking the Granted fields and removing the asterix
         .then(function () {
@@ -292,8 +340,8 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
               return promise
                 .then(function () {
                   return remote.setFindTimeout(defaultFindTimeout)
-                    .findByCssSelector('[data-test-subj="fieldInput0"] .ui-select-search')
-                    .type(fieldName + '\t');
+                    .findByCssSelector('[data-test-subj="fieldInput0"] input')
+                    .type(fieldName + '\n');
                 })
                 .then(function () {
                   return PageObjects.common.sleep(1000);
@@ -302,13 +350,13 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
             }, Promise.resolve());
           }
 
-          if (userObj.indices[0].field_security) {
+          if (userObj.elasticsearch.indices[0].field_security) {
             // have to remove the '*'
             return remote.setFindTimeout(defaultFindTimeout)
-              .findByCssSelector('div[data-test-subj="fieldInput0"] > div > span > span > span > span.ui-select-match-close')
+              .findByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"]')
               .click()
               .then(function () {
-                return addGrantedField(userObj.indices[0].field_security.grant);
+                return addGrantedField(userObj.elasticsearch.indices[0].field_security.grant);
               });
           }
         })    //clicking save button
@@ -344,10 +392,10 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         .then(() => {
           return PageObjects.common.sleep(2000);
         })
-        .then (() => {
+        .then(() => {
           return testSubjects.getVisibleText('confirmModalBodyText');
         })
-        .then ((alert) => {
+        .then((alert) => {
           alertText = alert;
           log.debug('Delete user alert text = ' + alertText);
           return testSubjects.click('confirmModalConfirmButton');

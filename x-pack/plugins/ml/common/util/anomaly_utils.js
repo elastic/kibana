@@ -12,6 +12,8 @@
 */
 
 import _ from 'lodash';
+import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
+import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
 
 // List of function descriptions for which actual values from record level results should be displayed.
 const DISPLAY_ACTUAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean', 'max', 'min', 'sum',
@@ -74,28 +76,19 @@ export function getSeverityColor(normalizedScore) {
   }
 }
 
-// Recurses through an object holding the list of detector descriptions against job IDs
-// checking for duplicate descriptions. For any detectors with duplicate descriptions, the
-// description is modified by appending the job ID in parentheses.
-// Only checks for duplicates across jobs; any duplicates within a job are left as-is.
-export function labelDuplicateDetectorDescriptions(detectorsByJob) {
-  const checkedJobIds = [];
-  _.each(detectorsByJob, function (detectors, jobId) {
-    checkedJobIds.push(jobId);
-    const otherJobs = _.omit(detectorsByJob, checkedJobIds);
-    _.each(detectors, function (description, i) {
-      _.each(otherJobs, function (otherJobDetectors, otherJobId) {
-        _.each(otherJobDetectors, function (otherDescription, j) {
-          if (description === otherDescription) {
-            detectors[i] = description + ' (' + jobId + ')';
-            otherJobDetectors[j] = description + ' (' + otherJobId + ')';
-          }
-        });
-      });
-    });
-  });
-
-  return detectorsByJob;
+// Returns a label to use for the multi-bucket impact of an anomaly
+// according to the value of the multi_bucket_impact field of a record,
+// which ranges from -5 to +5.
+export function getMultiBucketImpactLabel(multiBucketImpact) {
+  if (multiBucketImpact >= MULTI_BUCKET_IMPACT.HIGH) {
+    return 'high';
+  } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM) {
+    return 'medium';
+  } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.LOW) {
+    return 'low';
+  } else {
+    return 'none';
+  }
 }
 
 // Returns the name of the field to use as the entity name from the source record
@@ -150,6 +143,14 @@ export function showActualForFunction(functionDescription) {
 // whereas the 'function_description' field holds a ML-built display hint for function e.g. 'count'.
 export function showTypicalForFunction(functionDescription) {
   return _.indexOf(DISPLAY_TYPICAL_FUNCTIONS, functionDescription) > -1;
+}
+
+// Returns whether a rule can be configured against the specified anomaly.
+export function isRuleSupported(record) {
+  // A rule can be configured with a numeric condition if the function supports it,
+  // and/or with scope if there is a partitioning fields.
+  return (CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(record.function) === -1) ||
+    (getEntityFieldName(record) !== undefined);
 }
 
 // Two functions for converting aggregation type names.

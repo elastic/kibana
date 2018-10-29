@@ -6,7 +6,7 @@
 import chrome from 'ui/chrome';
 
 const usersUrl = chrome.addBasePath('/api/security/v1/users');
-const rolesUrl = chrome.addBasePath('/api/security/v1/roles');
+const rolesUrl = chrome.addBasePath('/api/security/role');
 
 export const createApiClient = (httpClient) => {
   return {

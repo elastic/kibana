@@ -17,15 +17,18 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions } from './on_prem';
-import { ELASTIC_CLOUD_INSTRUCTIONS } from './elastic_cloud';
+import { createElasticCloudInstructions } from './elastic_cloud';
 import { getSavedObjects } from './saved_objects/get_saved_objects';
 
-const apmIntro = 'Collect in-depth performance metrics and errors from inside your applications.';
+const apmIntro = i18n.translate('kbn.server.tutorials.apm.introduction', {
+  defaultMessage: 'Collect in-depth performance metrics and errors from inside your applications.',
+});
 
-const ENABLED_KEY = 'xpack.apm.ui.enabled';
 function isEnabled(config) {
+  const ENABLED_KEY = 'xpack.apm.ui.enabled';
   if (config.has(ENABLED_KEY)) {
     return config.get(ENABLED_KEY);
   }
@@ -33,52 +36,54 @@ function isEnabled(config) {
   return false;
 }
 
-const TITLE_KEY = 'xpack.apm.indexPattern';
-const DEFAULT_TITLE = 'apm*';
-function getIndexPatternTitle(config) {
-  if (config.has(TITLE_KEY)) {
-    return config.get(TITLE_KEY);
-  }
-
-  return DEFAULT_TITLE;
-}
-
 export function apmSpecProvider(server) {
   const config = server.config();
-  const apmIndexPattern = getIndexPatternTitle(config);
+  const apmIndexPattern = config.get('apm_oss.indexPattern');
 
   const artifacts = {
     dashboards: [
       {
         id: '8d3ed660-7828-11e7-8c47-65b845b5cfb3',
-        linkLabel: 'APM dashboard',
-        isOverview: true
-      }
-    ]
+        linkLabel: i18n.translate('kbn.server.tutorials.apm.specProvider.artifacts.dashboards.linkLabel', {
+          defaultMessage: 'APM dashboard',
+        }),
+        isOverview: true,
+      },
+    ],
   };
+
   if (isEnabled(config)) {
     artifacts.application = {
       path: '/app/apm',
-      label: 'Launch APM'
+      label: i18n.translate('kbn.server.tutorials.apm.specProvider.artifacts.application.label', {
+        defaultMessage: 'Launch APM',
+      }),
     };
   }
 
   return {
     id: 'apm',
-    name: 'APM',
+    name: i18n.translate('kbn.server.tutorials.apm.specProvider.name', {
+      defaultMessage: 'APM',
+    }),
     category: TUTORIAL_CATEGORY.OTHER,
     shortDescription: apmIntro,
-    longDescription: 'Application Performance Monitoring (APM) collects in-depth' +
-      ' performance metrics and errors from inside your application.' +
-      ' It allows you to monitor the performance of thousands of applications in real time.' +
-      ' [Learn more]({config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html).',
+    longDescription: i18n.translate('kbn.server.tutorials.apm.specProvider.longDescription', {
+      defaultMessage: 'Application Performance Monitoring (APM) collects in-depth \
+performance metrics and errors from inside your application. \
+It allows you to monitor the performance of thousands of applications in real time. \
+[Learn more]({learnMoreLink}).',
+      values: { learnMoreLink: '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html' },
+    }),
     euiIconType: 'apmApp',
     artifacts: artifacts,
     onPrem: onPremInstructions(apmIndexPattern),
-    elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
+    elasticCloud: createElasticCloudInstructions(),
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
     savedObjects: getSavedObjects(apmIndexPattern),
-    savedObjectsInstallMsg: 'Load index pattern, visualizations, and pre-defined dashboards.' +
-      ' An index pattern is required for some features in the APM UI.',
+    savedObjectsInstallMsg: i18n.translate('kbn.server.tutorials.apm.specProvider.savedObjectsInstallMsg', {
+      defaultMessage: 'Load index pattern, visualizations, and pre-defined dashboards. \
+An index pattern is required for some features in the APM UI.',
+    }),
   };
 }

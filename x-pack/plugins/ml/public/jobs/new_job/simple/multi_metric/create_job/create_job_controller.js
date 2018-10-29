@@ -8,7 +8,6 @@
 
 import _ from 'lodash';
 
-import 'plugins/kibana/visualize/styles/main.less';
 import { aggTypes } from 'ui/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
@@ -33,7 +32,8 @@ import { mlEscape } from 'plugins/ml/util/string_utils';
 import {
   createSearchItems,
   addNewJobToRecentlyAccessed,
-  moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+  moveToAdvancedJobCreationProvider,
+  focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { MultiMetricJobServiceProvider } from './create_job_service';
@@ -65,6 +65,7 @@ module
   .controller('MlCreateMultiMetricJob', function (
     $scope,
     $route,
+    $timeout,
     Private,
     AppState) {
 
@@ -368,7 +369,6 @@ module
       const $frontCard = angular.element('.multi-metric-job-container .detector-container .card-front');
       $frontCard.addClass('card');
       $frontCard.find('.card-title').text(labels[0]);
-      const w = $frontCard.width();
 
       let marginTop = (labels.length > 1) ? 54 : 0;
       $frontCard.css('margin-top', marginTop);
@@ -384,33 +384,23 @@ module
       angular.element('.card-behind').remove();
 
       for (let i = 0; i < labels.length; i++) {
-        let el = '<div class="card card-behind"><div class="card-title">';
+        let el = `<div class="card card-behind card-behind-${i}"><div class="card-title">`;
         el += mlEscape(labels[i]);
         el += '</div><label class="kuiFormLabel">';
         el += mlEscape(backCardTitle);
         el += '</label></div>';
 
         const $backCard = angular.element(el);
-        $backCard.css('width', w);
-        $backCard.css('height', 100);
-        $backCard.css('display', 'auto');
         $backCard.css('z-index', (9 - i));
 
         $backCard.insertBefore($frontCard);
       }
 
       const cardsBehind = angular.element('.card-behind');
-      let marginLeft = 0;
-      let backWidth = w;
 
       for (let i = 0; i < cardsBehind.length; i++) {
         cardsBehind[i].style.marginTop = marginTop + 'px';
-        cardsBehind[i].style.marginLeft = marginLeft + 'px';
-        cardsBehind[i].style.width = backWidth + 'px';
-
         marginTop -= (10 - (i * (10 / labels.length))) * (10 / labels.length);
-        marginLeft += (5 - (i / 2));
-        backWidth -= (5 - (i / 2)) * 2;
       }
       let i = 0;
       let then = window.performance.now();
@@ -507,6 +497,8 @@ module
                     $scope.formConfig.end,
                     'explorer');
 
+                  focusOnResultsLink('job_running_view_results_link', $timeout);
+
                   loadCharts();
                 })
                 .catch((resp) => {
@@ -559,6 +551,7 @@ module
                   }
                 } else {
                   $scope.jobState = JOB_STATE.FINISHED;
+                  focusOnResultsLink('job_finished_view_results_link', $timeout);
                 }
                 jobCheck();
               });
@@ -658,21 +651,6 @@ module
         });
     };
 
-    // resize the spilt cards on page resize.
-    // when the job starts the 'Analysis running' label appearing can cause a scroll bar to appear
-    // which will cause the split cards to look odd
-    // TODO - all charts should resize correctly on page resize
-    function resize() {
-      if ($scope.formConfig.splitField !== undefined) {
-        let width = angular.element('.card-front').width();
-        const cardsBehind = angular.element('.card-behind');
-        for (let i = 0; i < cardsBehind.length; i++) {
-          cardsBehind[i].style.width = width + 'px';
-          width -= (5 - (i / 2)) * 2;
-        }
-      }
-    }
-
     $scope.setFullTimeRange = function () {
       return mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
     };
@@ -691,10 +669,6 @@ module
       if ($scope.formConfig.splitField !== undefined) {
         $scope.setModelMemoryLimit();
       }
-    });
-
-    angular.element(window).resize(() => {
-      resize();
     });
 
     $scope.$on('$destroy', () => {

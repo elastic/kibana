@@ -18,7 +18,7 @@
  */
 
 import { createFunctionalTestRunner } from '../src/functional_test_runner';
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 
 export default function (grunt) {
   grunt.registerMultiTask('functional_test_runner', 'run tests with the functional test runner', function () {
@@ -28,8 +28,10 @@ export default function (grunt) {
       configOverrides
     } = this.options();
 
-    const log = createToolingLog(logLevel);
-    log.pipe(process.stdout);
+    const log = new ToolingLog({
+      level: logLevel,
+      writeTo: process.stdout,
+    });
 
     const functionalTestRunner = createFunctionalTestRunner({
       log,

@@ -27,7 +27,7 @@ import { toastNotifications } from 'ui/notify';
 const MINZOOM = 0;
 const MAXZOOM = 22;//increase this to 22. Better for WMS
 
-export function BaseMapsVisualizationProvider(serviceSettings) {
+export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
 
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
@@ -121,7 +121,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
 
     _baseLayerConfigured() {
       const mapParams = this._getMapsParams();
-      return mapParams.wms.baseLayersAreLoaded || mapParams.wms.selectedTmsLayer;
+      return mapParams.wms.selectedTmsLayer;
     }
 
     async _updateBaseLayer() {
@@ -166,9 +166,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
               ...mapParams.wms.options
             }
           });
-        } else {
-
-          await mapParams.wms.baseLayersAreLoaded;
+        } else if (mapParams.wms.selectedTmsLayer) {
           const selectedTmsLayer = mapParams.wms.selectedTmsLayer;
           this._setTmsLayer(selectedTmsLayer);
 
@@ -197,7 +195,9 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
     }
 
     async _updateData() {
-      throw new Error('Child should implement this method to respond to data-update');
+      throw new Error(i18n('tileMap.baseMapsVisualization.childShouldImplementMethodErrorMessage', {
+        defaultMessage: 'Child should implement this method to respond to data-update',
+      }));
     }
 
     _hasESResponseChanged(data) {

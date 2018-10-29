@@ -1,0 +1,111 @@
+.jobs-list-table > div > .euiTable {
+  & > thead {
+    th {
+      text-align: left;
+      white-space: normal;
+    }
+    th:nth-child(2) {
+      width: 34px;
+    }
+    th:nth-child(3) {
+      width: auto;
+    }
+    th:nth-child(4) {
+      width: 20px;
+    }
+    th:nth-child(5) {
+      width: auto;
+    }
+    th:nth-child(6) {
+      width: 100px;
+    }
+    th:nth-child(7) {
+      width: 85px;
+    }
+    th:nth-child(8) {
+      width: 80px;
+    }
+    th:nth-child(9) {
+      width: 80px;
+    }
+    th:nth-child(10) {
+      width: 150px;
+    }
+    th:nth-child(11) {
+      width: 80px;
+    }
+    th:nth-child(12) {
+      width: 30px;
+      .euiTableCellContent__text {
+        display: none;
+      }
+    }
+  }
+  & > tbody {
+
+    td:nth-child(4) .euiTableCellContent {
+      padding: 0px;
+    }
+
+    td:nth-child(10) {
+      white-space: nowrap;
+    }
+
+    .euiTableCellContent {
+      animation: unset;
+    }
+
+    .euiTableRow.euiTableRow-isExpandedRow > td > div > .euiTableCellContent__text {
+      width: 100%;
+      .euiTableRowCell {
+        background-color: inherit;
+      }
+    }
+
+    .euiTableRow > .euiTableRowCell > .euiTableCellContent > .euiTableCellContent__hoverItem {
+      opacity: 1;
+    }
+
+    .euiContextMenuPanel {
+       .euiContextMenuItem {
+         white-space: nowrap;
+       }
+       .euiContextMenuItem:last-child:not(.euiContextMenuItem-isDisabled) {
+        color: #A30000
+      }
+    }
+
+    .results-button {
+      margin-right: 10px;
+      width: 18px;
+    }
+
+    .euiContextMenuItem .euiIcon {
+      margin-right: 8px;
+    }
+  }
+
+  .actions-border {
+    height: 20px;
+    border-right: 1px solid #D9D9D9;
+    width: 1px;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0px 5px;
+  }
+
+  .job-description {
+    display: inline-block;
+  }
+
+  .job-loading-spinner {
+    text-align: center;
+  }
+}
+
+.jobs-list-table.jobs-selected {
+  .results-button {
+    color: silver;
+    pointer-events: none;
+  }
+}

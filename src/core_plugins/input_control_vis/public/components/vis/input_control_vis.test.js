@@ -19,7 +19,8 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import {
@@ -129,7 +130,7 @@ test('Clear btns enabled when there are values', () => {
 });
 
 test('clearControls', () => {
-  const component = mount(<InputControlVis
+  const component = mountWithIntl(<InputControlVis
     stageFilter={stageFilter}
     submitFilters={submitFilters}
     resetControls={resetControls}
@@ -148,7 +149,7 @@ test('clearControls', () => {
 });
 
 test('submitFilters', () => {
-  const component = mount(<InputControlVis
+  const component = mountWithIntl(<InputControlVis
     stageFilter={stageFilter}
     submitFilters={submitFilters}
     resetControls={resetControls}
@@ -167,7 +168,7 @@ test('submitFilters', () => {
 });
 
 test('resetControls', () => {
-  const component = mount(<InputControlVis
+  const component = mountWithIntl(<InputControlVis
     stageFilter={stageFilter}
     submitFilters={submitFilters}
     resetControls={resetControls}

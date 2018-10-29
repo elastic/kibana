@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 /* eslint camelcase: 0 */
+import { get } from 'lodash';
 import React, { Component, Fragment } from 'react';
 import {
   EuiButton,
@@ -31,12 +32,15 @@ import {
 import { toastNotifications } from 'ui/notify';
 import { USERS_PATH } from '../../../views/management/management_urls';
 import { ConfirmDelete } from './confirm_delete';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
 const validEmailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line max-len
 const validUsernameRegex = /[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*/;
-export class EditUser extends Component {
+class EditUserUI extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoaded: false,
       isNewUser: true,
       currentUser: {},
       showDeleteConfirmation: false,
@@ -56,11 +60,37 @@ export class EditUser extends Component {
     const { apiClient, username } = this.props;
     let { user, currentUser } = this.state;
     if (username) {
-      user = await apiClient.getUser(username);
-      currentUser = await apiClient.getCurrentUser();
+      try {
+        user = await apiClient.getUser(username);
+        currentUser = await apiClient.getCurrentUser();
+      } catch (err) {
+        toastNotifications.addDanger({
+          title: this.props.intl.formatMessage({
+            id: "xpack.security.management.users.editUser.errorLoadingUserTitle",
+            defaultMessage: "Error loading user"
+          }),
+          text: get(err, 'data.message') || err.message,
+        });
+        return;
+      }
     }
-    const roles = await apiClient.getRoles();
+
+    let roles;
+    try {
+      roles = await apiClient.getRoles();
+    } catch (err) {
+      toastNotifications.addDanger({
+        title: this.props.intl.formatMessage({
+          id: "xpack.security.management.users.editUser.errorLoadingRolesTitle",
+          defaultMessage: "Error loading roles"
+        }),
+        text: get(err, 'data.message') || err.message,
+      });
+      return;
+    }
+
     this.setState({
+      isLoaded: true,
       isNewUser: !username,
       currentUser,
       user,
@@ -77,19 +107,28 @@ export class EditUser extends Component {
   passwordError = () => {
     const { password } = this.state;
     if (password !== null && password.length < 6) {
-      return 'Password must be at least 6 characters';
+      return this.props.intl.formatMessage({
+        id: "xpack.security.management.users.editUser.passwordLengthErrorMessage",
+        defaultMessage: "Password must be at least 6 characters"
+      });
     }
   };
   currentPasswordError = () => {
     const { currentPasswordError } = this.state;
     if (currentPasswordError) {
-      return 'The current password you entered is incorrect';
+      return this.props.intl.formatMessage({
+        id: "xpack.security.management.users.editUser.incorrectPasswordErrorMessage",
+        defaultMessage: "The current password you entered is incorrect"
+      });
     }
   };
   confirmPasswordError = () => {
     const { password, confirmPassword } = this.state;
     if (password && confirmPassword !== null && password !== confirmPassword) {
-      return 'Passwords do not match';
+      return this.props.intl.formatMessage({
+        id: "xpack.security.management.users.editUser.passwordDoNotMatchErrorMessage",
+        defaultMessage: "Passwords do not match"
+      });
     }
   };
   usernameError = () => {
@@ -97,19 +136,28 @@ export class EditUser extends Component {
     if (username !== null && !username) {
       return 'Username is required';
     } else if (username && !username.match(validUsernameRegex)) {
-      return 'Username must begin with a letter or underscore and contain only letters, underscores, and numbers';
+      return this.props.intl.formatMessage({
+        id: "xpack.security.management.users.editUser.usernameAllowedCharactersErrorMessage",
+        defaultMessage: "Username must begin with a letter or underscore and contain only letters, underscores, and numbers"
+      });
     }
   };
   fullnameError = () => {
     const { full_name } = this.state.user;
     if (full_name !== null && !full_name) {
-      return 'Full name is required';
+      return this.props.intl.formatMessage({
+        id: "xpack.security.management.users.editUser.fullNameRequiredErrorMessage",
+        defaultMessage: "Full name is required"
+      });
     }
   };
   emailError = () => {
     const { email } = this.state.user;
     if (email !== null && (!email || !email.match(validEmailRegex))) {
-      return 'A valid email address is required';
+      return this.props.intl.formatMessage({
+        id: "xpack.security.management.users.editUser.validEmailRequiredErrorMessage",
+        defaultMessage: "A valid email address is required"
+      });
     }
   };
   changePassword = async () => {
@@ -117,12 +165,22 @@ export class EditUser extends Component {
     const { user, password, currentPassword } = this.state;
     try {
       await apiClient.changePassword(user.username, password, currentPassword);
-      toastNotifications.addSuccess('Password changed.');
+      toastNotifications.addSuccess(
+        this.props.intl.formatMessage({
+          id: "xpack.security.management.users.editUser.passwordSuccessfullyChangedNotificationMessage",
+          defaultMessage: "Password changed."
+        })
+      );
     } catch (e) {
       if (e.status === 401) {
         return this.setState({ currentPasswordError: true });
       } else {
-        toastNotifications.addDanger(`Error setting password: ${e.data.message}`);
+        toastNotifications.addDanger(
+          this.props.intl.formatMessage({
+            id: "xpack.security.management.users.editUser.settingPasswordErrorMessage",
+            defaultMessage: "Error setting password: {message}"
+          }, { message: e.data.message })
+        );
       }
     }
     this.clearPasswordForm();
@@ -139,10 +197,20 @@ export class EditUser extends Component {
     }
     try {
       await apiClient.saveUser(userToSave);
-      toastNotifications.addSuccess(`Saved user ${user.username}`);
+      toastNotifications.addSuccess(
+        this.props.intl.formatMessage({
+          id: "xpack.security.management.users.editUser.userSuccessfullySavedNotificationMessage",
+          defaultMessage: "Saved user {message}"
+        }, { message: user.username })
+      );
       changeUrl(USERS_PATH);
     } catch (e) {
-      toastNotifications.addDanger(`Error saving user: ${e.data.message}`);
+      toastNotifications.addDanger(
+        this.props.intl.formatMessage({
+          id: "xpack.security.management.users.editUser.savingUserErrorMessage",
+          defaultMessage: "Error saving user: {message}"
+        }, { message: e.data.message })
+      );
     }
   };
   clearPasswordForm = () => {
@@ -159,7 +227,10 @@ export class EditUser extends Component {
       <Fragment>
         {userIsLoggedInUser ? (
           <EuiFormRow
-            label="Current password"
+            label={this.props.intl.formatMessage({
+              id: "xpack.security.management.users.editUser.currentPasswordFormRowLabel",
+              defaultMessage: "Current password"
+            })}
             isInvalid={!!this.currentPasswordError()}
             error={this.currentPasswordError()}
           >
@@ -171,7 +242,15 @@ export class EditUser extends Component {
           </EuiFormRow>
         ) : null}
         <EuiFormRow
-          label={userIsLoggedInUser ? 'New password' : 'Password'}
+          label={
+            userIsLoggedInUser ? this.props.intl.formatMessage({
+              id: "xpack.security.management.users.editUser.newPasswordFormRowLabel",
+              defaultMessage: "New password"
+            }) : this.props.intl.formatMessage({
+              id: "xpack.security.management.users.editUser.passwordFormRowLabel",
+              defaultMessage: "Password"
+            })
+          }
           isInvalid={!!this.passwordError()}
           error={this.passwordError()}
         >
@@ -184,7 +263,10 @@ export class EditUser extends Component {
           />
         </EuiFormRow>
         <EuiFormRow
-          label="Confirm password"
+          label={this.props.intl.formatMessage({
+            id: "xpack.security.management.users.editUser.confirmPasswordFormRowLabel",
+            defaultMessage: "Confirm password"
+          })}
           isInvalid={!!this.confirmPasswordError()}
           error={this.confirmPasswordError()}
         >
@@ -215,10 +297,21 @@ export class EditUser extends Component {
         {this.passwordFields()}
         {username === 'kibana' ? (
           <Fragment>
-            <EuiCallOut title="Extra step needed" color="warning" iconType="help">
+            <EuiCallOut
+              title={this.props.intl.formatMessage({
+                id: "xpack.security.management.users.editUser.changePasswordExtraStepTitle",
+                defaultMessage: "Extra step needed"
+              })}
+              color="warning"
+              iconType="help"
+            >
               <p>
-                After you change the password for the kibana user, you must update the kibana.yml
-                file and restart Kibana.
+                <FormattedMessage
+                  id="xpack.security.management.users.editUser.changePasswordUpdateKibanaTitle"
+                  defaultMessage="After you change the password for the kibana user, you must update the {kibana}
+                  file and restart Kibana."
+                  values={{ kibana: 'kibana.yml' }}
+                />
               </p>
             </EuiCallOut>
             <EuiSpacer />
@@ -236,7 +329,10 @@ export class EditUser extends Component {
                 this.changePassword(password);
               }}
             >
-              Save password
+              <FormattedMessage
+                id="xpack.security.management.users.editUser.savePasswordButtonLabel"
+                defaultMessage="Save password"
+              />
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -246,7 +342,10 @@ export class EditUser extends Component {
                 this.clearPasswordForm();
               }}
             >
-              Cancel
+              <FormattedMessage
+                id="xpack.security.management.users.editUser.savePasswordCancelButtonLabel"
+                defaultMessage="Cancel"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -276,7 +375,7 @@ export class EditUser extends Component {
     this.setState({ showDeleteConfirmation: false });
   };
   render() {
-    const { changeUrl, apiClient } = this.props;
+    const { changeUrl, apiClient, intl } = this.props;
     const {
       user,
       roles,
@@ -289,6 +388,11 @@ export class EditUser extends Component {
     if (!user || !roles) {
       return null;
     }
+
+    if (!this.state.isLoaded) {
+      return null;
+    }
+
     return (
       <EuiPage className="mgtUsersEditPage">
         <EuiPageBody>
@@ -296,7 +400,20 @@ export class EditUser extends Component {
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
                 <EuiTitle>
-                  <h2>{isNewUser ? 'New user' : `Edit "${user.username}" user`}</h2>
+                  <h2>
+                    {isNewUser ?
+                      <FormattedMessage
+                        id="xpack.security.management.users.editUser.newUserTitle"
+                        defaultMessage="New user"
+                      />
+                      :
+                      <FormattedMessage
+                        id="xpack.security.management.users.editUser.editUserTitle"
+                        defaultMessage="Edit {userName} user"
+                        values={{ userName: user.username }}
+                      />
+                    }
+                  </h2>
                 </EuiTitle>
               </EuiPageContentHeaderSection>
               {reserved && (
@@ -309,8 +426,11 @@ export class EditUser extends Component {
               {reserved && (
                 <EuiText size="s" color="subdued">
                   <p>
-                    Reserved users are built-in and cannot be removed or modified. Only the password
-                    may be changed.
+                    <FormattedMessage
+                      id="xpack.security.management.users.editUser.modifyingReservedUsersDescription"
+                      defaultMessage="Reserved users are built-in and cannot be removed or modified. Only the password
+                      may be changed."
+                    />
                   </p>
                 </EuiText>
               )}
@@ -335,10 +455,16 @@ export class EditUser extends Component {
                     error={this.usernameError()}
                     helpText={
                       !isNewUser && !reserved
-                        ? "Username's cannot be changed after creation."
+                        ? intl.formatMessage({
+                          id: "xpack.security.management.users.editUser.changingUserNameAfterCreationDescription",
+                          defaultMessage: "Username's cannot be changed after creation."
+                        })
                         : null
                     }
-                    label="Username"
+                    label={intl.formatMessage({
+                      id: "xpack.security.management.users.editUser.usernameFormRowLabel",
+                      defaultMessage: "Username"
+                    })}
                   >
                     <EuiFieldText
                       onBlur={event =>
@@ -366,7 +492,10 @@ export class EditUser extends Component {
                       <EuiFormRow
                         isInvalid={!!this.fullnameError()}
                         error={this.fullnameError()}
-                        label="Full name"
+                        label={intl.formatMessage({
+                          id: "xpack.security.management.users.editUser.fullNameFormRowLabel",
+                          defaultMessage: "Full name"
+                        })}
                       >
                         <EuiFieldText
                           onBlur={event =>
@@ -393,7 +522,10 @@ export class EditUser extends Component {
                       <EuiFormRow
                         isInvalid={!!this.emailError()}
                         error={this.emailError()}
-                        label="Email address"
+                        label={intl.formatMessage({
+                          id: "xpack.security.management.users.editUser.emailAddressFormRowLabel",
+                          defaultMessage: "Email address"
+                        })}
                       >
                         <EuiFieldText
                           onBlur={event =>
@@ -419,10 +551,18 @@ export class EditUser extends Component {
                       </EuiFormRow>
                     </Fragment>
                   )}
-                  <EuiFormRow label="Roles">
+                  <EuiFormRow
+                    label={intl.formatMessage({
+                      id: "xpack.security.management.users.editUser.rolesFormRowLabel",
+                      defaultMessage: "Roles"
+                    })}
+                  >
                     <EuiComboBox
                       data-test-subj="userFormRolesDropdown"
-                      placeholder="Add roles"
+                      placeholder={intl.formatMessage({
+                        id: "xpack.security.management.users.editUser.addRolesPlaceholder",
+                        defaultMessage: "Add roles"
+                      })}
                       onChange={this.onRolesChange}
                       isDisabled={reserved}
                       name="roles"
@@ -435,7 +575,12 @@ export class EditUser extends Component {
 
                   {isNewUser || showChangePasswordForm ? null : (
                     <EuiFormRow label="Password">
-                      <EuiLink onClick={this.toggleChangePasswordForm}>Change password</EuiLink>
+                      <EuiLink onClick={this.toggleChangePasswordForm}>
+                        <FormattedMessage
+                          id="xpack.security.management.users.editUser.changePasswordButtonLabel"
+                          defaultMessage="Change password"
+                        />
+                      </EuiLink>
                     </EuiFormRow>
                   )}
                   {this.changePasswordForm()}
@@ -443,7 +588,12 @@ export class EditUser extends Component {
                   <EuiHorizontalRule />
 
                   {reserved && (
-                    <EuiButton onClick={() => changeUrl(USERS_PATH)}>Return to user list</EuiButton>
+                    <EuiButton onClick={() => changeUrl(USERS_PATH)}>
+                      <FormattedMessage
+                        id="xpack.security.management.users.editUser.returnToUserListButtonLabel"
+                        defaultMessage="Return to user list"
+                      />
+                    </EuiButton>
                   )}
                   {reserved ? null : (
                     <EuiFlexGroup responsive={false}>
@@ -454,7 +604,16 @@ export class EditUser extends Component {
                           data-test-subj="userFormSaveButton"
                           onClick={() => this.saveUser()}
                         >
-                          {isNewUser ? 'Create user' : 'Update user'}
+                          {isNewUser ?
+                            <FormattedMessage
+                              id="xpack.security.management.users.editUser.createUserButtonLabel"
+                              defaultMessage="Create user"
+                            />
+                            :
+                            <FormattedMessage
+                              id="xpack.security.management.users.editUser.updateUserButtonLabel"
+                              defaultMessage="Update user"
+                            />}
                         </EuiButton>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -462,7 +621,10 @@ export class EditUser extends Component {
                           data-test-subj="userFormCancelButton"
                           onClick={() => changeUrl(USERS_PATH)}
                         >
-                          Cancel
+                          <FormattedMessage
+                            id="xpack.security.management.users.editUser.cancelButtonLabel"
+                            defaultMessage="Cancel"
+                          />
                         </EuiButtonEmpty>
                       </EuiFlexItem>
                       <EuiFlexItem grow={true} />
@@ -475,7 +637,10 @@ export class EditUser extends Component {
                             data-test-subj="userFormDeleteButton"
                             color="danger"
                           >
-                            Delete user
+                            <FormattedMessage
+                              id="xpack.security.management.users.editUser.deleteUserButtonLabel"
+                              defaultMessage="Delete user"
+                            />
                           </EuiButtonEmpty>
                         </EuiFlexItem>
                       )}
@@ -490,3 +655,5 @@ export class EditUser extends Component {
     );
   }
 }
+
+export const EditUser = injectI18n(EditUserUI);

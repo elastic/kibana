@@ -26,4 +26,3 @@ export const MAX_NUMBER_OF_MATCHING_INDICES = 100;
 export const MAX_SEARCH_SIZE = MAX_NUMBER_OF_MATCHING_INDICES + ESTIMATED_NUMBER_OF_SYSTEM_INDICES;
 
 export const PER_PAGE_INCREMENTS = [5, 10, 20, 50];
-export const ILLEGAL_CHARACTERS = ['\\', '/', '?', '"', '<', '>', '|', ' '];

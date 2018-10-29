@@ -259,6 +259,19 @@
     });
 
     /**
+     * Perform a [shield.getUserPrivileges](Retrieve a user's list of privileges) request
+     *
+     */
+    shield.getUserPrivileges = ca({
+      params: {},
+      urls: [
+        {
+          fmt: '/_xpack/security/user/_privileges'
+        }
+      ]
+    });
+
+    /**
      * Asks Elasticsearch to prepare SAML authentication request to be sent to
      * the 3rd-party SAML identity provider.
      *
@@ -359,6 +372,37 @@
       needBody: true,
       url: {
         fmt: '/_xpack/security/oauth2/token'
+      }
+    });
+
+    shield.getPrivilege = ca({
+      method: 'GET',
+      urls: [{
+        fmt: '/_xpack/security/privilege/<%=privilege%>',
+        req: {
+          privilege: {
+            type: 'string',
+            required: false
+          }
+        }
+      }, {
+        fmt: '/_xpack/security/privilege'
+      }]
+    });
+
+    shield.postPrivileges = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_xpack/security/privilege'
+      }
+    });
+
+    shield.hasPrivileges = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_xpack/security/user/_has_privileges'
       }
     });
   };

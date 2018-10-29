@@ -59,8 +59,7 @@ describe('parent pipeline aggs', function () {
             title: 'New Visualization',
             type: 'metric',
             params: {
-              fontSize: 60,
-              handleNoResults: true
+              fontSize: 60
             },
             aggs: [
               {

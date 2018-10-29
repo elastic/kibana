@@ -17,62 +17,106 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { i18n } from '@kbn/i18n';
-import JSON5 from 'json5';
+import path from 'path';
+import normalize from 'normalize-path';
+import chalk from 'chalk';
 
-import { extractHtmlMessages } from './extract_html_messages';
-import { extractCodeMessages } from './extract_code_messages';
-import { extractJadeMessages } from './extract_jade_messages';
-import { extractHandlebarsMessages } from './extract_handlebars_messages';
-import { globAsync, makeDirAsync, accessAsync, readFileAsync, writeFileAsync } from './utils';
+import {
+  extractHtmlMessages,
+  extractCodeMessages,
+  extractPugMessages,
+  extractHandlebarsMessages,
+} from './extractors';
+import { globAsync, readFileAsync } from './utils';
+import { paths, exclude } from '../../../.i18nrc.json';
+import { createFailError, isFailError } from '../run';
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
+
   if (targetMap.has(key) && existingValue.message !== value.message) {
-    throw new Error(
-      `There is more than one default message for the same id "${key}": "${existingValue}" and "${value}"`
-    );
+    throw createFailError(`There is more than one default message for the same id "${key}":
+"${existingValue.message}" and "${value.message}"`);
   }
+
   targetMap.set(key, value);
 }
 
-export async function extractDefaultTranslations(inputPath) {
-  const entries = await globAsync('*.{js,jsx,jade,ts,tsx,html,hbs,handlebars}', {
+function normalizePath(inputPath) {
+  return normalize(path.relative('.', inputPath));
+}
+
+export function filterPaths(inputPaths) {
+  const availablePaths = Object.values(paths);
+  const pathsForExtraction = new Set();
+
+  for (const inputPath of inputPaths) {
+    const normalizedPath = normalizePath(inputPath);
+
+    // If input path is the sub path of or equal to any available path, include it.
+    if (
+      availablePaths.some(path => normalizedPath.startsWith(`${path}/`) || path === normalizedPath)
+    ) {
+      pathsForExtraction.add(normalizedPath);
+    } else {
+      // Otherwise go through all available paths and see if any of them is the sub
+      // path of the input path (empty normalized path corresponds to root or above).
+      availablePaths
+        .filter(path => !normalizedPath || path.startsWith(`${normalizedPath}/`))
+        .forEach(ePath => pathsForExtraction.add(ePath));
+    }
+  }
+
+  return [...pathsForExtraction];
+}
+
+export function validateMessageNamespace(id, filePath) {
+  const normalizedPath = normalizePath(filePath);
+
+  const [expectedNamespace] = Object.entries(paths).find(([, pluginPath]) =>
+    normalizedPath.startsWith(`${pluginPath}/`)
+  );
+
+  if (!id.startsWith(`${expectedNamespace}.`)) {
+    throw createFailError(`Expected "${id}" id to have "${expectedNamespace}" namespace. \
+See .i18nrc.json for the list of supported namespaces.`);
+  }
+}
+
+export async function extractMessagesFromPathToMap(inputPath, targetMap) {
+  const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
   });
 
-  const { htmlEntries, codeEntries, jadeEntries, hbsEntries } = entries.reduce(
+  const { htmlEntries, codeEntries, pugEntries, hbsEntries } = entries.reduce(
     (paths, entry) => {
-      const resolvedPath = resolve(inputPath, entry);
+      const resolvedPath = path.resolve(inputPath, entry);
 
       if (resolvedPath.endsWith('.html')) {
         paths.htmlEntries.push(resolvedPath);
-      } else if (resolvedPath.endsWith('.jade')) {
-        paths.jadeEntries.push(resolvedPath);
+      } else if (resolvedPath.endsWith('.pug')) {
+        paths.pugEntries.push(resolvedPath);
       } else if (resolvedPath.endsWith('.hbs') || resolvedPath.endsWith('.handlebars')) {
-        paths.hbsFiles.push(resolvedPath);
+        paths.hbsEntries.push(resolvedPath);
       } else {
         paths.codeEntries.push(resolvedPath);
       }
 
       return paths;
     },
-    { htmlEntries: [], codeEntries: [], jadeEntries: [], hbsEntries: [] }
+    { htmlEntries: [], codeEntries: [], pugEntries: [], hbsEntries: [] }
   );
-
-  const defaultMessagesMap = new Map();
 
   await Promise.all(
     [
       [htmlEntries, extractHtmlMessages],
       [codeEntries, extractCodeMessages],
-      [jadeEntries, extractJadeMessages],
+      [pugEntries, extractPugMessages],
       [hbsEntries, extractHandlebarsMessages],
     ].map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
-        entries.map(async entry => {
+        entries.filter(entry => !exclude.includes(normalizePath(entry))).map(async entry => {
           return {
             name: entry,
             content: await readFileAsync(entry),
@@ -83,40 +127,19 @@ export async function extractDefaultTranslations(inputPath) {
       for (const { name, content } of files) {
         try {
           for (const [id, value] of extractFunction(content)) {
-            addMessageToMap(defaultMessagesMap, id, value);
+            validateMessageNamespace(id, name);
+            addMessageToMap(targetMap, id, value);
           }
         } catch (error) {
-          throw new Error(`Error in ${name}\n${error.message || error}`);
+          if (isFailError(error)) {
+            throw createFailError(
+              `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(name)}\n${error}`
+            );
+          }
+
+          throw error;
         }
       }
     })
   );
-
-  // .slice(0, -1): remove closing curly brace from json to append messages
-  let jsonBuffer = Buffer.from(
-    JSON5.stringify({ formats: i18n.formats }, { quote: `'`, space: 2 }).slice(0, -1)
-  );
-
-  const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) => {
-    return key1 < key2 ? -1 : 1;
-  });
-
-  for (const [mapKey, mapValue] of defaultMessages) {
-    jsonBuffer = Buffer.concat([
-      jsonBuffer,
-      Buffer.from(`  '${mapKey}': '${mapValue.message}',`),
-      Buffer.from(mapValue.context ? ` // ${mapValue.context}\n` : '\n'),
-    ]);
-  }
-
-  // append previously removed closing curly brace
-  jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
-
-  try {
-    await accessAsync(resolve(inputPath, 'translations'));
-  } catch (_) {
-    await makeDirAsync(resolve(inputPath, 'translations'));
-  }
-
-  await writeFileAsync(resolve(inputPath, 'translations', 'en.json'), jsonBuffer);
 }

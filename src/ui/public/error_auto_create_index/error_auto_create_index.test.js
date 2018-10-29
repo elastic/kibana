@@ -30,7 +30,7 @@ import fetchMock from 'fetch-mock';
 import { kfetch } from 'ui/kfetch';
 import { isAutoCreateIndexError } from './error_auto_create_index';
 
-describe('isAutoCreateIndexError correctly handles FetchError thrown by kfetch', () => {
+describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch', () => {
   describe('404', () => {
     beforeEach(() => {
       fetchMock.post({
@@ -43,15 +43,12 @@ describe('isAutoCreateIndexError correctly handles FetchError thrown by kfetch',
     afterEach(() => fetchMock.restore());
 
     test('should return false', async () => {
-      let gotError = false;
+      expect.assertions(1);
       try {
         await kfetch({ method: 'POST', pathname: 'my/path' });
-      } catch (fetchError) {
-        gotError = true;
-        expect(isAutoCreateIndexError(fetchError)).toBe(false);
+      } catch (kfetchError) {
+        expect(isAutoCreateIndexError(kfetchError)).toBe(false);
       }
-
-      expect(gotError).toBe(true);
     });
   });
 
@@ -67,15 +64,12 @@ describe('isAutoCreateIndexError correctly handles FetchError thrown by kfetch',
     afterEach(() => fetchMock.restore());
 
     test('should return false', async () => {
-      let gotError = false;
+      expect.assertions(1);
       try {
         await kfetch({ method: 'POST', pathname: 'my/path' });
-      } catch (fetchError) {
-        gotError = true;
-        expect(isAutoCreateIndexError(fetchError)).toBe(false);
+      } catch (kfetchError) {
+        expect(isAutoCreateIndexError(kfetchError)).toBe(false);
       }
-
-      expect(gotError).toBe(true);
     });
   });
 
@@ -85,7 +79,7 @@ describe('isAutoCreateIndexError correctly handles FetchError thrown by kfetch',
         matcher: '*',
         response: {
           body: {
-            code: 'ES_AUTO_CREATE_INDEX_ERROR'
+            code: 'ES_AUTO_CREATE_INDEX_ERROR',
           },
           status: 503,
         },
@@ -94,16 +88,12 @@ describe('isAutoCreateIndexError correctly handles FetchError thrown by kfetch',
     afterEach(() => fetchMock.restore());
 
     test('should return true', async () => {
-      let gotError = false;
+      expect.assertions(1);
       try {
         await kfetch({ method: 'POST', pathname: 'my/path' });
-      } catch (fetchError) {
-        gotError = true;
-        expect(isAutoCreateIndexError(fetchError)).toBe(true);
+      } catch (kfetchError) {
+        expect(isAutoCreateIndexError(kfetchError)).toBe(true);
       }
-
-      expect(gotError).toBe(true);
     });
   });
 });
-

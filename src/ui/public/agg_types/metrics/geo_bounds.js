@@ -28,6 +28,7 @@ export const geoBoundsMetricAgg = new MetricAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'geo_point'
     }
   ]

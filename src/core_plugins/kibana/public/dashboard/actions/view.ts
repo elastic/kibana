@@ -34,6 +34,7 @@ export enum ViewActionTypeKeys {
   UPDATE_TIME_RANGE = 'UPDATE_TIME_RANGE',
   UPDATE_FILTERS = 'UPDATE_FILTERS',
   UPDATE_QUERY = 'UPDATE_QUERY',
+  CLOSE_CONTEXT_MENU = 'CLOSE_CONTEXT_MENU',
 }
 
 export interface UpdateViewModeAction
@@ -41,6 +42,9 @@ export interface UpdateViewModeAction
 
 export interface SetVisibleContextMenuPanelIdAction
   extends KibanaAction<ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID, PanelId> {}
+
+export interface CloseContextMenuAction
+  extends KibanaAction<ViewActionTypeKeys.CLOSE_CONTEXT_MENU, undefined> {}
 
 export interface MaximizePanelAction
   extends KibanaAction<ViewActionTypeKeys.MAXIMIZE_PANEl, PanelId> {}
@@ -68,6 +72,7 @@ export interface UpdateQueryAction extends KibanaAction<ViewActionTypeKeys.UPDAT
 export type ViewActions =
   | UpdateViewModeAction
   | SetVisibleContextMenuPanelIdAction
+  | CloseContextMenuAction
   | MaximizePanelAction
   | MinimizePanelAction
   | UpdateIsFullScreenModeAction
@@ -78,6 +83,7 @@ export type ViewActions =
   | UpdateQueryAction;
 
 export const updateViewMode = createAction<string>(ViewActionTypeKeys.UPDATE_VIEW_MODE);
+export const closeContextMenu = createAction(ViewActionTypeKeys.CLOSE_CONTEXT_MENU);
 export const setVisibleContextMenuPanelId = createAction<PanelId>(
   ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID
 );

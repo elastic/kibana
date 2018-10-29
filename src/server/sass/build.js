@@ -21,16 +21,16 @@ import path from 'path';
 import { promisify } from 'util';
 import fs from 'fs';
 import sass from 'node-sass';
-import minimatch from 'minimatch';
+import autoprefixer from 'autoprefixer';
+import postcss from 'postcss';
 
 const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
 
 export class Build {
-  constructor(source, options = {}) {
+  constructor(source) {
     this.source = source;
-    this.onSuccess = options.onSuccess || (() => {});
-    this.onError = options.onError || (() => {});
+    this.includedFiles = [source];
   }
 
   outputPath() {
@@ -46,8 +46,8 @@ export class Build {
     return path.join(path.dirname(this.source), '**', '*.s{a,c}ss');
   }
 
-  async buildIfInPath(path) {
-    if (minimatch(path, this.getGlob())) {
+  async buildIfIncluded(path) {
+    if (this.includedFiles && this.includedFiles.includes(path)) {
       await this.build();
       return true;
     }
@@ -60,24 +60,25 @@ export class Build {
    */
 
   async build() {
-    try {
-      const outFile = this.outputPath();
+    const outFile = this.outputPath();
+    const rendered = await renderSass({
+      file: this.source,
+      outFile,
+      sourceMap: true,
+      sourceMapEmbed: true,
+      includePaths: [
+        path.resolve(__dirname, '../..'),
+        path.resolve(__dirname, '../../../node_modules')
+      ]
+    });
 
-      const rendered = await renderSass({
-        file: this.source,
-        outFile,
-        sourceMap: true,
-        sourceMapEmbed: true,
-        sourceComments: true,
-      });
 
-      await writeFile(outFile, rendered.css);
+    const prefixed = postcss([ autoprefixer ]).process(rendered.css);
 
-      this.onSuccess(this);
-    } catch(e) {
-      this.onError(this, e);
-    } finally {
-      return this;
-    }
+    this.includedFiles = rendered.stats.includedFiles;
+
+    await writeFile(outFile, prefixed.css);
+
+    return this;
   }
 }

@@ -14,13 +14,14 @@ import { parseInterval } from 'ui/utils/parse_interval';
 import { timefilter } from 'ui/timefilter';
 
 import uiRoutes from 'ui/routes';
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import template from './new_job.html';
 import saveStatusTemplate from 'plugins/ml/jobs/new_job/advanced/save_status_modal/save_status_modal.html';
 import { createSearchItems, createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { loadIndexPatterns, loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { ML_JOB_FIELD_TYPES, ES_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
+import { ALLOWED_DATA_UNITS } from 'plugins/ml/../common/constants/validation';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults, newJobLimits, newJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import {
@@ -37,7 +38,7 @@ uiRoutes
   .when('/jobs/new_job/advanced', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkCreateJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       indexPatterns: loadIndexPatterns,
@@ -50,7 +51,7 @@ uiRoutes
   .when('/jobs/new_job/advanced/:jobId', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkCreateJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       indexPatterns: loadIndexPatterns,
@@ -193,6 +194,7 @@ module.controller('MlNewJob',
         scrollSizeDefault: 1000,
         indicesText: '',
         typesText: '',
+        scriptFields: [],
       },
       saveStatus: {
         job: 0,
@@ -349,6 +351,16 @@ module.controller('MlNewJob',
                     }
                   });
                 });
+              });
+
+              // Add script fields from the job configuration to $scope.fields
+              // so they're available from within the dropdown in the detector modal.
+              const scriptFields = Object.keys(_.get($scope.job, 'datafeed_config.script_fields', {}));
+              // This type information is retrieved via fieldCaps for regular fields,
+              // here we're creating a similar object so the script field is usable further on.
+              const scriptType = { type: 'script_fields', searchable: false, aggregatable: true };
+              scriptFields.forEach((fieldName) => {
+                $scope.fields[fieldName] = scriptType;
               });
 
               if (Object.keys($scope.fields).length) {
@@ -698,7 +710,16 @@ module.controller('MlNewJob',
         });
 
         const indicesText = datafeedConfig.indices.join(',');
-        $scope.ui.fieldsUpToDate = (indicesText === $scope.ui.datafeed.indicesText);
+
+        const scriptFields = (datafeedConfig.script_fields !== undefined) ? Object.keys(datafeedConfig.script_fields) : [];
+
+        let fieldsUpToDate = true;
+        if (indicesText !== $scope.ui.datafeed.indicesText || _.isEqual(scriptFields, $scope.ui.datafeed.scriptFields) === false) {
+          fieldsUpToDate = false;
+        }
+
+        $scope.ui.fieldsUpToDate = fieldsUpToDate;
+
         const types = Array.isArray(datafeedConfig.types) ? datafeedConfig.types : [];
 
         $scope.ui.datafeed = {
@@ -711,6 +732,7 @@ module.controller('MlNewJob',
           scrollSizeDefault: scrollSizeDefault,
           indicesText,
           typesText: types.join(','),
+          scriptFields,
         };
 
         if ($scope.ui.fieldsUpToDate === false) {
@@ -747,8 +769,8 @@ module.controller('MlNewJob',
     function setFieldDelimiterControlsFromText() {
       if ($scope.job.data_description && $scope.job.data_description.field_delimiter) {
 
-      // if the data format has not been set and fieldDelimiter exists,
-      // assume the format is delimited
+        // if the data format has not been set and fieldDelimiter exists,
+        // assume the format is delimited
         if ($scope.job.data_description.format === undefined) {
           $scope.job.data_description.format = 'delimited';
         }
@@ -1014,6 +1036,13 @@ module.controller('MlNewJob',
           let msg = 'Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ';
           msg += 'must start and end with an alphanumeric character';
           tabs[0].checks.groupIds.message = msg;
+        }
+
+        if (validationResults.contains('model_memory_limit_units_invalid')) {
+          tabs[0].checks.modelMemoryLimit.valid = false;
+          const str = `${(ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(', '))} or ${([...ALLOWED_DATA_UNITS].pop())}`;
+          const msg = `Model memory limit data unit unrecognized. It must be ${str}`;
+          tabs[0].checks.modelMemoryLimit.message = msg;
         }
 
         if (validationResults.contains('model_memory_limit_invalid')) {

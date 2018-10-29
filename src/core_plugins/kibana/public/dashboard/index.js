@@ -19,7 +19,6 @@
 
 import './dashboard_app';
 import './saved_dashboard/saved_dashboards';
-import './styles/index.less';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
@@ -28,7 +27,7 @@ import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-import { SavedObjectNotFound } from 'ui/errors';
+import { InvalidJSONProperty, SavedObjectNotFound } from 'ui/errors';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { recentlyAccessed } from 'ui/persisted_log';
@@ -51,7 +50,7 @@ uiRoutes
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
-    controller($injector, $location, $scope, Private, config) {
+    controller($injector, $location, $scope, Private, config, breadcrumbState) {
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
       const dashboardConfig = $injector.get('dashboardConfig');
 
@@ -64,6 +63,7 @@ uiRoutes
       };
       $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
       $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;
+      breadcrumbState.set([{ text: 'Dashboards' }]);
     },
     resolve: {
       dash: function ($route, Private, redirectWhenMissing, kbnUrl) {
@@ -114,6 +114,13 @@ uiRoutes
             return savedDashboard;
           })
           .catch((error) => {
+            // A corrupt dashboard was detected (e.g. with invalid JSON properties)
+            if (error instanceof InvalidJSONProperty) {
+              toastNotifications.addDanger(error.message);
+              kbnUrl.redirect(DashboardConstants.LANDING_PAGE_PATH);
+              return;
+            }
+
             // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
             // See https://github.com/elastic/kibana/issues/10951 for more context.
             if (error instanceof SavedObjectNotFound && id === 'create') {

@@ -53,8 +53,9 @@ export const esTestConfig = new class EsTestConfig {
       };
     }
 
-    const username = process.env.TEST_KIBANA_USERNAME || adminTestUser.username;
-    const password = process.env.TEST_KIBANA_PASSWORD || adminTestUser.password;
+    const username = process.env.TEST_ES_USERNAME || adminTestUser.username;
+    const password = process.env.TEST_ES_PASSWORD || adminTestUser.password;
+
     return {
       // Allow setting any individual component(s) of the URL,
       // or use default values (username and password from ../kbn/users.js)

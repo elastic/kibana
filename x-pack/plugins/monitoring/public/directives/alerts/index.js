@@ -13,7 +13,7 @@ import { KuiTableRowCell, KuiTableRow } from '@kbn/ui-framework/components';
 import { MonitoringTable } from 'plugins/monitoring/components/table';
 import { CALCULATE_DURATION_SINCE, SORT_DESCENDING } from '../../../common/constants';
 import { Tooltip } from 'plugins/monitoring/components/tooltip';
-import { FormattedMessage } from 'plugins/monitoring/components/alerts/formatted_message';
+import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
 import { formatTimestampToDuration } from '../../../common/format_timestamp_to_duration';
 import { formatDateTimeLocal } from '../../../common/formatting';
@@ -54,18 +54,18 @@ const alertRowFactory = (scope, kbnUrl) => {
 
     return (
       <KuiTableRow>
-        <KuiTableRowCell>
+        <KuiTableRowCell tabIndex="0">
           <Tooltip text={severityIcon.title} placement="bottom" trigger="hover">
             <EuiHealth color={severityIcon.color} data-test-subj="alertIcon" aria-label={severityIcon.title}>
               { capitalize(severityIcon.value) }
             </EuiHealth>
           </Tooltip>
         </KuiTableRowCell>
-        <KuiTableRowCell>
+        <KuiTableRowCell tabIndex="0">
           { resolution.icon } { resolution.text }
         </KuiTableRowCell>
-        <KuiTableRowCell>
-          <FormattedMessage
+        <KuiTableRowCell tabIndex="0">
+          <FormattedAlert
             prefix={props.prefix}
             suffix={props.suffix}
             message={props.message}
@@ -73,13 +73,13 @@ const alertRowFactory = (scope, kbnUrl) => {
             changeUrl={changeUrl}
           />
         </KuiTableRowCell>
-        <KuiTableRowCell>
+        <KuiTableRowCell tabIndex="0">
           { linkToCategories[props.metadata.link] ? linkToCategories[props.metadata.link] : 'General' }
         </KuiTableRowCell>
-        <KuiTableRowCell>
+        <KuiTableRowCell tabIndex="0">
           { formatDateTimeLocal(props.update_timestamp) }
         </KuiTableRowCell>
-        <KuiTableRowCell>
+        <KuiTableRowCell tabIndex="0">
           { formatTimestampToDuration(props.timestamp, CALCULATE_DURATION_SINCE) } ago
         </KuiTableRowCell>
       </KuiTableRow>

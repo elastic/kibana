@@ -1,0 +1,178 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`formats %s patterns and indents multi-line messages correctly 1`] = `
+"         │ [32msucc[39m foo bar
+         │      { foo: { bar: { '1': [Array] } },
+         │        bar: { bar: { '1': [Array] } } }
+         │
+         │      Infinity
+"
+`;
+
+exports[`level:debug/type:debug snapshots: is written 1`] = `true`;
+
+exports[`level:debug/type:debug snapshots: output 1`] = `
+" [2mdebg[22m foo
+"
+`;
+
+exports[`level:debug/type:error snapshots: is written 1`] = `true`;
+
+exports[`level:debug/type:error snapshots: output 1`] = `
+"[31mERROR[39m foo
+"
+`;
+
+exports[`level:debug/type:info snapshots: is written 1`] = `true`;
+
+exports[`level:debug/type:info snapshots: output 1`] = `
+" [34minfo[39m foo
+"
+`;
+
+exports[`level:debug/type:success snapshots: is written 1`] = `true`;
+
+exports[`level:debug/type:success snapshots: output 1`] = `
+" [32msucc[39m foo
+"
+`;
+
+exports[`level:debug/type:verbose snapshots: is written 1`] = `false`;
+
+exports[`level:debug/type:warning snapshots: is written 1`] = `true`;
+
+exports[`level:debug/type:warning snapshots: output 1`] = `
+" [33mwarn[39m foo
+"
+`;
+
+exports[`level:error/type:debug snapshots: is written 1`] = `false`;
+
+exports[`level:error/type:error snapshots: is written 1`] = `true`;
+
+exports[`level:error/type:error snapshots: output 1`] = `
+"[31mERROR[39m foo
+"
+`;
+
+exports[`level:error/type:info snapshots: is written 1`] = `false`;
+
+exports[`level:error/type:success snapshots: is written 1`] = `false`;
+
+exports[`level:error/type:verbose snapshots: is written 1`] = `false`;
+
+exports[`level:error/type:warning snapshots: is written 1`] = `false`;
+
+exports[`level:info/type:debug snapshots: is written 1`] = `false`;
+
+exports[`level:info/type:error snapshots: is written 1`] = `true`;
+
+exports[`level:info/type:error snapshots: output 1`] = `
+"[31mERROR[39m foo
+"
+`;
+
+exports[`level:info/type:info snapshots: is written 1`] = `true`;
+
+exports[`level:info/type:info snapshots: output 1`] = `
+" [34minfo[39m foo
+"
+`;
+
+exports[`level:info/type:success snapshots: is written 1`] = `true`;
+
+exports[`level:info/type:success snapshots: output 1`] = `
+" [32msucc[39m foo
+"
+`;
+
+exports[`level:info/type:verbose snapshots: is written 1`] = `false`;
+
+exports[`level:info/type:warning snapshots: is written 1`] = `true`;
+
+exports[`level:info/type:warning snapshots: output 1`] = `
+" [33mwarn[39m foo
+"
+`;
+
+exports[`level:silent/type:debug snapshots: is written 1`] = `false`;
+
+exports[`level:silent/type:error snapshots: is written 1`] = `false`;
+
+exports[`level:silent/type:info snapshots: is written 1`] = `false`;
+
+exports[`level:silent/type:success snapshots: is written 1`] = `false`;
+
+exports[`level:silent/type:verbose snapshots: is written 1`] = `false`;
+
+exports[`level:silent/type:warning snapshots: is written 1`] = `false`;
+
+exports[`level:verbose/type:debug snapshots: is written 1`] = `true`;
+
+exports[`level:verbose/type:debug snapshots: output 1`] = `
+" [2mdebg[22m foo
+"
+`;
+
+exports[`level:verbose/type:error snapshots: is written 1`] = `true`;
+
+exports[`level:verbose/type:error snapshots: output 1`] = `
+"[31mERROR[39m foo
+"
+`;
+
+exports[`level:verbose/type:info snapshots: is written 1`] = `true`;
+
+exports[`level:verbose/type:info snapshots: output 1`] = `
+" [34minfo[39m foo
+"
+`;
+
+exports[`level:verbose/type:success snapshots: is written 1`] = `true`;
+
+exports[`level:verbose/type:success snapshots: output 1`] = `
+" [32msucc[39m foo
+"
+`;
+
+exports[`level:verbose/type:verbose snapshots: is written 1`] = `true`;
+
+exports[`level:verbose/type:verbose snapshots: output 1`] = `
+" [95msill[39m foo
+"
+`;
+
+exports[`level:verbose/type:warning snapshots: is written 1`] = `true`;
+
+exports[`level:verbose/type:warning snapshots: output 1`] = `
+" [33mwarn[39m foo
+"
+`;
+
+exports[`level:warning/type:debug snapshots: is written 1`] = `false`;
+
+exports[`level:warning/type:error snapshots: is written 1`] = `true`;
+
+exports[`level:warning/type:error snapshots: output 1`] = `
+"[31mERROR[39m foo
+"
+`;
+
+exports[`level:warning/type:info snapshots: is written 1`] = `false`;
+
+exports[`level:warning/type:success snapshots: is written 1`] = `false`;
+
+exports[`level:warning/type:verbose snapshots: is written 1`] = `false`;
+
+exports[`level:warning/type:warning snapshots: is written 1`] = `true`;
+
+exports[`level:warning/type:warning snapshots: output 1`] = `
+" [33mwarn[39m foo
+"
+`;
+
+exports[`throws error if created with invalid level 1`] = `"Invalid log level \\"foo\\" (expected one of silent,error,warning,info,debug,verbose)"`;
+
+exports[`throws error if writeTo config is not defined or doesn't have a write method 1`] = `"ToolingLogTextWriter requires the \`writeTo\` option be set to a stream (like process.stdout)"`;
+
+exports[`throws error if writeTo config is not defined or doesn't have a write method 2`] = `"ToolingLogTextWriter requires the \`writeTo\` option be set to a stream (like process.stdout)"`;

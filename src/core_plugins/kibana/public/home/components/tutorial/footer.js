@@ -28,6 +28,8 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export function Footer({ url, label }) {
   return (
     <div>
@@ -38,7 +40,10 @@ export function Footer({ url, label }) {
         <EuiFlexItem grow={false}>
           <EuiText>
             <p>
-              {`When all steps are complete, you're ready to explore your data.`}
+              <FormattedMessage
+                id="kbn.home.exploreYourDataDescription"
+                defaultMessage="When all steps are complete, you're ready to explore your data."
+              />
             </p>
           </EuiText>
         </EuiFlexItem>

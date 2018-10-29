@@ -20,7 +20,7 @@
 import expect from 'expect.js';
 import { MetricVisComponent } from '../metric_vis_controller';
 
-describe('metric vis', function () {
+describe('metric vis controller', function () {
 
   const vis = {
     params: {
@@ -53,10 +53,8 @@ describe('metric vis', function () {
 
   it('should set the metric label and value', function () {
     const metrics = metricController._processTableGroups({
-      tables: [{
-        columns: [{ title: 'Count', aggConfig: { ...aggConfig, makeLabel: () => 'Count' } }],
-        rows: [[ 4301021 ]]
-      }]
+      columns: [{ id: 'col-0', title: 'Count', aggConfig: { ...aggConfig, makeLabel: () => 'Count' } }],
+      rows: [{ 'col-0': 4301021 }]
     });
 
     expect(metrics.length).to.be(1);
@@ -66,13 +64,11 @@ describe('metric vis', function () {
 
   it('should support multi-value metrics', function () {
     const metrics = metricController._processTableGroups({
-      tables: [{
-        columns: [
-          { aggConfig: { ...aggConfig, makeLabel: () => '1st percentile of bytes' } },
-          { aggConfig: { ...aggConfig, makeLabel: () => '99th percentile of bytes' } }
-        ],
-        rows: [[ 182, 445842.4634666484 ]]
-      }]
+      columns: [
+        { id: 'col-0', aggConfig: { ...aggConfig, makeLabel: () => '1st percentile of bytes' } },
+        { id: 'col-1', aggConfig: { ...aggConfig, makeLabel: () => '99th percentile of bytes' } }
+      ],
+      rows: [{ 'col-0': 182, 'col-1': 445842.4634666484 }]
     });
 
     expect(metrics.length).to.be(2);

@@ -31,3 +31,11 @@ export const OPERATOR = {
   GREATER_THAN: 'gt',
   GREATER_THAN_OR_EQUAL: 'gte',
 };
+
+// List of detector functions which don't support rules with numeric conditions.
+export const CONDITIONS_NOT_SUPPORTED_FUNCTIONS = [
+  'freq_rare',
+  'lat_long',
+  'metric',
+  'rare',
+];

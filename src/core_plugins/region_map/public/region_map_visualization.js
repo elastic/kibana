@@ -26,7 +26,7 @@ import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter'
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
 
-export function RegionMapsVisualizationProvider(Private, config) {
+export function RegionMapsVisualizationProvider(Private, config, i18n) {
 
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
@@ -46,14 +46,17 @@ export function RegionMapsVisualizationProvider(Private, config) {
       }
     }
 
-    async _updateData(tableGroup) {
-      this._chartData = tableGroup;
+    async _updateData(table) {
+      this._chartData = table;
       let results;
-      if (!tableGroup || !tableGroup.tables || !tableGroup.tables.length || tableGroup.tables[0].columns.length !== 2) {
+      if (!table || !table.rows.length || table.columns.length !== 2) {
         results = [];
       } else {
-        const buckets = tableGroup.tables[0].rows;
-        results = buckets.map(([term, value]) => {
+        const termColumn = table.columns[0].id;
+        const valueColumn = table.columns[1].id;
+        results = table.rows.map(row => {
+          const term = row[termColumn];
+          const value = row[valueColumn];
           return { term: term, value: value };
         });
       }
@@ -150,16 +153,27 @@ export function RegionMapsVisualizationProvider(Private, config) {
           return;
         }
 
-        const rowIndex = this._chartData.tables[0].rows.findIndex(row => row[0] === event);
-        this._vis.API.events.addFilter(this._chartData.tables[0], 0, rowIndex, event);
+        const rowIndex = this._chartData.rows.findIndex(row => row[0] === event);
+        this._vis.API.events.addFilter(this._chartData, 0, rowIndex, event);
       });
 
       this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {
           toastNotifications.addWarning({
-            title: `Unable to show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on map`,
-            text: `Ensure that each of these term matches a shape on that shape's join field: ${event.mismatches.join(', ')}`,
+            title: i18n('regionMap.visualization.unableToShowMismatchesWarningTitle', {
+              defaultMessage: 'Unable to show {mismatchesLength} {oneMismatch, plural, one {result} other {results}} on map',
+              values: {
+                mismatchesLength: event.mismatches.length,
+                oneMismatch: event.mismatches.length > 1 ? 0 : 1,
+              },
+            }),
+            text: i18n('regionMap.visualization.unableToShowMismatchesWarningText', {
+              defaultMessage: 'Ensure that each of these term matches a shape on that shape\'s join field: {mismatches}',
+              values: {
+                mismatches: event.mismatches.join(', '),
+              },
+            }),
           });
         }
       });

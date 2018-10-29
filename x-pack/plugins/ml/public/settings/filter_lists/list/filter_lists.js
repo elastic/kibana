@@ -22,7 +22,7 @@ import { toastNotifications } from 'ui/notify';
 
 import { FilterListsHeader } from './header';
 import { FilterListsTable } from './table';
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { ml } from '../../../services/ml_api_service';
 
 
 export class FilterLists extends Component {
@@ -39,6 +39,21 @@ export class FilterLists extends Component {
     this.refreshFilterLists();
   }
 
+  setFilterLists = (filterLists) => {
+    // Check selected filter lists still exist.
+    this.setState((prevState) => {
+      const loadedFilterIds = filterLists.map(filterList => filterList.filter_id);
+      const selectedFilterLists = prevState.selectedFilterLists.filter((filterList) => {
+        return (loadedFilterIds.indexOf(filterList.filter_id) !== -1);
+      });
+
+      return {
+        filterLists,
+        selectedFilterLists
+      };
+    });
+  }
+
   setSelectedFilterLists = (selectedFilterLists) => {
     this.setState({ selectedFilterLists });
   }
@@ -47,18 +62,7 @@ export class FilterLists extends Component {
     // Load the list of filters.
     ml.filters.filtersStats()
       .then((filterLists) => {
-        // Check selected filter lists still exist.
-        this.setState((prevState) => {
-          const loadedFilterIds = filterLists.map(filterList => filterList.filter_id);
-          const selectedFilterLists = prevState.selectedFilterLists.filter((filterList) => {
-            return (loadedFilterIds.indexOf(filterList.filter_id) !== -1);
-          });
-
-          return {
-            filterLists,
-            selectedFilterLists
-          };
-        });
+        this.setFilterLists(filterLists);
       })
       .catch((resp) => {
         console.log('Error loading list of filters:', resp);

@@ -17,24 +17,36 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function dockerMetricsSpecProvider() {
+export function dockerMetricsSpecProvider(server, context) {
   const moduleName = 'docker';
   return {
     id: 'dockerMetrics',
-    name: 'Docker metrics',
+    name: i18n.translate('kbn.server.tutorials.dockerMetrics.nameTitle', {
+      defaultMessage: 'Docker metrics',
+    }),
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch metrics about your Docker containers.',
-    longDescription: 'The `docker` Metricbeat module fetches metrics from the Docker server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-docker.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.dockerMetrics.shortDescription', {
+      defaultMessage: 'Fetch metrics about your Docker containers.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.dockerMetrics.longDescription', {
+      defaultMessage: 'The `docker` Metricbeat module fetches metrics from the Docker server. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-docker.html',
+      },
+    }),
     euiIconType: 'logoDocker',
     artifacts: {
       dashboards: [
         {
           id: 'AV4REOpp5NkDleZmzKkE',
-          linkLabel: 'Docker metrics dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.dockerMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Docker metrics dashboard',
+          }),
           isOverview: true
         }
       ],
@@ -44,7 +56,7 @@ export function dockerMetricsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/docker_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

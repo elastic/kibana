@@ -8,16 +8,13 @@ import React, { Component } from 'react';
 import { STATUS } from '../../../constants';
 import { isEmpty } from 'lodash';
 import { loadAgentStatus } from '../../../services/rest/apm';
-import { KibanaLink } from '../../../utils/url';
-import { EuiButton } from '@elastic/eui';
-import List from './List';
-import { HeaderContainer } from '../../shared/UIComponents';
-import { KueryBar } from '../../shared/KueryBar';
-
+import { ServiceList } from './ServiceList';
+import { EuiSpacer } from '@elastic/eui';
 import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
 import EmptyMessage from '../../shared/EmptyMessage';
+import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
 
-class ServiceOverview extends Component {
+export class ServiceOverview extends Component {
   state = {
     historicalDataFound: true
   };
@@ -35,8 +32,9 @@ class ServiceOverview extends Component {
     this.checkForHistoricalData(this.props);
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.checkForHistoricalData(nextProps);
+  componentDidUpdate() {
+    // QUESTION: Do we want to check on ANY update, or only if serviceList status/data have changed?
+    this.checkForHistoricalData(this.props);
   }
 
   render() {
@@ -47,7 +45,7 @@ class ServiceOverview extends Component {
       <EmptyMessage
         heading={
           historicalDataFound
-            ? 'No services with data in the selected time range.'
+            ? 'No services were found'
             : "Looks like you don't have any services with APM installed. Let's add some!"
         }
         subheading={
@@ -58,32 +56,14 @@ class ServiceOverview extends Component {
 
     return (
       <div>
-        <HeaderContainer>
-          <h1>Services</h1>
-          <SetupInstructionsLink />
-        </HeaderContainer>
-
-        <KueryBar />
-
+        <EuiSpacer />
         <ServiceListRequest
           urlParams={urlParams}
           render={({ data }) => (
-            <List items={data} noItemsMessage={noItemsMessage} />
+            <ServiceList items={data} noItemsMessage={noItemsMessage} />
           )}
         />
       </div>
     );
   }
 }
-
-function SetupInstructionsLink({ buttonFill = false }) {
-  return (
-    <KibanaLink pathname={'/app/kibana'} hash={'/home/tutorial/apm'}>
-      <EuiButton size="s" color="primary" fill={buttonFill}>
-        Setup Instructions
-      </EuiButton>
-    </KibanaLink>
-  );
-}
-
-export default ServiceOverview;

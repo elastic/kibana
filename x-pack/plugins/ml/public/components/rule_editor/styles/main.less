@@ -1,37 +1,34 @@
 .ml-rule-editor-flyout {
   font-size: 14px;
 
-  .select-rule-description-list {
+  .select-rule-action .rule-detector-description-list {
     padding-left: 16px;
-
-    .euiDescriptionList__title {
-      flex-basis: 15%;
-    }
-
-    .euiDescriptionList__description {
-      flex-basis: 85%;
-    }
-  }
-
-  .euiDescriptionList.select-rule-description-list.euiDescriptionList--column > * {
-    margin-top: 5px;
   }
 
   .select-rule-action-panel {
-    padding-top:10px;
+    padding:10px 0px;
 
     .euiDescriptionList {
       .euiDescriptionList__title {
         flex-basis: 15%;
+        padding: 0px 16px;
       }
 
       .euiDescriptionList__description {
         flex-basis: 85%;
       }
 
+      .euiDescriptionList__title:nth-child(1),
       .euiDescriptionList__description:nth-child(2) {
         color: #1a1a1a;
         font-weight: 600;
+        border-bottom : 1px solid #d9d9d9;
+        padding-bottom: 12px;
+      }
+
+      .euiDescriptionList__title:nth-child(3),
+      .euiDescriptionList__description:nth-child(4) {
+        padding-top: 6px;
       }
     }
 
@@ -62,6 +59,16 @@
   .scope-edit-filter-link {
     line-height: 32px;
     font-size: 12px;
+  }
+
+  .condition-edit-value-field {
+    width: 170px;
+    height: 28px;
+    margin: 0px 2px;
+
+    input {
+      height: 28px;
+    }
   }
 
   .euiExpressionButton.disabled {

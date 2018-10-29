@@ -8,6 +8,7 @@ Array [
         "enabled": true,
       },
     },
+    "apm": undefined,
     "beats": Object {
       "beats": Object {
         "total": null,
@@ -16,6 +17,7 @@ Array [
       "bytesSent": null,
       "totalEvents": null,
     },
+    "ccs": "proddy1",
     "cluster_name": "proddy1",
     "cluster_uuid": "fOt6KT9KTICAMm2ncRhsMg",
     "elasticsearch": Object {
@@ -108,6 +110,7 @@ Array [
         "enabled": true,
       },
     },
+    "apm": undefined,
     "beats": Object {
       "beats": Object {
         "total": null,
@@ -116,6 +119,7 @@ Array [
       "bytesSent": null,
       "totalEvents": null,
     },
+    "ccs": undefined,
     "cluster_name": "monitoring-one",
     "cluster_uuid": "F4hFnr5JQQayOzd8yG1rSg",
     "elasticsearch": Object {
@@ -213,6 +217,7 @@ Array [
         "enabled": true,
       },
     },
+    "apm": undefined,
     "beats": Object {
       "beats": Object {
         "total": null,
@@ -221,6 +226,7 @@ Array [
       "bytesSent": null,
       "totalEvents": null,
     },
+    "ccs": "proddy1",
     "cluster_name": "proddy1",
     "cluster_uuid": "fOt6KT9KTICAMm2ncRhsMg",
     "elasticsearch": Object {
@@ -313,6 +319,7 @@ Array [
         "enabled": true,
       },
     },
+    "apm": undefined,
     "beats": Object {
       "beats": Object {
         "total": null,
@@ -321,6 +328,7 @@ Array [
       "bytesSent": null,
       "totalEvents": null,
     },
+    "ccs": undefined,
     "cluster_name": "monitoring-one",
     "cluster_uuid": "F4hFnr5JQQayOzd8yG1rSg",
     "elasticsearch": Object {

@@ -3,7 +3,7 @@
 exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="pipelineViewer__statement"
+  className="monPipelineViewer__statement"
   component="div"
   direction="row"
   gutterSize="none"
@@ -29,7 +29,8 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          className="pipelineViewer__plugin"
+          aria-label="mutate"
+          className="monPipelineViewer__plugin"
           color="primary"
           flush="left"
           iconSide="left"
@@ -72,19 +73,19 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
       wrap={false}
     >
       <Metric
-        className="pipelineViewer__metric--cpuTime"
+        className="monPipelineViewer__metric--cpuTime"
         key="cpuMetric"
         value="25%"
         warning={true}
       />
       <Metric
-        className="pipelineViewer__metric--eventMillis"
+        className="monPipelineViewer__metric--eventMillis"
         key="eventMillis"
         value="100 ms/e"
         warning={false}
       />
       <Metric
-        className="pipelineViewer__metric--events"
+        className="monPipelineViewer__metric--events"
         key="eventsReceived"
         value="120 e/s received"
       />
@@ -96,7 +97,7 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
 exports[`PluginStatement component adds warning highlight for event millis 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="pipelineViewer__statement"
+  className="monPipelineViewer__statement"
   component="div"
   direction="row"
   gutterSize="none"
@@ -122,7 +123,8 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
         grow={false}
       >
         <EuiButtonEmpty
-          className="pipelineViewer__plugin"
+          aria-label="mutate"
+          className="monPipelineViewer__plugin"
           color="primary"
           flush="left"
           iconSide="left"
@@ -165,19 +167,19 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
       wrap={false}
     >
       <Metric
-        className="pipelineViewer__metric--cpuTime"
+        className="monPipelineViewer__metric--cpuTime"
         key="cpuMetric"
         value="25%"
         warning={false}
       />
       <Metric
-        className="pipelineViewer__metric--eventMillis"
+        className="monPipelineViewer__metric--eventMillis"
         key="eventMillis"
         value="100 ms/e"
         warning={true}
       />
       <Metric
-        className="pipelineViewer__metric--events"
+        className="monPipelineViewer__metric--events"
         key="eventsReceived"
         value="120 e/s received"
       />
@@ -189,7 +191,7 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
 exports[`PluginStatement component does not render explicit id field if no id is specified 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="pipelineViewer__statement"
+  className="monPipelineViewer__statement"
   component="div"
   direction="row"
   gutterSize="none"
@@ -215,7 +217,8 @@ exports[`PluginStatement component does not render explicit id field if no id is
         grow={false}
       >
         <EuiButtonEmpty
-          className="pipelineViewer__plugin"
+          aria-label="stdin"
+          className="monPipelineViewer__plugin"
           color="primary"
           flush="left"
           iconSide="left"
@@ -245,7 +248,7 @@ exports[`PluginStatement component does not render explicit id field if no id is
       wrap={false}
     >
       <Metric
-        className="pipelineViewer__metric--eventsEmitted"
+        className="monPipelineViewer__metric--eventsEmitted"
         key="eventsEmitted"
         value="125 e/s emitted"
       />
@@ -257,7 +260,7 @@ exports[`PluginStatement component does not render explicit id field if no id is
 exports[`PluginStatement component renders input metrics and explicit id fields 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="pipelineViewer__statement"
+  className="monPipelineViewer__statement"
   component="div"
   direction="row"
   gutterSize="none"
@@ -283,7 +286,8 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
         grow={false}
       >
         <EuiButtonEmpty
-          className="pipelineViewer__plugin"
+          aria-label="stdin"
+          className="monPipelineViewer__plugin"
           color="primary"
           flush="left"
           iconSide="left"
@@ -326,7 +330,7 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
       wrap={false}
     >
       <Metric
-        className="pipelineViewer__metric--eventsEmitted"
+        className="monPipelineViewer__metric--eventsEmitted"
         key="eventsEmitted"
         value="125 e/s emitted"
       />
@@ -338,7 +342,7 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
 exports[`PluginStatement component renders processor statement metrics 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="pipelineViewer__statement"
+  className="monPipelineViewer__statement"
   component="div"
   direction="row"
   gutterSize="none"
@@ -364,7 +368,8 @@ exports[`PluginStatement component renders processor statement metrics 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          className="pipelineViewer__plugin"
+          aria-label="mutate"
+          className="monPipelineViewer__plugin"
           color="primary"
           flush="left"
           iconSide="left"
@@ -407,19 +412,19 @@ exports[`PluginStatement component renders processor statement metrics 1`] = `
       wrap={false}
     >
       <Metric
-        className="pipelineViewer__metric--cpuTime"
+        className="monPipelineViewer__metric--cpuTime"
         key="cpuMetric"
         value="25%"
         warning={false}
       />
       <Metric
-        className="pipelineViewer__metric--eventMillis"
+        className="monPipelineViewer__metric--eventMillis"
         key="eventMillis"
         value="100 ms/e"
         warning={false}
       />
       <Metric
-        className="pipelineViewer__metric--events"
+        className="monPipelineViewer__metric--events"
         key="eventsReceived"
         value="120 e/s received"
       />

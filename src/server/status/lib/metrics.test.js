@@ -100,7 +100,7 @@ describe('Metrics', function () {
         'osup': 1008991,
         'psup': 7.168,
         'psmem': { 'rss': 193716224, 'heapTotal': 168194048, 'heapUsed': 130553400, 'external': 1779619 },
-        'concurrents': { '5603': 0 },
+        'concurrent_connections': 0,
         'psdelay': 1.6091690063476562,
         'host': 'blahblah.local'
       };
@@ -131,9 +131,6 @@ describe('Metrics', function () {
         },
         'requests': {
           'disconnects': 0,
-          'status_codes': {
-            '200': 22
-          },
           'total': 22
         },
         'response_times': {
@@ -159,7 +156,7 @@ describe('Metrics', function () {
           memory: { free_in_bytes: 12, total_in_bytes: 24 },
         },
         response_times: { max_in_millis: 4 },
-        requests: { total: 22, disconnects: 0, status_codes: { '200': 22 } },
+        requests: { total: 22, disconnects: 0 },
       });
     });
   });

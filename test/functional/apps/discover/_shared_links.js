@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'header']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'share']);
 
   describe('shared links', function describeIndexTests() {
     let baseUrl;
@@ -59,54 +59,50 @@ export default function ({ getService, getPageObjects }) {
 
       //After hiding the time picker, we need to wait for
       //the refresh button to hide before clicking the share button
-      return PageObjects.common.sleep(1000);
+      await PageObjects.common.sleep(1000);
+
+      await PageObjects.share.clickShareTopNavButton();
     });
 
-    describe('shared link', function () {
-      it('should show "Share a link" caption', async function () {
-        const expectedCaption = 'Share saved';
-
-        await PageObjects.discover.clickShare();
-        const actualCaption = await PageObjects.discover.getShareCaption();
-
-        expect(actualCaption).to.contain(expectedCaption);
-      });
-
-      it('should show the correct formatted URL', async function () {
+    describe('permalink', function () {
+      it('should allow for copying the snapshot URL', async function () {
         const expectedUrl =
           baseUrl +
           '/app/kibana?_t=1453775307251#' +
-          '/discover?_g=(refreshInterval:(pause:!f,value:0),time' +
+          '/discover?_g=(refreshInterval:(pause:!t,value:0),time' +
           ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09' +
           '-23T18:31:44.000Z\'))&_a=(columns:!(_source),index:\'logstash-' +
           '*\',interval:auto,query:(language:lucene,query:\'\')' +
           ',sort:!(\'@timestamp\',desc))';
-        const actualUrl = await PageObjects.discover.getSharedUrl();
+        const actualUrl = await PageObjects.share.getSharedUrl();
         // strip the timestamp out of each URL
         expect(actualUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')).to.be(
           expectedUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')
         );
       });
 
-      it('gets copied to clipboard', async function () {
-        const isCopiedToClipboard = await PageObjects.discover.clickCopyToClipboard();
-        expect(isCopiedToClipboard).to.eql(true);
-      });
-
-      // TODO: verify clipboard contents
-      it('shorten URL button should produce a short URL', async function () {
+      it('should allow for copying the snapshot URL as a short URL', async function () {
         const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
-        await PageObjects.discover.clickShortenUrl();
-        await retry.try(async function tryingForTime() {
-          const actualUrl = await PageObjects.discover.getSharedUrl();
+        await PageObjects.share.checkShortenUrl();
+        await retry.try(async () => {
+          const actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.match(re);
         });
       });
 
-      // NOTE: This test has to run immediately after the test above
-      it('copies short URL to clipboard', async function () {
-        const isCopiedToClipboard = await PageObjects.discover.clickCopyToClipboard();
-        expect(isCopiedToClipboard).to.eql(true);
+      it('should allow for copying the saved object URL', async function () {
+        const expectedUrl =
+          baseUrl +
+          '/app/kibana#' +
+          '/discover/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
+          '?_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A0)' +
+          '%2Ctime%3A(from%3A\'2015-09-19T06%3A31%3A44.000Z\'%2C' +
+          'mode%3Aabsolute%2Cto%3A\'2015-09-23T18%3A31%3A44.000Z\'))';
+        await PageObjects.discover.loadSavedSearch('A Saved Search');
+        await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.share.exportAsSavedObject();
+        const actualUrl = await PageObjects.share.getSharedUrl();
+        expect(actualUrl).to.be(expectedUrl);
       });
     });
   });

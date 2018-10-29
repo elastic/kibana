@@ -39,6 +39,7 @@ export const CleanPackagesTask = {
     await deleteAll(log, [
       build.resolvePath('packages'),
       build.resolvePath('x-pack'),
+      build.resolvePath('yarn.lock'),
     ]);
   },
 };
@@ -50,7 +51,7 @@ export const CleanTypescriptTask = {
   async run(config, log, build) {
     await deleteAll(log, [
       build.resolvePath('**/*.{ts,tsx,d.ts}'),
-      build.resolvePath('**/tsconfig.json'),
+      build.resolvePath('**/tsconfig*.json'),
     ]);
   },
 };
@@ -100,7 +101,7 @@ export const CleanExtraFilesFromModulesTask = {
       '.jscs.json',
       '.lint',
     ];
-    const hints = ['*.flow', '*.webidl', '*.map'];
+    const hints = ['*.flow', '*.webidl', '*.map', '@types'];
     const scripts = [
       '*.sh',
       '*.bat',
@@ -154,7 +155,7 @@ export const CleanExtraBinScriptsTask = {
   description: 'Cleaning extra bin/* scripts from platform-specific builds',
 
   async run(config, log, build) {
-    for (const platform of config.getPlatforms()) {
+    for (const platform of config.getNodePlatforms()) {
       if (platform.isWindows()) {
         await deleteAll(log, [
           build.resolvePathForPlatform(platform, 'bin', '*'),
@@ -186,6 +187,7 @@ export const CleanExtraBrowsersTask = {
         if (platforms.windows) {
           paths.push(phantomPath('phantomjs-*-windows.zip'));
           paths.push(chromiumPath('chromium-*-win32.zip'));
+          paths.push(chromiumPath('chromium-*-windows.zip'));
         }
 
         if (platforms.darwin) {
@@ -200,7 +202,7 @@ export const CleanExtraBrowsersTask = {
         return paths;
       };
     };
-    for (const platform of config.getPlatforms()) {
+    for (const platform of config.getNodePlatforms()) {
       const getBrowserPaths = getBrowserPathsForPlatform(platform);
       if (platform.isWindows()) {
         await deleteAll(log, getBrowserPaths({ linux: true, darwin: true }));

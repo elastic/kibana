@@ -27,7 +27,7 @@ const events = [
       heapUsed: 318428400,
       external: 5172252
     },
-    concurrents: { '5601': 6 },
+    concurrent_connections: 6,
     psdelay: 0.4091129992157221
   },
   {
@@ -53,7 +53,7 @@ const events = [
       heapUsed: 315669840,
       external: 5083177
     },
-    concurrents: { '5601': 6 },
+    concurrent_connections: 6,
     psdelay: 0.6715770000591874
   }
 ];
@@ -102,7 +102,6 @@ describe('Event Roller', () => {
       requests: {
         disconnects: 0,
         total: 138, // 103 + 35
-        status_codes: { '200': 20, '304': 118 }
       },
       response_times: {
         average: 5.213592233009709, // max of 5.213592233009709, 4.6

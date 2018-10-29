@@ -22,6 +22,7 @@ import PropTypes from 'prop-types';
 import { PER_PAGE_INCREMENTS } from '../../../../constants';
 
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -39,6 +40,8 @@ import {
 import {
   Pager
 } from '@elastic/eui/lib/services';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class IndicesList extends Component {
   static propTypes = {
@@ -98,7 +101,11 @@ export class IndicesList extends Component {
         iconSide="right"
         onClick={this.openPerPageControl}
       >
-        Rows per page: {perPage}
+        <FormattedMessage
+          id="kbn.management.createIndexPattern.step.pagingLabel"
+          defaultMessage="Rows per page: {perPage}"
+          values={{ perPage }}
+        />
       </EuiButtonEmpty>
     );
 
@@ -178,6 +185,13 @@ export class IndicesList extends Component {
         <EuiTableRow key={key}>
           <EuiTableRowCell>
             {this.highlightIndexName(index.name, queryWithoutWildcard)}
+          </EuiTableRowCell>
+          <EuiTableRowCell>
+            {index.tags.map(tag => {
+              return (
+                <EuiBadge key={`index_${key}_tag_${tag.key}`} color="primary">{tag.name}</EuiBadge>
+              );
+            })}
           </EuiTableRowCell>
         </EuiTableRow>
       );

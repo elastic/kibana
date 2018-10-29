@@ -18,13 +18,16 @@ import { DeauthenticationResult } from '../../../../lib/authentication/deauthent
 
 describe('Authentication routes', () => {
   let serverStub;
-  let replyStub;
+  let hStub;
 
   beforeEach(() => {
     serverStub = serverFixture();
-    replyStub = sinon.stub();
-    replyStub.continue = sinon.stub();
-    replyStub.redirect = sinon.stub();
+    hStub = {
+      authenticated: sinon.stub(),
+      continue: 'blah',
+      redirect: sinon.stub(),
+      response: sinon.stub()
+    };
 
     initAuthenticateApi(serverStub);
   });
@@ -33,6 +36,7 @@ describe('Authentication routes', () => {
     let loginRoute;
     let request;
     let authenticateStub;
+    let authorizationModeStub;
 
     beforeEach(() => {
       loginRoute = serverStub.route
@@ -48,6 +52,7 @@ describe('Authentication routes', () => {
       authenticateStub = serverStub.plugins.security.authenticate.withArgs(
         sinon.match(BasicCredentials.decorateRequest({ headers: {} }, 'user', 'password'))
       );
+      authorizationModeStub = serverStub.plugins.security.authorization.mode;
     });
 
     it('correctly defines route.', async () => {
@@ -61,6 +66,9 @@ describe('Authentication routes', () => {
             username: Joi.string().required(),
             password: Joi.string().required()
           }
+        },
+        response: {
+          emptyStatusCode: 204,
         }
       });
     });
@@ -69,39 +77,29 @@ describe('Authentication routes', () => {
       const unhandledException = new Error('Something went wrong.');
       authenticateStub.throws(unhandledException);
 
-      await loginRoute.handler(request, replyStub);
-
-      sinon.assert.notCalled(replyStub.continue);
-      sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, sinon.match({
-        isBoom: true,
-        output: {
-          payload: {
+      return loginRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          expect(response.isBoom).to.be(true);
+          expect(response.output.payload).to.eql({
             statusCode: 500,
             error: 'Internal Server Error',
             message: 'An internal server error occurred'
-          }
-        }
-      }));
+          });
+        });
     });
 
     it('returns 401 if authentication fails.', async () => {
       const failureReason = new Error('Something went wrong.');
       authenticateStub.returns(Promise.resolve(AuthenticationResult.failed(failureReason)));
 
-      await loginRoute.handler(request, replyStub);
-
-      sinon.assert.notCalled(replyStub.continue);
-      sinon.assert.calledOnce(replyStub);
-
-      sinon.assert.calledWithExactly(
-        replyStub,
-        sinon.match({
-          isBoom: true,
-          message: failureReason.toString(),
-          output: { statusCode: 401 },
-        })
-      );
+      return loginRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          expect(response.isBoom).to.be(true);
+          expect(response.message).to.be(failureReason.message);
+          expect(response.output.statusCode).to.be(401);
+        });
     });
 
     it('returns 401 if authentication is not handled.', async () => {
@@ -109,33 +107,48 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.notHandled())
       );
 
-      await loginRoute.handler(request, replyStub);
-
-      sinon.assert.notCalled(replyStub.continue);
-      sinon.assert.calledOnce(replyStub);
-
-      sinon.assert.calledWithExactly(
-        replyStub,
-        sinon.match({
-          isBoom: true,
-          message: 'Unauthorized',
-          output: { statusCode: 401 },
-        })
-      );
+      return loginRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          expect(response.isBoom).to.be(true);
+          expect(response.message).to.be('Unauthorized');
+          expect(response.output.statusCode).to.be(401);
+        });
     });
 
-    it('returns user data if authentication succeed.', async () => {
-      const user = { username: 'user' };
-      authenticateStub.returns(
-        Promise.resolve(AuthenticationResult.succeeded(user))
-      );
+    describe('authentication succeeds', () => {
+      const getDeprecationMessage = username =>
+        `${username} relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0`;
 
-      await loginRoute.handler(request, replyStub);
+      it(`returns user data and doesn't log deprecation warning if authorization.mode.useRbacForRequest returns true.`, async () => {
+        const user = { username: 'user' };
+        authenticateStub.returns(
+          Promise.resolve(AuthenticationResult.succeeded(user))
+        );
+        authorizationModeStub.useRbacForRequest.returns(true);
 
-      sinon.assert.notCalled(replyStub);
-      sinon.assert.calledOnce(replyStub.continue);
-      sinon.assert.calledWithExactly(replyStub.continue, { credentials: user });
+        await loginRoute.handler(request, hStub);
+
+        sinon.assert.calledWithExactly(authorizationModeStub.useRbacForRequest, request);
+        sinon.assert.neverCalledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
+        sinon.assert.calledOnce(hStub.response);
+      });
+
+      it(`returns user data and logs deprecation warning if authorization.mode.useRbacForRequest returns false.`, async () => {
+        const user = { username: 'user' };
+        authenticateStub.returns(
+          Promise.resolve(AuthenticationResult.succeeded(user))
+        );
+        authorizationModeStub.useRbacForRequest.returns(false);
+
+        await loginRoute.handler(request, hStub);
+
+        sinon.assert.calledWithExactly(authorizationModeStub.useRbacForRequest, request);
+        sinon.assert.calledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
+        sinon.assert.calledOnce(hStub.response);
+      });
     });
+
   });
 
   describe('logout', () => {
@@ -167,12 +180,12 @@ describe('Authentication routes', () => {
         .withArgs(request)
         .returns(Promise.reject(unhandledException));
 
-      await logoutRoute.handler(request, replyStub);
-
-      sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, Boom.wrap(unhandledException));
-      sinon.assert.notCalled(replyStub.continue);
-      sinon.assert.notCalled(replyStub.redirect);
+      return logoutRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          expect(response).to.be(Boom.boomify(unhandledException));
+          sinon.assert.notCalled(hStub.redirect);
+        });
     });
 
     it('returns 500 if authenticator fails to deauthenticate.', async () => {
@@ -183,30 +196,25 @@ describe('Authentication routes', () => {
         .withArgs(request)
         .returns(Promise.resolve(DeauthenticationResult.failed(failureReason)));
 
-      await logoutRoute.handler(request, replyStub);
-
-      sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, Boom.wrap(failureReason));
-      sinon.assert.notCalled(replyStub.continue);
-      sinon.assert.notCalled(replyStub.redirect);
+      return logoutRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          expect(response).to.be(Boom.boomify(failureReason));
+          sinon.assert.notCalled(hStub.redirect);
+        });
     });
 
     it('returns 400 for AJAX requests that can not handle redirect.', async () => {
       const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } });
 
-      await logoutRoute.handler(request, replyStub);
-
-      sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(
-        replyStub,
-        sinon.match({
-          isBoom: true,
-          message: 'Client should be able to process redirect response.',
-          output: { statusCode: 400 }
-        })
-      );
-      sinon.assert.notCalled(replyStub.continue);
-      sinon.assert.notCalled(replyStub.redirect);
+      return logoutRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          expect(response.isBoom).to.be(true);
+          expect(response.message).to.be('Client should be able to process redirect response.');
+          expect(response.output.statusCode).to.be(400);
+          sinon.assert.notCalled(hStub.redirect);
+        });
     });
 
     it('redirects user to the URL returned by authenticator.', async () => {
@@ -218,12 +226,10 @@ describe('Authentication routes', () => {
           Promise.resolve(DeauthenticationResult.redirectTo('https://custom.logout'))
         );
 
-      await logoutRoute.handler(request, replyStub);
+      await logoutRoute.handler(request, hStub);
 
-      sinon.assert.calledOnce(replyStub.redirect);
-      sinon.assert.calledWithExactly(replyStub.redirect, 'https://custom.logout');
-      sinon.assert.notCalled(replyStub);
-      sinon.assert.notCalled(replyStub.continue);
+      sinon.assert.calledOnce(hStub.redirect);
+      sinon.assert.calledWithExactly(hStub.redirect, 'https://custom.logout');
     });
 
     it('redirects user to the base path if deauthentication succeeds.', async () => {
@@ -233,12 +239,10 @@ describe('Authentication routes', () => {
         .withArgs(request)
         .returns(Promise.resolve(DeauthenticationResult.succeeded()));
 
-      await logoutRoute.handler(request, replyStub);
+      await logoutRoute.handler(request, hStub);
 
-      sinon.assert.calledOnce(replyStub.redirect);
-      sinon.assert.calledWithExactly(replyStub.redirect, '/test-base-path/');
-      sinon.assert.notCalled(replyStub);
-      sinon.assert.notCalled(replyStub.continue);
+      sinon.assert.calledOnce(hStub.redirect);
+      sinon.assert.calledWithExactly(hStub.redirect, '/test-base-path/');
     });
 
     it('redirects user to the base path if deauthentication is not handled.', async () => {
@@ -248,12 +252,10 @@ describe('Authentication routes', () => {
         .withArgs(request)
         .returns(Promise.resolve(DeauthenticationResult.notHandled()));
 
-      await logoutRoute.handler(request, replyStub);
+      await logoutRoute.handler(request, hStub);
 
-      sinon.assert.calledOnce(replyStub.redirect);
-      sinon.assert.calledWithExactly(replyStub.redirect, '/test-base-path/');
-      sinon.assert.notCalled(replyStub);
-      sinon.assert.notCalled(replyStub.continue);
+      sinon.assert.calledOnce(hStub.redirect);
+      sinon.assert.calledWithExactly(hStub.redirect, '/test-base-path/');
     });
   });
 
@@ -276,10 +278,9 @@ describe('Authentication routes', () => {
 
     it('returns user from the authenticated request property.', async () => {
       const request = { auth: { credentials: { username: 'user' } } };
-      await meRoute.handler(request, replyStub);
+      const response = await meRoute.handler(request, hStub);
 
-      sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, { username: 'user' });
+      expect(response).to.eql({ username: 'user' });
     });
   });
 
@@ -315,21 +316,17 @@ describe('Authentication routes', () => {
       const unhandledException = new Error('Something went wrong.');
       serverStub.plugins.security.authenticate.throws(unhandledException);
 
-      await samlAcsRoute.handler(request, replyStub);
-
-      sinon.assert.notCalled(replyStub.continue);
-      sinon.assert.notCalled(replyStub.redirect);
-      sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(replyStub, sinon.match({
-        isBoom: true,
-        output: {
-          payload: {
+      return samlAcsRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          sinon.assert.notCalled(hStub.redirect);
+          expect(response.isBoom).to.be(true);
+          expect(response.output.payload).to.eql({
             statusCode: 500,
             error: 'Internal Server Error',
             message: 'An internal server error occurred'
-          }
-        }
-      }));
+          });
+        });
     });
 
     it('returns 401 if authentication fails.', async () => {
@@ -338,19 +335,14 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.failed(failureReason))
       );
 
-      await samlAcsRoute.handler(request, replyStub);
-
-      sinon.assert.notCalled(replyStub.continue);
-      sinon.assert.notCalled(replyStub.redirect);
-      sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(
-        replyStub,
-        sinon.match({
-          isBoom: true,
-          message: failureReason.toString(),
-          output: { statusCode: 401 }
-        })
-      );
+      return samlAcsRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          sinon.assert.notCalled(hStub.redirect);
+          expect(response.isBoom).to.be(true);
+          expect(response.message).to.be(failureReason.message);
+          expect(response.output.statusCode).to.be(401);
+        });
     });
 
     it('returns 401 if authentication is not handled.', async () => {
@@ -358,19 +350,14 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.notHandled())
       );
 
-      await samlAcsRoute.handler(request, replyStub);
-
-      sinon.assert.notCalled(replyStub.continue);
-      sinon.assert.notCalled(replyStub.redirect);
-      sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(
-        replyStub,
-        sinon.match({
-          isBoom: true,
-          message: 'Unauthorized',
-          output: { statusCode: 401 }
-        })
-      );
+      return samlAcsRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          sinon.assert.notCalled(hStub.redirect);
+          expect(response.isBoom).to.be(true);
+          expect(response.message).to.be('Unauthorized');
+          expect(response.output.statusCode).to.be(401);
+        });
     });
 
     it('returns 403 if there an active session exists.', async () => {
@@ -378,20 +365,15 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.succeeded({}))
       );
 
-      await samlAcsRoute.handler(request, replyStub);
-
-      sinon.assert.notCalled(replyStub.continue);
-      sinon.assert.notCalled(replyStub.redirect);
-      sinon.assert.calledOnce(replyStub);
-      sinon.assert.calledWithExactly(
-        replyStub,
-        sinon.match({
-          isBoom: true,
-          message: 'Sorry, you already have an active Kibana session. ' +
-            'If you want to start a new one, please logout from the existing session first.',
-          output: { statusCode: 403 }
-        })
-      );
+      return samlAcsRoute
+        .handler(request, hStub)
+        .catch((response) => {
+          sinon.assert.notCalled(hStub.redirect);
+          expect(response.isBoom).to.be(true);
+          expect(response.message).to.be('Sorry, you already have an active Kibana session. ' +
+                'If you want to start a new one, please logout from the existing session first.');
+          expect(response.output.statusCode).to.be(403);
+        });
     });
 
     it('redirects if required by the authentication process.', async () => {
@@ -399,11 +381,9 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.redirectTo('http://redirect-to/path'))
       );
 
-      await samlAcsRoute.handler(request, replyStub);
+      await samlAcsRoute.handler(request, hStub);
 
-      sinon.assert.calledWithExactly(replyStub.redirect, 'http://redirect-to/path');
-      sinon.assert.notCalled(replyStub);
-      sinon.assert.notCalled(replyStub.continue);
+      sinon.assert.calledWithExactly(hStub.redirect, 'http://redirect-to/path');
     });
   });
 });

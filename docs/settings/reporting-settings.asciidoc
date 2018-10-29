@@ -51,13 +51,27 @@ reports, you might need to change the following settings.
 How often the index that stores reporting jobs rolls over to a new index.
 Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
 
+`xpack.reporting.queue.pollEnabled`::
+Set to `true` (default) to enable the Kibana instance to to poll the index for
+pending jobs and claim them for execution. Setting this to `false` allows the
+Kibana instance to only add new jobs to the reporting queue, list jobs, and
+provide the downloads to completed report through the UI.
+
+[NOTE]
+============
+Running multiple instances of Kibana in a cluster for load balancing of
+reporting requires identical values for `xpack.reporting.encryptionKey` and, if
+security is enabled, `xpack.security.encryptionKey`.
+============
+
 `xpack.reporting.queue.pollInterval`::
-How often idle workers poll the index for pending jobs. Defaults to `3000` (3 seconds).
+Specifies the number of milliseconds that idle workers wait between polling the
+index for pending jobs. Defaults to `3000` (3 seconds).
 
 [[xpack-reporting-q-timeout]]`xpack.reporting.queue.timeout`::
 How long each worker has to produce a report. If your machine is slow or under
 heavy load, you might need to increase this timeout. Specified in milliseconds.
-Defaults to `30000` (30 seconds).
+Defaults to `120000` (two minutes).
 
 [float]
 [[reporting-capture-settings]]
@@ -76,8 +90,9 @@ Defaults to `3000` (3 seconds).
 [[xpack-reporting-browser]]`xpack.reporting.capture.browser.type`::
 Specifies the browser to use to capture screenshots. Valid options are `phantom`
 and `chromium`. When `chromium` is set, the settings specified in the <<reporting-chromium-settings, Chromium settings>>
-are respected.
-Defaults to `phantom`.
+are respected. This setting will be deprecated in 7.0, when Phantom support is removed.
+Defaults to `chromium`.
+
 
 [float]
 [[reporting-chromium-settings]]
@@ -121,5 +136,10 @@ content. The index is automatically created if it does not already exist.
 Defaults to `.reporting`
 
 `xpack.reporting.roles.allow`::
-Specifies the roles in addition to superusers that are allowed to access reporting.
+Specifies the roles in addition to superusers that can use reporting.
 Defaults to `[ "reporting_user" ]`
++ 
+--
+NOTE: Each user has access to only their own reports. 
+
+--
