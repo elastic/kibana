@@ -14,14 +14,13 @@ export function jobAuditMessagesRoutes(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/job_audit_messages/messages/{jobId}',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { getJobAuditMessages } = jobAuditMessagesProvider(callWithRequest);
       const { jobId } = request.params;
       const from = request.query.from;
       return getJobAuditMessages(jobId, from)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -31,13 +30,12 @@ export function jobAuditMessagesRoutes(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/job_audit_messages/messages',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { getJobAuditMessages } = jobAuditMessagesProvider(callWithRequest);
       const from = request.query.from;
       return getJobAuditMessages(undefined, from)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -47,12 +45,11 @@ export function jobAuditMessagesRoutes(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/job_audit_messages/summary',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { getAuditMessagesSummary } = jobAuditMessagesProvider(callWithRequest);
       return getAuditMessagesSummary()
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

@@ -17,15 +17,27 @@
  * under the License.
  */
 
-import { BinderBase } from './binder';
+export interface Emitter {
+  on: (args: any[]) => void;
+  off: (args: any[]) => void;
+  addListener: Emitter['on'];
+  removeListener: Emitter['off'];
+}
 
-export class BinderFor extends BinderBase {
-  constructor(emitter) {
-    super();
-    this.emitter = emitter;
+export class BinderBase {
+  private disposal: Array<() => void> = [];
+
+  public on(emitter: Emitter, ...args: any[]) {
+    const on = emitter.on || emitter.addListener;
+    const off = emitter.off || emitter.removeListener;
+
+    on.apply(emitter, args);
+    this.disposal.push(() => off.apply(emitter, args));
   }
 
-  on(...args) {
-    super.on(this.emitter, ...args);
+  public destroy() {
+    const destroyers = this.disposal;
+    this.disposal = [];
+    destroyers.forEach(fn => fn());
   }
 }
