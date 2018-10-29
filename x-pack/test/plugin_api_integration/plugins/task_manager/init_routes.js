@@ -23,12 +23,12 @@ export function initRoutes(server) {
         }),
       },
     },
-    async handler(request, reply) {
+    async handler(request) {
       try {
         const task = await taskManager.schedule(request.payload, { request });
-        reply(task);
+        return task;
       } catch (err) {
-        reply(err);
+        return err;
       }
     },
   });
@@ -36,11 +36,11 @@ export function initRoutes(server) {
   server.route({
     path: '/api/sample_tasks',
     method: 'GET',
-    async handler(_req, reply) {
+    async handler() {
       try {
-        reply(taskManager.fetch());
+        return taskManager.fetch();
       } catch (err) {
-        reply(err);
+        return err;
       }
     }
   });
@@ -48,12 +48,12 @@ export function initRoutes(server) {
   server.route({
     path: '/api/sample_tasks',
     method: 'DELETE',
-    async handler(_req, reply) {
+    async handler() {
       try {
         const { docs: tasks } = await taskManager.fetch();
-        reply(Promise.all(tasks.map((task) => taskManager.remove(task.id))));
+        return Promise.all(tasks.map((task) => taskManager.remove(task.id)));
       } catch (err) {
-        reply(err);
+        return err;
       }
     },
   });
