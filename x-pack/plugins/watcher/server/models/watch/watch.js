@@ -50,7 +50,7 @@ export class Watch {
   }
 
   // from Elasticsearch
-  static fromUpstreamJson(json) {
+  static fromUpstreamJson(json, options) {
     if (!json.watchJson) {
       throw badRequest(
         i18n.translate('xpack.watcher.models.watch.absenceOfWatchJsonPropertyBadRequestMessage', {
@@ -65,6 +65,6 @@ export class Watch {
     const type = getWatchType(json.watchJson);
     const WatchType = WatchTypes[type];
 
-    return WatchType.fromUpstreamJson(json);
+    return WatchType.fromUpstreamJson(json, options);
   }
 }
