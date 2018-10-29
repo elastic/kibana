@@ -35,34 +35,32 @@ export default function (kibana) {
   return new kibana.Plugin({
     require: ['kibana'],
     config(Joi) {
-      const { array, boolean, number, object, string, ref } = Joi;
-
-      const sslSchema = object({
-        verificationMode: string().valid('none', 'certificate', 'full').default('full'),
-        certificateAuthorities: array().single().items(string()),
-        certificate: string(),
-        key: string(),
-        keyPassphrase: string(),
-        alwaysPresentCertificate: boolean().default(false),
+      const sslSchema = Joi.object({
+        verificationMode: Joi.string().valid('none', 'certificate', 'full').default('full'),
+        certificateAuthorities: Joi.array().single().items(Joi.string()),
+        certificate: Joi.string(),
+        key: Joi.string(),
+        keyPassphrase: Joi.string(),
+        alwaysPresentCertificate: Joi.boolean().default(false),
       }).default();
 
-      return object({
-        enabled: boolean().default(true),
-        url: string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
-        preserveHost: boolean().default(true),
-        username: string(),
-        password: string(),
-        shardTimeout: number().default(30000),
-        requestTimeout: number().default(30000),
-        requestHeadersWhitelist: array().items().single().default(DEFAULT_REQUEST_HEADERS),
-        customHeaders: object().default({}),
-        pingTimeout: number().default(ref('requestTimeout')),
-        startupTimeout: number().default(5000),
-        logQueries: boolean().default(false),
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+        url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
+        preserveHost: Joi.boolean().default(true),
+        username: Joi.string(),
+        password: Joi.string(),
+        shardTimeout: Joi.number().default(30000),
+        requestTimeout: Joi.number().default(30000),
+        requestHeadersWhitelist: Joi.array().items().single().default(DEFAULT_REQUEST_HEADERS),
+        customHeaders: Joi.object().default({}),
+        pingTimeout: Joi.number().default(Joi.ref('requestTimeout')),
+        startupTimeout: Joi.number().default(5000),
+        logQueries: Joi.boolean().default(false),
         ssl: sslSchema,
         apiVersion: Joi.string().default('master'),
-        healthCheck: object({
-          delay: number().default(2500)
+        healthCheck: Joi.object({
+          delay: Joi.number().default(2500)
         }).default(),
       }).default();
     },

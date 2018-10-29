@@ -34,4 +34,5 @@ export {
   hasSearchStategyForIndexPattern,
   isDefaultTypeIndexPattern,
   SearchError,
+  getSearchErrorType,
 } from './search_strategy';

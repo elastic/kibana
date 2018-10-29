@@ -24,7 +24,7 @@ export const CleanNodeBuildsTask = {
     'Cleaning npm from node',
 
   async run(config, log, build) {
-    for (const platform of config.getPlatforms()) {
+    for (const platform of config.getNodePlatforms()) {
       await deleteAll(log, [
         build.resolvePathForPlatform(platform, 'node/lib/node_modules'),
         build.resolvePathForPlatform(platform, 'node/bin/npm'),
