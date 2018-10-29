@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import './table_vis_controller';
 import './table_vis_params';
 import 'ui/agg_table';
