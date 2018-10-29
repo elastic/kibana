@@ -43,7 +43,7 @@ export default function ({ getService }) {
     },
   ];
 
-  describe('mappings', () => {
+  describe.skip('mappings', () => {
     for (const { indexTemplate, metrics, name } of metricSets) {
       let mappings;
 
