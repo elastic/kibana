@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse as parseUrl } from 'url';
 import * as Chrome from 'puppeteer';
+import { parse as parseUrl } from 'url';
 import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
@@ -39,7 +39,6 @@ export class HeadlessChromiumDriver {
       waitForSelector,
     }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string }
   ) {
-
     this.logger.debug(`HeadlessChromiumDriver:opening url ${url}`);
     await this.page.setRequestInterception(true);
     this.page.on('request', (interceptedRequest: any) => {
@@ -134,11 +133,15 @@ export class HeadlessChromiumDriver {
     port: string | undefined
   ) {
     if (conditions.protocol === 'http' && conditions.port === 80) {
-      return port === undefined || port === null || port === conditions.port.toString();
+      return (
+        port === undefined || port === null || port === '' || port === conditions.port.toString()
+      );
     }
 
     if (conditions.protocol === 'https' && conditions.port === 443) {
-      return port === undefined || port === null || port === conditions.port.toString();
+      return (
+        port === undefined || port === null || port === '' || port === conditions.port.toString()
+      );
     }
 
     return port === conditions.port.toString();
