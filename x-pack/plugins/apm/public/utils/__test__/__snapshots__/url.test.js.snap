@@ -1,14 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KibanaLinkComponent should render correct markup 1`] = `
-<a
-  className="euiLink euiLink--primary"
-  href="myBasePath/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))&_g="
->
-  Go to Discover
-</a>
-`;
-
 exports[`RelativeLinkComponent should render correct markup 1`] = `
 <a
   className="euiLink euiLink--primary "
@@ -19,9 +10,23 @@ exports[`RelativeLinkComponent should render correct markup 1`] = `
 </a>
 `;
 
+exports[`UnconnectedKibanaLink should render correct markup 1`] = `
+<a
+  className="euiLink euiLink--primary"
+  href="myBasePath/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))&_g="
+>
+  Go to Discover
+</a>
+`;
+
 exports[`ViewMLJob should render component 1`] = `
-<Connect(KibanaLinkComponent)
+<Component
   hash="/timeseriesexplorer"
+  location={
+    Object {
+      "search": "",
+    }
+  }
   pathname="/app/ml"
   query={
     Object {
@@ -37,5 +42,5 @@ exports[`ViewMLJob should render component 1`] = `
   }
 >
   View Job
-</Connect(KibanaLinkComponent)>
+</Component>
 `;
