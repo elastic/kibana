@@ -4,14 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const WATCH_STATES = {
 
-  DISABLED: 'Disabled',
+  DISABLED: i18n.translate('xpack.watcher.constants.watchStates.disabledStateText', {
+    defaultMessage: 'Disabled'
+  }),
 
-  OK: 'OK',
+  OK: i18n.translate('xpack.watcher.constants.watchStates.okStateText', {
+    defaultMessage: 'OK'
+  }),
 
-  FIRING: 'Firing',
+  FIRING: i18n.translate('xpack.watcher.constants.watchStates.firingStateText', {
+    defaultMessage: 'Firing'
+  }),
 
-  ERROR: 'Error!'
+  ERROR: i18n.translate('xpack.watcher.constants.watchStates.errorStateText', {
+    defaultMessage: 'Error!'
+  }),
 
 };
