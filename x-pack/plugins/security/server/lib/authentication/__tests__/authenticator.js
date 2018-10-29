@@ -99,7 +99,7 @@ describe('Authenticator', () => {
       expect(shouldAuthenticate()).to.be(true);
     });
 
-    it(`returns false if xpackInfo.feature('security').authenticate is false`, async () => {
+    it(`returns false if xpackInfo.feature('security').getLicenseCheckResults().authenticate is false`, async () => {
       server.plugins.xpack_main.info.feature.withArgs('security').returns({
         getLicenseCheckResults: sinon.stub().returns({ authenticate: false })
       });
