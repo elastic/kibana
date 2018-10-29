@@ -10,10 +10,12 @@ import {
   REPOSITORY_INDEX_STATUS_INDEX_TYPE,
   REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
 } from '../../mappings';
+import { RepositoryUri } from '../../model';
 import { IndexWorkerResult, WorkerProgress } from '../../model/repository';
 import { IndexerFactory, IndexProgress } from '../indexer';
 import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
+import { SocketService } from '../socket_service';
 import { AbstractWorker } from './abstract_worker';
 import { CancellationSerivce } from './cancellation_service';
 import { Job } from './job';
@@ -26,7 +28,8 @@ export class IndexWorker extends AbstractWorker {
     protected readonly log: Log,
     protected readonly objectsClient: SavedObjectsClient,
     protected readonly indexerFactories: IndexerFactory[],
-    private readonly cancellationService: CancellationSerivce
+    private readonly cancellationService: CancellationSerivce,
+    private readonly socketService: SocketService
   ) {
     super(queue, log);
   }
@@ -35,43 +38,28 @@ export class IndexWorker extends AbstractWorker {
     const { payload, cancellationToken } = job;
     const { uri, revision } = payload;
 
-    const progressReporter = async (progress: IndexProgress) => {
-      let statusIndex = '';
-      if (progress.type === 'lsp') {
-        statusIndex = REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE;
-      } else if (progress.type === 'repository') {
-        statusIndex = REPOSITORY_INDEX_STATUS_INDEX_TYPE;
-      }
+    this.socketService.boardcastIndexProgress(uri, 0);
 
-      const p: WorkerProgress = {
-        uri,
-        progress: progress.percentage,
-        timestamp: new Date(),
-        revision,
-      };
-      try {
-        return await this.objectsClient.create(statusIndex, p, {
-          id: uri,
-        });
-      } catch (error) {
-        // If the object already exists then update the status
-        return await this.objectsClient.update(statusIndex, uri, p);
-      }
-    };
+    const indexerNumber = this.indexerFactories.length;
 
     // Binding the index cancellation logic
     this.cancellationService.cancelIndexJob(uri);
-    const indexPromises = this.indexerFactories.map(indexerFactory => {
-      const indexer = indexerFactory.create(uri, revision);
-      if (cancellationToken) {
-        cancellationToken.on(() => {
-          indexer.cancel();
-        });
-        this.cancellationService.registerIndexJobToken(uri, cancellationToken);
+    const indexPromises = this.indexerFactories.map(
+      (indexerFactory: IndexerFactory, index: number) => {
+        const indexer = indexerFactory.create(uri, revision);
+        if (cancellationToken) {
+          cancellationToken.on(() => {
+            indexer.cancel();
+          });
+          this.cancellationService.registerIndexJobToken(uri, cancellationToken);
+        }
+        const progressReporter = this.getProgressReporter(uri, revision, index, indexerNumber);
+        return indexer.start(progressReporter);
       }
-      return indexer.start(progressReporter);
-    });
+    );
     await Promise.all(indexPromises);
+
+    this.socketService.boardcastIndexProgress(uri, 100);
 
     // TODO: populate the actual index result
     const res: IndexWorkerResult = {
@@ -124,5 +112,40 @@ export class IndexWorker extends AbstractWorker {
     });
 
     return await super.onJobCompleted(job, res);
+  }
+
+  private getProgressReporter(
+    repoUri: RepositoryUri,
+    revision: string,
+    index: number,
+    total: number
+  ) {
+    return async (progress: IndexProgress) => {
+      let statusIndex = '';
+      if (progress.type === 'lsp') {
+        statusIndex = REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE;
+      } else if (progress.type === 'repository') {
+        statusIndex = REPOSITORY_INDEX_STATUS_INDEX_TYPE;
+      }
+
+      const p: WorkerProgress = {
+        uri: repoUri,
+        progress: progress.percentage,
+        timestamp: new Date(),
+        revision,
+      };
+
+      const globalProgress = (index * 100 + progress.percentage) / total;
+
+      this.socketService.boardcastIndexProgress(repoUri, globalProgress);
+      try {
+        return await this.objectsClient.create(statusIndex, p, {
+          id: repoUri,
+        });
+      } catch (error) {
+        // If the object already exists then update the status
+        return await this.objectsClient.update(statusIndex, repoUri, p);
+      }
+    };
   }
 }

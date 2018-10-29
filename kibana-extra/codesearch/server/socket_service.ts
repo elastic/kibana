@@ -6,24 +6,24 @@
 
 import { Socket } from 'socket.io';
 
-import { CloneProgress, RepositoryUri } from '../model';
+import { CloneProgress, RepositoryUri, SocketKind } from '../model';
 import { Log } from './log';
 
 export class SocketService {
-  private sockets: Map<string, Socket>;
+  private sockets: Map<SocketKind, Socket>;
 
   constructor(private readonly log: Log) {
-    this.sockets = new Map<string, Socket>();
+    this.sockets = new Map<SocketKind, Socket>();
   }
 
-  public registerSocket(name: string, s: Socket) {
-    this.log.info(`Register socket for ${name}`);
-    this.sockets.set(name, s);
+  public registerSocket(kind: SocketKind, s: Socket) {
+    this.log.info(`Register socket for ${kind}`);
+    this.sockets.set(kind, s);
   }
 
-  public unregisterSocket(name: string) {
-    this.log.info(`Unregister socket for ${name}`);
-    this.sockets.delete(name);
+  public unregisterSocket(kind: SocketKind) {
+    this.log.info(`Unregister socket for ${kind}`);
+    this.sockets.delete(kind);
   }
 
   public boardcastCloneProgress(
@@ -31,14 +31,31 @@ export class SocketService {
     progress: number,
     cloneProgress?: CloneProgress
   ) {
-    const s = this.sockets.get('clone-progress');
+    this.boardcastProgress(SocketKind.CLONE_PROGRESS, repoUri, progress, { cloneProgress });
+  }
+
+  public boardcastIndexProgress(repoUri: RepositoryUri, progress: number) {
+    this.boardcastProgress(SocketKind.INDEX_PROGRESS, repoUri, progress, {});
+  }
+
+  public boardcastDeleteProgress(repoUri: RepositoryUri, progress: number) {
+    this.boardcastProgress(SocketKind.DELETE_PROGRESS, repoUri, progress, {});
+  }
+
+  private boardcastProgress(
+    kind: SocketKind,
+    repoUri: RepositoryUri,
+    progress: number,
+    options: any
+  ) {
+    const s = this.sockets.get(kind);
     if (!s) {
       return;
     }
-    s.emit('clone-progress', {
+    s.emit(kind, {
+      ...options,
       repoUri,
       progress,
-      cloneProgress,
     });
   }
 }

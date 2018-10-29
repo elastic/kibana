@@ -130,7 +130,8 @@ export default (kibana: any) =>
         log,
         objectsClient,
         [lspIndexerFactory],
-        cancellationService
+        cancellationService,
+        socketService
       ).bind();
       const cloneWorker = new CloneWorker(
         queue,
@@ -146,7 +147,8 @@ export default (kibana: any) =>
         objectsClient,
         adminCluster.getClient(),
         cancellationService,
-        lspService
+        lspService,
+        socketService
       ).bind();
       const updateWorker = new UpdateWorker(
         queue,

@@ -19,6 +19,7 @@ import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryService } from '../repository_service';
+import { SocketService } from '../socket_service';
 import { AbstractWorker } from './abstract_worker';
 import { CancellationSerivce } from './cancellation_service';
 import { Job } from './job';
@@ -32,13 +33,17 @@ export class DeleteWorker extends AbstractWorker {
     private readonly objectsClient: SavedObjectsClient,
     protected readonly client: EsClient,
     private readonly cancellationService: CancellationSerivce,
-    private readonly lspService: LspService
+    private readonly lspService: LspService,
+    private readonly socketService: SocketService
   ) {
     super(queue, log);
   }
 
   public async executeJob(job: Job) {
     const { uri, dataPath } = job.payload;
+
+    // Notify repo delete start through websocket.
+    this.socketService.boardcastDeleteProgress(uri, 0);
 
     // Cancel running workers
     // TODO: Add support for clone/update worker.
@@ -82,29 +87,42 @@ export class DeleteWorker extends AbstractWorker {
 
     const deleteWorkspacePromise = this.lspService.deleteWorkspace(uri);
 
-    await Promise.all([
-      deleteRepoPromise,
-      deleteCloneStatusPromise,
-      deleteLspIndexStatusPromise,
-      deleteIndexStatusPromise,
-      deleteSymbolESIndexPromise,
-      deleteReferenceESIndexPromise,
-      deleteWorkspacePromise,
-    ]);
+    try {
+      await Promise.all([
+        deleteRepoPromise,
+        deleteCloneStatusPromise,
+        deleteLspIndexStatusPromise,
+        deleteIndexStatusPromise,
+        deleteSymbolESIndexPromise,
+        deleteReferenceESIndexPromise,
+        deleteWorkspacePromise,
+      ]);
 
-    // 4. Delete the document index where the repository document resides, so
-    // that you won't be able to import the same repositories until they are
-    // fully removed.
-    await this.deletePromiseWrapper(
-      this.client.indices.delete({ index: DocumentIndexName(uri) }),
-      'document ES index',
-      uri
-    );
+      // 4. Delete the document index where the repository document resides, so
+      // that you won't be able to import the same repositories until they are
+      // fully removed.
+      await this.deletePromiseWrapper(
+        this.client.indices.delete({ index: DocumentIndexName(uri) }),
+        'document ES index',
+        uri
+      );
 
-    return {
-      uri,
-      res: true,
-    };
+      // Notify repo delete end through websocket.
+      this.socketService.boardcastDeleteProgress(uri, 100);
+
+      return {
+        uri,
+        res: true,
+      };
+    } catch (error) {
+      this.log.error(`Delete repository ${uri} error. ${error}`);
+      // Notify repo delete failed through websocket.
+      this.socketService.boardcastDeleteProgress(uri, -100);
+      return {
+        uri,
+        res: false,
+      };
+    }
   }
 
   public async onJobEnqueued(job: Job) {

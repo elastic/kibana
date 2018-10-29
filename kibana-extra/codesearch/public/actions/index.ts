@@ -13,6 +13,7 @@ export * from './structure';
 export * from './editor';
 export * from './user';
 export * from './commit';
+export * from './status';
 
 export interface Match {
   isExact?: boolean;

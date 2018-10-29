@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './highlight';
-export * from './search';
-export * from './repository';
-export * from './task';
-export * from './lsp';
-export * from './workspace';
-export * from './socket';
+export enum SocketKind {
+  CLONE_PROGRESS = 'clone-progress',
+  DELETE_PROGRESS = 'delete-progress',
+  INDEX_PROGRESS = 'index-progress',
+}
