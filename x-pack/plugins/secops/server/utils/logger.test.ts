@@ -6,6 +6,8 @@
 
 import { createLogger } from './logger';
 
+/* tslint:disable:no-any */
+
 const APP_ID = 'secops';
 const createMockServer = () => ({ log: jest.fn() });
 

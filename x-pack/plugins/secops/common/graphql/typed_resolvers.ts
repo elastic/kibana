@@ -6,9 +6,12 @@
 
 import { GraphQLResolveInfo } from 'graphql';
 
+// tslint:disable-next-line:no-any
 type BasicResolver<Result, Args = any> = (
+  // tslint:disable-next-line:no-any
   parent: any,
   args: Args,
+  // tslint:disable-next-line:no-any
   context: any,
   info: GraphQLResolveInfo
 ) => Promise<Result> | Result;
@@ -20,6 +23,7 @@ type AppResolverResult<R> =
   | { [P in keyof R]: () => R[P] }
   | R;
 
+// tslint:disable-next-line:no-any
 export type AppResolvedResult<Resolver> = Resolver extends AppResolver<infer Result, any, any, any>
   ? Result
   : never;
