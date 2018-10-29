@@ -45,15 +45,13 @@ const flags = getopts(process.argv.slice(0), {
     'debug',
     'all-platforms'
   ],
-  default: {
-    'version-qualifier': ''
-  },
   alias: {
     v: 'verbose',
     d: 'debug',
   },
   default: {
-    debug: true
+    debug: true,
+    'version-qualifier': ''
   },
   unknown: (flag) => {
     unknownFlags.push(flag);
