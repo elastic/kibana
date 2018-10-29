@@ -6,8 +6,6 @@
 
 import { amMocking } from './kibana.index';
 
-const createMockServer = () => ({ log: jest.fn() });
-
 describe('kibana.index', () => {
   describe('#amMocking', () => {
     afterEach(() => delete process.env.INGEST_MOCKS);
