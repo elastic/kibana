@@ -9,7 +9,13 @@ import { internalAuthData } from '../../../utils/wrap_request';
 export interface BackendFrameworkAdapter {
   internalUser: FrameworkInternalUser;
   version: string;
-  getSetting(settingPath: string): any;
+  license: 'oss' | 'trial' | 'standard' | 'basic' | 'gold' | 'platinum';
+  securityEnabled: boolean;
+  licenseActive: boolean;
+  on(event: 'xpack.status.green', cb: () => void): void;
+  getSetting(
+    settingPath: 'xpack.beats.encryptionKey' | 'xpack.beats.enrollmentTokensTtlInSeconds'
+  ): any;
   exposeStaticDir(urlPath: string, dir: string): void;
   registerRoute<
     RouteRequest extends FrameworkWrappableRequest,

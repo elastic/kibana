@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { BackendFrameworkAdapter } from '../adapter_types';
 
 interface ContractConfig {
@@ -13,7 +14,7 @@ interface ContractConfig {
 
 export const contractTests = (testName: string, config: ContractConfig) => {
   describe.skip(testName, () => {
-    // let frameworkAdapter: BackendFrameworkAdapter;
+    let frameworkAdapter: BackendFrameworkAdapter;
     beforeAll(async () => {
       jest.setTimeout(100000); // 1 second
 
@@ -24,11 +25,39 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     afterAll(async () => config.after && (await config.after()));
     beforeEach(async () => {
       // FIXME: one of these always should exist, type ContractConfig as such
-      // const frameworkAdapter = config.adapterSetup();
+      frameworkAdapter = config.adapterSetup();
     });
 
-    it('Should have tests here', () => {
-      expect(true).toEqual(true);
+    it('Should call callback when plugin is green', () => {
+      const greenCallback = jest.fn();
+
+      frameworkAdapter.on('xpack.status.green', greenCallback);
+      expect(greenCallback).toBeCalled();
+    });
+
+    it('Should return settings from Kibana', () => {
+      const encryptionKey = frameworkAdapter.getSetting('xpack.beats.encryptionKey');
+      expect(encryptionKey).toEqual('xpack_beats_default_encryptionKey');
+
+      const enrollmentTokensTtlInSeconds = frameworkAdapter.getSetting(
+        'xpack.beats.enrollmentTokensTtlInSeconds'
+      );
+      expect(enrollmentTokensTtlInSeconds).toEqual(600);
+    });
+    it('Should return current Kibana version', () => {
+      expect(frameworkAdapter.version).not.toEqual(undefined);
+    });
+    it('Should return current license', () => {
+      expect(frameworkAdapter.license).toEqual('trial');
+    });
+    it('Should return current license status', () => {
+      expect(frameworkAdapter.licenseActive).toEqual(true);
+    });
+    it('Should return security status', () => {
+      expect(frameworkAdapter.securityEnabled).toEqual(true);
+    });
+    it('Should return security status', () => {
+      expect(frameworkAdapter.securityEnabled).toEqual(true);
     });
   });
 };
