@@ -11,7 +11,7 @@ const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0
 
 export const imageTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
 
-export function parse(str, withData = false) {
+export function parseDataUrl(str, withData = false) {
   if (typeof str !== 'string') return;
 
   const matches = str.match(dataurlRegex);
