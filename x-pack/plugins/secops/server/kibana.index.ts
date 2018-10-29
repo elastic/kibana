@@ -20,7 +20,7 @@ export interface KbnServer extends Server {
 export const amMocking = (): boolean => process.env.INGEST_MOCKS === 'true';
 
 export const initServerWithKibana = (kbnServer: KbnServer) => {
-  const logger = createLogger(kbnServer);
+  const logger = createLogger(kbnServer.log.bind(kbnServer));
   logger.info('Plugin initializing');
 
   const mocking = amMocking();

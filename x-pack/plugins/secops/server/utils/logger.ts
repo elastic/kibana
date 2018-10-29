@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
-
 const LOGGING_TAGS = ['secops'];
+
+// Definition (except for the "() => any" at the end is from :
+// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/hapi/v16/index.d.ts#L318
+export type HapiLogger = (
+  tags: string | string[],
+  // tslint:disable-next-line:ban-types
+  data?: string | Object | Function,
+  timestamp?: number
+) => void;
 
 export interface Logger {
   debug: (message: string) => void;
@@ -15,9 +22,9 @@ export interface Logger {
   error: (message: string) => void;
 }
 
-export const createLogger = (kbnServer: Readonly<Server>): Readonly<Logger> => ({
-  debug: (message: string) => kbnServer.log(['debug', ...LOGGING_TAGS], message),
-  info: (message: string) => kbnServer.log(['info', ...LOGGING_TAGS], message),
-  warn: (message: string) => kbnServer.log(['warning', ...LOGGING_TAGS], message),
-  error: (message: string) => kbnServer.log(['error', ...LOGGING_TAGS], message),
+export const createLogger = (logger: HapiLogger): Readonly<Logger> => ({
+  debug: (message: string) => logger(['debug', ...LOGGING_TAGS], message),
+  info: (message: string) => logger(['info', ...LOGGING_TAGS], message),
+  warn: (message: string) => logger(['warning', ...LOGGING_TAGS], message),
+  error: (message: string) => logger(['error', ...LOGGING_TAGS], message),
 });
