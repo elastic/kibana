@@ -12,7 +12,7 @@ export function validateDateHistogramField(dateHistogramField) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.dateHistogramFieldMissing"
-        defaultMessage="You must select a date field"
+        defaultMessage="Date field is required."
       />
     )];
   }
