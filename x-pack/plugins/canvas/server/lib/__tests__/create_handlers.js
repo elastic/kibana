@@ -8,8 +8,8 @@ import expect from 'expect.js';
 import { createHandlers } from '../create_handlers';
 
 let securityMode = 'pass';
-let license = 'trial';
-let securityEnabled = true;
+let isSecurityAvailable = true;
+let isSecurityEnabled = true;
 const authError = new Error('auth error');
 
 const mockRequest = {
@@ -33,8 +33,8 @@ const mockServer = {
     xpack_main: {
       info: {
         feature: () => ({
-          isAvailable: () => license !== 'basic',
-          isEnabled: () => securityEnabled,
+          isAvailable: () => isSecurityAvailable,
+          isEnabled: () => isSecurityEnabled,
         }),
       },
     },
@@ -53,8 +53,8 @@ describe('server createHandlers', () => {
 
   beforeEach(() => {
     securityMode = 'pass';
-    securityEnabled = true;
-    license = 'trial';
+    isSecurityEnabled = true;
+    isSecurityAvailable = true;
     handlers = createHandlers(mockRequest, mockServer);
   });
 
@@ -112,9 +112,9 @@ describe('server createHandlers', () => {
       expect(payload).to.equal('payload');
     });
 
-    it('works without security on basic license', async () => {
-      // create server with a basic license
-      license = 'basic';
+    it('works without security available', async () => {
+      // create server with security unavailable (i.e. when user is on a basic license)
+      isSecurityAvailable = false;
 
       // this shouldn't do anything
       securityMode = 'fail';
@@ -132,7 +132,7 @@ describe('server createHandlers', () => {
 
     it('works with security disabled in elasticsearch', async () => {
       // create server with security disabled
-      securityEnabled = false;
+      isSecurityEnabled = false;
 
       // this shouldn't do anything
       securityMode = 'fail';
