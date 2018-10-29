@@ -13,6 +13,7 @@ export const whoAmISchema = gql`
   }
 
   extend type Source {
+    "Just a simple example to get the app name"
     whoAmI: SayMyName
   }
 `;

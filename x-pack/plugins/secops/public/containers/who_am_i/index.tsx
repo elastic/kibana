@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
+
 import { WhoAmIQuery } from '../../../common/graphql/types';
 
-import { whoAmIQuery } from './who_am_I.gql_query';
+import { whoAmIQuery } from './who_am_i.gql_query';
 
-interface WHoAmIArgs {
+interface WhoAmIArgs {
   appName: string;
 }
 
 interface WHoAmIProps {
-  children: (args: WHoAmIArgs) => React.ReactNode;
+  children: (args: WhoAmIArgs) => React.ReactNode;
   sourceId: string;
 }
 
@@ -28,8 +30,7 @@ export const WhoAmI = ({ children, sourceId }: WHoAmIProps) => (
   >
     {({ data }) =>
       children({
-        appName:
-          data && data.source && data.source.whoAmI ? data.source.whoAmI.appName : 'Who am I ?',
+        appName: get(data, 'source.whoAmI.appName') || 'Who am I ?',
       })
     }
   </Query>
