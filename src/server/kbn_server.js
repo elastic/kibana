@@ -18,7 +18,6 @@
  */
 
 import { constant, once, compact, flatten } from 'lodash';
-import { fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';
@@ -161,7 +160,7 @@ export default class KbnServer {
       return;
     }
 
-    await fromNode(cb => this.server.stop(cb));
+    await this.server.stop();
   }
 
   async inject(opts) {
@@ -185,6 +184,6 @@ export default class KbnServer {
     };
     const plain = JSON.stringify(subset, null, 2);
     this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
-    this.server.plugins['even-better'].monitor.reconfigure(loggingOptions);
+    this.server.plugins['@elastic/good'].reconfigure(loggingOptions);
   }
 }

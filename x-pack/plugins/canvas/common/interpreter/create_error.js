@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { spy } from 'sinon';
-
-export function replyFixture() {
-  const reply = spy();
-  reply.redirect = spy();
-  reply.continue = spy();
-  reply.unstate = spy();
-  return reply;
-}
+export const createError = err => ({
+  type: 'error',
+  error: {
+    stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
+    message: typeof err === 'string' ? err : err.message,
+  },
+});

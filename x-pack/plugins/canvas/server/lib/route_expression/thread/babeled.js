@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-
-export function mapConcurrentConnections(concurrents) {
-  return _.reduce(_.values(concurrents), (result, value) => {
-    return result + value;
-  }, 0);
-}
+// The babel-register below uses .babelrc by default.
+require('babel-register');
+require('./worker');
