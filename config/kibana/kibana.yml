@@ -3,7 +3,7 @@ optimize:
   sourceMaps: false
 #  sourceMaps: '#cheap-source-map'
 
-codesearch:
+code:
   enableGlobalReference: false
 #  repos:
 #  - repo: 'github.com/Microsoft/TypeScript-Node-Starter'

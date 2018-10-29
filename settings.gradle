@@ -1,6 +1,6 @@
 //include 'util'
 //include 'elasticsearch'
 
-include 'kibana-extra:codesearch'
+include 'kibana-extra:code'
 include 'lsp:javascript-typescript-langserver'
 include 'lsp:eclipse.jdt.ls'

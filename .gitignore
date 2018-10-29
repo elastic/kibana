@@ -1,6 +1,6 @@
 gen/
 bin/
-!/kibana-extra/codesearch/packages/codesearch-filename-check/bin/
+!/kibana-extra/code/packages/code-filename-check/bin/
 .DS_Store
 .gradle/
 .idea/
