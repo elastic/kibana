@@ -214,25 +214,6 @@ class Authenticator {
   }
 
   /**
-   * Serializes the request's session.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {Promise.<string>}
-   */
-  async serializeSession(request) {
-    assertRequest(request);
-
-    return await this._session.serialize(request);
-  }
-
-  /**
-   * Returns the options that we're using for the session cookie
-   * @returns {CookieOptions}
-   */
-  getSessionCookieOptions() {
-    return this._session.getCookieOptions();
-  }
-
-  /**
    * Instantiates authentication provider based on the provider key from config.
    * @param {string} providerType Provider type key.
    * @param {Object} options Options to pass to provider's constructor.
@@ -300,8 +281,6 @@ export async function initAuthenticator(server, authorizationMode) {
   server.expose('authenticate', (request) => authenticator.authenticate(request));
   server.expose('deauthenticate', (request) => authenticator.deauthenticate(request));
   server.expose('registerAuthScopeGetter', (scopeExtender) => authScope.registerGetter(scopeExtender));
-  server.expose('serializeSession', (request) => authenticator.serializeSession(request));
-  server.expose('getSessionCookieOptions', () => authenticator.getSessionCookieOptions());
 
   server.expose('isAuthenticated', async (request) => {
     try {
