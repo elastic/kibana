@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memoize } from 'lodash';
 import numeral from '@elastic/numeral';
+import { memoize } from 'lodash';
 
 const UNIT_CUT_OFF = 10 * 1000000; // 10 seconds in microseconds
 
@@ -54,12 +54,12 @@ export function tpmUnit(type) {
 }
 
 export function getDurationPercent(
-  itemDuration,
-  totalDuration,
-  fallbackResult
+  itemDuration: number,
+  totalDuration?: number,
+  fallbackResult?: any = ''
 ) {
   if (totalDuration === undefined || totalDuration === 0) {
-    return fallbackResult || '';
+    return fallbackResult;
   }
   return numeral(itemDuration / totalDuration).format('0.00%');
 }
