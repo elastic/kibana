@@ -46,7 +46,7 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -57,7 +57,14 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
     $scope.pageData = $route.current.locals.pageData;
 
     const title = $injector.get('title');
-    title($scope.cluster, `Elasticsearch - Indices - ${$scope.indexName} - Advanced`);
+    const routeTitle = i18n('xpack.monitoring.elasticsearch.indices.advanced.routeTitle', {
+      defaultMessage: '`Elasticsearch - Indices - {indexName} - Advanced',
+      values: {
+        indexName: $scope.indexName
+      }
+    });
+
+    title($scope.cluster, routeTitle);
 
     const $executor = $injector.get('$executor');
     $executor.register({

@@ -46,7 +46,7 @@ uiRoutes.when('/elasticsearch/indices/:index', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -57,7 +57,14 @@ uiRoutes.when('/elasticsearch/indices/:index', {
     $scope.indexName = $route.current.params.index;
 
     const title = $injector.get('title');
-    title($scope.cluster, `Elasticsearch - Indices - ${$scope.indexName} - Overview`);
+    const routeTitle = i18n('xpack.monitoring.elasticsearch.indices.overview.routeTitle', {
+      defaultMessage: '`Elasticsearch - Indices - {indexName} - Overview',
+      values: {
+        indexName: $scope.indexName
+      }
+    });
+
+    title($scope.cluster, routeTitle);
 
     const $executor = $injector.get('$executor');
     $executor.register({

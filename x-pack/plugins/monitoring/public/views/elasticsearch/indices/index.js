@@ -22,7 +22,7 @@ uiRoutes.when('/elasticsearch/indices', {
   },
   controllerAs: 'elasticsearchIndices',
   controller: class ElasticsearchIndicesController extends MonitoringViewBaseTableController {
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       const features = $injector.get('features');
@@ -33,7 +33,9 @@ uiRoutes.when('/elasticsearch/indices', {
       let showSystemIndices = features.isEnabled('showSystemIndices', false);
 
       super({
-        title: 'Elasticsearch - Indices',
+        title: i18n('xpack.monitoring.elasticsearch.indices.routeTitle', {
+          defaultMessage: 'Elasticsearch - Indices'
+        }),
         storageKey: 'elasticsearch.indices',
         apiUrlFn: () => `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices?show_system_indices=${showSystemIndices}`,
         reactNodeId: 'elasticsearchIndicesReact',

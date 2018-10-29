@@ -46,7 +46,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -56,7 +56,14 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
     $scope.pageData = $route.current.locals.pageData;
 
     const title = $injector.get('title');
-    title($scope.cluster, `Elasticsearch - Nodes - ${$scope.pageData.nodeSummary.name} - Advanced`);
+    const routeTitle = i18n('xpack.monitoring.elasticsearch.node.advanced.routeTitle', {
+      defaultMessage: 'Elasticsearch - Nodes - {nodeSummaryName} - Advanced',
+      values: {
+        nodeSummaryName: $scope.pageData.nodeSummary.name
+      }
+    });
+
+    title($scope.cluster, routeTitle);
 
     const $executor = $injector.get('$executor');
     $executor.register({

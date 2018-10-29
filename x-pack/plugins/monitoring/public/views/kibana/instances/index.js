@@ -23,9 +23,11 @@ uiRoutes.when('/kibana/instances', {
   controllerAs: 'kibanas',
   controller: class KibanaInstancesList extends MonitoringViewBaseTableController {
 
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       super({
-        title: 'Kibana Instances',
+        title: i18n('xpack.monitoring.kibana.instances.routeTitle', {
+          defaultMessage: 'Kibana Instances'
+        }),
         storageKey: 'kibana.instances',
         getPageData,
         $scope,

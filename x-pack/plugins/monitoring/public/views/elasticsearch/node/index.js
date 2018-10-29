@@ -23,7 +23,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -33,7 +33,14 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
     $scope.pageData = $route.current.locals.pageData;
 
     const title = $injector.get('title');
-    title($scope.cluster, `Elasticsearch - Nodes - ${$scope.pageData.nodeSummary.name} - Overview`);
+    const routeTitle = i18n('xpack.monitoring.elasticsearch.node.overview.routeTitle', {
+      defaultMessage: 'Elasticsearch - Nodes - {nodeSummaryName} - Overview',
+      values: {
+        nodeSummaryName: $scope.pageData.nodeSummary.name
+      }
+    });
+
+    title($scope.cluster, routeTitle);
 
     const features = $injector.get('features');
     const callPageData = partial(getPageData, $injector);

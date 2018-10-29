@@ -18,9 +18,11 @@ uiRoutes.when('/elasticsearch/ccr', {
   },
   controllerAs: 'elasticsearchCcr',
   controller: class ElasticsearchCcrController extends MonitoringViewBaseController {
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       super({
-        title: 'Elasticsearch - Ccr',
+        title: i18n('xpack.monitoring.elasticsearch.ccr.routeTitle', {
+          defaultMessage: 'Elasticsearch - Ccr'
+        }),
         reactNodeId: 'elasticsearchCcrReact',
         getPageData,
         $scope,

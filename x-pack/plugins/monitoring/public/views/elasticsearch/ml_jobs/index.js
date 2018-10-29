@@ -23,9 +23,11 @@ uiRoutes.when('/elasticsearch/ml_jobs', {
   controllerAs: 'mlJobs',
   controller: class MlJobsList extends MonitoringViewBaseTableController {
 
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       super({
-        title: 'Elasticsearch - Machine Learning Jobs',
+        title: i18n('xpack.monitoring.elasticsearch.mlJobs.routeTitle', {
+          defaultMessage: 'Elasticsearch - Machine Learning Jobs'
+        }),
         storageKey: 'elasticsearch.mlJobs',
         getPageData,
         $scope,
