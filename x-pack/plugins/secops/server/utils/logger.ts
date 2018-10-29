@@ -6,7 +6,7 @@
 
 const LOGGING_TAGS = ['secops'];
 
-// Definition (except for the "() => any" at the end is from :
+// Definition is from:
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/hapi/v16/index.d.ts#L318
 export type HapiLogger = (
   tags: string | string[],
