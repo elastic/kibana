@@ -11,7 +11,7 @@ import createHistory from 'history/createMemoryHistory';
 import {
   toQuery,
   fromQuery,
-  KibanaLinkComponent,
+  UnconnectedKibanaLink,
   RelativeLinkComponent,
   encodeKibanaSearchParams,
   decodeKibanaSearchParams,
@@ -182,7 +182,7 @@ describe('RelativeLinkComponent', () => {
   });
 });
 
-describe('KibanaLinkComponent', () => {
+describe('UnconnectedKibanaLink', () => {
   let wrapper;
 
   beforeEach(() => {
@@ -198,14 +198,14 @@ describe('KibanaLinkComponent', () => {
     };
 
     wrapper = mount(
-      <KibanaLinkComponent
+      <UnconnectedKibanaLink
         location={{ search: '' }}
         pathname={'/app/kibana'}
         hash={'/discover'}
         query={discoverQuery}
       >
         Go to Discover
-      </KibanaLinkComponent>
+      </UnconnectedKibanaLink>
     );
   });
 
