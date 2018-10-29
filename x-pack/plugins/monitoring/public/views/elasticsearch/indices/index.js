@@ -11,6 +11,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseTableController } from '../../';
 import { ElasticsearchIndices } from '../../../components';
 import template from './index.html';
+import { I18nProvider } from '@kbn/i18n/react';
 
 uiRoutes.when('/elasticsearch/indices', {
   template,
@@ -60,12 +61,14 @@ uiRoutes.when('/elasticsearch/indices', {
 
       this.renderReact = ({ clusterStatus, indices }) => {
         super.renderReact(
-          <ElasticsearchIndices
-            clusterStatus={clusterStatus}
-            indices={indices}
-            showSystemIndices={showSystemIndices}
-            toggleShowSystemIndices={toggleShowSystemIndices}
-          />
+          <I18nProvider>
+            <ElasticsearchIndices
+              clusterStatus={clusterStatus}
+              indices={indices}
+              showSystemIndices={showSystemIndices}
+              toggleShowSystemIndices={toggleShowSystemIndices}
+            />
+          </I18nProvider>
         );
       };
     }

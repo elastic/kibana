@@ -16,7 +16,7 @@ import { EuiLink } from '@elastic/eui';
 import { KuiTableRowCell, KuiTableRow } from '@kbn/ui-framework/components';
 import { SystemIndicesCheckbox } from './system_indices_checkbox';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const filterFields = ['name', 'status'];
 const columns = [
@@ -114,11 +114,7 @@ const getNoDataMessage = filterText => {
     <FormattedMessage
       id="xpack.monitoring.elasticsearch.indices.howToShowSystemIndicesDescription"
       //eslint-disable-next-line max-len
-      defaultMessage="If you are looking for system indices (e.g., .kibana), try checking {leftSingleQuote}Show system indices{rightSingleQuote}."
-      values={{
-        leftSingleQuote: '&lsquo;',
-        rightSingleQuote: '&rsquo;'
-      }}
+      defaultMessage="If you are looking for system indices (e.g., .kibana), try checking 'Show system indices'."
     />
   );
   if (filterText) {
@@ -163,7 +159,7 @@ const renderToolBarSection = ({ showSystemIndices, toggleShowSystemIndices, ...p
   />
 );
 
-export function ElasticsearchIndices({ clusterStatus, indices, ...props }) {
+function ElasticsearchIndicesUI({ clusterStatus, indices, intl, ...props }) {
   return (
     <Fragment>
       <ClusterStatus stats={clusterStatus} />
@@ -175,7 +171,10 @@ export function ElasticsearchIndices({ clusterStatus, indices, ...props }) {
         sortKey={props.sortKey}
         sortOrder={props.sortOrder}
         onNewState={props.onNewState}
-        placeholder="Filter Indices..."
+        placeholder={intl.formatMessage({
+          id: 'xpack.monitoring.elasticsearch.indices.monitoringTablePlaceholder',
+          defaultMessage: 'Filter Indices…',
+        })}
         filterFields={filterFields}
         renderToolBarSections={renderToolBarSection}
         columns={columns}
@@ -188,3 +187,4 @@ export function ElasticsearchIndices({ clusterStatus, indices, ...props }) {
   );
 }
 
+export const ElasticsearchIndices = injectI18n(ElasticsearchIndicesUI);

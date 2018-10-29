@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { CcrShard } from './ccr_shard';
 
 describe('CcrShard', () => {
@@ -45,7 +45,7 @@ describe('CcrShard', () => {
   };
 
   test('that it renders normally', () => {
-    const component = shallow(<CcrShard {...props} />);
+    const component = shallowWithIntl(<CcrShard.WrappedComponent {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -63,7 +63,7 @@ describe('CcrShard', () => {
       }
     };
 
-    const component = shallow(<CcrShard {...localProps} />);
+    const component = shallowWithIntl(<CcrShard.WrappedComponent {...localProps} />);
     expect(component.find('EuiPanel').get(0)).toMatchSnapshot();
   });
 });

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Ccr } from './ccr';
 
 describe('Ccr', () => {
@@ -67,7 +67,7 @@ describe('Ccr', () => {
       }
     ];
 
-    const component = shallow(<Ccr data={data} />);
+    const component = shallowWithIntl(<Ccr.WrappedComponent data={data} />);
     expect(component).toMatchSnapshot();
   });
 });

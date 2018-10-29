@@ -15,6 +15,7 @@ import { MetricCell, OfflineCell } from './cells';
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import { KuiTableRowCell, KuiTableRow } from '@kbn/ui-framework/components';
 import { i18n } from '@kbn/i18n';
+import { injectI18n } from '@kbn/i18n/react';
 
 const filterFields = ['name'];
 const getColumns = showCgroupMetricsElasticsearch => {
@@ -200,7 +201,7 @@ const nodeRowFactory = showCgroupMetricsElasticsearch => {
   };
 };
 
-export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElasticsearch, ...props }) {
+function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticsearch, intl, ...props }) {
   const columns = getColumns(showCgroupMetricsElasticsearch);
 
   return (
@@ -215,7 +216,10 @@ export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElas
         sortKey={props.sortKey}
         sortOrder={props.sortOrder}
         onNewState={props.onNewState}
-        placeholder="Filter Nodes..."
+        placeholder={intl.formatMessage({
+          id: 'xpack.monitoring.elasticsearch.nodes.monitoringTablePlaceholder',
+          defaultMessage: 'Filter Nodes…',
+        })}
         filterFields={filterFields}
         columns={columns}
         rowComponent={nodeRowFactory(showCgroupMetricsElasticsearch)}
@@ -223,3 +227,5 @@ export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElas
     </Fragment>
   );
 }
+
+export const ElasticsearchNodes = injectI18n(ElasticsearchNodesUI);
