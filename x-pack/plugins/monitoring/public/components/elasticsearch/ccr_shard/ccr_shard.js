@@ -60,7 +60,7 @@ class CcrShardUI extends PureComponent {
                 <EuiTextColor color="danger">
                   <FormattedMessage
                     id="xpack.monitoring.elasticsearch.ccrShard.errorsTableTitle"
-                    defaultMessage=">Errors"
+                    defaultMessage="Errors"
                   />
                 </EuiTextColor>
               </h3>

@@ -124,7 +124,7 @@ class ShardActivityUI extends React.Component {
       <Fragment>
         <FormattedMessage
           id="xpack.monitoring.elasticsearch.shardActivity.noActiveShardRecoveriesMessage"
-          defaultMessage=" There are no active shard recoveries for this cluster.{nextLine}
+          defaultMessage="There are no active shard recoveries for this cluster.{nextLine}
           Try viewing {shardActivityHistoryLink}."
           values={{
             shardActivityHistoryLink: (
