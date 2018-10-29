@@ -23,7 +23,7 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
 
   return {
     type: 'onPostAuth',
-    method(request, reply) {
+    async method(request, h) {
       const { auth, url } = request;
       const isAppRequest = url.path.startsWith('/app/');
 
@@ -33,15 +33,14 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
           // that app and none others.  Here we are intercepting all other routing and ensuring the viewer
           // app is the only one ever rendered.
           // Read more about Dashboard Only Mode here: https://github.com/elastic/x-pack-kibana/issues/180
-          reply.renderApp(dashboardViewerApp);
-          return;
+          const response = await h.renderApp(dashboardViewerApp);
+          return response.takeover();
         }
 
-        reply(Boom.notFound());
-        return;
+        throw Boom.notFound();
       }
 
-      reply.continue();
+      return h.continue;
     }
   };
 }

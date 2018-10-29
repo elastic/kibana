@@ -77,7 +77,7 @@ exports[`Field for array setting should render as read only with help text if ov
             size="xs"
           >
             <FormattedMessage
-              defaultMessage="This setting is overriden by the Kibana server and can not be changed."
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
               id="kbn.management.settings.field.helpText"
               values={Object {}}
             />
@@ -456,7 +456,7 @@ exports[`Field for boolean setting should render as read only with help text if 
             size="xs"
           >
             <FormattedMessage
-              defaultMessage="This setting is overriden by the Kibana server and can not be changed."
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
               id="kbn.management.settings.field.helpText"
               values={Object {}}
             />
@@ -827,7 +827,7 @@ exports[`Field for image setting should render as read only with help text if ov
             size="xs"
           >
             <FormattedMessage
-              defaultMessage="This setting is overriden by the Kibana server and can not be changed."
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
               id="kbn.management.settings.field.helpText"
               values={Object {}}
             />
@@ -1215,7 +1215,7 @@ exports[`Field for json setting should render as read only with help text if ove
             size="xs"
           >
             <FormattedMessage
-              defaultMessage="This setting is overriden by the Kibana server and can not be changed."
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
               id="kbn.management.settings.field.helpText"
               values={Object {}}
             />
@@ -1708,7 +1708,7 @@ exports[`Field for markdown setting should render as read only with help text if
             size="xs"
           >
             <FormattedMessage
-              defaultMessage="This setting is overriden by the Kibana server and can not be changed."
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
               id="kbn.management.settings.field.helpText"
               values={Object {}}
             />
@@ -2151,7 +2151,7 @@ exports[`Field for number setting should render as read only with help text if o
             size="xs"
           >
             <FormattedMessage
-              defaultMessage="This setting is overriden by the Kibana server and can not be changed."
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
               id="kbn.management.settings.field.helpText"
               values={Object {}}
             />
@@ -2530,7 +2530,7 @@ exports[`Field for select setting should render as read only with help text if o
             size="xs"
           >
             <FormattedMessage
-              defaultMessage="This setting is overriden by the Kibana server and can not be changed."
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
               id="kbn.management.settings.field.helpText"
               values={Object {}}
             />
@@ -2977,7 +2977,7 @@ exports[`Field for string setting should render as read only with help text if o
             size="xs"
           >
             <FormattedMessage
-              defaultMessage="This setting is overriden by the Kibana server and can not be changed."
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
               id="kbn.management.settings.field.helpText"
               values={Object {}}
             />
