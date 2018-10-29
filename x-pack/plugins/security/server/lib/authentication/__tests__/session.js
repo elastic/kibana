@@ -44,6 +44,7 @@ describe('Session', () => {
         password: 'encryption-key',
         clearInvalid: true,
         validateFunc: sinon.match.func,
+        isHttpOnly: true,
         isSecure: 'secure-cookies',
         isSameSite: false,
         path: 'base/path/'
