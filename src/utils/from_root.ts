@@ -17,22 +17,9 @@
  * under the License.
  */
 
-export class BinderBase {
-  constructor() {
-    this.disposal = [];
-  }
+import { resolve } from 'path';
+import { pkg } from './package_json';
 
-  on(emitter, ...args) {
-    const on = emitter.on || emitter.addListener;
-    const off = emitter.off || emitter.removeListener;
-
-    on.apply(emitter, args);
-    this.disposal.push(() => off.apply(emitter, args));
-  }
-
-  destroy() {
-    const destroyers = this.disposal;
-    this.disposal = [];
-    destroyers.forEach(fn => fn());
-  }
+export function fromRoot(...args: string[]) {
+  return resolve(pkg.__dirname, ...args);
 }

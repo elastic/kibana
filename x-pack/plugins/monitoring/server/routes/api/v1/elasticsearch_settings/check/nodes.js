@@ -17,12 +17,12 @@ export function nodesSettingsCheckRoute(server) {
     config: {
       validate: {}
     },
-    async handler(req, reply) {
+    async handler(req) {
       try {
         const response = await checkNodesSettings(req); // needs to be try/catch to handle privilege error
-        reply(response);
+        return response;
       } catch (err) {
-        reply(handleSettingsError(err));
+        throw handleSettingsError(err);
       }
     }
   });
