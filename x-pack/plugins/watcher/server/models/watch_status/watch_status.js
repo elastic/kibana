@@ -31,6 +31,7 @@ export class WatchStatus {
     this.id = props.id;
     this.watchState = props.state;
     this.watchStatusJson = props.watchStatusJson;
+    this.watchErrors = props.watchErrors || {};
 
     this.isActive = Boolean(get(this.watchStatusJson, 'state.active'));
     this.lastChecked = getMoment(get(this.watchStatusJson, 'last_checked'));
@@ -38,7 +39,11 @@ export class WatchStatus {
 
     const actionStatusesJson = get(this.watchStatusJson, 'actions', {});
     this.actionStatuses = map(actionStatusesJson, (actionStatusJson, id) => {
-      const json = { id, actionStatusJson };
+      const json = {
+        id,
+        actionStatusJson,
+        errors: this.watchErrors.actions && this.watchErrors.actions[id],
+      };
       return ActionStatus.fromUpstreamJson(json);
     });
   }
@@ -56,6 +61,10 @@ export class WatchStatus {
 
     if (totals[ACTION_STATES.ERROR] > 0) {
       return WATCH_STATES.ERROR;
+    }
+
+    if (totals[ACTION_STATES.CONFIG_ERROR] > 0) {
+      return WATCH_STATES.CONFIG_ERROR;
     }
 
     const firingTotal = totals[ACTION_STATES.FIRING] + totals[ACTION_STATES.ACKNOWLEDGED] +
@@ -131,7 +140,7 @@ export class WatchStatus {
   static fromUpstreamJson(json) {
     if (!json.id) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watchStatus.absenceOfIdPropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.watchStatus.idPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain an {id} property',
           values: {
             id: 'id'
@@ -141,7 +150,7 @@ export class WatchStatus {
     }
     if (!json.watchStatusJson) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watchStatus.absenceOfWatchStatusJsonPropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.watchStatus.watchStatusJsonPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain a {watchStatusJson} property',
           values: {
             watchStatusJson: 'watchStatusJson'

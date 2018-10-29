@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
 import { BaseAction } from './base_action';
-import { ACTION_TYPES } from '../../../common/constants';
+import { ACTION_TYPES, ERROR_CODES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
 export class LoggingAction extends BaseAction {
-  constructor(props) {
+  constructor(props, errors) {
     props.type = ACTION_TYPES.LOGGING;
-    super(props);
+    super(props, errors);
 
     this.text = props.text;
   }
@@ -30,12 +29,14 @@ export class LoggingAction extends BaseAction {
   // From Kibana
   static fromDownstreamJson(json) {
     const props = super.getPropsFromDownstreamJson(json);
+    const { errors } = this.validateJson(json);
 
     Object.assign(props, {
       text: json.text
     });
 
-    return new LoggingAction(props);
+    const action = new LoggingAction(props, errors);
+    return { action, errors };
   }
 
   // To Elasticsearch
@@ -54,33 +55,46 @@ export class LoggingAction extends BaseAction {
   // From Elasticsearch
   static fromUpstreamJson(json) {
     const props = super.getPropsFromUpstreamJson(json);
-
-    if (!json.actionJson.logging) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.loggingAction.absenceOfActionJsonLoggingPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonLogging} property',
-          values: {
-            actionJsonLogging: 'actionJson.logging'
-          }
-        }),
-      );
-    }
-    if (!json.actionJson.logging.text) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.loggingAction.absenceOfActionJsonLoggingTextPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonLoggingText} property',
-          values: {
-            actionJsonLoggingText: 'actionJson.logging.text'
-          }
-        }),
-      );
-    }
+    const { errors } = this.validateJson(json.actionJson);
 
     Object.assign(props, {
       text: json.actionJson.logging.text
     });
 
-    return new LoggingAction(props);
+    const action = new LoggingAction(props, errors);
+    return { action, errors };
+  }
+
+  static validateJson(json) {
+    const errors = [];
+
+    if (!json.logging) {
+      errors.push({
+        code: ERROR_CODES.ERR_PROP_MISSING,
+        message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonLoggingPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJsonLogging} property',
+          values: {
+            actionJsonLogging: 'actionJson.logging'
+          }
+        }),
+      });
+
+      json.logging = {};
+    }
+
+    if (!json.logging.text) {
+      errors.push({
+        code: ERROR_CODES.ERR_PROP_MISSING,
+        message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonLoggingTextPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJsonLoggingText} property',
+          values: {
+            actionJsonLoggingText: 'actionJson.logging.text'
+          }
+        }),
+      });
+    }
+
+    return { errors: errors.length ? errors : null };
   }
 
   /*

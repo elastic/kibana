@@ -18,7 +18,10 @@ import { Transaction } from '../../../../../typings/Transaction';
 // @ts-ignore
 import { asTime } from '../../../../utils/formatters';
 // @ts-ignore
-import { StickyProperties } from '../../../shared/StickyProperties';
+import {
+  IStickyProperty,
+  StickyProperties
+} from '../../../shared/StickyProperties';
 
 function getDurationPercent(
   transactionDuration: number,
@@ -43,7 +46,7 @@ export function StickyTransactionPropertiesComponent({
   const url = get(transaction, REQUEST_URL_FULL, 'N/A');
   const duration = transaction.transaction.duration.us;
   const rootDuration = root && root.transaction.duration.us;
-  const stickyProperties = [
+  const stickyProperties: IStickyProperty[] = [
     {
       label: 'Timestamp',
       fieldName: '@timestamp',

@@ -7,7 +7,7 @@
 
 import { Importer } from './importer';
 
-export class JsonImporter extends Importer {
+export class NdjsonImporter extends Importer {
   constructor(results, settings) {
     super(settings);
   }
