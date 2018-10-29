@@ -84,7 +84,7 @@ export const createFunctionbeatInstructions = context => ({
       textPre: i18n.translate('kbn.common.tutorials.functionbeatInstructions.deploy.osxTextPre', {
         defaultMessage: 'This installs Functionbeat as a Lambda function.\
 The `setup` command checks the Elasticsearch configuration and loads the \
-Kibana index pattern. It is normaly safe to omit this command.',
+Kibana index pattern. It is normally safe to omit this command.',
       }),
       commands: [
         './functionbeat setup',
@@ -98,7 +98,7 @@ Kibana index pattern. It is normaly safe to omit this command.',
       textPre: i18n.translate('kbn.common.tutorials.functionbeatInstructions.deploy.windowsTextPre', {
         defaultMessage: 'This installs Functionbeat as a Lambda function.\
 The `setup` command checks the Elasticsearch configuration and loads the \
-Kibana index pattern. It is normaly safe to omit this command.',
+Kibana index pattern. It is normally safe to omit this command.',
       }),
       commands: [
         'PS C:\\Program Files\\Functionbeat> functionbeat.exe setup',
@@ -228,8 +228,8 @@ export function functionbeatEnableInstructions() {
   ];
   const defaultTextPost = i18n.translate('kbn.common.tutorials.functionbeatEnableOnPremInstructions.defaultTextPost', {
     defaultMessage: 'Where `<cloudwatch-log-group>` is the name of the log group you want to ingest, \
-and `<unique-bucket-name>` is a valid S3 bucket name which will be used temporarily for \
-deploying Functionbeat'
+and `<unique-bucket-name>` is a valid S3 bucket name which will be used for staging the \
+Functionbeat deploy.'
   });
   return {
     OSX_LINUX: {
