@@ -106,9 +106,10 @@ export class TaskStore {
     };
 
     try {
-      await this.callCluster('indices.create', {
-        index: this.index,
+      return await this.callCluster('indices.putTemplate', {
+        name: this.index,
         body: {
+          index_patterns: [this.index],
           mappings: {
             _doc: {
               dynamic: 'strict',
@@ -122,20 +123,7 @@ export class TaskStore {
         },
       });
     } catch (err) {
-      if (
-        !err.body ||
-        !err.body.error ||
-        err.body.error.type !== 'resource_already_exists_exception'
-      ) {
-        throw err;
-      }
-      return this.callCluster('indices.putMapping', {
-        index: this.index,
-        type: DOC_TYPE,
-        body: {
-          properties,
-        },
-      });
+      throw err;
     }
   }
 
@@ -277,6 +265,7 @@ export class TaskStore {
     const result = await this.callCluster('search', {
       type: DOC_TYPE,
       index: this.index,
+      ignoreUnavailable: true,
       body: {
         ...opts,
         query,
