@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { KibanaLink } from '../../utils/url';
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 function DiscoverButton({ query, children, ...rest }) {
   return (
@@ -16,9 +16,9 @@ function DiscoverButton({ query, children, ...rest }) {
       query={query}
       {...rest}
     >
-      <EuiButton iconType="discoverApp">
+      <EuiButtonEmpty iconType="discoverApp">
         {children || 'View in Discover'}
-      </EuiButton>
+      </EuiButtonEmpty>
     </KibanaLink>
   );
 }
