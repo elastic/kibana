@@ -31,3 +31,4 @@ export {
   untar,
   deleteAll,
 } from './fs';
+export { scanDelete } from './scan_delete';

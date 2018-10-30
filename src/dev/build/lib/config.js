@@ -23,13 +23,14 @@ import { platform as getOsPlatform } from 'os';
 import { getVersionInfo } from './version_info';
 import { createPlatform } from './platform';
 
-export async function getConfig({ isRelease }) {
+export async function getConfig({ isRelease, targetAllPlatforms }) {
   const pkgPath = resolve(__dirname, '../../../../package.json');
   const pkg = require(pkgPath);
   const repoRoot = dirname(pkgPath);
   const nodeVersion = pkg.engines.node;
 
   const platforms = ['darwin', 'linux', 'windows'].map(createPlatform);
+
   const versionInfo = await getVersionInfo({
     isRelease,
     pkg,
@@ -71,11 +72,37 @@ export async function getConfig({ isRelease }) {
     }
 
     /**
-     * Return the list of Platforms we are targeting
+     * Return the list of Platforms we are targeting, if --this-platform flag is
+     * specified only the platform for this OS will be returned
      * @return {Array<Platform>}
      */
-    getPlatforms() {
-      return platforms;
+    getTargetPlatforms() {
+      if (targetAllPlatforms) {
+        return platforms;
+      }
+
+      return [this.getPlatformForThisOs()];
+    }
+
+    /**
+     * Return the list of Platforms we need/have node downloads for. We always
+     * include the linux platform even if we aren't targeting linux so we can
+     * reliably get the LICENSE file, which isn't included in the windows version
+     * @return {Array<Platform>}
+     */
+    getNodePlatforms() {
+      if (targetAllPlatforms) {
+        return platforms;
+      }
+
+      if (process.platform === 'linux') {
+        return [this.getLinuxPlatform()];
+      }
+
+      return [
+        this.getPlatformForThisOs(),
+        this.getLinuxPlatform()
+      ];
     }
 
     /**

@@ -130,6 +130,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                   isOpen={false}
                   ownFocus={true}
                   panelPaddingSize="none"
+                  repositionOnScroll={true}
                 >
                   <EuiOutsideClickDetector
                     onOutsideClick={[Function]}

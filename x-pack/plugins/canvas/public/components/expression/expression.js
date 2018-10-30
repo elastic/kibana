@@ -6,7 +6,14 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiPanel, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+} from '@elastic/eui';
 import { ExpressionInput } from '../expression_input';
 
 export const Expression = ({
@@ -16,6 +23,8 @@ export const Expression = ({
   setExpression,
   done,
   error,
+  isAutocompleteEnabled,
+  toggleAutocompleteEnabled,
 }) => {
   return (
     <EuiPanel>
@@ -24,22 +33,32 @@ export const Expression = ({
         error={error}
         value={formState.expression}
         onChange={updateValue}
+        isAutocompleteEnabled={isAutocompleteEnabled}
       />
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" color={formState.dirty ? 'danger' : 'primary'} onClick={done}>
-            {formState.dirty ? 'Cancel' : 'Close'}
-          </EuiButtonEmpty>
+          <EuiSwitch
+            id="autocompleteOptIn"
+            name="popswitch"
+            label="Enable autocomplete"
+            checked={isAutocompleteEnabled}
+            onChange={toggleAutocompleteEnabled}
+          />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            disabled={!!error}
-            onClick={() => setExpression(formState.expression)}
-            size="s"
-          >
-            Run
-          </EuiButton>
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiButtonEmpty size="s" color={formState.dirty ? 'danger' : 'primary'} onClick={done}>
+              {formState.dirty ? 'Cancel' : 'Close'}
+            </EuiButtonEmpty>
+            <EuiButton
+              fill
+              disabled={!!error}
+              onClick={() => setExpression(formState.expression)}
+              size="s"
+            >
+              Run
+            </EuiButton>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
@@ -53,4 +72,6 @@ Expression.propTypes = {
   setExpression: PropTypes.func,
   done: PropTypes.func,
   error: PropTypes.string,
+  isAutocompleteEnabled: PropTypes.bool,
+  toggleAutocompleteEnabled: PropTypes.func,
 };
