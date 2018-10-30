@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* tslint:disable */
 import { Logger } from '../../utils/logger';
 import { Context } from '../index';
 
+/* tslint:disable */
 export const mockSourceData = {
   id: 'default',
   configuration: {
@@ -16,14 +16,15 @@ export const mockSourceData = {
     },
   },
 };
+/* tslint:enable */
 
-export const getSourceQueryMock = (logger: Logger | null) => ({
+export const getSourceQueryMock = (logger: Logger) => ({
   source: (root: unknown, args: unknown, context: Context) => {
-    logger && logger.info('Mock source');
+    logger.info('Mock source');
     const operationName = context.req.payload.operationName.toLowerCase();
     switch (operationName) {
       case 'test': {
-        logger && logger.info(`Using mock for test ${mockSourceData}`);
+        logger.info(`Using mock for test ${mockSourceData}`);
         return mockSourceData;
       }
       default: {
