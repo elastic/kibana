@@ -6,6 +6,9 @@
   max-height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
 }
 
 .canvasSidebar__pop {

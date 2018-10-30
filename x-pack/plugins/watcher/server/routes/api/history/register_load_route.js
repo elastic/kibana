@@ -34,7 +34,7 @@ export function registerLoadRoute(server) {
   server.route({
     path: '/api/watcher/history/{id}',
     method: 'GET',
-    handler: (request, reply) => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const id = request.params.id;
 
@@ -42,10 +42,8 @@ export function registerLoadRoute(server) {
         .then((responseFromES) => {
           const hit = get(responseFromES, 'hits.hits[0]');
           if (!hit) {
-            return reply(
-              wrapCustomError(
-                new Error(`Watch History Item with id = ${id} not found`), 404
-              )
+            throw wrapCustomError(
+              new Error(`Watch History Item with id = ${id} not found`), 404
             );
           }
 
@@ -59,16 +57,18 @@ export function registerLoadRoute(server) {
           };
 
           const watchHistoryItem = WatchHistoryItem.fromUpstreamJson(json);
-          reply({ watchHistoryItem: watchHistoryItem.downstreamJson });
+          ({
+            watchHistoryItem: watchHistoryItem.downstreamJson
+          });
         })
         .catch(err => {
         // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
-            return reply(wrapEsError(err));
+            throw wrapEsError(err);
           }
 
           // Case: default
-          reply(wrapUnknownError(err));
+          wrapUnknownError(err);
         });
     },
     config: {

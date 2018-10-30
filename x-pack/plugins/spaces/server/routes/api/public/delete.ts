@@ -12,7 +12,7 @@ export function initDeleteSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'DELETE',
     path: '/api/spaces/space/{id}',
-    async handler(request: any, reply: any) {
+    async handler(request: any, h: any) {
       const { SavedObjectsClient } = server.savedObjects;
       const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
         request
@@ -26,12 +26,12 @@ export function initDeleteSpacesApi(server: any, routePreCheckLicenseFn: any) {
         result = await spacesClient.delete(id);
       } catch (error) {
         if (SavedObjectsClient.errors.isNotFoundError(error)) {
-          return reply(Boom.notFound());
+          return Boom.notFound();
         }
-        return reply(wrapError(error));
+        return wrapError(error);
       }
 
-      return reply(result).code(204);
+      return h.response(result).code(204);
     },
     config: {
       pre: [routePreCheckLicenseFn],

@@ -16,8 +16,8 @@ export function esIndices(server) {
   server.route({
     method: 'GET',
     path: '/api/canvas/es_indices',
-    handler: function(request, reply) {
-      reply(getESIndices(kbnIndex, partial(callWithRequest, request)));
+    handler: function(request) {
+      return getESIndices(kbnIndex, partial(callWithRequest, request));
     },
   });
 }

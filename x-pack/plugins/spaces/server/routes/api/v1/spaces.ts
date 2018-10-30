@@ -15,7 +15,7 @@ export function initPrivateSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'POST',
     path: '/api/spaces/v1/space/{id}/select',
-    async handler(request: any, reply: any) {
+    async handler(request: any) {
       const { SavedObjectsClient } = server.savedObjects;
       const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
         request
@@ -30,20 +30,20 @@ export function initPrivateSpacesApi(server: any, routePreCheckLicenseFn: any) {
           SavedObjectsClient.errors
         );
         if (!existingSpace) {
-          return reply(Boom.notFound());
+          return Boom.notFound();
         }
 
         const config = server.config();
 
-        return reply({
+        return {
           location: addSpaceIdToPath(
             config.get('server.basePath'),
             existingSpace.id,
             config.get('server.defaultRoute')
           ),
-        });
+        };
       } catch (error) {
-        return reply(wrapError(error));
+        return wrapError(error);
       }
     },
     config: {

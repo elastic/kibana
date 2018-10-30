@@ -33,7 +33,7 @@ export function CollapsibleStatement(props) {
     >
       <EuiFlexItem key={id} grow={false}>
         <EuiButtonIcon
-          aria-label
+          aria-label="collapse"
           color="text"
           iconType={getToggleIconType(isCollapsed)}
           onClick={toggleClicked}

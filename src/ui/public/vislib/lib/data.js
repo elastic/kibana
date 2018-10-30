@@ -45,7 +45,7 @@ export function VislibLibDataProvider(Private) {
       this.uiState = uiState;
       this.data = this.copyDataObj(data);
       this.type = this.getDataType();
-
+      this._cleanVisData();
       this.labels = this._getLabels(this.data);
       this.color = this.labels ? color(this.labels, uiState.get('vis.colors')) : undefined;
       this._normalizeOrdered();
@@ -96,7 +96,10 @@ export function VislibLibDataProvider(Private) {
     }
 
     _getLabels(data) {
-      return this.type === 'series' ? getLabels(data) : this.pieNames();
+      if (this.type === 'series') {
+        return getLabels(data);
+      }
+      return [];
     }
 
     getDataType() {
@@ -345,19 +348,42 @@ export function VislibLibDataProvider(Private) {
     }
 
     /**
-     * Removes zeros from pie chart data
+     * Clean visualization data from missing/wrong values.
+     * Currently used only to clean remove zero slices from
+     * pie chart.
+     */
+    _cleanVisData() {
+      const visData = this.getVisData();
+      if (this.type === 'slices') {
+        this._cleanPieChartData(visData);
+      }
+    }
+
+    /**
+     * Mutate the current pie chart vis data to remove slices with
+     * zero values.
+     * @param {Array} data
+     */
+    _cleanPieChartData(data) {
+      _.forEach(data, (obj) => {
+        obj.slices = this._removeZeroSlices(obj.slices);
+      });
+    }
+
+    /**
+     * Removes zeros from pie chart data, mutating the passed values.
      * @param slices
      * @returns {*}
      */
     _removeZeroSlices(slices) {
-      const self = this;
-
-      if (!slices.children) return slices;
+      if (!slices.children) {
+        return slices;
+      }
 
       slices = _.clone(slices);
-      slices.children = slices.children.reduce(function (children, child) {
+      slices.children = slices.children.reduce((children, child) => {
         if (child.size !== 0) {
-          children.push(self._removeZeroSlices(child));
+          return [...children, this._removeZeroSlices(child)];
         }
         return children;
       }, []);
@@ -378,8 +404,6 @@ export function VislibLibDataProvider(Private) {
 
       _.forEach(data, function (obj) {
         const columns = obj.raw ? obj.raw.columns : undefined;
-        obj.slices = self._removeZeroSlices(obj.slices);
-
         _.forEach(self.getNames(obj, columns), function (name) {
           names.push(name);
         });

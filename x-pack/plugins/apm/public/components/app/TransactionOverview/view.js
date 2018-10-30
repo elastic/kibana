@@ -67,7 +67,7 @@ class TransactionOverview extends Component {
     const { hasDynamicBaseline, license, location, urlParams } = this.props;
 
     const { serviceName, transactionType } = urlParams;
-    const mlEnabled = chrome.getInjected('mlEnabled');
+    const mlEnabled = chrome.getInjected('mlEnabled', false);
 
     const ChartHeaderContent =
       hasDynamicBaseline && get(license.data, 'features.ml.isAvailable') ? (
