@@ -20,6 +20,7 @@ export interface KbnServer extends Server {
 export const amMocking = (): boolean => process.env.INGEST_MOCKS === 'true';
 
 export const initServerWithKibana = (kbnServer: KbnServer) => {
+  // bind is so "this" binds correctly to the logger since hapi server does not auto-bind its methods
   const logger = createLogger(kbnServer.log.bind(kbnServer));
   logger.info('Plugin initializing');
 
