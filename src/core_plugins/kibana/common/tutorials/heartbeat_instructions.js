@@ -95,10 +95,6 @@ export const createHeartbeatInstructions = context => ({
         'PS > cd C:\\Program Files\\Heartbeat',
         'PS C:\\Program Files\\Heartbeat> .\\install-service-heartbeat.ps1',
       ],
-      textPost: i18n.translate('kbn.common.tutorials.heartbeatInstructions.install.windowsTextPost', {
-        defaultMessage: 'Modify the settings under `output.elasticsearch` in the {path} file to point to your Elasticsearch installation.',
-        values: { path: '`C:\\Program Files\\Heartbeat\\heartbeat.yml`' },
-      }),
     }
   },
   START: {
@@ -146,7 +142,7 @@ export const createHeartbeatInstructions = context => ({
         defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: [
-        'PS C:\\Program Files\\Heartbeat> heartbeat.exe setup',
+        'PS C:\\Program Files\\Heartbeat> .\\heartbeat.exe setup',
         'PS C:\\Program Files\\Heartbeat> Start-Service heartbeat',
       ],
     },
