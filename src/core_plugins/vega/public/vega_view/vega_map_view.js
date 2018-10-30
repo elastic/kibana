@@ -39,8 +39,8 @@ export class VegaMapView extends VegaBaseView {
       baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
       if (!baseMapOpts) {
         this.onWarn(i18n.translate('vega.mapView.mapStyleNotFoundWarningMessage', {
-          defaultMessage: '{mapStyleParam} {mapStyleName} was not found',
-          values: { mapStyleParam: 'mapStyle', mapStyleName: JSON.stringify(mapStyle) },
+          defaultMessage: '{mapStyleParam} was not found',
+          values: { mapStyleParam: `"mapStyle": ${JSON.stringify(mapStyle)}` },
         }));
       } else {
         limitMinZ = baseMapOpts.minZoom;
@@ -54,7 +54,7 @@ export class VegaMapView extends VegaBaseView {
       } else if (value < min) {
         this.onWarn(i18n.translate('vega.mapView.resettingPropertyToMinValueWarningMessage', {
           defaultMessage: 'Resetting {name} to {min}',
-          values: { name, min },
+          values: { name: `"${name}"`, min },
         }));
         value = min;
       } else if (value > max) {

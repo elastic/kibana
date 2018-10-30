@@ -79,7 +79,7 @@ export class VegaParser {
     }
     if (!_.isPlainObject(this.spec)) {
       throw new Error(i18n.translate('vega.vegaParser.invalidVegaSpecErrorMessage', {
-        defaultMessage: 'Invalid Vega spec',
+        defaultMessage: 'Invalid Vega specification',
       }));
     }
     this.isVegaLite = this._parseSchema();
@@ -189,8 +189,8 @@ export class VegaParser {
           defaultMessage: 'The {widthParam} and {heightParam} params are ignored with {autosizeParam}',
           values: {
             autosizeParam: 'autosize=fit',
-            widthParam: '\'width\'',
-            heightParam: '\'height\'',
+            widthParam: '"width"',
+            heightParam: '"height"',
           },
         }));
       }
@@ -208,8 +208,8 @@ export class VegaParser {
         this.containerDir = 'column';
       } else {
         throw new Error(i18n.translate('vega.vegaParser.unrecognizedControlsLocationValueErrorMessage', {
-          defaultMessage: 'Unrecognized {controlsLocationParam} value. Expecting one of ["{locToDirMap}"]',
-          values: { locToDirMap: locToDirMap.keys().join('", "'), controlsLocationParam: 'controlsLocation' }
+          defaultMessage: 'Unrecognized {controlsLocationParam} value. Expecting one of [{locToDirMap}]',
+          values: { locToDirMap: `"${locToDirMap.keys().join('", "')}"`, controlsLocationParam: 'controlsLocation' }
         }));
       }
     }
@@ -236,13 +236,13 @@ export class VegaParser {
       if (!_.isPlainObject(result)) {
         throw new Error(i18n.translate('vega.vegaParser.hostConfigValueTypeErrorMessage', {
           defaultMessage: 'If present, {configName} must be an object',
-          values: { configName: '_hostConfig' },
+          values: { configName: '"_hostConfig"' },
         }));
       }
       this._onWarning(i18n.translate('vega.vegaParser.hostConfigIsDeprecatedWarningMessage', {
         defaultMessage: '{deprecatedConfigName} has been deprecated. Use {newConfigName} instead.',
         values: {
-          deprecatedConfigName: '_hostConfig',
+          deprecatedConfigName: '"_hostConfig"',
           newConfigName: 'config.kibana',
         },
       }));
@@ -393,8 +393,8 @@ export class VegaParser {
   _parseSchema() {
     if (!this.spec.$schema) {
       this._onWarning(i18n.translate('vega.vegaParser.inputSpecDoesNotSpecifySchemaWarningMessage', {
-        defaultMessage: 'The input spec does not specify a {schemaParam}, defaulting to "{defaultSchema}"',
-        values: { defaultSchema: DEFAULT_SCHEMA, schemaParam: '"$schema"' },
+        defaultMessage: 'The input spec does not specify a {schemaParam}, defaulting to {defaultSchema}',
+        values: { defaultSchema: `"${DEFAULT_SCHEMA}"`, schemaParam: '"$schema"' },
       }));
       this.spec.$schema = DEFAULT_SCHEMA;
     }

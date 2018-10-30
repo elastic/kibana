@@ -73,24 +73,24 @@ export class EsQueryParser {
           values: {
             legacyContext: `"${LEGACY_CONTEXT}"`,
             bodyQueryConfigName: '"body.query"',
-            dataUrlParam: 'data.url',
+            dataUrlParam: '"data.url"',
           },
         }));
       } else if (usesContext) {
         throw new Error(i18n.translate('vega.esQueryParser.dataUrlMustNotHaveLegacyContextTogetherWithContextOrTimefieldErrorMessage', {
-          defaultMessage: 'Data {urlParam} must not have {legacyContext} together with {context} or {timefield}',
+          defaultMessage: '{dataUrlParam} must not have {legacyContext} together with {context} or {timefield}',
           values: {
             legacyContext: `"${LEGACY_CONTEXT}"`,
             context: `"${CONTEXT}"`,
             timefield: `"${TIMEFIELD}"`,
-            urlParam: 'url',
+            dataUrlParam: '"data.url"',
           },
         }));
       } else if (legacyContext !== true && (typeof legacyContext !== 'string' || legacyContext.length === 0)) {
         throw new Error(i18n.translate('vega.esQueryParser.legacyContextCanBeTrueErrorMessage', {
           // eslint-disable-next-line max-len
-          defaultMessage: 'Legacy "{legacyContext}" can either be {trueValue} (ignores time range picker), or it can be the name of the time field, e.g. {timestampParam}',
-          values: { legacyContext: LEGACY_CONTEXT, trueValue: 'true', timestampParam: '"@timestamp"' },
+          defaultMessage: 'Legacy {legacyContext} can either be {trueValue} (ignores time range picker), or it can be the name of the time field, e.g. {timestampParam}',
+          values: { legacyContext: `"${LEGACY_CONTEXT}"`, trueValue: 'true', timestampParam: '"@timestamp"' },
         }));
       }
 
@@ -204,9 +204,9 @@ export class EsQueryParser {
               size = 50; // by default, try to get ~80 values
             } else if (typeof size !== 'number') {
               throw new Error(i18n.translate('vega.esQueryParser.autointervalValueTypeErrorMessage', {
-                defaultMessage: '"{autointerval}" must be either {trueValue} or a number',
+                defaultMessage: '{autointerval} must be either {trueValue} or a number',
                 values: {
-                  autointerval: AUTOINTERVAL,
+                  autointerval: `"${AUTOINTERVAL}"`,
                   trueValue: 'true',
                 },
               }));
@@ -232,9 +232,9 @@ export class EsQueryParser {
               continue;
             default:
               throw new Error(i18n.translate('vega.esQueryParser.timefilterValueErrorMessage', {
-                defaultMessage: '"{timefilter}" property must be set to {trueValue}, {minValue}, or {maxValue}',
+                defaultMessage: '{timefilter} property must be set to {trueValue}, {minValue}, or {maxValue}',
                 values: {
-                  timefilter: TIMEFILTER,
+                  timefilter: `"${TIMEFILTER}"`,
                   trueValue: 'true',
                   minValue: '"min"',
                   maxValue: '"max"',
@@ -279,7 +279,7 @@ export class EsQueryParser {
         throw new Error(i18n.translate('vega.esQueryParser.shiftMustValueTypeErrorMessage', {
           defaultMessage: '{shiftParam} must be a numeric value',
           values: {
-            shiftParam: 'shift',
+            shiftParam: '"shift"',
           },
         }));
       }
@@ -307,10 +307,10 @@ export class EsQueryParser {
           break;
         default:
           throw new Error(i18n.translate('vega.esQueryParser.unknownUnitValueErrorMessage', {
-            defaultMessage: 'Unknown {unitParamName} value. Must be one of: {unitParamValues}',
+            defaultMessage: 'Unknown {unitParamName} value. Must be one of: [{unitParamValues}]',
             values: {
-              unitParamName: 'unit',
-              unitParamValues: '[week, day, hour, minute, second]',
+              unitParamName: '"unit"',
+              unitParamValues: '"week", "day", "hour", "minute", "second"',
             },
           }));
       }

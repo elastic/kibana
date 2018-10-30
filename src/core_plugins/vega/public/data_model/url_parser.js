@@ -38,10 +38,10 @@ export class UrlParser {
     let url = urlObj.url;
     if (!url) {
       throw new Error(i18n.translate('vega.urlParser.dataUrlRequiresUrlParameterInFormErrorMessage', {
-        defaultMessage: '{dataUrlParam} requires a {urlParam} parameter in a form \'{formLink}\'',
+        defaultMessage: '{dataUrlParam} requires a {urlParam} parameter in a form "{formLink}"',
         values: {
-          dataUrlParam: 'data.url',
-          urlParam: 'url',
+          dataUrlParam: '"data.url"',
+          urlParam: '"url"',
           formLink: 'https://example.org/path/subpath',
         },
       }));
