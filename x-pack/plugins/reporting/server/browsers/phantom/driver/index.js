@@ -18,11 +18,77 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
     if (page === false || browser === false) throw new Error('Phantom instance is closed');
   };
 
-  const configurePage = () => {
+  const configurePage = (pageOptions) => {
     const RESOURCE_TIMEOUT = 5000;
     return fromCallback(cb => page.set('resourceTimeout', RESOURCE_TIMEOUT, cb))
       .then(() => {
         if (zoom) return fromCallback(cb => page.set('zoomFactor', zoom, cb));
+      })
+      .then(() => {
+        if (pageOptions.conditionalHeaders) {
+          const headers = pageOptions.conditionalHeaders.headers;
+          const conditions = pageOptions.conditionalHeaders.conditions;
+
+          const escape = (str) => {
+            return str
+              .replace(/'/g, `\\'`)
+              .replace(/\\/g, `\\\\`)
+              .replace(/\r?\n/g, '\\n');
+          };
+
+          // we're using base64 encoding for any user generated values that we need to eval
+          // to be sure that we're handling these properly
+          const btoa = (str) => {
+            return Buffer.from(str).toString('base64');
+          };
+
+          const fn = `function (requestData, networkRequest) {
+            var log = function (msg) {
+              if (!page.onConsoleMessage) {
+                return;
+              }
+              page.onConsoleMessage(msg);
+            };
+
+            var parseUrl = function (url) {
+              var link = document.createElement('a');
+              link.href = url;
+              return {
+                protocol: link.protocol,
+                port: link.port,
+                hostname: link.hostname,
+                pathname: link.pathname,
+              };
+            };
+
+            var shouldUseCustomHeadersForPort = function (port) {
+              if ('${escape(conditions.protocol)}' === 'http' && ${conditions.port} === 80) {
+                return port === undefined || port === null || port === '' || port === '${conditions.port}';
+              }
+
+              if ('${escape(conditions.protocol)}' === 'https' && ${conditions.port} === 443) {
+                return port === undefined || port === null || port === '' || port === '${conditions.port}';
+              }
+
+              return port === '${conditions.port}';
+            };
+
+            var url = parseUrl(requestData.url);
+            if (
+              url.hostname === '${escape(conditions.hostname)}' &&
+              url.protocol === '${escape(conditions.protocol)}:' &&
+              shouldUseCustomHeadersForPort(url.port) &&
+              url.pathname.indexOf('${escape(conditions.basePath)}/') === 0
+            ) {
+              log('Using custom headers for ' + requestData.url);
+              ${Object.keys(headers).map(key => `networkRequest.setHeader(atob('${btoa(key)}'), atob('${btoa(headers[key])}'));`)
+    .join('\n')}
+            } else {
+              log('No custom headers for ' + requestData.url);
+            }
+          }`;
+          return fromCallback(cb => page.setFn('onResourceRequested', fn, cb));
+        }
       });
   };
 
@@ -30,26 +96,9 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
     open(url, pageOptions) {
       validateInstance();
 
-      return configurePage()
+      return configurePage(pageOptions)
         .then(() => logger.debug('Configured page'))
         .then(() => fromCallback(cb => page.open(url, cb)))
-        .then(async (status) => {
-          const { sessionCookie } =  pageOptions;
-          if (sessionCookie) {
-            await fromCallback(cb => page.clearCookies(cb));
-            // phantom doesn't support the SameSite option for the cookie, so we aren't setting it
-            await fromCallback(cb => page.addCookie({
-              name: sessionCookie.name,
-              value: sessionCookie.value,
-              path: sessionCookie.path,
-              httponly: sessionCookie.httpOnly,
-              secure: sessionCookie.secure,
-            }, cb));
-            return await fromCallback(cb => page.open(url, cb));
-          } else {
-            return status;
-          }
-        })
         .then(status => {
           logger.debug(`Page opened with status ${status}`);
           if (status !== 'success') throw new Error('URL open failed. Is the server running?');
