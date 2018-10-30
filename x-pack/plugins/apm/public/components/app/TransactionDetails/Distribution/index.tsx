@@ -10,7 +10,6 @@ import React, { Component } from 'react';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { IBucket } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_buckets';
 import { IDistributionResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_distribution';
-// @ts-ignore
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
 import { fromQuery, history, toQuery } from '../../../../utils/url';
 // @ts-ignore

@@ -15,12 +15,12 @@ interface Numeral {
 
 const UNIT_CUT_OFF = 10 * 1000000; // 10 seconds in microseconds
 
-export function asSeconds(value: number, withUnit: boolean = true) {
+export function asSeconds(value: number, withUnit = true) {
   const formatted = asDecimal(value / 1000000);
   return `${formatted}${withUnit ? ' s' : ''}`;
 }
 
-export function asMillis(value: number, withUnit: boolean = true) {
+export function asMillis(value: number, withUnit = true) {
   const formatted = asInteger(value / 1000);
   return `${formatted}${withUnit ? ' ms' : ''}`;
 }

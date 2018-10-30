@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { asTime, asPercent } from '../formatters';
+import { asPercent, asTime } from '../formatters';
 
 describe('formatters', () => {
   it('asTime', () => {
@@ -15,16 +15,16 @@ describe('formatters', () => {
   });
 
   describe('asPercent', () => {
-    it('should format item duration as percent', () => {
+    it('should format item as percent', () => {
       expect(asPercent(3725, 10000, 'n/a')).toBe('37.25%');
     });
 
-    it('should return fallback when totalDuration is 0 ', () => {
+    it('should return fallback when denominator is 0 ', () => {
       expect(asPercent(3725, 0, 'n/a')).toBe('n/a');
       expect(asPercent(3725, 0)).toBe('');
     });
 
-    it('should return fallback when totalDuration is undefined ', () => {
+    it('should return fallback when denominator is undefined ', () => {
       expect(asPercent(3725, undefined, 'n/a')).toBe('n/a');
       expect(asPercent(3725)).toBe('');
     });

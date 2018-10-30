@@ -13,7 +13,6 @@ import {
   USER_ID
 } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/Transaction';
-// @ts-ignore
 import { asPercent, asTime } from '../../../../utils/formatters';
 // @ts-ignore
 import {
