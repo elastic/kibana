@@ -7,8 +7,11 @@
 import { memoize } from 'lodash';
 
 // TODO Add DefinitelyTyped definitions for @types/elastic__numeral
-// import numeral from '@elastic/numeral';
-import numeral = require('@elastic/numeral');
+import * as untypedNumeral from '@elastic/numeral';
+interface Numeral {
+  format: (pattern: string) => string;
+}
+const numeral: (input: number) => Numeral = untypedNumeral;
 
 const UNIT_CUT_OFF = 10 * 1000000; // 10 seconds in microseconds
 
