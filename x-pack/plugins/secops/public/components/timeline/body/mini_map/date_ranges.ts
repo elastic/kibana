@@ -33,8 +33,8 @@ interface GetDatesParams {
  * @example
  * test('given a unit of "year", it returns the four quarters of the year', () => {
  *   const unit: MomentUnit = 'year';
- *   const end = moment('Mon, 31 Dec 2018 23:59:59 -0700');
- *   const current = moment('Mon, 01 Jan 2018 00:00:00 -0700');
+ *   const end = moment.utc('Mon, 31 Dec 2018 23:59:59 -0700');
+ *   const current = moment.utc('Mon, 01 Jan 2018 00:00:00 -0700');
  *
  *   expect(getDates({ unit, end, current })).toEqual(
  *     [
@@ -72,8 +72,12 @@ export const getDates = ({ unit, end, current }: GetDatesParams): Date[] =>
 export function getDateRange<T>(unit: MomentUnit, cb: (d: Date[]) => T): T {
   return cb(
     getDates({
-      current: moment().startOf(unit),
-      end: moment().endOf(unit), // TODO: this should be relative to `unit`
+      current: moment()
+        .utc()
+        .startOf(unit),
+      end: moment()
+        .utc()
+        .endOf(unit), // TODO: this should be relative to `unit`
       unit,
     })
   );
