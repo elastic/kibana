@@ -19,16 +19,18 @@ export function registerLoadRoute(server) {
   server.route({
     path: '/api/logstash/cluster',
     method: 'GET',
-    handler: (request, reply) => {
+    handler: (request, h) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       return fetchCluster(callWithRequest)
-        .then(responseFromES => reply({ cluster: Cluster.fromUpstreamJSON(responseFromES).downstreamJSON }))
+        .then(responseFromES => ({
+          cluster: Cluster.fromUpstreamJSON(responseFromES).downstreamJSON
+        }))
         .catch((e) => {
           if (e.status === 403) {
-            return reply();
+            return h.response();
           }
-          reply(Boom.internal(e));
+          throw Boom.internal(e);
         });
     },
     config: {

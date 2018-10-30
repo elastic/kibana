@@ -13,6 +13,7 @@ import { wrapError } from '../client/errors';
 import Boom from 'boom';
 
 import { isSecurityDisabled } from '../lib/security_utils';
+import { isBasicLicense } from '../lib/check_license';
 
 export function systemRoutes(server, commonRouteConfig) {
   const callWithInternalUser = callWithInternalUserFactory(server);
@@ -38,17 +39,20 @@ export function systemRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/_has_privileges',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      if (isSecurityDisabled(server)) {
+      // isSecurityDisabled will return true if it is a basic license
+      // this will cause the subsequent ml.privilegeCheck to fail.
+      // therefore, check for a basic license first and report that security
+      // is disabled because its not available on basic
+      if (isBasicLicense(server) || isSecurityDisabled(server)) {
         // if xpack.security.enabled has been explicitly set to false
         // return that security is disabled and don't call the privilegeCheck endpoint
-        reply({ securityDisabled: true });
+        return { securityDisabled: true };
       } else {
         const body = request.payload;
         return callWithRequest('ml.privilegeCheck', { body })
-          .then(resp => reply(resp))
-          .catch(resp => reply(wrapError(resp)));
+          .catch(resp => wrapError(resp));
       }
     },
     config: {
@@ -59,10 +63,12 @@ export function systemRoutes(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/ml_node_count',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return new Promise((resolve, reject) => {
-        if (isSecurityDisabled(server)) {
+        // check for basic license first for consistency with other
+        // security disabled checks
+        if (isBasicLicense(server) || isSecurityDisabled(server)) {
           getNodeCount()
             .then(resolve)
             .catch(reject);
@@ -98,8 +104,7 @@ export function systemRoutes(server, commonRouteConfig) {
             .catch(reject);
         }
       })
-        .then(resp => reply(resp))
-        .catch(error => reply(wrapError(error)));
+        .catch(error => wrapError(error));
     },
     config: {
       ...commonRouteConfig
@@ -109,11 +114,10 @@ export function systemRoutes(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/info',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return callWithRequest('ml.info')
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -123,11 +127,10 @@ export function systemRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/es_search',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return callWithRequest('search', request.payload)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

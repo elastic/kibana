@@ -15,9 +15,9 @@ import { withDefaultValidators } from '../lib/helpers/input_validation';
 
 const pre = [{ method: setupRequest, assign: 'setup' }];
 const ROOT = '/api/apm/services/{serviceName}/errors';
-const defaultErrorHandler = reply => err => {
+const defaultErrorHandler = err => {
   console.error(err.stack);
-  reply(Boom.wrap(err, 400));
+  throw Boom.boomify(err, { statusCode: 400 });
 };
 
 export function initErrorsApi(server) {
@@ -33,7 +33,7 @@ export function initErrorsApi(server) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: req => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
       const { sortField, sortDirection } = req.query;
@@ -43,9 +43,7 @@ export function initErrorsApi(server) {
         sortField,
         sortDirection,
         setup
-      })
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      }).catch(defaultErrorHandler);
     }
   });
 
@@ -58,12 +56,12 @@ export function initErrorsApi(server) {
         query: withDefaultValidators()
       }
     },
-    handler: (req, reply) => {
+    handler: req => {
       const { setup } = req.pre;
       const { serviceName, groupId } = req.params;
-      return getErrorGroup({ serviceName, groupId, setup })
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      return getErrorGroup({ serviceName, groupId, setup }).catch(
+        defaultErrorHandler
+      );
     }
   });
 
@@ -76,13 +74,13 @@ export function initErrorsApi(server) {
         query: withDefaultValidators()
       }
     },
-    handler: (req, reply) => {
+    handler: req => {
       const { setup } = req.pre;
       const { serviceName, groupId } = req.params;
 
-      return getDistribution({ serviceName, groupId, setup })
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      return getDistribution({ serviceName, groupId, setup }).catch(
+        defaultErrorHandler
+      );
     }
   });
 }

@@ -35,19 +35,19 @@ import { recentlyAccessedShape } from './recently_accessed';
 import { I18nProvider } from '@kbn/i18n/react';
 
 export function HomeApp({
-  addBasePath,
   directories,
   recentlyAccessed,
 }) {
 
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
   const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
+  const mlEnabled = chrome.getInjected('mlEnabled', false);
   const savedObjectsClient = chrome.getSavedObjectsClient();
 
   const renderTutorialDirectory = (props) => {
     return (
       <TutorialDirectory
-        addBasePath={addBasePath}
+        addBasePath={chrome.addBasePath}
         openTab={props.match.params.tab}
         isCloudEnabled={isCloudEnabled}
       />
@@ -57,7 +57,7 @@ export function HomeApp({
   const renderTutorial = (props) => {
     return (
       <Tutorial
-        addBasePath={addBasePath}
+        addBasePath={chrome.addBasePath}
         isCloudEnabled={isCloudEnabled}
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
@@ -83,7 +83,7 @@ export function HomeApp({
             path="/home/feature_directory"
           >
             <FeatureDirectory
-              addBasePath={addBasePath}
+              addBasePath={chrome.addBasePath}
               directories={directories}
             />
           </Route>
@@ -91,9 +91,10 @@ export function HomeApp({
             path="/home"
           >
             <Home
-              addBasePath={addBasePath}
+              addBasePath={chrome.addBasePath}
               directories={directories}
               apmUiEnabled={apmUiEnabled}
+              mlEnabled={mlEnabled}
               recentlyAccessed={recentlyAccessed}
               find={savedObjectsClient.find}
               localStorage={localStorage}
@@ -107,7 +108,6 @@ export function HomeApp({
 }
 
 HomeApp.propTypes = {
-  addBasePath: PropTypes.func.isRequired,
   directories: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,

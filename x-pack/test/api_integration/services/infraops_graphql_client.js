@@ -6,16 +6,22 @@
 
 import { format as formatUrl } from 'url';
 import fetch from 'node-fetch';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
+
+import introspectionQueryResultData from '../../../plugins/infra/common/graphql/introspection.json';
 
 export function InfraOpsGraphQLProvider({ getService }) {
   const config = getService('config');
   const kbnURL = formatUrl(config.get('servers.kibana'));
 
   return new ApolloClient({
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      fragmentMatcher: new IntrospectionFragmentMatcher({
+        introspectionQueryResultData,
+      }),
+    }),
     link: new HttpLink({
       credentials: 'same-origin',
       fetch,
@@ -25,6 +31,4 @@ export function InfraOpsGraphQLProvider({ getService }) {
       uri: `${kbnURL}/api/infra/graphql`,
     }),
   });
-
 }
-

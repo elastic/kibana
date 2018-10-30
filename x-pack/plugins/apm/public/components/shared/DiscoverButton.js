@@ -6,14 +6,19 @@
 
 import React from 'react';
 import { KibanaLink } from '../../utils/url';
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
-function DiscoverButton({ query, children }) {
+function DiscoverButton({ query, children, ...rest }) {
   return (
-    <KibanaLink pathname={'/app/kibana'} hash={'/discover'} query={query}>
-      <EuiButton iconType="discoverApp">
+    <KibanaLink
+      pathname={'/app/kibana'}
+      hash={'/discover'}
+      query={query}
+      {...rest}
+    >
+      <EuiButtonEmpty iconType="discoverApp">
         {children || 'View in Discover'}
-      </EuiButton>
+      </EuiButtonEmpty>
     </KibanaLink>
   );
 }

@@ -6,9 +6,22 @@
 
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { createQueryStringForDetailTime } from './create_query_string_for_detail_time';
 
-export const RedirectToPodDetail = ({ match }: RouteComponentProps<{ name: string }>) => (
-  <Redirect to={`/metrics/pod/${match.params.name}`} />
-);
+export const RedirectToPodDetail = ({ match, location }: RouteComponentProps<{ name: string }>) => {
+  const args = createQueryStringForDetailTime(location);
+  return <Redirect to={`/metrics/pod/${match.params.name}${args}`} />;
+};
 
-export const getPodDetailUrl = ({ name }: { name: string }) => `#/link-to/pod-detail/${name}`;
+export const getPodDetailUrl = ({
+  name,
+  to,
+  from,
+}: {
+  name: string;
+  to?: number;
+  from?: number;
+}) => {
+  const args = to && from ? `?to=${to}&from=${from}` : '';
+  return `#/link-to/pod-detail/${name}${args}`;
+};

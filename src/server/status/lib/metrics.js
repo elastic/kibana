@@ -23,6 +23,12 @@ import { get, isObject, merge } from 'lodash';
 import { keysToSnakeCaseShallow } from '../../../utils/case_conversion';
 import { getAllStats as cGroupStats } from './cgroup';
 
+const requestDefaults = {
+  disconnects: 0,
+  statusCodes: {},
+  total: 0,
+};
+
 export class Metrics {
   constructor(config, server) {
     this.config = config;
@@ -98,8 +104,11 @@ export class Metrics {
         avg_in_millis: isNaN(avgInMillis) ? undefined : avgInMillis, // convert NaN to undefined
         max_in_millis: maxInMillis
       },
-      requests: keysToSnakeCaseShallow(get(hapiEvent, ['requests', port])),
-      concurrent_connections: get(hapiEvent, ['concurrents', port]),
+      requests: {
+        ...requestDefaults,
+        ...keysToSnakeCaseShallow(get(hapiEvent, ['requests', port]))
+      },
+      concurrent_connections: hapiEvent.concurrent_connections
     };
   }
 

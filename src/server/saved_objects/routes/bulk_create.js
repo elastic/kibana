@@ -40,11 +40,11 @@ export const createBulkCreateRoute = prereqs => ({
         }).required()
       ),
     },
-    handler(request, reply) {
+    handler(request) {
       const { overwrite } = request.query;
       const { savedObjectsClient } = request.pre;
 
-      reply(savedObjectsClient.bulkCreate(request.payload, { overwrite }));
+      return savedObjectsClient.bulkCreate(request.payload, { overwrite });
     },
   },
 });
