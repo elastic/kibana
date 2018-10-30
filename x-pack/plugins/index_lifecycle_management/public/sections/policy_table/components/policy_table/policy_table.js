@@ -124,7 +124,7 @@ export class PolicyTableUi extends Component {
     } else if (fieldName === 'coveredIndices' && value) {
       return (
         <EuiText>
-          <b>{value.length}</b> ({value.join(', ')})
+          <b>{value.length}</b>
         </EuiText>
       );
     } else if (fieldName === 'modified_date' && value) {
