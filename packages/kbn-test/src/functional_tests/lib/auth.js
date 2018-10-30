@@ -30,7 +30,7 @@ import { delay, fromNode as fcb } from 'bluebird';
 
 export const DEFAULT_SUPERUSER_PASS = 'iamsuperuser';
 
-async function updateCredentials(port, auth, username, password, retries = 10) {
+async function updateCredentials(port, auth, username, password, roles = [], retries = 10) {
   const result = await fcb(cb =>
     request(
       {
@@ -43,7 +43,7 @@ async function updateCredentials(port, auth, username, password, retries = 10) {
           pathname: `/_xpack/security/user/${username}/_password`,
         }),
         json: true,
-        body: { password },
+        body: { password, roles },
       },
       (err, httpResponse, body) => {
         cb(err, { httpResponse, body });
@@ -59,25 +59,20 @@ async function updateCredentials(port, auth, username, password, retries = 10) {
 
   if (retries > 0) {
     await delay(2500);
-    return await updateCredentials(port, auth, username, password, retries - 1);
+    return await updateCredentials(port, auth, username, password, roles, retries - 1);
   }
 
   throw new Error(`${statusCode} response, expected 200 -- ${JSON.stringify(body)}`);
 }
 
-export async function setupUsers(log, config) {
-  const esPort = config.get('servers.elasticsearch.port');
-
+export async function setupUsers(log, esPort, updates) {
   // track the current credentials for the `elastic` user as
   // they will likely change as we apply updates
   let auth = `elastic:${DEFAULT_SUPERUSER_PASS}`;
 
-  // list of updates we need to apply
-  const updates = [config.get('servers.elasticsearch'), config.get('servers.kibana')];
-
-  for (const { username, password } of updates) {
+  for (const { username, password, roles } of updates) {
     log.info('setting %j user password to %j', username, password);
-    await updateCredentials(esPort, auth, username, password);
+    await updateCredentials(esPort, auth, username, password, roles || []);
     if (username === 'elastic') {
       auth = `elastic:${password}`;
     }
