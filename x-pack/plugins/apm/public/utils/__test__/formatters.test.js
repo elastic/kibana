@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { asTime, getDurationPercent } from '../formatters';
+import { asTime, asPercent } from '../formatters';
 
 describe('formatters', () => {
   it('asTime', () => {
@@ -14,19 +14,19 @@ describe('formatters', () => {
     expect(asTime(1000 * 1000 * 20)).toBe('20.0 s');
   });
 
-  describe('getDurationPercent', () => {
+  describe('asPercent', () => {
     it('should format item duration as percent', () => {
-      expect(getDurationPercent(3725, 10000, 'n/a')).toBe('37.25%');
+      expect(asPercent(3725, 10000, 'n/a')).toBe('37.25%');
     });
 
     it('should return fallback when totalDuration is 0 ', () => {
-      expect(getDurationPercent(3725, 0, 'n/a')).toBe('n/a');
-      expect(getDurationPercent(3725, 0)).toBe('');
+      expect(asPercent(3725, 0, 'n/a')).toBe('n/a');
+      expect(asPercent(3725, 0)).toBe('');
     });
 
     it('should return fallback when totalDuration is undefined ', () => {
-      expect(getDurationPercent(3725, undefined, 'n/a')).toBe('n/a');
-      expect(getDurationPercent(3725)).toBe('');
+      expect(asPercent(3725, undefined, 'n/a')).toBe('n/a');
+      expect(asPercent(3725)).toBe('');
     });
   });
 });
