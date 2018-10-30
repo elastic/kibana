@@ -7,11 +7,14 @@
 import { VectorSource } from './source';
 import React from 'react';
 import {
+  EuiLink,
   EuiText,
   EuiSelect,
   EuiFormRow
 } from '@elastic/eui';
+
 import { GIS_API_PATH } from '../../../../common/constants';
+import { emsServiceSettings } from '../../../kibana_services';
 
 export class EMSFileSource extends VectorSource {
 
@@ -62,13 +65,13 @@ export class EMSFileSource extends VectorSource {
   }
 
   renderDetails() {
+    const emsHotLink = emsServiceSettings.getEMSHotLinkByName(this._descriptor.name);
     return (
       <EuiText color="subdued" size="s">
         <p className="gisLayerDetails">
           <strong className="gisLayerDetails__label">Source:</strong><span>Elastic Maps Service</span><br/>
-          <strong className="gisLayerDetails__label">Type:</strong><span>Vector</span><br/>
           <strong className="gisLayerDetails__label">Name:</strong><span>{this._descriptor.name}</span><br/>
-          {/*<strong>todo hotlink to EMS landing page</strong>*/}
+          <EuiLink href={emsHotLink} target="_blank">Preview on landing page</EuiLink><br/>
         </p>
       </EuiText>
     );

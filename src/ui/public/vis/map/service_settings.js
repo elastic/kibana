@@ -184,9 +184,13 @@ uiModules.get('kibana')
         }
       }
 
-      getEMSHotLink(fileLayer) {
-        const id = `file/${fileLayer.name}`;
+      getEMSHotLinkByName(name) {
+        const id = `file/${name}`;
         return `${mapConfig.emsLandingPageUrl}#${id}`;
+      }
+
+      getEMSHotLink(fileLayer) {
+        return this.getEMSHotLinkByName(fileLayer.name);
       }
     }
 
