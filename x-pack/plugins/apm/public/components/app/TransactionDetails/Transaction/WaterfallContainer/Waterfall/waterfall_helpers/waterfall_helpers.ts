@@ -125,25 +125,30 @@ function getClockSkew(
   itemsById: IWaterfallIndex,
   parentTransactionSkew: number
 ) {
-  // calculate clock skew for transactions with parents
-  if (item.docType === 'transaction' && item.parentId) {
-    const parentItem = itemsById[item.parentId];
+  switch (item.docType) {
+    case 'span':
+      return parentTransactionSkew;
+    case 'transaction': {
+      if (!item.parentId) {
+        return 0;
+      }
 
-    // determine if child starts before the parent, and in that case how much
-    const diff = parentItem.timestamp + parentItem.skew - item.timestamp;
+      const parentItem = itemsById[item.parentId];
 
-    // If child transaction starts after parent span there is no clock skew
-    if (diff < 0) {
-      return 0;
+      // determine if child starts before the parent, and in that case how much
+      const diff = parentItem.timestamp + parentItem.skew - item.timestamp;
+
+      // If child transaction starts after parent span there is no clock skew
+      if (diff < 0) {
+        return 0;
+      }
+
+      // latency can only be calculated if parent duration is larger than child duration
+      const latency = Math.max(parentItem.duration - item.duration, 0);
+      const skew = diff + latency / 2;
+      return skew;
     }
-
-    // latency can only be calculated if parent duration is larger than child duration
-    const latency = Math.max(parentItem.duration - item.duration, 0);
-    const skew = diff + latency / 2;
-    return skew;
   }
-
-  return parentTransactionSkew;
 }
 
 export function getWaterfallItems(
