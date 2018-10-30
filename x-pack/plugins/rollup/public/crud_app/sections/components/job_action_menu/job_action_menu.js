@@ -89,19 +89,21 @@ class JobActionMenuUi extends Component {
       });
     }
 
-    items.push({
-      name: intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.deleteJobLabel',
-        defaultMessage: 'Delete {isSingleSelection, plural, one {job} other {jobs}}',
-      }, {
-        isSingleSelection,
-      }),
-      icon: <EuiIcon type="trash" />,
-      onClick: () => {
-        this.closePopover();
-        this.openDeleteConfirmationModal();
-      },
-    });
+    if (this.canDeleteJobs()) {
+      items.push({
+        name: intl.formatMessage({
+          id: 'xpack.rollupJobs.jobActionMenu.deleteJobLabel',
+          defaultMessage: 'Delete {isSingleSelection, plural, one {job} other {jobs}}',
+        }, {
+          isSingleSelection,
+        }),
+        icon: <EuiIcon type="trash" />,
+        onClick: () => {
+          this.closePopover();
+          this.openDeleteConfirmationModal();
+        },
+      });
+    }
 
     const panelTree = {
       id: 0,
@@ -143,6 +145,12 @@ class JobActionMenuUi extends Component {
   canStopJobs() {
     const { jobs } = this.props;
     return jobs.some(job => job.status === 'started');
+  }
+
+  canDeleteJobs() {
+    const { jobs } = this.props;
+    const areAllJobsStopped = jobs.findIndex(job => job.status === 'started') === -1;
+    return areAllJobsStopped;
   }
 
   confirmDeleteModal = () => {
