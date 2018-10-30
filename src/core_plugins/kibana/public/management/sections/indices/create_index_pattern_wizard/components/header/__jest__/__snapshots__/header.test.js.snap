@@ -2,9 +2,6 @@
 
 exports[`Header should render normally 1`] = `
 <div>
-  <EuiSpacer
-    size="m"
-  />
   <EuiTitle
     size="m"
   >
@@ -59,9 +56,6 @@ exports[`Header should render normally 1`] = `
 
 exports[`Header should render without including system indices 1`] = `
 <div>
-  <EuiSpacer
-    size="m"
-  />
   <EuiTitle
     size="m"
   >

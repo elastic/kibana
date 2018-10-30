@@ -65,7 +65,7 @@ export function ExplorerChartLabel({ detectorLabel, entityFields, infoTooltip, w
   );
 }
 ExplorerChartLabel.propTypes = {
-  detectorLabel: PropTypes.string.isRequired,
+  detectorLabel: PropTypes.object.isRequired,
   entityFields: PropTypes.arrayOf(ExplorerChartLabelBadge.propTypes.entity),
   infoTooltip: PropTypes.object.isRequired,
   wrapLabel: PropTypes.bool
