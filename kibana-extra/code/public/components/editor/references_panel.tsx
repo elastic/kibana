@@ -5,12 +5,11 @@
  */
 
 import { EuiAccordion, EuiButtonIcon, EuiLoadingKibana, EuiPanel, EuiTitle } from '@elastic/eui';
-import { range } from 'lodash';
-import { IPosition, IRange } from 'monaco-editor';
+import { IPosition } from 'monaco-editor';
 import queryString from 'query-string';
 import React from 'react';
 import { parseSchema } from '../../../common/uri_util';
-import { CodeAndLocation, GroupedFileReferences, GroupedRepoReferences } from '../../actions';
+import { GroupedFileReferences, GroupedRepoReferences } from '../../actions';
 import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';
 
@@ -69,52 +68,21 @@ export class ReferencesPanel extends React.Component<Props> {
   }
 
   private renderReference(file: GroupedFileReferences) {
-    const key = `${file.path}`;
-    let text: string = '';
-    let lineMappings: string[] = [];
-    const highlightRanges: IRange[] = [];
-    const pushCodes = (code: CodeAndLocation) => {
-      text = text + code.code + '\n';
-      const lines = range(code.lineRange.startLine + 1, code.lineRange.endLine + 1).map(
-        v => `${v}`
-      );
-      lineMappings = lineMappings.concat(lines);
-      for (const l of code.locations) {
-        const startLineNumber = lineMappings.indexOf(`${l.range.start.line + 1}`) + 1;
-        const endLineNumber = lineMappings.indexOf(`${l.range.end.line + 1}`) + 1;
-        highlightRanges.push({
-          startLineNumber,
-          endLineNumber,
-          startColumn: l.range.start.character + 1,
-          endColumn: l.range.end.character + 1,
-        });
-      }
-    };
-    const pushPlaceholder = () => {
-      text = text + '\n';
-      lineMappings.push('...');
-    };
-    for (const code of file.codes) {
-      if (!(text === '' && code.lineRange.startLine === 0)) {
-        pushPlaceholder();
-      }
-      pushCodes(code);
-    }
-    pushPlaceholder();
+    const key = `${file.uri}`;
     const lineNumberFn = (l: number) => {
-      return lineMappings[l - 1];
+      return file.lineNumbers[l - 1];
     };
     return (
       <CodeBlock
         key={key}
         language={file.language}
         startLine={0}
-        code={text}
-        file={file.path}
+        code={file.code}
+        file={file.file}
         folding={false}
         lineNumbersFunc={lineNumberFn}
-        highlightRanges={highlightRanges}
-        onClick={this.onCodeClick.bind(this, lineMappings, file.codes[0].locations[0].uri)}
+        highlightRanges={file.highlights}
+        onClick={this.onCodeClick.bind(this, file.lineNumbers, file.uri)}
       />
     );
   }

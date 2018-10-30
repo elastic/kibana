@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Range } from 'monaco-editor';
 import { createAction } from 'redux-actions';
-import { Hover, Location, Position, TextDocumentPositionParams } from 'vscode-languageserver';
-
-export interface LineRange {
-  startLine: number;
-  endLine: number;
-}
+import { Hover, Position, TextDocumentPositionParams } from 'vscode-languageserver';
 
 export interface GroupedRepoReferences {
   repo: string;
@@ -18,15 +14,14 @@ export interface GroupedRepoReferences {
 }
 
 export interface GroupedFileReferences {
-  path: string;
-  language?: string;
-  codes: CodeAndLocation[];
-}
-
-export interface CodeAndLocation {
-  lineRange: LineRange;
+  uri: string;
+  file: string;
+  language: string;
   code: string;
-  locations: Location[];
+  lineNumbers: string[];
+  repo: string;
+  revision: string;
+  highlights: Range[];
 }
 
 export const findReferences = createAction<TextDocumentPositionParams>('FIND REFERENCES');
