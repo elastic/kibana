@@ -33,9 +33,9 @@ function generatePdfObservableFn(server) {
   const captureConcurrency = 1;
   const getLayout = getLayoutFactory(server);
 
-  const urlScreenshotsObservable = (urls, sessionCookie, layout) => {
+  const urlScreenshotsObservable = (urls, conditionalHeaders, layout) => {
     return Rx.from(urls).pipe(
-      mergeMap(url => screenshotsObservable(url, sessionCookie, layout),
+      mergeMap(url => screenshotsObservable(url, conditionalHeaders, layout),
         (outer, inner) => inner,
         captureConcurrency
       )
@@ -67,11 +67,9 @@ function generatePdfObservableFn(server) {
   };
 
 
-  return function generatePdfObservable(title, urls, browserTimezone, sessionCookie, layoutParams, logo) {
-
+  return function generatePdfObservable(title, urls, browserTimezone, conditionalHeaders, layoutParams, logo) {
     const layout = getLayout(layoutParams);
-
-    const screenshots$ = urlScreenshotsObservable(urls, sessionCookie, layout);
+    const screenshots$ = urlScreenshotsObservable(urls, conditionalHeaders, layout);
 
     return screenshots$.pipe(
       toArray(),

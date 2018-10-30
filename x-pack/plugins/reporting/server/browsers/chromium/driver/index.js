@@ -7,6 +7,7 @@
 import fs from 'fs';
 import path from 'path';
 import moment from 'moment';
+import { parse as parseUrl } from 'url';
 import { promisify, delay } from 'bluebird';
 import { transformFn } from './transform_fn';
 import { ignoreSSLErrorsBehavior } from './ignore_ssl_errors';
@@ -30,7 +31,7 @@ export class HeadlessChromiumDriver {
     return result.result.value;
   }
 
-  async open(url, { sessionCookie, waitForSelector }) {
+  async open(url, { conditionalHeaders, waitForSelector }) {
     this._logger.debug(`HeadlessChromiumDriver:opening url ${url}`);
     const { Network, Page } = this._client;
     await Promise.all([
@@ -39,7 +40,34 @@ export class HeadlessChromiumDriver {
     ]);
 
     await ignoreSSLErrorsBehavior(this._client.Security);
-    await Network.setCookie(sessionCookie);
+
+    Network.requestIntercepted(({ interceptionId, request, authChallenge }) => {
+      if (authChallenge) {
+        Network.continueInterceptedRequest({
+          interceptionId,
+          authChallengeResponse: {
+            response: 'Default'
+          }
+        });
+        return;
+      }
+      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, request.url)) {
+        this._logger.debug(`Using custom headers for ${request.url}`);
+        Network.continueInterceptedRequest({
+          interceptionId,
+          headers: {
+            ...request.headers,
+            ...conditionalHeaders.headers
+          }
+        });
+      } else {
+        this._logger.debug(`No custom headers for ${request.url}`);
+        Network.continueInterceptedRequest({
+          interceptionId
+        });
+      }
+    });
+    await Network.setRequestInterception({ patterns: [{ urlPattern: '*' }] });
     await Page.navigate({ url });
     await Page.loadEventFired();
     const { frameTree } = await Page.getResourceTree();
@@ -148,5 +176,42 @@ export class HeadlessChromiumDriver {
 
       await delay(this._waitForDelayMs);
     }
+  }
+
+  _shouldUseCustomHeaders(conditions, url) {
+    const { hostname, protocol, port, pathname } = parseUrl(url);
+
+    if (pathname === undefined) {
+      // There's a discrepancy between the NodeJS docs and the typescript types. NodeJS docs
+      // just say 'string' and the typescript types say 'string | undefined'. We haven't hit a
+      // situation where it's undefined but here's an explicit Error if we do.
+      throw new Error(`pathname is undefined, don't know how to proceed`);
+    }
+
+    return (
+      hostname === conditions.hostname &&
+      protocol === `${conditions.protocol}:` &&
+      this._shouldUseCustomHeadersForPort(conditions, port) &&
+      pathname.startsWith(`${conditions.basePath}/`)
+    );
+  }
+
+  _shouldUseCustomHeadersForPort(
+    conditions,
+    port
+  ) {
+    if (conditions.protocol === 'http' && conditions.port === 80) {
+      return (
+        port === undefined || port === null || port === '' || port === conditions.port.toString()
+      );
+    }
+
+    if (conditions.protocol === 'https' && conditions.port === 443) {
+      return (
+        port === undefined || port === null || port === '' || port === conditions.port.toString()
+      );
+    }
+
+    return port === conditions.port.toString();
   }
 }
