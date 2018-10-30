@@ -265,6 +265,7 @@ export class TaskStore {
     const result = await this.callCluster('search', {
       type: DOC_TYPE,
       index: this.index,
+      ignoreUnavailable: true,
       body: {
         ...opts,
         query,
