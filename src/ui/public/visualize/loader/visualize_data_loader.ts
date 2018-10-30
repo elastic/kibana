@@ -94,11 +94,13 @@ export class VisualizeDataLoader {
         this.visData = await Promise.resolve(this.responseHandler(requestHandlerResponse));
       }
       return this.visData;
-    } catch (e) {
+    } catch (error) {
       params.searchSource.cancelQueued();
-      this.vis.requestError = e;
-      this.vis.showRequestError = e.type && e.type === 'UNSUPPORTED_QUERY';
-      if (isTermSizeZeroError(e)) {
+      this.vis.requestError = error;
+      this.vis.showRequestError = error.type && error.type === 'UNSUPPORTED_QUERY';
+      // tslint:disable-next-line
+      console.error(error);
+      if (isTermSizeZeroError(error)) {
         return toastNotifications.addDanger(
           `Your visualization ('${this.vis.title}') has an error: it has a term ` +
             `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
@@ -107,7 +109,7 @@ export class VisualizeDataLoader {
       }
       toastNotifications.addDanger({
         title: 'Error in visualization',
-        text: e.message,
+        text: error.message,
       });
     }
   }
