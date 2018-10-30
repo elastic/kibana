@@ -32,12 +32,8 @@ async function getUnusedConfigKeys(plugins, disabledPluginSpecs, rawSettings, co
   const settings = transformDeprecations(rawSettings);
 
   // transform deprecated plugin settings
-  await Promise.all(
-    plugins.map(async ({ spec }) => {
-      const transform = await getTransform(spec);
-      transform(settings);
-    })
-  );
+  const transforms = await Promise.all(plugins.map(({ spec }) => getTransform(spec)));
+  transforms.forEach(transform => Object.assign(settings, transform(settings)));
 
   // remove config values from disabled plugins
   for (const spec of disabledPluginSpecs) {
