@@ -17,11 +17,13 @@
  * under the License.
  */
 
+import { Unit } from '@kbn/datemath';
+
 export class InvalidEsCalendarIntervalError extends Error {
   constructor(
     public readonly interval: string,
     public readonly value: number,
-    public readonly unit: string,
+    public readonly unit: Unit,
     public readonly type: string
   ) {
     super(`Invalid calendar interval: ${interval}, value must be 1`);
