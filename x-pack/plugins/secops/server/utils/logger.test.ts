@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createLogger, HapiLogger } from './logger';
+import { createLogger } from './logger';
 
 const APP_ID = 'secops';
 
