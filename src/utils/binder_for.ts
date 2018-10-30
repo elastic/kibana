@@ -17,23 +17,14 @@
  * under the License.
  */
 
-import { Formats } from './core/formats';
+import { BinderBase, Emitter } from './binder';
 
-/**
- * Messages tree, where leafs are translated strings
- */
-export interface Messages {
-  [key: string]: PlainMessages;
-}
+export class BinderFor extends BinderBase {
+  constructor(private readonly emitter: Emitter) {
+    super();
+  }
 
-export interface PlainMessages {
-  [key: string]: any;
-  /**
-   * locale of the messages
-   */
-  locale?: string;
-  /**
-   * set of options to the underlying formatter
-   */
-  formats?: Formats;
+  public on(...args: any[]) {
+    super.on(this.emitter, ...args);
+  }
 }

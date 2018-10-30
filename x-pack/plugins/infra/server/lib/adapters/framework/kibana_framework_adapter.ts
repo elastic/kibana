@@ -5,7 +5,7 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { IStrictReply, Request, Server } from 'hapi';
+import { Request, ResponseToolkit, Server } from 'hapi';
 
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
@@ -13,11 +13,24 @@ import {
   InfraFrameworkIndexPatternsService,
   InfraFrameworkRequest,
   InfraFrameworkRouteOptions,
+  InfraResponse,
   InfraTSVBResponse,
   InfraWrappableRequest,
   internalInfraFrameworkRequest,
 } from './adapter_types';
-import { graphiqlHapi, graphqlHapi } from './apollo_server_hapi';
+import {
+  graphiqlHapi,
+  graphqlHapi,
+  HapiGraphiQLPluginOptions,
+  HapiGraphQLPluginOptions,
+} from './apollo_server_hapi';
+
+declare module 'hapi' {
+  interface PluginProperties {
+    elasticsearch: any;
+    kibana: any;
+  }
+}
 
 export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public version: string;
@@ -41,7 +54,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.server.register({
+    this.server.register<HapiGraphQLPluginOptions>({
       options: {
         graphqlOptions: (req: Request) => ({
           context: { req: wrapRequest(req) },
@@ -49,10 +62,10 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
         }),
         path: routePath,
       },
-      register: graphqlHapi,
+      plugin: graphqlHapi,
     });
 
-    this.server.register({
+    this.server.register<HapiGraphiQLPluginOptions>({
       options: {
         graphiqlOptions: {
           endpointURL: routePath,
@@ -60,15 +73,16 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
         },
         path: `${routePath}/graphiql`,
       },
-      register: graphiqlHapi,
+      plugin: graphiqlHapi,
     });
   }
 
-  public registerRoute<RouteRequest extends InfraWrappableRequest, RouteResponse>(
-    route: InfraFrameworkRouteOptions<RouteRequest, RouteResponse>
-  ) {
-    const wrappedHandler = (request: any, reply: IStrictReply<RouteResponse>) =>
-      route.handler(wrapRequest(request), reply);
+  public registerRoute<
+    RouteRequest extends InfraWrappableRequest,
+    RouteResponse extends InfraResponse
+  >(route: InfraFrameworkRouteOptions<RouteRequest, RouteResponse>) {
+    const wrappedHandler = (request: any, h: ResponseToolkit) =>
+      route.handler(wrapRequest(request), h);
 
     this.server.route({
       handler: wrappedHandler,
@@ -112,24 +126,23 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
   ) {
     const internalRequest = req[internalInfraFrameworkRequest];
     const server = internalRequest.server;
-    return new Promise<InfraTSVBResponse>((resolve, reject) => {
-      const request = {
-        url: '/api/metrics/vis/data',
-        method: 'POST',
-        headers: internalRequest.headers,
-        payload: {
-          timerange,
-          panels: [model],
-          filters,
-        },
-      };
-      server.inject(request, res => {
-        if (res.statusCode !== 200) {
-          return reject(res);
-        }
-        resolve(res.result);
-      });
-    });
+    const request = {
+      url: '/api/metrics/vis/data',
+      method: 'POST',
+      headers: internalRequest.headers,
+      payload: {
+        timerange,
+        panels: [model],
+        filters,
+      },
+    };
+
+    const res = await server.inject(request);
+    if (res.statusCode !== 200) {
+      throw res;
+    }
+
+    return res.result as InfraTSVBResponse;
   }
 }
 
