@@ -73,9 +73,11 @@ class VisEditor extends Component {
     if (this.state.model.index_pattern !== this.props.vis.params.index_pattern) {
       return true;
     }
-    const annotations = new Set(this.props.vis.params.annotations.map(annotation => annotation.index_pattern));
-    const stateAnnotations = new Set(this.state.model.annotations.map(annotation => annotation.index_pattern));
-    const diff = [...annotations].filter(a => !stateAnnotations.has(a));
+    const visAnnotations = this.props.vis.params.annotations || [];
+    const stateAnnotations = this.state.model.annotations || [];
+    const currentAnnotations = new Set(visAnnotations.map(annotation => annotation.index_pattern));
+    const prevAnnotations = new Set(stateAnnotations.map(annotation => annotation.index_pattern));
+    const diff = [...currentAnnotations].filter(a => !prevAnnotations.has(a));
     return diff.length !== 0;
   }
 
@@ -92,25 +94,30 @@ class VisEditor extends Component {
     return fields;
   }
 
+  checkIndexPatternChanges = async () => {
+    if (this.isIndexPatternChanged()) {
+      const fields = await this.fetchIndexPatternFields(this.props.vis);
+      const visFields = {
+        ...this.state.visFields,
+        ...fields,
+      };
+      this.setState({
+        visFields,
+      });
+    }
+  }
+
   handleChange = async (part) => {
     const nextModel = { ...this.state.model, ...part };
     this.props.vis.params = nextModel;
     if (this.state.autoApply) {
       this.props.vis.updateState();
     }
-    let visFields = this.state.visFields;
-    if (this.isIndexPatternChanged()) {
-      const fields = await this.fetchIndexPatternFields(this.props.vis);
-      visFields = {
-        ...this.state.visFields,
-        ...fields,
-      };
-    }
     this.setState({
       model: nextModel,
       dirty: !this.state.autoApply,
-      visFields,
     });
+    this.checkIndexPatternChanges();
   }
 
   handleCommit = () => {
@@ -184,13 +191,7 @@ class VisEditor extends Component {
   }
 
   async componentDidMount() {
-    const fields = await this.fetchIndexPatternFields(this.props.vis);
-    this.setState({
-      visFields: {
-        ...this.state.visFields,
-        ...fields,
-      }
-    });
+    await this.checkIndexPatternChanges();
     this.props.renderComplete('mount');
   }
 
