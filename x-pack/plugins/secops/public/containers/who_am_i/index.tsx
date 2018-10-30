@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 
@@ -30,7 +30,7 @@ export const WhoAmI = ({ children, sourceId }: WHoAmIProps) => (
   >
     {({ data }) =>
       children({
-        appName: get(data, 'source.whoAmI.appName') || 'Who am I ?',
+        appName: getOr('Who am I ?', 'source.whoAmI.appName', data),
       })
     }
   </Query>

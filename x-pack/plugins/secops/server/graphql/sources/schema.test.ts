@@ -43,37 +43,6 @@ const testCaseSource = {
   },
 };
 
-// const testCaseAllSources = {
-//   id: 'Test case to query basic information from allSources',
-//   query: `
-// 		query SourceQuery($sourceId: ID!) {
-// 			source(id: $sourceId) {
-// 				id
-// 				configuration {
-// 					fields {
-// 						host
-// 					}
-// 				}
-// 			}
-// 		}
-// 	`,
-//   variables: { sourceId: 'default' },
-//   context: {
-//     req: {
-//       payload: {
-//         operationName: 'test',
-//       },
-//     },
-//   },
-//   expected: {
-//     data: {
-//       source: {
-//         ...mockSourceData,
-//       },
-//     },
-//   },
-// };
-
 describe('Test Source Schema', () => {
   // Array of case types
   const cases = [testCaseSource];
