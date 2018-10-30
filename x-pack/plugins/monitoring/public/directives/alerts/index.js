@@ -91,8 +91,8 @@ const alertRowFactory = (scope, kbnUrl) => {
 
     if (props.resolved_timestamp) {
       resolution.text = props.intl.formatMessage({ id: 'xpack.monitoring.alerts.resolvedAgoDescription',
-        defaultMessage: '{duraction} ago',
-      }, { duraction: formatTimestampToDuration(props.resolved_timestamp, CALCULATE_DURATION_SINCE) }
+        defaultMessage: '{duration} ago',
+      }, { duration: formatTimestampToDuration(props.resolved_timestamp, CALCULATE_DURATION_SINCE) }
       );
     } else {
       resolution.icon = (
@@ -134,9 +134,9 @@ const alertRowFactory = (scope, kbnUrl) => {
         </KuiTableRowCell>
         <KuiTableRowCell tabIndex="0">
           <FormattedMessage
-            id="xpack.monitoring.alerts.trigeredAgoDescription"
-            defaultMessage="{duraction} ago"
-            values={{ duraction: formatTimestampToDuration(props.timestamp, CALCULATE_DURATION_SINCE) }}
+            id="xpack.monitoring.alerts.triggeredAgoDescription"
+            defaultMessage="{duration} ago"
+            values={{ duration: formatTimestampToDuration(props.timestamp, CALCULATE_DURATION_SINCE) }}
           />
         </KuiTableRowCell>
       </KuiTableRow>

@@ -229,7 +229,7 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
             return (
               <span className="monTableCell__clusterCellExpired">
                 <FormattedMessage
-                  id="xpack.monitoring.cluster.listing.licenseInfo.expiredDescription"
+                  id="xpack.monitoring.cluster.listing.licenseInfo.expiredLabel"
                   defaultMessage="Expired"
                 />
               </span>
@@ -240,7 +240,7 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
           return (
             <span>
               <FormattedMessage
-                id="xpack.monitoring.cluster.listing.licenseInfo.expiresDescription"
+                id="xpack.monitoring.cluster.listing.licenseInfo.expiresLabel"
                 defaultMessage="Expires {date}"
                 values={{ date: moment(this.props.license.expiry_date_in_millis).format('D MMM YY') }}
               />
@@ -315,7 +315,7 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
           >
             <EuiHealth color="subdued" data-test-subj="alertIcon">
               <FormattedMessage
-                id="xpack.monitoring.cluster.listing.alerts.notAvailableDescription"
+                id="xpack.monitoring.cluster.listing.alerts.notAvailableLabel"
                 defaultMessage="N/A"
               />
             </EuiHealth>
@@ -388,7 +388,7 @@ uiModule.directive('monitoringClusterListing', ($injector, i18n) => {
       const globalState = $injector.get('globalState');
       const kbnUrl = $injector.get('kbnUrl');
       const showLicenseExpiration = $injector.get('showLicenseExpiration');
-      const filterClusterPlaceholder = i18n('xpack.monitoring.cluster.listing.filterClustersPlaceholder',
+      const filterClustersPlaceholder = i18n('xpack.monitoring.cluster.listing.filterClustersPlaceholder',
         { defaultMessage: 'Filter Clusters…' }
       );
 
@@ -403,7 +403,7 @@ uiModule.directive('monitoringClusterListing', ($injector, i18n) => {
               sortKey={scope.sortKey}
               sortOrder={scope.sortOrder}
               onNewState={scope.onNewState}
-              placeholder={filterClusterPlaceholder}
+              placeholder={filterClustersPlaceholder}
               filterFields={filterFields}
               columns={columns}
               rowComponent={clusterRowFactory(scope, globalState, kbnUrl, showLicenseExpiration)}
