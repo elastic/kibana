@@ -75,10 +75,8 @@ fi
 ###
 ### "install" node into this shell
 ###
-if [[ "$OS" != "win" ]]; then
-    export PATH="$nodeBin:$PATH"
-    hash -r
-fi
+export PATH="$nodeBin:$PATH"
+hash -r
 
 ###
 ### downloading yarn
@@ -89,18 +87,14 @@ npm install -g yarn@^${yarnVersion}
 ###
 ### "install" yarn into this shell
 ###
-if [[ "$OS" != "win" ]]; then
-    export PATH="$yarnDir/bin:$PATH"
-    yarnGlobalDir="$(yarn global bin)"
-    export PATH="$PATH:$yarnGlobalDir"
-    hash -r
-fi
+yarnGlobalDir="$(yarn global bin)"
+export PATH="$PATH:$yarnGlobalDir"
+hash -r
 
 ###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
-yarn config set cache-folder "$cacheDir/yarn"
 yarn kbn bootstrap
 
 ###
