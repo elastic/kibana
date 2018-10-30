@@ -8,4 +8,4 @@
 export type Range = '1 Day' | '1 Week' | '1 Month' | '1 Year';
 
 /** Enables runtime enumeration of valid `Range`s */
-export const Ranges: Readonly<Range[]> = ['1 Day', '1 Week', '1 Month', '1 Year'];
+export const Ranges: Range[] = ['1 Day', '1 Week', '1 Month', '1 Year'];
