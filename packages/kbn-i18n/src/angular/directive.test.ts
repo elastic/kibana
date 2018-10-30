@@ -19,12 +19,13 @@
 
 import angular from 'angular';
 import 'angular-mocks';
+import 'angular-sanitize';
 
 import { i18nDirective } from './directive';
 import { I18nProvider } from './provider';
 
 angular
-  .module('app', [])
+  .module('app', ['ngSanitize'])
   .provider('i18n', I18nProvider)
   .directive('i18nId', i18nDirective);
 
@@ -81,5 +82,20 @@ describe('i18nDirective', () => {
     scope.$digest();
 
     expect(element.html()).toMatchSnapshot();
+  });
+
+  test('sanitizes message before inserting it to DOM', () => {
+    const element = angular.element(
+      `<div
+        i18n-id="id"
+        i18n-default-message="Default message, {value}"
+        i18n-values="{ value: '<div ng-click=&quot;dangerousAction()&quot;></div>' }"
+       />`
+    );
+
+    compile(element)(scope);
+    scope.$digest();
+
+    expect(element[0]).toMatchSnapshot();
   });
 });

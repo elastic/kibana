@@ -3,3 +3,15 @@
 exports[`i18nDirective inserts correct translation html content with values 1`] = `"default-message word"`;
 
 exports[`i18nDirective inserts correct translation html content with values 2`] = `"default-message anotherWord"`;
+
+exports[`i18nDirective sanitizes message before inserting it to DOM 1`] = `
+<div
+  class="ng-scope ng-isolate-scope"
+  i18n-default-message="Default message, {value}"
+  i18n-id="id"
+  i18n-values="{ value: '<div ng-click=\\"dangerousAction()\\"></div>' }"
+>
+  Default message, 
+  <div />
+</div>
+`;
