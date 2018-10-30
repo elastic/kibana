@@ -134,9 +134,11 @@ export class TelemetryOptIn extends React.Component {
             <span>
               <FormattedMessage
                 id="xpack.licenseMgmt.telemetryOptIn.sendBasicFeatureStatisticsLabel"
-                defaultMessage="Send basic feature usage statistics to Elastic periodically."
+                defaultMessage="Send basic feature usage statistics to Elastic periodically. {popover}"
+                values={{
+                  popover
+                }}
               />
-              {popover}
             </span>
           }
           id="isOptingInToTelemetry"
