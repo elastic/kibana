@@ -6,12 +6,12 @@
 
 import { memoize } from 'lodash';
 
-// TODO Add DefinitelyTyped definitions for @types/elastic__numeral
-import * as untypedNumeral from '@elastic/numeral';
+// tslint:disable-next-line  no-var-requires
+const numeral: (input: number) => Numeral = require('@elastic/numeral');
+
 interface Numeral {
   format: (pattern: string) => string;
 }
-const numeral: (input: number) => Numeral = untypedNumeral;
 
 const UNIT_CUT_OFF = 10 * 1000000; // 10 seconds in microseconds
 
@@ -61,13 +61,13 @@ export function tpmUnit(type: string): string {
   return type === 'request' ? 'rpm' : 'tpm';
 }
 
-export function getDurationPercent(
-  itemDuration: number,
-  totalDuration: number = 0,
+export function asPercent(
+  numerator: number,
+  denominator: number = 0,
   fallbackResult: any = ''
 ): string {
-  if (totalDuration === 0) {
+  if (denominator === 0) {
     return fallbackResult;
   }
-  return numeral(itemDuration / totalDuration).format('0.00%');
+  return numeral(numerator / denominator).format('0.00%');
 }

@@ -9,11 +9,8 @@ import React from 'react';
 
 import { first } from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
-import {
-  asMillis,
-  getDurationPercent
 // @ts-ignore
-} from '../../../../../../../utils/formatters';
+import { asMillis, asPercent } from '../../../../../../../utils/formatters';
 // @ts-ignore
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
@@ -69,7 +66,7 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
     },
     {
       label: '% of transaction',
-      val: getDurationPercent(spanDuration, totalDuration, ''),
+      val: asPercent(spanDuration, totalDuration, ''),
       width: '50%'
     }
   ];

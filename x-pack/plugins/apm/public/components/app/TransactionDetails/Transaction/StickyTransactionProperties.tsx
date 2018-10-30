@@ -14,7 +14,8 @@ import {
 } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/Transaction';
 // @ts-ignore
-import { asTime, getDurationPercent } from '../../../../utils/formatters';
+import { asPercent, asTime } from '../../../../utils/formatters';
+// @ts-ignore
 import {
   IStickyProperty,
   StickyProperties
@@ -55,7 +56,7 @@ export function StickyTransactionProperties({
     },
     {
       label: '% of trace',
-      val: getDurationPercent(duration, totalDuration),
+      val: asPercent(duration, totalDuration),
       width: '25%'
     },
     {
