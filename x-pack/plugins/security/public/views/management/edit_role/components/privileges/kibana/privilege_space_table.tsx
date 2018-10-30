@@ -37,7 +37,7 @@ interface DeletedSpace extends Space {
   deleted: boolean;
 }
 
-export class PrivilegeSpaceTableUI extends Component<Props, State> {
+class PrivilegeSpaceTableUI extends Component<Props, State> {
   public state = {
     searchTerm: '',
   };

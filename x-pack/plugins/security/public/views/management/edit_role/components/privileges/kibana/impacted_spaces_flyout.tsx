@@ -35,7 +35,7 @@ interface State {
   showImpactedSpaces: boolean;
 }
 
-export class ImpactedSpacesFlyoutUI extends Component<Props, State> {
+class ImpactedSpacesFlyoutUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {

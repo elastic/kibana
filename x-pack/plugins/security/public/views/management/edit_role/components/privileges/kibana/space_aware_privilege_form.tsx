@@ -58,7 +58,7 @@ interface State {
   privilegeForms: PrivilegeForm[];
 }
 
-export class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
+class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const { role } = props;
@@ -100,7 +100,7 @@ export class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
           <p>
             <FormattedMessage
               id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
-              defaultMessage="Please ensure your account has all privileges granted by the 
+              defaultMessage="Please ensure your account has all privileges granted by the
               {kibanaUser} role, and try again."
               values={{
                 kibanaUser: (
@@ -221,8 +221,8 @@ export class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
           <p>
             <FormattedMessage
               id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.grantMorePrivilegesTitle"
-              defaultMessage="Grant more privileges on a per space basis. For example, if the privileges are 
-              {read} for all spaces, you can set the privileges to {all} 
+              defaultMessage="Grant more privileges on a per space basis. For example, if the privileges are
+              {read} for all spaces, you can set the privileges to {all}
               for an individual space."
               values={{
                 read: (

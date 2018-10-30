@@ -57,7 +57,7 @@ interface State {
   formError: RoleValidationResult | null;
 }
 
-export class EditRolePageUI extends Component<Props, State> {
+class EditRolePageUI extends Component<Props, State> {
   private validator: RoleValidator;
 
   constructor(props: Props) {

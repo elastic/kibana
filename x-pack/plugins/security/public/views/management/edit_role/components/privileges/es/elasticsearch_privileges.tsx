@@ -40,7 +40,7 @@ interface Props {
   intl: InjectedIntl;
 }
 
-export class ElasticsearchPrivilegesUI extends Component<Props, {}> {
+class ElasticsearchPrivilegesUI extends Component<Props, {}> {
   public render() {
     return (
       <I18nProvider>
