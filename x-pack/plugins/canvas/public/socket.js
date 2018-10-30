@@ -6,7 +6,7 @@
 
 import io from 'socket.io-client';
 import { functionsRegistry } from '../common/lib/functions_registry';
-import { loadBrowserPlugins } from './lib/load_browser_plugins';
+import { getBrowserRegistries } from './lib/browser_registries';
 
 let socket;
 
@@ -14,7 +14,7 @@ export function createSocket(basePath) {
   socket = io(undefined, { path: `${basePath}/socket.io` });
 
   socket.on('getFunctionList', () => {
-    const pluginsLoaded = loadBrowserPlugins();
+    const pluginsLoaded = getBrowserRegistries();
 
     pluginsLoaded.then(() => socket.emit('functionList', functionsRegistry.toJS()));
   });

@@ -29,7 +29,7 @@ exports[`LoginPage disabled form states renders as expected when a connection to
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="xpack.security.login.loginPage.welcomeTitle"
+              id="xpack.security.loginPage.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -43,7 +43,7 @@ exports[`LoginPage disabled form states renders as expected when a connection to
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="xpack.security.login.loginPage.welcomeDescription"
+              id="xpack.security.loginPage.welcomeDescription"
               values={Object {}}
             />
           </p>
@@ -73,14 +73,14 @@ exports[`LoginPage disabled form states renders as expected when a connection to
             message={
               <FormattedMessage
                 defaultMessage="See the Kibana logs for details and try reloading the page."
-                id="xpack.security.login.loginPage.esUnavailableMessage"
+                id="xpack.security.loginPage.esUnavailableMessage"
                 values={Object {}}
               />
             }
             title={
               <FormattedMessage
                 defaultMessage="Cannot connect to the Elastiscearch cluster"
-                id="xpack.security.login.loginPage.esUnavailableTitle"
+                id="xpack.security.loginPage.esUnavailableTitle"
                 values={Object {}}
               />
             }
@@ -121,7 +121,7 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="xpack.security.login.loginPage.welcomeTitle"
+              id="xpack.security.loginPage.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -135,7 +135,7 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="xpack.security.login.loginPage.welcomeDescription"
+              id="xpack.security.loginPage.welcomeDescription"
               values={Object {}}
             />
           </p>
@@ -165,14 +165,14 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
             message={
               <FormattedMessage
                 defaultMessage="Refer to the Kibana logs for more details and refresh to try again."
-                id="xpack.security.login.loginPage.unknownLayoutMessage"
+                id="xpack.security.loginPage.unknownLayoutMessage"
                 values={Object {}}
               />
             }
             title={
               <FormattedMessage
                 defaultMessage="Unsupported login form layout."
-                id="xpack.security.login.loginPage.unknownLayoutTitle"
+                id="xpack.security.loginPage.unknownLayoutTitle"
                 values={Object {}}
               />
             }
@@ -213,7 +213,7 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="xpack.security.login.loginPage.welcomeTitle"
+              id="xpack.security.loginPage.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -227,7 +227,7 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="xpack.security.login.loginPage.welcomeDescription"
+              id="xpack.security.loginPage.welcomeDescription"
               values={Object {}}
             />
           </p>
@@ -257,14 +257,14 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
             message={
               <FormattedMessage
                 defaultMessage="Contact your system administrator."
-                id="xpack.security.login.loginPage.requiresSecureConnectionMessage"
+                id="xpack.security.loginPage.requiresSecureConnectionMessage"
                 values={Object {}}
               />
             }
             title={
               <FormattedMessage
                 defaultMessage="A secure connection is required for log in"
-                id="xpack.security.login.loginPage.requiresSecureConnectionTitle"
+                id="xpack.security.loginPage.requiresSecureConnectionTitle"
                 values={Object {}}
               />
             }
@@ -305,7 +305,7 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="xpack.security.login.loginPage.welcomeTitle"
+              id="xpack.security.loginPage.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -319,7 +319,7 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="xpack.security.login.loginPage.welcomeDescription"
+              id="xpack.security.loginPage.welcomeDescription"
               values={Object {}}
             />
           </p>
@@ -349,14 +349,14 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
             message={
               <FormattedMessage
                 defaultMessage="To use the full set of free features in this distribution of Kibana, please update Elasticsearch to the default distribution."
-                id="xpack.security.login.loginPage.xpackUnavailableMessage"
+                id="xpack.security.loginPage.xpackUnavailableMessage"
                 values={Object {}}
               />
             }
             title={
               <FormattedMessage
                 defaultMessage="Cannot connect to the Elasticsearch cluster currently configured for Kibana."
-                id="xpack.security.login.loginPage.xpackUnavailableTitle"
+                id="xpack.security.loginPage.xpackUnavailableTitle"
                 values={Object {}}
               />
             }
@@ -397,7 +397,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="xpack.security.login.loginPage.welcomeTitle"
+              id="xpack.security.loginPage.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -411,7 +411,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="xpack.security.login.loginPage.welcomeDescription"
+              id="xpack.security.loginPage.welcomeDescription"
               values={Object {}}
             />
           </p>

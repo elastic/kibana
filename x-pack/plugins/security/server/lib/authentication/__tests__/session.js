@@ -6,7 +6,6 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import iron from 'iron';
 
 import { serverFixture } from '../../__tests__/__fixtures__/server';
 import { Session } from '../session';
@@ -187,89 +186,6 @@ describe('Session', () => {
       await session.clear(request);
 
       sinon.assert.calledOnce(request.cookieAuth.clear);
-    });
-  });
-
-  describe('`serialize` method', () => {
-    let session;
-    beforeEach(async () => {
-      config.get.withArgs('xpack.security.cookieName').returns('cookie-name');
-      config.get.withArgs('xpack.security.encryptionKey').returns('encryption-key');
-      session = await Session.create(server);
-    });
-
-    it('returns null if state is null', async () => {
-      const request = {
-        _states: {
-        }
-      };
-
-      const returnValue = await session.serialize(request);
-      expect(returnValue).to.eql(null);
-    });
-
-    it('uses iron to encrypt the state with the set password', async () => {
-      const stateValue = {
-        foo: 'bar'
-      };
-      const request = {
-        _states: {
-          'cookie-name': {
-            value: stateValue,
-          }
-        }
-      };
-
-      sandbox.stub(iron, 'seal')
-        .withArgs(stateValue, 'encryption-key', iron.defaults)
-        .callsArgWith(3, null, 'serialized-value');
-
-      const returnValue = await session.serialize(request);
-      expect(returnValue).to.eql('serialized-value');
-    });
-
-    it(`rejects if iron can't seal the session`, async () => {
-      const stateValue = {
-        foo: 'bar'
-      };
-      const request = {
-        _states: {
-          'cookie-name': {
-            value: stateValue,
-          }
-        }
-      };
-
-      sandbox.stub(iron, 'seal')
-        .withArgs(stateValue, 'encryption-key', iron.defaults)
-        .callsArgWith(3, new Error('IDK'), null);
-
-      try {
-        await session.serialize(request);
-        expect().fail('`serialize` should fail.');
-      } catch(err) {
-        expect(err).to.be.a(Error);
-        expect(err.message).to.be('IDK');
-      }
-    });
-  });
-
-  describe('`getCookieOptions` method', () => {
-    let session;
-    beforeEach(async () => {
-      config.get.withArgs('xpack.security.cookieName').returns('cookie-name');
-      config.get.withArgs('xpack.security.secureCookies').returns('secure-cookies');
-      config.get.withArgs('server.basePath').returns('base/path');
-      session = await Session.create(server);
-    });
-
-    it('returns cookie options', () => {
-      expect(session.getCookieOptions()).to.eql({
-        name: 'cookie-name',
-        path: 'base/path/',
-        httpOnly: true,
-        secure: 'secure-cookies'
-      });
     });
   });
 });

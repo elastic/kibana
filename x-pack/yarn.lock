@@ -187,11 +187,6 @@
   resolved "https://registry.yarnpkg.com/@types/catbox/-/catbox-10.0.1.tgz#266679017749041fe9873fee1131dd2aaa04a07e"
   integrity sha512-ECuJ+f5gGHiLeiE4RlE/xdqv/0JVDToegPV1aTb10tQStYa0Ycq2OJfQukDv3IFaw3B+CMV46jHc5bXe6QXEQg==
 
-"@types/cookie@^0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@types/cookie/-/cookie-0.3.1.tgz#720a756ea8e760a258708b52441bd341f1ef4296"
-  integrity sha512-64Uv+8bTRVZHlbB8eXQgMP9HguxPgnOOIYrQpwHWrtLDrtcG/lILKhUl7bV65NSOIJ9dXGYD7skQFXzhL8tk1A==
-
 "@types/cookiejar@*":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@types/cookiejar/-/cookiejar-2.1.0.tgz#4b7daf2c51696cfc70b942c11690528229d1a1ce"
@@ -2657,7 +2652,7 @@ convert-source-map@^1.4.0, convert-source-map@^1.5.0:
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.5.1.tgz#b8278097b9bc229365de5c62cf5fcaed8b5599e5"
   integrity sha1-uCeAl7m8IpNl3lxiz1/K7YtVmeU=
 
-cookie@0.3.1, cookie@^0.3.1:
+cookie@0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.3.1.tgz#e7e0a1f9ef43b4c8ba925c5c5a96e806d16873bb"
   integrity sha1-5+Ch+e9DtMi6klxcWpboBtFoc7s=
@@ -3378,10 +3373,10 @@ ecdsa-sig-formatter@1.0.10:
   dependencies:
     safe-buffer "^5.0.1"
 
-elasticsearch@^15.1.1:
-  version "15.1.1"
-  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-15.1.1.tgz#242f2378fccd601586ff763a8a933cd5d41c945f"
-  integrity sha512-Yr9xy10rUMjDty7qCys7X9AIW5+PX4Gtv2NksZqXIc+AZiWna/y2QwZdiSLtb5LTOKDp7PbegfuokhIjMHUpKw==
+elasticsearch@^15.2.0:
+  version "15.2.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-15.2.0.tgz#234362b5aa743d9c0a925566569ea7813b8f2569"
+  integrity sha512-jOFcBoEh3Sn3gjUTozInODZTLriJtfppAUC7jnQCUE+OUj8o7GoAyC+L4h/L3ZxmXNFbQCunqVR+nmSofHdo9A==
   dependencies:
     agentkeepalive "^3.4.1"
     chalk "^1.0.0"
@@ -5398,15 +5393,6 @@ invert-kv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
   integrity sha1-EEqOSqym09jNFXqO+L+rLXo//bY=
-
-iron@4:
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/iron/-/iron-4.0.5.tgz#4f042cceb8b9738f346b59aa734c83a89bc31428"
-  integrity sha1-TwQszri5c480a1mqc0yDqJvDFCg=
-  dependencies:
-    boom "5.x.x"
-    cryptiles "3.x.x"
-    hoek "4.x.x"
 
 iron@5.x.x:
   version "5.0.4"
