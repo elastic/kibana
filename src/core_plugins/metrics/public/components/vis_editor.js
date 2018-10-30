@@ -69,6 +69,15 @@ class VisEditor extends Component {
     }
   }
 
+  isIndexPatternChanged = () => {
+    if (this.state.model.index_pattern !== this.props.vis.params.index_pattern) {
+      return true;
+    }
+    const annotations = new Set(this.props.vis.params.annotations.map(annotation => annotation.index_pattern));
+    const stateAnnotations = new Set(this.state.model.annotations.map(annotation => annotation.index_pattern));
+    const diff = [...annotations].filter(a => !stateAnnotations.has(a));
+    return diff.length !== 0;
+  }
 
   async fetchIndexPatternFields(vis) {
     if (vis.params.index_pattern === '') {
@@ -90,7 +99,7 @@ class VisEditor extends Component {
       this.props.vis.updateState();
     }
     let visFields = this.state.visFields;
-    if (this.state.model.index_pattern !== this.props.vis.params.index_pattern) {
+    if (this.isIndexPatternChanged()) {
       const fields = await this.fetchIndexPatternFields(this.props.vis);
       visFields = {
         ...this.state.visFields,
