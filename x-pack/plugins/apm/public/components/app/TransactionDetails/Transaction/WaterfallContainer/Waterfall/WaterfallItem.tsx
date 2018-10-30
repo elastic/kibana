@@ -33,15 +33,19 @@ const ItemBar = styled<ItemBarProps, any>('div')`
   height: ${px(unit)};
   left: ${props => props.left}%;
   width: ${props => props.width}%;
-  min-width: '2px';
+  min-width: 2px;
   background-color: ${props => props.color};
 `;
 
+// Note: "direction: rtl;" is here to prevent text from running off of
+// the right edge and instead pushing it to the left. For an example of
+// how this works, see here: https://codepen.io/sqren/pen/JrXNjY
 const SpanLabel = styled<{ left: number }, any>('div')`
   white-space: nowrap;
   position: relative;
   left: ${props => `${props.left}%`};
   width: ${props => `${100 - props.left}%`};
+  direction: rtl;
   text-align: left;
   margin: ${px(units.quarter)} 0 0;
   font-family: ${fontFamilyCode};
