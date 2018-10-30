@@ -18,6 +18,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { WhatIs } from '../../blurbs';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class ExplainCollectionEnabled extends React.Component {
   constructor(props) {
@@ -59,11 +60,22 @@ export class ExplainCollectionEnabled extends React.Component {
         <EuiHorizontalRule size="half" />
         <EuiText>
           <p>
-            We checked the {context} settings and found that <EuiCode>{property}</EuiCode>
-            is set to <EuiCode>{data}</EuiCode>.
+            <FormattedMessage
+              id="xpack.monitoring.noData.explanations.collectionEnabledDescription"
+              defaultMessage="We checked the {context} settings and found that {property}
+              is set to {data}."
+              values={{
+                context,
+                property: (<EuiCode>{property}</EuiCode>),
+                data: (<EuiCode>{data}</EuiCode>)
+              }}
+            />
           </p>
           <p>
-            Would you like to turn it on?
+            <FormattedMessage
+              id="xpack.monitoring.noData.explanations.collectionEnabled.turnItOnDescription"
+              defaultMessage="Would you like to turn it on?"
+            />
           </p>
         </EuiText>
         <EuiSpacer />
@@ -80,7 +92,10 @@ export class ExplainCollectionEnabled extends React.Component {
               data-test-subj="enableCollectionEnabled"
               isLoading={isCollectionEnabledUpdating}
             >
-              Turn on monitoring
+              <FormattedMessage
+                id="xpack.monitoring.noData.explanations.collectionEnabled.turnOnMonitoringButtonLabel"
+                defaultMessage="Turn on monitoring"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -89,20 +104,33 @@ export class ExplainCollectionEnabled extends React.Component {
 
     const stillWaiting = this.state.waitedTooLong ? (
       <p>
-        <a href="#/">Still waiting?</a>
+        <a href="#/">
+          <FormattedMessage
+            id="xpack.monitoring.noData.explanations.collectionEnabled.stillWaitingLinkText"
+            defaultMessage="Still waiting?"
+          />
+        </a>
       </p>
     ) : null;
 
     const renderSuccess = () => (
       <Fragment>
         <EuiTitle size="l" data-test-subj="monitoringCollectionEnabledMessage">
-          <h2>Success! Getting your monitoring data.</h2>
+          <h2>
+            <FormattedMessage
+              id="xpack.monitoring.noData.explanations.collectionEnabled.monitoringTurnOnSuccessfullyTitle"
+              defaultMessage="Success! Getting your monitoring data."
+            />
+          </h2>
         </EuiTitle>
         <EuiHorizontalRule size="half" />
         <EuiText>
           <p>
-            When the data is in your cluster, your monitoring dashboard will
-            show up here. This might take a few seconds.
+            <FormattedMessage
+              id="xpack.monitoring.noData.explanations.collectionEnabled.monitoringTurnOnSuccessfullyDescription"
+              defaultMessage="When the data is in your cluster, your monitoring dashboard will
+              show up here. This might take a few seconds."
+            />
           </p>
         </EuiText>
         <EuiSpacer />

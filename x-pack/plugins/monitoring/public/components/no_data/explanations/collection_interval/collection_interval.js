@@ -18,6 +18,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { WhatIs } from '../../blurbs';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class ExplainCollectionInterval extends React.Component {
   constructor(props) {
@@ -45,15 +46,29 @@ export class ExplainCollectionInterval extends React.Component {
         <EuiHorizontalRule size="half" />
         <EuiText>
           <p>
-            We checked the {context} settings and found that <EuiCode>{property}</EuiCode>
-            is set to <EuiCode>{data}</EuiCode>.
+            <FormattedMessage
+              id="xpack.monitoring.noData.explanations.collectionIntervalDescription"
+              defaultMessage="We checked the {context} settings and found that {property}
+              is set to {data}."
+              values={{
+                context,
+                property: (<EuiCode>{property}</EuiCode>),
+                data: (<EuiCode>{data}</EuiCode>)
+              }}
+            />
           </p>
           <p>
-            The collection interval setting needs to be a positive integer
-            (10s is recommended) in order for the collection agents to be active.
+            <FormattedMessage
+              id="xpack.monitoring.noData.explanations.collectionInterval.wrongIntervalValueDescription"
+              defaultMessage="The collection interval setting needs to be a positive integer
+              (10s is recommended) in order for the collection agents to be active."
+            />
           </p>
           <p>
-            Would you like us to change it and enable monitoring?
+            <FormattedMessage
+              id="xpack.monitoring.noData.explanations.collectionInterval.changeIntervalValueDescription"
+              defaultMessage="Would you like us to change it and enable monitoring?"
+            />
           </p>
         </EuiText>
         <EuiSpacer />
@@ -70,7 +85,10 @@ export class ExplainCollectionInterval extends React.Component {
               data-test-subj="enableCollectionInterval"
               isLoading={isCollectionIntervalUpdating}
             >
-              Turn on monitoring
+              <FormattedMessage
+                id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
+                defaultMessage="Turn on monitoring"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -79,14 +97,22 @@ export class ExplainCollectionInterval extends React.Component {
     const renderSuccess = () => (
       <Fragment>
         <EuiTitle size="l">
-          <h2>Success! Wait a moment please.</h2>
+          <h2>
+            <FormattedMessage
+              id="xpack.monitoring.noData.explanations.collectionInterval.monitoringTurnOnSuccessfullyTitle"
+              defaultMessage="Success! Wait a moment please."
+            />
+          </h2>
         </EuiTitle>
         <EuiHorizontalRule size="half" />
         <EuiText>
           <p>
-            As soon as monitoring data appears in your
-            cluster the page will automatically refresh with your monitoring
-            dashboard. This only takes only a few seconds.
+            <FormattedMessage
+              id="xpack.monitoring.noData.explanations.collectionInterval.monitoringTurnOnSuccessfullyDescription"
+              defaultMessage="As soon as monitoring data appears in your
+              cluster the page will automatically refresh with your monitoring
+              dashboard. This only takes only a few seconds."
+            />
           </p>
         </EuiText>
         <EuiSpacer />
