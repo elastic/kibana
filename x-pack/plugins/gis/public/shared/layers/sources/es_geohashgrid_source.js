@@ -9,8 +9,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiFormRow,
-  EuiText,
+  EuiFormRow
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../components/single_field_select';
@@ -29,6 +28,7 @@ import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import { ESGeohashGridSourceDetails } from './es_geohashgrid_sourcedetails';
 
 const aggSchemas = new Schemas([
   {
@@ -77,15 +77,7 @@ export class ESGeohashGridSource extends ASource {
   }
 
   renderDetails() {
-    return (
-      <EuiText color="subdued" size="s">
-        <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Type: </strong><span>geohash_grid</span><br/>
-          <strong className="gisLayerDetails__label">Index pattern: </strong><span>{this._descriptor.indexPatternId}</span><br/>
-          <strong className="gisLayerDetails__label">Point field: </strong><span>{this._descriptor.geoField}</span><br/>
-        </p>
-      </EuiText>
-    );
+    return (<ESGeohashGridSourceDetails source={this} geoField={this._descriptor.geoField} />);
   }
 
   async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerId, layerName }) {
@@ -299,7 +291,7 @@ class Editor extends React.Component {
         geoField,
       });
     }
-  }
+  };
 
   _renderGeoSelect() {
     if (!this.state.indexPattern) {
@@ -323,7 +315,10 @@ class Editor extends React.Component {
 
   filterForGeoPoint = fields => {
     return fields.some(({ type }) => type === 'geo_point');
-  }
+  };
+
+
+
 
   render() {
     return (
