@@ -24,18 +24,59 @@ import { MonitoringTable } from 'plugins/monitoring/components/table';
 import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
 import { SORT_ASCENDING } from '../../../../common/constants';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const filterFields = [ 'cluster_name', 'status', 'license.type' ];
 const columns = [
-  { title: 'Name', sortKey: 'cluster_name', sortOrder: SORT_ASCENDING },
-  { title: 'Status', sortKey: 'status' },
-  { title: 'Nodes', sortKey: 'elasticsearch.cluster_stats.nodes.count.total' },
-  { title: 'Indices', sortKey: 'elasticsearch.cluster_stats.indices.count' },
-  { title: 'Data', sortKey: 'elasticsearch.cluster_stats.indices.store.size_in_bytes' },
-  { title: 'Logstash', sortKey: 'logstash.node_count' },
-  { title: 'Kibana', sortKey: 'kibana.count' },
-  { title: 'License', sortKey: 'license.type' }
+  {
+    title: i18n.translate('xpack.monitoring.cluster.listing.nameColumnTitle', {
+      defaultMessage: 'Name',
+    }),
+    sortKey: 'cluster_name', sortOrder: SORT_ASCENDING
+  },
+  {
+    title: i18n.translate('xpack.monitoring.cluster.listing.statusColumnTitle', {
+      defaultMessage: 'Status',
+    }),
+    sortKey: 'status'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.cluster.listing.nodesColumnTitle', {
+      defaultMessage: 'Nodes',
+    }),
+    sortKey: 'elasticsearch.cluster_stats.nodes.count.total'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.cluster.listing.indicesColumnTitle', {
+      defaultMessage: 'Indices',
+    }),
+    sortKey: 'elasticsearch.cluster_stats.indices.count'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.cluster.listing.dataColumnTitle', {
+      defaultMessage: 'Data',
+    }),
+    sortKey: 'elasticsearch.cluster_stats.indices.store.size_in_bytes'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.cluster.listing.logstashColumnTitle', {
+      defaultMessage: 'Logstash',
+    }),
+    sortKey: 'logstash.node_count'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.cluster.listing.kibanaColumnTitle', {
+      defaultMessage: 'Kibana',
+    }),
+    sortKey: 'kibana.count'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.cluster.listing.licenseColumnTitle', {
+      defaultMessage: 'License',
+    }),
+    sortKey: 'license.type'
+  }
 ];
 
 const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) => {
@@ -61,14 +102,36 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
 
     handleClickIncompatibleLicense() {
       this.licenseWarning({
-        title: `You can't view the "${this.props.cluster_name}" cluster`,
+        title: (
+          <FormattedMessage
+            id="xpack.monitoring.cluster.listing.incompatibleLicense.warningMessageTitle"
+            defaultMessage="You can't view the {clusterName} cluster"
+            values={{ clusterName: '"' + this.props.cluster_name + '"' }}
+          />
+        ),
         text: (
           <Fragment>
-            <p>The Basic license does not support multi-cluster monitoring.</p>
             <p>
-              Need to monitor multiple clusters?{' '}
-              <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">Get a license with full functionality</a>{' '}
-              to enjoy multi-cluster monitoring.
+              <FormattedMessage
+                id="xpack.monitoring.cluster.listing.incompatibleLicense.noMultiClusterSupportMessage"
+                defaultMessage="The Basic license does not support multi-cluster monitoring."
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="xpack.monitoring.cluster.listing.incompatibleLicense.infoMessage"
+                defaultMessage="Need to monitor multiple clusters? {getLicenseInfoLink} to enjoy multi-cluster monitoring."
+                values={{
+                  getLicenseInfoLink: (
+                    <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.listing.incompatibleLicense.getLicenseLinkLabel"
+                        defaultMessage="Get a license with full functionality"
+                      />
+                    </a>
+                  )
+                }}
+              />
             </p>
           </Fragment>
         ),
@@ -79,15 +142,44 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
       const licensingPath = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management/home`;
 
       this.licenseWarning({
-        title: `You can't view the "${this.props.cluster_name}" cluster`,
+        title: (
+          <FormattedMessage
+            id="xpack.monitoring.cluster.listing.invalidLicense.warningMessageTitle"
+            defaultMessage="You can't view the {clusterName} cluster"
+            values={{ clusterName: '"' + this.props.cluster_name + '"' }}
+          />
+        ),
         text: (
           <Fragment>
-            <p>The license information is invalid.</p>
             <p>
-              Need a license?{' '}
-              <a href={licensingPath}>Get a free Basic license</a> or{' '}
-              <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">get a license with full functionality</a>{' '}
-              to enjoy multi-cluster monitoring.
+              <FormattedMessage
+                id="xpack.monitoring.cluster.listing.invalidLicense.invalidInfoMessage"
+                defaultMessage="The license information is invalid."
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="xpack.monitoring.cluster.listing.invalidLicense.infoMessage"
+                defaultMessage="Need a license? {getBasicLicenseLink} or {getLicenseInfoLink} to enjoy multi-cluster monitoring."
+                values={{
+                  getBasicLicenseLink: (
+                    <a href={licensingPath}>
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.listing.invalidLicense.getBasicLicenseLinkLabel"
+                        defaultMessage="Get a free Basic license"
+                      />
+                    </a>
+                  ),
+                  getLicenseInfoLink: (
+                    <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.listing.invalidLicense.getLicenseLinkLabel"
+                        defaultMessage="get a license with full functionality"
+                      />
+                    </a>
+                  )
+                }}
+              />
             </p>
           </Fragment>
         ),
@@ -136,7 +228,10 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
             // license is expired
             return (
               <span className="monTableCell__clusterCellExpired">
-                Expired
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.listing.licenseInfo.expiredDescription"
+                  defaultMessage="Expired"
+                />
               </span>
             );
           }
@@ -144,7 +239,11 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
           // license is fine
           return (
             <span>
-              Expires { moment(this.props.license.expiry_date_in_millis).format('D MMM YY') }
+              <FormattedMessage
+                id="xpack.monitoring.cluster.listing.licenseInfo.expiresDescription"
+                defaultMessage="Expires {date}"
+                values={{ date: moment(this.props.license.expiry_date_in_millis).format('D MMM YY') }}
+              />
             </span>
           );
         };
@@ -167,7 +266,10 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
           onClick={this.handleClickInvalidLicense.bind(this)}
         >
           <EuiHealth color="subdued" data-test-subj="alertIcon">
-            N/A
+            <FormattedMessage
+              id="xpack.monitoring.cluster.listing.licenseInfo.notAvailableDescription"
+              defaultMessage="N/A"
+            />
           </EuiHealth>
         </EuiLink>
       );
@@ -268,7 +370,7 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
 };
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringClusterListing', ($injector) => {
+uiModule.directive('monitoringClusterListing', ($injector, i18n) => {
   return {
     restrict: 'E',
     scope: {
@@ -283,6 +385,9 @@ uiModule.directive('monitoringClusterListing', ($injector) => {
       const globalState = $injector.get('globalState');
       const kbnUrl = $injector.get('kbnUrl');
       const showLicenseExpiration = $injector.get('showLicenseExpiration');
+      const filterClusterPlaceholder = i18n('xpack.monitoring.cluster.listing.filterClustersPlaceholder',
+        { defaultMessage: 'Filter Clusters…' }
+      );
 
       scope.$watch('clusters', (clusters = []) => {
         const clusterTable = (
@@ -295,7 +400,7 @@ uiModule.directive('monitoringClusterListing', ($injector) => {
               sortKey={scope.sortKey}
               sortOrder={scope.sortOrder}
               onNewState={scope.onNewState}
-              placeholder="Filter Clusters..."
+              placeholder={filterClusterPlaceholder}
               filterFields={filterFields}
               columns={columns}
               rowComponent={clusterRowFactory(scope, globalState, kbnUrl, showLicenseExpiration)}
