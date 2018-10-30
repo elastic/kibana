@@ -98,8 +98,8 @@ export class StepTermsUi extends Component {
                   id="xpack.rollupJobs.create.stepTermsDescription"
                   defaultMessage={`
                     Select the fields you want to bucket using terms aggregations. This can be
-                    potentially costly for high-cardinality groups such as IP addresses, especially
-                    if the time-bucket is particularly sparse.
+                    costly for high-cardinality fields such as IP addresses,
+                    if the time bucket is sparse.
                   `}
                 />
               </p>

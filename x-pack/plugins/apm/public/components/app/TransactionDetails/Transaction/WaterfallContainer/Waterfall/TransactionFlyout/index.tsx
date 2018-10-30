@@ -5,20 +5,20 @@
  */
 
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiPortal,
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
-import { TransactionLink } from 'x-pack/plugins/apm/public/components/shared/TransactionLink';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { ActionMenu } from '../../../ActionMenu';
+import { DiscoverTransactionLink } from '../../../ActionMenu';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
@@ -44,39 +44,37 @@ export function TransactionFlyout({
   }
 
   return (
-    <EuiFlyout onClose={onClose} size="l">
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h4>Transaction details</h4>
-            </EuiTitle>
-          </EuiFlexItem>
+    <EuiPortal>
+      <EuiFlyout onClose={onClose} size="m" ownFocus={true}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiTitle>
+                <h4>Transaction details</h4>
+              </EuiTitle>
+            </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <ActionMenu transaction={transactionDoc} />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <TransactionLink transaction={transactionDoc}>
-              <EuiButton iconType="visLine">
-                View transaction group details
-              </EuiButton>
-            </TransactionLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <FlyoutTopLevelProperties transaction={transactionDoc} />
-        <EuiHorizontalRule />
-        <StickyTransactionProperties transaction={transactionDoc} />
-        <EuiHorizontalRule />
-        <TransactionPropertiesTableForFlyout
-          transaction={transactionDoc}
-          location={location}
-          urlParams={urlParams}
-        />
-      </EuiFlyoutBody>
-    </EuiFlyout>
+            <EuiFlexItem grow={false}>
+              <DiscoverTransactionLink transaction={transactionDoc}>
+                <EuiButtonEmpty iconType="discoverApp">
+                  View transaction in Discover
+                </EuiButtonEmpty>
+              </DiscoverTransactionLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <FlyoutTopLevelProperties transaction={transactionDoc} />
+          <EuiHorizontalRule />
+          <StickyTransactionProperties transaction={transactionDoc} />
+          <EuiHorizontalRule />
+          <TransactionPropertiesTableForFlyout
+            transaction={transactionDoc}
+            location={location}
+            urlParams={urlParams}
+          />
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    </EuiPortal>
   );
 }
