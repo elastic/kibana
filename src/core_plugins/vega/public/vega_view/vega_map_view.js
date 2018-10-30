@@ -60,7 +60,7 @@ export class VegaMapView extends VegaBaseView {
       } else if (value > max) {
         this.onWarn(i18n.translate('vega.mapView.resettingPropertyToMaxValueWarningMessage', {
           defaultMessage: 'Resetting {name} to {max}',
-          values: { name, max },
+          values: { name: `"${name}"`, max },
         }));
         value = max;
       }
@@ -73,8 +73,8 @@ export class VegaMapView extends VegaBaseView {
       this.onWarn(i18n.translate('vega.mapView.minZoomAndMaxZoomHaveBeenSwappedWarningMessage', {
         defaultMessage: '{minZoomPropertyName} and {maxZoomPropertyName} have been swapped',
         values: {
-          minZoomPropertyName: 'minZoom',
-          maxZoomPropertyName: 'maxZoom',
+          minZoomPropertyName: '"minZoom"',
+          maxZoomPropertyName: '"maxZoom"',
         },
       }));
       [minZoom, maxZoom] = [maxZoom, minZoom];

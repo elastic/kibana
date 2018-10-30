@@ -69,20 +69,20 @@ export class EsQueryParser {
     if (legacyContext !== undefined) {
       if (body.query !== undefined) {
         throw new Error(i18n.translate('vega.esQueryParser.dataUrlMustNotHaveLegacyAndBodyQueryValuesAtTheSameTimeErrorMessage', {
-          defaultMessage: 'Data {urlParam} must not have legacy "{legacyContext}" and {bodyQueryConfigName} values at the same time',
+          defaultMessage: '{dataUrlParam} must not have legacy {legacyContext} and {bodyQueryConfigName} values at the same time',
           values: {
-            legacyContext: LEGACY_CONTEXT,
+            legacyContext: `"${LEGACY_CONTEXT}"`,
             bodyQueryConfigName: '"body.query"',
-            urlParam: 'url',
+            dataUrlParam: 'data.url',
           },
         }));
       } else if (usesContext) {
         throw new Error(i18n.translate('vega.esQueryParser.dataUrlMustNotHaveLegacyContextTogetherWithContextOrTimefieldErrorMessage', {
-          defaultMessage: 'Data {urlParam} must not have "{legacyContext}" together with "{context}" or "{timefield}"',
+          defaultMessage: 'Data {urlParam} must not have {legacyContext} together with {context} or {timefield}',
           values: {
-            legacyContext: LEGACY_CONTEXT,
-            context: CONTEXT,
-            timefiels: TIMEFIELD,
+            legacyContext: `"${LEGACY_CONTEXT}"`,
+            context: `"${CONTEXT}"`,
+            timefield: `"${TIMEFIELD}"`,
             urlParam: 'url',
           },
         }));

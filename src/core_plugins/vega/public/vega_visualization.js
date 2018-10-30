@@ -46,8 +46,8 @@ export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, 
         idxObj = await findObjectByTitle(savedObjectsClient, 'index-pattern', index);
         if (!idxObj) {
           throw new Error(i18n.translate('vega.visualization.indexNotFoundErrorMessage', {
-            defaultMessage: 'Index "{index}" not found',
-            values: { index },
+            defaultMessage: 'Index {index} not found',
+            values: { index: `"${index}"` },
           }));
         }
       } else {
