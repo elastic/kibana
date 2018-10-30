@@ -155,7 +155,7 @@
     url-join "^4.0.0"
     ws "^4.1.0"
 
-"@types/angular@^1.6.50":
+"@types/angular@1.6.51", "@types/angular@^1.6.50":
   version "1.6.51"
   resolved "https://registry.yarnpkg.com/@types/angular/-/angular-1.6.51.tgz#a67515b0ba6a2ff68894a39405c1343cbf9c36d4"
   integrity sha512-wYU+/zlJWih7ZmonWVjGQ18tG7GboI9asMNjRBM5fpIFJWXSioQttCTw9qGL44cP82ghM8sCV9apEqm1zBDq2w==
