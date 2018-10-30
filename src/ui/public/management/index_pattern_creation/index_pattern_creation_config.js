@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { i18n } from '@kbn/i18n';
 
 const indexPatternTypeName = i18n.translate('common.ui.management.editIndexPattern.createIndex.defaultTypeName',
