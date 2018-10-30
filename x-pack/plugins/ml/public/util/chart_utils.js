@@ -318,7 +318,7 @@ export function removeLabelOverlap(axis, startTimeMs, tickInterval, width) {
     const fn = function (ts) {
       const filteredTicks = axis.selectAll('.tick').filter(d => d === ts);
 
-      if (filteredTicks[0].length === 0) {
+      if (filteredTicks.length === 0 || filteredTicks[0].length === 0) {
         return false;
       }
 
