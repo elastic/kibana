@@ -19,7 +19,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -28,14 +28,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-export class List extends Component {
+export class ListUi extends Component {
   static propTypes = {
     indexPatterns: PropTypes.array,
     defaultIndex: PropTypes.string,
   }
 
   renderList() {
-    const { indexPatterns } = this.props;
+    const { indexPatterns, intl } = this.props;
 
     if (indexPatterns && indexPatterns.length) {
       return (
@@ -50,12 +50,10 @@ export class List extends Component {
                 icon = (
                   <Fragment>
                     <em
-                      aria-label={(
-                        <FormattedMessage
-                          id="kbn.management.indexPatternList.defaultIndexPatternIconAriaLabel"
-                          defaultMessage="Default index pattern"
-                        />
-                      )}
+                      aria-label={intl.formatMessage({
+                        id: 'kbn.management.indexPatternList.defaultIndexPatternIconAriaLabel',
+                        defaultMessage: 'Default index pattern',
+                      })}
                       className="fa fa-star"
                     />
                     {' '}
@@ -131,3 +129,5 @@ export class List extends Component {
     );
   }
 }
+
+export const List = injectI18n(ListUi);
