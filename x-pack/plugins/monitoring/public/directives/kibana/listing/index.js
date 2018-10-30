@@ -23,6 +23,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const filterFields = [ 'kibana.name', 'kibana.host', 'kibana.status', 'kibana.transport_address' ];
 const columns = [
@@ -86,9 +87,25 @@ const instanceRowFactory = (scope, kbnUrl) => {
           <div className="monTableCell__transportAddress">{ get(props, 'kibana.transport_address') }</div>
         </KuiTableRowCell>
         <KuiTableRowCell>
-          <div title={`Instance status: ${props.kibana.status}`} className="monTableCell__status">
+          <div
+            className="monTableCell__status"
+            title={(
+              <FormattedMessage
+                id="xpack.monitoring.kibana.listing.instanceStatusTitle"
+                defaultMessage="Instance status: {kibanaStatus}"
+                values={{
+                  kibanaStatus: props.kibana.status
+                }}
+              />
+            )}
+          >
             <KibanaStatusIcon status={props.kibana.status} availability={props.availability} />&nbsp;
-            { !props.availability ? 'Offline' : capitalize(props.kibana.status) }
+            { !props.availability ? (
+              <FormattedMessage
+                id="xpack.monitoring.kibana.listing.instanceStatus.offlineLabel"
+                defaultMessage="Offline"
+              />
+            ) : capitalize(props.kibana.status) }
           </div>
         </KuiTableRowCell>
         <KuiTableRowCell>
