@@ -39,7 +39,6 @@ export const Header = ({
   onChangeIncludingSystemIndices,
 }) => (
   <div>
-    <EuiSpacer size="m"/>
     <EuiTitle>
       <h1>
         <FormattedMessage

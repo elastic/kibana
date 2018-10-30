@@ -54,7 +54,7 @@ export class Fields {
   static fromUpstreamJson(json) {
     if (!json.fields) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.fields.absenceOfFieldsPropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.fields.fieldsPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain a {fields} property',
           values: {
             fields: 'fields'
