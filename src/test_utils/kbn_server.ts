@@ -27,7 +27,7 @@ import {
   kibanaServerTestUser,
   kibanaTestUser,
 } from '@kbn/test';
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep, get } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
@@ -158,6 +158,7 @@ export async function startTestServers({
   settings: {
     es: {
       license: 'oss' | 'basic' | 'gold' | 'trial';
+      [key: string]: any;
     };
     kbn: {
       /**
@@ -186,11 +187,14 @@ export async function startTestServers({
   log.info('starting elasticsearch');
   log.indent(4);
 
-  const es = createEsTestCluster({
-    log,
-    license: settings.es.license,
-    password: settings.es.license === 'trial' ? DEFAULT_SUPERUSER_PASS : undefined,
-  });
+  const license = get(settings, 'es.license', 'trial');
+  const es = createEsTestCluster(
+    defaultsDeep({}, get(settings, 'es', {}), {
+      log,
+      license,
+      password: license === 'trial' ? DEFAULT_SUPERUSER_PASS : undefined,
+    })
+  );
 
   log.indent(-4);
 
@@ -198,8 +202,9 @@ export async function startTestServers({
 
   await es.start();
 
-  if (settings.users) {
-    if (settings.es.license !== 'trial') {
+  const usersToBeAdded = get(settings, 'users', []);
+  if (usersToBeAdded.length > 0) {
+    if (license !== 'trial') {
       throw new Error(
         'Adding users is only supported by startTestServers when using a trial license'
       );
@@ -212,7 +217,7 @@ export async function startTestServers({
         password: 'x-pack-test-password',
         roles: ['kibana_user'],
       },
-      ...settings.users,
+      ...usersToBeAdded,
     ]);
   }
 
