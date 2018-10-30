@@ -36,6 +36,7 @@ export interface TaskRunner {
 interface Updatable {
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<RemoveResult>;
+  getMaxAttempts(): number;
 }
 
 interface Opts {
@@ -197,17 +198,32 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private async processResult(result: RunResult): Promise<RunResult> {
-    const runAt = result.runAt || intervalFromNow(this.instance.interval);
-    const state = result.state || this.instance.state || {};
+    const recurring = result.runAt || this.instance.interval || result.error;
+    if (recurring) {
+      // recurring task: update the task instance
+      const state = result.state || this.instance.state || {};
+      const status = this.instance.attempts < this.store.getMaxAttempts() ? 'idle' : 'failed';
 
-    if (runAt || result.error) {
+      let runAt;
+      if (result.error) {
+        // task run errored, keep the same runAt
+        runAt = this.instance.runAt;
+      } else {
+        runAt =
+          result.runAt ||
+          intervalFromNow(this.instance.interval) ||
+          minutesFromNow((this.instance.attempts + 1) * 5);
+      }
+
       await this.store.update({
         ...this.instance,
-        runAt: runAt || minutesFromNow((this.instance.attempts + 1) * 5),
+        runAt,
         state,
+        status,
         attempts: result.error ? this.instance.attempts + 1 : 0,
       });
     } else {
+      // not a recurring task: clean up by removing the task instance from store
       try {
         await this.store.remove(this.instance.id);
       } catch (err) {

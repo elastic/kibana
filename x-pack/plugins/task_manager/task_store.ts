@@ -203,6 +203,15 @@ export class TaskStore {
   };
 
   /**
+   * getter for maxAttempts
+   *
+   * @returns {number} maxAttempts
+   */
+  public getMaxAttempts(): number {
+    return this.maxAttempts;
+  }
+
+  /**
    * Updates the specified doc in the index, returning the doc
    * with its version up to date.
    *
