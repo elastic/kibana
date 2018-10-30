@@ -25,6 +25,9 @@ import VisPicker from './vis_picker';
 import PanelConfig from './panel_config';
 import brushHandler from '../lib/create_brush_handler';
 import { get } from 'lodash';
+import { extractIndexPatterns } from '../lib/extract_index_patterns';
+import { fetchFields } from '../lib/fetch_fields';
+import chrome from 'ui/chrome';
 
 class VisEditor extends Component {
   constructor(props) {
@@ -32,7 +35,13 @@ class VisEditor extends Component {
     const { vis } = props;
     this.appState = vis.API.getAppState();
     const reversed = get(this.appState, 'options.darkTheme', false);
-    this.state = { model: props.vis.params, dirty: false, autoApply: true, reversed };
+    this.state = {
+      model: props.vis.params,
+      dirty: false,
+      autoApply: true,
+      reversed,
+      visFields: {},
+    };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.handleUiState = this.handleUiState.bind(this, props.vis);
     this.handleAppStateChange = this.handleAppStateChange.bind(this);
@@ -60,27 +69,51 @@ class VisEditor extends Component {
     }
   }
 
-  render() {
-    const handleChange = (part) => {
-      const nextModel = { ...this.state.model, ...part };
 
-      this.props.vis.params = nextModel;
-      if (this.state.autoApply) {
-        this.props.vis.updateState();
-      }
+  async fetchIndexPatternFields(vis) {
+    if (vis.params.index_pattern === '') {
+      // set the default index pattern if none is defined.
+      const savedObjectsClient = chrome.getSavedObjectsClient();
+      const indexPattern = await savedObjectsClient.get('index-pattern', this.getConfig('defaultIndex'));
+      const defaultIndexPattern = indexPattern.attributes.title;
+      vis.params.index_pattern = defaultIndexPattern;
+    }
+    const indexPatterns = extractIndexPatterns(vis);
+    const fields = await fetchFields(indexPatterns);
+    return fields;
+  }
 
-      this.setState({ model: nextModel, dirty: !this.state.autoApply });
-    };
-
-    const handleAutoApplyToggle = (part) => {
-      this.setState({ autoApply: part.target.checked });
-    };
-
-    const handleCommit = () => {
+  handleChange = async (part) => {
+    const nextModel = { ...this.state.model, ...part };
+    this.props.vis.params = nextModel;
+    if (this.state.autoApply) {
       this.props.vis.updateState();
-      this.setState({ dirty: false });
-    };
+    }
+    let visFields = this.state.visFields;
+    if (this.state.model.index_pattern !== this.props.vis.params.index_pattern) {
+      const fields = await this.fetchIndexPatternFields(this.props.vis);
+      visFields = {
+        ...this.state.visFields,
+        ...fields,
+      };
+    }
+    this.setState({
+      model: nextModel,
+      dirty: !this.state.autoApply,
+      visFields,
+    });
+  }
 
+  handleCommit = () => {
+    this.props.vis.updateState();
+    this.setState({ dirty: false });
+  }
+
+  handleAutoApplyToggle = (part) => {
+    this.setState({ autoApply: part.target.checked });
+  }
+
+  render() {
     if (!this.props.isEditorMode) {
       if (!this.props.vis.params || !this.props.visData) return null;
       const reversed = this.state.reversed;
@@ -91,7 +124,7 @@ class VisEditor extends Component {
           onBrush={this.onBrush}
           onUiState={this.handleUiState}
           uiState={this.props.vis.getUiState()}
-          fields={this.props.vis.fields}
+          fields={this.state.visFields}
           model={this.props.vis.params}
           visData={this.props.visData}
           getConfig={this.getConfig}
@@ -105,7 +138,7 @@ class VisEditor extends Component {
       return (
         <div className="vis_editor">
           <div className="vis-editor-hide-for-reporting">
-            <VisPicker model={model} onChange={handleChange} />
+            <VisPicker model={model} onChange={this.handleChange} />
           </div>
           <VisEditorVisualization
             dirty={this.state.dirty}
@@ -117,20 +150,20 @@ class VisEditor extends Component {
             onUiState={this.handleUiState}
             uiState={this.props.vis.getUiState()}
             onBrush={this.onBrush}
-            onCommit={handleCommit}
-            onToggleAutoApply={handleAutoApplyToggle}
-            onChange={handleChange}
+            onCommit={this.handleCommit}
+            onToggleAutoApply={this.handleAutoApplyToggle}
+            onChange={this.handleChange}
             title={this.props.vis.title}
             description={this.props.vis.description}
             dateFormat={this.props.config.get('dateFormat')}
           />
           <div className="vis-editor-hide-for-reporting">
             <PanelConfig
-              fields={this.props.vis.fields}
+              fields={this.state.visFields}
               model={model}
               visData={this.props.visData}
               dateFormat={this.props.config.get('dateFormat')}
-              onChange={handleChange}
+              onChange={this.handleChange}
               getConfig={this.getConfig}
             />
           </div>
@@ -141,12 +174,19 @@ class VisEditor extends Component {
     return null;
   }
 
-  componentDidMount() {
-    this.props.renderComplete();
+  async componentDidMount() {
+    const fields = await this.fetchIndexPatternFields(this.props.vis);
+    this.setState({
+      visFields: {
+        ...this.state.visFields,
+        ...fields,
+      }
+    });
+    this.props.renderComplete('mount');
   }
 
   componentDidUpdate() {
-    this.props.renderComplete();
+    this.props.renderComplete('updated');
   }
 }
 
