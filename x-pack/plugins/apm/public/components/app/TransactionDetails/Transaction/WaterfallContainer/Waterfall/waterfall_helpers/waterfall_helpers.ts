@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, flatten, groupBy, indexBy, isEmpty, sortBy } from 'lodash';
+import {
+  first,
+  flatten,
+  groupBy,
+  indexBy,
+  isEmpty,
+  sortBy,
+  uniq
+} from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
 import { Transaction } from '../../../../../../../../typings/Transaction';
 
@@ -124,16 +132,20 @@ export function getWaterfallItems(
   return getSortedChildren(entryTransactionItem);
 }
 
-const getTraceRoot = (childrenByParentId: IWaterfallGroup) => {
+function getTraceRoot(childrenByParentId: IWaterfallGroup) {
   const item = first(childrenByParentId.root);
   if (item && item.docType === 'transaction') {
     return item.transaction;
   }
-};
+}
+
+function getServices(items: IWaterfallItem[]) {
+  const serviceNames = items.map(item => item.serviceName);
+  return uniq(serviceNames);
+}
 
 export function getWaterfall(
   hits: Array<Span | Transaction>,
-  services: string[],
   entryTransaction: Transaction
 ): IWaterfall {
   if (isEmpty(hits)) {
@@ -186,7 +198,7 @@ export function getWaterfall(
     traceRoot,
     traceRootDuration: traceRoot && traceRoot.transaction.duration.us,
     duration: entryTransaction.transaction.duration.us,
-    services,
+    services: getServices(items),
     items,
     itemsById,
     getTransactionById

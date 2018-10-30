@@ -7,26 +7,18 @@
 import React from 'react';
 import { RRRRender } from 'react-redux-request';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
-import {
-  getWaterfall,
-  IWaterfall
-} from '../../components/app/TransactionDetails/Transaction/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { IWaterfall } from '../../components/app/TransactionDetails/Transaction/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 import { IUrlParams } from '../urlParams';
 import { WaterfallV1Request } from './waterfallV1';
 import { WaterfallV2Request } from './waterfallV2';
 
-interface WaterfallV1OrV2Props {
+interface Props {
   urlParams: IUrlParams;
   transaction: Transaction;
-  render: RRRRender<WaterfallResponse>;
+  render: RRRRender<IWaterfall>;
 }
 
-function WaterfallV1OrV2({
-  urlParams,
-  transaction,
-  render
-}: WaterfallV1OrV2Props) {
+export function WaterfallRequest({ urlParams, transaction, render }: Props) {
   const hasTrace = transaction.hasOwnProperty('trace');
   if (hasTrace) {
     return (
@@ -45,27 +37,4 @@ function WaterfallV1OrV2({
       />
     );
   }
-}
-
-interface WaterfallRequestProps {
-  urlParams: IUrlParams;
-  transaction: Transaction;
-  render: RRRRender<IWaterfall>;
-}
-
-export function WaterfallRequest({
-  urlParams,
-  transaction,
-  render
-}: WaterfallRequestProps) {
-  return (
-    <WaterfallV1OrV2
-      urlParams={urlParams}
-      transaction={transaction}
-      render={({ data, status, args }) => {
-        const waterfall = getWaterfall(data.hits, data.services, transaction);
-        return render({ status, args, data: waterfall });
-      }}
-    />
-  );
 }
