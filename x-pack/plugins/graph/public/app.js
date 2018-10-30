@@ -552,7 +552,10 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
           defaultMessage: 'Invalid URL',
         }),
         text: i18n('xpack.graph.settings.drillDowns.invalidUrlWarningText', {
-          defaultMessage: 'The URL must contain a {{gquery}} string',
+          defaultMessage: 'The URL must contain a {gquery} string',
+          values: {
+            gquery: '{{gquery}}'
+          }
         }),
       });
       return;
