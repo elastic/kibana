@@ -8,9 +8,10 @@ import * as React from 'react';
 import { pure } from 'recompose';
 
 import { ColumnarPage } from '../../components/page';
+import { WhoAmI } from '../../containers/who_am_i';
 
 export const HomePage = pure(() => (
   <ColumnarPage>
-    <h1>Hello Sec Ops</h1>
+    <WhoAmI sourceId="default">{({ appName }) => <h1>Hello {appName}</h1>}</WhoAmI>
   </ColumnarPage>
 ));
