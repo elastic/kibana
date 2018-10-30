@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-
-interface AnyObject {
-  [key: string]: any;
-}
+import { Capabilities } from 'x-pack/plugins/xpack_main/common';
 
 export async function capabilityDecorator(
-  server: AnyObject,
-  request: AnyObject,
-  capabilities: { [key: string]: boolean }
+  server: Record<string, any>,
+  request: Record<string, any>,
+  capabilities: Capabilities
 ) {
   if (!isAuthenticatedRoute(request)) {
     return capabilities;
@@ -39,12 +36,12 @@ export async function capabilityDecorator(
   };
 }
 
-function isAuthenticatedRoute(request: AnyObject) {
+function isAuthenticatedRoute(request: Record<string, any>) {
   const { settings } = request.route;
   return settings.auth !== false;
 }
 
-function getPrivilegedActions(server: AnyObject, actions: AnyObject) {
+function getPrivilegedActions(server: Record<string, any>, actions: Record<string, any>) {
   const uiApps = server.getAllUiApps();
 
   const navLinkSpecs = server.getUiNavLinks();

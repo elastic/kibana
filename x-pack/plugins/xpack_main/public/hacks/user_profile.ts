@@ -7,7 +7,7 @@
 import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { UserProfile } from '../services/user_profile';
+import { UserProfile } from '../../common';
 
 uiModules.get('userProfile').provider('userProfile', function userProfileProvider() {
   // @ts-ignore

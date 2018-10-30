@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Capabilities {
-  [key: string]: boolean;
-}
+import { Capabilities } from './capabilities';
 
 export class UserProfile {
   private capabilities: Capabilities;

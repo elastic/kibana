@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Capabilities } from 'x-pack/plugins/xpack_main/common';
 import { PriorityCollection } from './priority_collection';
-
-export interface Capabilities {
-  [capability: string]: boolean;
-}
 
 export type CapabilityDecorator = (
   server: Record<string, any>,

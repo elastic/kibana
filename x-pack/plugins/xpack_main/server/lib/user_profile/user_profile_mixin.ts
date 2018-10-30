@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UserProfile } from './user_profile';
+import { UserProfile } from '../../../common';
 import { buildUserCapabilities } from './user_profile_capability_registry';
 
 export function userProfileMixin(kbnServer: Record<string, any>, server: Record<string, any>) {
