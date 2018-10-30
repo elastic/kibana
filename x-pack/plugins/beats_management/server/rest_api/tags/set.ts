@@ -16,6 +16,7 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
   method: 'PUT',
   path: '/api/beats/tag/{tag}',
   licenseRequired: true,
+  requiredRoles: ['beats_admin'],
   config: {
     validate: {
       params: Joi.object({
@@ -37,20 +38,20 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
       }).allow(null),
     },
   },
-  handler: async (request: FrameworkRequest, reply: any) => {
+  handler: async (request: FrameworkRequest, h: any) => {
     const defaultConfig = { configuration_blocks: [], color: '#DD0A73' };
     const config = get(request, 'payload', defaultConfig) || defaultConfig;
 
     try {
       const { isValid, result } = await libs.tags.saveTag(request.user, request.params.tag, config);
       if (!isValid) {
-        return reply({ result, success: false }).code(400);
+        return h.response({ result, success: false }).code(400);
       }
 
-      reply({ success: true }).code(result === 'created' ? 201 : 200);
+      return h.response({ success: true }).code(result === 'created' ? 201 : 200);
     } catch (err) {
       // TODO move this to kibana route thing in adapter
-      return reply(wrapEsError(err));
+      return wrapEsError(err);
     }
   },
 });

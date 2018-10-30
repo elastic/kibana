@@ -35330,7 +35330,7 @@ var _strongLogTransformer2 = _interopRequireDefault(_strongLogTransformer);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function generateColors() {
-    const colorWheel = [_chalk2.default.cyan, _chalk2.default.magenta, _chalk2.default.blue, _chalk2.default.yellow, _chalk2.default.green, _chalk2.default.red];
+    const colorWheel = [_chalk2.default.cyan, _chalk2.default.magenta, _chalk2.default.blue, _chalk2.default.yellow, _chalk2.default.green];
     const count = colorWheel.length;
     let children = 0;
     return () => colorWheel[children++ % count];

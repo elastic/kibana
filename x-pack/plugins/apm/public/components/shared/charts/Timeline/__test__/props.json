@@ -10,8 +10,8 @@
   },
   "animation": null,
   "agentMarks": [
-    { "timeLabel": 100000, "name": "timeToFirstByte", "timeAxis": 100000 },
-    { "timeLabel": 110000, "name": "domInteractive", "timeAxis": 110000 },
-    { "timeLabel": 190000, "name": "domComplete", "timeAxis": 190000 }
+    { "name": "timeToFirstByte", "us": 100000 },
+    { "name": "domInteractive", "us": 110000 },
+    { "name": "domComplete", "us": 190000 }
   ]
 }
