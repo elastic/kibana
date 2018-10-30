@@ -17,8 +17,8 @@ export interface IWaterfallGroup {
 }
 
 export interface IWaterfall {
-  rootTransaction?: Transaction;
-  rootTransactionDuration?: number;
+  traceRoot?: Transaction;
+  traceRootDuration?: number;
   duration?: number;
   services: string[];
   items: IWaterfallItem[];
@@ -124,7 +124,7 @@ export function getWaterfallItems(
   return getSortedChildren(entryTransactionItem);
 }
 
-const getRootTransactions = (childrenByParentId: IWaterfallGroup) => {
+const getTraceRoot = (childrenByParentId: IWaterfallGroup) => {
   const item = first(childrenByParentId.root);
   if (item && item.docType === 'transaction') {
     return item.transaction;
@@ -168,7 +168,7 @@ export function getWaterfall(
   );
   const entryTransactionItem = getTransactionItem(entryTransaction);
   const items = getWaterfallItems(childrenByParentId, entryTransactionItem);
-  const rootTransaction = getRootTransactions(childrenByParentId);
+  const traceRoot = getTraceRoot(childrenByParentId);
   const itemsById: IWaterfallIndex = indexBy(items, 'id');
 
   const getTransactionById = (id?: IWaterfallItem['id']) => {
@@ -183,9 +183,8 @@ export function getWaterfall(
   };
 
   return {
-    rootTransaction,
-    rootTransactionDuration:
-      rootTransaction && rootTransaction.transaction.duration.us,
+    traceRoot,
+    traceRootDuration: traceRoot && traceRoot.transaction.duration.us,
     duration: entryTransaction.transaction.duration.us,
     services,
     items,

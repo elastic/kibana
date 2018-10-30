@@ -63,7 +63,7 @@ export function TransactionFlyout({
           <EuiHorizontalRule />
           <StickyTransactionProperties
             transaction={transactionDoc}
-            totalDuration={waterfall.rootTransactionDuration}
+            totalDuration={waterfall.traceRootDuration}
           />
           <EuiHorizontalRule />
           <TransactionPropertiesTableForFlyout

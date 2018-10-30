@@ -33,7 +33,7 @@ function MaybeViewTraceLink({
 }) {
   const isRoot =
     transaction.transaction.id ===
-    (waterfall.rootTransaction && waterfall.rootTransaction.transaction.id);
+    (waterfall.traceRoot && waterfall.traceRoot.transaction.id);
 
   let button;
   if (isRoot) {
@@ -50,7 +50,7 @@ function MaybeViewTraceLink({
 
   return (
     <EuiFlexItem grow={false}>
-      <TransactionLink transaction={waterfall.rootTransaction}>
+      <TransactionLink transaction={waterfall.traceRoot}>
         {button}
       </TransactionLink>
     </EuiFlexItem>
@@ -105,7 +105,7 @@ export const Transaction: React.SFC<Props> = ({
 
       <StickyTransactionProperties
         transaction={transaction}
-        totalDuration={waterfall.rootTransactionDuration}
+        totalDuration={waterfall.traceRootDuration}
       />
 
       <EuiSpacer />
