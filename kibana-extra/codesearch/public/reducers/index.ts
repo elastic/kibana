@@ -5,6 +5,7 @@
  */
 import { combineReducers } from 'redux';
 
+import { commit, CommitState } from './commit';
 import { documentSearch, DocumentSearchState } from './document_search';
 import { editor, EditorState } from './editor';
 import { file, FileState } from './file';
@@ -24,6 +25,7 @@ export interface RootState {
   route: RouteState;
   status: StatusState;
   userConfig: UserConfigState;
+  commit: CommitState;
 }
 
 export const rootReducer = combineReducers({
@@ -36,4 +38,5 @@ export const rootReducer = combineReducers({
   route,
   status,
   userConfig,
+  commit,
 });

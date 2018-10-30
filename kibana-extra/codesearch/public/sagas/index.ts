@@ -6,6 +6,7 @@
 
 import { fork } from 'redux-saga/effects';
 
+import { watchLoadCommit } from './commit';
 import { watchDocumentSearch } from './document_search';
 import { watchCloseReference, watchLspMethods } from './editor';
 import { watchFetchBranchesAndCommits, watchFetchRepoTree } from './file';
@@ -41,4 +42,5 @@ export function* rootSaga() {
   yield fork(watchGotoRepo);
   yield fork(watchLoadRepo);
   yield fork(watchLoadUserConfig);
+  yield fork(watchLoadCommit);
 }

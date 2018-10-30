@@ -18,3 +18,4 @@ export const MAIN_ROOT = `/:resource/:org/:repo/:pathType(${PathTypes.blob}|${
 })/:revision`;
 export const ADMIN = '/admin';
 export const SEARCH = '/search';
+export const DIFF = '/commit/:resource/:org/:repo/:commitId';

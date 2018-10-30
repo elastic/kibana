@@ -166,6 +166,12 @@ export class GitOperations {
     const diffs = await commit.getDiff();
 
     const commitDiff: CommitDiff = {
+      commit: {
+        sha: commit.sha(),
+        author: commit.author().name(),
+        message: commit.message(),
+        date: commit.date(),
+      },
       additions: 0,
       deletions: 0,
       files: [],
@@ -184,6 +190,8 @@ export class GitOperations {
             language,
             path,
             modifiedCode,
+            additions: total_additions,
+            deletions: total_deletions,
             kind: DiffKind.ADDED,
           });
         } else if (patch.isDeleted()) {
@@ -195,6 +203,8 @@ export class GitOperations {
             path,
             originCode,
             kind: DiffKind.DELETED,
+            additions: total_additions,
+            deletions: total_deletions,
           });
         } else if (patch.isModified()) {
           const path = patch.newFile().path();
@@ -209,6 +219,8 @@ export class GitOperations {
             originCode,
             modifiedCode,
             kind: DiffKind.MODIFIED,
+            additions: total_additions,
+            deletions: total_deletions,
           });
         } else if (patch.isRenamed()) {
           const path = patch.newFile().path();
@@ -216,6 +228,8 @@ export class GitOperations {
             path,
             originPath: patch.oldFile().path(),
             kind: DiffKind.RENAMED,
+            additions: total_additions,
+            deletions: total_deletions,
           });
         }
       }
