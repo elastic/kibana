@@ -56,7 +56,7 @@ function getDiscoverQuery(span: Span) {
 interface Props {
   span?: Span;
   parentTransaction?: Transaction;
-  totalDuration: number;
+  totalDuration?: number;
   onClose: () => void;
 }
 

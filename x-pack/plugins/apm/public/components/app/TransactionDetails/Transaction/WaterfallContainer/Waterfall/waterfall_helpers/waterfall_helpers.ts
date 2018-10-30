@@ -19,7 +19,7 @@ export interface IWaterfallGroup {
 export interface IWaterfall {
   rootTransaction?: Transaction;
   rootTransactionDuration?: number;
-  duration: number;
+  duration?: number;
   services: string[];
   items: IWaterfallItem[];
   itemsById: IWaterfallIndex;
@@ -138,7 +138,6 @@ export function getWaterfall(
 ): IWaterfall {
   if (isEmpty(hits)) {
     return {
-      duration: 0,
       services: [],
       items: [],
       itemsById: {},

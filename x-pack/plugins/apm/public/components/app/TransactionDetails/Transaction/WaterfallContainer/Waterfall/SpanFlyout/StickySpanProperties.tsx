@@ -31,10 +31,14 @@ function getPrimaryType(type: string) {
 
 interface Props {
   span: Span;
-  totalDuration: number;
+  totalDuration?: number;
 }
 
 export function StickySpanProperties({ span, totalDuration }: Props) {
+  if (!totalDuration) {
+    return null;
+  }
+
   const spanName = span.span.name;
   const spanDuration = span.span.duration.us;
   const relativeDuration = spanDuration / totalDuration;
