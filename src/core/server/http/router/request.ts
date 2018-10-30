@@ -18,7 +18,7 @@
  */
 
 import { ObjectType, TypeOf } from '@kbn/config-schema';
-import { Request } from 'hapi-latest';
+import { Request } from 'hapi';
 
 import { filterHeaders, Headers } from './headers';
 import { RouteSchemas } from './route';

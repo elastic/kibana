@@ -7,43 +7,36 @@
 import React from 'react';
 import DetailView from '../index';
 import props from './props.json';
+import { shallow } from 'enzyme';
 
-import {
-  mountWithRouterAndStore,
-  mockMoment,
-  toJson
-} from '../../../../../utils/testHelpers';
+import { mockMoment } from '../../../../../utils/testHelpers';
 
 describe('DetailView', () => {
-  let storeState;
   beforeEach(() => {
     // Avoid timezone issues
     mockMoment();
-
-    storeState = {
-      location: { search: '' }
-    };
   });
 
   it('should render empty state', () => {
-    const wrapper = mountWithRouterAndStore(
-      <DetailView errorGroup={[]} urlParams={props.urlParams} location={{}} />,
-      storeState
+    const wrapper = shallow(
+      <DetailView
+        errorGroup={[]}
+        urlParams={props.urlParams}
+        location={{ state: '' }}
+      />
     );
-
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   it('should render with data', () => {
-    const wrapper = mountWithRouterAndStore(
+    const wrapper = shallow(
       <DetailView
         errorGroup={props.errorGroup}
         urlParams={props.urlParams}
-        location={{}}
-      />,
-      storeState
+        location={{ state: '' }}
+      />
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

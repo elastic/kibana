@@ -18,17 +18,16 @@ export function registerJobsRoute(server) {
     config: {
       pre: [ licensePreRouting ]
     },
-    handler: async (request, reply) => {
+    handler: async (request) => {
       try {
         const callWithRequest = callWithRequestFactory(server, request);
-        const results = await callWithRequest('rollup.jobs');
-        reply(results);
+        return await callWithRequest('rollup.jobs');
       } catch(err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        wrapUnknownError(err);
       }
     },
   });
@@ -39,7 +38,7 @@ export function registerJobsRoute(server) {
     config: {
       pre: [ licensePreRouting ]
     },
-    handler: async (request, reply) => {
+    handler: async (request) => {
       try {
         const {
           id,
@@ -56,14 +55,13 @@ export function registerJobsRoute(server) {
 
         // Then request the newly created job.
         const results = await callWithRequest('rollup.job', { id });
-        reply(results.jobs[0]);
+        return results.jobs[0];
       } catch(err) {
         if (isEsError(err)) {
-          const boomError = wrapEsError(err);
-          return reply(boomError);
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
   });
@@ -74,19 +72,17 @@ export function registerJobsRoute(server) {
     config: {
       pre: [ licensePreRouting ]
     },
-    handler: async (request, reply) => {
+    handler: async (request) => {
       try {
         const { jobIds } = request.payload;
         const callWithRequest = callWithRequestFactory(server, request);
-        const results = await Promise.all(jobIds.map(id => callWithRequest('rollup.startJob', { id })));
-
-        reply(results);
+        return await Promise.all(jobIds.map(id => callWithRequest('rollup.startJob', { id })));
       } catch(err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
   });
@@ -97,19 +93,17 @@ export function registerJobsRoute(server) {
     config: {
       pre: [ licensePreRouting ]
     },
-    handler: async (request, reply) => {
+    handler: async (request) => {
       try {
         const { jobIds } = request.payload;
         const callWithRequest = callWithRequestFactory(server, request);
-        const results = await Promise.all(jobIds.map(id => callWithRequest('rollup.stopJob', { id })));
-
-        reply(results);
+        return await Promise.all(jobIds.map(id => callWithRequest('rollup.stopJob', { id })));
       } catch(err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
   });
@@ -120,19 +114,17 @@ export function registerJobsRoute(server) {
     config: {
       pre: [ licensePreRouting ]
     },
-    handler: async (request, reply) => {
+    handler: async (request) => {
       try {
         const { jobIds } = request.payload;
         const callWithRequest = callWithRequestFactory(server, request);
-        const results = await Promise.all(jobIds.map(id => callWithRequest('rollup.deleteJob', { id })));
-
-        reply(results);
+        return await Promise.all(jobIds.map(id => callWithRequest('rollup.deleteJob', { id })));
       } catch(err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
   });
