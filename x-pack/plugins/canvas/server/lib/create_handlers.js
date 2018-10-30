@@ -5,6 +5,7 @@
  */
 
 import boom from 'boom';
+import { isSecurityEnabled } from './feature_check';
 
 export const createHandlers = (request, server) => {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -19,7 +20,8 @@ export const createHandlers = (request, server) => {
     httpHeaders: request.headers,
     elasticsearchClient: async (...args) => {
       // check if the session is valid because continuing to use it
-      if (server.plugins.security) {
+      // TODO: replace this when we use the method exposed by security https://github.com/elastic/kibana/pull/24616
+      if (isSecurityEnabled(server)) {
         const authenticationResult = await server.plugins.security.authenticate(request);
         if (!authenticationResult.succeeded()) throw boom.unauthorized(authenticationResult.error);
       }
