@@ -98,7 +98,7 @@ export class RoleValidator {
           {
             defaultMessage: 'Expected {elasticIndices} to be an array',
             values: {
-              elasticIndices: role.elasticsearch.indices,
+              elasticIndices: '"role.elasticsearch.indices"',
             },
           }
         )
