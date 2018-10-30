@@ -119,6 +119,9 @@ export function WaterfallItem({
   const left = (item.offset / totalDuration) * 100;
   const Label = item.docType === 'transaction' ? TransactionLabel : SpanLabel;
 
+  // Note: the <Prefix> appears *after* the item name in the DOM order
+  // because this label is styled with "direction: rtl;" so that the name
+  // itself doesn't flow outside the box to the right.
   return (
     <Container
       item={item}
@@ -128,8 +131,7 @@ export function WaterfallItem({
     >
       <ItemBar left={left} width={width} color={color} type={item.docType} />
       <Label left={left}>
-        <Prefix item={item} />
-        {item.name}
+        {item.name} <Prefix item={item} />
       </Label>
     </Container>
   );
