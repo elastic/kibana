@@ -5,6 +5,7 @@
  */
 
 import { EsClient, Esqueue } from '@codesearch/esqueue';
+import moment from 'moment';
 
 import {
   REPOSITORY_DELETE_STATUS_INDEX_TYPE,
@@ -147,6 +148,12 @@ export class DeleteWorker extends AbstractWorker {
       timestamp: new Date(),
     };
     return await this.objectsClient.update(REPOSITORY_DELETE_STATUS_INDEX_TYPE, p.uri, p);
+  }
+
+  protected getTimeoutMs(_: any) {
+    return (
+      moment.duration(1, 'hour').asMilliseconds() + moment.duration(10, 'minutes').asMilliseconds()
+    );
   }
 
   private deletePromiseWrapper(

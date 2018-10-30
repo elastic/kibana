@@ -5,6 +5,7 @@
  */
 
 import { Esqueue } from '@codesearch/esqueue';
+import moment = require('moment');
 
 import {
   REPOSITORY_INDEX_STATUS_INDEX_TYPE,
@@ -112,6 +113,11 @@ export class IndexWorker extends AbstractWorker {
     });
 
     return await super.onJobCompleted(job, res);
+  }
+
+  protected getTimeoutMs(_: any) {
+    // TODO(mengwei): query object/file number of a repo and come up with a number in here.
+    return moment.duration(5, 'hour').asMilliseconds();
   }
 
   private getProgressReporter(

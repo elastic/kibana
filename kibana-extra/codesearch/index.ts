@@ -5,6 +5,7 @@
  */
 
 import { Esqueue } from '@codesearch/esqueue';
+import moment from 'moment';
 import { resolve } from 'path';
 
 import { mappings } from './mappings';
@@ -59,16 +60,18 @@ export default (kibana: any) =>
       return Joi.object({
         enabled: Joi.boolean().default(true),
         queueIndex: Joi.string().default('.codesearch-worker-queue'),
-        queueTimeout: Joi.number().default(60 * 60 * 1000), // 1 hour by default
+        // 1 hour by default.
+        queueTimeout: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),
         // The frequency which update scheduler executes. 5 minutes by default.
-        updateFrequencyMs: Joi.number().default(5 * 60 * 1000),
+        updateFrequencyMs: Joi.number().default(moment.duration(5, 'minute').asMilliseconds()),
         // The frequency which index scheduler executes. 1 day by default.
-        indexFrequencyMs: Joi.number().default(24 * 60 * 60 * 1000),
+        indexFrequencyMs: Joi.number().default(moment.duration(1, 'day').asMilliseconds()),
         // The frequency which each repo tries to update. 1 hour by default.
-        updateRepoFrequencyMs: Joi.number().default(60 * 60 * 1000),
+        updateRepoFrequencyMs: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),
         // The frequency which each repo tries to index. 1 day by default.
-        indexRepoFrequencyMs: Joi.number().default(24 * 60 * 1000),
-        lspRequestTimeout: Joi.number().default(5 * 60), // timeout a request over 30s
+        indexRepoFrequencyMs: Joi.number().default(moment.duration(1, 'day').asMilliseconds()),
+        // timeout a request over 30s.
+        lspRequestTimeout: Joi.number().default(moment.duration(30, 'second').asSeconds()),
         repos: Joi.array().default([]),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         isAdmin: Joi.boolean().default(true), // If we show the admin buttons

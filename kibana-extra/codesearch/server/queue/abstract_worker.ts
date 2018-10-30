@@ -10,6 +10,7 @@ import {
   events as esqueueEvents,
   Job as JobInternal,
 } from '@codesearch/esqueue';
+import moment from 'moment';
 
 import { WorkerResult } from 'model/repository';
 import { Log } from '../log';
@@ -24,10 +25,20 @@ export abstract class AbstractWorker implements Worker {
 
   // Assemble jobs, for now most of the job object construction should be the same.
   public createJob(payload: any, options: any): Job {
-    return {
-      payload,
-      options,
-    };
+    if (options.timeout !== undefined || options.timeout !== null) {
+      return {
+        payload,
+        options,
+      };
+    } else {
+      return {
+        payload,
+        options: {
+          ...options,
+          timeout: this.getTimeoutMs(payload),
+        },
+      };
+    }
   }
 
   public async executeJob(job: Job): Promise<WorkerResult> {
@@ -109,5 +120,10 @@ export abstract class AbstractWorker implements Worker {
     return new Promise<WorkerResult>((resolve, _) => {
       resolve();
     });
+  }
+
+  protected getTimeoutMs(payload: any) {
+    // Set to 1 hour by default. Override this function for sub classes if necessary.
+    return moment.duration(1, 'hour').asMilliseconds();
   }
 }

@@ -5,6 +5,7 @@
  */
 
 import { EsClient, Esqueue } from '@codesearch/esqueue';
+import moment from 'moment';
 
 import { RepositoryUtils } from '../../common/repository_utils';
 import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
