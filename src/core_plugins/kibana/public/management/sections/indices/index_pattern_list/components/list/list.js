@@ -28,7 +28,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-export class ListUi extends Component {
+class ListUi extends Component {
   static propTypes = {
     indexPatterns: PropTypes.array,
     defaultIndex: PropTypes.string,
