@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, groupBy, indexBy, sortBy } from 'lodash';
+import { first, flatten, groupBy, indexBy, isEmpty, sortBy } from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
 import { Transaction } from '../../../../../../../../typings/Transaction';
 
 export interface IWaterfallIndex {
   [key: string]: IWaterfallItem;
+}
+
+export interface IWaterfallGroup {
+  [key: string]: IWaterfallItem[];
 }
 
 export interface IWaterfall {
@@ -104,47 +108,44 @@ function getSpanItem(span: Span): IWaterfallItemSpan {
 }
 
 export function getWaterfallItems(
-  items: IWaterfallItem[],
+  childrenByParentId: IWaterfallGroup,
   entryTransactionItem: IWaterfallItem
 ) {
-  const itemsById: IWaterfallIndex = indexBy(items, 'id');
-  const childrenByParentId = groupBy(
-    items,
-    item => (item.parentId ? item.parentId : 'root')
-  );
-
-  function getOrderedItems(item: IWaterfallItem): IWaterfallItem[] {
+  function getSortedChildren(item: IWaterfallItem): IWaterfallItem[] {
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
-    // mutating to ensure both data structures ("itemsById" and "items") have the same data
     item.childIds = children.map(child => child.id);
     item.offset = item.timestamp - entryTransactionItem.timestamp;
 
-    const deepChildren = flatten(children.map(getOrderedItems));
+    const deepChildren = flatten(children.map(getSortedChildren));
     return [item, ...deepChildren];
   }
 
-  return {
-    items: getOrderedItems(entryTransactionItem),
-    itemsById
-  };
+  return getSortedChildren(entryTransactionItem);
 }
 
-function getRootTransaction(filteredHits: IWaterfallItem[]) {
-  const rootTransaction = filteredHits.find(hit => {
-    return hit.docType === 'transaction' && !hit.parentId;
-  });
-
-  if (rootTransaction && rootTransaction.docType === 'transaction') {
-    return rootTransaction.transaction;
+const getRootTransactions = (childrenByParentId: IWaterfallGroup) => {
+  const item = first(childrenByParentId.root);
+  if (item && item.docType === 'transaction') {
+    return item.transaction;
   }
-}
+};
 
 export function getWaterfall(
   hits: Array<Span | Transaction>,
   services: string[],
   entryTransaction: Transaction
 ): IWaterfall {
+  if (isEmpty(hits)) {
+    return {
+      duration: 0,
+      services: [],
+      items: [],
+      itemsById: {},
+      getTransactionById: () => undefined
+    };
+  }
+
   const filteredHits = hits
     .filter(hit => {
       const docType = hit.processor.event;
@@ -162,12 +163,14 @@ export function getWaterfall(
       }
     });
 
-  const rootTransaction = getRootTransaction(filteredHits);
-  const entryTransactionItem = getTransactionItem(entryTransaction);
-  const { items, itemsById } = getWaterfallItems(
+  const childrenByParentId = groupBy(
     filteredHits,
-    entryTransactionItem
+    hit => (hit.parentId ? hit.parentId : 'root')
   );
+  const entryTransactionItem = getTransactionItem(entryTransaction);
+  const items = getWaterfallItems(childrenByParentId, entryTransactionItem);
+  const rootTransaction = getRootTransactions(childrenByParentId);
+  const itemsById: IWaterfallIndex = indexBy(items, 'id');
 
   const getTransactionById = (id?: IWaterfallItem['id']) => {
     if (!id) {

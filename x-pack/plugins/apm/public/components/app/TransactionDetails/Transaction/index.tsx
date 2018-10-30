@@ -13,7 +13,7 @@ import {
   EuiTitle,
   EuiToolTip
 } from '@elastic/eui';
-import { get, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
@@ -32,7 +32,8 @@ function MaybeViewTraceLink({
   waterfall: IWaterfall;
 }) {
   const isRoot =
-    transaction.transaction.id === get(waterfall.rootTransaction, 'id');
+    transaction.transaction.id ===
+    (waterfall.rootTransaction && waterfall.rootTransaction.transaction.id);
 
   let button;
   if (isRoot) {
