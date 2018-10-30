@@ -19,6 +19,7 @@
 
 export { bootstrap } from './bootstrap';
 
+import opn from 'opn';
 import { first } from 'rxjs/operators';
 import { ConfigService, Env } from './config';
 import { HttpConfig, HttpModule, HttpServerInfo } from './http';
@@ -55,6 +56,13 @@ export class Server {
     }
 
     await this.legacy.service.start(httpServerInfo);
+
+    if (this.env.cliArgs.open && httpServerInfo && !loaded) {
+      const basePath = httpConfig.rewriteBasePath ? httpConfig.basePath : '';
+      const uri = `${httpServerInfo.server.info.uri}${basePath}`;
+      this.log.info(`Opening ${uri} in browser`);
+      opn(uri);
+    }
 
     const unhandledConfigPaths = await this.configService.getUnusedPaths();
     if (unhandledConfigPaths.length > 0) {
