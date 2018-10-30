@@ -34,6 +34,11 @@ export class ALayer {
     return parseInt(event.target.value, 10);
   }
 
+  static getBoundDataForSource(mbMap, sourceId) {
+    const mbStyle = mbMap.getStyle();
+    return mbStyle.sources[sourceId].data;
+  }
+
   static _renderZoomSliders(minZoom, maxZoom, onMinZoomChange, onMaxZoomChange) {
     // if (this.state.showAtAllZoomLevels) {
     //   return;

@@ -294,7 +294,8 @@ export class VectorLayer extends ALayer {
 
     const featureCollection = this._getSourceFeatureCollection();
     const mbSourceAfterAdding = mbMap.getSource(this.getId());
-    if (featureCollection !== mbSourceAfterAdding._data) {
+    const dataBoundToMap = ALayer.getBoundDataForSource(mbMap, this.getId());
+    if (featureCollection !== dataBoundToMap) {
       mbSourceAfterAdding.setData(featureCollection);
     }
 

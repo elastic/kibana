@@ -101,7 +101,8 @@ export class GeohashGridLayer extends ALayer {
 
     const scaledPropertyName = '__kbn_heatmap_weight__';
     const propertyName = 'value';
-    if (featureCollection !== mbSourceAfter._data) {
+    const dataBoundToMap = ALayer.getBoundDataForSource(mbMap, this.getId());
+    if (featureCollection !== dataBoundToMap) {
       let max = 0;
       for (let i = 0; i < featureCollection.features.length; i++) {
         max = Math.max(featureCollection.features[i].properties[propertyName], max);
