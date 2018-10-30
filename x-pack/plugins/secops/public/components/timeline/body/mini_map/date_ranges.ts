@@ -61,24 +61,19 @@ export const getDates = ({ unit, end, current }: GetDatesParams): Date[] =>
 /**
  * An impure function (it performs IO to get the current `Date`) that,
  * given a unit (e.g. `'year' | 'month' | 'week'...`), it
- * invokes a callback, passing it a range of `Date`s with
- * a granularity appropriate to the unit.
- * @param unit e.g. 'year' | 'month' | 'week'...
- * @param cb This callback will be invoked with the resulting years. Example: `getDateRange('year', dates => console.log(dates))`
- *
- * @example
- * getDateRange('year', dates => console.log(dates))
+ * returns range of `Date`s with a granularity appropriate to the unit.
  */
-export function getDateRange<T>(unit: MomentUnit, cb: (d: Date[]) => T): T {
-  return cb(
-    getDates({
-      current: moment()
-        .utc()
-        .startOf(unit),
-      end: moment()
-        .utc()
-        .endOf(unit), // TODO: this should be relative to `unit`
-      unit,
-    })
-  );
+export function getDateRange(unit: MomentUnit): Date[] {
+  const current = moment()
+    .utc()
+    .startOf(unit);
+  const end = moment()
+    .utc()
+    .endOf(unit);
+
+  return getDates({
+    current,
+    end, // TODO: this should be relative to `unit`
+    unit,
+  });
 }

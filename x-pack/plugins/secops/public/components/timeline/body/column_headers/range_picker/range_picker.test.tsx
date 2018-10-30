@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as fp from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { RangePicker } from './range_picker';
 import { Range, Ranges } from './ranges';
@@ -13,7 +13,7 @@ import { Range, Ranges } from './ranges';
 describe('RangePicker', () => {
   describe('rendering', () => {
     test('it renders the ranges', () => {
-      const wrapper = mount(<RangePicker selected={'1 Week'} onRangeSelected={fp.noop} />);
+      const wrapper = mount(<RangePicker selected={'1 Week'} onRangeSelected={noop} />);
 
       Ranges.forEach(range => {
         expect(wrapper.text()).toContain(range);
@@ -22,7 +22,7 @@ describe('RangePicker', () => {
 
     test('it selects the option specified by the "selected" prop', () => {
       const selected: Range = '1 Month';
-      const wrapper = mount(<RangePicker selected={selected} onRangeSelected={fp.noop} />);
+      const wrapper = mount(<RangePicker selected={selected} onRangeSelected={noop} />);
 
       expect(wrapper.find('select').props().value).toBe(selected);
     });

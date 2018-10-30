@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as fp from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { TimelineHeader } from './timeline_header';
@@ -16,12 +16,12 @@ describe('Header', () => {
       const wrapper = mount(
         <TimelineHeader
           dataProviders={mockDataProviders}
-          onDataProviderRemoved={fp.noop}
+          onDataProviderRemoved={noop}
           width={1000}
         />
       );
 
-      expect(wrapper.find('[data-test-subj="dataProviders"]').length).toEqual(1);
+      expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toEqual(true);
     });
   });
 });

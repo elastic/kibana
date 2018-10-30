@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as fp from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import { OnFilterChange } from '../../../events';
@@ -26,7 +26,7 @@ export const TextFilter = pure<Props>(
     columnId,
     minWidth,
     filter = '',
-    onFilterChange = fp.noop,
+    onFilterChange = noop,
     placeholder = DEFAULT_PLACEHOLDER,
   }) => {
     const onChange = (event: React.ChangeEvent<HTMLInputElement>): void => {

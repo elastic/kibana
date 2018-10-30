@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as fp from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { DataProvider } from './data_provider';
 import { DataProviders } from './data_providers';
@@ -17,27 +17,29 @@ import {
 
 describe('DataProviders', () => {
   describe('rendering', () => {
+    const dropMessage = 'Drop anything with a Facet count here';
+
     test('it should render a placeholder when there are zero data providers', () => {
       const dataProviders: DataProvider[] = [];
 
       const wrapper = mount(
-        <DataProviders dataProviders={dataProviders} onDataProviderRemoved={fp.noop} />
+        <DataProviders dataProviders={dataProviders} onDataProviderRemoved={noop} />
       );
 
-      expect(wrapper.text()).toContain('Drop anything with a Facet count here');
+      expect(wrapper.text()).toContain(dropMessage);
     });
 
     test('it should NOT render a placeholder given a non-empty collection of data providers', () => {
       const wrapper = mount(
-        <DataProviders dataProviders={mockDataProviders} onDataProviderRemoved={fp.noop} />
+        <DataProviders dataProviders={mockDataProviders} onDataProviderRemoved={noop} />
       );
 
-      expect(wrapper.text()).not.toContain('Drop anything with a Facet count here');
+      expect(wrapper.text()).not.toContain(dropMessage);
     });
 
     test('it renders the data providers', () => {
       const wrapper = mount(
-        <DataProviders dataProviders={mockDataProviders} onDataProviderRemoved={fp.noop} />
+        <DataProviders dataProviders={mockDataProviders} onDataProviderRemoved={noop} />
       );
 
       mockDataProviderNames().forEach(name =>

@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as fp from 'lodash/fp';
+import { noop, omit } from 'lodash/fp';
 import * as React from 'react';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
@@ -25,16 +25,16 @@ describe('Timeline', () => {
         <Timeline
           columnHeaders={headers}
           dataProviders={mockDataProviders}
-          onColumnSorted={fp.noop}
-          onDataProviderRemoved={fp.noop}
-          onFilterChange={fp.noop}
-          onRangeSelected={fp.noop}
+          onColumnSorted={noop}
+          onDataProviderRemoved={noop}
+          onFilterChange={noop}
+          onRangeSelected={noop}
           sort={sort}
           width={1000}
         />
       );
 
-      expect(wrapper.find('[data-test-subj="timelineHeader"]').length).toEqual(1);
+      expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
     });
 
     test('it renders the timeline body', () => {
@@ -42,16 +42,16 @@ describe('Timeline', () => {
         <Timeline
           columnHeaders={headers}
           dataProviders={mockDataProviders}
-          onColumnSorted={fp.noop}
-          onDataProviderRemoved={fp.noop}
-          onFilterChange={fp.noop}
-          onRangeSelected={fp.noop}
+          onColumnSorted={noop}
+          onDataProviderRemoved={noop}
+          onFilterChange={noop}
+          onRangeSelected={noop}
           sort={sort}
           width={1000}
         />
       );
 
-      expect(wrapper.find('[data-test-subj="body"]').length).toEqual(1);
+      expect(wrapper.find('[data-test-subj="body"]').exists()).toEqual(true);
     });
   });
 
@@ -65,9 +65,9 @@ describe('Timeline', () => {
             columnHeaders={headers}
             dataProviders={mockDataProviders}
             onColumnSorted={mockOnColumnSorted}
-            onDataProviderRemoved={fp.noop}
-            onFilterChange={fp.noop}
-            onRangeSelected={fp.noop}
+            onDataProviderRemoved={noop}
+            onFilterChange={noop}
+            onRangeSelected={noop}
             sort={sort}
             width={1000}
           />
@@ -93,10 +93,10 @@ describe('Timeline', () => {
           <Timeline
             columnHeaders={headers}
             dataProviders={mockDataProviders}
-            onColumnSorted={fp.noop}
+            onColumnSorted={noop}
             onDataProviderRemoved={mockOnDataProviderRemoved}
-            onFilterChange={fp.noop}
-            onRangeSelected={fp.noop}
+            onFilterChange={noop}
+            onRangeSelected={noop}
             sort={sort}
             width={1000}
           />
@@ -107,7 +107,7 @@ describe('Timeline', () => {
           .first()
           .simulate('click');
 
-        const callbackParams = fp.omit('render', mockOnDataProviderRemoved.mock.calls[0][0]);
+        const callbackParams = omit('render', mockOnDataProviderRemoved.mock.calls[0][0]);
 
         expect(callbackParams).toEqual({
           enabled: true,
@@ -133,10 +133,10 @@ describe('Timeline', () => {
           <Timeline
             columnHeaders={allColumnsHaveTextFilters}
             dataProviders={mockDataProviders}
-            onColumnSorted={fp.noop}
-            onDataProviderRemoved={fp.noop}
+            onColumnSorted={noop}
+            onDataProviderRemoved={noop}
             onFilterChange={mockOnFilterChange}
-            onRangeSelected={fp.noop}
+            onRangeSelected={noop}
             sort={sort}
             width={1000}
           />
@@ -163,9 +163,9 @@ describe('Timeline', () => {
           <Timeline
             columnHeaders={headers}
             dataProviders={mockDataProviders}
-            onColumnSorted={fp.noop}
-            onDataProviderRemoved={fp.noop}
-            onFilterChange={fp.noop}
+            onColumnSorted={noop}
+            onDataProviderRemoved={noop}
+            onFilterChange={noop}
             onRangeSelected={mockOnRangeSelected}
             sort={sort}
             width={1000}

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as fp from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import { OnFilterChange } from '../../events';
@@ -17,10 +17,8 @@ interface Props {
 }
 
 /** Renders a header's filter, based on the `columnHeaderType` */
-export const Filter = pure<Props>(({ header, onFilterChange = fp.noop }) => {
+export const Filter = pure<Props>(({ header, onFilterChange = noop }) => {
   switch (header.columnHeaderType) {
-    case 'not-filtered':
-      return null;
     case 'text-filter':
       return (
         <TextFilter
@@ -30,6 +28,7 @@ export const Filter = pure<Props>(({ header, onFilterChange = fp.noop }) => {
           placeholder={header.placeholder}
         />
       );
+    case 'not-filtered': // fall through
     default:
       return null;
   }

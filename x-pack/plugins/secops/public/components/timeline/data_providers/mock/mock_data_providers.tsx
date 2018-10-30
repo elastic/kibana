@@ -23,9 +23,9 @@ const mockSourceNameToEventCount: NameToEventCount<number> = {
   'Provider 4': 237,
   'Provider 5': 310,
   'Provider 6': 1052,
-  'Provider 7': 538,
+  'Provider 7': 533,
   'Provider 8': 429,
-  'Provider 9': 708,
+  'Provider 9': 706,
 };
 
 /** Returns a collection of mock data provider names */

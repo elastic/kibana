@@ -29,9 +29,9 @@ export const RangePicker = pure<Props>(({ selected, onRangeSelected }) => {
       value={selected}
       onChange={onChange}
     >
-      {Ranges.map(r => (
-        <option key={r} value={r}>
-          {r}
+      {Ranges.map(range => (
+        <option key={range} value={range}>
+          {range}
         </option>
       ))}
     </select>

@@ -8,19 +8,23 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import { SortDirection } from './sort';
 
-export const SORT_DIRECTION_ASCENDING = '^';
-export const SORT_DIRECTION_DESCENDING = 'v';
-export const SORT_DIRECTION_NONE = '';
+export type SortDirectionIndicator = '' | '^' | 'v';
+
+const unhandledDirection = (x: never): never => {
+  throw new Error('Unhandled sort direction');
+};
 
 /** Returns the symbol that corresponds to the specified `SortDirection` */
-export const getDirection = (sortDirection: SortDirection): string => {
+export const getDirection = (sortDirection: SortDirection): SortDirectionIndicator => {
   switch (sortDirection) {
     case 'ascending':
-      return SORT_DIRECTION_ASCENDING;
+      return '^';
     case 'descending':
-      return SORT_DIRECTION_DESCENDING;
+      return 'v';
+    case 'none':
+      return '';
     default:
-      return SORT_DIRECTION_NONE;
+      return unhandledDirection(sortDirection);
   }
 };
 

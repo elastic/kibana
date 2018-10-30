@@ -21,10 +21,11 @@ export const FacetText = pure<Props>(({ text }) => (
     style={{
       backgroundColor: '#e4e4e4',
       border: '1px solid',
+      borderColor: '#e4e4e4',
       borderRadius: '4px',
       color: '#666666',
       margin: '0px 5px',
-      padding: '5px',
+      padding: '0 2px 0 2px',
     }}
   >
     {text}

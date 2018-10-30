@@ -34,7 +34,7 @@ describe('Filter', () => {
 
       const wrapper = mount(<Filter header={notFilteredHeader} />);
 
-      expect(wrapper.find('[data-test-subj="textFilter"]').length).toEqual(0);
+      expect(wrapper.find('[data-test-subj="textFilter"]').exists()).toEqual(false);
     });
   });
 });

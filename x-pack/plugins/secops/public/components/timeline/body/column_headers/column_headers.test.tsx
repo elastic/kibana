@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as fp from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { Sort } from '../sort/sort';
 import { ColumnHeaders } from './column_headers';
@@ -20,7 +20,7 @@ describe('ColumnHeaders', () => {
 
     test('it renders the range picker header', () => {
       const wrapper = mount(
-        <ColumnHeaders columnHeaders={headers} sort={sort} onRangeSelected={fp.noop} />
+        <ColumnHeaders columnHeaders={headers} sort={sort} onRangeSelected={noop} />
       );
 
       expect(wrapper.find('[data-test-subj="rangePicker"]').props()).toHaveProperty('value');
@@ -28,7 +28,7 @@ describe('ColumnHeaders', () => {
 
     test('it renders the other (data-driven) column headers', () => {
       const wrapper = mount(
-        <ColumnHeaders columnHeaders={headers} sort={sort} onRangeSelected={fp.noop} />
+        <ColumnHeaders columnHeaders={headers} sort={sort} onRangeSelected={noop} />
       );
 
       headers.forEach(h => {

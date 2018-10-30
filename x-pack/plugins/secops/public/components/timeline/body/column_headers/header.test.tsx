@@ -7,7 +7,6 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 import { Sort } from '../sort/sort';
-import { SORT_DIRECTION_DESCENDING } from '../sort/sort_indicator';
 import { ColumnHeader } from './column_header';
 import {
   getNewSortDirectionOnClick,
@@ -38,9 +37,7 @@ describe('Header', () => {
     test('it renders a sort indicator', () => {
       const wrapper = mount(<Header sort={sort} header={columnHeader} />);
 
-      expect(wrapper.find('[data-test-subj="sortIndicator"]').text()).toEqual(
-        SORT_DIRECTION_DESCENDING
-      );
+      expect(wrapper.find('[data-test-subj="sortIndicator"]').text()).toEqual('v');
     });
 
     test('it renders a filter', () => {

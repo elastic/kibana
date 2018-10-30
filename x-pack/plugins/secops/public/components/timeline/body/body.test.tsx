@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as fp from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { Body } from './body';
@@ -25,10 +25,10 @@ describe('ColumnHeaders', () => {
           columnHeaders={headers}
           dataProviders={mockDataProviders}
           sort={sort}
-          onColumnSorted={fp.noop}
-          onDataProviderRemoved={fp.noop}
-          onFilterChange={fp.noop}
-          onRangeSelected={fp.noop}
+          onColumnSorted={noop}
+          onDataProviderRemoved={noop}
+          onFilterChange={noop}
+          onRangeSelected={noop}
           width={1000}
         />
       );

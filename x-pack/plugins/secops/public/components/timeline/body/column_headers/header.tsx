@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as fp from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import { OnColumnSorted, OnFilterChange } from '../../events';
@@ -22,6 +22,10 @@ interface GetSortDirectionParams {
 export const getSortDirection = ({ header, sort }: GetSortDirectionParams): SortDirection =>
   header.id === sort.columnId ? sort.sortDirection : 'none';
 
+const unhandledSortDirection = (x: never): never => {
+  throw new Error('Unhandled sort direction');
+};
+
 /** Given a current sort direction, it returns the next sort direction */
 export const getNextSortDirection = (currentSort: Sort): SortDirection => {
   switch (currentSort.sortDirection) {
@@ -29,8 +33,10 @@ export const getNextSortDirection = (currentSort: Sort): SortDirection => {
       return 'ascending';
     case 'ascending':
       return 'descending';
-    default:
+    case 'none':
       return 'descending';
+    default:
+      return unhandledSortDirection(currentSort.sortDirection);
   }
 };
 
@@ -55,7 +61,7 @@ interface Props {
 
 /** Renders a header */
 export const Header = pure<Props>(
-  ({ header, sort, onColumnSorted = fp.noop, onFilterChange = fp.noop }) => {
+  ({ header, sort, onColumnSorted = noop, onFilterChange = noop }) => {
     const onClick = () => {
       onColumnSorted({
         columnId: header.id,

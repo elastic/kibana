@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as fp from 'lodash/fp';
+import { noop, omit } from 'lodash/fp';
 import * as React from 'react';
 import {
   getEventCount,
@@ -18,7 +18,7 @@ describe('Providers', () => {
   describe('rendering', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
-        <Providers dataProviders={mockDataProviders} onDataProviderRemoved={fp.noop} />
+        <Providers dataProviders={mockDataProviders} onDataProviderRemoved={noop} />
       );
 
       mockDataProviderNames().forEach(name =>
@@ -43,7 +43,7 @@ describe('Providers', () => {
         .first()
         .simulate('click');
 
-      const callbackParams = fp.omit('render', mockOnDataProviderRemoved.mock.calls[0][0]);
+      const callbackParams = omit('render', mockOnDataProviderRemoved.mock.calls[0][0]);
 
       expect(callbackParams).toEqual({
         enabled: true,

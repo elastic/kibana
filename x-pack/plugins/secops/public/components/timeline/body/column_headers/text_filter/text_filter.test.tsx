@@ -14,7 +14,7 @@ describe('TextFilter', () => {
       test('it renders the default placeholder when no filter is specified, and a placeholder is NOT provided', () => {
         const wrapper = mount(<TextFilter columnId="foo" minWidth={100} />);
 
-        expect(wrapper.find(`input[placeholder="${DEFAULT_PLACEHOLDER}"]`)).toHaveLength(1);
+        expect(wrapper.find(`input[placeholder="${DEFAULT_PLACEHOLDER}"]`).exists()).toEqual(true);
       });
 
       test('it renders the default placeholder when no filter is specified, a placeholder is provided', () => {
@@ -23,7 +23,7 @@ describe('TextFilter', () => {
           <TextFilter columnId="foo" placeholder={placeholder} minWidth={100} />
         );
 
-        expect(wrapper.find(`input[placeholder="${placeholder}"]`)).toHaveLength(1);
+        expect(wrapper.find(`input[placeholder="${placeholder}"]`).exists()).toEqual(true);
       });
     });
 

@@ -47,7 +47,7 @@ export const DataProviders = pure<Props>(({ dataProviders, onDataProviderRemoved
       padding: '5px',
     }}
   >
-    {dataProviders.length > 0 ? (
+    {dataProviders.length ? (
       <Providers dataProviders={dataProviders} onDataProviderRemoved={onDataProviderRemoved} />
     ) : (
       <Empty />
