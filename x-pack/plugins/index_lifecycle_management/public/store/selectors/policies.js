@@ -236,7 +236,8 @@ export const phaseToES = (state, phase) => {
       esPhase.actions.rollover.max_age = `${phase[PHASE_ROLLOVER_MAX_AGE]}${
         phase[PHASE_ROLLOVER_MAX_AGE_UNITS]
       }`;
-    } else if (isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])) {
+    }
+    if (isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])) {
       if (phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] === MAX_SIZE_TYPE_DOCUMENT) {
         esPhase.actions.rollover.max_docs = phase[PHASE_ROLLOVER_MAX_SIZE_STORED];
       } else {
@@ -246,7 +247,6 @@ export const phaseToES = (state, phase) => {
       }
     }
   }
-
   if (phase[PHASE_NODE_ATTRS]) {
     esPhase.actions.allocate = {
       include: {}, // TODO: this seems to be a constant, confirm?
