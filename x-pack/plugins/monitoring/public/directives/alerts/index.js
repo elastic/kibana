@@ -21,10 +21,18 @@ import { i18n } from '@kbn/i18n';
 import { injectI18n, I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 
 const linkToCategories = {
-  'elasticsearch/nodes': 'Elasticsearch Nodes',
-  'elasticsearch/indices': 'Elasticsearch Indices',
-  'kibana/instances': 'Kibana Instances',
-  'logstash/instances': 'Logstash Nodes',
+  'elasticsearch/nodes': i18n.translate('xpack.monitoring.alerts.esNodesCategoryLabel', {
+    defaultMessage: 'Elasticsearch Nodes',
+  }),
+  'elasticsearch/indices': i18n.translate('xpack.monitoring.alerts.esIndicesCategoryLabel', {
+    defaultMessage: 'Elasticsearch Indices',
+  }),
+  'kibana/instances': i18n.translate('xpack.monitoring.alerts.kibanaInstancesCategoryLabel', {
+    defaultMessage: 'Kibana Instances',
+  }),
+  'logstash/instances': i18n.translate('xpack.monitoring.alerts.logstashNodesCategoryLabel', {
+    defaultMessage: 'Logstash Nodes',
+  }),
 };
 const filterFields = [ 'message', 'severity_group', 'prefix', 'suffix', 'metadata.link', 'since', 'timestamp', 'update_timestamp' ];
 const columns = [

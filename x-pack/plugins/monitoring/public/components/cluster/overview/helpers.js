@@ -31,7 +31,7 @@ export function HealthStatusIndicator(props) {
   return (
     <EuiHealth color={statusColor} data-test-subj="statusIcon">
       <FormattedMessage
-        id="xpack.monitoring.cluster.overview.healthDescription"
+        id="xpack.monitoring.cluster.overview.healthStatusDescription"
         defaultMessage="Health is {status}"
         values={{ status: props.status }}
       />

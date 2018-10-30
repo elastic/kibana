@@ -314,7 +314,10 @@ const clusterRowFactory = (scope, globalState, kbnUrl, showLicenseExpiration) =>
             trigger="hover"
           >
             <EuiHealth color="subdued" data-test-subj="alertIcon">
-              N/A
+              <FormattedMessage
+                id="xpack.monitoring.cluster.listing.alerts.notAvailableDescription"
+                defaultMessage="N/A"
+              />
             </EuiHealth>
           </Tooltip>
         );

@@ -20,14 +20,14 @@ export function LicenseText({ license, showLicenseExpiration }) {
   return (
     <EuiLink href="#/license">
       <FormattedMessage
-        id="xpack.monitoring.cluster.overview.license.typeLinkText"
-        defaultMessage="{licenseType} license{willExpireOn}"
+        id="xpack.monitoring.cluster.overview.licenseText.toLicensePageLinkLabel"
+        defaultMessage="{licenseType} license {willExpireOn}"
         values={{
           licenseType: capitalize(license.type),
           willExpireOn: license.expiry_date_in_millis === undefined ? '' : (
             <FormattedMessage
-              id="xpack.monitoring.cluster.overview.license.willExpireOnDateText"
-              defaultMessage=" will expire on {expiryDate}"
+              id="xpack.monitoring.cluster.overview.licenseText.expireDateText"
+              defaultMessage="will expire on {expiryDate}"
               values={{ expiryDate: formatDateLocal(license.expiry_date_in_millis) }}
             />
           )

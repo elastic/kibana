@@ -60,7 +60,7 @@ function BeatsPanelUi(props) {
                 <EuiLink
                   onClick={goToBeats}
                   aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.beatsPanel.beatsLinkAriaLabel', defaultMessage: 'Beats Overview' })}
+                    id: 'xpack.monitoring.cluster.overview.beatsPanel.overviewLinkAriaLabel', defaultMessage: 'Beats Overview' })}
                   data-test-subj="beatsOverview"
                 >
                   <FormattedMessage
@@ -100,13 +100,13 @@ function BeatsPanelUi(props) {
                 <EuiLink
                   onClick={goToInstances}
                   aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.beatsPanel.beatsInstancesLinkAriaLabel',
+                    id: 'xpack.monitoring.cluster.overview.beatsPanel.instancesTotalLinkAriaLabel',
                     defaultMessage: 'Beats Instances: {beatsTotal}' },
                   { beatsTotal: props.beats.total })}
                   data-test-subj="beatsListing"
                 >
                   <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.beatsPanel.bytesSentLinkLabel"
+                    id="xpack.monitoring.cluster.overview.beatsPanel.beatsTotalLinkLabel"
                     defaultMessage="Beats: {beatsTotal}"
                     values={{ beatsTotal: (<span data-test-subj="beatsTotal">{props.beats.total}</span>) }}
                   />

@@ -62,8 +62,8 @@ function ElasticsearchPanelUi(props) {
       return [
         <EuiDescriptionListTitle key="mlJobsListTitle">
           <FormattedMessage
-            id="xpack.monitoring.cluster.overview.esPanel.jobLabel"
-            defaultMessage="Job"
+            id="xpack.monitoring.cluster.overview.esPanel.jobsLabel"
+            defaultMessage="Jobs"
           />
         </EuiDescriptionListTitle>,
         <EuiDescriptionListDescription key="mlJobsCount" data-test-subj="esMlJobs">{ props.ml.jobs }</EuiDescriptionListDescription>
@@ -137,7 +137,7 @@ function ElasticsearchPanelUi(props) {
                   onClick={goToNodes}
                 >
                   <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.esPanel.nodesLinkLabel"
+                    id="xpack.monitoring.cluster.overview.esPanel.nodesTotalLinkLabel"
                     defaultMessage="Nodes: {nodesTotal}"
                     values={{ nodesTotal: formatNumber(get(nodes, 'count.total'), 'int_commas') }}
                   />
@@ -161,7 +161,8 @@ function ElasticsearchPanelUi(props) {
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.jvmHeapLabel"
-                  defaultMessage="JVM Heap"
+                  defaultMessage="{javaVirtualMachine} Heap"
+                  values={{ javaVirtualMachine: 'JVM' }}
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esJvmHeap">

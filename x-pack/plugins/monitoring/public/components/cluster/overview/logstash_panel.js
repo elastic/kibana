@@ -115,7 +115,8 @@ function LogstashPanelUi(props) {
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.jvmHeapLabel"
-                  defaultMessage="JVM Heap"
+                  defaultMessage="{javaVirtualMachine} Heap"
+                  values={{ javaVirtualMachine: 'JVM' }}
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="lsJvmHeap">
@@ -148,7 +149,7 @@ function LogstashPanelUi(props) {
                     <span className="kuiIcon fa-flask betaIcon" />
                   </Tooltip>
                   <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.logstashPanel.pipelinesLinkLabel"
+                    id="xpack.monitoring.cluster.overview.logstashPanel.pipelinesCountLinkLabel"
                     defaultMessage="Pipelines: {pipelineCount}"
                     values={{ pipelineCount: (<span data-test-subj="number_of_logstash_pipelines">{ props.pipeline_count }</span>) }}
                   />

@@ -78,7 +78,7 @@ function KibanaPanelUi(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="kbnMaxResponseTime">
                 <FormattedMessage
-                  id="xpack.monitoring.cluster.overview.kibanaPanel.maxResponseTimeText"
+                  id="xpack.monitoring.cluster.overview.kibanaPanel.maxResponseTimeDescription"
                   defaultMessage="{maxTime} ms"
                   values={{ maxTime: props.response_time_max }}
                 />
@@ -95,7 +95,7 @@ function KibanaPanelUi(props) {
                   data-test-subj="kbnInstances"
                   aria-label={props.intl.formatMessage({
                     id: 'xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkAriaLabel',
-                    defaultMessage: 'Instances: {instancesCount}' },
+                    defaultMessage: 'Kibana Instances: {instancesCount}' },
                   { instancesCount: props.count })}
                 >
                   <FormattedMessage

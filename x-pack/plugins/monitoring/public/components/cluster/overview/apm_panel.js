@@ -46,7 +46,7 @@ function ApmPanelUi(props) {
                 <EuiLink
                   onClick={goToApm}
                   aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.apmPanel.apmOverviewLinkAriaLabel', defaultMessage: 'APM Overview' })}
+                    id: 'xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel', defaultMessage: 'APM Overview' })}
                   data-test-subj="apmOverview"
                 >
                   <FormattedMessage
@@ -69,7 +69,7 @@ function ApmPanelUi(props) {
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.monitoring.cluster.overview.apmPanel.lastEventsLabel"
+                  id="xpack.monitoring.cluster.overview.apmPanel.lastEventLabel"
                   defaultMessage="Last Event"
                 />
               </EuiDescriptionListTitle>
@@ -86,13 +86,13 @@ function ApmPanelUi(props) {
                 <EuiLink
                   onClick={goToInstances}
                   aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.apmPanel.apmInstancesLinkAriaLabel',
+                    id: 'xpack.monitoring.cluster.overview.apmPanel.instancesTotalLinkAriaLabel',
                     defaultMessage: 'Apm Instances: {apmsTotal}' },
                   { apmsTotal: props.apms.total })}
                   data-test-subj="apmListing"
                 >
                   <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.apmPanel.apmServersLinkLabel"
+                    id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
                     defaultMessage="APM Servers: {apmsTotal}"
                     values={{ apmsTotal: (<span data-test-subj="apmsTotal">{props.apms.total}</span>) }}
                   />
