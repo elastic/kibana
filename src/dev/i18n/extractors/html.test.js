@@ -24,8 +24,12 @@ const htmlSourceBuffer = Buffer.from(`
   <div>
     <p
       i18n-id="kbn.dashboard.id-1"
-      i18n-default-message="Message text 1"
+      i18n-default-message="Message text 1 {value}"
       i18n-context="Message context 1"
+      i18n-values="{
+        value: 'Multiline
+                string',
+      }"
     ></p>
   </div>
   <div>

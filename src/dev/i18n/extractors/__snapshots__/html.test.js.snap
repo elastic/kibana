@@ -6,7 +6,7 @@ Array [
     "kbn.dashboard.id-1",
     Object {
       "context": "Message context 1",
-      "message": "Message text 1",
+      "message": "Message text 1 {value}",
     },
   ],
   Array [
