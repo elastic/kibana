@@ -41,7 +41,6 @@ export const Timeline = pure<Props>(
       style={{
         border: '1px solid black',
         borderRadius: '10px',
-        cursor: 'default',
         display: 'flex',
         flexDirection: 'column',
         minHeight: '700px',

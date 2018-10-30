@@ -21,7 +21,14 @@ export const RangePicker = pure<Props>(({ selected, onRangeSelected }) => {
   };
 
   return (
-    <select data-test-subj="rangePicker" value={selected} onChange={onChange}>
+    <select
+      style={{
+        cursor: 'pointer',
+      }}
+      data-test-subj="rangePicker"
+      value={selected}
+      onChange={onChange}
+    >
       {Ranges.map(r => (
         <option key={r} value={r}>
           {r}

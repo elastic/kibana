@@ -25,6 +25,7 @@ const CloseButton = pure(({ onDataProviderRemoved, dataProvider }: CloseButtonPr
       data-test-subj="closeButton"
       onClick={onClick}
       style={{
+        cursor: 'pointer',
         margin: '0 10px 0 15px',
       }}
     >

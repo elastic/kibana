@@ -80,6 +80,7 @@ export const Header = pure<Props>(
           data-test-subj="header"
           onClick={onClick}
           style={{
+            cursor: 'pointer',
             display: 'flex',
             flexDirection: 'row',
           }}
