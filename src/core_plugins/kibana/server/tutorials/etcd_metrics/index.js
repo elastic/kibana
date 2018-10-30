@@ -17,22 +17,35 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function etcdMetricsSpecProvider() {
+export function etcdMetricsSpecProvider(server, context) {
   const moduleName = 'etcd';
   return {
     id: 'etcdMetrics',
-    name: 'Etcd metrics',
+    name: i18n.translate('kbn.server.tutorials.etcdMetrics.nameTitle', {
+      defaultMessage: 'Etcd metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from the Etcd server.',
-    longDescription: 'The `etcd` Metricbeat module fetches internal metrics from Etcd.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-etcd.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.etcdMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from the Etcd server.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.etcdMetrics.longDescription', {
+      defaultMessage: 'The `etcd` Metricbeat module fetches internal metrics from Etcd. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-etcd.html',
+      },
+    }),
+    euiIconType: 'logoEtcd',
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.etcdMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],
@@ -41,7 +54,7 @@ export function etcdMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

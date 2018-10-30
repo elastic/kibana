@@ -26,7 +26,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import Wreck from 'wreck';
 
-import { createToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { download } from '../download';
 
 const TMP_DESTINATION = resolve(__dirname, '__tmp__');
@@ -41,9 +41,13 @@ describe('src/dev/build/tasks/nodejs/download', () => {
   const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.reset());
 
-  const log = createToolingLog('verbose');
   const onLogLine = sandbox.stub();
-  log.on('data', onLogLine);
+  const log = new ToolingLog({
+    level: 'verbose',
+    writeTo: {
+      write: onLogLine
+    }
+  });
 
   const FOO_SHA256 = '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae';
   const createSendHandler = (send) => (req, res) => {

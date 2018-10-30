@@ -80,4 +80,79 @@ describe('Buckets wrapper', function () {
       expect(buckets).to.have.length(1);
     });
   });
+
+  describe('drop_partial option', function () {
+    const aggResp = {
+      buckets: [
+        { key: 0, value: {} },
+        { key: 100, value: {} },
+        { key: 200, value: {} },
+        { key: 300, value: {} }
+      ]
+    };
+
+    it('drops partial buckets when enabled', function () {
+      const aggParams = {
+        drop_partials: true,
+        field: {
+          name: 'date'
+        }
+      };
+      const timeRange = {
+        gte: 150,
+        lte: 350,
+        name: 'date'
+      };
+      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      expect(buckets).to.have.length(1);
+    });
+
+    it('keeps partial buckets when disabled', function () {
+      const aggParams = {
+        drop_partials: false,
+        field: {
+          name: 'date'
+        }
+      };
+      const timeRange = {
+        gte: 150,
+        lte: 350,
+        name: 'date'
+      };
+      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      expect(buckets).to.have.length(4);
+    });
+
+    it('keeps aligned buckets when enabled', function () {
+      const aggParams = {
+        drop_partials: true,
+        field: {
+          name: 'date'
+        }
+      };
+      const timeRange = {
+        gte: 100,
+        lte: 400,
+        name: 'date'
+      };
+      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      expect(buckets).to.have.length(3);
+    });
+
+    it('does not drop buckets for non-timerange fields', function () {
+      const aggParams = {
+        drop_partials: true,
+        field: {
+          name: 'other_time'
+        }
+      };
+      const timeRange = {
+        gte: 150,
+        lte: 350,
+        name: 'date'
+      };
+      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+      expect(buckets).to.have.length(4);
+    });
+  });
 });

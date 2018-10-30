@@ -23,7 +23,6 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'X-Pack SAML API Integration Tests',
     },
-    env: xPackAPITestsConfig.get('env'),
 
     esTestCluster: {
       ...xPackAPITestsConfig.get('esTestCluster'),

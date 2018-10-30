@@ -18,13 +18,13 @@
  */
 
 import $ from 'jquery';
-import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { tabifyAggResponse } from 'ui/agg_response/tabify/tabify';
+import { LegacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
+import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
 describe('Table Vis Controller', function () {
   let $rootScope;
@@ -35,6 +35,8 @@ describe('Table Vis Controller', function () {
   let Vis;
   let fixtures;
   let AppState;
+  let tableAggResponse;
+  let tabifiedResponse;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
   beforeEach(ngMock.inject(function ($injector) {
@@ -44,6 +46,7 @@ describe('Table Vis Controller', function () {
     fixtures = require('fixtures/fake_hierarchical_data');
     AppState = Private(AppStateProvider);
     Vis = Private(VisProvider);
+    tableAggResponse =  Private(LegacyResponseHandlerProvider).handler;
   }));
 
   function OneRangeVis(params) {
@@ -74,6 +77,7 @@ describe('Table Vis Controller', function () {
   function initController(vis) {
     vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
+    tabifiedResponse = tabifyAggResponse(vis.aggs, fixtures.oneRangeBucket);
     $rootScope.vis = vis;
     $rootScope.uiState = new AppState({ uiState: {} }).makeStateful('uiState');
     $rootScope.renderComplete = () => {};
@@ -99,16 +103,14 @@ describe('Table Vis Controller', function () {
     $rootScope.$apply();
   }
 
-  it('exposes #tableGroups and #hasSomeRows when a response is attached to scope', function () {
+  it('exposes #tableGroups and #hasSomeRows when a response is attached to scope', async function () {
     const vis = new OneRangeVis();
     initController(vis);
 
     expect(!$scope.tableGroups).to.be.ok();
     expect(!$scope.hasSomeRows).to.be.ok();
 
-    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig(), fixtures.oneRangeBucket, {
-      isHierarchical: vis.isHierarchical()
-    }));
+    attachEsResponseToScope(await tableAggResponse(tabifiedResponse));
 
     expect($scope.hasSomeRows).to.be(true);
     expect($scope.tableGroups).to.have.property('tables');
@@ -117,20 +119,18 @@ describe('Table Vis Controller', function () {
     expect($scope.tableGroups.tables[0].rows).to.have.length(2);
   });
 
-  it('clears #tableGroups and #hasSomeRows when the response is removed', function () {
+  it('clears #tableGroups and #hasSomeRows when the response is removed', async function () {
     const vis = new OneRangeVis();
     initController(vis);
 
-    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig(), fixtures.oneRangeBucket, {
-      isHierarchical: vis.isHierarchical()
-    }));
+    attachEsResponseToScope(await tableAggResponse(tabifiedResponse));
     removeEsResponseFromScope();
 
     expect(!$scope.hasSomeRows).to.be.ok();
     expect(!$scope.tableGroups).to.be.ok();
   });
 
-  it('sets the sort on the scope when it is passed as a vis param', function () {
+  it('sets the sort on the scope when it is passed as a vis param', async function () {
     const sortObj = {
       columnIndex: 1,
       direction: 'asc'
@@ -138,29 +138,19 @@ describe('Table Vis Controller', function () {
     const vis = new OneRangeVis({ sort: sortObj });
     initController(vis);
 
-    // modify the data to not have any buckets
-    const resp = _.cloneDeep(fixtures.oneRangeBucket);
-    resp.aggregations.agg_2.buckets = {};
-
-    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig(), resp, {
-      isHierarchical: vis.isHierarchical()
-    }));
+    attachEsResponseToScope(await tableAggResponse(tabifiedResponse));
 
     expect($scope.sort.columnIndex).to.equal(sortObj.columnIndex);
     expect($scope.sort.direction).to.equal(sortObj.direction);
   });
 
-  it('sets #hasSomeRows properly if the table group is empty', function () {
+  it('sets #hasSomeRows properly if the table group is empty', async function () {
     const vis = new OneRangeVis();
     initController(vis);
 
-    // modify the data to not have any buckets
-    const resp = _.cloneDeep(fixtures.oneRangeBucket);
-    resp.aggregations.agg_2.buckets = {};
+    tabifiedResponse.rows = [];
 
-    attachEsResponseToScope(tabifyAggResponse(vis.getAggConfig(), resp, {
-      isHierarchical: vis.isHierarchical()
-    }));
+    attachEsResponseToScope(await tableAggResponse(tabifiedResponse));
 
     expect($scope.hasSomeRows).to.be(false);
     expect(!$scope.tableGroups).to.be.ok();

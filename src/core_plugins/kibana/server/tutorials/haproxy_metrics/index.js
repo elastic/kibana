@@ -17,22 +17,35 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function haproxyMetricsSpecProvider() {
+export function haproxyMetricsSpecProvider(server, context) {
   const moduleName = 'haproxy';
   return {
     id: 'haproxyMetrics',
-    name: 'HAProxy metrics',
+    name: i18n.translate('kbn.server.tutorials.haproxyMetrics.nameTitle', {
+      defaultMessage: 'HAProxy metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from the HAProxy server.',
-    longDescription: 'The `haproxy` Metricbeat module fetches internal metrics from HAProxy.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-haproxy.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.haproxyMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from the HAProxy server.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.haproxyMetrics.longDescription', {
+      defaultMessage: 'The `haproxy` Metricbeat module fetches internal metrics from HAProxy. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-haproxy.html',
+      },
+    }),
+    euiIconType: 'logoHAproxy',
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.haproxyMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],
@@ -41,7 +54,7 @@ export function haproxyMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

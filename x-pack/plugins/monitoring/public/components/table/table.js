@@ -393,7 +393,7 @@ export class MonitoringTable extends React.Component {
   }
 
   render() {
-    const classes = classNames(this.props.className, 'monitoringTable');
+    const classes = classNames(this.props.className, 'monTable');
 
     let table; // This will come out to either be the KuiTable or a "No Data" message
 
@@ -434,7 +434,7 @@ export class MonitoringTable extends React.Component {
     }
 
     return (
-      <KuiControlledTable className={classes} data-test-subj={`${this.props.className}Container`}>
+      <KuiControlledTable className={classes} data-test-subj={`${this.props.className}Container`} style={{ margin: 10 }}>
         { this.getToolBar(numVisibleRows, numAvailableRows) }
         { table }
         { this.getFooter(numVisibleRows, numAvailableRows, this.props.alwaysShowPageControls) }

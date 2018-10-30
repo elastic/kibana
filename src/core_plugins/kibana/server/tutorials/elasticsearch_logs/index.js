@@ -17,26 +17,38 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function elasticsearchLogsSpecProvider() {
+export function elasticsearchLogsSpecProvider(server, context) {
   const moduleName = 'elasticsearch';
   const geoipRequired = false;
   const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'elasticsearchLogs',
-    name: 'Elasticsearch logs',
+    name: i18n.translate('kbn.server.tutorials.elasticsearchLogs.nameTitle', {
+      defaultMessage: 'Elasticsearch logs',
+    }),
     category: TUTORIAL_CATEGORY.LOGGING,
     isBeta: true,
-    shortDescription: 'Collect and parse logs created by Elasticsearch.',
-    longDescription: 'The `elasticsearch` Filebeat module parses logs created by Elasticsearch.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-elasticsearch.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.elasticsearchLogs.shortDescription', {
+      defaultMessage: 'Collect and parse logs created by Elasticsearch.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.elasticsearchLogs.longDescription', {
+      defaultMessage: 'The `elasticsearch` Filebeat module parses logs created by Elasticsearch. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-elasticsearch.html',
+      },
+    }),
     euiIconType: 'logoElasticsearch',
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.elasticsearchLogs.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],
@@ -45,7 +57,7 @@ export function elasticsearchLogsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

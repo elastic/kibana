@@ -17,27 +17,39 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function postgresqlLogsSpecProvider() {
+export function postgresqlLogsSpecProvider(server, context) {
   const moduleName = 'postgresql';
   const geoipRequired = false;
   const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'postgresqlLogs',
-    name: 'PostgreSQL logs',
+    name: i18n.translate('kbn.server.tutorials.postgresqlLogs.nameTitle', {
+      defaultMessage: 'PostgreSQL logs',
+    }),
     category: TUTORIAL_CATEGORY.LOGGING,
-    shortDescription: 'Collect and parse error and slow logs created by PostgreSQL.',
-    longDescription: 'The `postgresql` Filebeat module parses error and slow logs created by PostgreSQL.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-postgresql.html).',
-    //euiIconType: 'logoPostgreSQL',
+    shortDescription: i18n.translate('kbn.server.tutorials.postgresqlLogs.shortDescription', {
+      defaultMessage: 'Collect and parse error and slow logs created by PostgreSQL.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.postgresqlLogs.longDescription', {
+      defaultMessage: 'The `postgresql` Filebeat module parses error and slow logs created by PostgreSQL. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-postgresql.html',
+      },
+    }),
+    euiIconType: 'logoPostgres',
     artifacts: {
       dashboards: [
         {
           id: '158be870-87f4-11e7-ad9c-db80de0bf8d3',
-          linkLabel: 'PostgreSQL logs dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.postgresqlLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'PostgreSQL logs dashboard',
+          }),
           isOverview: true
         }
       ],
@@ -47,7 +59,7 @@ export function postgresqlLogsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/postgresql_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

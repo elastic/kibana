@@ -34,11 +34,13 @@ import { uiSettingsServiceFactory } from './ui_settings_service_factory';
  */
 export function getUiSettingsServiceForRequest(server, request, options = {}) {
   const {
-    getDefaults
+    getDefaults,
+    overrides,
   } = options;
 
   const uiSettingsService = uiSettingsServiceFactory(server, {
     getDefaults,
+    overrides,
     savedObjectsClient: request.getSavedObjectsClient()
   });
 

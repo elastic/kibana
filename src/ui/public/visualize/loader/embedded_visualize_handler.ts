@@ -64,7 +64,7 @@ export class EmbeddedVisualizeHandler {
   }, 100);
 
   private dataLoaderParams: RequestHandlerParams;
-  private appState: AppState;
+  private readonly appState?: AppState;
   private uiState: PersistedState;
   private dataLoader: VisualizeDataLoader;
 
@@ -105,7 +105,7 @@ export class EmbeddedVisualizeHandler {
 
     this.vis.on('update', this.handleVisUpdate);
     this.vis.on('reload', this.reload);
-    this.uiState.on('change', this.fetchAndRender);
+    this.uiState.on('change', this.onUiStateChange);
     timefilter.on('autoRefreshFetch', this.reload);
 
     this.dataLoader = new VisualizeDataLoader(vis, Private);
@@ -165,7 +165,7 @@ export class EmbeddedVisualizeHandler {
     this.vis.removeListener('reload', this.reload);
     this.vis.removeListener('update', this.handleVisUpdate);
     this.element.removeEventListener('renderComplete', this.onRenderCompleteListener);
-    this.uiState.off('change', this.fetchAndRender);
+    this.uiState.off('change', this.onUiStateChange);
     visualizationLoader.destroy(this.element);
     this.renderCompleteHelper.destroy();
   }
@@ -224,6 +224,10 @@ export class EmbeddedVisualizeHandler {
   private onRenderCompleteListener = () => {
     this.listeners.emit(RENDER_COMPLETE_EVENT);
     this.element.removeAttribute(LOADING_ATTRIBUTE);
+  };
+
+  private onUiStateChange = () => {
+    this.fetchAndRender();
   };
 
   /**

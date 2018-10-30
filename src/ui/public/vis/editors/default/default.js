@@ -21,7 +21,6 @@ import './sidebar';
 import './vis_options';
 import './vis_editor_resizer';
 import './vis_type_agg_filter';
-import './vis_type_field_filter';
 import $ from 'jquery';
 
 import _ from 'lodash';
@@ -32,7 +31,6 @@ import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
-import { updateEditorStateWithChanges } from './update_editor_state';
 
 
 const defaultEditor = function ($rootScope, $compile) {
@@ -108,26 +106,18 @@ const defaultEditor = function ($rootScope, $compile) {
 
           $scope.getSidebarClass = () => {
             if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.SMALL) {
-              return 'collapsible-sidebar--small';
+              return 'visEditor__collapsibleSidebar--small';
             } else if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.MEDIUM) {
-              return 'collapsible-sidebar--medium';
+              return 'visEditor__collapsibleSidebar--medium';
             } else if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.LARGE) {
-              return 'collapsible-sidebar--large';
+              return 'visEditor__collapsibleSidebar--large';
             }
           };
 
-          let lockDirty = false;
           $scope.$watch(() => {
             return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
-            // when visualization updates its `vis.params` we need to update the editor, but we should
-            // not set the dirty flag (as this change came from vis itself and is already applied)
-            if (lockDirty) {
-              lockDirty = false;
-            } else {
-              $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
-            }
-
+            $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
             $scope.responseValueAggs = null;
             try {
               $scope.responseValueAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
@@ -144,8 +134,9 @@ const defaultEditor = function ($rootScope, $compile) {
           $scope.$watch(() => {
             return $scope.vis.getCurrentState(false);
           }, (newState) => {
-            if (updateEditorStateWithChanges(newState, $scope.oldState, $scope.state)) {
-              lockDirty = true;
+            if (!_.isEqual(newState, $scope.oldState)) {
+              $scope.state = $scope.vis.copyCurrentState(true);
+              $scope.oldState = newState;
             }
           }, true);
 
@@ -161,7 +152,7 @@ const defaultEditor = function ($rootScope, $compile) {
         }
 
         if (!this._handler) {
-          const visualizationEl = this.el.find('.vis-editor-canvas')[0];
+          const visualizationEl = this.el.find('.visEditor__canvas')[0];
           getVisualizeLoader().then(loader => {
             if (!visualizationEl) {
               return;

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StaticLookupFormatEditor should render multiple lookup entries and unknown key value 1`] = `
+exports[`StaticLookupFormatEditorComponent should render multiple lookup entries and unknown key value 1`] = `
 <React.Fragment>
   <EuiBasicTable
     columns={
@@ -77,7 +77,13 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Value for unknown key"
+    label={
+      <FormattedMessage
+        defaultMessage="Value for unknown key"
+        id="common.ui.fieldEditor.staticLookup.unknownKeyLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}
@@ -94,7 +100,7 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
 </React.Fragment>
 `;
 
-exports[`StaticLookupFormatEditor should render normally 1`] = `
+exports[`StaticLookupFormatEditorComponent should render normally 1`] = `
 <React.Fragment>
   <EuiBasicTable
     columns={
@@ -165,7 +171,13 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Value for unknown key"
+    label={
+      <FormattedMessage
+        defaultMessage="Value for unknown key"
+        id="common.ui.fieldEditor.staticLookup.unknownKeyLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiFieldText
       compressed={false}

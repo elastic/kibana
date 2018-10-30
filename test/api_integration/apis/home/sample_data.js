@@ -26,6 +26,19 @@ export default function ({ getService }) {
 
   describe('sample data apis', () => {
 
+    describe('list', () => {
+      it('should return list of sample data sets with installed status', async () => {
+        const resp = await supertest
+          .get(`/api/sample_data`)
+          .set('kbn-xsrf', 'kibana')
+          .expect(200);
+
+        expect(resp.body).to.be.an('array');
+        expect(resp.body.length).to.be.above(0);
+        expect(resp.body[0].status).to.be('not_installed');
+      });
+    });
+
     describe('install', () => {
       it('should return 404 if id does not match any sample data sets', async () => {
         await supertest
@@ -40,7 +53,7 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
-        expect(resp.body).to.eql({ docsLoaded: 13059, kibanaSavedObjectsLoaded: 21 });
+        expect(resp.body).to.eql({ elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 }, kibanaSavedObjectsLoaded: 21 });
       });
 
       it('should load elasticsearch index containing sample data with dates relative to current time', async () => {

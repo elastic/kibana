@@ -17,22 +17,35 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function windowsMetricsSpecProvider() {
+export function windowsMetricsSpecProvider(server, context) {
   const moduleName = 'windows';
   return {
     id: 'windowsMetrics',
-    name: 'Windows metrics',
+    name: i18n.translate('kbn.server.tutorials.windowsMetrics.nameTitle', {
+      defaultMessage: 'Windows metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from Windows.',
-    longDescription: 'The `windows` Metricbeat module fetches internal metrics from Windows.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-windows.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.windowsMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from Windows.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.windowsMetrics.longDescription', {
+      defaultMessage: 'The `windows` Metricbeat module fetches internal metrics from Windows. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-windows.html',
+      },
+    }),
+    euiIconType: 'logoWindows',
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.windowsMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],
@@ -41,7 +54,7 @@ export function windowsMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

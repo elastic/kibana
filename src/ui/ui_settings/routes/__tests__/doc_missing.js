@@ -48,7 +48,7 @@ export function docMissingSuite() {
   });
 
   describe('get route', () => {
-    it('creates doc, returns a 200 with no settings', async () => {
+    it('creates doc, returns a 200 with settings', async () => {
       const { kbnServer } = getServices();
 
       const { statusCode, result } = await kbnServer.inject({
@@ -58,7 +58,15 @@ export function docMissingSuite() {
 
       expect(statusCode).to.be(200);
       assertSinonMatch(result, {
-        settings: {}
+        settings: {
+          buildNum: {
+            userValue: sinon.match.number,
+          },
+          foo: {
+            userValue: 'bar',
+            isOverridden: true
+          }
+        }
       });
     });
   });
@@ -82,6 +90,10 @@ export function docMissingSuite() {
           },
           defaultIndex: {
             userValue: defaultIndex
+          },
+          foo: {
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });
@@ -109,6 +121,10 @@ export function docMissingSuite() {
           },
           defaultIndex: {
             userValue: defaultIndex
+          },
+          foo: {
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });
@@ -129,6 +145,10 @@ export function docMissingSuite() {
         settings: {
           buildNum: {
             userValue: sinon.match.number
+          },
+          foo: {
+            userValue: 'bar',
+            isOverridden: true
           }
         }
       });

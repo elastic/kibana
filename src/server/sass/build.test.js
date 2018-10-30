@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import path from 'path';
 import sass from 'node-sass';
 import { Build } from './build';
 
@@ -27,7 +28,7 @@ describe('SASS builder', () => {
 
   it('generates a glob', () => {
     const builder = new Build('/foo/style.sass');
-    expect(builder.getGlob()).toEqual('/foo/**/*.s{a,c}ss');
+    expect(builder.getGlob()).toEqual(path.join('/foo', '**', '*.s{a,c}ss'));
   });
 
   it('builds SASS', () => {
@@ -35,17 +36,15 @@ describe('SASS builder', () => {
     const builder = new Build('/foo/style.sass');
     builder.build();
 
-    expect(sass.render.mock.calls[0][0]).toEqual({
-      file: '/foo/style.sass',
-      outFile: '/foo/style.css',
-      sourceComments: true,
-      sourceMap: true,
-      sourceMapEmbed: true
-    });
+    const sassCall = sass.render.mock.calls[0][0];
+    expect(sassCall.file).toEqual('/foo/style.sass');
+    expect(sassCall.outFile).toEqual(path.join('/foo', 'style.css'));
+    expect(sassCall.sourceMap).toBe(true);
+    expect(sassCall.sourceMapEmbed).toBe(true);
   });
 
   it('has an output file with a different extension', () => {
     const builder = new Build('/foo/style.sass');
-    expect(builder.outputPath()).toEqual('/foo/style.css');
+    expect(builder.outputPath()).toEqual(path.join('/foo', 'style.css'));
   });
 });

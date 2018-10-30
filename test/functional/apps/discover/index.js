@@ -37,5 +37,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_sidebar'));
     loadTestFile(require.resolve('./_source_filters'));
     loadTestFile(require.resolve('./_large_string'));
+    loadTestFile(require.resolve('./_inspector'));
   });
 }

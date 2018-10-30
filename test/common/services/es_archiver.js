@@ -18,8 +18,9 @@
  */
 
 import { EsArchiver } from '../../../src/es_archiver';
+import * as KibanaServer from './kibana_server';
 
-export async function EsArchiverProvider({ getService }) {
+export function EsArchiverProvider({ getService, hasService }) {
   const config = getService('config');
   const client = getService('es');
   const log = getService('log');
@@ -30,9 +31,19 @@ export async function EsArchiverProvider({ getService }) {
 
   const dataDir = config.get('esArchiver.directory');
 
-  return new EsArchiver({
+  const esArchiver = new EsArchiver({
     client,
     dataDir,
     log,
   });
+
+  if (hasService('kibanaServer')) {
+    KibanaServer.extendEsArchiver({
+      esArchiver,
+      kibanaServer: getService('kibanaServer'),
+      defaults: config.get('uiSettings.defaults'),
+    });
+  }
+
+  return esArchiver;
 }

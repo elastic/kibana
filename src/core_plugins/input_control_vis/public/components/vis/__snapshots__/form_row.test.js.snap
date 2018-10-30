@@ -11,6 +11,7 @@ exports[`renders disabled control with tooltip 1`] = `
 >
   <EuiToolTip
     content="I am disabled for testing purposes"
+    delay="regular"
     placement="top"
     position="top"
   >

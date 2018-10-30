@@ -25,7 +25,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
+  EuiPage,
   Query,
 } from '@elastic/eui';
 
@@ -35,7 +35,15 @@ import { Form } from './components/form';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
-import './advanced_settings.less';
+import {
+  registerDefaultComponents,
+  PAGE_TITLE_COMPONENT,
+  PAGE_SUBTITLE_COMPONENT,
+  PAGE_FOOTER_COMPONENT
+} from './components/default_component_registry';
+import { getSettingsComponent } from './components/component_registry';
+
+import { I18nProvider } from '@kbn/i18n/react';
 
 export class AdvancedSettings extends Component {
   static propTypes = {
@@ -50,8 +58,11 @@ export class AdvancedSettings extends Component {
     this.init(config);
     this.state = {
       query: parsedQuery,
+      footerQueryMatched: false,
       filteredSettings: this.mapSettings(Query.execute(parsedQuery, this.settings)),
     };
+
+    registerDefaultComponents();
   }
 
   init(config) {
@@ -59,9 +70,9 @@ export class AdvancedSettings extends Component {
     this.groupedSettings = this.mapSettings(this.settings);
 
     this.categories = Object.keys(this.groupedSettings).sort((a, b) => {
-      if(a === DEFAULT_CATEGORY) return -1;
-      if(b === DEFAULT_CATEGORY) return 1;
-      if(a > b) return 1;
+      if (a === DEFAULT_CATEGORY) return -1;
+      if (b === DEFAULT_CATEGORY) return 1;
+      if (a > b) return 1;
       return a === b ? 0 : -1;
     });
 
@@ -90,6 +101,7 @@ export class AdvancedSettings extends Component {
           name: setting[0],
           value: setting[1].userValue,
           isCustom: config.isCustom(setting[0]),
+          isOverridden: config.isOverridden(setting[0]),
         });
       })
       .filter((c) => !c.readonly)
@@ -125,41 +137,57 @@ export class AdvancedSettings extends Component {
   clearQuery = () => {
     this.setState({
       query: Query.parse(''),
+      footerQueryMatched: false,
       filteredSettings: this.groupedSettings,
     });
   }
 
+  onFooterQueryMatchChange = (matched) => {
+    this.setState({
+      footerQueryMatched: matched
+    });
+  }
+
   render() {
-    const { filteredSettings, query } = this.state;
+    const { filteredSettings, query, footerQueryMatched } = this.state;
+
+    const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT);
+    const PageSubtitle = getSettingsComponent(PAGE_SUBTITLE_COMPONENT);
+    const PageFooter = getSettingsComponent(PAGE_FOOTER_COMPONENT);
 
     return (
-      <div className="advancedSettings">
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem>
-            <EuiText>
-              <h1 data-test-subj="managementSettingsTitle">Settings</h1>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <Search
-              query={query}
+      <I18nProvider>
+        <EuiPage restrictWidth>
+          <div className="mgtAdvancedSettings">
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem>
+                <PageTitle />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <Search
+                  query={query}
+                  categories={this.categories}
+                  onQueryChange={this.onQueryChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <PageSubtitle />
+            <EuiSpacer size="m" />
+            <CallOuts />
+            <EuiSpacer size="m" />
+            <Form
+              settings={filteredSettings}
               categories={this.categories}
-              onQueryChange={this.onQueryChange}
+              categoryCounts={this.categoryCounts}
+              clearQuery={this.clearQuery}
+              save={this.saveConfig}
+              clear={this.clearConfig}
+              showNoResultsMessage={!footerQueryMatched}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <CallOuts/>
-        <EuiSpacer size="m" />
-        <Form
-          settings={filteredSettings}
-          categories={this.categories}
-          categoryCounts={this.categoryCounts}
-          clearQuery={this.clearQuery}
-          save={this.saveConfig}
-          clear={this.clearConfig}
-        />
-      </div>
+            <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} />
+          </div>
+        </EuiPage>
+      </I18nProvider>
     );
   }
 }

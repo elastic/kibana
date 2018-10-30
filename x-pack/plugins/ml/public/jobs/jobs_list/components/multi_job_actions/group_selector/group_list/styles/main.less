@@ -1,0 +1,37 @@
+.group-list {
+  max-height: 350px;
+  overflow: auto;
+
+  .group-item {
+    line-height: 18px;
+    padding: 6px 0px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+
+    &:focus {
+      background-color: #eef6f9;
+      box-shadow: none;
+    }
+
+    .check {
+      width: 20px;
+      display: inline-block;
+    }
+
+    .inline-group {
+      border: 1px solid #FFFFFF;
+      border-radius: 3px;
+    }
+  }
+  .group-item:hover {
+    .inline-group {
+      border: 1px solid #555555;
+      box-shadow: 0px 1px 2px #999;
+    }
+  }
+
+  .group-item:last-child {
+    margin-bottom: 0px;
+    border-bottom: none;
+  }
+}

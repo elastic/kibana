@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('data-shared-item title should update a viz when using a custom panel title', async () => {
-      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.switchToEditMode();
       const CUSTOM_VIS_TITLE = 'ima custom title for a vis!';
       await dashboardPanelActions.setCustomPanelTitle(CUSTOM_VIS_TITLE);
       await retry.try(async () => {
@@ -89,7 +89,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('data-shared-item title should update a saved search when using a custom panel title', async () => {
+    // TODO: flaky https://github.com/elastic/kibana/issues/24287
+    it.skip('data-shared-item title should update a saved search when using a custom panel title', async () => {
       const CUSTOM_SEARCH_TITLE = 'ima custom title for a search!';
       await dashboardPanelActions.setCustomPanelTitle(CUSTOM_SEARCH_TITLE, 'Rendering Test: saved search');
       await retry.try(async () => {

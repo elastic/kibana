@@ -17,20 +17,30 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function phpfpmMetricsSpecProvider() {
+export function phpfpmMetricsSpecProvider(server, context) {
   const moduleName = 'php_fpm';
   return {
     id: 'phpfpmMetrics',
-    name: 'PHP-FPM metrics',
+    name: i18n.translate('kbn.server.tutorials.phpFpmMetrics.nameTitle', {
+      defaultMessage: 'PHP-FPM metrics',
+    }),
     category: TUTORIAL_CATEGORY.METRICS,
     isBeta: true,
-    shortDescription: 'Fetch internal metrics from PHP-FPM.',
-    longDescription: 'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html).',
-    //euiIconType: 'logoPHPFPM',
+    shortDescription: i18n.translate('kbn.server.tutorials.phpFpmMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from PHP-FPM.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.phpFpmMetrics.longDescription', {
+      defaultMessage: 'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html',
+      },
+    }),
+    euiIconType: 'logoPhp',
     artifacts: {
       dashboards: [
         /*{
@@ -45,7 +55,7 @@ export function phpfpmMetricsSpecProvider() {
     },
     completionTimeMinutes: 10,
     //previewImagePath: '/plugins/kibana/home/tutorial_resources/php_fpm_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

@@ -11,6 +11,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
     className="ml-rule-editor-flyout"
     closeButtonAriaLabel="Closes this dialog"
     hideCloseButton={false}
+    maxWidth={false}
     onClose={[Function]}
     ownFocus={false}
     size="m"
@@ -30,6 +31,15 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
       <DetectorDescriptionList
+        anomaly={
+          Object {
+            "detectorIndex": 0,
+            "jobId": "farequote_no_by",
+            "source": Object {
+              "function": "mean",
+            },
+          }
+        }
         detector={
           Object {
             "detector_description": "mean(responsetime)",
@@ -132,6 +142,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
         compressed={false}
         disabled={true}
         id="enable_conditions_checkbox"
+        indeterminate={false}
         label="Add numeric conditions for when the rule applies. Multiple conditions are combined using AND."
         onChange={[Function]}
       />
@@ -230,6 +241,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
     className="ml-rule-editor-flyout"
     closeButtonAriaLabel="Closes this dialog"
     hideCloseButton={false}
+    maxWidth={false}
     onClose={[Function]}
     ownFocus={false}
     size="m"
@@ -249,6 +261,15 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
       <DetectorDescriptionList
+        anomaly={
+          Object {
+            "detectorIndex": 1,
+            "jobId": "farequote_no_by",
+            "source": Object {
+              "function": "max",
+            },
+          }
+        }
         detector={
           Object {
             "custom_rules": Array [
@@ -365,6 +386,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
         compressed={false}
         disabled={true}
         id="enable_conditions_checkbox"
+        indeterminate={false}
         label="Add numeric conditions for when the rule applies. Multiple conditions are combined using AND."
         onChange={[Function]}
       />
@@ -463,6 +485,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
     className="ml-rule-editor-flyout"
     closeButtonAriaLabel="Closes this dialog"
     hideCloseButton={false}
+    maxWidth={false}
     onClose={[Function]}
     ownFocus={false}
     size="m"
@@ -482,6 +505,15 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
       <DetectorDescriptionList
+        anomaly={
+          Object {
+            "detectorIndex": 0,
+            "jobId": "farequote_no_by",
+            "source": Object {
+              "function": "mean",
+            },
+          }
+        }
         detector={
           Object {
             "detector_description": "mean(responsetime)",
@@ -584,6 +616,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
         compressed={false}
         disabled={true}
         id="enable_conditions_checkbox"
+        indeterminate={false}
         label="Add numeric conditions for when the rule applies. Multiple conditions are combined using AND."
         onChange={[Function]}
       />
@@ -674,6 +707,7 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
     className="ml-rule-editor-flyout"
     closeButtonAriaLabel="Closes this dialog"
     hideCloseButton={false}
+    maxWidth={false}
     onClose={[Function]}
     ownFocus={false}
     size="m"
@@ -693,6 +727,7 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
       <SelectRuleAction
+        addItemToFilterList={[Function]}
         anomaly={
           Object {
             "detectorIndex": 1,
@@ -703,7 +738,6 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
           }
         }
         deleteRuleAtIndex={[Function]}
-        detectorIndex={1}
         job={
           Object {
             "analysis_config": Object {
@@ -742,6 +776,7 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
           }
         }
         setEditRuleIndex={[Function]}
+        updateRuleAtIndex={[Function]}
       />
     </EuiFlyoutBody>
     <EuiFlyoutFooter>

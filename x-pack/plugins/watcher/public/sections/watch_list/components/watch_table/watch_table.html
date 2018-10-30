@@ -16,17 +16,17 @@
           sort-field="watchTable.sortField"
           sort-reverse="watchTable.sortReverse"
         >
-          ID
+          {{ 'xpack.watcher.sections.watchList.watchTable.idColumnLabel' | i18n: { defaultMessage: 'ID' } }}
         </sortable-column>
       </th>
-      <th scope="col" class="kuiTableHeaderCell">
+      <th scope="col" class="kuiTableHeaderCell" width="25%">
         <sortable-column
           field="name"
           on-sort-change="watchTable.onSortChange"
           sort-field="watchTable.sortField"
           sort-reverse="watchTable.sortReverse"
         >
-          Name
+          {{ 'xpack.watcher.sections.watchList.watchTable.nameColumnLabel' | i18n: { defaultMessage: 'Name' } }}
         </sortable-column>
       </th>
       <th scope="col" class="kuiTableHeaderCell">
@@ -36,7 +36,7 @@
           sort-field="watchTable.sortField"
           sort-reverse="watchTable.sortReverse"
         >
-          State
+          {{ 'xpack.watcher.sections.watchList.watchTable.stateColumnLabel' | i18n: { defaultMessage: 'State' } }}
         </sortable-column>
       </th>
       <th scope="col" class="kuiTableHeaderCell">
@@ -46,7 +46,7 @@
           sort-field="watchTable.sortField"
           sort-reverse="watchTable.sortReverse"
         >
-          Comment
+          {{ 'xpack.watcher.sections.watchList.watchTable.commentColumnLabel' | i18n: { defaultMessage: 'Comment' } }}
         </sortable-column>
       </th>
       <th scope="col" class="kuiTableHeaderCell">
@@ -56,7 +56,7 @@
           sort-field="watchTable.sortField"
           sort-reverse="watchTable.sortReverse"
         >
-          Last Fired
+          {{ 'xpack.watcher.sections.watchList.watchTable.lastFiredColumnLabel' | i18n: { defaultMessage: 'Last Fired' } }}
         </sortable-column>
       </th>
       <th scope="col" class="kuiTableHeaderCell">
@@ -66,7 +66,7 @@
           sort-field="watchTable.sortField"
           sort-reverse="watchTable.sortReverse"
         >
-          Last Triggered
+          {{ 'xpack.watcher.sections.watchList.watchTable.lastTriggeredColumnLabel' | i18n: { defaultMessage: 'Last Triggered' } }}
         </sortable-column>
       </th>
       <th scope="col" class="kuiTableHeaderCell"></th>
@@ -92,57 +92,62 @@
       </td>
       <td class="kuiTableRowCell">
         <div class="kuiTableRowCell__liner">
-          <a
-            class="kuiLink"
-            ng-href="#/management/elasticsearch/watcher/watches/watch/{{item.watch.id}}/status"
-            title="{{item.watch.id}}"
-            ng-if="watchTable.isEditable(item)"
-
-          >
-            {{item.watch.id}}
-          </a>
-          <span
-            title="{{item.watch.id}}"
-            ng-if="!watchTable.isEditable(item)"
-          >
-            {{item.watch.id}}
-          </span>
+          <kbn-tooltip text="{{item.watch.id}}">
+            <a
+              class="kuiLink"
+              ng-href="#/management/elasticsearch/watcher/watches/watch/{{item.watch.id}}/status"
+              title="{{item.watch.id}}"
+              ng-if="watchTable.isEditable(item)"
+            >
+              {{item.watch.id}}
+            </a>
+            <span
+              title="{{item.watch.id}}"
+              ng-if="!watchTable.isEditable(item)"
+            >
+              {{item.watch.id}}
+            </span>
+          </kbn-tooltip>
         </div>
       </td>
       <td class="kuiTableRowCell">
         <div class="kuiTableRowCell__liner">
-          <span title="{{item.watch.name}}">
+          <kbn-tooltip text="{{item.watch.name}}">
             {{item.watch.name}}
-          </span>
+          </kbn-tooltip>
         </div>
       </td>
       <td class="kuiTableRowCell">
         <div class="kuiTableRowCell__liner">
-          <span title="{{item.watch.watchStatus.state}}">
+          <kbn-tooltip text="{{item.watch.watchStatus.state}}">
             <watch-state-icon watch-status="item.watch.watchStatus"></watch-state-icon>
             {{ item.watch.watchStatus.state }}
-          </span>
+          </kbn-tooltip>
         </div>
       </td>
       <td class="kuiTableRowCell">
         <div class="kuiTableRowCell__liner">
-          <span title="{{item.watch.watchStatus.comment}}">
+          <kbn-tooltip text="{{item.watch.watchStatus.comment}}">
             {{item.watch.watchStatus.comment}}
-          </span>
+          </kbn-tooltip>
         </div>
       </td>
       <td class="kuiTableRowCell">
         <div class="kuiTableRowCell__liner">
-          <span title="{{item.watch.watchStatus.lastFired | moment}}">
-            {{item.watch.watchStatus.lastFiredHumanized}}
-          </span>
+          <kbn-tooltip text="{{item.watch.watchStatus.lastFired | moment}}">
+            <span title="{{item.watch.watchStatus.lastFired | moment}}">
+              {{item.watch.watchStatus.lastFiredHumanized}}
+            </span>
+          </kbn-tooltip>
         </div>
       </td>
       <td class="kuiTableRowCell">
         <div class="kuiTableRowCell__liner">
-          <span title="{{item.watch.watchStatus.lastChecked | moment}}">
-            {{item.watch.watchStatus.lastCheckedHumanized}}
-          </span>
+          <kbn-tooltip text="{{item.watch.watchStatus.lastChecked | moment}}">
+            <span title="{{item.watch.watchStatus.lastChecked | moment}}">
+              {{item.watch.watchStatus.lastCheckedHumanized}}
+            </span>
+          </kbn-tooltip>
         </div>
       </td>
       <td class="kuiTableRowCell">
@@ -150,13 +155,16 @@
           <div class="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
             <a
               class="kuiMenuButton kuiMenuButton--basic kuiMenuButton--iconText"
-              title="Edit"
+              title="{{ 'xpack.watcher.sections.watchList.watchTable.menuEditButtonTitle' | i18n: { defaultMessage: 'Edit' } }}"
               ng-href="#/management/elasticsearch/watcher/watches/watch/{{item.watch.id}}/edit"
               ng-if="watchTable.isEditable(item)"
               data-test-subj="lnkWatchEdit-{{ item.watch.id }}"
             >
               <span class="kuiMenuButton__icon kuiIcon fa-pencil"></span>
-              <span>Edit</span>
+              <span
+                i18n-id="xpack.watcher.sections.watchList.watchTable.menuEditButtonLabel"
+                i18n-default-message="Edit"
+              ></span>
             </a>
           </div>
         </div>

@@ -90,6 +90,7 @@ export default class ServerStatus {
       title: state.title,
       nickname: _.sample(state.nicknames),
       icon: state.icon,
+      uiColor: states.get(state.id).uiColor,
       since: since,
     };
   }

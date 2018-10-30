@@ -17,12 +17,12 @@ import {
 import { get, capitalize, isEmpty } from 'lodash';
 import { STATUS } from '../../../../constants';
 
-import { ContextProperties } from '../../../shared/ContextProperties';
+import { StickyProperties } from '../../../shared/StickyProperties';
 import { Tab, HeaderMedium } from '../../../shared/UIComponents';
 import DiscoverButton from '../../../shared/DiscoverButton';
 import {
   PropertiesTable,
-  getLevelOneProps
+  getPropertyTabNames
 } from '../../../shared/PropertiesTable';
 import Stacktrace from '../../../shared/Stacktrace';
 import {
@@ -30,7 +30,8 @@ import {
   ERROR_GROUP_ID,
   SERVICE_AGENT_NAME,
   SERVICE_LANGUAGE_NAME,
-  USER_ID
+  USER_ID,
+  REQUEST_URL_FULL
 } from '../../../../../common/constants';
 import { fromQuery, toQuery, history } from '../../../../utils/url';
 
@@ -71,7 +72,7 @@ function getTabs(context, logStackframes) {
   return [
     ...(logStackframes ? [LOG_STACKTRACE_TAB] : []),
     EXC_STACKTRACE_TAB,
-    ...getLevelOneProps(dynamicProps)
+    ...getPropertyTabNames(dynamicProps)
   ];
 }
 
@@ -87,23 +88,39 @@ function DetailView({ errorGroup, urlParams, location }) {
   const { serviceName } = urlParams;
 
   const timestamp = get(errorGroup, 'data.error.@timestamp');
-  const url = get(errorGroup.data.error, 'context.request.url.full', 'N/A');
+  const url = get(errorGroup.data.error, REQUEST_URL_FULL, 'N/A');
 
   const stickyProperties = [
     {
+      label: 'Timestamp',
+      fieldName: '@timestamp',
+      val: timestamp,
+      width: '50%'
+    },
+    {
+      fieldName: REQUEST_URL_FULL,
+      label: 'URL',
+      val: url,
+      truncated: true,
+      width: '50%'
+    },
+    {
       label: 'Request method',
       fieldName: 'context.request.method',
-      val: get(errorGroup.data, 'error.context.request.method', 'N/A')
+      val: get(errorGroup.data, 'error.context.request.method', 'N/A'),
+      width: '25%'
     },
     {
       label: 'Handled',
       fieldName: 'error.exception.handled',
-      val: get(errorGroup.data, 'error.error.exception.handled', 'N/A')
+      val: get(errorGroup.data, 'error.error.exception.handled', 'N/A'),
+      width: '25%'
     },
     {
       label: 'User ID',
       fieldName: USER_ID,
-      val: get(errorGroup.data.error, USER_ID, 'N/A')
+      val: get(errorGroup.data.error, USER_ID, 'N/A'),
+      width: '50%'
     }
   ];
 
@@ -154,11 +171,9 @@ function DetailView({ errorGroup, urlParams, location }) {
         </DiscoverButton>
       </HeaderContainer>
 
-      <ContextProperties
-        timestamp={timestamp}
-        url={url}
-        stickyProperties={stickyProperties}
-      />
+      <TabContentContainer>
+        <StickyProperties stickyProperties={stickyProperties} />
+      </TabContentContainer>
 
       <TabContainer>
         {tabs.map(key => {

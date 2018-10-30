@@ -275,7 +275,7 @@ export class VegaParser {
     const validate = (name, isZoom) => {
       const val = this._config[name];
       if (val !== undefined) {
-        const parsed = Number.parseFloat(val);
+        const parsed = parseFloat(val);
         if (Number.isFinite(parsed) && (!isZoom || (parsed >= 0 && parsed <= 30))) {
           res[name] = parsed;
           return;
@@ -299,7 +299,7 @@ export class VegaParser {
     }
 
     this._parseBool('zoomControl', res, true);
-    this._parseBool('scrollWheelZoom', res, true);
+    this._parseBool('scrollWheelZoom', res, false);
 
     const maxBounds = this._config.maxBounds;
     if (maxBounds !== undefined) {

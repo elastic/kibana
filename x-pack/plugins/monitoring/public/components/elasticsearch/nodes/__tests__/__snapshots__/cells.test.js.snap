@@ -8,7 +8,7 @@ exports[`Node Listing Metric Cell should format N/A as the metric for an offline
     class="kuiTableRowCell__liner"
   >
     <div
-      class="monitoringTableCell__number monitoringTableCell__offline"
+      class="monTableCell__number monTableCell__offline"
     >
       N/A
     </div>
@@ -24,15 +24,15 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
     class="kuiTableRowCell__liner"
   >
     <div
-      class="monitoringTableCell__MetricCell__metric"
+      class="monTableCell__metricCellMetric"
     >
       206.3 GB
     </div>
     <span
-      class="monitoringTableCell__MetricCell__slopeArrow fa fa-long-arrow-down"
+      class="monTableCell__metricCellSlopeArrow fa fa-long-arrow-down"
     />
     <div
-      class="monitoringTableCell__MetricCell__minMax"
+      class="monTableCell__metricCellMixMax"
     >
       <div>
         206.5 GB max
@@ -53,15 +53,15 @@ exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
     class="kuiTableRowCell__liner"
   >
     <div
-      class="monitoringTableCell__MetricCell__metric"
+      class="monTableCell__metricCellMetric"
     >
       0%
     </div>
     <span
-      class="monitoringTableCell__MetricCell__slopeArrow fa fa-long-arrow-down"
+      class="monTableCell__metricCellSlopeArrow fa fa-long-arrow-down"
     />
     <div
-      class="monitoringTableCell__MetricCell__minMax"
+      class="monTableCell__metricCellMixMax"
     >
       <div>
         2% max

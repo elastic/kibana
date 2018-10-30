@@ -31,6 +31,7 @@ export const significantTermsBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       scriptable: false,
       filterFieldTypes: 'string'
     },

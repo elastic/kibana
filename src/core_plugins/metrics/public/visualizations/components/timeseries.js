@@ -137,7 +137,7 @@ class Timeseries extends Component {
       }
     }, { bottomLegend: this.props.legendPosition === 'bottom' });
     return (
-      <div className={className}>
+      <div className={className} data-test-subj="timeseriesChart">
         <div style={styles.content} className="rhythm_chart__content">
           <div className="rhythm_chart__visualization">
             <TimeseriesChart

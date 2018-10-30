@@ -99,6 +99,7 @@ describe('ServerStatus class', function () {
         expect(overall).toHaveProperty('state', state.id);
         expect(overall).toHaveProperty('title', state.title);
         expect(overall).toHaveProperty('icon', state.icon);
+        expect(overall).toHaveProperty('uiColor', state.uiColor);
         expect(state.nicknames).toContain(overall.nickname);
       };
 

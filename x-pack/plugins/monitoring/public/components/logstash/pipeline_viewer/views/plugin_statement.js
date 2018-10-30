@@ -19,7 +19,7 @@ function getInputStatementMetrics({ latestEventsPerSecond }) {
   return [
     <Metric
       key="eventsEmitted"
-      className="pipelineViewer__metric--eventsEmitted"
+      className="monPipelineViewer__metric--eventsEmitted"
       value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s emitted')}
     />,
   ];
@@ -35,7 +35,7 @@ function getProcessorStatementMetrics(processorVertex) {
   return [
     <Metric
       key="cpuMetric"
-      className="pipelineViewer__metric--cpuTime"
+      className="monPipelineViewer__metric--cpuTime"
       warning={processorVertex.isTimeConsuming()}
       value={formatMetric(
         Math.round(percentOfTotalProcessorTime || 0),
@@ -46,13 +46,13 @@ function getProcessorStatementMetrics(processorVertex) {
     />,
     <Metric
       key="eventMillis"
-      className="pipelineViewer__metric--eventMillis"
+      className="monPipelineViewer__metric--eventMillis"
       warning={processorVertex.isSlow()}
       value={formatMetric(latestMillisPerEvent, '0.[00]a', 'ms/e')}
     />,
     <Metric
       key="eventsReceived"
-      className="pipelineViewer__metric--events"
+      className="monPipelineViewer__metric--events"
       value={formatMetric(latestEventsPerSecond, '0.[00]a', 'e/s received')}
     />,
   ];
@@ -76,7 +76,7 @@ export function PluginStatement({
   return (
     <EuiFlexGroup
       alignItems="center"
-      className="pipelineViewer__statement"
+      className="monPipelineViewer__statement"
       gutterSize="none"
       justifyContent="spaceBetween"
     >
@@ -84,7 +84,8 @@ export function PluginStatement({
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              className="pipelineViewer__plugin"
+              aria-label={name}
+              className="monPipelineViewer__plugin"
               color="primary"
               flush="left"
               iconType="dot"

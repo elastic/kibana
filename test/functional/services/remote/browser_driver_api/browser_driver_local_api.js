@@ -62,7 +62,7 @@ export function createLocalBrowserDriverApi(log, url, browser) {
       });
 
       proc.on('exit', (code) => {
-        if (!api.isStopped() || code > 0) {
+        if (!api.isStopped() && code > 0) {
           api.emit('error', new Error(driverName + ` exited with code ${code}`));
         }
       });

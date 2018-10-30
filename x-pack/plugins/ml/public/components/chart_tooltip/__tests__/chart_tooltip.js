@@ -4,19 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
+import { mlChartTooltipService } from '../chart_tooltip_service';
+
 describe('ML - mlChartTooltipService', () => {
-  let mlChartTooltipService;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(() => {
-    ngMock.inject(function ($injector) {
-      mlChartTooltipService = $injector.get('mlChartTooltipService');
-    });
-  });
-
   it('service API duck typing', () => {
     expect(mlChartTooltipService).to.be.an('object');
     expect(mlChartTooltipService.show).to.be.a('function');

@@ -6,7 +6,7 @@
 
 import chrome from 'ui/chrome';
 
-import { http } from 'plugins/ml/services/http_service';
+import { http } from '../../services/http_service';
 
 const basePath = chrome.addBasePath('/api/ml');
 
@@ -36,6 +36,16 @@ export const jobs = {
     return http({
       url: `${basePath}/jobs/groups`,
       method: 'GET',
+    });
+  },
+
+  updateGroups(updatedJobs) {
+    return http({
+      url: `${basePath}/jobs/update_groups`,
+      method: 'POST',
+      data: {
+        jobs: updatedJobs,
+      }
     });
   },
 

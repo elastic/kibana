@@ -91,21 +91,22 @@ export function processRecordScoreResults(scoreData) {
   return bucketScoreData;
 }
 
-// Uses data from the list of anomaly records to add anomalyScore properties
-// to the chartData entries for anomalous buckets.
+// Uses data from the list of anomaly records to add anomalyScore,
+// function, actual and typical properties, plus causes and multi-bucket
+// info if applicable, to the chartData entries for anomalous buckets.
 export function processDataForFocusAnomalies(
   chartData,
   anomalyRecords,
   timeFieldName) {
 
-  // Iterate through the anomaly records, adding anomalyScore properties
-  // to the chartData entries for anomalous buckets.
-  _.each(anomalyRecords, (record) => {
+  // Iterate through the anomaly records adding the
+  // various properties required for display.
+  anomalyRecords.forEach((record) => {
 
     // Look for a chart point with the same time as the record.
     // If none found, find closest time in chartData set.
     const recordTime = record[timeFieldName];
-    let chartPoint = findNearestChartPointToTime(chartData, recordTime);
+    let chartPoint = findChartPointForAnomalyTime(chartData, recordTime);
 
     // TODO - handle case where there is an anomaly due to the absence of data
     // and there is no model plot.
@@ -121,24 +122,33 @@ export function processDataForFocusAnomalies(
 
     if (chartPoint !== undefined) {
       // If chart aggregation interval > bucket span, there may be more than
-      // one anomaly record in the interval, so get max record anomalyScore.
-      chartPoint.anomalyScore = Math.max(_.get(chartPoint, 'anomalyScore', 0), record.record_score);
-      chartPoint.function = record.function;
+      // one anomaly record in the interval, so use the properties from
+      // the record with the highest anomalyScore.
+      const recordScore = record.record_score;
+      const pointScore = chartPoint.anomalyScore;
+      if (pointScore === undefined || pointScore < recordScore) {
+        chartPoint.anomalyScore = recordScore;
+        chartPoint.function = record.function;
 
-      if (_.has(record, 'actual')) {
-        chartPoint.actual = record.actual;
-        chartPoint.typical = record.typical;
-      } else {
-        const causes = _.get(record, 'causes', []);
-        if (causes.length > 0) {
-          chartPoint.byFieldName = record.by_field_name;
-          chartPoint.numberOfCauses = causes.length;
-          if (causes.length === 1) {
-            // If only a single cause, copy actual and typical values to the top level.
-            const cause = _.first(record.causes);
-            chartPoint.actual = cause.actual;
-            chartPoint.typical = cause.typical;
+        if (_.has(record, 'actual')) {
+          chartPoint.actual = record.actual;
+          chartPoint.typical = record.typical;
+        } else {
+          const causes = _.get(record, 'causes', []);
+          if (causes.length > 0) {
+            chartPoint.byFieldName = record.by_field_name;
+            chartPoint.numberOfCauses = causes.length;
+            if (causes.length === 1) {
+              // If only a single cause, copy actual and typical values to the top level.
+              const cause = _.first(record.causes);
+              chartPoint.actual = cause.actual;
+              chartPoint.typical = cause.typical;
+            }
           }
+        }
+
+        if (_.has(record, 'multi_bucket_impact')) {
+          chartPoint.multiBucketImpact = record.multi_bucket_impact;
         }
       }
     }
@@ -165,6 +175,7 @@ export function processScheduledEventsForChart(chartData, scheduledEvents) {
   return chartData;
 }
 
+// Finds the chart point which is closest in time to the specified time.
 export function findNearestChartPointToTime(chartData, time) {
   let chartPoint;
   if(chartData === undefined) {
@@ -198,6 +209,41 @@ export function findNearestChartPointToTime(chartData, time) {
         } else {
           foundItem = previousItem;
         }
+
+        break;
+      }
+    }
+
+    chartPoint = foundItem;
+  }
+
+  return chartPoint;
+}
+
+// Finds the chart point which corresponds to an anomaly with the
+// specified time.
+export function findChartPointForAnomalyTime(chartData, anomalyTime) {
+  let chartPoint;
+  if(chartData === undefined) {
+    return chartPoint;
+  }
+
+  for (let i = 0; i < chartData.length; i++) {
+    if (chartData[i].date.getTime() === anomalyTime) {
+      chartPoint = chartData[i];
+      break;
+    }
+  }
+
+  if (chartPoint === undefined) {
+    // Find the time of the point which falls immediately before the
+    // time of the anomaly. This is the start of the chart 'bucket'
+    // which contains the anomalous bucket.
+    let foundItem;
+    for (let i = 0; i < chartData.length; i++) {
+      const itemTime = chartData[i].date.getTime();
+      if (itemTime > anomalyTime) {
+        foundItem = (i > 0) ? chartData[i - 1] : chartData[0];
         break;
       }
     }

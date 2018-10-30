@@ -23,7 +23,7 @@ import getopts from 'getopts';
 import dedent from 'dedent';
 import chalk from 'chalk';
 
-import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 import { buildDistributables } from './build_distributables';
 import { isErrorLogged } from './lib';
 
@@ -43,10 +43,14 @@ const flags = getopts(process.argv.slice(0), {
     'skip-node-download',
     'verbose',
     'debug',
+    'all-platforms'
   ],
   alias: {
     v: 'verbose',
     d: 'debug',
+  },
+  default: {
+    debug: true
   },
   unknown: (flag) => {
     unknownFlags.push(flag);
@@ -71,22 +75,27 @@ if (flags.help) {
         --no-oss                {dim Only produce the default distributable of Kibana}
         --skip-archives         {dim Don't produce tar/zip archives}
         --skip-os-packages      {dim Don't produce rpm/deb packages}
+        --all-platforms         {dim Produce archives for all platforms, not just this one}
         --rpm                   {dim Only build the rpm package}
         --deb                   {dim Only build the deb package}
         --release               {dim Produce a release-ready distributable}
         --skip-node-download    {dim Reuse existing downloads of node.js}
         --verbose,-v            {dim Turn on verbose logging}
-        --debug,-d              {dim Turn on debug logging}
+        --no-debug              {dim Turn off debug logging}
     `) + '\n'
   );
   process.exit(1);
 }
 
-const log = createToolingLog(pickLevelFromFlags(flags));
-log.pipe(process.stdout);
+const log = new ToolingLog({
+  level: pickLevelFromFlags(flags, {
+    default: flags.debug === false ? 'info' : 'debug'
+  }),
+  writeTo: process.stdout
+});
 
 function isOsPackageDesired(name) {
-  if (flags['skip-os-packages']) {
+  if (flags['skip-os-packages'] || !flags['all-platforms']) {
     return false;
   }
 
@@ -107,6 +116,7 @@ buildDistributables({
   createArchives: !Boolean(flags['skip-archives']),
   createRpmPackage: isOsPackageDesired('rpm'),
   createDebPackage: isOsPackageDesired('deb'),
+  targetAllPlatforms: Boolean(flags['all-platforms']),
 }).catch(error => {
   if (!isErrorLogged(error)) {
     log.error('Uncaught error');

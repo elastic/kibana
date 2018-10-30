@@ -21,6 +21,7 @@ import { writeFile } from 'fs';
 
 import Boom from 'boom';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
@@ -150,7 +151,7 @@ export default class BaseOptimizer {
         {
           test,
           include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
-          exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\]node_modules[\/\\]/,
+          exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
         }
       ];
     };
@@ -294,43 +295,49 @@ export default class BaseOptimizer {
     };
 
     // when running from source transpile TypeScript automatically
-    const isSourceConfig = {
-      module: {
-        rules: [
-          {
-            resource: createSourceFileResourceSelector(/\.tsx?$/),
-            use: maybeAddCacheLoader('typescript', [
-              {
-                loader: 'ts-loader',
-                options: {
-                  transpileOnly: true,
-                  experimentalWatchApi: true,
-                  onlyCompileBundledFiles: true,
-                  compilerOptions: {
-                    sourceMap: Boolean(this.sourceMaps),
-                    target: 'es5',
-                    module: 'esnext',
+    const getSourceConfig = () => {
+      // dev/typescript is deleted from the distributable, so only require it if we actually need the source config
+      const { Project } = require('../dev/typescript');
+      const browserProject = new Project(fromRoot('tsconfig.browser.json'));
+
+      return {
+        module: {
+          rules: [
+            {
+              resource: createSourceFileResourceSelector(/\.tsx?$/),
+              use: maybeAddCacheLoader('typescript', [
+                {
+                  loader: 'ts-loader',
+                  options: {
+                    transpileOnly: true,
+                    experimentalWatchApi: true,
+                    onlyCompileBundledFiles: true,
+                    configFile: fromRoot('tsconfig.json'),
+                    compilerOptions: {
+                      ...browserProject.config.compilerOptions,
+                      sourceMap: Boolean(this.sourceMaps),
+                    }
                   }
                 }
-              }
-            ]),
-          }
-        ]
-      },
+              ]),
+            }
+          ]
+        },
 
-      stats: {
-        // when typescript doesn't do a full type check, as we have the ts-loader
-        // configured here, it does not have enough information to determine
-        // whether an imported name is a type or not, so when the name is then
-        // exported, typescript has no choice but to emit the export. Fortunately,
-        // the extraneous export should not be harmful, so we just suppress these warnings
-        // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
-        warningsFilter: /export .* was not found in/
-      },
+        stats: {
+          // when typescript doesn't do a full type check, as we have the ts-loader
+          // configured here, it does not have enough information to determine
+          // whether an imported name is a type or not, so when the name is then
+          // exported, typescript has no choice but to emit the export. Fortunately,
+          // the extraneous export should not be harmful, so we just suppress these warnings
+          // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
+          warningsFilter: /export .* was not found in/
+        },
 
-      resolve: {
-        extensions: ['.ts', '.tsx'],
-      },
+        resolve: {
+          extensions: ['.ts', '.tsx'],
+        },
+      };
     };
 
     // We need to add react-addons (and a few other bits) for enzyme to work.
@@ -365,12 +372,40 @@ export default class BaseOptimizer {
             'NODE_ENV': '"production"'
           }
         }),
-        new webpack.optimize.UglifyJsPlugin({
-          compress: {
-            warnings: false
-          },
+        new UglifyJsPlugin({
+          parallel: true,
           sourceMap: false,
-          mangle: false
+          uglifyOptions: {
+            compress: {
+              // the following is required for dead-code the removal
+              // check in React DevTools
+
+              unused: true,
+              dead_code: true,
+              conditionals: true,
+              evaluate: true,
+
+              comparisons: false,
+              sequences: false,
+              properties: false,
+              drop_debugger: false,
+              booleans: false,
+              loops: false,
+              toplevel: false,
+              top_retain: false,
+              hoist_funs: false,
+              if_return: false,
+              join_vars: false,
+              collapse_vars: false,
+              reduce_vars: false,
+              warnings: false,
+              negate_iife: false,
+              keep_fnames: true,
+              keep_infinity: true,
+              side_effects: false
+            },
+            mangle: false
+          }
         }),
       ]
     };
@@ -379,7 +414,7 @@ export default class BaseOptimizer {
       commonConfig,
       IS_KIBANA_DISTRIBUTABLE
         ? isDistributableConfig
-        : isSourceConfig,
+        : getSourceConfig(),
       this.uiBundles.isDevMode()
         ? webpackMerge(watchingConfig, supportEnzymeConfig)
         : productionConfig
@@ -392,8 +427,7 @@ export default class BaseOptimizer {
       Stats.presetToOptions('minimal')
     ));
 
-    return Boom.create(
-      500,
+    return Boom.internal(
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
       stats.toJson(Stats.presetToOptions('detailed'))
     );

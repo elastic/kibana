@@ -17,22 +17,35 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function zookeeperMetricsSpecProvider() {
+export function zookeeperMetricsSpecProvider(server, context) {
   const moduleName = 'zookeeper';
   return {
     id: moduleName + 'Metrics',
-    name: 'Zookeeper metrics',
+    name: i18n.translate('kbn.server.tutorials.zookeeperMetrics.nameTitle', {
+      defaultMessage: 'Zookeeper metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch interal metrics from a Zookeeper server.',
-    longDescription: 'The `' + moduleName + '` Metricbeat module fetches internal metrics from a Zookeeper server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-' + moduleName + '.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.zookeeperMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from a Zookeeper server.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.zookeeperMetrics.longDescription', {
+      defaultMessage: 'The `{moduleName}` Metricbeat module fetches internal metrics from a Zookeeper server. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        moduleName,
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-' + moduleName + '.html',
+      },
+    }),
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.zookeeperMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],
@@ -41,7 +54,7 @@ export function zookeeperMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

@@ -169,13 +169,29 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
-    async isDuplicateTitleWarningDisplayed() {
-      return await testSubjects.exists('titleDupicateWarnMsg');
+    /**
+     * Asserts that the duplicate title warning is either displayed or not displayed.
+     * @param { displayed: boolean }
+     */
+    async expectDuplicateTitleWarningDisplayed({ displayed }) {
+      if (displayed) {
+        await testSubjects.existOrFail('titleDupicateWarnMsg');
+      } else {
+        await testSubjects.missingOrFail('titleDupicateWarnMsg');
+      }
     }
 
-    async clickEdit() {
-      log.debug('Clicking edit');
-      return await testSubjects.click('dashboardEditMode');
+    async switchToEditMode() {
+      log.debug('Switching to edit mode');
+      await testSubjects.click('dashboardEditMode');
+      // wait until the count of dashboard panels equals the count of toggle menu icons
+      await retry.waitFor('in edit mode', async () => {
+        const [panels, menuIcons] = await Promise.all([
+          testSubjects.findAll('dashboardPanel'),
+          testSubjects.findAll('dashboardPanelToggleMenuIcon'),
+        ]);
+        return panels.length === menuIcons.length;
+      });
     }
 
     async getIsInViewMode() {
@@ -278,16 +294,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async gotoDashboardEditMode(dashboardName) {
       await this.loadSavedDashboard(dashboardName);
-      await this.clickEdit();
+      await this.switchToEditMode();
     }
 
     async renameDashboard(dashName) {
       log.debug(`Naming dashboard ` + dashName);
       await testSubjects.click('dashboardRenameButton');
-      await testSubjects.setValue('dashboardTitle', dashName);
+      await testSubjects.setValue('savedObjectTitle', dashName);
     }
 
     /**
+     * Save the current dashboard with the specified name and options and
+     * verify that the save was successful
      *
      * @param dashName {String}
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
@@ -299,10 +317,19 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.clickSave();
       }
 
+      // Confirm that the Dashboard has actually been saved
+      await testSubjects.existOrFail('saveDashboardSuccess');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForSaveModalToClose();
+    }
 
-      // Confirm that the Dashboard has been saved.
-      return await testSubjects.exists('saveDashboardSuccess');
+    async waitForSaveModalToClose() {
+      log.debug('Waiting for dashboard save modal to close');
+      await retry.try(async () => {
+        if (await testSubjects.exists('savedObjectSaveModal')) {
+          throw new Error('dashboard save still open');
+        }
+      });
     }
 
     async deleteDashboard(dashboardName, dashboardId) {
@@ -319,10 +346,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickSave() {
-      await retry.try(async () => {
-        log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveDashboardButton');
-      });
+      log.debug('DashboardPage.clickSave');
+      await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
     /**
@@ -336,7 +361,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       log.debug('entering new title');
-      await testSubjects.setValue('dashboardTitle', dashboardTitle);
+      await testSubjects.setValue('savedObjectTitle', dashboardTitle);
 
       if (saveOptions.storeTimeWithDashboard !== undefined) {
         await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
@@ -388,7 +413,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await find.allByCssSelector('.dashboardLink');
+      const dashboardTitles = await find.allByCssSelector('[data-test-subj^="dashboardListingTitleLink"]');
       return dashboardTitles.length;
     }
 
@@ -404,6 +429,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     // entry, or at least to a single page of results
     async loadSavedDashboard(dashName) {
       log.debug(`Load Saved Dashboard ${dashName}`);
+
+      await this.gotoDashboardLandingPage();
 
       await retry.try(async () => {
         await this.searchForDashboardWithName(dashName);

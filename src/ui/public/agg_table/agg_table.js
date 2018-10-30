@@ -102,10 +102,10 @@ uiModules
             return;
           }
 
-          self.csv.filename = ($scope.exportTitle || table.title() || 'table') + '.csv';
+          self.csv.filename = ($scope.exportTitle || table.title || 'table') + '.csv';
           $scope.rows = table.rows;
           $scope.formattedColumns = table.columns.map(function (col, i) {
-            const agg = $scope.table.aggConfig(col);
+            const agg = col.aggConfig;
             const field = agg.getField();
             const formattedColumn = {
               title: col.title,

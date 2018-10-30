@@ -4,6 +4,7 @@ exports[`Search should render normally 1`] = `
 <EuiSearchBar
   box={
     Object {
+      "aria-label": "Search advanced settings",
       "incremental": true,
     }
   }

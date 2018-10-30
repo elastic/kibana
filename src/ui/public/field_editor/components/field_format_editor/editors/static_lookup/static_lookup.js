@@ -34,7 +34,6 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
-  static formatId = 'static_lookup';
 
   onLookupChange = (newLookupParams, index) => {
     const lookupEntries = [...this.props.formatParams.lookupEntries];
@@ -145,8 +144,7 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
         </EuiButton>
         <EuiSpacer size="l" />
         <EuiFormRow
-          label={intl.formatMessage(
-            { id: 'common.ui.fieldEditor.staticLookup.unknownKeyLabel', defaultMessage: 'Value for unknown key' })}
+          label={<FormattedMessage id="common.ui.fieldEditor.staticLookup.unknownKeyLabel" defaultMessage="Value for unknown key" />}
         >
           <EuiFieldText
             value={formatParams.unknownKeyValue || ''}
@@ -164,3 +162,4 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
 }
 
 export const StaticLookupFormatEditor = injectI18n(StaticLookupFormatEditorComponent);
+StaticLookupFormatEditor.formatId = 'static_lookup';

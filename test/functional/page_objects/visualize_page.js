@@ -18,8 +18,9 @@
  */
 
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
-import Keys from 'leadfoot/keys';
 import Bluebird from 'bluebird';
+import expect from 'expect.js';
+import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -30,10 +31,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const flyout = getService('flyout');
   const renderable = getService('renderable');
+  const table = getService('table');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
   class VisualizePage {
+
+    get index() {
+      return {
+        LOGSTASH_TIME_BASED: 'logstash-*',
+        LOGSTASH_NON_TIME_BASED: 'logstash*'
+      };
+    }
 
     async navigateToNewVisualization() {
       log.debug('navigateToApp visualize new');
@@ -49,6 +58,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
           throw new Error('wait for visualization select page');
         }
       });
+    }
+
+    async clickVisType(type) {
+      await testSubjects.click(`visType-${type}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickAreaChart() {
@@ -228,11 +242,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getVegaViewContainer() {
-      return await find.byCssSelector('div.vega-view-container');
+      return await find.byCssSelector('div.vgaVis__view');
     }
 
     async getVegaControlContainer() {
-      return await find.byCssSelector('div.vega-controls-container');
+      return await find.byCssSelector('div.vgaVis__controls');
     }
 
     async setFromTime(timeString) {
@@ -353,7 +367,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
-    async clickNewSearch(indexPattern = 'logstash-*') {
+    async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
       await testSubjects.click(`paginatedListItem-${indexPattern}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -385,20 +399,26 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
-    async clickBucket(bucketName) {
-      const chartTypes = await retry.try(
-        async () => await find.allByCssSelector('li.list-group-item.list-group-menu-item'));
-      log.debug('found bucket types ' + chartTypes.length);
+    async clickBucket(bucketName, type = 'bucket') {
+      const testSubject = type === 'bucket' ? 'bucketsAggGroup' : 'metricsAggGroup';
+      await retry.try(async () => {
+        const chartTypes = await retry.try(
+          async () => await find.allByCssSelector(`[data-test-subj="${testSubject}"] .list-group-menu-item`));
+        log.debug('found bucket types ' + chartTypes.length);
 
-      async function getChartType(chart) {
-        const chartString = await chart.getVisibleText();
-        if (chartString === bucketName) {
-          await chart.click();
-          await PageObjects.common.sleep(500);
+        async function getChartType(chart) {
+          const chartString = await chart.getVisibleText();
+          if (chartString === bucketName) {
+            await chart.click();
+            return true;
+          }
         }
-      }
-      const getChartTypesPromises = chartTypes.map(getChartType);
-      await Promise.all(getChartTypesPromises);
+        const getChartTypesPromises = chartTypes.map(getChartType);
+        const clickResult = await Promise.all(getChartTypesPromises);
+        if (!clickResult.some(result => result === true)) {
+          throw new Error(`bucket ${bucketName} not found`);
+        }
+      });
     }
 
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
@@ -416,6 +436,21 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await remote.pressKeys('\uE006');
       });
       await PageObjects.common.sleep(500);
+    }
+
+    /**
+     * Set the test for a filter aggregation.
+     * @param {*} filterValue the string value of the filter
+     * @param {*} filterIndex used when multiple filters are configured on the same aggregation
+     * @param {*} aggregationId the ID if the aggregation. On Tests, it start at from 2
+     */
+    async setFilterAggregationValue(filterValue, filterIndex = 0, aggregationId = 2) {
+      const inputField = await testSubjects.find(`visEditorFilterInput_${aggregationId}_${filterIndex}`);
+      await inputField.type(filterValue);
+    }
+
+    async addNewFilterAggregation() {
+      return await testSubjects.click('visEditorAddFilterButton');
     }
 
     async toggleOpenEditor(index, toState = 'true') {
@@ -541,6 +576,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setInterval(newValue) {
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       await input.type(newValue);
+      await remote.pressKeys(Keys.RETURN);
+    }
+
+    async setCustomInterval(newValue) {
+      await this.setInterval('Custom');
+      const input = await find.byCssSelector('input[name="customInterval"]');
+      await input.clearValue();
+      await input.type(newValue);
     }
 
     async setNumericInterval(newValue, { append } = {}) {
@@ -553,22 +596,26 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setSize(newValue) {
-      const input = await find.byCssSelector('input[name="size"]');
+      const input = await find.byCssSelector(`vis-editor-agg-params[aria-hidden="false"] input[name="size"]`);
       await input.clearValue();
-      await input.type(newValue);
+      await input.type(String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
       await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
+    async toggleAggegationEditor(agg) {
+      await testSubjects.click(`aggregationEditor${agg} toggleEditor`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
 
     async toggleOtherBucket() {
-      return await find.clickByCssSelector('input[name="showOther"]');
+      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showOther"]');
     }
 
     async toggleMissingBucket() {
-      return await find.clickByCssSelector('input[name="showMissing"]');
+      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showMissing"]');
     }
 
     async isApplyEnabled() {
@@ -602,13 +649,47 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+
+    async changeHeatmapColorNumbers(value = 6) {
+      const input = await testSubjects.find(`heatmapOptionsColorsNumberInput`);
+      await input.clearValue();
+      await input.type(`${value}`);
+    }
+
     async clickMetricsAndAxes() {
       await testSubjects.click('visEditorTabadvanced');
     }
 
+    async clickOptionsTab() {
+      await testSubjects.click('visEditorTaboptions');
+    }
+
+    async clickEnableCustomRanges() {
+      await testSubjects.click('heatmapEnableCustomRanges');
+    }
+
+    async clickAddRange() {
+      await testSubjects.click(`heatmapAddRangeButton`);
+    }
+
+    async isCustomRangeTableShown() {
+      await testSubjects.exists('heatmapCustomRangesTable');
+    }
+
+    async addCustomRange(from, to) {
+      const table = await testSubjects.find('heatmapCustomRangesTable');
+      const lastRow = await table.findByCssSelector('tr:last-child');
+      const fromCell = await lastRow.findByCssSelector('td:first-child input');
+      fromCell.clearValue();
+      fromCell.type(`${from}`);
+      const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
+      toCell.clearValue();
+      toCell.type(`${to}`);
+    }
     async clickYAxisOptions(axisId) {
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
+
     async clickYAxisAdvancedOptions(axisId) {
       await testSubjects.click(`toggleYAxisAdvancedOptions-${axisId}`);
     }
@@ -645,25 +726,36 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async ensureSavePanelOpen() {
       log.debug('ensureSavePanelOpen');
-      let isOpen = await testSubjects.exists('saveVisualizationButton');
+      let isOpen = await testSubjects.exists('savedObjectSaveModal');
       await retry.try(async () => {
         while (!isOpen) {
           await testSubjects.click('visualizeSaveButton');
-          isOpen = await testSubjects.exists('saveVisualizationButton');
+          isOpen = await testSubjects.exists('savedObjectSaveModal');
         }
       });
     }
 
     async saveVisualization(vizName, { saveAsNew = false } = {}) {
       await this.ensureSavePanelOpen();
-      await testSubjects.setValue('visTitleInput', vizName);
-      log.debug('click submit button');
-      await testSubjects.click('saveVisualizationButton');
+      await testSubjects.setValue('savedObjectTitle', vizName);
       if (saveAsNew) {
+        log.debug('Check save as new visualization');
         await testSubjects.click('saveAsNewCheckbox');
       }
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      return await testSubjects.exists('saveVisualizationSuccess');
+      log.debug('Click Save Visualization button');
+      await testSubjects.click('confirmSaveSavedObjectButton');
+    }
+
+    async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
+      await this.saveVisualization(vizName, { saveAsNew });
+      const successToast = await testSubjects.exists('saveVisualizationSuccess', defaultFindTimeout);
+      expect(successToast).to.be(true);
+    }
+
+    async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
+      await this.saveVisualization(vizName, { saveAsNew });
+      const errorToast = await testSubjects.exists('saveVisualizationError', defaultFindTimeout);
+      expect(errorToast).to.be(true);
     }
 
     async clickLoadSavedVisButton() {
@@ -802,8 +894,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       log.debug(`maxYLabel = ${maxYLabel}, maxYLabelYPosition = ${maxYLabelYPosition}`);
 
       // 2). get the minimum chart Y-Axis marker value and Y position
-      const minYAxisChartMarker = await
-        find.byCssSelector('div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick');
+      const minYAxisChartMarker = await find.byCssSelector(
+        'div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'
+      );
       const minYLabel = (await minYAxisChartMarker.getVisibleText()).replace(',', '');
       const minYLabelYPosition = (await minYAxisChartMarker.getPosition()).y;
       return ((maxYLabel - minYLabel) / (minYLabelYPosition - maxYLabelYPosition));
@@ -834,6 +927,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
       return await Promise.all(getChartTypesPromises);
     }
+    async expectPieChartError() {
+      return await testSubjects.existOrFail('visLibVisualizeError');
+    }
 
     async getChartAreaWidth() {
       const rect = await retry.try(async () => find.byCssSelector('clipPath rect'));
@@ -845,9 +941,43 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await rect.getAttribute('height');
     }
 
+    /**
+     * If you are writing new tests, you should rather look into getTableVisContent method instead.
+     */
     async getTableVisData() {
       const dataTable = await testSubjects.find('paginated-table-body');
       return await dataTable.getVisibleText();
+    }
+
+    /**
+     * This function is the newer function to retrieve data from within a table visualization.
+     * It uses a better return format, than the old getTableVisData, by properly splitting
+     * cell values into arrays. Please use this function for newer tests.
+     */
+    async getTableVisContent({ stripEmptyRows = true } = { }) {
+      const container = await testSubjects.find('tableVis');
+      const allTables = await testSubjects.findAllDescendant('paginated-table-body', container);
+
+      if (allTables.length === 0) {
+        return [];
+      }
+
+      const allData = await Promise.all(allTables.map(async (t) => {
+        let data = await table.getDataFromElement(t);
+        if (stripEmptyRows) {
+          data = data.filter(row => row.length > 0 && row.some(cell => cell.trim().length > 0));
+        }
+        return data;
+      }));
+
+      if (allTables.length === 1) {
+        // If there was only one table we return only the data for that table
+        // This prevents an unnecessary array around that single table, which
+        // is the case we have in most tests.
+        return allData[0];
+      }
+
+      return allData;
     }
 
     async getInspectorTableData() {
@@ -891,6 +1021,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async waitForVisualization() {
       return await find.byCssSelector('.visualization');
+    }
+
+    async waitForVisualizationSavedToastGone() {
+      return await testSubjects.waitForDeleted('saveVisualizationSuccess');
     }
 
     async getZoomSelectors(zoomSelector) {
@@ -1012,6 +1146,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async filterOnTableCell(column, row) {
+      const table = await testSubjects.find('tableVis');
+      const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+      await remote.moveMouseTo(cell);
+      const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
+      await filterBtn.click();
+    }
+
     async doesLegendColorChoiceExist(color) {
       return await testSubjects.exists(`legendSelectColor-${color}`);
     }
@@ -1034,6 +1176,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await bucketType.click();
     }
 
+    async filterPieSlice(name) {
+      const slice = await this.getPieSlice(name);
+      // Since slice is an SVG element we can't simply use .click() for it
+      await remote.moveMouseTo(slice);
+      await remote.clickMouseButton();
+    }
+
     async getPieSlice(name) {
       return await testSubjects.find(`pieSlice-${name.split(' ').join('-')}`);
     }
@@ -1053,6 +1202,47 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const pieSlices = await this.getAllPieSlices(name);
       return await Promise.all(pieSlices.map(async pieSlice => await pieSlice.getAttribute('style')));
     }
+
+    async getBucketErrorMessage() {
+      const error = await find.byCssSelector('.visEditorAggParam__error');
+      const errorMessage = await error.getProperty('innerText');
+      log.debug(errorMessage);
+      return errorMessage;
+    }
+
+    async selectSortMetric(agg, metric) {
+      const sortMetric = await find.byCssSelector(`[data-test-subj="visEditorOrder${agg}-${metric}"]`);
+      return await sortMetric.click();
+    }
+
+    async selectCustomSortMetric(agg, metric, field) {
+      await this.selectSortMetric(agg, 'custom');
+      await this.selectAggregation(metric, 'groupName');
+      await this.selectField(field, 'groupName');
+    }
+
+    async clickSplitDirection(direction) {
+      const activeParamPanel = await find.byCssSelector('vis-editor-agg-params[aria-hidden="false"]');
+      const button = await testSubjects.findDescendant(`splitBy-${direction}`, activeParamPanel);
+      await button.click();
+    }
+
+    async countNestedTables() {
+      const vis = await testSubjects.find('tableVis');
+      const result = [];
+
+      for (let i = 1; true; i++) {
+        const selector = new Array(i).fill('.agg-table-group').join(' ');
+        const tables = await vis.findAllByCssSelector(selector);
+        if (tables.length === 0) {
+          break;
+        }
+        result.push(tables.length);
+      }
+
+      return result;
+    }
+
   }
 
   return new VisualizePage();

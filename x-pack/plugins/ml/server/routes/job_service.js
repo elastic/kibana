@@ -14,7 +14,7 @@ export function jobServiceRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/jobs/force_start_datafeeds',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { forceStartDatafeeds } = jobServiceProvider(callWithRequest);
       const {
@@ -23,8 +23,7 @@ export function jobServiceRoutes(server, commonRouteConfig) {
         end
       } = request.payload;
       return forceStartDatafeeds(datafeedIds, start, end)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -34,13 +33,12 @@ export function jobServiceRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/jobs/stop_datafeeds',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { stopDatafeeds } = jobServiceProvider(callWithRequest);
       const { datafeedIds } = request.payload;
       return stopDatafeeds(datafeedIds)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -50,13 +48,12 @@ export function jobServiceRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/jobs/delete_jobs',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { deleteJobs } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
       return deleteJobs(jobIds)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -66,13 +63,12 @@ export function jobServiceRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/jobs/close_jobs',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { closeJobs } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
       return closeJobs(jobIds)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -82,13 +78,12 @@ export function jobServiceRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/jobs/jobs_summary',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { jobsSummary } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
       return jobsSummary(jobIds)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -98,13 +93,12 @@ export function jobServiceRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/jobs/jobs',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { createFullJobsList } = jobServiceProvider(callWithRequest);
       const { jobIds } = request.payload;
       return createFullJobsList(jobIds)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -114,12 +108,26 @@ export function jobServiceRoutes(server, commonRouteConfig) {
   server.route({
     method: 'GET',
     path: '/api/ml/jobs/groups',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { getAllGroups } = jobServiceProvider(callWithRequest);
       return getAllGroups()
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/ml/jobs/update_groups',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { updateGroups } = jobServiceProvider(callWithRequest);
+      const { jobs } = request.payload;
+      return updateGroups(jobs)
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

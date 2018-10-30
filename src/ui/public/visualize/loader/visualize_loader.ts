@@ -62,6 +62,11 @@ class VisualizeLoader {
    * In most of the cases you will need this method, since it allows you to specify
    * filters, handlers, queries, etc. on the savedObject before rendering.
    *
+   * We do not encourage you to use this method, since it will most likely be changed
+   * or removed in a future version of Kibana. Rather embed a visualization by its id
+   * via the {@link #embedVisualizationWithId} method.
+   *
+   * @deprecated You should rather embed by id, since this method will be removed in the future.
    * @param element The DOM element to render the visualization into.
    *    You can alternatively pass a jQuery element instead.
    * @param savedObj The savedObject as it could be retrieved by the
@@ -106,6 +111,8 @@ class VisualizeLoader {
     element.className = 'visualize';
     element.setAttribute('data-test-subj', 'visualizationLoader');
     container.appendChild(element);
+    // We need the container to have display: flex so visualization will render correctly
+    container.style.display = 'flex';
 
     // If params specified cssClass, we will set this to the element.
     if (params.cssClass) {

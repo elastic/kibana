@@ -17,27 +17,27 @@
  * under the License.
  */
 
-import { first, k$, Observable, Subscription, toPromise } from '../../lib/kbn_observable';
+import { Observable, Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 import { CoreService } from '../../types/core_service';
-import { Env } from '../config';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
-import { HttpServer } from './http_server';
+import { HttpServer, HttpServerInfo } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 import { Router } from './router';
 
-export class HttpService implements CoreService {
+export class HttpService implements CoreService<HttpServerInfo> {
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private configSubscription?: Subscription;
 
   private readonly log: Logger;
 
-  constructor(private readonly config$: Observable<HttpConfig>, logger: LoggerFactory, env: Env) {
+  constructor(private readonly config$: Observable<HttpConfig>, logger: LoggerFactory) {
     this.log = logger.get('http');
 
-    this.httpServer = new HttpServer(logger.get('http', 'server'), env);
+    this.httpServer = new HttpServer(logger.get('http', 'server'));
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
@@ -52,7 +52,7 @@ export class HttpService implements CoreService {
       }
     });
 
-    const config = await k$(this.config$)(first(), toPromise());
+    const config = await this.config$.pipe(first()).toPromise();
 
     // If a redirect port is specified, we start an HTTP server at this port and
     // redirect all requests to the SSL port.
@@ -60,7 +60,7 @@ export class HttpService implements CoreService {
       await this.httpsRedirectServer.start(config);
     }
 
-    await this.httpServer.start(config);
+    return await this.httpServer.start(config);
   }
 
   public async stop() {

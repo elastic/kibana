@@ -19,6 +19,7 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
     compressed={false}
     disabled={false}
     id="enable_scope_checkbox"
+    indeterminate={false}
     label="Add a filter list to limit where the rule applies."
     onChange={[MockFunction]}
   />
@@ -51,6 +52,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
     compressed={false}
     disabled={false}
     id="enable_scope_checkbox"
+    indeterminate={false}
     label="Add a filter list to limit where the rule applies."
     onChange={[MockFunction]}
   />
@@ -97,6 +99,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
     compressed={false}
     disabled={false}
     id="enable_scope_checkbox"
+    indeterminate={false}
     label="Add a filter list to limit where the rule applies."
     onChange={[MockFunction]}
   />
@@ -143,6 +146,7 @@ exports[`ScopeSection renders when not enabled 1`] = `
     compressed={false}
     disabled={false}
     id="enable_scope_checkbox"
+    indeterminate={false}
     label="Add a filter list to limit where the rule applies."
     onChange={[MockFunction]}
   />
@@ -172,6 +176,7 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
     compressed={false}
     disabled={false}
     id="enable_scope_checkbox"
+    indeterminate={false}
     label="Add a filter list to limit where the rule applies."
     onChange={[MockFunction]}
   />

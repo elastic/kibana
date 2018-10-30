@@ -24,6 +24,9 @@ import { inspect } from 'util';
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
+import { getSnapshotOfRunnableLogs } from './log_cache';
+import { escapeCdata } from '../xml';
+
 export function setupJUnitReportGeneration(runner, options = {}) {
   const {
     reportName = 'Unnamed Mocha Tests',
@@ -120,9 +123,12 @@ export function setupJUnitReportGeneration(runner, options = {}) {
 
     [...results, ...skippedResults].forEach(result => {
       const el = addTestcaseEl(result.node);
+      el.ele('system-out').dat(
+        escapeCdata(getSnapshotOfRunnableLogs(result.node) || '')
+      );
 
       if (result.failed) {
-        el.ele('failure').dat(inspect(result.error));
+        el.ele('failure').dat(escapeCdata(inspect(result.error)));
         return;
       }
 

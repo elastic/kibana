@@ -22,31 +22,31 @@ import sinon from 'sinon';
 
 import { FieldFormat } from '../field_format';
 import * as FieldFormatsServiceNS from '../field_formats_service';
-import { createServer } from '../../../test_utils/kbn_server';
+import { fieldFormatsMixin } from '../field_formats_mixin';
 
 describe('server.registerFieldFormat(createFormat)', () => {
   const sandbox = sinon.createSandbox();
 
-  let server;
+  let registerFieldFormat;
+  let fieldFormatServiceFactory;
+  const serverMock = { decorate() {} };
   beforeEach(async () => {
-    const kbnServer = createServer();
-    await kbnServer.ready();
-    server = kbnServer.server;
+    sandbox.stub(serverMock);
+    await fieldFormatsMixin({}, serverMock);
+    [[,, fieldFormatServiceFactory], [,, registerFieldFormat]] = serverMock.decorate.args;
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
+  afterEach(() => sandbox.restore());
 
   it('throws if createFormat is not a function', () => {
-    expect(() => server.registerFieldFormat()).to.throwError(error => {
+    expect(() => registerFieldFormat()).to.throwError(error => {
       expect(error.message).to.match(/createFormat is not a function/i);
     });
   });
 
   it('calls the createFormat() function with the FieldFormat class', () => {
     const createFormat = sinon.stub();
-    server.registerFieldFormat(createFormat);
+    registerFieldFormat(createFormat);
     sinon.assert.calledOnce(createFormat);
     sinon.assert.calledWithExactly(createFormat, sinon.match.same(FieldFormat));
   });
@@ -61,9 +61,9 @@ describe('server.registerFieldFormat(createFormat)', () => {
     class FooFormat {
       static id = 'foo'
     }
-    server.registerFieldFormat(() => FooFormat);
+    registerFieldFormat(() => FooFormat);
 
-    const fieldFormats = await server.fieldFormatServiceFactory({
+    const fieldFormats = await fieldFormatServiceFactory({
       getAll: () => ({}),
       getDefaults: () => ({})
     });

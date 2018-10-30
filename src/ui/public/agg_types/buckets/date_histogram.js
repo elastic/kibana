@@ -27,6 +27,8 @@ import { TimeBuckets } from '../../time_buckets';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
 import intervalTemplate from '../controls/time_interval.html';
+import { timefilter } from '../../timefilter';
+import dropPartialTemplate from '../controls/drop_partials.html';
 
 const config = chrome.getUiSettingsClient();
 const detectedTimezone = moment.tz.guess();
@@ -40,16 +42,10 @@ function getInterval(agg) {
   return interval;
 }
 
-function getBounds(vis) {
-  if (vis.API.timeFilter.isTimeRangeSelectorEnabled && vis.filters && vis.filters.timeRange) {
-    return vis.API.timeFilter.calculateBounds(vis.filters.timeRange);
-  }
-}
-
 function setBounds(agg, force) {
   if (agg.buckets._alreadySet && !force) return;
   agg.buckets._alreadySet = true;
-  const bounds = getBounds(agg.vis);
+  const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
   agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
 }
 
@@ -89,9 +85,10 @@ export const dateHistogramBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'date',
       default: function (agg) {
-        return agg._indexPattern.timeFieldName;
+        return agg.getIndexPattern().timeFieldName;
       },
       onChange: function (agg) {
         if (_.get(agg, 'params.interval.val') === 'auto' && !agg.fieldIsTimeField()) {
@@ -101,7 +98,16 @@ export const dateHistogramBucketAgg = new BucketAggType({
         setBounds(agg, true);
       }
     },
-
+    {
+      name: 'timeRange',
+      default: null,
+      write: _.noop,
+    },
+    {
+      name: 'useNormalizedEsInterval',
+      default: true,
+      write: _.noop,
+    },
     {
       name: 'interval',
       type: 'optioned',
@@ -122,17 +128,10 @@ export const dateHistogramBucketAgg = new BucketAggType({
       write: function (agg, output, aggs) {
         setBounds(agg, true);
         agg.buckets.setInterval(getInterval(agg));
-
-        const interval = agg.buckets.getInterval();
+        const { useNormalizedEsInterval } = agg.params;
+        const interval = agg.buckets.getInterval(useNormalizedEsInterval);
         output.bucketInterval = interval;
         output.params.interval = interval.expression;
-
-        const isDefaultTimezone = config.isDefault('dateFormat:tz');
-        if (isDefaultTimezone) {
-          output.params.time_zone = detectedTimezone || tzOffset;
-        } else {
-          output.params.time_zone = config.get('dateFormat:tz');
-        }
 
         const scaleMetrics = interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
@@ -146,13 +145,25 @@ export const dateHistogramBucketAgg = new BucketAggType({
         }
       }
     },
+    {
+      name: 'time_zone',
+      default: () => {
+        const isDefaultTimezone = config.isDefault('dateFormat:tz');
+        return isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
+      },
+    },
+    {
+      name: 'drop_partials',
+      default: false,
+      write: _.noop,
+      editor: dropPartialTemplate,
+    },
 
     {
       name: 'customInterval',
       default: '2h',
       write: _.noop
     },
-
     {
       name: 'format'
     },

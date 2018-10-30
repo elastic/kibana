@@ -38,12 +38,16 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe.skip('adding a filter that excludes all data', async () => {
+    describe('adding a filter that excludes all data', async () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.setTimepickerInDataRange();
         await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
         await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
+
+        // TODO: Remove once https://github.com/elastic/kibana/issues/22561 is fixed
+        await dashboardPanelActions.removePanelByTitle('Filter Bytes Test: timelion split 5 on bytes');
+
         await dashboardAddPanel.closeAddPanel();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -93,20 +97,25 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.savedSearchRowCount(0);
       });
 
-      it('timelion is filtered', async () => {
-        await dashboardExpect.timelionLegendCount(0);
-      });
+      // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
+      // it('timelion is filtered', async () => {
+      //   await dashboardExpect.timelionLegendCount(0);
+      // });
 
       it('vega is filtered', async () => {
         await dashboardExpect.vegaTextsDoNotExist(['5,000']);
       });
     });
 
-    describe.skip('using a pinned filter that excludes all data', async () => {
+    describe('using a pinned filter that excludes all data', async () => {
       before(async () => {
         await filterBar.toggleFilterPinned('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
+      });
+
+      after(async () => {
+        await filterBar.toggleFilterPinned('bytes');
       });
 
       it('filters on pie charts', async () => {
@@ -150,16 +159,17 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.savedSearchRowCount(0);
       });
 
-      it('timelion is filtered', async () => {
-        await dashboardExpect.timelionLegendCount(0);
-      });
+      // TODO: Uncomment once https://github.com/elastic/kibana/issues/22561 is fixed
+      // it('timelion is filtered', async () => {
+      //   await dashboardExpect.timelionLegendCount(0);
+      // });
 
       it('vega is filtered', async () => {
         await dashboardExpect.vegaTextsDoNotExist(['5,000']);
       });
     });
 
-    describe.skip('disabling a filter unfilters the data on', async () => {
+    describe('disabling a filter unfilters the data on', async () => {
       before(async () => {
         await testSubjects.click('disableFilter-bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -200,11 +210,11 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('tsvb top n', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['6,308.13', '6,308.13']);
+        await dashboardExpect.tsvbTopNValuesExist(['6,308.125', '6,308.125']);
       });
 
       it('tsvb markdown', async () => {
-        await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.29']);
+        await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
       });
 
       it('saved searches', async () => {
@@ -241,7 +251,7 @@ export default function ({ getService, getPageObjects }) {
         await renderable.waitForRender();
         await dashboardExpect.pieSliceCount(3);
 
-        await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
+        await PageObjects.visualize.saveVisualizationExpectSuccess('Rendering Test: animal sounds pie');
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -256,15 +266,31 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await dashboardExpect.pieSliceCount(1);
 
-        await PageObjects.visualize.saveVisualization('animal sounds pie');
+        await PageObjects.visualize.saveVisualizationExpectSuccess('animal sounds pie');
         await PageObjects.header.clickDashboard();
 
         await dashboardExpect.pieSliceCount(1);
       });
 
+      it('Removing filter pills and query unfiters data as expected', async () => {
+        await dashboardPanelActions.clickEdit();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
+        await filterBar.removeFilter('sound.keyword');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await dashboardExpect.pieSliceCount(5);
+
+        await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
+        await PageObjects.header.clickDashboard();
+
+        await dashboardExpect.pieSliceCount(5);
+      });
+
       it('Pie chart linked to saved search filters data', async () => {
         await dashboardAddPanel.addVisualization('Filter Test: animals: linked to search with filter');
-        await dashboardExpect.pieSliceCount(3);
+        await dashboardExpect.pieSliceCount(7);
       });
 
       it('Pie chart linked to saved search filters shows no data with conflicting dashboard query', async () => {
@@ -272,7 +298,7 @@ export default function ({ getService, getPageObjects }) {
         await queryBar.submitQuery();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await dashboardExpect.pieSliceCount(0);
+        await dashboardExpect.pieSliceCount(5);
       });
     });
   });

@@ -17,27 +17,39 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function osqueryLogsSpecProvider() {
+export function osqueryLogsSpecProvider(server, context) {
   const moduleName = 'osquery';
   const geoipRequired = false;
   const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'osqueryLogs',
-    name: 'Osquery logs',
+    name: i18n.translate('kbn.server.tutorials.osqueryLogs.nameTitle', {
+      defaultMessage: 'Osquery logs',
+    }),
     category: TUTORIAL_CATEGORY.SECURITY,
-    shortDescription: 'Collect the result logs created by osqueryd.',
-    longDescription: 'The `osquery` Filebeat module collects the JSON result logs collected by `osqueryd`.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-osquery.html).',
-    //euiIconType: 'logoOsquery',
+    shortDescription: i18n.translate('kbn.server.tutorials.osqueryLogs.shortDescription', {
+      defaultMessage: 'Collect the result logs created by osqueryd.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.osqueryLogs.longDescription', {
+      defaultMessage: 'The `osquery` Filebeat module collects the JSON result logs collected by `osqueryd`. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-osquery.html',
+      },
+    }),
+    euiIconType: 'logoOsquery',
     artifacts: {
       dashboards: [
         {
           id: '69f5ae20-eb02-11e7-8f04-51231daa5b05',
-          linkLabel: 'Osquery logs dashboard',
+          linkLabel: i18n.translate('kbn.server.tutorials.osqueryLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Osquery logs dashboard',
+          }),
           isOverview: true
         }
       ],
@@ -47,7 +59,7 @@ export function osqueryLogsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/osquery_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

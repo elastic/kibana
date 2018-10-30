@@ -20,13 +20,13 @@
 import { getConfig, createRunner } from './lib';
 
 import {
-  BootstrapTask,
   BuildPackagesTask,
   CleanExtraBinScriptsTask,
   CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
   CleanPackagesTask,
   CleanTypescriptTask,
+  CleanNodeBuildsTask,
   CleanTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
@@ -61,6 +61,7 @@ export async function buildDistributables(options) {
     createArchives,
     createRpmPackage,
     createDebPackage,
+    targetAllPlatforms,
   } = options;
 
   log.verbose('building distributables with options:', {
@@ -75,6 +76,7 @@ export async function buildDistributables(options) {
 
   const config = await getConfig({
     isRelease,
+    targetAllPlatforms
   });
 
   const run = createRunner({
@@ -89,7 +91,6 @@ export async function buildDistributables(options) {
    */
   await run(VerifyEnvTask);
   await run(CleanTask);
-  await run(BootstrapTask);
   await run(downloadFreshNode ? DownloadNodeBuildsTask : VerifyExistingNodeBuildsTask);
   await run(ExtractNodeBuildsTask);
 
@@ -120,6 +121,7 @@ export async function buildDistributables(options) {
   await run(CreateArchivesSourcesTask);
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
+  await run(CleanNodeBuildsTask);
 
   /**
    * package platform-specific builds into archives

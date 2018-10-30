@@ -48,10 +48,8 @@ export function VislibVisualizationsPieChartProvider(Private) {
   class PieChart extends Chart {
     constructor(handler, chartEl, chartData) {
       super(handler, chartEl, chartData);
-
       const charts = this.handler.data.getVisData();
       this._validatePieData(charts);
-
       this._attr = _.defaults(handler.visConfig.get('chart', {}), defaults);
     }
 
@@ -61,7 +59,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
      * If so, an error is thrown.
      */
     _validatePieData(charts) {
-      const isAllZeros = charts.every(function (chart) {
+      const isAllZeros = charts.every((chart) => {
         return chart.slices.children.length === 0;
       });
 
@@ -370,6 +368,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
           const svg = div.append('svg')
             .attr('width', width)
             .attr('height', height)
+            .attr('focusable', 'false')
             .append('g')
             .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 

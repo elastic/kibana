@@ -17,49 +17,58 @@
  * under the License.
  */
 
-import { getCacheKey, install, process } from 'ts-jest';
-import { JestConfig, TransformOptions } from 'ts-jest/dist/jest-types';
+import TsJest from 'ts-jest';
 
 import { getTsProjectForAbsolutePath } from '../typescript';
 
+const DEFAULT_TS_CONFIG_PATH = require.resolve('../../../tsconfig.json');
+const DEFAULT_BROWSER_TS_CONFIG_PATH = require.resolve('../../../tsconfig.browser.json');
+
 function extendJestConfigJSON(jestConfigJSON: string, filePath: string) {
-  const jestConfig = JSON.parse(jestConfigJSON) as JestConfig;
+  const jestConfig = JSON.parse(jestConfigJSON) as jest.ProjectConfig;
   return JSON.stringify(extendJestConfig(jestConfig, filePath));
 }
 
-function extendJestConfig(jestConfig: JestConfig, filePath: string) {
+function extendJestConfig(jestConfig: jest.ProjectConfig, filePath: string) {
+  let tsConfigFile = getTsProjectForAbsolutePath(filePath).tsConfigPath;
+
+  // swap ts config file for jest tests
+  if (tsConfigFile === DEFAULT_BROWSER_TS_CONFIG_PATH) {
+    tsConfigFile = DEFAULT_TS_CONFIG_PATH;
+  }
+
   return {
     ...jestConfig,
     globals: {
       ...(jestConfig.globals || {}),
       'ts-jest': {
         skipBabel: true,
-        tsConfigFile: getTsProjectForAbsolutePath(filePath).tsConfigPath,
+        tsConfigFile,
       },
     },
   };
 }
 
 module.exports = {
+  canInstrument: true,
+
   process(
     src: string,
-    filePath: string,
-    jestConfig: JestConfig,
-    transformOptions: TransformOptions
+    filePath: jest.Path,
+    jestConfig: jest.ProjectConfig,
+    transformOptions: jest.TransformOptions
   ) {
     const extendedConfig = extendJestConfig(jestConfig, filePath);
-    return process(src, filePath, extendedConfig, transformOptions);
+    return TsJest.process(src, filePath, extendedConfig, transformOptions);
   },
 
   getCacheKey(
     src: string,
     filePath: string,
     jestConfigJSON: string,
-    transformOptions: TransformOptions
+    transformOptions: jest.TransformOptions
   ) {
     const extendedConfigJSON = extendJestConfigJSON(jestConfigJSON, filePath);
-    return getCacheKey(src, filePath, extendedConfigJSON, transformOptions);
+    return TsJest.getCacheKey!(src, filePath, extendedConfigJSON, transformOptions);
   },
-
-  install,
 };

@@ -2,12 +2,12 @@
 
 exports[`after fetch hideWriteControls 1`] = `
 <EuiPage
-  className="dashboardLandingPage"
+  className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
+  restrictWidth={true}
 >
   <EuiPageBody
-    restrictWidth={true}
+    restrictWidth={false}
   >
     <EuiPageContent
       horizontalPosition="center"
@@ -32,12 +32,12 @@ exports[`after fetch hideWriteControls 1`] = `
 
 exports[`after fetch initialFilter 1`] = `
 <EuiPage
-  className="dashboardLandingPage"
+  className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
+  restrictWidth={true}
 >
   <EuiPageBody
-    restrictWidth={true}
+    restrictWidth={false}
   >
     <EuiPageContent
       horizontalPosition="center"
@@ -99,6 +99,7 @@ exports[`after fetch initialFilter 1`] = `
             grow={true}
           >
             <EuiFieldSearch
+              aria-label="Filter dashboards"
               compressed={false}
               data-test-subj="searchFilter"
               fullWidth={true}
@@ -184,12 +185,12 @@ exports[`after fetch initialFilter 1`] = `
 
 exports[`after fetch renders call to action when no dashboards exist 1`] = `
 <EuiPage
-  className="dashboardLandingPage"
+  className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
+  restrictWidth={true}
 >
   <EuiPageBody
-    restrictWidth={true}
+    restrictWidth={false}
   >
     <EuiPageContent
       horizontalPosition="center"
@@ -211,7 +212,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
             </EuiButton>
           }
           body={
-            <UNDEFINED>
+            <React.Fragment>
               <p>
                 You can combine data views from any Kibana app into one dashboard and see everything in one place.
               </p>
@@ -226,7 +227,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
                 </EuiLink>
                  to take a test drive.
               </p>
-            </UNDEFINED>
+            </React.Fragment>
           }
           iconColor="subdued"
           iconType="dashboardApp"
@@ -244,12 +245,12 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
 
 exports[`after fetch renders table rows 1`] = `
 <EuiPage
-  className="dashboardLandingPage"
+  className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
+  restrictWidth={true}
 >
   <EuiPageBody
-    restrictWidth={true}
+    restrictWidth={false}
   >
     <EuiPageContent
       horizontalPosition="center"
@@ -311,6 +312,7 @@ exports[`after fetch renders table rows 1`] = `
             grow={true}
           >
             <EuiFieldSearch
+              aria-label="Filter dashboards"
               compressed={false}
               data-test-subj="searchFilter"
               fullWidth={true}
@@ -396,12 +398,12 @@ exports[`after fetch renders table rows 1`] = `
 
 exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 <EuiPage
-  className="dashboardLandingPage"
+  className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
+  restrictWidth={true}
 >
   <EuiPageBody
-    restrictWidth={true}
+    restrictWidth={false}
   >
     <EuiPageContent
       horizontalPosition="center"
@@ -494,6 +496,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
             grow={true}
           >
             <EuiFieldSearch
+              aria-label="Filter dashboards"
               compressed={false}
               data-test-subj="searchFilter"
               fullWidth={true}
@@ -579,12 +582,12 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
 
 exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
 <EuiPage
-  className="dashboardLandingPage"
+  className="dshDashboardListing__page"
   data-test-subj="dashboardLandingPage"
-  restrictWidth={false}
+  restrictWidth={true}
 >
   <EuiPageBody
-    restrictWidth={true}
+    restrictWidth={false}
   />
 </EuiPage>
 `;

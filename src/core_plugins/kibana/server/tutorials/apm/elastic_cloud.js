@@ -17,64 +17,74 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
 
 import {
-  NODE_CLIENT_INSTRUCTIONS,
-  DJANGO_CLIENT_INSTRUCTIONS,
-  FLASK_CLIENT_INSTRUCTIONS,
-  RAILS_CLIENT_INSTRUCTIONS,
-  RACK_CLIENT_INSTRUCTIONS,
-  JS_CLIENT_INSTRUCTIONS,
-  GO_CLIENT_INSTRUCTIONS,
-  JAVA_CLIENT_INSTRUCTIONS,
+  createNodeClientInstructions,
+  createDjangoClientInstructions,
+  createFlaskClientInstructions,
+  createRailsClientInstructions,
+  createRackClientInstructions,
+  createJsClientInstructions,
+  createGoClientInstructions,
+  createJavaClientInstructions,
 } from './apm_client_instructions';
 
-const SERVER_URL_INSTRUCTION = {
-  title: 'APM Server endpoint',
-  textPre:
-    `Retrieve the APM Server URL from the Deployments section on the Elastic Cloud dashboard.
-    You will also need the APM Server secret token, which was generated on deployment.`,
-};
+const createServerUrlInstruction = () => ({
+  title: i18n.translate('kbn.server.tutorials.apm.serverUrlInstruction.title', {
+    defaultMessage: 'APM Server endpoint',
+  }),
+  textPre: i18n.translate('kbn.server.tutorials.apm.serverUrlInstruction.textPre', {
+    defaultMessage: 'Retrieve the APM Server URL from the Deployments section on the Elastic Cloud dashboard. \
+You will also need the APM Server secret token, which was generated on deployment.',
+  }),
+});
 
-export const ELASTIC_CLOUD_INSTRUCTIONS = {
-  instructionSets: [
-    {
-      title: 'APM Agents',
-      instructionVariants: [
-        {
-          id: INSTRUCTION_VARIANT.NODE,
-          instructions: [SERVER_URL_INSTRUCTION, ...NODE_CLIENT_INSTRUCTIONS],
-        },
-        {
-          id: INSTRUCTION_VARIANT.DJANGO,
-          instructions: [SERVER_URL_INSTRUCTION, ...DJANGO_CLIENT_INSTRUCTIONS],
-        },
-        {
-          id: INSTRUCTION_VARIANT.FLASK,
-          instructions: [SERVER_URL_INSTRUCTION, ...FLASK_CLIENT_INSTRUCTIONS],
-        },
-        {
-          id: INSTRUCTION_VARIANT.RAILS,
-          instructions: [SERVER_URL_INSTRUCTION, ...RAILS_CLIENT_INSTRUCTIONS],
-        },
-        {
-          id: INSTRUCTION_VARIANT.RACK,
-          instructions: [SERVER_URL_INSTRUCTION, ...RACK_CLIENT_INSTRUCTIONS],
-        },
-        {
-          id: INSTRUCTION_VARIANT.JS,
-          instructions: [SERVER_URL_INSTRUCTION, ...JS_CLIENT_INSTRUCTIONS],
-        },
-        {
-          id: INSTRUCTION_VARIANT.GO,
-          instructions: [SERVER_URL_INSTRUCTION, ...GO_CLIENT_INSTRUCTIONS],
-        },
-        {
-          id: INSTRUCTION_VARIANT.JAVA,
-          instructions: [SERVER_URL_INSTRUCTION, ...JAVA_CLIENT_INSTRUCTIONS],
-        },
-      ],
-    },
-  ],
-};
+export function createElasticCloudInstructions() {
+  const SERVER_URL_INSTRUCTION = createServerUrlInstruction();
+
+  return {
+    instructionSets: [
+      {
+        title: i18n.translate('kbn.server.tutorials.apm.elasticCloudInstructions.title', {
+          defaultMessage: 'APM Agents',
+        }),
+        instructionVariants: [
+          {
+            id: INSTRUCTION_VARIANT.NODE,
+            instructions: [SERVER_URL_INSTRUCTION, ...createNodeClientInstructions()],
+          },
+          {
+            id: INSTRUCTION_VARIANT.DJANGO,
+            instructions: [SERVER_URL_INSTRUCTION, ...createDjangoClientInstructions()],
+          },
+          {
+            id: INSTRUCTION_VARIANT.FLASK,
+            instructions: [SERVER_URL_INSTRUCTION, ...createFlaskClientInstructions()],
+          },
+          {
+            id: INSTRUCTION_VARIANT.RAILS,
+            instructions: [SERVER_URL_INSTRUCTION, ...createRailsClientInstructions()],
+          },
+          {
+            id: INSTRUCTION_VARIANT.RACK,
+            instructions: [SERVER_URL_INSTRUCTION, ...createRackClientInstructions()],
+          },
+          {
+            id: INSTRUCTION_VARIANT.JS,
+            instructions: [SERVER_URL_INSTRUCTION, ...createJsClientInstructions()],
+          },
+          {
+            id: INSTRUCTION_VARIANT.GO,
+            instructions: [SERVER_URL_INSTRUCTION, ...createGoClientInstructions()],
+          },
+          {
+            id: INSTRUCTION_VARIANT.JAVA,
+            instructions: [SERVER_URL_INSTRUCTION, ...createJavaClientInstructions()],
+          },
+        ],
+      },
+    ],
+  };
+}
