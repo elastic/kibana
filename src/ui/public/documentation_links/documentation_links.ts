@@ -19,10 +19,14 @@
 
 import { metadata } from '../metadata';
 
+/*
+  WARNING: The links in this file are validated during the docs build. This is accomplished with some regex magic that
+  looks for these particular constants. As a result, we should not add new constants or change the existing ones.
+  If you absolutely must make a change, talk to Clinton Gormley first so he can update his Perl scripts.
+ */
 export const DOC_LINK_VERSION = metadata.branch;
 export const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
 const ELASTIC_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
-const PAINLESS_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/`;
 
 export const documentationLinks = {
   filebeat: {
@@ -35,6 +39,9 @@ export const documentationLinks = {
   },
   metricbeat: {
     base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
+  },
+  heartbeat: {
+    base: `${ELASTIC_WEBSITE_URL}guide/en/beats/heartbeat/${DOC_LINK_VERSION}`,
   },
   logstash: {
     base: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`,
@@ -75,7 +82,7 @@ export const documentationLinks = {
     scriptFields: `${ELASTIC_DOCS}search-request-script-fields.html`,
     scriptAggs: `${ELASTIC_DOCS}search-aggregations.html#_values_source`,
     painless: `${ELASTIC_DOCS}modules-scripting-painless.html`,
-    painlessApi: `${PAINLESS_DOCS}painless-api-reference.html`,
+    painlessApi: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-api-reference.html`,
     painlessSyntax: `${ELASTIC_DOCS}modules-scripting-painless-syntax.html`,
     luceneExpressions: `${ELASTIC_DOCS}modules-scripting-expression.html`,
   },

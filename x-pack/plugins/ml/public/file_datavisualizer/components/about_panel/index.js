@@ -5,4 +5,4 @@
  */
 
 
-export { AboutPanel } from './about_panel';
+export { AboutPanel, LoadingPanel } from './about_panel';

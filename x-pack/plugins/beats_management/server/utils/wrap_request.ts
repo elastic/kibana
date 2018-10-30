@@ -19,6 +19,7 @@ export function wrapRequest<InternalRequest extends FrameworkWrappableRequest>(
   const isAuthenticated = headers.authorization != null;
 
   return {
+    // @ts-ignore -- partial applucation, adapter adds other user data
     user: isAuthenticated
       ? {
           kind: 'authenticated',

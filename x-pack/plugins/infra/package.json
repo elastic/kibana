@@ -6,7 +6,7 @@
     "build-graphql-types": "node scripts/generate_types_from_graphql.js"
   },
   "devDependencies": {
-    "@types/boom": "3.2.2",
+    "@types/boom": "7.2.0",
     "@types/lodash": "^4.14.110"
   },
   "dependencies": {
