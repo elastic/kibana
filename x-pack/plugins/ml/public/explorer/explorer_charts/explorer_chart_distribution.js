@@ -38,6 +38,7 @@ import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tool
 import { CHART_TYPE } from '../explorer_constants';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
+const Y_AXIS_LABEL_THRESHOLD = 10;
 
 export class ExplorerChartDistribution extends React.Component {
   static propTypes = {
@@ -189,8 +190,15 @@ export class ExplorerChartDistribution extends React.Component {
         .remove();
       d3.select('.temp-axis-label').remove();
 
-      // Set the size of the left margin according to the width of the largest y axis tick label.
-      if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
+      // Set the size of the left margin according to the width of the largest y axis tick label
+      // if the chart is either a population chart or a rare chart below the cardinality threshold.
+      if (
+        chartType === CHART_TYPE.POPULATION_DISTRIBUTION
+        || (
+          chartType === CHART_TYPE.EVENT_DISTRIBUTION
+          && scaleCategories.length <= Y_AXIS_LABEL_THRESHOLD
+        )
+      ) {
         margin.left = (Math.max(maxYAxisLabelWidth, 40));
       }
       vizWidth = svgWidth - margin.left - margin.right;
@@ -280,6 +288,13 @@ export class ExplorerChartDistribution extends React.Component {
       axes.append('g')
         .attr('class', 'y axis')
         .call(yAxis);
+
+      // emphasize the y axis label this rare chart is actually about
+      if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
+        axes.selectAll('.y.axis text').each(function (d) {
+          d3.select(this).classed('ml-explorer-chart-axis-emphasis', (d === highlight));
+        });
+      }
 
       if (tooManyBuckets === false) {
         removeLabelOverlap(gAxis, tickValuesStart, interval, vizWidth);
