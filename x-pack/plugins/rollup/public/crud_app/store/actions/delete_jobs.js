@@ -9,13 +9,27 @@ import { toastNotifications } from 'ui/notify';
 import { deleteJobs as sendDeleteJobsRequest } from '../../services';
 import { getDetailPanelJob } from '../selectors';
 
+import {
+  UPDATE_JOB_START,
+  UPDATE_JOB_SUCCESS,
+  UPDATE_JOB_FAILURE,
+} from '../action_types';
+
 import { refreshJobs } from './refresh_jobs';
 import { closeDetailPanel } from './detail_panel';
 
 export const deleteJobs = (jobIds) => async (dispatch, getState) => {
+  dispatch({
+    type: UPDATE_JOB_START,
+  });
+
   try {
     await sendDeleteJobsRequest(jobIds);
   } catch (error) {
+    dispatch({
+      type: UPDATE_JOB_FAILURE,
+    });
+
     return toastNotifications.addDanger(error.data.message);
   }
 
@@ -30,6 +44,10 @@ export const deleteJobs = (jobIds) => async (dispatch, getState) => {
   if (detailPanelJob && jobIds.includes(detailPanelJob.id)) {
     dispatch(closeDetailPanel());
   }
+
+  dispatch({
+    type: UPDATE_JOB_SUCCESS,
+  });
 
   dispatch(refreshJobs());
 };

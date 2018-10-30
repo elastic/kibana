@@ -6,13 +6,17 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
   EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPopover,
+  EuiText,
 } from '@elastic/eui';
 
 import { ConfirmDeleteModal } from './confirm_delete_modal';
@@ -23,6 +27,7 @@ class JobActionMenuUi extends Component {
     startJobs: PropTypes.func.isRequired,
     stopJobs: PropTypes.func.isRequired,
     deleteJobs: PropTypes.func.isRequired,
+    isUpdating: PropTypes.bool.isRequired,
     iconSide: PropTypes.string,
     anchorPosition: PropTypes.string,
     label: PropTypes.node,
@@ -187,7 +192,27 @@ class JobActionMenuUi extends Component {
   };
 
   render() {
-    const { intl } = this.props;
+    const { intl, isUpdating } = this.props;
+
+    if (isUpdating) {
+      return (
+        <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l"/>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobActionMenu.updatingText"
+                defaultMessage="Updating"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
     const jobCount = this.props.jobs.length;
 
     const {

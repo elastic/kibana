@@ -9,14 +9,33 @@ import {
   startJobs as sendStartJobsRequest,
   stopJobs as sendStopJobsRequest,
 } from '../../services';
+
+import {
+  UPDATE_JOB_START,
+  UPDATE_JOB_SUCCESS,
+  UPDATE_JOB_FAILURE,
+} from '../action_types';
+
 import { refreshJobs } from './refresh_jobs';
 
 export const startJobs = (jobIds) => async (dispatch) => {
+  dispatch({
+    type: UPDATE_JOB_START,
+  });
+
   try {
     await sendStartJobsRequest(jobIds);
   } catch (error) {
+    dispatch({
+      type: UPDATE_JOB_FAILURE,
+    });
+
     return toastNotifications.addDanger(error.data.message);
   }
+
+  dispatch({
+    type: UPDATE_JOB_SUCCESS,
+  });
 
   dispatch(refreshJobs());
 };
