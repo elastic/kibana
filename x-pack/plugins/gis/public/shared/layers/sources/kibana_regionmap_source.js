@@ -15,6 +15,7 @@ import {
 export class KibanaRegionmapSource extends VectorSource {
 
   static type = 'REGIONMAP_FILE';
+  static typeDisplayName = 'Kibana Custom Region Map'
 
   constructor(descriptor, regionList) {
     super(descriptor);
@@ -22,8 +23,9 @@ export class KibanaRegionmapSource extends VectorSource {
   }
 
   static createDescriptor(name) {
-    return { name,
-      type: KibanaRegionmapSource.type
+    return {
+      type: KibanaRegionmapSource.type,
+      name: name
     };
   }
 
@@ -67,6 +69,15 @@ export class KibanaRegionmapSource extends VectorSource {
   async getGeoJson() {
     const fileSource = this._regionList.find(source => source.name === this._descriptor.name);
     return VectorSource.getGeoJson(fileSource, fileSource.url);
+  }
+
+  async getStringFields() {
+    //todo: use map/service-settings instead.
+    const fileSource = this._regionList.find((source => source.name === this._descriptor.name));
+
+    return fileSource.fields.map(f => {
+      return { name: f.name, label: f.description };
+    });
   }
 
   async getDisplayName() {

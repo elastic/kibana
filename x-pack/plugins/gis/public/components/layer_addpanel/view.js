@@ -10,6 +10,8 @@ import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
 import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
 import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
 import { ESSearchSource } from '../../shared/layers/sources/es_search_source';
+import { KibanaRegionmapSource } from '../../shared/layers/sources/kibana_regionmap_source';
+
 import {
   EuiText,
   EuiSpacer,
@@ -198,6 +200,21 @@ export class AddLayerPanel extends React.Component {
             </EuiText>
           </Fragment>
         ),
+      },
+      {
+        value: KibanaRegionmapSource.type,
+        inputDisplay: KibanaRegionmapSource.typeDisplayName,
+        dropdownDisplay: (
+          <Fragment>
+            <strong>{KibanaRegionmapSource.typeDisplayName}</strong>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p className="euiTextColor--subdued">
+                Region map vectors defined in your Kibana customizations.
+              </p>
+            </EuiText>
+          </Fragment>
+        ),
       }
     ];
 
@@ -234,6 +251,8 @@ export class AddLayerPanel extends React.Component {
         return ESGeohashGridSource.renderEditor(editorProperties);
       case ESSearchSource.type:
         return ESSearchSource.renderEditor(editorProperties);
+      case KibanaRegionmapSource.type:
+        return KibanaRegionmapSource.renderEditor(editorProperties);
       default:
         throw new Error(`Unexepected source type: ${this.state.sourceType}`);
     }
