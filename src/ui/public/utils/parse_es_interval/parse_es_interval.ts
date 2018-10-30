@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import dateMath from '@kbn/datemath';
+import dateMath, { Unit } from '@kbn/datemath';
 
 import { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
 import { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';
@@ -25,6 +25,8 @@ import { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error
 const ES_INTERVAL_STRING_REGEX = new RegExp(
   '^([1-9][0-9]*)\\s*(' + dateMath.units.join('|') + ')$'
 );
+
+export type ParsedInterval = ReturnType<typeof parseEsInterval>;
 
 /**
  * Extracts interval properties from an ES interval string. Disallows unrecognized interval formats
@@ -37,7 +39,7 @@ const ES_INTERVAL_STRING_REGEX = new RegExp(
  * | -------- | ---------------- | ------------------- |
  * | ms       | fixed            | fixed               |
  * | s        | fixed            | fixed               |
- * | m        | fixed            | fixed               |
+ * | m        | calendar         | fixed               |
  * | h        | calendar         | fixed               |
  * | d        | calendar         | fixed               |
  * | w        | calendar         | N/A - disallowed    |
@@ -45,7 +47,7 @@ const ES_INTERVAL_STRING_REGEX = new RegExp(
  * | y        | calendar         | N/A - disallowed    |
  *
  */
-export function parseEsInterval(interval: string): { value: number; unit: string; type: string } {
+export function parseEsInterval(interval: string) {
   const matches = String(interval)
     .trim()
     .match(ES_INTERVAL_STRING_REGEX);
@@ -54,9 +56,9 @@ export function parseEsInterval(interval: string): { value: number; unit: string
     throw new InvalidEsIntervalFormatError(interval);
   }
 
-  const value = matches && parseFloat(matches[1]);
-  const unit = matches && matches[2];
-  const type = unit && dateMath.unitsMap[unit].type;
+  const value = parseFloat(matches[1]);
+  const unit = matches[2] as Unit;
+  const type = dateMath.unitsMap[unit].type;
 
   if (type === 'calendar' && value !== 1) {
     throw new InvalidEsCalendarIntervalError(interval, value, unit, type);
@@ -65,6 +67,9 @@ export function parseEsInterval(interval: string): { value: number; unit: string
   return {
     value,
     unit,
-    type: (type === 'mixed' && value === 1) || type === 'calendar' ? 'calendar' : 'fixed',
+    type:
+      (type === 'mixed' && value === 1) || type === 'calendar'
+        ? ('calendar' as 'calendar')
+        : ('fixed' as 'fixed'),
   };
 }

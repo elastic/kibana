@@ -317,11 +317,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.clickSave();
       }
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
       // Confirm that the Dashboard has actually been saved
       await testSubjects.existOrFail('saveDashboardSuccess');
-
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await this.waitForSaveModalToClose();
     }
 

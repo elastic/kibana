@@ -57,13 +57,25 @@ function ExplorerChartContainer({
   } = series;
 
   const chartType = getChartType(series);
+  let DetectorLabel = <React.Fragment>{detectorLabel}</React.Fragment>;
+
+  if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
+    const byField = series.entityFields.find(d => d.fieldType === 'by');
+    if (typeof byField !== 'undefined') {
+      DetectorLabel = (
+        <React.Fragment>
+          {detectorLabel}<br />y-axis event distribution split by &quot;{byField.fieldName}&quot;
+        </React.Fragment>
+      );
+    }
+  }
 
   return (
     <React.Fragment>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <ExplorerChartLabel
-            detectorLabel={detectorLabel}
+            detectorLabel={DetectorLabel}
             entityFields={entityFields}
             infoTooltip={{ ...series.infoTooltip, chartType }}
             wrapLabel={wrapLabel}
