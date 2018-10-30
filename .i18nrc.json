@@ -11,8 +11,7 @@
     "tagCloud": "src/core_plugins/tagcloud",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
     "xpack.watcher": "x-pack/plugins/watcher",
-    "xpack.rollupJobs": "x-pack/plugins/rollup",
-    "xpack.security": "x-pack/plugins/security"
+    "xpack.rollupJobs": "x-pack/plugins/rollup"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",
