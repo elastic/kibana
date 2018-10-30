@@ -87,9 +87,6 @@ coming[6.4.3]
 [[enhancement-6.4.3]]
 === Enhancements
 
-Operations::
-* Upgrades the version of ChromeDriver to 2.42.1 {pull}23648[#23648]
-
 Platform::
 * Upgrades the minimum yarn version to 1.10.1 {pull}23971[#23971]
 
@@ -97,18 +94,15 @@ Platform::
 [[bug-6.4.3]]
 === Bug fixes
 
-Management::
-* Fixes the positioning of a button popover in *Index Management* {pull}23801[#23801]
-
 Monitoring::
 * Ensures the provided node id is used in a query {pull}23715[#23715]
 * Preserves the state of cross cluster search {pull}24331[#24331]
 
 Visualization::
 * Fixes the editor so that updating `aggconfigs` in a visualization 
-and then calling `vis.updateState()` works correctly {pull}24484[#24484]
+and then calling `vis.updateState()` works correctly {pull}22869[#22869]
 * Fixes a memory leak in `vislib`, where the scope used for the legend was never 
-destroyed. As a result, memory piled up in a dashboard with auto-refresh enabled. {pull}24282[#24282]
+destroyed. As a result, memory piled up in a dashboard with auto-refresh enabled. {pull}24134[#24134]
 * Fixes pie charts so that they work properly when the time window doesn't have
 any data {pull}24031[#24031]
 
