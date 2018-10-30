@@ -6,6 +6,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -19,7 +20,7 @@ import { Transaction as ITransaction } from '../../../../../typings/Transaction'
 import { IUrlParams } from '../../../../store/urlParams';
 import EmptyMessage from '../../../shared/EmptyMessage';
 import { TransactionLink } from '../../../shared/TransactionLink';
-import { ActionMenu } from './ActionMenu';
+import { DiscoverTransactionLink } from './ActionMenu';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
 // @ts-ignore
 import { TransactionPropertiesTable } from './TransactionPropertiesTable';
@@ -89,7 +90,11 @@ export const Transaction: React.SFC<Props> = ({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <ActionMenu transaction={transaction} />
+              <DiscoverTransactionLink transaction={transaction}>
+                <EuiButtonEmpty iconType="discoverApp">
+                  View transaction in Discover
+                </EuiButtonEmpty>
+              </DiscoverTransactionLink>
             </EuiFlexItem>
             <MaybeViewTraceLink transaction={transaction} root={root} />
           </EuiFlexGroup>
