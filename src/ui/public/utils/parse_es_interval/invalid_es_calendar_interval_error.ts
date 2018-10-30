@@ -18,6 +18,7 @@
  */
 
 import { Unit } from '@kbn/datemath';
+import { i18n } from '@kbn/i18n';
 
 export class InvalidEsCalendarIntervalError extends Error {
   constructor(
@@ -26,7 +27,12 @@ export class InvalidEsCalendarIntervalError extends Error {
     public readonly unit: Unit,
     public readonly type: string
   ) {
-    super(`Invalid calendar interval: ${interval}, value must be 1`);
+    super(
+      i18n.translate('common.ui.parseEsInterval.invalidEsCalendarIntervalErrorMessage', {
+        defaultMessage: 'Invalid calendar interval: {interval}, value must be 1',
+        values: { interval },
+      })
+    );
 
     this.name = 'InvalidEsCalendarIntervalError';
     this.value = value;
