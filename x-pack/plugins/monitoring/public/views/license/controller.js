@@ -12,6 +12,8 @@ import { formatDateTimeLocal } from '../../../common/formatting';
 import { MANAGEMENT_BASE_PATH } from 'plugins/xpack_main/components';
 import { License } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
+import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const REACT_NODE_ID = 'licenseReact';
 
@@ -34,7 +36,10 @@ export class LicenseViewController {
 
     const cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
     $scope.cluster = cluster;
-    title($scope.cluster, 'License');
+    const routeTitle = i18n.translate('xpack.monitoring.license.licenseRouteTitle', {
+      defaultMessage: 'License'
+    });
+    title($scope.cluster, routeTitle);
 
     this.license = cluster.license;
     this.isExpired = Date.now() > get(cluster, 'license.expiry_date_in_millis');
@@ -56,14 +61,16 @@ export class LicenseViewController {
 
       // Mount the React component to the template
       render(
-        <License
-          isPrimaryCluster={isPrimaryCluster}
-          status={license.status}
-          type={license.type}
-          isExpired={isExpired}
-          expiryDate={expiryDate}
-          uploadLicensePath={uploadLicensePath}
-        />,
+        <I18nProvider>
+          <License
+            isPrimaryCluster={isPrimaryCluster}
+            status={license.status}
+            type={license.type}
+            isExpired={isExpired}
+            expiryDate={expiryDate}
+            uploadLicensePath={uploadLicensePath}
+          />
+        </I18nProvider>,
         document.getElementById(REACT_NODE_ID)
       );
     });
