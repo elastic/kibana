@@ -8,11 +8,15 @@ import * as React from 'react';
 import { DataProvider } from '../data_provider';
 import { FacetText } from '../facet_text';
 
+interface NameToEventCount<TValue> {
+  [name: string]: TValue;
+}
+
 /**
  * A map of mock data provider name to a count of events for
  * that mock data provider
  */
-const mockSourceNameToEventCount = {
+const mockSourceNameToEventCount: NameToEventCount<number> = {
   'Provider 1': 64,
   'Provider 2': 158,
   'Provider 3': 381,
