@@ -127,7 +127,7 @@ const alertRowFactory = (scope, kbnUrl) => {
         </KuiTableRowCell>
         <KuiTableRowCell tabIndex="0">
           { linkToCategories[props.metadata.link] ? linkToCategories[props.metadata.link] :
-            props.intl.formatMessage({ id: 'xpack.monitoring.alerts.generalCategoryDescription', defaultMessage: 'General', }) }
+            props.intl.formatMessage({ id: 'xpack.monitoring.alerts.generalCategoryLabel', defaultMessage: 'General', }) }
         </KuiTableRowCell>
         <KuiTableRowCell tabIndex="0">
           { formatDateTimeLocal(props.update_timestamp) }
