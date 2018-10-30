@@ -30,7 +30,7 @@
             class="kuiText kuiVerticalRhythmSmall"
             i18n-id="xpack.searchProfiler.licenseErrorMessageDescription"
             i18n-default-message="The Profiler Visualization requires an active license ({licenseTypeList} or {platinumLicenseType}), but none were found in your cluster."
-            i18n-values="{ licenseTypeList: '<code>Trial</code>, <code>Basic</code>, <code>Gold</code>', platinumLicenseType: '<code>Platinum</code>' }"
+            i18n-values="{ licenseTypeList: '<code>' + trialLicense + '</code>, <code>' + basicLicense + '</code>, <code>' + goldLicense + '</code>', platinumLicenseType: '<code>' + platinumLicense + '</code>' }"
           ></p>
 
           <p
