@@ -44,8 +44,7 @@ const traceListColumns: ITableColumn[] = [
   {
     field: 'sample.context.service.name',
     name: 'Originating service',
-    sortable: true,
-    render: service => service
+    sortable: true
   },
   {
     field: 'averageResponseTime',
