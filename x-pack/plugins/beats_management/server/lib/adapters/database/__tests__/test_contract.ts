@@ -32,7 +32,7 @@ export const contractTests = (testName: string, config: ContractConfig) => {
         await database.putTemplate(
           { kind: 'internal' },
           {
-            name: '.management-beats-index',
+            name: '.management-beats',
             body: beatsIndexTemplate,
           }
         );
