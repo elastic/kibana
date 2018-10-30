@@ -5402,27 +5402,15 @@ ejs@^2.2.4:
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.5.7.tgz#cc872c168880ae3c7189762fd5ffc00896c9518a"
   integrity sha1-zIcsFoiArjxxiXYv1f/ACJbJUYo=
 
-elasticsearch-browser@^15.1.1:
-  version "15.1.1"
-  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-15.1.1.tgz#aff065eff546a585c7e61da896b808fe5812de3d"
-  integrity sha512-QV5l0OufbAVmzA4dsDLKqUJFRcIiUM5f9eM+nZNj4sW5Legp6YfxuCT2aN5+Zd9RL5J8cb5xSZglqIXtllqZKA==
+elasticsearch-browser@^15.2.0:
+  version "15.2.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-15.2.0.tgz#3af0d4b6ffbd125842c7082bbdd99ae4afcba27b"
+  integrity sha512-Rhz7SkuPeiBtRZP2xn98NhiECJQSTrzUEDHXkepkYXqH755kjPzpJB2rvioKDkA+4gegOyHk2yx+VDGcMXQhVg==
 
-elasticsearch@^14.2.0:
-  version "14.2.1"
-  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-14.2.1.tgz#d10cb0b9562ca6614d178c30a112b93f6e8570d1"
-  integrity sha1-0QywuVYspmFNF4wwoRK5P26FcNE=
-  dependencies:
-    agentkeepalive "^3.4.1"
-    chalk "^1.0.0"
-    lodash "2.4.2"
-    lodash.get "^4.4.2"
-    lodash.isempty "^4.4.0"
-    lodash.trimend "^4.5.1"
-
-elasticsearch@^15.1.1:
-  version "15.1.1"
-  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-15.1.1.tgz#242f2378fccd601586ff763a8a933cd5d41c945f"
-  integrity sha512-Yr9xy10rUMjDty7qCys7X9AIW5+PX4Gtv2NksZqXIc+AZiWna/y2QwZdiSLtb5LTOKDp7PbegfuokhIjMHUpKw==
+elasticsearch@^15.2.0:
+  version "15.2.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-15.2.0.tgz#234362b5aa743d9c0a925566569ea7813b8f2569"
+  integrity sha512-jOFcBoEh3Sn3gjUTozInODZTLriJtfppAUC7jnQCUE+OUj8o7GoAyC+L4h/L3ZxmXNFbQCunqVR+nmSofHdo9A==
   dependencies:
     agentkeepalive "^3.4.1"
     chalk "^1.0.0"
@@ -10617,11 +10605,6 @@ lodash.topath@^4.5.2:
   resolved "https://registry.yarnpkg.com/lodash.topath/-/lodash.topath-4.5.2.tgz#3616351f3bba61994a0931989660bd03254fd009"
   integrity sha1-NhY1Hzu6YZlKCTGYlmC9AyVP0Ak=
 
-lodash.trimend@^4.5.1:
-  version "4.5.1"
-  resolved "https://registry.yarnpkg.com/lodash.trimend/-/lodash.trimend-4.5.1.tgz#12804437286b98cad8996b79414e11300114082f"
-  integrity sha1-EoBENyhrmMrYmWt5QU4RMAEUCC8=
-
 lodash.uniq@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
@@ -10638,11 +10621,6 @@ lodash.uniqueid@^3.0.0:
   integrity sha1-WUFvE0EDziU9S0qoGCcr4/u8u9s=
   dependencies:
     lodash._root "^3.0.0"
-
-lodash@2.4.2, lodash@~2.4.1:
-  version "2.4.2"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-2.4.2.tgz#fadd834b9683073da179b3eae6d9c0d15053f73e"
-  integrity sha1-+t2DS5aDBz2hebPq5tnA0VBT9z4=
 
 lodash@3.10.1, lodash@^3.10.0, lodash@^3.10.1, lodash@^3.3.1, lodash@^3.8.0, lodash@~3.10.1:
   version "3.10.1"
@@ -10668,6 +10646,11 @@ lodash@^4.0.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.4, l
   version "3.10.1-kibana1"
   resolved "https://registry.yarnpkg.com/@elastic/lodash/-/lodash-3.10.1-kibana1.tgz#9baa52c296ec06a52461f8516bb94172ef53a7fe"
   integrity sha512-JIL1V6Kd9mhm7OCO5nmpMF8hW2iw1godcXgBikhIlTvsu6hBA8Xnxfc/AukdysTfJo4zWaZ8PzlJX/hKN/DlDA==
+
+lodash@~2.4.1:
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-2.4.2.tgz#fadd834b9683073da179b3eae6d9c0d15053f73e"
+  integrity sha1-+t2DS5aDBz2hebPq5tnA0VBT9z4=
 
 lodash@~4.3.0:
   version "4.3.0"
@@ -10828,14 +10811,14 @@ makeerror@1.0.x:
   dependencies:
     tmpl "1.0.x"
 
-makelogs@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/makelogs/-/makelogs-4.1.0.tgz#9bb74ede29844648196f47b405bbd1383e5dca3a"
-  integrity sha512-MUSPMQBN6aLRQ+BEOdXK93+3WECgek1pd1OoTOJjrxBBNiWZn5C0riywvuGki6Xiwj2CrjW7+nATdogDSd6TgA==
+makelogs@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/makelogs/-/makelogs-4.3.0.tgz#cfcf9dbe8988f70a06472101e6731cdb27466ab2"
+  integrity sha512-2jSmXtlYhrr0/Y2AqVt0OmySEmxdJlUAd6UJgiPM40TZRfzyO/e51P4LrVnVqujp2pLHktTG6VcTUujyiQQsOA==
   dependencies:
     async "^1.4.2"
     bluebird "^2.10.0"
-    elasticsearch "^14.2.0"
+    elasticsearch "^15.2.0"
     inquirer "^0.11.1"
     lodash "~2.4.1"
     moment "^2.10.6"
