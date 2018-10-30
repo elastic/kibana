@@ -20,7 +20,7 @@
 import { SearchError } from './search_error';
 
 export const noOpSearchStrategy = {
-  id: 'noop',
+  id: 'noOp',
 
   search: async () => {
     const searchError = new SearchError({
