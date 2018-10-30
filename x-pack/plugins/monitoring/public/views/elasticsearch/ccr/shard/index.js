@@ -12,6 +12,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../../base_controller';
 import { CcrShard } from '../../../../components/elasticsearch/ccr_shard';
+import { I18nProvider } from '@kbn/i18n/react';
 
 uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   template,
@@ -41,7 +42,7 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
 
       this.renderReact = (props) => {
         super.renderReact(
-          <CcrShard {...props} />
+          <I18nProvider><CcrShard {...props} /> </I18nProvider>
         );
       };
     }

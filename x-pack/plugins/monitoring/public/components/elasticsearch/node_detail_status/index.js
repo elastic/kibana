@@ -8,9 +8,9 @@ import React, { Fragment } from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { NodeStatusIcon } from '../node';
 import { formatMetric } from '../../../lib/format_number';
-import { i18n } from '@kbn/i18n';
+import { injectI18n } from '@kbn/i18n/react';
 
-export function NodeDetailStatus({ stats }) {
+function NodeDetailStatusUI({ stats, intl }) {
   const {
     transport_address: transportAddress,
     usedHeap,
@@ -30,52 +30,57 @@ export function NodeDetailStatus({ stats }) {
       dataTestSubj: 'transportAddress'
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.jvmHeapLabel', {
-        defaultMessage: '{javaVirtualMachine} Heap',
-        values: {
-          javaVirtualMachine: 'JVM'
-        }
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.jvmHeapLabel',
+        defaultMessage: '{javaVirtualMachine} Heap' }, {
+        javaVirtualMachine: 'JVM'
       }),
       value: formatMetric(usedHeap, '0,0.[00]', '%', { prependSpace: false }),
       dataTestSubj: 'jvmHeap'
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.freeDiskSpaceLabel', {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.freeDiskSpaceLabel',
         defaultMessage: 'Free Disk Space',
       }),
       value: formatMetric(freeSpace, '0.0 b'),
       dataTestSubj: 'freeDiskSpace'
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.documentsLabel', {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.documentsLabel',
         defaultMessage: 'Documents',
       }),
       value: formatMetric(documents, '0.[0]a'),
       dataTestSubj: 'documentCount'
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.dataLabel', {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.dataLabel',
         defaultMessage: 'Data',
       }),
       value: formatMetric(dataSize, '0.0 b'),
       dataTestSubj: 'dataSize'
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.indicesLabel', {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.indicesLabel',
         defaultMessage: 'Indices',
       }),
       value: formatMetric(indexCount, 'int_commas'),
       dataTestSubj: 'indicesCount'
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.shardsLabel', {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.shardsLabel',
         defaultMessage: 'Shards',
       }),
       value: formatMetric(totalShards, 'int_commas'),
       dataTestSubj: 'shardsCount'
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.typeLabel', {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.typeLabel',
         defaultMessage: 'Type',
       }),
       value: nodeTypeLabel,
@@ -99,3 +104,5 @@ export function NodeDetailStatus({ stats }) {
     />
   );
 }
+
+export const NodeDetailStatus = injectI18n(NodeDetailStatusUI);

@@ -121,7 +121,7 @@ const getNoDataMessage = filterText => {
       <div>
         <p>
           <FormattedMessage
-            id="xpack.monitoring.elasticsearch.indices..noFilteredIndicesDescription"
+            id="xpack.monitoring.elasticsearch.indices.noFilteredIndicesDescription"
             defaultMessage="There are no indices that match your selection with the filter [{filterText}].
             Try changing the filter or the time range selection."
             values={{

@@ -8,10 +8,9 @@ import React, { Fragment } from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { ElasticsearchStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export function IndexDetailStatus({ stats }) {
+function IndexDetailStatusUI({ stats, intl }) {
   const {
     dataSize,
     documents: documentCount,
@@ -22,35 +21,40 @@ export function IndexDetailStatus({ stats }) {
 
   const metrics = [
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.indexDetailStatus.totalLabel', {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.indexDetailStatus.totalTitle',
         defaultMessage: 'Total',
       }),
       value: formatMetric(dataSize.total, '0.0 b'),
       dataTestSubj: 'dataSize'
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.indexDetailStatus.primariesTitle', {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.indexDetailStatus.primariesTitle',
         defaultMessage: 'Primaries',
       }),
       value: formatMetric(dataSize.primaries, '0.0 b'),
       dataTestSubj: 'dataSizePrimaries'
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.indexDetailStatus.documentsTitle', {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.indexDetailStatus.documentsTitle',
         defaultMessage: 'Documents',
       }),
       value: formatMetric(documentCount, '0.[0]a'),
       dataTestSubj: 'documentCount'
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.indexDetailStatus.totalShardsTitle', {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.indexDetailStatus.totalShardsTitle',
         defaultMessage: 'Total Shards',
       }),
       value: formatMetric(totalShards, 'int_commas'),
       dataTestSubj: 'totalShards'
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.indexDetailStatus.unassignedShardsTitle', {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.indexDetailStatus.unassignedShardsTitle',
         defaultMessage: 'Unassigned Shards',
       }),
       value: formatMetric(unassignedShards, 'int_commas'),
@@ -81,3 +85,5 @@ export function IndexDetailStatus({ stats }) {
     />
   );
 }
+
+export const IndexDetailStatus = injectI18n(IndexDetailStatusUI);
