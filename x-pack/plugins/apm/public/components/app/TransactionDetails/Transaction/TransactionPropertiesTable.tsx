@@ -73,7 +73,7 @@ export function TransactionPropertiesTable({
                   })
                 });
               }}
-              selected={currentTab === key}
+              isSelected={currentTab === key}
               key={key}
             >
               {capitalize(key)}
