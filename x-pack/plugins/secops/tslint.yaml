@@ -1,0 +1,5 @@
+extends: ../../tslint.yaml
+
+rules:
+  no-any: true
+  no-unused-variable: true

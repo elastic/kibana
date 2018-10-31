@@ -27,8 +27,11 @@ export interface AppFrameworkAdapter {
   scaledDateFormat?: string;
   timezone?: string;
 
+  // tslint:disable-next-line:no-any
   setUISettings(key: string, value: any): void;
+  // tslint:disable-next-line:no-any
   render(component: React.ReactElement<any>): void;
+  // tslint:disable-next-line:no-any
   renderBreadcrumbs(component: React.ReactElement<any>): void;
 }
 
@@ -53,12 +56,16 @@ export interface AppObservableApi {
 }
 
 export interface AppUiKibanaAdapterScope extends IScope {
+  // tslint:disable-next-line:no-any
   breadcrumbs: any[];
+  // tslint:disable-next-line:no-any
   topNavMenu: any[];
 }
 
 export interface AppKibanaUIConfig {
+  // tslint:disable-next-line:no-any
   get(key: string): any;
+  // tslint:disable-next-line:no-any
   set(key: string, value: any): Promise<boolean>;
 }
 

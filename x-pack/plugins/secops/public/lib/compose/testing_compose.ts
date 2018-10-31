@@ -43,6 +43,7 @@ export function compose(): AppFrontendLibs {
     schema,
   });
 
+  // tslint:disable-next-line:no-any
   const cache = new InMemoryCache((window as any).__APOLLO_CLIENT__);
 
   const apolloClient = new ApolloClient({

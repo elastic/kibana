@@ -11,6 +11,7 @@ import { getConfigSchema, initServerWithKibana, KbnServer } from './server/kiban
 
 const APP_ID = 'secops';
 
+// tslint:disable-next-line:no-any
 export function secops(kibana: any) {
   return new kibana.Plugin({
     id: APP_ID,
