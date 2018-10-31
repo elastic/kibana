@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './monitors';
+import { HBServerLibs } from './lib/lib';
+import { createGetAllRoute } from './rest_api';
+
+export const initHeartbeatServer = (libs: HBServerLibs) => {
+  libs.framework.registerRoute(createGetAllRoute(libs));
+};

@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './monitors';
+import { initHeartbeatServer } from './heartbeat_server';
+import { compose } from './lib/compose/kibana';
+
+export const initServerWithKibana = (hapiServer: any) => {
+  const libs = compose(hapiServer);
+  initHeartbeatServer(libs);
+};

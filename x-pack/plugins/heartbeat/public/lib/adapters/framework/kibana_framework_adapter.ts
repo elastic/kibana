@@ -38,7 +38,7 @@ export class HeartbeatKibanaFrameworkAdapter implements HeartbeatFrameworkAdapte
         ReactDOM.render(rootComponent, elem);
       },
       template:
-        '<div style="display: flex; align-items: stretch; flex: 1 0 0;" id="heartbeatReactRoot"></div>',
+        '<heartbeat-app section="kibana" class="ng-scope"><div id="heartbeatReactRoot"></div></heartbeat-app>',
     });
   };
 }

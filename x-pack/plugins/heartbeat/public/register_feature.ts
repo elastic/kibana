@@ -9,14 +9,12 @@ import {
   FeatureCatalogueRegistryProvider,
 } from 'ui/registry/feature_catalogue';
 
-const APP_ID = 'heartbeat';
-
 FeatureCatalogueRegistryProvider.register(() => ({
   id: 'heartbeat',
   title: 'Heartbeat',
   description: 'Perform endpoint health checks and uptime monitoring.',
   icon: 'heartbeatApp',
-  path: `heartbeat`,
+  path: `heartbeat#/home`,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 }));
