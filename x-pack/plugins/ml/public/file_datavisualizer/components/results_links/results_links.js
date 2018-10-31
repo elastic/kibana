@@ -19,6 +19,7 @@ import {
 import moment from 'moment';
 import uiChrome from 'ui/chrome';
 import { ml } from '../../../services/ml_api_service';
+import { isFullLicense } from '../../../license/check_license';
 
 const RECHECK_DELAY_MS = 3000;
 
@@ -90,14 +91,16 @@ export class ResultsLinks extends Component {
           />
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
-            title="Create new ML job"
-            description=""
-            href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/step/job_type?index=${indexPatternId}${_g}`}
-          />
-        </EuiFlexItem>
+        {(isFullLicense() === true) &&
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
+              title="Create new ML job"
+              description=""
+              href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/step/job_type?index=${indexPatternId}${_g}`}
+            />
+          </EuiFlexItem>
+        }
 
         <EuiFlexItem>
           <EuiCard

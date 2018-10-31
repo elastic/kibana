@@ -114,13 +114,10 @@ describe('plugins/elasticsearch', () => {
       sinon.assert.calledOnce(server.ext);
       sinon.assert.calledWithExactly(server.ext, sinon.match.string, sinon.match.func);
 
-      // call the server extension
-      const reply = sinon.stub();
       const [, handler] = server.ext.firstCall.args;
-      handler({}, reply);
+      handler();  // this should be health.stop
 
-      // ensure that the handler called reply and unregistered the time
-      sinon.assert.calledOnce(reply);
+      // ensure that the handler unregistered the timer
       expect(getTimerCount()).to.be(0);
     });
 

@@ -23,6 +23,7 @@ import { Header } from './components/header';
 import './header_global_nav.less';
 import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { breadcrumbs } from '../../services/breadcrumb_state';
+import { injectI18nProvider } from '@kbn/i18n/react';
 
 const module = uiModules.get('kibana');
 
@@ -31,7 +32,7 @@ module.directive('headerGlobalNav', (reactDirective, chrome, Private) => {
   const navLinks = chrome.getNavLinks();
   const homeHref = chrome.addBasePath('/app/kibana#/home');
 
-  return reactDirective(Header, [
+  return reactDirective(injectI18nProvider(Header), [
     // scope accepted by directive, passed in as React props
     'appTitle',
     'isVisible',

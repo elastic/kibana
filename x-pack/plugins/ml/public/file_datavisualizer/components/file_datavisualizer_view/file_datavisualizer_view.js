@@ -23,12 +23,19 @@ import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { EditFlyout } from '../edit_flyout';
 import { ImportView } from '../import_view';
 import { MAX_BYTES } from '../../../../common/constants/file_datavisualizer';
-import { readFile, createUrlOverrides, processResults } from './utils';
+import {
+  readFile,
+  createUrlOverrides,
+  processResults,
+  reduceData,
+} from './utils';
 
 export const MODE = {
   READ: 0,
   IMPORT: 1,
 };
+
+const UPLOAD_SIZE_MB = 5;
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -108,9 +115,12 @@ export class FileDataVisualizerView extends Component {
 
   async loadSettings(data, overrides, isRetry = false) {
     try {
+      // reduce the amount of data being sent to the endpoint
+      // 5MB should be enough to contain 1000 lines
+      const lessData = reduceData(data, UPLOAD_SIZE_MB);
       console.log('overrides', overrides);
       const { analyzeFile } = ml.fileDatavisualizer;
-      const resp = await analyzeFile(data, overrides);
+      const resp = await analyzeFile(lessData, overrides);
       const serverSettings = processResults(resp.results);
       const serverOverrides = resp.overrides;
 

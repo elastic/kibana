@@ -101,12 +101,7 @@ export abstract class Type<V> {
       return error;
     }
 
-    const { context = {}, type, path: rawPath, message } = error;
-
-    // Before v11.0.0 Joi reported paths as `.`-delimited strings, but more
-    // recent version use arrays instead. Once we upgrade Joi, we should just
-    // remove this split logic and use `path` provided by Joi directly.
-    const path = rawPath ? rawPath.split('.') : [];
+    const { context = {}, type, path, message } = error;
 
     const errorHandleResult = this.handleError(type, context, path);
     if (errorHandleResult instanceof SchemaTypeError) {

@@ -4646,9 +4646,12 @@ and limitations under the License.
 ***************************************************************************** */
 /* global Reflect, Promise */
 
-var extendStatics = Object.setPrototypeOf ||
-    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return extendStatics(d, b);
+};
 
 function __extends(d, b) {
     extendStatics(d, b);
@@ -4656,12 +4659,15 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
-var __assign = Object.assign || function __assign(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
     }
-    return t;
+    return __assign.apply(this, arguments);
 }
 
 function __rest(s, e) {
@@ -4705,8 +4711,8 @@ function __generator(thisArg, body) {
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
         while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
                 case 0: case 1: t = op; break;
                 case 4: _.label++; return { value: op[1], done: false };
@@ -4774,7 +4780,7 @@ function __asyncGenerator(thisArg, _arguments, generator) {
     return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
     function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
     function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
-    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);  }
+    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
     function fulfill(value) { resume("next", value); }
     function reject(value) { resume("throw", value); }
     function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
@@ -4783,13 +4789,15 @@ function __asyncGenerator(thisArg, _arguments, generator) {
 function __asyncDelegator(o) {
     var i, p;
     return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
-    function verb(n, f) { if (o[n]) i[n] = function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; }; }
+    function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; } : f; }
 }
 
 function __asyncValues(o) {
     if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator];
-    return m ? m.call(o) : typeof __values === "function" ? __values(o) : o[Symbol.iterator]();
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 }
 
 function __makeTemplateObject(cooked, raw) {
@@ -26150,6 +26158,9 @@ var subscribeTo = function (result) {
             }
         };
     }
+    else if (result && typeof result[__WEBPACK_IMPORTED_MODULE_9__symbol_observable__["a" /* observable */]] === 'function') {
+        return Object(__WEBPACK_IMPORTED_MODULE_4__subscribeToObservable__["a" /* subscribeToObservable */])(result);
+    }
     else if (Object(__WEBPACK_IMPORTED_MODULE_5__isArrayLike__["a" /* isArrayLike */])(result)) {
         return Object(__WEBPACK_IMPORTED_MODULE_1__subscribeToArray__["a" /* subscribeToArray */])(result);
     }
@@ -26158,9 +26169,6 @@ var subscribeTo = function (result) {
     }
     else if (result && typeof result[__WEBPACK_IMPORTED_MODULE_8__symbol_iterator__["a" /* iterator */]] === 'function') {
         return Object(__WEBPACK_IMPORTED_MODULE_3__subscribeToIterable__["a" /* subscribeToIterable */])(result);
-    }
-    else if (result && typeof result[__WEBPACK_IMPORTED_MODULE_9__symbol_observable__["a" /* observable */]] === 'function') {
-        return Object(__WEBPACK_IMPORTED_MODULE_4__subscribeToObservable__["a" /* subscribeToObservable */])(result);
     }
     else {
         var value = Object(__WEBPACK_IMPORTED_MODULE_7__isObject__["a" /* isObject */])(result) ? 'an invalid object' : "'" + result + "'";
