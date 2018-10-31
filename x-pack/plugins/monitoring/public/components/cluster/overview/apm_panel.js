@@ -23,6 +23,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { formatTimestampToDuration } from '../../../../common';
+import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 
 function ApmPanelUi(props) {
   if (!get(props, 'apms.total', 0) > 0) {
@@ -74,7 +75,11 @@ function ApmPanelUi(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="apmsBytesSent">
-                {formatTimestampToDuration(+moment(props.timeOfLastEvent), 'since') + ' ago'}
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.apmPanel.lastEventDescription"
+                  defaultMessage="{timeOfLastEvent} ago"
+                  values={{ timeOfLastEvent: formatTimestampToDuration(+moment(props.timeOfLastEvent), CALCULATE_DURATION_SINCE) }}
+                />
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
