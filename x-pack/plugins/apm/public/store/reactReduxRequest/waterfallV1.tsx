@@ -13,7 +13,10 @@ import {
 } from 'x-pack/plugins/apm/common/constants';
 import { Span } from 'x-pack/plugins/apm/typings/Span';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
+import {
+  getWaterfall,
+  IWaterfall
+} from '../../components/app/TransactionDetails/Transaction/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 import { loadSpans } from '../../services/rest/apm';
 import { IUrlParams } from '../urlParams';
 // @ts-ignore
@@ -24,7 +27,7 @@ export const ID = 'waterfallV1';
 interface Props {
   urlParams: IUrlParams;
   transaction: Transaction;
-  render: RRRRender<WaterfallResponse>;
+  render: RRRRender<IWaterfall>;
 }
 
 export function WaterfallV1Request({ urlParams, transaction, render }: Props) {
@@ -42,12 +45,8 @@ export function WaterfallV1Request({ urlParams, transaction, render }: Props) {
       fn={loadSpans}
       args={[{ serviceName, start, end, transactionId }]}
       render={({ status, data = [], args }) => {
-        const res = {
-          hits: [transaction, ...data],
-          services: [serviceName]
-        };
-
-        return render({ status, data: res, args });
+        const waterfall = getWaterfall([transaction, ...data], transaction);
+        return render({ status, data: waterfall, args });
       }}
     />
   );
