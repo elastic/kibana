@@ -291,7 +291,7 @@ export class ExplorerChartDistribution extends React.Component {
 
       // emphasize the y axis label this rare chart is actually about
       if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
-        axes.selectAll('.y.axis text').each(function (d) {
+        axes.select('.y').selectAll('text').each(function (d) {
           d3.select(this).classed('ml-explorer-chart-axis-emphasis', (d === highlight));
         });
       }
