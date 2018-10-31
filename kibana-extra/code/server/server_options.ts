@@ -22,7 +22,7 @@ export class ServerOptions {
 
   public readonly indexRepoFrequencyMs: number = this.options.indexRepoFrequencyMs;
 
-  public readonly lspRequestTimeout: number = this.options.lspRequestTimeout;
+  public readonly lspRequestTimeoutMs: number = this.options.lspRequestTimeoutMs;
 
   public readonly maxWorkspace: number = this.options.maxWorkspace;
 

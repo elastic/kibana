@@ -6,6 +6,7 @@
 
 import { EsClient } from '@code/esqueue';
 
+import { IRange } from 'monaco-editor';
 import { LineMapper } from '../../common/line_mapper';
 import {
   Document,
@@ -17,8 +18,17 @@ import {
 } from '../../model';
 import { DocumentIndexNamePrefix } from '../indexer/schema';
 import { Log } from '../log';
-import { CompositeSourceContentConstructor } from '../utils/composite_source_content_constructor';
+import {
+  expandRanges,
+  extractSourceContent,
+  LineMapping,
+  LineRange,
+  mergeRanges,
+} from '../utils/composite_source_merger';
 import { AbstractSearchClient } from './abstract_search_client';
+
+const HIT_MERGE_LINE_INTERVAL = 2; // Inclusive
+const MAX_HIT_NUMBER = 5;
 
 export class DocumentSearchClient extends AbstractSearchClient {
   private HIGHLIGHT_TAG = '_@_';
@@ -192,10 +202,7 @@ export class DocumentSearchClient extends AbstractSearchClient {
         });
       }
       const hitsContent = this.termsToHits(doc.content, termContent);
-      const sourceContent = new CompositeSourceContentConstructor(
-        hitsContent,
-        doc.content
-      ).construct();
+      const sourceContent = this.getSourceContent(hitsContent, doc);
       const item: SearchResultItem = {
         uri: repoUri,
         filePath: path,
@@ -215,6 +222,32 @@ export class DocumentSearchClient extends AbstractSearchClient {
       langAggregations: aggregations.language.buckets,
       took: rawRes.took,
       total: rawRes.hits.total,
+    };
+  }
+
+  private getSourceContent(hitsContent: SourceHit[], doc: Document) {
+    const slicedHighlights = hitsContent.slice(0, MAX_HIT_NUMBER);
+    const slicedRanges: LineRange[] = slicedHighlights.map(hit => ({
+      startLine: hit.range.startLoc.line,
+      endLine: hit.range.endLoc.line,
+    }));
+
+    const expandedRanges = expandRanges(slicedRanges, HIT_MERGE_LINE_INTERVAL);
+    const mergedRanges = mergeRanges(expandedRanges);
+    const lineMapping = new LineMapping();
+    const result = extractSourceContent(mergedRanges, doc.content.split('\n'), lineMapping);
+    const ranges: IRange[] = hitsContent
+      .filter(hit => lineMapping.hasLine(hit.range.startLoc.line))
+      .map(hit => ({
+        startColumn: hit.range.startLoc.column + 1,
+        startLineNumber: lineMapping.lineNumber(hit.range.startLoc.line),
+        endColumn: hit.range.endLoc.column + 1,
+        endLineNumber: lineMapping.lineNumber(hit.range.endLoc.line),
+      }));
+    return {
+      content: result.join('\n'),
+      lineMapping: lineMapping.toStringArray(),
+      ranges,
     };
   }
 

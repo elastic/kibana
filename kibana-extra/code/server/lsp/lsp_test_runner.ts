@@ -22,7 +22,7 @@ const options = {
   queueTimeout: 60 * 60 * 1000, // 1 hour by default
   updateFreqencyMs: 5 * 60 * 1000, // 5 minutes by default
   indexFrequencyMs: 24 * 60 * 60 * 1000, // 1 day by default
-  lspRequestTimeout: 5 * 60, // timeout a request over 30s
+  lspRequestTimeoutMs: 5 * 60, // timeout a request over 30s
   repos: [],
   maxWorkspace: 5, // max workspace folder for each language server
   isAdmin: true, // If we show the admin buttons

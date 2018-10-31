@@ -16,13 +16,13 @@ import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { SymbolSearchClient } from '../search';
 import { ServerOptions } from '../server_options';
-import { detectLanguage } from '../utils/detect_language';
 import {
   expandRanges,
   extractSourceContent,
   LineMapping,
   mergeRanges,
-} from '../utils/source_merger';
+} from '../utils/composite_source_merger';
+import { detectLanguage } from '../utils/detect_language';
 import { promiseTimeout } from '../utils/timeout';
 
 export function lspRoute(
@@ -38,7 +38,7 @@ export function lspRoute(
         if (method) {
           try {
             const result = await promiseTimeout(
-              serverOptions.lspRequestTimeout,
+              serverOptions.lspRequestTimeoutMs,
               lspService.sendRequest(`textDocument/${method}`, req.payload)
             );
             return result;
@@ -75,7 +75,7 @@ export function lspRoute(
     async handler(req, h: hapi.ResponseToolkit) {
       try {
         const response: ResponseMessage = await promiseTimeout(
-          serverOptions.lspRequestTimeout,
+          serverOptions.lspRequestTimeoutMs,
           lspService.sendRequest(`textDocument/references`, req.payload)
         );
         const gitOperations = new GitOperations(serverOptions.repoPath);
@@ -98,11 +98,11 @@ export function lspRoute(
           const language = await detectLanguage(file!, blob.content());
           const lineMappings = new LineMapping();
           const code = extractSourceContent(mergedRanges, source, lineMappings).join('\n');
-          const lineNumbers = lineMappings.toStringArray('...', 1);
+          const lineNumbers = lineMappings.toStringArray();
           const highlights = locations.map(l => {
             const { start, end } = l.range;
-            const startLineNumber = lineMappings.lineNumber(start.line, 1);
-            const endLineNumber = lineMappings.lineNumber(end.line, 1);
+            const startLineNumber = lineMappings.lineNumber(start.line);
+            const endLineNumber = lineMappings.lineNumber(end.line);
             return {
               startLineNumber,
               startColumn: start.character + 1,

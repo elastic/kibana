@@ -89,8 +89,8 @@ export class ReferencesPanel extends React.Component<Props> {
 
   private onCodeClick(lineNumbers: string[], url: string, pos: IPosition) {
     const { uri } = parseSchema(url)!;
-    const line = lineNumbers[pos.lineNumber - 1];
-    if (line !== '...') {
+    const line = parseInt(lineNumbers[pos.lineNumber - 1], 10);
+    if (!isNaN(line)) {
       const queries = queryString.parse(history.location.search);
       const query = queryString.stringify({
         ...queries,

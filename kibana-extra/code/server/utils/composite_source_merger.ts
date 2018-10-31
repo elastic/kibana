@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const DEFAULT_LINE_NUMBER_PLACEHOLDER = '..';
+
 export interface LineRange {
   startLine: number;
   endLine: number;
@@ -11,19 +13,19 @@ export interface LineRange {
 
 /**
  * expand ranges of lines, eg:
- * expand 2 lines of [[3,4], [9,9]] with value 2 becomes [(1,6), (7,11)]
+ * expand 2 lines of [[3,4], [9,9]] with value 2 becomes [(1,7), (7,12)]
  * @param lines the array of line numbers
  * @param expand the expand range
  */
 export function expandRanges(lines: LineRange[], expand: number): LineRange[] {
   return lines.map(line => ({
     startLine: Math.max(0, line.startLine - expand),
-    endLine: line.endLine + expand,
+    endLine: line.endLine + expand + 1,
   }));
 }
 
 /**
- * merge the ranges that overlap each other into a, eg:
+ * merge the ranges that overlap each other into one, eg:
  * [(1,3), (2,5)] => [(1,5)]
  * @param ranges
  */
@@ -61,6 +63,8 @@ export function mergeRanges(ranges: LineRange[]): LineRange[] {
  * @param source the source content
  * @param mapper a line mapper object which contains the relationship between source content and partial content
  * @return the extracted partial contents
+ * #todo To support server side render for grammar highlights, we could change the source parameter to HighlightedCode[].
+ * #todo interface HighlightedCode { text: string, highlights: ... };
  */
 export function extractSourceContent(
   ranges: LineRange[],
@@ -91,7 +95,10 @@ export function extractSourceContent(
 export class LineMapping {
   private lines: number[] = [];
   private reverseMap: Map<number, number> = new Map<number, number>();
-  public toStringArray(placeHolder: string, startAtLine: number = 0): string[] {
+  public toStringArray(
+    placeHolder: string = DEFAULT_LINE_NUMBER_PLACEHOLDER,
+    startAtLine: number = 1
+  ): string[] {
     return this.lines.map(v => {
       if (Number.isNaN(v)) {
         return placeHolder;
@@ -111,8 +118,12 @@ export class LineMapping {
     }
   }
 
-  public lineNumber(originLineNumber: number, startAtLine: number = 0) {
-    const n = this.reverseMap.get(originLineNumber);
-    return n === undefined ? undefined : n + startAtLine;
+  public lineNumber(originLineNumber: number, startAtLine: number = 1) {
+    const n = this.reverseMap.get(originLineNumber) || Number.NaN;
+    return n + startAtLine;
+  }
+
+  public hasLine(line: number) {
+    return this.reverseMap.has(line);
   }
 }
