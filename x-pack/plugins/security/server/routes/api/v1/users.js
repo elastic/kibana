@@ -20,10 +20,10 @@ export function initUsersApi(server) {
   server.route({
     method: 'GET',
     path: '/api/security/v1/users',
-    handler(request, reply) {
+    handler(request) {
       return callWithRequest(request, 'shield.getUser').then(
-        (response) => reply(_.values(response)),
-        _.flow(wrapError, reply)
+        _.values,
+        wrapError
       );
     },
     config: {
@@ -34,14 +34,14 @@ export function initUsersApi(server) {
   server.route({
     method: 'GET',
     path: '/api/security/v1/users/{username}',
-    handler(request, reply) {
+    handler(request) {
       const username = request.params.username;
       return callWithRequest(request, 'shield.getUser', { username }).then(
         (response) => {
-          if (response[username]) return reply(response[username]);
-          return reply(Boom.notFound());
+          if (response[username]) return response[username];
+          throw Boom.notFound();
         },
-        _.flow(wrapError, reply));
+        wrapError);
     },
     config: {
       pre: [routePreCheckLicenseFn]
@@ -51,12 +51,12 @@ export function initUsersApi(server) {
   server.route({
     method: 'POST',
     path: '/api/security/v1/users/{username}',
-    handler(request, reply) {
+    handler(request) {
       const username = request.params.username;
       const body = _(request.payload).omit(['username', 'enabled']).omit(_.isNull);
       return callWithRequest(request, 'shield.putUser', { username, body }).then(
-        () => reply(request.payload),
-        _.flow(wrapError, reply));
+        () => request.payload,
+        wrapError);
     },
     config: {
       validate: {
@@ -69,11 +69,11 @@ export function initUsersApi(server) {
   server.route({
     method: 'DELETE',
     path: '/api/security/v1/users/{username}',
-    handler(request, reply) {
+    handler(request, h) {
       const username = request.params.username;
       return callWithRequest(request, 'shield.deleteUser', { username }).then(
-        () => reply().code(204),
-        _.flow(wrapError, reply));
+        () => h.response().code(204),
+        wrapError);
     },
     config: {
       pre: [routePreCheckLicenseFn]
@@ -83,7 +83,7 @@ export function initUsersApi(server) {
   server.route({
     method: 'POST',
     path: '/api/security/v1/users/{username}/password',
-    async handler(request, reply) {
+    async handler(request, h) {
       const username = request.params.username;
       const { password, newPassword } = request.payload;
       const isCurrentUser = username === request.auth.credentials.username;
@@ -95,7 +95,7 @@ export function initUsersApi(server) {
             BasicCredentials.decorateRequest(request, username, password)
           );
         } catch(err) {
-          return reply(Boom.unauthorized(err));
+          throw Boom.unauthorized(err);
         }
       }
 
@@ -110,14 +110,14 @@ export function initUsersApi(server) {
           );
 
           if (!authenticationResult.succeeded()) {
-            return reply(Boom.unauthorized((authenticationResult.error)));
+            throw Boom.unauthorized((authenticationResult.error));
           }
         }
       } catch(err) {
-        return reply(wrapError(err));
+        throw wrapError(err);
       }
 
-      return reply().code(204);
+      return h.response().code(204);
     },
     config: {
       validate: {

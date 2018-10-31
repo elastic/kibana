@@ -46,7 +46,7 @@ export function logstashNodeRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
@@ -74,12 +74,12 @@ export function logstashNodeRoute(server) {
           getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid }),
         ]);
 
-        reply({
+        return {
           metrics,
           nodeSummary,
-        });
+        };
       } catch(err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });
