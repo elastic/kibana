@@ -7,8 +7,6 @@
 import mapboxgl from 'mapbox-gl';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { FillableCircle, FillableVector } from '../icons/additional_layer_icons';
-import _ from 'lodash';
 
 import { ALayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
@@ -17,6 +15,7 @@ import { LeftInnerJoin } from './joins/left_inner_join';
 import { FeatureTooltip } from 'plugins/gis/components/map/feature_tooltip';
 import { store } from '../../store/store';
 import { getMapColors } from '../../selectors/map_selectors';
+import _ from 'lodash';
 
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
 
@@ -80,28 +79,10 @@ export class VectorLayer extends ALayer {
     return [VectorStyle];
   }
 
-  getIcon= (() => {
-    const defaultStroke = 'grey';
-    const strokeWidth = '1px';
-    return () => {
-      const { fillColor, lineColor } = _.get(this.getCurrentStyle(),
-        '_descriptor.properties');
-      const stroke = _.get(lineColor, 'options.color');
-      const fill = _.get(fillColor, 'options.color');
-
-      const style = {
-        ...stroke && { stroke } || { stroke: defaultStroke },
-        strokeWidth,
-        ...fill && { fill },
-      };
-
-      return (
-        this._isPointsOnly()
-          ? <FillableCircle style={style}/>
-          : <FillableVector style={style}/>
-      );
-    };
-  })();
+  getIcon() {
+    const isPointsOnly = this._isPointsOnly();
+    return this._style.getIcon(isPointsOnly);
+  }
 
   async getStringFields() {
     return await this._source.getStringFields();
