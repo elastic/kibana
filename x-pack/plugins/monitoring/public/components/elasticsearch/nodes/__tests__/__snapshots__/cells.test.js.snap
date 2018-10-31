@@ -10,7 +10,9 @@ exports[`Node Listing Metric Cell should format N/A as the metric for an offline
     <div
       class="monTableCell__number monTableCell__offline"
     >
-      N/A
+      <span>
+        N/A
+      </span>
     </div>
   </div>
 </td>
