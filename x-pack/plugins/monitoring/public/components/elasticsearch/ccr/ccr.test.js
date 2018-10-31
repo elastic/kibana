@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
 import { Ccr } from './ccr';
 
 describe('Ccr', () => {
