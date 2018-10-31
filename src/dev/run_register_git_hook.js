@@ -17,4 +17,13 @@
  * under the License.
  */
 
-export function createFailError(msg: string, exitCode?: number): Error;
+import { run, createFailError } from './run';
+import { registerPrecommitGitHook } from './register_git_hook';
+
+run(async ({ log }) => {
+  try {
+    await registerPrecommitGitHook(log);
+  } catch (error) {
+    throw createFailError(error);
+  }
+});

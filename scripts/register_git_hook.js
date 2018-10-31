@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export function createFailError(msg: string, exitCode?: number): Error;
+require('../src/setup_node_env');
+require('../src/dev/run_register_git_hook');

@@ -55,7 +55,7 @@
     "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent",
     "kbn:watch": "node scripts/kibana --dev --logging.json=false",
     "build:types": "tsc --p tsconfig.types.json",
-    "kbn:bootstrap": "yarn build:types"
+    "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook"
   },
   "repository": {
     "type": "git",
@@ -307,7 +307,6 @@
     "gulp-babel": "^7.0.1",
     "gulp-sourcemaps": "1.7.3",
     "has-ansi": "^3.0.0",
-    "husky": "^0.14.3",
     "image-diff": "1.6.0",
     "intl-messageformat-parser": "^1.4.0",
     "istanbul-instrumenter-loader": "3.0.0",
