@@ -98,4 +98,34 @@ describe('i18nDirective', () => {
 
     expect(element[0]).toMatchSnapshot();
   });
+
+  test('sanitizes onclick attribute', () => {
+    const element = angular.element(
+      `<div
+        i18n-id="id"
+        i18n-default-message="Default {one} onclick=alert(1) {two} message"
+        i18n-values="{ one: '<span', two: '>Press</span>' }"
+       />`
+    );
+
+    compile(element)(scope);
+    scope.$digest();
+
+    expect(element[0]).toMatchSnapshot();
+  });
+
+  test('sanitizes onmouseover attribute', () => {
+    const element = angular.element(
+      `<div
+        i18n-id="id"
+        i18n-default-message="Default {value} message"
+        i18n-values="{ value: '<span onmouseover=&quot;alert(1)&quot;>Press</span>' }"
+       />`
+    );
+
+    compile(element)(scope);
+    scope.$digest();
+
+    expect(element[0]).toMatchSnapshot();
+  });
 });

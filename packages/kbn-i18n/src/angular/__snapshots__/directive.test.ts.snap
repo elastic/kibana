@@ -15,3 +15,33 @@ exports[`i18nDirective sanitizes message before inserting it to DOM 1`] = `
   <div />
 </div>
 `;
+
+exports[`i18nDirective sanitizes onclick attribute 1`] = `
+<div
+  class="ng-scope ng-isolate-scope"
+  i18n-default-message="Default {one} onclick=alert(1) {two} message"
+  i18n-id="id"
+  i18n-values="{ one: '<span', two: '>Press</span>' }"
+>
+  Default 
+  <span>
+    Press
+  </span>
+   message
+</div>
+`;
+
+exports[`i18nDirective sanitizes onmouseover attribute 1`] = `
+<div
+  class="ng-scope ng-isolate-scope"
+  i18n-default-message="Default {value} message"
+  i18n-id="id"
+  i18n-values="{ value: '<span onmouseover=\\"alert(1)\\">Press</span>' }"
+>
+  Default 
+  <span>
+    Press
+  </span>
+   message
+</div>
+`;
