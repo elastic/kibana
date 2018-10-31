@@ -203,7 +203,7 @@ module
       description: '',
       jobGroups: [],
       useDedicatedIndex: false,
-      enableModelPlot: false, // here default to false to start
+      enableModelPlot: false,
       isSparseData: false,
       modelMemoryLimit: DEFAULT_MODEL_MEMORY_LIMIT
     };

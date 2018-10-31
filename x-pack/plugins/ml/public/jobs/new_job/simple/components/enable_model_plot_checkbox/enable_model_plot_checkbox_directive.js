@@ -66,7 +66,7 @@ module.directive('mlEnableModelPlotCheckbox', function () {
         $scope.ui.cardinalityValidator.status = STATUS.RUNNING;
         $scope.ui.cardinalityValidator.message = '';
 
-        // create temporary job since cardinality validation expects that format -> Note: need to clear out tempJob somewhere?
+        // create temporary job since cardinality validation expects that format
         const tempJob = $scope.getJobFromConfig($scope.formConfig);
 
         ml.validateCardinality(tempJob)
@@ -100,9 +100,9 @@ module.directive('mlEnableModelPlotCheckbox', function () {
           $scope.formConfig.enableModelPlot = true;
           validateCardinality();
         } else {
+          $scope.formConfig.enableModelPlot = false;
           $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
           $scope.ui.cardinalityValidator.message = '';
-          $scope.formConfig.enableModelPlot = false;
         }
       };
 
@@ -114,12 +114,14 @@ module.directive('mlEnableModelPlotCheckbox', function () {
       $scope.$watch('formConfig.splitField', revalidateCardinalityOnFieldChange, true);
       // Population: Fire off cardinality validatation when overField is updated
       $scope.$watch('formConfig.overField', revalidateCardinalityOnFieldChange, true);
-      $scope.$watch('tempSelectedField.field', revalidateCardinalityOnFieldChange, true);
 
       function updateCheckbox() {
+        // disable if (check is running && checkbox checked) or (form is invalid && checkbox unchecked)
         const checkboxDisabled = (
-          $scope.ui.cardinalityValidator.status === STATUS.RUNNING ||
-          $scope.ui.formValid !== true
+          ($scope.ui.cardinalityValidator.status === STATUS.RUNNING &&
+          $scope.formConfig.enableModelPlot === true) ||
+          ($scope.ui.formValid !== true &&
+          $scope.formConfig.enableModelPlot === false)
         );
         const validatorRunning = ($scope.ui.cardinalityValidator.status === STATUS.RUNNING);
         const warningStatus = ($scope.ui.cardinalityValidator.status === STATUS.WARNING);
