@@ -53,7 +53,6 @@ export function TransactionFlyout({
                 <h4>Transaction details</h4>
               </EuiTitle>
             </EuiFlexItem>
-
             <EuiFlexItem grow={false}>
               <DiscoverTransactionLink transaction={transactionDoc}>
                 <EuiButtonEmpty iconType="discoverApp">
