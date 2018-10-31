@@ -30,7 +30,7 @@ export class DataRequest {
   }
 
   hasDataOrRequestInProgress() {
-   return this._descriptor.data || this._descriptor.dataRequestToken;
+    return this._descriptor.data || this._descriptor.dataRequestToken;
   }
 
   getDataId() {
