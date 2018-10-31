@@ -29,7 +29,7 @@ export interface YamlConfigSchema {
     label: string;
     type: 'input' | 'multi-input' | 'select' | 'code' | 'password';
     helpText?: string;
-    transform?: 'removed';
+    placeholder?: string;
   };
   options?: Array<{ value: string; text: string }>;
   validations?: 'isHosts' | 'isString' | 'isPeriod' | 'isPath' | 'isPaths' | 'isYaml';
@@ -46,6 +46,15 @@ export interface FrameworkAdapter {
   baseURLPath: string;
   registerManagementSection(pluginId: string, displayName: string, basePath: string): void;
   // Methods
+  getCurrentUser(): {
+    email: string | null;
+    enabled: boolean;
+    full_name: string | null;
+    metadata: { _reserved: true };
+    roles: string[];
+    scope: string[];
+    username: string;
+  };
   setUISettings(key: string, value: any): void;
   render(component: React.ReactElement<any>): void;
 }

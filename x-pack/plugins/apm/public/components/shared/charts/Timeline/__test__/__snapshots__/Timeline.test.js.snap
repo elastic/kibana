@@ -57,21 +57,18 @@ exports[`Timeline should render with data 1`] = `
             }
           }
         >
-          <div>
-            Hello - i am a header
-          </div>
           <div
             className="rv-xy-plot "
             style={
               Object {
-                "height": "40px",
+                "height": "100px",
                 "width": "1000px",
               }
             }
           >
             <svg
               className="rv-xy-plot__inner"
-              height={40}
+              height={100}
               onClick={[Function]}
               onDoubleClick={[Function]}
               onMouseDown={[Function]}
@@ -94,7 +91,7 @@ exports[`Timeline should render with data 1`] = `
               >
                 <g
                   className="rv-xy-plot__axis__ticks"
-                  transform="translate(0, 40)"
+                  transform="translate(0, 100)"
                 >
                   <g
                     className="rv-xy-plot__axis__tick"
@@ -133,7 +130,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       0
                     </text>
@@ -175,7 +172,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       20 ms
                     </text>
@@ -217,7 +214,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       40 ms
                     </text>
@@ -259,7 +256,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       60 ms
                     </text>
@@ -301,7 +298,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       80 ms
                     </text>
@@ -343,7 +340,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       100 ms
                     </text>
@@ -385,7 +382,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       120 ms
                     </text>
@@ -427,7 +424,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       140 ms
                     </text>
@@ -469,7 +466,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       160 ms
                     </text>
@@ -511,7 +508,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       180 ms
                     </text>
@@ -519,7 +516,7 @@ exports[`Timeline should render with data 1`] = `
                 </g>
               </g>
               <g
-                transform="translate(950, 40)"
+                transform="translate(950, 28)"
               >
                 <text
                   dy="0"
@@ -533,6 +530,7 @@ exports[`Timeline should render with data 1`] = `
             <div
               style={
                 Object {
+                  "bottom": "0",
                   "left": "484.2043232706185px",
                   "position": "absolute",
                 }
@@ -562,6 +560,7 @@ exports[`Timeline should render with data 1`] = `
             <div
               style={
                 Object {
+                  "bottom": "0",
                   "left": "528.1747555976804px",
                   "position": "absolute",
                 }
@@ -591,6 +590,7 @@ exports[`Timeline should render with data 1`] = `
             <div
               style={
                 Object {
+                  "bottom": "0",
                   "left": "879.9382142141751px",
                   "position": "absolute",
                 }

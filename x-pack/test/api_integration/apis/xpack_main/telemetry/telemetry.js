@@ -5,8 +5,8 @@
  */
 
 import expect from 'expect.js';
-import multiclusterFixture from './fixtures/multicluster';
-import basicclusterFixture from './fixtures/basiccluster';
+import multiClusterFixture from './fixtures/multicluster';
+import basicClusterFixture from './fixtures/basiccluster';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -27,7 +27,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
-      expect(body).to.eql(multiclusterFixture);
+      expect(body).to.eql(multiClusterFixture);
 
       await esArchiver.unload(archive);
     });
@@ -47,7 +47,7 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .send({ timeRange })
           .expect(200);
-        expect(body).to.eql(basicclusterFixture);
+        expect(body).to.eql(basicClusterFixture);
 
         await esArchiver.unload(archive);
       });
