@@ -189,10 +189,8 @@ export class StepMetricsUi extends Component {
               <p>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepMetricsDescription"
-                  defaultMessage={`
-                    Select the metrics to collect while rolling up data. By default,
-                    only doc_counts are collected for each group.
-                  `}
+                  defaultMessage="Select the metrics to collect while rolling up data. By default,
+                    only doc_counts are collected for each group."
                 />
               </p>
             </EuiText>
