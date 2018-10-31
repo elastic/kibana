@@ -129,7 +129,7 @@
     <span class="kuiButton__icon kuiIcon fa-trash"></span>
     <span
       i18n-id="xpack.graph.settings.blacklist.clearButtonLabel"
-      i18n-default-message="Clear"    
+      i18n-default-message="Clear"
     ></span>
   </button>
 </div>
@@ -168,17 +168,17 @@
 
         <span ng-if="suggestTemplateFix">
           <i
-            tooltip="{{ ::'xpack.graph.settings.drillDowns.kibanaUrlWarningTitle' | i18n: { defaultMessage: 'Kibana URL pasted' } }}"
+            tooltip="{{ ::'xpack.graph.settings.drillDowns.kibanaUrlWarningTooltip' | i18n: { defaultMessage: 'Kibana URL pasted' } }}"
             class="text-color-warning fa fa-warning"
           ></i>
           {{ ::'xpack.graph.settings.drillDowns.kibanaUrlWarningText' | i18n: { defaultMessage: 'This looks like a Kibana URL. Would you like us to convert it to a template for you?' } }}
           <a
             ng-click="replaceKibanaUrlParam()"
-            i18n-id="xpack.graph.settings.drillDowns.kibanaUrlWarningYesOption"
+            i18n-id="xpack.graph.settings.drillDowns.kibanaUrlWarningYesOptionLinkText"
             i18n-default-message="yes"
           ></a> / <a
             ng-click="rejectKibanaUrlSuggestion()"
-            i18n-id="xpack.graph.settings.drillDowns.kibanaUrlWarningNoOption"
+            i18n-id="xpack.graph.settings.drillDowns.kibanaUrlWarningNoOptionLinkText"
             i18n-default-message="no"
           ></a>
         </span>
@@ -416,7 +416,7 @@
         >
           <option
             value=""
-            i18n-id="xpack.graph.settings.advancedSettings.diversityFieldInputPlaceholder"
+            i18n-id="xpack.graph.settings.advancedSettings.diversityFieldInputOptionLabel"
             i18n-default-message="[No diversification]"
           ></option>
         </select>

@@ -1115,7 +1115,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
         });
         let text;
         if (!canSaveData && $scope.workspace.nodes.length > 0) {
-          text = i18n('xpack.graph.saveWorkspace.successNotification.noDataSavingText', {
+          text = i18n('xpack.graph.saveWorkspace.successNotification.noDataSavedText', {
             defaultMessage: 'The configuration was saved, but the data was not saved',
           });
         }

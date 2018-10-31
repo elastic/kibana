@@ -21,13 +21,20 @@
           ng-options="option.attributes.title for option in indices" ng-model="grr.proposedIndex">
           <option
             value=""
-            i18n-id="xpack.graph.topNavMenu.selectIndexPatternPlaceholder"
+            i18n-id="xpack.graph.topNavMenu.selectIndexPatternOptionLabel"
             i18n-default-message="Select index pattern..."
           ></option>
         </select>
 
         <!-- Added fields. -->
-        <span class="gphNoUserSelect" ng-repeat="f in selectedFields" ng-attr-tooltip="Shift + click to toggle if search returns {{f.name}}">
+        <span
+          class="gphNoUserSelect"
+          ng-repeat="f in selectedFields"
+          ng-attr-tooltip="{{ ::'xpack.graph.topNavMenu.addedFieldTooltip' | i18n: {
+            defaultMessage: 'Shift + click to toggle if search returns {fName}',
+            values: { fName: f.name }
+          } }}"
+        >
           <svg class="gphNode" width="30" height="30" ng-click="clickVertexFieldIcon(f, $event)" ng-class="{'gphNode-disabled':f.hopSize<=0}">
             <circle class="gphNode__circle" r="13" cx="15" cy="15" ng-class="{selectedNode:kbnTopNav.currentKey === 'fieldConfig'&&f === selectedFieldConfig}"
               ng-attr-style="fill:{{f.color}}" />
@@ -38,9 +45,18 @@
         </span>
 
         <!-- Add field button. -->
-        <span class="gphNoUserSelect" ng-attr-tooltip="Add a field source for vertices">
-          <button class="gphAddButton" ng-disabled="selectedIndex === null" aria-label="Add a field" id="addVertexFieldButton"
-            ng-class="{'gphAddButton-focus':selectedIndex !== null&&selectedFields.length === 0}" ng-click="toggleShowAdvancedFieldsConfig()">
+        <span
+          class="gphNoUserSelect"
+          ng-attr-tooltip="{{ ::'xpack.graph.topNavMenu.addFieldButtonTooltip' | i18n: { defaultMessage: 'Add a field source for vertices' } }}"
+        >
+          <button
+            class="gphAddButton"
+            ng-disabled="selectedIndex === null"
+            aria-label="{{ ::'xpack.graph.topNavMenu.addFieldButtonAriaLabel' | i18n: { defaultMessage: 'Add a field' } }}"
+            id="addVertexFieldButton"
+            ng-class="{'gphAddButton-focus':selectedIndex !== null&&selectedFields.length === 0}"
+            ng-click="toggleShowAdvancedFieldsConfig()"
+          >
             <span aria-hidden="true" class="kuiIcon fa-plus"></span>
           </button>
         </span>
@@ -68,7 +84,7 @@
     <div class="config">
       <div class="container-fluid">
         <label
-          i18n-id="xpack.graph.queryConfig.addFieldTitle"
+          i18n-id="xpack.graph.queryConfig.addFieldLabel"
           i18n-default-message="Add a field source for vertices"
         ></label>
         <form>
@@ -280,13 +296,23 @@
     <div id="sidebar" class="gphSidebar" ng-if="workspace !== null">
 
       <div>
-        <button class="kuiButton kuiButton--basic kuiButton--small" tooltip="Undo" type="button" ng-click="workspace.undo()"
-          ng-disabled="workspace === null||workspace.undoLog.length <1">
+        <button
+          class="kuiButton kuiButton--basic kuiButton--small"
+          tooltip="{{ ::'xpack.graph.sidebar.topMenu.undoButtonTooltip' | i18n: { defaultMessage: 'Undo' } }}"
+          type="button"
+          ng-click="workspace.undo()"
+          ng-disabled="workspace === null||workspace.undoLog.length <1"
+        >
           <span class="kuiIcon fa-history"></span>
         </button>
 
-        <button class="kuiButton kuiButton--basic kuiButton--small" tooltip="Redo" type="button" ng-disabled="workspace === null ||workspace.redoLog.length === 0"
-          ng-click="workspace.redo()">
+        <button
+          class="kuiButton kuiButton--basic kuiButton--small"
+          tooltip="{{ ::'xpack.graph.sidebar.topMenu.redoButtonTooltip' | i18n: { defaultMessage: 'Redo' } }}"
+          type="button"
+          ng-disabled="workspace === null ||workspace.redoLog.length === 0"
+          ng-click="workspace.redo()"
+        >
           <span class="kuiIcon fa-repeat"></span>
         </button>
 
@@ -350,7 +376,7 @@
             tooltip="{{ ::'xpack.graph.sidebar.selections.selectAllButtonTooltip' | i18n: { defaultMessage: 'Select all' } }}"
             type="button" class="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
             ng-disabled="workspace.nodes.length === 0" ng-click="setDetail(null);workspace.selectAll()"
-            i18n-id="xpack.graph.sidebar.selections..selectAllButtonLabel"
+            i18n-id="xpack.graph.sidebar.selections.selectAllButtonLabel"
             i18n-default-message="all"
           ></button>
 
