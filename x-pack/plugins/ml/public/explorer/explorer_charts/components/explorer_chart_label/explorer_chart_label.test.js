@@ -11,7 +11,6 @@ import React from 'react';
 
 import { ExplorerChartLabel } from './explorer_chart_label';
 
-const DetectorLabel = <React.Fragment>{seriesConfig.detectorLabel}</React.Fragment>;
 
 describe('ExplorerChartLabelBadge', () => {
 
@@ -19,7 +18,7 @@ describe('ExplorerChartLabelBadge', () => {
 
     const wrapper = shallow(
       <ExplorerChartLabel
-        detectorLabel={DetectorLabel}
+        detectorLabel={seriesConfig.detectorLabel}
         entityFields={seriesConfig.entityFields}
         infoTooltip={seriesConfig.infoTooltip}
         wrapLabel={false}
@@ -33,7 +32,7 @@ describe('ExplorerChartLabelBadge', () => {
 
     const wrapper = shallow(
       <ExplorerChartLabel
-        detectorLabel={DetectorLabel}
+        detectorLabel={seriesConfig.detectorLabel}
         entityFields={seriesConfig.entityFields}
         infoTooltip={seriesConfig.infoTooltip}
         wrapLabel={true}

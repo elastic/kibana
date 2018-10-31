@@ -8,9 +8,7 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
     <span
       className="ml-explorer-chart-label-detector"
     >
-      <React.Fragment>
-        high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
-      </React.Fragment>
+      high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
       <React.Fragment>
          – 
       </React.Fragment>
@@ -66,9 +64,7 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
     <span
       className="ml-explorer-chart-label-detector"
     >
-      <React.Fragment>
-        high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
-      </React.Fragment>
+      high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
       <React.Fragment>
          
       </React.Fragment>
