@@ -22,11 +22,13 @@ export class CsvImporter extends Importer {
 
   async read(csv) {
     try {
+      const transform = this.shouldTrimFields ? (f => f.trim()) : (f => f);
       const config = {
         header: false,
         skipEmptyLines: 'greedy',
         delimiter: this.delimiter,
         quoteChar: this.quote,
+        transform,
       };
 
       const parserOutput = Papa.parse(csv, config);
@@ -42,7 +44,7 @@ export class CsvImporter extends Importer {
         this.data.shift();
       }
 
-      this.docArray = formatToJson(this.data, this.columnNames, this.shouldTrimFields);
+      this.docArray = formatToJson(this.data, this.columnNames);
 
       return {
         success: true,
@@ -56,14 +58,13 @@ export class CsvImporter extends Importer {
   }
 }
 
-function formatToJson(data, columnNames, trim = false) {
-  const process = trim ? (f => f.trim()) : (f => f);
+function formatToJson(data, columnNames) {
   const docArray = [];
   for (let i = 0; i < data.length; i++) {
     const line = {};
     for (let c = 0; c < columnNames.length; c++) {
       const col = columnNames[c];
-      line[col] = process(data[i][c]);
+      line[col] = data[i][c];
     }
     docArray.push(line);
   }
