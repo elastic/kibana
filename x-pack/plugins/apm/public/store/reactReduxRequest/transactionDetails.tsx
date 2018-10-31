@@ -5,19 +5,29 @@
  */
 
 import React from 'react';
-import { createInitialDataSelector } from './helpers';
-import { Request } from 'react-redux-request';
+import { Request, RRRRender } from 'react-redux-request';
+import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { loadTransaction } from '../../services/rest/apm';
+import { IReduxState } from '../rootReducer';
+import { IUrlParams } from '../urlParams';
+// @ts-ignore
+import { createInitialDataSelector } from './helpers';
 
 const ID = 'transactionDetails';
 const INITIAL_DATA = {};
 const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
-export function getTransactionDetails(state) {
+export function getTransactionDetails(state: IReduxState) {
   return withInitialData(state.reactReduxRequest[ID]);
 }
 
-export function TransactionDetailsRequest({ urlParams, render }) {
+export function TransactionDetailsRequest({
+  urlParams,
+  render
+}: {
+  urlParams: IUrlParams;
+  render: RRRRender<Transaction>;
+}) {
   const { serviceName, start, end, transactionId, traceId, kuery } = urlParams;
 
   if (!(serviceName && start && end && transactionId)) {
