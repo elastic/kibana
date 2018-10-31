@@ -32,7 +32,7 @@ class Timeline extends PureComponent {
 
 Timeline.propTypes = {
   agentMarks: PropTypes.array,
-  duration: PropTypes.number.isRequired,
+  duration: PropTypes.number,
   height: PropTypes.number.isRequired,
   header: PropTypes.node,
   margins: PropTypes.object.isRequired,
