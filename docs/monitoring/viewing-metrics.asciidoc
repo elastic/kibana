@@ -69,20 +69,26 @@ xpack.monitoring.elasticsearch.ssl.certificateAuthorities: /path/to/your/cacert.
 
 --
 
+. If {security} is enabled on the {kib} server, identify or create users that 
+have access to the {kib} indices and permission to read from the monitoring 
+indices.
++
+--
+You can assign users the `monitoring_user` and `kibana_user` 
+{stack-ov}/built-in-roles.html[built-in roles]. These roles have the necessary 
+privileges to use the monitoring dashboards. 
+
+NOTE: These users must exist on the cluster where the monitoring data is stored, 
+that is to say the monitoring cluster. If you are accessing a remote monitoring 
+cluster, you mus use credentials that are valid on both the {kib} server and the 
+monitoring cluster.
+
+--
+
 . Open {kib} in your web browser and log in. 
 +
 --
 If you are running {kib} locally, go to `http://localhost:5601/`. 
-
-If {security} is enabled on the {kib} server, to access {kib} and view the 
-monitoring dashboards, you must log in as a user who has the `kibana_user` and 
-`monitoring_user` roles. These roles have the necessary privileges to view the 
-monitoring dashboards. For more information, see 
-{stack-ov}/built-in-roles.html[Built-in roles].
-
-If you are accessing a remote monitoring cluster, you must log in to {kib}
-with credentials that are valid on both the {kib} server and the monitoring 
-cluster.
 --
 
 . In the side navigation, click *Monitoring*. The first time you open {kib}
