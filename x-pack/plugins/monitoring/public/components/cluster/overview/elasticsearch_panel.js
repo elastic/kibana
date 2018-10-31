@@ -79,8 +79,7 @@ function ElasticsearchPanelUi(props) {
       {...props}
       statusIndicator={statusIndicator}
       url="elasticsearch"
-      title={props.intl.formatMessage({
-        id: 'xpack.monitoring.cluster.overview.esPanel.elasticsearchTitle', defaultMessage: 'Elasticsearch' })}
+      title="Elasticsearch"
       extras={licenseText}
     >
       <EuiFlexGrid columns={3}>
