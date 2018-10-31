@@ -118,7 +118,7 @@ export class ExplainCollectionEnabled extends React.Component {
         <EuiTitle size="l" data-test-subj="monitoringCollectionEnabledMessage">
           <h2>
             <FormattedMessage
-              id="xpack.monitoring.noData.explanations.collectionEnabled.monitoringTurnOnSuccessfullyTitle"
+              id="xpack.monitoring.noData.explanations.collectionEnabled.monitoringTurnedOnTitle"
               defaultMessage="Success! Getting your monitoring data."
             />
           </h2>
@@ -127,7 +127,7 @@ export class ExplainCollectionEnabled extends React.Component {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.monitoring.noData.explanations.collectionEnabled.monitoringTurnOnSuccessfullyDescription"
+              id="xpack.monitoring.noData.explanations.collectionEnabled.monitoringTurnedOnDescription"
               defaultMessage="When the data is in your cluster, your monitoring dashboard will
               show up here. This might take a few seconds."
             />

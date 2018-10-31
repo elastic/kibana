@@ -66,7 +66,7 @@ export class ExplainCollectionInterval extends React.Component {
           </p>
           <p>
             <FormattedMessage
-              id="xpack.monitoring.noData.explanations.collectionInterval.changeIntervalValueDescription"
+              id="xpack.monitoring.noData.explanations.collectionInterval.changeIntervalDescription"
               defaultMessage="Would you like us to change it and enable monitoring?"
             />
           </p>
@@ -99,7 +99,7 @@ export class ExplainCollectionInterval extends React.Component {
         <EuiTitle size="l">
           <h2>
             <FormattedMessage
-              id="xpack.monitoring.noData.explanations.collectionInterval.monitoringTurnOnSuccessfullyTitle"
+              id="xpack.monitoring.noData.explanations.collectionInterval.monitoringTurnedOnTitle"
               defaultMessage="Success! Wait a moment please."
             />
           </h2>
@@ -108,7 +108,7 @@ export class ExplainCollectionInterval extends React.Component {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.monitoring.noData.explanations.collectionInterval.monitoringTurnOnSuccessfullyDescription"
+              id="xpack.monitoring.noData.explanations.collectionInterval.monitoringTurnedOnDescription"
               defaultMessage="As soon as monitoring data appears in your
               cluster the page will automatically refresh with your monitoring
               dashboard. This only takes only a few seconds."

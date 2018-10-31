@@ -12,13 +12,12 @@ import { formatDateTimeLocal } from '../../../common/formatting';
 import { MANAGEMENT_BASE_PATH } from 'plugins/xpack_main/components';
 import { License } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
-import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
 const REACT_NODE_ID = 'licenseReact';
 
 export class LicenseViewController {
-  constructor($injector, $scope) {
+  constructor($injector, $scope, i18n) {
     timefilter.disableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
 
@@ -26,17 +25,17 @@ export class LicenseViewController {
       unmountComponentAtNode(document.getElementById(REACT_NODE_ID));
     });
 
-    this.init($injector, $scope);
+    this.init($injector, $scope, i18n);
   }
 
-  init($injector, $scope) {
+  init($injector, $scope, i18n) {
     const globalState = $injector.get('globalState');
     const title = $injector.get('title');
     const $route = $injector.get('$route');
 
     const cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
     $scope.cluster = cluster;
-    const routeTitle = i18n.translate('xpack.monitoring.license.licenseRouteTitle', {
+    const routeTitle = i18n('xpack.monitoring.license.licenseRouteTitle', {
       defaultMessage: 'License'
     });
     title($scope.cluster, routeTitle);

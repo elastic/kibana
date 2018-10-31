@@ -35,7 +35,7 @@ export function ExplainExporters({ context, property, data }) {
 
         <p>
           <FormattedMessage
-            id="xpack.monitoring.noData.explanations.exporters.problemWithConfigurationOrEsSettingsDescription"
+            id="xpack.monitoring.noData.explanations.exporters.problemWithConfigDescription"
             defaultMessage="Using monitoring exporters ship the monitoring data to a remote
             monitoring cluster is highly recommended as it keeps the integrity of
             the monitoring data safe no matter what the state of the production
@@ -52,7 +52,7 @@ export function ExplainExporters({ context, property, data }) {
 
         <p>
           <FormattedMessage
-            id="xpack.monitoring.noData.explanations.exporters.checkIntendedExportersAreEnabledDescription"
+            id="xpack.monitoring.noData.explanations.exporters.checkConfigDescription"
             defaultMessage="Check that the intended exporters are enabled for sending statistics to
             the monitoring cluster, and that the monitoring cluster host matches the {monitoringEs}
             setting in {kibanaConfig} to see monitoring data in this instance of Kibana."

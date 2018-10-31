@@ -28,11 +28,8 @@ export function WeTried() {
         <p>
           <FormattedMessage
             id="xpack.monitoring.noData.reasons.noMonitoringDataFoundDescription"
-            defaultMessage="No monitoring data found. Try setting the time filter to {quote}Last 1
-            hour{quote} or check if data is available for a different time period."
-            values={{
-              quote: '&quot;'
-            }}
+            defaultMessage="No monitoring data found. Try setting the time filter to &quot;Last 1
+            hour&quot; or check if data is available for a different time period."
           />
         </p>
         <p>
