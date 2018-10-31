@@ -26,7 +26,7 @@ export class LoggedOutPage extends Component<Props, {}> {
               <EuiTitle size="l" className="loggedOut__title">
                 <h1>
                   <FormattedMessage
-                    id="kbn.loggedOut.title"
+                    id="xpack.security.loggedOut.title"
                     defaultMessage="Successfully logged out"
                   />
                 </h1>
@@ -36,7 +36,7 @@ export class LoggedOutPage extends Component<Props, {}> {
           </header>
           <div className="loggedOut__content eui-textCenter">
             <EuiButton href={this.props.addBasePath('/login')}>
-              <FormattedMessage id="kbn.loggedOut.login" defaultMessage="Login" />
+              <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Login" />
             </EuiButton>
           </div>
         </div>
