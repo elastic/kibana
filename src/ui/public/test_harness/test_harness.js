@@ -24,7 +24,7 @@ import { parse as parseUrl } from 'url';
 import sinon from 'sinon';
 import { Notifier } from '../notify';
 import { metadata } from '../metadata';
-import { UiSettingsClient } from '../../ui_settings/public/ui_settings_client';
+import { UiSettingsClient } from '../../../core/public/ui_settings';
 
 import './test_harness.less';
 import 'ng_mock';
@@ -46,16 +46,25 @@ before(() => {
   sinon.useFakeXMLHttpRequest();
 });
 
-let stubUiSettings = new UiSettingsClient({
-  defaults: metadata.uiSettings.defaults,
-  initialSettings: {},
-  notify: new Notifier({ location: 'Config' }),
-  api: {
-    batchSet() {
-      return { settings: stubUiSettings.getAll() };
-    }
+let stubUiSettings;
+function createStubUiSettings() {
+  if (stubUiSettings) {
+    stubUiSettings.stop();
   }
-});
+
+  stubUiSettings = new UiSettingsClient({
+    api: {
+      async batchSet() {
+        return { settings: stubUiSettings.getAll() };
+      }
+    },
+    onUpdateError: () => {},
+    defaults: metadata.uiSettings.defaults,
+    initialSettings: {},
+  });
+}
+
+createStubUiSettings();
 sinon.stub(chrome, 'getUiSettingsClient').callsFake(() => stubUiSettings);
 
 beforeEach(function () {
@@ -68,16 +77,7 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-  stubUiSettings = new UiSettingsClient({
-    defaults: metadata.uiSettings.defaults,
-    initialSettings: {},
-    notify: new Notifier({ location: 'Config' }),
-    api: {
-      batchSet() {
-        return { settings: stubUiSettings.getAll() };
-      }
-    }
-  });
+  createStubUiSettings();
 });
 
 // Kick off mocha, called at the end of test entry files

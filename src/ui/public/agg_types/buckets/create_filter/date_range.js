@@ -31,5 +31,5 @@ export function createFilterDateRange(agg, key) {
   if (range.to) filter.lt = +range.to;
   if (range.to && range.from) filter.format = 'epoch_millis';
 
-  return buildRangeFilter(agg.params.field, filter, agg._indexPattern);
+  return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
 }

@@ -6,6 +6,7 @@ Array [
     Object {
       "basePath": true,
       "dev": true,
+      "optimize": false,
       "quiet": true,
       "repl": false,
       "silent": false,
@@ -33,6 +34,12 @@ Array [
               "starting legacy service",
             ],
           ],
+          "results": Array [
+            Object {
+              "isThrow": false,
+              "value": undefined,
+            },
+          ],
         },
         "error": [MockFunction],
         "fatal": [MockFunction],
@@ -52,6 +59,7 @@ Array [
     Object {
       "basePath": false,
       "dev": true,
+      "optimize": false,
       "quiet": false,
       "repl": false,
       "silent": true,

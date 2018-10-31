@@ -6,17 +6,16 @@
 
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import createHistory from 'history/createMemoryHistory';
-
 import {
   toQuery,
   fromQuery,
-  KibanaLinkComponent,
+  UnconnectedKibanaLink,
   RelativeLinkComponent,
   encodeKibanaSearchParams,
   decodeKibanaSearchParams,
-  getMlJobUrl
+  ViewMLJob
 } from '../url';
 import { toJson } from '../testHelpers';
 
@@ -183,7 +182,7 @@ describe('RelativeLinkComponent', () => {
   });
 });
 
-describe('KibanaLinkComponent', () => {
+describe('UnconnectedKibanaLink', () => {
   let wrapper;
 
   beforeEach(() => {
@@ -199,20 +198,20 @@ describe('KibanaLinkComponent', () => {
     };
 
     wrapper = mount(
-      <KibanaLinkComponent
+      <UnconnectedKibanaLink
         location={{ search: '' }}
         pathname={'/app/kibana'}
         hash={'/discover'}
         query={discoverQuery}
       >
         Go to Discover
-      </KibanaLinkComponent>
+      </UnconnectedKibanaLink>
     );
   });
 
   it('should have correct url', () => {
     expect(wrapper.find('a').prop('href')).toBe(
-      "myBasePath/app/kibana#/discover?_g=&_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))"
+      "myBasePath/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))&_g="
     );
   });
 
@@ -221,22 +220,39 @@ describe('KibanaLinkComponent', () => {
   });
 });
 
-describe('getMlJobUrl', () => {
-  it('should have correct url', () => {
-    const serviceName = 'myServiceName';
-    const transactionType = 'myTransactionType';
+describe('ViewMLJob', () => {
+  it('should render component', () => {
     const location = { search: '' };
-    expect(getMlJobUrl(serviceName, transactionType, location)).toBe(
-      '/app/ml#/timeseriesexplorer/?_g=(ml:(jobIds:!(myServiceName-myTransactionType-high_mean_response_time)))&_a=!n'
+    const wrapper = shallow(
+      <ViewMLJob
+        serviceName="myServiceName"
+        transactionType="myTransactionType"
+        location={location}
+      />
     );
+
+    expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  it('should not contain basePath', () => {
-    const serviceName = 'myServiceName';
-    const transactionType = 'myTransactionType';
+  it('should have correct path props', () => {
     const location = { search: '' };
-    expect(getMlJobUrl(serviceName, transactionType, location)).toBe(
-      '/app/ml#/timeseriesexplorer/?_g=(ml:(jobIds:!(myServiceName-myTransactionType-high_mean_response_time)))&_a=!n'
+    const wrapper = shallow(
+      <ViewMLJob
+        serviceName="myServiceName"
+        transactionType="myTransactionType"
+        location={location}
+      />
     );
+
+    expect(wrapper.prop('pathname')).toBe('/app/ml');
+    expect(wrapper.prop('hash')).toBe('/timeseriesexplorer');
+    expect(wrapper.prop('query')).toEqual({
+      _a: null,
+      _g: {
+        ml: {
+          jobIds: ['myServiceName-myTransactionType-high_mean_response_time']
+        }
+      }
+    });
   });
 });

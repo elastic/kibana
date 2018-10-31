@@ -36,22 +36,26 @@ export default function ({ getService, getPageObjects }) {
 
       for (const time of rows.map(row => row.lastModified)) {
         // last modified is a relative time string. Check for 'ago' suffix
-        expect(time).to.be.a('string').match(/ ago$/);
+        expect(time)
+          .to.be.a('string')
+          .match(/ ago$/);
       }
 
-      const expectedRows = [{
-        selected: false,
-        id: 'tweets_and_beats',
-        description: 'ingest tweets and beats',
-        username: 'elastic'
-      }];
+      const expectedRows = [
+        {
+          selected: false,
+          id: 'tweets_and_beats',
+          description: 'ingest tweets and beats',
+          username: 'elastic',
+        },
+      ];
 
       for (let emptyPipelineId = 1; emptyPipelineId <= 19; ++emptyPipelineId) {
         expectedRows.push({
           selected: false,
           id: `empty_pipeline_${emptyPipelineId}`,
           description: 'an empty pipeline',
-          username: 'elastic'
+          username: 'elastic',
         });
       }
 
@@ -89,13 +93,13 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('delete button', () => {
-      it('is disabled when no rows are selected', async () => {
+      it('is missing when no rows are selected', async () => {
         await pipelineList.deselectAllRows();
-        await pipelineList.assertDeleteButton({ enabled: false });
+        await pipelineList.assertDeleteButtonMissing();
       });
 
       it('is enabled when all rows are selected', async () => {
-        await pipelineList.selectAllRows();
+        await pipelineList.clickSelectAll();
         await pipelineList.assertDeleteButton({ enabled: true });
       });
 
@@ -141,7 +145,9 @@ export default function ({ getService, getPageObjects }) {
 
         for (const time of rows.map(row => row.lastModified)) {
           // last modified is a relative time string. Check for 'ago' suffix
-          expect(time).to.be.a('string').match(/ ago$/);
+          expect(time)
+            .to.be.a('string')
+            .match(/ ago$/);
         }
 
         expect(rowsWithoutTime).to.eql([
@@ -149,21 +155,20 @@ export default function ({ getService, getPageObjects }) {
             selected: false,
             id: 'empty_pipeline_20',
             description: 'an empty pipeline',
-            username: 'elastic'
+            username: 'elastic',
           },
           {
             selected: false,
             id: 'empty_pipeline_21',
             description: 'an empty pipeline',
-            username: 'elastic'
-          }
+            username: 'elastic',
+          },
         ]);
       });
     });
 
     describe('clone button', () => {
       it('links to the pipeline editor with cloned pipeline details', async () => {
-
         // First, create a random pipeline
         await PageObjects.logstash.gotoNewPipelineEditor();
 
@@ -188,9 +193,15 @@ export default function ({ getService, getPageObjects }) {
         await pipelineEditor.setQueueCheckpointWrites(queueCheckpointWrites);
 
         await pipelineEditor.assertInputs({
-          id, description, pipeline,
-          workers, batchSize,
-          queueType, queueMaxBytesNumber, queueMaxBytesUnits, queueCheckpointWrites
+          id,
+          description,
+          pipeline,
+          workers,
+          batchSize,
+          queueType,
+          queueMaxBytesNumber,
+          queueMaxBytesUnits,
+          queueCheckpointWrites,
         });
 
         await pipelineEditor.clickSave();
@@ -203,11 +214,16 @@ export default function ({ getService, getPageObjects }) {
 
         // Check that pipeline edit view is shown with cloned pipeline details
         await pipelineEditor.assertInputs({
-          id: '', description, pipeline,
-          workers, batchSize,
-          queueType, queueMaxBytesNumber, queueMaxBytesUnits, queueCheckpointWrites
+          id: '',
+          description,
+          pipeline,
+          workers,
+          batchSize,
+          queueType,
+          queueMaxBytesNumber,
+          queueMaxBytesUnits,
+          queueCheckpointWrites,
         });
-
       });
 
       after(async () => {

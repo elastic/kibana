@@ -19,20 +19,12 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { PointSeriesGetPointProvider } from '../_get_point';
+import { getPoint } from '../_get_point';
 
 describe('getPoint', function () {
 
-  let getPoint;
-
   const truthFormatted = { fieldFormatter: _.constant(_.constant(true)) };
   const identFormatted = { fieldFormatter: _.constant(_.identity) };
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    getPoint = Private(PointSeriesGetPointProvider);
-  }));
 
   describe('Without series aspect', function () {
     let seriesAspect;

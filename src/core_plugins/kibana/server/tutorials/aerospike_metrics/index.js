@@ -17,22 +17,35 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function aerospikeMetricsSpecProvider() {
+export function aerospikeMetricsSpecProvider(server, context) {
   const moduleName = 'aerospike';
   return {
     id: 'aerospikeMetrics',
-    name: 'Aerospike metrics',
+    name: i18n.translate('kbn.server.tutorials.aerospikeMetrics.nameTitle', {
+      defaultMessage: 'Aerospike metrics',
+    }),
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetch internal metrics from the Aerospike server.',
-    longDescription: 'The `aerospike` Metricbeat module fetches internal metrics from Aerospike.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-aerospike.html).',
+    shortDescription: i18n.translate('kbn.server.tutorials.aerospikeMetrics.shortDescription', {
+      defaultMessage: 'Fetch internal metrics from the Aerospike server.',
+    }),
+    longDescription: i18n.translate('kbn.server.tutorials.aerospikeMetrics.longDescription', {
+      defaultMessage: 'The `aerospike` Metricbeat module fetches internal metrics from Aerospike. \
+[Learn more]({learnMoreLink}).',
+      values: {
+        learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-aerospike.html',
+      },
+    }),
+    euiIconType: 'logoAerospike',
     artifacts: {
       application: {
-        label: 'Discover',
+        label: i18n.translate('kbn.server.tutorials.aerospikeMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover'
       },
       dashboards: [],
@@ -41,7 +54,7 @@ export function aerospikeMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

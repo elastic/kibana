@@ -43,6 +43,17 @@ describe('dev/i18n/extractors/html', () => {
     expect(actual.sort()).toMatchSnapshot();
   });
 
+  test('extracts default messages from HTML with one-time binding', () => {
+    const actual = Array.from(
+      extractHtmlMessages(`
+<div>
+  {{::'kbn.id' | i18n: { defaultMessage: 'Message text with {value}', values: { value: 'value' } }}}
+</div>
+`)
+    );
+    expect(actual.sort()).toMatchSnapshot();
+  });
+
   test('throws on empty i18n-id', () => {
     const source = Buffer.from(`\
 <p
@@ -60,6 +71,16 @@ describe('dev/i18n/extractors/html', () => {
 <p
   i18n-id="message-id"
 ></p>
+`);
+
+    expect(() => extractHtmlMessages(source).next()).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws on i18n filter usage in angular directive argument', () => {
+    const source = Buffer.from(`\
+<div
+  ng-options="mode as ('metricVis.colorModes.' + mode | i18n: { defaultMessage: mode }) for mode in collections.metricColorMode"
+></div>
 `);
 
     expect(() => extractHtmlMessages(source).next()).toThrowErrorMatchingSnapshot();

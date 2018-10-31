@@ -18,7 +18,6 @@
  */
 
 import { remove } from 'lodash';
-import { prependPath } from '../../url/prepend_path';
 import { relativeToAbsolute } from '../../url/relative_to_absolute';
 import { absoluteToParsedUrl } from '../../url/absolute_to_parsed_url';
 
@@ -41,28 +40,6 @@ export function initChromeNavApi(chrome, internals) {
 
   chrome.showOnlyById = (id) => {
     remove(internals.nav, app => app.id !== id);
-  };
-
-  chrome.getBasePath = function () {
-    return internals.basePath || '';
-  };
-
-  /**
-   *
-   * @param url {string} a relative url. ex: /app/kibana#/management
-   * @return {string} the relative url with the basePath prepended to it. ex: rkz/app/kibana#/management
-   */
-  chrome.addBasePath = function (url) {
-    return prependPath(url, chrome.getBasePath());
-  };
-
-  chrome.removeBasePath = function (url) {
-    if (!internals.basePath) {
-      return url;
-    }
-
-    const basePathRegExp = new RegExp(`^${internals.basePath}`);
-    return url.replace(basePathRegExp, '');
   };
 
   function lastSubUrlKey(link) {
@@ -154,8 +131,8 @@ export function initChromeNavApi(chrome, internals) {
   };
 
   internals.nav.forEach(link => {
-    link.url = relativeToAbsolute(link.url);
-    link.subUrlBase = relativeToAbsolute(link.subUrlBase);
+    link.url = relativeToAbsolute(chrome.addBasePath(link.url));
+    link.subUrlBase = relativeToAbsolute(chrome.addBasePath(link.subUrlBase));
   });
 
   // simulate a possible change in url to initialize the

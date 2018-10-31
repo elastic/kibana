@@ -23,8 +23,6 @@ import { toastNotifications } from 'ui/notify';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiButton,
@@ -60,7 +58,7 @@ export class DashboardAddPanel extends React.Component {
           key="visSavedObjectFinder"
           callToActionButton={addNewVisBtn}
           onChoose={this.onAddPanel}
-          find={this.props.find}
+          visTypes={this.props.visTypes}
           noItemsMessage="No matching visualizations found."
           savedObjectType="visualization"
         />
@@ -74,7 +72,6 @@ export class DashboardAddPanel extends React.Component {
         <SavedObjectFinder
           key="searchSavedObjectFinder"
           onChoose={this.onAddPanel}
-          find={this.props.find}
           noItemsMessage="No matching saved searches found."
           savedObjectType="search"
         />
@@ -133,13 +130,9 @@ export class DashboardAddPanel extends React.Component {
       >
         <EuiFlyoutBody>
 
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle>
-                <h2>Add Panels</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTitle size="s">
+            <h1>Add Panels</h1>
+          </EuiTitle>
 
           <EuiTabs>
             {this.renderTabs()}
@@ -157,7 +150,7 @@ export class DashboardAddPanel extends React.Component {
 
 DashboardAddPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
-  find: PropTypes.func.isRequired,
+  visTypes: PropTypes.object.isRequired,
   addNewPanel: PropTypes.func.isRequired,
   addNewVis: PropTypes.func.isRequired,
 };

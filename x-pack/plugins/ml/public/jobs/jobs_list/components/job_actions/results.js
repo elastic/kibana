@@ -40,9 +40,11 @@ function getLink(location, jobs) {
 
 export function ResultLinks({ jobs })  {
   const tooltipJobs = (jobs.length === 1) ? jobs[0].id : `${jobs.length} jobs`;
+  const singleMetricVisible = (jobs.length < 2);
+  const singleMetricEnabled = (jobs.length === 1 && jobs[0].isSingleMetricViewerJob);
   return (
     <React.Fragment>
-      {(jobs.length < 2) &&
+      {(singleMetricVisible) &&
         <EuiToolTip
           position="bottom"
           content={`Open ${tooltipJobs} in Single Metric Viewer`}
@@ -52,7 +54,7 @@ export function ResultLinks({ jobs })  {
             iconType="stats"
             aria-label={`Open ${tooltipJobs} in Single Metric Viewer`}
             className="results-button"
-
+            isDisabled={(singleMetricEnabled === false)}
           />
         </EuiToolTip>
       }

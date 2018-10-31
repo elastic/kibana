@@ -18,6 +18,7 @@
  */
 
 import { SavedObjectNotFound } from 'ui/errors';
+import { i18n } from '@kbn/i18n';
 
 async function getSavedObject(doc, services) {
   const service = services.find(service => service.type === doc._type);
@@ -27,6 +28,7 @@ async function getSavedObject(doc, services) {
 
   const obj = await service.get();
   obj.id = doc._id;
+  obj.migrationVersion = doc._migrationVersion;
   return obj;
 }
 
@@ -35,22 +37,43 @@ function addJsonFieldToIndexPattern(target, sourceString, fieldName, indexName) 
     try {
       target[fieldName] = JSON.parse(sourceString);
     } catch (error) {
-      throw new Error(`Error encountered parsing ${fieldName} for index pattern ${indexName}: ${error.message}`);
+      throw new Error(
+        i18n.translate('kbn.management.objects.parsingFieldErrorMessage', {
+          defaultMessage: 'Error encountered parsing {fieldName} for index pattern {indexName}: {errorMessage}',
+          values: {
+            fieldName,
+            indexName,
+            errorMessage: error.message,
+          }
+        }),
+      );
     }
   }
 }
 async function importIndexPattern(doc, indexPatterns, overwriteAll) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
   const emptyPattern = await indexPatterns.get();
-  const { title, timeFieldName, fields, fieldFormatMap, sourceFilters } = doc._source;
+  const {
+    title,
+    timeFieldName,
+    fields,
+    fieldFormatMap,
+    sourceFilters,
+    type,
+    typeMeta,
+  } = doc._source;
   const importedIndexPattern = {
     id: doc._id,
     title,
-    timeFieldName
+    timeFieldName,
   };
+  if (type) {
+    importedIndexPattern.type = type;
+  }
   addJsonFieldToIndexPattern(importedIndexPattern, fields, 'fields', title);
   addJsonFieldToIndexPattern(importedIndexPattern, fieldFormatMap, 'fieldFormatMap', title);
   addJsonFieldToIndexPattern(importedIndexPattern, sourceFilters, 'sourceFilters', title);
+  addJsonFieldToIndexPattern(importedIndexPattern, typeMeta, 'typeMeta', title);
   Object.assign(emptyPattern, importedIndexPattern);
 
   const newId = await emptyPattern.create(true, !overwriteAll);
@@ -117,14 +140,11 @@ export async function resolveIndexPatternConflicts(
 
 export async function saveObjects(objs, overwriteAll) {
   let importCount = 0;
-  await awaitEachItemInParallel(
-    objs,
-    async obj => {
-      if (await saveObject(obj, overwriteAll)) {
-        importCount++;
-      }
+  await awaitEachItemInParallel(objs, async obj => {
+    if (await saveObject(obj, overwriteAll)) {
+      importCount++;
     }
-  );
+  });
   return importCount;
 }
 
@@ -132,12 +152,7 @@ export async function saveObject(obj, overwriteAll) {
   return await obj.save({ confirmOverwrite: !overwriteAll });
 }
 
-export async function resolveSavedSearches(
-  savedSearches,
-  services,
-  indexPatterns,
-  overwriteAll
-) {
+export async function resolveSavedSearches(savedSearches, services, indexPatterns, overwriteAll) {
   let importCount = 0;
   await awaitEachItemInParallel(savedSearches, async searchDoc => {
     const obj = await getSavedObject(searchDoc, services);
@@ -152,12 +167,7 @@ export async function resolveSavedSearches(
   return importCount;
 }
 
-export async function resolveSavedObjects(
-  savedObjects,
-  overwriteAll,
-  services,
-  indexPatterns
-) {
+export async function resolveSavedObjects(savedObjects, overwriteAll, services, indexPatterns) {
   const docTypes = groupByType(savedObjects);
 
   // Keep track of how many we actually import because the user
@@ -165,19 +175,20 @@ export async function resolveSavedObjects(
   let importedObjectCount = 0;
   const failedImports = [];
   // Start with the index patterns since everything is dependent on them
-  await awaitEachItemInParallel(
-    docTypes.indexPatterns,
-    async indexPatternDoc => {
-      try {
-        const importedIndexPatternId = await importIndexPattern(indexPatternDoc, indexPatterns, overwriteAll);
-        if (importedIndexPatternId) {
-          importedObjectCount++;
-        }
-      } catch (error) {
-        failedImports.push({ indexPatternDoc, error });
+  await awaitEachItemInParallel(docTypes.indexPatterns, async indexPatternDoc => {
+    try {
+      const importedIndexPatternId = await importIndexPattern(
+        indexPatternDoc,
+        indexPatterns,
+        overwriteAll
+      );
+      if (importedIndexPatternId) {
+        importedObjectCount++;
       }
+    } catch (error) {
+      failedImports.push({ indexPatternDoc, error });
     }
-  );
+  });
 
   // We want to do the same for saved searches, but we want to keep them separate because they need
   // to be applied _first_ because other saved objects can be dependent on those saved searches existing

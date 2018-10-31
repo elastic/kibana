@@ -52,10 +52,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./_embed_mode'));
       loadTestFile(require.resolve('./_full_screen_mode'));
       loadTestFile(require.resolve('./_dashboard_filter_bar'));
-
-      // TODO: unskip when https://github.com/elastic/kibana/issues/20442 is fixed
-      //loadTestFile(require.resolve('./_dashboard_filtering'));
-
+      loadTestFile(require.resolve('./_dashboard_filtering'));
       loadTestFile(require.resolve('./_panel_expand_toggle'));
       loadTestFile(require.resolve('./_dashboard_grid'));
       loadTestFile(require.resolve('./_dashboard_snapshots'));

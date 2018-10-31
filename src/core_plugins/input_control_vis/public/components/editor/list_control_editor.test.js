@@ -19,10 +19,10 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
-import { getIndexPatternsMock } from './__tests__/get_index_patterns_mock';
 
 import {
   ListControlEditor,
@@ -68,7 +68,6 @@ describe('renders', () => {
       }
     };
     const component = shallow(<ListControlEditor
-      getIndexPatterns={getIndexPatternsMock}
       getIndexPattern={getIndexPatternMock}
       controlIndex={0}
       controlParams={controlParams}
@@ -94,7 +93,6 @@ describe('renders', () => {
       { value: '2', text: 'fieldB' }
     ];
     const component = shallow(<ListControlEditor
-      getIndexPatterns={getIndexPatternsMock}
       getIndexPattern={getIndexPatternMock}
       controlIndex={0}
       controlParams={controlParams}
@@ -129,7 +127,6 @@ describe('renders', () => {
         }
       };
       const component = shallow(<ListControlEditor
-        getIndexPatterns={getIndexPatternsMock}
         getIndexPattern={getIndexPatternMock}
         controlIndex={0}
         controlParams={controlParams}
@@ -163,7 +160,6 @@ describe('renders', () => {
         }
       };
       const component = shallow(<ListControlEditor
-        getIndexPatterns={getIndexPatternsMock}
         getIndexPattern={getIndexPatternMock}
         controlIndex={0}
         controlParams={controlParams}
@@ -197,7 +193,6 @@ describe('renders', () => {
         }
       };
       const component = shallow(<ListControlEditor
-        getIndexPatterns={getIndexPatternsMock}
         getIndexPattern={getIndexPatternMock}
         controlIndex={0}
         controlParams={controlParams}
@@ -220,8 +215,7 @@ describe('renders', () => {
 });
 
 test('handleCheckboxOptionChange - multiselect', async () => {
-  const component = mount(<ListControlEditor
-    getIndexPatterns={getIndexPatternsMock}
+  const component = mountWithIntl(<ListControlEditor
     getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
@@ -258,8 +252,7 @@ test('handleCheckboxOptionChange - multiselect', async () => {
 });
 
 test('handleNumberOptionChange - size', async () => {
-  const component = mount(<ListControlEditor
-    getIndexPatterns={getIndexPatternsMock}
+  const component = mountWithIntl(<ListControlEditor
     getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}

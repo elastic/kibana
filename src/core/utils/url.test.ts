@@ -52,7 +52,7 @@ describe('modifyUrl()', () => {
   test('supports changing port', () => {
     expect(
       modifyUrl('http://localhost:5601', parsed => {
-        parsed.port = (Number.parseInt(parsed.port!) + 1).toString();
+        parsed.port = (Number(parsed.port!) + 1).toString();
         return parsed;
       })
     ).toEqual('http://localhost:5602/');

@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import './region_map.less';
 import './region_map_vis_params';
-import image from './images/icon-vector-map.svg';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -29,7 +27,7 @@ import { mapToLayerWithId } from './util';
 import { RegionMapsVisualizationProvider } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
 
-VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config) {
+VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config, i18n) {
   const VisFactory = Private(VisFactoryProvider);
   const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
 
@@ -39,11 +37,11 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
 
   return VisFactory.createBaseVisualization({
     name: 'region_map',
-    title: 'Region Map',
-    description: 'Show metrics on a thematic map. Use one of the provided base maps, or add your own. ' +
-    'Darker colors represent higher values.',
+    title: i18n('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' }),
+    description: i18n('regionMap.mapVis.regionMapDescription', { defaultMessage: 'Show metrics on a thematic map. Use one of the \
+provided base maps, or add your own. Darker colors represent higher values.' }),
     category: CATEGORY.MAP,
-    image,
+    icon: 'visMapRegion',
     visConfig: {
       defaults: {
         legendPosition: 'bottomright',
@@ -67,16 +65,16 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
       collections: {
         legendPositions: [{
           value: 'bottomleft',
-          text: 'bottom left',
+          text: i18n('regionMap.mapVis.regionMapEditorConfig.bottomLeftText', { defaultMessage: 'bottom left' }),
         }, {
           value: 'bottomright',
-          text: 'bottom right',
+          text: i18n('regionMap.mapVis.regionMapEditorConfig.bottomRightText', { defaultMessage: 'bottom right' }),
         }, {
           value: 'topleft',
-          text: 'top left',
+          text: i18n('regionMap.mapVis.regionMapEditorConfig.topLeftText', { defaultMessage: 'top left' }),
         }, {
           value: 'topright',
-          text: 'top right',
+          text: i18n('regionMap.mapVis.regionMapEditorConfig.topRightText', { defaultMessage: 'top right' }),
         }],
         colorSchemas: Object.keys(truncatedColorMaps),
         vectorLayers: vectorLayers
@@ -85,7 +83,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Value',
+          title: i18n('regionMap.mapVis.regionMapEditorConfig.schemas.metricTitle', { defaultMessage: 'Value' }),
           min: 1,
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits',
@@ -98,13 +96,12 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
           group: 'buckets',
           name: 'segment',
           icon: 'fa fa-globe',
-          title: 'shape field',
+          title: i18n('regionMap.mapVis.regionMapEditorConfig.schemas.segmentTitle', { defaultMessage: 'shape field' }),
           min: 1,
           max: 1,
           aggFilter: ['terms']
         }
       ])
-    },
-    responseHandler: 'tabify'
+    }
   });
 });

@@ -130,6 +130,84 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
             },
           ],
         ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "{savedObjectsLength} saved objects successfully added",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Request failed, Error: {message}",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+        ],
       },
       "formatNumber": [MockFunction],
       "formatPlural": [MockFunction],
@@ -155,7 +233,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
     steps={
       Array [
         Object {
-          "children": <UNDEFINED>
+          "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
               component="div"
@@ -203,7 +281,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
               size="m"
               title="Request failed, Error: {message}"
             />
-          </UNDEFINED>,
+          </React.Fragment>,
           "key": "installStep",
           "status": "incomplete",
           "title": "Load Kibana objects",
@@ -439,6 +517,52 @@ exports[`bulkCreate should display success message when bulkCreate is successful
             },
           ],
         ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+          Object {
+            "isThrow": false,
+            "value": "{savedObjectsLength} saved objects successfully added",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Imports index pattern, visualizations and pre-defined dashboards.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Load Kibana objects",
+          },
+        ],
       },
       "formatNumber": [MockFunction],
       "formatPlural": [MockFunction],
@@ -464,7 +588,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
     steps={
       Array [
         Object {
-          "children": <UNDEFINED>
+          "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
               component="div"
@@ -512,7 +636,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
               size="m"
               title="{savedObjectsLength} saved objects successfully added"
             />
-          </UNDEFINED>,
+          </React.Fragment>,
           "key": "installStep",
           "status": "complete",
           "title": "Load Kibana objects",
@@ -716,7 +840,7 @@ exports[`renders 1`] = `
   steps={
     Array [
       Object {
-        "children": <UNDEFINED>
+        "children": <React.Fragment>
           <EuiFlexGroup
             alignItems="center"
             component="div"
@@ -758,7 +882,7 @@ exports[`renders 1`] = `
           <EuiSpacer
             size="s"
           />
-        </UNDEFINED>,
+        </React.Fragment>,
         "key": "installStep",
         "status": "incomplete",
         "title": "Load Kibana objects",

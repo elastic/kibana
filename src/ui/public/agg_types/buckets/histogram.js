@@ -19,6 +19,8 @@
 
 import _ from 'lodash';
 
+import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 import '../../validate_date_interval';
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
@@ -57,6 +59,7 @@ export const histogramBucketAgg = new BucketAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'number'
     },
     {
@@ -94,6 +97,12 @@ export const histogramBucketAgg = new BucketAggType({
               min: _.get(resp, 'aggregations.minAgg.value'),
               max: _.get(resp, 'aggregations.maxAgg.value')
             });
+          })
+          .catch(() => {
+            toastNotifications.addWarning(i18n.translate('common.ui.aggTypes.histogram.missingMaxMinValuesWarning', {
+              // eslint-disable-next-line max-len
+              defaultMessage: 'Unable to retrieve max and min values to auto-scale histogram buckets. This may lead to poor visualization performance.'
+            }));
           });
       },
       write: function (aggConfig, output) {

@@ -1,8 +1,7 @@
-ml-explorer-chart,
 .ml-explorer-chart-container {
-  display: block;
+  overflow: hidden;
 
-  svg {
+  .ml-explorer-chart-svg {
     font-size: 12px;
     font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
 
@@ -13,7 +12,10 @@ ml-explorer-chart,
       }
 
       rect.selected-interval {
-        fill: rgba(200, 200, 200, 0.25);
+        fill: rgba(200, 200, 200, 0.1);
+        stroke: #6b6b6b;
+        stroke-width: 2px;
+        stroke-opacity: 0.8;
       }
 
       rect.scheduled-event-marker {
@@ -31,12 +33,16 @@ ml-explorer-chart,
     shape-rendering: crispEdges;
   }
 
+  .axis .tick line.ml-tick-emphasis {
+    stroke: rgba(0, 0, 0, 0.2);
+  }
+
   .axis text {
-    fill: #000;
+    fill: #888;
   }
 
   .axis .tick line {
-    stroke: rgba(0, 0, 0, 0.1);
+    stroke: rgba(0, 0, 0, 0.05);
     stroke-width: 1px;
   }
 
@@ -46,9 +52,14 @@ ml-explorer-chart,
     stroke-width: 2;
   }
 
-  .values-dots circle {
+  .values-dots circle,
+  .values-dots-circle {
     fill: #32a7c2;
     stroke-width: 0;
+  }
+
+  .values-dots circle.values-dots-circle-blur {
+    fill: #aaa;
   }
 
   .metric-value {
@@ -56,45 +67,58 @@ ml-explorer-chart,
     fill: #32a7c2;
   }
 
-  circle.metric-value {
+  .metric-value {
     opacity: 1;
     fill: transparent;
     stroke: #32a7c2;
     stroke-width: 0px;
   }
 
-  circle.anomaly-marker {
+  .anomaly-marker {
     stroke-width: 1px;
     stroke: #aaaaaa;
   }
 
-  circle.anomaly-marker:hover {
+  .anomaly-marker:hover {
     stroke-width: 6px;
     stroke: #32a7c2;
   }
 
-  circle.metric-value.critical {
+  .anomaly-marker.critical {
     fill: #fe5050;
   }
 
-  circle.metric-value.major {
+  .anomaly-marker.major {
     fill: #ff7e00;
   }
 
-  circle.metric-value.minor {
+  .anomaly-marker.minor {
     fill: #ffdd00;
   }
 
-  circle.metric-value.warning {
+  .anomaly-marker.warning {
     fill: #8bc8fb;
   }
 
-  circle.metric-value.low {
+  .anomaly-marker.low {
     fill: #d2e9f7;
   }
 
-  circle.metric-value:hover {
+  .metric-value:hover,
+  .anomaly-marker:hover {
     stroke-width: 6px;
     stroke-opacity: 0.65;
   }
+}
+
+.ml-explorer-chart {
+  overflow: hidden;
+}
+
+.ml-explorer-chart-content-wrapper {
+  height: 215px;
+}
+
+.ml-explorer-chart-axis-emphasis {
+  font-weight: bold;
 }

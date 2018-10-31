@@ -1,7 +1,7 @@
-<div class="vis-editor-agg-form-row" ng-controller="agg.type.params.byName.precision.controller">
+<div class="visEditorAgg__formRow--flex" ng-controller="agg.type.params.byName.precision.controller">
   <div ng-if="!agg.params.autoPrecision" class="form-group">
     <label for="visEditorMapPrecision{{agg.id}}">Precision</label>
-    <div class="vis-editor-agg-form-row">
+    <div class="visEditorAgg__formRow--flex">
       <input
         id="visEditorMapPrecision{{agg.id}}"
         name="precision"
@@ -12,14 +12,14 @@
         min="1"
         max="{{config.get('visualization:tileMap:maxPrecision')}}"
         >
-      <div class="form-group vis-editor-agg-form-value">
+      <div class="visEditorAgg__sliderValue">
         {{agg.params.precision}}
       </div>
     </div>
   </div>
 </div>
 
-<div class="vis-option-item">
+<div>
   <label>
     <input type="checkbox"
     name="autoPrecision"
@@ -28,7 +28,7 @@
   </label>
 </div>
 
-<div class="vis-option-item">
+<div>
   <label>
     <input type="checkbox"
            name="useGeocentroid"
@@ -37,7 +37,7 @@
   </label>
 </div>
 
-<div class="vis-option-item">
+<div>
   <label>
     <input
       type="checkbox"

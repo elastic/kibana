@@ -60,9 +60,9 @@ class MarkdownEditor extends Component {
   render() {
     const { model, visData, dateFormat } = this.props;
     const series = _.get(visData, `${model.id}.series`, []);
-    const variables = convertSeriesToVars(series, model, dateFormat);
+    const variables = convertSeriesToVars(series, model, dateFormat, this.props.getConfig);
     const rows = [];
-    const rawFormatter = tickFormatter('0.[0000]');
+    const rawFormatter = tickFormatter('0.[0000]', null, this.props.getConfig);
 
     const createPrimitiveRow = key => {
       const snippet = `{{ ${key} }}`;

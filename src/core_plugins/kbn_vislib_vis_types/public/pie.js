@@ -21,16 +21,15 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import pieTemplate from './editors/pie.html';
-import image from './images/icon-donut.svg';
 
-export default function HistogramVisType(Private) {
+export default function HistogramVisType(Private, i18n) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'pie',
-    title: 'Pie',
-    image,
-    description: 'Compare parts of a whole',
+    title: i18n('kbnVislibVisTypes.pie.pieTitle', { defaultMessage: 'Pie' }),
+    icon: 'visPie',
+    description: i18n('kbnVislibVisTypes.pie.pieDescription', { defaultMessage: 'Compare parts of a whole' }),
     category: CATEGORY.BASIC,
     visConfig: {
       defaults: {
@@ -68,7 +67,7 @@ export default function HistogramVisType(Private) {
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Slice Size',
+          title: i18n('kbnVislibVisTypes.pie.metricTitle', { defaultMessage: 'Slice Size' }),
           min: 1,
           max: 1,
           aggFilter: ['sum', 'count', 'cardinality', 'top_hits'],
@@ -80,7 +79,7 @@ export default function HistogramVisType(Private) {
           group: 'buckets',
           name: 'segment',
           icon: 'fa fa-scissors',
-          title: 'Split Slices',
+          title: i18n('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split Slices' }),
           min: 0,
           max: Infinity,
           aggFilter: ['!geohash_grid', '!filter']
@@ -89,7 +88,7 @@ export default function HistogramVisType(Private) {
           group: 'buckets',
           name: 'split',
           icon: 'fa fa-th',
-          title: 'Split Chart',
+          title: i18n('kbnVislibVisTypes.pie.splitTitle', { defaultMessage: 'Split Chart' }),
           mustBeFirst: true,
           min: 0,
           max: 1,
@@ -98,5 +97,6 @@ export default function HistogramVisType(Private) {
       ])
     },
     hierarchicalData: true,
+    responseHandler: 'vislib_slices',
   });
 }

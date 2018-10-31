@@ -10,6 +10,7 @@ import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
+import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
 import moment from 'moment';
 import { uniq } from 'lodash';
 
@@ -98,7 +99,7 @@ export function jobsProvider(callWithRequest) {
       const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length);
       const {
         earliest: earliestTimestampMs,
-        latest: latestTimestampMs } = earliestAndLatestTimeStamps(job.data_counts);
+        latest: latestTimestampMs } = earliestAndLatestTimestamps(job.data_counts);
 
       const tempJob = {
         id: job.job_id,
@@ -112,6 +113,7 @@ export function jobsProvider(callWithRequest) {
         datafeedState: (hasDatafeed && job.datafeed_config.state) ? job.datafeed_config.state : '',
         latestTimestampMs,
         earliestTimestampMs,
+        isSingleMetricViewerJob: isTimeSeriesViewJob(job),
         nodeName: (job.node) ? job.node.name : undefined,
       };
       if (jobIds.find(j => (j === tempJob.id))) {
@@ -239,7 +241,7 @@ export function jobsProvider(callWithRequest) {
     return jobs;
   }
 
-  function earliestAndLatestTimeStamps(dataCounts) {
+  function earliestAndLatestTimestamps(dataCounts) {
     const obj = {
       earliest: undefined,
       latest: undefined,

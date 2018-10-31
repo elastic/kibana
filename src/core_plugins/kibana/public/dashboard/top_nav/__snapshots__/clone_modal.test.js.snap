@@ -5,6 +5,7 @@ exports[`renders DashboardCloneModal 1`] = `
   <EuiModal
     className="dshCloneModal"
     data-test-subj="dashboardCloneModal"
+    maxWidth={true}
     onClose={[Function]}
   >
     <EuiModalHeader>

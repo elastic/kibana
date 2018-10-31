@@ -24,6 +24,7 @@ import * as vega from 'vega-lib';
 import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { i18n }  from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { buildQueryFilter } from 'ui/filter_manager/lib';
 
@@ -82,7 +83,7 @@ export class VegaBaseView {
 
     try {
       this._$parentEl.empty()
-        .addClass('vega-main')
+        .addClass(`vgaVis`)
         .css('flex-direction', this._parser.containerDir);
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
@@ -95,10 +96,11 @@ export class VegaBaseView {
         return;
       }
 
-      this._$container = $('<div class="vega-view-container">')
+      this._$container = $('<div class="vgaVis__view">')
+        // Force a height here because css is not loaded in mocha test
+        .css('height', '100%')
         .appendTo(this._$parentEl);
-      this._$controls = $('<div class="vega-controls-container">')
-        .css('flex-direction', this._parser.controlsDir)
+      this._$controls = $(`<div class="vgaVis__controls vgaVis__controls--${this._parser.controlsDir}">`)
         .appendTo(this._$parentEl);
 
       this._addDestroyHandler(() => {
@@ -144,7 +146,13 @@ export class VegaBaseView {
         // because user can only supply pure JSON data structure.
         uri = uri.url;
       } else if (!this._vegaConfig.enableExternalUrls) {
-        throw new Error('External URLs are not enabled. Add   vega.enableExternalUrls: true   to kibana.yml');
+        throw new Error(i18n.translate('vega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
+          defaultMessage: 'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
+          values: {
+            enableExternalUrls: 'vega.enableExternalUrls: true',
+            kibanaConfigFileName: 'kibana.yml',
+          },
+        }));
       }
       return originalSanitize(uri, options);
     };
@@ -165,11 +173,11 @@ export class VegaBaseView {
 
   _addMessage(type, text) {
     if (!this._$messages) {
-      this._$messages = $(`<ul class="vega-messages">`).appendTo(this._$parentEl);
+      this._$messages = $(`<ul class="vgaVis__messages">`).appendTo(this._$parentEl);
     }
     this._$messages.append(
-      $(`<li class="vega-message-${type}">`).append(
-        $(`<pre>`).text(text)
+      $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
+        $(`<pre class="vgaVis__messageCode">`).text(text)
       )
     );
   }
@@ -232,7 +240,10 @@ export class VegaBaseView {
       const handlerFunc = vegaFunctions[funcName];
       if (!handlerFunc || !this[handlerFunc]) {
         // in case functions don't match the list above
-        throw new Error(`${funcName}() is not defined for this graph`);
+        throw new Error(i18n.translate('vega.vegaParser.baseView.functionIsNotDefinedForGraphErrorMessage', {
+          defaultMessage: '{funcName} is not defined for this graph',
+          values: { funcName: `${funcName}()` },
+        }));
       }
       await this[handlerFunc](...args);
     } catch (err) {
@@ -307,8 +318,13 @@ export class VegaBaseView {
       const startDate = dateMath.parse(start);
       const endDate = dateMath.parse(end);
       if (!startDate || !endDate || !startDate.isValid() || !endDate.isValid()) {
-        throw new Error(`Error setting time filter: both time values must be either relative or absolute dates. ` +
-          `start=${JSON.stringify(start)}, end=${JSON.stringify(end)}`);
+        throw new Error(i18n.translate('vega.vegaParser.baseView.timeValuesTypeErrorMessage', {
+          defaultMessage: 'Error setting time filter: both time values must be either relative or absolute dates. {start}, {end}',
+          values: {
+            start: `start=${JSON.stringify(start)}`,
+            end: `end=${JSON.stringify(end)}`,
+          },
+        }));
       }
       reverse = startDate.isAfter(endDate);
       if (isValidAbsStart || isValidAbsEnd) {

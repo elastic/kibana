@@ -41,7 +41,7 @@ const uiSettings = chrome.getUiSettingsClient();
 setDefaultTimezone(uiSettings.get('dateFormat:tz'));
 setStartDayOfWeek(uiSettings.get('dateFormat:dow'));
 
-uiSettings.subscribe(({ key, newValue }) => {
+uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
   if (key === 'dateFormat:tz') {
     setDefaultTimezone(newValue);
   } else if (key === 'dateFormat:dow') {
