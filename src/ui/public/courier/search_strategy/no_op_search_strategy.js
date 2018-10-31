@@ -27,6 +27,7 @@ export const noOpSearchStrategy = {
       status: '418', // "I'm a teapot" error
       title: 'No search strategy registered',
       message: `Couldn't find a search strategy for the search request`,
+      type: 'NO_OP_SEARCH_STRATEGY',
       path: '',
     });
 

@@ -97,7 +97,8 @@ export class VisualizeDataLoader {
     } catch (e) {
       params.searchSource.cancelQueued();
       this.vis.requestError = e;
-      this.vis.showRequestError = e.type && e.type === 'UNSUPPORTED_QUERY';
+      this.vis.showRequestError =
+        e.type && ['NO_OP_SEARCH_STRATEGY', 'UNSUPPORTED_QUERY'].includes(e.type);
       if (isTermSizeZeroError(e)) {
         return toastNotifications.addDanger(
           `Your visualization ('${this.vis.title}') has an error: it has a term ` +
