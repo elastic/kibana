@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { PluginStatement } from '../plugin_statement';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from '../../../../../../../../test_utils/enzyme_helpers.js';
 
 import { EuiButtonEmpty, EuiBadge } from '@elastic/eui';
 
@@ -49,7 +49,7 @@ describe('PluginStatement component', () => {
     };
   });
 
-  const render = props => shallow(<PluginStatement {...props} />);
+  const render = props => shallowWithIntl(<PluginStatement.WrappedComponent {...props} />);
 
   it('renders input metrics and explicit id fields', () => {
     expect(render(props)).toMatchSnapshot();

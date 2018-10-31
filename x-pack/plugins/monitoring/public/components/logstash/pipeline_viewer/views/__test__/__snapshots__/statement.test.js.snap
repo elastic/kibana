@@ -94,7 +94,7 @@ exports[`Statement component renders a PluginStatement component for plugin mode
   <div
     className="monPipelineViewer__spaceContainer"
   />
-  <PluginStatement
+  <InjectIntl(PluginStatementUi)
     onShowVertexDetails={[MockFunction]}
     statement={
       PluginStatement {

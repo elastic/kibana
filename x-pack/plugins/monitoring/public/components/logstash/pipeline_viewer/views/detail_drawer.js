@@ -112,7 +112,7 @@ function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
       <EuiTableRow key="events_in">
         <EuiTableRowCell>
           <FormattedMessage
-            id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsReceivedRateLabel"
+            id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsReceivedLabel"
             defaultMessage="Events Received"
           />
         </EuiTableRowCell>
