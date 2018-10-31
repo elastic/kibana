@@ -29,18 +29,18 @@ export function initRoutes(server) {
   server.route({
     method: 'get',
     path: `${ROOT}/junk`,
-    handler: async (request, reply) => {
-      reply(ZIPCODES);
+    handler: async () => {
+      return ZIPCODES;
     }
   });
 
   server.route({
     method: 'GET',
     path: `${ROOT}/data/ems`,
-    handler: async (request, reply) => {
+    handler: async (request) => {
 
       if (!request.query.name) {
-        reply(null);
+        return null;
       }
 
       const ems = await getEMSResources();//todo: should do this lazily from emsV2 instance
@@ -52,7 +52,7 @@ export function initRoutes(server) {
       const file = await fetch(layer.url);
       const fileGeoJson = await file.json();
 
-      reply(fileGeoJson);
+      return fileGeoJson;
 
     }
   });
@@ -60,7 +60,7 @@ export function initRoutes(server) {
   server.route({
     method: 'GET',
     path: `${ROOT}/meta`,
-    handler: async (request, reply) => {
+    handler: async (request) => {
 
       let ems;
       try {
@@ -83,7 +83,7 @@ export function initRoutes(server) {
         indexPatterns = [];
       }
 
-      reply({
+      return ({
         data_sources: {
           ems: {
             file: ems.fileLayers,
