@@ -149,7 +149,6 @@ describe('headers', () => {
       const executeJob = executeJobFactory(mockServer);
       await executeJob({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }, cancellationToken);
 
-      //expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:custompngLogo');
       expect(generatePngObservable).toBeCalledWith('http://localhost:5601/sbp/app/kibana#/something', undefined, expect.objectContaining({
         headers: expect.anything(),
         conditions: expect.objectContaining({
@@ -169,7 +168,6 @@ describe('headers', () => {
       const executeJob = executeJobFactory(mockServer);
       await executeJob({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }, cancellationToken);
 
-      //expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:custompngLogo');
       expect(generatePngObservable).toBeCalledWith('http://localhost:443/sbp/app/kibana#/something', undefined, expect.objectContaining({
         headers: expect.anything(),
         conditions: expect.objectContaining({
@@ -187,7 +185,6 @@ describe('headers', () => {
       const executeJob = executeJobFactory(mockServer);
       await executeJob({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }, cancellationToken);
 
-      //expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:custompngLogo');
       expect(generatePngObservable).toBeCalledWith('http://localhost:5601/sbp/app/kibana#/something', undefined, expect.objectContaining({
         headers: expect.anything(),
         conditions: expect.objectContaining({
@@ -205,7 +202,6 @@ describe('headers', () => {
       const executeJob = executeJobFactory(mockServer);
       await executeJob({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }, cancellationToken);
 
-      //expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:custompngLogo');
       expect(generatePngObservable).toBeCalledWith('http://localhost:5601/sbp/app/kibana#/something', undefined, expect.objectContaining({
         headers: expect.anything(),
         conditions: expect.objectContaining({
@@ -225,7 +221,6 @@ describe('headers', () => {
       const executeJob = executeJobFactory(mockServer);
       await executeJob({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }, cancellationToken);
 
-      //expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:custompngLogo');
       expect(generatePngObservable).toBeCalledWith('https://localhost:5601/sbp/app/kibana#/something', undefined, expect.objectContaining({
         headers: expect.anything(),
         conditions: expect.objectContaining({
@@ -243,7 +238,6 @@ describe('headers', () => {
       const executeJob = executeJobFactory(mockServer);
       await executeJob({ relativeUrl: '/app/kibana#/something', headers: encryptedHeaders }, cancellationToken);
 
-      //expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:custompngLogo');
       expect(generatePngObservable).toBeCalledWith('http://localhost:5601/sbp/app/kibana#/something', undefined, expect.objectContaining({
         headers: expect.anything(),
         conditions: expect.objectContaining({
@@ -264,7 +258,6 @@ test(`passes browserTimezone to generatePng`, async () => {
   const browserTimezone = 'UTC';
   await executeJob({ relativeUrl: '/app/kibana#/something', browserTimezone, headers: encryptedHeaders }, cancellationToken);
 
-  //expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:custompngLogo');
   expect(generatePngObservable).toBeCalledWith('http://localhost:5601/sbp/app/kibana#/something', browserTimezone, expect.anything(), undefined);
 });
 
