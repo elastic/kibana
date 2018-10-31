@@ -5,12 +5,14 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { find } from 'lodash';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmOverview } from '../../../components/apm/overview';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes.when('/apm', {
   template,
@@ -37,15 +39,24 @@ uiRoutes.when('/apm', {
         $injector
       });
 
+      function onBrush({ xaxis }) {
+        timefilter.setTime({
+          from: moment(xaxis.from),
+          to: moment(xaxis.to),
+          mode: 'absolute',
+        });
+      }
+
       $scope.$watch(() => this.data, data => {
-        this.renderReact(data);
+        this.renderReact(data, onBrush);
       });
     }
 
-    renderReact(data) {
+    renderReact(data, onBrush) {
       const component = (
         <ApmOverview
           {...data}
+          onBrush={onBrush}
         />
       );
       super.renderReact(component);
