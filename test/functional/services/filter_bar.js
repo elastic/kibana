@@ -19,10 +19,11 @@
 
 import Keys from 'leadfoot/keys';
 
-export function FilterBarProvider({ getService }) {
+export function FilterBarProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const PageObjects = getPageObjects(['common']);
 
   async function typeIntoReactSelect(testSubj, value) {
     const select = await testSubjects.find(testSubj);
@@ -44,18 +45,24 @@ export function FilterBarProvider({ getService }) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} removeFilter-${key}`);
+      // these methods should each wait until their action is complet e but we don't know what to wait for
+      await PageObjects.common.sleep(2001);
     }
 
     async toggleFilterEnabled(key) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
+      // these methods should each wait until their action is complet e but we don't know what to wait for
+      await PageObjects.common.sleep(2002);
     }
 
     async toggleFilterPinned(key) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} pinFilter-${key}`);
+      // these methods should each wait until their action is complet e but we don't know what to wait for
+      await PageObjects.common.sleep(2003);
     }
 
     /**

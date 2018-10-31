@@ -17,9 +17,11 @@
  * under the License.
  */
 
-export function DocTableProvider({ getService }) {
+export function DocTableProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const PageObjects = getPageObjects(['common']);
+
 
   class DocTable {
     async getTable() {
@@ -75,6 +77,8 @@ export function DocTableProvider({ getService }) {
     async toggleRowExpanded(row) {
       const rowExpandToggle = await this.getRowExpandToggle(row);
       await rowExpandToggle.click();
+      // Not sure how to determine this rowExpandToggle completed but the next step often fails without this sleep
+      await PageObjects.common.sleep(2222);
 
       const detailsRow = await row.findByXpath('./following-sibling::*[@data-test-subj="docTableDetailsRow"]');
       return await retry.try(async () => {
