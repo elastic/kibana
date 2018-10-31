@@ -8,21 +8,32 @@ import compose from 'lodash/fp/compose';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
+import { InfraNodeType } from 'x-pack/plugins/infra/common/graphql/types';
 import { LoadingPage } from '../../components/loading_page';
 import { replaceLogFilterInQueryString } from '../../containers/logs/with_log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
 import { WithSource } from '../../containers/with_source';
 import { getTimeFromLocation } from './query_params';
 
-export const RedirectToPodLogs = ({ match, location }: RouteComponentProps<{ podId: string }>) => (
+type RedirectToNodeLogsProps = RouteComponentProps<{
+  nodeName: string;
+  nodeType: InfraNodeType;
+}>;
+
+export const RedirectToNodeLogs = ({
+  match: {
+    params: { nodeName, nodeType },
+  },
+  location,
+}: RedirectToNodeLogsProps) => (
   <WithSource>
     {({ configuredFields }) => {
       if (!configuredFields) {
-        return <LoadingPage message="Loading pod logs" />;
+        return <LoadingPage message={`Loading ${nodeType} logs`} />;
       }
 
       const searchString = compose(
-        replaceLogFilterInQueryString(`${configuredFields.pod}: ${match.params.podId}`),
+        replaceLogFilterInQueryString(`${configuredFields[nodeType]}: ${nodeName}`),
         replaceLogPositionInQueryString(getTimeFromLocation(location))
       )('');
 
@@ -31,5 +42,12 @@ export const RedirectToPodLogs = ({ match, location }: RouteComponentProps<{ pod
   </WithSource>
 );
 
-export const getPodLogsUrl = ({ podId, time }: { podId: string; time?: number }) =>
-  ['#/link-to/pod-logs/', podId, ...(time ? [`?time=${time}`] : [])].join('');
+export const getNodeLogsUrl = ({
+  nodeName,
+  nodeType,
+  time,
+}: {
+  nodeName: string;
+  nodeType: InfraNodeType;
+  time?: number;
+}) => [`#/link-to/${nodeType}-logs/`, nodeName, ...(time ? [`?time=${time}`] : [])].join('');
