@@ -60,10 +60,10 @@ describe('User routes', () => {
       expect(changePasswordRoute.config).to.have.property('pre');
       expect(changePasswordRoute.config.pre).to.have.length(1);
       expect(changePasswordRoute.config.validate).to.eql({
-        payload: {
+        payload: Joi.object({
           password: Joi.string(),
           newPassword: Joi.string().required()
-        }
+        })
       });
     });
 
