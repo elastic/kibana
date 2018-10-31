@@ -189,11 +189,11 @@ class ObjectsTableUI extends Component {
         this.setState({
           isSearching: false,
         });
-        toastNotifications.addDanger({
-          title: `Unable find saved objects`,
-          text: `${error}`,
-        });
       }
+      toastNotifications.addDanger({
+        title: `Unable find saved objects`,
+        text: `${error}`,
+      });
       return;
     }
 
