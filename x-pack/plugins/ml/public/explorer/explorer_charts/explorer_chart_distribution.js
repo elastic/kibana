@@ -239,11 +239,10 @@ export class ExplorerChartDistribution extends React.Component {
       timeBuckets.setInterval('auto');
       const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
-      const emphasisStart = Math.max(config.selectedEarliest, config.plotEarliest);
-      const emphasisEnd = Math.min(config.selectedLatest, config.plotLatest);
+      const tickValuesStart = Math.max(config.selectedEarliest, config.plotEarliest);
       // +1 ms to account for the ms that was substracted for query aggregations.
-      const interval = emphasisEnd - emphasisStart + 1;
-      const tickValues = getTickValues(emphasisStart, interval, config.plotEarliest, config.plotLatest);
+      const interval = config.selectedLatest - config.selectedEarliest + 1;
+      const tickValues = getTickValues(tickValuesStart, interval, config.plotEarliest, config.plotLatest);
 
       const xAxis = d3.svg.axis().scale(lineChartXScale)
         .orient('bottom')
@@ -283,7 +282,7 @@ export class ExplorerChartDistribution extends React.Component {
         .call(yAxis);
 
       if (tooManyBuckets === false) {
-        removeLabelOverlap(gAxis, emphasisStart, interval, vizWidth);
+        removeLabelOverlap(gAxis, tickValuesStart, interval, vizWidth);
       }
     }
 
