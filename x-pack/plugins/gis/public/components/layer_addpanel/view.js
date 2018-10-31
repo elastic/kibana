@@ -210,7 +210,7 @@ export class AddLayerPanel extends React.Component {
             <EuiSpacer size="xs" />
             <EuiText size="s" color="subdued">
               <p className="euiTextColor--subdued">
-                Region map boundary layers configured your config/kibana.yml file.
+                Region map boundary layers configured in your config/kibana.yml file.
               </p>
             </EuiText>
           </Fragment>

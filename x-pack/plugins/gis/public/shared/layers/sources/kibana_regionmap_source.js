@@ -15,7 +15,7 @@ import {
 export class KibanaRegionmapSource extends VectorSource {
 
   static type = 'REGIONMAP_FILE';
-  static typeDisplayName = 'Custom Region Map';
+  static typeDisplayName = 'Custom region boundaries';
 
   constructor(descriptor, regionList) {
     super(descriptor);
