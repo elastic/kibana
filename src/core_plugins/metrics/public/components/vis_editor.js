@@ -94,8 +94,8 @@ class VisEditor extends Component {
     return fields;
   }
 
-  checkIndexPatternChanges = async () => {
-    if (this.isIndexPatternChanged()) {
+  checkIndexPatternChanges = async (forceFetch) => {
+    if (forceFetch || this.isIndexPatternChanged()) {
       const fields = await this.fetchIndexPatternFields(this.props.vis);
       const visFields = {
         ...this.state.visFields,
@@ -191,7 +191,7 @@ class VisEditor extends Component {
   }
 
   async componentDidMount() {
-    await this.checkIndexPatternChanges();
+    await this.checkIndexPatternChanges(true);
     this.props.renderComplete('mount');
   }
 
