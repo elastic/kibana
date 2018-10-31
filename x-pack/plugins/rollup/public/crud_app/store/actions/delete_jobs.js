@@ -6,7 +6,7 @@
 
 import { toastNotifications } from 'ui/notify';
 
-import { deleteJobs as sendDeleteJobsRequest } from '../../services';
+import { deleteJobs as sendDeleteJobsRequest, createNoticeableDelay } from '../../services';
 import { getDetailPanelJob } from '../selectors';
 
 import {
@@ -24,7 +24,7 @@ export const deleteJobs = (jobIds) => async (dispatch, getState) => {
   });
 
   try {
-    await sendDeleteJobsRequest(jobIds);
+    await createNoticeableDelay(sendDeleteJobsRequest(jobIds));
   } catch (error) {
     dispatch({
       type: UPDATE_JOB_FAILURE,
