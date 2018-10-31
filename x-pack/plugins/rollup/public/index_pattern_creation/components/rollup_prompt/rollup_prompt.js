@@ -17,16 +17,16 @@ export const RollupPrompt = () => (
     title="Beta feature"
   >
     <p>
-      Kibana support for rollup index patterns is in beta. You may encounter issues using
-      them in saved searches, visualizations, and dashboards. They are not supported
-      in advanced features such as Visual Builder, Timelion, and Machine Learning.
+      Kibana&apos;s support for rollup index patterns is in beta. You might encounter
+      issues using these patterns in saved searches, visualizations, and dashboards.
+      They are not supported in advanced features, such as Visual Builder, Timelion,
+      and Machine Learning.
     </p>
     <p>
-      Rollup index patterns can match against one rollup index and zero or more
-      regular indices. They will have limited metrics, fields, intervals and aggregations
-      available based on the rollup index job configuration. The rollup index is
-      limited to those that have one job configuration, or multiple jobs
-      with compatible configurations.
+      You can match a rollup index pattern against one rollup index and zero or
+      more regular indices. A rollup index pattern has limited metrics, fields,
+      intervals, and aggregations. A rollup index is limited to indices that have
+      one job configuration, or multiple jobs with compatible configurations.
     </p>
   </EuiCallOut>
 );

@@ -19,7 +19,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import { euiColorAccent } from '@elastic/eui/dist/eui_theme_k6_light.json';
 
 import {
   EuiBadge,
@@ -61,8 +61,8 @@ export class CreateButton extends Component {
     });
   }
 
-  renderBetaIcon = () => {
-    const color = rgbToHex(euiVars.euiColorAccent);
+  renderBetaBadge = () => {
+    const color = rgbToHex(euiColorAccent);
     return (
       <EuiBadge color={color}>Beta</EuiBadge>
     );
@@ -123,10 +123,10 @@ export class CreateButton extends Component {
                   <EuiDescriptionList style={{ whiteSpace: 'nowrap' }}>
                     <EuiDescriptionListTitle>
                       {option.text}
-                      { option.beta ? (
+                      { option.isBeta ? (
                         <Fragment>
                           {' '}
-                          {this.renderBetaIcon()}
+                          {this.renderBetaBadge()}
                         </Fragment>
                       ) : null }
                     </EuiDescriptionListTitle>
