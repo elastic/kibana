@@ -19,11 +19,12 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { flattenDeep } from 'lodash';
+import { debounce, flattenDeep } from 'lodash';
 import { Header } from './components/header';
 import { Flyout } from './components/flyout';
 import { Relationships } from './components/relationships';
 import { Table } from './components/table';
+import { toastNotifications } from 'ui/notify';
 
 import {
   EuiSpacer,
@@ -50,7 +51,6 @@ import {
   getRelationships,
   getSavedObjectLabel,
 } from '../../lib';
-import { ensureMinimumTime } from '../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 export const INCLUDED_TYPES = [
@@ -102,9 +102,15 @@ class ObjectsTableUI extends Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
+    this._isMounted = true;
     this.fetchSavedObjects();
     this.fetchCounts();
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    this.debouncedFetch.cancel();
   }
 
   fetchCounts = async () => {
@@ -151,51 +157,66 @@ class ObjectsTableUI extends Component {
     }));
   };
 
-  fetchSavedObjects = async () => {
+  fetchSavedObjects = () => {
+    this.setState({
+      isSearching: true,
+    }, this.debouncedFetch.bind(null, this.state.activeQuery.text));
+  }
+
+  debouncedFetch = debounce(async (activeQueryText) => {
     const { savedObjectsClient } = this.props;
     const { activeQuery, page, perPage } = this.state;
-
-    this.setState({ isSearching: true });
-
     const { queryText, visibleTypes } = parseQuery(activeQuery);
+    const findOptions = {
+      search: queryText ? `${queryText}*` : undefined,
+      perPage,
+      page: page + 1,
+      fields: ['title', 'id'],
+      searchFields: ['title'],
+      type: INCLUDED_TYPES.filter(
+        type => !visibleTypes || visibleTypes.includes(type)
+      ),
+    };
+    if (findOptions.type.length > 1) {
+      findOptions.sortField = 'type';
+    }
 
-    let savedObjects = [];
-    let filteredItemCount = 0;
-
-    const type = INCLUDED_TYPES.filter(
-      type => !visibleTypes || visibleTypes.includes(type)
-    );
-
-    // TODO: is there a good way to stop existing calls if the input changes?
-    await ensureMinimumTime(
-      (async () => {
-        const filteredSavedObjects = await savedObjectsClient.find({
-          search: queryText ? `${queryText}*` : undefined,
-          perPage,
-          page: page + 1,
-          sortField: 'type',
-          fields: ['title', 'id'],
-          searchFields: ['title'],
-          type,
+    let resp;
+    try {
+      resp = await savedObjectsClient.find(findOptions);
+    } catch (error) {
+      if (this._isMounted) {
+        this.setState({
+          isSearching: false,
         });
+        toastNotifications.addDanger({
+          title: `Unable find saved objects`,
+          text: `${error}`,
+        });
+      }
+      return;
+    }
 
-        savedObjects = filteredSavedObjects.savedObjects.map(savedObject => ({
-          title: savedObject.attributes.title,
-          type: savedObject.type,
-          id: savedObject.id,
-          icon: getSavedObjectIcon(savedObject.type),
-        }));
+    if (!this._isMounted) {
+      return;
+    }
 
-        filteredItemCount = filteredSavedObjects.total;
-      })()
-    );
+    // ignore results for old requests that are returned out of order
+    if (activeQueryText !== activeQuery.text) {
+      return;
+    }
 
     this.setState({
-      savedObjects,
-      filteredItemCount,
+      savedObjects: resp.savedObjects.map(savedObject => ({
+        title: savedObject.attributes.title,
+        type: savedObject.type,
+        id: savedObject.id,
+        icon: getSavedObjectIcon(savedObject.type),
+      })),
+      filteredItemCount: resp.total,
       isSearching: false,
     });
-  };
+  }, 300);
 
   refreshData = async () => {
     await Promise.all([this.fetchSavedObjects(), this.fetchCounts()]);
