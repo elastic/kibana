@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`sessionCookie Fails if no relativeURL is passed in 1`] = `"Unable to generate report. Url is not defined."`;
