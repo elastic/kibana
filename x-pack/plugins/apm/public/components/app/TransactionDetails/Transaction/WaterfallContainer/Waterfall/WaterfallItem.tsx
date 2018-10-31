@@ -84,7 +84,7 @@ interface ITimelineMargins {
 
 interface IWaterfallItemProps {
   timelineMargins: ITimelineMargins;
-  totalDuration: number;
+  totalDuration?: number;
   item: IWaterfallItem;
   color: string;
   isSelected: boolean;
@@ -111,8 +111,12 @@ export function WaterfallItem({
   isSelected,
   onClick
 }: IWaterfallItemProps) {
+  if (!totalDuration) {
+    return null;
+  }
+
   const width = (item.duration / totalDuration) * 100;
-  const left = (item.offset / totalDuration) * 100;
+  const left = ((item.offset + item.skew) / totalDuration) * 100;
   const Label = item.docType === 'transaction' ? TransactionLabel : SpanLabel;
 
   return (

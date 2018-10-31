@@ -23,6 +23,7 @@ import {
   PropertiesTable
 } from '../../../shared/PropertiesTable';
 import { WaterfallContainer } from './WaterfallContainer';
+import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 const TableContainer = styled.div`
   padding: ${px(units.plus)} ${px(units.plus)} 0;
@@ -44,11 +45,15 @@ interface TransactionPropertiesTableProps {
   location: any;
   transaction: Transaction;
   urlParams: IUrlParams;
+  waterfall: IWaterfall;
 }
 
-export const TransactionPropertiesTable: React.SFC<
-  TransactionPropertiesTableProps
-> = ({ location, transaction, urlParams }) => {
+export function TransactionPropertiesTable({
+  location,
+  transaction,
+  urlParams,
+  waterfall
+}: TransactionPropertiesTableProps) {
   const tabs = getTabs(transaction);
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
   const agentName = transaction.context.service.agent.name;
@@ -84,6 +89,7 @@ export const TransactionPropertiesTable: React.SFC<
           transaction={transaction}
           location={location}
           urlParams={urlParams}
+          waterfall={waterfall}
         />
       )}
 
@@ -98,4 +104,4 @@ export const TransactionPropertiesTable: React.SFC<
       )}
     </div>
   );
-};
+}
