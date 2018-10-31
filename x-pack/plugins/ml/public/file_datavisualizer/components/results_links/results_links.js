@@ -83,7 +83,7 @@ export class ResultsLinks extends Component {
       to,
     } = this.state;
 
-    const _g = `&_g=(time:(from:'${from}',mode:quick,to:'${to}'))`;
+    const _g = (this.props.timeFieldName !== undefined) ? `&_g=(time:(from:'${from}',mode:quick,to:'${to}'))` : '';
 
     return (
       <EuiFlexGroup gutterSize="l">
