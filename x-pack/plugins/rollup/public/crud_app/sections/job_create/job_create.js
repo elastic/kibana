@@ -56,22 +56,22 @@ import {
 } from './steps_config';
 
 const stepIdToTitleMap = {
-  [STEP_LOGISTICS]: i18n.translate('xpack.rollupJobs.create.stepLogisticsTitle', {
+  [STEP_LOGISTICS]: i18n.translate('xpack.rollupJobs.create.steps.stepLogisticsTitle', {
     defaultMessage: 'Logistics',
   }),
-  [STEP_DATE_HISTOGRAM]: i18n.translate('xpack.rollupJobs.create.stepDateHistogramTitle', {
+  [STEP_DATE_HISTOGRAM]: i18n.translate('xpack.rollupJobs.create.steps.stepDateHistogramTitle', {
     defaultMessage: 'Date histogram',
   }),
-  [STEP_TERMS]: i18n.translate('xpack.rollupJobs.create.stepTermsTitle', {
+  [STEP_TERMS]: i18n.translate('xpack.rollupJobs.create.steps.stepTermsTitle', {
     defaultMessage: 'Terms',
   }),
-  [STEP_HISTOGRAM]: i18n.translate('xpack.rollupJobs.create.stepHistogramTitle', {
+  [STEP_HISTOGRAM]: i18n.translate('xpack.rollupJobs.create.steps.stepHistogramTitle', {
     defaultMessage: 'Histogram',
   }),
-  [STEP_METRICS]: i18n.translate('xpack.rollupJobs.create.stepMetricsTitle', {
+  [STEP_METRICS]: i18n.translate('xpack.rollupJobs.create.steps.stepMetricsTitle', {
     defaultMessage: 'Metrics',
   }),
-  [STEP_REVIEW]: i18n.translate('xpack.rollupJobs.create.stepReviewTitle', {
+  [STEP_REVIEW]: i18n.translate('xpack.rollupJobs.create.steps.stepReviewTitle', {
     defaultMessage: 'Review and save',
   }),
 };
@@ -416,7 +416,7 @@ export class JobCreateUi extends Component {
     const breadcrumbs = [{
       text: (
         <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.jobs"
+          id="xpack.rollupJobs.create.breadcrumbs.jobsText"
           defaultMessage="Rollup jobs"
         />
       ),
@@ -424,7 +424,7 @@ export class JobCreateUi extends Component {
     }, {
       text: (
         <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.create"
+          id="xpack.rollupJobs.create.breadcrumbs.createText"
           defaultMessage="Create"
         />
       ),

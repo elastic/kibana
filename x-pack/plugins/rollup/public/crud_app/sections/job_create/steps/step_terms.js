@@ -96,11 +96,9 @@ export class StepTermsUi extends Component {
               <p>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepTermsDescription"
-                  defaultMessage={`
-                    Select the fields you want to bucket using terms aggregations. This can be
-                    costly for high-cardinality fields such as IP addresses,
-                    if the time bucket is sparse.
-                  `}
+                  defaultMessage="Select the fields you want to bucket using terms aggregations.
+                    This can be costly for high-cardinality fields such as IP addresses,
+                    if the time bucket is sparse."
                 />
               </p>
             </EuiText>
