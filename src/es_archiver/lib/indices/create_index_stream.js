@@ -20,7 +20,7 @@
 import { Transform } from 'stream';
 
 import { get, once } from 'lodash';
-import { deleteKibanaIndices } from './kibana_index';
+import { deleteKibanaIndices, hasDefaultSpace, createDefaultSpace } from './kibana_index';
 
 import { deleteIndex } from './delete_index';
 
@@ -46,14 +46,22 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
+        const needsDefaultSpace = index.startsWith('.kibana') && await hasDefaultSpace({ index, client });
+
         if (index.startsWith('.kibana')) {
           await clearKibanaIndices();
         }
+
         await client.indices.create({
           method: 'PUT',
           index,
           body: { settings, mappings, aliases },
         });
+
+        if (needsDefaultSpace) {
+          await createDefaultSpace({ index, client });
+        }
+
         stats.createdIndex(index, { settings });
       } catch (err) {
         if (get(err, 'body.error.type') !== 'resource_already_exists_exception' || attemptNumber >= 3) {

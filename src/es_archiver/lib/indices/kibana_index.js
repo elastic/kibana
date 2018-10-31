@@ -102,3 +102,28 @@ async function loadElasticVersion() {
   const packageJson = await readFile(path.join(__dirname, '../../../../package.json'));
   return JSON.parse(packageJson).version;
 }
+
+export async function hasDefaultSpace({ index, client }) {
+  return await client.exists({
+    index,
+    type: 'doc',
+    id: 'space:default'
+  });
+}
+
+export async function createDefaultSpace({ index, client }) {
+  await client.index({
+    index,
+    type: 'doc',
+    id: 'space:default',
+    body: {
+      type: 'space',
+      updated_at: new Date().toISOString(),
+      space: {
+        name: 'Default Space',
+        description: 'This is the default space',
+        _reserved: true
+      }
+    }
+  });
+}
