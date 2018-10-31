@@ -109,7 +109,7 @@ export class VectorStyle {
   getIcon= (() => {
     const defaultStroke = 'grey';
     const strokeWidth = '1px';
-    return isPointsOnly => {
+    return (isPointsOnly = false) => {
       const { fillColor, lineColor } = this._descriptor.properties;
       const stroke = _.get(lineColor, 'options.color');
       const fill = _.get(fillColor, 'options.color');
