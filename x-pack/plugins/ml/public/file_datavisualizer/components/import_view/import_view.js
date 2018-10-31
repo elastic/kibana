@@ -170,7 +170,11 @@ export class ImportView extends Component {
                   if (success && createIndexPattern) {
                     const indexPatternName = (indexPattern === '') ? index : indexPattern;
 
-                    const indexPatternResp = await createKibanaIndexPattern(indexPatternName, this.props.indexPatterns);
+                    const indexPatternResp = await createKibanaIndexPattern(
+                      indexPatternName,
+                      this.props.indexPatterns,
+                      this.props.kibanaConfig,
+                    );
                     success = indexPatternResp.success;
                     this.setState({
                       indexPatternCreatedStatus: indexPatternResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
@@ -427,7 +431,7 @@ export class ImportView extends Component {
   }
 }
 
-async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFieldName = DEFAULT_TIME_FIELD) {
+async function createKibanaIndexPattern(indexPatternName, indexPatterns, kibanaConfig, timeFieldName = DEFAULT_TIME_FIELD) {
   try {
     const emptyPattern = await indexPatterns.get();
 
@@ -438,6 +442,13 @@ async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFie
     });
 
     const id = await emptyPattern.create();
+
+    // check if there's a default index pattern, if not,
+    // set the newly created one as the default index pattern.
+    if (!kibanaConfig.get('defaultIndex')) {
+      await kibanaConfig.set('defaultIndex', id);
+    }
+
     return {
       success: true,
       id,
@@ -503,5 +514,3 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
 
   return '';
 }
-
-
