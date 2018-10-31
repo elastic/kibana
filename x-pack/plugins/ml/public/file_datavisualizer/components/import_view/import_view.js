@@ -57,6 +57,7 @@ const DEFAULT_STATE = {
   indexPatternNames: [],
   indexNameError: '',
   indexPatternNameError: '',
+  timeFieldName: undefined,
 };
 
 export class ImportView extends Component {
@@ -87,6 +88,7 @@ export class ImportView extends Component {
   async import() {
     const { fileContents, results } = this.props;
     const { format } = results;
+    let { timeFieldName } = this.state;
     const {
       index,
       indexPattern,
@@ -108,14 +110,29 @@ export class ImportView extends Component {
         this.props.hideBottomBar();
         setTimeout(async () => {
           let success = false;
+          const createPipeline = (pipelineString !== '');
 
           let indexCreationSettings = {};
           try {
+            const settings = JSON.parse(indexSettingsString);
+            const mappings = JSON.parse(mappingsString);
             indexCreationSettings = {
-              settings: JSON.parse(indexSettingsString),
-              mappings: JSON.parse(mappingsString),
-              pipeline: JSON.parse(pipelineString),
+              settings,
+              mappings,
             };
+            if (createPipeline) {
+              indexCreationSettings.pipeline = JSON.parse(pipelineString);
+            }
+
+            // if an @timestamp field has been added to the
+            // mappings, use this field as the time field.
+            // This relies on the field being populated by
+            // the ingest pipeline on ingest
+            if (mappings[DEFAULT_TIME_FIELD] !== undefined) {
+              timeFieldName = DEFAULT_TIME_FIELD;
+              this.setState({ timeFieldName });
+            }
+
             success = true;
           } catch (error) {
             success = false;
@@ -146,15 +163,19 @@ export class ImportView extends Component {
                   indexCreatedStatus: indexCreated ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
                 });
 
-                const pipelineCreated = (initializeImportResp.pipelineId !== undefined);
-                if (indexCreated) {
-                  this.setState({
-                    ingestPipelineCreatedStatus: pipelineCreated  ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                    ingestPipelineId: pipelineCreated ? initializeImportResp.pipelineId : '',
-                  });
+                if (createPipeline) {
+                  const pipelineCreated = (initializeImportResp.pipelineId !== undefined);
+                  if (indexCreated) {
+                    this.setState({
+                      ingestPipelineCreatedStatus: pipelineCreated  ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                      ingestPipelineId: pipelineCreated ? initializeImportResp.pipelineId : '',
+                    });
+                  }
+                  success = (indexCreated && pipelineCreated);
+                } else {
+                  success = indexCreated;
                 }
 
-                success = (indexCreated && pipelineCreated);
 
                 if (success) {
                   const importId = initializeImportResp.id;
@@ -167,21 +188,23 @@ export class ImportView extends Component {
                     docCount: importResp.docCount,
                   });
 
-                  if (success && createIndexPattern) {
-                    const indexPatternName = (indexPattern === '') ? index : indexPattern;
-
-                    const indexPatternResp = await createKibanaIndexPattern(
-                      indexPatternName,
-                      this.props.indexPatterns,
-                      this.props.kibanaConfig,
-                    );
-                    success = indexPatternResp.success;
-                    this.setState({
-                      indexPatternCreatedStatus: indexPatternResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                      indexPatternId: indexPatternResp.id,
-                    });
-                    if (indexPatternResp.success === false) {
-                      errors.push(indexPatternResp.error);
+                  if (success) {
+                    if (createIndexPattern) {
+                      const indexPatternName = (indexPattern === '') ? index : indexPattern;
+                      const indexPatternResp = await createKibanaIndexPattern(
+                        indexPatternName,
+                        this.props.indexPatterns,
+                        timeFieldName,
+                        this.props.kibanaConfig,
+                      );
+                      success = indexPatternResp.success;
+                      this.setState({
+                        indexPatternCreatedStatus: indexPatternResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                        indexPatternId: indexPatternResp.id,
+                      });
+                      if (indexPatternResp.success === false) {
+                        errors.push(indexPatternResp.error);
+                      }
                     }
                   } else {
                     errors.push(importResp.error);
@@ -301,7 +324,10 @@ export class ImportView extends Component {
       pipelineString,
       indexNameError,
       indexPatternNameError,
+      timeFieldName,
     } = this.state;
+
+    const createPipeline = (pipelineString !== '');
 
     const statuses = {
       reading,
@@ -312,6 +338,7 @@ export class ImportView extends Component {
       uploadProgress,
       uploadStatus,
       createIndexPattern,
+      createPipeline,
     };
 
     const disableImport = (
@@ -399,14 +426,16 @@ export class ImportView extends Component {
                     ingestPipelineId={ingestPipelineId}
                     docCount={docCount}
                     importFailures={importFailures}
+                    createIndexPattern={createIndexPattern}
+                    createPipeline={createPipeline}
                   />
 
                   <EuiSpacer size="l" />
 
                   <ResultsLinks
-                    index={(index)}
-                    indexPatternId={(indexPatternId)}
-                    timeFieldName={DEFAULT_TIME_FIELD}
+                    index={index}
+                    indexPatternId={indexPatternId}
+                    timeFieldName={timeFieldName}
                   />
                 </React.Fragment>
               }
@@ -433,7 +462,7 @@ export class ImportView extends Component {
   }
 }
 
-async function createKibanaIndexPattern(indexPatternName, indexPatterns, kibanaConfig, timeFieldName = DEFAULT_TIME_FIELD) {
+async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFieldName, kibanaConfig) {
   try {
     const emptyPattern = await indexPatterns.get();
 
@@ -467,13 +496,16 @@ async function createKibanaIndexPattern(indexPatternName, indexPatterns, kibanaC
 function getDefaultState(state, results) {
   const indexSettingsString = (state.indexSettingsString === '') ? '{}' : state.indexSettingsString;
   const mappingsString = (state.mappingsString === '') ? JSON.stringify(results.mappings, null, 2) : state.mappingsString;
-  const pipelineString = (state.pipelineString === '') ? JSON.stringify(results.ingest_pipeline, null, 2) : state.pipelineString;
+  const pipelineString = (state.pipelineString === '' && results.ingest_pipeline !== undefined) ?
+    JSON.stringify(results.ingest_pipeline, null, 2) : state.pipelineString;
+  const timeFieldName = results.timestamp_field;
 
   return {
     ... DEFAULT_STATE,
     indexSettingsString,
     mappingsString,
     pipelineString,
+    timeFieldName,
   };
 }
 

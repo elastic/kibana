@@ -36,7 +36,11 @@ export class ResultsLinks extends Component {
   }
 
   componentDidMount() {
-    this.updateTimeValues();
+    // if this data has a time field,
+    // find the start and end times
+    if (this.props.timeFieldName !== undefined) {
+      this.updateTimeValues();
+    }
   }
 
   componentWillUnmount() {
@@ -71,6 +75,7 @@ export class ResultsLinks extends Component {
   render() {
     const {
       indexPatternId,
+      timeFieldName,
     } = this.props;
 
     const {
@@ -91,7 +96,7 @@ export class ResultsLinks extends Component {
           />
         </EuiFlexItem>
 
-        {(isFullLicense() === true) &&
+        {(isFullLicense() === true && timeFieldName !== undefined) &&
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
