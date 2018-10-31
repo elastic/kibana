@@ -86,7 +86,14 @@ export class ImportView extends Component {
 
   // TODO - sort this function out. it's a mess
   async import() {
-    const { fileContents, results } = this.props;
+    const {
+      fileContents,
+      results,
+      indexPatterns,
+      kibanaConfig,
+      showBottomBar,
+    } = this.props;
+
     const { format } = results;
     let { timeFieldName } = this.state;
     const {
@@ -193,9 +200,9 @@ export class ImportView extends Component {
                       const indexPatternName = (indexPattern === '') ? index : indexPattern;
                       const indexPatternResp = await createKibanaIndexPattern(
                         indexPatternName,
-                        this.props.indexPatterns,
+                        indexPatterns,
                         timeFieldName,
-                        this.props.kibanaConfig,
+                        kibanaConfig,
                       );
                       success = indexPatternResp.success;
                       this.setState({
@@ -216,7 +223,8 @@ export class ImportView extends Component {
             }
           }
 
-          this.props.showBottomBar();
+          showBottomBar();
+
           this.setState({
             importing: false,
             imported: success,
