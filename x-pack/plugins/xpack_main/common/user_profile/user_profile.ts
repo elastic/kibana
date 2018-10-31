@@ -23,11 +23,14 @@ export class UserProfile {
   }
 
   public canReadSavedObject(savedObjectType: string, defaultValue: boolean = true): boolean {
-    return this.hasCapability(`saved_objects/${savedObjectType}/get`, defaultValue);
+    return this.hasCapability(`action:saved_objects/${savedObjectType}/get`, defaultValue);
   }
 
   public canWriteSavedObject(savedObjectType: string, defaultValue: boolean = true): boolean {
-    return this.hasCapability(`saved_objects/${savedObjectType}/create`, defaultValue);
+    return (
+      this.hasCapability(`action:saved_objects/${savedObjectType}/create`, defaultValue) &&
+      this.hasCapability(`action:saved_objects/${savedObjectType}/update`, defaultValue)
+    );
   }
 
   public toJSON() {
