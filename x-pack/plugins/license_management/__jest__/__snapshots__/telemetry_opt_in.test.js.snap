@@ -1,7 +1,52 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
-<TelemetryOptIn>
+<TelemetryOptIn
+  intl={
+    Object {
+      "formatDate": [MockFunction],
+      "formatHTMLMessage": [MockFunction],
+      "formatMessage": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "defaultMessage": "Gold and platinum customers: help support give you better service.",
+              "description": undefined,
+              "id": "xpack.licenseMgmt.telemetryOptIn.customersHelpSupportDescription",
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Send basic feature usage statistics to Elastic periodically. {popover}",
+              "description": undefined,
+              "id": "xpack.licenseMgmt.telemetryOptIn.sendBasicFeatureStatisticsLabel",
+            },
+            Object {
+              "popover": "@__ccc957752b__@ELEMENT-ccc957752b-1@__ccc957752b__@",
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": "Gold and platinum customers: help support give you better service.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Send basic feature usage statistics to Elastic periodically. {popover}",
+          },
+        ],
+      },
+      "formatNumber": [MockFunction],
+      "formatPlural": [MockFunction],
+      "formatRelative": [MockFunction],
+      "formatTime": [MockFunction],
+      "now": [MockFunction],
+      "textComponent": "span",
+    }
+  }
+>
   <EuiText
     grow={true}
   >
@@ -37,72 +82,75 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
     label={
       <span>
         <FormattedMessage
-          defaultMessage="Send basic feature usage statistics to Elastic periodically."
+          defaultMessage="Send basic feature usage statistics to Elastic periodically. {popover}"
           id="xpack.licenseMgmt.telemetryOptIn.sendBasicFeatureStatisticsLabel"
-          values={Object {}}
-        />
-        <EuiPopover
-          anchorPosition="downCenter"
-          button={
-            <EuiLink
-              color="primary"
-              onClick={[Function]}
-              type="button"
-            >
-              <FormattedMessage
-                defaultMessage="Read more"
-                id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
-                values={Object {}}
-              />
-            </EuiLink>
-          }
-          className="eui-AlignBaseline"
-          closePopover={[Function]}
-          hasArrow={true}
-          id="readMorePopover"
-          isOpen={false}
-          ownFocus={true}
-          panelPaddingSize="m"
-        >
-          <EuiText
-            className="licManagement__narrowText"
-            grow={true}
-          >
-            <p>
-              <FormattedMessage
-                defaultMessage="This feature periodically sends basic feature usage statistics. This information will not be shared outside of Elastic. See an {exampleLink} or read our {telemetryPrivacyStatementLink}. You can disable this feature any time."
-                id="xpack.licenseMgmt.telemetryOptIn.featureUsageWarningMessage"
-                values={
-                  Object {
-                    "exampleLink": <EuiLink
-                      color="primary"
-                      onClick={[Function]}
-                      type="button"
-                    >
-                      <FormattedMessage
-                        defaultMessage="example"
-                        id="xpack.licenseMgmt.telemetryOptIn.exampleLinkText"
-                        values={Object {}}
-                      />
-                    </EuiLink>,
-                    "telemetryPrivacyStatementLink": <EuiLink
-                      color="primary"
-                      href="https://www.elastic.co/legal/telemetry-privacy-statement"
-                      target="_blank"
-                      type="button"
-                    >
-                      <FormattedMessage
-                        defaultMessage="telemetry privacy statement"
-                        id="xpack.licenseMgmt.telemetryOptIn.telemetryPrivacyStatementLinkText"
-                        values={Object {}}
-                      />
-                    </EuiLink>,
-                  }
+          values={
+            Object {
+              "popover": <EuiPopover
+                anchorPosition="downCenter"
+                button={
+                  <EuiLink
+                    color="primary"
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Read more"
+                      id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
+                      values={Object {}}
+                    />
+                  </EuiLink>
                 }
-              />
-            </p>
-          </EuiText>
-        </EuiPopover>
+                className="eui-AlignBaseline"
+                closePopover={[Function]}
+                hasArrow={true}
+                id="readMorePopover"
+                isOpen={false}
+                ownFocus={true}
+                panelPaddingSize="m"
+              >
+                <EuiText
+                  className="licManagement__narrowText"
+                  grow={true}
+                >
+                  <p>
+                    <FormattedMessage
+                      defaultMessage="This feature periodically sends basic feature usage statistics. This information will not be shared outside of Elastic. See an {exampleLink} or read our {telemetryPrivacyStatementLink}. You can disable this feature any time."
+                      id="xpack.licenseMgmt.telemetryOptIn.featureUsageWarningMessage"
+                      values={
+                        Object {
+                          "exampleLink": <EuiLink
+                            color="primary"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <FormattedMessage
+                              defaultMessage="example"
+                              id="xpack.licenseMgmt.telemetryOptIn.exampleLinkText"
+                              values={Object {}}
+                            />
+                          </EuiLink>,
+                          "telemetryPrivacyStatementLink": <EuiLink
+                            color="primary"
+                            href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                            target="_blank"
+                            type="button"
+                          >
+                            <FormattedMessage
+                              defaultMessage="telemetry privacy statement"
+                              id="xpack.licenseMgmt.telemetryOptIn.telemetryPrivacyStatementLinkText"
+                              values={Object {}}
+                            />
+                          </EuiLink>,
+                        }
+                      }
+                    />
+                  </p>
+                </EuiText>
+              </EuiPopover>,
+            }
+          }
+        />
       </span>
     }
     onChange={[Function]}
@@ -127,56 +175,15 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
       >
         <span>
           <FormattedMessage
-            defaultMessage="Send basic feature usage statistics to Elastic periodically."
+            defaultMessage="Send basic feature usage statistics to Elastic periodically. {popover}"
             id="xpack.licenseMgmt.telemetryOptIn.sendBasicFeatureStatisticsLabel"
-            values={Object {}}
-          >
-            <span>
-              Send basic feature usage statistics to Elastic periodically.
-            </span>
-          </FormattedMessage>
-          <EuiPopover
-            anchorPosition="downCenter"
-            button={
-              <EuiLink
-                color="primary"
-                onClick={[Function]}
-                type="button"
-              >
-                <FormattedMessage
-                  defaultMessage="Read more"
-                  id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
-                  values={Object {}}
-                />
-              </EuiLink>
-            }
-            className="eui-AlignBaseline"
-            closePopover={[Function]}
-            hasArrow={true}
-            id="readMorePopover"
-            isOpen={false}
-            ownFocus={true}
-            panelPaddingSize="m"
-          >
-            <EuiOutsideClickDetector
-              onOutsideClick={[Function]}
-            >
-              <div
-                className="euiPopover euiPopover--anchorDownCenter eui-AlignBaseline"
-                id="readMorePopover"
-                onClick={[Function]}
-                onKeyDown={[Function]}
-              >
-                <div
-                  className="euiPopover__anchor"
-                >
-                  <EuiLink
-                    color="primary"
-                    onClick={[Function]}
-                    type="button"
-                  >
-                    <button
-                      className="euiLink euiLink--primary"
+            values={
+              Object {
+                "popover": <EuiPopover
+                  anchorPosition="downCenter"
+                  button={
+                    <EuiLink
+                      color="primary"
                       onClick={[Function]}
                       type="button"
                     >
@@ -184,17 +191,63 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                         defaultMessage="Read more"
                         id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
                         values={Object {}}
-                      >
-                        <span>
-                          Read more
-                        </span>
-                      </FormattedMessage>
-                    </button>
-                  </EuiLink>
-                </div>
-              </div>
-            </EuiOutsideClickDetector>
-          </EuiPopover>
+                      />
+                    </EuiLink>
+                  }
+                  className="eui-AlignBaseline"
+                  closePopover={[Function]}
+                  hasArrow={true}
+                  id="readMorePopover"
+                  isOpen={false}
+                  ownFocus={true}
+                  panelPaddingSize="m"
+                >
+                  <EuiText
+                    className="licManagement__narrowText"
+                    grow={true}
+                  >
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="This feature periodically sends basic feature usage statistics. This information will not be shared outside of Elastic. See an {exampleLink} or read our {telemetryPrivacyStatementLink}. You can disable this feature any time."
+                        id="xpack.licenseMgmt.telemetryOptIn.featureUsageWarningMessage"
+                        values={
+                          Object {
+                            "exampleLink": <EuiLink
+                              color="primary"
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <FormattedMessage
+                                defaultMessage="example"
+                                id="xpack.licenseMgmt.telemetryOptIn.exampleLinkText"
+                                values={Object {}}
+                              />
+                            </EuiLink>,
+                            "telemetryPrivacyStatementLink": <EuiLink
+                              color="primary"
+                              href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                              target="_blank"
+                              type="button"
+                            >
+                              <FormattedMessage
+                                defaultMessage="telemetry privacy statement"
+                                id="xpack.licenseMgmt.telemetryOptIn.telemetryPrivacyStatementLinkText"
+                                values={Object {}}
+                              />
+                            </EuiLink>,
+                          }
+                        }
+                      />
+                    </p>
+                  </EuiText>
+                </EuiPopover>,
+              }
+            }
+          >
+            <span>
+              Send basic feature usage statistics to Elastic periodically. {popover}
+            </span>
+          </FormattedMessage>
         </span>
       </label>
     </div>
@@ -202,4 +255,51 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
 </TelemetryOptIn>
 `;
 
-exports[`TelemetryOptIn should not display when telemetry is opted in 1`] = `<TelemetryOptIn />`;
+exports[`TelemetryOptIn should not display when telemetry is opted in 1`] = `
+<TelemetryOptIn
+  intl={
+    Object {
+      "formatDate": [MockFunction],
+      "formatHTMLMessage": [MockFunction],
+      "formatMessage": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "defaultMessage": "Gold and platinum customers: help support give you better service.",
+              "description": undefined,
+              "id": "xpack.licenseMgmt.telemetryOptIn.customersHelpSupportDescription",
+            },
+            Object {},
+          ],
+          Array [
+            Object {
+              "defaultMessage": "Send basic feature usage statistics to Elastic periodically. {popover}",
+              "description": undefined,
+              "id": "xpack.licenseMgmt.telemetryOptIn.sendBasicFeatureStatisticsLabel",
+            },
+            Object {
+              "popover": "@__ccc957752b__@ELEMENT-ccc957752b-1@__ccc957752b__@",
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": "Gold and platinum customers: help support give you better service.",
+          },
+          Object {
+            "isThrow": false,
+            "value": "Send basic feature usage statistics to Elastic periodically. {popover}",
+          },
+        ],
+      },
+      "formatNumber": [MockFunction],
+      "formatPlural": [MockFunction],
+      "formatRelative": [MockFunction],
+      "formatTime": [MockFunction],
+      "now": [MockFunction],
+      "textComponent": "span",
+    }
+  }
+/>
+`;
