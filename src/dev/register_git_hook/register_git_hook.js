@@ -68,7 +68,7 @@ function getKbnPrecommitGitHookScript(rootPath, kbnPrecommitGitHookScriptPath) {
   # Check if we have node js bin in path
   has_node || { echo "Can't found node bin in the PATH. Please update the PATH to proceed"; exit 1; }
   
-  npm run precommit
+  npm run --silent precommit
   
   exit 0`, '\n');
 }
