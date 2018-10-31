@@ -20,6 +20,7 @@
 
 import './app_switcher';
 import './global_nav_link';
+import 'ui/i18n';
 
 import globalNavTemplate from './global_nav.html';
 import './global_nav.less';

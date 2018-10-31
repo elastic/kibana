@@ -41,7 +41,6 @@ export const Header = ({
   isBeta,
 }) => (
   <div>
-    <EuiSpacer size="m"/>
     <EuiTitle>
       <h1>
         <FormattedMessage

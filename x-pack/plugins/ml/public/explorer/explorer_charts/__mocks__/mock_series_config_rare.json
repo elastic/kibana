@@ -1,0 +1,49 @@
+{
+  "jobId": "ffb-rare-url-0921",
+  "detectorIndex": 0,
+  "metricFunction": "count",
+  "timeField": "@timestamp",
+  "interval": "15m",
+  "datafeedConfig": {
+    "datafeed_id": "datafeed-ffb-rare-url-0921",
+    "job_id": "ffb-rare-url-0921",
+    "query_delay": "115433ms",
+    "indices": [
+      "filebeat-6.0.0-2017-nginx-elasticco-anon"
+    ],
+    "types": [],
+    "query": {
+      "match_all": {
+        "boost": 1
+      }
+    },
+    "scroll_size": 1000,
+    "chunking_config": {
+      "mode": "auto"
+    },
+    "state": "stopped"
+  },
+  "functionDescription": "rare",
+  "bucketSpanSeconds": 900,
+  "detectorLabel": "rare by \"nginx.access.url\"",
+  "entityFields": [
+    {
+      "fieldName": "nginx.access.url",
+      "fieldValue": "/?node=4.1.1,5,7",
+      "fieldType": "by"
+    }
+  ],
+  "infoTooltip": {
+    "jobId": "ffb-rare-url-0921",
+    "aggregationInterval": "15m",
+    "chartFunction": "count",
+    "entityFields": [
+      {
+        "fieldName": "nginx.access.url",
+        "fieldValue": "&#x2F;?node=4.1.1,5,7"
+      }
+    ]
+  },
+  "loading": true,
+  "chartData": null
+}
