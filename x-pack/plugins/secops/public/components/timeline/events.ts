@@ -6,7 +6,7 @@
 
 import { Range } from './body/column_headers/range_picker/ranges';
 import { ColumnId } from './body/column_id';
-import { SortDirection } from './body/sort/sort';
+import { SortDirection } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 
 /** Invoked when a user clicks the close button to remove a data provider */

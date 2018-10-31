@@ -6,8 +6,8 @@
 
 import * as React from 'react';
 import { pure } from 'recompose';
+import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
-import { DataProviders } from '../data_providers/data_providers';
 import { OnDataProviderRemoved } from '../events';
 
 interface Props {

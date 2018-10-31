@@ -7,10 +7,10 @@
 import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
+import { Body } from '.';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
-import { Body } from './body';
 import { headers } from './column_headers/headers';
-import { Sort } from './sort/sort';
+import { Sort } from './sort';
 
 describe('ColumnHeaders', () => {
   describe('rendering', () => {

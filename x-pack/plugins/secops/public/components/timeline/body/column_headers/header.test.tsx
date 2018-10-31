@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { Sort } from '../sort/sort';
+import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 import {
   getNewSortDirectionOnClick,

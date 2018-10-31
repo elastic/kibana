@@ -7,8 +7,8 @@
 import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { Sort } from '../sort/sort';
-import { ColumnHeaders } from './column_headers';
+import { ColumnHeaders } from '.';
+import { Sort } from '../sort';
 import { headers } from './headers';
 
 describe('ColumnHeaders', () => {

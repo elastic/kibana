@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { pure } from 'recompose';
-import { SortDirection } from './sort';
+import { SortDirection } from '.';
 
 export type SortDirectionIndicator = '' | '^' | 'v';
 

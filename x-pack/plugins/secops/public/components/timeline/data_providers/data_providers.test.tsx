@@ -7,8 +7,8 @@
 import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
+import { DataProviders } from '.';
 import { DataProvider } from './data_provider';
-import { DataProviders } from './data_providers';
 import {
   getEventCount,
   mockDataProviderNames,

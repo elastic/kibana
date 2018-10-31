@@ -8,7 +8,7 @@ import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import { OnColumnSorted, OnFilterChange } from '../../events';
-import { Sort, SortDirection } from '../sort/sort';
+import { Sort, SortDirection } from '../sort';
 import { SortIndicator } from '../sort/sort_indicator';
 import { ColumnHeader } from './column_header';
 import { Filter } from './filter';

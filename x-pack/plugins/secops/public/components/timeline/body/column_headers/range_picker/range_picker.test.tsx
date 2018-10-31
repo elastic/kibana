@@ -7,7 +7,7 @@
 import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { RangePicker } from './range_picker';
+import { RangePicker } from '.';
 import { Range, Ranges } from './ranges';
 
 describe('RangePicker', () => {

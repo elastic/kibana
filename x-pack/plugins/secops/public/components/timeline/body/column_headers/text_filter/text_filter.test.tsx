@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { DEFAULT_PLACEHOLDER, TextFilter } from './text_filter';
+import { DEFAULT_PLACEHOLDER, TextFilter } from '.';
 
 describe('TextFilter', () => {
   describe('rendering', () => {

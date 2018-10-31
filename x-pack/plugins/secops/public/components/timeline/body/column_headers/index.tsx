@@ -8,10 +8,10 @@ import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import { OnColumnSorted, OnFilterChange, OnRangeSelected } from '../../events';
-import { Sort } from '../sort/sort';
+import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 import { Header } from './header';
-import { RangePicker } from './range_picker/range_picker';
+import { RangePicker } from './range_picker';
 
 interface Props {
   columnHeaders: ColumnHeader[];

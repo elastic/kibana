@@ -8,9 +8,9 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import { DataProvider } from '../data_providers/data_provider';
 import { OnColumnSorted, OnDataProviderRemoved, OnFilterChange, OnRangeSelected } from '../events';
+import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
-import { ColumnHeaders } from './column_headers/column_headers';
-import { Sort } from './sort/sort';
+import { Sort } from './sort';
 
 interface Props {
   columnHeaders: ColumnHeader[];

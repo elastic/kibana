@@ -9,7 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import { OnFilterChange } from '../../events';
 import { ColumnHeader } from './column_header';
-import { TextFilter } from './text_filter/text_filter';
+import { TextFilter } from './text_filter';
 
 interface Props {
   header: ColumnHeader;

@@ -8,8 +8,9 @@ import * as React from 'react';
 import { pure } from 'recompose';
 
 import { ColumnarPage } from '../../components/page';
+import { Timeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
-import { Sort } from '../../components/timeline/body/sort/sort';
+import { Sort } from '../../components/timeline/body/sort';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
 import {
   OnColumnSorted,
@@ -17,7 +18,6 @@ import {
   OnFilterChange,
   OnRangeSelected,
 } from '../../components/timeline/events';
-import { Timeline } from '../../components/timeline/timeline';
 
 const onColumnSorted: OnColumnSorted = sorted => {
   alert(`column sorted: ${JSON.stringify(sorted)}`);

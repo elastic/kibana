@@ -6,9 +6,9 @@
 
 import * as React from 'react';
 import { pure } from 'recompose';
-import { Body } from './body/body';
+import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
-import { Sort } from './body/sort/sort';
+import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import { OnColumnSorted, OnDataProviderRemoved, OnFilterChange, OnRangeSelected } from './events';
 import { TimelineHeader } from './header/timeline_header';
