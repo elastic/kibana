@@ -44,7 +44,8 @@ export function ViewMLJob({
   };
 
   return (
-    <KibanaLink
+    <UnconnectedKibanaLink
+      location={location}
       pathname={pathname}
       hash={hash}
       query={query}
@@ -164,13 +165,19 @@ export interface KibanaLinkArgs {
   className?: string;
 }
 
-export function KibanaLinkComponent({
+/**
+ * NOTE: Use this component directly if you have to use a link that is
+ * going to be rendered outside of React, e.g. in the Kibana global toast loader.
+ *
+ * You must remember to pass in location in that case.
+ */
+export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   location,
   pathname,
   hash,
   query = {},
   ...props
-}: KibanaLinkArgs) {
+}) => {
   // Preserve current _g and _a
   const currentQuery = toQuery(location.search);
   const nextQuery = {
@@ -186,14 +193,14 @@ export function KibanaLinkComponent({
   });
 
   return <EuiLink {...props} href={href} />;
-}
+};
 
 const withLocation = connect(
   ({ location }: { location: any }) => ({ location }),
   {}
 );
 export const RelativeLink = withLocation(RelativeLinkComponent);
-export const KibanaLink = withLocation(KibanaLinkComponent);
+export const KibanaLink = withLocation(UnconnectedKibanaLink);
 
 // This is downright horrible 😭 💔
 // Angular decodes encoded url tokens like "%2F" to "/" which causes the route to change.
