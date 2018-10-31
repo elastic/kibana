@@ -101,7 +101,7 @@ const jobRowFactory = (scope, kbnUrl) => {
 };
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringMlListing', kbnUrl => {
+uiModule.directive('monitoringMlListing', (kbnUrl, i18n) => {
   return {
     restrict: 'E',
     scope: {
@@ -117,12 +117,23 @@ uiModule.directive('monitoringMlListing', kbnUrl => {
       const getNoDataMessage = filterText => {
         if (filterText) {
           return (
-            `There are no Machine Learning Jobs that match the filter [${filterText.trim()}] or the time range.
-Try changing the filter or time range.`
+            i18n('xpack.monitoring.elasticsearch.mlJobListing.noFilteredJobsDescription', {
+              // eslint-disable-next-line max-len
+              defaultMessage: 'There are no Machine Learning Jobs that match the filter [{filterText}] or the time range. Try changing the filter or time range.',
+              values: {
+                filterText: filterText.trim()
+              }
+            })
           );
         }
-        return 'There are no Machine Learning Jobs that match your query. Try changing the time range selection.';
+        return i18n('xpack.monitoring.elasticsearch.mlJobListing.noJobsDescription', {
+          defaultMessage: 'There are no Machine Learning Jobs that match your query. Try changing the time range selection.'
+        });
       };
+
+      const filterJobsPlaceholder = i18n('xpack.monitoring.elasticsearch.mlJobListing.filterJobsPlaceholder', {
+        defaultMessage: 'Filter Alerts…'
+      });
 
       scope.$watch('jobs', (jobs = []) => {
         const mlTable = (
@@ -134,7 +145,7 @@ Try changing the filter or time range.`
             sortKey={scope.sortKey}
             sortOrder={scope.sortOrder}
             onNewState={scope.onNewState}
-            placeholder="Filter Jobs..."
+            placeholder={filterJobsPlaceholder}
             filterFields={filterFields}
             columns={columns}
             rowComponent={jobRowFactory(scope, kbnUrl)}
