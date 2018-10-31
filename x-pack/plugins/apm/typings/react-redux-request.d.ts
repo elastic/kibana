@@ -9,14 +9,14 @@
 declare module 'react-redux-request' {
   import React from 'react';
 
-  export interface RRRRenderArgs<T, P = any[]> {
+  export interface RRRRenderResponse<T, P = any[]> {
     status: 'SUCCESS' | 'LOADING' | 'FAILURE';
     data: T;
     args: P;
   }
 
   export type RRRRender<T, P = any[]> = (
-    args: RRRRenderArgs<T, P>
+    res: RRRRenderResponse<T, P>
   ) => JSX.Element | null;
 
   export interface RequestProps<T, P> {
