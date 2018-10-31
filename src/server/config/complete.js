@@ -28,12 +28,12 @@ const getFlattenedKeys = object => (
 );
 
 async function getUnusedConfigKeys(plugins, disabledPluginSpecs, rawSettings, configValues) {
-  // transform deprecated core settings
-  const settings = transformDeprecations(rawSettings);
-
-  // transform deprecated plugin settings
-  const transforms = await Promise.all(plugins.map(({ spec }) => getTransform(spec)));
-  transforms.forEach(transform => Object.assign(settings, transform(settings)));
+  // transform deprecated settings
+  const transforms = [
+    transformDeprecations,
+    ...await Promise.all(plugins.map(({ spec }) => getTransform(spec)))
+  ];
+  const settings = transforms.reduce((a, c) => c(a), rawSettings);
 
   // remove config values from disabled plugins
   for (const spec of disabledPluginSpecs) {
@@ -65,7 +65,6 @@ export default async function (kbnServer, server, config) {
     kbnServer.settings,
     config.get()
   );
-
 
   if (!unusedKeys.length) {
     return;
