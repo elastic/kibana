@@ -42,8 +42,6 @@ export const IndexPattern = props => {
 
   const htmlId = htmlIdGenerator();
 
-  console.log('fields', fields);
-
   const model = { ...defaults, ...props.model };
   return (
     <div className={props.className}>
