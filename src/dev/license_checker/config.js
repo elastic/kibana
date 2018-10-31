@@ -47,6 +47,7 @@ export const LICENSE_WHITELIST = [
   'CC-BY',
   'CC-BY-3.0',
   'CC-BY-4.0',
+  'Eclipse Distribution License - v 1.0',
   'ISC',
   'MIT OR GPL-2.0',
   'MIT',
@@ -63,7 +64,8 @@ export const LICENSE_WHITELIST = [
 export const LICENSE_OVERRIDES = {
   'scriptjs@2.5.8': ['MIT'], // license header appended in the dist
   'react-lib-adler32@1.0.1': ['BSD'], // adler32 extracted from react source
-
+  'jsts@1.1.2': ['Eclipse Distribution License - v 1.0'], //cf. https://github.com/bjornharrtell/jsts
+  '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], //license in readme https://github.com/tmcw/jsonlint
   // TODO can be removed once we upgrade past elasticsearch-browser@14.0.0
   'elasticsearch-browser@13.0.1': ['Apache-2.0'],
 
