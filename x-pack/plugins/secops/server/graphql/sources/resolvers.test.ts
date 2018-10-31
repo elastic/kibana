@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { GraphQLResolveInfo } from 'graphql';
+import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
 import { Sources, SourcesAdapter } from '../../lib/sources';
 import { createSourcesResolvers, SourcesResolversDeps } from './resolvers';
 import { mockSourceData } from './source.mock';
@@ -20,18 +21,26 @@ const mockSourcesAdapter: SourcesAdapter = {
 const mockLibs: SourcesResolversDeps = {
   sources: new Sources(mockSourcesAdapter),
 };
-const context: any = {
-  req: {
+
+const req: FrameworkRequest = {
+  [internalFrameworkRequest]: {
     params: {},
     query: {},
     payload: {
       operationName: 'test',
     },
   },
+  params: {},
+  query: {},
+  payload: {
+    operationName: 'test',
+  },
 };
 
+const context = { req };
+
 describe('Test Source Resolvers', () => {
-  test(`Make sure that getCongiguration have been called`, async () => {
+  test(`Make sure that getConfiguration have been called`, async () => {
     const data = await createSourcesResolvers(mockLibs).Query.source(
       null,
       { id: 'default' },
