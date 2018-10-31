@@ -180,7 +180,7 @@ export async function loadSpans({
 }
 
 export async function loadTrace({ traceId, start, end }: IUrlParams) {
-  const result: WaterfallResponse = await callApi(
+  const hits: WaterfallResponse = await callApi(
     {
       pathname: `/api/apm/traces/${traceId}`,
       query: {
@@ -193,8 +193,7 @@ export async function loadTrace({ traceId, start, end }: IUrlParams) {
     }
   );
 
-  result.hits = result.hits.map(addVersion);
-  return result;
+  return hits.map(addVersion);
 }
 
 export async function loadTransaction({
