@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import * as React from 'react';
 import { FacetText } from './facet_text';
 
@@ -13,9 +13,14 @@ describe('FacetText', () => {
     test('it renders the contents of the text prop', () => {
       const text = '123';
 
-      const wrapper = mount(<FacetText text={text} />);
+      const wrapper = shallow(<FacetText text={text} />);
 
-      expect(wrapper.find('[data-test-subj="facetText"]').text()).toEqual(text);
+      expect(
+        wrapper
+          .dive()
+          .find('[data-test-subj="facetText"]')
+          .text()
+      ).toEqual(text);
     });
   });
 });
