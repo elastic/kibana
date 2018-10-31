@@ -57,7 +57,7 @@ export class Server {
 
     await this.legacy.service.start(httpServerInfo);
 
-    if (this.env.cliArgs.open && httpServerInfo && !loaded) {
+    if (this.env.cliArgs.open && httpServerInfo) {
       const basePath = httpConfig.rewriteBasePath ? httpConfig.basePath : '';
       const uri = `${httpServerInfo.server.info.uri}${basePath}`;
       this.log.info(`Opening ${uri} in browser`);
