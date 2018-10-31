@@ -10,8 +10,8 @@
   209:23  error  Elements with the 'option' interactive role must be focusable                                                   jsx-a11y/interactive-supports-focus
   218:25  error  Elements with the ARIA role "option" must have the following attributes defined: aria-selected                  jsx-a11y/role-has-required-aria-props
 */
-/* eslint-disable */
-
+/* eslint-disable jsx-a11y/interactive-supports-focus */
+/* eslint-disable jsx-a11y/role-has-required-aria-props */
 
 import React from 'react';
 import PropTypes from 'prop-types';

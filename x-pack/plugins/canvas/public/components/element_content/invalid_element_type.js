@@ -6,7 +6,7 @@
 /* Disabling eslint because of this jsx-a11y error(https://www.npmjs.com/package/eslint-plugin-jsx-a11y):
 11:3  error  Non-interactive elements should not be assigned mouse or keyboard event listeners  jsx-a11y/no-noninteractive-element-interactions
 */
-/* eslint-disable */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
 import React from 'react';
 import PropTypes from 'prop-types';
