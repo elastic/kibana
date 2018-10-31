@@ -11,7 +11,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-export class ESGeohashGridSourceDetails extends React.Component {
+export class ESSourceDetails extends React.Component {
 
   constructor() {
     super();
@@ -39,9 +39,9 @@ export class ESGeohashGridSourceDetails extends React.Component {
     return (
       <EuiText color="subdued" size="s">
         <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Type: </strong><span>geohash_grid</span><br/>
+          <strong className="gisLayerDetails__label">Type: </strong><span>{this.props.sourceType}</span><br/>
           <strong className="gisLayerDetails__label">Index pattern: </strong><span>{this.state.indexPatternTitle}</span><br/>
-          <strong className="gisLayerDetails__label">Point field: </strong><span>{this.props.geoField}</span><br/>
+          <strong className="gisLayerDetails__label">{this.props.geoFieldType}</strong><span>{this.props.geoField}</span><br/>
         </p>
       </EuiText>
     );

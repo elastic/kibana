@@ -28,7 +28,7 @@ import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
-import { ESGeohashGridSourceDetails } from './es_geohashgrid_sourcedetails';
+import { ESSourceDetails } from './es_geohashgrid_sourcedetails';
 
 const aggSchemas = new Schemas([
   {
@@ -77,7 +77,14 @@ export class ESGeohashGridSource extends ASource {
   }
 
   renderDetails() {
-    return (<ESGeohashGridSourceDetails source={this} geoField={this._descriptor.geoField} />);
+    return (
+      <ESSourceDetails
+        source={this}
+        geoField={this._descriptor.geoField}
+        geoFieldType="Point field"
+        sourceType={ESGeohashGridSource.typeDisplayName}
+      />
+    );
   }
 
   async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerId, layerName }) {

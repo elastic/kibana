@@ -19,7 +19,7 @@ import { emsServiceSettings } from '../../../kibana_services';
 export class EMSFileSource extends VectorSource {
 
   static type = 'EMS_FILE';
-  static typeDisplayName = 'EMS';
+  static typeDisplayName = 'Elastic Maps Service region boundaries';
 
   static createDescriptor(name) {
     return {

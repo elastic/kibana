@@ -11,9 +11,7 @@ import React, { Fragment } from 'react';
 import { VectorSource } from './source';
 import {
   EuiFormRow,
-  // EuiFieldNumber,
-  EuiSwitch,
-  EuiText,
+  EuiSwitch
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../components/single_field_select';
@@ -26,6 +24,7 @@ import {
 import { hitsToGeoJson, createExtentFilter } from '../../../elasticsearch_geo_utils';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
+import { ESSourceDetails } from './es_geohashgrid_sourcedetails';
 
 const DEFAULT_LIMIT = 2048;
 export class ESSearchSource extends VectorSource {
@@ -62,15 +61,12 @@ export class ESSearchSource extends VectorSource {
 
   renderDetails() {
     return (
-      <EuiText color="subdued" size="s">
-        <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Type: </strong><span>Elasticsearch document</span><br/>
-          <strong className="gisLayerDetails__label">Index pattern: </strong><span>{this._descriptor.indexPatternId}</span><br/>
-          <strong className="gisLayerDetails__label">Geo field: </strong><span>{this._descriptor.geoField}</span><br/>
-          {/*//todo : skip for now to reduce form-length for demo*/}
-          {/*<strong className="gisLayerDetails__label">Limit: </strong><span>{this._descriptor.limit}</span>*/}
-        </p>
-      </EuiText>
+      <ESSourceDetails
+        source={this}
+        geoField={this._descriptor.geoField}
+        geoFieldType="Shape field"
+        sourceType={ESSearchSource.typeDisplayName}
+      />
     );
   }
 
