@@ -36,9 +36,11 @@ import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY, VALUES_KEY } from '../constants';
 import { createFailError } from '../../run';
 
 /**
- * Find all substrings of "{{ any text }}" pattern
+ * Find all substrings of "{{ any text }}" pattern allowing '{' and '}' chars in single quote strings
+ *
+ * Example: `{{ ::'message.id' | i18n: { defaultMessage: 'Message with {{curlyBraces}}' } }}`
  */
-const ANGULAR_EXPRESSION_REGEX = /\{\{+([\s\S]*?)\}\}+/g;
+const ANGULAR_EXPRESSION_REGEX = /{{([^{}]|({([^']|('([^']|(\\'))*'))*?}))*}}+/g;
 
 const I18N_FILTER_MARKER = '| i18n: ';
 
@@ -113,7 +115,12 @@ function parseIdExpression(expression) {
   const stringNode = [...traverseNodes(ast.program.directives)].find(node =>
     isDirectiveLiteral(node)
   );
-  return stringNode ? formatJSString(stringNode.value) : null;
+
+  if (!stringNode) {
+    throw createFailError(`Message id should be a string literal, but got: \n${expression}`);
+  }
+
+  return formatJSString(stringNode.value);
 }
 
 function trimCurlyBraces(string) {
@@ -148,7 +155,40 @@ function trimOneTimeBindingOperator(string) {
   return string;
 }
 
+/**
+ * Remove interpolation expressions from angular and throw on `| i18n:` substring.
+ *
+ * Correct usage: `<p aria-label="{{ ::'namespace.id' | i18n: { defaultMessage: 'Message' } }}"></p>`.
+ *
+ * Incorrect usage: `ng-options="mode as ('metricVis.colorModes.' + mode | i18n: { defaultMessage: mode }) for mode in collections.metricColorMode"`
+ *
+ * @param {string} string html content
+ */
+function validateI18nFilterUsage(string) {
+  const stringWithoutExpressions = string.replace(ANGULAR_EXPRESSION_REGEX, '');
+  const i18nMarkerPosition = stringWithoutExpressions.indexOf(I18N_FILTER_MARKER);
+
+  if (i18nMarkerPosition === -1) {
+    return;
+  }
+
+  const linesCount = (stringWithoutExpressions.slice(0, i18nMarkerPosition).match(/\n/g) || [])
+    .length;
+
+  const errorWithContext = createParserErrorMessage(string, {
+    loc: {
+      line: linesCount + 1,
+      column: 0,
+    },
+    message: 'I18n filter can be used only in interpolation expressions',
+  });
+
+  throw createFailError(errorWithContext);
+}
+
 function* getFilterMessages(htmlContent) {
+  validateI18nFilterUsage(htmlContent);
+
   const expressions = (htmlContent.match(ANGULAR_EXPRESSION_REGEX) || [])
     .filter(expression => expression.includes(I18N_FILTER_MARKER))
     .map(trimCurlyBraces);

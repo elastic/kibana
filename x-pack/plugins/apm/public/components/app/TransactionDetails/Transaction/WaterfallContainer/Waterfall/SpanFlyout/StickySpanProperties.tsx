@@ -12,7 +12,6 @@ import { first } from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
 // @ts-ignore
 import { asMillis } from '../../../../../../../utils/formatters';
-// @ts-ignore
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
 function getSpanLabel(type: string) {
@@ -32,10 +31,14 @@ function getPrimaryType(type: string) {
 
 interface Props {
   span: Span;
-  totalDuration: number;
+  totalDuration?: number;
 }
 
 export function StickySpanProperties({ span, totalDuration }: Props) {
+  if (!totalDuration) {
+    return null;
+  }
+
   const spanName = span.span.name;
   const spanDuration = span.span.duration.us;
   const relativeDuration = spanDuration / totalDuration;
@@ -54,18 +57,18 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
       label: 'Type',
       val: spanTypeLabel,
       truncated: true,
-      widht: '16.6%'
+      widht: '50%'
     },
     {
       fieldName: 'span.duration.us',
       label: 'Duration',
       val: asMillis(spanDuration),
-      width: '16.6%'
+      width: '50%'
     },
     {
       label: '% of transaction',
       val: numeral(relativeDuration).format('0.00%'),
-      width: '16.6%'
+      width: '50%'
     }
   ];
 
