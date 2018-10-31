@@ -18,12 +18,13 @@
  */
 
 import chalk from 'chalk';
-import { lstat, stat, symlink, unlink, writeFile } from 'fs';
+import { chmod, lstat, stat, symlink, unlink, writeFile } from 'fs';
 import { trim } from 'lodash';
 import { resolve } from 'path';
 import { promisify } from 'util';
 import { REPO_ROOT } from '../constants';
 
+const chmodAsync = promisify(chmod);
 const lstatAsync = promisify(lstat);
 const statAsync = promisify(stat);
 const symlinkAsync = promisify(symlink);
@@ -108,8 +109,13 @@ async function writeGitHook(kbnGitHookScriptPath, gitHookScriptPath, kbnHookScri
     await unlinkAsync(kbnGitHookScriptPath);
   } catch (e) { /* no-op */ }
 
-  await writeFileAsync(kbnGitHookScriptPath, kbnHookScript);
+  await writeExecutableKbnGitHookScript(kbnGitHookScriptPath, kbnHookScript);
   await writeGitHookSymlink(kbnGitHookScriptPath, gitHookScriptPath);
+}
+
+async function writeExecutableKbnGitHookScript(kbnGitHookScriptPath, kbnHookScript) {
+  await writeFileAsync(kbnGitHookScriptPath, kbnHookScript);
+  await chmodAsync(kbnGitHookScriptPath, 0o755);
 }
 
 async function writeGitHookSymlink(kbnGitHookScriptPath, gitHookScriptPath) {
