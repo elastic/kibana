@@ -64,6 +64,23 @@ interface ActionMenuState {
   readonly isOpen: boolean;
 }
 
+export const DiscoverTransactionLink: React.SFC<ActionMenuProps> = ({
+  transaction,
+  children
+}) => {
+  return (
+    <KibanaLink
+      pathname="/app/kibana"
+      hash="/discover"
+      query={getDiscoverQuery(
+        transaction.transaction.id,
+        transaction.version === 'v2' ? transaction.trace.id : undefined
+      )}
+      children={children}
+    />
+  );
+};
+
 export class ActionMenu extends React.Component<
   ActionMenuProps,
   ActionMenuState
@@ -114,16 +131,9 @@ export class ActionMenu extends React.Component<
 
     const items = [
       <EuiContextMenuItem icon="discoverApp" key="discover-transaction">
-        <KibanaLink
-          pathname="/app/kibana"
-          hash="/discover"
-          query={getDiscoverQuery(
-            transaction.transaction.id,
-            transaction.version === 'v2' ? transaction.trace.id : undefined
-          )}
-        >
+        <DiscoverTransactionLink transaction={transaction}>
           View sample document
-        </KibanaLink>
+        </DiscoverTransactionLink>
       </EuiContextMenuItem>,
       ...this.getInfraActions(transaction)
     ];
