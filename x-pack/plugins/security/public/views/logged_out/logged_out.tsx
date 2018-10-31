@@ -20,6 +20,6 @@ chrome
   .setRootController('logout', ($scope: any) => {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById('reactLoggedOutRoot');
-      render(<LoggedOutPage />, domNode);
+      render(<LoggedOutPage addBasePath={chrome.addBasePath} />, domNode);
     });
   });

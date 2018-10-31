@@ -8,7 +8,11 @@ import { EuiButton, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 
-export class LoggedOutPage extends Component<{}, {}> {
+interface Props {
+  addBasePath: (path: string) => string;
+}
+
+export class LoggedOutPage extends Component<Props, {}> {
   public render() {
     return (
       <I18nProvider>
@@ -31,7 +35,7 @@ export class LoggedOutPage extends Component<{}, {}> {
             </div>
           </header>
           <div className="loggedOut__content eui-textCenter">
-            <EuiButton href="/login">
+            <EuiButton href={this.props.addBasePath('/login')}>
               <FormattedMessage id="kbn.loggedOut.login" defaultMessage="Login" />
             </EuiButton>
           </div>
