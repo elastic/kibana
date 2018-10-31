@@ -68,7 +68,7 @@ export const TransactionPropertiesTable: React.SFC<
                   })
                 });
               }}
-              selected={currentTab === key}
+              isSelected={currentTab === key}
               key={key}
             >
               {capitalize(key)}
