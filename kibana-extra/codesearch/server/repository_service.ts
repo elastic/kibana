@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import del from 'del';
 import fs from 'fs';
 import Git from 'nodegit';
-import rimraf from 'rimraf';
 
 import { RepositoryUtils } from '../common/repository_utils';
 import {
@@ -31,85 +31,92 @@ export class RepositoryService {
       const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, repo.uri);
       if (fs.existsSync(localPath)) {
         this.log.info(`Repository exist in local path: ${localPath}. Do update instead of clone.`);
-        // Do update instead of clone if the local repo exists.
-        const updateRes = await this.update(repo.uri);
-        return {
-          uri: repo.uri,
-          repo: {
-            ...repo,
-            defaultBranch: updateRes.branch,
-            revision: updateRes.revision,
-          },
-        };
-      } else {
         try {
-          const gitRepo = await Git.Clone.clone(repo.url, localPath, {
-            fetchOpts: {
-              callbacks: {
-                transferProgress: {
-                  throttle: 50, // Make the progress update less frequent.
-                  callback: (stats: any) => {
-                    const progress =
-                      (100 * (stats.receivedObjects() + stats.indexedObjects())) /
-                      (stats.totalObjects() * 2);
-                    const cloneProgress = {
-                      isCloned: false,
-                      receivedObjects: stats.receivedObjects(),
-                      indexedObjects: stats.indexedObjects(),
-                      totalObjects: stats.totalObjects(),
-                      localObjects: stats.localObjects(),
-                      totalDeltas: stats.totalDeltas(),
-                      indexedDeltas: stats.indexedDeltas(),
-                      receivedBytes: stats.receivedBytes(),
-                    };
-                    if (handler) {
-                      handler(progress, cloneProgress);
-                    }
-                  },
-                },
-              },
-            },
-          });
-          const headCommit = await gitRepo.getHeadCommit();
-          const headRevision = headCommit.sha();
-          const currentBranch = await gitRepo.getCurrentBranch();
-          const currentBranchName = currentBranch.shorthand();
-          this.log.info(
-            `Clone repository from ${
-              repo.url
-            } to ${localPath} done with head revision ${headRevision} and default branch ${currentBranchName}`
-          );
+          // Do update instead of clone if the local repo exists.
+          const updateRes = await this.update(repo.uri);
           return {
             uri: repo.uri,
             repo: {
               ...repo,
-              defaultBranch: currentBranchName,
-              revision: headRevision,
+              defaultBranch: updateRes.branch,
+              revision: updateRes.revision,
             },
           };
         } catch (error) {
-          const msg = `Clone repository from ${repo.url} to ${localPath} error: ${error}`;
-          this.log.error(msg);
-          throw new Error(msg);
+          // If failed to update the current git repo living in the disk, clean up the local git repo and
+          // move on with the clone.
+          await this.remove(repo.uri);
         }
+      }
+
+      // Go head with the actual clone.
+      try {
+        const gitRepo = await Git.Clone.clone(repo.url, localPath, {
+          fetchOpts: {
+            callbacks: {
+              transferProgress: {
+                throttle: 50, // Make the progress update less frequent.
+                callback: (stats: any) => {
+                  const progress =
+                    (100 * (stats.receivedObjects() + stats.indexedObjects())) /
+                    (stats.totalObjects() * 2);
+                  const cloneProgress = {
+                    isCloned: false,
+                    receivedObjects: stats.receivedObjects(),
+                    indexedObjects: stats.indexedObjects(),
+                    totalObjects: stats.totalObjects(),
+                    localObjects: stats.localObjects(),
+                    totalDeltas: stats.totalDeltas(),
+                    indexedDeltas: stats.indexedDeltas(),
+                    receivedBytes: stats.receivedBytes(),
+                  };
+                  if (handler) {
+                    handler(progress, cloneProgress);
+                  }
+                },
+              },
+            },
+          },
+        });
+        const headCommit = await gitRepo.getHeadCommit();
+        const headRevision = headCommit.sha();
+        const currentBranch = await gitRepo.getCurrentBranch();
+        const currentBranchName = currentBranch.shorthand();
+        this.log.info(
+          `Clone repository from ${
+            repo.url
+          } to ${localPath} done with head revision ${headRevision} and default branch ${currentBranchName}`
+        );
+        return {
+          uri: repo.uri,
+          repo: {
+            ...repo,
+            defaultBranch: currentBranchName,
+            revision: headRevision,
+          },
+        };
+      } catch (error) {
+        const msg = `Clone repository from ${repo.url} to ${localPath} error: ${error}`;
+        this.log.error(msg);
+        throw new Error(msg);
       }
     }
   }
 
   public async remove(uri: string): Promise<DeleteWorkerResult> {
     const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, uri);
-    // For now, just `rm -rf`
-    rimraf(localPath, (error: Error) => {
-      if (error) {
-        this.log.error(`Remove ${localPath} error: ${error}.`);
-        throw error;
-      }
+    try {
+      // For now, just `rm -rf`
+      await del([localPath]);
       this.log.info(`Remove ${localPath} done.`);
-    });
-    return {
-      uri,
-      res: true,
-    };
+      return {
+        uri,
+        res: true,
+      };
+    } catch (error) {
+      this.log.error(`Remove ${localPath} error: ${error}.`);
+      throw error;
+    }
   }
 
   public async update(uri: string): Promise<UpdateWorkerResult> {
