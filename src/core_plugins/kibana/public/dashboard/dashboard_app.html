@@ -18,7 +18,7 @@
               <a
                 class="kuiLocalBreadcrumb__link"
                 href="{{landingPageUrl()}}"
-                i18n-id="kbn.dashboard.app.dashboardLinkLabel"
+                i18n-id="kbn.dashboard.dashboardLinkLabel"
                 i18n-default-message="Dashboard"
               ></a>
             </div>
@@ -54,49 +54,64 @@
   >
     <h2
       class="kuiTitle kuiVerticalRhythm"
-      i18n-id="kbn.dashboard.app.fillDashboardTitle"
+      i18n-id="kbn.dashboard.fillDashboardTitle"
       i18n-default-message="This dashboard is empty. Let&rsquo;s fill it up!"
     >
     </h2>
 
-    <p
-      class="kuiText kuiVerticalRhythm"
-      i18n-id="kbn.dashboard.app.addVisualizationToDashboardDescription"
-      i18n-default-message="Click the {unsafe_addVisualizationToDashboardLink} button in the menu bar above to add a visualization to the dashboard. {br}If you haven't set up any visualizations yet, {visitVisualizeAppLink} to create your first visualization."
-      i18n-values="{
-        unsafe_addVisualizationToDashboardLink: '<a
-          kbn-accessible-click
-          class=\'kuiButton kuiButton--primary kuiButton--small\'
-          ng-click=\'showAddPanel()\'
-          aria-label=\'' + addVisualizationToDashboardLinkAriaLabel + '\'
-          data-test-subj=\'emptyDashboardAddPanelButton\'>' + addVisualizationToDashboardLinkText + '</a>',
-        br: '<br/>',
-        visitVisualizeAppLink: '<a class=\'kuiLink\' href=\'#/visualize\'>' + visitVisualizeAppLinkText + '</a>'}"
-    >
+    <p>
+      <span
+        i18n-id="kbn.dashboard.addVisualizationDescription1"
+        i18n-default-message="Click the "
+        i18n-context="Part of composite label kbn.dashboard.addVisualizationDescription1 + {link} + kbn.dashboard.addVisualizationDescription2"
+      ></span>
+      <a
+        kbn-accessible-click
+        class="kuiButton kuiButton--primary kuiButton--small"
+        ng-click="showAddPanel()"
+        aria-label="{{ 'kbn.dashboard.addVisualizationLinkAriaLabel' | i18n: { defaultMessage: 'Add visualization' } }}"
+        data-test-subj="emptyDashboardAddPanelButton"
+        i18n-id="kbn.dashboard.addVisualizationLinkText"
+        i18n-default-message="Add"
+      ></a>
+      <span
+        i18n-id="kbn.dashboard.addVisualizationDescription2"
+        i18n-default-message=" button in the menu bar above to add a visualization to the dashboard. {br}If you haven't set up any visualizations yet, {visitVisualizeAppLink} to create your first visualization."
+        i18n-values="{
+          br: '<br/>',
+          visitVisualizeAppLink: '<a class=\'kuiLink\' href=\'#/visualize\'>' + visitVisualizeAppLinkText + '</a>'
+        }"
+      ></span>
     </p>
   </div>
 
   <div ng-show="getShouldShowViewHelp()" class="dshStartScreen">
     <h2
       class="kuiTitle kuiVerticalRhythm"
-      i18n-id="kbn.dashboard.app.fillDashboardTitle"
+      i18n-id="kbn.dashboard.fillDashboardTitle"
       i18n-default-message="This dashboard is empty. Let&rsquo;s fill it up!"
     >
     </h2>
 
     <p
       class="kuiText kuiVerticalRhythm"
-      i18n-id="kbn.dashboard.app.howToStartWorkingOnNewDashboardDescription"
-      i18n-default-message="Click the {unsafe_howToStartWorkingOnNewDashboardEditLink} button in the menu bar above to start working on your new dashboard."
-      i18n-values="{
-        unsafe_howToStartWorkingOnNewDashboardEditLink: '
-          <a
-            kbn-accessible-click
-            class=\'kuiButton kuiButton--primary kuiButton--small\'
-            ng-click=\'enterEditMode()\'
-          >' + howToStartWorkingOnNewDashboardEditLinkText + '</a>'
-      }"
     >
+      <span
+        i18n-id="kbn.dashboard.howToStartWorkingOnNewDashboardDescription1"
+        i18n-default-message="Click the "
+        i18n-context="Part of composite label kbn.dashboard.howToStartWorkingOnNewDashboardDescription1 + {link} + kbn.dashboard.howToStartWorkingOnNewDashboardDescription2"
+      ></span>
+      <a
+        kbn-accessible-click
+        class="kuiButton kuiButton--primary kuiButton--small"
+        ng-click="enterEditMode()"
+        i18n-id="kbn.dashboard.howToStartWorkingOnNewDashboardEditLinkText"
+        i18n-default-message="Edit"
+      ></a>
+      <span
+        i18n-id="kbn.dashboard.howToStartWorkingOnNewDashboardDescription2"
+        i18n-default-message=" button in the menu bar above to start working on your new dashboard."
+      ></span>
     </p>
   </div>
 

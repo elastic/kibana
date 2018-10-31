@@ -47,20 +47,8 @@ app.directive('dashboardListing', function (reactDirective) {
 });
 
 function createNewDashboardCtrl($scope) {
-  $scope.addVisualizationToDashboardLinkText = i18n.translate('kbn.dashboard.app.addVisualizationToDashboardLinkText', {
-    defaultMessage: 'Add',
-  });
-
-  $scope.addVisualizationToDashboardLinkAriaLabel = i18n.translate('kbn.dashboard.app.addVisualizationToDashboardLinkAriaLabel', {
-    defaultMessage: 'Add visualization',
-  });
-
-  $scope.visitVisualizeAppLinkText = i18n.translate('kbn.dashboard.app.visitVisualizeAppLinkText', {
+  $scope.visitVisualizeAppLinkText = i18n.translate('kbn.dashboard.visitVisualizeAppLinkText', {
     defaultMessage: 'visit the Visualize app',
-  });
-
-  $scope.howToStartWorkingOnNewDashboardEditLinkText = i18n.translate('kbn.dashboard.app.howToStartWorkingOnNewDashboardEditLinkText', {
-    defaultMessage: 'Edit',
   });
 }
 
@@ -148,7 +136,7 @@ uiRoutes
             if (error instanceof SavedObjectNotFound && id === 'create') {
               // Note "new AppState" is necessary so the state in the url is preserved through the redirect.
               kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
-              toastNotifications.addWarning(i18n('kbn.dashboard.routes.toastNotifications.urlDashboardWasRemovedInSixZeroWarningMessage',
+              toastNotifications.addWarning(i18n('kbn.dashboard.urlWasRemovedInSixZeroWarningMessage',
                 { defaultMessage: 'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.' }
               ));
             } else {
