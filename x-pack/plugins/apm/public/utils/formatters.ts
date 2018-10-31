@@ -63,9 +63,9 @@ export function tpmUnit(type: string): string {
 
 export function asPercent(
   numerator: number,
-  denominator: number = 0,
-  fallbackResult: string = ''
-): string {
+  denominator = 0,
+  fallbackResult = ''
+) {
   if (denominator === 0) {
     return fallbackResult;
   }
