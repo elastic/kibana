@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './monitors';
+import { HBMonitor } from '../../../../common/domain_types';
+
+export interface HBMonitorsAdapter {
+  getAll(request: any): Promise<HBMonitor[]>;
+}
