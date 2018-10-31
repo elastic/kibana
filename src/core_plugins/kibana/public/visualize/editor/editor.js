@@ -416,13 +416,15 @@ function VisEditor(
           }
         });
         return { id };
-      }, (err) => {
+      }, (error) => {
+        // eslint-disable-next-line
+        console.error(error);
         toastNotifications.addDanger({
           title: `Error on saving '${savedVis.title}'`,
-          text: err.message,
+          text: error.message,
           'data-test-subj': 'saveVisualizationError',
         });
-        return { error: err };
+        return { error };
       });
   }
 

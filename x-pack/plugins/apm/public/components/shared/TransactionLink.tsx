@@ -9,7 +9,7 @@ import { Transaction } from '../../../typings/Transaction';
 import { KibanaLink, legacyEncodeURIComponent } from '../../utils/url';
 
 interface TransactionLinkProps {
-  transaction: Transaction;
+  transaction?: Transaction;
 }
 
 /**
