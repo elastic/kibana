@@ -33,12 +33,12 @@ export function asMillisWithDefault(value?: number) {
 }
 
 export const getTimeFormatter: (
-  max: any
-) => (value: any, withUnit?: boolean) => string = memoize(
-  (max: any) => (max > UNIT_CUT_OFF ? asSeconds : asMillis)
+  max: number
+) => (value: number, withUnit?: boolean) => string = memoize(
+  (max: number) => (max > UNIT_CUT_OFF ? asSeconds : asMillis)
 );
 
-export function timeUnit(max: any) {
+export function timeUnit(max: number) {
   return max > UNIT_CUT_OFF ? 's' : 'ms';
 }
 
@@ -64,7 +64,7 @@ export function tpmUnit(type: string): string {
 export function asPercent(
   numerator: number,
   denominator: number = 0,
-  fallbackResult: any = ''
+  fallbackResult: string = ''
 ): string {
   if (denominator === 0) {
     return fallbackResult;

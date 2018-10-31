@@ -18,8 +18,8 @@ import EmptyMessage from '../../../shared/EmptyMessage';
 
 interface IChartPoint {
   sample?: IBucket['sample'];
-  x0: string;
-  x: string;
+  x0: number;
+  x: number;
   y: number;
   style: {
     cursor: string;
@@ -31,15 +31,17 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
     return [];
   }
 
-  return buckets.map(({ sample, count, key }) => {
-    return {
-      sample,
-      x0: key,
-      x: key + bucketSize,
-      y: count,
-      style: { cursor: count > 0 && sample ? 'pointer' : 'default' }
-    };
-  });
+  return buckets.map(
+    ({ sample, count, key }): IChartPoint => {
+      return {
+        sample,
+        x0: key,
+        x: key + bucketSize,
+        y: count,
+        style: { cursor: count > 0 && sample ? 'pointer' : 'default' }
+      };
+    }
+  );
 }
 
 interface Props {
@@ -66,7 +68,7 @@ export class Distribution extends Component<Props> {
     );
 
     const isEmpty = distribution.totalHits === 0;
-    const xMax = d3.max(buckets, d => d.x);
+    const xMax = d3.max(buckets, d => d.x) || 0;
     const timeFormatter = getTimeFormatter(xMax);
     const unit = timeUnit(xMax);
 

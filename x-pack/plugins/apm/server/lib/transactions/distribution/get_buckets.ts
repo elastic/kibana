@@ -19,7 +19,7 @@ import { Transaction } from '../../../../typings/Transaction';
 import { Setup } from '../../helpers/setup_request';
 
 export interface IBucket {
-  key: string;
+  key: number;
   count: number;
   sample?: IBucketSample;
 }
