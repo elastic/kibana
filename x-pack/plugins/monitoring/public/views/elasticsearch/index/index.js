@@ -58,7 +58,7 @@ uiRoutes.when('/elasticsearch/indices/:index', {
 
     const title = $injector.get('title');
     const routeTitle = i18n('xpack.monitoring.elasticsearch.indices.overview.routeTitle', {
-      defaultMessage: '`Elasticsearch - Indices - {indexName} - Overview',
+      defaultMessage: 'Elasticsearch - Indices - {indexName} - Overview',
       values: {
         indexName: $scope.indexName
       }

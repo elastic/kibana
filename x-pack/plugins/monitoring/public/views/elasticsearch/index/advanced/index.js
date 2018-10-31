@@ -58,7 +58,7 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
 
     const title = $injector.get('title');
     const routeTitle = i18n('xpack.monitoring.elasticsearch.indices.advanced.routeTitle', {
-      defaultMessage: '`Elasticsearch - Indices - {indexName} - Advanced',
+      defaultMessage: 'Elasticsearch - Indices - {indexName} - Advanced',
       values: {
         indexName: $scope.indexName
       }
