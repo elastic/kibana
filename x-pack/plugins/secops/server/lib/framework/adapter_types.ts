@@ -23,6 +23,7 @@ export interface FrameworkRequest<InternalRequest extends WrappableRequest = Wra
   query: InternalRequest['query'];
 }
 
+// tslint:disable-next-line:no-any
 export interface WrappableRequest<Payload = any, Params = any, Query = any> {
   payload: Payload;
   params: Params;

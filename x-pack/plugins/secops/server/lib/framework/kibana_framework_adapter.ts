@@ -22,7 +22,9 @@ import {
 
 declare module 'hapi' {
   interface PluginProperties {
+    // tslint:disable-next-line:no-any
     elasticsearch: any;
+    // tslint:disable-next-line:no-any
     kibana: any;
   }
 }

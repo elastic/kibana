@@ -30,7 +30,9 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
 
   private adapterService: KibanaAdapterServiceProvider;
   private timezoneProvider: AppTimezoneProvider;
+  // tslint:disable-next-line:no-any
   private rootComponent: React.ReactElement<any> | null = null;
+  // tslint:disable-next-line:no-any
   private breadcrumbsComponent: React.ReactElement<any> | null = null;
 
   constructor(uiModule: IModule, uiRoutes: KibanaUIRoutes, timezoneProvider: AppTimezoneProvider) {
@@ -39,16 +41,19 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
     this.register(uiModule, uiRoutes);
   }
 
+  // tslint:disable-next-line:no-any
   public setUISettings = (key: string, value: any) => {
     this.adapterService.callOrBuffer(({ config }) => {
       config.set(key, value);
     });
   };
 
+  // tslint:disable-next-line:no-any
   public render = (component: React.ReactElement<any>) => {
     this.adapterService.callOrBuffer(() => (this.rootComponent = component));
   };
 
+  // tslint:disable-next-line:no-any
   public renderBreadcrumbs = (component: React.ReactElement<any>) => {
     this.adapterService.callOrBuffer(() => (this.breadcrumbsComponent = component));
   };
@@ -120,7 +125,8 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
       config: AppKibanaUIConfig,
       kbnVersion: string,
       Private: <Provider>(provider: Provider) => Provider,
-      // @ts-ignore: inject kibanaAdapter to force eager instaliation
+      // @ts-ignore: inject kibanaAdapter to force eager installation
+      // tslint:disable-next-line:no-any
       kibanaAdapter: any
     ) => {
       this.timezone = Private(this.timezoneProvider)();
