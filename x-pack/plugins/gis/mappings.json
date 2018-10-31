@@ -11,7 +11,8 @@
         "type": "integer"
       },
       "bounds": {
-        "type": "geo_shape"
+        "type": "geo_shape",
+        "tree": "quadtree"
       },
       "mapStateJSON": {
         "type": "text"
