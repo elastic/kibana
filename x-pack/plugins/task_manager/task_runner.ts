@@ -205,7 +205,7 @@ export class TaskManagerRunner implements TaskRunner {
       const status = this.instance.attempts < this.store.getMaxAttempts() ? 'idle' : 'failed';
 
       let runAt;
-      if (result.error) {
+      if (status === 'failed') {
         // task run errored, keep the same runAt
         runAt = this.instance.runAt;
       } else {
