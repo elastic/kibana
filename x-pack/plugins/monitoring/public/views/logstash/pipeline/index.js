@@ -50,7 +50,7 @@ function getPageData($injector) {
               defaultMessage: 'now'
             })
             : i18n.translate('xpack.monitoring.logstash.pipeline.relativeLastSeenAgoLabel', {
-              efaultMessage: 'until {relativeLastSeen} ago', values: { relativeLastSeen }
+              defaultMessage: 'until {relativeLastSeen} ago', values: { relativeLastSeen }
             })
         };
       });
