@@ -17,6 +17,7 @@ export class CsvImporter extends Importer {
     this.quote = results.quote;
     this.hasHeaderRow = results.has_header_row;
     this.columnNames = results.column_names;
+    this.shouldTrimFields = (results.should_trim_fields || false);
   }
 
   async read(csv) {
@@ -41,7 +42,7 @@ export class CsvImporter extends Importer {
         this.data.shift();
       }
 
-      this.docArray = formatToJson(this.data, this.columnNames);
+      this.docArray = formatToJson(this.data, this.columnNames, this.shouldTrimFields);
 
       return {
         success: true,
@@ -55,13 +56,14 @@ export class CsvImporter extends Importer {
   }
 }
 
-function formatToJson(data, columnNames) {
+function formatToJson(data, columnNames, trim = false) {
+  const process = trim ? (f => f.trim()) : (f => f);
   const docArray = [];
   for (let i = 0; i < data.length; i++) {
     const line = {};
     for (let c = 0; c < columnNames.length; c++) {
       const col = columnNames[c];
-      line[col] = data[i][c];
+      line[col] = process(data[i][c]);
     }
     docArray.push(line);
   }
