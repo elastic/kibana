@@ -22,7 +22,7 @@ import { toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
 import {
   isTimeSeriesViewJob,
@@ -54,7 +54,7 @@ uiRoutes
   .when('/timeseriesexplorer/?', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
       mlNodeCount: getMlNodeCount,

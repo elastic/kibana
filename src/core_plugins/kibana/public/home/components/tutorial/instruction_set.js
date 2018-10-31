@@ -97,7 +97,7 @@ class InstructionSetUi extends React.Component {
       case StatusCheckStates.HAS_DATA:
         message = this.props.statusCheckConfig.success
           ? this.props.statusCheckConfig.success
-          : this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instractionSet.successLabel',
+          : this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instructionSet.successLabel',
             defaultMessage: 'Success' });
         color = 'success';
         break;
@@ -105,7 +105,7 @@ class InstructionSetUi extends React.Component {
       case StatusCheckStates.NO_DATA:
         message = this.props.statusCheckConfig.error
           ? this.props.statusCheckConfig.error
-          : this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instractionSet.noDataLabel',
+          : this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instructionSet.noDataLabel',
             defaultMessage: 'No data found' });
         color = 'warning';
         break;
@@ -154,7 +154,7 @@ class InstructionSetUi extends React.Component {
               isLoading={statusCheckState === StatusCheckStates.FETCHING}
             >
               {statusCheckConfig.btnLabel || <FormattedMessage
-                id="kbn.home.tutorial.instractionSet.checkStatusButtonLabel"
+                id="kbn.home.tutorial.instructionSet.checkStatusButtonLabel"
                 defaultMessage="Check status"
               />}
             </EuiButton>
@@ -168,7 +168,7 @@ class InstructionSetUi extends React.Component {
     );
 
     return {
-      title: statusCheckConfig.title || this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instractionSet.statusCheckTitle',
+      title: statusCheckConfig.title || this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instructionSet.statusCheckTitle',
         defaultMessage: 'Status Check'
       }),
       status: this.getStepStatus(statusCheckState),
@@ -221,7 +221,7 @@ class InstructionSetUi extends React.Component {
         'fa-caret-right': !this.state.isParamFormVisible,
         'fa-caret-down': this.state.isParamFormVisible
       });
-      const ariaLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instractionSet.toggleAriaLabel',
+      const ariaLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.instructionSet.toggleAriaLabel',
         defaultMessage: 'toggle command parameters visibility'
       });
       paramsVisibilityToggle = (
@@ -234,7 +234,7 @@ class InstructionSetUi extends React.Component {
             <span className={visibilityToggleClasses} />
             <span className="kuiSideBarCollapsibleTitle__text">
               <FormattedMessage
-                id="kbn.home.tutorial.instractionSet.customizeLabel"
+                id="kbn.home.tutorial.instructionSet.customizeLabel"
                 defaultMessage="Customize your code snippets"
               />
             </span>

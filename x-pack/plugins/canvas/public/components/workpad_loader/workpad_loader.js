@@ -35,6 +35,7 @@ const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
 export class WorkpadLoader extends React.PureComponent {
   static propTypes = {
     workpadId: PropTypes.string.isRequired,
+    canUserWrite: PropTypes.bool.isRequired,
     createWorkpad: PropTypes.func.isRequired,
     findWorkpads: PropTypes.func.isRequired,
     downloadWorkpad: PropTypes.func.isRequired,
@@ -45,8 +46,8 @@ export class WorkpadLoader extends React.PureComponent {
   };
 
   state = {
-    deletingWorkpad: false,
     createPending: false,
+    deletingWorkpad: false,
     sortField: '@timestamp',
     sortDirection: 'desc',
     selectedWorkpads: [],
@@ -56,6 +57,9 @@ export class WorkpadLoader extends React.PureComponent {
   async componentDidMount() {
     // on component load, kick off the workpad search
     this.props.findWorkpads();
+
+    // keep track of whether or not the component is mounted, to prevent rogue setState calls
+    this._isMounted = true;
   }
 
   componentWillReceiveProps(newProps) {
@@ -64,25 +68,29 @@ export class WorkpadLoader extends React.PureComponent {
     if (workpadId !== newProps.workpadId) onClose();
   }
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   // create new empty workpad
   createWorkpad = async () => {
     this.setState({ createPending: true });
     await this.props.createWorkpad();
-    this.setState({ createPending: false });
+    this._isMounted && this.setState({ createPending: false });
   };
 
   // create new workpad from uploaded JSON
   uploadWorkpad = async workpad => {
     this.setState({ createPending: true });
     await this.props.createWorkpad(workpad);
-    this.setState({ createPending: false });
+    this._isMounted && this.setState({ createPending: false });
   };
 
   // clone existing workpad
   cloneWorkpad = async workpad => {
     this.setState({ createPending: true });
     await this.props.cloneWorkpad(workpad.id);
-    this.setState({ createPending: false });
+    this._isMounted && this.setState({ createPending: false });
   };
 
   // Workpad remove methods
@@ -92,16 +100,18 @@ export class WorkpadLoader extends React.PureComponent {
 
   removeWorkpads = () => {
     const { selectedWorkpads } = this.state;
+
     this.props.removeWorkpads(selectedWorkpads.map(({ id }) => id)).then(remainingIds => {
       const remainingWorkpads =
         remainingIds.length > 0
           ? selectedWorkpads.filter(({ id }) => remainingIds.includes(id))
           : [];
 
-      this.setState({
-        deletingWorkpad: false,
-        selectedWorkpads: remainingWorkpads,
-      });
+      this._isMounted &&
+        this.setState({
+          deletingWorkpad: false,
+          selectedWorkpads: remainingWorkpads,
+        });
     });
   };
 
@@ -124,6 +134,7 @@ export class WorkpadLoader extends React.PureComponent {
 
   renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
     const { sortField, sortDirection } = this.state;
+    const { canUserWrite, createPending } = this.props;
 
     const actions = [
       {
@@ -139,11 +150,14 @@ export class WorkpadLoader extends React.PureComponent {
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content="Clone">
+              <EuiToolTip
+                content={canUserWrite ? 'Clone' : `You don't have permission to clone workpads`}
+              >
                 <EuiButtonIcon
                   iconType="copy"
                   onClick={() => this.cloneWorkpad(workpad)}
                   aria-label="Clone Workpad"
+                  disabled={!canUserWrite}
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -218,7 +232,7 @@ export class WorkpadLoader extends React.PureComponent {
 
     return (
       <Fragment>
-        <WorkpadDropzone onUpload={this.uploadWorkpad}>
+        <WorkpadDropzone onUpload={this.uploadWorkpad} disabled={createPending || !canUserWrite}>
           <EuiBasicTable
             compressed
             items={rows}
@@ -250,7 +264,57 @@ export class WorkpadLoader extends React.PureComponent {
       sortField,
       sortDirection,
     } = this.state;
+    const { canUserWrite } = this.props;
     const isLoading = this.props.workpads == null;
+
+    let createButton = (
+      <WorkpadCreate
+        createPending={createPending}
+        onCreate={this.createWorkpad}
+        disabled={!canUserWrite}
+      />
+    );
+
+    let deleteButton = (
+      <EuiButton
+        size="s"
+        color="danger"
+        iconType="trash"
+        onClick={this.openRemoveConfirm}
+        disabled={!canUserWrite}
+      >
+        {`Delete (${selectedWorkpads.length})`}
+      </EuiButton>
+    );
+
+    const downloadButton = (
+      <EuiButton size="s" color="secondary" onClick={this.downloadWorkpads} iconType="sortDown">
+        {`Download (${selectedWorkpads.length})`}
+      </EuiButton>
+    );
+
+    let uploadButton = (
+      <WorkpadUpload onUpload={this.uploadWorkpad} disabled={createPending || !canUserWrite} />
+    );
+
+    if (!canUserWrite) {
+      createButton = (
+        <EuiToolTip content="You don't have permission to create workpads">
+          {createButton}
+        </EuiToolTip>
+      );
+      deleteButton = (
+        <EuiToolTip content="You don't have permission to delete workpads">
+          {deleteButton}
+        </EuiToolTip>
+      );
+      uploadButton = (
+        <EuiToolTip content="You don't have permission to upload workpads">
+          {uploadButton}
+        </EuiToolTip>
+      );
+    }
+
     const modalTitle =
       selectedWorkpads.length === 1
         ? `Delete workpad '${selectedWorkpads[0].name}'?`
@@ -287,26 +351,8 @@ export class WorkpadLoader extends React.PureComponent {
                     <EuiFlexGroup gutterSize="s">
                       {selectedWorkpads.length > 0 && (
                         <Fragment>
-                          <EuiFlexItem grow={false}>
-                            <EuiButton
-                              size="s"
-                              color="secondary"
-                              onClick={this.downloadWorkpads}
-                              iconType="sortDown"
-                            >
-                              {`Download (${selectedWorkpads.length})`}
-                            </EuiButton>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiButton
-                              size="s"
-                              color="danger"
-                              iconType="trash"
-                              onClick={this.openRemoveConfirm}
-                            >
-                              {`Delete (${selectedWorkpads.length})`}
-                            </EuiButton>
-                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>{downloadButton}</EuiFlexItem>
+                          <EuiFlexItem grow={false}>{deleteButton}</EuiFlexItem>
                         </Fragment>
                       )}
                       <EuiFlexItem grow={1}>
@@ -320,19 +366,9 @@ export class WorkpadLoader extends React.PureComponent {
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={2}>
-                    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                      <EuiFlexItem grow={false}>
-                        <WorkpadUpload
-                          createPending={createPending}
-                          onUpload={this.uploadWorkpad}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <WorkpadCreate
-                          createPending={createPending}
-                          onCreate={this.createWorkpad}
-                        />
-                      </EuiFlexItem>
+                    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" wrap>
+                      <EuiFlexItem grow={false}>{uploadButton}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>

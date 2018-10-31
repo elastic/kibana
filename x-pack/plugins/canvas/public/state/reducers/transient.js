@@ -8,7 +8,7 @@ import { handleActions } from 'redux-actions';
 import { set, del } from 'object-path-immutable';
 import { restoreHistory } from '../actions/history';
 import * as actions from '../actions/transient';
-import { removeElement } from '../actions/elements';
+import { removeElements } from '../actions/elements';
 import { setRefreshInterval } from '../actions/workpad';
 
 export const transientReducer = handleActions(
@@ -17,19 +17,19 @@ export const transientReducer = handleActions(
     // TODO: we shouldn't need to reset the resolved args for history
     [restoreHistory]: transientState => set(transientState, 'resolvedArgs', {}),
 
-    [removeElement]: (transientState, { payload: { elementId } }) => {
+    [removeElements]: (transientState, { payload: { elementIds } }) => {
       const { selectedElement } = transientState;
       return del(
         {
           ...transientState,
-          selectedElement: selectedElement === elementId ? null : selectedElement,
+          selectedElement: elementIds.indexOf(selectedElement) === -1 ? selectedElement : null,
         },
-        ['resolvedArgs', elementId]
+        ['resolvedArgs', elementIds]
       );
     },
 
-    [actions.setEditing]: (transientState, { payload }) => {
-      return set(transientState, 'editing', Boolean(payload));
+    [actions.setCanUserWrite]: (transientState, { payload }) => {
+      return set(transientState, 'canUserWrite', Boolean(payload));
     },
 
     [actions.setFullscreen]: (transientState, { payload }) => {

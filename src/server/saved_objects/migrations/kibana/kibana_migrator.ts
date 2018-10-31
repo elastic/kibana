@@ -22,7 +22,9 @@
  * (the shape of the mappings and documents in the index).
  */
 
-import { SavedObjectDoc } from '../../serialization';
+import { once } from 'lodash';
+import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
+import { SavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator } from '../../validation';
 import { buildActiveMappings, CallCluster, IndexMigrator, LogFn, MappingProperties } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
@@ -30,10 +32,12 @@ import { DocumentMigrator, VersionedTransformer } from '../core/document_migrato
 export interface KbnServer {
   server: Server;
   version: string;
+  ready: () => Promise<any>;
   uiExports: {
     savedObjectMappings: any[];
     savedObjectMigrations: any;
     savedObjectValidations: any;
+    savedObjectSchemas: SavedObjectsSchemaDefinition;
   };
 }
 
@@ -60,10 +64,52 @@ interface ElasticsearchPlugin {
  * @class KibanaMigrator
  */
 export class KibanaMigrator {
+  /**
+   * Migrates the mappings and documents in the Kibana index. This will run only
+   * once and subsequent calls will return the result of the original call.
+   *
+   * @returns
+   * @memberof KibanaMigrator
+   */
+  public awaitMigration = once(async () => {
+    const { server } = this.kbnServer;
+
+    // Wait until the plugins have been found an initialized...
+    await this.kbnServer.ready();
+
+    // We can't do anything if the elasticsearch plugin has been disabled.
+    if (!server.plugins.elasticsearch) {
+      server.log(
+        ['warning', 'migration'],
+        'The elasticsearch plugin is disabled. Skipping migrations.'
+      );
+      return { status: 'skipped' };
+    }
+
+    // Wait until elasticsearch is green...
+    await server.plugins.elasticsearch.waitUntilReady();
+
+    const config = server.config();
+    const migrator = new IndexMigrator({
+      batchSize: config.get('migrations.batchSize'),
+      callCluster: server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
+      documentMigrator: this.documentMigrator,
+      index: config.get('kibana.index'),
+      log: this.log,
+      mappingProperties: this.mappingProperties,
+      pollInterval: config.get('migrations.pollInterval'),
+      scrollDuration: config.get('migrations.scrollDuration'),
+      serializer: this.serializer,
+    });
+
+    return migrator.migrate();
+  });
+
   private kbnServer: KbnServer;
   private documentMigrator: VersionedTransformer;
   private mappingProperties: MappingProperties;
   private log: LogFn;
+  private serializer: SavedObjectsSerializer;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -74,6 +120,9 @@ export class KibanaMigrator {
    */
   constructor({ kbnServer }: { kbnServer: KbnServer }) {
     this.kbnServer = kbnServer;
+    this.serializer = new SavedObjectsSerializer(
+      new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas)
+    );
     this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings || []);
     this.log = (meta: string[], message: string) => kbnServer.server.log(meta, message);
     this.documentMigrator = new DocumentMigrator({
@@ -104,54 +153,6 @@ export class KibanaMigrator {
   public migrateDocument(doc: SavedObjectDoc): SavedObjectDoc {
     return this.documentMigrator.migrate(doc);
   }
-
-  /**
-   * Migrates the mappings and documents in the Kibana index.
-   *
-   * @returns
-   * @memberof KibanaMigrator
-   */
-  public migrateIndex() {
-    const { server } = this.kbnServer;
-
-    // We can't do anything if the elasticsearch plugin has been disabled.
-    if (!server.plugins.elasticsearch) {
-      server.log(
-        ['warning', 'migration'],
-        'The elasticsearch plugin is disabled. Skipping migrations.'
-      );
-      return { status: 'skipped' };
-    }
-
-    const config = server.config();
-    const migrator = new IndexMigrator({
-      batchSize: config.get('migrations.batchSize'),
-      callCluster: createCallCluster(server),
-      documentMigrator: this.documentMigrator,
-      index: config.get('kibana.index'),
-      log: this.log,
-      mappingProperties: this.mappingProperties,
-      pollInterval: config.get('migrations.pollInterval'),
-      scrollDuration: config.get('migrations.scrollDuration'),
-    });
-
-    return migrator.migrate();
-  }
-}
-
-/**
- * Wait until the elasticsearch plugin says it's ready, then return the
- * elasticsearch connection that will be used to run migrations.
- */
-function createCallCluster(server: Server): any {
-  let callCluster: CallCluster;
-  return async (path: any, opts: any) => {
-    if (!callCluster) {
-      await server.plugins.elasticsearch!.waitUntilReady();
-      callCluster = server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser;
-    }
-    return await callCluster(path, opts);
-  };
 }
 
 /**

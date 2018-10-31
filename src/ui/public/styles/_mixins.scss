@@ -23,3 +23,22 @@
   }
 }
 
+@mixin kibana-resizer($size: ($euiSizeM + 2px), $cursor: ew-resize) {
+  display: flex;
+  flex: 0 0 $size;
+  width: $size;
+  cursor: $cursor;
+  background-color: $euiColorLightestShade;
+  align-items: center;
+  margin: 0;
+  user-select: none;
+
+  &:hover {
+    background-color: tintOrShade($euiColorPrimary, 80%, 60%);
+  }
+
+  &.active {
+    background-color: $euiColorPrimary;
+    color: $euiColorEmptyShade;
+  }
+}

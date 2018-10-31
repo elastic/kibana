@@ -7,30 +7,30 @@
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
       <!-- Title. -->
-      <div
-        data-transclude-slot="topLeftCorner"
-        class="kuiLocalBreadcrumbs"
-        data-test-subj="breadcrumbs"
-        role="heading"
-        aria-level="1"
-      >
-        <div class="kuiLocalBreadcrumb">
-          <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Dashboard</a>
+        <div data-transclude-slot="topLeftCorner">
+          <div
+            class="kuiLocalBreadcrumbs"
+            data-test-subj="breadcrumbs"
+            role="heading"
+            aria-level="1"
+            ng-if="showPluginBreadcrumbs">
+            <div class="kuiLocalBreadcrumb">
+              <a class="kuiLocalBreadcrumb__link" href="{{landingPageUrl()}}">Dashboard</a>
+            </div>
+            <div class="kuiLocalBreadcrumb">
+              {{ getDashTitle() }}
+            </div>
+          </div>
         </div>
-        <div class="kuiLocalBreadcrumb">
-          {{ getDashTitle() }}
-        </div>
-      </div>
 
       <!-- Search. -->
       <div ng-show="chrome.getVisible()" class="fullWidth" data-transclude-slot="bottomRow">
         <query-bar
           query="model.query"
           app-name="'dashboard'"
-          on-submit="updateQueryAndFetch($query)"
+          on-submit="updateQueryAndFetch"
           index-patterns="indexPatterns"
-        >
-        </query-bar>
+        ></query-bar>
       </div>
     </div>
   </kbn-top-nav>

@@ -18,7 +18,6 @@
  */
 
 import { constant, once, compact, flatten } from 'lodash';
-import { fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';
@@ -38,7 +37,6 @@ import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
-import { KibanaMigrator } from './saved_objects/migrations';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
@@ -141,7 +139,7 @@ export default class KbnServer {
 
     const { server, config } = this;
 
-    await new KibanaMigrator({ kbnServer: this }).migrateIndex();
+    await server.kibanaMigrator.awaitMigration();
 
     if (isWorker) {
       // help parent process know when we are ready
@@ -162,7 +160,7 @@ export default class KbnServer {
       return;
     }
 
-    await fromNode(cb => this.server.stop(cb));
+    await this.server.stop();
   }
 
   async inject(opts) {
@@ -186,6 +184,6 @@ export default class KbnServer {
     };
     const plain = JSON.stringify(subset, null, 2);
     this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
-    this.server.plugins['even-better'].monitor.reconfigure(loggingOptions);
+    this.server.plugins['@elastic/good'].reconfigure(loggingOptions);
   }
 }

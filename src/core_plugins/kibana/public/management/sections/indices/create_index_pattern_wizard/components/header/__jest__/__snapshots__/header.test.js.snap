@@ -2,17 +2,18 @@
 
 exports[`Header should render normally 1`] = `
 <div>
-  <EuiSpacer
-    size="m"
-  />
   <EuiTitle
     size="m"
   >
     <h1>
       <FormattedMessage
-        defaultMessage="Create index pattern"
+        defaultMessage="Create {indexPatternName}"
         id="kbn.management.createIndexPatternHeader"
-        values={Object {}}
+        values={
+          Object {
+            "indexPatternName": undefined,
+          }
+        }
       />
     </h1>
   </EuiTitle>
@@ -45,23 +46,6 @@ exports[`Header should render normally 1`] = `
           </EuiTextColor>
         </p>
       </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiSwitch
-        checked={true}
-        id="checkboxShowSystemIndices"
-        label={
-          <FormattedMessage
-            defaultMessage="Include system indices"
-            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch"
-            values={Object {}}
-          />
-        }
-        onChange={[Function]}
-      />
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
@@ -72,17 +56,18 @@ exports[`Header should render normally 1`] = `
 
 exports[`Header should render without including system indices 1`] = `
 <div>
-  <EuiSpacer
-    size="m"
-  />
   <EuiTitle
     size="m"
   >
     <h1>
       <FormattedMessage
-        defaultMessage="Create index pattern"
+        defaultMessage="Create {indexPatternName}"
         id="kbn.management.createIndexPatternHeader"
-        values={Object {}}
+        values={
+          Object {
+            "indexPatternName": undefined,
+          }
+        }
       />
     </h1>
   </EuiTitle>
@@ -115,23 +100,6 @@ exports[`Header should render without including system indices 1`] = `
           </EuiTextColor>
         </p>
       </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiSwitch
-        checked={false}
-        id="checkboxShowSystemIndices"
-        label={
-          <FormattedMessage
-            defaultMessage="Include system indices"
-            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch"
-            values={Object {}}
-          />
-        }
-        onChange={[Function]}
-      />
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer

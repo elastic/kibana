@@ -1,5 +1,13 @@
 @import 'ui/public/styles/styling_constants';
 
+@import 'ui/public/query_bar/index';
+
+// Context styles
+@import './context/index';
+
+// Dev tools styles
+@import './dev_tools/index';
+
 // Discover styles
 @import './discover/index';
 
@@ -10,10 +18,8 @@
 @import './visualize/index';
 @import 'ui/public/vis/index';
 
-// Also import Timelion in case of embedding chart into dashboard
-// SASSTODO: Remove once the pipeline imports all compiled CSS files always
-@import '../../timelion/public/directives/index';
-@import '../../timelion/public/vis/index';
+// Management styles
+@import './management/index';
 
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS

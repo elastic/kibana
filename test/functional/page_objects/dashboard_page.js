@@ -317,11 +317,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.clickSave();
       }
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
       // Confirm that the Dashboard has actually been saved
       await testSubjects.existOrFail('saveDashboardSuccess');
-
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await this.waitForSaveModalToClose();
     }
 
@@ -348,10 +346,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickSave() {
-      await retry.try(async () => {
-        log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveSavedObjectButton');
-      });
+      log.debug('DashboardPage.clickSave');
+      await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
     /**

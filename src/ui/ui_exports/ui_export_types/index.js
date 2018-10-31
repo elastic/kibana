@@ -25,6 +25,7 @@ export {
 export {
   mappings,
   migrations,
+  savedObjectSchemas,
   validations,
 } from './saved_object';
 
@@ -47,6 +48,7 @@ export {
   navbarExtensions,
   contextMenuActions,
   managementSections,
+  indexManagement,
   devTools,
   docViews,
   hacks,

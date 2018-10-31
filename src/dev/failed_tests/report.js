@@ -42,7 +42,10 @@ const mapXml = es.map((file, cb) => {
  * Filters all testsuites to find failed testcases
  */
 const filterFailures = es.map((testSuite, cb) => {
-  const testFiles = testSuite.testsuites.testsuite;
+  // Grab the failures. Reporters may report multiple testsuites in a single file.
+  const testFiles = testSuite.testsuites
+    ? testSuite.testsuites.testsuite
+    : [testSuite.testsuite];
 
   const failures = testFiles.reduce((failures, testFile) => {
     for (const testCase of testFile.testcase) {
