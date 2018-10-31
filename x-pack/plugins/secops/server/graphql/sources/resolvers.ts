@@ -23,7 +23,7 @@ export type QueryAllSourcesResolver = AppResolverWithFields<
   'id' | 'configuration'
 >;
 
-interface SourcesResolversDeps {
+export interface SourcesResolversDeps {
   sources: Sources;
 }
 

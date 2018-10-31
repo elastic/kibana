@@ -18,6 +18,7 @@ import {
   OnFilterChange,
   OnRangeSelected,
 } from '../../components/timeline/events';
+import { WhoAmI } from '../../containers/who_am_i';
 
 const onColumnSorted: OnColumnSorted = sorted => {
   alert(`column sorted: ${JSON.stringify(sorted)}`);
@@ -60,6 +61,7 @@ export const HomePage = pure(() => (
         sort={sort}
         width={900}
       />
+      <WhoAmI sourceId="default">{({ appName }) => <h1>Hello {appName}</h1>}</WhoAmI>
     </div>
   </ColumnarPage>
 ));
