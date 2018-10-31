@@ -123,9 +123,7 @@ describe('ExplorerChart', () => {
     expect([...yAxisTicks]).toHaveLength(5);
     const emphasizedAxisLabel = wrapper.getDOMNode().querySelectorAll('.ml-explorer-chart-axis-emphasis');
     expect(emphasizedAxisLabel).toHaveLength(1);
-    expect(emphasizedAxisLabel.innerHtml).toBe('303');
-    console.warn('emphasizedAxisLabel', emphasizedAxisLabel.innerHtml);
-    console.warn('html', wrapper.html());
+    expect(emphasizedAxisLabel[0].innerHTML).toBe('303');
 
     const paths = wrapper.getDOMNode().querySelectorAll('path');
     expect(paths[0].getAttribute('class')).toBe('domain');
