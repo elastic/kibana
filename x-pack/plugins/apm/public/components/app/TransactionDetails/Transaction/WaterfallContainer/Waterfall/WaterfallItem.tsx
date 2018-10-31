@@ -33,15 +33,19 @@ const ItemBar = styled<ItemBarProps, any>('div')`
   height: ${px(unit)};
   left: ${props => props.left}%;
   width: ${props => props.width}%;
-  min-width: '2px';
+  min-width: 2px;
   background-color: ${props => props.color};
 `;
 
+// Note: "direction: rtl;" is here to prevent text from running off of
+// the right edge and instead pushing it to the left. For an example of
+// how this works, see here: https://codepen.io/sqren/pen/JrXNjY
 const SpanLabel = styled<{ left: number }, any>('div')`
   white-space: nowrap;
   position: relative;
   left: ${props => `${props.left}%`};
   width: ${props => `${100 - props.left}%`};
+  direction: rtl;
   text-align: left;
   margin: ${px(units.quarter)} 0 0;
   font-family: ${fontFamilyCode};
@@ -115,6 +119,9 @@ export function WaterfallItem({
   const left = (item.offset / totalDuration) * 100;
   const Label = item.docType === 'transaction' ? TransactionLabel : SpanLabel;
 
+  // Note: the <Prefix> appears *after* the item name in the DOM order
+  // because this label is styled with "direction: rtl;" so that the name
+  // itself doesn't flow outside the box to the right.
   return (
     <Container
       item={item}
@@ -124,8 +131,7 @@ export function WaterfallItem({
     >
       <ItemBar left={left} width={width} color={color} type={item.docType} />
       <Label left={left}>
-        <Prefix item={item} />
-        {item.name}
+        {item.name} <Prefix item={item} />
       </Label>
     </Container>
   );
