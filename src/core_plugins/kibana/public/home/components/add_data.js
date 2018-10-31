@@ -21,6 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 
 import {
   EuiButton,
@@ -34,9 +35,13 @@ import {
   EuiCard,
   EuiIcon,
   EuiHorizontalRule,
+  EuiFlexGrid,
 } from '@elastic/eui';
 
-const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
+/* istanbul ignore next */
+const basePath = chrome.getBasePath();
+
+const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
 
   const renderCards = () => {
     const apmTitle = intl.formatMessage({
@@ -61,7 +66,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
       defaultMessage: 'Collect metrics from the operating system and services running on your servers.'
     });
     const securityTitle = intl.formatMessage({
-      id: 'kbn.home.addData.security.nameTitle', defaultMessage: 'Security Analytics'
+      id: 'kbn.home.addData.security.nameTitle', defaultMessage: 'Security analytics'
     });
     const securityDescription = intl.formatMessage({
       id: 'kbn.home.addData.security.nameDescription',
@@ -189,17 +194,17 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
 
       <EuiHorizontalRule />
 
-      <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexGrid columns={mlEnabled !== false ? 3 : 2}>
         <EuiFlexItem className={footerItemClasses}>
           <EuiText>
             <strong style={{ height: 38 }}>
               <FormattedMessage
                 id="kbn.home.addData.sampleDataTitle"
-                defaultMessage="Sample Data"
+                defaultMessage="Add sample data"
               />
             </strong>
             <EuiLink
-              style={{ marginLeft: 8 }}
+              style={{ display: 'block', textAlign: 'center' }}
               href="#/home/tutorial_directory/sampleData"
             >
               <FormattedMessage
@@ -209,16 +214,38 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
             </EuiLink>
           </EuiText>
         </EuiFlexItem>
+        {mlEnabled !== false ?
+          <EuiFlexItem className={footerItemClasses}>
+            <EuiText>
+              <strong style={{ height: 38 }}>
+                <FormattedMessage
+                  id="kbn.home.addData.uploadFileTitle"
+                  defaultMessage="Upload data from log file"
+                />
+              </strong>
+              <EuiLink
+                style={{ display: 'block', textAlign: 'center' }}
+                href={`${basePath}/app/ml#/filedatavisualizer`}
+              >
+                <FormattedMessage
+                  id="kbn.home.addData.uploadFileLink"
+                  defaultMessage="Import a CSV, NDJSON, or log file"
+                />
+              </EuiLink>
+            </EuiText>
+          </EuiFlexItem>
+          : null
+        }
         <EuiFlexItem className={footerItemClasses}>
           <EuiText>
             <strong style={{ height: 38 }}>
               <FormattedMessage
                 id="kbn.home.addData.yourDataTitle"
-                defaultMessage="Your Data"
+                defaultMessage="Use Elasticsearch data"
               />
             </strong>
             <EuiLink
-              style={{ marginLeft: 8 }}
+              style={{ display: 'block', textAlign: 'center' }}
               href="#/management/kibana/index"
             >
               <FormattedMessage
@@ -228,16 +255,14 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl }) => {
             </EuiLink>
           </EuiText>
         </EuiFlexItem>
-
-
-      </EuiFlexGroup>
-
+      </EuiFlexGrid>
     </EuiPanel>
   );
 };
 
 AddDataUi.propTypes = {
   apmUiEnabled: PropTypes.bool.isRequired,
+  mlEnabled: PropTypes.bool.isRequired,
   isNewKibanaInstance: PropTypes.bool.isRequired,
 };
 

@@ -50,7 +50,7 @@ describe('pointSeriesChartDataFromTable', function () {
     table.columns = [ { aggConfig: agg } ];
     table.rows.push([ result ]);
 
-    const chartData = pointSeriesChartDataFromTable(vis, table);
+    const chartData = pointSeriesChartDataFromTable(table);
 
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
@@ -92,7 +92,7 @@ describe('pointSeriesChartDataFromTable', function () {
       table.rows.push([date, new AggConfigResult(y.agg, date, y.at(i))]);
     });
 
-    const chartData = pointSeriesChartDataFromTable(vis, table);
+    const chartData = pointSeriesChartDataFromTable(table);
 
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
@@ -155,7 +155,7 @@ describe('pointSeriesChartDataFromTable', function () {
       table.rows.push([dateResult, avgResult, maxResult]);
     });
 
-    const chartData = pointSeriesChartDataFromTable(vis, table);
+    const chartData = pointSeriesChartDataFromTable(table);
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
     expect(chartData.series).to.have.length(2);
@@ -235,7 +235,7 @@ describe('pointSeriesChartDataFromTable', function () {
       table.rows.push([dateResult, termResult, avgResult, maxResult]);
     });
 
-    const chartData = pointSeriesChartDataFromTable(vis, table);
+    const chartData = pointSeriesChartDataFromTable(table);
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
     // one series for each extension, and then one for each metric inside

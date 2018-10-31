@@ -24,13 +24,11 @@ include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
 
-include::monitoring/monitoring-xkib.asciidoc[]
+include::monitoring/monitoring-kibana.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
 
 include::settings/settings-xkb.asciidoc[]
-
-include::migration.asciidoc[]
 
 include::getting-started.asciidoc[]
 
@@ -54,6 +52,8 @@ include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
 
+include::spaces/index.asciidoc[]
+
 include::security/index.asciidoc[]
 
 include::management/watcher-ui/index.asciidoc[]
@@ -74,4 +74,8 @@ include::limitations.asciidoc[]
 
 include::release-notes/highlights.asciidoc[]
 
+include::migration.asciidoc[]
+
 include::CHANGELOG.asciidoc[]
+
+include::redirects.asciidoc[]

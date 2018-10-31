@@ -22,19 +22,16 @@ import moment from 'moment';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from '../../../vis';
-import { AggConfig } from '../../../vis/agg_config';
-import { PointSeriesGetAspectsProvider } from '../_get_aspects';
+import { getAspects } from '../_get_aspects';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('getAspects', function () {
   let Vis;
   let indexPattern;
-  let getAspects;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    getAspects = Private(PointSeriesGetAspectsProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
@@ -114,7 +111,7 @@ describe('getAspects', function () {
   it('produces an aspect object for each of the aspect types found in the columns', function () {
     init(1, 1, 1);
 
-    const aspects = getAspects(vis, table);
+    const aspects = getAspects(table);
     validate(aspects.x, 0);
     validate(aspects.series, 1);
     validate(aspects.y, 2);
@@ -123,7 +120,7 @@ describe('getAspects', function () {
   it('uses arrays only when there are more than one aspect of a specific type', function () {
     init(0, 1, 2);
 
-    const aspects = getAspects(vis, table);
+    const aspects = getAspects(table);
 
     validate(aspects.x, 0);
     expect(aspects.series == null).to.be(true);
@@ -137,22 +134,20 @@ describe('getAspects', function () {
     init(0, 2, 1);
 
     expect(function () {
-      getAspects(vis, table);
+      getAspects(table);
     }).to.throwError(TypeError);
   });
 
   it('creates a fake x aspect if the column does not exist', function () {
     init(0, 0, 1);
 
-    const aspects = getAspects(vis, table);
+    const aspects = getAspects(table);
 
     expect(aspects.x)
       .to.be.an('object')
       .and.have.property('i', -1)
       .and.have.property('aggConfig')
       .and.have.property('title');
-
-    expect(aspects.x.aggConfig).to.be.an(AggConfig);
 
   });
 });

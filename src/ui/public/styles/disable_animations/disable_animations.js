@@ -38,7 +38,7 @@ function updateStyleSheet() {
 }
 
 updateStyleSheet();
-uiSettings.subscribe(({ key }) => {
+uiSettings.getUpdate$().subscribe(({ key }) => {
   if (key === 'accessibility:disableAnimations') {
     updateStyleSheet();
   }

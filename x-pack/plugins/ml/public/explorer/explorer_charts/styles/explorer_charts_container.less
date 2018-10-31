@@ -99,35 +99,12 @@
 
     }
 
-    .ml-explorer-chart-container {
-      .explorer-chart-label {
-        display: block;
-        font-size: 13px;
-        font-weight: normal;
-
-        .explorer-chart-label-fields {
-          vertical-align: top;
-          max-width: calc(~"100% - 15px");
-          text-overflow: ellipsis;
-          overflow: hidden;
-          white-space: nowrap;
-          display: inline-block;
-        }
-
-        .euiIcon {
-          vertical-align: top;
-          margin: 4px 0 0 4px;
-        }
-
-        a {
-          float:right;
-          padding-left: 5px;
-        }
-      }
-
-      .content-wrapper {
-        height: 215px;
-      }
-    }
   }
+}
+
+/* wrapper class for the top right alert icon and view button */
+.ml-explorer-chart-icons {
+  padding-left: 5px;
+  /* counter-margin for EuiButtonEmpty's padding */
+  margin: 2px -8px 0 0;
 }

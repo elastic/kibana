@@ -9,9 +9,3 @@ export interface CaptureConfig {
   zoom: number;
   viewport: Size;
 }
-
-export interface ViewZoomWidthHeight {
-  zoom: number;
-  width: number;
-  height: number;
-}

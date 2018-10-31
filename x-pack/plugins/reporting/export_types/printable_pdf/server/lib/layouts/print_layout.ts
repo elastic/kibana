@@ -4,18 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
-import { KbnServer, Size } from '../../../../../types';
+import { EvaluateOptions, KbnServer, Size } from '../../../../../types';
+import { LayoutTypes } from '../../../common/constants';
 import { Layout } from './layout';
 import { CaptureConfig } from './types';
-
-type EvalArgs = any[];
-
-interface EvaluateOptions {
-  // 'fn' is a function in string form to avoid tslint from auto formatting it into a version not
-  // underfood by transform_fn safeWrap.
-  fn: ((...evalArgs: EvalArgs) => any);
-  args: EvalArgs; // Arguments to be passed into the function defined by fn.
-}
 
 interface BrowserClient {
   evaluate: (evaluateOptions: EvaluateOptions) => void;
@@ -34,8 +26,8 @@ export class PrintLayout extends Layout {
 
   private captureConfig: CaptureConfig;
 
-  constructor(server: KbnServer, id: string) {
-    super(id);
+  constructor(server: KbnServer) {
+    super(LayoutTypes.PRINT);
     this.captureConfig = server.config().get('xpack.reporting.capture');
   }
 

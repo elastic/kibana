@@ -13,8 +13,8 @@
 </kbn-top-nav>
 
 <div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem" data-test-subj="visualizeSelectSearch">
-  <div class="wizard kuiViewContentItem">
-    <div class="wizard-column wizard-column--small">
+  <div class="visWizard kuiViewContentItem">
+    <div class="visWizard__column visWizard__column--small">
       <h2 class="kuiTitle kuiVerticalRhythm">
         From a New Search, Select Index
       </h2>
@@ -24,12 +24,12 @@
         list="indexPattern.list"
         list-property="attributes.title"
         user-make-url="makeUrl"
-        class="wizard-row visualizeWizardPaginatedSelectableList kuiVerticalRhythm"
+        class="visWizard__row visWizard__list--paginated--selectable kuiVerticalRhythm"
         disable-auto-focus="true"
       ></paginated-selectable-list>
     </div>
 
-    <div class="wizard-column wizard-column--large">
+    <div class="visWizard__column visWizard__column--large">
       <h2 class="kuiTitle kuiVerticalRhythm">
         Or, From a Saved Search
       </h2>
@@ -37,7 +37,7 @@
       <!-- Saved searches -->
       <saved-object-finder
         type="searches"
-        class="wizard-row visualizeWizardSavedObjectFinder kuiVerticalRhythm"
+        class="visWizard__row visWizard__savedObjectFinder kuiVerticalRhythm"
         make-url="step2WithSearchUrl"
         disable-auto-focus="true"
       ></saved-object-finder>

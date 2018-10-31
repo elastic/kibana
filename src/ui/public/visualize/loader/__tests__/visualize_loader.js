@@ -185,12 +185,6 @@ describe('visualize loader', () => {
         expect(vis.attr('data-foo')).to.be('');
         expect(vis.attr('data-with-dash')).to.be('value');
       });
-
-      it('should hide spy panel control by default', () => {
-        const vis = embedWithParams({});
-        expect(vis.find('[data-test-subj="spyToggleButton"]').length).to.be(0);
-      });
-
     });
 
     describe('embedVisualizationWithId', () => {
@@ -312,7 +306,7 @@ describe('visualize loader', () => {
         expect(container.find('[data-test-subj="visualizationLoader"]').attr('data-added')).to.be('value');
       });
 
-      describe('should allow updating the time range of the visualization', async () => {
+      it('should allow updating the time range of the visualization', async () => {
         const spy = sandbox.spy(VisualizeDataLoader.prototype, 'fetch');
 
         const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {

@@ -1,7 +1,11 @@
 <!-- vis type specific options -->
 <div class="kuiSideBarSection">
   <div class="form-group">
-    <label for="coordinateMapOptionsMapType">Map type</label>
+    <label
+      for="coordinateMapOptionsMapType"
+      i18n-id="tileMap.visParams.mapTypeLabel"
+      i18n-default-message="Map type"
+    ></label>
       <select
         id="coordinateMapOptionsMapType"
         name="agg"
@@ -15,9 +19,12 @@
 
 
   <div class="kuiSideBarFormRow" >
-    <label class="kuiSideBarFormRow__label" for="colorSchema">
-      Color Schema
-    </label>
+    <label
+      class="kuiSideBarFormRow__label"
+      for="colorSchema"
+      i18n-id="tileMap.visParams.colorSchemaLabel"
+      i18n-default-message="Color Schema"
+    ></label>
     <div class="kuiSideBarFormRow__control">
       <select
         id="colorSchema"
@@ -30,10 +37,11 @@
 
   <div ng-if="editorState.params.mapType === 'Heatmap'" class="form-group">
     <div>
-      <label>
-        Cluster size
-      </label>
-      <div class="vis-editor-agg-form-row">
+      <label
+        i18n-id="tileMap.visParams.clusterSizeLabel"
+        i18n-default-message="Cluster size"
+      ></label>
+      <div class="visEditorAgg__formRow--flex">
         <input
           name="heatClusterSize"
           ng-model="editorState.params.heatClusterSize"
@@ -44,7 +52,7 @@
           max="3.0"
           step="0.1"
           >
-        <div class="vis-editor-agg-form-value">
+        <div class="visEditorAgg__sliderValue">
           {{editorState.params.heatClusterSize}}
         </div>
       </div>
@@ -55,9 +63,12 @@
   <vislib-basic-options></vislib-basic-options>
 
   <div class="kuiSideBarFormRow">
-    <label class="kuiSideBarFormRow__label" for="desaturateMapTiles">
-      Desaturate tiles
-    </label>
+    <label
+      class="kuiSideBarFormRow__label"
+      for="desaturateMapTiles"
+      i18n-id="tileMap.visParams.desaturateTilesLabel"
+      i18n-default-message="Desaturate tiles"
+    ></label>
 
     <div class="kuiSideBarFormRow__control">
       <input
@@ -69,7 +80,7 @@
       >
       &nbsp;
       <icon-tip
-        content="'Reduce the vibrancy of tile colors. This does not work in any version of Internet Explorer.'"
+        content="{{::'tileMap.visParams.reduceVibrancyOfTileColorsTip' | i18n: {defaultMessage: '\'Reduce the vibrancy of tile colors. This does not work in any version of Internet Explorer.\''} }}"
         position="'right'"
       ></icon-tip>
     </div>

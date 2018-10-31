@@ -51,7 +51,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
     }
 
     async openContextMenu(parent) {
-      log.debug('openContextMenu');
+      log.debug(`openContextMenu(${parent}`);
       const panelOpen = await this.isContextMenuOpen(parent);
       if (!panelOpen) {
         await retry.try(async () => {
@@ -102,6 +102,12 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
     async removePanel() {
       log.debug('removePanel');
       await this.openContextMenu();
+      await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async removePanelByTitle(title) {
+      const header = await this.getPanelHeading(title);
+      await this.openContextMenu(header);
       await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 

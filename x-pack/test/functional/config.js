@@ -16,6 +16,9 @@ import {
   GrokDebuggerPageProvider,
   WatcherPageProvider,
   ReportingPageProvider,
+  SpaceSelectorPageProvider,
+  AccountSettingProvider,
+  InfraHomePageProvider,
 } from './page_objects';
 
 import {
@@ -64,8 +67,10 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/watcher'),
       resolve(__dirname, './apps/dashboard_mode'),
       resolve(__dirname, './apps/security'),
+      resolve(__dirname, './apps/spaces'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
+      resolve(__dirname, './apps/infra'),
     ],
 
     // define the name and providers for services that should be
@@ -107,12 +112,15 @@ export default async function ({ readConfigFile }) {
     pageObjects: {
       ...kibanaFunctionalConfig.get('pageObjects'),
       security: SecurityPageProvider,
+      accountSetting: AccountSettingProvider,
       monitoring: MonitoringPageProvider,
       logstash: LogstashPageProvider,
       graph: GraphPageProvider,
       grokDebugger: GrokDebuggerPageProvider,
       watcher: WatcherPageProvider,
       reporting: ReportingPageProvider,
+      spaceSelector: SpaceSelectorPageProvider,
+      infraHome: InfraHomePageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -159,6 +167,12 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/dev_tools/grokdebugger'
       },
+      spaceSelector: {
+        pathname: '/',
+      },
+      infraOps: {
+        pathname: '/app/infra'
+      }
     },
 
     // choose where esArchiver should load archives from

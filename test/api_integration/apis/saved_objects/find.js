@@ -140,6 +140,25 @@ export default function ({ getService }) {
         ));
       });
 
+      describe('missing type', () => {
+        it('should return 400', async () => (
+          await supertest
+            .get('/api/saved_objects/_find')
+            .expect(400)
+            .then(resp => {
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message: 'child "type" fails because ["type" is required]',
+                statusCode: 400,
+                validation: {
+                  keys: ['type'],
+                  source: 'query'
+                }
+              });
+            })
+        ));
+      });
+
       describe('page beyond total', () => {
         it('should return 200 with empty response', async () => (
           await supertest

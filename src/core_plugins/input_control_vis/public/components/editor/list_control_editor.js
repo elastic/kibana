@@ -19,8 +19,9 @@
 
 import PropTypes from 'prop-types';
 import React, { Component }  from 'react';
-import { IndexPatternSelect } from './index_pattern_select';
+import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiFormRow,
@@ -110,8 +111,11 @@ export class ListControlEditor extends Component {
       options.push(
         <EuiFormRow
           id={`parentSelect-${this.props.controlIndex}`}
-          label="Parent control"
-          helpText="Options are based on the value of parent control. Disabled if parent is not set."
+          label={<FormattedMessage id="inputControl.editor.listControl.parentLabel" defaultMessage="Parent control" />}
+          helpText={<FormattedMessage
+            id="inputControl.editor.listControl.parentDescription"
+            defaultMessage="Options are based on the value of parent control. Disabled if parent is not set."
+          />}
           key="parentSelect"
         >
           <EuiSelect
@@ -129,10 +133,13 @@ export class ListControlEditor extends Component {
       <EuiFormRow
         id={`multiselect-${this.props.controlIndex}`}
         key="multiselect"
-        helpText="Allow multiple selection"
+        helpText={<FormattedMessage
+          id="inputControl.editor.listControl.multiselectDescription"
+          defaultMessage="Allow multiple selection"
+        />}
       >
         <EuiSwitch
-          label="Multiselect"
+          label={<FormattedMessage id="inputControl.editor.listControl.multiselectLabel" defaultMessage="Multiselect" />}
           checked={this.props.controlParams.options.multiselect}
           onChange={(evt) => {
             this.props.handleCheckboxOptionChange(this.props.controlIndex, 'multiselect', evt);
@@ -143,8 +150,17 @@ export class ListControlEditor extends Component {
     );
 
     const dynamicOptionsHelpText = this.state.isStringField
-      ? 'Update options in response to user input'
-      : 'Only available for "string" fields';
+      ? (
+        <FormattedMessage
+          id="inputControl.editor.listControl.dynamicOptions.updateDescription"
+          defaultMessage="Update options in response to user input"
+        />
+      ) : (
+        <FormattedMessage
+          id="inputControl.editor.listControl.dynamicOptions.stringFieldDescription"
+          defaultMessage="Only available for &quot;string&quot; fields"
+        />
+      );
     options.push(
       <EuiFormRow
         id={`dynamicOptions-${this.props.controlIndex}`}
@@ -152,7 +168,7 @@ export class ListControlEditor extends Component {
         helpText={dynamicOptionsHelpText}
       >
         <EuiSwitch
-          label="Dynamic Options"
+          label={<FormattedMessage id="inputControl.editor.listControl.dynamicOptionsLabel" defaultMessage="Dynamic Options" />}
           checked={this.props.controlParams.options.dynamicOptions}
           onChange={(evt) => {
             this.props.handleCheckboxOptionChange(this.props.controlIndex, 'dynamicOptions', evt);
@@ -168,9 +184,9 @@ export class ListControlEditor extends Component {
       options.push(
         <EuiFormRow
           id={`size-${this.props.controlIndex}`}
-          label="Size"
+          label={<FormattedMessage id="inputControl.editor.listControl.sizeLabel" defaultMessage="Size" />}
           key="size"
-          helpText="Number of options"
+          helpText={<FormattedMessage id="inputControl.editor.listControl.sizeDescription" defaultMessage="Number of options" />}
         >
           <EuiFieldNumber
             min={1}
@@ -191,11 +207,9 @@ export class ListControlEditor extends Component {
     return (
       <div>
 
-        <IndexPatternSelect
+        <IndexPatternSelectFormRow
           indexPatternId={this.props.controlParams.indexPattern}
           onChange={this.props.handleIndexPatternChange}
-          getIndexPatterns={this.props.getIndexPatterns}
-          getIndexPattern={this.props.getIndexPattern}
           controlIndex={this.props.controlIndex}
         />
 
@@ -216,7 +230,6 @@ export class ListControlEditor extends Component {
 }
 
 ListControlEditor.propTypes = {
-  getIndexPatterns: PropTypes.func.isRequired,
   getIndexPattern: PropTypes.func.isRequired,
   controlIndex: PropTypes.number.isRequired,
   controlParams: PropTypes.object.isRequired,
@@ -230,3 +243,4 @@ ListControlEditor.propTypes = {
   })).isRequired,
   handleParentChange: PropTypes.func.isRequired,
 };
+

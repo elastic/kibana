@@ -2,7 +2,7 @@
 
 exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 <div
-  className="inputControlVis"
+  className="icvContainer"
 >
   <EuiFlexGroup
     alignItems="stretch"
@@ -24,7 +24,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
         }
       }
     >
-      <ListControl
+      <InjectIntl(ListControlUi)
         controlIndex={0}
         disableMsg={null}
         fetchOptions={[Function]}
@@ -75,7 +75,11 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Clear form
+          <FormattedMessage
+            defaultMessage="Clear form"
+            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -97,7 +101,11 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Cancel changes
+          <FormattedMessage
+            defaultMessage="Cancel changes"
+            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -119,7 +127,11 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Apply changes
+          <FormattedMessage
+            defaultMessage="Apply changes"
+            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -129,7 +141,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 
 exports[`Clear btns enabled when there are values 1`] = `
 <div
-  className="inputControlVis"
+  className="icvContainer"
 >
   <EuiFlexGroup
     alignItems="stretch"
@@ -151,7 +163,7 @@ exports[`Clear btns enabled when there are values 1`] = `
         }
       }
     >
-      <ListControl
+      <InjectIntl(ListControlUi)
         controlIndex={0}
         disableMsg={null}
         fetchOptions={[Function]}
@@ -202,7 +214,11 @@ exports[`Clear btns enabled when there are values 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Clear form
+          <FormattedMessage
+            defaultMessage="Clear form"
+            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -224,7 +240,11 @@ exports[`Clear btns enabled when there are values 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Cancel changes
+          <FormattedMessage
+            defaultMessage="Cancel changes"
+            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -246,7 +266,11 @@ exports[`Clear btns enabled when there are values 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Apply changes
+          <FormattedMessage
+            defaultMessage="Apply changes"
+            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -256,7 +280,7 @@ exports[`Clear btns enabled when there are values 1`] = `
 
 exports[`Renders list control 1`] = `
 <div
-  className="inputControlVis"
+  className="icvContainer"
 >
   <EuiFlexGroup
     alignItems="stretch"
@@ -278,7 +302,7 @@ exports[`Renders list control 1`] = `
         }
       }
     >
-      <ListControl
+      <InjectIntl(ListControlUi)
         controlIndex={0}
         disableMsg={null}
         fetchOptions={[Function]}
@@ -329,7 +353,11 @@ exports[`Renders list control 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Clear form
+          <FormattedMessage
+            defaultMessage="Clear form"
+            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -351,7 +379,11 @@ exports[`Renders list control 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Cancel changes
+          <FormattedMessage
+            defaultMessage="Cancel changes"
+            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -373,7 +405,11 @@ exports[`Renders list control 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Apply changes
+          <FormattedMessage
+            defaultMessage="Apply changes"
+            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -383,7 +419,7 @@ exports[`Renders list control 1`] = `
 
 exports[`Renders range control 1`] = `
 <div
-  className="inputControlVis"
+  className="icvContainer"
 >
   <EuiFlexGroup
     alignItems="stretch"
@@ -405,7 +441,7 @@ exports[`Renders range control 1`] = `
         }
       }
     >
-      <RangeControl
+      <InjectIntl(RangeControlUi)
         control={
           Object {
             "id": "mock-range-control",
@@ -456,7 +492,11 @@ exports[`Renders range control 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Clear form
+          <FormattedMessage
+            defaultMessage="Clear form"
+            id="inputControl.vis.inputControlVis.clearFormButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -478,7 +518,11 @@ exports[`Renders range control 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Cancel changes
+          <FormattedMessage
+            defaultMessage="Cancel changes"
+            id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -500,7 +544,11 @@ exports[`Renders range control 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Apply changes
+          <FormattedMessage
+            defaultMessage="Apply changes"
+            id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>

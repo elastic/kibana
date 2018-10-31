@@ -169,8 +169,16 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
-    async isDuplicateTitleWarningDisplayed() {
-      return await testSubjects.exists('titleDupicateWarnMsg');
+    /**
+     * Asserts that the duplicate title warning is either displayed or not displayed.
+     * @param { displayed: boolean }
+     */
+    async expectDuplicateTitleWarningDisplayed({ displayed }) {
+      if (displayed) {
+        await testSubjects.existOrFail('titleDupicateWarnMsg');
+      } else {
+        await testSubjects.missingOrFail('titleDupicateWarnMsg');
+      }
     }
 
     async switchToEditMode() {
@@ -292,7 +300,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async renameDashboard(dashName) {
       log.debug(`Naming dashboard ` + dashName);
       await testSubjects.click('dashboardRenameButton');
-      await testSubjects.setValue('dashboardTitle', dashName);
+      await testSubjects.setValue('savedObjectTitle', dashName);
     }
 
     /**
@@ -309,20 +317,16 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.clickSave();
       }
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
       // Confirm that the Dashboard has actually been saved
-      if (!await testSubjects.exists('saveDashboardSuccess')) {
-        throw new Error('Expected to find "saveDashboardSuccess" toast after saving dashboard');
-      }
-
+      await testSubjects.existOrFail('saveDashboardSuccess');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await this.waitForSaveModalToClose();
     }
 
     async waitForSaveModalToClose() {
       log.debug('Waiting for dashboard save modal to close');
       await retry.try(async () => {
-        if (await testSubjects.exists('dashboardSaveModal')) {
+        if (await testSubjects.exists('savedObjectSaveModal')) {
           throw new Error('dashboard save still open');
         }
       });
@@ -342,10 +346,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickSave() {
-      await retry.try(async () => {
-        log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveDashboardButton');
-      });
+      log.debug('DashboardPage.clickSave');
+      await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
     /**
@@ -359,7 +361,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       log.debug('entering new title');
-      await testSubjects.setValue('dashboardTitle', dashboardTitle);
+      await testSubjects.setValue('savedObjectTitle', dashboardTitle);
 
       if (saveOptions.storeTimeWithDashboard !== undefined) {
         await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);

@@ -52,21 +52,20 @@ export class Session {
   async get(request) {
     assertRequest(request);
 
-    return new Promise((resolve) => {
-      this._server.auth.test(HAPI_STRATEGY_NAME, request, (err, session) => {
-        if (Array.isArray(session)) {
-          const warning = `Found ${session.length} auth sessions when we were only expecting 1.`;
-          this._server.log(['warning', 'security', 'auth', 'session'], warning);
-          return resolve(null);
-        }
+    try {
+      const session = await this._server.auth.test(HAPI_STRATEGY_NAME, request);
 
-        if (err) {
-          this._server.log(['debug', 'security', 'auth', 'session'], err);
-        }
+      if (Array.isArray(session)) {
+        const warning = `Found ${session.length} auth sessions when we were only expecting 1.`;
+        this._server.log(['warning', 'security', 'auth', 'session'], warning);
+        return null;
+      }
 
-        resolve(err ? null : session.value);
-      });
-    });
+      return session.value;
+    } catch (err) {
+      this._server.log(['debug', 'security', 'auth', 'session'], err);
+      return null;
+    }
   }
 
   /**
@@ -102,25 +101,34 @@ export class Session {
    */
   static async create(server) {
     // Register HAPI plugin that manages session cookie and delegate parsing of the session cookie to it.
-    await new Promise((resolve, reject) => {
-      server.register(hapiAuthCookie, (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
-      });
+    await server.register({
+      plugin: hapiAuthCookie
     });
 
     const config =  server.config();
-    server.auth.strategy(HAPI_STRATEGY_NAME, 'cookie', HAPI_STRATEGY_MODE, {
-      cookie: config.get('xpack.security.cookieName'),
-      password: config.get('xpack.security.encryptionKey'),
+    const httpOnly = true;
+    const name = config.get('xpack.security.cookieName');
+    const password = config.get('xpack.security.encryptionKey');
+    const path = `${config.get('server.basePath')}/`;
+    const secure = config.get('xpack.security.secureCookies');
+
+    server.auth.strategy(HAPI_STRATEGY_NAME, 'cookie', {
+      cookie: name,
+      password,
       clearInvalid: true,
       validateFunc: Session._validateCookie,
-      isSecure: config.get('xpack.security.secureCookies'),
-      path: `${config.get('server.basePath')}/`
+      isHttpOnly: httpOnly,
+      isSecure: secure,
+      isSameSite: false,
+      path: path,
     });
+
+    if (HAPI_STRATEGY_MODE) {
+      server.auth.default({
+        strategy: HAPI_STRATEGY_NAME,
+        mode: 'required'
+      });
+    }
 
     return new Session(server);
   }
@@ -133,12 +141,11 @@ export class Session {
    * @param {function} callback Callback to be called once validation is completed.
    * @private
    */
-  static _validateCookie(request, session, callback) {
+  static _validateCookie(request, session) {
     if (session.expires && session.expires < Date.now()) {
-      callback(new Error('Session has expired'), false /* isValid */);
-      return;
+      return { valid: false };
     }
 
-    callback(null /* error */, true /* isValid */, session);
+    return { valid: true };
   }
 }

@@ -40,7 +40,7 @@ beforeEach(() => {
 test('render', () => {
   const component = shallow(<DashboardAddPanel
     onClose={onClose}
-    find={() => {}}
+    visTypes={{}}
     addNewPanel={() => {}}
     addNewVis={() => {}}
   />);

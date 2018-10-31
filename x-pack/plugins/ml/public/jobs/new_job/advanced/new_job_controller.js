@@ -14,7 +14,7 @@ import { parseInterval } from 'ui/utils/parse_interval';
 import { timefilter } from 'ui/timefilter';
 
 import uiRoutes from 'ui/routes';
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import template from './new_job.html';
 import saveStatusTemplate from 'plugins/ml/jobs/new_job/advanced/save_status_modal/save_status_modal.html';
@@ -38,7 +38,7 @@ uiRoutes
   .when('/jobs/new_job/advanced', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkCreateJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       indexPatterns: loadIndexPatterns,
@@ -51,7 +51,7 @@ uiRoutes
   .when('/jobs/new_job/advanced/:jobId', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkCreateJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       indexPatterns: loadIndexPatterns,
@@ -194,6 +194,7 @@ module.controller('MlNewJob',
         scrollSizeDefault: 1000,
         indicesText: '',
         typesText: '',
+        scriptFields: [],
       },
       saveStatus: {
         job: 0,
@@ -709,7 +710,16 @@ module.controller('MlNewJob',
         });
 
         const indicesText = datafeedConfig.indices.join(',');
-        $scope.ui.fieldsUpToDate = (indicesText === $scope.ui.datafeed.indicesText);
+
+        const scriptFields = (datafeedConfig.script_fields !== undefined) ? Object.keys(datafeedConfig.script_fields) : [];
+
+        let fieldsUpToDate = true;
+        if (indicesText !== $scope.ui.datafeed.indicesText || _.isEqual(scriptFields, $scope.ui.datafeed.scriptFields) === false) {
+          fieldsUpToDate = false;
+        }
+
+        $scope.ui.fieldsUpToDate = fieldsUpToDate;
+
         const types = Array.isArray(datafeedConfig.types) ? datafeedConfig.types : [];
 
         $scope.ui.datafeed = {
@@ -722,6 +732,7 @@ module.controller('MlNewJob',
           scrollSizeDefault: scrollSizeDefault,
           indicesText,
           typesText: types.join(','),
+          scriptFields,
         };
 
         if ($scope.ui.fieldsUpToDate === false) {
@@ -758,8 +769,8 @@ module.controller('MlNewJob',
     function setFieldDelimiterControlsFromText() {
       if ($scope.job.data_description && $scope.job.data_description.field_delimiter) {
 
-      // if the data format has not been set and fieldDelimiter exists,
-      // assume the format is delimited
+        // if the data format has not been set and fieldDelimiter exists,
+        // assume the format is delimited
         if ($scope.job.data_description.format === undefined) {
           $scope.job.data_description.format = 'delimited';
         }

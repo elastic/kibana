@@ -43,7 +43,8 @@ import {
   getNewConditionDefaults,
   isValidRule,
   saveJobRule,
-  deleteJobRule
+  deleteJobRule,
+  addItemToFilter,
 } from './utils';
 
 import { ACTION, CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../../../common/constants/detector_rule';
@@ -130,7 +131,7 @@ export class RuleEditorFlyout extends Component {
     });
 
     if (this.partitioningFieldNames.length > 0 && this.canGetFilters) {
-      // Load the current list of filters.
+      // Load the current list of filters. These are used for configuring rule scope.
       ml.filters.filters()
         .then((filters) => {
           const filterListIds = filters.map(filter => filter.filter_id);
@@ -305,19 +306,33 @@ export class RuleEditorFlyout extends Component {
 
   saveEdit = () => {
     const {
-      job,
-      anomaly,
       rule,
       ruleIndex
+    } = this.state;
+
+    this.updateRuleAtIndex(ruleIndex, rule);
+  }
+
+  updateRuleAtIndex = (ruleIndex, editedRule) => {
+    const {
+      job,
+      anomaly,
     } = this.state;
 
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
-    saveJobRule(job, detectorIndex, ruleIndex, rule)
+    saveJobRule(job, detectorIndex, ruleIndex, editedRule)
       .then((resp) => {
         if (resp.success) {
-          toastNotifications.addSuccess(`Changes to ${jobId} detector rules saved`);
+          toastNotifications.add(
+            {
+              title: `Changes to ${jobId} detector rules saved`,
+              color: 'success',
+              iconType: 'check',
+              text: 'Note that changes will take effect for new results only.'
+            }
+          );
           this.closeFlyout();
         } else {
           toastNotifications.addDanger(`Error saving changes to ${jobId} detector rules`);
@@ -353,6 +368,27 @@ export class RuleEditorFlyout extends Component {
           errorMessage += ` : ${error.message}`;
         }
         toastNotifications.addDanger(errorMessage);
+      });
+  }
+
+  addItemToFilterList = (item, filterId, closeFlyoutOnAdd) => {
+    addItemToFilter(item, filterId)
+      .then(() => {
+        if (closeFlyoutOnAdd === true) {
+          toastNotifications.add(
+            {
+              title: `Added ${item} to ${filterId}`,
+              color: 'success',
+              iconType: 'check',
+              text: 'Note that changes will take effect for new results only.'
+            }
+          );
+          this.closeFlyout();
+        }
+      })
+      .catch((error) => {
+        console.log(`Error adding ${item} to filter ${filterId}:`, error);
+        toastNotifications.addDanger(`An error occurred adding ${item} to filter ${filterId}`);
       });
   }
 
@@ -392,9 +428,10 @@ export class RuleEditorFlyout extends Component {
             <SelectRuleAction
               job={job}
               anomaly={anomaly}
-              detectorIndex={anomaly.detectorIndex}
               setEditRuleIndex={this.setEditRuleIndex}
+              updateRuleAtIndex={this.updateRuleAtIndex}
               deleteRuleAtIndex={this.deleteRuleAtIndex}
+              addItemToFilterList={this.addItemToFilterList}
             />
           </EuiFlyoutBody>
 
@@ -442,6 +479,7 @@ export class RuleEditorFlyout extends Component {
             <DetectorDescriptionList
               job={job}
               detector={detector}
+              anomaly={anomaly}
             />
             <EuiSpacer size="m" />
             <EuiText>

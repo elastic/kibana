@@ -29,19 +29,18 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.reporting.initTests();
     });
 
-    const expectUnsavedChangesWarning = async () => {
-      await PageObjects.reporting.openReportingPanel();
-      const warningExists = await PageObjects.reporting.getUnsavedChangesWarningExists();
-      expect(warningExists).to.be(true);
-      const buttonExists = await PageObjects.reporting.getGenerateReportButtonExists();
-      expect(buttonExists).to.be(false);
+    const expectDisabledGenerateReportButton = async () => {
+      const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
+      await retry.try(async () => {
+        const isDisabled = await generateReportButton.getProperty('disabled');
+        expect(isDisabled).to.be(true);
+      });
     };
 
     const expectEnabledGenerateReportButton = async () => {
-      await PageObjects.reporting.openReportingPanel();
-      const printPdfButton = await PageObjects.reporting.getGenerateReportButton();
+      const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
       await retry.try(async () => {
-        const isDisabled = await printPdfButton.getProperty('disabled');
+        const isDisabled = await generateReportButton.getProperty('disabled');
         expect(isDisabled).to.be(false);
       });
     };
@@ -72,16 +71,18 @@ export default function ({ getService, getPageObjects }) {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.clickNewDashboard();
-          await expectUnsavedChangesWarning();
+          await PageObjects.reporting.openPdfReportingPanel();
+          await expectDisabledGenerateReportButton();
         });
 
         it('becomes available when saved', async () => {
           await PageObjects.dashboard.saveDashboard('mydash');
+          await PageObjects.reporting.openPdfReportingPanel();
           await expectEnabledGenerateReportButton();
         });
       });
 
-      describe('Print Layout', () => {
+      describe.skip('Print Layout', () => {
         it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
@@ -101,7 +102,8 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.dashboard.saveDashboard('report test');
 
-          await PageObjects.reporting.openReportingPanel();
+          await PageObjects.reporting.openPdfReportingPanel();
+          await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
 
@@ -129,7 +131,8 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.switchToEditMode();
           await PageObjects.dashboard.useMargins(true);
           await PageObjects.dashboard.saveDashboard('report test');
-          await PageObjects.reporting.openReportingPanel();
+          await PageObjects.reporting.openPdfReportingPanel();
+          await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
 
@@ -150,7 +153,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('Preserve Layout', () => {
+      describe.skip('Preserve Layout', () => {
         it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
@@ -158,9 +161,8 @@ export default function ({ getService, getPageObjects }) {
           // report than phantom.
           this.timeout(360000);
 
-          await PageObjects.reporting.openReportingPanel();
+          await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
-          await PageObjects.reporting.clickPreserveLayoutOption();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
@@ -190,23 +192,25 @@ export default function ({ getService, getPageObjects }) {
       describe('Generate CSV button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('discover');
-          await expectUnsavedChangesWarning();
+          await PageObjects.reporting.openCsvReportingPanel();
+          await expectDisabledGenerateReportButton();
         });
 
         it('becomes available when saved', async () => {
           await PageObjects.discover.saveSearch('my search');
+          await PageObjects.reporting.openCsvReportingPanel();
           await expectEnabledGenerateReportButton();
         });
 
         it('generates a report with data', async () => {
           await PageObjects.reporting.setTimepickerInDataRange();
-          await PageObjects.reporting.clickTopNavReportingLink();
+          await PageObjects.reporting.openCsvReportingPanel();
           await expectReportCanBeCreated();
         });
 
         it('generates a report with no data', async () => {
           await PageObjects.reporting.setTimepickerInNoDataRange();
-          await PageObjects.reporting.clickTopNavReportingLink();
+          await PageObjects.reporting.openCsvReportingPanel();
           await expectReportCanBeCreated();
         });
       });
@@ -218,7 +222,8 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.common.navigateToUrl('visualize', 'new');
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
-          await expectUnsavedChangesWarning();
+          await PageObjects.reporting.openPdfReportingPanel();
+          await expectDisabledGenerateReportButton();
         });
 
         it('becomes available when saved', async () => {
@@ -227,15 +232,16 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.selectAggregation('Date Histogram');
           await PageObjects.visualize.clickGo();
           await PageObjects.visualize.saveVisualizationExpectSuccess('my viz');
+          await PageObjects.reporting.openPdfReportingPanel();
           await expectEnabledGenerateReportButton();
         });
 
-        it('matches baseline report', async function () {
+        it.skip('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);
 
-          await PageObjects.reporting.openReportingPanel();
+          await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
 

@@ -49,6 +49,7 @@ describe('callClient', () => {
       _flatten: () => ({}),
       requestIsStopped: () => {},
       getField: () => 'indexPattern',
+      getPreferredSearchStrategyId: () => undefined,
       ...overrideSource
     };
 
@@ -134,7 +135,7 @@ describe('callClient', () => {
         });
       });
 
-      it(`still resolves the promise in spite of the failure`, () => {
+      it(`still bubbles up the failure`, () => {
         const searchRequestFail = createSearchRequest('fail', {
           source: {
             getField: () => ({ type: 'fail' }),
@@ -144,22 +145,7 @@ describe('callClient', () => {
         searchRequests = [ searchRequestFail ];
 
         return callClient(searchRequests).then(results => {
-          expect(results).to.eql(undefined);
-        });
-      });
-
-      it(`calls the errorHandler provided to the searchRequest`, () => {
-        const errorHandlerSpy = sinon.spy();
-        const searchRequestFail = createSearchRequest('fail', {
-          source: {
-            getField: () => ({ type: 'fail' }),
-          },
-        }, errorHandlerSpy);
-
-        searchRequests = [ searchRequestFail ];
-
-        return callClient(searchRequests).then(() => {
-          sinon.assert.calledOnce(errorHandlerSpy);
+          expect(results).to.eql([{ error: new Error('Search failed') }]);
         });
       });
     });
@@ -183,19 +169,6 @@ describe('callClient', () => {
 
       return callClient(searchRequests).then(() => {
         expect(whenAbortedSpy.callCount).to.be(1);
-      });
-    });
-
-    it(`calls searchRequest.handleFailure() with the ES error that's thrown`, async () => {
-      esShouldError = true;
-      const searchRequest = createSearchRequest(1);
-
-      const handleFailureSpy = sinon.spy();
-      searchRequest.handleFailure = handleFailureSpy;
-      searchRequests = [ searchRequest ];
-
-      return callClient(searchRequests).then(() => {
-        sinon.assert.calledWith(handleFailureSpy, 'fake es error');
       });
     });
   });
@@ -347,18 +320,24 @@ describe('callClient', () => {
       searchRequestA = createSearchRequest('a', {
         source: {
           getField: () => ({ type: 'a' }),
+          getSearchStrategyForSearchRequest: () => {},
+          getPreferredSearchStrategyId: () => {},
         },
       });
 
       searchRequestB = createSearchRequest('b', {
         source: {
           getField: () => ({ type: 'b' }),
+          getSearchStrategyForSearchRequest: () => {},
+          getPreferredSearchStrategyId: () => {},
         },
       });
 
       searchRequestA2 = createSearchRequest('a2', {
         source: {
           getField: () => ({ type: 'a' }),
+          getSearchStrategyForSearchRequest: () => {},
+          getPreferredSearchStrategyId: () => {},
         },
       });
     });

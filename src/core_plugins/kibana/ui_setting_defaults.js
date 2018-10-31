@@ -44,6 +44,12 @@ export function getUiSettingDefaults() {
       description: `When set, * is allowed as the first character in a query clause. Currently only applies when experimental query
         features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options`,
     },
+    'k7design': {
+      name: 'Use the new K7 UI design',
+      value: false,
+      description: `When set, Kibana will use the new K7 design targeted for release in 7.0. At this time, not all features are
+        implemented.`,
+    },
     'search:queryLanguage': {
       name: 'Query language',
       value: 'lucene',
@@ -184,6 +190,15 @@ export function getUiSettingDefaults() {
       description: `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html"
         target="_blank" rel="noopener noreferrer">Request Preference</a>
         used when <strong>courier:setRequestPreference</strong> is set to "custom".`,
+      category: ['search'],
+    },
+    'courier:maxConcurrentShardRequests': {
+      name: 'Max Concurrent Shard Requests',
+      value: 0,
+      type: 'number',
+      description: `Controls the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
+        target="_blank" rel="noopener noreferrer">max_concurrent_shard_requests</a>
+        setting used for _msearch requests sent by Kibana. Set to 0 to disable this config and use the Elasticsearch default.`,
       category: ['search'],
     },
     'fields:popularLimit': {

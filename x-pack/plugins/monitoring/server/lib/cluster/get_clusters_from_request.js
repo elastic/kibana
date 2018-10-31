@@ -18,12 +18,20 @@ import { alertsClusterSearch } from '../../cluster_alerts/alerts_cluster_search'
 import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
 import { getClustersSummary } from './get_clusters_summary';
 import { CLUSTER_ALERTS_SEARCH_SIZE } from '../../../common/constants';
+import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
  */
 export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, start, end } = {}) {
-  const { esIndexPattern, kbnIndexPattern, lsIndexPattern, beatsIndexPattern, alertsIndex } = indexPatterns;
+  const {
+    esIndexPattern,
+    kbnIndexPattern,
+    lsIndexPattern,
+    beatsIndexPattern,
+    apmIndexPattern,
+    alertsIndex
+  } = indexPatterns;
 
   // get clusters with stats and cluster state
   let clusters = await getClustersStats(req, esIndexPattern, clusterUuid);
@@ -104,6 +112,13 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
   beatsByCluster.forEach(beats => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: beats.clusterUuid });
     set(clusters[clusterIndex], 'beats', beats.stats);
+  });
+
+  // add apm data
+  const apmsByCluster = await getApmsForClusters(req, apmIndexPattern, clusters);
+  apmsByCluster.forEach(apm => {
+    const clusterIndex = findIndex(clusters, { cluster_uuid: apm.clusterUuid });
+    set(clusters[clusterIndex], 'apm', apm.stats);
   });
 
   const config = req.server.config();
