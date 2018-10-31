@@ -54,6 +54,7 @@ export const FieldList = ({
     toolsRight: addButton ? addButton : undefined,
     box: {
       incremental: true,
+      placeholder: 'Search',
     },
   };
 

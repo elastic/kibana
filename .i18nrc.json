@@ -6,6 +6,7 @@
     "kbnVislibVisTypes": "src/core_plugins/kbn_vislib_vis_types",
     "markdownVis": "src/core_plugins/markdown_vis",
     "metricVis": "src/core_plugins/metric_vis",
+    "vega": "src/core_plugins/vega",
     "tableVis": "src/core_plugins/table_vis",
     "regionMap": "src/core_plugins/region_map",
     "statusPage": "src/core_plugins/status_page",
@@ -13,6 +14,7 @@
     "tagCloud": "src/core_plugins/tagcloud",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
     "xpack.watcher": "x-pack/plugins/watcher",
+    "xpack.rollupJobs": "x-pack/plugins/rollup",
     "xpack.security": "x-pack/plugins/security"
   },
   "exclude": [
