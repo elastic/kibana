@@ -38,6 +38,12 @@ import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tool
 import { CHART_TYPE } from '../explorer_constants';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
+
+// If a rare/event-distribution chart has a cardinality of 10 or less,
+// then the chart will display the y axis labels for each lane of events.
+// If cardinality is higher, then the axis will just be hidden.
+// Cardinality in this case refers to the available for display,
+// not the cardinality of the full source data set.
 const Y_AXIS_LABEL_THRESHOLD = 10;
 
 export class ExplorerChartDistribution extends React.Component {
