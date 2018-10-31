@@ -6,7 +6,13 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
     color="warning"
     iconType="alert"
     size="m"
-    title="Proceed with caution"
+    title={
+      <FormattedMessage
+        defaultMessage="Proceed with caution"
+        id="common.ui.fieldEditor.warningCallOutHeader"
+        values={Object {}}
+      />
+    }
   >
     <p>
       <FormattedMessage

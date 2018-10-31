@@ -31,6 +31,12 @@ const translateCallMessageSource = `
 i18n.translate('message-id-2', { defaultMessage: 'Default message 2', context: 'Message context 2' });
 `;
 
+const i18nCallMessageWithTemplateLiteralSource = `
+i18n('message-id-3', { defaultMessage: \`Default
+message 3\`, context: \`Message
+context 3\` });
+`;
+
 describe('dev/i18n/extractors/i18n_call', () => {
   test('extracts "i18n" and "i18n.translate" functions call message', () => {
     let callExpressionNode = [...traverseNodes(parse(i18nCallMessageSource).program.body)].find(
@@ -42,6 +48,12 @@ describe('dev/i18n/extractors/i18n_call', () => {
     callExpressionNode = [...traverseNodes(parse(translateCallMessageSource).program.body)].find(
       node => isCallExpression(node)
     );
+
+    expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
+
+    callExpressionNode = [
+      ...traverseNodes(parse(i18nCallMessageWithTemplateLiteralSource).program.body),
+    ].find(node => isCallExpression(node));
 
     expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
   });

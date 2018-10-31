@@ -108,9 +108,11 @@ export const security = (kibana) => new kibana.Plugin({
     // Create a Hapi auth scheme that should be applied to each request.
     server.auth.scheme('login', () => ({ authenticate: authenticateFactory(server) }));
 
-    // The `required` means that the `session` strategy that is based on `login` schema defined above will be
+    server.auth.strategy('session', 'login');
+
+    // The default means that the `session` strategy that is based on `login` schema defined above will be
     // automatically assigned to all routes that don't contain an auth config.
-    server.auth.strategy('session', 'login', 'required');
+    server.auth.default('session');
 
     // exposes server.plugins.security.authorization
     const authorization = createAuthorizationService(server, xpackInfoFeature);

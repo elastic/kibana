@@ -18,7 +18,7 @@
  */
 
 import { omit } from 'lodash';
-import { getRootType } from '../../../mappings';
+import { getRootType, getRootPropertiesObjects } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
@@ -246,6 +246,38 @@ export class SavedObjectsRepository {
   }
 
   /**
+   * Deletes all objects from the provided namespace.
+   *
+   * @param {string} namespace
+   * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
+   */
+  async deleteByNamespace(namespace) {
+
+    if (!namespace || typeof namespace !== 'string') {
+      throw new TypeError(`namespace is required, and must be a string`);
+    }
+
+    const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
+
+    const typesToDelete = allTypes.filter(type => !this._schema.isNamespaceAgnostic(type));
+
+    const esOptions = {
+      index: this._index,
+      ignore: [404],
+      refresh: 'wait_for',
+      body: {
+        conflicts: 'proceed',
+        ...getSearchDsl(this._mappings, this._schema, {
+          namespace,
+          type: typesToDelete,
+        })
+      }
+    };
+
+    return await this._writeToCluster('deleteByQuery', esOptions);
+  }
+
+  /**
    * @param {object} [options={}]
    * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
@@ -466,6 +498,82 @@ export class SavedObjectsRepository {
       version: response._version,
       attributes
     };
+  }
+
+  /**
+   * Increases a counter field by one. Creates the document if one doesn't exist for the given id.
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {string} counterFieldName
+   * @param {object} [options={}]
+   * @property {object} [options.migrationVersion=undefined]
+   * @returns {promise}
+   */
+  async incrementCounter(type, id, counterFieldName, options = {}) {
+    if (typeof type !== 'string') {
+      throw new Error('"type" argument must be a string');
+    }
+    if (typeof counterFieldName !== 'string') {
+      throw new Error('"counterFieldName" argument must be a string');
+    }
+
+    const {
+      migrationVersion,
+      namespace,
+    } = options;
+
+    const time = this._getCurrentTime();
+
+
+    const migrated = this._migrator.migrateDocument({
+      id,
+      type,
+      attributes: { [counterFieldName]: 1 },
+      migrationVersion,
+      updated_at: time,
+    });
+
+    const raw = this._serializer.savedObjectToRaw(migrated);
+
+    const response = await this._writeToCluster('update', {
+      id: this._serializer.generateRawId(namespace, type, id),
+      type: this._type,
+      index: this._index,
+      refresh: 'wait_for',
+      _source: true,
+      body: {
+        script: {
+          source: `
+              if (ctx._source[params.type][params.counterFieldName] == null) {
+                ctx._source[params.type][params.counterFieldName] = params.count;
+              }
+              else {
+                ctx._source[params.type][params.counterFieldName] += params.count;
+              }
+              ctx._source.updated_at = params.time;
+            `,
+          lang: 'painless',
+          params: {
+            count: 1,
+            time,
+            type,
+            counterFieldName,
+          },
+        },
+        upsert: raw._source,
+      },
+    });
+
+    return {
+      id,
+      type,
+      updated_at: time,
+      version: response._version,
+      attributes: response.get._source[type],
+    };
+
+
   }
 
   async _writeToCluster(method, params) {

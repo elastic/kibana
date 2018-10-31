@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { partial } from 'lodash';
+import boom from 'boom';
+import { isSecurityEnabled } from './feature_check';
 
 export const createHandlers = (request, server) => {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -17,6 +18,15 @@ export const createHandlers = (request, server) => {
         ? `${server.info.uri}${config.get('server.basePath')}`
         : server.info.uri,
     httpHeaders: request.headers,
-    elasticsearchClient: partial(callWithRequest, request),
+    elasticsearchClient: async (...args) => {
+      // check if the session is valid because continuing to use it
+      // TODO: replace this when we use the method exposed by security https://github.com/elastic/kibana/pull/24616
+      if (isSecurityEnabled(server)) {
+        const authenticationResult = await server.plugins.security.authenticate(request);
+        if (!authenticationResult.succeeded()) throw boom.unauthorized(authenticationResult.error);
+      }
+
+      return callWithRequest(request, ...args);
+    },
   };
 };

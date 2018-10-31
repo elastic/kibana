@@ -203,7 +203,7 @@ export class PipelineList extends React.Component {
     const { clonePipeline, createPipeline, isReadOnly, openPipeline } = this.props;
     const { isSelectable, message, pipelines, selection, showConfirmDeleteModal } = this.state;
     return (
-      <EuiPage style={{ minHeight: '100vh' }} data-test-subj="pipelineList">
+      <EuiPage data-test-subj="pipelineList">
         <EuiPageContent horizontalPosition="center">
           {this.renderNoPermissionCallOut()}
           <PipelinesTable

@@ -19,9 +19,10 @@
 
 import * as PropTypes from 'prop-types';
 import * as React from 'react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider, intlShape } from 'react-intl';
 
 import * as i18n from '../core';
+import { isPseudoLocale, translateUsingPseudoLocale } from '../core/pseudo_locale';
 
 /**
  * The library uses the provider pattern to scope an i18n context to a tree
@@ -29,22 +30,46 @@ import * as i18n from '../core';
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
 export class I18nProvider extends React.PureComponent {
-  public static propTypes = {
-    children: PropTypes.object,
-  };
+  public static propTypes = { children: PropTypes.element.isRequired };
+  public static contextTypes = { intl: intlShape };
+  public static childContextTypes = { intl: intlShape };
+
+  public getChildContext() {
+    // if pseudo locale is set, default intl.formatMessage should be decorated
+    // with the pseudo localization function
+    if (this.context.intl && isPseudoLocale(i18n.getLocale())) {
+      const formatMessage = this.context.intl.formatMessage;
+      this.context.intl.formatMessage = (...args: any[]) => {
+        return translateUsingPseudoLocale(formatMessage.apply(this.context.intl, args));
+      };
+    }
+
+    return { intl: this.context.intl };
+  }
 
   public render() {
-    const { children } = this.props;
+    const child = React.Children.only(this.props.children);
+    if (this.context.intl) {
+      // We can have IntlProvider somewhere within ancestors so we just reuse it
+      // and don't recreate with another IntlProvider
+      return child;
+    }
 
     return (
       <IntlProvider
         locale={i18n.getLocale()}
-        messages={i18n.getMessages()}
+        messages={i18n.getTranslation().messages}
         defaultLocale={i18n.getDefaultLocale()}
-        formats={i18n.getFormats()}
+        formats={i18n.getTranslation().formats}
         defaultFormats={i18n.getFormats()}
+        textComponent={React.Fragment}
       >
-        {children}
+        {
+          // We use `<I18nProvider>{child}</I18nProvider>` trick to decorate intl.formatMessage
+          // in `getChildContext()` method. I18nProdiver will have `this.context.intl` so the
+          // recursion won't be infinite
+        }
+        {isPseudoLocale(i18n.getLocale()) ? <I18nProvider>{child}</I18nProvider> : child}
       </IntlProvider>
     );
   }

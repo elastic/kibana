@@ -15,9 +15,10 @@ import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
 
+import { CHART_TYPE } from '../explorer/explorer_constants';
 
 export const LINE_CHART_ANOMALY_RADIUS = 7;
-export const MULTI_BUCKET_SYMBOL_SIZE = 144;   // In square pixels for use with d3 symbol.size
+export const MULTI_BUCKET_SYMBOL_SIZE = 100;   // In square pixels for use with d3 symbol.size
 export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
 
 const MAX_LABEL_WIDTH = 100;
@@ -127,6 +128,29 @@ export function filterAxisLabels(selection, chartWidth) {
     });
 }
 
+// feature flags for chart types
+const EVENT_DISTRIBUTION_ENABLED = true;
+const POPULATION_DISTRIBUTION_ENABLED = true;
+
+// get the chart type based on its configuration
+export function getChartType(config) {
+  if (
+    EVENT_DISTRIBUTION_ENABLED &&
+    config.functionDescription === 'rare' &&
+    (config.entityFields.some(f => f.fieldType === 'over') === false)
+  ) {
+    return CHART_TYPE.EVENT_DISTRIBUTION;
+  } else if (
+    POPULATION_DISTRIBUTION_ENABLED &&
+    config.functionDescription !== 'rare' &&
+    config.entityFields.some(f => f.fieldType === 'over')
+  ) {
+    return CHART_TYPE.POPULATION_DISTRIBUTION;
+  }
+
+  return CHART_TYPE.SINGLE_METRIC;
+}
+
 export function getExploreSeriesLink(series) {
   // Open the Single Metric dashboard over the same overall bounds and
   // zoomed in to the same time as the current chart.
@@ -215,6 +239,12 @@ const TICK_DIRECTION = {
 // the bounds of earliest and latest. This is useful for the Anomaly Explorer Charts
 // to align axis ticks with the gray area resembling the swimlane cell selection.
 export function getTickValues(startTimeMs, tickInterval, earliest, latest) {
+  // A tickInterval equal or smaller than 0 would trigger a call stack exception,
+  // so we're trying to catch that before it happens.
+  if (tickInterval <= 0) {
+    throw Error('tickInterval must be larger than 0.');
+  }
+
   const tickValues = [startTimeMs];
 
   function addTicks(ts, operator) {
@@ -294,7 +324,7 @@ export function removeLabelOverlap(axis, startTimeMs, tickInterval, width) {
     const fn = function (ts) {
       const filteredTicks = axis.selectAll('.tick').filter(d => d === ts);
 
-      if (filteredTicks[0].length === 0) {
+      if (filteredTicks.length === 0 || filteredTicks[0].length === 0) {
         return false;
       }
 

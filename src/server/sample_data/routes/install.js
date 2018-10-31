@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Boom from 'boom';
 import Joi from 'joi';
 
 import { loadData } from './lib/load_data';
@@ -75,13 +76,13 @@ export const createInstallRoute = () => ({
         id: Joi.string().required(),
       }).required()
     },
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       const server = request.server;
       const sampleDataset = server.getSampleDatasets().find(sampleDataset => {
         return sampleDataset.id === request.params.id;
       });
       if (!sampleDataset) {
-        return reply().code(404);
+        return h.response().code(404);
       }
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -122,7 +123,7 @@ export const createInstallRoute = () => ({
         } catch (err) {
           const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
           server.log(['warning'], errMsg);
-          return reply(errMsg).code(err.status);
+          return h.response(errMsg).code(err.status);
         }
 
         try {
@@ -131,20 +132,26 @@ export const createInstallRoute = () => ({
           counts[index] = count;
         } catch (err) {
           server.log(['warning'], `sample_data install errors while loading data. Error: ${err}`);
-          return reply(err.message).code(500);
+          return h.response(err.message).code(500);
         }
       }
 
-      const createResults = await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
+      let createResults;
+      try {
+        createResults = await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
+      }  catch (err) {
+        server.log(['warning'], `bulkCreate failed, error: ${err.message}`);
+        return Boom.badImplementation(`Unable to load kibana saved objects, see kibana logs for details`);
+      }
       const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
         return savedObjectCreateResult.hasOwnProperty('error');
       });
       if (errors.length > 0) {
         server.log(['warning'], `sample_data install errors while loading saved objects. Errors: ${errors.join(',')}`);
-        return reply(`Unable to load kibana saved objects, see kibana logs for details`).code(403);
+        return h.response(`Unable to load kibana saved objects, see kibana logs for details`).code(403);
       }
 
-      return reply({ elasticsearchIndicesCreated: counts, kibanaSavedObjectsLoaded: sampleDataset.savedObjects.length });
+      return h.response({ elasticsearchIndicesCreated: counts, kibanaSavedObjectsLoaded: sampleDataset.savedObjects.length });
     }
   }
 });

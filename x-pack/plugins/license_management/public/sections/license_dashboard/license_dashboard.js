@@ -20,7 +20,7 @@ import {
 
 export const LicenseDashboard = () => {
   return (
-    <div className="licenseManagement__contain">
+    <div className="licManagement__contain">
       <EuiFlexGroup justifyContent="spaceAround">
         <LicenseStatus />
       </EuiFlexGroup>
