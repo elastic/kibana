@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import template from 'plugins/security/views/logged_out/logged_out.html';
 import React from 'react';
 import { render } from 'react-dom';
