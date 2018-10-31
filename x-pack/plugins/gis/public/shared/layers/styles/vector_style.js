@@ -11,6 +11,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem
 } from '@elastic/eui';
+import { FillableCircle, FillableVector } from '../../icons/additional_layer_icons';
+import _ from 'lodash';
 
 
 const DEFAULT_COLOR = '#e6194b';
@@ -103,6 +105,29 @@ export class VectorStyle {
     }
     return this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.DYNAMIC;
   }
+
+  getIcon= (() => {
+    const defaultStroke = 'grey';
+    const strokeWidth = '1px';
+    return isPointsOnly => {
+      const { fillColor, lineColor } = this._descriptor.properties;
+      const stroke = _.get(lineColor, 'options.color');
+      const fill = _.get(fillColor, 'options.color');
+
+      const style = {
+        ...stroke && { stroke } || { stroke: defaultStroke },
+        strokeWidth,
+        ...fill && { fill },
+      };
+
+      return (
+        isPointsOnly
+          ? <FillableCircle style={style}/>
+          : <FillableVector style={style}/>
+      );
+    };
+  })();
+
 
   static computeScaledValues(featureCollection, field) {
     const fieldName = field.name;
