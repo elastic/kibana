@@ -7,6 +7,7 @@
 import React from 'react';
 import { StatementListHeading } from './statement_list_heading';
 import { EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function Queue() {
   return (
@@ -14,7 +15,10 @@ export function Queue() {
       <StatementListHeading iconType="logstashQueue" title="Queue" />
       <EuiSpacer size="s" />
       <EuiText className="monPipelineViewer__queueMessage">
-        Queue metrics not available
+        <FormattedMessage
+          id="xpack.monitoring.logstash.pipeline.queue.noMetricsDescription"
+          defaultMessage="Queue metrics not available"
+        />
       </EuiText>
     </div>
   );
