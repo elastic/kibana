@@ -14,7 +14,6 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_SAMPLED
 } from '../../../../common/constants';
-import { TermsAggsBucket } from '../../../../typings/elasticsearch';
 import { Transaction } from '../../../../typings/Transaction';
 import { Setup } from '../../helpers/setup_request';
 
@@ -34,7 +33,9 @@ interface IBucketsResponse {
   buckets: IBucket[];
 }
 
-interface ESBucket extends TermsAggsBucket {
+interface ESBucket {
+  key: number;
+  doc_count: number;
   sample: SearchResponse<{
     transaction: Pick<Transaction['transaction'], 'id' | 'sampled'>;
     trace: {
