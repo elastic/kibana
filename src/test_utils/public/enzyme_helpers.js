@@ -17,6 +17,13 @@
  * under the License.
  */
 
+/**
+ * Components using the react-intl module require access to the intl context.
+ * This is not available when mounting single components in Enzyme.
+ * These helper functions aim to address that and wrap a valid,
+ * intl context around them.
+ */
+
 import React from 'react';
 import { I18nProvider, intlShape } from '@kbn/i18n/react';
 import { mount, shallow, render } from 'enzyme';
