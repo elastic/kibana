@@ -4,29 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-import React, {Fragment} from 'react';
-import PropTypes from 'prop-types';
 
-import {
-  EuiFormRow,
-  EuiButton,
-} from '@elastic/eui';
-import {IndexPatternSelect} from 'ui/index_patterns/components/index_pattern_select';
-
+import React, { Fragment } from 'react';
 
 import { ASource } from './source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   indexPatternService,
-  inspectorAdapters,
   SearchSource,
-  timeService,
 } from '../../../kibana_services';
-import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
-import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
 
 const aggSchemas = new Schemas([
