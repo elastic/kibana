@@ -31,7 +31,7 @@ const module = uiModules.get('security', ['kibana']);
 module.controller('securityNavController', ($scope, ShieldUser, globalNavState, kbnBaseUrl, Private) => {
   const xpackInfo = Private(XPackInfoProvider);
   const showSecurityLinks = xpackInfo.get('features.security.showLinks');
-  if (Private(PathProvider).isLoginOrLogoutOrLoggedOut() || !showSecurityLinks) return;
+  if (Private(PathProvider).isUnauthenticated() || !showSecurityLinks) return;
 
   $scope.user = ShieldUser.getCurrent();
   $scope.route = `${kbnBaseUrl}#/account`;
@@ -54,7 +54,7 @@ chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
   render(el) {
     const xpackInfo = Private(XPackInfoProvider);
     const showSecurityLinks = xpackInfo.get('features.security.showLinks');
-    if (Private(PathProvider).isLoginOrLogoutOrLoggedOut() || !showSecurityLinks) return null;
+    if (Private(PathProvider).isUnauthenticated() || !showSecurityLinks) return null;
 
     const props = {
       user: ShieldUser.getCurrent(),

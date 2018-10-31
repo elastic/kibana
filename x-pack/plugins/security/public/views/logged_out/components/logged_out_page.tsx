@@ -31,7 +31,9 @@ export class LoggedOutPage extends Component<{}, {}> {
             </div>
           </header>
           <div className="loggedOut__content eui-textCenter">
-            <EuiButton href="/login">Login</EuiButton>
+            <EuiButton href="/login">
+              <FormattedMessage id="kbn.loggedOut.login" defaultMessage="Login" />
+            </EuiButton>
           </div>
         </div>
       </I18nProvider>

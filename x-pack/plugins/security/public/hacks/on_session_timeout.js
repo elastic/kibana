@@ -21,7 +21,7 @@ const SESSION_TIMEOUT_GRACE_PERIOD_MS = 5000;
 const module = uiModules.get('security', []);
 module.config(($httpProvider) => {
   $httpProvider.interceptors.push(($timeout, $window, $q, $injector, sessionTimeout, Notifier, Private, autoLogout) => {
-    const isLoginOrLogoutOrLoggedOut = Private(PathProvider).isLoginOrLogoutOrLoggedOut();
+    const isUnauthenticated = Private(PathProvider).isUnauthenticated();
     const notifier = new Notifier();
     const notificationLifetime = 60 * 1000;
     const notificationOptions = {
@@ -61,7 +61,7 @@ module.config(($httpProvider) => {
 
     function interceptorFactory(responseHandler) {
       return function interceptor(response) {
-        if (!isLoginOrLogoutOrLoggedOut && !isSystemApiRequest(response.config) && sessionTimeout !== null) {
+        if (!isUnauthenticated && !isSystemApiRequest(response.config) && sessionTimeout !== null) {
           clearNotifications();
           scheduleNotification();
         }
