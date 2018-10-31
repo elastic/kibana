@@ -3,6 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* Disabling eslint because of this jsx-a11y error:
+11:3  error  Non-interactive elements should not be assigned mouse or keyboard event listeners  jsx-a11y/no-noninteractive-element-interactions
+*/
+/* eslint-disable */
 
 import React from 'react';
 import PropTypes from 'prop-types';
