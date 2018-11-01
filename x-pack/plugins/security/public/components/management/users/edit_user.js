@@ -122,16 +122,10 @@ export class EditUser extends Component {
       return 'Username must begin with a letter or underscore and contain only letters, underscores, and numbers';
     }
   };
-  fullnameError = () => {
-    const { full_name } = this.state.user;
-    if (full_name !== null && !full_name) {
-      return 'Full name is required';
-    }
-  };
   emailError = () => {
     const { email } = this.state.user;
-    if (email !== null && (!email || !email.match(validEmailRegex))) {
-      return 'A valid email address is required';
+    if (email !== null && email !== '' && !email.match(validEmailRegex)) {
+      return 'Email address is invalid';
     }
   };
   changePassword = async () => {
@@ -288,8 +282,6 @@ export class EditUser extends Component {
     const { user, isNewUser } = this.state;
     return (
       !user.username ||
-      !user.full_name ||
-      !user.email ||
       this.emailError() ||
       (isNewUser && (this.passwordError() || this.confirmPasswordError()))
     );
@@ -391,8 +383,6 @@ export class EditUser extends Component {
                   {reserved ? null : (
                     <Fragment>
                       <EuiFormRow
-                        isInvalid={!!this.fullnameError()}
-                        error={this.fullnameError()}
                         label="Full name"
                       >
                         <EuiFieldText
