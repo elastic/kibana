@@ -22,6 +22,8 @@ import {
   addSearchStrategy,
 } from './search_strategy_registry';
 
+import { noOpSearchStrategy } from './no_op_search_strategy';
+
 describe('SearchStrategyRegistry', () => {
   describe('assignSearchRequestsToSearchStrategies', () => {
     test('associates search requests with valid search strategies', () => {
@@ -64,7 +66,6 @@ describe('SearchStrategyRegistry', () => {
       };
 
       const searchRequests = [ searchRequest0, searchRequest1, searchRequest2, searchRequest3];
-
       const searchStrategiesWithSearchRequests = assignSearchRequestsToSearchStrategies(searchRequests);
 
       expect(searchStrategiesWithSearchRequests).toEqual([{
@@ -73,6 +74,21 @@ describe('SearchStrategyRegistry', () => {
       }, {
         searchStrategy: searchStrategyA,
         searchRequests: [ searchRequest1, searchRequest2 ],
+      }]);
+    });
+
+    test(`associates search requests with noOpSearchStrategy when a viable one can't be found`, () => {
+      const searchRequest0 = {
+        id: 0,
+        source: { getField: () => {}, getPreferredSearchStrategyId: () => {} },
+      };
+
+      const searchRequests = [ searchRequest0 ];
+      const searchStrategiesWithSearchRequests = assignSearchRequestsToSearchStrategies(searchRequests);
+
+      expect(searchStrategiesWithSearchRequests).toEqual([{
+        searchStrategy: noOpSearchStrategy,
+        searchRequests: [ searchRequest0 ],
       }]);
     });
   });
