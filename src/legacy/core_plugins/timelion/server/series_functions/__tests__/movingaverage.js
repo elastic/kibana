@@ -17,8 +17,7 @@
  * under the License.
  */
 
-const filename = require('path').basename(__filename);
-const fn = require(`../${filename}`);
+const fn = require(`../moving_acerage`);
 const expect = require('chai').expect;
 
 import moment from 'moment';
@@ -34,7 +33,7 @@ function getFivePointSeries() {
   ]);
 }
 
-describe(filename, () => {
+describe('moving_average.js', () => {
 
   let seriesList;
   beforeEach(() => {

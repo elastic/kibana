@@ -20,7 +20,8 @@ async function listFiles() {
   const pattern = resolve(__dirname, './apis/*/index.js');
   const files = await scan(pattern);
   files.forEach(file => {
-    const { name, description } = require(file);
+    // FIXME: no dynamic require
+    const { name, description } = require(file); // eslint-disable-line import/no-dynamic-require
     console.log('    ' + bold(`node ${argv.$0} ${name}`));
     console.log(`      ${description}`);
   });
