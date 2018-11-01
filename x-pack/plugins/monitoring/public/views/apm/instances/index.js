@@ -11,6 +11,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { ApmServerInstances } from '../../../components/apm/instances';
 import { MonitoringViewBaseTableController } from '../../base_table_controller';
+import { I18nProvider } from '@kbn/i18n/react';
 
 uiRoutes.when('/apm/instances', {
   template,
@@ -53,16 +54,18 @@ uiRoutes.when('/apm/instances', {
       } = this;
 
       const component = (
-        <ApmServerInstances
-          apms={{
-            pageIndex,
-            filterText,
-            sortKey,
-            sortOrder,
-            onNewState,
-            data,
-          }}
-        />
+        <I18nProvider>
+          <ApmServerInstances
+            apms={{
+              pageIndex,
+              filterText,
+              sortKey,
+              sortOrder,
+              onNewState,
+              data,
+            }}
+          />
+        </I18nProvider>
       );
       super.renderReact(component);
     }

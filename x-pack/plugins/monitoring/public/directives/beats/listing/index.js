@@ -23,6 +23,7 @@ import { MonitoringTable } from 'plugins/monitoring/components/table';
 import {
   EuiLink,
 } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const filterFields = [ 'name', 'type', 'version', 'output' ];
 const columns = [
@@ -108,24 +109,26 @@ uiModule.directive('monitoringBeatsListing', (kbnUrl) => {
 
       scope.$watch('data', (data = {}) => {
         render((
-          <div>
-            <Stats stats={data.stats} />
-            <div className="page-row">
-              <MonitoringTable
-                className="beatsTable"
-                rows={data.listing}
-                pageIndex={scope.pageIndex}
-                filterText={scope.filterText}
-                sortKey={scope.sortKey}
-                sortOrder={scope.sortOrder}
-                onNewState={scope.onNewState}
-                placeholder="Filter Beats..."
-                filterFields={filterFields}
-                columns={columns}
-                rowComponent={beatRowFactory(scope, kbnUrl)}
-              />
+          <I18nProvider>
+            <div>
+              <Stats stats={data.stats} />
+              <div className="page-row">
+                <MonitoringTable
+                  className="beatsTable"
+                  rows={data.listing}
+                  pageIndex={scope.pageIndex}
+                  filterText={scope.filterText}
+                  sortKey={scope.sortKey}
+                  sortOrder={scope.sortOrder}
+                  onNewState={scope.onNewState}
+                  placeholder="Filter Beats..."
+                  filterFields={filterFields}
+                  columns={columns}
+                  rowComponent={beatRowFactory(scope, kbnUrl)}
+                />
+              </div>
             </div>
-          </div>
+          </I18nProvider>
         ), $el[0]);
       });
 

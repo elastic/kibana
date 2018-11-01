@@ -21,6 +21,7 @@ import {
   formatNumber,
   formatPercentageUsage
 } from '../../../lib/format_number';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const filterFields = [ 'logstash.name', 'logstash.host', 'logstash.http_address' ];
 const columns = [
@@ -102,19 +103,21 @@ uiModule.directive('monitoringLogstashNodeListing', kbnUrl => {
 
       scope.$watch('nodes', (nodes = []) => {
         const nodesTable = (
-          <MonitoringTable
-            className="logstashNodesTable"
-            rows={nodes}
-            pageIndex={scope.pageIndex}
-            filterText={scope.filterText}
-            sortKey={scope.sortKey}
-            sortOrder={scope.sortOrder}
-            onNewState={scope.onNewState}
-            placeholder="Filter Nodes..."
-            filterFields={filterFields}
-            columns={columns}
-            rowComponent={nodeRowFactory(scope, kbnUrl)}
-          />
+          <I18nProvider>
+            <MonitoringTable
+              className="logstashNodesTable"
+              rows={nodes}
+              pageIndex={scope.pageIndex}
+              filterText={scope.filterText}
+              sortKey={scope.sortKey}
+              sortOrder={scope.sortOrder}
+              onNewState={scope.onNewState}
+              placeholder="Filter Nodes..."
+              filterFields={filterFields}
+              columns={columns}
+              rowComponent={nodeRowFactory(scope, kbnUrl)}
+            />
+          </I18nProvider>
         );
         render(nodesTable, $el[0]);
       });

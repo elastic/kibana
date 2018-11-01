@@ -12,6 +12,7 @@ import {
   KuiToolBarSection,
   KuiToolBarText
 } from '@kbn/ui-framework/components';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function MonitoringTableToolBar(props) {
   const searchBox = props.showSearchBox
@@ -40,7 +41,13 @@ export function MonitoringTableToolBar(props) {
   const totalRows = Boolean(props.showTotalRows)
     ? (
       <p tabIndex="0" className="monitoringTableToolbarTotalRows">
-        {props.totalRows} in total
+        <FormattedMessage
+          id="xpack.monitoring.table.toolbar.totalRowsDescription"
+          defaultMessage="{totalRows} in total"
+          values={{
+            totalRows: props.totalRows
+          }}
+        />
       </p>
     )
     : null;

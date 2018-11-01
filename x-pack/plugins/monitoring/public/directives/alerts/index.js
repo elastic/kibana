@@ -17,6 +17,7 @@ import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_a
 import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
 import { formatTimestampToDuration } from '../../../common/format_timestamp_to_duration';
 import { formatDateTimeLocal } from '../../../common/formatting';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const linkToCategories = {
   'elasticsearch/nodes': 'Elasticsearch Nodes',
@@ -96,14 +97,16 @@ uiModule.directive('monitoringClusterAlertsListing', kbnUrl => {
 
       scope.$watch('alerts', (alerts = []) => {
         const alertsTable = (
-          <MonitoringTable
-            className="alertsTable"
-            rows={alerts}
-            placeholder="Filter Alerts..."
-            filterFields={filterFields}
-            columns={columns}
-            rowComponent={alertRowFactory(scope, kbnUrl)}
-          />
+          <I18nProvider>
+            <MonitoringTable
+              className="alertsTable"
+              rows={alerts}
+              placeholder="Filter Alerts..."
+              filterFields={filterFields}
+              columns={columns}
+              rowComponent={alertRowFactory(scope, kbnUrl)}
+            />
+          </I18nProvider>
         );
         render(alertsTable, $el[0]);
       });

@@ -24,6 +24,7 @@ import { Sparkline } from 'plugins/monitoring/components/sparkline';
 import { SORT_ASCENDING } from '../../../../common/constants';
 import { formatMetric } from '../../../lib/format_number';
 import { timefilter } from 'ui/timefilter';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const filterFields = [ 'id' ];
 const columns = [
@@ -151,19 +152,21 @@ uiModule.directive('monitoringLogstashPipelineListing', ($injector) => {
         }
 
         const pipelinesTable = (
-          <MonitoringTable
-            className="logstashPipelinesTable"
-            rows={pipelines}
-            pageIndex={scope.pageIndex}
-            filterText={scope.filterText}
-            sortKey={scope.sortKey}
-            sortOrder={scope.sortOrder}
-            onNewState={scope.onNewState}
-            placeholder="Filter Pipelines..."
-            filterFields={filterFields}
-            columns={columns}
-            rowComponent={pipelineRowFactory(onPipelineClick, onBrush, tooltipXValueFormatter, tooltipYValueFormatter)}
-          />
+          <I18nProvider>
+            <MonitoringTable
+              className="logstashPipelinesTable"
+              rows={pipelines}
+              pageIndex={scope.pageIndex}
+              filterText={scope.filterText}
+              sortKey={scope.sortKey}
+              sortOrder={scope.sortOrder}
+              onNewState={scope.onNewState}
+              placeholder="Filter Pipelines..."
+              filterFields={filterFields}
+              columns={columns}
+              rowComponent={pipelineRowFactory(onPipelineClick, onBrush, tooltipXValueFormatter, tooltipYValueFormatter)}
+            />
+          </I18nProvider>
         );
         render(pipelinesTable, $el[0]);
       });

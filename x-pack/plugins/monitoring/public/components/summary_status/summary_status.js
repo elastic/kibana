@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { isEmpty, capitalize } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StatusIcon } from '../status_icon/index.js';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const wrapChild = ({ label, value, dataTestSubj }, index) => (
   <EuiFlexItem
@@ -27,13 +28,26 @@ const wrapChild = ({ label, value, dataTestSubj }, index) => (
   </EuiFlexItem>
 );
 
-const DefaultIconComponent = ({ status }) => (
+const DefaultIconComponent = injectI18n(({ status, intl }) => (
   <Fragment>
-    Status: {(
-      <StatusIcon type={status.toUpperCase()} label={`Status: ${status}`} />
-    )}
+    <FormattedMessage
+      id="xpack.monitoring.summaryStatus.statusIconTitle"
+      defaultMessage="Status: {statusIcon}"
+      values={{
+        statusIcon: (
+          <StatusIcon
+            type={status.toUpperCase()}
+            label={intl.formatMessage({
+              id: 'xpack.monitoring.summaryStatus.statusIconLabel',
+              defaultMessage: 'Status: {status}' }, {
+              status
+            })}
+          />
+        )
+      }}
+    />
   </Fragment>
-);
+));
 
 const StatusIndicator = ({ status, isOnline, IconComponent }) => {
   if (isEmpty(status)) {
