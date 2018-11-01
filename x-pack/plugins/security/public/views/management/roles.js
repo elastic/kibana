@@ -100,10 +100,6 @@ routes.when(ROLES_PATH, {
       return $scope.roles.filter(role => !role.metadata._reserved);
     }
 
-    $scope.noFoundMatches = i18n('xpack.security.management.roles.matchingText', {
-      defaultMessage: 'matching',
-    });
-
     $scope.reversedTooltip = i18n('xpack.security.management.roles.reversedTooltip', {
       defaultMessage: 'Reserved roles are built-in and cannot be removed or modified. Only the password may be changed.',
     });

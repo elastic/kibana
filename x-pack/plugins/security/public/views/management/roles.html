@@ -78,12 +78,22 @@
         <div class="kuiPanel kuiPanel--centered" ng-show="!(roles | filter:query).length">
           <div
             class="kuiNoItems"
-            i18n-id="xpack.security.management.roles.noFoundMatchingRolesDescription"
-            i18n-default-message="No {message} roles found"
-            i18n-values="{
-              message: '<span ng-show=\'query\'>' + noFoundMatches+ '</span>'
-            }"
-          ></div>
+          >
+            <span
+              i18n-id="xpack.security.management.roles.noFoundMatchingRolesDescription1"
+              i18n-default-message="No "
+              i18n-context="Part of composite label xpack.security.management.roles.noFoundMatchingRolesDescription1 + {matchingText} + xpack.security.management.roles.noFoundMatchingRolesDescription2"
+            ></span>
+            <span
+              ng-show="query"
+              i18n-id="xpack.security.management.roles.matchingText"
+              i18n-default-message="matching"
+            ></span>
+            <span
+              i18n-id="xpack.security.management.roles.noFoundMatchingRolesDescription2"
+              i18n-default-message=" roles found"
+            ></span>
+          </div>
         </div>
 
         <!-- Table -->
