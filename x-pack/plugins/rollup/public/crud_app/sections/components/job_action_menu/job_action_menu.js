@@ -53,8 +53,7 @@ class JobActionMenuUi extends Component {
       intl,
     } = this.props;
 
-    const isSingleSelection = this.isSingleSelection();
-    const entity = this.getEntity(isSingleSelection);
+    const isSingleSelection = this.isSingleSelection() ? 1 : 0;
 
     const items = [];
 
@@ -62,8 +61,10 @@ class JobActionMenuUi extends Component {
       items.push({
         name: intl.formatMessage({
           id: 'xpack.rollupJobs.jobActionMenu.startJobLabel',
-          defaultMessage: 'Start {entity}',
-        }, { entity }),
+          defaultMessage: 'Start {isSingleSelection, plural, one {job} other {jobs}}',
+        }, {
+          isSingleSelection,
+        }),
         icon: <EuiIcon type="play" />,
         onClick: () => {
           this.closePopover();
@@ -76,8 +77,10 @@ class JobActionMenuUi extends Component {
       items.push({
         name: intl.formatMessage({
           id: 'xpack.rollupJobs.jobActionMenu.stopJobLabel',
-          defaultMessage: 'Stop {entity}',
-        }, { entity }),
+          defaultMessage: 'Stop {isSingleSelection, plural, one {job} other {jobs}}',
+        }, {
+          isSingleSelection,
+        }),
         icon: <EuiIcon type="stop" />,
         onClick: () => {
           this.closePopover();
@@ -89,8 +92,10 @@ class JobActionMenuUi extends Component {
     items.push({
       name: intl.formatMessage({
         id: 'xpack.rollupJobs.jobActionMenu.deleteJobLabel',
-        defaultMessage: 'Delete {entity}',
-      }, { entity }),
+        defaultMessage: 'Delete {isSingleSelection, plural, one {job} other {jobs}}',
+      }, {
+        isSingleSelection,
+      }),
       icon: <EuiIcon type="trash" />,
       onClick: () => {
         this.closePopover();
@@ -98,13 +103,12 @@ class JobActionMenuUi extends Component {
       },
     });
 
-    const upperCasedEntity = `${entity[0].toUpperCase()}${entity.slice(1)}`;
     const panelTree = {
       id: 0,
       title: intl.formatMessage({
         id: 'xpack.rollupJobs.jobActionMenu.panelTitle',
-        defaultMessage: '{upperCasedEntity} options',
-      }, { upperCasedEntity }),
+        defaultMessage: 'Job options',
+      }),
       items,
     };
 
@@ -159,12 +163,10 @@ class JobActionMenuUi extends Component {
     };
 
     const isSingleSelection = this.isSingleSelection();
-    const entity = this.getEntity(isSingleSelection);
 
     return (
       <ConfirmDeleteModal
         isSingleSelection={isSingleSelection}
-        entity={entity}
         jobs={jobs}
         onConfirm={onConfirmDelete}
         onCancel={this.closeDeleteConfirmationModal}
@@ -174,10 +176,6 @@ class JobActionMenuUi extends Component {
 
   isSingleSelection = () => {
     return this.props.jobs.length === 1;
-  };
-
-  getEntity = isSingleSelection => {
-    return isSingleSelection ? 'job' : 'jobs';
   };
 
   render() {
@@ -195,12 +193,12 @@ class JobActionMenuUi extends Component {
     } = this.props;
 
     const panels = this.panels();
-    const isSingleSelection = this.isSingleSelection();
-    const entity = this.getEntity(isSingleSelection);
+
     const actionsAriaLabel = intl.formatMessage({
       id: 'xpack.rollupJobs.jobActionMenu.jobActionMenuButtonAriaLabel',
-      defaultMessage: '{entity} options',
-    }, { entity });
+      defaultMessage: 'Job options',
+    });
+
     const button = (
       <EuiButton
         data-test-subj="jobActionMenuButton"
@@ -218,7 +216,6 @@ class JobActionMenuUi extends Component {
       <div>
         {this.confirmDeleteModal()}
         <EuiPopover
-          id={`actionMenu${entity}`}
           button={button}
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover}

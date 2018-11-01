@@ -18,7 +18,7 @@ export interface ITableColumn {
   align?: string;
   width?: string;
   sortable?: boolean;
-  render: (value: any, item?: any) => any;
+  render?: (value: any, item?: any) => any;
 }
 
 export interface IManagedTableProps {
