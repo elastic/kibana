@@ -1,6 +1,7 @@
 {
   "paths": {
     "common.ui": "src/ui",
+    "console": "src/core_plugins/console",
     "inputControl":"src/core_plugins/input_control_vis",
     "kbn": "src/core_plugins/kibana",
     "kbnVislibVisTypes": "src/core_plugins/kbn_vislib_vis_types",
@@ -12,11 +13,13 @@
     "statusPage": "src/core_plugins/status_page",
     "tileMap": "src/core_plugins/tile_map",
     "tagCloud": "src/core_plugins/tagcloud",
+    "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
     "xpack.monitoring": "x-pack/plugins/monitoring",
     "xpack.rollupJobs": "x-pack/plugins/rollup",
-    "xpack.watcher": "x-pack/plugins/watcher",
-    "xpack.security": "x-pack/plugins/security"
+    "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
+    "xpack.security": "x-pack/plugins/security",
+    "xpack.watcher": "x-pack/plugins/watcher"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",
