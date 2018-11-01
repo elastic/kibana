@@ -5,13 +5,15 @@
  */
 
 import * as Chrome from 'puppeteer';
+import { parse as parseUrl } from 'url';
 import {
+  ConditionalHeaders,
+  ConditionalHeadersConditions,
   ElementPosition,
   EvalArgs,
   EvalFn,
   EvaluateOptions,
   Logger,
-  SessionCookie,
   ViewZoomWidthHeight,
 } from '../../../../types';
 
@@ -33,17 +35,26 @@ export class HeadlessChromiumDriver {
   public async open(
     url: string,
     {
-      sessionCookie,
+      conditionalHeaders,
       waitForSelector,
-    }: {
-      sessionCookie: SessionCookie;
-      waitForSelector: string;
-    }
+    }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string }
   ) {
     this.logger.debug(`HeadlessChromiumDriver:opening url ${url}`);
-    if (sessionCookie) {
-      await this.page.setCookie(sessionCookie);
-    }
+    await this.page.setRequestInterception(true);
+    this.page.on('request', (interceptedRequest: any) => {
+      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
+        this.logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
+        interceptedRequest.continue({
+          headers: {
+            ...interceptedRequest.headers(),
+            ...conditionalHeaders.headers,
+          },
+        });
+      } else {
+        this.logger.debug(`No custom headers for ${interceptedRequest.url()}`);
+        interceptedRequest.continue();
+      }
+    });
 
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
     await this.page.waitFor(waitForSelector);
@@ -97,5 +108,42 @@ export class HeadlessChromiumDriver {
       deviceScaleFactor: zoom,
       isMobile: false,
     });
+  }
+
+  private _shouldUseCustomHeaders(conditions: ConditionalHeadersConditions, url: string) {
+    const { hostname, protocol, port, pathname } = parseUrl(url);
+
+    if (pathname === undefined) {
+      // There's a discrepancy between the NodeJS docs and the typescript types. NodeJS docs
+      // just say 'string' and the typescript types say 'string | undefined'. We haven't hit a
+      // situation where it's undefined but here's an explicit Error if we do.
+      throw new Error(`pathname is undefined, don't know how to proceed`);
+    }
+
+    return (
+      hostname === conditions.hostname &&
+      protocol === `${conditions.protocol}:` &&
+      this._shouldUseCustomHeadersForPort(conditions, port) &&
+      pathname.startsWith(`${conditions.basePath}/`)
+    );
+  }
+
+  private _shouldUseCustomHeadersForPort(
+    conditions: ConditionalHeadersConditions,
+    port: string | undefined
+  ) {
+    if (conditions.protocol === 'http' && conditions.port === 80) {
+      return (
+        port === undefined || port === null || port === '' || port === conditions.port.toString()
+      );
+    }
+
+    if (conditions.protocol === 'https' && conditions.port === 443) {
+      return (
+        port === undefined || port === null || port === '' || port === conditions.port.toString()
+      );
+    }
+
+    return port === conditions.port.toString();
   }
 }
