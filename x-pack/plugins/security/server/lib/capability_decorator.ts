@@ -52,8 +52,8 @@ function getPrivilegedActions(server: Record<string, any>, actions: Record<strin
 
   const savedObjectsActions = _.flatten(
     types.map((type: string) => [
-      actions.getSavedObjectAction(type, 'read'),
-      actions.getSavedObjectAction(type, 'create'),
+      actions.savedObject.get(type, 'read'),
+      actions.savedObject.get(type, 'create'),
     ])
   );
 

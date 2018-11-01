@@ -27,8 +27,10 @@ const createMockAuditLogger = () => {
 
 const createMockActions = () => {
   return {
-    getSavedObjectAction(type, action) {
-      return `mock-action:saved_objects/${type}/${action}`;
+    savedObject: {
+      get(type, action) {
+        return `mock-saved_object:${type}/${action}`;
+      }
     }
   };
 };
@@ -73,7 +75,7 @@ describe(`spaces disabled`, () => {
 
       await expect(client.create(type)).rejects.toThrowError(mockErrors.generalError);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'create')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'create')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -89,7 +91,7 @@ describe(`spaces disabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'create')]: false,
+            [mockActions.savedObject.get(type, 'create')]: false,
           }
         }))
       };
@@ -112,13 +114,13 @@ describe(`spaces disabled`, () => {
       await expect(client.create(type, attributes, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'create')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'create')]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'create',
         [type],
-        [mockActions.getSavedObjectAction(type, 'create')],
+        [mockActions.savedObject.get(type, 'create')],
         {
           type,
           attributes,
@@ -141,7 +143,7 @@ describe(`spaces disabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'create')]: true,
+            [mockActions.savedObject.get(type, 'create')]: true,
           }
         }))
       };
@@ -165,7 +167,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'create')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'create')]);
       expect(mockBaseClient.create).toHaveBeenCalledWith(type, attributes, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'create', [type], {
@@ -203,7 +205,7 @@ describe(`spaces disabled`, () => {
       await expect(client.bulkCreate([{ type }])).rejects.toThrowError(mockErrors.generalError);
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'bulk_create')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'bulk_create')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -220,8 +222,8 @@ describe(`spaces disabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type1, 'bulk_create')]: false,
-            [mockActions.getSavedObjectAction(type2, 'bulk_create')]: true,
+            [mockActions.savedObject.get(type1, 'bulk_create')]: false,
+            [mockActions.savedObject.get(type2, 'bulk_create')]: true,
           }
         }))
       };
@@ -249,15 +251,15 @@ describe(`spaces disabled`, () => {
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([
-        mockActions.getSavedObjectAction(type1, 'bulk_create'),
-        mockActions.getSavedObjectAction(type2, 'bulk_create'),
+        mockActions.savedObject.get(type1, 'bulk_create'),
+        mockActions.savedObject.get(type2, 'bulk_create'),
       ]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'bulk_create',
         [type1, type2],
-        [mockActions.getSavedObjectAction(type1, 'bulk_create')],
+        [mockActions.savedObject.get(type1, 'bulk_create')],
         {
           objects,
           options,
@@ -279,8 +281,8 @@ describe(`spaces disabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type1, 'bulk_create')]: true,
-            [mockActions.getSavedObjectAction(type2, 'bulk_create')]: true,
+            [mockActions.savedObject.get(type1, 'bulk_create')]: true,
+            [mockActions.savedObject.get(type2, 'bulk_create')]: true,
           }
         }))
       };
@@ -308,8 +310,8 @@ describe(`spaces disabled`, () => {
       expect(result).toBe(returnValue);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([
-        mockActions.getSavedObjectAction(type1, 'bulk_create'),
-        mockActions.getSavedObjectAction(type2, 'bulk_create'),
+        mockActions.savedObject.get(type1, 'bulk_create'),
+        mockActions.savedObject.get(type2, 'bulk_create'),
       ]);
       expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(objects, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
@@ -347,7 +349,7 @@ describe(`spaces disabled`, () => {
       await expect(client.delete(type)).rejects.toThrowError(mockErrors.generalError);
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'delete')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'delete')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -363,7 +365,7 @@ describe(`spaces disabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'delete')]: false,
+            [mockActions.savedObject.get(type, 'delete')]: false,
           }
         }))
       };
@@ -385,13 +387,13 @@ describe(`spaces disabled`, () => {
       await expect(client.delete(type, id)).rejects.toThrowError(mockErrors.forbiddenError);
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'delete')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'delete')]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'delete',
         [type],
-        [mockActions.getSavedObjectAction(type, 'delete')],
+        [mockActions.savedObject.get(type, 'delete')],
         {
           type,
           id,
@@ -413,7 +415,7 @@ describe(`spaces disabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'delete')]: true,
+            [mockActions.savedObject.get(type, 'delete')]: true,
           }
         }))
       };
@@ -437,7 +439,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'delete')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'delete')]);
       expect(mockBaseClient.delete).toHaveBeenCalledWith(type, id, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete', [type], {
@@ -475,7 +477,7 @@ describe(`spaces disabled`, () => {
       await expect(client.find({ type })).rejects.toThrowError(mockErrors.generalError);
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'find')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -491,7 +493,7 @@ describe(`spaces disabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'find')]: false,
+            [mockActions.savedObject.get(type, 'find')]: false,
           }
         }))
       };
@@ -513,13 +515,13 @@ describe(`spaces disabled`, () => {
       await expect(client.find(options)).rejects.toThrowError(mockErrors.forbiddenError);
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'find')]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'find',
         [type],
-        [mockActions.getSavedObjectAction(type, 'find')],
+        [mockActions.savedObject.get(type, 'find')],
         {
           options
         }
@@ -538,8 +540,8 @@ describe(`spaces disabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type1, 'find')]: false,
-            [mockActions.getSavedObjectAction(type2, 'find')]: true,
+            [mockActions.savedObject.get(type1, 'find')]: false,
+            [mockActions.savedObject.get(type2, 'find')]: true,
           }
         }))
       };
@@ -563,15 +565,15 @@ describe(`spaces disabled`, () => {
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([
-        mockActions.getSavedObjectAction(type1, 'find'),
-        mockActions.getSavedObjectAction(type2, 'find')
+        mockActions.savedObject.get(type1, 'find'),
+        mockActions.savedObject.get(type2, 'find')
       ]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'find',
         [type1, type2],
-        [mockActions.getSavedObjectAction(type1, 'find')],
+        [mockActions.savedObject.get(type1, 'find')],
         {
           options
         }
@@ -592,7 +594,7 @@ describe(`spaces disabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'find')]: true,
+            [mockActions.savedObject.get(type, 'find')]: true,
           }
         }))
       };
@@ -615,7 +617,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'find')]);
       expect(mockBaseClient.find).toHaveBeenCalledWith({ type });
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find', [type], {
@@ -651,7 +653,7 @@ describe(`spaces disabled`, () => {
       await expect(client.bulkGet([{ type }])).rejects.toThrowError(mockErrors.generalError);
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'bulk_get')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'bulk_get')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -668,8 +670,8 @@ describe(`spaces disabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type1, 'bulk_get')]: false,
-            [mockActions.getSavedObjectAction(type2, 'bulk_get')]: true,
+            [mockActions.savedObject.get(type1, 'bulk_get')]: false,
+            [mockActions.savedObject.get(type2, 'bulk_get')]: true,
           }
         }))
       };
@@ -697,15 +699,15 @@ describe(`spaces disabled`, () => {
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([
-        mockActions.getSavedObjectAction(type1, 'bulk_get'),
-        mockActions.getSavedObjectAction(type2, 'bulk_get'),
+        mockActions.savedObject.get(type1, 'bulk_get'),
+        mockActions.savedObject.get(type2, 'bulk_get'),
       ]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'bulk_get',
         [type1, type2],
-        [mockActions.getSavedObjectAction(type1, 'bulk_get')],
+        [mockActions.savedObject.get(type1, 'bulk_get')],
         {
           objects,
           options,
@@ -728,8 +730,8 @@ describe(`spaces disabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type1, 'bulk_get')]: true,
-            [mockActions.getSavedObjectAction(type2, 'bulk_get')]: true,
+            [mockActions.savedObject.get(type1, 'bulk_get')]: true,
+            [mockActions.savedObject.get(type2, 'bulk_get')]: true,
           }
         }))
       };
@@ -757,8 +759,8 @@ describe(`spaces disabled`, () => {
       expect(result).toBe(returnValue);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([
-        mockActions.getSavedObjectAction(type1, 'bulk_get'),
-        mockActions.getSavedObjectAction(type2, 'bulk_get'),
+        mockActions.savedObject.get(type1, 'bulk_get'),
+        mockActions.savedObject.get(type2, 'bulk_get'),
       ]);
       expect(mockBaseClient.bulkGet).toHaveBeenCalledWith(objects, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
@@ -796,7 +798,7 @@ describe(`spaces disabled`, () => {
       await expect(client.get(type)).rejects.toThrowError(mockErrors.generalError);
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'get')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'get')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -812,7 +814,7 @@ describe(`spaces disabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'get')]: false,
+            [mockActions.savedObject.get(type, 'get')]: false,
           }
         }))
       };
@@ -835,13 +837,13 @@ describe(`spaces disabled`, () => {
       await expect(client.get(type, id, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'get')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'get')]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'get',
         [type],
-        [mockActions.getSavedObjectAction(type, 'get')],
+        [mockActions.savedObject.get(type, 'get')],
         {
           type,
           id,
@@ -864,7 +866,7 @@ describe(`spaces disabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'get')]: true,
+            [mockActions.savedObject.get(type, 'get')]: true,
           }
         }))
       };
@@ -888,7 +890,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'get')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'get')]);
       expect(mockBaseClient.get).toHaveBeenCalledWith(type, id, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'get', [type], {
@@ -926,7 +928,7 @@ describe(`spaces disabled`, () => {
       await expect(client.update(type)).rejects.toThrowError(mockErrors.generalError);
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'update')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'update')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -942,7 +944,7 @@ describe(`spaces disabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'update')]: false,
+            [mockActions.savedObject.get(type, 'update')]: false,
           }
         }))
       };
@@ -966,13 +968,13 @@ describe(`spaces disabled`, () => {
       await expect(client.update(type, id, attributes, options)).rejects.toThrowError(mockErrors.forbiddenError);
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'update')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'update')]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'update',
         [type],
-        [mockActions.getSavedObjectAction(type, 'update')],
+        [mockActions.savedObject.get(type, 'update')],
         {
           type,
           id,
@@ -996,7 +998,7 @@ describe(`spaces disabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'update')]: true,
+            [mockActions.savedObject.get(type, 'update')]: true,
           }
         }))
       };
@@ -1021,7 +1023,7 @@ describe(`spaces disabled`, () => {
 
       expect(result).toBe(returnValue);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'update')]);
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'update')]);
       expect(mockBaseClient.update).toHaveBeenCalledWith(type, id, attributes, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'update', [type], {
@@ -1066,7 +1068,7 @@ describe(`spaces enabled`, () => {
       await expect(client.create(type)).rejects.toThrowError(mockErrors.generalError);
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'create')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'create')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -1083,7 +1085,7 @@ describe(`spaces enabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'create')]: false,
+            [mockActions.savedObject.get(type, 'create')]: false,
           }
         }))
       };
@@ -1110,13 +1112,13 @@ describe(`spaces enabled`, () => {
 
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'create')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'create')]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'create',
         [type],
-        [mockActions.getSavedObjectAction(type, 'create')],
+        [mockActions.savedObject.get(type, 'create')],
         {
           type,
           attributes,
@@ -1140,7 +1142,7 @@ describe(`spaces enabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'create')]: true,
+            [mockActions.savedObject.get(type, 'create')]: true,
           }
         }))
       };
@@ -1168,7 +1170,7 @@ describe(`spaces enabled`, () => {
       expect(result).toBe(returnValue);
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'create')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'create')]);
       expect(mockBaseClient.create).toHaveBeenCalledWith(type, attributes, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'create', [type], {
@@ -1211,7 +1213,7 @@ describe(`spaces enabled`, () => {
 
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'bulk_create')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'bulk_create')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -1229,8 +1231,8 @@ describe(`spaces enabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type1, 'bulk_create')]: false,
-            [mockActions.getSavedObjectAction(type2, 'bulk_create')]: true,
+            [mockActions.savedObject.get(type1, 'bulk_create')]: false,
+            [mockActions.savedObject.get(type2, 'bulk_create')]: true,
           }
         }))
       };
@@ -1262,15 +1264,15 @@ describe(`spaces enabled`, () => {
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [
-        mockActions.getSavedObjectAction(type1, 'bulk_create'),
-        mockActions.getSavedObjectAction(type2, 'bulk_create'),
+        mockActions.savedObject.get(type1, 'bulk_create'),
+        mockActions.savedObject.get(type2, 'bulk_create'),
       ]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'bulk_create',
         [type1, type2],
-        [mockActions.getSavedObjectAction(type1, 'bulk_create')],
+        [mockActions.savedObject.get(type1, 'bulk_create')],
         {
           objects,
           options,
@@ -1293,8 +1295,8 @@ describe(`spaces enabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type1, 'bulk_create')]: true,
-            [mockActions.getSavedObjectAction(type2, 'bulk_create')]: true,
+            [mockActions.savedObject.get(type1, 'bulk_create')]: true,
+            [mockActions.savedObject.get(type2, 'bulk_create')]: true,
           }
         }))
       };
@@ -1326,8 +1328,8 @@ describe(`spaces enabled`, () => {
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [
-        mockActions.getSavedObjectAction(type1, 'bulk_create'),
-        mockActions.getSavedObjectAction(type2, 'bulk_create'),
+        mockActions.savedObject.get(type1, 'bulk_create'),
+        mockActions.savedObject.get(type2, 'bulk_create'),
       ]);
       expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(objects, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
@@ -1370,7 +1372,7 @@ describe(`spaces enabled`, () => {
 
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'delete')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'delete')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -1387,7 +1389,7 @@ describe(`spaces enabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'delete')]: false,
+            [mockActions.savedObject.get(type, 'delete')]: false,
           }
         }))
       };
@@ -1413,13 +1415,13 @@ describe(`spaces enabled`, () => {
 
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'delete')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'delete')]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'delete',
         [type],
-        [mockActions.getSavedObjectAction(type, 'delete')],
+        [mockActions.savedObject.get(type, 'delete')],
         {
           type,
           id,
@@ -1442,7 +1444,7 @@ describe(`spaces enabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'delete')]: true,
+            [mockActions.savedObject.get(type, 'delete')]: true,
           }
         }))
       };
@@ -1470,7 +1472,7 @@ describe(`spaces enabled`, () => {
       expect(result).toBe(returnValue);
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'delete')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'delete')]);
       expect(mockBaseClient.delete).toHaveBeenCalledWith(type, id, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'delete', [type], {
@@ -1513,7 +1515,7 @@ describe(`spaces enabled`, () => {
 
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'find')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'find')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -1530,7 +1532,7 @@ describe(`spaces enabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'find')]: false,
+            [mockActions.savedObject.get(type, 'find')]: false,
           }
         }))
       };
@@ -1556,13 +1558,13 @@ describe(`spaces enabled`, () => {
 
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'find')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'find')]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'find',
         [type],
-        [mockActions.getSavedObjectAction(type, 'find')],
+        [mockActions.savedObject.get(type, 'find')],
         {
           options
         }
@@ -1582,8 +1584,8 @@ describe(`spaces enabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type1, 'find')]: false,
-            [mockActions.getSavedObjectAction(type2, 'find')]: true,
+            [mockActions.savedObject.get(type1, 'find')]: false,
+            [mockActions.savedObject.get(type2, 'find')]: true,
           }
         }))
       };
@@ -1611,15 +1613,15 @@ describe(`spaces enabled`, () => {
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [
-        mockActions.getSavedObjectAction(type1, 'find'),
-        mockActions.getSavedObjectAction(type2, 'find')
+        mockActions.savedObject.get(type1, 'find'),
+        mockActions.savedObject.get(type2, 'find')
       ]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'find',
         [type1, type2],
-        [mockActions.getSavedObjectAction(type1, 'find')],
+        [mockActions.savedObject.get(type1, 'find')],
         {
           options
         }
@@ -1641,7 +1643,7 @@ describe(`spaces enabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'find')]: true,
+            [mockActions.savedObject.get(type, 'find')]: true,
           }
         }))
       };
@@ -1668,7 +1670,7 @@ describe(`spaces enabled`, () => {
       expect(result).toBe(returnValue);
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'find')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'find')]);
       expect(mockBaseClient.find).toHaveBeenCalledWith({ type });
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find', [type], {
@@ -1709,7 +1711,7 @@ describe(`spaces enabled`, () => {
 
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'bulk_get')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'bulk_get')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -1727,8 +1729,8 @@ describe(`spaces enabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type1, 'bulk_get')]: false,
-            [mockActions.getSavedObjectAction(type2, 'bulk_get')]: true,
+            [mockActions.savedObject.get(type1, 'bulk_get')]: false,
+            [mockActions.savedObject.get(type2, 'bulk_get')]: true,
           }
         }))
       };
@@ -1760,15 +1762,15 @@ describe(`spaces enabled`, () => {
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [
-        mockActions.getSavedObjectAction(type1, 'bulk_get'),
-        mockActions.getSavedObjectAction(type2, 'bulk_get'),
+        mockActions.savedObject.get(type1, 'bulk_get'),
+        mockActions.savedObject.get(type2, 'bulk_get'),
       ]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'bulk_get',
         [type1, type2],
-        [mockActions.getSavedObjectAction(type1, 'bulk_get')],
+        [mockActions.savedObject.get(type1, 'bulk_get')],
         {
           objects,
           options,
@@ -1792,8 +1794,8 @@ describe(`spaces enabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type1, 'bulk_get')]: true,
-            [mockActions.getSavedObjectAction(type2, 'bulk_get')]: true,
+            [mockActions.savedObject.get(type1, 'bulk_get')]: true,
+            [mockActions.savedObject.get(type2, 'bulk_get')]: true,
           }
         }))
       };
@@ -1825,8 +1827,8 @@ describe(`spaces enabled`, () => {
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [
-        mockActions.getSavedObjectAction(type1, 'bulk_get'),
-        mockActions.getSavedObjectAction(type2, 'bulk_get'),
+        mockActions.savedObject.get(type1, 'bulk_get'),
+        mockActions.savedObject.get(type2, 'bulk_get'),
       ]);
       expect(mockBaseClient.bulkGet).toHaveBeenCalledWith(objects, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
@@ -1869,7 +1871,7 @@ describe(`spaces enabled`, () => {
 
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'get')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'get')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -1886,7 +1888,7 @@ describe(`spaces enabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'get')]: false,
+            [mockActions.savedObject.get(type, 'get')]: false,
           }
         }))
       };
@@ -1913,13 +1915,13 @@ describe(`spaces enabled`, () => {
 
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'get')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'get')]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'get',
         [type],
-        [mockActions.getSavedObjectAction(type, 'get')],
+        [mockActions.savedObject.get(type, 'get')],
         {
           type,
           id,
@@ -1943,7 +1945,7 @@ describe(`spaces enabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'get')]: true,
+            [mockActions.savedObject.get(type, 'get')]: true,
           }
         }))
       };
@@ -1971,7 +1973,7 @@ describe(`spaces enabled`, () => {
       expect(result).toBe(returnValue);
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'get')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'get')]);
       expect(mockBaseClient.get).toHaveBeenCalledWith(type, id, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'get', [type], {
@@ -2014,7 +2016,7 @@ describe(`spaces enabled`, () => {
 
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'update')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'update')]);
       expect(mockErrors.decorateGeneralError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -2031,7 +2033,7 @@ describe(`spaces enabled`, () => {
           hasAllRequested: false,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'update')]: false,
+            [mockActions.savedObject.get(type, 'update')]: false,
           }
         }))
       };
@@ -2059,13 +2061,13 @@ describe(`spaces enabled`, () => {
 
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'update')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'update')]);
       expect(mockErrors.decorateForbiddenError).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
         username,
         'update',
         [type],
-        [mockActions.getSavedObjectAction(type, 'update')],
+        [mockActions.savedObject.get(type, 'update')],
         {
           type,
           id,
@@ -2090,7 +2092,7 @@ describe(`spaces enabled`, () => {
           hasAllRequested: true,
           username,
           privileges: {
-            [mockActions.getSavedObjectAction(type, 'update')]: true,
+            [mockActions.savedObject.get(type, 'update')]: true,
           }
         }))
       };
@@ -2119,7 +2121,7 @@ describe(`spaces enabled`, () => {
       expect(result).toBe(returnValue);
       expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
-      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.getSavedObjectAction(type, 'update')]);
+      expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, [mockActions.savedObject.get(type, 'update')]);
       expect(mockBaseClient.update).toHaveBeenCalledWith(type, id, attributes, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'update', [type], {

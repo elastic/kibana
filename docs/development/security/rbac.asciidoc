@@ -32,9 +32,9 @@ Authorization: Basic kibana changeme
            "actions":[
                "version:7.0.0-alpha1-SNAPSHOT",
                "action:login",
-               "action:saved_objects/dashboard/get",
-               "action:saved_objects/dashboard/bulk_get",
-               "action:saved_objects/dashboard/find",
+               "saved_object:dashboard/get",
+               "saved_object:dashboard/bulk_get",
+               "saved_object:dashboard/find",
                ...
            ],"metadata":{}}
    }
@@ -90,7 +90,7 @@ Authorization: Basic foo_read_only_user password
            "application":"kibana-.kibana",
            "resources":["*"],
            "privileges":[
-             "action:saved_objects/dashboard/save",
+             "saved_object:dashboard/save",
            ]
        }
    ]
@@ -120,7 +120,7 @@ Authorization: Basic foo_legacy_user password
            "application":"kibana-.kibana",
            "resources":["*"],
            "privileges":[
-             "action:saved_objects/dashboard/save"
+             "saved_object:dashboard/save"
            ]
        }
    ],
@@ -152,7 +152,7 @@ Here is an example response if the user does not have application privileges, bu
   "application": {
     "kibana-.kibana": {
       "*": {
-        "action:saved_objects/dashboard/save": false
+        "saved_object:dashboard/save": false
       }
     }
   }

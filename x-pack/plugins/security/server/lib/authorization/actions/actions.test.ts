@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { actionsFactory } from './actions';
+import { actionsFactory } from '.';
 
-const createMockConfig = (settings = {}) => {
+const createMockConfig = (settings: Record<string, any> = {}) => {
   const mockConfig = {
-    get: jest.fn()
+    get: jest.fn(),
   };
 
   mockConfig.get.mockImplementation(key => settings[key]);
@@ -22,7 +22,7 @@ describe('#login', () => {
 
     const actions = actionsFactory(mockConfig);
 
-    expect(actions.login).toEqual('action:login');
+    expect(actions.login).toEqual('login:');
   });
 });
 
@@ -42,38 +42,42 @@ describe('#getSavedObjectAction()', () => {
     const mockConfig = createMockConfig();
     const actions = actionsFactory(mockConfig);
     const type = 'saved-object-type';
-    const action = 'saved-object-action';
+    const operation = 'saved-object-action';
 
-    const result = actions.getSavedObjectAction(type, action);
+    const result = actions.savedObject.get(type, operation);
 
-    expect(result).toEqual(`action:saved_objects/${type}/${action}`);
+    expect(result).toEqual(`saved_object:${type}/${operation}`);
   });
 
-  [null, undefined, '', 1, true, {}].forEach(type => {
+  [null, undefined, '', 1, true, {}].forEach((type: any) => {
     test(`type of ${JSON.stringify(type)} throws error`, () => {
       const mockConfig = createMockConfig();
       const actions = actionsFactory(mockConfig);
 
-      expect(() => actions.getSavedObjectAction(type, 'saved-object-action')).toThrowErrorMatchingSnapshot();
+      expect(() =>
+        actions.savedObject.get(type, 'saved-object-action')
+      ).toThrowErrorMatchingSnapshot();
     });
   });
 
-  [null, undefined, '', 1, true, {}].forEach(action => {
-    test(`action of ${JSON.stringify(action)} throws error`, () => {
+  [null, undefined, '', 1, true, {}].forEach((operation: any) => {
+    test(`action of ${JSON.stringify(operation)} throws error`, () => {
       const mockConfig = createMockConfig();
       const actions = actionsFactory(mockConfig);
 
-      expect(() => actions.getSavedObjectAction('saved-object-type', action)).toThrowErrorMatchingSnapshot();
+      expect(() =>
+        actions.savedObject.get('saved-object-type', operation)
+      ).toThrowErrorMatchingSnapshot();
     });
   });
 
-  describe('#manageSpaces', () => {
+  describe('#spaces.manage', () => {
     test('returns action:manage_spaces/*', () => {
       const mockConfig = createMockConfig();
 
       const actions = actionsFactory(mockConfig);
 
-      expect(actions.manageSpaces).toEqual('action:manage_spaces/*');
+      expect(actions.space.manage).toEqual('space:manage');
     });
   });
 });

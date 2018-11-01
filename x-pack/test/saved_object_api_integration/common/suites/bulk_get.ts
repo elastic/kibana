@@ -87,7 +87,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_get dashboard,globaltype,visualization, missing action:saved_objects/dashboard/bulk_get,action:saved_objects/globaltype/bulk_get,action:saved_objects/visualization/bulk_get`,
+      message: `Unable to bulk_get dashboard,globaltype,visualization, missing saved_object:dashboard/bulk_get,saved_object:globaltype/bulk_get,saved_object:visualization/bulk_get`,
     });
   };
 

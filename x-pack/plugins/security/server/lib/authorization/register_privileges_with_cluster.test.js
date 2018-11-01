@@ -66,6 +66,10 @@ const registerPrivilegesWithClusterTest = (description, {
     return mockServer;
   };
 
+  test('expect wrote more tests', () => {
+    expect(true).toBe(false);
+  });
+
   const createExpectUpdatedPrivileges = (mockServer, mockCallWithInternalUser, error) => {
     return (postPrivilegesBody) => {
       expect(error).toBeUndefined();
@@ -180,6 +184,7 @@ registerPrivilegesWithClusterTest(`passes saved object types, and actions to bui
 
 registerPrivilegesWithClusterTest(`inserts privileges when we don't have any existing privileges`, {
   privilegeMap: {
+    features: {},
     global: {
       foo: ['action:foo']
     },
@@ -210,6 +215,7 @@ registerPrivilegesWithClusterTest(`inserts privileges when we don't have any exi
 
 registerPrivilegesWithClusterTest(`throws error when we should be removing privilege`, {
   privilegeMap: {
+    features: {},
     global: {
       foo: ['action:foo'],
     },
@@ -246,6 +252,7 @@ registerPrivilegesWithClusterTest(`throws error when we should be removing privi
 
 registerPrivilegesWithClusterTest(`updates privileges when actions don't match`, {
   privilegeMap: {
+    features: {},
     global: {
       foo: ['action:foo']
     },
@@ -291,6 +298,7 @@ registerPrivilegesWithClusterTest(`updates privileges when actions don't match`,
 
 registerPrivilegesWithClusterTest(`updates privileges when global privilege added`, {
   privilegeMap: {
+    features: {},
     global: {
       foo: ['action:foo'],
       quz: ['action:quz']
@@ -343,6 +351,7 @@ registerPrivilegesWithClusterTest(`updates privileges when global privilege adde
 
 registerPrivilegesWithClusterTest(`updates privileges when space privilege added`, {
   privilegeMap: {
+    features: {},
     global: {
       foo: ['action:foo'],
     },
@@ -395,6 +404,7 @@ registerPrivilegesWithClusterTest(`updates privileges when space privilege added
 
 registerPrivilegesWithClusterTest(`doesn't update privileges when order of actions differ`, {
   privilegeMap: {
+    features: {},
     global: {
       foo: ['action:foo', 'action:quz']
     },
@@ -425,6 +435,7 @@ registerPrivilegesWithClusterTest(`doesn't update privileges when order of actio
 
 registerPrivilegesWithClusterTest(`throws and logs error when errors getting privileges`, {
   privilegeMap: {
+    features: {},
     global: {},
     space: {}
   },
@@ -436,6 +447,7 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors getting pri
 
 registerPrivilegesWithClusterTest(`throws and logs error when errors putting privileges`, {
   privilegeMap: {
+    features: {},
     global: {
       foo: []
     },

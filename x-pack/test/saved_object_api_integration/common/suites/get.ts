@@ -62,7 +62,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
   const createExpectNotSpaceAwareRbacForbidden = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Forbidden',
-      message: `Unable to get globaltype, missing action:saved_objects/globaltype/get`,
+      message: `Unable to get globaltype, missing saved_object:globaltype/get`,
       statusCode: 403,
     });
   };
@@ -84,7 +84,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
   const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Forbidden',
-      message: `Unable to get ${type}, missing action:saved_objects/${type}/get`,
+      message: `Unable to get ${type}, missing saved_object:${type}/get`,
       statusCode: 403,
     });
   };

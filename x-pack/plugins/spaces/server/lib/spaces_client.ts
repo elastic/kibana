@@ -23,7 +23,7 @@ export class SpacesClient {
     if (this.useRbac()) {
       const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
       const { hasAllRequested } = await checkPrivileges.globally(
-        this.authorization.actions.manageSpaces
+        this.authorization.actions.space.manage
       );
       return hasAllRequested;
     }
@@ -93,7 +93,7 @@ export class SpacesClient {
   public async create(space: Space) {
     if (this.useRbac()) {
       await this.ensureAuthorizedGlobally(
-        this.authorization.actions.manageSpaces,
+        this.authorization.actions.space.manage,
         'create',
         'Unauthorized to create spaces'
       );
@@ -122,7 +122,7 @@ export class SpacesClient {
   public async update(id: string, space: Space) {
     if (this.useRbac()) {
       await this.ensureAuthorizedGlobally(
-        this.authorization.actions.manageSpaces,
+        this.authorization.actions.space.manage,
         'update',
         'Unauthorized to update spaces'
       );
@@ -140,7 +140,7 @@ export class SpacesClient {
   public async delete(id: string) {
     if (this.useRbac()) {
       await this.ensureAuthorizedGlobally(
-        this.authorization.actions.manageSpaces,
+        this.authorization.actions.space.manage,
         'delete',
         'Unauthorized to delete spaces'
       );

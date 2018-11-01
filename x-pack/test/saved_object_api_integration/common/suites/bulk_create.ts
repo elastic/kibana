@@ -143,7 +143,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,globaltype,visualization, missing action:saved_objects/dashboard/bulk_create,action:saved_objects/globaltype/bulk_create,action:saved_objects/visualization/bulk_create`,
+      message: `Unable to bulk_create dashboard,globaltype,visualization, missing saved_object:dashboard/bulk_create,saved_object:globaltype/bulk_create,saved_object:visualization/bulk_create`,
     });
   };
 

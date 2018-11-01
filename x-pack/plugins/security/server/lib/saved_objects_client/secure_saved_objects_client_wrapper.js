@@ -118,7 +118,7 @@ export class SecureSavedObjectsClientWrapper {
 
   async _ensureAuthorized(typeOrTypes, action, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const actions = types.map(type => this._actions.getSavedObjectAction(type, action));
+    const actions = types.map(type => this._actions.savedObject.get(type, action));
     const { hasAllRequested, username, privileges } = await this._checkSavedObjectPrivileges(actions);
 
     if (hasAllRequested) {
