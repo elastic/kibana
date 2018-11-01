@@ -83,23 +83,10 @@ export const security = (kibana) => new kibana.Plugin({
       const config = server.config();
 
       return {
-        showUserProfile: true,
         secureCookies: config.get('xpack.security.secureCookies'),
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
         enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
       };
-    },
-    replaceInjectedVars: function (vars, request) {
-      const { settings } = request.route;
-      // Don't show user profile if requested page is not authenticated.
-      // (there won't be a user...)
-      if (settings.auth === false) {
-        return {
-          ...vars,
-          showUserProfile: false,
-        };
-      }
-      return vars;
     }
   },
 

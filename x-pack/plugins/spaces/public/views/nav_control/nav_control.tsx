@@ -57,7 +57,7 @@ module.controller(
     let mounted = false;
 
     $scope.$parent.$watch('isVisible', function isVisibleWatcher(isVisible: boolean) {
-      if (isVisible && !mounted && !pathProvider.isStatusPage()) {
+      if (isVisible && !mounted && !pathProvider.isUnauthenticated()) {
         render(
           <NavControlPopover
             spacesManager={spacesManager}
@@ -102,6 +102,11 @@ chromeHeaderNavControlsRegistry.register(
     side: NavControlSide.Left,
     render(el: HTMLElement) {
       const userProfile = Private(UserProfileProvider);
+      const pathProvider = Private(PathProvider);
+
+      if (pathProvider.isUnauthenticated()) {
+        return;
+      }
 
       const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
 
