@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { KibanaLink } from '../../utils/url';
+// @ts-ignore
 import { EuiButtonEmpty } from '@elastic/eui';
+import React from 'react';
+import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { KibanaLink } from '../../utils/url';
 
-function DiscoverButton({ query, children, ...rest }) {
+interface Props {
+  query: StringMap;
+  children: any;
+}
+
+export function DiscoverButton({ query, children, ...rest }: Props) {
   return (
     <KibanaLink
       pathname={'/app/kibana'}
@@ -22,5 +29,3 @@ function DiscoverButton({ query, children, ...rest }) {
     </KibanaLink>
   );
 }
-
-export default DiscoverButton;

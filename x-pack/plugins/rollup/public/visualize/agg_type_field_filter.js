@@ -6,18 +6,20 @@
 
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 
-/**
- * If rollup index pattern, check its capabilities
- * and limit available fields for a given aggType based on that.
- */
-aggTypeFieldFilters.addFilter(
-  (field, fieldParamType, aggConfig) => {
-    const indexPattern = aggConfig.getIndexPattern();
-    if(!indexPattern || indexPattern.type !== 'rollup') {
-      return true;
+export function initAggTypeFieldFilter() {
+  /**
+   * If rollup index pattern, check its capabilities
+   * and limit available fields for a given aggType based on that.
+   */
+  aggTypeFieldFilters.addFilter(
+    (field, fieldParamType, aggConfig) => {
+      const indexPattern = aggConfig.getIndexPattern();
+      if(!indexPattern || indexPattern.type !== 'rollup') {
+        return true;
+      }
+      const aggName = aggConfig.type && aggConfig.type.name;
+      const aggFields = indexPattern.typeMeta && indexPattern.typeMeta.aggs && indexPattern.typeMeta.aggs[aggName];
+      return aggFields && aggFields[field.name];
     }
-    const aggName = aggConfig.type && aggConfig.type.name;
-    const aggFields = indexPattern.typeMeta && indexPattern.typeMeta.aggs && indexPattern.typeMeta.aggs[aggName];
-    return aggFields && aggFields[field.name];
-  }
-);
+  );
+}
