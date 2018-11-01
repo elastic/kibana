@@ -45,6 +45,7 @@ export function ContextPageProvider({ getService, getPageObjects }) {
       });
 
       await remote.get(appUrl);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
       await this.waitUntilContextLoadingHasFinished();
       // For lack of a better way, using a sleep to ensure page is loaded before proceeding
       await PageObjects.common.sleep(1000);
@@ -72,6 +73,7 @@ export function ContextPageProvider({ getService, getPageObjects }) {
         const predecessorButton = await this.getPredecessorLoadMoreButton();
         await predecessorButton.click();
       });
+      await this.waitUntilContextLoadingHasFinished();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -81,6 +83,7 @@ export function ContextPageProvider({ getService, getPageObjects }) {
         const sucessorButton = await this.getSuccessorLoadMoreButton();
         await sucessorButton.click();
       });
+      await this.waitUntilContextLoadingHasFinished();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

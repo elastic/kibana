@@ -20,7 +20,7 @@
 export function DocTableProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'context', 'header']);
 
 
   class DocTable {
@@ -72,13 +72,15 @@ export function DocTableProvider({ getService, getPageObjects }) {
       const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
       const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
       await addInclusiveFilterButton.click();
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
     }
 
     async toggleRowExpanded(row) {
       const rowExpandToggle = await this.getRowExpandToggle(row);
       await rowExpandToggle.click();
-      // Not sure how to determine this rowExpandToggle completed but the next step often fails without this sleep
-      await PageObjects.common.sleep(2222);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
 
       const detailsRow = await row.findByXpath('./following-sibling::*[@data-test-subj="docTableDetailsRow"]');
       return await retry.try(async () => {

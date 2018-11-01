@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       await remote.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*',
+        'telemetry:optIn': false });
       await PageObjects.common.navigateToApp('discover');
     });
 
