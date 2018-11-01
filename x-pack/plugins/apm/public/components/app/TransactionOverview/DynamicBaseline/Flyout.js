@@ -18,8 +18,7 @@ import {
   EuiFlyoutHeader,
   EuiText,
   EuiTitle,
-  EuiSpacer,
-  EuiBetaBadge
+  EuiSpacer
 } from '@elastic/eui';
 import { KibanaLink, ViewMLJob } from '../../../../utils/url';
 
@@ -120,10 +119,6 @@ export default class DynamicBaselineFlyout extends Component {
             <h2>Enable anomaly detection on response times</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiBetaBadge
-            label="Beta"
-            tooltipContent="This feature is currently in beta. Please help us by reporting any bugs."
-          />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {hasDynamicBaseline && (

@@ -22,7 +22,7 @@ import { beatsIndexTemplate } from './utils/index_templates';
 export const initManagementServer = (libs: CMServerLibs) => {
   if (libs.database) {
     libs.database.putTemplate(libs.framework.internalUser, {
-      name: 'beats-template',
+      name: '.management-beats',
       body: beatsIndexTemplate,
     });
   }
