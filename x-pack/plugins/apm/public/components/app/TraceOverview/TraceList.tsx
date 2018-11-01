@@ -6,22 +6,16 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { Transaction } from '../../../../typings/Transaction';
 import { ITransactionGroup } from '../../../../typings/TransactionGroup';
 import { fontSizes, truncate } from '../../../style/variables';
-// @ts-ignore
 import { asMillisWithDefault } from '../../../utils/formatters';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 // @ts-ignore
 import TooltipOverlay from '../../shared/TooltipOverlay';
-import { TraceLink } from '../../shared/TraceLink';
+import { TransactionLink } from '../../shared/TransactionLink';
 
-function formatString(value: string) {
-  return value || 'N/A';
-}
-
-const StyledTraceLink = styled(TraceLink)`
+const StyledTransactionLink = styled(TransactionLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -29,28 +23,27 @@ const StyledTraceLink = styled(TraceLink)`
 interface Props {
   items: ITransactionGroup[];
   noItemsMessage: any;
+  isLoading: boolean;
 }
 
 const traceListColumns: ITableColumn[] = [
   {
-    field: 'sample',
+    field: 'name',
     name: 'Name',
     width: '40%',
     sortable: true,
-    render: (transaction: Transaction) => (
-      <TooltipOverlay content={formatString(transaction.transaction.name)}>
-        <StyledTraceLink transaction={transaction}>
-          {formatString(transaction.transaction.name)}
-        </StyledTraceLink>
+    render: (name, group: ITransactionGroup) => (
+      <TooltipOverlay content={name}>
+        <StyledTransactionLink transaction={group.sample}>
+          {name}
+        </StyledTransactionLink>
       </TooltipOverlay>
     )
   },
   {
-    field: 'sample',
+    field: 'sample.context.service.name',
     name: 'Originating service',
-    sortable: true,
-    render: (transaction: Transaction) =>
-      formatString(transaction.context.service.name)
+    sortable: true
   },
   {
     field: 'averageResponseTime',
@@ -76,15 +69,14 @@ const traceListColumns: ITableColumn[] = [
   }
 ];
 
-export function TraceList({ items = [], noItemsMessage, ...rest }: Props) {
-  return (
+export function TraceList({ items = [], noItemsMessage, isLoading }: Props) {
+  return isLoading ? null : (
     <ManagedTable
       columns={traceListColumns}
       items={items}
       initialSort={{ field: 'impact', direction: 'desc' }}
       noItemsMessage={noItemsMessage}
       initialPageSize={25}
-      {...rest}
     />
   );
 }

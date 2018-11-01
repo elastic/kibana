@@ -79,7 +79,9 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       _deserialize(map = '{}') {
         return _.mapValues(angular.fromJson(map), deserializeFieldFormatMap);
       }
-    }
+    },
+    type: 'keyword',
+    typeMeta: 'json',
   });
 
   function serializeFieldFormatMap(flat, format, field) {

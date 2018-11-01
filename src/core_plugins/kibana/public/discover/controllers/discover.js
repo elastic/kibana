@@ -63,6 +63,7 @@ import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -302,11 +303,17 @@ function discoverController(
     .setField('highlightAll', true)
     .setField('version', true);
 
+  // Even when searching rollups, we want to use the default strategy so that we get back a
+  // document-like response.
+  $scope.searchSource.setPreferredSearchStrategyId('default');
+
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.create();
-  timeRangeSearchSource.setField('filter', () => {
-    return timefilter.createFilter($scope.indexPattern);
-  });
+  if(isDefaultTypeIndexPattern($scope.indexPattern)) {
+    timeRangeSearchSource.setField('filter', () => {
+      return timefilter.createFilter($scope.indexPattern);
+    });
+  }
 
   $scope.searchSource.setParent(timeRangeSearchSource);
 
@@ -316,10 +323,19 @@ function discoverController(
     defaultMessage: 'Discover',
   });
 
+  const discoverBreadcrumbsTitle = i18n.translate('kbn.discover.discoverBreadcrumbsTitle', {
+    defaultMessage: 'Discover',
+  });
+
   if (savedSearch.id && savedSearch.title) {
-    breadcrumbState.set([{ text: discoverBreadcrumbText, href: '#/discover' }, { text: savedSearch.title }]);
+    breadcrumbState.set([{
+      text: discoverBreadcrumbsTitle,
+      href: '#/discover'
+    }, { text: savedSearch.title }]);
   } else {
-    breadcrumbState.set([{ text: discoverBreadcrumbText }]);
+    breadcrumbState.set([{
+      text: discoverBreadcrumbsTitle,
+    }]);
   }
 
   let stateMonitor;
@@ -432,7 +448,7 @@ function discoverController(
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    timefield: $scope.indexPattern.timeFieldName,
+    timefield: isDefaultTypeIndexPattern($scope.indexPattern) && $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.ip.list,
   };

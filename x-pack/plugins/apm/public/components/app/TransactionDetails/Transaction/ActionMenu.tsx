@@ -20,9 +20,9 @@ import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 
 function getDiscoverQuery(transactionId: string, traceId?: string) {
-  let query = `${PROCESSOR_EVENT}:transaction AND ${TRANSACTION_ID}:${transactionId}`;
+  let query = `${PROCESSOR_EVENT}:"transaction" AND ${TRANSACTION_ID}:"${transactionId}"`;
   if (traceId) {
-    query += ` AND ${TRACE_ID}:${traceId}`;
+    query += ` AND ${TRACE_ID}:"${traceId}"`;
   }
   return {
     _a: {
@@ -64,6 +64,22 @@ interface ActionMenuState {
   readonly isOpen: boolean;
 }
 
+export const DiscoverTransactionLink: React.SFC<ActionMenuProps> = ({
+  transaction,
+  children
+}) => {
+  const traceId =
+    transaction.version === 'v2' ? transaction.trace.id : undefined;
+  return (
+    <KibanaLink
+      pathname="/app/kibana"
+      hash="/discover"
+      query={getDiscoverQuery(transaction.transaction.id, traceId)}
+      children={children}
+    />
+  );
+};
+
 export class ActionMenu extends React.Component<
   ActionMenuProps,
   ActionMenuState
@@ -80,26 +96,18 @@ export class ActionMenu extends React.Component<
     this.setState({ isOpen: false });
   };
 
-  public render() {
-    const { transaction } = this.props;
+  public getInfraActions(transaction: Transaction) {
+    const { system } = transaction.context;
 
-    const items = [
-      <EuiContextMenuItem icon="discoverApp" key="discover-transaction">
-        <KibanaLink
-          pathname="/app/kibana"
-          hash="/discover"
-          query={getDiscoverQuery(
-            transaction.transaction.id,
-            transaction.version === 'v2' ? transaction.trace.id : undefined
-          )}
-        >
-          View sample document
-        </KibanaLink>
-      </EuiContextMenuItem>,
+    if (!system || !system.hostname) {
+      return [];
+    }
+
+    return [
       <EuiContextMenuItem icon="infraApp" key="infra-host-metrics">
         <KibanaLink
           pathname="/app/infra"
-          hash={`/link-to/host-detail/${transaction.context.system.hostname}`}
+          hash={`/link-to/host-detail/${system.hostname}`}
           query={getInfraMetricsQuery(transaction)}
         >
           <span>View host metrics (beta)</span>
@@ -108,12 +116,25 @@ export class ActionMenu extends React.Component<
       <EuiContextMenuItem icon="infraApp" key="infra-host-logs">
         <KibanaLink
           pathname="/app/infra"
-          hash={`/link-to/host-logs/${transaction.context.system.hostname}`}
+          hash={`/link-to/host-logs/${system.hostname}`}
           query={{ time: new Date(transaction['@timestamp']).getTime() }}
         >
           <span>View host logs (beta)</span>
         </KibanaLink>
       </EuiContextMenuItem>
+    ];
+  }
+
+  public render() {
+    const { transaction } = this.props;
+
+    const items = [
+      <EuiContextMenuItem icon="discoverApp" key="discover-transaction">
+        <DiscoverTransactionLink transaction={transaction}>
+          View sample document
+        </DiscoverTransactionLink>
+      </EuiContextMenuItem>,
+      ...this.getInfraActions(transaction)
     ];
 
     return (

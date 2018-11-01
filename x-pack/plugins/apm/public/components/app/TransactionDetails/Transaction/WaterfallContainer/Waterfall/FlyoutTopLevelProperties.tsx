@@ -9,20 +9,20 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME
 } from 'x-pack/plugins/apm/common/constants';
-import {
-  KibanaLink,
-  legacyEncodeURIComponent
-  // @ts-ignore
-} from 'x-pack/plugins/apm/public/utils/url';
+import { StickyProperties } from 'x-pack/plugins/apm/public/components/shared/StickyProperties';
+import { TransactionLink } from 'x-pack/plugins/apm/public/components/shared/TransactionLink';
+import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-// @ts-ignore
-import { StickyProperties } from '../../../../../shared/StickyProperties';
 
 interface Props {
-  transaction: Transaction;
+  transaction?: Transaction;
 }
 
 export function FlyoutTopLevelProperties({ transaction }: Props) {
+  if (!transaction) {
+    return null;
+  }
+
   const stickyProperties = [
     {
       label: 'Service',
@@ -41,14 +41,9 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       label: 'Transaction',
       fieldName: TRANSACTION_NAME,
       val: (
-        <KibanaLink
-          pathname={'/app/apm'}
-          hash={`/${transaction.context.service.name}/transactions/${
-            transaction.transaction.type
-          }/${legacyEncodeURIComponent(transaction.transaction.name)}`}
-        >
+        <TransactionLink transaction={transaction}>
           {transaction.transaction.name}
-        </KibanaLink>
+        </TransactionLink>
       ),
       width: '50%'
     }

@@ -1,19 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Header should render normally 1`] = `
+exports[`Header should render a different name, prompt, and beta tag if provided 1`] = `
 <div>
-  <EuiSpacer
-    size="m"
-  />
   <EuiTitle
     size="m"
   >
     <h1>
       <FormattedMessage
-        defaultMessage="Create index pattern"
+        defaultMessage="Create {indexPatternName}"
         id="kbn.management.createIndexPatternHeader"
-        values={Object {}}
+        values={
+          Object {
+            "indexPatternName": "test index pattern",
+          }
+        }
       />
+      <React.Fragment>
+         
+        <EuiBetaBadge
+          label="Beta"
+          tooltipPosition="top"
+        />
+      </React.Fragment>
     </h1>
   </EuiTitle>
   <EuiFlexGroup
@@ -46,22 +54,67 @@ exports[`Header should render normally 1`] = `
         </p>
       </EuiText>
     </EuiFlexItem>
+  </EuiFlexGroup>
+  <React.Fragment>
+    <EuiSpacer
+      size="s"
+    />
+    <div>
+      Test prompt
+    </div>
+  </React.Fragment>
+  <EuiSpacer
+    size="m"
+  />
+</div>
+`;
+
+exports[`Header should render normally 1`] = `
+<div>
+  <EuiTitle
+    size="m"
+  >
+    <h1>
+      <FormattedMessage
+        defaultMessage="Create {indexPatternName}"
+        id="kbn.management.createIndexPatternHeader"
+        values={
+          Object {
+            "indexPatternName": undefined,
+          }
+        }
+      />
+    </h1>
+  </EuiTitle>
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
     <EuiFlexItem
       component="div"
       grow={false}
     >
-      <EuiSwitch
-        checked={true}
-        id="checkboxShowSystemIndices"
-        label={
-          <FormattedMessage
-            defaultMessage="Include system indices"
-            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
-            values={Object {}}
-          />
-        }
-        onChange={[Function]}
-      />
+      <EuiText
+        grow={true}
+      >
+        <p>
+          <EuiTextColor
+            color="subdued"
+            component="span"
+          >
+            <FormattedMessage
+              defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
+              id="kbn.management.createIndexPatternLabel"
+              values={Object {}}
+            />
+          </EuiTextColor>
+        </p>
+      </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
@@ -72,17 +125,18 @@ exports[`Header should render normally 1`] = `
 
 exports[`Header should render without including system indices 1`] = `
 <div>
-  <EuiSpacer
-    size="m"
-  />
   <EuiTitle
     size="m"
   >
     <h1>
       <FormattedMessage
-        defaultMessage="Create index pattern"
+        defaultMessage="Create {indexPatternName}"
         id="kbn.management.createIndexPatternHeader"
-        values={Object {}}
+        values={
+          Object {
+            "indexPatternName": undefined,
+          }
+        }
       />
     </h1>
   </EuiTitle>
@@ -115,23 +169,6 @@ exports[`Header should render without including system indices 1`] = `
           </EuiTextColor>
         </p>
       </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiSwitch
-        checked={false}
-        id="checkboxShowSystemIndices"
-        label={
-          <FormattedMessage
-            defaultMessage="Include system indices"
-            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
-            values={Object {}}
-          />
-        }
-        onChange={[Function]}
-      />
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer

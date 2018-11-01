@@ -22,12 +22,11 @@ export class ElementShareContainer extends React.PureComponent {
   componentDidMount() {
     const { functionName, onComplete } = this.props;
     const isDevelopment = process.env.NODE_ENV !== 'production';
-    let t;
 
     // check that the done event is called within a certain time
     if (isDevelopment) {
       const timeout = 15; // timeout, in seconds
-      t = setTimeout(() => {
+      this.timeout = setTimeout(() => {
         // TODO: show this message in a proper notification
         console.warn(
           `done handler not called in render function after ${timeout} seconds: ${functionName}`
@@ -37,7 +36,7 @@ export class ElementShareContainer extends React.PureComponent {
 
     // dispatches a custom DOM event on the container when the element is complete
     onComplete(() => {
-      clearTimeout(t);
+      clearTimeout(this.timeout);
       if (!this.sharedItemRef) return; // without this, crazy fast forward/backward paging leads to an error
       const ev = new Event('renderComplete');
       this.sharedItemRef.dispatchEvent(ev);
@@ -50,6 +49,10 @@ export class ElementShareContainer extends React.PureComponent {
       // see: src/ui/public/render_complete/directive.js
       this.setState({ renderComplete: true });
     });
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.timeout);
   }
 
   render() {

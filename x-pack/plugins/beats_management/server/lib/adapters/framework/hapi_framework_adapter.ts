@@ -8,6 +8,7 @@ import { wrapRequest } from '../../../utils/wrap_request';
 import { FrameworkInternalUser } from './adapter_types';
 import {
   BackendFrameworkAdapter,
+  FrameworkResponse,
   FrameworkRouteOptions,
   FrameworkWrappableRequest,
 } from './adapter_types';
@@ -61,14 +62,15 @@ export class HapiBackendFrameworkAdapter implements BackendFrameworkAdapter {
     });
   }
 
-  public registerRoute<RouteRequest extends FrameworkWrappableRequest, RouteResponse>(
-    route: FrameworkRouteOptions<RouteRequest, RouteResponse>
-  ) {
+  public registerRoute<
+    RouteRequest extends FrameworkWrappableRequest,
+    RouteResponse extends FrameworkResponse
+  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
     if (!this.server) {
       throw new Error('Must pass a hapi server into the adapter to use registerRoute');
     }
-    const wrappedHandler = (licenseRequired: boolean) => (request: any, reply: any) => {
-      return route.handler(wrapRequest(request), reply);
+    const wrappedHandler = (licenseRequired: boolean) => (request: any, h: any) => {
+      return route.handler(wrapRequest(request), h);
     };
 
     this.server.route({

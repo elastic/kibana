@@ -5,13 +5,11 @@
  */
 
 // tslint:disable-next-line  no-var-requires
-const numeral = require('@elastic/numeral');
 import React from 'react';
 
 import { first } from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
-// @ts-ignore
-import { asMillis } from '../../../../../../../utils/formatters';
+import { asMillis, asPercent } from '../../../../../../../utils/formatters';
 // @ts-ignore
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
@@ -32,34 +30,43 @@ function getPrimaryType(type: string) {
 
 interface Props {
   span: Span;
-  totalDuration: number;
+  totalDuration?: number;
 }
 
 export function StickySpanProperties({ span, totalDuration }: Props) {
+  if (!totalDuration) {
+    return null;
+  }
+
   const spanName = span.span.name;
   const spanDuration = span.span.duration.us;
-  const relativeDuration = spanDuration / totalDuration;
   const spanTypeLabel = getSpanLabel(getPrimaryType(span.span.type));
 
   const stickyProperties = [
     {
       label: 'Name',
       fieldName: 'span.name',
-      val: spanName || 'N/A'
+      val: spanName || 'N/A',
+      truncated: true,
+      width: '50%'
     },
     {
       fieldName: 'span.type',
       label: 'Type',
-      val: spanTypeLabel
+      val: spanTypeLabel,
+      truncated: true,
+      widht: '50%'
     },
     {
       fieldName: 'span.duration.us',
       label: 'Duration',
-      val: asMillis(spanDuration)
+      val: asMillis(spanDuration),
+      width: '50%'
     },
     {
       label: '% of transaction',
-      val: numeral(relativeDuration).format('0.00%')
+      val: asPercent(spanDuration, totalDuration),
+      width: '50%'
     }
   ];
 

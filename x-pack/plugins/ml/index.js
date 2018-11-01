@@ -44,6 +44,12 @@ export const ml = (kibana) => {
       styleSheetPaths: `${__dirname}/public/index.scss`,
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
       home: ['plugins/ml/register_feature'],
+      injectDefaultVars(server) {
+        const config = server.config();
+        return {
+          mlEnabled: config.get('xpack.ml.enabled'),
+        };
+      },
     },
 
 
@@ -60,12 +66,12 @@ export const ml = (kibana) => {
       // Add server routes and initialize the plugin here
       const commonRouteConfig = {
         pre: [
-          function forbidApiAccess(request, reply) {
+          function forbidApiAccess() {
             const licenseCheckResults = xpackMainPlugin.info.feature(thisPlugin.id).getLicenseCheckResults();
             if (licenseCheckResults.isAvailable) {
-              reply();
+              return null;
             } else {
-              reply(Boom.forbidden(licenseCheckResults.message));
+              throw Boom.forbidden(licenseCheckResults.message);
             }
           }
         ]
