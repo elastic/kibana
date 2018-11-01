@@ -5,58 +5,41 @@
 <titleabbrev>Viewing monitoring data</titleabbrev>
 ++++
 
-You can use {kib} to monitor the health and performance of {es}, {ls}, {kib}, 
-and Beats. 
+After you enable monitoring in {es}, {ls}, {kib}, or Beats, you can use {kib} to 
+view its health and performance. 
 
-TIP: If you have a dedicated monitoring cluster, the information is accessible
-even if the {es} cluster you're monitoring is not. You can send data from
-multiple clusters to the same monitoring cluster and view them all through the
-same instance of {kib}. To learn more about typical monitoring architectures 
-with separate production and monitoring clusters, see
-{xpack-ref}/how-monitoring-works.html[How monitoring works].
+TIP: If you have a dedicated _monitoring cluster_, the information is accessible
+even if the cluster you're monitoring is not. If you have at least a gold 
+license, you can send data from multiple clusters to the same monitoring cluster 
+and view them all through the same instance of {kib}. 
 
-. Optional: {ref}/configuring-monitoring.html[Configure monitoring in {es}]. If you want
-to use a separate monitoring cluster, see
-{xpack-ref}/monitoring-production.html[Monitoring in a production environment].
+To learn more about typical monitoring architectures, 
+see {stack-ov}/how-monitoring-works.html[How monitoring works].
 
-. Optional: <<monitoring-kibana,Configure monitoring in {kib}>>.
+To visualize monitoring data in {kib}:
 
-. Optional: {logstash-ref}/configuring-logstash.html[Configure monitoring in Logstash].
-
-. Optional: Configure monitoring in {auditbeat-ref}/monitoring.html[Auditbeat],
-{filebeat-ref}/monitoring.html[Filebeat],
-{heartbeat-ref}/monitoring.html[Heartbeat],
-{metricbeat-ref}/monitoring.html[Metricbeat],
-{packetbeat-ref}/monitoring.html[Packetbeat], and
-{winlogbeat-ref}/monitoring.html[Winlogbeat].
-
-. Configure {kib} to visualize monitoring data:
-
-.. Verify that `xpack.monitoring.ui.enabled` is set to `true`, which is the
+. Verify that `xpack.monitoring.ui.enabled` is set to `true`, which is the
 default value. For more information, see <<monitoring-settings-kb>>.
 
-.. Identify where to retrieve monitoring data from. If you want to use a
-separate _monitoring cluster_, set `xpack.monitoring.elasticsearch.url` in the
+. Identify where to retrieve monitoring data from. If you want to use a
+separate monitoring cluster, set `xpack.monitoring.elasticsearch.url` in the
 `kibana.yml` file. Otherwise, the monitoring data is stored in the production
 cluster.
-+
---
-TIP: If {security} is enabled on the monitoring cluster, use an HTTPS URL such
-as `https://<your_monitoring_cluster>:9200` in this setting.
 
---
+. If {security} is enabled on the monitoring cluster: 
 
-.. If {security} is enabled on the monitoring cluster, identify a user ID and 
-password that {kib} can use to retrieve monitoring data. Specify these values in 
-the `xpack.monitoring.elasticsearch.username` and 
+.. Use an HTTPS URL such as `https://<your_monitoring_cluster>:9200` in the 
+`xpack.monitoring.elasticsearch.url` setting.
+
+.. Identify a user ID and password that {kib} can use to retrieve monitoring 
+data. Specify these values in the `xpack.monitoring.elasticsearch.username` and 
 `xpack.monitoring.elasticsearch.password` settings in the `kibana.yml` file.
 If these settings are omitted, {kib} uses the `elasticsearch.username` and
 `elasticsearch.password` setting values.
 
-.. If {security} is enabled on the monitoring cluster, configure {kib} to 
-encrypt communications between the {kib} server and the monitoring cluster. 
-Specify the `xpack.monitoring.elasticsearch.ssl.*` settings in the `kibana.yml` 
-file on the {kib} server.
+.. Configure {kib} to encrypt communications between the {kib} server and the 
+monitoring cluster. Specify the `xpack.monitoring.elasticsearch.ssl.*` settings 
+in the `kibana.yml` file on the {kib} server.
 +
 --
 For example, if you are using your own certificate authority to sign
@@ -80,7 +63,7 @@ privileges to use the monitoring dashboards.
 
 NOTE: These users must exist on the cluster where the monitoring data is stored, 
 that is to say the monitoring cluster. If you are accessing a remote monitoring 
-cluster, you mus use credentials that are valid on both the {kib} server and the 
+cluster, you must use credentials that are valid on both the {kib} server and the 
 monitoring cluster.
 
 --
