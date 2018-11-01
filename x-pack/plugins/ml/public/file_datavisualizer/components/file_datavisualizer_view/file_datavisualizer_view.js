@@ -308,6 +308,7 @@ export class FileDataVisualizerView extends Component {
               fileContents={fileContents}
               fileSize={fileSize}
               indexPatterns={this.props.indexPatterns}
+              kibanaConfig={this.props.kibanaConfig}
               showBottomBar={this.showBottomBar}
               hideBottomBar={this.hideBottomBar}
             />
