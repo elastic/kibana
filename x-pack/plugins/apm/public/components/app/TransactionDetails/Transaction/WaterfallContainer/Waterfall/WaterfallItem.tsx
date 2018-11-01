@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import {
   colors,
   fontFamily,
@@ -91,6 +92,29 @@ interface IWaterfallItemProps {
   onClick: () => any;
 }
 
+function DroppedSpansWarning({ item }: { item: IWaterfallItem }) {
+  const dropped: number = get(
+    item,
+    'transaction.transaction.span_count.dropped.total',
+    0
+  );
+
+  if (dropped === 0) {
+    return null;
+  }
+  return (
+    <EuiToolTip
+      content={
+        <EuiText>
+          <p>This transaction is missing spans.</p>
+        </EuiText>
+      }
+    >
+      <EuiIcon type="alert" />
+    </EuiToolTip>
+  );
+}
+
 function Prefix({ item }: { item: IWaterfallItem }) {
   if (item.docType !== 'transaction') {
     return null;
@@ -98,7 +122,7 @@ function Prefix({ item }: { item: IWaterfallItem }) {
 
   return (
     <React.Fragment>
-      <EuiIcon type="merge" />{' '}
+      <EuiIcon type="merge" /> <DroppedSpansWarning item={item} />{' '}
     </React.Fragment>
   );
 }
