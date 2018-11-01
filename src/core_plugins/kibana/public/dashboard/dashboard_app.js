@@ -57,7 +57,6 @@ import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
-import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -186,7 +185,7 @@ app.directive('dashboardApp', function ($injector) {
       const updateBreadcrumbs = () => {
         breadcrumbState.set([
           {
-            text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
+            text: i18n('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
               defaultMessage: 'Dashboard',
             }),
             href: $scope.landingPageUrl()
