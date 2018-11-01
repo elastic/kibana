@@ -160,13 +160,13 @@ class ObjectsTableUI extends Component {
   fetchSavedObjects = () => {
     this.setState({
       isSearching: true,
-    }, this.debouncedFetch.bind(null, this.state.activeQuery.text));
+    }, this.debouncedFetch);
   }
 
-  debouncedFetch = debounce(async (activeQueryText) => {
+  debouncedFetch = debounce(async () => {
     const { savedObjectsClient } = this.props;
-    const { activeQuery, page, perPage } = this.state;
-    const { queryText, visibleTypes } = parseQuery(activeQuery);
+    const { activeQuery: query, page, perPage } = this.state;
+    const { queryText, visibleTypes } = parseQuery(query);
     const findOptions = {
       search: queryText ? `${queryText}*` : undefined,
       perPage,
@@ -201,20 +201,22 @@ class ObjectsTableUI extends Component {
       return;
     }
 
-    // ignore results for old requests that are returned out of order
-    if (activeQueryText !== activeQuery.text) {
-      return;
-    }
+    this.setState(({ activeQuery }) => {
+      // ignore results for old requests
+      if (activeQuery.text !== query.text) {
+        return {};
+      }
 
-    this.setState({
-      savedObjects: resp.savedObjects.map(savedObject => ({
-        title: savedObject.attributes.title,
-        type: savedObject.type,
-        id: savedObject.id,
-        icon: getSavedObjectIcon(savedObject.type),
-      })),
-      filteredItemCount: resp.total,
-      isSearching: false,
+      return {
+        savedObjects: resp.savedObjects.map(savedObject => ({
+          title: savedObject.attributes.title,
+          type: savedObject.type,
+          id: savedObject.id,
+          icon: getSavedObjectIcon(savedObject.type),
+        })),
+        filteredItemCount: resp.total,
+        isSearching: false,
+      };
     });
   }, 300);
 
