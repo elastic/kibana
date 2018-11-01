@@ -316,17 +316,6 @@ module.exports = {
     },
 
     /**
-     * disable jsx-a11y for canvas - which needs to be fixed
-     */
-    {
-      files: ['x-pack/plugins/canvas/**'],
-      rules: {
-        'jsx-a11y/no-static-element-interactions': 'off',
-        //'jsx-a11y/anchor-has-content': 'off',
-      },
-    },
-
-    /**
      * disable jsx-a11y for kbn-ui-framework
      */
     {

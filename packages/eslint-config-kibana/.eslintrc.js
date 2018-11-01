@@ -12,11 +12,7 @@ module.exports = {
     'prefer-object-spread',
     'jsx-a11y',
   ],
-
-  // "extends": [
-  //   "plugin:jsx-a11y/recommended"
-  // ],
-
+  
   env: {
     es6: true,
     node: true,
