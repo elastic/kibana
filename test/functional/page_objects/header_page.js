@@ -31,10 +31,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   const wait = getService('wait');
   const PageObjects = getPageObjects(['common']);
 
-  //const globalTimePickerSelector = By.css('[data-test-subj="globalTimepickerButton"]');
   const quickButtonSelector = By.css('[data-test-subj="timepicker-quick-button"');
   const absoluteFromInputSelector = By.css('[data-test-subj="absolute-datetime-input-from"]');
-  //const absoluteToInputSelector = By.css('[data-test-subj="absolute-datetime-input-to"]');
 
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -63,7 +61,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickVisualize() {
       log.debug('click Visualize tab');
-      await this.clickSelector(By.css('a[href*=\'visualize\']'));
+      await this.clickSelector('a[href*=\'visualize\']');
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.confirmTopNavTextContains('visualize');
       await this.awaitGlobalLoadingIndicatorHidden();
@@ -71,7 +69,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickDashboard() {
       log.debug('click Dashboard tab');
-      await this.clickSelector(By.css('a[href*=\'dashboard\']'));
+      await this.clickSelector('a[href*=\'dashboard\']');
       await retry.try(async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
         const isLandingPageVisible = await testSubjects.exists('dashboardLandingPage');
@@ -84,13 +82,13 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickManagement() {
       log.debug('click Management tab');
-      await this.clickSelector(By.css('a[href*=\'management\']'));
+      await this.clickSelector('a[href*=\'management\']');
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickSettings() {
       log.debug('click Settings tab');
-      await this.clickSelector(By.css('a[href*=\'settings\']'));
+      await this.clickSelector('a[href*=\'settings\']');
     }
 
     async clickTimepicker() {
@@ -112,11 +110,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('timePicker');
     }
 
-    // async isAbsoluteSectionShowing() {
-    //   log.debug('isAbsoluteSectionShowing');
-    //   const absoluteFrom = await findElement(By.css('input[ng-model=\'absolute.from\']'));
-    //   return await absoluteFrom.isEnabled();
-    // }
 
     async showAbsoluteSection() {
       log.debug('showAbsoluteSection');

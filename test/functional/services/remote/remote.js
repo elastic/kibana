@@ -139,10 +139,6 @@ export async function RemoteProvider({ getService }) {
         await element.click();
       },
 
-      // async append(selector, text) {
-
-      // },
-
       async get(url, insertTimestamp = true) {
         if (insertTimestamp) {
           const urlWithTime = modifyUrl(url, parsed => {
