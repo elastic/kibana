@@ -79,7 +79,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
           title={
             <h3>
               <FormattedMessage
-                id="xpack.security.management.editRoles.privileges.es.elasticSearchPrivileges.clusterPrivilegesTitle"
+                id="xpack.security.management.editRoles.elasticSearchPrivileges.clusterPrivilegesTitle"
                 defaultMessage="Cluster privileges"
               />
             </h3>
@@ -87,7 +87,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
           description={
             <p>
               <FormattedMessage
-                id="xpack.security.management.editRoles.privileges.es.elasticSearchPrivileges.manageRoleActionsDescription"
+                id="xpack.security.management.editRoles.elasticSearchPrivileges.manageRoleActionsDescription"
                 defaultMessage="Manage the actions this role can perform against your cluster. "
               />
               {this.learnMore(documentationLinks.esClusterPrivileges)}
@@ -105,7 +105,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
           title={
             <h3>
               <FormattedMessage
-                id="xpack.security.management.editRoles.privileges.es.elasticSearchPrivileges.runAsPrivilegesTitle"
+                id="xpack.security.management.editRoles.elasticSearchPrivileges.runAsPrivilegesTitle"
                 defaultMessage="Run As privileges"
               />
             </h3>
@@ -113,7 +113,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
           description={
             <p>
               <FormattedMessage
-                id="xpack.security.management.editRoles.privileges.es.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
+                id="xpack.security.management.editRoles.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
                 defaultMessage="Allow requests to be submitted on the behalf of other users. "
               />
               {this.learnMore(documentationLinks.esRunAsPrivileges)}
@@ -126,7 +126,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
                 this.props.editable
                   ? intl.formatMessage({
                       id:
-                        'xpack.security.management.editRoles.privileges.es.elasticSearchPrivileges.addUserTitle',
+                        'xpack.security.management.editRoles.elasticSearchPrivileges.addUserTitle',
                       defaultMessage: 'Add a user...',
                     })
                   : undefined
@@ -148,7 +148,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
         <EuiTitle size={'xs'}>
           <h3>
             <FormattedMessage
-              id="xpack.security.management.editRoles.privileges.es.elasticSearchPrivileges.indexPrivilegesTitle"
+              id="xpack.security.management.editRoles.elasticSearchPrivileges.indexPrivilegesTitle"
               defaultMessage="Index privileges"
             />
           </h3>
@@ -157,7 +157,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
         <EuiText size={'s'} color={'subdued'}>
           <p>
             <FormattedMessage
-              id="xpack.security.management.editRoles.privileges.es.elasticSearchPrivileges.controlAccessToClusterDataDescription"
+              id="xpack.security.management.editRoles.elasticSearchPrivileges.controlAccessToClusterDataDescription"
               defaultMessage="Control access to the data in your cluster. "
             />
             {this.learnMore(documentationLinks.esIndicesPrivileges)}
@@ -171,7 +171,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
         {this.props.editable && (
           <EuiButton size={'s'} iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>
             <FormattedMessage
-              id="xpack.security.management.editRoles.privileges.es.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
+              id="xpack.security.management.editRoles.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
               defaultMessage="Add index privilege"
             />
           </EuiButton>
@@ -183,7 +183,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
   public learnMore = (href: string) => (
     <EuiLink className="editRole__learnMore" href={href} target={'_blank'}>
       <FormattedMessage
-        id="xpack.security.management.editRoles.privileges.es.elasticSearchPrivileges.learnMoreLinkText"
+        id="xpack.security.management.editRoles.elasticSearchPrivileges.learnMoreLinkText"
         defaultMessage="Learn more"
       />
     </EuiLink>

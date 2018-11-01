@@ -32,7 +32,7 @@ routes.defaults(/\/management/, {
       function ensureSecurityRegistered() {
         const registerSecurity = () => management.register('security', {
           display: i18n.translate(
-            'xpack.security.management.management.securityTitle', {
+            'xpack.security.management.securityTitle', {
               defaultMessage: 'Security',
             }),
           order: 10,
@@ -47,7 +47,7 @@ routes.defaults(/\/management/, {
             name: 'securityUsersLink',
             order: 10,
             display: i18n.translate(
-              'xpack.security.management.management.usersTitle', {
+              'xpack.security.management.usersTitle', {
                 defaultMessage: 'Users',
               }),
             url: `#${USERS_PATH}`,
@@ -59,7 +59,7 @@ routes.defaults(/\/management/, {
             name: 'securityRolesLink',
             order: 20,
             display: i18n.translate(
-              'xpack.security.management.management.rolesTitle', {
+              'xpack.security.management.rolesTitle', {
                 defaultMessage: 'Roles',
               }),
             url: `#${ROLES_PATH}`,

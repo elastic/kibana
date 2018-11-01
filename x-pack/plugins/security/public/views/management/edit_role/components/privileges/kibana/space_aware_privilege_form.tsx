@@ -83,7 +83,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
           title={
             <p>
               <FormattedMessage
-                id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
+                id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
                 defaultMessage="Insufficient Privileges"
               />
             </p>
@@ -93,20 +93,20 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
         >
           <p>
             <FormattedMessage
-              id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.howToViewAllAvailableSpacesDescription"
+              id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.howToViewAllAvailableSpacesDescription"
               defaultMessage="You are not authorized to view all available spaces."
             />
           </p>
           <p>
             <FormattedMessage
-              id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
+              id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
               defaultMessage="Please ensure your account has all privileges granted by the
               {kibanaUser} role, and try again."
               values={{
                 kibanaUser: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.kibanaUserTitle"
+                      id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.kibanaUserTitle"
                       defaultMessage="kibana_user"
                     />
                   </strong>
@@ -126,7 +126,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     const description = (
       <p>
         <FormattedMessage
-          id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.minimumActionsUserCanPerformInYourSpacesDescription"
+          id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.minimumActionsUserCanPerformInYourSpacesDescription"
           defaultMessage="Specify the minimum actions users can perform in your spaces."
         />
       </p>
@@ -135,20 +135,19 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     let helptext;
     if (basePrivilege === NO_PRIVILEGE_VALUE) {
       helptext = intl.formatMessage({
-        id:
-          'xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.noAccessToSpacesHelpText',
+        id: 'xpack.security.management.editRoles.spaceAwarePrivilegeForm.noAccessToSpacesHelpText',
         defaultMessage: 'No access to spaces',
       });
     } else if (basePrivilege === 'all') {
       helptext = intl.formatMessage({
         id:
-          'xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.viewEditShareAppsWithinAllSpacesHelpText',
+          'xpack.security.management.editRoles.spaceAwarePrivilegeForm.viewEditShareAppsWithinAllSpacesHelpText',
         defaultMessage: 'View, edit, and share objects and apps within all spaces',
       });
     } else if (basePrivilege === 'read') {
       helptext = intl.formatMessage({
         id:
-          'xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.viewObjectsAndAppsWithinAllSpacesHelpText',
+          'xpack.security.management.editRoles.spaceAwarePrivilegeForm.viewObjectsAndAppsWithinAllSpacesHelpText',
         defaultMessage: 'View objects and apps within all spaces',
       });
     }
@@ -159,7 +158,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
           title={
             <h3>
               <FormattedMessage
-                id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.minPrivilegesForAllSpacesTitle"
+                id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.minPrivilegesForAllSpacesTitle"
                 defaultMessage="Minimum privileges for all spaces"
               />
             </h3>
@@ -206,7 +205,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
         <EuiTitle size={'xs'}>
           <h3>
             <FormattedMessage
-              id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.higherPrivilegesForIndividualSpacesTitle"
+              id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.higherPrivilegesForIndividualSpacesTitle"
               defaultMessage="Higher privileges for individual spaces"
             />
           </h3>
@@ -220,7 +219,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
         >
           <p>
             <FormattedMessage
-              id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.grantMorePrivilegesTitle"
+              id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.grantMorePrivilegesTitle"
               defaultMessage="Grant more privileges on a per space basis. For example, if the privileges are
               {read} for all spaces, you can set the privileges to {all}
               for an individual space."
@@ -228,7 +227,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
                 read: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.readText"
+                      id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.readText"
                       defaultMessage="read"
                     />
                   </strong>
@@ -236,7 +235,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
                 all: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.allText"
+                      id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.allText"
                       defaultMessage="all"
                     />
                   </strong>
@@ -284,7 +283,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
                 onClick={this.addSpacePrivilege}
               >
                 <FormattedMessage
-                  id="xpack.security.management.editRoles.privileges.kibana.spaceAwarePrivilegeForm.addSpacePrivilegeTitle"
+                  id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.addSpacePrivilegeTitle"
                   defaultMessage="Add space privilege"
                 />
               </EuiButton>

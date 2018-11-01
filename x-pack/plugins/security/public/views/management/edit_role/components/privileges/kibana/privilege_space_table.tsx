@@ -77,8 +77,7 @@ class PrivilegeSpaceTableUI extends Component<Props, State> {
           box: {
             incremental: true,
             placeholder: intl.formatMessage({
-              id:
-                'xpack.security.management.editRoles.privileges.kibana.privilegeSpaceTable.filterPlaceholder',
+              id: 'xpack.security.management.editRoles.privilegeSpaceTable.filterPlaceholder',
               defaultMessage: 'Filter',
             }),
           },
@@ -111,7 +110,7 @@ class PrivilegeSpaceTableUI extends Component<Props, State> {
       {
         field: 'space',
         name: intl.formatMessage({
-          id: 'xpack.security.management.editRoles.privileges.kibana.privilegeSpaceTable.spaceName',
+          id: 'xpack.security.management.editRoles.privilegeSpaceTable.spaceName',
           defaultMessage: 'Space',
         }),
         width: this.props.readonly ? '75%' : '50%',
@@ -120,7 +119,7 @@ class PrivilegeSpaceTableUI extends Component<Props, State> {
             return (
               <EuiText color={'subdued'}>
                 <FormattedMessage
-                  id="xpack.security.management.editRoles.privileges.kibana.privilegeSpaceTable.deletedSpaceDescription"
+                  id="xpack.security.management.editRoles.privilegeSpaceTable.deletedSpaceDescription"
                   defaultMessage="{valur} (deleted)"
                   values={{ value: space.id }}
                 />
@@ -134,8 +133,7 @@ class PrivilegeSpaceTableUI extends Component<Props, State> {
       {
         field: 'privilege',
         name: intl.formatMessage({
-          id:
-            'xpack.security.management.editRoles.privileges.kibana.privilegeSpaceTable.privilegeName',
+          id: 'xpack.security.management.editRoles.privilegeSpaceTable.privilegeName',
           defaultMessage: 'Privilege',
         }),
         width: this.props.readonly ? '25%' : undefined,
@@ -160,8 +158,7 @@ class PrivilegeSpaceTableUI extends Component<Props, State> {
     if (!this.props.readonly) {
       columns.push({
         name: intl.formatMessage({
-          id:
-            'xpack.security.management.editRoles.privileges.kibana.privilegeSpaceTable.actionsName',
+          id: 'xpack.security.management.editRoles.privilegeSpaceTable.actionsName',
           defaultMessage: 'Actions',
         }),
         actions: [

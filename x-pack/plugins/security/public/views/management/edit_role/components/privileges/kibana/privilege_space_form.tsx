@@ -44,7 +44,7 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.security.management.editRoles.privileges.kibana.privilegeSpaceForm.spacesFormRowLabel"
+                id="xpack.security.management.editRoles.privilegeSpaceForm.spacesFormRowLabel"
                 defaultMessage="Spaces"
               />
             }
@@ -61,7 +61,7 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.security.management.editRoles.privileges.kibana.privilegeSpaceForm.privilegeFormRowLabel"
+                id="xpack.security.management.editRoles.privilegeSpaceForm.privilegeFormRowLabel"
                 defaultMessage="Privilege"
               />
             }

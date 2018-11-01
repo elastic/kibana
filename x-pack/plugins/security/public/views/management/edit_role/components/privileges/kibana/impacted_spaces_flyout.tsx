@@ -50,7 +50,7 @@ class ImpactedSpacesFlyoutUI extends Component<Props, State> {
         <div className="showImpactedSpaces">
           <EuiLink onClick={this.toggleShowImpactedSpaces}>
             <FormattedMessage
-              id="xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.viewSpacesPrivilegesSummaryLinkText"
+              id="xpack.security.management.editRoles.impactedSpacesFlyout.viewSpacesPrivilegesSummaryLinkText"
               defaultMessage="View summary of spaces privileges"
             />
           </EuiLink>
@@ -70,18 +70,18 @@ class ImpactedSpacesFlyoutUI extends Component<Props, State> {
     const { intl } = this.props;
     if (privileges.indexOf('all') >= 0) {
       return intl.formatMessage({
-        id: 'xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.allLabel',
+        id: 'xpack.security.management.editRoles.impactedSpacesFlyout.allLabel',
         defaultMessage: 'all',
       }) as KibanaPrivilege;
     }
     if (privileges.indexOf('read') >= 0) {
       return intl.formatMessage({
-        id: 'xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.readLabel',
+        id: 'xpack.security.management.editRoles.impactedSpacesFlyout.readLabel',
         defaultMessage: 'read',
       }) as KibanaPrivilege;
     }
     return intl.formatMessage({
-      id: 'xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.noneLabel',
+      id: 'xpack.security.management.editRoles.impactedSpacesFlyout.noneLabel',
       defaultMessage: 'none',
     }) as KibanaPrivilege;
   }
@@ -124,7 +124,7 @@ class ImpactedSpacesFlyoutUI extends Component<Props, State> {
           <EuiTitle size="m">
             <h1 id="showImpactedSpacesTitle">
               <FormattedMessage
-                id="xpack.security.management.editRoles.privileges.kibana.impactedSpacesFlyout.spacePrivilegesSummaryTitle"
+                id="xpack.security.management.editRoles.impactedSpacesFlyout.spacePrivilegesSummaryTitle"
                 defaultMessage="Summary of space privileges"
               />
             </h1>
