@@ -137,7 +137,7 @@ export interface TaskDictionary<T extends TaskDefinition> {
   [taskType: string]: T;
 }
 
-export type TaskStatus = 'idle' | 'running';
+export type TaskStatus = 'idle' | 'running' | 'failed';
 
 /*
  * A task instance represents all of the data required to store, fetch,

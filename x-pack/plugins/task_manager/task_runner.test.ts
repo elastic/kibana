@@ -207,6 +207,7 @@ describe('TaskManagerRunner', () => {
     const store = {
       update: sinon.stub(),
       remove: sinon.stub(),
+      getMaxAttempts: sinon.stub().returns(5),
     };
     const runner = new TaskManagerRunner({
       kbnServer: sinon.stub(),
