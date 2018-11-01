@@ -42,6 +42,7 @@ const defaultConfigPath = resolveConfigPath('test/functional/config.js');
 cmd
   .description(`CLI to manage archiving/restoring data in elasticsearch`)
   .option('--es-url [url]', 'url for elasticsearch')
+  .option('--kibana-url [url]', 'url for kibana (only necessary if using "load" method)')
   .option(`--dir [path]`, 'where archives are stored')
   .option('--verbose', 'turn on verbose logging')
   .option('--config [path]', 'path to a functional test config file to use for default values', resolveConfigPath, defaultConfigPath)
@@ -83,6 +84,7 @@ async function execute(operation, ...args) {
       // load default values from the specified config file
       const config = await readConfigFile(log, resolve(cmd.config));
       if (!cmd.esUrl) cmd.esUrl = formatUrl(config.get('servers.elasticsearch'));
+      if (!cmd.kibanaUrl) cmd.kibanaUrl = formatUrl(config.get('servers.kibana'));
       if (!cmd.dir) cmd.dir = config.get('esArchiver.directory');
     }
 
@@ -97,6 +99,7 @@ async function execute(operation, ...args) {
     if (!cmd.esUrl) {
       error('You must specify either --es-url or --config flags');
     }
+
     if (!cmd.dir) {
       error('You must specify either --dir or --config flags');
     }
@@ -119,6 +122,7 @@ async function execute(operation, ...args) {
         log,
         client,
         dataDir: resolve(cmd.dir),
+        kibanaUrl: cmd.kibanaUrl
       });
       await esArchiver[operation](...args);
     } finally {
