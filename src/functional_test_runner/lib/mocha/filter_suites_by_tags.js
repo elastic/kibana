@@ -31,7 +31,7 @@ export function filterSuitesByTags({ log, mocha, include, exclude }) {
   // if include tags were provided, filter the tree once to
   // only include branches that are included at some point
   if (include.length) {
-    log.info('Only running suites, and their child suites, if it includes the tag(s):', include);
+    log.info('Only running suites (and their sub-suites) if they include the tag(s):', include);
 
     const isIncluded = suite => !suite._tags ? false : suite._tags.some(t => include.includes(t));
     const isChildIncluded = suite => suite.suites.some(s => isIncluded(s) || isChildIncluded(s));

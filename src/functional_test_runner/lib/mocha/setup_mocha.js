@@ -60,8 +60,8 @@ export async function setupMocha(lifecycle, log, config, providers) {
   filterSuitesByTags({
     log,
     mocha,
-    include: config.get('testTags.include'),
-    exclude: config.get('testTags.exclude'),
+    include: config.get('suiteTags.include'),
+    exclude: config.get('suiteTags.exclude'),
   });
 
   return mocha;

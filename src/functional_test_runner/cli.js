@@ -75,7 +75,7 @@ const functionalTestRunner = createFunctionalTestRunner({
       grep: cmd.grep,
       invert: cmd.invert,
     },
-    testTags: {
+    suiteTags: {
       include: cmd.includeTag,
       exclude: cmd.excludeTag,
     },

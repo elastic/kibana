@@ -96,7 +96,7 @@ it('only runs hooks of parents and tests in level1a', async () => {
 
   expect(history).toMatchInlineSnapshot(`
 Array [
-  "info: Only running suites, and their child suites, if it includes the tag(s): [ 'level1a' ]",
+  "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1a' ]",
   "suite: ",
   "suite: level 1",
   "suite: level 1 level 1a",
@@ -115,7 +115,7 @@ it('only runs hooks of parents and tests in level1b', async () => {
 
   expect(history).toMatchInlineSnapshot(`
 Array [
-  "info: Only running suites, and their child suites, if it includes the tag(s): [ 'level1b' ]",
+  "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1b' ]",
   "suite: ",
   "suite: level 1",
   "suite: level 1 level 1b",
@@ -134,7 +134,7 @@ it('only runs hooks of parents and tests in level1a and level1b', async () => {
 
   expect(history).toMatchInlineSnapshot(`
 Array [
-  "info: Only running suites, and their child suites, if it includes the tag(s): [ 'level1a', 'level1b' ]",
+  "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1a', 'level1b' ]",
   "suite: ",
   "suite: level 1",
   "suite: level 1 level 1a",
@@ -157,7 +157,7 @@ it('only runs level1a if including level1 and excluding level1b', async () => {
 
   expect(history).toMatchInlineSnapshot(`
 Array [
-  "info: Only running suites, and their child suites, if it includes the tag(s): [ 'level1' ]",
+  "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1' ]",
   "info: Filtering out any suites that include the tag(s): [ 'level1b' ]",
   "suite: ",
   "suite: level 1",
@@ -177,7 +177,7 @@ it('only runs level1b if including level1 and excluding level1a', async () => {
 
   expect(history).toMatchInlineSnapshot(`
 Array [
-  "info: Only running suites, and their child suites, if it includes the tag(s): [ 'level1' ]",
+  "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1' ]",
   "info: Filtering out any suites that include the tag(s): [ 'level1a' ]",
   "suite: ",
   "suite: level 1",
