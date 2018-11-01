@@ -18,7 +18,7 @@
  */
 
 jest.mock('../chrome', () => ({
-  addBasePath: (path: string) => `http://localhost.com/myBase/${path}`,
+  addBasePath: (path: string) => `http://localhost/myBase/${path}`,
 }));
 
 jest.mock('../metadata', () => ({
