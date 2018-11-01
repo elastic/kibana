@@ -34,7 +34,7 @@ export class SpaceValidator {
 
     if (!space.name || !space.name.trim()) {
       return invalid(
-        i18n.translate('xpack.spaces.management.lib.validateSpace.requiredNameErrorMessage', {
+        i18n.translate('xpack.spaces.management.validateSpace.requiredNameErrorMessage', {
           defaultMessage: 'Name is required',
         })
       );
@@ -42,7 +42,7 @@ export class SpaceValidator {
 
     if (space.name.length > 1024) {
       return invalid(
-        i18n.translate('xpack.spaces.management.lib.validateSpace.nameMaxLengthErrorMessage', {
+        i18n.translate('xpack.spaces.management.validateSpace.nameMaxLengthErrorMessage', {
           defaultMessage: 'Name must not exceed 1024 characters',
         })
       );
@@ -58,7 +58,7 @@ export class SpaceValidator {
 
     if (space.description && space.description.length > 2000) {
       return invalid(
-        i18n.translate('xpack.spaces.management.lib.validateSpace.describeMaxLengthErrorMessage', {
+        i18n.translate('xpack.spaces.management.validateSpace.describeMaxLengthErrorMessage', {
           defaultMessage: 'Description must not exceed 2000 characters',
         })
       );
@@ -78,19 +78,16 @@ export class SpaceValidator {
 
     if (!space.id) {
       return invalid(
-        i18n.translate(
-          'xpack.spaces.management.lib.validateSpace.urlIdentifierRequiredErrorMessage',
-          {
-            defaultMessage: 'URL identifier is required',
-          }
-        )
+        i18n.translate('xpack.spaces.management.validateSpace.urlIdentifierRequiredErrorMessage', {
+          defaultMessage: 'URL identifier is required',
+        })
       );
     }
 
     if (!isValidSpaceIdentifier(space.id)) {
       return invalid(
         i18n.translate(
-          'xpack.spaces.management.lib.validateSpace.urlIdentifierAllowedCharactersErrorMessage',
+          'xpack.spaces.management.validateSpace.urlIdentifierAllowedCharactersErrorMessage',
           {
             defaultMessage:
               'URL identifier can only contain a-z, 0-9, and the characters "_" and "-"',

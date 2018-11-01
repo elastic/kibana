@@ -95,7 +95,7 @@ class SpaceSelectorUI extends Component<Props, State> {
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage
-                  id="xpack.spaces.spaceSelector.spaceSelector.selectSpacesTitle"
+                  id="xpack.spaces.spaceSelector.selectSpacesTitle"
                   defaultMessage="Select your space"
                 />
               </h1>
@@ -103,7 +103,7 @@ class SpaceSelectorUI extends Component<Props, State> {
             <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
-                  id="xpack.spaces.spaceSelector.spaceSelector.changeSpaceAnytimeAvailabilityText"
+                  id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
                   defaultMessage="You can change your space at anytime"
                 />
               </p>
@@ -132,7 +132,7 @@ class SpaceSelectorUI extends Component<Props, State> {
                   textAlign="center"
                 >
                   <FormattedMessage
-                    id="xpack.spaces.spaceSelector.spaceSelector.noSpacesMatchSearchCriteriaDescription"
+                    id="xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription"
                     defaultMessage="No spaces match search criteria"
                   />
                 </EuiText>
@@ -154,7 +154,7 @@ class SpaceSelectorUI extends Component<Props, State> {
         <EuiFieldSearch
           className="spcSpaceSelector__searchField"
           placeholder={intl.formatMessage({
-            id: 'xpack.spaces.spaceSelector.spaceSelector.findSpacePlaceholder',
+            id: 'xpack.spaces.spaceSelector.findSpacePlaceholder',
             defaultMessage: 'Find a space',
           })}
           incremental={true}

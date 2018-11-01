@@ -48,7 +48,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={intl.formatMessage({
-              id: 'xpack.spaces.management.editSpace.customizeSpaceAvatar.initialItemsFormRowLabel',
+              id: 'xpack.spaces.management.customizeSpaceAvatar.initialItemsFormRowLabel',
               defaultMessage: 'Initials (2 max)',
             })}
           >
@@ -65,7 +65,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
         <EuiFlexItem grow={true}>
           <EuiFormRow
             label={intl.formatMessage({
-              id: 'xpack.spaces.management.editSpace.customizeSpaceAvatar.colorFormRowLabel',
+              id: 'xpack.spaces.management.customizeSpaceAvatar.colorFormRowLabel',
               defaultMessage: 'Color',
             })}
           >
@@ -110,7 +110,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
         <EuiFormRow hasEmptyLabelSpace={true}>
           <EuiLink name="customize_space_link" onClick={this.showFields}>
             <FormattedMessage
-              id="xpack.spaces.management.editSpace.customizeSpaceAvatar.customizeLinkText"
+              id="xpack.spaces.management.customizeSpaceAvatar.customizeLinkText"
               defaultMessage="Customize"
             />
           </EuiLink>

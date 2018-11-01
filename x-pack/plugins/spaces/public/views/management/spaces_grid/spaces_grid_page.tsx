@@ -89,7 +89,7 @@ class SpacesGridPageUI extends Component<Props, State> {
             <EuiText>
               <h1>
                 <FormattedMessage
-                  id="xpack.spaces.management.spacesGrid.spacesGridPage.spacesTitle"
+                  id="xpack.spaces.management.spacesGridPage.spacesTitle"
                   defaultMessage="Spaces"
                 />
               </h1>
@@ -108,7 +108,7 @@ class SpacesGridPageUI extends Component<Props, State> {
           search={{
             box: {
               placeholder: intl.formatMessage({
-                id: 'xpack.spaces.management.spacesGrid.spacesGridPage.searchPlaceholder',
+                id: 'xpack.spaces.management.spacesGridPage.searchPlaceholder',
                 defaultMessage: 'Search',
               }),
             },
@@ -117,7 +117,7 @@ class SpacesGridPageUI extends Component<Props, State> {
           message={
             this.state.loading ? (
               <FormattedMessage
-                id="xpack.spaces.management.spacesGrid.spacesGridPage.loadingTitle"
+                id="xpack.spaces.management.spacesGridPage.loadingTitle"
                 defaultMessage="loading…"
               />
             ) : (
@@ -138,7 +138,7 @@ class SpacesGridPageUI extends Component<Props, State> {
         }}
       >
         <FormattedMessage
-          id="xpack.spaces.management.spacesGrid.spacesGridPage.createSpaceButtonLabel"
+          id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
           defaultMessage="Create space"
         />
       </EuiButton>
@@ -185,7 +185,7 @@ class SpacesGridPageUI extends Component<Props, State> {
       toastNotifications.addDanger(
         intl.formatMessage(
           {
-            id: 'xpack.spaces.management.spacesGrid.spacesGridPage.errorDeletingSpaceErrorMessage',
+            id: 'xpack.spaces.management.spacesGridPage.errorDeletingSpaceErrorMessage',
             defaultMessage: 'Error deleting space: {errorMessage}',
           },
           {
@@ -203,8 +203,7 @@ class SpacesGridPageUI extends Component<Props, State> {
 
     const message = intl.formatMessage(
       {
-        id:
-          'xpack.spaces.management.spacesGrid.spacesGridPage.spaceSuccessfullyDeletedNotificationMessage',
+        id: 'xpack.spaces.management.spacesGridPage.spaceSuccessfullyDeletedNotificationMessage',
         defaultMessage: 'Deleted "{spaceName}" space.',
       },
       {
@@ -268,7 +267,7 @@ class SpacesGridPageUI extends Component<Props, State> {
       {
         field: 'name',
         name: intl.formatMessage({
-          id: 'xpack.spaces.management.spacesGrid.spacesGridPage.spaceColumnName',
+          id: 'xpack.spaces.management.spacesGridPage.spaceColumnName',
           defaultMessage: 'Space',
         }),
         sortable: true,
@@ -287,7 +286,7 @@ class SpacesGridPageUI extends Component<Props, State> {
       {
         field: 'id',
         name: intl.formatMessage({
-          id: 'xpack.spaces.management.spacesGrid.spacesGridPage.identifierColumnName',
+          id: 'xpack.spaces.management.spacesGridPage.identifierColumnName',
           defaultMessage: 'Identifier',
         }),
         sortable: true,
@@ -295,25 +294,24 @@ class SpacesGridPageUI extends Component<Props, State> {
       {
         field: 'description',
         name: intl.formatMessage({
-          id: 'xpack.spaces.management.spacesGrid.spacesGridPage.descriptionColumnName',
+          id: 'xpack.spaces.management.spacesGridPage.descriptionColumnName',
           defaultMessage: 'Description',
         }),
         sortable: true,
       },
       {
         name: intl.formatMessage({
-          id: 'xpack.spaces.management.spacesGrid.spacesGridPage.actionsColumnName',
+          id: 'xpack.spaces.management.spacesGridPage.actionsColumnName',
           defaultMessage: 'Actions',
         }),
         actions: [
           {
             name: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGrid.spacesGridPage.actions.editSpaceActionName',
+              id: 'xpack.spaces.management.spacesGridPage.editSpaceActionName',
               defaultMessage: 'Edit',
             }),
             description: intl.formatMessage({
-              id:
-                'xpack.spaces.management.spacesGrid.spacesGridPage.actions.editSpaceActionDescription',
+              id: 'xpack.spaces.management.spacesGridPage.editSpaceActionDescription',
               defaultMessage: 'Edit this space.',
             }),
             onClick: this.onEditSpaceClick,
@@ -324,12 +322,11 @@ class SpacesGridPageUI extends Component<Props, State> {
           {
             available: (record: Space) => !isReservedSpace(record),
             name: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGrid.spacesGridPage.actions.deleteActionName',
+              id: 'xpack.spaces.management.spacesGridPage.deleteActionName',
               defaultMessage: 'Delete',
             }),
             description: intl.formatMessage({
-              id:
-                'xpack.spaces.management.spacesGrid.spacesGridPage.actions.deleteThisSpaceActionDescription',
+              id: 'xpack.spaces.management.spacesGridPage.deleteThisSpaceActionDescription',
               defaultMessage: 'Delete this space.',
             }),
             onClick: this.onDeleteSpaceClick,
