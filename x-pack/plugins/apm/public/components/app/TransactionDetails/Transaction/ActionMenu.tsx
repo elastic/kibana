@@ -20,9 +20,9 @@ import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 
 function getDiscoverQuery(transactionId: string, traceId?: string) {
-  let query = `${PROCESSOR_EVENT}:transaction AND ${TRANSACTION_ID}:${transactionId}`;
+  let query = `${PROCESSOR_EVENT}:"transaction" AND ${TRANSACTION_ID}:"${transactionId}"`;
   if (traceId) {
-    query += ` AND ${TRACE_ID}:${traceId}`;
+    query += ` AND ${TRACE_ID}:"${traceId}"`;
   }
   return {
     _a: {
@@ -68,14 +68,13 @@ export const DiscoverTransactionLink: React.SFC<ActionMenuProps> = ({
   transaction,
   children
 }) => {
+  const traceId =
+    transaction.version === 'v2' ? transaction.trace.id : undefined;
   return (
     <KibanaLink
       pathname="/app/kibana"
       hash="/discover"
-      query={getDiscoverQuery(
-        transaction.transaction.id,
-        transaction.version === 'v2' ? transaction.trace.id : undefined
-      )}
+      query={getDiscoverQuery(transaction.transaction.id, traceId)}
       children={children}
     />
   );
