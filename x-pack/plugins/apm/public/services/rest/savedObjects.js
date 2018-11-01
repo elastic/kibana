@@ -4,33 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memoize, isEmpty, first } from 'lodash';
+import { memoize } from 'lodash';
 import chrome from 'ui/chrome';
 import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { callApi } from './callApi';
 
 export const getAPMIndexPattern = memoize(async () => {
-  const res = await callApi({
-    pathname: `/api/saved_objects/_find`,
-    query: {
-      type: 'index-pattern'
-    }
-  });
-
-  if (isEmpty(res.savedObjects)) {
-    return;
-  }
-
   const apmIndexPattern = chrome.getInjected('apmIndexPattern');
-  const apmSavedObject = first(
-    res.savedObjects.filter(
-      savedObject => savedObject.attributes.title === apmIndexPattern
-    )
-  );
-
-  if (!apmSavedObject) {
+  try {
+    const res = await callApi({
+      pathname: `/api/saved_objects/index-pattern/${apmIndexPattern}`
+    });
+    return getFromSavedObject(res);
+  } catch (error) {
     return;
   }
-
-  return getFromSavedObject(apmSavedObject);
 });
