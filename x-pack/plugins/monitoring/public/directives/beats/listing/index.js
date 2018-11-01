@@ -9,6 +9,8 @@ import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { Stats } from 'plugins/monitoring/components/beats';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
+import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
   SORT_ASCENDING,
   SORT_DESCENDING,
@@ -26,14 +28,40 @@ import {
 
 const filterFields = [ 'name', 'type', 'version', 'output' ];
 const columns = [
-  { title: 'Name', sortKey: 'name', sortOrder: SORT_ASCENDING },
-  { title: 'Type', sortKey: 'type' },
-  { title: 'Output Enabled', sortKey: 'output' },
-  { title: 'Total Events Rate', sortKey: 'total_events_rate', secondarySortOrder: SORT_DESCENDING },
-  { title: 'Bytes Sent Rate', sortKey: 'bytes_sent_rate' },
-  { title: 'Output Errors', sortKey: 'errors' },
-  { title: 'Allocated Memory', sortKey: 'memory' },
-  { title: 'Version', sortKey: 'version' },
+  {
+    title: i18n.translate('xpack.monitoring.beats.instances.nameTitle', { defaultMessage: 'Name' }),
+    sortKey: 'name',
+    sortOrder: SORT_ASCENDING
+  },
+  {
+    title: i18n.translate('xpack.monitoring.beats.instances.typeTitle', { defaultMessage: 'Type' }),
+    sortKey: 'type'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.beats.instances.outputEnabledTitle', { defaultMessage: 'Output Enabled' }),
+    sortKey: 'output'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.beats.instances.totalEventsRateTitle', { defaultMessage: 'Total Events Rate' }),
+    sortKey: 'total_events_rate',
+    secondarySortOrder: SORT_DESCENDING
+  },
+  {
+    title: i18n.translate('xpack.monitoring.beats.instances.bytesSentRateTitle', { defaultMessage: 'Bytes Sent Rate' }),
+    sortKey: 'bytes_sent_rate'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.beats.instances.outputErrorsTitle', { defaultMessage: 'Output Errors' }),
+    sortKey: 'errors'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.beats.instances.allocatedMemoryTitle', { defaultMessage: 'Allocated Memory' }),
+    sortKey: 'memory'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.beats.instances.versionTitle', { defaultMessage: 'Version' }),
+    sortKey: 'version'
+  },
 ];
 const beatRowFactory = (scope, kbnUrl) => {
   return props => {
@@ -93,7 +121,7 @@ const beatRowFactory = (scope, kbnUrl) => {
 };
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringBeatsListing', (kbnUrl) => {
+uiModule.directive('monitoringBeatsListing', (kbnUrl, i18n) => {
   return {
     restrict: 'E',
     scope: {
@@ -107,25 +135,29 @@ uiModule.directive('monitoringBeatsListing', (kbnUrl) => {
     link(scope, $el) {
 
       scope.$watch('data', (data = {}) => {
+        const filterBeatsPlaceholder = i18n('xpack.monitoring.beats.filterBeatsPlaceholder', { defaultMessage: 'Filter Beats…' });
+
         render((
-          <div>
-            <Stats stats={data.stats} />
-            <div className="page-row">
-              <MonitoringTable
-                className="beatsTable"
-                rows={data.listing}
-                pageIndex={scope.pageIndex}
-                filterText={scope.filterText}
-                sortKey={scope.sortKey}
-                sortOrder={scope.sortOrder}
-                onNewState={scope.onNewState}
-                placeholder="Filter Beats..."
-                filterFields={filterFields}
-                columns={columns}
-                rowComponent={beatRowFactory(scope, kbnUrl)}
-              />
+          <I18nProvider>
+            <div>
+              <Stats stats={data.stats} />
+              <div className="page-row">
+                <MonitoringTable
+                  className="beatsTable"
+                  rows={data.listing}
+                  pageIndex={scope.pageIndex}
+                  filterText={scope.filterText}
+                  sortKey={scope.sortKey}
+                  sortOrder={scope.sortOrder}
+                  onNewState={scope.onNewState}
+                  placeholder={filterBeatsPlaceholder}
+                  filterFields={filterFields}
+                  columns={columns}
+                  rowComponent={beatRowFactory(scope, kbnUrl)}
+                />
+              </div>
             </div>
-          </div>
+          </I18nProvider>
         ), $el[0]);
       });
 

@@ -8,6 +8,7 @@ import { get } from 'lodash';
 import React from 'react';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function Stats({ stats }) {
   const types = stats.types.map(({ type, count }, index) => {
@@ -35,7 +36,11 @@ export function Stats({ stats }) {
 
       <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
-          Total Beats:&nbsp;
+          <FormattedMessage
+            id="xpack.monitoring.beats.overview.totalBeatsLabel"
+            defaultMessage="Total Beats:"
+          />
+          &nbsp;
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <strong data-test-subj="totalBeats">
@@ -46,7 +51,11 @@ export function Stats({ stats }) {
         {types}
 
         <EuiFlexItem grow={false}>
-          Total Events:&nbsp;
+          <FormattedMessage
+            id="xpack.monitoring.beats.overview.totalEventsLabel"
+            defaultMessage="Total Events:"
+          />
+          &nbsp;
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -56,7 +65,11 @@ export function Stats({ stats }) {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          Bytes Sent:&nbsp;
+          <FormattedMessage
+            id="xpack.monitoring.beats.overview.bytesSentLabel"
+            defaultMessage="Bytes Sent:"
+          />
+          &nbsp;
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <strong data-test-subj="bytesSent">
