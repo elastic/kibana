@@ -225,7 +225,13 @@ TimeBuckets.prototype.setInterval = function (input) {
 TimeBuckets.prototype.getInterval = function (useNormalizedEsInterval = true) {
   const self = this;
   const duration = self.getDuration();
-  return decorateInterval(maybeScaleInterval(readInterval()));
+  const parsedInterval = readInterval();
+
+  if(useNormalizedEsInterval) {
+    return decorateInterval(maybeScaleInterval(parsedInterval));
+  } else {
+    return decorateInterval(parsedInterval);
+  }
 
   // either pull the interval from state or calculate the auto-interval
   function readInterval() {
@@ -251,6 +257,7 @@ TimeBuckets.prototype.getInterval = function (useNormalizedEsInterval = true) {
     if (+scaled === +interval) return interval;
 
     decorateInterval(interval);
+    decorateInterval(scaled);
     return _.assign(scaled, {
       preScaled: interval,
       scale: interval / scaled,
