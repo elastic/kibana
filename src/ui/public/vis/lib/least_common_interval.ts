@@ -25,8 +25,8 @@ import { parseEsInterval } from '../../utils/parse_es_interval';
  * Finds the lowest common interval between two given ES date histogram intervals
  * in the format of (value)(unit)
  *
- *  - `ms, s` units are fixed-length intervals
- *  - `m, h, d` units are fixed-length intervals when value > 1 (i.e. 2m, 24h, 7d),
+ *  - `ms` units are fixed-length intervals
+ *  - `s, m, h, d` units are fixed-length intervals when value > 1 (i.e. 2m, 24h, 7d),
  *    but calendar interval when value === 1
  *  - `w, M, q, y` units are calendar intervals and do not support multiple, aka
  *    value must === 1
@@ -51,7 +51,7 @@ export function leastCommonInterval(a: string, b: string): string {
   }
 
   // If intervals are calendar units, pick the larger one (calendar value is always 1)
-  if (aInt.type === 'calendar') {
+  if (aInt.type === 'calendar' || bInt.type === 'calendar') {
     return aUnit.weight > bUnit.weight ? `${aInt.value}${aInt.unit}` : `${bInt.value}${bInt.unit}`;
   }
 
@@ -68,8 +68,11 @@ export function leastCommonInterval(a: string, b: string): string {
     return a.replace(/\s/g, '');
   }
 
-  // Otherwise find the biggest unit that divides evenly
-  const lcmUnit = unitsDesc.find(unit => unitsMap[unit].base && lcmMs % unitsMap[unit].base === 0);
+  // Otherwise find the biggest non-calendar unit that divides evenly
+  const lcmUnit = unitsDesc.find(unit => {
+    const unitInfo = unitsMap[unit];
+    return !!(unitInfo.type !== 'calendar' && lcmMs % unitInfo.base === 0);
+  });
 
   // Throw error in case we couldn't divide evenly, theoretically we never get here as everything is
   // divisible by 1 millisecond
