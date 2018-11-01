@@ -5,7 +5,7 @@
 [partintro]
 --
 
-{monitoring} in {kib} serves two separate purposes:
+The {kib} {monitor-features} serve two separate purposes:
 
 . To visualize monitoring data from across the {stack}. You can view health and 
 performance data for {es}, {ls}, and Beats in real time, as well as analyze past 
@@ -14,7 +14,7 @@ performance. For more information, see
 
 . To monitor {kib} itself and route that data to the monitoring cluster.
 
-If you enable {monitoring} across the {stack}, a monitoring agent runs on
+If you enable monitoring across the {stack}, a monitoring agent runs on
 each {es} node, {ls} node, {kib} instance, and Beat to collect and index
 metrics. Each node and instance is considered unique based on its persistent
 UUID, which is written to the <<settings,`path.data`>> directory when the node

@@ -5,8 +5,8 @@
 <titleabbrev>Viewing monitoring data</titleabbrev>
 ++++
 
-After you enable monitoring in {es}, {ls}, {kib}, or Beats, you can use {kib} to 
-view its health and performance. 
+After you enable monitoring in one or more products in the {stack}, you can use 
+{kib} to view their health and performance. 
 
 TIP: If you have a dedicated _monitoring cluster_, the information is accessible
 even if the cluster you're monitoring is not. If you have at least a gold 
@@ -16,7 +16,7 @@ and view them all through the same instance of {kib}.
 To learn more about typical monitoring architectures, 
 see {stack-ov}/how-monitoring-works.html[How monitoring works].
 
-To visualize monitoring data in {kib}:
+To see monitoring data in {kib}:
 
 . Verify that `xpack.monitoring.ui.enabled` is set to `true`, which is the
 default value. For more information, see <<monitoring-settings-kb>>.
@@ -26,7 +26,7 @@ separate monitoring cluster, set `xpack.monitoring.elasticsearch.url` in the
 `kibana.yml` file. Otherwise, the monitoring data is stored in the production
 cluster.
 
-. If {security} is enabled on the monitoring cluster: 
+. If the Elastic {security-features} are enabled on the monitoring cluster: 
 
 .. Use an HTTPS URL such as `https://<your_monitoring_cluster>:9200` in the 
 `xpack.monitoring.elasticsearch.url` setting.
@@ -52,9 +52,9 @@ xpack.monitoring.elasticsearch.ssl.certificateAuthorities: /path/to/your/cacert.
 
 --
 
-. If {security} is enabled on the {kib} server, identify or create users that 
-have access to the {kib} indices and permission to read from the monitoring 
-indices.
+. If the Elastic {security-features} are enabled on the {kib} server, identify 
+or create users that have access to the {kib} indices and permission to read 
+from the monitoring indices.
 +
 --
 You can assign users the `monitoring_user` and `kibana_user` 

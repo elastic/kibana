@@ -5,7 +5,7 @@
 <titleabbrev>Configuring monitoring</titleabbrev>
 ++++
 
-If you enable the collection of monitoring data in your cluster, you can 
+If you enable the Elastic {monitor-features} in your cluster, you can 
 optionally collect metrics about {kib}. 
 
 The following method involves sending the metrics to the production cluster, 
@@ -15,7 +15,7 @@ method, see <<monitoring-metricbeat>>.
 To learn about monitoring in general, see 
 {stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
 
-. Enable the collection of monitoring data in {stack}. Set 
+. Enable the collection of monitoring data. Set 
 `xpack.monitoring.collection.enabled` to `true` on the production cluster.  +
 + 
 --
@@ -62,7 +62,7 @@ as `https://<your_production_cluster>:9200` in this setting.
 
 --
 
-. If {security} is enabled on the production cluster:
+. If the Elastic {security-features} are enabled on the production cluster:
 
 .. Verify that there is a
 valid user ID and password in the `elasticsearch.username` and
