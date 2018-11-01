@@ -15,23 +15,12 @@ import {
   USER_ID
 } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/Transaction';
-// @ts-ignore
-import { asTime } from '../../../../utils/formatters';
+import { asPercent, asTime } from '../../../../utils/formatters';
 // @ts-ignore
 import {
   IStickyProperty,
   StickyProperties
 } from '../../../shared/StickyProperties';
-
-function getDurationPercent(
-  transactionDuration: number,
-  rootDuration?: number
-) {
-  if (rootDuration === undefined || rootDuration === 0) {
-    return '';
-  }
-  return ((transactionDuration / rootDuration) * 100).toFixed(2) + '%';
-}
 
 interface Props {
   transaction: Transaction;
@@ -45,7 +34,7 @@ export function StickyTransactionPropertiesComponent({
   const timestamp = get(transaction, '@timestamp');
   const url = get(transaction, REQUEST_URL_FULL, 'N/A');
   const duration = transaction.transaction.duration.us;
-  const rootDuration = root && root.transaction.duration.us;
+  const totalDuration = root && root.transaction.duration.us;
   const stickyProperties: IStickyProperty[] = [
     {
       label: 'Timestamp',
@@ -69,7 +58,7 @@ export function StickyTransactionPropertiesComponent({
     },
     {
       label: '% of trace',
-      val: getDurationPercent(duration, rootDuration),
+      val: asPercent(duration, totalDuration),
       width: '25%'
     },
     {
