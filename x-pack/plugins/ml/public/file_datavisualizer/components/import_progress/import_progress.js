@@ -30,6 +30,7 @@ export function ImportProgress({ statuses }) {
     uploadProgress,
     uploadStatus,
     createIndexPattern,
+    createPipeline,
   } = statuses;
 
   let statusInfo = null;
@@ -90,6 +91,8 @@ export function ImportProgress({ statuses }) {
     if (createIndexPattern === true) {
       createIndexPatternTitle = 'Creating index pattern';
       statusInfo = (<p>Creating index pattern</p>);
+    } else {
+      statusInfo = null;
     }
   }
   if (completedStep >= 5) {
@@ -113,20 +116,24 @@ export function ImportProgress({ statuses }) {
       onClick: () => {},
     },
     {
-      title: createIngestPipelineTitle,
-      isSelected: (indexCreatedStatus === IMPORT_STATUS.COMPLETE),
-      isComplete: (ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE),
-      status: ingestPipelineCreatedStatus,
-      onClick: () => {},
-    },
-    {
       title: uploadingDataTitle,
-      isSelected: (indexCreatedStatus === IMPORT_STATUS.COMPLETE && ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE),
+      isSelected: (indexCreatedStatus === IMPORT_STATUS.COMPLETE &&
+        (createPipeline === false || (createPipeline === true && ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE))),
       isComplete: (uploadStatus === IMPORT_STATUS.COMPLETE),
       status: uploadStatus,
       onClick: () => {},
     }
   ];
+
+  if (createPipeline === true) {
+    steps.splice(2, 0, {
+      title: createIngestPipelineTitle,
+      isSelected: (indexCreatedStatus === IMPORT_STATUS.COMPLETE),
+      isComplete: (ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE),
+      status: ingestPipelineCreatedStatus,
+      onClick: () => {},
+    });
+  }
 
   if (createIndexPattern === true) {
     steps.push({

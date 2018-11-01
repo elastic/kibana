@@ -191,7 +191,7 @@ describe('UnconnectedKibanaLink', () => {
         interval: 'auto',
         query: {
           language: 'lucene',
-          query: `context.service.name:myServiceName AND error.grouping_key:myGroupId`
+          query: `context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"`
         },
         sort: { '@timestamp': 'desc' }
       }
@@ -211,7 +211,7 @@ describe('UnconnectedKibanaLink', () => {
 
   it('should have correct url', () => {
     expect(wrapper.find('a').prop('href')).toBe(
-      "myBasePath/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))&_g="
+      'myBasePath/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:\'context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"\'),sort:(\'@timestamp\':desc))&_g=(time:(from:now-24h,mode:quick,to:now))'
     );
   });
 
