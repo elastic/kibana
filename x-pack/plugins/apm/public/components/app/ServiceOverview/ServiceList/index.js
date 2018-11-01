@@ -10,16 +10,17 @@ import styled from 'styled-components';
 import { RelativeLink } from '../../../../utils/url';
 import { fontSizes, truncate } from '../../../../style/variables';
 import TooltipOverlay from '../../../shared/TooltipOverlay';
-import { asMillisWithDefault, asDecimal } from '../../../../utils/formatters';
+import { asMillis, asDecimal } from '../../../../utils/formatters';
 import { ManagedTable } from '../../../shared/ManagedTable';
 
-// TODO: Consolidate these formatting helpers centrally
 function formatNumber(value) {
   if (value === 0) {
     return '0';
+  } else if (value <= 0.1) {
+    return '< 0.1';
+  } else {
+    return asDecimal(value);
   }
-  const formatted = asDecimal(value);
-  return formatted <= 0.1 ? '< 0.1' : formatted;
 }
 
 function formatString(value) {
@@ -56,7 +57,7 @@ const SERVICE_COLUMNS = [
     name: 'Avg. response time',
     sortable: true,
     dataType: 'number',
-    render: value => asMillisWithDefault(value)
+    render: value => asMillis(value)
   },
   {
     field: 'transactionsPerMinute',

@@ -8,18 +8,23 @@ import { asPercent, asTime } from '../formatters';
 
 describe('formatters', () => {
   describe('asTime', () => {
-    it('microseconds', () => {
+    it('formats correctly with defaults', () => {
+      expect(asTime(null)).toBe('N/A');
+      expect(asTime(undefined)).toBe('N/A');
+      expect(asTime(0)).toBe('0 μs');
       expect(asTime(1)).toBe('1 μs');
       expect(asTime(1000)).toBe('1,000 μs');
-    });
-
-    it('milliseconds', () => {
       expect(asTime(1000 * 1000)).toBe('1,000 ms');
       expect(asTime(1000 * 1000 * 10)).toBe('10,000 ms');
+      expect(asTime(1000 * 1000 * 20)).toBe('20.0 s');
     });
 
-    it('seconds', () => {
-      expect(asTime(1000 * 1000 * 20)).toBe('20.0 s');
+    it('formats without unit', () => {
+      expect(asTime(1000, { withUnit: false })).toBe('1,000');
+    });
+
+    it('formats without unit', () => {
+      expect(asTime(undefined, { defaultValue: 'nope' })).toBe('nope');
     });
   });
 
