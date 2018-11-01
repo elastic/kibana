@@ -28,26 +28,9 @@ import React from 'react';
 import { I18nProvider, intlShape } from '@kbn/i18n/react';
 import { mount, shallow, render } from 'enzyme';
 
-let intl;
-
-/**
- * This component is used to get intl object passed by IntlProvider via context
- */
-class IntlGetter extends React.Component {
-  static contextTypes = { intl: intlShape };
-
-  constructor(props, context) {
-    super(props, context);
-
-    intl = this.context.intl;
-  }
-
-  render() {
-    return '';
-  }
-}
-
-mount(<I18nProvider><IntlGetter/></I18nProvider>);
+// Use fake component to extract `intl` property to use in tests.
+const { intl } = mount(<I18nProvider><br /></I18nProvider>)
+  .find('IntlProvider').instance().getChildContext();
 
 function getOptions(context = {}, childContextTypes = {}, props = []) {
   return {
@@ -73,8 +56,8 @@ function nodeWithIntlProp(node) {
 /**
  *  Creates the wrapper instance using shallow with provided intl object into context
  *
- *  @param  node The React element or cheerio wrapper
- *  @param  options properties to pass into shallow wrapper
+ *  @param node The React element or cheerio wrapper
+ *  @param options properties to pass into shallow wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
 export function shallowWithIntl(node, { context, childContextTypes, ...props } = {}) {
@@ -89,8 +72,8 @@ export function shallowWithIntl(node, { context, childContextTypes, ...props } =
 /**
  *  Creates the wrapper instance using mount with provided intl object into context
  *
- *  @param  node The React element or cheerio wrapper
- *  @param  options properties to pass into mount wrapper
+ *  @param node The React element or cheerio wrapper
+ *  @param options properties to pass into mount wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
 export function mountWithIntl(node, { context, childContextTypes, ...props } = {}) {
@@ -105,8 +88,8 @@ export function mountWithIntl(node, { context, childContextTypes, ...props } = {
 /**
  *  Creates the wrapper instance using render with provided intl object into context
  *
- *  @param  node The React element or cheerio wrapper
- *  @param  options properties to pass into render wrapper
+ *  @param node The React element or cheerio wrapper
+ *  @param options properties to pass into render wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
 export function renderWithIntl(node, { context, childContextTypes, ...props } = {}) {
