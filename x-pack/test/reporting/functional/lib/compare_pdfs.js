@@ -14,6 +14,65 @@ import { comparePngs } from '../../../../../test/functional/services/lib/compare
 
 const mkdirAsync = promisify(mkdirp);
 
+async function convertPageToImage(pdfImage, pageNum, log) {
+  // For some reason the library seems to randomly throw "Failed to convert page to image" errors that are
+  // resolved on a retry. We've taken this code out before and just start hitting the error again in our
+  // ci.
+  let failCount = 0;
+  while (true) {
+    try {
+      return await pdfImage.convertPage(pageNum);
+    } catch (error) {
+      log.error(`Error caught while converting pdf page ${pageNum} to png: ${error.message}`);
+      if (failCount < 3) {
+        log.error(`${failCount}: Will try conversion again...`);
+        failCount++;
+        continue;
+      } else {
+        log.error(`Failed ${failCount} times, throwing error`);
+        throw error;
+      }
+    }
+  }
+}
+
+function comparePngs(actualPath, expectedPath, diffPath, log) {
+  log.debug(`comparePngs: ${actualPath} vs ${expectedPath}`);
+  return new Promise(resolve => {
+    const actual = fs.createReadStream(actualPath).pipe(new PNG()).on('parsed', doneReading);
+    const expected = fs.createReadStream(expectedPath).pipe(new PNG()).on('parsed', doneReading);
+    let filesRead = 0;
+
+    // Note that this threshold value only affects color comparison from pixel to pixel. It won't have
+    // any affect when comparing neighboring pixels - so slight shifts, font variations, or "blurry-ness"
+    // will still show up as diffs, but upping this will not help that.  Instead we keep the threshold low, and expect
+    // some the diffCount to be lower than our own threshold value.
+    const THRESHOLD = .1;
+
+    function doneReading() {
+      if (++filesRead < 2) return;
+      const diffPng = new PNG({ width: actual.width, height: actual.height });
+      log.debug(`calculating diff pixels...`);
+      const diffPixels = pixelmatch(
+        actual.data,
+        expected.data,
+        diffPng.data,
+        actual.width,
+        actual.height,
+        {
+          threshold: THRESHOLD,
+          // Adding this doesn't seem to make a difference at all, but ideally we want to avoid picking up anti aliasing
+          // differences from fonts on different OSs.
+          includeAA: true
+        }
+      );
+      log.debug(`diff pixels: ${diffPixels}`);
+      diffPng.pack().pipe(fs.createWriteStream(diffPath));
+      resolve(diffPixels);
+    }
+  });
+}
+
 export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screenshotsDirectory, log) {
   log.debug(`checkIfPdfsMatch: ${actualPdfPath} vs ${baselinePdfPath}`);
   // Copy the pdfs into the screenshot session directory, as that's where the generated pngs will automatically be
@@ -44,6 +103,10 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   fs.writeFileSync(actualCopyPath, fs.readFileSync(actualPdfPath));
 
   const convertOptions = {
+<<<<<<< HEAD
+=======
+    // '-density': '300',
+>>>>>>> Enabling report tests, adjusting the config export for it, and having successes(!)
   };
 
   const actualPdfImage = new PDFImage(actualCopyPath, { convertOptions });
@@ -66,9 +129,9 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
 
   for (let pageNum = 0; pageNum <= expectedPages; ++pageNum) {
     log.debug(`Converting expected pdf page ${pageNum} to png`);
-    const expectedPagePng = await expectedPdfImage.convertPage(pageNum);
+    const expectedPagePng = await convertPageToImage(expectedPdfImage, pageNum, log);
     log.debug(`Converting actual pdf page ${pageNum} to png`);
-    const actualPagePng = await actualPdfImage.convertPage(pageNum);
+    const actualPagePng = await convertPageToImage(actualPdfImage, pageNum, log);
     const diffPngPath = path.resolve(failureDirectoryPath, `${baselinePdfFileName}-${pageNum}.png`);
     diffTotal += await comparePngs(actualPagePng, expectedPagePng, diffPngPath, sessionDirectoryPath, log);
     pageNum++;

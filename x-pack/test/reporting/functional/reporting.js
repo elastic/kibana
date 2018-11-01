@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe.skip('Print Layout', () => {
+      describe('Print Layout', () => {
         it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
@@ -154,9 +154,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      // TODO Re-enable the tests after removing Phantom:
-      // https://github.com/elastic/kibana/issues/21485
-      describe.skip('Preserve Layout', () => {
+      describe('Preserve Layout', () => {
         it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
@@ -304,9 +302,7 @@ export default function ({ getService, getPageObjects }) {
           await expectEnabledGenerateReportButton();
         });
 
-        // TODO Re-enable the tests after removing Phantom:
-        // https://github.com/elastic/kibana/issues/21485
-        it.skip('matches baseline report', async function () {
+        it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(180000);

@@ -151,7 +151,6 @@ export function screenshotsObservableFactory(server) {
         // bumping to 250.
         const hackyWaitForVisualizations = () => new Promise(r => setTimeout(r, 250));
 
-
         return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
       },
       args: [layout.selectors.renderComplete, captureConfig.loadDelay],
