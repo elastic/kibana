@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('actualUsers = %j', users);
       expect(users.OptionalUser.roles).to.eql(['']);
       expect(users.OptionalUser.fullname).to.eql('');
-      expect(users.OptionalUser.email).to.eql('');
+      expect(users.OptionalUser.email).not.to.be.defined;
       expect(users.OptionalUser.reserved).to.be(false);
     });
 
