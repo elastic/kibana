@@ -87,6 +87,7 @@ export class JobListUi extends Component {
     // this page.
     this.props.closeDetailPanel();
   }
+
   getHeaderSection() {
     return (
       <EuiPageContentHeaderSection>
@@ -101,6 +102,7 @@ export class JobListUi extends Component {
       </EuiPageContentHeaderSection>
     );
   }
+
   renderNoPermission() {
     const { intl } = this.props;
     const title = intl.formatMessage({
@@ -124,10 +126,11 @@ export class JobListUi extends Component {
       </Fragment>
     );
   }
+
   renderEmpty() {
     return (
       <EuiEmptyPrompt
-        iconType="managementApp"
+        iconType="indexRollupApp"
         title={(
           <h1>
             <FormattedMessage
