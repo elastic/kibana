@@ -20,7 +20,7 @@
 import { KbnTopNavControllerProvider } from 'ui/kbn_top_nav/kbn_top_nav_controller';
 import storage from '../storage';
 
-export function SenseTopNavController(Private) {
+export function SenseTopNavController(Private, i18n) {
   const KbnTopNavController = Private(KbnTopNavControllerProvider);
 
   const controller = new KbnTopNavController([
@@ -32,19 +32,25 @@ export function SenseTopNavController(Private) {
     },
     {
       key: 'history',
-      description: 'History',
+      description: i18n('console.topNav.historyTabDescription', {
+        defaultMessage: 'History',
+      }),
       template: `<sense-history></sense-history>`,
       testId: 'consoleHistoryButton',
     },
     {
       key: 'settings',
-      description: 'Settings',
+      description: i18n('console.topNav.settingsTabDescription', {
+        defaultMessage: 'Settings',
+      }),
       template: `<sense-settings></sense-settings>`,
       testId: 'consoleSettingsButton',
     },
     {
       key: 'help',
-      description: 'Help',
+      description: i18n('console.topNav.helpTabDescription', {
+        defaultMessage: 'Help',
+      }),
       template: `<sense-help></sense-help>`,
       testId: 'consoleHelpButton',
     },
