@@ -7,6 +7,7 @@
 import moment from 'moment';
 import 'moment-duration-format';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 
 export function formatBytesUsage(used, max) {
   return formatNumber(used, 'byte') + ' / ' + formatNumber(max, 'byte');
@@ -61,5 +62,5 @@ export function formatMetric(value, format, suffix, options = {}) {
     }
     return formatNumber(value, format) + _suffix;
   }
-  return 'N/A';
+  return i18n.translate('xpack.monitoring.formatNumbers.notAvailableLabel', { defaultMessage: 'N/A' });
 }

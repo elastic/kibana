@@ -5,6 +5,7 @@
  */
 
 import { set as setBreadcrumbs } from 'ui/chrome/services/breadcrumb_state';
+import { i18n } from '@kbn/i18n';
 
 // Helper for making objects to use in a link element
 const createCrumb = (url, label, testSubj) => {
@@ -17,55 +18,70 @@ const createCrumb = (url, label, testSubj) => {
 
 // generate Elasticsearch breadcrumbs
 function getElasticsearchBreadcrumbs(mainInstance) {
+  const esLabel = i18n.translate('xpack.monitoring.breadcrumbs.esLabel', { defaultMessage: 'Elasticsearch' });
   const breadcrumbs = [];
   if (mainInstance.instance) {
-    breadcrumbs.push(createCrumb('#/elasticsearch', 'Elasticsearch'));
+    breadcrumbs.push(createCrumb('#/elasticsearch', esLabel));
     if (mainInstance.name === 'indices') {
-      breadcrumbs.push(createCrumb('#/elasticsearch/indices', 'Indices', 'breadcrumbEsIndices'));
+      breadcrumbs.push(createCrumb('#/elasticsearch/indices', i18n.translate(
+        'xpack.monitoring.breadcrumbs.es.indicesLabel', { defaultMessage: 'Indices' }), 'breadcrumbEsIndices'));
     } else if (mainInstance.name === 'nodes') {
-      breadcrumbs.push(createCrumb('#/elasticsearch/nodes', 'Nodes', 'breadcrumbEsNodes'));
+      breadcrumbs.push(createCrumb('#/elasticsearch/nodes', i18n.translate(
+        'xpack.monitoring.breadcrumbs.es.nodesLabel', { defaultMessage: 'Nodes' }), 'breadcrumbEsNodes'));
     } else if (mainInstance.name === 'ml') {
       // ML Instance (for user later)
-      breadcrumbs.push(createCrumb('#/elasticsearch/ml_jobs', 'Jobs'));
+      breadcrumbs.push(createCrumb('#/elasticsearch/ml_jobs', i18n.translate(
+        'xpack.monitoring.breadcrumbs.es.jobsLabel', { defaultMessage: 'Jobs' })
+      ));
     } else if (mainInstance.name === 'ccr_shard') {
-      breadcrumbs.push(createCrumb('#/elasticsearch/ccr', 'CCR'));
+      breadcrumbs.push(createCrumb('#/elasticsearch/ccr', i18n.translate(
+        'xpack.monitoring.breadcrumbs.es.ccrLabel', { defaultMessage: 'CCR' })
+      ));
     }
     breadcrumbs.push(createCrumb(null, mainInstance.instance));
   } else {
     // don't link to Overview when we're possibly on Overview or its sibling tabs
-    breadcrumbs.push(createCrumb(null, 'Elasticsearch'));
+    breadcrumbs.push(createCrumb(null, esLabel));
   }
   return breadcrumbs;
 }
 
 // generate Kibana breadcrumbs
 function getKibanaBreadcrumbs(mainInstance) {
+  const kibanaLabel = i18n.translate('xpack.monitoring.breadcrumbs.kibanaLabel', { defaultMessage: 'Kibana' });
   const breadcrumbs = [];
   if (mainInstance.instance) {
-    breadcrumbs.push(createCrumb('#/kibana', 'Kibana'));
-    breadcrumbs.push(createCrumb('#/kibana/instances', 'Instances'));
+    breadcrumbs.push(createCrumb('#/kibana', kibanaLabel));
+    breadcrumbs.push(createCrumb('#/kibana/instances', i18n.translate(
+      'xpack.monitoring.breadcrumbs.kibana.instancesLabel', { defaultMessage: 'Instances' })
+    ));
   } else {
     // don't link to Overview when we're possibly on Overview or its sibling tabs
-    breadcrumbs.push(createCrumb(null, 'Kibana'));
+    breadcrumbs.push(createCrumb(null, kibanaLabel));
   }
   return breadcrumbs;
 }
 
 // generate Logstash breadcrumbs
 function getLogstashBreadcrumbs(mainInstance) {
+  const logstashLabel = i18n.translate('xpack.monitoring.breadcrumbs.logstashLabel', { defaultMessage: 'Logstash' });
   const breadcrumbs = [];
   if (mainInstance.instance) {
-    breadcrumbs.push(createCrumb('#/logstash', 'Logstash'));
+    breadcrumbs.push(createCrumb('#/logstash', logstashLabel));
     if (mainInstance.name === 'nodes') {
-      breadcrumbs.push(createCrumb('#/logstash/nodes', 'Nodes'));
+      breadcrumbs.push(createCrumb('#/logstash/nodes', i18n.translate(
+        'xpack.monitoring.breadcrumbs.logstash.nodesLabel', { defaultMessage: 'Nodes' })
+      ));
     }
     breadcrumbs.push(createCrumb(null, mainInstance.instance));
   } else if (mainInstance.page === 'pipeline') {
-    breadcrumbs.push(createCrumb('#/logstash', 'Logstash'));
-    breadcrumbs.push(createCrumb('#/logstash/pipelines', 'Pipelines'));
+    breadcrumbs.push(createCrumb('#/logstash', logstashLabel));
+    breadcrumbs.push(createCrumb('#/logstash/pipelines', i18n.translate(
+      'xpack.monitoring.breadcrumbs.logstash.pipelinesLabel', { defaultMessage: 'Pipelines' })
+    ));
   } else {
     // don't link to Overview when we're possibly on Overview or its sibling tabs
-    breadcrumbs.push(createCrumb(null, 'Logstash'));
+    breadcrumbs.push(createCrumb(null, logstashLabel));
   }
 
   return breadcrumbs;
@@ -73,13 +89,16 @@ function getLogstashBreadcrumbs(mainInstance) {
 
 // generate Beats breadcrumbs
 function getBeatsBreadcrumbs(mainInstance) {
+  const beatsLabel = i18n.translate('xpack.monitoring.breadcrumbs.beatsLabel', { defaultMessage: 'Beats' });
   const breadcrumbs = [];
   if (mainInstance.instance) {
-    breadcrumbs.push(createCrumb('#/beats', 'Beats'));
-    breadcrumbs.push(createCrumb('#/beats/beats', 'Instances'));
+    breadcrumbs.push(createCrumb('#/beats', beatsLabel));
+    breadcrumbs.push(createCrumb('#/beats/beats', i18n.translate(
+      'xpack.monitoring.breadcrumbs.beats.instancesLabel', { defaultMessage: 'Instances' })
+    ));
     breadcrumbs.push(createCrumb(null, mainInstance.instance));
   } else {
-    breadcrumbs.push(createCrumb(null, 'Beats'));
+    breadcrumbs.push(createCrumb(null, beatsLabel));
   }
 
   return breadcrumbs;
@@ -87,20 +106,28 @@ function getBeatsBreadcrumbs(mainInstance) {
 
 // generate Apm breadcrumbs
 function getApmBreadcrumbs(mainInstance) {
+  const apmLabel = i18n.translate('xpack.monitoring.breadcrumbs.apmLabel', { defaultMessage: 'APM' });
   const breadcrumbs = [];
   if (mainInstance.instance) {
-    breadcrumbs.push(createCrumb('#/apm', 'APM'));
-    breadcrumbs.push(createCrumb('#/apm/instances', 'Instances'));
+    breadcrumbs.push(createCrumb('#/apm', apmLabel));
+    breadcrumbs.push(createCrumb('#/apm/instances', i18n.translate(
+      'xpack.monitoring.breadcrumbs.apm.instancesLabel', { defaultMessage: 'Instances' })
+    ));
   } else {
     // don't link to Overview when we're possibly on Overview or its sibling tabs
-    breadcrumbs.push(createCrumb(null, 'APM'));
+    breadcrumbs.push(createCrumb(null, apmLabel));
   }
   return breadcrumbs;
 }
 
 export function breadcrumbsProvider() {
   return function createBreadcrumbs(clusterName, mainInstance) {
-    let breadcrumbs = [ createCrumb('#/home', 'Clusters', 'breadcrumbClusters') ];
+    let breadcrumbs = [ createCrumb('#/home',
+      i18n.translate(
+        'xpack.monitoring.breadcrumbs.clustersLabel', { defaultMessage: 'Clusters' }
+      ),
+      'breadcrumbClusters')
+    ];
 
     if (!mainInstance.inOverview && clusterName) {
       breadcrumbs.push(createCrumb('#/overview', clusterName));
