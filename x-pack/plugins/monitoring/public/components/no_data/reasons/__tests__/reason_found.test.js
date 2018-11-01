@@ -5,14 +5,14 @@
  */
 
 import React from 'react';
-import { render } from 'enzyme';
+import { renderWithIntl } from '../../../../../../../test_utils/enzyme_helpers.js';
 import { ReasonFound } from '../';
 
 const enabler = {};
 
 describe('ReasonFound', () => {
   test('should load ExplainCollectionInterval component', () => {
-    const component = render(
+    const component = renderWithIntl(
       <ReasonFound
         reason={{
           property: 'xpack.monitoring.collection.interval',
@@ -26,7 +26,7 @@ describe('ReasonFound', () => {
   });
 
   test('should load ExplainExporters component', () => {
-    const component = render(
+    const component = renderWithIntl(
       <ReasonFound
         reason={{
           property: 'xpack.monitoring.exporters',
@@ -40,7 +40,7 @@ describe('ReasonFound', () => {
   });
 
   test('should load ExplainPluginEnabled component', () => {
-    const component = render(
+    const component = renderWithIntl(
       <ReasonFound
         reason={{
           property: 'xpack.monitoring.enabled',

@@ -35,7 +35,7 @@ Array [
           xpack.monitoring.collection.interval
         </code>
       </span>
-      is set to 
+       is set to 
       <span
         class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
       >

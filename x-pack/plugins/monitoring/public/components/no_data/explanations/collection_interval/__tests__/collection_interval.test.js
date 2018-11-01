@@ -6,7 +6,7 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mount } from 'enzyme';
+import { mountWithIntl } from '../../../../../../../../test_utils/enzyme_helpers.js';
 import { ExplainCollectionInterval } from '../collection_interval';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -28,7 +28,7 @@ describe('ExplainCollectionInterval', () => {
         enabler={enabler}
       />
     );
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     expect(rendered).toMatchSnapshot();
   });
 
@@ -43,7 +43,7 @@ describe('ExplainCollectionInterval', () => {
         enabler={enabler}
       />
     );
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     const actionButton = findTestSubject(rendered, 'enableCollectionInterval');
     actionButton.simulate('click');
     expect(enabler.enableCollectionInterval.calledOnce).toBe(true);
@@ -61,7 +61,7 @@ describe('ExplainCollectionInterval', () => {
           enabler={enabler}
         />
       );
-      const rendered = mount(component);
+      const rendered = mountWithIntl(component);
       expect(rendered).toMatchSnapshot();
     });
 
@@ -76,7 +76,7 @@ describe('ExplainCollectionInterval', () => {
           enabler={enabler}
         />
       );
-      const rendered = mount(component);
+      const rendered = mountWithIntl(component);
       expect(rendered).toMatchSnapshot();
     });
   });

@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { render } from 'enzyme';
+import { renderWithIntl } from '../../../../../../../test_utils/enzyme_helpers.js';
 import { WeTried } from '../';
 
 describe('WeTried', () => {
   test('should render "we tried" message', () => {
-    const component = render(<WeTried />);
+    const component = renderWithIntl(<WeTried />);
     expect(component).toMatchSnapshot();
   });
 });

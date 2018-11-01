@@ -5,14 +5,14 @@
  */
 
 import React from 'react';
-import { render } from 'enzyme';
+import { renderWithIntl } from '../../../../../../test_utils/enzyme_helpers.js';
 import { NoData } from '../';
 
 const enabler = {};
 
 describe('NoData', () => {
   test('should show text next to the spinner while checking a setting', () => {
-    const component = render(
+    const component = renderWithIntl(
       <NoData
         isLoading={true}
         checkMessage="checking something to test"
@@ -23,7 +23,7 @@ describe('NoData', () => {
   });
 
   test('should show a default message if reason is unknown', () => {
-    const component = render(
+    const component = renderWithIntl(
       <NoData
         isLoading={false}
         reason={{

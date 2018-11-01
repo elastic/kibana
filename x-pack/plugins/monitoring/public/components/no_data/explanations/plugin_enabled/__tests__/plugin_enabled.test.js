@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { render } from 'enzyme';
+import { renderWithIntl } from '../../../../../../../../test_utils/enzyme_helpers.js';
 import { ExplainPluginEnabled } from '../plugin_enabled';
 
 describe('ExplainPluginEnabled', () => {
   test('should explain about xpack.monitoring.enabled setting', () => {
-    const component = render(
+    const component = renderWithIntl(
       <ExplainPluginEnabled
         property="xpack.monitoring.enabled"
         data="false"

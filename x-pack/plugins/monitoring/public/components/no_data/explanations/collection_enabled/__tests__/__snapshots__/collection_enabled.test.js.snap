@@ -9,6 +9,88 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
       "enableCollectionEnabled": [Function],
     }
   }
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   property="xpack.monitoring.collection.enabled"
 >
   <Component>
@@ -18,7 +100,13 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
       <h2
         className="euiTitle euiTitle--large"
       >
-        Monitoring is currently off
+        <FormattedMessage
+          defaultMessage="Monitoring is currently off"
+          id="xpack.monitoring.noData.blurbs.monitoringIsOffTitle"
+          values={Object {}}
+        >
+          Monitoring is currently off
+        </FormattedMessage>
       </h2>
     </EuiTitle>
     <EuiTextColor
@@ -35,7 +123,13 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
             className="euiText"
           >
             <p>
-              Monitoring provides insight to your hardware performance and load.
+              <FormattedMessage
+                defaultMessage="Monitoring provides insight to your hardware performance and load."
+                id="xpack.monitoring.noData.blurbs.monitoringIsOffDescription"
+                values={Object {}}
+              >
+                Monitoring provides insight to your hardware performance and load.
+              </FormattedMessage>
             </p>
           </div>
         </EuiText>
@@ -57,52 +151,72 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
       className="euiText"
     >
       <p>
-        We checked the 
-        cluster
-         settings and found that 
-        <EuiCode>
-          <EuiCodeBlockImpl
-            fontSize="s"
-            inline={true}
-            paddingSize="l"
-            transparentBackground={false}
-          >
-            <span
-              className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-              style={Object {}}
-            >
-              <code
-                className="euiCodeBlock__code"
-              >
-                xpack.monitoring.collection.enabled
-              </code>
-            </span>
-          </EuiCodeBlockImpl>
-        </EuiCode>
-        is set to 
-        <EuiCode>
-          <EuiCodeBlockImpl
-            fontSize="s"
-            inline={true}
-            paddingSize="l"
-            transparentBackground={false}
-          >
-            <span
-              className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-              style={Object {}}
-            >
-              <code
-                className="euiCodeBlock__code"
-              >
+        <FormattedMessage
+          defaultMessage="We checked the {context} settings and found that {property} is set to {data}."
+          id="xpack.monitoring.noData.explanations.collectionEnabledDescription"
+          values={
+            Object {
+              "context": "cluster",
+              "data": <EuiCode>
                 -1
-              </code>
-            </span>
-          </EuiCodeBlockImpl>
-        </EuiCode>
-        .
+              </EuiCode>,
+              "property": <EuiCode>
+                xpack.monitoring.collection.enabled
+              </EuiCode>,
+            }
+          }
+        >
+          We checked the cluster settings and found that 
+          <EuiCode>
+            <EuiCodeBlockImpl
+              fontSize="s"
+              inline={true}
+              paddingSize="l"
+              transparentBackground={false}
+            >
+              <span
+                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                style={Object {}}
+              >
+                <code
+                  className="euiCodeBlock__code"
+                >
+                  xpack.monitoring.collection.enabled
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
+          </EuiCode>
+           is set to 
+          <EuiCode>
+            <EuiCodeBlockImpl
+              fontSize="s"
+              inline={true}
+              paddingSize="l"
+              transparentBackground={false}
+            >
+              <span
+                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                style={Object {}}
+              >
+                <code
+                  className="euiCodeBlock__code"
+                >
+                  -1
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
+          </EuiCode>
+          .
+        </FormattedMessage>
       </p>
       <p>
-        Would you like to turn it on?
+        <FormattedMessage
+          defaultMessage="Would you like to turn it on?"
+          id="xpack.monitoring.noData.explanations.collectionEnabled.turnItOnDescription"
+          values={Object {}}
+        >
+          Would you like to turn it on?
+        </FormattedMessage>
       </p>
     </div>
   </EuiText>
@@ -152,7 +266,13 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
                 <span
                   className="euiButton__text"
                 >
-                  Turn on monitoring
+                  <FormattedMessage
+                    defaultMessage="Turn on monitoring"
+                    id="xpack.monitoring.noData.explanations.collectionEnabled.turnOnMonitoringButtonLabel"
+                    values={Object {}}
+                  >
+                    Turn on monitoring
+                  </FormattedMessage>
                 </span>
               </span>
             </button>

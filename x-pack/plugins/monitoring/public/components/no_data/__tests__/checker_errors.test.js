@@ -6,12 +6,12 @@
 
 import React from 'react';
 import { boomify, forbidden } from 'boom';
-import { render } from 'enzyme';
+import { renderWithIntl } from '../../../../../../test_utils/enzyme_helpers.js';
 import { CheckerErrors } from '../checker_errors';
 
 describe('CheckerErrors', () => {
   test('should render nothing if errors is empty', () => {
-    const component = render(<CheckerErrors errors={[]} />);
+    const component = renderWithIntl(<CheckerErrors errors={[]} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -19,7 +19,7 @@ describe('CheckerErrors', () => {
     const err1 = forbidden(new Error('no access for you'));
     const err2 = boomify(new Error('bad thing happened'));
     const errors = [err1, err2].map(err => err.output.payload);
-    const component = render(<CheckerErrors errors={errors} />);
+    const component = renderWithIntl(<CheckerErrors errors={errors} />);
     expect(component).toMatchSnapshot();
   });
 });

@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { render } from 'enzyme';
+import { renderWithIntl } from '../../../../../../../../test_utils/enzyme_helpers.js';
 import { ExplainExporters } from '../exporters';
 
 describe('ExplainExporters', () => {
   test('should explain about xpack.monitoring.exporters setting', () => {
-    const component = render(
+    const component = renderWithIntl(
       <ExplainExporters
         property="xpack.monitoring.exporters"
         data={'myMonitoringClusterExporter1'}

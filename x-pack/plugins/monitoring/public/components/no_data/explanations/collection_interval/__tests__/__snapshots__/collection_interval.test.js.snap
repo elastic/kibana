@@ -9,6 +9,88 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       "enableCollectionInterval": [Function],
     }
   }
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   isCollectionIntervalUpdated={true}
   isCollectionIntervalUpdating={false}
   property="xpack.monitoring.collection.interval"
@@ -19,7 +101,13 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
     <h2
       className="euiTitle euiTitle--large"
     >
-      Success! Wait a moment please.
+      <FormattedMessage
+        defaultMessage="Success! Wait a moment please."
+        id="xpack.monitoring.noData.explanations.collectionInterval.monitoringTurnedOnTitle"
+        values={Object {}}
+      >
+        Success! Wait a moment please.
+      </FormattedMessage>
     </h2>
   </EuiTitle>
   <EuiHorizontalRule
@@ -37,7 +125,13 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       className="euiText"
     >
       <p>
-        As soon as monitoring data appears in your cluster the page will automatically refresh with your monitoring dashboard. This only takes only a few seconds.
+        <FormattedMessage
+          defaultMessage="As soon as monitoring data appears in your cluster the page will automatically refresh with your monitoring dashboard. This only takes only a few seconds."
+          id="xpack.monitoring.noData.explanations.collectionInterval.monitoringTurnedOnDescription"
+          values={Object {}}
+        >
+          As soon as monitoring data appears in your cluster the page will automatically refresh with your monitoring dashboard. This only takes only a few seconds.
+        </FormattedMessage>
       </p>
     </div>
   </EuiText>
@@ -67,6 +161,88 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       "enableCollectionInterval": [Function],
     }
   }
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   isCollectionIntervalUpdated={false}
   isCollectionIntervalUpdating={true}
   property="xpack.monitoring.collection.interval"
@@ -78,7 +254,13 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       <h2
         className="euiTitle euiTitle--large"
       >
-        Monitoring is currently off
+        <FormattedMessage
+          defaultMessage="Monitoring is currently off"
+          id="xpack.monitoring.noData.blurbs.monitoringIsOffTitle"
+          values={Object {}}
+        >
+          Monitoring is currently off
+        </FormattedMessage>
       </h2>
     </EuiTitle>
     <EuiTextColor
@@ -95,7 +277,13 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
             className="euiText"
           >
             <p>
-              Monitoring provides insight to your hardware performance and load.
+              <FormattedMessage
+                defaultMessage="Monitoring provides insight to your hardware performance and load."
+                id="xpack.monitoring.noData.blurbs.monitoringIsOffDescription"
+                values={Object {}}
+              >
+                Monitoring provides insight to your hardware performance and load.
+              </FormattedMessage>
             </p>
           </div>
         </EuiText>
@@ -117,55 +305,81 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       className="euiText"
     >
       <p>
-        We checked the 
-        cluster
-         settings and found that 
-        <EuiCode>
-          <EuiCodeBlockImpl
-            fontSize="s"
-            inline={true}
-            paddingSize="l"
-            transparentBackground={false}
-          >
-            <span
-              className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-              style={Object {}}
-            >
-              <code
-                className="euiCodeBlock__code"
-              >
-                xpack.monitoring.collection.interval
-              </code>
-            </span>
-          </EuiCodeBlockImpl>
-        </EuiCode>
-        is set to 
-        <EuiCode>
-          <EuiCodeBlockImpl
-            fontSize="s"
-            inline={true}
-            paddingSize="l"
-            transparentBackground={false}
-          >
-            <span
-              className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-              style={Object {}}
-            >
-              <code
-                className="euiCodeBlock__code"
-              >
+        <FormattedMessage
+          defaultMessage="We checked the {context} settings and found that {property} is set to {data}."
+          id="xpack.monitoring.noData.explanations.collectionIntervalDescription"
+          values={
+            Object {
+              "context": "cluster",
+              "data": <EuiCode>
                 -1
-              </code>
-            </span>
-          </EuiCodeBlockImpl>
-        </EuiCode>
-        .
+              </EuiCode>,
+              "property": <EuiCode>
+                xpack.monitoring.collection.interval
+              </EuiCode>,
+            }
+          }
+        >
+          We checked the cluster settings and found that 
+          <EuiCode>
+            <EuiCodeBlockImpl
+              fontSize="s"
+              inline={true}
+              paddingSize="l"
+              transparentBackground={false}
+            >
+              <span
+                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                style={Object {}}
+              >
+                <code
+                  className="euiCodeBlock__code"
+                >
+                  xpack.monitoring.collection.interval
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
+          </EuiCode>
+           is set to 
+          <EuiCode>
+            <EuiCodeBlockImpl
+              fontSize="s"
+              inline={true}
+              paddingSize="l"
+              transparentBackground={false}
+            >
+              <span
+                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                style={Object {}}
+              >
+                <code
+                  className="euiCodeBlock__code"
+                >
+                  -1
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
+          </EuiCode>
+          .
+        </FormattedMessage>
       </p>
       <p>
-        The collection interval setting needs to be a positive integer (10s is recommended) in order for the collection agents to be active.
+        <FormattedMessage
+          defaultMessage="The collection interval setting needs to be a positive integer (10s is recommended) in order for the collection agents to be active."
+          id="xpack.monitoring.noData.explanations.collectionInterval.wrongIntervalValueDescription"
+          values={Object {}}
+        >
+          The collection interval setting needs to be a positive integer (10s is recommended) in order for the collection agents to be active.
+        </FormattedMessage>
       </p>
       <p>
-        Would you like us to change it and enable monitoring?
+        <FormattedMessage
+          defaultMessage="Would you like us to change it and enable monitoring?"
+          id="xpack.monitoring.noData.explanations.collectionInterval.changeIntervalDescription"
+          values={Object {}}
+        >
+          Would you like us to change it and enable monitoring?
+        </FormattedMessage>
       </p>
     </div>
   </EuiText>
@@ -225,7 +439,13 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
                 <span
                   className="euiButton__text"
                 >
-                  Turn on monitoring
+                  <FormattedMessage
+                    defaultMessage="Turn on monitoring"
+                    id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
+                    values={Object {}}
+                  >
+                    Turn on monitoring
+                  </FormattedMessage>
                 </span>
               </span>
             </button>
@@ -246,6 +466,88 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
       "enableCollectionInterval": [Function],
     }
   }
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   isCollectionIntervalUpdated={false}
   isCollectionIntervalUpdating={false}
   property="xpack.monitoring.collection.interval"
@@ -257,7 +559,13 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
       <h2
         className="euiTitle euiTitle--large"
       >
-        Monitoring is currently off
+        <FormattedMessage
+          defaultMessage="Monitoring is currently off"
+          id="xpack.monitoring.noData.blurbs.monitoringIsOffTitle"
+          values={Object {}}
+        >
+          Monitoring is currently off
+        </FormattedMessage>
       </h2>
     </EuiTitle>
     <EuiTextColor
@@ -274,7 +582,13 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
             className="euiText"
           >
             <p>
-              Monitoring provides insight to your hardware performance and load.
+              <FormattedMessage
+                defaultMessage="Monitoring provides insight to your hardware performance and load."
+                id="xpack.monitoring.noData.blurbs.monitoringIsOffDescription"
+                values={Object {}}
+              >
+                Monitoring provides insight to your hardware performance and load.
+              </FormattedMessage>
             </p>
           </div>
         </EuiText>
@@ -296,55 +610,81 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
       className="euiText"
     >
       <p>
-        We checked the 
-        cluster
-         settings and found that 
-        <EuiCode>
-          <EuiCodeBlockImpl
-            fontSize="s"
-            inline={true}
-            paddingSize="l"
-            transparentBackground={false}
-          >
-            <span
-              className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-              style={Object {}}
-            >
-              <code
-                className="euiCodeBlock__code"
-              >
-                xpack.monitoring.collection.interval
-              </code>
-            </span>
-          </EuiCodeBlockImpl>
-        </EuiCode>
-        is set to 
-        <EuiCode>
-          <EuiCodeBlockImpl
-            fontSize="s"
-            inline={true}
-            paddingSize="l"
-            transparentBackground={false}
-          >
-            <span
-              className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-              style={Object {}}
-            >
-              <code
-                className="euiCodeBlock__code"
-              >
+        <FormattedMessage
+          defaultMessage="We checked the {context} settings and found that {property} is set to {data}."
+          id="xpack.monitoring.noData.explanations.collectionIntervalDescription"
+          values={
+            Object {
+              "context": "cluster",
+              "data": <EuiCode>
                 -1
-              </code>
-            </span>
-          </EuiCodeBlockImpl>
-        </EuiCode>
-        .
+              </EuiCode>,
+              "property": <EuiCode>
+                xpack.monitoring.collection.interval
+              </EuiCode>,
+            }
+          }
+        >
+          We checked the cluster settings and found that 
+          <EuiCode>
+            <EuiCodeBlockImpl
+              fontSize="s"
+              inline={true}
+              paddingSize="l"
+              transparentBackground={false}
+            >
+              <span
+                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                style={Object {}}
+              >
+                <code
+                  className="euiCodeBlock__code"
+                >
+                  xpack.monitoring.collection.interval
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
+          </EuiCode>
+           is set to 
+          <EuiCode>
+            <EuiCodeBlockImpl
+              fontSize="s"
+              inline={true}
+              paddingSize="l"
+              transparentBackground={false}
+            >
+              <span
+                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                style={Object {}}
+              >
+                <code
+                  className="euiCodeBlock__code"
+                >
+                  -1
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
+          </EuiCode>
+          .
+        </FormattedMessage>
       </p>
       <p>
-        The collection interval setting needs to be a positive integer (10s is recommended) in order for the collection agents to be active.
+        <FormattedMessage
+          defaultMessage="The collection interval setting needs to be a positive integer (10s is recommended) in order for the collection agents to be active."
+          id="xpack.monitoring.noData.explanations.collectionInterval.wrongIntervalValueDescription"
+          values={Object {}}
+        >
+          The collection interval setting needs to be a positive integer (10s is recommended) in order for the collection agents to be active.
+        </FormattedMessage>
       </p>
       <p>
-        Would you like us to change it and enable monitoring?
+        <FormattedMessage
+          defaultMessage="Would you like us to change it and enable monitoring?"
+          id="xpack.monitoring.noData.explanations.collectionInterval.changeIntervalDescription"
+          values={Object {}}
+        >
+          Would you like us to change it and enable monitoring?
+        </FormattedMessage>
       </p>
     </div>
   </EuiText>
@@ -395,7 +735,13 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
                 <span
                   className="euiButton__text"
                 >
-                  Turn on monitoring
+                  <FormattedMessage
+                    defaultMessage="Turn on monitoring"
+                    id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
+                    values={Object {}}
+                  >
+                    Turn on monitoring
+                  </FormattedMessage>
                 </span>
               </span>
             </button>

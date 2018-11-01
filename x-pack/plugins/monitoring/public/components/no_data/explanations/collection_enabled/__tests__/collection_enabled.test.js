@@ -6,7 +6,7 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mount } from 'enzyme';
+import { mountWithIntl } from '../../../../../../../../test_utils/enzyme_helpers.js';
 import { ExplainCollectionEnabled } from '../collection_enabled';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -27,12 +27,12 @@ describe('ExplainCollectionEnabled', () => {
   });
 
   test('should explain about xpack.monitoring.collection.enabled setting', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     expect(rendered).toMatchSnapshot();
   });
 
   test('should have a button that triggers ajax action', () => {
-    const rendered = mount(component);
+    const rendered = mountWithIntl(component);
     const actionButton = findTestSubject(rendered, 'enableCollectionEnabled');
     actionButton.simulate('click');
     expect(enabler.enableCollectionEnabled.calledOnce).toBe(true);
