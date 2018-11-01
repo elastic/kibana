@@ -45,7 +45,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} removeFilter-${key}`);
-      // these methods should each wait until their action is complet e but we don't know what to wait for
+      // these methods should each wait until their action is complete but we don't know what to wait for
       await PageObjects.common.sleep(2001);
     }
 
@@ -53,7 +53,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
-      // these methods should each wait until their action is complet e but we don't know what to wait for
+      // these methods should each wait until their action is complete but we don't know what to wait for
       await PageObjects.common.sleep(2002);
     }
 
@@ -61,7 +61,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} pinFilter-${key}`);
-      // these methods should each wait until their action is complet e but we don't know what to wait for
+      // these methods should each wait until their action is complete but we don't know what to wait for
       await PageObjects.common.sleep(2003);
     }
 
