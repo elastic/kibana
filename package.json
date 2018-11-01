@@ -349,7 +349,7 @@
     "listr": "^0.14.1",
     "load-grunt-config": "0.19.2",
     "makelogs": "^4.3.0",
-    "mocha": "^5.2.0",
+    "mocha": "3.3.0",
     "mock-fs": "^4.4.2",
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
