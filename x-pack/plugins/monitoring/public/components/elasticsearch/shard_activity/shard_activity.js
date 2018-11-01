@@ -123,9 +123,12 @@ class ShardActivityUI extends React.Component {
     return (
       <Fragment>
         <FormattedMessage
-          id="xpack.monitoring.elasticsearch.shardActivity.noActiveShardRecoveriesMessage"
-          defaultMessage="There are no active shard recoveries for this cluster.{nextLine}
-          Try viewing {shardActivityHistoryLink}."
+          id="xpack.monitoring.elasticsearch.shardActivity.noActiveShardRecoveriesMessage.completedRecoveriesLinkTextProblem"
+          defaultMessage="There are no active shard recoveries for this cluster."
+        /><br />
+        <FormattedMessage
+          id="xpack.monitoring.elasticsearch.shardActivity.noActiveShardRecoveriesMessage.completedRecoveriesLinkTextSolution"
+          defaultMessage="Try viewing {shardActivityHistoryLink}."
           values={{
             shardActivityHistoryLink: (
               <EuiLink onClick={this.props.toggleShardActivityHistory}>
@@ -134,8 +137,7 @@ class ShardActivityUI extends React.Component {
                   defaultMessage="completed recoveries"
                 />
               </EuiLink>
-            ),
-            nextLine: (<br />)
+            )
           }}
         />
       </Fragment>

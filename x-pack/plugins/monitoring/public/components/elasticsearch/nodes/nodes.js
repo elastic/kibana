@@ -61,9 +61,9 @@ const getColumns = showCgroupMetricsElasticsearch => {
   }
   cols.push({
     title: i18n.translate('xpack.monitoring.elasticsearch.nodes.jvmMemoryColumnTitle', {
-      defaultMessage: '{javaVirtulalMachine} Memory',
+      defaultMessage: '{javaVirtualMachine} Memory',
       values: {
-        javaVirtulalMachine: 'JVM'
+        javaVirtualMachine: 'JVM'
       }
     }),
     sortKey: 'node_jvm_mem_percent'
