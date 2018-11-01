@@ -10,7 +10,6 @@ import React from 'react';
 import { first } from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
 import { asMillis, asPercent } from '../../../../../../../utils/formatters';
-// @ts-ignore
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
 function getSpanLabel(type: string) {
@@ -30,10 +29,14 @@ function getPrimaryType(type: string) {
 
 interface Props {
   span: Span;
-  totalDuration: number;
+  totalDuration?: number;
 }
 
 export function StickySpanProperties({ span, totalDuration }: Props) {
+  if (!totalDuration) {
+    return null;
+  }
+
   const spanName = span.span.name;
   const spanDuration = span.span.duration.us;
   const spanTypeLabel = getSpanLabel(getPrimaryType(span.span.type));

@@ -16,7 +16,6 @@ import {
 } from '../../../../style/variables';
 import { get, capitalize, isEmpty } from 'lodash';
 import { STATUS } from '../../../../constants';
-
 import { StickyProperties } from '../../../shared/StickyProperties';
 import { Tab, HeaderMedium } from '../../../shared/UIComponents';
 import { DiscoverButton } from '../../../shared/DiscoverButton';

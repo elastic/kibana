@@ -65,7 +65,10 @@ export function TransactionFlyout({
         <EuiFlyoutBody>
           <FlyoutTopLevelProperties transaction={transactionDoc} />
           <EuiHorizontalRule />
-          <StickyTransactionProperties transaction={transactionDoc} />
+          <StickyTransactionProperties
+            transaction={transactionDoc}
+            totalDuration={waterfall.traceRootDuration}
+          />
           <EuiHorizontalRule />
           <TransactionPropertiesTableForFlyout
             transaction={transactionDoc}

@@ -6,8 +6,6 @@
 
 import { get } from 'lodash';
 import React from 'react';
-import { connect } from 'react-redux';
-import { selectWaterfallRoot } from 'x-pack/plugins/apm/public/store/selectors/waterfall';
 import {
   REQUEST_URL_FULL,
   TRANSACTION_DURATION,
@@ -16,7 +14,6 @@ import {
 } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/Transaction';
 import { asPercent, asTime } from '../../../../utils/formatters';
-// @ts-ignore
 import {
   IStickyProperty,
   StickyProperties
@@ -24,17 +21,16 @@ import {
 
 interface Props {
   transaction: Transaction;
-  root?: Transaction;
+  totalDuration?: number;
 }
 
-export function StickyTransactionPropertiesComponent({
+export function StickyTransactionProperties({
   transaction,
-  root
+  totalDuration
 }: Props) {
-  const timestamp = get(transaction, '@timestamp');
+  const timestamp = transaction['@timestamp'];
   const url = get(transaction, REQUEST_URL_FULL, 'N/A');
   const duration = transaction.transaction.duration.us;
-  const totalDuration = root && root.transaction.duration.us;
   const stickyProperties: IStickyProperty[] = [
     {
       label: 'Timestamp',
@@ -78,11 +74,3 @@ export function StickyTransactionPropertiesComponent({
 
   return <StickyProperties stickyProperties={stickyProperties} />;
 }
-
-const mapStateToProps = (state: any, props: Partial<Props>) => ({
-  root: selectWaterfallRoot(state, props)
-});
-
-export const StickyTransactionProperties = connect<{}, {}, Props>(
-  mapStateToProps
-)(StickyTransactionPropertiesComponent);
