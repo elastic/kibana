@@ -14,6 +14,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { VisibilityToggle } from '../../../shared/components/visibility_toggle';
+import { ColorGradient } from '../../../shared/icons/color_gradient';
 
 export class TOCEntry extends React.Component {
 
@@ -115,6 +116,9 @@ export class TOCEntry extends React.Component {
             <span className="grab"><EuiIcon type="grab" className="grab"/></span>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiFlexItem>
+          <ColorGradient/>
+        </EuiFlexItem>
       </div>
     );
   }
