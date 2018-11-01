@@ -7,12 +7,8 @@
 import React from 'react';
 import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
 
-import { RedirectToContainerDetail } from './redirect_to_container_detail';
-import { RedirectToContainerLogs } from './redirect_to_container_logs';
-import { RedirectToHostDetail } from './redirect_to_host_detail';
-import { RedirectToHostLogs } from './redirect_to_host_logs';
-import { RedirectToPodDetail } from './redirect_to_pod_detail';
-import { RedirectToPodLogs } from './redirect_to_pod_logs';
+import { RedirectToNodeDetail } from './redirect_to_node_detail';
+import { RedirectToNodeLogs } from './redirect_to_node_logs';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
@@ -25,14 +21,13 @@ export class LinkToPage extends React.Component<LinkToPageProps> {
     return (
       <Switch>
         <Route
-          path={`${match.url}/container-logs/:containerId`}
-          component={RedirectToContainerLogs}
+          path={`${match.url}/:nodeType(host|container|pod)-logs/:nodeName`}
+          component={RedirectToNodeLogs}
         />
-        <Route path={`${match.url}/host-logs/:hostname`} component={RedirectToHostLogs} />
-        <Route path={`${match.url}/pod-logs/:podId`} component={RedirectToPodLogs} />
-        <Route path={`${match.url}/host-detail/:name`} component={RedirectToHostDetail} />
-        <Route path={`${match.url}/pod-detail/:name`} component={RedirectToPodDetail} />
-        <Route path={`${match.url}/container-detail/:name`} component={RedirectToContainerDetail} />
+        <Route
+          path={`${match.url}/:nodeType(host|container|pod)-detail/:nodeName`}
+          component={RedirectToNodeDetail}
+        />
         <Redirect to="/home" />
       </Switch>
     );

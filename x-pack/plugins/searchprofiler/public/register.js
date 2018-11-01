@@ -6,9 +6,11 @@
 
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
 
-DevToolsRegistryProvider.register(() => ({
+DevToolsRegistryProvider.register(i18n => ({
   order: 5,
   name: 'searchprofiler',
-  display: 'Search Profiler',
+  display: i18n('xpack.searchProfiler.pageDisplayName', {
+    defaultMessage: 'Search Profiler',
+  }),
   url: '#/dev_tools/searchprofiler'
 }));
