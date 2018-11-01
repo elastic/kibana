@@ -5,7 +5,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { AutocompleteField } from '../autocomplete_field/index';
 import { OptionControl } from '../table_controls';
@@ -15,15 +14,13 @@ interface ControlBarProps {
   assignmentOptions: AssignmentOptionsType;
   kueryBarProps?: KueryBarProps;
   selectionCount: number;
-  intl: InjectedIntl;
 }
 
-function ControlBarUI(props: ControlBarProps) {
+export function ControlBar(props: ControlBarProps) {
   const {
     assignmentOptions: { actionHandler, items, schema, type },
     kueryBarProps,
     selectionCount,
-    intl,
   } = props;
 
   if (type === 'none') {
@@ -50,13 +47,7 @@ function ControlBarUI(props: ControlBarProps) {
       {showSearch &&
         kueryBarProps && (
           <EuiFlexItem>
-            <AutocompleteField
-              {...kueryBarProps}
-              placeholder={intl.formatMessage({
-                id: 'xpack.beatsManagement.table.controlBarFilterResultsPlaceholder',
-                defaultMessage: 'Filter results',
-              })}
-            />
+            <AutocompleteField {...kueryBarProps} placeholder="Filter results" />
           </EuiFlexItem>
         )}
       {showAssignmentOptions &&
@@ -73,5 +64,3 @@ function ControlBarUI(props: ControlBarProps) {
     </EuiFlexGroup>
   );
 }
-
-export const ControlBar = injectI18n(ControlBarUI);

@@ -5,7 +5,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { first, sortByOrder } from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -21,21 +20,13 @@ export const BeatDetailsActionSection = ({ beat }: BeatDetailsActionSectionProps
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            <FormattedMessage
-              id="xpack.beatsManagement.beat.actionSectionTypeText"
-              defaultMessage="Type:"
-            />
-            &nbsp;
+            Type:&nbsp;
             <strong>{beat.type}</strong>.
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            <FormattedMessage
-              id="xpack.beatsManagement.beat.actionSectionVersionText"
-              defaultMessage="Version:"
-            />
-            &nbsp;
+            Version:&nbsp;
             <strong>{beat.version}</strong>.
           </EuiText>
         </EuiFlexItem>
@@ -49,10 +40,7 @@ export const BeatDetailsActionSection = ({ beat }: BeatDetailsActionSectionProps
           beat.full_tags.length > 0 && (
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                <FormattedMessage
-                  id="xpack.beatsManagement.beat.lastConfigUpdateMessage"
-                  defaultMessage="Last Config Update: "
-                />
+                Last Config Update:{' '}
                 <strong>
                   {moment(
                     first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
@@ -64,12 +52,7 @@ export const BeatDetailsActionSection = ({ beat }: BeatDetailsActionSectionProps
           )}
       </EuiFlexGroup>
     ) : (
-      <div>
-        <FormattedMessage
-          id="xpack.beatsManagement.beat.beatNotFoundMessage"
-          defaultMessage="Beat not found"
-        />
-      </div>
+      <div>Beat not found</div>
     )}
   </div>
 );

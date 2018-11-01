@@ -10,7 +10,6 @@ import {
   EuiConfirmModal,
   EuiOverlayMask,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { AssignmentActionType } from '../table';
 
@@ -61,18 +60,8 @@ export class ActionControl extends React.PureComponent<ActionControlProps, Actio
           <EuiOverlayMask>
             <EuiConfirmModal
               buttonColor={danger ? 'danger' : 'primary'}
-              cancelButtonText={
-                <FormattedMessage
-                  id="xpack.beatsManagement.tableControls.actionControlCancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              }
-              confirmButtonText={
-                <FormattedMessage
-                  id="xpack.beatsManagement.tableControls.actionControlConfirmButtonLabel"
-                  defaultMessage="Confirm"
-                />
-              }
+              cancelButtonText="Cancel"
+              confirmButtonText="Confirm"
               onConfirm={() => {
                 actionHandler(action);
                 this.setState({ showModal: false });

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { AssignmentComponentType, AssignmentControlSchema } from '../table';
 import { AssignmentActionType } from '../table';
@@ -14,31 +13,24 @@ import { SelectionCount } from './selection_count';
 import { TagBadgeList } from './tag_badge_list';
 
 interface OptionControlProps {
-  intl: InjectedIntl;
   items: any[];
   schema: AssignmentControlSchema;
   selectionCount: number;
   actionHandler(action: AssignmentActionType, payload?: any): void;
 }
 
-const OptionControlUI = (props: OptionControlProps) => {
+export const OptionControl = (props: OptionControlProps) => {
   const {
     actionHandler,
     items,
     schema,
     schema: { action, danger, name, showWarning, warningHeading, warningMessage },
     selectionCount,
-    intl,
   } = props;
   switch (schema.type) {
     case AssignmentComponentType.Action:
       if (!action) {
-        throw Error(
-          intl.formatMessage({
-            id: 'xpack.beatsManagement.tableControls.optionControlActionNotUndefinedErrorTitle',
-            defaultMessage: 'Action cannot be undefined',
-          })
-        );
+        throw Error('Action cannot be undefined');
       }
       return (
         <ActionControl
@@ -60,5 +52,3 @@ const OptionControlUI = (props: OptionControlProps) => {
   }
   return <div>{schema.type}</div>;
 };
-
-export const OptionControl = injectI18n(OptionControlUI);

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 
@@ -47,14 +46,7 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
             exact={true}
             render={() => <Redirect from="/" exact={true} to="/overview/beats" />}
           />
-          <Route
-            path="/overview"
-            render={(props: any) => (
-              <I18nProvider>
-                <MainPages {...props} libs={libs} />
-              </I18nProvider>
-            )}
-          />
+          <Route path="/overview" render={(props: any) => <MainPages {...props} libs={libs} />} />
           <RouteWithBreadcrumb
             title={params => {
               return `Beats: ${params.beatId}`;
