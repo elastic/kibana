@@ -22,6 +22,9 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import { toArray } from 'rxjs/operators';
+import wreck from 'wreck';
+
+import { deleteIndex } from './delete_index';
 import { collectUiExports } from '../../../ui/ui_exports';
 import { KibanaMigrator } from '../../../server/saved_objects/migrations';
 import { findPluginSpecs } from '../../../plugin_discovery';
@@ -44,17 +47,24 @@ const buildUiExports = _.once(async () => {
 /**
  * Deletes all indices that start with `.kibana`
  */
-export async function deleteKibanaIndices({ client, stats }) {
+export async function deleteKibanaIndices({ client, stats, log }) {
   const indexNames = await fetchKibanaIndices(client);
   if (!indexNames.length) {
     return;
   }
+
   await client.indices.putSettings({
     index: indexNames,
     body: { index: { blocks: { read_only: false } } },
   });
-  await client.indices.delete({ index: indexNames });
-  indexNames.forEach(stats.deletedIndex);
+
+  await deleteIndex({
+    client,
+    stats,
+    index: indexNames,
+    log,
+  });
+
   return indexNames;
 }
 
@@ -100,6 +110,45 @@ async function loadElasticVersion() {
   const readFile = promisify(fs.readFile);
   const packageJson = await readFile(path.join(__dirname, '../../../../package.json'));
   return JSON.parse(packageJson).version;
+}
+
+const spacesEnabledCache = new Map();
+export async function isSpacesEnabled({ kibanaUrl }) {
+  if (!spacesEnabledCache.has(kibanaUrl)) {
+    const statuses = await getKibanaStatuses({ kibanaUrl });
+    spacesEnabledCache.set(kibanaUrl, !!statuses.find(({ id }) => id.startsWith('plugin:spaces@')));
+  }
+
+  return spacesEnabledCache.get(kibanaUrl);
+}
+
+async function getKibanaStatuses({ kibanaUrl }) {
+  try {
+    const { payload } = await wreck.get('/api/status', {
+      baseUrl: kibanaUrl,
+      json: true
+    });
+    return payload.status.statuses;
+  } catch (error) {
+    throw new Error(`Unable to fetch Kibana status API response from Kibana at ${kibanaUrl}`);
+  }
+}
+
+export async function createDefaultSpace({ index, client }) {
+  await client.index({
+    index,
+    type: 'doc',
+    id: 'space:default',
+    body: {
+      type: 'space',
+      updated_at: new Date().toISOString(),
+      space: {
+        name: 'Default Space',
+        description: 'This is the default space',
+        _reserved: true
+      }
+    }
+  });
 }
 
 /**
