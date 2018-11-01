@@ -7,25 +7,17 @@
 
 // @ts-ignore
 import { esTestConfig, kbnTestConfig, OPTIMIZE_BUNDLE_DIR } from '@kbn/test';
-import { resolve } from 'path';
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
+// @ts-ignore
+import { xpackKbnServerConfig } from '../../../../../../../test_utils/kbn_server_config';
 import { KibanaBackendFrameworkAdapter } from './../kibana_framework_adapter';
 import { contractTests } from './test_contract';
-
 let servers: any;
 contractTests('Kibana  Framework Adapter', {
   async before() {
     servers = await kbnTestServer.startTestServers({
       adjustTimeout: t => jest.setTimeout(t),
-      settings: {
-        kbn: {
-          plugins: { paths: [resolve(__dirname, '../../../../../../../../node_modules/x-pack')] },
-          logging: { verbose: true, silent: false },
-        },
-        es: {
-          license: 'trial',
-        },
-      },
+      settings: xpackKbnServerConfig,
     });
 
     // const config = legacyServer.server.config();
