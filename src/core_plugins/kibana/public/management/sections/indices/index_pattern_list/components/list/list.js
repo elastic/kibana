@@ -19,6 +19,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -27,35 +28,77 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-export class List extends Component {
+class ListUi extends Component {
   static propTypes = {
     indexPatterns: PropTypes.array,
     defaultIndex: PropTypes.string,
   }
 
   renderList() {
-    const { indexPatterns } = this.props;
-    return indexPatterns && indexPatterns.length ? (
-      <div>
-        {
-          indexPatterns.map(pattern => {
-            return (
-              <div key={pattern.id} >
-                <EuiButtonEmpty size="xs" href={pattern.url} data-test-subj="indexPatternLink">
-                  {pattern.default ? <Fragment><i aria-label="Default index pattern" className="fa fa-star" /> </Fragment> : ''}
-                  {pattern.active ? <strong>{pattern.title}</strong> : pattern.title} {pattern.tag ? (
-                    <Fragment key={pattern.tag.key}>
-                      {<EuiBadge color={pattern.tag.color || 'primary'}>{pattern.tag.name}</EuiBadge> }
-                    </Fragment>
-                  ) : null}
-                </EuiButtonEmpty>
-                <EuiSpacer size="xs"/>
-              </div>
-            );
-          })
-        }
-      </div>
-    ) : null;
+    const { indexPatterns, intl } = this.props;
+
+    if (indexPatterns && indexPatterns.length) {
+      return (
+        <div>
+          {
+            indexPatterns.map(pattern => {
+              const { id, default: isDefault, active, url, title, tag } = pattern;
+
+              let icon;
+
+              if (isDefault) {
+                icon = (
+                  <Fragment>
+                    <em
+                      aria-label={intl.formatMessage({
+                        id: 'kbn.management.indexPatternList.defaultIndexPatternIconAriaLabel',
+                        defaultMessage: 'Default index pattern',
+                      })}
+                      className="fa fa-star"
+                    />
+                    {' '}
+                  </Fragment>
+                );
+              }
+
+              let titleElement;
+
+              if (active) {
+                titleElement = <strong>{title}</strong>;
+              } else {
+                titleElement = title;
+              }
+
+              let tagElement;
+
+              if (tag) {
+                const { key, color, name } = tag;
+
+                tagElement = (
+                  <Fragment key={key}>
+                    {' '}
+                    <EuiBadge color={color || 'primary'}>{name}</EuiBadge>
+                  </Fragment>
+                );
+              }
+
+              return (
+                <div key={id}>
+                  <EuiButtonEmpty size="xs" href={url} data-test-subj="indexPatternLink">
+                    {icon}
+                    {titleElement}
+                    {tagElement}
+                  </EuiButtonEmpty>
+                  <EuiSpacer size="xs"/>
+                </div>
+              );
+            })
+          }
+        </div>
+      );
+    }
+
+    return null;
   }
 
   renderNoDefaultMessage() {
@@ -66,7 +109,12 @@ export class List extends Component {
           color="warning"
           size="s"
           iconType="alert"
-          title="No default index pattern. You must select or create one to continue."
+          title={(
+            <FormattedMessage
+              id="kbn.management.indexPatternList.noDefaultIndexPatternTitle"
+              defaultMessage="No default index pattern. You must select or create one to continue."
+            />
+          )}
         />
       </div>
     ) : null;
@@ -81,3 +129,5 @@ export class List extends Component {
     );
   }
 }
+
+export const List = injectI18n(ListUi);

@@ -15,6 +15,7 @@ import {
   EuiSpacer
 } from '@elastic/eui';
 import { EDITOR } from '../../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function CustomPatternsInput({ value, onChange }) {
   const sampleCustomPatterns = `POSTFIX_QUEUEID [0-9A-F]{10,11}
@@ -23,14 +24,24 @@ MSG message-id=<%{GREEDYDATA}>`;
   return (
     <EuiAccordion
       id="customPatternsInput"
-      buttonContent="Custom Patterns"
+      buttonContent={(
+        <FormattedMessage
+          id="xpack.grokDebugger.customPatternsButtonLabel"
+          defaultMessage="Custom Patterns"
+        />
+      )}
       data-test-subj="btnToggleCustomPatternsInput"
     >
 
       <EuiSpacer size="m" />
 
       <EuiCallOut
-        title="Enter one custom pattern per line. For example:"
+        title={(
+          <FormattedMessage
+            id="xpack.grokDebugger.customPatterns.callOutTitle"
+            defaultMessage="Enter one custom pattern per line. For example:"
+          />
+        )}
       >
         <EuiCodeBlock>
           { sampleCustomPatterns }
