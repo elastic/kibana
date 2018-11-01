@@ -7,11 +7,20 @@
 import { asPercent, asTime } from '../formatters';
 
 describe('formatters', () => {
-  it('asTime', () => {
-    expect(asTime(1000)).toBe('1 ms');
-    expect(asTime(1000 * 1000)).toBe('1,000 ms');
-    expect(asTime(1000 * 1000 * 10)).toBe('10,000 ms');
-    expect(asTime(1000 * 1000 * 20)).toBe('20.0 s');
+  describe('asTime', () => {
+    it('microseconds', () => {
+      expect(asTime(1)).toBe('1 μs');
+      expect(asTime(1000)).toBe('1,000 μs');
+    });
+
+    it('milliseconds', () => {
+      expect(asTime(1000 * 1000)).toBe('1,000 ms');
+      expect(asTime(1000 * 1000 * 10)).toBe('10,000 ms');
+    });
+
+    it('seconds', () => {
+      expect(asTime(1000 * 1000 * 20)).toBe('20.0 s');
+    });
   });
 
   describe('asPercent', () => {

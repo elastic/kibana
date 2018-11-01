@@ -13,7 +13,8 @@ interface Numeral {
   format: (pattern: string) => string;
 }
 
-const UNIT_CUT_OFF = 10 * 1000000; // 10 seconds in microseconds
+const SECONDS_CUT_OFF = 10 * 1000000; // 10 seconds (in microseconds)
+const MILLISECONDS_CUT_OFF = 10 * 1000; // 10 milliseconds (in microseconds)
 
 export function asSeconds(value: number, withUnit = true) {
   const formatted = asDecimal(value / 1000000);
@@ -25,6 +26,11 @@ export function asMillis(value: number, withUnit = true) {
   return `${formatted}${withUnit ? ' ms' : ''}`;
 }
 
+export function asMicros(value: number, withUnit = true) {
+  const formatted = asInteger(value);
+  return `${formatted}${withUnit ? ' μs' : ''}`;
+}
+
 export function asMillisWithDefault(value?: number) {
   if (value == null) {
     return `N/A`;
@@ -32,14 +38,30 @@ export function asMillisWithDefault(value?: number) {
   return asMillis(value);
 }
 
-export const getTimeFormatter: (
+type TimeFormatter = (
   max: number
-) => (value: number, withUnit?: boolean) => string = memoize(
-  (max: number) => (max > UNIT_CUT_OFF ? asSeconds : asMillis)
-);
+) => (value: number, withUnit?: boolean) => string;
+
+export const getTimeFormatter: TimeFormatter = memoize((max: number) => {
+  const unit = timeUnit(max);
+  switch (unit) {
+    case 's':
+      return asSeconds;
+    case 'ms':
+      return asMillis;
+    case 'us':
+      return asMicros;
+  }
+});
 
 export function timeUnit(max: number) {
-  return max > UNIT_CUT_OFF ? 's' : 'ms';
+  if (max > SECONDS_CUT_OFF) {
+    return 's';
+  } else if (max > MILLISECONDS_CUT_OFF) {
+    return 'ms';
+  } else {
+    return 'us';
+  }
 }
 
 /*
