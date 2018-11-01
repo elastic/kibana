@@ -21,7 +21,9 @@ export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const remote = getService('remote');
 
-  describe('discover app @ciGroup06', function () {
+  describe('discover app', function () {
+    this.tags('ciGroup06');
+
     before(function () {
       return remote.setWindowSize(1200, 800);
     });

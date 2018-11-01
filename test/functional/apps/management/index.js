@@ -20,21 +20,21 @@
 export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
 
-  describe('management @ciGroup07', function () {
-    // on setup, we create an settingsPage instance
-    // that we will use for all the tests
-    before(async function () {
+  describe('management', function () {
+    before(async () => {
       await esArchiver.unload('logstash_functional');
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('makelogs');
     });
 
-    after(async function () {
+    after(async () => {
       await esArchiver.unload('makelogs');
       await esArchiver.unload('empty_kibana');
     });
 
-    describe('mgmt1 @ciGroup07', function () {
+    describe('', function () {
+      this.tags('ciGroup07');
+
       loadTestFile(require.resolve('./_create_index_pattern_wizard'));
       loadTestFile(require.resolve('./_index_pattern_create_delete'));
       loadTestFile(require.resolve('./_index_pattern_results_sort'));
@@ -44,7 +44,9 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_scripted_fields_preview'));
     });
 
-    describe('mgmt2 @ciGroup08', function () {
+    describe('', function () {
+      this.tags('ciGroup08');
+
       loadTestFile(require.resolve('./_index_pattern_filter'));
       loadTestFile(require.resolve('./_scripted_fields_filter'));
       loadTestFile(require.resolve('./_import_objects'));
@@ -52,7 +54,5 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_handle_alias'));
       loadTestFile(require.resolve('./_handle_version_conflict'));
     });
-
   });
-
 }

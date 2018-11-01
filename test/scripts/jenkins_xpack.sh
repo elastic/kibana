@@ -37,9 +37,11 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 export TEST_ES_FROM=${TEST_ES_FROM:-source}
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
-xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --grep @ciGroup01
+xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag ciGroup01
 echo ""
-xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --grep @ciGroup02
+xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag ciGroup02
 echo ""
-xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --grep @ciGroup03
+xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag ciGroup03
+echo ""
+xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --exclude-tag ciGroup01 --exclude-tag ciGroup02 --exclude-tag ciGroup03
 echo ""

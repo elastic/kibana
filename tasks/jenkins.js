@@ -18,6 +18,7 @@
  */
 
 import { reportFailedTests } from '../src/dev/failed_tests/report';
+import { getFunctionalTestGroupRunConfigs } from './function_test_groups';
 
 module.exports = function (grunt) {
   grunt.registerTask('jenkins:docs', [
@@ -43,18 +44,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jenkins:selenium', [
     'checkPlugins',
-    'run:functionalTestsReleaseGroup1',
-    'run:functionalTestsReleaseGroup2',
-    'run:functionalTestsReleaseGroup3',
-    'run:functionalTestsReleaseGroup4',
-    'run:functionalTestsReleaseGroup5',
-    'run:functionalTestsReleaseGroup6',
-    'run:functionalTestsReleaseGroup7',
-    'run:functionalTestsReleaseGroup8',
-    'run:functionalTestsReleaseGroup9',
-    'run:functionalTestsReleaseGroup10',
-    'run:functionalTestsReleaseGroup11',
-    'run:functionalTestsReleaseGroup12',
+    ...Object.keys(getFunctionalTestGroupRunConfigs()).map(subTask => `run:${subTask}`),
+    'run:pluginFunctionalTestsRelease',
   ]);
 
   grunt.registerTask(
@@ -64,5 +55,4 @@ module.exports = function (grunt) {
       reportFailedTests(this.async());
     }
   );
-
 };

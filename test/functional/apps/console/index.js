@@ -20,7 +20,9 @@
 export default function ({ getService, loadTestFile }) {
   const remote = getService('remote');
 
-  describe('console app @ciGroup01', function () {
+  describe('console app', function () {
+    this.tags('ciGroup01');
+
     before(async function () {
       await remote.setWindowSize(1300, 1100);
     });
