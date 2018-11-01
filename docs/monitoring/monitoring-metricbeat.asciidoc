@@ -13,9 +13,34 @@ image::monitoring/images/metricbeat.png[Example monitoring architecture]
 To learn about monitoring in general, see 
 {stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
 
-. Enable the collection of monitoring data. Set 
-`xpack.monitoring.collection.enabled` to `true` on the production cluster. +
-+ 
+
+. Enable the collection of monitoring data. 
+
+** In {kib}:
+
+... Open {kib} in your web browser. If you are running {kib} locally, go to 
+`http://localhost:5601/`. 
++
+--
+////
+If the Elastic {security-features} are enabled on the {kib} server, to access 
+{kib} and view the monitoring dashboards, you must log in as a user who has the 
+`kibana_user` and `monitoring_user` roles. For more information, see 
+{stack-ov}/built-in-roles.html[Built-in roles].
+//TBD: What permissions are required to update cluster settings?
+
+If you are accessing a remote monitoring cluster, you must log in to {kib}
+with credentials that are valid on both the {kib} server and the monitoring 
+cluster.
+////
+--
+
+... In the side navigation, click *Monitoring*. If data collection is disabled, 
+you are prompted to turn it on. 
+
+** From the Console or command line, set `xpack.monitoring.collection.enabled` 
+to `true` on the production cluster. +
++
 --
 For example, you can use the following APIs to review and change this setting:
 
