@@ -3,6 +3,88 @@
 exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
 <PrivilegeCalloutWarning
   basePrivilege="all"
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   isReservedRole={false}
 >
   <EuiCallOut
@@ -12,7 +94,7 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
     title={
       <FormattedMessage
         defaultMessage="Minimum privilege is too high to customize individual spaces"
-        id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.minimumPrivilegeTitle"
+        id="xpack.security.management.editRoles.privilegeCalloutWarning.minimumPrivilegeTitle"
         values={Object {}}
       />
     }
@@ -69,12 +151,10 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
         >
           <FormattedMessage
             defaultMessage="Minimum privilege is too high to customize individual spaces"
-            id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.minimumPrivilegeTitle"
+            id="xpack.security.management.editRoles.privilegeCalloutWarning.minimumPrivilegeTitle"
             values={Object {}}
           >
-            <span>
-              Minimum privilege is too high to customize individual spaces
-            </span>
+            Minimum privilege is too high to customize individual spaces
           </FormattedMessage>
         </span>
       </div>
@@ -90,74 +170,66 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
               defaultMessage="Setting the minimum privilege to {allText} grants full access to all
                 spaces. To customize privileges for individual spaces, the minimum privilege must be
                 either {readText} or {noneText}."
-              id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.howToCustomizePrivilegesForIndividualSpacesDescription"
+              id="xpack.security.management.editRoles.privilegeCalloutWarning.howToCustomizePrivilegesForIndividualSpacesDescription"
               values={
                 Object {
                   "allText": <strong>
                     <FormattedMessage
                       defaultMessage="all"
-                      id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.allText"
+                      id="xpack.security.management.editRoles.privilegeCalloutWarning.allText"
                       values={Object {}}
                     />
                   </strong>,
                   "noneText": <strong>
                     <FormattedMessage
                       defaultMessage="none"
-                      id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.noneText"
+                      id="xpack.security.management.editRoles.privilegeCalloutWarning.noneText"
                       values={Object {}}
                     />
                   </strong>,
                   "readText": <strong>
                     <FormattedMessage
                       defaultMessage="read"
-                      id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.readText"
+                      id="xpack.security.management.editRoles.privilegeCalloutWarning.readText"
                       values={Object {}}
                     />
                   </strong>,
                 }
               }
             >
-              <span>
-                Setting the minimum privilege to 
-                <strong>
-                  <FormattedMessage
-                    defaultMessage="all"
-                    id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.allText"
-                    values={Object {}}
-                  >
-                    <span>
-                      all
-                    </span>
-                  </FormattedMessage>
-                </strong>
-                 grants full access to all
+              Setting the minimum privilege to 
+              <strong>
+                <FormattedMessage
+                  defaultMessage="all"
+                  id="xpack.security.management.editRoles.privilegeCalloutWarning.allText"
+                  values={Object {}}
+                >
+                  all
+                </FormattedMessage>
+              </strong>
+               grants full access to all
                 spaces. To customize privileges for individual spaces, the minimum privilege must be
                 either 
-                <strong>
-                  <FormattedMessage
-                    defaultMessage="read"
-                    id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.readText"
-                    values={Object {}}
-                  >
-                    <span>
-                      read
-                    </span>
-                  </FormattedMessage>
-                </strong>
-                 or 
-                <strong>
-                  <FormattedMessage
-                    defaultMessage="none"
-                    id="xpack.security.management.editRoles.privileges.kibana.privilegeCalloutWarning.noneText"
-                    values={Object {}}
-                  >
-                    <span>
-                      none
-                    </span>
-                  </FormattedMessage>
-                </strong>
-                .
-              </span>
+              <strong>
+                <FormattedMessage
+                  defaultMessage="read"
+                  id="xpack.security.management.editRoles.privilegeCalloutWarning.readText"
+                  values={Object {}}
+                >
+                  read
+                </FormattedMessage>
+              </strong>
+               or 
+              <strong>
+                <FormattedMessage
+                  defaultMessage="none"
+                  id="xpack.security.management.editRoles.privilegeCalloutWarning.noneText"
+                  values={Object {}}
+                >
+                  none
+                </FormattedMessage>
+              </strong>
+              .
             </FormattedMessage>
           </p>
         </div>

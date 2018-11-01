@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import {
+  mountWithIntl,
+  shallowWithIntl,
+} from '../../../../../../../../../test_utils/enzyme_helpers';
 import { RoleValidator } from '../../../lib/validate_role';
 import { ClusterPrivileges } from './cluster_privileges';
 import { ElasticsearchPrivileges } from './elasticsearch_privileges';
@@ -34,7 +37,7 @@ test('it renders without crashing', () => {
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
   };
-  const wrapper = shallow(<ElasticsearchPrivileges {...props} />);
+  const wrapper = shallowWithIntl(<ElasticsearchPrivileges.WrappedComponent {...props} />);
   expect(wrapper).toMatchSnapshot();
 });
 
@@ -61,7 +64,7 @@ test('it renders ClusterPrivileges', () => {
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
   };
-  const wrapper = mount(<ElasticsearchPrivileges {...props} />);
+  const wrapper = mountWithIntl(<ElasticsearchPrivileges.WrappedComponent {...props} />);
   expect(wrapper.find(ClusterPrivileges)).toHaveLength(1);
 });
 
@@ -88,6 +91,6 @@ test('it renders IndexPrivileges', () => {
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
   };
-  const wrapper = mount(<ElasticsearchPrivileges {...props} />);
+  const wrapper = mountWithIntl(<ElasticsearchPrivileges.WrappedComponent {...props} />);
   expect(wrapper.find(IndexPrivileges)).toHaveLength(1);
 });

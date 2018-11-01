@@ -5,8 +5,11 @@
  */
 
 import { EuiFlyout, EuiLink } from '@elastic/eui';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import {
+  mountWithIntl,
+  shallowWithIntl,
+} from '../../../../../../../../../test_utils/enzyme_helpers';
 import { ImpactedSpacesFlyout } from './impacted_spaces_flyout';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 
@@ -52,16 +55,18 @@ const buildProps = (customProps = {}) => {
 
 describe('<ImpactedSpacesFlyout>', () => {
   it('renders without crashing', () => {
-    expect(shallow(<ImpactedSpacesFlyout {...buildProps()} />)).toMatchSnapshot();
+    expect(
+      shallowWithIntl(<ImpactedSpacesFlyout.WrappedComponent {...buildProps()} />)
+    ).toMatchSnapshot();
   });
 
   it('does not immediately show the flyout', () => {
-    const wrapper = mount(<ImpactedSpacesFlyout {...buildProps()} />);
+    const wrapper = mountWithIntl(<ImpactedSpacesFlyout.WrappedComponent {...buildProps()} />);
     expect(wrapper.find(EuiFlyout)).toHaveLength(0);
   });
 
   it('shows the flyout after clicking the link', () => {
-    const wrapper = mount(<ImpactedSpacesFlyout {...buildProps()} />);
+    const wrapper = mountWithIntl(<ImpactedSpacesFlyout.WrappedComponent {...buildProps()} />);
     wrapper.find(EuiLink).simulate('click');
     expect(wrapper.find(EuiFlyout)).toHaveLength(1);
   });
@@ -82,7 +87,7 @@ describe('<ImpactedSpacesFlyout>', () => {
         },
       });
 
-      const wrapper = shallow(<ImpactedSpacesFlyout {...props} />);
+      const wrapper = shallowWithIntl(<ImpactedSpacesFlyout.WrappedComponent {...props} />);
       wrapper.find(EuiLink).simulate('click');
 
       const table = wrapper.find(PrivilegeSpaceTable);
@@ -112,7 +117,7 @@ describe('<ImpactedSpacesFlyout>', () => {
         },
       });
 
-      const wrapper = shallow(<ImpactedSpacesFlyout {...props} />);
+      const wrapper = shallowWithIntl(<ImpactedSpacesFlyout.WrappedComponent {...props} />);
       wrapper.find(EuiLink).simulate('click');
 
       const table = wrapper.find(PrivilegeSpaceTable);
@@ -141,7 +146,7 @@ describe('<ImpactedSpacesFlyout>', () => {
         },
       });
 
-      const wrapper = shallow(<ImpactedSpacesFlyout {...props} />);
+      const wrapper = shallowWithIntl(<ImpactedSpacesFlyout.WrappedComponent {...props} />);
       wrapper.find(EuiLink).simulate('click');
 
       const table = wrapper.find(PrivilegeSpaceTable);

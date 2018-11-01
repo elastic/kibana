@@ -22,7 +22,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Spaces"
-          id="xpack.security.management.editRoles.privileges.kibana.privilegeSpaceForm.spacesFormRowLabel"
+          id="xpack.security.management.editRoles.privilegeSpaceForm.spacesFormRowLabel"
           values={Object {}}
         />
       }
@@ -60,7 +60,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Privilege"
-          id="xpack.security.management.editRoles.privileges.kibana.privilegeSpaceForm.privilegeFormRowLabel"
+          id="xpack.security.management.editRoles.privilegeSpaceForm.privilegeFormRowLabel"
           values={Object {}}
         />
       }

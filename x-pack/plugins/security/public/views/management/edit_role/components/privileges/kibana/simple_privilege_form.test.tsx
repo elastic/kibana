@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import {
+  mountWithIntl,
+  shallowWithIntl,
+} from '../../../../../../../../../test_utils/enzyme_helpers';
 import { PrivilegeSelector } from './privilege_selector';
 import { SimplePrivilegeForm } from './simple_privilege_form';
 
@@ -32,12 +35,12 @@ const buildProps = (customProps?: any) => {
 
 describe('<SimplePrivilegeForm>', () => {
   it('renders without crashing', () => {
-    expect(shallow(<SimplePrivilegeForm {...buildProps()} />)).toMatchSnapshot();
+    expect(shallowWithIntl(<SimplePrivilegeForm {...buildProps()} />)).toMatchSnapshot();
   });
 
   it('displays "none" when no privilege is selected', () => {
     const props = buildProps();
-    const wrapper = shallow(<SimplePrivilegeForm {...props} />);
+    const wrapper = shallowWithIntl(<SimplePrivilegeForm {...props} />);
     const selector = wrapper.find(PrivilegeSelector);
     expect(selector.props()).toMatchObject({
       value: 'none',
@@ -53,7 +56,7 @@ describe('<SimplePrivilegeForm>', () => {
         },
       },
     });
-    const wrapper = shallow(<SimplePrivilegeForm {...props} />);
+    const wrapper = shallowWithIntl(<SimplePrivilegeForm {...props} />);
     const selector = wrapper.find(PrivilegeSelector);
     expect(selector.props()).toMatchObject({
       value: 'read',
@@ -62,7 +65,7 @@ describe('<SimplePrivilegeForm>', () => {
 
   it('fires its onChange callback when the privilege changes', () => {
     const props = buildProps();
-    const wrapper = mount(<SimplePrivilegeForm {...props} />);
+    const wrapper = mountWithIntl(<SimplePrivilegeForm {...props} />);
     const selector = wrapper.find(PrivilegeSelector).find('select');
     selector.simulate('change', { target: { value: 'all' } });
 

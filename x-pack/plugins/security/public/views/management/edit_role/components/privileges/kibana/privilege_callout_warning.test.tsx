@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mountWithIntl } from '../../../../../../../../../test_utils/enzyme_helpers';
 import { PrivilegeCalloutWarning } from './privilege_callout_warning';
 
 describe('PrivilegeCalloutWarning', () => {
   it('renders without crashing', () => {
     expect(
-      mount(<PrivilegeCalloutWarning basePrivilege={'all'} isReservedRole={false} />)
+      mountWithIntl(<PrivilegeCalloutWarning basePrivilege={'all'} isReservedRole={false} />)
     ).toMatchSnapshot();
   });
 });
