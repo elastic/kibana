@@ -11,11 +11,17 @@ import {
   EuiCodeEditor
 } from '@elastic/eui';
 import { EDITOR } from '../../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function EventInput({ value, onChange }) {
   return (
     <EuiFormRow
-      label="Sample Data"
+      label={(
+        <FormattedMessage
+          id="xpack.grokDebugger.sampleDataLabel"
+          defaultMessage="Sample Data"
+        />
+      )}
       fullWidth
       data-test-subj="aceEventInput"
     >
