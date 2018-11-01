@@ -14,14 +14,10 @@ performance. For more information, see
 
 . To monitor {kib} itself and route that data to the monitoring cluster.
 
-If you enable monitoring across the {stack}, a monitoring agent runs on
-each {es} node, {ls} node, {kib} instance, and Beat to collect and index
-metrics. Each node and instance is considered unique based on its persistent
+If you enable monitoring across the {stack}, each {es} node, {ls} node, {kib} 
+instance, and Beat is considered unique based on its persistent
 UUID, which is written to the <<settings,`path.data`>> directory when the node
 or instance starts. 
-
-beta[] Alternatively, in 6.4 and later versions, you can use {metricbeat} to 
-collect and ship data about {kib} and {es}. 
 
 * <<monitoring-kibana>>
 * <<monitoring-data>>
