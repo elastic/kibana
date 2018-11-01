@@ -17,7 +17,6 @@ export const contractTests = (testName: string, config: ContractConfig) => {
     beforeAll(config.before);
     afterAll(config.after);
     beforeEach(async () => {
-      // FIXME: one of these always should exist, type ContractConfig as such
       frameworkAdapter = config.adapterSetup();
     });
 

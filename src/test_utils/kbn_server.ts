@@ -18,7 +18,6 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-// @ts-ignore: implicit any for JS file
 import {
   createEsTestCluster,
   DEFAULT_SUPERUSER_PASS,
@@ -26,6 +25,8 @@ import {
   kbnTestConfig,
   kibanaServerTestUser,
   kibanaTestUser,
+  setupUsers,
+  // @ts-ignore: implicit any for JS file
 } from '@kbn/test';
 import { defaultsDeep, get } from 'lodash';
 import { resolve } from 'path';
@@ -147,24 +148,22 @@ export const request: Record<
  */
 export async function startTestServers({
   adjustTimeout,
-  settings = {
-    es: {
-      license: 'oss',
-    },
-    kbn: {},
-  },
+  settings = {},
 }: {
   adjustTimeout: (timeout: number) => void;
   settings: {
-    es: {
+    es?: {
       license: 'oss' | 'basic' | 'gold' | 'trial';
       [key: string]: any;
     };
-    kbn: {
+    kbn?: {
       /**
        * An array of directories paths, passed in via absolute path strings
        */
-      plugins?: string[];
+      plugins?: {
+        paths: string[];
+        [key: string]: any;
+      };
       [key: string]: any;
     };
     /**
@@ -177,6 +176,15 @@ export async function startTestServers({
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
   }
+  const license = get<'oss' | 'basic' | 'gold' | 'trial'>(settings, 'es.license', 'oss');
+  const usersToBeAdded = get(settings, 'users', []);
+  if (usersToBeAdded.length > 0) {
+    if (license !== 'trial') {
+      throw new Error(
+        'Adding users is only supported by startTestServers when using a trial license'
+      );
+    }
+  }
 
   const log = new ToolingLog({
     level: 'debug',
@@ -187,7 +195,6 @@ export async function startTestServers({
   log.info('starting elasticsearch');
   log.indent(4);
 
-  const license = get(settings, 'es.license', 'trial');
   const es = createEsTestCluster(
     defaultsDeep({}, get(settings, 'es', {}), {
       log,
@@ -198,30 +205,31 @@ export async function startTestServers({
 
   log.indent(-4);
 
-  adjustTimeout(es.getStartTimeout());
+  // Add time for KBN and adding users
+  adjustTimeout(es.getStartTimeout() + 60000);
 
   await es.start();
 
-  const usersToBeAdded = get(settings, 'users', []);
-  if (usersToBeAdded.length > 0) {
-    if (license !== 'trial') {
-      throw new Error(
-        'Adding users is only supported by startTestServers when using a trial license'
-      );
-    }
+  const kbnSettings: any = get(settings, 'kbn', {});
+  if (['gold', 'trial'].includes(license)) {
     await setupUsers(log, esTestConfig.getUrlParts().port, [
-      esTestConfig.getUrlParts(),
-      kbnTestConfig.getUrlParts(),
-      {
-        username: 'kibana_user',
-        password: 'x-pack-test-password',
-        roles: ['kibana_user'],
-      },
       ...usersToBeAdded,
+      // user elastic
+      esTestConfig.getUrlParts(),
+      // user kibana
+      kbnTestConfig.getUrlParts(),
     ]);
+
+    // Override provided configs, we know what the elastic user is now
+    kbnSettings.elasticsearch = {
+      url: esTestConfig.getUrl(),
+      username: esTestConfig.getUrlParts().username,
+      password: esTestConfig.getUrlParts().password,
+    };
   }
 
-  const root = createRootWithCorePlugins(settings.kbn);
+  const root = createRootWithCorePlugins(kbnSettings);
+
   await root.start();
 
   const kbnServer = getKbnServer(root);
