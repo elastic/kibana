@@ -65,7 +65,7 @@ const columns = [
     sortKey: 'unassigned_shards'
   }
 ];
-const IndexRow = ({ status, ...props }) => (
+const IndexRow = injectI18n(({ status, ...props }) => (
   <KuiTableRow>
     <KuiTableRowCell data-test-subj="name">
       <EuiLink
@@ -77,15 +77,11 @@ const IndexRow = ({ status, ...props }) => (
     </KuiTableRowCell>
     <KuiTableRowCell>
       <div
-        title={(
-          <FormattedMessage
-            id="xpack.monitoring.elasticsearch.indices.indexStatusTitle"
-            defaultMessage="Index status: {status}"
-            values={{
-              status
-            }}
-          />
-        )}
+        title={props.intl.formatMessage({
+          id: 'xpack.monitoring.elasticsearch.indices.indexStatusTitle',
+          defaultMessage: 'Index status: {status}' }, {
+          status
+        })}
       >
         <ElasticsearchStatusIcon status={status} />&nbsp;
         {capitalize(status)}
@@ -107,7 +103,7 @@ const IndexRow = ({ status, ...props }) => (
       {formatMetric(get(props, 'unassigned_shards'), '0')}
     </KuiTableRowCell>
   </KuiTableRow>
-);
+));
 
 const getNoDataMessage = filterText => {
   const howToShowSystemIndicesDescription = (
