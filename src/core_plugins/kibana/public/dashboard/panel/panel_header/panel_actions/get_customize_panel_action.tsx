@@ -37,7 +37,7 @@ export function getCustomizePanelAction({
 }): ContextMenuAction {
   return new ContextMenuAction(
     {
-      displayName: i18n.translate('kbn.dashboard.panel.header.actions.customizePanel.displayName', {
+      displayName: i18n.translate('kbn.dashboard.panel.customizePanel.displayName', {
         defaultMessage: 'Customize panel',
       }),
       id: 'customizePanel',
@@ -47,7 +47,7 @@ export function getCustomizePanelAction({
       childContextMenuPanel: new ContextMenuPanel(
         {
           id: 'panelSubOptionsMenu',
-          title: i18n.translate('kbn.dashboard.panel.header.actions.customizePanel.title', {
+          title: i18n.translate('kbn.dashboard.panel.customizePanel.title', {
             defaultMessage: 'Customize panel',
           }),
         },

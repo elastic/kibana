@@ -64,7 +64,7 @@ function PanelHeaderUi({
         title={title}
         aria-label={intl.formatMessage(
           {
-            id: 'kbn.dashboard.panel.header.dashboardPanelAriaLabel',
+            id: 'kbn.dashboard.panel.dashboardPanelAriaLabel',
             defaultMessage: 'Dashboard panel: {title}',
           },
           {

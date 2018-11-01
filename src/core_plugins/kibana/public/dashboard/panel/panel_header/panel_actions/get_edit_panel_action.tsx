@@ -32,7 +32,7 @@ import { DashboardViewMode } from '../../../dashboard_view_mode';
 export function getEditPanelAction() {
   return new ContextMenuAction(
     {
-      displayName: i18n.translate('kbn.dashboard.panel.header.actions.editPanel.displayName', {
+      displayName: i18n.translate('kbn.dashboard.panel.editPanel.displayName', {
         defaultMessage: 'Edit visualization',
       }),
       id: 'editPanel',

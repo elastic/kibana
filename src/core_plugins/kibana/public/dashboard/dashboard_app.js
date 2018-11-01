@@ -274,20 +274,20 @@ app.directive('dashboardApp', function ($injector) {
         }
 
         confirmModal(
-          i18n('kbn.dashboard.app.changeViewModeConfirmModal.discardChangesDescription',
+          i18n('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription',
             { defaultMessage: 'Once you discard your changes, there\'s no getting them back.' }
           ),
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,
-            confirmButtonText: i18n('kbn.dashboard.app.changeViewModeConfirmModal.confirmButtonLabel',
+            confirmButtonText: i18n('kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
               { defaultMessage: 'Discard changes' }
             ),
-            cancelButtonText: i18n('kbn.dashboard.app.changeViewModeConfirmModal.cancelButtonLabel',
+            cancelButtonText: i18n('kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
               { defaultMessage: 'Continue editing' }
             ),
             defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
-            title: i18n('kbn.dashboard.app.changeViewModeConfirmModal.discardChangesTitle',
+            title: i18n('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle',
               { defaultMessage: 'Discard changes to dashboard?' }
             )
           }
@@ -311,7 +311,7 @@ app.directive('dashboardApp', function ($injector) {
           .then(function (id) {
             if (id) {
               toastNotifications.addSuccess({
-                title: i18n('kbn.dashboard.app.dashboardWasSavedSuccessMessage',
+                title: i18n('kbn.dashboard.dashboardWasSavedSuccessMessage',
                   {
                     defaultMessage: 'Dashboard \'{dashTitle}\' was saved',
                     values: { dashTitle: dash.title },
@@ -330,7 +330,7 @@ app.directive('dashboardApp', function ($injector) {
             return { id };
           }).catch((error) => {
             toastNotifications.addDanger({
-              title: i18n('kbn.dashboard.app.dashboardWasNotSavedDangerMessage',
+              title: i18n('kbn.dashboard.dashboardWasNotSavedDangerMessage',
                 {
                   defaultMessage: 'Dashboard \'{dashTitle}\' was not saved. Error: {errorMessage}',
                   values: {

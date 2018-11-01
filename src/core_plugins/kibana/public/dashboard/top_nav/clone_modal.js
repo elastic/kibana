@@ -94,9 +94,8 @@ class DashboardCloneModalUi extends React.Component {
           title={this.props.intl.formatMessage({
             id: 'kbn.dashboard.topNav.cloneModal.dashboardExistsTitle',
             defaultMessage: 'A Dashboard with the title {newDashboardName} already exists.',
-            values: {
-              newDashboardName: this.state.newDashboardName,
-            },
+          }, {
+            newDashboardName: this.state.newDashboardName,
           })}
           color="warning"
           data-test-subj="titleDupicateWarnMsg"

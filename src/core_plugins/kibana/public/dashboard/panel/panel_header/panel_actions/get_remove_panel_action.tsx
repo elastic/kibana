@@ -32,7 +32,7 @@ import { DashboardViewMode } from '../../../dashboard_view_mode';
 export function getRemovePanelAction(onDeletePanel: () => void) {
   return new ContextMenuAction(
     {
-      displayName: i18n.translate('kbn.dashboard.panel.header.actions.removePanel.displayName', {
+      displayName: i18n.translate('kbn.dashboard.panel.removePanel.displayName', {
         defaultMessage: 'Delete from dashboard',
       }),
       id: 'deletePanel',

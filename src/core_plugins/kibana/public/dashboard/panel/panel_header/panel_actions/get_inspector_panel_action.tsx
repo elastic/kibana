@@ -42,7 +42,7 @@ export function getInspectorPanelAction({
   return new ContextMenuAction(
     {
       id: 'openInspector',
-      displayName: i18n.translate('kbn.dashboard.panel.header.actions.inspectorPanel.displayName', {
+      displayName: i18n.translate('kbn.dashboard.panel.inspectorPanel.displayName', {
         defaultMessage: 'Inspect',
       }),
       parentPanelId: 'mainMenu',

@@ -45,6 +45,6 @@ export function showSaveModal(saveModal) {
       onClose: closeModal
     }
   );
-  const elementWithIntlProvider = <I18nProvider>{element}</I18nProvider>;
-  ReactDOM.render(elementWithIntlProvider, container);
+
+  ReactDOM.render(<I18nProvider>{element}</I18nProvider>, container);
 }

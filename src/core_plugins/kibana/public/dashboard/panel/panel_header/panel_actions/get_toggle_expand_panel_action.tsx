@@ -39,18 +39,12 @@ export function getToggleExpandPanelAction({
   return new ContextMenuAction(
     {
       displayName: isExpanded
-        ? i18n.translate(
-            'kbn.dashboard.panel.header.actions.toggleExpandPanel.expandedDisplayName',
-            {
-              defaultMessage: 'Minimize',
-            }
-          )
-        : i18n.translate(
-            'kbn.dashboard.panel.header.actions.toggleExpandPanel.notExpandedDisplayName',
-            {
-              defaultMessage: 'Full screen',
-            }
-          ),
+        ? i18n.translate('kbn.dashboard.panel.toggleExpandPanel.expandedDisplayName', {
+            defaultMessage: 'Minimize',
+          })
+        : i18n.translate('kbn.dashboard.panel.toggleExpandPanel.notExpandedDisplayName', {
+            defaultMessage: 'Full screen',
+          }),
       id: 'togglePanel',
       parentPanelId: 'mainMenu',
     },
