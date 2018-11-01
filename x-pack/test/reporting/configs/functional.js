@@ -5,7 +5,7 @@
  */
 const path = require('path');
 
-export default async function getFunctionalConfig({ readConfigFile }) {
+export async function getFunctionalConfig({ readConfigFile }) {
   const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../../functional/config.js'));
 
   return {
