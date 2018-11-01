@@ -5,8 +5,8 @@
  */
 // @ts-ignore
 import { EuiColorPicker, EuiFieldText, EuiLink } from '@elastic/eui';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mountWithIntl, shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
 
 const space = {
@@ -15,17 +15,23 @@ const space = {
 };
 
 test('renders without crashing', () => {
-  const wrapper = shallow(<CustomizeSpaceAvatar space={space} onChange={jest.fn()} />);
+  const wrapper = shallowWithIntl(
+    <CustomizeSpaceAvatar.WrappedComponent space={space} onChange={jest.fn()} />
+  );
   expect(wrapper).toMatchSnapshot();
 });
 
 test('renders a "customize" link by default', () => {
-  const wrapper = mount(<CustomizeSpaceAvatar space={space} onChange={jest.fn()} />);
+  const wrapper = mountWithIntl(
+    <CustomizeSpaceAvatar.WrappedComponent space={space} onChange={jest.fn()} />
+  );
   expect(wrapper.find(EuiLink)).toHaveLength(1);
 });
 
 test('shows customization fields when the "customize" link is clicked', () => {
-  const wrapper = mount(<CustomizeSpaceAvatar space={space} onChange={jest.fn()} />);
+  const wrapper = mountWithIntl(
+    <CustomizeSpaceAvatar.WrappedComponent space={space} onChange={jest.fn()} />
+  );
   wrapper.find(EuiLink).simulate('click');
 
   expect(wrapper.find(EuiLink)).toHaveLength(0);
@@ -43,7 +49,9 @@ test('invokes onChange callback when avatar is customized', () => {
 
   const changeHandler = jest.fn();
 
-  const wrapper = mount(<CustomizeSpaceAvatar space={customizedSpace} onChange={changeHandler} />);
+  const wrapper = mountWithIntl(
+    <CustomizeSpaceAvatar.WrappedComponent space={customizedSpace} onChange={changeHandler} />
+  );
   wrapper.find(EuiLink).simulate('click');
 
   wrapper

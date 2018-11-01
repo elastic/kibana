@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mountWithIntl, shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
 import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
@@ -38,8 +38,8 @@ describe('ConfirmDeleteModal', () => {
     const onConfirm = jest.fn();
 
     expect(
-      shallow(
-        <ConfirmDeleteModal
+      shallowWithIntl(
+        <ConfirmDeleteModal.WrappedComponent
           space={space}
           spacesManager={spacesManager}
           spacesNavState={spacesNavState}
@@ -71,8 +71,8 @@ describe('ConfirmDeleteModal', () => {
     const onCancel = jest.fn();
     const onConfirm = jest.fn();
 
-    const wrapper = mount(
-      <ConfirmDeleteModal
+    const wrapper = mountWithIntl(
+      <ConfirmDeleteModal.WrappedComponent
         space={space}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}

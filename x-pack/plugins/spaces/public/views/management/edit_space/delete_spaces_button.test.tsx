@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
 import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
 import { DeleteSpacesButton } from './delete_spaces_button';
@@ -34,8 +34,8 @@ describe('DeleteSpacesButton', () => {
       refreshSpacesList: jest.fn(),
     };
 
-    const wrapper = shallow(
-      <DeleteSpacesButton
+    const wrapper = shallowWithIntl(
+      <DeleteSpacesButton.WrappedComponent
         space={space}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}

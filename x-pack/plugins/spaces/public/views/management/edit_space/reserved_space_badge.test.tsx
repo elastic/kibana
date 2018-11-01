@@ -5,8 +5,8 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
 import { ReservedSpaceBadge } from './reserved_space_badge';
 
 const reservedSpace = {
@@ -21,11 +21,11 @@ const unreservedSpace = {
 };
 
 test('it renders without crashing', () => {
-  const wrapper = shallow(<ReservedSpaceBadge space={reservedSpace} />);
+  const wrapper = shallowWithIntl(<ReservedSpaceBadge space={reservedSpace} />);
   expect(wrapper.find(EuiIcon)).toHaveLength(1);
 });
 
 test('it renders nothing for an unreserved space', () => {
-  const wrapper = shallow(<ReservedSpaceBadge space={unreservedSpace} />);
+  const wrapper = shallowWithIntl(<ReservedSpaceBadge space={unreservedSpace} />);
   expect(wrapper.find('*')).toHaveLength(0);
 });

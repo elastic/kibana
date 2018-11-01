@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallowWithIntl } from '../../../../../../../test_utils/enzyme_helpers';
 import { AdvancedSettingsSubtitle } from './advanced_settings_subtitle';
 
 describe('AdvancedSettingsSubtitle', () => {
@@ -13,6 +13,6 @@ describe('AdvancedSettingsSubtitle', () => {
       id: 'my-space',
       name: 'My Space',
     };
-    expect(shallow(<AdvancedSettingsSubtitle space={space} />)).toMatchSnapshot();
+    expect(shallowWithIntl(<AdvancedSettingsSubtitle space={space} />)).toMatchSnapshot();
   });
 });

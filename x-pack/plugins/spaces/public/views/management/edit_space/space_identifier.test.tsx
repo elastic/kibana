@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
 import { SpaceValidator } from '../lib';
 import { SpaceIdentifier } from './space_identifier';
 
@@ -19,6 +19,6 @@ test('renders without crashing', () => {
     onChange: jest.fn(),
     validator: new SpaceValidator(),
   };
-  const wrapper = shallow(<SpaceIdentifier {...props} />);
+  const wrapper = shallowWithIntl(<SpaceIdentifier.WrappedComponent {...props} />);
   expect(wrapper).toMatchSnapshot();
 });

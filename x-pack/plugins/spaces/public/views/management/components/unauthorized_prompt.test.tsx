@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
 import { UnauthorizedPrompt } from './unauthorized_prompt';
 
 describe('UnauthorizedPrompt', () => {
   it('renders as expected', () => {
-    expect(shallow(<UnauthorizedPrompt />)).toMatchSnapshot();
+    expect(shallowWithIntl(<UnauthorizedPrompt />)).toMatchSnapshot();
   });
 });

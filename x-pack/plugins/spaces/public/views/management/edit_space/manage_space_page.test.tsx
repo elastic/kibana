@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mountWithIntl } from '../../../../../../test_utils/enzyme_helpers';
 import { UserProfileProvider } from '../../../../../xpack_main/public/services/user_profile';
 import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
@@ -42,8 +42,8 @@ describe('ManageSpacePage', () => {
 
     const userProfile = buildUserProfile(true);
 
-    const wrapper = mount(
-      <ManageSpacePage
+    const wrapper = mountWithIntl(
+      <ManageSpacePage.WrappedComponent
         spacesManager={spacesManager}
         userProfile={userProfile}
         spacesNavState={spacesNavState}
@@ -96,8 +96,8 @@ describe('ManageSpacePage', () => {
 
     const userProfile = buildUserProfile(true);
 
-    const wrapper = mount(
-      <ManageSpacePage
+    const wrapper = mountWithIntl(
+      <ManageSpacePage.WrappedComponent
         spaceId={'existing-space'}
         spacesManager={spacesManager}
         userProfile={userProfile}
