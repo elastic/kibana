@@ -40,15 +40,6 @@ app.directive('timelionHelp', function ($http, i18n) {
         };
 
         $scope.translations = {
-          firstTimeConfigurationLinkText: i18n(
-            'timelion.help.configuration.firstTimeConfigurationLinkText',
-            {
-              defaultMessage: 'First time configuration',
-            }
-          ),
-          welcomeFunctionReferenceLinkText: i18n('timelion.help.welcome.functionReferenceLinkText', {
-            defaultMessage: 'Jump to the function reference',
-          }),
           nextButtonLabel: i18n('timelion.help.nextPageButtonLabel', {
             defaultMessage: 'Next',
           }),
@@ -57,31 +48,6 @@ app.directive('timelionHelp', function ($http, i18n) {
           }),
           dontShowHelpButtonLabel: i18n('timelion.help.dontShowHelpButtonLabel', {
             defaultMessage: 'Don\'t show this again',
-          }),
-          intervalIsAutoMessage: i18n(
-            'timelion.help.configuration.valid.intervals.content.intervalIsAutoText',
-            {
-              defaultMessage: 'You\'re all set!',
-            }
-          ),
-          intervalIsNotAutoMessage: i18n(
-            'timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText',
-            {
-              defaultMessage: 'Set it to {auto} to let Timelion choose an appropriate interval.',
-              values: { auto: '<code>auto </code>' },
-            }
-          ),
-          luceneQueryLinkText: i18n('timelion.help.querying.luceneQueryLinkText', {
-            defaultMessage: 'Lucene query string',
-          }),
-          metricAggregationLinkText: i18n('timelion.help.querying.count.metricAggregationLinkText', {
-            defaultMessage: 'Elasticsearch metric aggregation',
-          }),
-          functionReferenceLinkText: i18n('timelion.help.functionReferenceLinkText', {
-            defaultMessage: 'Function reference',
-          }),
-          welcomePageLinkText: i18n('timelion.help.mainPage.functionReference.welcomePageLinkText', {
-            defaultMessage: 'Check out the tutorial',
           }),
           strongNextText: i18n('timelion.help.welcome.content.strongNextText', {
             defaultMessage: 'Next',
