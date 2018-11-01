@@ -4,10 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 export class NotFoundPage extends React.PureComponent {
   public render() {
-    return <div>No content found</div>;
+    return (
+      <div>
+        <FormattedMessage
+          id="xpack.beatsManagement.mainPageErrors.noContentFoundErrorMessage"
+          defaultMessage="No content found"
+        />
+      </div>
+    );
   }
 }

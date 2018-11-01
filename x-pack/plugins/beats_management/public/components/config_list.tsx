@@ -6,6 +6,7 @@
 
 // @ts-ignore
 import { EuiBasicTable, EuiLink } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { ConfigurationBlock } from '../../common/domain_types';
 import { supportedConfigs } from '../config_schemas';
@@ -13,15 +14,19 @@ import { supportedConfigs } from '../config_schemas';
 interface ComponentProps {
   configs: ConfigurationBlock[];
   onConfigClick: (action: 'edit' | 'delete', config: ConfigurationBlock) => any;
+  intl: InjectedIntl;
 }
 
-export const ConfigList: React.SFC<ComponentProps> = props => (
+const ConfigListUI: React.SFC<ComponentProps> = props => (
   <EuiBasicTable
     items={props.configs || []}
     columns={[
       {
         field: 'type',
-        name: 'Type',
+        name: props.intl.formatMessage({
+          id: 'xpack.beatsManagement.tag.configListTypeColumnName',
+          defaultMessage: 'Type',
+        }),
         truncateText: false,
         render: (value: string, config: ConfigurationBlock) => {
           const type = supportedConfigs.find((sc: any) => sc.value === config.type);
@@ -35,7 +40,10 @@ export const ConfigList: React.SFC<ComponentProps> = props => (
       },
       {
         field: 'module',
-        name: 'Module',
+        name: props.intl.formatMessage({
+          id: 'xpack.beatsManagement.tag.configListModuleColumnName',
+          defaultMessage: 'Module',
+        }),
         truncateText: false,
         render: (value: string) => {
           return value || 'N/A';
@@ -43,14 +51,26 @@ export const ConfigList: React.SFC<ComponentProps> = props => (
       },
       {
         field: 'description',
-        name: 'Description',
+        name: props.intl.formatMessage({
+          id: 'xpack.beatsManagement.tag.configListDescriptionColumnName',
+          defaultMessage: 'Description',
+        }),
       },
       {
-        name: 'Actions',
+        name: props.intl.formatMessage({
+          id: 'xpack.beatsManagement.tag.configListActionsColumnName',
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
-            name: 'Remove',
-            description: 'Remove this config from tag',
+            name: props.intl.formatMessage({
+              id: 'xpack.beatsManagement.tag.configListRemoveColumnName',
+              defaultMessage: 'Remove',
+            }),
+            description: props.intl.formatMessage({
+              id: 'xpack.beatsManagement.tag.configListRemoveDescription',
+              defaultMessage: 'Remove this config from tag',
+            }),
             type: 'icon',
             icon: 'trash',
             onClick: (item: ConfigurationBlock) => props.onConfigClick('delete', item),
@@ -60,3 +80,5 @@ export const ConfigList: React.SFC<ComponentProps> = props => (
     ]}
   />
 );
+
+export const ConfigList = injectI18n(ConfigListUI);
