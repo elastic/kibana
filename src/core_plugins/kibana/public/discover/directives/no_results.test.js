@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { render, mount } from 'enzyme';
+import { renderWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -40,7 +40,7 @@ describe('DiscoverNoResults', () => {
           reason: { reason: 'Bad error' },
         }];
 
-        const component = render(
+        const component = renderWithIntl(
           <DiscoverNoResults
             shardFailures={shardFailures}
             isTimePickerOpen={false}
@@ -55,7 +55,7 @@ describe('DiscoverNoResults', () => {
       test(`doesn't render failures list when there are no failures`, () => {
         const shardFailures = [];
 
-        const component = render(
+        const component = renderWithIntl(
           <DiscoverNoResults
             shardFailures={shardFailures}
             isTimePickerOpen={false}
@@ -70,7 +70,7 @@ describe('DiscoverNoResults', () => {
 
     describe('isTimePickerOpen', () => {
       test('false is reflected in the aria-expanded state of the button', () => {
-        const component = render(
+        const component = renderWithIntl(
           <DiscoverNoResults
             timeFieldName="awesome_time_field"
             isTimePickerOpen={false}
@@ -85,7 +85,7 @@ describe('DiscoverNoResults', () => {
       });
 
       test('true is reflected in the aria-expanded state of the button', () => {
-        const component = render(
+        const component = renderWithIntl(
           <DiscoverNoResults
             timeFieldName="awesome_time_field"
             isTimePickerOpen={true}
@@ -102,7 +102,7 @@ describe('DiscoverNoResults', () => {
 
     describe('timeFieldName', () => {
       test('renders time range feedback', () => {
-        const component = render(
+        const component = renderWithIntl(
           <DiscoverNoResults
             timeFieldName="awesome_time_field"
             isTimePickerOpen={false}
@@ -117,7 +117,7 @@ describe('DiscoverNoResults', () => {
 
     describe('queryLanguage', () => {
       test('supports lucene and renders doc link', () => {
-        const component = render(
+        const component = renderWithIntl(
           <DiscoverNoResults
             queryLanguage="lucene"
             isTimePickerOpen={false}
@@ -133,7 +133,7 @@ describe('DiscoverNoResults', () => {
     describe('topNavToggle', () => {
       test('is called whe time picker button is clicked', () => {
         const topNavToggleSpy = sinon.stub();
-        const component = mount(
+        const component = mountWithIntl(
           <DiscoverNoResults
             timeFieldName="awesome_time_field"
             isTimePickerOpen={false}

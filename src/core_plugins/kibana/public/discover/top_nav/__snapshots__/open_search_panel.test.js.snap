@@ -15,7 +15,11 @@ exports[`render 1`] = `
       size="s"
     >
       <h1>
-        Open Search
+        <FormattedMessage
+          defaultMessage="Open Search"
+          id="kbn.discover.topNav.openSearchPanel.openSearchTitle"
+          values={Object {}}
+        />
       </h1>
     </EuiTitle>
     <EuiSpacer
@@ -31,11 +35,21 @@ exports[`render 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Manage searches
+          <FormattedMessage
+            defaultMessage="Manage searches"
+            id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       }
       makeUrl={[Function]}
-      noItemsMessage="No matching searches found."
+      noItemsMessage={
+        <FormattedMessage
+          defaultMessage="No matching searches found."
+          id="kbn.discover.topNav.openSearchPanel.noSearchesFoundDescription"
+          values={Object {}}
+        />
+      }
       onChoose={[Function]}
       savedObjectType="search"
     />
