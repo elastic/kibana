@@ -7,15 +7,14 @@
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'bluebird';
-import pixelmatch from 'pixelmatch';
 import mkdirp from 'mkdirp';
-
-import { PNG } from 'pngjs';
 import { PDFImage } from 'pdf-image';
 import PDFJS from 'pdfjs-dist';
+import { comparePngs } from './common';
 
 const mkdirAsync = promisify(mkdirp);
 
+<<<<<<< HEAD
 function comparePngs(actualPath, expectedPath, diffPath, log) {
   log.debug(`comparePngs: ${actualPath} vs ${expectedPath}`);
   return new Promise(resolve => {
@@ -42,6 +41,8 @@ function comparePngs(actualPath, expectedPath, diffPath, log) {
   });
 }
 
+=======
+>>>>>>> 8efd352912... Add png output to reports 65 (#24759)
 export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screenshotsDirectory, log) {
   log.debug(`checkIfPdfsMatch: ${actualPdfPath} vs ${baselinePdfPath}`);
   // Copy the pdfs into the screenshot session directory, as that's where the generated pngs will automatically be
