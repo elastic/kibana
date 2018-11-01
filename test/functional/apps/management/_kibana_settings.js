@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   describe('kibana settings', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({});
+      await kibanaServer.uiSettings.replace({ 'accessibility:disableAnimations': 'true' });
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.createIndexPattern();

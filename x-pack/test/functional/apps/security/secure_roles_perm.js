@@ -25,7 +25,11 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({
+        'dateFormat:tz': 'UTC',
+        'defaultIndex': 'logstash-*',
+        'accessibility:disableAnimations': 'true',
+      });
       await PageObjects.settings.navigateTo();
     });
 

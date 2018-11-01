@@ -40,7 +40,8 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
+        'defaultIndex': 'logstash-*',
+        'accessibility:disableAnimations': 'true',
       });
 
       await PageObjects.common.navigateToApp('discover');

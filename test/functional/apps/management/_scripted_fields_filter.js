@@ -35,13 +35,17 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('management');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
-        'defaultIndex': 'f1e4c910-a2e6-11e7-bb30-233be9be6a15'
+        'defaultIndex': 'f1e4c910-a2e6-11e7-bb30-233be9be6a15',
+        'accessibility:disableAnimations': 'true',
       });
     });
 
     after(async function () {
       await esArchiver.unload('management');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+      await kibanaServer.uiSettings.replace({
+        'dateFormat:tz': 'UTC',
+        'accessibility:disableAnimations': 'true',
+     });
     });
 
     const scriptedPainlessFieldName = 'ram_pain1';

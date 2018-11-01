@@ -29,7 +29,8 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
     async initTests() {
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
+        'defaultIndex': 'logstash-*',
+        'accessibility:disableAnimations': 'true'
       });
 
       log.debug('load kibana index');

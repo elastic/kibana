@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
   describe('import objects', function describeIndexTests() {
     beforeEach(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({});
+      await kibanaServer.uiSettings.replace({ 'accessibility:disableAnimations': 'true' });
       await PageObjects.settings.navigateTo();
       await esArchiver.load('management');
     });

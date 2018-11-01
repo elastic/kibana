@@ -22,6 +22,7 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       await esArchiver.load(archive);
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
+        'accessibility:disableAnimations': 'true',
         'telemetry:optIn': false // provide extra height for the page and avoid clusters sending telemetry during tests
       });
 

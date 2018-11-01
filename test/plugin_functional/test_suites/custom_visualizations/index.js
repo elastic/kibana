@@ -26,7 +26,11 @@ export default function ({ getService, loadTestFile }) {
     before(async () => {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/visualize');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'Australia/North', 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({
+        'dateFormat:tz': 'Australia/North',
+        'defaultIndex': 'logstash-*',
+        'accessibility:disableAnimations': 'true'
+       });
       await remote.setWindowSize(1300, 900);
     });
 

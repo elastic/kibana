@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         defaultIndex: 'logstash-*',
+        'accessibility:disableAnimations': 'true',
       });
 
       log.debug('load kibana index with default index pattern');

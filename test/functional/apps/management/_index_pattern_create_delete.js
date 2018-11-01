@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
   describe('creating and deleting default index', function describeIndexTests() {
     before(function () {
       // delete .kibana index and then wait for Kibana to re-create it
-      return kibanaServer.uiSettings.replace({})
+      return kibanaServer.uiSettings.replace({ 'accessibility:disableAnimations': 'true' })
         .then(function () {
           return PageObjects.settings.navigateTo();
         })

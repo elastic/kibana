@@ -29,7 +29,11 @@ export default function ({ getService, loadTestFile }) {
       remote.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({
+        'dateFormat:tz': 'UTC',
+        'defaultIndex': 'logstash-*',
+        'accessibility:disableAnimations': 'true',
+       });
     });
 
     loadTestFile(require.resolve('./_embedding_chart'));
