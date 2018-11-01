@@ -339,7 +339,7 @@ exports[`Field for array setting should render user value if there is user value
           <span>
             <span>
               <EuiLink
-                aria-label="Reset {ariaName} to default"
+                aria-label="Reset array test setting to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-array:test:setting"
                 onClick={[Function]}
@@ -712,7 +712,7 @@ exports[`Field for boolean setting should render user value if there is user val
           <span>
             <span>
               <EuiLink
-                aria-label="Reset {ariaName} to default"
+                aria-label="Reset boolean test setting to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-boolean:test:setting"
                 onClick={[Function]}
@@ -1082,7 +1082,7 @@ exports[`Field for image setting should render user value if there is user value
           <span>
             <span>
               <EuiLink
-                aria-label="Reset {ariaName} to default"
+                aria-label="Reset image test setting to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-image:test:setting"
                 onClick={[Function]}
@@ -1098,7 +1098,7 @@ exports[`Field for image setting should render user value if there is user value
             </span>
             <span>
               <EuiLink
-                aria-label="Change {ariaName}"
+                aria-label="Change image test setting"
                 color="primary"
                 data-test-subj="advancedSetting-changeImage-image:test:setting"
                 onClick={[Function]}
@@ -1440,7 +1440,7 @@ exports[`Field for json setting should render default value if there is no user 
           <span>
             <span>
               <EuiLink
-                aria-label="Reset {ariaName} to default"
+                aria-label="Reset json test setting to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-json:test:setting"
                 onClick={[Function]}
@@ -1575,7 +1575,7 @@ exports[`Field for json setting should render user value if there is user value 
           <span>
             <span>
               <EuiLink
-                aria-label="Reset {ariaName} to default"
+                aria-label="Reset json test setting to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-json:test:setting"
                 onClick={[Function]}
@@ -2018,7 +2018,7 @@ exports[`Field for markdown setting should render user value if there is user va
           <span>
             <span>
               <EuiLink
-                aria-label="Reset {ariaName} to default"
+                aria-label="Reset markdown test setting to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-markdown:test:setting"
                 onClick={[Function]}
@@ -2413,7 +2413,7 @@ exports[`Field for number setting should render user value if there is user valu
           <span>
             <span>
               <EuiLink
-                aria-label="Reset {ariaName} to default"
+                aria-label="Reset number test setting to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-number:test:setting"
                 onClick={[Function]}
@@ -2843,7 +2843,7 @@ exports[`Field for select setting should render user value if there is user valu
           <span>
             <span>
               <EuiLink
-                aria-label="Reset {ariaName} to default"
+                aria-label="Reset select test setting to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-select:test:setting"
                 onClick={[Function]}
@@ -3239,7 +3239,7 @@ exports[`Field for string setting should render user value if there is user valu
           <span>
             <span>
               <EuiLink
-                aria-label="Reset {ariaName} to default"
+                aria-label="Reset string test setting to default"
                 color="primary"
                 data-test-subj="advancedSetting-resetField-string:test:setting"
                 onClick={[Function]}
