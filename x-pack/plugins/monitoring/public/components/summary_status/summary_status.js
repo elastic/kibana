@@ -68,6 +68,7 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
   );
 };
 
+// eslint-disable-next-line no-unused-vars
 export function SummaryStatus({ metrics, status, isOnline, IconComponent = DefaultIconComponent, intl, ...props }) {
   return (
     <div className="monSummaryStatus" role="status">
