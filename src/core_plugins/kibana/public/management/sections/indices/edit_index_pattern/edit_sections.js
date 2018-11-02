@@ -41,7 +41,7 @@ export function IndicesEditSectionsProvider() {
       count: fieldCount.indexed
     });
 
-    if(indexPatternListProvider.areScriptedFieldsEnabled(indexPattern)) {
+    if(!indexPatternListProvider || indexPatternListProvider.areScriptedFieldsEnabled(indexPattern)) {
       editSections.push({
         title: i18n.translate('kbn.management.editIndexPattern.tabs.scriptedHeader', { defaultMessage: 'Scripted fields' }),
         index: 'scriptedFields',
