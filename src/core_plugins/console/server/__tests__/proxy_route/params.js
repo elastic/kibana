@@ -38,7 +38,6 @@ describe('Console Proxy Route', () => {
 
     setup = () => {
       const server = new Server();
-      server.connection({ port: 0 });
       teardowns.push(() => server.stop());
       return { server };
     };

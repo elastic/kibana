@@ -64,6 +64,10 @@ export {
 } from './jobs';
 
 export {
+  createNoticeableDelay,
+} from './noticeable_delay';
+
+export {
   extractQueryParams,
 } from './query_params';
 
