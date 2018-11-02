@@ -36,9 +36,9 @@ export class LeftInnerJoin {
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
       feature.properties[newField] = null;//wipe
-      const joinFieldValue = feature.properties[this._descriptor.leftField];
+      const joinfield = feature.properties[this._descriptor.leftField];
       for (let j = 0; j < table.length; j++) {
-        if (table[j].key === joinFieldValue) {
+        if (table[j].key === joinfield) {
           feature.properties[newField] = table[j].value;
         }
       }

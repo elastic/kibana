@@ -172,12 +172,12 @@ export class VectorStyle {
     const dynamicFields = [];
     //todo: should always be intialized really
     if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options
-      && this._descriptor.properties.fillColor.options.fieldValue) {
-      dynamicFields.push(this._descriptor.properties.fillColor.options.fieldValue);
+      && this._descriptor.properties.fillColor.options.field) {
+      dynamicFields.push(this._descriptor.properties.fillColor.options.field);
     }
     if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options
-      && this._descriptor.properties.lineColor.options.fieldValue) {
-      dynamicFields.push(this._descriptor.properties.lineColor.options.fieldValue);
+      && this._descriptor.properties.lineColor.options.field) {
+      dynamicFields.push(this._descriptor.properties.lineColor.options.field);
     }
 
     const updateStatuses = dynamicFields.map((field) => {
@@ -193,8 +193,8 @@ export class VectorStyle {
       return null;
     }
 
-    if (this._descriptor.properties[property].options.fieldValue) {
-      const originalFieldName = this._descriptor.properties[property].options.fieldValue.name;
+    if (this._descriptor.properties[property].options.field) {
+      const originalFieldName = this._descriptor.properties[property].options.field.name;
       const targetName = VectorStyle.getComputedFieldName(originalFieldName);
       return [
         'interpolate',

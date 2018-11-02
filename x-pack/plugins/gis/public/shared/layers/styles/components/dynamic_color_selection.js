@@ -34,10 +34,10 @@ export class DynamicColorSelection extends React.Component {
       }
     };
 
-    if (this.props.selectedOptions && this.props.selectedOptions.fieldValue) {
+    if (this.props.selectedOptions && this.props.selectedOptions.field) {
       if (!this.state.comboBoxOptions) {
         const selectedValue = this.props.fields.find(field => {
-          return field.name === this.props.selectedOptions.fieldValue.name;
+          return field.name === this.props.selectedOptions.field.name;
         });
         this.state.comboBoxOptions = selectedValue ? [selectedValue] : [];
       }
