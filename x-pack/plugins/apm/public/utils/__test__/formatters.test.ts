@@ -23,7 +23,7 @@ describe('formatters', () => {
       expect(asTime(1000, { withUnit: false })).toBe('1,000');
     });
 
-    it('formats without unit', () => {
+    it('falls back to default value', () => {
       expect(asTime(undefined, { defaultValue: 'nope' })).toBe('nope');
     });
   });
