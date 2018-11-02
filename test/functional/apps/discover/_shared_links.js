@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2015-09-23 18:31:44.000';
 
       // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace({
+      await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
         defaultIndex: 'logstash-*',
       });

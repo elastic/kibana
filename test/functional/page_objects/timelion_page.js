@@ -27,7 +27,7 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
 
   class TimelionPage {
     async initTests() {
-      await kibanaServer.uiSettings.replace({
+      await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });

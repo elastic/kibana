@@ -51,7 +51,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         esArchiver.loadIfNeeded(dataIndex)
       ]);
 
-      await kibanaServer.uiSettings.replace({
+      await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
         'defaultIndex': defaultIndex,
         'telemetry:optIn': false

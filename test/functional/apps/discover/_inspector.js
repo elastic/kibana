@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('discover');
       // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace({
+      await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });

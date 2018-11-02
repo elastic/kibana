@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
     before(async () => {
       await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('../functional/fixtures/es_archiver/visualize_embedding');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'Australia/North', 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'Australia/North', 'defaultIndex': 'logstash-*' });
       await remote.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.header.clickGlobalNavigationLink('Embedding Vis');

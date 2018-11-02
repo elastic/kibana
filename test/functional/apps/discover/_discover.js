@@ -24,13 +24,9 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const remote = getService('remote');
-  const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
-  const defaultSettings = {
-    'dateFormat:tz': 'UTC',
-    defaultIndex: 'logstash-*',
-  };
+
 
   describe('discover app', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
@@ -39,9 +35,6 @@ export default function ({ getService, getPageObjects }) {
     const toTimeString = 'September 23rd 2015, 18:31:44.000';
 
     before(async function () {
-      // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace(defaultSettings);
-
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
 

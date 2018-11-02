@@ -22,7 +22,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize']);
 
@@ -33,12 +32,6 @@ export default function ({ getService, getPageObjects }) {
 
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('discover');
-      // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
-      });
-
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     });

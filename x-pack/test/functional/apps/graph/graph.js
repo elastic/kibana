@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('empty_kibana');
       log.debug('create secrepo index pattern');
       await PageObjects.settings.createIndexPattern('secrepo', '@timestamp');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+      await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       log.debug('navigateTo graph');
       await PageObjects.common.navigateToApp('graph');
     });

@@ -44,7 +44,6 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await remote.setWindowSize(1200, 800);
       // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.createIndexPattern();

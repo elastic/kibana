@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and then wait for Kibana to re-create it
       await remote.setWindowSize(1200, 800);
       await esArchiver.load('management');
-      await kibanaServer.uiSettings.replace({
+      await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'f1e4c910-a2e6-11e7-bb30-233be9be6a15'
       });
