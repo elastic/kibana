@@ -200,27 +200,29 @@ function createPlugin$(log: Logger, path: string) {
  */
 function parseManifest(rawManifest: Buffer): PluginManifest {
   const manifest: Partial<PluginManifest> = JSON.parse(rawManifest.toString());
-  if (
-    manifest &&
-    manifest.id &&
-    manifest.version &&
-    typeof manifest.id === 'string' &&
-    typeof manifest.version === 'string'
-  ) {
-    return {
-      id: manifest.id,
-      version: manifest.version,
-      kibanaVersion:
-        typeof manifest.kibanaVersion === 'string' && manifest.kibanaVersion
-          ? manifest.kibanaVersion
-          : manifest.version,
-      requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
-      optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
-      ui: typeof manifest.ui === 'boolean' ? manifest.ui : false,
-    };
+  if (!manifest || typeof manifest !== 'object') {
+    throw new Error('Plugin manifest must contain a JSON encoded object.');
   }
 
-  throw new Error('The "id" or/and "version" is missing in the plugin manifest.');
+  if (!manifest.id || typeof manifest.id !== 'string') {
+    throw new Error('Plugin manifest must contain an "id" property.');
+  }
+
+  if (!manifest.version || typeof manifest.version !== 'string') {
+    throw new Error(`Plugin manifest for "${manifest.id}" must contain a "version" property.`);
+  }
+
+  return {
+    id: manifest.id,
+    version: manifest.version,
+    kibanaVersion:
+      typeof manifest.kibanaVersion === 'string' && manifest.kibanaVersion
+        ? manifest.kibanaVersion
+        : manifest.version,
+    requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
+    optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
+    ui: typeof manifest.ui === 'boolean' ? manifest.ui : false,
+  };
 }
 
 /**

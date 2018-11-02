@@ -174,7 +174,7 @@ Array [
     '2-no-manifest',
     'kibana.json'
   )})",
-  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, ${resolveForSnapshot(
+  "Error: Plugin manifest must contain an \\"id\\" property. (invalid-manifest, ${resolveForSnapshot(
     TEST_PATHS.scanDirs.nonEmpty,
     '4-incomplete-manifest',
     'kibana.json'
@@ -234,7 +234,7 @@ Array [
     await expect(plugins$.toPromise()).resolves.toEqual([]);
     await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
 Array [
-  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, ${resolveForSnapshot(
+  "Error: Plugin manifest must contain a JSON encoded object. (invalid-manifest, ${resolveForSnapshot(
     TEST_PATHS.paths.existentDir,
     'kibana.json'
   )})",
@@ -266,7 +266,7 @@ Array [
     await expect(plugins$.toPromise()).resolves.toEqual([]);
     await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
 Array [
-  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, ${resolveForSnapshot(
+  "Error: Plugin manifest must contain an \\"id\\" property. (invalid-manifest, ${resolveForSnapshot(
     TEST_PATHS.paths.existentDir,
     'kibana.json'
   )})",
@@ -282,7 +282,7 @@ Array [
     await expect(plugins$.toPromise()).resolves.toEqual([]);
     await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
 Array [
-  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, ${resolveForSnapshot(
+  "Error: Plugin manifest for \\"some-id\\" must contain a \\"version\\" property. (invalid-manifest, ${resolveForSnapshot(
     TEST_PATHS.paths.existentDir,
     'kibana.json'
   )})",
