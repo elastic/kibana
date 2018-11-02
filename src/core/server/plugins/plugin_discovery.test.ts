@@ -26,19 +26,43 @@ jest.mock('fs', () => ({
   stat: mockStat,
 }));
 
+import { resolve } from 'path';
 import { Observable } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';
 import { logger } from '../logging/__mocks__';
 import { PluginManifest, PluginsDiscovery } from './plugins_discovery';
 
+/**
+ * Resolves absolute path and escapes backslashes (used on windows systems).
+ * @param pathSegments Test path segments.
+ */
+function resolveForSnapshot(...pathSegments: string[]) {
+  return resolve(...pathSegments).replace(/\\/g, '\\\\');
+}
+
+const TEST_PATHS = {
+  scanDirs: {
+    nonEmpty: resolve('scan', 'non-empty'),
+    nonEmpty2: resolve('scan', 'non-empty-2'),
+    nonExistent: resolve('scan', 'non-existent'),
+    empty: resolve('scan', 'empty'),
+  },
+  paths: {
+    existentDir: resolve('path', 'existent-dir'),
+    existentDir2: resolve('path', 'existent-dir-2'),
+    nonDir: resolve('path', 'non-dir'),
+    nonExistent: resolve('path', 'non-existent'),
+  },
+};
+
 let discovery: PluginsDiscovery;
 beforeEach(() => {
   mockReaddir.mockImplementation((path, cb) => {
-    if (path === '/scan/non-empty/') {
+    if (path === TEST_PATHS.scanDirs.nonEmpty) {
       cb(null, ['1', '2-no-manifest', '3', '4-incomplete-manifest']);
-    } else if (path === '/scan/non-empty-2/') {
+    } else if (path === TEST_PATHS.scanDirs.nonEmpty2) {
       cb(null, ['5-invalid-manifest', '6', '7-non-dir']);
-    } else if (path.includes('non-existent')) {
+    } else if (path === TEST_PATHS.scanDirs.nonExistent) {
       cb(new Error('ENOENT'));
     } else {
       cb(null, []);
@@ -54,11 +78,11 @@ beforeEach(() => {
   });
 
   mockReadFile.mockImplementation((path, cb) => {
-    if (path.endsWith('no-manifest/kibana.json')) {
+    if (path.includes('no-manifest')) {
       cb(new Error('ENOENT'));
-    } else if (path.endsWith('invalid-manifest/kibana.json')) {
+    } else if (path.includes('invalid-manifest')) {
       cb(null, Buffer.from('not-json'));
-    } else if (path.endsWith('incomplete-manifest/kibana.json')) {
+    } else if (path.includes('incomplete-manifest')) {
       cb(null, Buffer.from(JSON.stringify({ version: '1' })));
     } else {
       cb(null, Buffer.from(JSON.stringify({ id: 'plugin', version: '1' })));
@@ -75,8 +99,8 @@ afterEach(() => {
 test('properly scans folders and paths', async () => {
   const { plugins$, errors$ } = discovery.discover({
     initialize: true,
-    scanDirs: ['/scan/non-empty/', '/scan/non-existent/', '/scan/empty/', '/scan/non-empty-2/'],
-    paths: ['/path/existent-dir', '/path/non-dir', '/path/non-existent', '/path/existent-dir-2'],
+    scanDirs: Object.values(TEST_PATHS.scanDirs),
+    paths: Object.values(TEST_PATHS.paths),
   });
 
   await expect(plugins$.pipe(toArray()).toPromise()).resolves.toMatchInlineSnapshot(`
@@ -90,7 +114,7 @@ Array [
       "ui": false,
       "version": "1",
     },
-    "path": "/scan/non-empty/1",
+    "path": "${resolveForSnapshot(TEST_PATHS.scanDirs.nonEmpty, '1')}",
   },
   Object {
     "manifest": Object {
@@ -101,7 +125,7 @@ Array [
       "ui": false,
       "version": "1",
     },
-    "path": "/scan/non-empty/3",
+    "path": "${resolveForSnapshot(TEST_PATHS.scanDirs.nonEmpty, '3')}",
   },
   Object {
     "manifest": Object {
@@ -112,7 +136,7 @@ Array [
       "ui": false,
       "version": "1",
     },
-    "path": "/scan/non-empty-2/6",
+    "path": "${resolveForSnapshot(TEST_PATHS.scanDirs.nonEmpty2, '6')}",
   },
   Object {
     "manifest": Object {
@@ -123,7 +147,7 @@ Array [
       "ui": false,
       "version": "1",
     },
-    "path": "/path/existent-dir",
+    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",
   },
   Object {
     "manifest": Object {
@@ -134,7 +158,7 @@ Array [
       "ui": false,
       "version": "1",
     },
-    "path": "/path/existent-dir-2",
+    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir2)}",
   },
 ]
 `);
@@ -148,12 +172,26 @@ Array [
       .toPromise()
   ).resolves.toMatchInlineSnapshot(`
 Array [
-  "Error: ENOENT (missing-manifest, /scan/non-empty/2-no-manifest/kibana.json)",
-  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, /scan/non-empty/4-incomplete-manifest/kibana.json)",
-  "Error: ENOENT (invalid-scan-dir, /scan/non-existent/)",
-  "Error: Unexpected token o in JSON at position 1 (invalid-manifest, /scan/non-empty-2/5-invalid-manifest/kibana.json)",
-  "Error: /path/non-dir is not a directory. (invalid-plugin-dir, /path/non-dir)",
-  "Error: ENOENT (invalid-plugin-dir, /path/non-existent)",
+  "Error: ENOENT (missing-manifest, ${resolveForSnapshot(
+    TEST_PATHS.scanDirs.nonEmpty,
+    '2-no-manifest',
+    'kibana.json'
+  )})",
+  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, ${resolveForSnapshot(
+    TEST_PATHS.scanDirs.nonEmpty,
+    '4-incomplete-manifest',
+    'kibana.json'
+  )})",
+  "Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${resolveForSnapshot(
+    TEST_PATHS.scanDirs.nonEmpty2,
+    '5-invalid-manifest',
+    'kibana.json'
+  )})",
+  "Error: ENOENT (invalid-scan-dir, ${resolveForSnapshot(TEST_PATHS.scanDirs.nonExistent)})",
+  "Error: ${resolveForSnapshot(
+    TEST_PATHS.paths.nonDir
+  )} is not a directory. (invalid-plugin-dir, ${resolveForSnapshot(TEST_PATHS.paths.nonDir)})",
+  "Error: ENOENT (invalid-plugin-dir, ${resolveForSnapshot(TEST_PATHS.paths.nonExistent)})",
 ]
 `);
 });
@@ -165,7 +203,7 @@ describe('parsing plugin manifest', () => {
     const discoveryResult = discovery.discover({
       initialize: true,
       scanDirs: [],
-      paths: ['/path/existent-dir'],
+      paths: [TEST_PATHS.paths.existentDir],
     });
 
     plugins$ = discoveryResult.plugins$.pipe(toArray());
@@ -183,7 +221,10 @@ describe('parsing plugin manifest', () => {
     await expect(plugins$.toPromise()).resolves.toEqual([]);
     await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
 Array [
-  "Error: Unexpected end of JSON input (invalid-manifest, /path/existent-dir/kibana.json)",
+  "Error: Unexpected end of JSON input (invalid-manifest, ${resolveForSnapshot(
+    TEST_PATHS.paths.existentDir,
+    'kibana.json'
+  )})",
 ]
 `);
   });
@@ -196,7 +237,10 @@ Array [
     await expect(plugins$.toPromise()).resolves.toEqual([]);
     await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
 Array [
-  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, /path/existent-dir/kibana.json)",
+  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, ${resolveForSnapshot(
+    TEST_PATHS.paths.existentDir,
+    'kibana.json'
+  )})",
 ]
 `);
   });
@@ -209,7 +253,10 @@ Array [
     await expect(plugins$.toPromise()).resolves.toEqual([]);
     await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
 Array [
-  "Error: Unexpected token o in JSON at position 1 (invalid-manifest, /path/existent-dir/kibana.json)",
+  "Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${resolveForSnapshot(
+    TEST_PATHS.paths.existentDir,
+    'kibana.json'
+  )})",
 ]
 `);
   });
@@ -222,7 +269,10 @@ Array [
     await expect(plugins$.toPromise()).resolves.toEqual([]);
     await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
 Array [
-  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, /path/existent-dir/kibana.json)",
+  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, ${resolveForSnapshot(
+    TEST_PATHS.paths.existentDir,
+    'kibana.json'
+  )})",
 ]
 `);
   });
@@ -235,7 +285,10 @@ Array [
     await expect(plugins$.toPromise()).resolves.toEqual([]);
     await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
 Array [
-  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, /path/existent-dir/kibana.json)",
+  "Error: The \\"id\\" or/and \\"version\\" is missing in the plugin manifest. (invalid-manifest, ${resolveForSnapshot(
+    TEST_PATHS.paths.existentDir,
+    'kibana.json'
+  )})",
 ]
 `);
   });
@@ -256,7 +309,7 @@ Array [
       "ui": false,
       "version": "some-version",
     },
-    "path": "/path/existent-dir",
+    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",
   },
 ]
 `);
@@ -296,7 +349,7 @@ Array [
       "ui": true,
       "version": "some-version",
     },
-    "path": "/path/existent-dir",
+    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",
   },
 ]
 `);
