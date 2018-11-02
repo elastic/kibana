@@ -257,7 +257,6 @@ TimeBuckets.prototype.getInterval = function (useNormalizedEsInterval = true) {
     if (+scaled === +interval) return interval;
 
     decorateInterval(interval);
-    decorateInterval(scaled);
     return _.assign(scaled, {
       preScaled: interval,
       scale: interval / scaled,
