@@ -90,6 +90,11 @@ class VisEditorVisualization extends Component {
         appState: this.props.appState,
       });
 
+      this._handler.onVisDataObservable().subscribe((data) => {
+        // everytime data updates
+        return data;
+      });
+
       if (this._handlerUpdateHasAlreadyBeenTriggered) {
         this.onUpdate();
       }

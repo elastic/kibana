@@ -19,6 +19,8 @@
 
 import { EventEmitter } from 'events';
 import { debounce } from 'lodash';
+import * as Rx from 'rxjs';
+import { share } from 'rxjs/operators';
 import { Inspector } from '../../inspector';
 
 import { PersistedState } from '../../persisted_state';
@@ -67,6 +69,8 @@ export class EmbeddedVisualizeHandler {
   private readonly appState?: AppState;
   private uiState: PersistedState;
   private dataLoader: VisualizeDataLoader;
+  private dataSubject: Rx.Subject<any>;
+  private data$: Rx.Observable<any>;
 
   constructor(
     private readonly element: HTMLElement,
@@ -110,6 +114,9 @@ export class EmbeddedVisualizeHandler {
 
     this.dataLoader = new VisualizeDataLoader(vis, Private);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
+
+    this.dataSubject = new Rx.Subject();
+    this.data$ = this.dataSubject.asObservable().pipe(share());
 
     this.render();
   }
@@ -200,6 +207,10 @@ export class EmbeddedVisualizeHandler {
     return this.firstRenderComplete;
   }
 
+  public onVisDataObservable(): Rx.Observable<any> {
+    return this.data$;
+  }
+
   /**
    * Adds a listener to be called whenever the visualization finished rendering.
    * This can be called multiple times, when the visualization rerenders, e.g. due
@@ -266,7 +277,10 @@ export class EmbeddedVisualizeHandler {
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
 
-    return this.dataLoader.fetch(this.dataLoaderParams);
+    return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
+      this.dataSubject.next(data);
+      return data;
+    });
   };
 
   private render = (visData: any = null) => {
