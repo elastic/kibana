@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }) {
     const toTime = '2015-09-23 18:31:44.000';
 
     const log = getService('log');
+    const find = getService('find');
     const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
     before(async function () {
@@ -73,17 +74,24 @@ export default function ({ getService, getPageObjects }) {
         await  PageObjects.visualize.selectFieldById('Three letter abbreviation', 'joinField');
         await  PageObjects.visualize.selectFieldById('Country name', 'joinField');
         await  PageObjects.visualize.selectFieldById('Two letter abbreviation', 'joinField');
-
         await PageObjects.common.sleep(2000);//need some time for the data to load
 
         await PageObjects.visualize.openInspector();
         const actualData = await PageObjects.visualize.getInspectorTableData();
         const expectedData = [['CN', '2,592'], ['IN', '2,373'], ['US', '1,194'], ['ID', '489'], ['BR', '415']];
         expect(actualData).to.eql(expectedData);
-
-
       });
 
+      it('base layer settings should be selectable', async function () {
+        await PageObjects.visualize.clickOptions();
+        await PageObjects.visualize.selectFieldById('road_map', 'tmsLayers');
+      });
+
+      it('should contain a dropdown with the default road_map base layer as an option',
+        async () => {
+          const roadMapExists = await find.existsByCssSelector('[label="road_map"]');
+          expect(roadMapExists).to.be(true);
+        });
     });
   });
 
