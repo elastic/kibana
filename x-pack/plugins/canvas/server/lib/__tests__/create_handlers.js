@@ -6,6 +6,7 @@
 
 import expect from 'expect.js';
 import { createHandlers } from '../create_handlers';
+import { SECURITY_AUTH_MESSAGE } from '../../../common/lib/constants';
 
 let securityMode = 'pass';
 let isSecurityAvailable = true;
@@ -84,8 +85,7 @@ describe('server createHandlers', () => {
           throw new Error('elasticsearchClient should fail when authentication fails');
         })
         .catch(err => {
-          // note: boom pre-pends error messages with "Error: "
-          expect(err.message).to.be.equal(`Error: ${authError.message}`);
+          expect(err.message).to.be.equal(SECURITY_AUTH_MESSAGE);
         });
     });
 
