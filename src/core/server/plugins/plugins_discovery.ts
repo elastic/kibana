@@ -80,123 +80,118 @@ interface DiscoveryResult {
 const MANIFEST_FILE_NAME = 'kibana.json';
 
 /**
- * This class is responsible for discovering all recognizable plugins based on the
- * provided plugin config that defines top-level directories for groups of plugins
- * or/and direct paths to specific plugins.
+ * Tries to discover all possible plugins based on the provided plugin config.
+ * Discovery result consists of two separate streams, the one (`plugins$`) is
+ * for the successfully discovered plugins and the other one (`errors$`) is for
+ * all the errors that occurred during discovery process.
+ * @param log Plugin discovery logger instance.
+ * @param config Plugin config instance.
  */
-export class PluginsDiscovery {
-  constructor(private readonly log: Logger) {}
+export function discover(log: Logger, config: PluginsConfig) {
+  log.debug('Discovering plugins...');
 
-  /**
-   * Tries to discover all possible plugins based on the provided plugin config.
-   * Discovery result consists of two separate streams, the one (`plugins$`) is
-   * for the successfully discovered plugins and the other one (`errors$`) is for
-   * all the errors that occurred during discovery process.
-   * @param config Plugin config instance.
-   */
-  public discover(config: PluginsConfig) {
-    this.log.debug('Discovering plugins...');
+  const discoveryResults$ = merge(
+    processScanDirs$(log, config.scanDirs),
+    processPaths$(log, config.paths)
+  ).pipe(
+    mergeMap(pluginPathOrError => {
+      return typeof pluginPathOrError === 'string'
+        ? createPlugin$(log, pluginPathOrError)
+        : [pluginPathOrError];
+    }),
+    shareReplay()
+  );
 
-    const discoveryResults$ = merge(
-      this.processScanDirs$(config.scanDirs),
-      this.processPaths$(config.paths)
-    ).pipe(
-      mergeMap(pluginPathOrError => {
-        return typeof pluginPathOrError === 'string'
-          ? this.createPlugin$(pluginPathOrError)
-          : [pluginPathOrError];
-      }),
-      shareReplay()
-    );
+  return {
+    plugins$: discoveryResults$.pipe(
+      mergeMap(entry => (entry.plugin !== undefined ? [entry.plugin] : []))
+    ),
+    errors$: discoveryResults$.pipe(
+      mergeMap(entry => (entry.error !== undefined ? [entry.error] : []))
+    ),
+  };
+}
 
-    return {
-      plugins$: discoveryResults$.pipe(
-        mergeMap(entry => (entry.plugin !== undefined ? [entry.plugin] : []))
-      ),
-      errors$: discoveryResults$.pipe(
-        mergeMap(entry => (entry.error !== undefined ? [entry.error] : []))
-      ),
-    };
-  }
+/**
+ * Iterates over every entry in `scanDirs` and returns a merged stream of all
+ * sub-directories. If directory cannot be read or it's impossible to get stat
+ * for any of the nested entries then error is added into the stream instead.
+ * @param log Plugin discovery logger instance.
+ * @param scanDirs List of the top-level directories to process.
+ */
+function processScanDirs$(log: Logger, scanDirs: string[]) {
+  return from(scanDirs).pipe(
+    mergeMap(dir => {
+      log.debug(`Scanning "${dir}" for plugin sub-directories...`);
 
-  /**
-   * Iterates over every entry in `scanDirs` and returns a merged stream of all
-   * sub-directories. If directory cannot be read or it's impossible to get stat
-   * for any of the nested entries then error is added into the stream instead.
-   * @param scanDirs List of the top-level directories to process.
-   */
-  private processScanDirs$(scanDirs: string[]) {
-    return from(scanDirs).pipe(
-      mergeMap(dir => {
-        this.log.debug(`Scanning "${dir}" for plugin sub-directories...`);
+      return fsReadDir$(dir).pipe(
+        mergeMap(subDirs => subDirs.map(subDir => resolve(dir, subDir))),
+        mergeMap(path =>
+          fsStat$(path).pipe(
+            // Filter out non-directory entries from target directories, it's expected that
+            // these directories may contain files (e.g. `README.md` or `package.json`).
+            // We shouldn't silently ignore the entries we couldn't get stat for though.
+            mergeMap(pathStat => (pathStat.isDirectory() ? [path] : [])),
+            catchError(err => [
+              wrapError(PluginDiscoveryErrorType.InvalidPluginDirectory, path, err),
+            ])
+          )
+        ),
+        catchError(err => [wrapError(PluginDiscoveryErrorType.InvalidScanDirectory, dir, err)])
+      );
+    })
+  );
+}
 
-        return fsReadDir$(dir).pipe(
-          mergeMap(subDirs => subDirs.map(subDir => resolve(dir, subDir))),
-          mergeMap(path =>
-            fsStat$(path).pipe(
-              // Filter out non-directory entries from target directories, it's expected that
-              // these directories may contain files (e.g. `README.md` or `package.json`).
-              // We shouldn't silently ignore the entries we couldn't get stat for though.
-              mergeMap(pathStat => (pathStat.isDirectory() ? [path] : [])),
-              catchError(err => [
-                wrapError(PluginDiscoveryErrorType.InvalidPluginDirectory, path, err),
-              ])
-            )
-          ),
-          catchError(err => [wrapError(PluginDiscoveryErrorType.InvalidScanDirectory, dir, err)])
-        );
-      })
-    );
-  }
+/**
+ * Iterates over every entry in `paths` and returns a stream of all paths that
+ * are directories. If path is not a directory or it's impossible to get stat
+ * for this path then error is added into the stream instead.
+ * @param log Plugin discovery logger instance.
+ * @param paths List of paths to process.
+ */
+function processPaths$(log: Logger, paths: string[]) {
+  return from(paths).pipe(
+    mergeMap(path => {
+      log.debug(`Including "${path}" into the plugin path list.`);
 
-  /**
-   * Iterates over every entry in `paths` and returns a stream of all paths that
-   * are directories. If path is not a directory or it's impossible to get stat
-   * for this path then error is added into the stream instead.
-   * @param paths List of paths to process.
-   */
-  private processPaths$(paths: string[]) {
-    return from(paths).pipe(
-      mergeMap(path => {
-        this.log.debug(`Including "${path}" into the plugin path list.`);
+      return fsStat$(path).pipe(
+        // Since every path is specifically provided we should treat non-directory
+        // entries as mistakes we should report of.
+        mergeMap(pathStat => {
+          return pathStat.isDirectory()
+            ? [path]
+            : throwError(new Error(`${path} is not a directory.`));
+        }),
+        catchError(err => [wrapError(PluginDiscoveryErrorType.InvalidPluginDirectory, path, err)])
+      );
+    })
+  );
+}
 
-        return fsStat$(path).pipe(
-          // Since every path is specifically provided we should treat non-directory
-          // entries as mistakes we should report of.
-          mergeMap(pathStat => {
-            return pathStat.isDirectory()
-              ? [path]
-              : throwError(new Error(`${path} is not a directory.`));
-          }),
-          catchError(err => [wrapError(PluginDiscoveryErrorType.InvalidPluginDirectory, path, err)])
-        );
-      })
-    );
-  }
+/**
+ * Tries to load and parse the plugin manifest file located at the provided
+ * plugin directory path and throws if it fails to do so or plugin manifest
+ * isn't valid.
+ * @param log Plugin discovery logger instance.
+ * @param path Path to the plugin directory where manifest should be loaded from.
+ */
+function createPlugin$(log: Logger, path: string) {
+  const manifestPath = resolve(path, MANIFEST_FILE_NAME);
+  return fsReadFile$(manifestPath).pipe(
+    mergeMap(manifestContent => {
+      try {
+        const plugin = { path, manifest: parseManifest(manifestContent) };
 
-  /**
-   * Tries to load and parse the plugin manifest file located at the provided
-   * plugin directory path and throws if it fails to do so or plugin manifest
-   * isn't valid.
-   * @param path Path to the plugin directory where manifest should be loaded from.
-   */
-  private createPlugin$(path: string) {
-    const manifestPath = resolve(path, MANIFEST_FILE_NAME);
-    return fsReadFile$(manifestPath).pipe(
-      mergeMap(manifestContent => {
-        try {
-          const plugin = { path, manifest: parseManifest(manifestContent) };
+        log.debug(`Successfully discovered plugin "${plugin.manifest.id}" at "${path}"`);
 
-          this.log.debug(`Successfully discovered plugin "${plugin.manifest.id}" at "${path}"`);
-
-          return [{ plugin }];
-        } catch (err) {
-          return [wrapError(PluginDiscoveryErrorType.InvalidManifest, manifestPath, err)];
-        }
-      }),
-      catchError(err => [wrapError(PluginDiscoveryErrorType.MissingManifest, manifestPath, err)])
-    );
-  }
+        return [{ plugin }];
+      } catch (err) {
+        return [wrapError(PluginDiscoveryErrorType.InvalidManifest, manifestPath, err)];
+      }
+    }),
+    catchError(err => [wrapError(PluginDiscoveryErrorType.MissingManifest, manifestPath, err)])
+  );
 }
 
 /**

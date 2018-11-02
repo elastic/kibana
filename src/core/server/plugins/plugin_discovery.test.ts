@@ -30,7 +30,7 @@ import { resolve } from 'path';
 import { Observable } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';
 import { logger } from '../logging/__mocks__';
-import { PluginManifest, PluginsDiscovery } from './plugins_discovery';
+import { discover, PluginManifest } from './plugins_discovery';
 
 /**
  * Resolves absolute path and escapes backslashes (used on windows systems).
@@ -55,7 +55,6 @@ const TEST_PATHS = {
   },
 };
 
-let discovery: PluginsDiscovery;
 beforeEach(() => {
   mockReaddir.mockImplementation((path, cb) => {
     if (path === TEST_PATHS.scanDirs.nonEmpty) {
@@ -88,8 +87,6 @@ beforeEach(() => {
       cb(null, Buffer.from(JSON.stringify({ id: 'plugin', version: '1' })));
     }
   });
-
-  discovery = new PluginsDiscovery(logger.get());
 });
 
 afterEach(() => {
@@ -97,7 +94,7 @@ afterEach(() => {
 });
 
 test('properly scans folders and paths', async () => {
-  const { plugins$, errors$ } = discovery.discover({
+  const { plugins$, errors$ } = discover(logger.get(), {
     initialize: true,
     scanDirs: Object.values(TEST_PATHS.scanDirs),
     paths: Object.values(TEST_PATHS.paths),
@@ -200,7 +197,7 @@ describe('parsing plugin manifest', () => {
   let plugins$: Observable<Array<{ path: string; manifest: PluginManifest }>>;
   let errors$: Observable<string[]>;
   beforeEach(async () => {
-    const discoveryResult = discovery.discover({
+    const discoveryResult = discover(logger.get(), {
       initialize: true,
       scanDirs: [],
       paths: [TEST_PATHS.paths.existentDir],
