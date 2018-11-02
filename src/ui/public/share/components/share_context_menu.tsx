@@ -68,6 +68,7 @@ export class ShareContextMenu extends Component<Props> {
       name: 'Permalinks',
       icon: 'link',
       panel: permalinkPanel.id,
+      sortOrder: 0,
     });
     panels.push(permalinkPanel);
 
@@ -89,6 +90,7 @@ export class ShareContextMenu extends Component<Props> {
         name: 'Embed code',
         icon: 'console',
         panel: embedPanel.id,
+        sortOrder: 0,
       });
     }
 
@@ -132,10 +134,23 @@ export class ShareContextMenu extends Component<Props> {
         items: menuItems
           .map(menuItem => {
             menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
+            if (!menuItem.sortOrder) {
+              menuItem.sortOrder = 0;
+            }
             return menuItem;
           })
+          // Sorts ascending on sort order first and then ascending on name
           .sort((a, b) => {
-            return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+            if (a.sortOrder > b.sortOrder) {
+              return 1;
+            }
+            if (a.sortOrder < b.sortOrder) {
+              return -1;
+            }
+            if (a.name.toLowerCase().localeCompare(b.name.toLowerCase()) > 0) {
+              return 1;
+            }
+            return -1;
           }),
       };
       panels.push(topLevelMenuPanel);
