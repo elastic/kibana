@@ -116,6 +116,11 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await PageObjects.share.openShareMenuItem('PDF Reports');
     }
 
+    async openPngReportingPanel() {
+      log.debug('openPngReportingPanel');
+      await PageObjects.share.openShareMenuItem('PNG Reports');
+    }
+
     async clickDownloadReportButton(timeout) {
       await testSubjects.click('downloadCompletedReportButton', timeout);
     }
