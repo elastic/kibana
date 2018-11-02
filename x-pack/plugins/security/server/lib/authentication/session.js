@@ -72,7 +72,6 @@ export class Session {
       const warning = `Found ${session.length} auth sessions when we were only expecting 1.`;
       this._server.log(['warning', 'security', 'auth', 'session'], warning);
       return null;
-
     } catch (err) {
       this._server.log(['debug', 'security', 'auth', 'session'], err);
       return null;
