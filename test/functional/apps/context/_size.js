@@ -60,7 +60,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
 
       const table = await docTable.getTable();
-
       await PageObjects.context.clickPredecessorLoadMoreButton();
 
       await retry.try(async function () {

@@ -20,7 +20,7 @@
 export function DocTableProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'context', 'header']);
+  const PageObjects = getPageObjects(['common', 'header']);
 
 
   class DocTable {
@@ -73,14 +73,12 @@ export function DocTableProvider({ getService, getPageObjects }) {
       const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
       await addInclusiveFilterButton.click();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-      await PageObjects.context.waitUntilContextLoadingHasFinished();
     }
 
     async toggleRowExpanded(row) {
       const rowExpandToggle = await this.getRowExpandToggle(row);
       await rowExpandToggle.click();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-      await PageObjects.context.waitUntilContextLoadingHasFinished();
 
       const detailsRow = await row.findByXpath('./following-sibling::*[@data-test-subj="docTableDetailsRow"]');
       return await retry.try(async () => {

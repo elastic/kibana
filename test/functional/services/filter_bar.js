@@ -23,7 +23,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'header', 'context']);
+  const PageObjects = getPageObjects(['common', 'header']);
 
   async function typeIntoReactSelect(testSubj, value) {
     const select = await testSubjects.find(testSubj);
@@ -45,7 +45,6 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} removeFilter-${key}`);
-      await PageObjects.context.waitUntilContextLoadingHasFinished();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
@@ -53,9 +52,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
-      await PageObjects.context.waitUntilContextLoadingHasFinished();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-
     }
 
     async toggleFilterPinned(key) {
@@ -99,7 +96,6 @@ export function FilterBarProvider({ getService, getPageObjects }) {
         }
       }
       await testSubjects.click('saveFilter');
-      await PageObjects.context.waitUntilContextLoadingHasFinished();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 

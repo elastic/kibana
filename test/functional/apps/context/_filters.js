@@ -46,6 +46,7 @@ export default function ({ getService, getPageObjects }) {
 
       const anchorDetailsRow = await docTable.getAnchorDetailsRow(table);
       await docTable.addInclusiveFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
 
       await docTable.toggleRowExpanded(anchorRow);
 
@@ -63,7 +64,10 @@ export default function ({ getService, getPageObjects }) {
     it('should be toggleable via the filter bar', async function () {
       const table = await docTable.getTable();
       await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      // disable filter
       await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
 
       expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)).to.be(true);
 
