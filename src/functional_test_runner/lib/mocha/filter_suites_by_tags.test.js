@@ -100,7 +100,7 @@ Array [
   "suite: ",
   "suite: level 1",
   "suite: level 1 level 1a",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
+  "hook:  \\"before each\\" hook: rootBeforeEach",
   "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
   "test:  level 1 level 1a test 1a",
 ]
@@ -119,7 +119,7 @@ Array [
   "suite: ",
   "suite: level 1",
   "suite: level 1 level 1b",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
+  "hook:  \\"before each\\" hook: rootBeforeEach",
   "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
   "test:  level 1 level 1b test 1b",
 ]
@@ -138,11 +138,11 @@ Array [
   "suite: ",
   "suite: level 1",
   "suite: level 1 level 1a",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
+  "hook:  \\"before each\\" hook: rootBeforeEach",
   "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
   "test:  level 1 level 1a test 1a",
   "suite: level 1 level 1b",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
+  "hook:  \\"before each\\" hook: rootBeforeEach",
   "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
   "test:  level 1 level 1b test 1b",
 ]
@@ -162,7 +162,7 @@ Array [
   "suite: ",
   "suite: level 1",
   "suite: level 1 level 1a",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
+  "hook:  \\"before each\\" hook: rootBeforeEach",
   "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
   "test:  level 1 level 1a test 1a",
 ]
@@ -182,7 +182,7 @@ Array [
   "suite: ",
   "suite: level 1",
   "suite: level 1 level 1b",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
+  "hook:  \\"before each\\" hook: rootBeforeEach",
   "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
   "test:  level 1 level 1b test 1b",
 ]
@@ -201,7 +201,7 @@ Array [
   "suite: ",
   "suite: level 2",
   "suite: level 2 level 2a",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
+  "hook:  \\"before each\\" hook: rootBeforeEach",
   "test:  level 2 level 2a test 2a",
 ]
 `);
