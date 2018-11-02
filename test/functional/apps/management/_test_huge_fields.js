@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
   describe('test large number of fields', function () {
-    this.tags(['skipcloud']);
+    this.tags(['skipCloud']);
 
     const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
