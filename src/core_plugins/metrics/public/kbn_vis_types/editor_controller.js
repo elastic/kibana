@@ -26,7 +26,6 @@ function ReactEditorControllerProvider(Private, config) {
       this.el = el;
       this.savedObj = savedObj;
       this.vis = savedObj.vis;
-      this.vis.fields = {};
     }
 
     async render(params) {

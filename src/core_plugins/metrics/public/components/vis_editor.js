@@ -69,41 +69,28 @@ class VisEditor extends Component {
     }
   }
 
-  isIndexPatternChanged = () => {
-    if (this.state.model.index_pattern !== this.props.vis.params.index_pattern) {
-      return true;
-    }
-    const visAnnotations = this.props.vis.params.annotations || [];
-    const stateAnnotations = this.state.model.annotations || [];
-    const currentAnnotations = new Set(visAnnotations.map(annotation => annotation.index_pattern));
-    const prevAnnotations = new Set(stateAnnotations.map(annotation => annotation.index_pattern));
-    const diff = [...currentAnnotations].filter(a => !prevAnnotations.has(a));
-    return diff.length !== 0;
+  fetchIndexPatternFields = async () => {
+    const { params } = this.props.vis;
+    const { visFields } = this.state;
+    const indexPatterns = extractIndexPatterns(params, visFields);
+    const fields = await fetchFields(indexPatterns);
+    this.setState((previousState) => {
+      return {
+        visFields: {
+          ...previousState.visFields,
+          ...fields,
+        }
+      };
+    });
   }
 
-  async fetchIndexPatternFields(vis) {
-    if (vis.params.index_pattern === '') {
+  setDefaultIndexPattern = async () => {
+    if (this.props.vis.params.index_pattern === '') {
       // set the default index pattern if none is defined.
       const savedObjectsClient = chrome.getSavedObjectsClient();
       const indexPattern = await savedObjectsClient.get('index-pattern', this.getConfig('defaultIndex'));
       const defaultIndexPattern = indexPattern.attributes.title;
-      vis.params.index_pattern = defaultIndexPattern;
-    }
-    const indexPatterns = extractIndexPatterns(vis);
-    const fields = await fetchFields(indexPatterns);
-    return fields;
-  }
-
-  checkIndexPatternChanges = async (forceFetch) => {
-    if (forceFetch || this.isIndexPatternChanged()) {
-      const fields = await this.fetchIndexPatternFields(this.props.vis);
-      const visFields = {
-        ...this.state.visFields,
-        ...fields,
-      };
-      this.setState({
-        visFields,
-      });
+      this.props.vis.params.index_pattern = defaultIndexPattern;
     }
   }
 
@@ -117,7 +104,7 @@ class VisEditor extends Component {
       model: nextModel,
       dirty: !this.state.autoApply,
     });
-    this.checkIndexPatternChanges();
+    this.fetchIndexPatternFields();
   }
 
   handleCommit = () => {
@@ -191,12 +178,13 @@ class VisEditor extends Component {
   }
 
   async componentDidMount() {
-    await this.checkIndexPatternChanges(true);
-    this.props.renderComplete('mount');
+    await this.setDefaultIndexPattern();
+    await this.fetchIndexPatternFields();
+    this.props.renderComplete();
   }
 
   componentDidUpdate() {
-    this.props.renderComplete('updated');
+    this.props.renderComplete();
   }
 }
 
