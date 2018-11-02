@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -33,6 +34,7 @@ import {
   JOB_DETAILS_TAB_HISTOGRAM,
   JOB_DETAILS_TAB_METRICS,
   JOB_DETAILS_TAB_JSON,
+  tabToHumanizedMap,
 } from '../../components';
 
 const JOB_DETAILS_TABS = [
@@ -98,7 +100,7 @@ export class DetailPanelUi extends Component {
           data-test-subj={`detailPanelTab${isSelected ? 'Selected' : ''}`}
           key={index}
         >
-          {tab}
+          {tabToHumanizedMap[tab]}
         </EuiTab>
       );
     });
@@ -136,12 +138,14 @@ export class DetailPanelUi extends Component {
     return (
       <Fragment>
         <EuiFlyoutBody>
-          <JobDetails
-            tab={panelType}
-            job={job}
-            stats={stats}
-            json={json}
-          />
+          <EuiErrorBoundary>
+            <JobDetails
+              tab={panelType}
+              job={job}
+              stats={stats}
+              json={json}
+            />
+          </EuiErrorBoundary>
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>

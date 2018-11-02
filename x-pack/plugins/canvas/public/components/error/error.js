@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ShowDebugging } from './show_debugging';
 
 export const Error = ({ payload }) => {
-  const functionName = get(payload, 'info.functionName');
   const message = get(payload, 'error.message');
 
   return (
@@ -28,21 +27,14 @@ export const Error = ({ payload }) => {
       }
     >
       <p>
-        <FormattedMessage
-          id="xpack.canvas.error.expressionErrorDescription"
-          defaultMessage="The function {functionName} failed{message}"
-          values={{
-            functionName: <strong>{functionName}</strong>,
-            message: message ? (
-              <FormattedMessage
-                id="xpack.canvas.error.expressionErrorDescription.withFollowingMessage"
-                defaultMessage=" with the following message: "
-              />
-            ) : (
-              '.'
-            ),
-          }}
-        />
+        {message ? (
+          <FormattedMessage
+            id="xpack.canvas.error.expressionErrorDescription"
+            defaultMessage="Expression failed with the message:"
+          />
+        ) : (
+          ''
+        )}
       </p>
       {message && <p style={{ padding: '0 16px' }}>{message}</p>}
 

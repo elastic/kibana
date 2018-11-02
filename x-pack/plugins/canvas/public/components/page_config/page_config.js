@@ -42,6 +42,7 @@ export const PageConfig = ({
       {pageIndex > 0 ? (
         <div>
           <EuiFormRow
+			compressed
             label={
               <FormattedMessage
                 id="xpack.canvas.pageConfig.transitionFormRowLabel"
@@ -50,7 +51,7 @@ export const PageConfig = ({
             }
           >
             <EuiSelect
-              defaultValue={transition ? transition.name : ''}
+              value={transition ? transition.name : ''}
               options={transitions}
               onChange={e => setTransition(e.target.value)}
             />

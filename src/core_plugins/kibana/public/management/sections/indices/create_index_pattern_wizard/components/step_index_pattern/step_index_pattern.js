@@ -219,19 +219,12 @@ export class StepIndexPatternComponent extends Component {
       <EuiCallOut
         title={<FormattedMessage
           id="kbn.management.createIndexPattern.step.warningHeader"
-          defaultMessage="Whoops!"
+          defaultMessage="There's already an index pattern called {query}"
+          values={{ query }}
         />}
         iconType="help"
         color="warning"
-      >
-        <p>
-          <FormattedMessage
-            id="kbn.management.createIndexPattern.step.warningLabel"
-            defaultMessage="There's already an index pattern called `{query}`"
-            values={{ query }}
-          />
-        </p>
-      </EuiCallOut>
+      />
     );
   }
 

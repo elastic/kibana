@@ -27,12 +27,12 @@ export const searchProxyRoute = {
         body: Joi.object().unknown(true).default()
       }).default()
     },
-    handler(request, reply) {
-      reply(callEsSearchApi({
+    handler(request) {
+      return callEsSearchApi({
         callCluster: request.pre.callCluster,
         index: request.payload.index,
         body: request.payload.body
-      }));
+      });
     }
   }
 };

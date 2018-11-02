@@ -6,8 +6,6 @@
 
 import hapiAuthCookie from 'hapi-auth-cookie';
 
-import iron from 'iron';
-
 const HAPI_STRATEGY_NAME = 'security-cookie';
 // Forbid applying of Hapi authentication strategies to routes automatically.
 const HAPI_STRATEGY_MODE = false;
@@ -17,16 +15,6 @@ function assertRequest(request) {
     throw new Error(`Request should be a valid object, was [${typeof request}].`);
   }
 }
-
-/**
- * CookieOptions
- * @typedef {Object} CookieOptions
- * @property {string} name - The name of the cookie
- * @property {string} password - The password that is used to encrypt the cookie
- * @property {string} path - The path that is set for the cookie
- * @property {boolean} secure - Whether the cookie should only be sent over HTTPS
- * @property {?number} ttl - Session duration in ms. If `null` session will stay active until the browser is closed.
- */
 
 /**
  * Manages Kibana user session.
@@ -40,20 +28,20 @@ export class Session {
   _server = null;
 
   /**
-   * Options for the cookie
-   * @type {CookieOptions}
+   * Session duration in ms. If `null` session will stay active until the browser is closed.
+   * @type {?number}
    * @private
    */
-  _cookieOptions = null;
+  _ttl = null;
 
   /**
    * Instantiates Session. Constructor is not supposed to be used directly. To make sure that all
    * `Session` dependencies/plugins are properly initialized one should use static `Session.create` instead.
    * @param {Hapi.Server} server HapiJS Server instance.
    */
-  constructor(server, cookieOptions) {
+  constructor(server) {
     this._server = server;
-    this._cookieOptions = cookieOptions;
+    this._ttl = this._server.config().get('xpack.security.sessionTimeout');
   }
 
   /**
@@ -64,21 +52,20 @@ export class Session {
   async get(request) {
     assertRequest(request);
 
-    return new Promise((resolve) => {
-      this._server.auth.test(HAPI_STRATEGY_NAME, request, (err, session) => {
-        if (Array.isArray(session)) {
-          const warning = `Found ${session.length} auth sessions when we were only expecting 1.`;
-          this._server.log(['warning', 'security', 'auth', 'session'], warning);
-          return resolve(null);
-        }
+    try {
+      const session = await this._server.auth.test(HAPI_STRATEGY_NAME, request);
 
-        if (err) {
-          this._server.log(['debug', 'security', 'auth', 'session'], err);
-        }
+      if (Array.isArray(session)) {
+        const warning = `Found ${session.length} auth sessions when we were only expecting 1.`;
+        this._server.log(['warning', 'security', 'auth', 'session'], warning);
+        return null;
+      }
 
-        resolve(err ? null : session.value);
-      });
-    });
+      return session.value;
+    } catch (err) {
+      this._server.log(['debug', 'security', 'auth', 'session'], err);
+      return null;
+    }
   }
 
   /**
@@ -92,7 +79,7 @@ export class Session {
 
     request.cookieAuth.set({
       value,
-      expires: this._cookieOptions.ttl && Date.now() + this._cookieOptions.ttl
+      expires: this._ttl && Date.now() + this._ttl
     });
   }
 
@@ -108,57 +95,14 @@ export class Session {
   }
 
   /**
-   * Serializes current session.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {Promise.<string>}
-   */
-  async serialize(request) {
-    const state = request._states[this._cookieOptions.name];
-    if (!state) {
-      return null;
-    }
-
-    const value = await new Promise((resolve, reject) => {
-      iron.seal(state.value, this._cookieOptions.password, iron.defaults, (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      });
-    });
-
-    return value;
-  }
-
-  /**
-   * Returns the options that we're using for the session cookie
-   * @returns {CookieOptions}
-   */
-  getCookieOptions() {
-    return {
-      name: this._cookieOptions.name,
-      path: this._cookieOptions.path,
-      httpOnly: this._cookieOptions.httpOnly,
-      secure: this._cookieOptions.secure,
-    };
-  }
-
-  /**
    * Prepares and creates a session instance.
    * @param {Hapi.Server} server HapiJS Server instance.
    * @returns {Promise.<Session>}
    */
   static async create(server) {
     // Register HAPI plugin that manages session cookie and delegate parsing of the session cookie to it.
-    await new Promise((resolve, reject) => {
-      server.register(hapiAuthCookie, (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
-      });
+    await server.register({
+      plugin: hapiAuthCookie
     });
 
     const config =  server.config();
@@ -167,26 +111,26 @@ export class Session {
     const password = config.get('xpack.security.encryptionKey');
     const path = `${config.get('server.basePath')}/`;
     const secure = config.get('xpack.security.secureCookies');
-    const ttl = config.get(`xpack.security.sessionTimeout`);
 
-    server.auth.strategy(HAPI_STRATEGY_NAME, 'cookie', HAPI_STRATEGY_MODE, {
+    server.auth.strategy(HAPI_STRATEGY_NAME, 'cookie', {
       cookie: name,
       password,
       clearInvalid: true,
       validateFunc: Session._validateCookie,
       isHttpOnly: httpOnly,
       isSecure: secure,
+      isSameSite: false,
       path: path,
     });
 
-    return new Session(server, {
-      httpOnly,
-      name,
-      password,
-      path,
-      secure,
-      ttl,
-    });
+    if (HAPI_STRATEGY_MODE) {
+      server.auth.default({
+        strategy: HAPI_STRATEGY_NAME,
+        mode: 'required'
+      });
+    }
+
+    return new Session(server);
   }
 
   /**
@@ -197,12 +141,11 @@ export class Session {
    * @param {function} callback Callback to be called once validation is completed.
    * @private
    */
-  static _validateCookie(request, session, callback) {
+  static _validateCookie(request, session) {
     if (session.expires && session.expires < Date.now()) {
-      callback(new Error('Session has expired'), false /* isValid */);
-      return;
+      return { valid: false };
     }
 
-    callback(null /* error */, true /* isValid */, session);
+    return { valid: true };
   }
 }
