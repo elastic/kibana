@@ -494,7 +494,6 @@ export const supportedConfigs = [
     config: metricbeatModuleConfig,
   },
   {
-    text: 'Output',
     text: i18n.translate('xpack.beatsManagement.configSchema.outputTitle', {
       defaultMessage: 'Output',
     }),
