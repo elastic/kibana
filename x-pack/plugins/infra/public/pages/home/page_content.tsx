@@ -44,6 +44,7 @@ export const HomePageContent: React.SFC = () => (
                               options={{ ...wafflemap, metric, fields: configuredFields, groupBy }}
                               reload={refetch}
                               onDrilldown={applyFilterQuery}
+                              timeRange={currentTimeRange}
                             />
                           )}
                         </WithWaffleNodes>

@@ -89,7 +89,7 @@ function downloadFile(url, dest, log) {
         }
 
         if (!res.ok) {
-          return reject(new Error(res.statusText));
+          return reject(new Error(`Unable to download elasticsearch snapshot: ${res.statusText}`));
         }
 
         const stream = fs.createWriteStream(downloadPath);

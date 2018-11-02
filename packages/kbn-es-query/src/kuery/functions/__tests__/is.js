@@ -94,6 +94,18 @@ describe('kuery functions', function () {
         expect(result).to.eql(expected);
       });
 
+      it('should return an ES query_string query using default_field when fieldName is null and value contains a wildcard', function () {
+        const expected = {
+          query_string: {
+            query: 'jpg*',
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('is', null, 'jpg*');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+        expectDeepEqual(result, expected);
+      });
+
       it('should return an ES bool query with a sub-query for each field when fieldName is "*"', function () {
         const node = nodeTypes.function.buildNode('is', '*', 200);
         const result = is.toElasticsearchQuery(node, indexPattern);
