@@ -5,6 +5,7 @@
  */
 
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { BASE_PATH } from '../common/constants';
@@ -14,7 +15,13 @@ import { FrontendLibs } from './lib/lib';
 import { PageRouter } from './router';
 
 function startApp(libs: FrontendLibs) {
-  libs.framework.registerManagementSection('beats', 'Beats Management', BASE_PATH);
+  libs.framework.registerManagementSection(
+    'beats',
+    i18n.translate('xpack.beatsManagement.managementMainPage.beatsManagementMessage', {
+      defaultMessage: 'Beats Management',
+    }),
+    BASE_PATH
+  );
   libs.framework.render(
     <ThemeProvider theme={{ eui: euiVars }}>
       <BreadcrumbProvider>
