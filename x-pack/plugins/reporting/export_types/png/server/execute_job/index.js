@@ -5,14 +5,13 @@
  */
 
 import url from 'url';
-import { cryptoFactory } from '../../../../server/lib/crypto';
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
-import { omit } from 'lodash';
-import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { compatibilityShimFactory } from './compatibility_shim';
+import { generatePngObservableFactory } from '../lib/generate_png';
+import { cryptoFactory } from '../../../../server/lib/crypto';
+import { getAbsoluteUrlFactory } from '../../../common/execute_job/get_absolute_url';
+import { omit } from 'lodash';
 
 const KBN_SCREENSHOT_HEADER_BLACKLIST = [
   'accept-encoding',
@@ -27,12 +26,10 @@ const KBN_SCREENSHOT_HEADER_BLACKLIST = [
 ];
 
 function executeJobFn(server) {
-  const generatePdfObservable = generatePdfObservableFactory(server);
+  const generatePngObservable = generatePngObservableFactory(server);
   const crypto = cryptoFactory(server);
-  const compatibilityShim = compatibilityShimFactory(server);
+  const getAbsoluteUrl = getAbsoluteUrlFactory(server);
   const config = server.config();
-
-  const serverBasePath = server.config().get('server.basePath');
 
   const decryptJobHeaders = async (job) => {
     const decryptedHeaders = await crypto.decrypt(job.headers);
@@ -42,6 +39,15 @@ function executeJobFn(server) {
   const omitBlacklistedHeaders = ({ job, decryptedHeaders }) => {
     const filteredHeaders = omit(decryptedHeaders, KBN_SCREENSHOT_HEADER_BLACKLIST);
     return { job, filteredHeaders };
+  };
+
+  const getSavedObjectAbsoluteUrl = (job, relativeUrl) => {
+    if (relativeUrl) {
+      const { pathname: path, hash, search } = url.parse(relativeUrl);
+      return getAbsoluteUrl({ basePath: job.basePath, path, hash, search });
+    }
+
+    throw new Error(`Unable to generate report. Url is not defined.`);
   };
 
   const getConditionalHeaders = ({ job, filteredHeaders }) => {
@@ -58,64 +64,45 @@ function executeJobFn(server) {
     return { job, conditionalHeaders };
   };
 
-  const getCustomLogo = async ({ job, conditionalHeaders }) => {
-    const fakeRequest = {
-      headers: conditionalHeaders.headers,
-      // This is used by the spaces SavedObjectClientWrapper to determine the existing space.
-      // We use the basePath from the saved job, which we'll have post spaces being implemented;
-      // or we use the server base path, which uses the default space
-      getBasePath: () => job.basePath || serverBasePath
-    };
+  const addForceNowQuerystring = async ({ job, conditionalHeaders }) => {
 
-    const savedObjects = server.savedObjects;
-    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
-    const uiSettings = server.uiSettingsServiceFactory({
-      savedObjectsClient
-    });
+    const jobUrl = getSavedObjectAbsoluteUrl(job, job.relativeUrl);
 
-    const logo = await uiSettings.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
+    if (!job.forceNow) {
+      return { job, conditionalHeaders, hashUrl: jobUrl };
+    }
 
-    return { job, conditionalHeaders, logo };
-  };
+    const parsed = url.parse(jobUrl, true);
+    const hash = url.parse(parsed.hash.replace(/^#/, ''), true);
 
-  const addForceNowQuerystring = async ({ job, conditionalHeaders, logo }) => {
-    const urls = job.urls.map(jobUrl => {
-      if (!job.forceNow) {
-        return jobUrl;
+    const transformedHash = url.format({
+      pathname: hash.pathname,
+      query: {
+        ...hash.query,
+        forceNow: job.forceNow
       }
-
-      const parsed = url.parse(jobUrl, true);
-      const hash = url.parse(parsed.hash.replace(/^#/, ''), true);
-
-      const transformedHash = url.format({
-        pathname: hash.pathname,
-        query: {
-          ...hash.query,
-          forceNow: job.forceNow
-        }
-      });
-
-      return url.format({
-        ...parsed,
-        hash: transformedHash
-      });
     });
-    return { job, conditionalHeaders, logo, urls };
+
+    const hashUrl = url.format({
+      ...parsed,
+      hash: transformedHash
+    });
+
+    return { job, conditionalHeaders, hashUrl };
   };
 
-  return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
+  return function executeJob(jobToExecute, cancellationToken) {
     const process$ = Rx.of(jobToExecute).pipe(
       mergeMap(decryptJobHeaders),
       catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
       map(omitBlacklistedHeaders),
       map(getConditionalHeaders),
-      mergeMap(getCustomLogo),
       mergeMap(addForceNowQuerystring),
-      mergeMap(({ job, conditionalHeaders, logo, urls }) => {
-        return generatePdfObservable(job.title, urls, job.browserTimezone, conditionalHeaders, job.layout, logo);
+      mergeMap(({ job, conditionalHeaders, hashUrl }) => {
+        return generatePngObservable(hashUrl, job.browserTimezone, conditionalHeaders, job.layout);
       }),
       map(buffer => ({
-        content_type: 'application/pdf',
+        content_type: 'image/png',
         content: buffer.toString('base64')
       }))
     );
@@ -125,7 +112,7 @@ function executeJobFn(server) {
     return process$.pipe(
       takeUntil(stop$)
     ).toPromise();
-  });
+  };
 }
 
 export const executeJobFactory = oncePerServer(executeJobFn);

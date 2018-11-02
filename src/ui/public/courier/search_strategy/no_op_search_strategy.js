@@ -17,8 +17,28 @@
  * under the License.
  */
 
-import { rename, unused } from './deprecations';
+import { SearchError } from './search_error';
 
-export { createTransform } from './create_transform';
-export { getTransform } from './get_transform';
-export const Deprecations = { rename, unused };
+export const noOpSearchStrategy = {
+  id: 'noOp',
+
+  search: async () => {
+    const searchError = new SearchError({
+      status: '418', // "I'm a teapot" error
+      title: 'No search strategy registered',
+      message: `Couldn't find a search strategy for the search request`,
+      type: 'NO_OP_SEARCH_STRATEGY',
+      path: '',
+    });
+
+    return {
+      searching: Promise.reject(searchError),
+      abort: () => {},
+      failedSearchRequests: [],
+    };
+  },
+
+  isViable: () => {
+    return true;
+  },
+};

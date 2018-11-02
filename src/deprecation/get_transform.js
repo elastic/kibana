@@ -17,8 +17,14 @@
  * under the License.
  */
 
+import { noop } from 'lodash';
+
+import { createTransform } from './create_transform';
 import { rename, unused } from './deprecations';
 
-export { createTransform } from './create_transform';
-export { getTransform } from './get_transform';
-export const Deprecations = { rename, unused };
+export async function getTransform(spec) {
+  const deprecationsProvider = spec.getDeprecationsProvider() || noop;
+  if (!deprecationsProvider) return;
+  const transforms = await deprecationsProvider({ rename, unused }) || [];
+  return createTransform(transforms);
+}
