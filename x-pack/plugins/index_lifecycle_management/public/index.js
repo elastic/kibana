@@ -8,3 +8,4 @@ import './register_management_section';
 import './register_routes';
 import './register_index_lifecycle_summary';
 import './register_index_lifecycle_actions';
+import './register_index_lifecycle_banner';

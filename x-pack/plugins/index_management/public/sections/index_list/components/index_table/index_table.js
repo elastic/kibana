@@ -39,6 +39,7 @@ import {
 } from '@elastic/eui';
 
 import { IndexActionsContextMenu } from '../../components';
+import { getBannerExtensions } from '../../../../index_management_extensions';
 
 const HEADERS = {
   name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
@@ -196,7 +197,10 @@ export class IndexTableUi extends Component {
       );
     });
   }
-
+  renderBanners() {
+    const { indices = [] } = this.props;
+    return getBannerExtensions().map(bannerExtension => bannerExtension(indices));
+  }
   buildRows() {
     const { indices = [], detailPanelIndexName } = this.props;
     return indices.map(index => {
@@ -292,6 +296,7 @@ export class IndexTableUi extends Component {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer />
+            { this.renderBanners()}
             <EuiFlexGroup gutterSize="l" alignItems="center">
               {atLeastOneItemSelected ? (
                 <EuiFlexItem grow={false}>

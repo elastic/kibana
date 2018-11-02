@@ -18,5 +18,12 @@ export const addActionExtension = (actionExtension)=> {
 export const getActionExtensions = () => {
   return actionExtensions;
 };
+const bannerExtensions = [];
+export const addBannerExtension = (actionExtension)=> {
+  bannerExtensions.push(actionExtension);
+};
+export const getBannerExtensions = () => {
+  return bannerExtensions;
+};
 
 
