@@ -20,7 +20,7 @@ import { getOccurrencesAtPosition } from 'monaco-editor/esm/vs/editor/contrib/wo
 import { Hover, MarkedString, Range } from 'vscode-languageserver-types';
 import { ContentWidget } from '../content_widget';
 import { Operation } from '../operation';
-import { HoverComputer } from './hover_computer';
+import { HoverComputer, LOADING } from './hover_computer';
 
 export class ContentHoverWidget extends ContentWidget {
   public static ID = 'editor.contrib.contentHoverWidget';
@@ -85,24 +85,62 @@ export class ContentHoverWidget extends ContentWidget {
       this.hoverResultAction(result);
     }
     if (this.lastRange && result && result.contents) {
-      this.renderMessages(this.lastRange, result);
+      this.render(this.lastRange, result);
     } else if (complete) {
       this.hide();
     }
   }
-
-  private renderMessages(renderRange: EditorRange, result: Hover) {
+  private renderLoading(fragment: DocumentFragment) {
+    const el = document.createElement('div');
+    el.classList.add('hover-row');
+    el.innerHTML = `
+        <div class="text-placeholder gradient"></div>      
+        <div class="text-placeholder gradient" style="width: 90%"></div>      
+        <div class="text-placeholder gradient" style="width: 75%""></div>      
+    `;
+    fragment.appendChild(el);
+  }
+  private render(renderRange: EditorRange, result: Hover) {
     const fragment = document.createDocumentFragment();
-    let contents = [];
-    if (Array.isArray(result.contents)) {
-      contents = result.contents;
+    if (result.contents === LOADING) {
+      this.renderLoading(fragment);
     } else {
-      contents = [result.contents as MarkedString];
+      let contents: MarkedString[] = [];
+      if (Array.isArray(result.contents)) {
+        contents = result.contents;
+      } else {
+        contents = [result.contents as MarkedString];
+      }
+      contents = contents.filter(v => {
+        if (typeof v === 'string') {
+          return !!v;
+        } else {
+          return !!v.value;
+        }
+      });
+      if (contents.length === 0) {
+        this.hide();
+        return;
+      }
+      this.renderMessage(contents, fragment);
     }
-    if (contents.length === 0) {
-      this.hide();
-      return;
+    // show
+    const startColumn = Math.min(
+      renderRange.startColumn,
+      result.range ? result.range.start.character + 1 : Number.MAX_VALUE
+    );
+    this.showAt(
+      new window.monaco.Position(renderRange.startLineNumber, startColumn),
+      this.shouldFocus
+    );
+    if (result.range) {
+      this.lastRange = this.toMonacoRange(result.range);
+      this.highlightOccurrences(this.lastRange);
     }
+    this.updateContents(fragment);
+  }
+
+  private renderMessage(contents: MarkedString[], fragment: DocumentFragment) {
     contents.filter(content => !!content).forEach(markedString => {
       let markdown: string;
       if (typeof markedString === 'string') {
@@ -128,21 +166,6 @@ export class ContentHoverWidget extends ContentWidget {
       el.appendChild(renderedContents);
       fragment.appendChild(el);
     });
-    // show
-
-    const startColumn = Math.min(
-      renderRange.startColumn,
-      result.range ? result.range.start.character + 1 : Number.MAX_VALUE
-    );
-    this.showAt(
-      new window.monaco.Position(renderRange.startLineNumber, startColumn),
-      this.shouldFocus
-    );
-    if (result.range) {
-      this.lastRange = this.toMonacoRange(result.range);
-      this.highlightOccurrences(this.lastRange);
-    }
-    this.updateContents(fragment);
   }
 
   private toMonacoRange(r: Range): EditorRange {
@@ -157,8 +180,7 @@ export class ContentHoverWidget extends ContentWidget {
   private renderButtons() {
     const buttonGroup = document.createElement('div');
     buttonGroup.className =
-      'euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive';
-    buttonGroup.style.cssText = 'padding: 4px 5px; border-top: 1px solid rgba(200, 200, 200, 0.5)';
+      'button-group euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive';
     buttonGroup.innerHTML = `
     <button id="btnDefinition" class="euiFlexItem euiButton euiButton--primary euiButton--small" type="button">
       <span class="euiButton__content">
