@@ -68,7 +68,8 @@
   "workspaces": {
     "packages": [
       "packages/*",
-      "x-pack"
+      "x-pack",
+      "x-pack/plugins/*"
     ],
     "nohoist": [
       "**/@types/*",
