@@ -22,6 +22,5 @@ set -e
 
 source "$(dirname $0)/../../src/dev/ci_setup/setup.sh"
 
-export TEST_BROWSER_HEADLESS=1
-node scripts/functional_test_runner --debug --grep @skipcloud --invert $@
-
+TEST_BROWSER_HEADLESS=1
+node scripts/functional_test_runner --debug --exclude-tag skipCloud $@
