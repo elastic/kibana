@@ -3,9 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Size } from '../../../../../types';
 
-export interface CaptureConfig {
-  zoom: number;
-  viewport: Size;
-}
+import './logged_out';
