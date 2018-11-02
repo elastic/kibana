@@ -28,6 +28,7 @@ export class JoinEditor extends React.Component {
 
   _renderJoins() {
     const joins = this.state.joins.map((joinDescriptor, index) => {
+
       const onJoinSelection = (joinDescriptor) => {
         if (this.state.joins[index]) {
           const updatedJoins = this.state.joins.slice();
@@ -38,12 +39,23 @@ export class JoinEditor extends React.Component {
           this.props.onJoinsEdited(this.props.layer, updatedJoins);
         }
       };
+
+      const onRemoveJoin = () => {
+        const updatedJoins = this.state.joins.slice();
+        updatedJoins.splice(index, 1);
+        this.setState({
+          joins: updatedJoins
+        });
+        this.props.onJoinsEdited(this.props.layer, updatedJoins);
+      };
+
       return (
         <Join
           key={index}
           join={joinDescriptor}
           layer={this.props.layer}
           onJoinSelection={onJoinSelection}
+          onRemoveJoin={onRemoveJoin}
         />
       );
     });

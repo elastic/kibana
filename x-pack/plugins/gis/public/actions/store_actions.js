@@ -278,6 +278,7 @@ export function clearTemporaryStyles() {
 
 export function setJoinsForLayer(layer, joins) {
   return async (dispatch, getState) => {
+    console.warn('Not Implemented: must remove any styles that are driven by join-fields that are no longer present');
     await dispatch({
       type: SET_JOINS,
       layer: layer,

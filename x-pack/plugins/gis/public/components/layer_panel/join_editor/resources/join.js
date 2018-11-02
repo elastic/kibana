@@ -114,23 +114,25 @@ export class Join extends React.Component {
     this.setState((prevState) => ({
       rightPopoverOpen: !prevState.rightPopoverOpen,
     }));
-  }
+  };
+
   closeRightPopover = () => {
     this.setState({
       rightPopoverOpen: false,
     });
-  }
+  };
 
   toggleLeftPopover = () => {
     this.setState((prevState) => ({
       leftPopoverOpen: !prevState.leftPopoverOpen,
     }));
-  }
+  };
+
   closeLeftPopover = () => {
     this.setState({
       leftPopoverOpen: false,
     });
-  }
+  };
 
 
   render() {
@@ -193,7 +195,14 @@ export class Join extends React.Component {
 
         </EuiFlexItem>
 
-        <EuiButtonIcon className="gisJoinItem__delete" iconType="trash" color="danger" aria-label="Delete join" title="Delete join" />
+        <EuiButtonIcon
+          className="gisJoinItem__delete"
+          iconType="trash"
+          color="danger"
+          aria-label="Delete join"
+          title="Delete join"
+          onClick={this.props.onRemoveJoin}
+        />
       </EuiFlexGroup>
     );
   }

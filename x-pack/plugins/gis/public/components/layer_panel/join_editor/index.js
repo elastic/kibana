@@ -11,8 +11,6 @@ import { setJoinsForLayer } from '../../../actions/store_actions';
 function mapDispatchToProps(dispatch) {
   return {
     onJoinsEdited: (layer, joins) => {
-      //todo: should filter out duplicate joins
-      //UX should not be able to allow for duplicate joins as well
       dispatch(setJoinsForLayer(layer, joins));
     }
   };
