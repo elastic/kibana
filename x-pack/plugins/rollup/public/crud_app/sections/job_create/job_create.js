@@ -26,6 +26,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { fatalError } from 'ui/notify';
+
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
   getRouterLinkProps,
@@ -239,24 +241,33 @@ export class JobCreateUi extends Component {
         return;
       }
 
-      const { error: errorString, statusCode } = error.data;
+      // Expect an error in the shape provided by Angular's $http service.
+      if (error && error.data) {
+        const { error: errorString, statusCode } = error.data;
 
-      const indexPatternAsyncErrors = [(
-        <FormattedMessage
-          id="xpack.rollupJobs.create.errors.indexPatternValidationError"
-          defaultMessage="There was a problem validating this index pattern: {statusCode} {error}"
-          values={{ error: errorString, statusCode }}
-        />
-      )];
+        const indexPatternAsyncErrors = [(
+          <FormattedMessage
+            id="xpack.rollupJobs.create.errors.indexPatternValidationError"
+            defaultMessage="There was a problem validating this index pattern: {statusCode} {error}"
+            values={{ error: errorString, statusCode }}
+          />
+        )];
 
-      this.setState({
-        indexPatternAsyncErrors,
-        indexPatternDateFields: [],
-        indexPatternTermsFields: [],
-        indexPatternHistogramFields: [],
-        indexPatternMetricsFields: [],
-        isValidatingIndexPattern: false,
-      });
+        this.setState({
+          indexPatternAsyncErrors,
+          indexPatternDateFields: [],
+          indexPatternTermsFields: [],
+          indexPatternHistogramFields: [],
+          indexPatternMetricsFields: [],
+          isValidatingIndexPattern: false,
+        });
+
+        return;
+      }
+
+      // This error isn't an HTTP error, so let the fatal error screen tell the user something
+      // unexpected happened.
+      fatalError(error, 'Rollup Job Wizard index pattern validation');
     });
   }, 300);
 
