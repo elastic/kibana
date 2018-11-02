@@ -20,20 +20,14 @@ To learn about monitoring in general, see
 
 ** In {kib}:
 
-... Open {kib} in your web browser. If you are running {kib} locally, go to 
-`http://localhost:5601/`. 
+... Open {kib} in your web browser. 
 +
 --
-////
-If the Elastic {security-features} are enabled on the {kib} server, to access 
-{kib} and view the monitoring dashboards, you must log in as a user who has the 
-`kibana_user` and `monitoring_user` roles. For more information, see 
-{stack-ov}/built-in-roles.html[Built-in roles].
-//TBD: What permissions are required to update cluster settings?
+If you are running {kib} locally, go to `http://localhost:5601/`. 
 
-If you are accessing a remote monitoring cluster, you must log in to {kib}
-with credentials that are valid on both the {kib} server and the monitoring 
-cluster.
+If the Elastic {security-features} are enabled, log in. 
+////
+//TBD: What permissions are required to update cluster settings?
 ////
 --
 
