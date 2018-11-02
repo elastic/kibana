@@ -26,7 +26,7 @@ function formatPolicies(policiesMap) {
 async function fetchPolicies(callWithRequest) {
   const params = {
     method: 'GET',
-    path: '/_ilm',
+    path: '/_ilm/policy',
     // we allow 404 since they may have no policies
     ignore: [ 404 ]
   };
@@ -60,7 +60,7 @@ export function registerFetchRoute(server) {
   server.route({
     path: '/api/index_lifecycle_management/policies',
     method: 'GET',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { withIndices } = request.query;
       try {
@@ -68,13 +68,13 @@ export function registerFetchRoute(server) {
         if (withIndices) {
           await addCoveredIndices(policiesMap, callWithRequest);
         }
-        reply(formatPolicies(policiesMap));
+        return formatPolicies(policiesMap);
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
     config: {

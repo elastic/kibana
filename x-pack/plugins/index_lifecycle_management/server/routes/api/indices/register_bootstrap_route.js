@@ -29,18 +29,18 @@ export function registerBootstrapRoute(server) {
   server.route({
     path: '/api/index_lifecycle_management/indices/bootstrap',
     method: 'POST',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
         const response = await bootstrap(callWithRequest, request.payload);
-        reply(response);
+        return response;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
     config: {

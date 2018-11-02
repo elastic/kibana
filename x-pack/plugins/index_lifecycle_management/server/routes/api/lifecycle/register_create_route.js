@@ -20,7 +20,7 @@ async function createLifecycle(callWithRequest, lifecycle) {
   };
   const params = {
     method: 'PUT',
-    path: `/_ilm/${lifecycle.name}`,
+    path: `/_ilm/policy/${lifecycle.name}`,
     ignore: [ 404 ],
     body,
   };
@@ -35,18 +35,18 @@ export function registerCreateRoute(server) {
   server.route({
     path: '/api/index_lifecycle_management/lifecycle',
     method: 'POST',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
         const response = await createLifecycle(callWithRequest, request.payload.lifecycle);
-        reply(response);
+        return response;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
     config: {

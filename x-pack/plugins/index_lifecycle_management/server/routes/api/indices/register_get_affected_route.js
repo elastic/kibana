@@ -72,7 +72,7 @@ export function registerGetAffectedRoute(server) {
     path:
       '/api/index_lifecycle_management/indices/affected/{indexTemplateName}',
     method: 'GET',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
@@ -80,13 +80,13 @@ export function registerGetAffectedRoute(server) {
           callWithRequest,
           request.params.indexTemplateName,
         );
-        reply(response);
+        return response;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
     config: {
@@ -98,7 +98,7 @@ export function registerGetAffectedRoute(server) {
     path:
       '/api/index_lifecycle_management/indices/affected/{indexTemplateName}/{policyName}',
     method: 'GET',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
@@ -107,13 +107,13 @@ export function registerGetAffectedRoute(server) {
           request.params.indexTemplateName,
           request.params.policyName
         );
-        reply(response);
+        return response;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
     config: {

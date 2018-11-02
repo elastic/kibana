@@ -61,19 +61,19 @@ export function registerFetchRoute(server) {
   server.route({
     path: '/api/index_lifecycle_management/templates',
     method: 'GET',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
         const hits = await fetchTemplates(callWithRequest);
         const templates = await formatTemplates(hits, callWithRequest);
-        reply(templates);
+        return templates;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
     config: {

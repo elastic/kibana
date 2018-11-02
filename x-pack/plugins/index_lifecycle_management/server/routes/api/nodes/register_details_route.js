@@ -43,19 +43,19 @@ export function registerDetailsRoute(server) {
   server.route({
     path: '/api/index_lifecycle_management/nodes/{nodeAttrs}/details',
     method: 'GET',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
         const stats = await fetchNodeStats(callWithRequest);
         const response = findMatchingNodes(stats, request.params.nodeAttrs);
-        reply(response);
+        return response;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
     config: {

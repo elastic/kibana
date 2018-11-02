@@ -9,11 +9,10 @@ import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 
-
 async function deletePolicies(policyNames, callWithRequest) {
   const params = {
     method: 'DELETE',
-    path: `/_ilm/${policyNames}`,
+    path: `/_ilm/policy/${policyNames}`,
     // we allow 404 since they may have no policies
     ignore: [ 404 ]
   };
@@ -28,17 +27,17 @@ export function registerDeleteRoute(server) {
   server.route({
     path: '/api/index_lifecycle_management/policies/{policyNames}',
     method: 'DELETE',
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { policyNames } = request.params;
       try {
         await deletePolicies(policyNames, callWithRequest);
-        reply();
+        return;
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
     config: {
