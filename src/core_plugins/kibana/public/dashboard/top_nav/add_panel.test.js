@@ -19,7 +19,7 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
   DashboardAddPanel,
@@ -38,7 +38,7 @@ beforeEach(() => {
 });
 
 test('render', () => {
-  const component = shallow(<DashboardAddPanel
+  const component = shallowWithIntl(<DashboardAddPanel.WrappedComponent
     onClose={onClose}
     visTypes={{}}
     addNewPanel={() => {}}

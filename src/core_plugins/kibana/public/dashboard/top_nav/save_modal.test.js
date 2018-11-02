@@ -18,14 +18,14 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
   DashboardSaveModal,
 } from './save_modal';
 
 test('renders DashboardSaveModal', () => {
-  const component = shallow(<DashboardSaveModal
+  const component = shallowWithIntl(<DashboardSaveModal.WrappedComponent
     onSave={() => {}}
     onClose={() => {}}
     title="dash title"
