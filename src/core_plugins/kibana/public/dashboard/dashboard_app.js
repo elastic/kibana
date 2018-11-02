@@ -275,7 +275,7 @@ app.directive('dashboardApp', function ($injector) {
 
         confirmModal(
           i18n('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription',
-            { defaultMessage: 'Once you discard your changes, there\'s no getting them back.' }
+            { defaultMessage: `Once you discard your changes, there's no getting them back.` }
           ),
           {
             onConfirm: revertChangesAndExitEditMode,
@@ -313,7 +313,7 @@ app.directive('dashboardApp', function ($injector) {
               toastNotifications.addSuccess({
                 title: i18n('kbn.dashboard.dashboardWasSavedSuccessMessage',
                   {
-                    defaultMessage: 'Dashboard \'{dashTitle}\' was saved',
+                    defaultMessage: `Dashboard '{dashTitle}' was saved`,
                     values: { dashTitle: dash.title },
                   },
                 ),
@@ -332,7 +332,7 @@ app.directive('dashboardApp', function ($injector) {
             toastNotifications.addDanger({
               title: i18n('kbn.dashboard.dashboardWasNotSavedDangerMessage',
                 {
-                  defaultMessage: 'Dashboard \'{dashTitle}\' was not saved. Error: {errorMessage}',
+                  defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
                   values: {
                     dashTitle: dash.title,
                     errorMessage: error.message,

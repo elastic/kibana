@@ -62,13 +62,13 @@
       <span
         i18n-id="kbn.dashboard.addVisualizationDescription1"
         i18n-default-message="Click the "
-        i18n-context="Part of composite label kbn.dashboard.addVisualizationDescription1 + {link} + kbn.dashboard.addVisualizationDescription2"
+        i18n-context="Part of composite label kbn.dashboard.addVisualizationDescription1 + kbn.dashboard.addVisualizationLinkText + kbn.dashboard.addVisualizationDescription2"
       ></span>
       <a
         kbn-accessible-click
         class="kuiButton kuiButton--primary kuiButton--small"
         ng-click="showAddPanel()"
-        aria-label="{{ 'kbn.dashboard.addVisualizationLinkAriaLabel' | i18n: { defaultMessage: 'Add visualization' } }}"
+        aria-label="{{::'kbn.dashboard.addVisualizationLinkAriaLabel' | i18n: { defaultMessage: 'Add visualization' } }}"
         data-test-subj="emptyDashboardAddPanelButton"
         i18n-id="kbn.dashboard.addVisualizationLinkText"
         i18n-default-message="Add"
@@ -92,13 +92,11 @@
     >
     </h2>
 
-    <p
-      class="kuiText kuiVerticalRhythm"
-    >
+    <p class="kuiText kuiVerticalRhythm">
       <span
         i18n-id="kbn.dashboard.howToStartWorkingOnNewDashboardDescription1"
         i18n-default-message="Click the "
-        i18n-context="Part of composite label kbn.dashboard.howToStartWorkingOnNewDashboardDescription1 + {link} + kbn.dashboard.howToStartWorkingOnNewDashboardDescription2"
+        i18n-context="Part of composite label kbn.dashboard.howToStartWorkingOnNewDashboardDescription1 + kbn.dashboard.howToStartWorkingOnNewDashboardEditLinkText + kbn.dashboard.howToStartWorkingOnNewDashboardDescription2"
       ></span>
       <a
         kbn-accessible-click

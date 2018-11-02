@@ -36,11 +36,6 @@ export function getDashboardTitle(title, viewMode, isDirty) {
       defaultMessage: 'Editing {title} (unsaved)',
       values: { title },
     });
-  } else if (isEditMode && isDirty) {
-    displayTitle = i18n.translate('kbn.dashboard.strings.dashboardUnsavedTitle', {
-      defaultMessage: '{title} (unsaved)',
-      values: { title },
-    });
   } else if (isEditMode) {
     displayTitle = i18n.translate('kbn.dashboard.strings.dashboardEditTitle', {
       defaultMessage: 'Editing {title}',

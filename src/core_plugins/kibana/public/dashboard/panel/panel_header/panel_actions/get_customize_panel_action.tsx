@@ -47,7 +47,7 @@ export function getCustomizePanelAction({
       childContextMenuPanel: new ContextMenuPanel(
         {
           id: 'panelSubOptionsMenu',
-          title: i18n.translate('kbn.dashboard.panel.customizePanel.title', {
+          title: i18n.translate('kbn.dashboard.panel.customizePanelTitle', {
             defaultMessage: 'Customize panel',
           }),
         },

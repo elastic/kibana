@@ -95,7 +95,7 @@ class DashboardCloneModalUi extends React.Component {
             id: 'kbn.dashboard.topNav.cloneModal.dashboardExistsTitle',
             defaultMessage: 'A Dashboard with the title {newDashboardName} already exists.',
           }, {
-            newDashboardName: this.state.newDashboardName,
+            newDashboardName: `'${this.state.newDashboardName}'`,
           })}
           color="warning"
           data-test-subj="titleDupicateWarnMsg"
@@ -108,7 +108,7 @@ class DashboardCloneModalUi extends React.Component {
                 confirmClone: (
                   <strong>
                     <FormattedMessage
-                      id="kbn.dashboard.topNav.cloneModal.confirmCloneTDescription"
+                      id="kbn.dashboard.topNav.cloneModal.confirmCloneDescription"
                       defaultMessage="Confirm Clone"
                     />
                   </strong>
@@ -169,7 +169,7 @@ class DashboardCloneModalUi extends React.Component {
               onClick={this.props.onClose}
             >
               <FormattedMessage
-                id="kbn.dashboard.topNav.cloneModal.cloneCancelButtonLabel"
+                id="kbn.dashboard.topNav.cloneModal.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButton>
@@ -181,7 +181,7 @@ class DashboardCloneModalUi extends React.Component {
               isLoading={this.state.isLoading}
             >
               <FormattedMessage
-                id="kbn.dashboard.topNav.cloneModal.cloneConfirmButtonLabel"
+                id="kbn.dashboard.topNav.cloneModal.confirmButtonLabel"
                 defaultMessage="Confirm Clone"
               />
             </EuiButton>

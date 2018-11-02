@@ -86,12 +86,10 @@ export class PanelUtils {
     const versionSplit = version.split('.');
     if (versionSplit.length < 3) {
       throw new Error(i18n.translate('kbn.dashboard.panel.invalidVersionErrorMessage', {
-        defaultMessage: 'Invalid version, {version}, expected {major}.{minor}.{patch}',
+        defaultMessage: 'Invalid version, {version}, expected {semver}',
         values: {
           version,
-          major: '<major>',
-          minor: '<minor>',
-          patch: '<patch>',
+          semver: '<major>.<minor>.<patch>',
         },
       }));
     }

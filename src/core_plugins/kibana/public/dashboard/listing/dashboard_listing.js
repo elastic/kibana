@@ -224,7 +224,7 @@ class DashboardListingUi extends React.Component {
         >
           <p>
             <FormattedMessage
-              id="kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.description"
+              id="kbn.dashboard.listing.deleteDashboardsConfirmModalDescription"
               defaultMessage="You can't recover deleted dashboards."
             />
           </p>
@@ -240,7 +240,7 @@ class DashboardListingUi extends React.Component {
           <EuiCallOut
             title={
               <FormattedMessage
-                id="kbn.dashboard.listing.listingLimitExceeded.title"
+                id="kbn.dashboard.listing.listingLimitExceededTitle"
                 defaultMessage="Listing limit exceeded"
               />
             }
@@ -249,18 +249,15 @@ class DashboardListingUi extends React.Component {
           >
             <p>
               <FormattedMessage
-                id="kbn.dashboard.listing.listingLimitExceeded.description"
-                // eslint-disable-next-line max-len
-                defaultMessage="You have {totalDashboards} dashboards, but your {listingLimitText} setting prevents the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
+                id="kbn.dashboard.listing.listingLimitExceededDescription"
+                defaultMessage="You have {totalDashboards} dashboards, but your {listingLimitText} setting prevents
+                the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
                 values={{
                   totalDashboards: this.state.totalDashboards,
                   listingLimitValue: this.props.listingLimit,
                   listingLimitText: (
                     <strong>
-                      <FormattedMessage
-                        id="kbn.dashboard.listing.listingLimitExceeded.listingLimitText"
-                        defaultMessage="listingLimit"
-                      />
+                      listingLimit
                     </strong>
                   ),
                   advancedSettingsLink: (

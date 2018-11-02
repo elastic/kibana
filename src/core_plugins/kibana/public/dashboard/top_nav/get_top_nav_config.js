@@ -59,7 +59,7 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
 function getFullScreenConfig(action) {
   return {
     key: 'full screen',
-    description: i18n.translate('kbn.dashboard.topNave.fullScreenConfig.description', {
+    description: i18n.translate('kbn.dashboard.topNave.fullScreenConfigDescription', {
       defaultMessage: 'Full Screen Mode',
     }),
     testId: 'dashboardFullScreenMode',
@@ -73,7 +73,7 @@ function getFullScreenConfig(action) {
 function getEditConfig(action) {
   return {
     key: 'edit',
-    description: i18n.translate('kbn.dashboard.topNave.editConfig.description', {
+    description: i18n.translate('kbn.dashboard.topNave.editConfigDescription', {
       defaultMessage: 'Switch to edit mode',
     }),
     testId: 'dashboardEditMode',
@@ -87,7 +87,7 @@ function getEditConfig(action) {
 function getSaveConfig(action) {
   return {
     key: TopNavIds.SAVE,
-    description: i18n.translate('kbn.dashboard.topNave.saveConfig.description', {
+    description: i18n.translate('kbn.dashboard.topNave.saveConfigDescription', {
       defaultMessage: 'Save your dashboard',
     }),
     testId: 'dashboardSaveMenuItem',
@@ -101,7 +101,7 @@ function getSaveConfig(action) {
 function getViewConfig(action) {
   return {
     key: 'cancel',
-    description: i18n.translate('kbn.dashboard.topNave.viewConfig.description', {
+    description: i18n.translate('kbn.dashboard.topNave.viewConfigDescription', {
       defaultMessage: 'Cancel editing and switch to view-only mode',
     }),
     testId: 'dashboardViewOnlyMode',
@@ -115,7 +115,7 @@ function getViewConfig(action) {
 function getCloneConfig(action) {
   return {
     key: TopNavIds.CLONE,
-    description: i18n.translate('kbn.dashboard.topNave.cloneConfig.description', {
+    description: i18n.translate('kbn.dashboard.topNave.cloneConfigDescription', {
       defaultMessage: 'Create a copy of your dashboard',
     }),
     testId: 'dashboardClone',
@@ -129,7 +129,7 @@ function getCloneConfig(action) {
 function getAddConfig(action) {
   return {
     key: TopNavIds.ADD,
-    description: i18n.translate('kbn.dashboard.topNave.addConfig.description', {
+    description: i18n.translate('kbn.dashboard.topNave.addConfigDescription', {
       defaultMessage: 'Add a panel to the dashboard',
     }),
     testId: 'dashboardAddPanelButton',
@@ -143,7 +143,7 @@ function getAddConfig(action) {
 function getShareConfig(action) {
   return {
     key: TopNavIds.SHARE,
-    description: i18n.translate('kbn.dashboard.topNave.shareConfig.description', {
+    description: i18n.translate('kbn.dashboard.topNave.shareConfigDescription', {
       defaultMessage: 'Share Dashboard',
     }),
     testId: 'shareTopNavButton',
@@ -157,7 +157,7 @@ function getShareConfig(action) {
 function getOptionsConfig(action) {
   return {
     key: TopNavIds.OPTIONS,
-    description: i18n.translate('kbn.dashboard.topNave.optionsConfig.description', {
+    description: i18n.translate('kbn.dashboard.topNave.optionsConfigDescription', {
       defaultMessage: 'Options',
     }),
     testId: 'dashboardOptionsButton',

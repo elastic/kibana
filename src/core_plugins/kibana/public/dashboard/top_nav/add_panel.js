@@ -154,7 +154,7 @@ class DashboardAddPanelUi extends React.Component {
           <EuiTitle size="s">
             <h1>
               <FormattedMessage
-                id="kbn.dashboard.topNav.addPanel.title"
+                id="kbn.dashboard.topNav.addPanelTitle"
                 defaultMessage="Add Panels"
               />
             </h1>

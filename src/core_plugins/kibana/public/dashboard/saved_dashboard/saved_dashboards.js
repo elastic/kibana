@@ -30,7 +30,7 @@ const module = uiModules.get('app/dashboard');
 // edited by the object editor.
 savedObjectManagementRegistry.register({
   service: 'savedDashboards',
-  title: i18n.translate('kbn.dashboard.savedDashboards.title', {
+  title: i18n.translate('kbn.dashboard.savedDashboardsTitle', {
     defaultMessage: 'dashboards',
   }),
 });

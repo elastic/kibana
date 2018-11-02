@@ -46,8 +46,8 @@ app.directive('dashboardListing', function (reactDirective) {
   return reactDirective(injectI18nProvider(DashboardListing));
 });
 
-function createNewDashboardCtrl($scope) {
-  $scope.visitVisualizeAppLinkText = i18n.translate('kbn.dashboard.visitVisualizeAppLinkText', {
+function createNewDashboardCtrl($scope, i18n) {
+  $scope.visitVisualizeAppLinkText = i18n('kbn.dashboard.visitVisualizeAppLinkText', {
     defaultMessage: 'visit the Visualize app',
   });
 }

@@ -105,7 +105,7 @@ class DashboardPanelUi extends React.Component {
         ref={panelElement => this.panelElement = panelElement}
       >
         {!this.props.initialized && <FormattedMessage
-          id="kbn.dashboard.panel.ebmeddableViewport.loadingLabel"
+          id="kbn.dashboard.panel.embeddableViewport.loadingLabel"
           defaultMessage="loading…"
         />}
       </div>
