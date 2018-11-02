@@ -6,6 +6,7 @@
 
 import chrome from 'ui/chrome';
 import React from 'react';
+import _ from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { applyTheme } from 'ui/theme';
@@ -21,7 +22,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { showOptionsPopover } from '../components/top_nav/show_options_popover';
 import { toastNotifications } from 'ui/notify';
-import { getMapReady } from "../selectors/map_selectors";
+import { getMapReady, getTimeFilters } from "../selectors/map_selectors";
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 
@@ -48,6 +49,9 @@ app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbStat
         zoom: mapState.zoom,
         center: mapState.center,
       }));
+      if (mapState.timeFilters) {
+        store.dispatch(setTimeFilters(mapState.timeFilters));
+      }
     }
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
@@ -62,6 +66,11 @@ app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbStat
     if (isDarkTheme !== getIsDarkTheme(store.getState())) {
       isDarkTheme = getIsDarkTheme(store.getState());
       updateTheme();
+    }
+
+    const timeFilters = getTimeFilters(store.getState());
+    if (!_.isEqual(timeFilters, timefilter.getTime())) {
+      timefilter.setTime(timeFilters);
     }
 
     // Part of initial syncing of store from saved object
