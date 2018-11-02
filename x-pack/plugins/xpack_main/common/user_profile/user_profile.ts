@@ -19,7 +19,7 @@ export class UserProfile {
   }
 
   public canAccessFeature(feature: string, defaultValue: boolean = true): boolean {
-    return this.hasCapability(`ui:${feature}/read`, defaultValue);
+    return this.hasCapability(`ui:${feature}`, defaultValue);
   }
 
   public canReadSavedObject(savedObjectType: string, defaultValue: boolean = true): boolean {
