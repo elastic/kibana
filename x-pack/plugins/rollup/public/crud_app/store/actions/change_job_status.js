@@ -8,25 +8,57 @@ import { toastNotifications } from 'ui/notify';
 import {
   startJobs as sendStartJobsRequest,
   stopJobs as sendStopJobsRequest,
+  createNoticeableDelay,
 } from '../../services';
+
+import {
+  UPDATE_JOB_START,
+  UPDATE_JOB_SUCCESS,
+  UPDATE_JOB_FAILURE,
+} from '../action_types';
+
 import { refreshJobs } from './refresh_jobs';
 
 export const startJobs = (jobIds) => async (dispatch) => {
+  dispatch({
+    type: UPDATE_JOB_START,
+  });
+
   try {
-    await sendStartJobsRequest(jobIds);
+    await createNoticeableDelay(sendStartJobsRequest(jobIds));
   } catch (error) {
+    dispatch({
+      type: UPDATE_JOB_FAILURE,
+    });
+
     return toastNotifications.addDanger(error.data.message);
   }
+
+  dispatch({
+    type: UPDATE_JOB_SUCCESS,
+  });
 
   dispatch(refreshJobs());
 };
 
 export const stopJobs = (jobIds) => async (dispatch) => {
+  dispatch({
+    type: UPDATE_JOB_START,
+  });
+
   try {
-    await sendStopJobsRequest(jobIds);
+    await createNoticeableDelay(sendStopJobsRequest(jobIds));
   } catch (error) {
+    dispatch({
+      type: UPDATE_JOB_FAILURE,
+    });
+
     return toastNotifications.addDanger(error.data.message);
   }
+
+  dispatch({
+    type: UPDATE_JOB_SUCCESS,
+  });
 
   dispatch(refreshJobs());
 };

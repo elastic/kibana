@@ -17,9 +17,13 @@ export class LoggingAction extends BaseAction {
 
   get upstreamJson() {
     const result = super.upstreamJson;
+    const text = !!this.text.trim() ? this.text : undefined;
 
     Object.assign(result, {
-      text: this.text
+      text,
+      logging: {
+        text,
+      }
     });
 
     return result;
