@@ -66,7 +66,7 @@ export function filterSuitesByTags({ log, mocha, include, exclude }) {
   if (exclude.length) {
     log.info('Filtering out any suites that include the tag(s):', exclude);
 
-    const isExcluded = suite => !suite._tags || !suite._tags.some(t => exclude.includes(t));
+    const isNotExcluded = suite => !suite._tags || !suite._tags.some(t => exclude.includes(t));
 
     (function recurse(parentSuite) {
       const children = parentSuite.suites;
@@ -75,7 +75,7 @@ export function filterSuitesByTags({ log, mocha, include, exclude }) {
       for (const child of children) {
         // keep suites that are not explicitly excluded but
         // recurse to remove excluded children
-        if (isExcluded(child)) {
+        if (isNotExcluded(child)) {
           parentSuite.suites.push(child);
           recurse(child);
         }
