@@ -21,48 +21,64 @@ export function buildPrivilegeMap(allSavedObjectTypes: string[], actions: any): 
     features: {
       discover: {
         read_write: [
+          actions.login,
+          ...actions.savedObject.readOperations(['config', 'index-pattern']),
+          ...actions.savedObject.allOperations('search'),
           actions.ui.get('kibana'),
           actions.ui.get('kibana:discover'),
-          ...actions.savedObject.readOperations('index-pattern'),
-          ...actions.savedObject.allOperations('search'),
+          actions.version,
         ],
         read: [
+          actions.login,
+          ...actions.savedObject.readOperations(['config', 'index-pattern', 'search']),
           actions.ui.get('kibana'),
           actions.ui.get('kibana:discover'),
-          ...actions.savedObject.readOperations(['index-pattern', 'search']),
+          actions.version,
         ],
         share: [actions.savedObject.get('search', 'share')],
       },
       visualize: {
         all: [
+          actions.login,
           ...actions.savedObject.allOperations('visualization'),
-          ...actions.savedObject.readOperations(['index-pattern', 'search']),
+          ...actions.savedObject.readOperations(['config', 'index-pattern', 'search']),
           actions.ui.get('kibana'),
           actions.ui.get('kibana:visualize'),
+          actions.version,
         ],
         read: [
-          ...actions.savedObject.readOperations(['index-pattern', 'search', 'visualization']),
+          actions.login,
+          ...actions.savedObject.readOperations([
+            'config',
+            'index-pattern',
+            'search',
+            'visualization',
+          ]),
           actions.ui.get('kibana'),
           actions.ui.get('kibana:visualize'),
+          actions.version,
         ],
       },
       dashboard: {
         all: [
-          actions.ui.get(`kibana`),
-          actions.ui.get(`kibana:dashboard`),
+          actions.login,
+          ...actions.savedObject.allOperations(['dashboard']),
           ...actions.savedObject.readOperations([
+            'config',
             'index-pattern',
             'search',
             'visualization',
             'timelion',
             'canvas',
           ]),
-          ...actions.savedObject.allOperations(['dashboard']),
-        ],
-        read: [
           actions.ui.get(`kibana`),
           actions.ui.get(`kibana:dashboard`),
+          actions.version,
+        ],
+        read: [
+          actions.login,
           ...actions.savedObject.readOperations([
+            'config',
             'index-pattern',
             'search',
             'visualization',
@@ -70,73 +86,105 @@ export function buildPrivilegeMap(allSavedObjectTypes: string[], actions: any): 
             'canvas',
             'dashboard',
           ]),
+          actions.ui.get(`kibana`),
+          actions.ui.get(`kibana:dashboard`),
+          actions.version,
         ],
       },
       timelion: {
         all: [
-          actions.ui.get(`timelion`),
-          ...actions.savedObject.readOperations(['index-pattern']),
+          actions.login,
+          ...actions.savedObject.readOperations(['config', 'index-pattern']),
           ...actions.savedObject.allOperations(['timelion']),
+          actions.ui.get(`timelion`),
+          actions.version,
         ],
         read: [
+          actions.login,
+          ...actions.savedObject.readOperations(['config', 'index-pattern', 'timelion']),
           actions.ui.get(`timelion`),
-          ...actions.savedObject.readOperations(['index-pattern', 'timelion']),
+          actions.version,
         ],
       },
       canvas: {
         all: [
-          actions.ui.get(`canvas`),
+          actions.login,
           ...actions.savedObject.readOperations(['index-pattern']),
           ...actions.savedObject.allOperations(['canvas']),
+          actions.ui.get(`canvas`),
+          actions.version,
         ],
         read: [
-          actions.ui.get(`canvas`),
+          actions.login,
           ...actions.savedObject.readOperations(['index-pattern', 'canvas']),
+          actions.ui.get(`canvas`),
+          actions.version,
         ],
       },
       apm: {
-        all: [actions.ui.get(`apm`)],
+        all: [actions.login, actions.ui.get(`apm`), actions.version],
       },
       ml: {
-        all: [actions.ui.get(`ml`)],
+        all: [actions.login, actions.ui.get(`ml`), actions.version],
       },
       graph: {
         all: [
-          actions.ui.get(`graph`),
+          actions.login,
           ...actions.savedObject.readOperations(['index-pattern']),
           ...actions.savedObject.allOperations(['graph']),
+          actions.ui.get(`graph`),
+          actions.version,
         ],
         read: [
-          actions.ui.get(`graph`),
+          actions.login,
           ...actions.savedObject.readOperations(['index-pattern', 'graph']),
+          actions.ui.get(`graph`),
+          actions.version,
         ],
       },
       devTools: {
         all: [
+          actions.api.get('console/proxy/execute'),
+          actions.login,
+          actions.savedObject.readOperations('config'),
           actions.ui.get(`kibana`),
           actions.ui.get('kibana:dev_tools'),
-          'api:console/proxy/execute',
+          actions.version,
         ],
       },
       monitoring: {
-        all: [actions.ui.get(`monitoring`)],
+        all: [
+          actions.login,
+          actions.savedObject.readOperations('config'),
+          actions.ui.get(`monitoring`),
+          actions.version,
+        ],
       },
       // This is a subfeature of a feature within an application
       // it feels strange to put the feature at the same level as a full-featured application
       advancedSettings: {
         all: [
-          actions.ui.get(`kibana:management:advancedSettings`),
+          actions.login,
           ...actions.savedObject.allOperations(['config']),
+          actions.ui.get(`kibana:management:advancedSettings`),
+          actions.version,
         ],
         read: [
+          actions.login,
           // not being able to write config makes some things hard:
           // automatic assignment of default index pattern
-          actions.ui.get(`kibana:management:advancedSettings`),
           ...actions.savedObject.readOperations(['config']),
+          actions.ui.get(`kibana:management:advancedSettings`),
+          actions.version,
         ],
       },
       management: {
-        all: [actions.ui.get(`kibana`), actions.ui.get(`kibana:management`)],
+        all: [
+          actions.login,
+          actions.ui.get(`kibana`),
+          actions.ui.get(`kibana:management`),
+          actions.version,
+        ],
       },
     },
     global: {
