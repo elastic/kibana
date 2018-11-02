@@ -136,16 +136,25 @@ describe('callClient', () => {
       });
 
       it(`still bubbles up the failure`, () => {
-        const searchRequestFail = createSearchRequest('fail', {
+        const searchRequestFail1 = createSearchRequest('fail1', {
           source: {
             getField: () => ({ type: 'fail' }),
           },
         });
 
-        searchRequests = [ searchRequestFail ];
+        const searchRequestFail2 = createSearchRequest('fail2', {
+          source: {
+            getField: () => ({ type: 'fail' }),
+          },
+        });
+
+        searchRequests = [ searchRequestFail1, searchRequestFail2 ];
 
         return callClient(searchRequests).then(results => {
-          expect(results).to.eql([{ error: new Error('Search failed') }]);
+          expect(results).to.eql([
+            { error: new Error('Search failed') },
+            { error: new Error('Search failed') },
+          ]);
         });
       });
     });
