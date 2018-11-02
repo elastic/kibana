@@ -9,7 +9,7 @@ import { first, tap, mergeMap } from 'rxjs/operators';
 import fs from 'fs';
 import getPort from 'get-port';
 import { promisify } from 'bluebird';
-import { LevelLogger } from '../../../../server/lib/level_logger';
+import { LevelLogger } from '../../../server/lib/level_logger';
 import { i18n } from '@kbn/i18n';
 
 const fsp = {

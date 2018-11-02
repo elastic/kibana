@@ -150,6 +150,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
         return 'PDF';
       case 'csv':
         return 'CSV';
+      case 'png':
+        return 'PNG';
       default:
         return this.props.reportType;
     }

@@ -52,6 +52,24 @@ function reportingProvider(Private: any, dashboardConfig: any, i18n: I18nService
       };
     };
 
+    const getPngJobParams = () => {
+      // Replace hashes with original RISON values.
+      const unhashedUrl = unhashUrl(window.location.href, getUnhashableStates());
+      const relativeUrl = unhashedUrl.replace(window.location.origin + chrome.getBasePath(), '');
+
+      const browserTimezone =
+        chrome.getUiSettingsClient().get('dateFormat:tz') === 'Browser'
+          ? moment.tz.guess()
+          : chrome.getUiSettingsClient().get('dateFormat:tz');
+
+      return {
+        ...sharingData,
+        objectType,
+        browserTimezone,
+        relativeUrl,
+      };
+    };
+
     const shareActions = [];
     if (xpackInfo.get('features.reporting.printablePdf.showLinks', false)) {
       const panelTitle = i18n('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
@@ -84,7 +102,32 @@ function reportingProvider(Private: any, dashboardConfig: any, i18n: I18nService
       });
     }
 
-    // TODO register PNG menu item once PNG is supported on server side
+    if (xpackInfo.get('features.reporting.png.showLinks', false)) {
+      const panelTitle = 'PNG Reports';
+
+      shareActions.push({
+        shareMenuItem: {
+          name: panelTitle,
+          icon: 'document',
+          toolTipContent: xpackInfo.get('features.reporting.png.message'),
+          disabled: !xpackInfo.get('features.reporting.png.enableLinks', false) ? true : false,
+          ['data-test-subj']: 'pngReportMenuItem',
+        },
+        panel: {
+          title: panelTitle,
+          content: (
+            <ScreenCapturePanelContent
+              reportType="png"
+              objectType={objectType}
+              objectId={objectId}
+              getJobParams={getPngJobParams}
+              isDirty={isDirty}
+              onClose={onClose}
+            />
+          ),
+        },
+      });
+    }
 
     return shareActions;
   };

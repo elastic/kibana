@@ -5,7 +5,7 @@
  */
 
 import url from 'url';
-import { getAbsoluteUrlFactory } from './get_absolute_url';
+import { getAbsoluteUrlFactory } from '../../../common/execute_job/get_absolute_url';
 import { i18n } from '@kbn/i18n';
 
 export function compatibilityShimFactory(server) {

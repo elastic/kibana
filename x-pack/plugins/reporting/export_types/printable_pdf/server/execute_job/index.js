@@ -5,6 +5,7 @@
  */
 
 import url from 'url';
+import { cryptoFactory } from '../../../../server/lib/crypto';
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { omit } from 'lodash';
@@ -12,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { cryptoFactory } from '../../../../server/lib/crypto';
 import { compatibilityShimFactory } from './compatibility_shim';
 
 const KBN_SCREENSHOT_HEADER_BLACKLIST = [
