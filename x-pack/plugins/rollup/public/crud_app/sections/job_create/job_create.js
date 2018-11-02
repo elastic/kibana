@@ -228,7 +228,7 @@ export class JobCreateUi extends Component {
       this.onFieldsChange({
         dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : null,
       }, STEP_DATE_HISTOGRAM);
-    }).catch(() => {
+    }).catch((error) => {
       // We don't need to do anything if this component has been unmounted.
       if (!this._isMounted) {
         return;
@@ -239,8 +239,22 @@ export class JobCreateUi extends Component {
         return;
       }
 
-      // TODO: Show toast or inline error.
+      const { error: errorString, statusCode } = error.data;
+
+      const indexPatternAsyncErrors = [(
+        <FormattedMessage
+          id="xpack.rollupJobs.create.errors.indexPatternValidationError"
+          defaultMessage="There was a problem validating this index pattern: {statusCode} {error}"
+          values={{ error: errorString, statusCode }}
+        />
+      )];
+
       this.setState({
+        indexPatternAsyncErrors,
+        indexPatternDateFields: [],
+        indexPatternTermsFields: [],
+        indexPatternHistogramFields: [],
+        indexPatternMetricsFields: [],
         isValidatingIndexPattern: false,
       });
     });
