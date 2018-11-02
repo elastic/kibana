@@ -55,12 +55,17 @@ function TimelineAxis({ plotValues, agentMarks }) {
                 tickSize={0}
                 tickValues={xAxisTickValues}
                 tickFormat={tickFormat}
+                tickPadding={20}
                 style={{
                   text: { fill: colors.gray3 }
                 }}
               />
 
-              <LastTickValue x={xScale(xMax)} value={tickFormat(xMax)} />
+              <LastTickValue
+                x={xScale(xMax)}
+                value={tickFormat(xMax)}
+                marginTop={28}
+              />
 
               {agentMarks.map(agentMark => (
                 <AgentMarker

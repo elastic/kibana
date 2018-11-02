@@ -26,13 +26,13 @@ export function registerKqlTelemetryApi(server) {
     method: 'POST',
     config: {
       validate: {
-        payload: {
+        payload: Joi.object({
           opt_in: Joi.bool().required(),
-        },
+        }),
       },
       tags: ['api'],
     },
-    handler: async function (request, reply) {
+    handler: async function (request) {
       const { savedObjects: { getSavedObjectsRepository } } = server;
       const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
       const internalRepository = getSavedObjectsRepository(callWithInternalUser);
@@ -51,10 +51,10 @@ export function registerKqlTelemetryApi(server) {
         );
       }
       catch (error) {
-        reply(new Boom('Something went wrong', { statusCode: error.status, data: { success: false } }));
+        return new Boom('Something went wrong', { statusCode: error.status, data: { success: false } });
       }
 
-      reply({ success: true });
+      return { success: true };
     },
   });
 }

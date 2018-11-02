@@ -36,7 +36,9 @@ describe('plugins/elasticsearch', function () {
           elasticsearch: {}
         },
         expose: sinon.mock(),
-        on: sinon.stub(),
+        events: {
+          on: sinon.stub(),
+        }
       };
 
       clusters = createClusters(server);
@@ -86,7 +88,6 @@ describe('plugins/elasticsearch', function () {
 
     it('closes all clusters', async () => {
       const server = new Hapi.Server();
-      server.connection({ port: 0 });
       const clusters = createClusters(server);
       const cluster = clusters.create('name', { config: true });
       expect(cluster).to.have.property('stub', true);

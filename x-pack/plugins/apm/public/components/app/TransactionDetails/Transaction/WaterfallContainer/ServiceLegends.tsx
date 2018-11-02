@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { px, unit } from '../../../../../style/variables';
@@ -13,7 +14,7 @@ import Legend from '../../../../shared/charts/Legend';
 const Legends = styled.div`
   display: flex;
 
-  div {
+  > * {
     margin-right: ${px(unit)};
     &:last-child {
       margin-right: 0;
@@ -30,6 +31,9 @@ interface Props {
 export function ServiceLegends({ serviceColors }: Props) {
   return (
     <Legends>
+      <EuiTitle size="xxxs">
+        <span>Services</span>
+      </EuiTitle>
       {Object.entries(serviceColors).map(([label, color]) => (
         <Legend key={color} color={color} text={label} />
       ))}

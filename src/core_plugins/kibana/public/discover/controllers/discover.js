@@ -63,6 +63,7 @@ import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -295,10 +296,19 @@ function discoverController(
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   docTitle.change(`Discover${pageTitleSuffix}`);
 
+  const discoverBreadcrumbsTitle = i18n.translate('kbn.discover.discoverBreadcrumbsTitle', {
+    defaultMessage: 'Discover',
+  });
+
   if (savedSearch.id && savedSearch.title) {
-    breadcrumbState.set([{ text: 'Discover', href: '#/discover' }, { text: savedSearch.title }]);
+    breadcrumbState.set([{
+      text: discoverBreadcrumbsTitle,
+      href: '#/discover'
+    }, { text: savedSearch.title }]);
   } else {
-    breadcrumbState.set([{ text: 'Discover' }]);
+    breadcrumbState.set([{
+      text: discoverBreadcrumbsTitle,
+    }]);
   }
 
   let stateMonitor;
