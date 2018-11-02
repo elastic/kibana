@@ -206,3 +206,16 @@ Array [
 ]
 `);
 });
+
+it('does nothing if everything excluded', async () => {
+  const { history } = await setup({
+    include: [],
+    exclude: ['level1', 'level2a'],
+  });
+
+  expect(history).toMatchInlineSnapshot(`
+Array [
+  "info: Filtering out any suites that include the tag(s): [ 'level1', 'level2a' ]",
+]
+`);
+});
