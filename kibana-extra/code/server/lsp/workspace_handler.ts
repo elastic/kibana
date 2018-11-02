@@ -74,6 +74,7 @@ export class WorkspaceHandler {
     if (workspaceHeadCommit.sha() !== targetCommit.sha()) {
       const commit = await workspaceRepo.getCommit(targetCommit.sha());
       this.log.info(`checkout ${workspaceRepo.workdir()} to commit ${targetCommit.sha()}`);
+      // @ts-ignore
       const result = await Reset.reset(workspaceRepo, commit, Reset.TYPE.HARD, {});
       if (result !== undefined && result !== Error.CODE.OK) {
         throw Boom.internal(`checkout workspace to commit ${targetCommit.sha()} failed.`);
@@ -160,11 +161,12 @@ export class WorkspaceHandler {
         for (const full of result) {
           if (full.symbols) {
             for (const symbol of full.symbols) {
-              const parsedLocation = this.convertLocation(symbol.symbolInformation.location);
-              if (parsedLocation) {
-                symbol.repoUri = parsedLocation.repoUri;
-                symbol.revision = parsedLocation.revision;
-              }
+              // TODO why this is still here?
+              // const parsedLocation = this.convertLocation(symbol.symbolInformation.location);
+              // if (parsedLocation) {
+              //   symbol.repoUri = parsedLocation.repoUri;
+              //   symbol.revision = parsedLocation.revision;
+              // }
               if (symbol.contents !== null || symbol.contents !== undefined) {
                 this.handleHoverContents(symbol);
               }

@@ -18,7 +18,7 @@ import { RepositoryUtils } from '../../common/repository_utils';
 
 const options = {
   enabled: true,
-  queueIndex: '.codesearch-worker-queue',
+  queueIndex: '.code-worker-queue',
   queueTimeout: 60 * 60 * 1000, // 1 hour by default
   updateFreqencyMs: 5 * 60 * 1000, // 5 minutes by default
   indexFrequencyMs: 24 * 60 * 60 * 1000, // 1 day by default

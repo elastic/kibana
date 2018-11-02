@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SymbolLocator } from '@codesearch/lsp-extension';
+import { SymbolLocator } from '@code/lsp-extension';
 import { Monaco } from 'init-monaco';
 import { editor, languages } from 'monaco-editor';
 import { Location } from 'vscode-languageserver-types';
