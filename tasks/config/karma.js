@@ -48,7 +48,7 @@ module.exports = function (grunt) {
       autoWatch: false,
       browsers: [pickBrowser()],
       customLaunchers: {
-        Chrome_Headless: { 
+        Chrome_Headless: {
           base: 'Chrome',
           flags: [
             '--headless',
