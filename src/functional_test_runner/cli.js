@@ -28,15 +28,15 @@ const cmd = new Command('node scripts/functional_test_runner');
 const resolveConfigPath = v => resolve(process.cwd(), v);
 const defaultConfigPath = resolveConfigPath('test/functional/config.js');
 
-const createMultiArgCollector = () => () => {
+const createMultiArgCollector = (map) => () => {
   const paths = [];
   return (arg) => {
-    paths.push(resolve(arg));
+    paths.push(map ? map(arg) : arg);
     return paths;
   };
 };
 
-const collectExcludePaths = createMultiArgCollector();
+const collectExcludePaths = createMultiArgCollector(a => resolve(a));
 const collectIncludeTags = createMultiArgCollector();
 const collectExcludeTags = createMultiArgCollector();
 
