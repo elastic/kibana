@@ -17,16 +17,24 @@
  * under the License.
  */
 
+/* eslint-disable no-multi-str*/
+
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 export function noValuesDisableMsg(fieldName, indexPatternName) {
-  return `Filtering occurs on the "${fieldName}" field,
-which doesn't exist on any documents in the "${indexPatternName}" index pattern.
-Choose a different field or index documents that contain values for this field.`;
+  return i18n.translate('inputControl.control.noValuesDisableTooltip', {
+    defaultMessage: 'Filtering occurs on the "{fieldName}" field, which doesn\'t exist on any documents in the "{indexPatternName}" \
+index pattern. Choose a different field or index documents that contain values for this field.',
+    values: { fieldName: fieldName, indexPatternName: indexPatternName }
+  });
 }
 
 export function noIndexPatternMsg(indexPatternId) {
-  return `Could not locate index-pattern id: ${indexPatternId}.`;
+  return i18n.translate('inputControl.control.noIndexPatternTooltip', {
+    defaultMessage: 'Could not locate index-pattern id: {indexPatternId}.',
+    values: { indexPatternId }
+  });
 }
 
 export class Control {
@@ -43,7 +51,9 @@ export class Control {
     // restore state from kibana filter context
     this.reset();
     // disable until initialized
-    this.disable('Control has not been initialized');
+    this.disable(i18n.translate('inputControl.control.notInitializedTooltip', {
+      defaultMessage: 'Control has not been initialized'
+    }));
   }
 
   async fetch() {

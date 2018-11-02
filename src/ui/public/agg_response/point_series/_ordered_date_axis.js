@@ -19,29 +19,26 @@
 
 import moment from 'moment';
 
-export function PointSeriesOrderedDateAxisProvider() {
+export function orderedDateAxis(chart) {
+  const xAgg = chart.aspects.x.aggConfig;
+  const buckets = xAgg.buckets;
+  const format = buckets.getScaledDateFormat();
 
-  return function orderedDateAxis(vis, chart) {
-    const xAgg = chart.aspects.x.aggConfig;
-    const buckets = xAgg.buckets;
-    const format = buckets.getScaledDateFormat();
-
-    chart.xAxisFormatter = function (val) {
-      return moment(val).format(format);
-    };
-
-    chart.ordered = {
-      date: true,
-      interval: buckets.getInterval(),
-    };
-
-    const axisOnTimeField = xAgg.fieldIsTimeField();
-    const bounds = buckets.getBounds();
-    if (bounds && axisOnTimeField) {
-      chart.ordered.min = bounds.min;
-      chart.ordered.max = bounds.max;
-    } else {
-      chart.ordered.endzones = false;
-    }
+  chart.xAxisFormatter = function (val) {
+    return moment(val).format(format);
   };
+
+  chart.ordered = {
+    date: true,
+    interval: buckets.getInterval(),
+  };
+
+  const axisOnTimeField = xAgg.fieldIsTimeField();
+  const bounds = buckets.getBounds();
+  if (bounds && axisOnTimeField) {
+    chart.ordered.min = bounds.min;
+    chart.ordered.max = bounds.max;
+  } else {
+    chart.ordered.endzones = false;
+  }
 }

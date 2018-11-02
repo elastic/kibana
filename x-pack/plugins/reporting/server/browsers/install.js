@@ -6,14 +6,12 @@
 
 import fs from 'fs';
 import path from 'path';
-import { promisify } from 'bluebird';
-import { extract } from './extract';
+import { promisify } from 'util';
 import { BROWSERS_BY_TYPE } from './browsers';
+import { extract } from './extract';
+import { md5 } from './download/checksum';
 
-const fsp = {
-  access: promisify(fs.access, fs),
-  chmod: promisify(fs.chmod, fs),
-};
+const chmod = promisify(fs.chmod);
 
 /**
  * "install" a browser by type into installs path by extracting the downloaded
@@ -33,13 +31,13 @@ export async function installBrowser(logger, browserConfig, browserType, install
   }
 
   const binaryPath = path.join(installsPath, pkg.binaryRelativePath);
-  try {
-    await fsp.access(binaryPath, fs.X_OK);
-  } catch (accessErr) {
-    // error here means the binary does not exist, so install it
+  const rawChecksum = await md5(binaryPath).catch(() => '');
+
+  if (rawChecksum !== pkg.rawChecksum) {
+    logger.debug(`Extracting ${browserType} to ${binaryPath}`);
     const archive = path.join(browser.paths.archivesPath, pkg.archiveFilename);
     await extract(archive, installsPath);
-    await fsp.chmod(binaryPath, '755');
+    await chmod(binaryPath, '755');
   }
 
   return browser.createDriverFactory(binaryPath, logger, browserConfig);

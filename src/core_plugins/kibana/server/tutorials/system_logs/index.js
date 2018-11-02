@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function systemLogsSpecProvider() {
+export function systemLogsSpecProvider(server, context) {
   const moduleName = 'system';
   const geoipRequired = true;
   const uaRequired = false;
@@ -36,7 +36,6 @@ export function systemLogsSpecProvider() {
       defaultMessage: 'Collect and parse logs written by the local Syslog server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.systemLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `system` Filebeat module collects and parses logs created by the system logging service of common \
 Unix/Linux based distributions. This module is not available on Windows. \
 [Learn more]({learnMoreLink}).',
@@ -60,7 +59,7 @@ Unix/Linux based distributions. This module is not available on Windows. \
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/system_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

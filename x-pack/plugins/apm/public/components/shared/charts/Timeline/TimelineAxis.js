@@ -18,7 +18,7 @@ import { getTimeFormatter } from '../../../../utils/formatters';
 const getXAxisTickValues = (tickValues, xMax) =>
   _.last(tickValues) * 1.05 > xMax ? tickValues.slice(0, -1) : tickValues;
 
-function TimelineAxis({ header, plotValues, agentMarks }) {
+function TimelineAxis({ plotValues, agentMarks }) {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormat = getTimeFormatter(xMax);
   const xAxisTickValues = getXAxisTickValues(tickValues, xMax);
@@ -38,13 +38,12 @@ function TimelineAxis({ header, plotValues, agentMarks }) {
               ...style
             }}
           >
-            {header}
             <XYPlot
               dontCheckIfEmpty
               width={width}
-              height={40}
+              height={margins.top}
               margin={{
-                top: 40,
+                top: margins.top,
                 left: margins.left,
                 right: margins.right
               }}
@@ -56,18 +55,23 @@ function TimelineAxis({ header, plotValues, agentMarks }) {
                 tickSize={0}
                 tickValues={xAxisTickValues}
                 tickFormat={tickFormat}
+                tickPadding={20}
                 style={{
                   text: { fill: colors.gray3 }
                 }}
               />
 
-              <LastTickValue x={xScale(xMax)} value={tickFormat(xMax)} />
+              <LastTickValue
+                x={xScale(xMax)}
+                value={tickFormat(xMax)}
+                marginTop={28}
+              />
 
               {agentMarks.map(agentMark => (
                 <AgentMarker
-                  key={agentMark.timeAxis}
+                  key={agentMark.name}
                   agentMark={agentMark}
-                  x={xScale(agentMark.timeAxis)}
+                  x={xScale(agentMark.us)}
                 />
               ))}
             </XYPlot>

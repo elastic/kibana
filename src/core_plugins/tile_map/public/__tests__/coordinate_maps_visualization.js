@@ -36,6 +36,7 @@ function mockRawData() {
   do {
     node = stack.pop();
     if (typeof node === 'object') {
+      // eslint-disable-next-line guard-for-in
       for (const key in node) {
         if (node.hasOwnProperty(key)) {
           if (key === 'aggConfig') {
@@ -50,7 +51,7 @@ function mockRawData() {
 mockRawData();
 
 
-const manifestUrl = 'https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest';
+const manifestUrl = 'https://catalogue-staging.maps.elastic.co/v2/manifest';
 const tmsManifestUrl = `"https://tiles-maps-stage.elastic.co/v2/manifest`;
 const manifest = {
   'services': [{

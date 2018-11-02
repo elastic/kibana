@@ -48,6 +48,7 @@ describe('Vis Class', function () {
   const state = (type) => ({
     type: {
       visConfig: { defaults: {} },
+      schemas: {},
       ...type,
     }
   });

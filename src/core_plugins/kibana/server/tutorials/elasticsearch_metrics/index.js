@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function elasticsearchMetricsSpecProvider() {
+export function elasticsearchMetricsSpecProvider(server, context) {
   const moduleName = 'elasticsearch';
   return {
     id: 'elasticsearchMetrics',
@@ -34,7 +34,6 @@ export function elasticsearchMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from Elasticsearch.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `elasticsearch` Metricbeat module fetches internal metrics from Elasticsearch. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -55,7 +54,7 @@ export function elasticsearchMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

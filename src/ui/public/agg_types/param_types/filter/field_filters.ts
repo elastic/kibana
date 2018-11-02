@@ -18,7 +18,7 @@
  */
 import { FieldParamType } from '../';
 import { IndexPattern } from '../../../index_patterns';
-import { AggConfig } from '../../../vis';
+import { AggConfig, Vis } from '../../../vis';
 
 type AggTypeFieldFilter = (
   field: any,
@@ -53,16 +53,11 @@ class AggTypeFieldFilters {
    * @param aggConfig The aggConfig for which the returning list will be used.
    * @return A filtered list of the passed fields.
    */
-  public filter(
-    fields: any[],
-    fieldParamType: FieldParamType,
-    indexPattern: IndexPattern,
-    aggConfig: AggConfig
-  ) {
+  public filter(fields: any[], fieldParamType: FieldParamType, aggConfig: AggConfig, vis: Vis) {
     const allFilters = Array.from(this.filters);
     const allowedAggTypeFields = fields.filter(field => {
       const isAggTypeFieldAllowed = allFilters.every(filter =>
-        filter(field, fieldParamType, indexPattern, aggConfig)
+        filter(field, fieldParamType, aggConfig, vis)
       );
       return isAggTypeFieldAllowed;
     });

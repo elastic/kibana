@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import {
@@ -43,7 +43,7 @@ const control = {
 };
 
 test('renders RangeControl', () => {
-  const component = shallow(<RangeControl
+  const component = shallowWithIntl(<RangeControl.WrappedComponent
     control={control}
     controlIndex={0}
     stageFilter={() => {}}
@@ -66,7 +66,7 @@ test('disabled', () => {
       return false;
     }
   };
-  const component = shallow(<RangeControl
+  const component = shallowWithIntl(<RangeControl.WrappedComponent
     control={disabledRangeControl}
     controlIndex={0}
     stageFilter={() => {}}
@@ -75,7 +75,7 @@ test('disabled', () => {
 });
 
 describe('min and max input values', () => {
-  const component = mount(<RangeControl
+  const component = mountWithIntl(<RangeControl.WrappedComponent
     control={control}
     controlIndex={0}
     stageFilter={() => {}}

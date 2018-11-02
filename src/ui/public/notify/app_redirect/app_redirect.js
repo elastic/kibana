@@ -17,9 +17,7 @@
  * under the License.
  */
 
-// Use the util instead of the export from ui/url because that module is tightly coupled with
-// Angular.
-import { modifyUrl } from '../../../../utils/modify_url';
+import { modifyUrl } from '../../../../core/public/utils';
 import { toastNotifications } from '../toasts';
 
 const APP_REDIRECT_MESSAGE_PARAM = 'app_redirect_message';

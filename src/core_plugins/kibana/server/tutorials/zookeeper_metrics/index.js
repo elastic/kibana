@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function zookeeperMetricsSpecProvider() {
+export function zookeeperMetricsSpecProvider(server, context) {
   const moduleName = 'zookeeper';
   return {
     id: moduleName + 'Metrics',
@@ -31,10 +31,9 @@ export function zookeeperMetricsSpecProvider() {
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.zookeeperMetrics.shortDescription', {
-      defaultMessage: 'Fetch interal metrics from a Zookeeper server.',
+      defaultMessage: 'Fetch internal metrics from a Zookeeper server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.zookeeperMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `{moduleName}` Metricbeat module fetches internal metrics from a Zookeeper server. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -55,7 +54,7 @@ export function zookeeperMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

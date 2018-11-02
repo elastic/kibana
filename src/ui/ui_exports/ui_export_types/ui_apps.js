@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { isAbsolute, normalize } from 'path';
 import { flatConcatAtType } from './reduce';
 import { alias, mapSpec, wrap } from './modify_reduce';
 
@@ -30,6 +29,7 @@ function applySpecDefaults(spec, type, pluginSpec) {
     order = 0,
     description = '',
     icon,
+    euiIconType,
     hidden = false,
     linkToLastSubUrl = true,
     listed = !hidden,
@@ -48,14 +48,6 @@ function applySpecDefaults(spec, type, pluginSpec) {
     );
   }
 
-  const styleSheetPath = spec.styleSheetPath ? normalize(spec.styleSheetPath) : undefined;
-
-  if (styleSheetPath && (!isAbsolute(styleSheetPath) || !styleSheetPath.startsWith(pluginSpec.getPublicDir()))) {
-    throw new Error(
-      `[plugin:${pluginId}] uiExports.app.styleSheetPath must be an absolute path within the public directory`
-    );
-  }
-
   return {
     pluginId,
     id,
@@ -64,11 +56,11 @@ function applySpecDefaults(spec, type, pluginSpec) {
     order,
     description,
     icon,
+    euiIconType,
     hidden,
     linkToLastSubUrl,
     listed,
     url,
-    styleSheetPath,
   };
 }
 

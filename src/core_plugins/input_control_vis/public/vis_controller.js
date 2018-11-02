@@ -23,6 +23,8 @@ import { InputControlVis } from './components/vis/input_control_vis';
 import { controlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
 
+import { I18nProvider } from '@kbn/i18n/react';
+
 class VisController {
   constructor(el, vis) {
     this.el = el;
@@ -50,17 +52,19 @@ class VisController {
 
   drawVis = () => {
     render(
-      <InputControlVis
-        updateFiltersOnChange={this.vis.params.updateFiltersOnChange}
-        controls={this.controls}
-        stageFilter={this.stageFilter}
-        submitFilters={this.submitFilters}
-        resetControls={this.updateControlsFromKbn}
-        clearControls={this.clearControls}
-        hasChanges={this.hasChanges}
-        hasValues={this.hasValues}
-        refreshControl={this.refreshControl}
-      />,
+      <I18nProvider>
+        <InputControlVis
+          updateFiltersOnChange={this.vis.params.updateFiltersOnChange}
+          controls={this.controls}
+          stageFilter={this.stageFilter}
+          submitFilters={this.submitFilters}
+          resetControls={this.updateControlsFromKbn}
+          clearControls={this.clearControls}
+          hasChanges={this.hasChanges}
+          hasValues={this.hasValues}
+          refreshControl={this.refreshControl}
+        />
+      </I18nProvider>,
       this.el);
   }
 
@@ -143,10 +147,11 @@ class VisController {
     this.vis.API.queryFilter.addFilters(newFilters, this.vis.params.pinFilters);
   }
 
-  clearControls = () => {
+  clearControls = async () => {
     this.controls.forEach((control) => {
       control.clear();
     });
+    await this.updateNestedControls();
     this.drawVis();
   }
 

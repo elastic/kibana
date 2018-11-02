@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function iisLogsSpecProvider() {
+export function iisLogsSpecProvider(server, context) {
   const moduleName = 'iis';
   const geoipRequired = false;
   const uaRequired = false;
@@ -36,14 +36,13 @@ export function iisLogsSpecProvider() {
       defaultMessage: 'Collect and parse access and error logs created by the IIS HTTP server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.iisLogs.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `iis` Filebeat module parses access and error logs created by the IIS HTTP server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iis.html',
       },
     }),
-    //euiIconType: 'logoIIS',
+    // euiIconType: 'logoIIS',
     artifacts: {
       dashboards: [
         {
@@ -60,7 +59,7 @@ export function iisLogsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/iis_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

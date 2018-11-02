@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import React from 'react';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
@@ -40,20 +41,22 @@ import { VisualizeConstants } from '../visualize/visualize_constants';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
-import { showSaveModal } from './top_nav/show_save_modal';
+import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { DashboardSaveModal } from './top_nav/save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
 import { showOptionsPopover } from './top_nav/show_options_popover';
-import { showShareContextMenu } from 'ui/share';
+import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
-import { DashboardPanelActionsRegistryProvider } from 'ui/dashboard_panel_actions/dashboard_panel_actions_registry';
+import { ContextMenuActionsRegistryProvider } from 'ui/embeddable';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
+import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -61,7 +64,6 @@ const app = uiModules.get('app/dashboard', [
   'react',
   'kibana/courier',
   'kibana/config',
-  'kibana/typeahead',
 ]);
 
 app.directive('dashboardViewportProvider', function (reactDirective) {
@@ -79,13 +81,24 @@ app.directive('dashboardApp', function ($injector) {
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, dashboardConfig, localStorage) {
+    controller: function (
+      $scope,
+      $rootScope,
+      $route,
+      $routeParams,
+      $location,
+      getAppState,
+      dashboardConfig,
+      localStorage,
+      breadcrumbState
+    ) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
-      const panelActionsRegistry = Private(DashboardPanelActionsRegistryProvider);
+      const panelActionsRegistry = Private(ContextMenuActionsRegistryProvider);
       const getUnhashableStates = Private(getUnhashableStatesProvider);
+      const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
       panelActionsStore.initializeFromRegistry(panelActionsRegistry);
 
@@ -133,14 +146,6 @@ app.directive('dashboardApp', function ($injector) {
         dirty: !dash.id
       };
 
-      this.getSharingTitle = () => {
-        return dash.title;
-      };
-
-      this.getSharingType = () => {
-        return 'dashboard';
-      };
-
       dashboardStateManager.registerChangeListener(status => {
         this.appStatus.dirty = status.dirty || !dash.id;
         updateState();
@@ -174,6 +179,23 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.getTitle(),
         dashboardStateManager.getViewMode(),
         dashboardStateManager.getIsDirty(timefilter));
+
+      // Push breadcrumbs to new header navigation
+      const updateBreadcrumbs = () => {
+        breadcrumbState.set([
+          {
+            text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
+              defaultMessage: 'Dashboard',
+            }),
+            href: $scope.landingPageUrl()
+          },
+          { text: $scope.getDashTitle() }
+        ]);
+      };
+      updateBreadcrumbs();
+      dashboardStateManager.registerChangeListener(updateBreadcrumbs);
+      config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
+
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardStateManager.saveState();
       $scope.getShouldShowEditHelp = () => (
@@ -278,7 +300,6 @@ app.directive('dashboardApp', function ($injector) {
       function save(saveOptions) {
         return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
           .then(function (id) {
-            $scope.kbnTopNav.close('save');
             if (id) {
               toastNotifications.addSuccess({
                 title: `Dashboard '${dash.title}' was saved`,
@@ -342,13 +363,17 @@ app.directive('dashboardApp', function ($injector) {
           });
         };
 
-        showSaveModal({
-          onSave,
-          title: currentTitle,
-          description: currentDescription,
-          timeRestore: currentTimeRestore,
-          showCopyOnSave: dash.id ? true : false,
-        });
+        const dashboardSaveModal = (
+          <DashboardSaveModal
+            onSave={onSave}
+            onClose={() => {}}
+            title={currentTitle}
+            description={currentDescription}
+            timeRestore={currentTimeRestore}
+            showCopyOnSave={dash.id ? true : false}
+          />
+        );
+        showSaveModal(dashboardSaveModal);
       };
       navActions[TopNavIds.CLONE] = () => {
         const currentTitle = dashboardStateManager.getTitle();
@@ -379,10 +404,7 @@ app.directive('dashboardApp', function ($injector) {
           $scope.$apply();
         };
 
-        const isLabsEnabled = config.get('visualize:enableLabs');
-        const listingLimit = config.get('savedObjects:listingLimit');
-
-        showAddPanel(chrome.getSavedObjectsClient(), dashboardStateManager.addNewPanel, addNewVis, listingLimit, isLabsEnabled, visTypes);
+        showAddPanel(dashboardStateManager.addNewPanel, addNewVis, visTypes);
       };
       navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
         showOptionsPopover({
@@ -409,6 +431,11 @@ app.directive('dashboardApp', function ($injector) {
           getUnhashableStates,
           objectId: dash.id,
           objectType: 'dashboard',
+          shareContextMenuExtensions,
+          sharingData: {
+            title: dash.title,
+          },
+          isDirty: dashboardStateManager.getIsDirty(),
         });
       };
 

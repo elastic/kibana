@@ -50,6 +50,6 @@ export function createJestConfig({
         reportName: 'X-Pack Jest Tests',
         rootDirectory: xPackKibanaDirectory,
       }]
-    ]
+    ],
   };
 }

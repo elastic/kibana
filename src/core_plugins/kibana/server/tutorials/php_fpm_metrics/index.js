@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function phpfpmMetricsSpecProvider() {
+export function phpfpmMetricsSpecProvider(server, context) {
   const moduleName = 'php_fpm';
   return {
     id: 'phpfpmMetrics',
@@ -34,14 +34,13 @@ export function phpfpmMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from PHP-FPM.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.phpFpmMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html',
       },
     }),
-    //euiIconType: 'logoPHPFPM',
+    euiIconType: 'logoPhp',
     artifacts: {
       dashboards: [
         /*{
@@ -56,7 +55,7 @@ export function phpfpmMetricsSpecProvider() {
     },
     completionTimeMinutes: 10,
     //previewImagePath: '/plugins/kibana/home/tutorial_resources/php_fpm_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

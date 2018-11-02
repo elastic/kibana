@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`xsrf request filter destructiveMethod: DELETE rejects requests without either an xsrf or version header: DELETE reject response 1`] = `"{\\"statusCode\\":400,\\"error\\":\\"Bad Request\\",\\"message\\":\\"Request must contain a kbn-xsrf header.\\"}"`;
-
-exports[`xsrf request filter destructiveMethod: POST rejects requests without either an xsrf or version header: POST reject response 1`] = `"{\\"statusCode\\":400,\\"error\\":\\"Bad Request\\",\\"message\\":\\"Request must contain a kbn-xsrf header.\\"}"`;
-
-exports[`xsrf request filter destructiveMethod: PUT rejects requests without either an xsrf or version header: PUT reject response 1`] = `"{\\"statusCode\\":400,\\"error\\":\\"Bad Request\\",\\"message\\":\\"Request must contain a kbn-xsrf header.\\"}"`;

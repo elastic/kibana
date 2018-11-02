@@ -1,5 +1,5 @@
 <div ng-if="aggIsTooLow" class="form-group">
-  <p class="vis-editor-agg-error">
+  <p class="visEditorAggParam__error">
     "{{ agg.schema.title }}" aggs must run before all other buckets!
   </p>
   <input
@@ -11,16 +11,16 @@
 </div>
 
 <div ng-if="agg.error" class="form-group">
-  <p class="vis-editor-agg-error ng-binding">
+  <p class="visEditorAggParam__error ng-binding">
     {{agg.error}}
   </p>
 </div>
 
 <div ng-if="agg.schema.deprecate" class="form-group">
-  <p ng-show="agg.schema.deprecateMessage" class="vis-editor-agg-error">
+  <p ng-show="agg.schema.deprecateMessage" class="visEditorAggParam__error">
     {{ agg.schema.deprecateMessage }}
   </p>
-  <p ng-show="!agg.schema.deprecateMessage" class="vis-editor-agg-error">
+  <p ng-show="!agg.schema.deprecateMessage" class="visEditorAggParam__error">
     "{{ agg.schema.title }}" has been deprecated.
   </p>
 </div>

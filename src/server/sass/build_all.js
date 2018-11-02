@@ -18,16 +18,15 @@
  */
 
 import { Build } from './build';
-import { collectUiExports } from '../../ui/ui_exports';
 
-export async function buildAll(enabledPluginSpecs) {
-  const { uiAppSpecs = [] } = collectUiExports(enabledPluginSpecs);
-  const bundles = await Promise.all(uiAppSpecs.map(async uiAppSpec => {
-    if (!uiAppSpec.styleSheetPath) {
+export async function buildAll(styleSheets = []) {
+  const bundles = await Promise.all(styleSheets.map(async styleSheet => {
+
+    if (!styleSheet.localPath.endsWith('.scss')) {
       return;
     }
 
-    const bundle = new Build(uiAppSpec.styleSheetPath);
+    const bundle = new Build(styleSheet.localPath);
     await bundle.build();
 
     return bundle;

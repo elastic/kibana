@@ -27,9 +27,8 @@ const options = {
     desc: 'Pass in a config',
   },
   esFrom: {
-    arg: '<snapshot|source>',
-    choices: ['snapshot', 'source'],
-    desc: 'Build Elasticsearch from source or run from snapshot.',
+    arg: '<snapshot|source|path>',
+    desc: 'Build Elasticsearch from source, snapshot or path to existing install dir.',
     default: 'snapshot',
   },
   'kibana-install-dir': {
@@ -54,7 +53,7 @@ export function displayHelp() {
       };
     })
     .map(option => {
-      return `--${option.usage.padEnd(28)} ${option.desc} ${option.default}`;
+      return `--${option.usage.padEnd(30)} ${option.desc} ${option.default}`;
     })
     .join(`\n      `);
 
@@ -78,6 +77,10 @@ export function processOptions(userOptions, defaultConfigPath) {
 
   if (!config) {
     throw new Error(`functional_tests_server: config is required`);
+  }
+
+  if (!userOptions.esFrom) {
+    userOptions.esFrom = 'snapshot';
   }
 
   if (userOptions['kibana-install-dir']) {

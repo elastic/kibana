@@ -17,26 +17,25 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import cluster from 'cluster';
-import { findIndex } from 'lodash';
+import { mockCluster } from './__mocks__/cluster';
+jest.mock('cluster', () => mockCluster());
 
-import MockClusterFork from './_mock_cluster_fork';
+import cluster from 'cluster';
+
 import Worker from './worker';
 import Log from '../log';
 
 const workersToShutdown = [];
 
 function assertListenerAdded(emitter, event) {
-  sinon.assert.calledWith(emitter.on, event);
+  expect(emitter.on).toHaveBeenCalledWith(event, expect.any(Function));
 }
 
 function assertListenerRemoved(emitter, event) {
-  sinon.assert.calledWith(
-    emitter.removeListener,
-    event,
-    emitter.on.args[findIndex(emitter.on.args, { 0: event })][1]
-  );
+  const [, onEventListener] = emitter.on.mock.calls.find(([eventName]) => {
+    return eventName === event;
+  });
+  expect(emitter.removeListener).toHaveBeenCalledWith(event, onEventListener);
 }
 
 function setup(opts = {}) {
@@ -50,81 +49,82 @@ function setup(opts = {}) {
   return worker;
 }
 
-describe('CLI cluster manager', function () {
-  const sandbox = sinon.createSandbox();
+describe('CLI cluster manager', () => {
+  afterEach(async () => {
+    while(workersToShutdown.length > 0) {
+      const worker = workersToShutdown.pop();
+      // If `fork` exists we should set `exitCode` to the non-zero value to
+      // prevent worker from auto restart.
+      if (worker.fork) {
+        worker.fork.exitCode = 1;
+      }
 
-  beforeEach(function () {
-    sandbox.stub(cluster, 'fork').callsFake(() => new MockClusterFork());
-  });
-
-  afterEach(async function () {
-    sandbox.restore();
-
-    for (const worker of workersToShutdown) {
       await worker.shutdown();
     }
+
+    cluster.fork.mockClear();
   });
 
-  describe('#onChange', function () {
-    describe('opts.watch = true', function () {
-      it('restarts the fork', function () {
+  describe('#onChange', () => {
+    describe('opts.watch = true', () => {
+      test('restarts the fork', () => {
         const worker = setup({ watch: true });
-        sinon.stub(worker, 'start');
+        jest.spyOn(worker, 'start').mockImplementation(() => {});
         worker.onChange('/some/path');
         expect(worker.changes).toEqual(['/some/path']);
-        sinon.assert.calledOnce(worker.start);
+        expect(worker.start).toHaveBeenCalledTimes(1);
       });
     });
 
-    describe('opts.watch = false', function () {
-      it('does not restart the fork', function () {
+    describe('opts.watch = false', () => {
+      test('does not restart the fork', () => {
         const worker = setup({ watch: false });
-        sinon.stub(worker, 'start');
+        jest.spyOn(worker, 'start').mockImplementation(() => {});
         worker.onChange('/some/path');
         expect(worker.changes).toEqual([]);
-        sinon.assert.notCalled(worker.start);
+        expect(worker.start).not.toHaveBeenCalled();
       });
     });
   });
 
-  describe('#shutdown', function () {
-    describe('after starting()', function () {
-      it('kills the worker and unbinds from message, online, and disconnect events', async function () {
+  describe('#shutdown', () => {
+    describe('after starting()', () => {
+      test('kills the worker and unbinds from message, online, and disconnect events', async () => {
         const worker = setup();
         await worker.start();
         expect(worker).toHaveProperty('online', true);
         const fork = worker.fork;
-        sinon.assert.notCalled(fork.process.kill);
+        expect(fork.process.kill).not.toHaveBeenCalled();
         assertListenerAdded(fork, 'message');
         assertListenerAdded(fork, 'online');
         assertListenerAdded(fork, 'disconnect');
         worker.shutdown();
-        sinon.assert.calledOnce(fork.process.kill);
+        expect(fork.process.kill).toHaveBeenCalledTimes(1);
         assertListenerRemoved(fork, 'message');
         assertListenerRemoved(fork, 'online');
         assertListenerRemoved(fork, 'disconnect');
       });
     });
 
-    describe('before being started', function () {
-      it('does nothing', function () {
+    describe('before being started', () => {
+      test('does nothing', () => {
         const worker = setup();
         worker.shutdown();
       });
     });
   });
 
-  describe('#parseIncomingMessage()', function () {
-    describe('on a started worker', function () {
-      it(`is bound to fork's message event`, async function () {
+  describe('#parseIncomingMessage()', () => {
+    describe('on a started worker', () => {
+      test(`is bound to fork's message event`, async () => {
         const worker = setup();
         await worker.start();
-        sinon.assert.calledWith(worker.fork.on, 'message');
+        expect(worker.fork.on).toHaveBeenCalledWith('message', expect.any(Function));
       });
     });
 
-    describe('do after', function () {
-      it('ignores non-array messages', function () {
+    describe('do after', () => {
+      test('ignores non-array messages', () => {
         const worker = setup();
         worker.parseIncomingMessage('some string thing');
         worker.parseIncomingMessage(0);
@@ -134,39 +134,39 @@ describe('CLI cluster manager', function () {
         worker.parseIncomingMessage(/weird/);
       });
 
-      it('calls #onMessage with message parts', function () {
+      test('calls #onMessage with message parts', () => {
         const worker = setup();
-        const stub = sinon.stub(worker, 'onMessage');
+        jest.spyOn(worker, 'onMessage').mockImplementation(() => {});
         worker.parseIncomingMessage([10, 100, 1000, 10000]);
-        sinon.assert.calledWith(stub, 10, 100, 1000, 10000);
+        expect(worker.onMessage).toHaveBeenCalledWith(10, 100, 1000, 10000);
       });
     });
   });
 
-  describe('#onMessage', function () {
-    describe('when sent WORKER_BROADCAST message', function () {
-      it('emits the data to be broadcasted', function () {
+  describe('#onMessage', () => {
+    describe('when sent WORKER_BROADCAST message', () => {
+      test('emits the data to be broadcasted', () => {
         const worker = setup();
         const data = {};
-        const stub = sinon.stub(worker, 'emit');
+        jest.spyOn(worker, 'emit').mockImplementation(() => {});
         worker.onMessage('WORKER_BROADCAST', data);
-        sinon.assert.calledWithExactly(stub, 'broadcast', data);
+        expect(worker.emit).toHaveBeenCalledWith('broadcast', data);
       });
     });
 
-    describe('when sent WORKER_LISTENING message', function () {
-      it('sets the listening flag and emits the listening event', function () {
+    describe('when sent WORKER_LISTENING message', () => {
+      test('sets the listening flag and emits the listening event', () => {
         const worker = setup();
-        const stub = sinon.stub(worker, 'emit');
+        jest.spyOn(worker, 'emit').mockImplementation(() => {});
         expect(worker).toHaveProperty('listening', false);
         worker.onMessage('WORKER_LISTENING');
         expect(worker).toHaveProperty('listening', true);
-        sinon.assert.calledWithExactly(stub, 'listening');
+        expect(worker.emit).toHaveBeenCalledWith('listening');
       });
     });
 
-    describe('when passed an unknown message', function () {
-      it('does nothing', function () {
+    describe('when passed an unknown message', () => {
+      test('does nothing', () => {
         const worker = setup();
         worker.onMessage('asdlfkajsdfahsdfiohuasdofihsdoif');
         worker.onMessage({});
@@ -175,46 +175,46 @@ describe('CLI cluster manager', function () {
     });
   });
 
-  describe('#start', function () {
-    describe('when not started', function () {
-      // TODO This test is flaky, see https://github.com/elastic/kibana/issues/15888
-      it.skip('creates a fork and waits for it to come online', async function () {
+  describe('#start', () => {
+    describe('when not started', () => {
+      test('creates a fork and waits for it to come online', async () => {
         const worker = setup();
 
-        sinon.spy(worker, 'on');
+        jest.spyOn(worker, 'on');
 
         await worker.start();
 
-        sinon.assert.calledOnce(cluster.fork);
-        sinon.assert.calledWith(worker.on, 'fork:online');
+        expect(cluster.fork).toHaveBeenCalledTimes(1);
+        expect(worker.on).toHaveBeenCalledWith('fork:online', expect.any(Function));
       });
 
-      // TODO This test is flaky, see https://github.com/elastic/kibana/issues/15888
-      it.skip('listens for cluster and process "exit" events', async function () {
+      test('listens for cluster and process "exit" events', async () => {
         const worker = setup();
 
-        sinon.spy(process, 'on');
-        sinon.spy(cluster, 'on');
+        jest.spyOn(process, 'on');
+        jest.spyOn(cluster, 'on');
 
         await worker.start();
 
-        sinon.assert.calledOnce(cluster.on);
-        sinon.assert.calledWith(cluster.on, 'exit');
-        sinon.assert.calledOnce(process.on);
-        sinon.assert.calledWith(process.on, 'exit');
+        expect(cluster.on).toHaveBeenCalledTimes(1);
+        expect(cluster.on).toHaveBeenCalledWith('exit', expect.any(Function));
+        expect(process.on).toHaveBeenCalledTimes(1);
+        expect(process.on).toHaveBeenCalledWith('exit', expect.any(Function));
       });
     });
 
-    describe('when already started', function () {
-      it('calls shutdown and waits for the graceful shutdown to cause a restart', async function () {
+    describe('when already started', () => {
+      test('calls shutdown and waits for the graceful shutdown to cause a restart', async () => {
         const worker = setup();
         await worker.start();
-        sinon.spy(worker, 'shutdown');
-        sinon.spy(worker, 'on');
+
+        jest.spyOn(worker, 'shutdown');
+        jest.spyOn(worker, 'on');
 
         worker.start();
-        sinon.assert.calledOnce(worker.shutdown);
-        sinon.assert.calledWith(worker.on, 'online');
+
+        expect(worker.shutdown).toHaveBeenCalledTimes(1);
+        expect(worker.on).toHaveBeenCalledWith('online', expect.any(Function));
       });
     });
   });

@@ -20,7 +20,7 @@
 import path from 'path';
 
 import {
-  extractDefaultTranslations,
+  extractMessagesFromPathToMap,
   validateMessageNamespace,
 } from './extract_default_translations';
 
@@ -40,42 +40,21 @@ jest.mock('../../../.i18nrc.json', () => ({
   exclude: [],
 }));
 
-const utils = require('./utils');
-utils.writeFileAsync = jest.fn();
-
 describe('dev/i18n/extract_default_translations', () => {
-  test('extracts messages to en.json', async () => {
+  test('extracts messages from path to map', async () => {
     const [pluginPath] = pluginsPaths;
+    const resultMap = new Map();
 
-    utils.writeFileAsync.mockClear();
-    await extractDefaultTranslations({
-      paths: [pluginPath],
-      output: pluginPath,
-    });
+    await extractMessagesFromPathToMap(pluginPath, resultMap);
 
-    const [[, json]] = utils.writeFileAsync.mock.calls;
-
-    expect(json.toString()).toMatchSnapshot();
-  });
-
-  test('injects default formats into en.json', async () => {
-    const [, pluginPath] = pluginsPaths;
-
-    utils.writeFileAsync.mockClear();
-    await extractDefaultTranslations({
-      paths: [pluginPath],
-      output: pluginPath,
-    });
-
-    const [[, json]] = utils.writeFileAsync.mock.calls;
-
-    expect(json.toString()).toMatchSnapshot();
+    expect([...resultMap].sort()).toMatchSnapshot();
   });
 
   test('throws on id collision', async () => {
     const [, , pluginPath] = pluginsPaths;
+
     await expect(
-      extractDefaultTranslations({ paths: [pluginPath], output: pluginPath })
+      extractMessagesFromPathToMap(pluginPath, new Map())
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 

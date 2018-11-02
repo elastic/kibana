@@ -19,6 +19,7 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiSearchBar,
@@ -26,7 +27,7 @@ import {
 
 import { getCategoryName } from '../../lib';
 
-export class Search extends PureComponent {
+class SearchUI extends PureComponent {
 
   static propTypes = {
     categories: PropTypes.array.isRequired,
@@ -46,17 +47,25 @@ export class Search extends PureComponent {
   }
 
   render() {
-    const { query, onQueryChange } = this.props;
+    const { query, onQueryChange, intl } = this.props;
 
     const box = {
       incremental: true,
+      'aria-label': intl.formatMessage({
+        id: 'kbn.management.settings.searchBarAriaLabel',
+        defaultMessage: 'Search advanced settings',
+      }), // hack until EuiSearchBar is fixed
+
     };
 
     const filters = [
       {
         type: 'field_value_selection',
         field: 'category',
-        name: 'Category',
+        name: intl.formatMessage({
+          id: 'kbn.management.settings.categorySearchLabel',
+          defaultMessage: 'Category',
+        }),
         multiSelect: 'or',
         options: this.categories,
       }
@@ -69,6 +78,9 @@ export class Search extends PureComponent {
         onChange={onQueryChange}
         query={query}
       />
+
     );
   }
 }
+
+export const Search = injectI18n(SearchUI);
