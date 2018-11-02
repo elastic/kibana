@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
+import turf from 'turf';
+import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
 import React, { Fragment } from 'react';
 import {
@@ -15,6 +17,8 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 
+const SOURCE_UPDATE_REQUIRED = true;
+const NO_SOURCE_UPDATE_REQUIRED = false;
 
 export class ALayer {
 
@@ -216,6 +220,41 @@ export class ALayer {
 
   async syncData() {
     //no-op by default
+  }
+
+  updateDueToExtent(source, meta = {}, dataFilters = {}) {
+    const extentAware = source.isFilterByMapBounds();
+    if (!extentAware) {
+      return NO_SOURCE_UPDATE_REQUIRED;
+    }
+
+    const { buffer: previousBuffer } = meta;
+    const { buffer: newBuffer } = dataFilters;
+
+    if (!previousBuffer) {
+      return SOURCE_UPDATE_REQUIRED;
+    }
+
+    if (_.isEqual(previousBuffer, newBuffer)) {
+      return NO_SOURCE_UPDATE_REQUIRED;
+    }
+
+    const previousBufferGeometry = turf.bboxPolygon([
+      previousBuffer.min_lon,
+      previousBuffer.min_lat,
+      previousBuffer.max_lon,
+      previousBuffer.max_lat
+    ]);
+    const newBufferGeometry = turf.bboxPolygon([
+      newBuffer.min_lon,
+      newBuffer.min_lat,
+      newBuffer.max_lon,
+      newBuffer.max_lat
+    ]);
+    const doesPreviousBufferContainNewBuffer = turfBooleanContains(previousBufferGeometry, newBufferGeometry);
+    return doesPreviousBufferContainNewBuffer
+      ? NO_SOURCE_UPDATE_REQUIRED
+      : SOURCE_UPDATE_REQUIRED;
   }
 
   renderStyleEditor(style, options) {

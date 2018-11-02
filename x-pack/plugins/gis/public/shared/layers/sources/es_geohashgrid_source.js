@@ -144,6 +144,10 @@ export class ESGeohashGridSource extends ASource {
     return !!timeField;
   }
 
+  isFilterByMapBounds() {
+    return true;
+  }
+
   async _getIndexPattern() {
     let indexPattern;
     try {

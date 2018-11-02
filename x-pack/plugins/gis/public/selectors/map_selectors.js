@@ -90,7 +90,7 @@ export const getMapExtent = ({ map }) => map.mapState.extent ?
   map.mapState.extent : {};
 
 export const getMapBuffer = ({ map }) => map.mapState.buffer ?
-  map.mapState.extent : {};
+  map.mapState.buffer : {};
 
 export const getMapZoom = ({ map }) => map.mapState.zoom ?
   map.mapState.zoom : 0;
