@@ -8,7 +8,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { ITransactionGroup } from '../../../../typings/TransactionGroup';
 import { fontSizes, truncate } from '../../../style/variables';
-// @ts-ignore
 import { asMillisWithDefault } from '../../../utils/formatters';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
