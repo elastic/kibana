@@ -138,7 +138,7 @@ export class ALayer {
   }
 
   getIcon() {
-    console.log('Icon not available for this layer type');
+    console.warn('Icon not available for this layer type');
   }
 
   getId() {

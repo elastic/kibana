@@ -92,7 +92,11 @@ export class VectorLayer extends ALayer {
 
     const numberFields = await this._source.getNumberFields();
     const numberFieldOptions = numberFields.map(name => {
-      return { label: name, origin: 'source' };
+      return {
+        label: name,
+        name: name,
+        origin: 'source'
+      };
     });
     const joinFields = this._joins.map(join => {
       return {
