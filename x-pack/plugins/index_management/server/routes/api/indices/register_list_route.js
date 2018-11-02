@@ -9,7 +9,9 @@ import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 import { getIndexManagementDataEnrichers } from '../../../../index_management_data';
-function formatHits(hits) {
+import { fetchAliases } from './fetch_aliases';
+
+function formatHits(hits, aliases) {
   return hits.map(hit => {
     return {
       health: hit.health,
@@ -22,6 +24,7 @@ function formatHits(hits) {
       documents_deleted: hit["docs.deleted"],
       size: hit["store.size"],
       primary_size: hit["pri.store.size"],
+      aliases: aliases.hasOwnProperty(hit.index) ? aliases[hit.index] : 'none',
     };
   });
 }
@@ -45,8 +48,9 @@ export function registerListRoute(server) {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
+        const aliases = await fetchAliases(callWithRequest);
         const hits = await fetchIndices(callWithRequest);
-        let response = formatHits(hits);
+        let response = formatHits(hits, aliases);
         const dataEnrichers = getIndexManagementDataEnrichers();
         for (let i = 0; i < dataEnrichers.length; i++) {
           const dataEnricher = dataEnrichers[i];

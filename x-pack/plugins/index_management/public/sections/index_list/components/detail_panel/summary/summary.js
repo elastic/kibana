@@ -43,6 +43,9 @@ const HEADERS = {
   }),
   primary_size: i18n.translate('xpack.idxMgmt.summary.headers.primaryStorageSizeHeader', {
     defaultMessage: 'Primary Storage Size',
+  }),
+  aliases: i18n.translate('xpack.idxMgmt.summary.headers.aliases', {
+    defaultMessage: 'Aliases'
   })
 };
 
@@ -68,10 +71,13 @@ export class Summary extends React.PureComponent {
     };
     Object.keys(HEADERS).forEach((fieldName, arrayIndex) => {
       const value = index[fieldName];
-      const content =
-        fieldName === "health" ? (
-          <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>
-        ) : value;
+      let content = value;
+      if(fieldName === 'health') {
+        content = <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
+      }
+      if(Array.isArray(content)) {
+        content = content.join(', ');
+      }
       const cell = [
         <EuiDescriptionListTitle key={fieldName}>
           <strong>{HEADERS[fieldName]}:</strong>
