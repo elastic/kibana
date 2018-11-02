@@ -10,7 +10,7 @@
   "scripts": {
     "kbn": "node ../../../scripts/kbn",
     "start": "../../node_modules/.bin/gulp canvas:dev",
-    "lint": "node ../../../scripts/eslint '*.js' '__tests__/**/*.js' 'tasks/**/*.js' 'server/**/*.js' 'common/**/*.js' 'public/**/*.{js,jsx}' 'canvas_plugin_src/**/*.{js,jsx}' --ignore-pattern 'canvas_plugin_src/lib/flot-charts/**/*' --ignore-pattern 'common/lib/grammar.js' --ignore-pattern 'canvas_plugin/**/*'",
+    "lint": "node ../../../scripts/eslint -c ../../../.eslintrc.js '*.js' '__tests__/**/*.js' 'tasks/**/*.js' 'server/**/*.js' 'common/**/*.js' 'public/**/*.{js,jsx}' 'canvas_plugin_src/**/*.{js,jsx}' --ignore-pattern 'canvas_plugin_src/lib/flot-charts/**/*' --ignore-pattern 'common/lib/grammar.js' --ignore-pattern 'canvas_plugin/**/*'",
     "test": "../../node_modules/.bin/gulp canvas:test",
     "test:common": "../../node_modules/.bin/gulp canvas:test:common",
     "test:server": "../../node_modules/.bin/gulp canvas:test:server",
