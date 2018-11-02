@@ -20,10 +20,10 @@
 import React, { Component } from 'react';
 import './share_panel_content.less';
 
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 
-import { ShareAction, ShareActionProvider } from 'ui/share/share_action';
+import { ShareAction, ShareActionProvider, ShareContextMenuPanelItem } from 'ui/share/share_action';
 import { UrlPanelContent } from './url_panel_content';
 
 interface Props {
@@ -51,7 +51,7 @@ export class ShareContextMenu extends Component<Props> {
 
   private getPanels = () => {
     const panels: EuiContextMenuPanelDescriptor[] = [];
-    const menuItems: EuiContextMenuPanelItemDescriptor[] = [];
+    const menuItems: ShareContextMenuPanelItem[] = [];
 
     const permalinkPanel = {
       id: panels.length + 1,
