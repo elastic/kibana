@@ -28,9 +28,9 @@ export class PluginDiscoveryError extends Error {
   constructor(
     public readonly type: PluginDiscoveryErrorType,
     public readonly path: string,
-    public readonly cause?: Error
+    public readonly cause: Error
   ) {
-    super(cause && cause.message);
+    super(cause.message);
 
     // Set the prototype explicitly, see:
     // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
