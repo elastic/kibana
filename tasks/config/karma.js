@@ -18,7 +18,6 @@
  */
 
 import { resolve, dirname } from 'path';
-import { platform as getOsPlatform } from 'os';
 import { times } from 'lodash';
 
 const TOTAL_CI_SHARDS = 4;
@@ -49,7 +48,7 @@ module.exports = function (grunt) {
       autoWatch: false,
       browsers: [pickBrowser()],
       customLaunchers: {
-        Chrome_Headless: {  
+        Chrome_Headless: { 
           base: 'Chrome',
           flags: [
             '--headless',
