@@ -206,7 +206,7 @@ export async function startTestServers({
   log.indent(-4);
 
   // Add time for KBN and adding users
-  adjustTimeout(es.getStartTimeout() + 60000);
+  adjustTimeout(es.getStartTimeout() + 100000);
 
   await es.start();
 
