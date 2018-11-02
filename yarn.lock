@@ -129,10 +129,10 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@4.5.1":
-  version "4.5.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-4.5.1.tgz#29ac4f07ab80b229ff4b183f7ced580b84a13df5"
-  integrity sha512-wUI2ALqKH2MPS7xUsfzm6QOmtnw2itSlWxIaje3y6kbnGyjdSyrewpaws6TRQL7bHss+ylKTVwJCWR6dSC3nVw==
+"@elastic/eui@4.5.1-logos":
+  version "4.5.1-logos"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-4.5.1-logos.tgz#9773cf5a183657668394aebaeff8014823ff2583"
+  integrity sha512-2F/AZ9uoneFEJNsy0r1sUzmxAlUjeCQCKfrFsolZaEud1ZnNxDx2Uf8qny5kpbsuDZ4DfLd181J73xLpRVtG2Q==
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
