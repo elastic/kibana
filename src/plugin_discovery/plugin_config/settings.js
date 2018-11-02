@@ -17,15 +17,10 @@
  * under the License.
  */
 
-import { get, noop } from 'lodash';
+import { get } from 'lodash';
 
 import * as serverConfig from '../../server/config';
-import { createTransform, Deprecations } from '../../deprecation';
-
-async function getDeprecationTransformer(spec) {
-  const provider = spec.getDeprecationsProvider() || noop;
-  return createTransform(await provider(Deprecations) || []);
-}
+import { getTransform } from '../../deprecation';
 
 /**
  *  Get the settings for a pluginSpec from the raw root settings while
@@ -38,7 +33,7 @@ async function getDeprecationTransformer(spec) {
  */
 export async function getSettings(spec, rootSettings, logDeprecation) {
   const prefix = spec.getConfigPrefix();
-  const transformer = await getDeprecationTransformer(spec);
   const rawSettings = get(serverConfig.transformDeprecations(rootSettings), prefix);
-  return transformer(rawSettings, logDeprecation);
+  const transform = await getTransform(spec);
+  return transform(rawSettings, logDeprecation);
 }

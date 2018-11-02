@@ -135,6 +135,11 @@ function getClockSkew(
 
       const parentItem = itemsById[item.parentId];
 
+      // For some reason the parent span and related transactions might be missing.
+      if (!parentItem) {
+        return 0;
+      }
+
       // determine if child starts before the parent, and in that case how much
       const diff = parentItem.timestamp + parentItem.skew - item.timestamp;
 

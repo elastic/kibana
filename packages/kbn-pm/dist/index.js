@@ -49884,7 +49884,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.buildProductionProjects = undefined;
 
 let buildProductionProjects = exports.buildProductionProjects = (() => {
-    var _ref = _asyncToGenerator(function* ({ kibanaRoot, buildRoot }) {
+    var _ref = _asyncToGenerator(function* ({ kibanaRoot, buildRoots }) {
         const projects = yield getProductionProjects(kibanaRoot);
         const projectGraph = (0, _projects.buildProjectGraph)(projects);
         const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
@@ -49896,7 +49896,9 @@ let buildProductionProjects = exports.buildProductionProjects = (() => {
             for (const project of batch) {
                 yield deleteTarget(project);
                 yield buildProject(project);
-                yield copyToBuild(project, kibanaRoot, buildRoot);
+                for (const buildRoot of buildRoots) {
+                    yield copyToBuild(project, kibanaRoot, buildRoot);
+                }
             }
         }
     });

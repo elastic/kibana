@@ -121,10 +121,10 @@ export function initUsersApi(server) {
     },
     config: {
       validate: {
-        payload: {
+        payload: Joi.object({
           password: Joi.string(),
           newPassword: Joi.string().required()
-        }
+        })
       },
       pre: [routePreCheckLicenseFn]
     }
