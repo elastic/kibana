@@ -133,12 +133,12 @@ export default new Chainable('yaxis', {
         const unitType = unitTokens[0];
         if (!tickFormatters[unitType]) {
           throw new Error (
-            i18n.translate('timelion.serverSideErrors.yaxisFunction.notSupportedUnitTypeErrorMessage', {
-              defaultMessage: '{units} is not a supported unit type.',
-              values: {
-                type: units,
-              },
-            })
+            i18n.translate(
+              'timelion.serverSideErrors.yaxisFunction.notSupportedUnitTypeErrorMessage',
+              {
+                defaultMessage: '{units} is not a supported unit type.',
+                values: { units },
+              })
           );
         }
         if (unitType === 'currency') {
