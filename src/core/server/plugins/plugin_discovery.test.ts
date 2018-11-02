@@ -94,13 +94,13 @@ afterEach(() => {
 });
 
 test('properly scans folders and paths', async () => {
-  const { plugins$, errors$ } = discover(logger.get(), {
+  const { plugin$, error$ } = discover(logger.get(), {
     initialize: true,
     scanDirs: Object.values(TEST_PATHS.scanDirs),
     paths: Object.values(TEST_PATHS.paths),
   });
 
-  await expect(plugins$.pipe(toArray()).toPromise()).resolves.toMatchInlineSnapshot(`
+  await expect(plugin$.pipe(toArray()).toPromise()).resolves.toMatchInlineSnapshot(`
 Array [
   Object {
     "manifest": Object {
@@ -161,7 +161,7 @@ Array [
 `);
 
   await expect(
-    errors$
+    error$
       .pipe(
         map(error => error.toString()),
         toArray()
@@ -203,8 +203,8 @@ describe('parsing plugin manifest', () => {
       paths: [TEST_PATHS.paths.existentDir],
     });
 
-    plugins$ = discoveryResult.plugins$.pipe(toArray());
-    errors$ = discoveryResult.errors$.pipe(
+    plugins$ = discoveryResult.plugin$.pipe(toArray());
+    errors$ = discoveryResult.error$.pipe(
       map(error => error.toString()),
       toArray()
     );

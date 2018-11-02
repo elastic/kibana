@@ -81,8 +81,8 @@ const MANIFEST_FILE_NAME = 'kibana.json';
 
 /**
  * Tries to discover all possible plugins based on the provided plugin config.
- * Discovery result consists of two separate streams, the one (`plugins$`) is
- * for the successfully discovered plugins and the other one (`errors$`) is for
+ * Discovery result consists of two separate streams, the one (`plugin$`) is
+ * for the successfully discovered plugins and the other one (`error$`) is for
  * all the errors that occurred during discovery process.
  * @param log Plugin discovery logger instance.
  * @param config Plugin config instance.
@@ -103,10 +103,10 @@ export function discover(log: Logger, config: PluginsConfig) {
   );
 
   return {
-    plugins$: discoveryResults$.pipe(
+    plugin$: discoveryResults$.pipe(
       mergeMap(entry => (entry.plugin !== undefined ? [entry.plugin] : []))
     ),
-    errors$: discoveryResults$.pipe(
+    error$: discoveryResults$.pipe(
       mergeMap(entry => (entry.error !== undefined ? [entry.error] : []))
     ),
   };

@@ -38,7 +38,7 @@ export class PluginsService implements CoreService {
   public async start() {
     this.log.debug('starting plugins service');
 
-    const { errors$, plugins$ } = await this.configService
+    const { error$, plugin$ } = await this.configService
       .atPath('plugins', PluginsConfig)
       .pipe(
         first(),
@@ -46,14 +46,14 @@ export class PluginsService implements CoreService {
       )
       .toPromise();
 
-    await plugins$
+    await plugin$
       .pipe(
         toArray(),
         tap(plugins => this.log.debug(`Discovered ${plugins.length} plugins.`))
       )
       .toPromise();
 
-    await errors$
+    await error$
       .pipe(
         filter(error => error.type === PluginDiscoveryErrorType.InvalidManifest),
         tap(invalidManifestError => this.log.error(invalidManifestError))
