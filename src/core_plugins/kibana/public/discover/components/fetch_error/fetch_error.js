@@ -52,11 +52,14 @@ const DiscoverFetchError = ({ fetchError }) => {
           values={{
             fetchErrorScript: '&lsquo;' + fetchError.script + '&rsquo;',
             scriptFaild: '&ldquo;Scripted fields&rdquo;',
-            managementLink: <a
-              href={url}
-              id="kbn.discover.fetchError.managmentLinkText"
-              defaultMessage="Management &gt; Index Patterns"
-            />
+            managementLink: (
+              <a href={url}>
+                <FormattedMessage
+                  id="kbn.discover.fetchError.managmentLinkText"
+                  defaultMessage="Management &gt; Index Patterns"
+                />
+              </a>
+            )
           }}
         />
       </p>
