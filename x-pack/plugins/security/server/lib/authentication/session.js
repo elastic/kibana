@@ -55,13 +55,23 @@ export class Session {
     try {
       const session = await this._server.auth.test(HAPI_STRATEGY_NAME, request);
 
-      if (Array.isArray(session)) {
-        const warning = `Found ${session.length} auth sessions when we were only expecting 1.`;
-        this._server.log(['warning', 'security', 'auth', 'session'], warning);
-        return null;
+      // If it's not an array, just return the session value
+      if (!Array.isArray(session)) {
+        return session.value;
       }
 
-      return session.value;
+      // If we have an array with one value, we're good also
+      if (session.length === 1) {
+        return session[0].value;
+      }
+
+      // Otherwise, we have more than one and won't be authing the user because we don't
+      // know which session identifies the actual user. There's potential to change this behavior
+      // to ensure all valid sessions identify the same user, or choose one valid one, but this
+      // is the safest option.
+      const warning = `Found ${session.length} auth sessions when we were only expecting 1.`;
+      this._server.log(['warning', 'security', 'auth', 'session'], warning);
+      return null;
     } catch (err) {
       this._server.log(['debug', 'security', 'auth', 'session'], err);
       return null;
