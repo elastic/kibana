@@ -107,8 +107,8 @@ class VisEditor extends Component {
     }
   }
 
-  handleChange = async (part) => {
-    const nextModel = { ...this.state.model, ...part };
+  handleChange = async (partialModel) => {
+    const nextModel = { ...this.state.model, ...partialModel };
     this.props.vis.params = nextModel;
     if (this.state.autoApply) {
       this.props.vis.updateState();
@@ -125,8 +125,8 @@ class VisEditor extends Component {
     this.setState({ dirty: false });
   }
 
-  handleAutoApplyToggle = (part) => {
-    this.setState({ autoApply: part.target.checked });
+  handleAutoApplyToggle = (event) => {
+    this.setState({ autoApply: event.target.checked });
   }
 
   render() {
