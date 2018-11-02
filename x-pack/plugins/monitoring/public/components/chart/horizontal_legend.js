@@ -9,6 +9,7 @@ import { includes, isFunction } from 'lodash';
 import {
   EuiKeyboardAccessible,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class HorizontalLegend extends React.Component {
   constructor() {
@@ -24,7 +25,10 @@ export class HorizontalLegend extends React.Component {
    */
   formatter(value) {
     if (value === null) {
-      return 'N/A';
+      return (<FormattedMessage
+        id="xpack.monitoring.chart.horizontalLegend.notAvailableLabel"
+        defaultMessage="N/A"
+      />);
     }
     if (isFunction(this.props.tickFormatter)) {
       return this.props.tickFormatter(value);

@@ -14,6 +14,7 @@ import { InfoTooltip } from './info_tooltip';
 import {
   EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiScreenReaderOnly
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function MonitoringTimeseriesContainer({ series, onBrush }) {
   if (series === undefined) {
@@ -35,7 +36,14 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
           <EuiFlexItem>
             <EuiTitle tabIndex="0">
               <Fragment>
-                <EuiScreenReaderOnly><span>This chart is not screen reader accessible</span></EuiScreenReaderOnly>
+                <EuiScreenReaderOnly>
+                  <span>
+                    <FormattedMessage
+                      id="xpack.monitoring.chart.screenReaderUnaccessibleTitle"
+                      defaultMessage="This chart is not screen reader accessible"
+                    />
+                  </span>
+                </EuiScreenReaderOnly>
                 <h2>
                   { getTitle(series) }{ units ? ` (${units})` : '' }
                 </h2>
