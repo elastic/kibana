@@ -252,7 +252,7 @@ export class ALayer {
       newBuffer.max_lat
     ]);
     const doesPreviousBufferContainNewBuffer = turfBooleanContains(previousBufferGeometry, newBufferGeometry);
-    return doesPreviousBufferContainNewBuffer
+    return doesPreviousBufferContainNewBuffer && !_.get(meta, 'areResultsTrimmed', false)
       ? NO_SOURCE_UPDATE_REQUIRED
       : SOURCE_UPDATE_REQUIRED;
   }

@@ -61,7 +61,10 @@ export class EMSFileSource extends VectorSource {
   async getGeoJson() {
     const fileSource = this._emsFiles.find((source => source.name === this._descriptor.name));
     const fetchUrl = `../${GIS_API_PATH}/data/ems?name=${encodeURIComponent(this._descriptor.name)}`;
-    return VectorSource.getGeoJson(fileSource, fetchUrl);
+    const featureCollection = VectorSource.getGeoJson(fileSource, fetchUrl);
+    return {
+      data: featureCollection
+    };
   }
 
   renderDetails() {

@@ -235,7 +235,7 @@ function updateWithDataResponse(state, action) {
   }
 
   dataRequest.data = action.data;
-  dataRequest.dataMeta = dataRequest.dataMetaAtStart;
+  dataRequest.dataMeta = { ...dataRequest.dataMetaAtStart, ...action.meta };
   dataRequest.dataMetaAtStart = null;
   dataRequest.dataRequestToken = null;
   dataRequest.dataId = action.dataId;

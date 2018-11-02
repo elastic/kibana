@@ -38,7 +38,7 @@ const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
     startLoading: (dataId, requestToken, meta) => dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
-    stopLoading: (dataId, requestToken, returnData) => dispatch(endDataLoad(layerId, dataId, requestToken, returnData)),
+    stopLoading: (dataId, requestToken, data, meta) => dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
     onRefreshStyle: async () => {
       await dispatch({
@@ -187,12 +187,13 @@ export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
   });
 }
 
-export function endDataLoad(layerId, dataId, requestToken, data) {
+export function endDataLoad(layerId, dataId, requestToken, data, meta) {
   return ({
     type: LAYER_DATA_LOAD_ENDED,
     layerId,
     dataId,
     data,
+    meta,
     requestToken
   });
 }

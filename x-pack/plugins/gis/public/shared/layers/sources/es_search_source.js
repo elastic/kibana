@@ -11,7 +11,7 @@ import React, { Fragment } from 'react';
 import { VectorSource } from './source';
 import {
   EuiFormRow,
-  EuiSwitch
+  EuiSwitch,
 } from '@elastic/eui';
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../components/single_field_select';
@@ -101,7 +101,7 @@ export class ESSearchSource extends VectorSource {
         //todo: this seems somewhat redundant. Have this be passed in as arguments in the getGeoJson.
         //no need to submit time and extent filters in the method if they are not supposed to be applied anyway
         if (this.isFilterByMapBounds()) {
-          filters.push(createExtentFilter(searchFilters.extent, geoField.name, geoField.type));
+          filters.push(createExtentFilter(searchFilters.buffer, geoField.name, geoField.type));
         }
 
         if (isTimeAware) {
@@ -124,11 +124,19 @@ export class ESSearchSource extends VectorSource {
       throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
     }
 
+    let featureCollection;
     try {
-      return hitsToGeoJson(resp.hits.hits, geoField.name, geoField.type);
+      featureCollection = hitsToGeoJson(resp.hits.hits, geoField.name, geoField.type);
     } catch(error) {
       throw new Error(`Unable to convert search response to geoJson feature collection, error: ${error.message}`);
     }
+
+    return {
+      data: featureCollection,
+      meta: {
+        areResultsTrimmed: resp.hits.total > resp.hits.hits.length
+      }
+    };
   }
 
   areFeatureTooltipsEnabled() {

@@ -138,13 +138,8 @@ export class VectorLayer extends ALayer {
     if (timeAware) {
       updateDueToTime = !_.isEqual(meta.timeFilters, filters.timeFilters);
     }
-    let updateDueToExtent = false;
-    if (extentAware) {
-      //todo: should have same padding logic here as in geohash_grid
-      updateDueToExtent = !_.isEqual(meta.extent, filters.extent);
-    }
 
-    return !updateDueToTime && !updateDueToExtent;
+    return !updateDueToTime && !this.updateDueToExtent(source, meta, filters);
 
   }
 
@@ -201,12 +196,12 @@ export class VectorLayer extends ALayer {
           featureCollection: sourceDataRequest.getData()
         };
       }
-      startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
-      const data = await this._source.getGeoJson({
+      startLoading(sourceDataId, requestToken, dataFilters);
+      const { data, meta } = await this._source.getGeoJson({
         layerId: this.getId(),
         layerName: this.getDisplayName()
       }, dataFilters);
-      stopLoading(sourceDataId, requestToken, data);
+      stopLoading(sourceDataId, requestToken, data, meta);
       return {
         refreshed: true,
         featureCollection: data
