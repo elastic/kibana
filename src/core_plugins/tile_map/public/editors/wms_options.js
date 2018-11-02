@@ -21,7 +21,7 @@ import { uiModules } from 'ui/modules';
 import wmsOptionsTemplate from './wms_options.html';
 const module = uiModules.get('kibana');
 
-module.directive('wmsOptions', function (serviceSettings) {
+module.directive('wmsOptions', function (serviceSettings, i18n) {
   return {
     restrict: 'E',
     template: wmsOptionsTemplate,
@@ -31,6 +31,7 @@ module.directive('wmsOptions', function (serviceSettings) {
       collections: '=',
     },
     link: function ($scope) {
+      $scope.wmsLinkText = i18n('tileMap.wmsOptions.wmsLinkText', { defaultMessage: 'here' });
 
       new Promise((resolve, reject) => {
 

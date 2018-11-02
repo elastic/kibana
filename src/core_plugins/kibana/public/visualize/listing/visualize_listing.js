@@ -22,6 +22,7 @@ import 'ui/pager_control';
 import 'ui/pager';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
+import { i18n } from '@kbn/i18n';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 
@@ -60,6 +61,10 @@ export function VisualizeListingController($injector) {
       .catch(error => notify.error(error));
   };
 
-  breadcrumbState.set([{ text: 'Visualize' }]);
+  breadcrumbState.set([{
+    text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
+      defaultMessage: 'Visualize',
+    })
+  }]);
   config.watch('k7design', (val) => this.showPluginBreadcrumbs = !val);
 }
