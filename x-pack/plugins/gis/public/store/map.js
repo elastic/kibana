@@ -94,7 +94,8 @@ export function map(state = INITIAL_STATE, action) {
       const newMapState = {
         center: action.mapState.center,
         zoom: action.mapState.zoom,
-        extent: action.mapState.extent
+        extent: action.mapState.extent,
+        buffer: action.mapState.buffer,
       };
       return { ...state, mapState: { ...state.mapState, ...newMapState } };
     case SET_TIME_FILTERS:
