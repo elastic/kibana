@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render } from 'enzyme';
+import { renderWithIntl } from '../../../../../test_utils/enzyme_helpers';
 import { SummaryStatus } from './summary_status';
 
 describe('Summary Status Component', () => {
@@ -26,7 +26,7 @@ describe('Summary Status Component', () => {
       status: 'green'
     };
 
-    expect(render(<SummaryStatus {...props} />)).toMatchSnapshot();
+    expect(renderWithIntl(<SummaryStatus {...props} />)).toMatchSnapshot();
   });
 
   it('should allow label to be optional', () => {
@@ -45,7 +45,7 @@ describe('Summary Status Component', () => {
       status: 'yellow'
     };
 
-    expect(render(<SummaryStatus {...props} />)).toMatchSnapshot();
+    expect(renderWithIntl(<SummaryStatus {...props} />)).toMatchSnapshot();
   });
 
   it('should allow status to be optional', () => {
@@ -64,6 +64,6 @@ describe('Summary Status Component', () => {
       ]
     };
 
-    expect(render(<SummaryStatus {...props} />)).toMatchSnapshot();
+    expect(renderWithIntl(<SummaryStatus {...props} />)).toMatchSnapshot();
   });
 });
