@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPanel } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
+
 import { OnDataProviderRemoved } from '../events';
 import { DataProvider } from './data_provider';
 
@@ -56,13 +58,11 @@ export const Providers = pure<Props>(({ dataProviders, onDataProviderRemoved }) 
     }}
   >
     {dataProviders.map(dataProvider => (
-      <div
+      <EuiPanel
         data-test-subj="provider"
         key={dataProvider.id}
         style={{
           alignItems: 'center',
-          border: '1px solid',
-          borderRadius: '5px',
           display: 'flex',
           flexDirection: 'row',
           margin: '5px',
@@ -72,7 +72,7 @@ export const Providers = pure<Props>(({ dataProviders, onDataProviderRemoved }) 
       >
         {dataProvider.render()}
         <CloseButton onDataProviderRemoved={onDataProviderRemoved} dataProvider={dataProvider} />
-      </div>
+      </EuiPanel>
     ))}
   </div>
 ));

@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import { pure } from 'recompose';
+
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
 import { Sort } from './body/sort';
