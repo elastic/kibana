@@ -46,7 +46,9 @@ function getPrivilegedActions(server: Record<string, any>, actions: Record<strin
 
   const navLinkSpecs = server.getUiNavLinks();
 
-  const uiCapabilityActions = [...uiApps, ...navLinkSpecs].map(entry => `ui:${entry._id}/read`);
+  const uiCapabilityActions = [...uiApps, ...navLinkSpecs].map(entry =>
+    actions.ui.get(entry.toJSON().id)
+  );
 
   const { types } = server.savedObjects;
 
