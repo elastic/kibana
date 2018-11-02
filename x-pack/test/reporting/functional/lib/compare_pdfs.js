@@ -14,35 +14,6 @@ import { comparePngs } from './common';
 
 const mkdirAsync = promisify(mkdirp);
 
-<<<<<<< HEAD
-function comparePngs(actualPath, expectedPath, diffPath, log) {
-  log.debug(`comparePngs: ${actualPath} vs ${expectedPath}`);
-  return new Promise(resolve => {
-    const actual = fs.createReadStream(actualPath).pipe(new PNG()).on('parsed', doneReading);
-    const expected = fs.createReadStream(expectedPath).pipe(new PNG()).on('parsed', doneReading);
-    let filesRead = 0;
-
-    function doneReading() {
-      if (++filesRead < 2) return;
-      const diffPng = new PNG({ width: actual.width, height: actual.height });
-      log.debug(`calculating diff pixels...`);
-      const diffPixels = pixelmatch(
-        actual.data,
-        expected.data,
-        diffPng.data,
-        actual.width,
-        actual.height,
-        { threshold: 0.9 }
-      );
-      log.debug(`diff pixels: ${diffPixels}`);
-      diffPng.pack().pipe(fs.createWriteStream(diffPath));
-      resolve(diffPixels);
-    }
-  });
-}
-
-=======
->>>>>>> 8efd352912... Add png output to reports 65 (#24759)
 export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screenshotsDirectory, log) {
   log.debug(`checkIfPdfsMatch: ${actualPdfPath} vs ${baselinePdfPath}`);
   // Copy the pdfs into the screenshot session directory, as that's where the generated pngs will automatically be
