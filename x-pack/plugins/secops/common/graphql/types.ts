@@ -37,10 +37,12 @@ export interface Query {
 export interface Source {
   id: string /** The id of the source */;
   configuration: SourceConfiguration /** The raw configuration of the source */;
+  getSuricataEvents?: (SuricataEvents | null)[] | null /** Get all event from suricata */;
   whoAmI?: SayMyName | null /** Just a simple example to get the app name */;
 }
 /** A set of configuration options for a security data source */
 export interface SourceConfiguration {
+  fileAlias: string /** The alias to read file data from */;
   fields: SourceFields /** The field mapping to use for this source */;
 }
 /** A mapping of semantic fields to their document counterparts */
@@ -53,11 +55,34 @@ export interface SourceFields {
   timestamp: string /** The field to use as a timestamp for metrics and logs */;
 }
 
+export interface SuricataEvents {
+  timestamp: string;
+  eventType: string;
+  flowId: string;
+  proto: string;
+  srcIp: string;
+  srcPort: string;
+  destIp: string;
+  destPort: string;
+  geoRegionName: string;
+  geoCountryIsoCode: string;
+}
+
 export interface SayMyName {
   appName: string /** The id of the source */;
 }
+
+export interface TimerangeInput {
+  interval: string /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */;
+  to: number /** The end of the timerange */;
+  from: number /** The beginning of the timerange */;
+}
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
+}
+export interface GetSuricataEventsSourceArgs {
+  timerange: TimerangeInput;
+  filterQuery?: string | null;
 }
 
 export namespace QueryResolvers {
@@ -95,6 +120,11 @@ export namespace SourceResolvers {
       any,
       Context
     > /** The raw configuration of the source */;
+    getSuricataEvents?: GetSuricataEventsResolver<
+      (SuricataEvents | null)[] | null,
+      any,
+      Context
+    > /** Get all event from suricata */;
     whoAmI?: WhoAmIResolver<
       SayMyName | null,
       any,
@@ -108,6 +138,16 @@ export namespace SourceResolvers {
     Parent = any,
     Context = any
   > = Resolver<R, Parent, Context>;
+  export type GetSuricataEventsResolver<
+    R = (SuricataEvents | null)[] | null,
+    Parent = any,
+    Context = any
+  > = Resolver<R, Parent, Context, GetSuricataEventsArgs>;
+  export interface GetSuricataEventsArgs {
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  }
+
   export type WhoAmIResolver<R = SayMyName | null, Parent = any, Context = any> = Resolver<
     R,
     Parent,
@@ -117,6 +157,7 @@ export namespace SourceResolvers {
 /** A set of configuration options for a security data source */
 export namespace SourceConfigurationResolvers {
   export interface Resolvers<Context = any> {
+    fileAlias?: FileAliasResolver<string, any, Context> /** The alias to read file data from */;
     fields?: FieldsResolver<
       SourceFields,
       any,
@@ -124,6 +165,11 @@ export namespace SourceConfigurationResolvers {
     > /** The field mapping to use for this source */;
   }
 
+  export type FileAliasResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
   export type FieldsResolver<R = SourceFields, Parent = any, Context = any> = Resolver<
     R,
     Parent,
@@ -171,6 +217,64 @@ export namespace SourceFieldsResolvers {
     Context
   >;
   export type TimestampResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace SuricataEventsResolvers {
+  export interface Resolvers<Context = any> {
+    timestamp?: TimestampResolver<string, any, Context>;
+    eventType?: EventTypeResolver<string, any, Context>;
+    flowId?: FlowIdResolver<string, any, Context>;
+    proto?: ProtoResolver<string, any, Context>;
+    srcIp?: SrcIpResolver<string, any, Context>;
+    srcPort?: SrcPortResolver<string, any, Context>;
+    destIp?: DestIpResolver<string, any, Context>;
+    destPort?: DestPortResolver<string, any, Context>;
+    geoRegionName?: GeoRegionNameResolver<string, any, Context>;
+    geoCountryIsoCode?: GeoCountryIsoCodeResolver<string, any, Context>;
+  }
+
+  export type TimestampResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type EventTypeResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FlowIdResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type ProtoResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;
+  export type SrcIpResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;
+  export type SrcPortResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type DestIpResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type DestPortResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type GeoRegionNameResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type GeoCountryIsoCodeResolver<R = string, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context
