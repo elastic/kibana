@@ -8,7 +8,7 @@ and closing or deleting indices. The UI provides a convenient way to
 perform bulk operations on multiple indices.
 
 To open the UI, select *Management > Index Management*. If security is enabled,
-you must have the the `monitor` cluster privilege and the `view_index_metadata` 
+you must have the `monitor` cluster privilege and the `view_index_metadata` 
 and `manage` index privileges to view the data.  See 
 {xpack-ref}/security-privileges.html[Security Privileges] for more
 information.
