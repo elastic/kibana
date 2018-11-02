@@ -103,7 +103,7 @@ describe('kuery functions', function () {
 
         const node = nodeTypes.function.buildNode('is', null, 'jpg*');
         const result = is.toElasticsearchQuery(node, indexPattern);
-        expectDeepEqual(result, expected);
+        expect(result).to.eql(expected);
       });
 
       it('should return an ES bool query with a sub-query for each field when fieldName is "*"', function () {
