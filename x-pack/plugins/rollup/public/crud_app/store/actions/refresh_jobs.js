@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toastNotifications } from 'ui/notify';
-import { loadJobs as sendLoadJobsRequest, deserializeJobs } from '../../services';
+import { i18n } from '@kbn/i18n';
+
+import {
+  loadJobs as sendLoadJobsRequest,
+  deserializeJobs,
+  showApiWarning,
+} from '../../services';
 import {
   REFRESH_JOBS_SUCCESS,
 } from '../action_types';
@@ -15,7 +20,9 @@ export const refreshJobs = () => async (dispatch) => {
   try {
     jobs = await sendLoadJobsRequest();
   } catch (error) {
-    return toastNotifications.addWarning(error.data.message);
+    return showApiWarning(error, i18n.translate('xpack.rollupJobs.api.errors.refreshJobsErrorLocation.text', {
+      defaultMessage: 'Rollup Job Wizard refresh jobs',
+    }));
   }
 
   dispatch({

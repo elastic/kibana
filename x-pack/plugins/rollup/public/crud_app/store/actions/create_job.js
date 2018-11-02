@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { fatalError } from 'ui/notify';
+
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
   createJob as sendCreateJobRequest,
@@ -33,34 +36,46 @@ export const createJob = (jobConfig) => async (dispatch) => {
       new Promise(resolve => setTimeout(resolve, 500)),
     ]);
   } catch (error) {
-    const { statusCode, data } = error;
+    if (error) {
+      const { statusCode, data } = error;
 
-    // Some errors have statusCode directly available but some are under a data property.
-    switch (statusCode || data.statusCode) {
-      case 409:
-        dispatch({
-          type: CREATE_JOB_FAILURE,
-          payload: {
-            error: {
-              message: `A job with ID '${jobConfig.id}' already exists.`,
+      // Expect an error in the shape provided by Angular's $http service.
+      if (data) {
+        // Some errors have statusCode directly available but some are under a data property.
+        if ((statusCode || (data && data.statusCode)) === 409) {
+          return dispatch({
+            type: CREATE_JOB_FAILURE,
+            payload: {
+              error: {
+                message: i18n.translate('xpack.rollupJobs.api.errors.createJobAlreadyExistsError.text', {
+                  defaultMessage: 'A job with ID \'{jobConfigId}\' already exists.',
+                  values: { jobConfigId: jobConfig.id },
+                }),
+              },
             },
-          },
-        });
-        break;
+          });
+        }
 
-      default:
-        dispatch({
+        return dispatch({
           type: CREATE_JOB_FAILURE,
           payload: {
             error: {
-              message: `Request failed with a ${statusCode} error. ${data.message}`,
+              message: i18n.translate('xpack.rollupJobs.api.errors.createJobDefaultError.text', {
+                defaultMessage: 'Request failed with a {statusCode} error. {message}',
+                values: { statusCode, message: data.message },
+              }),
               cause: data.cause,
             },
           },
         });
+      }
     }
 
-    return;
+    // This error isn't an HTTP error, so let the fatal error screen tell the user something
+    // unexpected happened.
+    return fatalError(error, i18n.translate('xpack.rollupJobs.api.errors.createJobErrorLocation.text', {
+      defaultMessage: 'Rollup Job Wizard create job',
+    }));
   }
 
   dispatch({

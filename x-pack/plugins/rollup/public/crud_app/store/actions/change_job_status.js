@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
+
 import {
   startJobs as sendStartJobsRequest,
   stopJobs as sendStopJobsRequest,
   createNoticeableDelay,
+  showApiError,
 } from '../../services';
 
 import {
@@ -31,7 +33,9 @@ export const startJobs = (jobIds) => async (dispatch) => {
       type: UPDATE_JOB_FAILURE,
     });
 
-    return toastNotifications.addDanger(error.data.message);
+    return showApiError(error, i18n.translate('xpack.rollupJobs.api.errors.startJobsErrorLocation.text', {
+      defaultMessage: 'Rollup Job Wizard start jobs',
+    }));
   }
 
   dispatch({
@@ -53,7 +57,9 @@ export const stopJobs = (jobIds) => async (dispatch) => {
       type: UPDATE_JOB_FAILURE,
     });
 
-    return toastNotifications.addDanger(error.data.message);
+    return showApiError(error, i18n.translate('xpack.rollupJobs.api.errors.stopJobsErrorLocation.text', {
+      defaultMessage: 'Rollup Job Wizard stop jobs',
+    }));
   }
 
   dispatch({
