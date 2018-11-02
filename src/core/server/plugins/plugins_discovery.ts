@@ -170,8 +170,8 @@ function processPaths$(log: Logger, paths: string[]) {
 }
 
 /**
- * Tries to load and parse the plugin manifest file located at the provided
- * plugin directory path and throws if it fails to do so or plugin manifest
+ * Tries to load and parse the plugin manifest file located at the provided plugin
+ * directory path and produces an error result if it fails to do so or plugin manifest
  * isn't valid.
  * @param log Plugin discovery logger instance.
  * @param path Path to the plugin directory where manifest should be loaded from.
