@@ -62,9 +62,7 @@ export async function integrateLocaleFiles(filePath, log) {
     throw createFailError(`Locale file should contain formats object.`);
   }
 
-  const localizedMessagesMap = new Map(
-    Object.entries(localizedMessages).filter(([key]) => key !== 'formats')
-  );
+  const localizedMessagesMap = new Map(Object.entries(localizedMessages.messages));
 
   verifyMessages(localizedMessagesMap, defaultMessagesMap);
 
