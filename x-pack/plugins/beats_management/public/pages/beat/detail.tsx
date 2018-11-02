@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { flatten, get } from 'lodash';
 import React from 'react';
 import { TABLE_CONFIG } from '../../../common/constants';
@@ -24,13 +25,14 @@ import { supportedConfigs } from '../../config_schemas';
 
 interface PageProps {
   beat: CMPopulatedBeat | undefined;
+  intl: InjectedIntl;
 }
 
 interface PageState {
   selectedConfig: ConfigurationBlock | null;
 }
 
-export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
+class BeatDetailPageUI extends React.PureComponent<PageProps, PageState> {
   constructor(props: PageProps) {
     super(props);
 
@@ -40,9 +42,16 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
   }
   public render() {
     const props = this.props;
-    const { beat } = props;
+    const { beat, intl } = props;
     if (!beat) {
-      return <div>Beat not found</div>;
+      return (
+        <div>
+          <FormattedMessage
+            id="xpack.beatsManagement.beat.beatDetailsPageBeatNotFoundErrorTitle"
+            defaultMessage="Beat not found"
+          />
+        </div>
+      );
     }
     const configurationBlocks = flatten(
       beat.full_tags.map((tag: BeatTag) => {
@@ -65,7 +74,10 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
     const columns = [
       {
         field: 'displayValue',
-        name: 'Type',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.beat.displayValueTypeColumnName',
+          defaultMessage: 'Type',
+        }),
         sortable: true,
         render: (value: string | null, configuration: any) => (
           <EuiLink
@@ -81,17 +93,26 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
       },
       {
         field: 'module',
-        name: 'Module',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.beat.moduleColumnName',
+          defaultMessage: 'Module',
+        }),
         sortable: true,
       },
       {
         field: 'description',
-        name: 'Description',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.beat.descriptionColumnName',
+          defaultMessage: 'Description',
+        }),
         sortable: true,
       },
       {
         field: 'tagId',
-        name: 'Tag',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.beat.tagColumnName',
+          defaultMessage: 'Tag',
+        }),
         render: (id: string, block: any) => (
           <ConnectedLink path={`/tag/edit/${id}`}>
             <TagBadge
@@ -108,13 +129,21 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h4>Configurations</h4>
+              <h4>
+                <FormattedMessage
+                  id="xpack.beatsManagement.beat.detailsConfigurationTitle"
+                  defaultMessage="Configurations"
+                />
+              </h4>
             </EuiTitle>
             <EuiText size="s">
               <p>
-                You can have multiple configurations applied to an individual tag. These
-                configurations can repeat or mix types as necessary. For example, you may utilize
-                three metricbeat configurations alongside one input and filebeat configuration.
+                <FormattedMessage
+                  id="xpack.beatsManagement.beat.appliedMultipleConfigurationsToIndividualTagDescription"
+                  defaultMessage="You can have multiple configurations applied to an individual tag. These
+                  configurations can repeat or mix types as necessary. For example, you may utilize
+                  three metricbeat configurations alongside one input and filebeat configuration."
+                />
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -132,3 +161,5 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
     );
   }
 }
+
+export const BeatDetailPage = injectI18n(BeatDetailPageUI);

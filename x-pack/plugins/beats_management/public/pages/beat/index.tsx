@@ -11,6 +11,7 @@ import {
   // @ts-ignore types for EuiTabs not currently available
   EuiTabs,
 } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { CMPopulatedBeat } from '../../../common/domain_types';
@@ -32,6 +33,7 @@ interface BeatDetailsPageProps extends URLStateProps<AppURLState> {
   history: any;
   libs: FrontendLibs;
   match: Match;
+  intl: InjectedIntl;
 }
 
 interface BeatDetailsPageState {
@@ -63,6 +65,7 @@ class BeatDetailsPageComponent extends React.PureComponent<
   };
 
   public render() {
+    const { intl } = this.props;
     const { beat } = this.state;
     let id;
     let name;
@@ -72,13 +75,33 @@ class BeatDetailsPageComponent extends React.PureComponent<
       name = beat.name;
     }
     const title = this.state.isLoading
-      ? 'Loading'
-      : `Beat: ${name || 'No name receved from beat'} (id: ${id})`;
+      ? intl.formatMessage({
+          id: 'xpack.beatsManagement.beat.mainLoadingTitle',
+          defaultMessage: 'Loading',
+        })
+      : intl.formatMessage(
+          {
+            id: 'xpack.beatsManagement.beat.beatNameAndIdTitle',
+            defaultMessage: 'Beat: {nameOrNoName} (id: {id})',
+          },
+          {
+            nameOrNoName:
+              name ||
+              intl.formatHTMLMessage({
+                id: 'xpack.beatsManagement.beat.naNameReceivedFromBeatTitle',
+                defaultMessage: 'No name received from beat',
+              }),
+            id,
+          }
+        );
 
     const tabs = [
       {
         id: `/beat/${id}`,
-        name: 'Config',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.beat.configName',
+          defaultMessage: 'Config',
+        }),
         disabled: false,
       },
       // {
@@ -88,7 +111,10 @@ class BeatDetailsPageComponent extends React.PureComponent<
       // },
       {
         id: `/beat/${id}/tags`,
-        name: 'Configuration Tags',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.beat.configurationTagsName',
+          defaultMessage: 'Configuration Tags',
+        }),
         disabled: false,
       },
     ];
@@ -141,12 +167,18 @@ class BeatDetailsPageComponent extends React.PureComponent<
   }
 
   private async loadBeat() {
+    const { intl } = this.props;
     const { beatId } = this.props.match.params;
     let beat;
     try {
       beat = await this.props.libs.beats.get(beatId);
       if (!beat) {
-        throw new Error('beat not found');
+        throw new Error(
+          intl.formatMessage({
+            id: 'xpack.beatsManagement.beat.beatNotFoundErrorTitle',
+            defaultMessage: 'beat not found',
+          })
+        );
       }
     } catch (e) {
       throw new Error(e);
@@ -154,4 +186,6 @@ class BeatDetailsPageComponent extends React.PureComponent<
     this.setState({ beat, isLoading: false });
   }
 }
-export const BeatDetailsPage = withUrlState<BeatDetailsPageProps>(BeatDetailsPageComponent);
+const BeatDetailsPageUI = withUrlState<BeatDetailsPageProps>(BeatDetailsPageComponent);
+
+export const BeatDetailsPage = injectI18n(BeatDetailsPageUI);

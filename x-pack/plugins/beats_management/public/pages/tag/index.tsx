@@ -9,6 +9,7 @@ import 'brace/theme/github';
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { sample } from 'lodash';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
@@ -89,12 +90,18 @@ export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageS
                 }
                 onClick={this.saveTag}
               >
-                Save
+                <FormattedMessage
+                  id="xpack.beatsManagement.mainPageTag.tagPageSaveButtonLabel"
+                  defaultMessage="Save"
+                />
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={() => this.props.goTo('/overview/tags')}>
-                Cancel
+                <FormattedMessage
+                  id="xpack.beatsManagement.mainPageTag.tagPageCancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>

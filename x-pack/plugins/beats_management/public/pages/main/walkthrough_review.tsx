@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { RouteComponentProps } from 'react-router';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
@@ -14,8 +15,9 @@ import { FrontendLibs } from '../../lib/lib';
 interface PageProps extends URLStateProps<AppURLState>, RouteComponentProps<any> {
   loadBeats: any;
   libs: FrontendLibs;
+  intl: InjectedIntl;
 }
-export class ReviewWalkthrough extends React.Component<PageProps, any> {
+class ReviewWalkthrough extends React.Component<PageProps, any> {
   constructor(props: PageProps) {
     super(props);
 
@@ -47,15 +49,35 @@ export class ReviewWalkthrough extends React.Component<PageProps, any> {
           <EuiPageContent>
             <EuiEmptyPrompt
               iconType="logoBeats"
-              title={<h2>Congratulations!</h2>}
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="xpack.beatsManagement.mainPages.congratulationsTitle"
+                    defaultMessage="Congratulations!"
+                  />
+                </h2>
+              }
               body={
                 <React.Fragment>
                   <p>
-                    You have enrolled your first beat, and we have assigned your new tag with its
-                    configurations to it
+                    <FormattedMessage
+                      id="xpack.beatsManagement.mainPages.firstBeatEnrollingTitle"
+                      defaultMessage="You have enrolled your first beat, and we have assigned your new tag with its
+                      configurations to it"
+                    />
                   </p>
-                  <h3>Next Steps</h3>
-                  <p>All that is left to do is to start the beat you just enrolled.</p>
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.beatsManagement.mainPages.firstBeatEnrollingNextStepsTitle"
+                      defaultMessage="Next Steps"
+                    />
+                  </h3>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.beatsManagement.mainPages.toStartBeatYouJustEnrolledTitle"
+                      defaultMessage="All that is left to do is to start the beat you just enrolled."
+                    />
+                  </p>
                 </React.Fragment>
               }
               actions={
@@ -66,7 +88,10 @@ export class ReviewWalkthrough extends React.Component<PageProps, any> {
                     goTo('/overview/beats');
                   }}
                 >
-                  Done
+                  <FormattedMessage
+                    id="xpack.beatsManagement.mainPages.firstBeatEnrollingDoneButtonLabel"
+                    defaultMessage="Done"
+                  />
                 </EuiButton>
               }
             />
@@ -80,16 +105,32 @@ export class ReviewWalkthrough extends React.Component<PageProps, any> {
     beats.map(({ id }) => ({ beatId: id, tag: tag.id }));
 
   private assignTagToBeat = async () => {
+    const { intl } = this.props;
     if (!this.props.urlState.enrollmentToken) {
-      return alert('Invalid URL, no enrollmentToken found');
+      return alert(
+        intl.formatMessage({
+          id: 'xpack.beatsManagement.mainPages.assignTagToBeatInvalidURLNoTokenFountTitle',
+          defaultMessage: 'Invalid URL, no enrollmentToken found',
+        })
+      );
     }
     if (!this.props.urlState.createdTag) {
-      return alert('Invalid URL, no createdTag found');
+      return alert(
+        intl.formatMessage({
+          id: 'xpack.beatsManagement.mainPages.assignTagToBeatInvalidURLNoTagFoundTitle',
+          defaultMessage: 'Invalid URL, no createdTag found',
+        })
+      );
     }
 
     const beat = await this.props.libs.beats.getBeatWithToken(this.props.urlState.enrollmentToken);
     if (!beat) {
-      return alert('Error: Beat not enrolled properly');
+      return alert(
+        intl.formatMessage({
+          id: 'xpack.beatsManagement.mainPages.assignTagToBeatBeatNotEnrolledProperlyTitle',
+          defaultMessage: 'Error: Beat not enrolled properly',
+        })
+      );
     }
     const tags = await this.props.libs.tags.getTagsWithIds([this.props.urlState.createdTag]);
 
@@ -103,4 +144,6 @@ export class ReviewWalkthrough extends React.Component<PageProps, any> {
   };
 }
 
-export const ReviewWalkthroughPage = withUrlState<PageProps>(ReviewWalkthrough);
+const ReviewWalkthroughPageUI = withUrlState<PageProps>(ReviewWalkthrough);
+
+export const ReviewWalkthroughPage = injectI18n(ReviewWalkthroughPageUI);

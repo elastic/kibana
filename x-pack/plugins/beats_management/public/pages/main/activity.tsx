@@ -4,10 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 export class ActivityPage extends React.PureComponent {
   public render() {
-    return <div>activity logs view</div>;
+    return (
+      <div>
+        <FormattedMessage
+          id="xpack.beatsManagement.mainPages.activity.activityLogsViewTitle"
+          defaultMessage="activity logs view"
+        />
+      </div>
+    );
   }
 }

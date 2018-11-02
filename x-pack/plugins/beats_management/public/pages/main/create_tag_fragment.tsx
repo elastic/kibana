@@ -5,6 +5,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 
 import 'brace/theme/github';
@@ -18,6 +19,7 @@ import { FrontendLibs } from '../../lib/lib';
 interface TagPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
   match: any;
+  intl: InjectedIntl;
 }
 
 interface TagPageState {
@@ -25,7 +27,7 @@ interface TagPageState {
   tag: BeatTag;
 }
 
-export class CreateTagFragment extends React.PureComponent<TagPageProps, TagPageState> {
+class CreateTagFragment extends React.PureComponent<TagPageProps, TagPageState> {
   private mode: 'edit' | 'create' = 'create';
   constructor(props: TagPageProps) {
     super(props);
@@ -77,7 +79,10 @@ export class CreateTagFragment extends React.PureComponent<TagPageProps, TagPage
               }
               onClick={this.saveTag}
             >
-              Save & Continue
+              <FormattedMessage
+                id="xpack.beatsManagement.mainPages.createTag.saveAndContinueButtonLabel"
+                defaultMessage="Save & Continue"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -95,9 +100,15 @@ export class CreateTagFragment extends React.PureComponent<TagPageProps, TagPage
   };
 
   private saveTag = async () => {
+    const { intl } = this.props;
     const newTag = await this.props.libs.tags.upsertTag(this.state.tag as BeatTag);
     if (!newTag) {
-      return alert('error saving tag');
+      return alert(
+        intl.formatMessage({
+          id: 'xpack.beatsManagement.mainPages.createTag.errorSavingTagTitle',
+          defaultMessage: 'error saving tag',
+        })
+      );
     }
     this.props.setUrlState({
       createdTag: newTag.id,
@@ -105,4 +116,6 @@ export class CreateTagFragment extends React.PureComponent<TagPageProps, TagPage
     this.props.goTo(`/overview/initial/review`);
   };
 }
-export const CreateTagPageFragment = withUrlState<TagPageProps>(CreateTagFragment);
+const CreateTagPageFragmentUI = withUrlState<TagPageProps>(CreateTagFragment);
+
+export const CreateTagPageFragment = injectI18n(CreateTagPageFragmentUI);
