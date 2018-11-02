@@ -11,6 +11,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { ApmServerInstances } from '../../../components/apm/instances';
 import { MonitoringViewBaseTableController } from '../../base_table_controller';
+import { I18nProvider } from '@kbn/i18n/react';
 
 uiRoutes.when('/apm/instances', {
   template,
@@ -21,7 +22,7 @@ uiRoutes.when('/apm/instances', {
     },
   },
   controller: class extends MonitoringViewBaseTableController {
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, {
@@ -29,7 +30,9 @@ uiRoutes.when('/apm/instances', {
       });
 
       super({
-        title: 'APM - Instances',
+        title: i18n('xpack.monitoring.apm.instancesRouteTitle', {
+          defaultMessage: 'APM - Instances'
+        }),
         storageKey: 'apm.instances',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/instances`,
         defaultData: {},
@@ -53,16 +56,18 @@ uiRoutes.when('/apm/instances', {
       } = this;
 
       const component = (
-        <ApmServerInstances
-          apms={{
-            pageIndex,
-            filterText,
-            sortKey,
-            sortOrder,
-            onNewState,
-            data,
-          }}
-        />
+        <I18nProvider>
+          <ApmServerInstances
+            apms={{
+              pageIndex,
+              filterText,
+              sortKey,
+              sortOrder,
+              onNewState,
+              data,
+            }}
+          />
+        </I18nProvider>
       );
       super.renderReact(component);
     }

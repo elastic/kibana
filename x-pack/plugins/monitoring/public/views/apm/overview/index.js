@@ -23,7 +23,7 @@ uiRoutes.when('/apm', {
     },
   },
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, {
@@ -31,7 +31,9 @@ uiRoutes.when('/apm', {
       });
 
       super({
-        title: 'APM',
+        title: i18n('xpack.monitoring.apm.overviewRouteTitle', {
+          defaultMessage: 'APM'
+        }),
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm`,
         defaultData: {},
         reactNodeId: 'apmOverviewReact',
