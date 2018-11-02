@@ -19,6 +19,7 @@ import { AgentMark } from '../get_agent_marks';
 import { SpanFlyout } from './SpanFlyout';
 import { TransactionFlyout } from './TransactionFlyout';
 import {
+  IServiceColors,
   IWaterfall,
   IWaterfallItem
 } from './waterfall_helpers/waterfall_helpers';
@@ -42,9 +43,7 @@ interface Props {
   urlParams: IUrlParams;
   waterfall: IWaterfall;
   location: any;
-  serviceColors: {
-    [key: string]: string;
-  };
+  serviceColors: IServiceColors;
 }
 
 export class Waterfall extends Component<Props> {

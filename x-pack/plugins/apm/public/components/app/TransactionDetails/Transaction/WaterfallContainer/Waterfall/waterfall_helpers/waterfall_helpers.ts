@@ -11,8 +11,10 @@ import {
   indexBy,
   isEmpty,
   sortBy,
-  uniq
+  uniq,
+  zipObject
 } from 'lodash';
+import { colors } from 'x-pack/plugins/apm/public/style/variables';
 import { Span } from '../../../../../../../../typings/Span';
 import { Transaction } from '../../../../../../../../typings/Transaction';
 
@@ -32,6 +34,7 @@ export interface IWaterfall {
   items: IWaterfallItem[];
   itemsById: IWaterfallIndex;
   getTransactionById: (id?: IWaterfallItem['id']) => Transaction | undefined;
+  serviceColors: IServiceColors;
 }
 
 interface IWaterfallItemBase {
@@ -193,6 +196,24 @@ function getServices(items: IWaterfallItem[]) {
   return uniq(serviceNames);
 }
 
+export interface IServiceColors {
+  [key: string]: string;
+}
+
+function getServiceColors(services: string[]) {
+  const assignedColors = [
+    colors.apmBlue,
+    colors.apmGreen,
+    colors.apmPurple,
+    colors.apmRed2,
+    colors.apmTan,
+    colors.apmOrange,
+    colors.apmYellow
+  ];
+
+  return zipObject(services, assignedColors) as IServiceColors;
+}
+
 export function getWaterfall(
   hits: Array<Span | Transaction>,
   entryTransaction: Transaction
@@ -202,7 +223,8 @@ export function getWaterfall(
       services: [],
       items: [],
       itemsById: {},
-      getTransactionById: () => undefined
+      getTransactionById: () => undefined,
+      serviceColors: {}
     };
   }
 
@@ -235,6 +257,7 @@ export function getWaterfall(
     entryTransactionItem
   );
   const traceRoot = getTraceRoot(childrenByParentId);
+  const services = getServices(items);
 
   const getTransactionById = (id?: IWaterfallItem['id']) => {
     if (!id) {
@@ -251,9 +274,10 @@ export function getWaterfall(
     traceRoot,
     traceRootDuration: traceRoot && traceRoot.transaction.duration.us,
     duration: entryTransaction.transaction.duration.us,
-    services: getServices(items),
+    services,
     items,
     itemsById,
-    getTransactionById
+    getTransactionById,
+    serviceColors: getServiceColors(services)
   };
 }
