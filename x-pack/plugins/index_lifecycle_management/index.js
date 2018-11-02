@@ -9,7 +9,7 @@ import { registerTemplatesRoutes } from './server/routes/api/templates';
 import { registerNodesRoutes } from './server/routes/api/nodes';
 import { registerPoliciesRoutes } from './server/routes/api/policies';
 import { registerLifecycleRoutes } from './server/routes/api/lifecycle';
-import { registerIndicesRoutes } from './server/routes/api/indices';
+import { registerIndexRoutes } from './server/routes/api/index';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
 import { indexLifecycleDataEnricher } from './index_lifecycle_data';
@@ -27,7 +27,7 @@ export function indexLifecycleManagement(kibana) {
       registerNodesRoutes(server);
       registerPoliciesRoutes(server);
       registerLifecycleRoutes(server);
-      registerIndicesRoutes(server);
+      registerIndexRoutes(server);
       if (
         server.plugins.index_management &&
         server.plugins.index_management.addIndexManagementDataEnricher

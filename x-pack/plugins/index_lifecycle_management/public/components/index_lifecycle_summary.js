@@ -5,7 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-
+import moment from 'moment-timezone';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,9 +46,17 @@ export class IndexLifecycleSummary extends Component {
     };
     Object.keys(HEADERS).forEach((fieldName, arrayIndex) => {
       const value = ilm[fieldName];
-      const content = fieldName === 'step_info' ? (
-        `${value.type}: ${value.reason}`
-      ) : value;
+      let content;
+      if (fieldName === 'step_info') {
+        if (value) {
+          content = `${value.type}: ${value.reason}`;
+        }
+      } else if (fieldName === 'action_time') {
+        content = moment(value).format('YYYY-MM-DD HH:mm:ss');
+      } else {
+        content = value;
+      }
+      content = content || '-';
       const cell = [
         <EuiDescriptionListTitle key={fieldName}>
           <strong>{HEADERS[fieldName]}:</strong>

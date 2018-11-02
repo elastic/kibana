@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerIndicesRoutes } from './register_indices_routes';
+export { registerIndexRoutes } from './register_index_routes';

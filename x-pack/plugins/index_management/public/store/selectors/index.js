@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { Pager } from '@elastic/eui';
 
 import { createSelector } from 'reselect';
@@ -16,6 +15,11 @@ export const getDetailPanelType = (state) => state.detailPanel.panelType;
 export const isDetailPanelOpen = (state) => !!getDetailPanelType(state);
 export const getDetailPanelIndexName = (state) => state.detailPanel.indexName;
 export const getIndices = (state) => state.indices.byId;
+export const getIndicesByName = (state, indexNames) => {
+  const indices = getIndices(state);
+  console.log(indices);
+  return indexNames.map((indexName) => indices[indexName]);
+};
 export const getIndexByIndexName = (state, name) => getIndices(state)[name];
 export const getFilteredIds = (state) => state.indices.filteredIds;
 export const getRowStatuses = (state) => state.rowStatus;

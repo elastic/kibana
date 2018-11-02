@@ -19,4 +19,5 @@ export * from './table_state';
 export * from './edit_index_settings';
 export * from './update_index_settings';
 export * from './detail_panel';
+export * from './extension_action';
 

@@ -6,8 +6,10 @@
 
 import { registerBootstrapRoute } from './register_bootstrap_route';
 import { registerGetAffectedRoute } from './register_get_affected_route';
+import { registerRetryRoute } from './register_retry_route';
 
-export function registerIndicesRoutes(server) {
+export function registerIndexRoutes(server) {
   registerBootstrapRoute(server);
   registerGetAffectedRoute(server);
+  registerRetryRoute(server);
 }
