@@ -46,17 +46,17 @@ export class PluginsService implements CoreService {
       )
       .toPromise();
 
-    await plugin$
-      .pipe(
-        toArray(),
-        tap(plugins => this.log.debug(`Discovered ${plugins.length} plugins.`))
-      )
-      .toPromise();
-
     await error$
       .pipe(
         filter(error => error.type === PluginDiscoveryErrorType.InvalidManifest),
         tap(invalidManifestError => this.log.error(invalidManifestError))
+      )
+      .toPromise();
+
+    await plugin$
+      .pipe(
+        toArray(),
+        tap(plugins => this.log.debug(`Discovered ${plugins.length} plugins.`))
       )
       .toPromise();
   }
