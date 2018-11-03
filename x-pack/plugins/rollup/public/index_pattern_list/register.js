@@ -7,4 +7,6 @@
 import { IndexPatternListConfigRegistry } from 'ui/management/index_pattern_list';
 import { RollupIndexPatternListConfig } from './rollup_index_pattern_list_config';
 
-IndexPatternListConfigRegistry.register(() => RollupIndexPatternListConfig);
+export function initIndexPatternList() {
+  IndexPatternListConfigRegistry.register(() => RollupIndexPatternListConfig);
+}
