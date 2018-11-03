@@ -50,8 +50,22 @@ export function MochaReporterProvider({ getService }) {
       runner.on('end', this.onEnd);
 
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
+        const extraNameParts = [];
+
+        if (config.get('mochaOpts.grep')) {
+          extraNameParts.push(`(grep=${config.get('mochaOpts.grep')})`);
+        }
+
+        if (config.get('suiteTags.include')) {
+          extraNameParts.push(`(tags=${config.get('suiteTags.include')})`);
+        }
+
+        if (config.get('suiteTags.exclude')) {
+          extraNameParts.push(`(!tags=${config.get('suiteTags.exclude')})`);
+        }
+
         setupJUnitReportGeneration(runner, {
-          reportName: config.get('junit.reportName'),
+          reportName: [config.get('junit.reportName'), ...extraNameParts].join(' '),
           rootDirectory: config.get('junit.rootDirectory')
         });
       }
