@@ -261,7 +261,6 @@ export class JobListUi extends Component {
       if (jobLoadError.status === 403) {
         content = this.renderNoPermission();
       } else {
-        // There was an eror
         content = this.renderError(jobLoadError);
       }
     } else if (!isLoading && !jobs.length) {
