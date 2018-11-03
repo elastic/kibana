@@ -29,6 +29,10 @@ export interface IWaterfallGroup {
 export interface IWaterfall {
   traceRoot?: Transaction;
   traceRootDuration?: number;
+
+  /**
+   * Duration in us
+   */
   duration?: number;
   services: string[];
   items: IWaterfallItem[];
@@ -42,9 +46,25 @@ interface IWaterfallItemBase {
   parentId?: string;
   serviceName: string;
   name: string;
+
+  /**
+   * Duration in us
+   */
   duration: number;
+
+  /**
+   * start timestamp in us
+   */
   timestamp: number;
+
+  /**
+   * offset from first item in us
+   */
   offset: number;
+
+  /**
+   * skew from original timestamp in us
+   */
   skew: number;
   childIds?: Array<IWaterfallItemBase['id']>;
 }
@@ -214,6 +234,14 @@ function getServiceColors(services: string[]) {
   return zipObject(services, assignedColors) as IServiceColors;
 }
 
+function getDuration(items: IWaterfallItem[]) {
+  const timestampStart = items[0].timestamp;
+  const timestampEnd = Math.max(
+    ...items.map(item => item.timestamp + item.duration)
+  );
+  return timestampEnd - timestampStart;
+}
+
 export function getWaterfall(
   hits: Array<Span | Transaction>,
   entryTransaction: Transaction
@@ -258,6 +286,7 @@ export function getWaterfall(
   );
   const traceRoot = getTraceRoot(childrenByParentId);
   const services = getServices(items);
+  const duration = getDuration(items);
 
   const getTransactionById = (id?: IWaterfallItem['id']) => {
     if (!id) {
@@ -273,7 +302,7 @@ export function getWaterfall(
   return {
     traceRoot,
     traceRootDuration: traceRoot && traceRoot.transaction.duration.us,
-    duration: entryTransaction.transaction.duration.us,
+    duration,
     services,
     items,
     itemsById,
