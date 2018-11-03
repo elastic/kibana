@@ -13,30 +13,43 @@ image::monitoring/images/metricbeat.png[Example monitoring architecture]
 To learn about monitoring in general, see 
 {stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
 
+. Disable the default collection of {kib} monitoring metrics. +
++
+--
+Add the following setting in the {kib} configuration file (`kibana.yml`): 
 
-. Enable the collection of monitoring data. 
+[source,yaml]
+----------------------------------
+xpack.monitoring.kibana.collection.enabled: false
+----------------------------------
+
+Leave the `xpack.monitoring.enabled` set to its default value (`true`). 
+
+For more information, see 
+<<monitoring-settings-kb,Monitoring settings in {kib}>>.
+--
+
+. <<start-stop,Start {kib}>>.
+
+. Enable the collection of monitoring data. Set 
+`xpack.monitoring.collection.enabled` to `true` on the production cluster. 
 
 ** In {kib}:
 
-... Open {kib} in your web browser. If you are running {kib} locally, go to 
-`http://localhost:5601/`. 
+... Open {kib} in your web browser. 
 +
 --
-////
-If the Elastic {security-features} are enabled on the {kib} server, to access 
-{kib} and view the monitoring dashboards, you must log in as a user who has the 
-`kibana_user` and `monitoring_user` roles. For more information, see 
-{stack-ov}/built-in-roles.html[Built-in roles].
-//TBD: What permissions are required to update cluster settings?
+If you are running {kib} locally, go to `http://localhost:5601/`. 
 
-If you are accessing a remote monitoring cluster, you must log in to {kib}
-with credentials that are valid on both the {kib} server and the monitoring 
-cluster.
-////
+If the Elastic {security-features} are enabled, log in. 
 --
 
 ... In the side navigation, click *Monitoring*. If data collection is disabled, 
 you are prompted to turn it on. 
++
+--
+//TBD: What permissions are required to update cluster settings?
+--
 
 ** From the Console or command line, set `xpack.monitoring.collection.enabled` 
 to `true` on the production cluster. +
@@ -58,22 +71,6 @@ PUT _cluster/settings
 
 For more information, see {ref}/monitoring-settings.html[Monitoring settings in {es}] 
 and {ref}/cluster-update-settings.html[Cluster update settings].
---
-
-. Disable the default collection of {kib} monitoring metrics. +
-+
---
-Add the following setting in the {kib} configuration file (`kibana.yml`): 
-
-[source,yaml]
-----------------------------------
-xpack.monitoring.kibana.collection.enabled: false
-----------------------------------
-
-Leave the `xpack.monitoring.enabled` set to its default value (`true`). 
-
-For more information, see 
-<<monitoring-settings-kb,Monitoring settings in {kib}>>.
 --
 
 . {metricbeat-ref}/metricbeat-installation.html[Install {metricbeat}] on the 
@@ -203,8 +200,6 @@ output.elasticsearch:
 {ref}/configuring-tls.html[encrypted communications], you must access it via 
 HTTPS. For example, use a `hosts` setting like `https://es-mon-1:9200` in the 
 `metricbeat.yml` file. 
-
-. <<start-stop,Start {kib}>>.
 
 . {metricbeat-ref}/metricbeat-starting.html[Start {metricbeat}]. 
 
