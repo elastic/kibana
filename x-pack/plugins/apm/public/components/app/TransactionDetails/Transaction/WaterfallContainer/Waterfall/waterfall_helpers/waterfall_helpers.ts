@@ -63,7 +63,7 @@ interface IWaterfallItemBase {
   offset: number;
 
   /**
-   * skew from original timestamp in us
+   * skew from timestamp in us
    */
   skew: number;
   childIds?: Array<IWaterfallItemBase['id']>;
@@ -143,38 +143,39 @@ function getSpanItem(span: Span): IWaterfallItemSpan {
   };
 }
 
-function getClockSkew(
+export function getClockSkew(
   item: IWaterfallItem,
-  itemsById: IWaterfallIndex,
+  parentItem: IWaterfallItem | undefined,
   parentTransactionSkew: number
 ) {
   switch (item.docType) {
     case 'span':
       return parentTransactionSkew;
     case 'transaction': {
-      if (!item.parentId) {
-        return 0;
-      }
-
-      const parentItem = itemsById[item.parentId];
-
       // For some reason the parent span and related transactions might be missing.
       if (!parentItem) {
         return 0;
       }
 
-      // determine if child starts before the parent, and in that case how much
-      const diff = parentItem.timestamp + parentItem.skew - item.timestamp;
+      const parentStart = parentItem.timestamp + parentItem.skew;
+      const parentEnd = parentStart + parentItem.duration;
 
-      // If child transaction starts after parent span there is no clock skew
-      if (diff < 0) {
+      // determine if child starts before the parent
+      const offsetStart = parentStart - item.timestamp;
+
+      // determine if child starts after the parent has ended
+      const offsetEnd = item.timestamp - parentEnd;
+
+      // child transaction starts before parent OR
+      // child transaction starts after parent has ended
+      if (offsetStart > 0 || offsetEnd > 0) {
+        const latency = Math.max(parentItem.duration - item.duration, 0) / 2;
+        return offsetStart + latency;
+
+        // child transaction starts withing parent duration and no adjustment is needed
+      } else {
         return 0;
       }
-
-      // latency can only be calculated if parent duration is larger than child duration
-      const latency = Math.max(parentItem.duration - item.duration, 0);
-      const skew = diff + latency / 2;
-      return skew;
     }
   }
 }
@@ -188,7 +189,8 @@ export function getWaterfallItems(
     item: IWaterfallItem,
     parentTransactionSkew: number
   ): IWaterfallItem[] {
-    const skew = getClockSkew(item, itemsById, parentTransactionSkew);
+    const parentItem = item.parentId ? itemsById[item.parentId] : undefined;
+    const skew = getClockSkew(item, parentItem, parentTransactionSkew);
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
     item.childIds = children.map(child => child.id);
@@ -237,7 +239,7 @@ function getServiceColors(services: string[]) {
 function getDuration(items: IWaterfallItem[]) {
   const timestampStart = items[0].timestamp;
   const timestampEnd = Math.max(
-    ...items.map(item => item.timestamp + item.duration)
+    ...items.map(item => item.timestamp + item.duration + item.skew)
   );
   return timestampEnd - timestampStart;
 }
