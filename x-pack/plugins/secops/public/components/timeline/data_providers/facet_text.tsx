@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiBadge } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 
@@ -16,18 +17,7 @@ interface Props {
  * typically a numeric value, but non-numeric values can also be rendered.
  */
 export const FacetText = pure<Props>(({ text }) => (
-  <span
-    data-test-subj="facetText"
-    style={{
-      backgroundColor: '#e4e4e4',
-      border: '1px solid',
-      borderColor: '#e4e4e4',
-      borderRadius: '4px',
-      color: '#666666',
-      margin: '0px 5px',
-      padding: '0 2px 0 2px',
-    }}
-  >
-    {text}
-  </span>
+  <EuiBadge color="primary">
+    <span data-test-subj="facetText">{text}</span>
+  </EuiBadge>
 ));

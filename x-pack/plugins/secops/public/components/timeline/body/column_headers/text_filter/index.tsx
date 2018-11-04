@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFieldText } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
+
 import { OnFilterChange } from '../../../events';
 import { ColumnId } from '../../column_id';
 
@@ -34,12 +36,11 @@ export const TextFilter = pure<Props>(
     };
 
     return (
-      <input
+      <EuiFieldText
         data-test-subj="textFilter"
         style={{
           minWidth: `${minWidth}px`,
         }}
-        type="text"
         placeholder={placeholder}
         value={filter}
         onChange={onChange}

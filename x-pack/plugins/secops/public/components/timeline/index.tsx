@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
@@ -25,6 +26,14 @@ interface Props {
   width: number;
 }
 
+const TimelineDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 700px;
+  overflow: none;
+  user-select: none;
+`;
+
 /** The parent Timeline component */
 export const Timeline = pure<Props>(
   ({
@@ -37,19 +46,7 @@ export const Timeline = pure<Props>(
     sort,
     width,
   }) => (
-    <div
-      data-test-subj="timeline"
-      style={{
-        border: '1px solid black',
-        borderRadius: '10px',
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '700px',
-        overflow: 'none',
-        userSelect: 'none',
-        width: `${width}px`,
-      }}
-    >
+    <TimelineDiv data-test-subj="timeline" style={{ width: `${width}px` }}>
       <TimelineHeader
         dataProviders={dataProviders}
         onDataProviderRemoved={onDataProviderRemoved}
@@ -65,6 +62,6 @@ export const Timeline = pure<Props>(
         sort={sort}
         width={width}
       />
-    </div>
+    </TimelineDiv>
   )
 );
