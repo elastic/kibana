@@ -6,23 +6,25 @@
 
 The message ids chosen for message keys are descriptive of the string, and its role in the interface (button, label, header, etc.). Each message id ends with a descriptive type. Types are defined at the end of message id by combining to the last segment using camel case.
 
-The following types are supported:
-- Title
-- Label
-- ButtonLabel
-- DropDown
-- Placeholder
-- Tooltip
-- AriaLabel
-- ErrorMessage
-- ToggleSwitch
-- LinkLabel and etc.
+Ids should end with:
+
+- Description (in most cases if it's `<p>` tag),
+- Title (if it's `<h1>`, `<h2>`, etc. tags),
+- Label (if it's `<label>` tag),
+- ButtonLabel (if it's `<button>` tag),
+- DropDownOptionLabel (if it'a an option),
+- Placeholder (if it's a placeholder),
+- Tooltip (if it's a tootltip),
+- AriaLabel (if it's `aria-label` tag attribute),
+- ErrorMessage (if it'a an error message),
+- LinkText (if it's `<a>` tag),
+- ToggleSwitch and etc.
 
 There is one more complex case, when we have to divide a single expression into different labels.
 
 For example the message before translation looks like:
 
-  ```js
+  ```html
   <p>
       The following deprecated languages are in use: {deprecatedLangsInUse.join(', ')}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert your scripted fields to <EuiLink href={painlessDocLink}>Painless</EuiLink> to avoid any problems.
   </p>
@@ -78,10 +80,33 @@ In case when `indicesLength` has value 1, the result string will be "`1 index`".
 
 ## Best practices
 
+### Usage of appropriate component
+
+#### In ReactJS
+
+- Mostly use `<FormattedMessage>` wherever it's possible.
+- Use `intl.formatmessage()` where the string is expected (`aria-label`, `placeholder`).
+- Use `i18n.translate()` in other cases (static field in class).
+
+#### In AngularJS
+
+- Use `i18n` service in controllers, directives, services by injected it.
+- Use `i18nId` directive in template.
+- Use `i18n` filter in template for attribute translation.
+- Use `i18n.translate()` in other cases (in plain JS).
+
+Note: Use bind once in filters wherever it's possible to prevent watcher creation.
+
+#### In JavaScript
+
+- Use `i18n.translate()` in NodeJS.
 
 ### Naming convention
 
 The message ids chosen for message keys should always be descriptive of the string, and its role in the interface (button label, title, etc.). Think of them as long variable names. When you have to change a message id, adding a progressive number to the existing key should always be used as a last resort.
+Here's a rule id maning:
+
+`{plugin}.{area}.[{sub-area}].{element}`
 
 - Message id should start with namespace that identifies a functional area of the app (`common.ui` or `common.server`) or a plugin (`kbn`, `vega`, etc.).
 
@@ -145,7 +170,6 @@ The message ids chosen for message keys should always be descriptive of the stri
     }}
   />
   ```
-
 
 ### Defining type for message
 
@@ -251,6 +275,69 @@ For example:
   />
   ```
 
+### Variety of `values`
+
+- Variables
+
+  ```html
+  <span i18n-id="kbn.management.editIndexPattern.timeFilterHeader"
+    i18n-default-message="Time Filter field name: {timeFieldName}"
+    i18n-values="{ timeFieldName: indexPattern.timeFieldName }"></span>
+  ```
+
+  ```html
+  <FormattedMessage
+    id="kbn.management.createIndexPatternHeader"
+    defaultMessage="Create {indexPatternName}"
+    values={{
+      indexPatternName
+    }}
+  />
+  ```
+
+- Labels and variables in tag
+
+  ```html
+  <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
+    i18n-default-message="This page lists every field in the {indexPatternTitle} index"
+    i18n-values="{ indexPatternTitle: '<strong>' + indexPattern.title + '</strong>' }"></span>
+  ```
+
+  ```html
+  <FormattedMessage
+    id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
+    defaultMessage="You can't use spaces or the characters {characterList}."
+    values={{ characterList: <strong>{characterList}</strong> }}
+  />
+  ```
+
+  ```html
+  <FormattedMessage
+    id="kbn.management.settings.form.noSearchResultText"
+    defaultMessage="No settings found {clearSearch}"
+    values={{
+      clearSearch: (
+        <EuiLink onClick={clearQuery}>
+          <FormattedMessage
+            id="kbn.management.settings.form.clearNoSearchResultText"
+            defaultMessage="(clear search)"
+          />
+        </EuiLink>
+      ),
+    }}
+  />
+  ```
+
+- Nontranslatable text such as property name.
+
+  ```html
+  <FormattedMessage
+    id="xpack.security.management.users.editUser.changePasswordUpdateKibanaTitle"
+    defaultMessage="After you change the password for the kibana user, you must update the {kibana}
+    file and restart Kibana."
+    values={{ kibana: 'kibana.yml' }}
+  />
+  ```
 
 ### Text with plurals
 
@@ -258,7 +345,7 @@ The numeric input is mapped to a plural category, some subset of "zero", "one", 
 
 Here is an example of message translation depending on a plural category:
 
-```js
+```html
 <span i18n-id="kbn.management.editIndexPattern.mappingConflictLabel"
       i18n-default-message="{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern."
       i18n-values="{ conflictFieldsLength: conflictFields.length }"></span>
@@ -278,8 +365,6 @@ Splitting sentences into several keys often inadvertently presumes a grammar, a 
   `The following dialogue box indicates progress. You can close it and the process will continue to run in the background.`
 
   If this group of sentences is separated it’s possible that the context of the `'it'` in `'close it'` will be lost.
-
-
 
 ### Unit tests
 
@@ -333,3 +418,25 @@ it('should render normally', async () => {
 });
 // ...
 ```
+
+## Development steps
+
+1. Apply appropriate `i18n` component.
+
+2. Check UI that nothing is broken.
+
+3. Check functionality of an element (button is clicked, checkbox is checked/unchecked, etc.).
+
+4. Run validation tool:
+    ```js
+      node scripts/i18n_check --output ./
+    ```
+    and look through created `en.json`.
+
+5. Run eslint, tslint rules.
+
+6. Run tests.
+
+7. Check with pseudo-locale by setting `i18n.locale` to `en-xa` in `./config/kibana.yml`.
+
+8. Check that CI green
