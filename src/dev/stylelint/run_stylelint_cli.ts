@@ -17,34 +17,9 @@
  * under the License.
  */
 
-import { run, combineErrors } from './run';
-import * as Eslint from './eslint';
-import * as Tslint from './tslint';
-import * as Stylelint from './stylelint';
-import { getFilesForCommit, checkFileCasing } from './precommit_hook';
+// import { ToolingLog } from '@kbn/dev-utils';
+// import getopts from 'getopts';
 
-run(async ({ log }) => {
-  const files = await getFilesForCommit();
-  const errors = [];
-
-  try {
-    await checkFileCasing(log, files);
-  } catch (error) {
-    errors.push(error);
-  }
-
-  for (const Linter of [Eslint, Tslint, Stylelint]) {
-    const filesToLint = Linter.pickFilesToLint(log, files);
-    if (filesToLint.length > 0) {
-      try {
-        await Linter.lintFiles(log, filesToLint);
-      } catch (error) {
-        errors.push(error);
-      }
-    }
-  }
-
-  if (errors.length) {
-    throw combineErrors(errors);
-  }
-});
+export function runStylelintCli() {
+  require('stylelint/lib/cli')('**/*.tsx');
+}

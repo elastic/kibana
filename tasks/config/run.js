@@ -82,6 +82,15 @@ module.exports = function (grunt) {
       ]
     },
 
+    // used by dev/run_precommit_hook.js
+    //    runs the stylelint script to check for linting errors in Style Components
+    stylelint: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/stylelint')
+      ]
+    },
+
     // used by the test and jenkins:unit tasks
     //    runs the tslint script to check for Typescript linting errors
     tslint: {
