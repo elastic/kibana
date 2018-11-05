@@ -134,18 +134,19 @@
                       data-test-subj="discoverIntervalSelect"
                       >
                     </select>
-                    <span
-                      ng-if="bucketInterval.scaled"
-                      i18n-id="kbn.discover.scaledToDescription "
-                      i18n-default-message="{iconTip} Scaled to {bucketIntervalDescription}"
-                      i18n-values="{
-                        iconTip: '<icon-tip
-                          content=\'getBucketIntervalToolTipText()\'
-                          position=&quot;\'top\'&quot;
-                        ></icon-tip>',
-                        bucketIntervalDescription: bucketInterval.description
-                      }"
-                    ></span>
+                    <span ng-if="bucketInterval.scaled">
+                      <icon-tip
+                        content="getBucketIntervalToolTipText()"
+                        position="'top'"
+                      ></icon-tip>
+                      <span
+                        i18n-id="kbn.discover.scaledToDescription"
+                        i18n-default-message="Scaled to {bucketIntervalDescription}"
+                        i18n-values="{
+                          bucketIntervalDescription: bucketInterval.description
+                        }"
+                      ></span>
+                    </span>
                   </span>
                 </div>
 
@@ -183,14 +184,22 @@
               <div
                 ng-if="rows.length == opts.sampleSize"
                 class="dscTable__footer"
-                i18n-id="kbn.discover.firstDocumentMatchingSearchTitle "
-                i18n-default-message="These are the first {sampleSize} documents matching
-                your search, refine your search to see others. {scrollToTopLink}"
-                i18n-values="{
-                  sampleSize: opts.sampleSize,
-                  scrollToTopLink: '<a kbn-accessible-click ng-click=\'scrollToTop()\'>' + backToTop + '</a>'
-                }"
-              ></div>
+              >
+                <span
+                  i18n-id="kbn.discover.howToSeeOtherMatchingDocumentsDescription"
+                  i18n-default-message="These are the first {sampleSize} documents matching
+                  your search, refine your search to see others. "
+                  i18n-values="{
+                    sampleSize: opts.sampleSize,
+                  }"
+                ></span>
+                <a
+                  kbn-accessible-click
+                  ng-click="scrollToTop()"
+                  i18n-id="kbn.discover.backToTopLinkText"
+                  i18n-default-message="Back to top."
+                ></a>
+              </div>
             </section>
           </div>
         </div>

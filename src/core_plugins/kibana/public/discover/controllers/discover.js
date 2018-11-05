@@ -77,9 +77,6 @@ uiRoutes
   })
   .when('/discover/:id?', {
     template: indexTemplate,
-    controller: function (i18n, $scope) {
-      $scope.backToTop = i18n('kbn.discover.backToTopTitle', { defaultMessage: 'Back to top.' });
-    },
     reloadOnSearch: false,
     resolve: {
       ip: function (Promise, indexPatterns, config, $location, Private) {
