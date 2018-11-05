@@ -30,7 +30,7 @@ const MyComponentContent = ({ intl }) => (
     placeholder={intl.formatMessage({
       id: 'message-id-1',
       defaultMessage: 'Default message 1',
-      context: 'Message context 1'
+      description: 'Message context 1'
     })}
   />
 );
@@ -44,7 +44,7 @@ class Component extends PureComponent {
         <FormattedMessage
           id="message-id-2"
           defaultMessage="Default message 2"
-          context="Message context 2"
+          description="Message context 2"
         />
       </p>
     );
@@ -58,7 +58,7 @@ const messageId = 'message-id'
 intl.formatMessage({
   id: messageId,
   defaultMessage: 'Default message',
-  context: 'Message context'
+  description: 'Message context'
 });
 `,
   `
@@ -66,7 +66,7 @@ intl.formatMessage({
   intl.formatMessage({
     id: 'message-id',
     defaultMessage: message,
-    context: 'Message context'
+    description: 'Message context'
   });
 `,
   `
@@ -74,7 +74,7 @@ const context = 'Message context'
 intl.formatMessage({
   id: 'message-id',
   defaultMessage: 'Default message',
-  context
+  description: 1
 });
 `,
 ];
@@ -110,7 +110,7 @@ describe('dev/i18n/extractors/react', () => {
       expect(() => extractIntlMessages(callExpressionNode)).toThrowErrorMatchingSnapshot();
     });
 
-    test('throws if context value is not a string literal', () => {
+    test('throws if description value is not a string literal', () => {
       const source = intlFormatMessageCallErrorSources[2];
       const ast = parse(source, { plugins: ['jsx'] });
       const callExpressionNode = [...traverseNodes(ast.program.body)].find(node =>

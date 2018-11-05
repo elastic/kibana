@@ -29,8 +29,10 @@ import {
   extractValuesKeysFromNode,
   checkValuesProperty,
 } from '../utils';
-import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY, VALUES_KEY } from '../constants';
+import { DEFAULT_MESSAGE_KEY, VALUES_KEY } from '../constants';
 import { createFailError } from '../../run';
+
+const CONTEXT_KEY = 'description';
 
 /**
  * Extract default messages from ReactJS intl.formatMessage(...) AST

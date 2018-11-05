@@ -269,7 +269,7 @@ class RootComponent extends Component {
 }
 ```
 
-Optionally we can pass `context` prop into `FormattedMessage` component.
+Optionally we can pass `description` prop into `FormattedMessage` component.
 This prop is optional context comment that will be extracted by i18n tools
 and added as a comment next to translation message at `defaultMessages.json`
 
@@ -292,6 +292,7 @@ const MyComponentContent = ({ intl }) => (
         id: 'welcome',
         defaultMessage: 'Hello {name}, you have {unreadCount, number}\
 {unreadCount, plural, one {message} other {messages}}',
+        description: 'Message context',
       },
       { name, unreadCount }
     )}

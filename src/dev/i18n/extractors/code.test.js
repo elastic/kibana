@@ -37,7 +37,7 @@ class Component extends PureComponent {
         <FormattedMessage
           id="kbn.mgmt.id-2"
           defaultMessage="Message text 2"
-          context="Message context"
+          description="Message context"
         />
         {intl.formatMessage({ id: 'kbn.mgmt.id-3', defaultMessage: 'Message text 3' })}
       </div>
@@ -47,10 +47,10 @@ class Component extends PureComponent {
 `);
 
 const intlFormatMessageSource = `
-  formatMessage({ id: 'kbn.mgmt.id-1', defaultMessage: 'Message text 1', context: 'Message context' });
-  intl.formatMessage({ id: 'kbn.mgmt.id-2', defaultMessage: 'Message text 2', context: 'Message context' });
-  props.intl.formatMessage({ id: 'kbn.mgmt.id-5', defaultMessage: 'Message text 5', context: 'Message context' });
-  this.props.intl.formatMessage({ id: 'kbn.mgmt.id-6', defaultMessage: 'Message text 6', context: 'Message context' });
+  formatMessage({ id: 'kbn.mgmt.id-1', defaultMessage: 'Message text 1', description: 'Message context' });
+  intl.formatMessage({ id: 'kbn.mgmt.id-2', defaultMessage: 'Message text 2', description: 'Message context' });
+  props.intl.formatMessage({ id: 'kbn.mgmt.id-5', defaultMessage: 'Message text 5', description: 'Message context' });
+  this.props.intl.formatMessage({ id: 'kbn.mgmt.id-6', defaultMessage: 'Message text 6', description: 'Message context' });
 `;
 
 const formattedMessageSource = `
@@ -59,7 +59,7 @@ function f() {
     <FormattedMessage
       id="kbn.mgmt.id-1"
       defaultMessage="Message text 1"
-      context="Message context"
+      description="Message context"
     />
   );
 }

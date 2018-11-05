@@ -20,7 +20,7 @@ Array [
 ]
 `;
 
-exports[`dev/i18n/extractors/react extractIntlMessages throws if context value is not a string literal 1`] = `"context value should be a string or template literal (\\"message-id\\")."`;
+exports[`dev/i18n/extractors/react extractIntlMessages throws if description value is not a string literal 1`] = `"context or description value should be a string or template literal (\\"message-id\\")."`;
 
 exports[`dev/i18n/extractors/react extractIntlMessages throws if defaultMessage value is not a string literal 1`] = `"defaultMessage value should be a string or template literal (\\"message-id\\")."`;
 

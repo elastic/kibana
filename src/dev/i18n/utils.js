@@ -236,7 +236,7 @@ export function extractContextValueFromNode(node, messageId) {
   }
 
   throw createFailError(
-    `context value should be a string or template literal ("${messageId}").`
+    `context or description value should be a string or template literal ("${messageId}").`
   );
 }
 
