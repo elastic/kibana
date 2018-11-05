@@ -4,42 +4,86 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
-import { mount } from 'enzyme'; // eslint-disable-line import/no-extraneous-dependencies
-import { intl } from './mocks/intl';
-
 /**
- *  Creates the wrapper instance with provided intl object into context
- *
- *  @param  node The React element or cheerio wrapper
- *  @param  options properties to pass into mount wrapper
- *  @return The wrapper instance around the rendered output with intl object in context
+ * Components using the react-intl module require access to the intl context.
+ * This is not available when mounting single components in Enzyme.
+ * These helper functions aim to address that and wrap a valid,
+ * intl context around them.
  */
-export function mountWithIntl(node, { context = {}, childContextTypes = {}, ...props } = {}) {
-  if (!node) {
-    throw new Error(`First argument should be cheerio object or React element, not ${node}`);
-  }
 
-  const clonedNode = React.cloneElement(node, { intl });
+import React from 'react';
+import { I18nProvider, intlShape } from '@kbn/i18n/react';
+import { mount, shallow, render } from 'enzyme'; // eslint-disable-line import/no-extraneous-dependencies
 
-  const options = {
+// Use fake component to extract `intl` property to use in tests.
+const { intl } = mount(<I18nProvider><br /></I18nProvider>)
+  .find('IntlProvider').instance().getChildContext();
+
+function getOptions(context = {}, childContextTypes = {}, props = []) {
+  return {
     context: {
       ...context,
       intl,
     },
     childContextTypes: {
       ...childContextTypes,
-      intl: PropTypes.any,
+      intl: intlShape,
     },
     ...props,
   };
-
-  if (React.isValidElement(node)) {
-    return mount(clonedNode, options);
-  }
-
-  return clonedNode.mount(options);
 }
 
-export { intl };
+/**
+ * When using React-Intl `injectIntl` on components, props.intl is required.
+ */
+function nodeWithIntlProp(node) {
+  return React.cloneElement(node, { intl });
+}
+
+/**
+ *  Creates the wrapper instance using shallow with provided intl object into context
+ *
+ *  @param node The React element or cheerio wrapper
+ *  @param options properties to pass into shallow wrapper
+ *  @return The wrapper instance around the rendered output with intl object in context
+ */
+export function shallowWithIntl(node, { context, childContextTypes, ...props } = {}) {
+  const options = getOptions(context, childContextTypes, props);
+
+  return shallow(
+    nodeWithIntlProp(node),
+    options,
+  );
+}
+
+/**
+ *  Creates the wrapper instance using mount with provided intl object into context
+ *
+ *  @param node The React element or cheerio wrapper
+ *  @param options properties to pass into mount wrapper
+ *  @return The wrapper instance around the rendered output with intl object in context
+ */
+export function mountWithIntl(node, { context, childContextTypes, ...props } = {}) {
+  const options = getOptions(context, childContextTypes, props);
+
+  return mount(
+    nodeWithIntlProp(node),
+    options,
+  );
+}
+
+/**
+ *  Creates the wrapper instance using render with provided intl object into context
+ *
+ *  @param node The React element or cheerio wrapper
+ *  @param options properties to pass into render wrapper
+ *  @return The wrapper instance around the rendered output with intl object in context
+ */
+export function renderWithIntl(node, { context, childContextTypes, ...props } = {}) {
+  const options = getOptions(context, childContextTypes, props);
+
+  return render(
+    nodeWithIntlProp(node),
+    options,
+  );
+}

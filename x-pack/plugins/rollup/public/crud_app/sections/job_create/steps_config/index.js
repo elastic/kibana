@@ -44,7 +44,9 @@ export const stepIdToStepConfigMap = {
       // Every week on Saturday, at 00:00:00
       rollupCron: '0 0 0 ? * 7',
       simpleRollupCron: '0 0 0 ? * 7',
-      rollupPageSize: '',
+      // The best page size boils down to how much memory the user has, e.g. how many buckets should
+      // be accumulated at one time. 1000 is probably a safe size without being too small.
+      rollupPageSize: 1000,
       // Though the API doesn't require a delay, in many real-world cases, servers will go down for
       // a few hours as they're being restarted. A delay of 1d would allow them that period to reboot
       // and the "expense" is pretty negligible in most cases: 1 day of extra non-rolled-up data.
