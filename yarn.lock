@@ -158,10 +158,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
   integrity sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==
 
-"@elastic/good@8.1.1-kibana1":
-  version "8.1.1-kibana1"
-  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-8.1.1-kibana1.tgz#d8e444fdac8cc7dad36d4e29acc566cbf93298b9"
-  integrity sha512-RLeMEkeglz4EpvlHyI/6I3C1V3+8AzT/BdzFL1h2MDUoaJlFHGoF7U6T5vkTO1BuAY7EgUeG8zIoftb1fweRQg==
+"@elastic/good@8.1.1-kibana2":
+  version "8.1.1-kibana2"
+  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-8.1.1-kibana2.tgz#3ba7413da9fae4c67f128f3e9b1dc28f24523c7a"
+  integrity sha512-2AYmQMBjmh2896FePnnGr9nwoqRxZ6bTjregDRI0CB9r4sIpIzG6J7oMa0GztdDMlrk5CslX1g9SN5EihddPlw==
   dependencies:
     hoek "5.x.x"
     joi "13.x.x"

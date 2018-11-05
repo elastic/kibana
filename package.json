@@ -68,7 +68,7 @@
   "dependencies": {
     "@elastic/eui": "4.5.1",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/good": "8.1.1-kibana1",
+    "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
