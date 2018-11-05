@@ -297,13 +297,11 @@ export class VectorLayer extends ALayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(pointLayerId, ['in', ['geometry-type'], 'Point', 'MultiPoint']);
+      mbMap.setFilter(pointLayerId, ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']]);
     }
     this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId, this.isTemporary());
     mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    if (!this._descriptor.showAtAllZoomLevels) {
-      mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    }
+    mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     this._addTooltipListeners(mbMap, pointLayerId);
   }
 
@@ -318,7 +316,13 @@ export class VectorLayer extends ALayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(fillLayerId, ['in', ['geometry-type'], 'Polygon', 'MultiPolygon', 'LineString', 'MultiLineString']);
+      mbMap.setFilter(fillLayerId, [
+        'any',
+        ['==', ['geometry-type'], 'Polygon'],
+        ['==', ['geometry-type'], 'MultiPolygon'],
+        ['==', ['geometry-type'], 'LineString'],
+        ['==', ['geometry-type'], 'MultiLineString']
+      ]);
     }
     if (!mbMap.getLayer(lineLayerId)) {
       mbMap.addLayer({
@@ -327,26 +331,25 @@ export class VectorLayer extends ALayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(lineLayerId, ['in', ['geometry-type'], 'Polygon', 'MultiPolygon', 'LineString', 'MultiLineString']);
+      mbMap.setFilter(lineLayerId, [
+        'any',
+        ['==', ['geometry-type'], 'Polygon'],
+        ['==', ['geometry-type'], 'MultiPolygon'],
+        ['==', ['geometry-type'], 'LineString'],
+        ['==', ['geometry-type'], 'MultiLineString']
+      ]);
     }
     this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, lineLayerId, this.isTemporary());
     mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayoutProperty(lineLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    if (!this._descriptor.showAtAllZoomLevels) {
-      mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-      mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    }
+    mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     this._addTooltipListeners(mbMap, fillLayerId);
   }
 
   _syncStylePropertiesWithMb(mbMap) {
-
-    const isPointsOnly = this._isPointsOnly();
-    if (isPointsOnly) {
-      this._setMbPointsProperties(mbMap);
-    } else {
-      this._setMbLinePolygonProeprties(mbMap);
-    }
+    this._setMbPointsProperties(mbMap);
+    this._setMbLinePolygonProeprties(mbMap);
   }
 
   _syncSourceBindingWithMb(mbMap) {
