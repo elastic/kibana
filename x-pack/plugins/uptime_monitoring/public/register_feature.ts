@@ -10,11 +10,11 @@ import {
 } from 'ui/registry/feature_catalogue';
 
 FeatureCatalogueRegistryProvider.register(() => ({
-  id: 'heartbeat',
-  title: 'Heartbeat',
+  id: 'uptime_monitoring',
+  title: 'Uptime Monitoring',
   description: 'Perform endpoint health checks and uptime monitoring.',
   icon: 'heartbeatApp',
-  path: `heartbeat#/home`,
+  path: `uptime#/home`,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 }));

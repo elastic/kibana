@@ -5,9 +5,9 @@
  */
 
 import { Request } from 'hapi';
-import { INDEX_NAMES } from 'x-pack/plugins/heartbeat/common/constants/index_names';
-import { HBPingSortDirectionArg } from 'x-pack/plugins/heartbeat/common/domain_types';
-import { Ping } from 'x-pack/plugins/heartbeat/common/graphql/types';
+import { INDEX_NAMES } from '../../../../common/constants/index_names';
+import { HBPingSortDirectionArg } from '../../../../common/domain_types';
+import { Ping } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { HBPingsAdapter } from './adapter_types';
 

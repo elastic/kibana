@@ -20,9 +20,9 @@ export async function startApp(libs: HeartbeatFrontendLibs) {
     <EuiPage>
       <EuiPageContent>
         <EuiTitle>
-          <h2>Heartbeat</h2>
+          <h2>Uptime Monitoring</h2>
         </EuiTitle>
-        <p>This is where the Heartbeat app will live.</p>
+        <p>This is where the Uptime app will live.</p>
       </EuiPageContent>
     </EuiPage>
   );

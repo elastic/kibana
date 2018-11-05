@@ -5,12 +5,12 @@
  */
 
 import Joi from 'joi';
-import { Ping } from 'x-pack/plugins/heartbeat/common/graphql/types';
+import { Ping } from '../../../common/graphql/types';
 import { HBServerLibs } from '../../lib/lib';
 
 export const createGetAllRoute = (libs: HBServerLibs) => ({
   method: 'GET',
-  path: '/api/heartbeat/monitors',
+  path: '/api/uptime/monitors',
   options: {
     validate: {
       query: Joi.object({

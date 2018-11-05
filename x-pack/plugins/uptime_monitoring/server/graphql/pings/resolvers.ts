@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HBResolver } from 'x-pack/plugins/heartbeat/common/graphql/resolver_types';
-import { Ping } from 'x-pack/plugins/heartbeat/common/graphql/types';
 import { HBPingSortDirectionArg } from '../../../common/domain_types';
+import { HBResolver } from '../../../common/graphql/resolver_types';
+import { Ping } from '../../../common/graphql/types';
 import { HBServerLibs } from '../../lib/lib';
 import { IHBContext } from '../types';
 import { ICreateHeartbeatGraphQLResolvers } from '../types';

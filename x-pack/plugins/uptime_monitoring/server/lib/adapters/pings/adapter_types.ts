@@ -5,8 +5,8 @@
  */
 
 import { Request } from 'hapi';
-import { Ping } from 'x-pack/plugins/heartbeat/common/graphql/types';
 import { HBPingSortDirectionArg } from '../../../../common/domain_types';
+import { Ping } from '../../../../common/graphql/types';
 
 export interface HBPingsAdapter {
   getAll(request: Request, sort: HBPingSortDirectionArg, size: number): Promise<Ping[]>;

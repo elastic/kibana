@@ -40,7 +40,7 @@ export const hbGraphQLHapiPlugin: Plugin<HBHapiGraphQLPluginOptions> = {
         }
       },
       method: ['get', 'post'],
-      path: options.path || '/api/heartbeat/graphql',
+      path: options.path || '/api/uptime/graphql',
       vhost: options.vhost || undefined,
     });
   },

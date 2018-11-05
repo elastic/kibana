@@ -5,5 +5,5 @@
  */
 
 export const PLUGIN = {
-  ID: 'heartbeat',
+  ID: 'uptime_monitoring',
 };

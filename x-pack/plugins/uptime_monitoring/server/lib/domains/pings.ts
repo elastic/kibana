@@ -5,8 +5,8 @@
  */
 
 import { Request } from 'hapi';
-import { HBPingSortDirectionArg } from 'x-pack/plugins/heartbeat/common/domain_types';
-import { Ping } from 'x-pack/plugins/heartbeat/common/graphql/types';
+import { HBPingSortDirectionArg } from '../../../common/domain_types';
+import { Ping } from '../../../common/graphql/types';
 import { HBPingsAdapter } from '../adapters/pings';
 
 export class HBPingsDomain {

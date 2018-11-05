@@ -21,13 +21,13 @@ export class HeartbeatKibanaFrameworkAdapter implements HeartbeatFrameworkAdapte
   private register = (uiRoutes: any, rootComponent: React.ReactElement<any>) => {
     uiRoutes.enable();
     uiRoutes.when('/home', {
-      controllerAs: 'heartbeat',
+      controllerAs: 'uptime',
       controller: () => {
-        const elem = document.getElementById('heartbeatReactRoot');
+        const elem = document.getElementById('uptimeMonitoringReactRoot');
         ReactDOM.render(rootComponent, elem);
       },
       template:
-        '<heartbeat-app section="kibana" class="ng-scope"><div id="heartbeatReactRoot"></div></heartbeat-app>',
+        '<uptime-monitoring-app section="kibana" class="ng-scope"><div id="uptimeMonitoringReactRoot"></div></uptime-monitoring-app>',
     });
   };
 }
