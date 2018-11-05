@@ -65,7 +65,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     visualization: CoordinateMapsVisualization,
     editorConfig: {
       collections: {
-        colorSchemas: Object.keys(truncatedColorMaps),
+        colorSchemas: Object.values(truncatedColorMaps).map(value => ({ id: value.id, label: value.label })),
         legendPositions: [{
           value: 'bottomleft',
           text: i18n.translate('tileMap.vis.map.editorConfig.legendPositions.bottomLeftText', {
