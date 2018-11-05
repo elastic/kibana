@@ -17,44 +17,44 @@
  * under the License.
  */
 
-const TEST_GROUP_IDS = new Array(12).fill(undefined).map((_, i) => {
-  const id = i + 1;
-  return id < 10 ? `0${id}` : `${id}`;
-});
-
+const TEST_GROUP_IDS = new Array(12).fill(undefined).map((_, i) => i + 1);
 const getTaskName = id => `functionalTestsReleaseGroup${id}`;
 const getTag = id => `ciGroup${id}`;
 
 export function getFunctionalTestGroupRunConfigs({ esFrom, kibanaInstallDir } = {}) {
 
-  // create the config for a `run:` task that executes the functional test runner
-  const runFtrArgs = (tagArgs) => ({
-    cmd: process.execPath,
-    args: [
-      'scripts/functional_tests',
-      ...tagArgs,
-      '--config', 'test/functional/config.js',
-      '--esFrom', esFrom,
-      '--bail',
-      '--debug',
-      '--kibana-install-dir', kibanaInstallDir,
-      '--',
-      '--server.maxPayloadBytes=1648576',
-    ],
-  });
-
   return {
     // include a run task for each test group
     ...TEST_GROUP_IDS.reduce((acc, id) => ({
       ...acc,
-      [getTaskName(id)]: runFtrArgs(['--include-tag', getTag(id)])
+      [getTaskName(id)]: {
+        cmd: process.execPath,
+        args: [
+          'scripts/functional_tests',
+          '--include-tag', getTag(id),
+          '--config', 'test/functional/config.js',
+          '--esFrom', esFrom,
+          '--bail',
+          '--debug',
+          '--kibana-install-dir', kibanaInstallDir,
+          '--',
+          '--server.maxPayloadBytes=1648576',
+        ],
+      }
     }), {}),
 
     // also include a run task for any test that is not in a group
-    [getTaskName('Ungrouped')]: runFtrArgs(TEST_GROUP_IDS.reduce((acc, id) => [
-      ...acc,
-      '--exclude-tag',
-      getTag(id)
-    ], [])),
+    functionalTestsAssertTagCoverage: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_test_runner',
+        '--assert-none-excluded',
+        ...TEST_GROUP_IDS.reduce((acc, id) => [
+          ...acc,
+          '--include-tag',
+          getTag(id)
+        ], [])
+      ],
+    },
   };
 }

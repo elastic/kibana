@@ -8,7 +8,9 @@ import { TestInvoker } from '../../common/lib/types';
 
 // tslint:disable:no-default-export
 export default function({ loadTestFile }: TestInvoker) {
-  describe('saved objects spaces only enabled', () => {
+  describe('saved objects spaces only enabled', function() {
+    (this as any).tags('ciGroup4');
+
     loadTestFile(require.resolve('./bulk_create'));
     loadTestFile(require.resolve('./bulk_get'));
     loadTestFile(require.resolve('./create'));

@@ -34,7 +34,7 @@ export default function ({ getService, loadTestFile }) {
     });
 
     describe('', function () {
-      this.tags('ciGroup09');
+      this.tags('ciGroup9');
 
       loadTestFile(require.resolve('./_embedding_chart'));
       loadTestFile(require.resolve('./_chart_types'));

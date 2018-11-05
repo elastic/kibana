@@ -42,7 +42,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
     // This has to be first since the other tests create some embeddables as side affects and our counting assumes
     // a fresh index.
     describe('using current data', function () {
-      this.tags('ciGroup02');
+      this.tags('ciGroup2');
       before(loadCurrentData);
       after(unloadCurrentData);
 
@@ -57,7 +57,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
     });
 
     describe('using current data', function () {
-      this.tags('ciGroup03');
+      this.tags('ciGroup3');
       before(loadCurrentData);
       after(unloadCurrentData);
 
@@ -74,7 +74,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
     // the data once to save on time. Eventually, all of these tests should just use current data and we can reserve
     // legacy data only for specifically testing BWC situations.
     describe('using legacy data', function () {
-      this.tags('ciGroup04');
+      this.tags('ciGroup4');
       before(() => remote.setWindowSize(1200, 900));
 
       loadTestFile(require.resolve('./_dashboard_time_picker'));
@@ -84,7 +84,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
     });
 
     describe('using legacy data', function () {
-      this.tags('ciGroup05');
+      this.tags('ciGroup5');
       before(() => remote.setWindowSize(1200, 900));
 
       loadTestFile(require.resolve('./_dashboard_save'));

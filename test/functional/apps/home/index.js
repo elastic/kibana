@@ -21,7 +21,7 @@ export default function ({ getService, loadTestFile }) {
   const remote = getService('remote');
 
   describe('homepage app', function () {
-    this.tags('ciGroup06');
+    this.tags('ciGroup6');
 
     before(function () {
       return remote.setWindowSize(1200, 800);

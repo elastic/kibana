@@ -10,7 +10,9 @@ export default function ({ loadTestFile, getService }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('phantom', () => {
+  describe('phantom', function () {
+    this.tags('ciGroup4');
+
     before(async () => {
       await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.load(OSS_DATA_ARCHIVE_PATH);

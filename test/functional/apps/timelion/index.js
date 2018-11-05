@@ -24,7 +24,7 @@ export default function ({ getService, loadTestFile }) {
   const kibanaServer = getService('kibanaServer');
 
   describe('timelion app', function () {
-    this.tags('ciGroup01');
+    this.tags('ciGroup1');
 
     before(async function () {
       log.debug('Starting timelion before method');

@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('Monitoring app', function () {
-    this.tags('ciGroup01');
+    this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./cluster/list'));
     loadTestFile(require.resolve('./cluster/overview'));

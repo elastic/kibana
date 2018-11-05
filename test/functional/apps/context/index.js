@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   const PageObjects = getPageObjects(['common']);
 
   describe('context app', function () {
-    this.tags('ciGroup01');
+    this.tags('ciGroup1');
 
     before(async function () {
       await remote.setWindowSize(1200, 800);
