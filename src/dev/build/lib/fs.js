@@ -39,7 +39,7 @@ const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
 const utimesAsync = promisify(fs.utimes);
 
-function assertAbsolute(path) {
+export function assertAbsolute(path) {
   if (!isAbsolute(path)) {
     throw new TypeError(
       'Please use absolute paths to keep things explicit. You probably want to use `build.resolvePath()` or `config.resolveFromRepo()`.'

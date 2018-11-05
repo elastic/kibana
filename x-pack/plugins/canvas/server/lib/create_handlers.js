@@ -5,6 +5,8 @@
  */
 
 import boom from 'boom';
+import { SECURITY_AUTH_MESSAGE } from '../../common/lib/constants';
+import { isSecurityEnabled } from './feature_check';
 
 export const createHandlers = (request, server) => {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -19,9 +21,21 @@ export const createHandlers = (request, server) => {
     httpHeaders: request.headers,
     elasticsearchClient: async (...args) => {
       // check if the session is valid because continuing to use it
-      if (server.plugins.security) {
-        const authenticationResult = await server.plugins.security.authenticate(request);
-        if (!authenticationResult.succeeded()) throw boom.unauthorized(authenticationResult.error);
+      if (isSecurityEnabled(server)) {
+        try {
+          const authenticationResult = await server.plugins.security.authenticate(request);
+          if (!authenticationResult.succeeded())
+            throw boom.unauthorized(authenticationResult.error);
+        } catch (e) {
+          // if authenticate throws, show error in development
+          if (process.env.NODE_ENV !== 'production') {
+            e.message = `elasticsearchClient failed: ${e.message}`;
+            console.error(e);
+          }
+
+          // hide all failure information from the user
+          throw boom.unauthorized(SECURITY_AUTH_MESSAGE);
+        }
       }
 
       return callWithRequest(request, ...args);

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiHealth,
@@ -13,22 +14,34 @@ import {
 const statusToHealthMap = {
   stopped: (
     <EuiHealth color="subdued">
-      Stopped
+      <FormattedMessage
+        id="xpack.rollupJobs.jobStatus.stoppedLabel"
+        defaultMessage="Stopped"
+      />
     </EuiHealth>
   ),
   started: (
     <EuiHealth color="success">
-      Started
+      <FormattedMessage
+        id="xpack.rollupJobs.jobStatus.startedLabel"
+        defaultMessage="Started"
+      />
     </EuiHealth>
   ),
   indexing: (
     <EuiHealth color="warning">
-      Indexing
+      <FormattedMessage
+        id="xpack.rollupJobs.jobStatus.indexingLabel"
+        defaultMessage="Indexing"
+      />
     </EuiHealth>
   ),
   abort: (
     <EuiHealth color="danger">
-      Aborting
+      <FormattedMessage
+        id="xpack.rollupJobs.jobStatus.abortingLabel"
+        defaultMessage="Aborting"
+      />
     </EuiHealth>
   ),
 };

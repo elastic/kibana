@@ -87,6 +87,7 @@ export class JobListUi extends Component {
     // this page.
     this.props.closeDetailPanel();
   }
+
   getHeaderSection() {
     return (
       <EuiPageContentHeaderSection>
@@ -101,6 +102,7 @@ export class JobListUi extends Component {
       </EuiPageContentHeaderSection>
     );
   }
+
   renderNoPermission() {
     const { intl } = this.props;
     const title = intl.formatMessage({
@@ -124,10 +126,11 @@ export class JobListUi extends Component {
       </Fragment>
     );
   }
+
   renderEmpty() {
     return (
       <EuiEmptyPrompt
-        iconType="managementApp"
+        iconType="indexRollupApp"
         title={(
           <h1>
             <FormattedMessage
@@ -141,9 +144,8 @@ export class JobListUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.rollupJobs.jobList.emptyPromptDescription"
-                defaultMessage={`
-                Rollup jobs summarize and store historical data in a smaller index for future analysis.
-                `}
+                defaultMessage="Rollup jobs summarize and store historical data in a smaller index
+                  for future analysis."
               />
             </p>
           </Fragment>

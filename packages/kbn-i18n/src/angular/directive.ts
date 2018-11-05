@@ -27,7 +27,10 @@ interface I18nScope extends IScope {
   id: string;
 }
 
-export function i18nDirective(i18n: I18nServiceType): IDirective<I18nScope> {
+export function i18nDirective(
+  i18n: I18nServiceType,
+  $sanitize: (html: string) => string
+): IDirective<I18nScope> {
   return {
     restrict: 'A',
     scope: {
@@ -38,20 +41,27 @@ export function i18nDirective(i18n: I18nServiceType): IDirective<I18nScope> {
     link($scope, $element) {
       if ($scope.values) {
         $scope.$watchCollection('values', () => {
-          setHtmlContent($element, $scope, i18n);
+          setHtmlContent($element, $scope, $sanitize, i18n);
         });
       } else {
-        setHtmlContent($element, $scope, i18n);
+        setHtmlContent($element, $scope, $sanitize, i18n);
       }
     },
   };
 }
 
-function setHtmlContent($element: IRootElementService, $scope: I18nScope, i18n: I18nServiceType) {
+function setHtmlContent(
+  $element: IRootElementService,
+  $scope: I18nScope,
+  $sanitize: (html: string) => string,
+  i18n: I18nServiceType
+) {
   $element.html(
-    i18n($scope.id, {
-      values: $scope.values,
-      defaultMessage: $scope.defaultMessage,
-    })
+    $sanitize(
+      i18n($scope.id, {
+        values: $scope.values,
+        defaultMessage: $scope.defaultMessage,
+      })
+    )
   );
 }
