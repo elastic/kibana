@@ -285,27 +285,66 @@ export class VectorLayer extends ALayer {
     }
   }
 
+  _setMbPointsProperties(mbMap) {
+    const sourceId = this.getId();
+    const pointLayerId = this.getId() +  '_circle';
+    const pointLayer = mbMap.getLayer(pointLayerId);
+    if (!pointLayer) {
+      mbMap.addLayer({
+        id: pointLayerId,
+        type: 'circle',
+        source: sourceId,
+        paint: {}
+      });
+      mbMap.setFilter(pointLayerId, ['in', ['geometry-type'], 'Point', 'MultiPoint']);
+    }
+    this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId, this.isTemporary());
+    mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    if (!this._descriptor.showAtAllZoomLevels) {
+      mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    }
+    this._addTooltipListeners(mbMap, pointLayerId);
+  }
+
+  _setMbLinePolygonProeprties(mbMap) {
+    const sourceId = this.getId();
+    const fillLayerId = this.getId() + '_fill';
+    const lineLayerId = this.getId() + '_line';
+    if (!mbMap.getLayer(fillLayerId)) {
+      mbMap.addLayer({
+        id: fillLayerId,
+        type: 'fill',
+        source: sourceId,
+        paint: {}
+      });
+      mbMap.setFilter(fillLayerId, ['in', ['geometry-type'], 'Polygon', 'MultiPolygon', 'LineString', 'MultiLineString']);
+    }
+    if (!mbMap.getLayer(lineLayerId)) {
+      mbMap.addLayer({
+        id: lineLayerId,
+        type: 'line',
+        source: sourceId,
+        paint: {}
+      });
+      mbMap.setFilter(lineLayerId, ['in', ['geometry-type'], 'Polygon', 'MultiPolygon', 'LineString', 'MultiLineString']);
+    }
+    this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, lineLayerId, this.isTemporary());
+    mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayoutProperty(lineLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    if (!this._descriptor.showAtAllZoomLevels) {
+      mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+      mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    }
+    this._addTooltipListeners(mbMap, fillLayerId);
+  }
+
   _syncStylePropertiesWithMb(mbMap) {
+
     const isPointsOnly = this._isPointsOnly();
     if (isPointsOnly) {
-      const pointLayerId = this.getId() +  '_circle';
-      this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId, this.isTemporary());
-      mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-      if (!this._descriptor.showAtAllZoomLevels) {
-        mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-      }
-      this._addTooltipListeners(mbMap, pointLayerId);
+      this._setMbPointsProperties(mbMap);
     } else {
-      const fillLayerId = this.getId() + '_fill';
-      const strokeLayerId = this.getId() + '_line';
-      this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, strokeLayerId, this.isTemporary());
-      mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-      mbMap.setLayoutProperty(strokeLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-      if (!this._descriptor.showAtAllZoomLevels) {
-        mbMap.setLayerZoomRange(strokeLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-        mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-      }
-      this._addTooltipListeners(mbMap, fillLayerId);
+      this._setMbLinePolygonProeprties(mbMap);
     }
   }
 

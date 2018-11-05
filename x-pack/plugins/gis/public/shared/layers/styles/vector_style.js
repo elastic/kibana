@@ -231,24 +231,6 @@ export class VectorStyle {
 
 
   setMBPaintProperties(mbMap, sourceId, fillLayerId, lineLayerId, temp) {
-
-    if (!mbMap.getLayer(fillLayerId)) {
-      mbMap.addLayer({
-        id: fillLayerId,
-        type: 'fill',
-        source: sourceId,
-        paint: {}
-      });
-    }
-    if (!mbMap.getLayer(lineLayerId)) {
-      mbMap.addLayer({
-        id: lineLayerId,
-        type: 'line',
-        source: sourceId,
-        paint: {}
-      });
-    }
-
     if (this._descriptor.properties.fillColor) {
       const color = this._getMBColor('fillColor');
       mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
@@ -271,17 +253,6 @@ export class VectorStyle {
   }
 
   setMBPaintPropertiesForPoints(mbMap, sourceId, pointLayerId, temp) {
-
-    const pointLayer = mbMap.getLayer(pointLayerId);
-    if (!pointLayer) {
-      mbMap.addLayer({
-        id: pointLayerId,
-        type: 'circle',
-        source: sourceId,
-        paint: {}
-      });
-    }
-
     if (this._descriptor.properties.fillColor) {
       const color = this._getMBColor('fillColor');
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', 10);
