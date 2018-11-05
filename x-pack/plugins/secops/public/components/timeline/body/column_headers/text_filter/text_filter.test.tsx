@@ -62,7 +62,6 @@ describe('TextFilter', () => {
         );
 
         wrapper.find('input').simulate('change', { target: { value: newFilter } });
-
         expect(onFilterChange).toBeCalledWith({
           columnId,
           filter: newFilter,

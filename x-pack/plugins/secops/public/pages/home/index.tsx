@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
-
-import { ColumnarPage } from '../../components/page';
 import { Navigation } from '../../components/page/navigation';
 import { Timeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
@@ -43,27 +42,22 @@ const sort: Sort = {
 };
 
 export const HomePage = pure(() => (
-  <ColumnarPage>
+  <EuiPage>
     <Navigation />
-    <div
-      style={{
-        alignItems: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        marginTop: '10px',
-      }}
-    >
-      <Timeline
-        columnHeaders={headers}
-        dataProviders={mockDataProviders}
-        onColumnSorted={onColumnSorted}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onFilterChange={onFilterChange}
-        onRangeSelected={onRangeSelected}
-        sort={sort}
-        width={900}
-      />
-      <WhoAmI sourceId="default">{({ appName }) => <h1>Hello {appName}</h1>}</WhoAmI>
-    </div>
-  </ColumnarPage>
+    <EuiPageBody>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center">
+        <Timeline
+          columnHeaders={headers}
+          dataProviders={mockDataProviders}
+          onColumnSorted={onColumnSorted}
+          onDataProviderRemoved={onDataProviderRemoved}
+          onFilterChange={onFilterChange}
+          onRangeSelected={onRangeSelected}
+          sort={sort}
+          width={900}
+        />
+        <WhoAmI sourceId="default">{({ appName }) => <h1>Hello {appName}</h1>}</WhoAmI>
+      </EuiPageContent>
+    </EuiPageBody>
+  </EuiPage>
 ));

@@ -17,7 +17,7 @@ describe('the ConfigurationSourcesAdapter', () => {
     expect(await sourcesAdapter.getAll()).toMatchObject({
       default: {
         metricAlias: expect.any(String),
-        logAlias: expect.any(String),
+        fileAlias: expect.any(String),
         fields: {
           container: expect.any(String),
           host: expect.any(String),
@@ -42,7 +42,7 @@ describe('the ConfigurationSourcesAdapter', () => {
     expect(await sourcesAdapter.getAll()).toMatchObject({
       default: {
         metricAlias: expect.any(String),
-        logAlias: expect.any(String),
+        fileAlias: expect.any(String),
       },
     });
   });
@@ -53,7 +53,7 @@ describe('the ConfigurationSourcesAdapter', () => {
         sources: {
           default: {
             metricAlias: 'METRIC_ALIAS',
-            logAlias: 'LOG_ALIAS',
+            fileAlias: 'FILE_ALIAS',
             fields: {
               container: 'DIFFERENT_CONTAINER_FIELD',
             },
@@ -65,7 +65,7 @@ describe('the ConfigurationSourcesAdapter', () => {
     expect(await sourcesAdapter.getAll()).toMatchObject({
       default: {
         metricAlias: 'METRIC_ALIAS',
-        logAlias: 'LOG_ALIAS',
+        fileAlias: 'FILE_ALIAS',
         fields: {
           container: 'DIFFERENT_CONTAINER_FIELD',
           host: expect.any(String),
@@ -84,7 +84,7 @@ describe('the ConfigurationSourcesAdapter', () => {
         sources: {
           sourceOne: {
             metricAlias: 'METRIC_ALIAS',
-            logAlias: 'LOG_ALIAS',
+            fileAlias: 'FILE_ALIAS',
             fields: {
               container: 'DIFFERENT_CONTAINER_FIELD',
             },
@@ -96,7 +96,7 @@ describe('the ConfigurationSourcesAdapter', () => {
     expect(await sourcesAdapter.getAll()).toMatchObject({
       sourceOne: {
         metricAlias: 'METRIC_ALIAS',
-        logAlias: 'LOG_ALIAS',
+        fileAlias: 'FILE_ALIAS',
         fields: {
           container: 'DIFFERENT_CONTAINER_FIELD',
           host: expect.any(String),

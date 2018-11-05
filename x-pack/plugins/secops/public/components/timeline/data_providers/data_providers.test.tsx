@@ -43,7 +43,7 @@ describe('DataProviders', () => {
       );
 
       mockDataProviderNames().forEach(name =>
-        expect(wrapper.text()).toContain(`${name} ${getEventCount(name)}`)
+        expect(wrapper.text()).toContain(`${getEventCount(name)} ${name}`)
       );
     });
   });
