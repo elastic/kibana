@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { createSocket } from '../../socket';
 import { initialize as initializeInterpreter } from '../../lib/interpreter';
+import { populateBrowserRegistries } from '../../lib/browser_registries';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
 import { trackRouteChange } from './track_route_change';
@@ -26,12 +27,17 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   // TODO: the correct socket path should come from upstream, using the constant here is not ideal
   setAppReady: basePath => async () => {
-    // initialize the socket and interpreter
-    createSocket(basePath);
-    await initializeInterpreter();
+    try {
+      // initialize the socket and interpreter
+      await createSocket(basePath);
+      await populateBrowserRegistries();
+      await initializeInterpreter();
 
-    // set app state to ready
-    dispatch(appReady());
+      // set app state to ready
+      dispatch(appReady());
+    } catch (e) {
+      dispatch(appError(e));
+    }
   },
   setAppError: payload => dispatch(appError(payload)),
 });
