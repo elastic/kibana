@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiHeaderSection, EuiToolTip } from '@elastic/eui';
+import { EuiBetaBadge, EuiHeaderSection } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -16,9 +16,7 @@ export const BetaBadgeHeaderSection: React.SFC<BetaBadgeHeaderSectionProps> = ({
   tooltipContent = 'Please help us improve by reporting issues or bugs in the Kibana repo.',
 }) => (
   <VerticallyCenteredHeaderSection side="right">
-    <EuiToolTip content={tooltipContent} position="bottom">
-      <EuiBadge color="hollow">Beta</EuiBadge>
-    </EuiToolTip>
+    <EuiBetaBadge label="Beta" tooltipContent={tooltipContent} />
   </VerticallyCenteredHeaderSection>
 );
 
