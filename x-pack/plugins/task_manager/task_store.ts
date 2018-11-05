@@ -169,13 +169,12 @@ export class TaskStore {
    *
    * @param opts - The query options used to filter tasks
    */
-  public async fetch(opts: FetchOpts = {}, verbose: undefined | boolean): Promise<FetchResult> {
+  public async fetch(opts: FetchOpts = {}): Promise<FetchResult> {
     const sort = paginatableSort(opts.sort);
     return this.search({
       sort,
       search_after: opts.searchAfter,
       query: opts.query,
-      verbose,
     });
   }
 
@@ -278,7 +277,7 @@ export class TaskStore {
       ? { bool: { must: [queryOnlyTasks, originalQuery] } }
       : queryOnlyTasks;
 
-    const searchObj = {
+    const result = await this.callCluster('search', {
       type: DOC_TYPE,
       index: this.index,
       ignoreUnavailable: true,
@@ -286,9 +285,7 @@ export class TaskStore {
         ...opts,
         query,
       },
-    };
-
-    const result = await this.callCluster('search', searchObj);
+    });
 
     const rawDocs = result.hits.hits;
 
