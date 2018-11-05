@@ -38,5 +38,5 @@ export function showApiError(error, title) {
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
   // unexpected happened.
-  return fatalError(error, title);
+  fatalError(error, title);
 }
