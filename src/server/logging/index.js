@@ -27,6 +27,6 @@ export async function setupLogging(server, config) {
   });
 }
 
-export function loggingMixin(kbnServer, server, config) {
-  return setupLogging(server, config);
+export async function loggingMixin(kbnServer, server, config) {
+  return await setupLogging(server, config);
 }
