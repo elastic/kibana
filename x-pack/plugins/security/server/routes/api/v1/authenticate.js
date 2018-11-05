@@ -18,16 +18,16 @@ export function initAuthenticateApi(server) {
     config: {
       auth: false,
       validate: {
-        payload: {
+        payload: Joi.object({
           username: Joi.string().required(),
           password: Joi.string().required()
-        }
+        })
       },
       response: {
         emptyStatusCode: 204,
       }
     },
-    async handler(request, reply) {
+    async handler(request, h) {
       const { username, password } = request.payload;
 
       try {
@@ -36,7 +36,7 @@ export function initAuthenticateApi(server) {
         );
 
         if (!authenticationResult.succeeded()) {
-          return reply(Boom.unauthorized(authenticationResult.error));
+          throw Boom.unauthorized(authenticationResult.error);
         }
 
         const { authorization } = server.plugins.security;
@@ -45,9 +45,9 @@ export function initAuthenticateApi(server) {
           server.log(['warning', 'deprecated', 'security'], msg);
         }
 
-        return reply.continue({ credentials: authenticationResult.user });
+        return h.response();
       } catch(err) {
-        return reply(wrapError(err));
+        throw wrapError(err);
       }
     }
   });
@@ -58,13 +58,13 @@ export function initAuthenticateApi(server) {
     config: {
       auth: false,
       validate: {
-        payload: {
+        payload: Joi.object({
           SAMLResponse: Joi.string().required(),
           RelayState: Joi.string().allow('')
-        }
+        })
       }
     },
-    async handler(request, reply) {
+    async handler(request, h) {
       try {
         // When authenticating using SAML we _expect_ to redirect to the SAML provider.
         // However, it may happen that Identity Provider sends a new SAML Response
@@ -91,21 +91,19 @@ export function initAuthenticateApi(server) {
         // although it might not be the ideal UX in the long term.
         const authenticationResult = await server.plugins.security.authenticate(request);
         if (authenticationResult.succeeded()) {
-          return reply(
-            Boom.forbidden(
-              'Sorry, you already have an active Kibana session. ' +
-              'If you want to start a new one, please logout from the existing session first.'
-            )
+          throw Boom.forbidden(
+            'Sorry, you already have an active Kibana session. ' +
+            'If you want to start a new one, please logout from the existing session first.'
           );
         }
 
         if (authenticationResult.redirected()) {
-          return reply.redirect(authenticationResult.redirectURL);
+          return h.redirect(authenticationResult.redirectURL);
         }
 
-        return reply(Boom.unauthorized(authenticationResult.error));
+        throw Boom.unauthorized(authenticationResult.error);
       } catch (err) {
-        return reply(wrapError(err));
+        throw wrapError(err);
       }
     }
   });
@@ -116,24 +114,22 @@ export function initAuthenticateApi(server) {
     config: {
       auth: false
     },
-    async handler(request, reply) {
+    async handler(request, h) {
       if (!canRedirectRequest(request)) {
-        return reply(
-          Boom.badRequest('Client should be able to process redirect response.')
-        );
+        throw Boom.badRequest('Client should be able to process redirect response.');
       }
 
       try {
         const deauthenticationResult = await server.plugins.security.deauthenticate(request);
         if (deauthenticationResult.failed()) {
-          return reply(wrapError(deauthenticationResult.error));
+          throw wrapError(deauthenticationResult.error);
         }
 
-        return reply.redirect(
+        return h.redirect(
           deauthenticationResult.redirectURL || `${server.config().get('server.basePath')}/`
         );
       } catch (err) {
-        return reply(wrapError(err));
+        throw wrapError(err);
       }
     }
   });
@@ -141,8 +137,8 @@ export function initAuthenticateApi(server) {
   server.route({
     method: 'GET',
     path: '/api/security/v1/me',
-    handler(request, reply) {
-      reply(request.auth.credentials);
+    handler(request) {
+      return request.auth.credentials;
     }
   });
 }

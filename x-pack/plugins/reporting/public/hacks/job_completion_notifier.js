@@ -25,7 +25,7 @@ import { downloadReport } from '../lib/download_report';
 uiModules.get('kibana')
   .run((Private, reportingPollConfig) => {
     // Don't show users any reporting toasts until they're logged in.
-    if (Private(PathProvider).isLoginOrLogout()) {
+    if (Private(PathProvider).isUnauthenticated()) {
       return;
     }
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { formatJSString } from '../utils';
+import { formatJSString, checkValuesProperty } from '../utils';
 import { createFailError } from '../../run';
 
 const HBS_REGEX = /(?<=\{\{)([\s\S]*?)(?=\}\})/g;
@@ -57,13 +57,21 @@ export function* extractHandlebarsMessages(buffer) {
     }
 
     const properties = JSON.parse(propertiesString.slice(1, -1));
-    const message = formatJSString(properties.defaultMessage);
 
-    if (typeof message !== 'string') {
+    if (typeof properties.defaultMessage !== 'string') {
       throw createFailError(
         `defaultMessage value in Handlebars i18n should be a string ("${messageId}").`
       );
     }
+
+    if (properties.context != null && typeof properties.context !== 'string') {
+      throw createFailError(
+        `Context value in Handlebars i18n should be a string ("${messageId}").`
+      );
+    }
+
+    const message = formatJSString(properties.defaultMessage);
+    const context = formatJSString(properties.context);
 
     if (!message) {
       throw createFailError(
@@ -71,13 +79,15 @@ export function* extractHandlebarsMessages(buffer) {
       );
     }
 
-    const context = formatJSString(properties.context);
+    const valuesObject = properties.values;
 
-    if (context != null && typeof context !== 'string') {
+    if (valuesObject != null && typeof valuesObject !== 'object') {
       throw createFailError(
-        `Context value in Handlebars i18n should be a string ("${messageId}").`
+        `"values" value should be an object in Handlebars i18n ("${messageId}").`
       );
     }
+
+    checkValuesProperty(Object.keys(valuesObject || {}), message, messageId);
 
     yield [messageId, { message, context }];
   }

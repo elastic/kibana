@@ -8,9 +8,10 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
 import { SearchResult } from '../../../common/log_search_result';
-import { logEntriesSelectors, logPositionSelectors, State } from '../../store';
+import { logEntriesActions, logEntriesSelectors, logPositionSelectors, State } from '../../store';
 import { LogEntry, LogEntryMessageSegment } from '../../utils/log_entry';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
+import { bindPlainActionCreators } from '../../utils/typed_redux';
 
 export const withStreamItems = connect(
   (state: State) => ({
@@ -21,7 +22,9 @@ export const withStreamItems = connect(
     lastLoadedTime: logEntriesSelectors.selectEntriesLastLoadedTime(state),
     items: selectItems(state),
   }),
-  {}
+  bindPlainActionCreators({
+    loadNewerEntries: logEntriesActions.loadNewerEntries,
+  })
 );
 
 export const WithStreamItems = asChildFunctionRenderer(withStreamItems);

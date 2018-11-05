@@ -65,12 +65,12 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
   server.route({
     method: 'GET',
     path: '/api/security/role',
-    async handler(request, reply) {
+    async handler(request) {
       try {
         const response = await callWithRequest(request, 'shield.getRole');
-        return reply(transformRolesFromEs(response));
+        return transformRolesFromEs(response);
       } catch (error) {
-        reply(wrapError(error));
+        return wrapError(error);
       }
     },
     config: {
@@ -81,17 +81,17 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
   server.route({
     method: 'GET',
     path: '/api/security/role/{name}',
-    async handler(request, reply) {
+    async handler(request) {
       const name = request.params.name;
       try {
         const response = await callWithRequest(request, 'shield.getRole', { name });
         if (response[name]) {
-          return reply(transformRoleFromEs(response[name], name));
+          return transformRoleFromEs(response[name], name);
         }
 
-        return reply(Boom.notFound());
+        return Boom.notFound();
       } catch (error) {
-        reply(wrapError(error));
+        return wrapError(error);
       }
     },
     config: {

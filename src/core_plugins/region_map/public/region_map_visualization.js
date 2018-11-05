@@ -26,7 +26,7 @@ import AggResponsePointSeriesTooltipFormatterProvider from './tooltip_formatter'
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
 
-export function RegionMapsVisualizationProvider(Private, config) {
+export function RegionMapsVisualizationProvider(Private, config, i18n) {
 
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
@@ -161,8 +161,19 @@ export function RegionMapsVisualizationProvider(Private, config) {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {
           toastNotifications.addWarning({
-            title: `Unable to show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on map`,
-            text: `Ensure that each of these term matches a shape on that shape's join field: ${event.mismatches.join(', ')}`,
+            title: i18n('regionMap.visualization.unableToShowMismatchesWarningTitle', {
+              defaultMessage: 'Unable to show {mismatchesLength} {oneMismatch, plural, one {result} other {results}} on map',
+              values: {
+                mismatchesLength: event.mismatches.length,
+                oneMismatch: event.mismatches.length > 1 ? 0 : 1,
+              },
+            }),
+            text: i18n('regionMap.visualization.unableToShowMismatchesWarningText', {
+              defaultMessage: 'Ensure that each of these term matches a shape on that shape\'s join field: {mismatches}',
+              values: {
+                mismatches: event.mismatches.join(', '),
+              },
+            }),
           });
         }
       });
