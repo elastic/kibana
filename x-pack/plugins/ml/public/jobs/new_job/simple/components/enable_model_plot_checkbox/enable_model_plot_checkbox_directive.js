@@ -109,6 +109,7 @@ module.directive('mlEnableModelPlotCheckbox', function () {
           $scope.formConfig.enableModelPlot = false;
           $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
           $scope.ui.cardinalityValidator.message = '';
+          updateCheckbox();
         }
       };
 
