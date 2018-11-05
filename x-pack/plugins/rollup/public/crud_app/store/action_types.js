@@ -22,6 +22,11 @@ export const CREATE_JOB_SUCCESS = 'CREATE_JOB_SUCCESS';
 export const CREATE_JOB_FAILURE = 'CREATE_JOB_FAILURE';
 export const CLEAR_CREATE_JOB_ERRORS = 'CLEAR_CREATE_JOB_ERRORS';
 
+// Update job (start, stop, delete)
+export const UPDATE_JOB_START = 'UPDATE_JOB_START';
+export const UPDATE_JOB_SUCCESS = 'UPDATE_JOB_SUCCESS';
+export const UPDATE_JOB_FAILURE = 'UPDATE_JOB_FAILURE';
+
 // Table state
 export const FILTER_CHANGED = 'FILTER_CHANGED';
 export const PAGE_CHANGED = 'PAGE_CHANGED';

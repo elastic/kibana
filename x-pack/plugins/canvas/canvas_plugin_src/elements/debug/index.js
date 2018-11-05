@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import header from './header.png';
 
 export const debug = () => ({
   name: 'debug',
-  displayName: 'Debug',
-  help: 'Just dumps the configuration of the element',
+  displayName: i18n.translate('xpack.canvas.elements.debugDisplayName', {
+    defaultMessage: 'Debug',
+  }),
+  help: i18n.translate('xpack.canvas.elements.debugHelpText', {
+    defaultMessage: 'Just dumps the configuration of the element',
+  }),
   image: header,
   expression: `demodata
 | render as=debug`,
