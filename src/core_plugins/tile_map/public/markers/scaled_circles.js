@@ -214,7 +214,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
 
 function makeLegendColors(colorRampKey) {
-  const colorRamp = truncatedColorMaps[colorRampKey];
+  const colorRamp = _.get(truncatedColorMaps[colorRampKey], 'value');
   return colorUtil.getLegendColors(colorRamp);
 }
 
