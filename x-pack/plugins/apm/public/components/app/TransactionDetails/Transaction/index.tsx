@@ -14,11 +14,9 @@ import {
   EuiTitle,
   EuiToolTip
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
 import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
-import EmptyMessage from '../../../shared/EmptyMessage';
 import { TransactionLink } from '../../../shared/TransactionLink';
 import { DiscoverTransactionLink } from './ActionMenu';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
@@ -71,15 +69,6 @@ export const Transaction: React.SFC<Props> = ({
   location,
   waterfall
 }) => {
-  if (isEmpty(transaction)) {
-    return (
-      <EmptyMessage
-        heading="No transaction sample available."
-        subheading="Try another time range, reset the search filter or select another bucket from the distribution histogram."
-      />
-    );
-  }
-
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup justifyContent="spaceBetween">
