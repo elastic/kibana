@@ -22,6 +22,7 @@ import {
   CONFIG_TELEMETRY_DESC,
 } from './common/constants';
 import { settingsRoute } from './server/routes/api/v1/settings';
+import { userProfileMixin } from './server/lib/user_profile';
 import mappings from './mappings.json';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
@@ -102,6 +103,8 @@ export const xpackMain = (kibana) => {
         'plugins/xpack_main/hacks/check_xpack_info_change',
         'plugins/xpack_main/hacks/telemetry_opt_in',
         'plugins/xpack_main/hacks/telemetry_trigger',
+        'plugins/xpack_main/hacks/user_profile',
+        'plugins/xpack_main/hacks/user_profile_config_decorators',
       ],
       replaceInjectedVars,
       __webpackPluginProvider__(webpack) {
@@ -121,6 +124,8 @@ export const xpackMain = (kibana) => {
 
       setupXPackMain(server);
       registerOssFeatures();
+
+      userProfileMixin(this.kbnServer, server);
 
       // register routes
       xpackInfoRoute(server);
