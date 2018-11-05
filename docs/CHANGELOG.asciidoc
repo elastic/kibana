@@ -17,6 +17,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.4.3>>
 * <<release-notes-6.4.2>>
 * <<release-notes-6.4.1>>
 * <<release-notes-6.4.0>>
@@ -76,6 +77,44 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+
+[[release-notes-6.4.3]]
+== {kib} 6.4.3
+coming[6.4.3]
+
+[float]
+[[breaking-6.4.3]]
+=== Breaking changes
+
+See <<breaking-changes, breaking changes>> for the changes 
+to be aware of when migrating your application from one version of 
+{kib} to another.
+
+
+[float]
+[[enhancement-6.4.3]]
+=== Enhancements
+
+Platform::
+* Upgrades the minimum yarn version to 1.10.1 {pull}23971[#23971]
+
+[float]
+[[bug-6.4.3]]
+=== Bug fixes
+
+Monitoring::
+* Ensures the provided node id is used in a query {pull}23715[#23715]
+* Preserves the state of cross cluster search {pull}24331[#24331]
+
+Visualization::
+* Fixes the editor so that updating `aggconfigs` in a visualization 
+and then calling `vis.updateState()` works correctly {pull}22869[#22869]
+* Fixes a memory leak in `vislib`, where the scope used for the legend was never 
+destroyed, which caused memory to pile up in a dashboard that has auto-refresh enabled {pull}24134[#24134]
+* Fixes pie charts so that they work properly when the time window doesn't have
+any data {pull}24031[#24031]
+
 
 [[release-notes-6.4.2]]
 == {kib} 6.4.2
