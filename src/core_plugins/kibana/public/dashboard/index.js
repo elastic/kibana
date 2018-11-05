@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { injectI18nProvider } from '@kbn/i18n/react';
 import './dashboard_app';
 import './saved_dashboard/saved_dashboards';
@@ -154,13 +153,13 @@ uiRoutes
     }
   });
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register((i18n) => {
   return {
     id: 'dashboard',
-    title: i18n.translate('kbn.dashboard.featureCatalogue.dashboardTitle', {
+    title: i18n('kbn.dashboard.featureCatalogue.dashboardTitle', {
       defaultMessage: 'Dashboard',
     }),
-    description: i18n.translate('kbn.dashboard.featureCatalogue.dashboardDescription', {
+    description: i18n('kbn.dashboard.featureCatalogue.dashboardDescription', {
       defaultMessage: 'Display and share a collection of visualizations and saved searches.',
     }),
     icon: 'dashboardApp',
