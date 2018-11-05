@@ -7,7 +7,7 @@
 import { I18nProvider } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import { UserProfile } from '../../../../../../../../xpack_main/public/services/user_profile';
+import { UserProfile } from '../../../../../../../../xpack_main/common/user_profile';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { RoleValidator } from '../../../lib/validate_role';

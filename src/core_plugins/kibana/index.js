@@ -130,7 +130,7 @@ export default function (kibana) {
       injectDefaultVars(server, options) {
         return {
           kbnIndex: options.index,
-          kbnBaseUrl
+          kbnBaseUrl,
         };
       },
 

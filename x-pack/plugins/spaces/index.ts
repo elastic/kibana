@@ -9,7 +9,6 @@ import { resolve } from 'path';
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
-import { registerUserProfileCapabilityFactory } from '../xpack_main/server/lib/user_profile_registry';
 import mappings from './mappings.json';
 import { SpacesAuditLogger } from './server/lib/audit_logger';
 import { checkLicense } from './server/lib/check_license';
@@ -144,23 +143,6 @@ export const spaces = (kibana: any) =>
       initPublicSpacesApi(server);
 
       initSpacesRequestInterceptors(server);
-
-      registerUserProfileCapabilityFactory(async request => {
-        const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
-
-        let manageSecurity = false;
-
-        if (server.plugins.security) {
-          const { showLinks = false } =
-            xpackMainPlugin.info.feature('security').getLicenseCheckResults() || {};
-          manageSecurity = showLinks;
-        }
-
-        return {
-          manageSpaces: await spacesClient.canEnumerateSpaces(),
-          manageSecurity,
-        };
-      });
 
       // Register a function with server to manage the collection of usage stats
       server.usage.collectorSet.register(getSpacesUsageCollector(server));
