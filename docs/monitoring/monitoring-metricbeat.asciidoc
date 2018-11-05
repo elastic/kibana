@@ -104,10 +104,12 @@ You must specify the following settings in the `modules.d/kibana.yml` file:
     - stats
   period: 10s
   hosts: ["http://localhost:5601"] <1>
-  xpack.enabled: true
+  xpack.enabled: true <2>
 ----------------------------------
-<1> This setting identifies the host and port number that are used to access {kib}.  
-
+<1> This setting identifies the host and port number that are used to access {kib}. 
+<2> This setting ensures that {kib} can read the monitoring data successfully. 
+That is to say, it's stored in the same location and format as monitoring data 
+that is sent by {ref}es-monitoring-exporters.html[exporters].  
 --
 
 . If the Elastic {security-features} are enabled, you must also provide a user 
