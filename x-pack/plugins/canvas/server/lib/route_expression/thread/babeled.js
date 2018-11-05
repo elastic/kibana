@@ -5,6 +5,8 @@
  */
 
 require('babel-register')({
+  compact: false,
+  minified: false,
   plugins: [
     'transform-object-rest-spread',
     'transform-async-to-generator',
