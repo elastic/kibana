@@ -255,6 +255,7 @@ export class WarmPhase extends PureComponent {
                 />
                 {phaseData[PHASE_SHRINK_ENABLED] ? (
                   <Fragment>
+                    <EuiSpacer />
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
                         <ErrableFormRow
