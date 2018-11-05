@@ -42,12 +42,10 @@ function isAuthenticatedRoute(request: Record<string, any>) {
 }
 
 function getPrivilegedActions(server: Record<string, any>, actions: Record<string, any>) {
-  const uiApps = server.getAllUiApps();
-
   const navLinkSpecs = server.getUiNavLinks();
 
-  const uiCapabilityActions = [...uiApps, ...navLinkSpecs].map(entry =>
-    actions.ui.get(entry.toJSON().id)
+  const uiCapabilityActions = navLinkSpecs.map((navLink: any) =>
+    actions.ui.get(navLink.toJSON().id)
   );
 
   const { types } = server.savedObjects;
