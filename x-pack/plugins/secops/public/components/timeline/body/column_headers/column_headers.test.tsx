@@ -18,21 +18,18 @@ describe('ColumnHeaders', () => {
       sortDirection: 'descending',
     };
 
-    test('it renders the range picker header', () => {
-      const wrapper = mount(
-        <ColumnHeaders columnHeaders={headers} sort={sort} onRangeSelected={noop} />
-      );
-
-      expect(wrapper.find('[data-test-subj="rangePicker"]').props()).toHaveProperty('value');
-    });
-
     test('it renders the other (data-driven) column headers', () => {
       const wrapper = mount(
         <ColumnHeaders columnHeaders={headers} sort={sort} onRangeSelected={noop} />
       );
 
       headers.forEach(h => {
-        expect(wrapper.find('[data-test-subj="columnHeaders"]').text()).toContain(h.text);
+        expect(
+          wrapper
+            .find('[data-test-subj="columnHeaders"]')
+            .first()
+            .text()
+        ).toContain(h.text);
       });
     });
   });

@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiText } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
+
 import { OnColumnSorted, OnFilterChange } from '../../events';
 import { Sort, SortDirection } from '../sort';
 import { SortIndicator } from '../sort/sort_indicator';
@@ -59,6 +62,23 @@ interface Props {
   sort: Sort;
 }
 
+const HeaderContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+`;
+
+const HeaderDiv = styled.div`
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+`;
+
+const Text = styled(EuiText)`
+  display: inline;
+  padding-left: 5px;
+`;
+
 /** Renders a header */
 export const Header = pure<Props>(
   ({ header, sort, onColumnSorted = noop, onFilterChange = noop }) => {
@@ -73,29 +93,19 @@ export const Header = pure<Props>(
     };
 
     return (
-      <div
+      <HeaderContainer
         data-test-subj="headerContainer"
         key={header.id}
         style={{
-          display: 'flex',
-          flexDirection: 'column',
           minWidth: `${header.minWidth}px`,
         }}
       >
-        <div
-          data-test-subj="header"
-          onClick={onClick}
-          style={{
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'row',
-          }}
-        >
-          <span data-test-subj="headerText">{header.text}</span>
+        <HeaderDiv data-test-subj="header" onClick={onClick}>
+          <Text data-test-subj="headerText">{header.text}</Text>
           <SortIndicator sortDirection={getSortDirection({ header, sort })} />
-        </div>
+        </HeaderDiv>
         <Filter header={header} onFilterChange={onFilterChange} />
-      </div>
+      </HeaderContainer>
     );
   }
 );

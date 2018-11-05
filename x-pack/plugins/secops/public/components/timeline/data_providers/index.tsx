@@ -6,6 +6,8 @@
 
 import * as React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
+
 import { OnDataProviderRemoved } from '../events';
 import { DataProvider } from './data_provider';
 import { Empty } from './empty';
@@ -15,6 +17,17 @@ interface Props {
   dataProviders: DataProvider[];
   onDataProviderRemoved: OnDataProviderRemoved;
 }
+
+const DropTargetDataProviders = styled.div`
+  border: 0.3rem dashed #999999;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 5px;
+  min-height: 100px;
+  padding: 5px;
+`;
 
 /**
  * Renders the data providers section of the timeline.
@@ -34,23 +47,11 @@ interface Props {
  * the data pro section.
  */
 export const DataProviders = pure<Props>(({ dataProviders, onDataProviderRemoved }) => (
-  <div
-    data-test-subj="dataProviders"
-    style={{
-      border: '0.3rem dashed #999999',
-      borderRadius: '5px',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      margin: '5px',
-      minHeight: '100px',
-      padding: '5px',
-    }}
-  >
+  <DropTargetDataProviders data-test-subj="dataProviders">
     {dataProviders.length ? (
       <Providers dataProviders={dataProviders} onDataProviderRemoved={onDataProviderRemoved} />
     ) : (
       <Empty />
     )}
-  </div>
+  </DropTargetDataProviders>
 ));

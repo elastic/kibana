@@ -144,7 +144,7 @@ describe('Timeline', () => {
 
         wrapper
           .find('[data-test-subj="textFilter"]')
-          .first()
+          .at(1)
           .simulate('change', { target: { value: newFilter } });
 
         expect(mockOnFilterChange).toBeCalledWith({
@@ -173,7 +173,7 @@ describe('Timeline', () => {
         );
 
         wrapper
-          .find('[data-test-subj="rangePicker"]')
+          .find('[data-test-subj="rangePicker"] select')
           .simulate('change', { target: { value: newSelection } });
 
         expect(mockOnRangeSelected).toBeCalledWith(newSelection);

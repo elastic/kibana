@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiIcon } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
+
 import { SortDirection } from '.';
 
-export type SortDirectionIndicator = '' | '^' | 'v';
+export type SortDirectionIndicator = undefined | 'sortUp' | 'sortDown';
 
 const unhandledDirection = (x: never): never => {
   throw new Error('Unhandled sort direction');
@@ -18,11 +21,11 @@ const unhandledDirection = (x: never): never => {
 export const getDirection = (sortDirection: SortDirection): SortDirectionIndicator => {
   switch (sortDirection) {
     case 'ascending':
-      return '^';
+      return 'sortUp';
     case 'descending':
-      return 'v';
+      return 'sortDown';
     case 'none':
-      return '';
+      return undefined;
     default:
       return unhandledDirection(sortDirection);
   }
@@ -32,15 +35,11 @@ interface Props {
   sortDirection: SortDirection;
 }
 
+const Icon = styled(EuiIcon)`
+  margin: 2px 5px 0 5px;
+`;
+
 /** Renders a sort indicator */
 export const SortIndicator = pure<Props>(({ sortDirection }) => (
-  <span
-    data-test-subj="sortIndicator"
-    style={{
-      color: '#D9D9D9',
-      margin: '0 5px 0 5px',
-    }}
-  >
-    {getDirection(sortDirection)}
-  </span>
+  <Icon data-test-subj="sortIndicator" type={getDirection(sortDirection)} />
 ));

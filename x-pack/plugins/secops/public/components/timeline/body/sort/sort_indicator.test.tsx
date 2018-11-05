@@ -13,21 +13,26 @@ describe('SortIndicator', () => {
     test('it renders the sort indicator', () => {
       const wrapper = mount(<SortIndicator sortDirection="descending" />);
 
-      expect(wrapper.find('[data-test-subj="sortIndicator"]').text()).toEqual('v');
+      expect(
+        wrapper
+          .find('[data-test-subj="sortIndicator"]')
+          .first()
+          .prop('type')
+      ).toEqual('sortDown');
     });
   });
 
   describe('getDirection', () => {
     test('it returns the expected symbol when the direction is ascending', () => {
-      expect(getDirection('ascending')).toEqual('^');
+      expect(getDirection('ascending')).toEqual('sortUp');
     });
 
     test('it returns the expected symbol when the direction is descending', () => {
-      expect(getDirection('descending')).toEqual('v');
+      expect(getDirection('descending')).toEqual('sortDown');
     });
 
-    test('it returns the expected symbol (an empty string) when the direction is neither ascending, nor descending', () => {
-      expect(getDirection('none')).toEqual('');
+    test('it returns the expected symbol (undefined) when the direction is neither ascending, nor descending', () => {
+      expect(getDirection('none')).toEqual(undefined);
     });
   });
 });

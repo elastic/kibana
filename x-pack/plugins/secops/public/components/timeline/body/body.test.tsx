@@ -34,7 +34,12 @@ describe('ColumnHeaders', () => {
       );
 
       headers.forEach(h => {
-        expect(wrapper.find('[data-test-subj="columnHeaders"]').text()).toContain(h.text);
+        expect(
+          wrapper
+            .find('[data-test-subj="columnHeaders"]')
+            .first()
+            .text()
+        ).toContain(h.text);
       });
     });
   });
