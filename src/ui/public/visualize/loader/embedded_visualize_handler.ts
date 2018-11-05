@@ -19,6 +19,8 @@
 
 import { EventEmitter } from 'events';
 import { debounce } from 'lodash';
+import * as Rx from 'rxjs';
+import { share } from 'rxjs/operators';
 import { Inspector } from '../../inspector';
 
 import { PersistedState } from '../../persisted_state';
@@ -45,6 +47,14 @@ const LOADING_ATTRIBUTE = 'data-loading';
  * with the visualization.
  */
 export class EmbeddedVisualizeHandler {
+  /**
+   * This observable will emit every time new data is loaded for the
+   * visualization. The emitted value is the loaded data after it has
+   * been transformed by the visualization's response handler.
+   * This should not be used by any plugin.
+   * @ignore
+   */
+  public readonly data$: Rx.Observable<any>;
   private vis: Vis;
   private loaded: boolean = false;
   private destroyed: boolean = false;
@@ -67,6 +77,7 @@ export class EmbeddedVisualizeHandler {
   private readonly appState?: AppState;
   private uiState: PersistedState;
   private dataLoader: VisualizeDataLoader;
+  private dataSubject: Rx.Subject<any>;
 
   constructor(
     private readonly element: HTMLElement,
@@ -110,6 +121,9 @@ export class EmbeddedVisualizeHandler {
 
     this.dataLoader = new VisualizeDataLoader(vis, Private);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
+
+    this.dataSubject = new Rx.Subject();
+    this.data$ = this.dataSubject.asObservable().pipe(share());
 
     this.render();
   }
@@ -266,7 +280,10 @@ export class EmbeddedVisualizeHandler {
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
 
-    return this.dataLoader.fetch(this.dataLoaderParams);
+    return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
+      this.dataSubject.next(data);
+      return data;
+    });
   };
 
   private render = (visData: any = null) => {
