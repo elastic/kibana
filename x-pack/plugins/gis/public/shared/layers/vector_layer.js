@@ -197,9 +197,10 @@ export class VectorLayer extends ALayer {
         };
       }
       startLoading(sourceDataId, requestToken, dataFilters);
+      const layerName = await this.getDisplayName();
       const { data, meta } = await this._source.getGeoJson({
         layerId: this.getId(),
-        layerName: this.getDisplayName()
+        layerName
       }, dataFilters);
       stopLoading(sourceDataId, requestToken, data, meta);
       return {
