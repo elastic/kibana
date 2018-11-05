@@ -7,8 +7,9 @@
 import { EsClient } from '@code/esqueue';
 
 import { Indexer, IndexProgress, ProgressReporter } from '.';
-import { IndexRequest, RepositoryUri } from '../../model';
+import { IndexRequest, IndexStats, RepositoryUri } from '../../model';
 import { Log } from '../log';
+import { aggregateIndexStats } from '../utils/index_stats_aggregator';
 import { IndexCreationRequest } from './index_creation_request';
 
 export abstract class AbstractIndexer implements Indexer {
@@ -44,6 +45,7 @@ export abstract class AbstractIndexer implements Indexer {
     let prevPercentage = 0;
     let successCount = 0;
     let failCount = 0;
+    const statsBuffer: IndexStats[] = [];
 
     try {
       reqs = await this.prepareRequests(this.repoUri);
@@ -60,7 +62,8 @@ export abstract class AbstractIndexer implements Indexer {
       }
 
       try {
-        await this.processRequest(req);
+        const stats = await this.processRequest(req);
+        statsBuffer.push(stats);
         successCount += 1;
       } catch (error) {
         this.log.debug(`Process index request error. ${error}`);
@@ -83,6 +86,7 @@ export abstract class AbstractIndexer implements Indexer {
         }
       }
     }
+    return aggregateIndexStats(statsBuffer);
   }
 
   public cancel() {
@@ -107,9 +111,11 @@ export abstract class AbstractIndexer implements Indexer {
     });
   }
 
-  protected async processRequest(request: IndexRequest) {
+  protected async processRequest(request: IndexRequest): Promise<IndexStats> {
     // This is the abstract implementation. You should override this.
-    return;
+    return new Promise<IndexStats>((resolve, reject) => {
+      resolve();
+    });
   }
 
   protected async prepareIndexCreationRequests(): Promise<IndexCreationRequest[]> {

@@ -10,7 +10,7 @@ import util from 'util';
 
 import { RepositoryUtils } from '../../common/repository_utils';
 import { toCanonicalUrl } from '../../common/uri_util';
-import { Document, LspIndexRequest, RepositoryUri } from '../../model';
+import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
@@ -167,7 +167,11 @@ export class LspIndexer extends AbstractIndexer {
     }
   }
 
-  protected async processRequest(request: LspIndexRequest) {
+  protected async processRequest(request: LspIndexRequest): Promise<IndexStats> {
+    const stats: IndexStats = new Map<IndexStatsKey, number>()
+      .set(IndexStatsKey.Symbol, 0)
+      .set(IndexStatsKey.Reference, 0)
+      .set(IndexStatsKey.File, 0);
     const { repoUri, revision, filePath, localRepoPath } = request;
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const response = await this.lspService.sendRequest('textDocument/full', {
@@ -191,6 +195,7 @@ export class LspIndexer extends AbstractIndexer {
         });
         symbolNames.add(symbol.symbolInformation.name);
       }
+      stats.set(IndexStatsKey.Symbol, symbols.length);
 
       for (const ref of references) {
         await this.client.index({
@@ -202,6 +207,7 @@ export class LspIndexer extends AbstractIndexer {
           body: ref,
         });
       }
+      stats.set(IndexStatsKey.Reference, references.length);
     } else {
       this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
     }
@@ -223,6 +229,7 @@ export class LspIndexer extends AbstractIndexer {
       id: `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}`,
       body,
     });
-    return;
+    stats.set(IndexStatsKey.File, 1);
+    return stats;
   }
 }

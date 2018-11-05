@@ -11,12 +11,12 @@ import {
   REPOSITORY_INDEX_STATUS_INDEX_TYPE,
   REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
 } from '../../mappings';
-import { RepositoryUri } from '../../model';
-import { IndexWorkerResult, WorkerProgress } from '../../model/repository';
+import { IndexStats, IndexWorkerResult, RepositoryUri, WorkerProgress } from '../../model';
 import { IndexerFactory, IndexProgress } from '../indexer';
 import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { SocketService } from '../socket_service';
+import { aggregateIndexStats } from '../utils/index_stats_aggregator';
 import { AbstractWorker } from './abstract_worker';
 import { CancellationSerivce } from './cancellation_service';
 import { Job } from './job';
@@ -45,7 +45,7 @@ export class IndexWorker extends AbstractWorker {
 
     // Binding the index cancellation logic
     this.cancellationService.cancelIndexJob(uri);
-    const indexPromises = this.indexerFactories.map(
+    const indexPromises: Array<Promise<IndexStats>> = this.indexerFactories.map(
       (indexerFactory: IndexerFactory, index: number) => {
         const indexer = indexerFactory.create(uri, revision);
         if (cancellationToken) {
@@ -58,19 +58,16 @@ export class IndexWorker extends AbstractWorker {
         return indexer.start(progressReporter);
       }
     );
-    await Promise.all(indexPromises);
+    const stats: IndexStats[] = await Promise.all(indexPromises);
 
     this.socketService.boardcastIndexProgress(uri, 100);
 
-    // TODO: populate the actual index result
     const res: IndexWorkerResult = {
       uri,
       revision,
-      // Number of symbols indexed.
-      symbols: 0,
-      // Number of files indexed.
-      file: 0,
+      stats: aggregateIndexStats(stats),
     };
+    this.log.info(`Index worker finished with stats: ${JSON.stringify([...res.stats])}`);
     return res;
   }
 

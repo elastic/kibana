@@ -64,12 +64,16 @@ export interface UpdateWorkerResult extends WorkerResult {
   revision: string;
 }
 
+export enum IndexStatsKey {
+  File = 'file-count',
+  Symbol = 'symbol-count',
+  Reference = 'reference-count',
+}
+export type IndexStats = Map<IndexStatsKey, number>;
+
 export interface IndexWorkerResult extends WorkerResult {
   revision: string;
-  // Number of symbols indexed.
-  symbols: number;
-  // Number of files indexed.
-  file: number;
+  stats: IndexStats;
 }
 
 export interface WorkerProgress {

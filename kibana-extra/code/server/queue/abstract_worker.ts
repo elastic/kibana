@@ -96,7 +96,7 @@ export abstract class AbstractWorker implements Worker {
   }
 
   public async onJobEnqueued(job: Job) {
-    this.log.info(`${this.id} job enqueued with result ${JSON.stringify(job)}`);
+    this.log.info(`${this.id} job enqueued with details ${JSON.stringify(job)}`);
     return await this.updateProgress(job.payload.uri, 0);
   }
 

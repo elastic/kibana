@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RepositoryUri } from 'model';
+import { IndexStats, RepositoryUri } from '../../model';
 
 export interface IndexProgress {
   type: string;
@@ -17,7 +17,7 @@ export interface IndexProgress {
 export type ProgressReporter = (progress: IndexProgress) => void;
 
 export interface Indexer {
-  start(ProgressReporter?: ProgressReporter): void;
+  start(ProgressReporter?: ProgressReporter): Promise<IndexStats>;
   cancel(): void;
 }
 
