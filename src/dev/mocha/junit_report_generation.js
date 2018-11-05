@@ -85,6 +85,9 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   runner.on('end', () => {
     // crawl the test graph to collect all defined tests
     const allTests = findAllTests(runner.suite);
+    if (!allTests.length) {
+      return;
+    }
 
     // filter out just the failures
     const failures = results.filter(result => result.failed);
