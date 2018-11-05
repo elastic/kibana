@@ -70,6 +70,12 @@ export function filterPaths(inputPaths) {
   return [...pathsForExtraction];
 }
 
+function filterEntries(entries) {
+  return entries.filter(entry =>
+    exclude.every(excludedPath => !normalizePath(entry).startsWith(excludedPath))
+  );
+}
+
 export function validateMessageNamespace(id, filePath) {
   const normalizedPath = normalizePath(filePath);
 
@@ -116,7 +122,7 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
       [hbsEntries, extractHandlebarsMessages],
     ].map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
-        entries.filter(entry => !exclude.includes(normalizePath(entry))).map(async entry => {
+        filterEntries(entries).map(async entry => {
           return {
             name: entry,
             content: await readFileAsync(entry),

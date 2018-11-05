@@ -24,6 +24,12 @@
     "src/ui/ui_render/bootstrap/app_bootstrap.js",
     "src/ui/ui_render/ui_render_mixin.js",
     "x-pack/plugins/monitoring/public/components/cluster/overview/alerts_panel.js",
-    "x-pack/plugins/monitoring/public/directives/alerts/index.js"
+    "x-pack/plugins/monitoring/public/directives/alerts/index.js",
+    "x-pack/plugins/grokdebugger/node_modules/",
+    "x-pack/plugins/index_management/node_modules/",
+    "x-pack/plugins/rollup/node_modules/",
+    "x-pack/plugins/searchprofiler/node_modules/",
+    "x-pack/plugins/security/node_modules/",
+    "x-pack/plugins/watcher/node_modules/"
   ]
 }
