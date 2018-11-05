@@ -17,27 +17,5 @@
  * under the License.
  */
 
-export enum PluginDiscoveryErrorType {
-  InvalidScanDirectory = 'invalid-scan-dir',
-  InvalidPluginDirectory = 'invalid-plugin-dir',
-  InvalidManifest = 'invalid-manifest',
-  MissingManifest = 'missing-manifest',
-}
-
-export class PluginDiscoveryError extends Error {
-  constructor(
-    public readonly type: PluginDiscoveryErrorType,
-    public readonly path: string,
-    public readonly cause: Error
-  ) {
-    super(cause.message);
-
-    // Set the prototype explicitly, see:
-    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
-    Object.setPrototypeOf(this, PluginDiscoveryError.prototype);
-  }
-
-  public toString() {
-    return `${super.toString()} (${this.type}, ${this.path})`;
-  }
-}
+export { PluginDiscoveryErrorType } from './plugin_discovery_error';
+export { discover } from './plugins_discovery';

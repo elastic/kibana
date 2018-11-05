@@ -22,7 +22,7 @@ import process from 'process';
 
 import { pkg } from '../../../utils/package_json';
 
-interface PackageInfo {
+export interface PackageInfo {
   version: string;
   branch: string;
   buildNum: number;

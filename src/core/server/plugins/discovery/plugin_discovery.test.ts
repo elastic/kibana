@@ -29,8 +29,9 @@ jest.mock('fs', () => ({
 import { resolve } from 'path';
 import { Observable } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';
-import { logger } from '../logging/__mocks__';
-import { discover, PluginManifest } from './plugins_discovery';
+import { logger } from '../../logging/__mocks__';
+import { PluginManifest } from './plugin_manifest_parser';
+import { discover } from './plugins_discovery';
 
 /**
  * Resolves absolute path and escapes backslashes (used on windows systems).
@@ -60,7 +61,7 @@ beforeEach(() => {
     if (path === TEST_PATHS.scanDirs.nonEmpty) {
       cb(null, ['1', '2-no-manifest', '3', '4-incomplete-manifest']);
     } else if (path === TEST_PATHS.scanDirs.nonEmpty2) {
-      cb(null, ['5-invalid-manifest', '6', '7-non-dir']);
+      cb(null, ['5-invalid-manifest', '6', '7-non-dir', '8-incompatible-manifest']);
     } else if (path === TEST_PATHS.scanDirs.nonExistent) {
       cb(new Error('ENOENT'));
     } else {
@@ -83,8 +84,10 @@ beforeEach(() => {
       cb(null, Buffer.from('not-json'));
     } else if (path.includes('incomplete-manifest')) {
       cb(null, Buffer.from(JSON.stringify({ version: '1' })));
-    } else {
+    } else if (path.includes('incompatible-manifest')) {
       cb(null, Buffer.from(JSON.stringify({ id: 'plugin', version: '1' })));
+    } else {
+      cb(null, Buffer.from(JSON.stringify({ id: 'plugin', version: '1', kibanaVersion: '1.2.3' })));
     }
   });
 });
@@ -94,18 +97,27 @@ afterEach(() => {
 });
 
 test('properly scans folders and paths', async () => {
-  const { plugin$, error$ } = discover(logger.get(), {
-    initialize: true,
-    scanDirs: Object.values(TEST_PATHS.scanDirs),
-    paths: Object.values(TEST_PATHS.paths),
-  });
+  const { plugin$, error$ } = discover(
+    {
+      initialize: true,
+      scanDirs: Object.values(TEST_PATHS.scanDirs),
+      paths: Object.values(TEST_PATHS.paths),
+    },
+    {
+      branch: 'master',
+      buildNum: 1,
+      buildSha: '',
+      version: '1.2.3',
+    },
+    logger.get()
+  );
 
   await expect(plugin$.pipe(toArray()).toPromise()).resolves.toMatchInlineSnapshot(`
 Array [
   Object {
     "manifest": Object {
       "id": "plugin",
-      "kibanaVersion": "1",
+      "kibanaVersion": "1.2.3",
       "optionalPlugins": Array [],
       "requiredPlugins": Array [],
       "ui": false,
@@ -116,7 +128,7 @@ Array [
   Object {
     "manifest": Object {
       "id": "plugin",
-      "kibanaVersion": "1",
+      "kibanaVersion": "1.2.3",
       "optionalPlugins": Array [],
       "requiredPlugins": Array [],
       "ui": false,
@@ -127,7 +139,7 @@ Array [
   Object {
     "manifest": Object {
       "id": "plugin",
-      "kibanaVersion": "1",
+      "kibanaVersion": "1.2.3",
       "optionalPlugins": Array [],
       "requiredPlugins": Array [],
       "ui": false,
@@ -138,7 +150,7 @@ Array [
   Object {
     "manifest": Object {
       "id": "plugin",
-      "kibanaVersion": "1",
+      "kibanaVersion": "1.2.3",
       "optionalPlugins": Array [],
       "requiredPlugins": Array [],
       "ui": false,
@@ -149,7 +161,7 @@ Array [
   Object {
     "manifest": Object {
       "id": "plugin",
-      "kibanaVersion": "1",
+      "kibanaVersion": "1.2.3",
       "optionalPlugins": Array [],
       "requiredPlugins": Array [],
       "ui": false,
@@ -184,6 +196,11 @@ Array [
     '5-invalid-manifest',
     'kibana.json'
   )})",
+  "Error: Plugin \\"plugin\\" is only compatible with Kibana version \\"1\\", but used Kibana version is \\"1.2.3\\". (incompatible-version, ${resolveForSnapshot(
+    TEST_PATHS.scanDirs.nonEmpty2,
+    '8-incompatible-manifest',
+    'kibana.json'
+  )})",
   "Error: ENOENT (invalid-scan-dir, ${resolveForSnapshot(TEST_PATHS.scanDirs.nonExistent)})",
   "Error: ${resolveForSnapshot(
     TEST_PATHS.paths.nonDir
@@ -197,11 +214,20 @@ describe('parsing plugin manifest', () => {
   let plugins$: Observable<Array<{ path: string; manifest: PluginManifest }>>;
   let errors$: Observable<string[]>;
   beforeEach(async () => {
-    const discoveryResult = discover(logger.get(), {
-      initialize: true,
-      scanDirs: [],
-      paths: [TEST_PATHS.paths.existentDir],
-    });
+    const discoveryResult = discover(
+      {
+        initialize: true,
+        scanDirs: [],
+        paths: [TEST_PATHS.paths.existentDir],
+      },
+      {
+        branch: 'master',
+        buildNum: 1,
+        buildSha: '',
+        version: '7.0.0-alpha1',
+      },
+      logger.get()
+    );
 
     plugins$ = discoveryResult.plugin$.pipe(toArray());
     errors$ = discoveryResult.error$.pipe(
@@ -290,9 +316,41 @@ Array [
 `);
   });
 
+  test('return error when plugin expected Kibana version is lower than actual version', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(null, Buffer.from(JSON.stringify({ id: 'some-id', version: '6.4.2' })));
+    });
+
+    await expect(plugins$.toPromise()).resolves.toEqual([]);
+    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
+Array [
+  "Error: Plugin \\"some-id\\" is only compatible with Kibana version \\"6.4.2\\", but used Kibana version is \\"7.0.0-alpha1\\". (incompatible-version, ${resolveForSnapshot(
+    TEST_PATHS.paths.existentDir,
+    'kibana.json'
+  )})",
+]
+`);
+  });
+
+  test('return error when plugin expected Kibana version is higher than actual version', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(null, Buffer.from(JSON.stringify({ id: 'some-id', version: '7.0.1' })));
+    });
+
+    await expect(plugins$.toPromise()).resolves.toEqual([]);
+    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
+Array [
+  "Error: Plugin \\"some-id\\" is only compatible with Kibana version \\"7.0.1\\", but used Kibana version is \\"7.0.0-alpha1\\". (incompatible-version, ${resolveForSnapshot(
+    TEST_PATHS.paths.existentDir,
+    'kibana.json'
+  )})",
+]
+`);
+  });
+
   test('set defaults for all missing optional fields', async () => {
     mockReadFile.mockImplementation((path, cb) => {
-      cb(null, Buffer.from(JSON.stringify({ id: 'some-id', version: 'some-version' })));
+      cb(null, Buffer.from(JSON.stringify({ id: 'some-id', version: '7.0.0' })));
     });
 
     await expect(plugins$.toPromise()).resolves.toMatchInlineSnapshot(`
@@ -300,13 +358,13 @@ Array [
   Object {
     "manifest": Object {
       "id": "some-id",
-      "kibanaVersion": "some-version",
+      "kibanaVersion": "7.0.0",
       "optionalPlugins": Array [],
       "requiredPlugins": Array [],
       "ui": false,
-      "version": "some-version",
+      "version": "7.0.0",
     },
-    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",
+    "path": "/projects/elastic/master/kibana/path/existent-dir",
   },
 ]
 `);
@@ -321,7 +379,7 @@ Array [
           JSON.stringify({
             id: 'some-id',
             version: 'some-version',
-            kibanaVersion: 'some-kibana-version',
+            kibanaVersion: '7.0.0',
             requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
             optionalPlugins: ['some-optional-plugin'],
             ui: true,
@@ -335,7 +393,7 @@ Array [
   Object {
     "manifest": Object {
       "id": "some-id",
-      "kibanaVersion": "some-kibana-version",
+      "kibanaVersion": "7.0.0",
       "optionalPlugins": Array [
         "some-optional-plugin",
       ],
@@ -344,6 +402,76 @@ Array [
         "some-required-plugin-2",
       ],
       "ui": true,
+      "version": "some-version",
+    },
+    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",
+  },
+]
+`);
+    await expect(errors$.toPromise()).resolves.toEqual([]);
+  });
+
+  test('return manifest when plugin expected Kibana version matches actual version', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(
+        null,
+        Buffer.from(
+          JSON.stringify({
+            id: 'some-id',
+            version: 'some-version',
+            kibanaVersion: '7.0.0-alpha2',
+            requiredPlugins: ['some-required-plugin'],
+          })
+        )
+      );
+    });
+
+    await expect(plugins$.toPromise()).resolves.toMatchInlineSnapshot(`
+Array [
+  Object {
+    "manifest": Object {
+      "id": "some-id",
+      "kibanaVersion": "7.0.0-alpha2",
+      "optionalPlugins": Array [],
+      "requiredPlugins": Array [
+        "some-required-plugin",
+      ],
+      "ui": false,
+      "version": "some-version",
+    },
+    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",
+  },
+]
+`);
+    await expect(errors$.toPromise()).resolves.toEqual([]);
+  });
+
+  test('return manifest when plugin expected Kibana version is `kibana`', async () => {
+    mockReadFile.mockImplementation((path, cb) => {
+      cb(
+        null,
+        Buffer.from(
+          JSON.stringify({
+            id: 'some-id',
+            version: 'some-version',
+            kibanaVersion: 'kibana',
+            requiredPlugins: ['some-required-plugin'],
+          })
+        )
+      );
+    });
+
+    await expect(plugins$.toPromise()).resolves.toMatchInlineSnapshot(`
+Array [
+  Object {
+    "manifest": Object {
+      "id": "some-id",
+      "kibanaVersion": "kibana",
+      "optionalPlugins": Array [],
+      "requiredPlugins": Array [
+        "some-required-plugin",
+      ],
+      "ui": false,
       "version": "some-version",
     },
     "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",

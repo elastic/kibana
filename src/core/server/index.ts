@@ -41,7 +41,7 @@ export class Server {
     this.log = logger.get('server');
 
     this.http = new HttpModule(configService.atPath('server', HttpConfig), logger);
-    this.plugins = new PluginsModule(configService, logger);
+    this.plugins = new PluginsModule(configService, logger, env);
     this.legacy = new LegacyCompatModule(configService, logger, env);
   }
 

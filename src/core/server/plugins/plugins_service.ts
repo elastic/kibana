@@ -19,16 +19,16 @@
 
 import { filter, first, map, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types/core_service';
-import { ConfigService } from '../config';
+import { ConfigService, Env } from '../config';
 import { Logger, LoggerFactory } from '../logging';
-import { PluginDiscoveryErrorType } from './plugin_discovery_error';
+import { discover, PluginDiscoveryErrorType } from './discovery';
 import { PluginsConfig } from './plugins_config';
-import { discover } from './plugins_discovery';
 
 export class PluginsService implements CoreService {
   private readonly log: Logger;
 
   constructor(
+    private readonly env: Env,
     private readonly logger: LoggerFactory,
     private readonly configService: ConfigService
   ) {
@@ -42,7 +42,9 @@ export class PluginsService implements CoreService {
       .atPath('plugins', PluginsConfig)
       .pipe(
         first(),
-        map(config => discover(this.logger.get('plugins', 'discovery'), config))
+        map(config =>
+          discover(config, this.env.packageInfo, this.logger.get('plugins', 'discovery'))
+        )
       )
       .toPromise();
 
