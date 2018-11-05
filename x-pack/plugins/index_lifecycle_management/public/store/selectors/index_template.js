@@ -124,7 +124,7 @@ export const getExistingAllocationRules = state => {
 const hasJSONChanged = (json1, json2) => JSON.stringify(json1) !== JSON.stringify(json2);
 export const getTemplateDiff = state => {
   const originalFullIndexTemplate = getFullSelectedIndexTemplate(state) || { settings: {} };
-  const attributeName = getSelectedNodeAttrs(state);
+  const attributeNameAndValue = getSelectedNodeAttrs(state);
   const baseNewFullIndexTemplate = {
     settings: {
       index: {
@@ -136,11 +136,12 @@ export const getTemplateDiff = state => {
       }
     }
   };
-  if (attributeName) {
+  if (attributeNameAndValue) {
+    const [ name, value ] = attributeNameAndValue.split[':'];
     baseNewFullIndexTemplate.routing =  {
       allocation: {
         include: {
-          sattr_name: attributeName,
+          [name]: value,
         }
       }
     };

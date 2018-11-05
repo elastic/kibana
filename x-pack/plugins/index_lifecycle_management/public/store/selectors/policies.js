@@ -179,7 +179,9 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
     if (actions.allocate) {
       const allocate = actions.allocate;
       if (allocate.require) {
-        policy[PHASE_NODE_ATTRS] = allocate.require._name;
+        Object.entries(allocate.require).forEach((entry) => {
+          policy[PHASE_NODE_ATTRS] = entry.join(':');
+        });
       }
     }
 
@@ -248,11 +250,12 @@ export const phaseToES = (state, phase) => {
     }
   }
   if (phase[PHASE_NODE_ATTRS]) {
+    const [ name, value, ] = phase[PHASE_NODE_ATTRS].split(':');
     esPhase.actions.allocate = {
       include: {}, // TODO: this seems to be a constant, confirm?
       exclude: {}, // TODO: this seems to be a constant, confirm?
       require: {
-        _name: phase[PHASE_NODE_ATTRS]
+        [name]: value
       }
     };
     if (isNumber(phase[PHASE_REPLICA_COUNT])) {
