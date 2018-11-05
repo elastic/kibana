@@ -17,6 +17,7 @@ export interface EsClient {
   };
 
   ping(): Promise<void>;
+  bulk(params: AnyObject): Promise<any>;
   index(params: AnyObject): Promise<any>;
   get(params: AnyObject): Promise<any>;
   update(params: AnyObject): Promise<any>;

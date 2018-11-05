@@ -17,6 +17,7 @@ import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';
 import { detectLanguage, detectLanguageByFilename } from '../utils/detect_language';
 import { AbstractIndexer } from './abstract_indexer';
+import { BatchIndexHelper } from './batch_index_helper';
 import { IndexCreationRequest } from './index_creation_request';
 import {
   DocumentAnalysisSettings,
@@ -38,6 +39,7 @@ export class LspIndexer extends AbstractIndexer {
   // Currently without the multi revision support, we use this placeholder revision string
   // to construct any ES document id.
   private PLACEHOLDER_REVISION: string = 'head';
+  private batchIndexHelper: BatchIndexHelper;
 
   constructor(
     protected readonly repoUri: RepositoryUri,
@@ -48,6 +50,8 @@ export class LspIndexer extends AbstractIndexer {
     protected readonly log: Log
   ) {
     super(repoUri, revision, client, log);
+
+    this.batchIndexHelper = new BatchIndexHelper(100, client, log);
   }
 
   protected async prepareIndexCreationRequests() {
@@ -185,29 +189,28 @@ export class LspIndexer extends AbstractIndexer {
     if (response && response.result.length > 0) {
       const { symbols, references } = response.result[0];
       for (const symbol of symbols) {
-        await this.client.index({
-          index: SymbolIndexName(repoUri),
-          type: SymbolTypeName,
-          id: `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${
-            symbol.symbolInformation.name
-          }`,
-          body: symbol,
-        });
+        await this.batchIndexHelper.index(
+          SymbolIndexName(repoUri),
+          SymbolTypeName,
+          `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${symbol.symbolInformation.name}`,
+          symbol
+        );
         symbolNames.add(symbol.symbolInformation.name);
       }
       stats.set(IndexStatsKey.Symbol, symbols.length);
 
       for (const ref of references) {
-        await this.client.index({
-          index: ReferenceIndexName(repoUri),
-          type: ReferenceTypeName,
-          id: `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${ref.location.uri}:${
+        await this.batchIndexHelper.index(
+          ReferenceIndexName(repoUri),
+          ReferenceTypeName,
+          `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${ref.location.uri}:${
             ref.location.range.start.line
           }:${ref.location.range.start.character}`,
-          body: ref,
-        });
+          ref
+        );
       }
       stats.set(IndexStatsKey.Reference, references.length);
+      await this.batchIndexHelper.flush();
     } else {
       this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
     }
