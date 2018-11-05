@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiContextMenu, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React from 'react';
 import { ActionDefinition } from './table_type_configs';
 
 interface ActionButtonProps {
+  itemName: 'Beats' | 'Tags';
   actions: ActionDefinition[];
   isPopoverVisible: boolean;
   actionHandler(action: string, payload?: any): void;
@@ -34,16 +35,6 @@ export function ActionButton(props: ActionButtonProps) {
   const { actions, actionHandler, hidePopover, isPopoverVisible, showPopover } = props;
   if (actions.length === 0) {
     return null;
-  } else if (actions.length <= 2) {
-    return (
-      <EuiFlexGroup>
-        {actions.map(({ action, danger, name }) => (
-          <EuiFlexItem key={action} grow={false}>
-            <Action action={action} actionHandler={actionHandler} danger={danger} name={name} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    );
   }
   return (
     <EuiPopover
@@ -64,7 +55,7 @@ export function ActionButton(props: ActionButtonProps) {
         panels={[
           {
             id: 0,
-            title: 'Bulk Actions',
+            title: `Manage ${props.itemName}`,
             items: actions.map(action => ({
               ...action,
               onClick: () => actionHandler(action.action),
