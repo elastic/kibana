@@ -24,7 +24,7 @@ import './agg_add';
 import { uiModules } from '../../../modules';
 import aggGroupTemplate from './agg_group.html';
 import { move } from '../../../utils/collection';
-import { aggGroupNameMaps } from './agg_groups';
+import { aggGroupNameMaps } from './agg_group_names';
 
 uiModules
   .get('app/visualize')

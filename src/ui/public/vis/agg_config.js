@@ -79,8 +79,6 @@ class AggConfig {
 
     // set the params to the values from opts, or just to the defaults
     this.setParams(opts.params || {});
-
-    this._percentageOfLabel = i18n.translate('common.ui.vis.aggConfig.percentageOfLabel', { defaultMessage: 'Percentage of ' });
   }
 
   /**
@@ -268,8 +266,11 @@ class AggConfig {
     }
 
     if (!this.type) return '';
-    let pre = percentageMode ? this._percentageOfLabel : '';
-    return pre += this.type.makeLabel(this);
+    return percentageMode ?
+      i18n.translate('common.ui.vis.aggConfig.percentageOfLabel', {
+        defaultMessage: 'Percentage of {label}',
+        values: { label: this.type.makeLabel(this) },
+      }) : `${this.type.makeLabel(this)}`;
   }
 
   getIndexPattern() {

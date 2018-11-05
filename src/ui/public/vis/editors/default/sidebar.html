@@ -10,10 +10,10 @@
     <div
       css-truncate
       aria-label="{{
-        ::'common.ui.vis.editors.sidebar.indexPatternAriaLabel' | i18n: 
-        { 
+        ::'common.ui.vis.editors.sidebar.indexPatternAriaLabel' | i18n:
+        {
           defaultMessage: 'Index pattern: {title}',
-          values: { title: vis.indexPattern.title } 
+          values: { title: vis.indexPattern.title }
         }
       }}"
       ng-if="vis.type.requiresSearch && vis.type.options.showIndexSelection"
@@ -104,7 +104,8 @@
               <icon aria-hidden="true" type="'refresh'"></icon>
             </button>
           </li>
-              <span ng-show="autoApplyEnabled"
+              <span
+                ng-show="autoApplyEnabled"
                 i18n-id="common.ui.vis.editors.sidebar.autoApplyChangesLabel"
                 i18n-default-message="Auto Apply"
               >

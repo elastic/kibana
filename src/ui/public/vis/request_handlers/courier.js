@@ -126,9 +126,9 @@ const CourierRequestHandlerProvider = function () {
         const lastAggConfig = aggs;
         vis.API.inspectorAdapters.requests.reset();
         const request = vis.API.inspectorAdapters.requests.start(
-          i18n.translate('common.ui.vis.courier.inspectorAdapters.dataRequest.dataText', { defaultMessage: 'Data' }),
+          i18n.translate('common.ui.vis.courier.inspector.dataRequest.title', { defaultMessage: 'Data' }),
           {
-            description: i18n.translate('common.ui.vis.courier.inspectorAdapters.dataRequest.fetchDataDescription',
+            description: i18n.translate('common.ui.vis.courier.inspector.dataRequest.description',
               { defaultMessage: 'This request queries Elasticsearch to fetch the data for the visualization.' }),
           });
         request.stats(getRequestInspectorStats(requestSearchSource));
