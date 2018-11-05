@@ -7,14 +7,14 @@ source "$(dirname $0)/../../src/dev/ci_setup/setup.sh"
 source "$(dirname $0)/../../src/dev/ci_setup/git_setup.sh"
 source "$(dirname $0)/../../src/dev/ci_setup/java_setup.sh"
 
-
+export TEST_BROWSER_HEADLESS=1
 export XPACK_DIR="$(cd "$(dirname "$0")/../../x-pack"; pwd)"
 echo "-> XPACK_DIR ${XPACK_DIR}"
 
 
 echo " -> Running mocha tests"
 cd "$XPACK_DIR"
-xvfb-run yarn test
+yarn test
 echo ""
 echo ""
 
@@ -37,11 +37,11 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 export TEST_ES_FROM=${TEST_ES_FROM:-source}
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
-xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag ciGroup01
+node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag ciGroup01
 echo ""
-xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag ciGroup02
+node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag ciGroup02
 echo ""
-xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag ciGroup03
+node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag ciGroup03
 echo ""
-xvfb-run node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --exclude-tag ciGroup01 --exclude-tag ciGroup02 --exclude-tag ciGroup03
+node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --exclude-tag ciGroup01 --exclude-tag ciGroup02 --exclude-tag ciGroup03
 echo ""
