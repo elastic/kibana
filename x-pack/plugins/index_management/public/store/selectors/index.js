@@ -17,7 +17,6 @@ export const getDetailPanelIndexName = (state) => state.detailPanel.indexName;
 export const getIndices = (state) => state.indices.byId;
 export const getIndicesByName = (state, indexNames) => {
   const indices = getIndices(state);
-  console.log(indices);
   return indexNames.map((indexName) => indices[indexName]);
 };
 export const getIndexByIndexName = (state, name) => getIndices(state)[name];

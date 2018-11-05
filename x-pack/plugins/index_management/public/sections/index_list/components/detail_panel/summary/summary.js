@@ -53,7 +53,6 @@ export class Summary extends React.PureComponent {
   getAdditionalContent() {
     const { index } = this.props;
     const extensions = getSummaryExtensions();
-    console.log(extensions);
     return extensions.map((summaryExtension) => {
       return (
         <Fragment>
