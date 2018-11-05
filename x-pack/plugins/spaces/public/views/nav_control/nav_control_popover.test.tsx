@@ -6,6 +6,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { UserProfile } from '../../../../xpack_main/common/user_profile';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
 import { SpacesGlobalNavButton } from './components/spaces_global_nav_button';
