@@ -58,7 +58,7 @@ uiRoutes
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
-    controller($injector, $location, $scope, Private, config, breadcrumbState) {
+    controller($injector, $location, $scope, Private, config, breadcrumbState, i18n) {
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
       const dashboardConfig = $injector.get('dashboardConfig');
 
@@ -72,7 +72,7 @@ uiRoutes
       $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
       $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;
       breadcrumbState.set([{
-        text: i18n.translate('kbn.dashboard.dashboardBreadcrumbsTitle', {
+        text: i18n('kbn.dashboard.dashboardBreadcrumbsTitle', {
           defaultMessage: 'Dashboards',
         }),
       }]);

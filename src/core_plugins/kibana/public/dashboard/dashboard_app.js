@@ -24,7 +24,6 @@ import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import { applyTheme } from 'ui/theme';
 import { toastNotifications } from 'ui/notify';
-import { injectI18nProvider } from '@kbn/i18n/react';
 
 import 'ui/query_bar';
 
@@ -67,7 +66,7 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 app.directive('dashboardViewportProvider', function (reactDirective) {
-  return reactDirective(injectI18nProvider(DashboardViewportProvider));
+  return reactDirective(DashboardViewportProvider);
 });
 
 app.directive('dashboardApp', function ($injector) {
