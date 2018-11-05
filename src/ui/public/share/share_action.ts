@@ -47,8 +47,12 @@ export interface ShareActionProps {
   onClose: () => void;
 }
 
+export interface ShareContextMenuPanelItem extends EuiContextMenuPanelItemDescriptor {
+  sortOrder: number;
+}
+
 export interface ShareAction {
-  shareMenuItem: EuiContextMenuPanelItemDescriptor;
+  shareMenuItem: ShareContextMenuPanelItem;
   panel: EuiContextMenuPanelDescriptor;
 }
 

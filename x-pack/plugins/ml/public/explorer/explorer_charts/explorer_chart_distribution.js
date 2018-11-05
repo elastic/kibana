@@ -131,9 +131,9 @@ export class ExplorerChartDistribution extends React.Component {
         .filter((d, i) => {
           // only filter for rare charts
           if (chartType === CHART_TYPE.EVENT_DISTRIBUTION) {
-            return true;
+            return (i < categoryLimit || d.key === highlight);
           }
-          return (i < categoryLimit || d.key === highlight);
+          return true;
         })
         .map(d => d.key);
 

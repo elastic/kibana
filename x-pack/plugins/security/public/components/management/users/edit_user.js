@@ -142,21 +142,12 @@ class EditUserUI extends Component {
       });
     }
   };
-  fullnameError = () => {
-    const { full_name } = this.state.user;
-    if (full_name !== null && !full_name) {
-      return this.props.intl.formatMessage({
-        id: "xpack.security.management.users.editUser.fullNameRequiredErrorMessage",
-        defaultMessage: "Full name is required"
-      });
-    }
-  };
   emailError = () => {
     const { email } = this.state.user;
-    if (email !== null && (!email || !email.match(validEmailRegex))) {
+    if (email !== null && email !== '' && !email.match(validEmailRegex)) {
       return this.props.intl.formatMessage({
         id: "xpack.security.management.users.editUser.validEmailRequiredErrorMessage",
-        defaultMessage: "A valid email address is required"
+        defaultMessage: "Email address is invalid"
       });
     }
   };
@@ -365,8 +356,6 @@ class EditUserUI extends Component {
     const { user, isNewUser } = this.state;
     return (
       !user.username ||
-      !user.full_name ||
-      !user.email ||
       this.emailError() ||
       (isNewUser && (this.passwordError() || this.confirmPasswordError()))
     );
@@ -490,8 +479,6 @@ class EditUserUI extends Component {
                   {reserved ? null : (
                     <Fragment>
                       <EuiFormRow
-                        isInvalid={!!this.fullnameError()}
-                        error={this.fullnameError()}
                         label={intl.formatMessage({
                           id: "xpack.security.management.users.editUser.fullNameFormRowLabel",
                           defaultMessage: "Full name"

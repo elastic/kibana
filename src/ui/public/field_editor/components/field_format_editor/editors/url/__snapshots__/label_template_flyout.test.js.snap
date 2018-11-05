@@ -93,7 +93,7 @@ exports[`LabelTemplateFlyout should render normally 1`] = `
           Array [
             Object {
               "input": 1234,
-              "labelTemplate": "User #{value}",
+              "labelTemplate": "User #{{value}}",
               "output": "<a href=\\"http://company.net/profiles?user_id=1234\\">User #1234</a>",
               "urlTemplate": "http://company.net/profiles?user_id={{value}}",
             },
