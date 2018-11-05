@@ -364,7 +364,7 @@ Array [
       "ui": false,
       "version": "7.0.0",
     },
-    "path": "/projects/elastic/master/kibana/path/existent-dir",
+    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",
   },
 ]
 `);
