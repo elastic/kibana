@@ -6,10 +6,10 @@
 
 import { DatabaseAdapter } from './adapters/database';
 import { BackendFrameworkAdapter } from './adapters/framework';
-import { HBMonitorsDomain } from './domains';
+import { HBPingsDomain } from './domains';
 
 export interface HBDomainLibs {
-  monitors: HBMonitorsDomain;
+  pings: HBPingsDomain;
 }
 
 export interface HBServerLibs extends HBDomainLibs {

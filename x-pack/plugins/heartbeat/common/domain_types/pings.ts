@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface HBMonitor {
-  isUp: boolean;
-}
+export type HBPingSortDirectionArg = 'asc' | 'desc';

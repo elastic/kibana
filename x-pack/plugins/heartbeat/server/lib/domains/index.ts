@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { HBMonitorsDomain } from './monitors';
+export { HBPingsDomain } from './pings';

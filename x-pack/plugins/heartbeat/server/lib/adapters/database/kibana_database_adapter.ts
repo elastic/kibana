@@ -6,10 +6,15 @@
 
 import { DatabaseAdapter } from './adapter_types';
 
-export class KibanaDatabaseAdapter implements DatabaseAdapter {
-  private elasticsearch: any;
+interface KibanaElasticsearchPlugin {
+  getCluster: (clusterName: 'admin' | 'data') => any;
+  callWithRequest: (request: any, action: string, params: any) => any;
+}
 
-  constructor(kbnElasticsearch: any) {
+export class KibanaDatabaseAdapter implements DatabaseAdapter {
+  private elasticsearch: KibanaElasticsearchPlugin;
+
+  constructor(kbnElasticsearch: KibanaElasticsearchPlugin) {
     this.elasticsearch = kbnElasticsearch.getCluster('data');
   }
 
