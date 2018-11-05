@@ -5,18 +5,17 @@
  */
 
 import {
-  EuiBadge,
   EuiBreadcrumbDefinition,
   EuiHeader,
   EuiHeaderBreadcrumbs,
   EuiHeaderSection,
-  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
 interface HeaderProps {
   breadcrumbs?: EuiBreadcrumbDefinition[];
+  appendSections?: React.ReactNode;
 }
 
 export class Header extends React.PureComponent<HeaderProps> {
@@ -28,21 +27,14 @@ export class Header extends React.PureComponent<HeaderProps> {
   ];
 
   public render() {
-    const { breadcrumbs = [] } = this.props;
+    const { breadcrumbs = [], appendSections = null } = this.props;
 
     return (
       <HeaderWrapper>
         <EuiHeaderSection>
           <EuiHeaderBreadcrumbs breadcrumbs={[...this.staticBreadcrumbs, ...breadcrumbs]} />
         </EuiHeaderSection>
-        <VerticallyCenteredHeaderSection side="right">
-          <EuiToolTip
-            content="This module is not GA. Please help us by reporting any bugs."
-            position="bottom"
-          >
-            <EuiBadge color="hollow">Beta</EuiBadge>
-          </EuiToolTip>
-        </VerticallyCenteredHeaderSection>
+        {appendSections}
       </HeaderWrapper>
     );
   }
@@ -50,10 +42,4 @@ export class Header extends React.PureComponent<HeaderProps> {
 
 const HeaderWrapper = styled(EuiHeader)`
   height: 29px;
-`;
-
-const VerticallyCenteredHeaderSection = styled(EuiHeaderSection)`
-  padding-left: ${props => props.theme.eui.euiSizeS};
-  padding-right: ${props => props.theme.eui.euiSizeS};
-  align-items: center;
 `;
