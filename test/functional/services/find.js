@@ -67,9 +67,9 @@ export function FindProvider({ getService }) {
     }
 
     async byCssSelector(selectorObj, timeout = defaultFindTimeout) {
-      // log.debug(`findByCssSelector ${selector}`);
+      log.debug(`findByCssSelector ${selectorObj}`);
       return await this._ensureElementWithTimeout(timeout, async remote => {
-        return await remote.findElement(selectorObj);
+        return await remote.findElement(By.css(selectorObj));
       });
     }
 
@@ -82,18 +82,31 @@ export function FindProvider({ getService }) {
 
     async setValue(selector, text) {
       return await retry.try(async () => {
+        log.debug(`setValue ${text} (${typeof text})`);
         const element = await this.byCssSelector(selector);
         await element.click();
+        log.debug('we clicked on the element');
+        await this.setValueElement(element, text);
+      });
+    }
 
+    async setValueElement(element, text) {
+      return await retry.try(async () => {
+        log.debug(`setValue ${text} (${typeof text})`);
+        await element.click();
+        log.debug('we clicked on the element');
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
         const input = await remote.getActiveElement();
         await input.clear();
-        const textArray = text.split('');
+        log.debug('we cleared the element');
+        // text.toString() in case a number comes in
+        const textArray = text.toString().split('');
         for (let i = 0; i < textArray.length; i++) {
           remote.sleep(50);
-          await input.sendKeys(text);
+          console.log(`sending ${textArray[i]}`);
+          await input.sendKeys(textArray[i]);
         }
       });
     }

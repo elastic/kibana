@@ -49,7 +49,9 @@ export function ComboBoxProvider({ getService }) {
     async _filterOptionsList(comboBoxElement, filterValue) {
       const input = await comboBoxElement.findByTagName('input');
       await input.clearValue();
-      await input.type(filterValue);
+      // await input.type(filterValue);
+      // await remote.type(comboBoxElement, filterValue);
+      await find.setValueElement(comboBoxElement, filterValue);
       await this._waitForOptionsListLoading(comboBoxElement);
     }
 

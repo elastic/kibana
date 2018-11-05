@@ -186,12 +186,12 @@ export function CommonPageProvider({ getService, getPageObjects }) {
                   }
                 });
             });
-          })
-          .then(async () => {
-            if (appName === 'status_page') return;
-            if (await testSubjects.exists('statusPageContainer')) {
-              throw new Error('Navigation ended up at the status page.');
-            }
+          // })
+          // .then(async () => {
+          //   if (appName === 'status_page') return;
+          //   if (await testSubjects.exists('statusPageContainer', 500)) {
+          //     throw new Error('Navigation ended up at the status page.');
+          //   }
           });
       });
     }
@@ -324,8 +324,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async isChromeVisible() {
-      const globalNavShown = await testSubjects.exists('globalNav');
-      const topNavShown = await testSubjects.exists('top-nav');
+      const globalNavShown = (await testSubjects.getAttribute('globalNav', 'aria-hidden')).includes('false');
+      const topNavShown = (await testSubjects.getAttribute('top-nav', 'aria-hidden')).includes('false');
+      log.debug(`isChromeVisible globalNav=${globalNavShown}, top-nav=${topNavShown}`);
       return globalNavShown && topNavShown;
     }
 

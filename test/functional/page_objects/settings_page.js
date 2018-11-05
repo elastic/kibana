@@ -72,9 +72,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async setAdvancedSettingsSelect(propertyName, propertyValue) {
-      await find.clickByCssSelector(
-        `[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`
-      );
+      const settingSelector = `[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`;
+      const selectElement = await find.byCssSelector(settingSelector);
+      await selectElement.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -560,7 +560,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`Clicking importObjects`);
       await testSubjects.click('importObjects');
       log.debug(`Setting the path on the file input`);
-      await find.setValue(By.css('.euiFilePicker__input'), path);
+      const fileInput = await find.byCssSelector('.euiFilePicker__input');
+      await fileInput.sendKeys(path);
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
         await testSubjects.click('importSavedObjectsOverwriteToggle');

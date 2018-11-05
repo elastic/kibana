@@ -71,7 +71,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       }
       await input.session.pressKeys(Keys.NULL); // Release modifier keys
       await input.session.pressKeys(Keys.BACKSPACE); // Delete all content
-      await input.type(markdown);
+
+      // await input.type(markdown); // TODO: Lee
+      // await remote.type(input, markdown);
+      await find.setValueElement(input, markdown);
+
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
