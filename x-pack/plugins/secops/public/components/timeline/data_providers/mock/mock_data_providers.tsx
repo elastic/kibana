@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiBadge, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 import { DataProvider } from '../data_provider';
-import { FacetText } from '../facet_text';
 
 interface NameToEventCount<TValue> {
   [name: string]: TValue;
@@ -54,7 +53,7 @@ export const mockDataProviders: DataProvider[] = Object.keys(mockSourceNameToEve
     negated: false,
     render: () => (
       <div data-test-subj="mockDataProvider">
-        <FacetText text={`${getEventCount(name)}`} />
+        <EuiBadge color="primary">{getEventCount(name)}</EuiBadge>
         <Text> {name} </Text>
       </div>
     ),
