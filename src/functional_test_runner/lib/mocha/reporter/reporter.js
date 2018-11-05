@@ -56,11 +56,11 @@ export function MochaReporterProvider({ getService }) {
           extraNameParts.push(`(grep=${config.get('mochaOpts.grep')})`);
         }
 
-        if (config.get('suiteTags.include')) {
+        if (config.get('suiteTags.include').length) {
           extraNameParts.push(`(tags=${config.get('suiteTags.include')})`);
         }
 
-        if (config.get('suiteTags.exclude')) {
+        if (config.get('suiteTags.exclude').length) {
           extraNameParts.push(`(!tags=${config.get('suiteTags.exclude')})`);
         }
 
