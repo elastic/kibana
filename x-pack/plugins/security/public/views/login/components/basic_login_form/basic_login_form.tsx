@@ -35,51 +35,50 @@ export class BasicLoginForm extends Component<Props, State> {
 
   public render() {
     return (
-      <Fragment>
-        {this.renderMessage()}
-        <EuiPanel>
-          <form onSubmit={this.submit}>
-            <EuiFormRow label="Username">
-              <EuiFieldText
-                id="username"
-                name="username"
-                data-test-subj="loginUsername"
-                value={this.state.username}
-                onChange={this.onUsernameChange}
-                disabled={this.state.isLoading}
-                isInvalid={false}
-                aria-required
-                inputRef={this.setUsernameInputRef}
-              />
-            </EuiFormRow>
+      <EuiPanel>
+        <form onSubmit={this.submit}>
+          <EuiFormRow label="Username">
+            <EuiFieldText
+              id="username"
+              name="username"
+              data-test-subj="loginUsername"
+              value={this.state.username}
+              onChange={this.onUsernameChange}
+              disabled={this.state.isLoading}
+              isInvalid={false}
+              aria-required
+              inputRef={this.setUsernameInputRef}
+            />
+          </EuiFormRow>
 
-            <EuiFormRow label="Password">
-              <EuiFieldText
-                id="password"
-                name="password"
-                data-test-subj="loginPassword"
-                type="password"
-                value={this.state.password}
-                onChange={this.onPasswordChange}
-                disabled={this.state.isLoading}
-                isInvalid={false}
-                aria-required
-              />
-            </EuiFormRow>
+          <EuiFormRow label="Password">
+            <EuiFieldText
+              id="password"
+              name="password"
+              data-test-subj="loginPassword"
+              type="password"
+              value={this.state.password}
+              onChange={this.onPasswordChange}
+              disabled={this.state.isLoading}
+              isInvalid={false}
+              aria-required
+            />
+          </EuiFormRow>
 
-            <EuiButton
-              fill
-              type="submit"
-              color="primary"
-              onClick={this.submit}
-              isLoading={this.state.isLoading}
-              data-test-subj="loginSubmit"
-            >
-              Log in
-            </EuiButton>
-          </form>
-        </EuiPanel>
-      </Fragment>
+          {this.renderMessage()}
+
+          <EuiButton
+            fill
+            type="submit"
+            color="primary"
+            onClick={this.submit}
+            isLoading={this.state.isLoading}
+            data-test-subj="loginSubmit"
+          >
+            Log in
+          </EuiButton>
+        </form>
+      </EuiPanel>
     );
   }
 
@@ -159,11 +158,14 @@ export class BasicLoginForm extends Component<Props, State> {
     http.post('./api/security/v1/login', { username, password }).then(
       () => (window.location.href = next),
       (error: any) => {
-        const { statusCode = 500 } = error.data || {};
+        const { statusCode = 500, error: errorString = 'Error' } = error.data || {};
 
-        let message = 'Oops! Error. Try again.';
+        let message;
+
         if (statusCode === 401) {
-          message = 'Invalid username or password. Please try again.';
+          message = `Incorrect username or password.`;
+        } else {
+          message = `There was an error logging you in (${statusCode}: ${errorString}).`;
         }
 
         this.setState({
