@@ -2,6 +2,88 @@
 
 exports[`UploadLicense should display a modal when license requires acknowledgement 1`] = `
 <Provider
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   store={
     Object {
       "dispatch": [Function],
@@ -21,9 +103,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
       isInvalid={false}
       messages={
         Array [
-          "Some functionality will be lost if you replace your 
-        TRIAL license with a
-        BASIC license.  Review the list of features below.",
+          "Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.",
           Array [
             "Watcher will be disabled",
           ],
@@ -45,9 +125,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
             id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
             values={Object {}}
           >
-            <span>
-              Upload your license
-            </span>
+            Upload your license
           </FormattedMessage>
         </h1>
       </EuiTitle>
@@ -207,9 +285,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                         id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
                                         values={Object {}}
                                       >
-                                        <span>
-                                          Confirm License Upload
-                                        </span>
+                                        Confirm License Upload
                                       </FormattedMessage>
                                     </div>
                                   </EuiModalHeaderTitle>
@@ -234,9 +310,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                           <div
                                             className="euiText"
                                           >
-                                            Some functionality will be lost if you replace your 
-        TRIAL license with a
-        BASIC license.  Review the list of features below.
+                                            Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
                                           </div>
                                         </EuiText>
                                         <EuiText
@@ -288,9 +362,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                             id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
                                             values={Object {}}
                                           >
-                                            <span>
-                                              Cancel
-                                            </span>
+                                            Cancel
                                           </FormattedMessage>
                                         </span>
                                       </span>
@@ -322,9 +394,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                             id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
                                             values={Object {}}
                                           >
-                                            <span>
-                                              Confirm
-                                            </span>
+                                            Confirm
                                           </FormattedMessage>
                                         </span>
                                       </span>
@@ -351,9 +421,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                         id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
                         values={Object {}}
                       >
-                        <span>
-                          Your license key is a JSON file with a signature attached.
-                        </span>
+                        Your license key is a JSON file with a signature attached.
                       </FormattedMessage>
                     </p>
                     <p>
@@ -368,11 +436,9 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                           }
                         }
                       >
-                        <span>
-                          Uploading a license will replace your current 
-                          <strong />
-                           license.
-                        </span>
+                        Uploading a license will replace your current 
+                        <strong />
+                         license.
                       </FormattedMessage>
                     </p>
                   </div>
@@ -475,9 +541,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                     id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
                                     values={Object {}}
                                   >
-                                    <span>
-                                      Select or drag your license file
-                                    </span>
+                                    Select or drag your license file
                                   </FormattedMessage>
                                 </div>
                               </div>
@@ -541,9 +605,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                       id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
                                       values={Object {}}
                                     >
-                                      <span>
-                                        Cancel
-                                      </span>
+                                      Cancel
                                     </FormattedMessage>
                                   </span>
                                 </span>
@@ -584,9 +646,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                       id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
                                       values={Object {}}
                                     >
-                                      <span>
-                                        Upload
-                                      </span>
+                                      Upload
                                     </FormattedMessage>
                                   </span>
                                 </span>
@@ -610,6 +670,88 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
 
 exports[`UploadLicense should display an error when ES says license is expired 1`] = `
 <Provider
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   store={
     Object {
       "dispatch": [Function],
@@ -643,9 +785,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
             id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
             values={Object {}}
           >
-            <span>
-              Upload your license
-            </span>
+            Upload your license
           </FormattedMessage>
         </h1>
       </EuiTitle>
@@ -686,9 +826,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                         id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
                         values={Object {}}
                       >
-                        <span>
-                          Your license key is a JSON file with a signature attached.
-                        </span>
+                        Your license key is a JSON file with a signature attached.
                       </FormattedMessage>
                     </p>
                     <p>
@@ -703,11 +841,9 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                           }
                         }
                       >
-                        <span>
-                          Uploading a license will replace your current 
-                          <strong />
-                           license.
-                        </span>
+                        Uploading a license will replace your current 
+                        <strong />
+                         license.
                       </FormattedMessage>
                     </p>
                   </div>
@@ -851,9 +987,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                     id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
                                     values={Object {}}
                                   >
-                                    <span>
-                                      Select or drag your license file
-                                    </span>
+                                    Select or drag your license file
                                   </FormattedMessage>
                                 </div>
                                 <EuiButtonEmpty
@@ -943,9 +1077,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                       id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
                                       values={Object {}}
                                     >
-                                      <span>
-                                        Cancel
-                                      </span>
+                                      Cancel
                                     </FormattedMessage>
                                   </span>
                                 </span>
@@ -986,9 +1118,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                       id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
                                       values={Object {}}
                                     >
-                                      <span>
-                                        Upload
-                                      </span>
+                                      Upload
                                     </FormattedMessage>
                                   </span>
                                 </span>
@@ -1012,6 +1142,88 @@ exports[`UploadLicense should display an error when ES says license is expired 1
 
 exports[`UploadLicense should display an error when ES says license is invalid 1`] = `
 <Provider
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   store={
     Object {
       "dispatch": [Function],
@@ -1045,9 +1257,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
             id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
             values={Object {}}
           >
-            <span>
-              Upload your license
-            </span>
+            Upload your license
           </FormattedMessage>
         </h1>
       </EuiTitle>
@@ -1088,9 +1298,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                         id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
                         values={Object {}}
                       >
-                        <span>
-                          Your license key is a JSON file with a signature attached.
-                        </span>
+                        Your license key is a JSON file with a signature attached.
                       </FormattedMessage>
                     </p>
                     <p>
@@ -1105,11 +1313,9 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                           }
                         }
                       >
-                        <span>
-                          Uploading a license will replace your current 
-                          <strong />
-                           license.
-                        </span>
+                        Uploading a license will replace your current 
+                        <strong />
+                         license.
                       </FormattedMessage>
                     </p>
                   </div>
@@ -1253,9 +1459,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                     id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
                                     values={Object {}}
                                   >
-                                    <span>
-                                      Select or drag your license file
-                                    </span>
+                                    Select or drag your license file
                                   </FormattedMessage>
                                 </div>
                                 <EuiButtonEmpty
@@ -1345,9 +1549,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                       id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
                                       values={Object {}}
                                     >
-                                      <span>
-                                        Cancel
-                                      </span>
+                                      Cancel
                                     </FormattedMessage>
                                   </span>
                                 </span>
@@ -1388,9 +1590,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                       id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
                                       values={Object {}}
                                     >
-                                      <span>
-                                        Upload
-                                      </span>
+                                      Upload
                                     </FormattedMessage>
                                   </span>
                                 </span>
@@ -1414,6 +1614,88 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
 
 exports[`UploadLicense should display an error when submitting invalid JSON 1`] = `
 <Provider
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   store={
     Object {
       "dispatch": [Function],
@@ -1447,9 +1729,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
             id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
             values={Object {}}
           >
-            <span>
-              Upload your license
-            </span>
+            Upload your license
           </FormattedMessage>
         </h1>
       </EuiTitle>
@@ -1490,9 +1770,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                         id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
                         values={Object {}}
                       >
-                        <span>
-                          Your license key is a JSON file with a signature attached.
-                        </span>
+                        Your license key is a JSON file with a signature attached.
                       </FormattedMessage>
                     </p>
                     <p>
@@ -1507,11 +1785,9 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                           }
                         }
                       >
-                        <span>
-                          Uploading a license will replace your current 
-                          <strong />
-                           license.
-                        </span>
+                        Uploading a license will replace your current 
+                        <strong />
+                         license.
                       </FormattedMessage>
                     </p>
                   </div>
@@ -1655,9 +1931,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                     id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
                                     values={Object {}}
                                   >
-                                    <span>
-                                      Select or drag your license file
-                                    </span>
+                                    Select or drag your license file
                                   </FormattedMessage>
                                 </div>
                                 <EuiButtonEmpty
@@ -1747,9 +2021,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                       id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
                                       values={Object {}}
                                     >
-                                      <span>
-                                        Cancel
-                                      </span>
+                                      Cancel
                                     </FormattedMessage>
                                   </span>
                                 </span>
@@ -1790,9 +2062,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                       id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
                                       values={Object {}}
                                     >
-                                      <span>
-                                        Upload
-                                      </span>
+                                      Upload
                                     </FormattedMessage>
                                   </span>
                                 </span>
@@ -1816,6 +2086,88 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
 
 exports[`UploadLicense should display error when ES returns error 1`] = `
 <Provider
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   store={
     Object {
       "dispatch": [Function],
@@ -1849,9 +2201,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
             id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
             values={Object {}}
           >
-            <span>
-              Upload your license
-            </span>
+            Upload your license
           </FormattedMessage>
         </h1>
       </EuiTitle>
@@ -1892,9 +2242,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                         id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
                         values={Object {}}
                       >
-                        <span>
-                          Your license key is a JSON file with a signature attached.
-                        </span>
+                        Your license key is a JSON file with a signature attached.
                       </FormattedMessage>
                     </p>
                     <p>
@@ -1909,11 +2257,9 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                           }
                         }
                       >
-                        <span>
-                          Uploading a license will replace your current 
-                          <strong />
-                           license.
-                        </span>
+                        Uploading a license will replace your current 
+                        <strong />
+                         license.
                       </FormattedMessage>
                     </p>
                   </div>
@@ -2057,9 +2403,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                     id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
                                     values={Object {}}
                                   >
-                                    <span>
-                                      Select or drag your license file
-                                    </span>
+                                    Select or drag your license file
                                   </FormattedMessage>
                                 </div>
                                 <EuiButtonEmpty
@@ -2149,9 +2493,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                       id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
                                       values={Object {}}
                                     >
-                                      <span>
-                                        Cancel
-                                      </span>
+                                      Cancel
                                     </FormattedMessage>
                                   </span>
                                 </span>
@@ -2192,9 +2534,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                       id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
                                       values={Object {}}
                                     >
-                                      <span>
-                                        Upload
-                                      </span>
+                                      Upload
                                     </FormattedMessage>
                                   </span>
                                 </span>
