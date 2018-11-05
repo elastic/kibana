@@ -21,7 +21,7 @@ export class Header extends React.PureComponent<HeaderProps> {
   private staticBreadcrumbs = [
     {
       href: '#/',
-      text: 'InfraOps',
+      text: 'Infrastructure',
     },
   ];
 
