@@ -9,9 +9,9 @@ import { includes, isFunction } from 'lodash';
 import {
   EuiKeyboardAccessible,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class HorizontalLegend extends React.Component {
+class HorizontalLegendUI extends React.Component {
   constructor() {
     super();
     this.formatter = this.formatter.bind(this);
@@ -37,6 +37,7 @@ export class HorizontalLegend extends React.Component {
   }
 
   createSeries(row, rowIdx) {
+    const { intl } = this.props;
     const formatter = row.tickFormatter || this.formatter;
     const value = formatter(this.props.seriesValues[row.id]);
     const classes = ['col-md-4 col-xs-6 monRhythmChart__legendItem'];
@@ -63,7 +64,10 @@ export class HorizontalLegend extends React.Component {
             <span
               className="fa fa-circle monRhythmChart__legendIndicator"
               style={{ color: row.color }}
-              aria-label="toggle button"
+              aria-label={intl.formatMessage({
+                id: 'xpack.monitoring.chart.horizontalLegend.toggleButtonAriaLabel',
+                defaultMessage: 'toggle button'
+              })}
             />
             { ' ' + row.label }
           </span>
@@ -87,3 +91,5 @@ export class HorizontalLegend extends React.Component {
     );
   }
 }
+
+export const HorizontalLegend = injectI18n(HorizontalLegendUI);
