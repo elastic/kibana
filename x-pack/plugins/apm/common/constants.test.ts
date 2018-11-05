@@ -10,6 +10,7 @@ import { Transaction } from '../typings/Transaction';
 import {
   PROCESSOR_EVENT,
   PROCESSOR_NAME,
+  REQUEST_METHOD,
   REQUEST_URL_FULL,
   SERVICE_AGENT_NAME,
   SERVICE_LANGUAGE_NAME,
@@ -70,7 +71,8 @@ describe('Transaction v1', () => {
       request: {
         url: {
           full: 'http://www.elastic.co'
-        }
+        },
+        method: 'GET'
       }
     },
     transaction: {
@@ -100,6 +102,10 @@ describe('Transaction v1', () => {
 
   it('REQUEST_URL_FULL', () => {
     expect(get(transaction, REQUEST_URL_FULL)).toBe('http://www.elastic.co');
+  });
+
+  it('REQUEST_METHOD', () => {
+    expect(get(transaction, REQUEST_METHOD)).toBe('GET');
   });
 
   it('USER_ID', () => {
@@ -167,7 +173,7 @@ describe('Transaction v2', () => {
         language: { name: 'nodejs', version: 'v1337' }
       },
       user: { id: '1337' },
-      request: { url: { full: 'http://www.elastic.co' } }
+      request: { url: { full: 'http://www.elastic.co' }, method: 'GET' }
     },
     transaction: {
       duration: { us: 1337 },
@@ -194,6 +200,10 @@ describe('Transaction v2', () => {
 
   it('REQUEST_URL_FULL', () => {
     expect(get(transaction, REQUEST_URL_FULL)).toBe('http://www.elastic.co');
+  });
+
+  it('REQUEST_METHOD', () => {
+    expect(get(transaction, REQUEST_METHOD)).toBe('GET');
   });
 
   it('USER_ID', () => {

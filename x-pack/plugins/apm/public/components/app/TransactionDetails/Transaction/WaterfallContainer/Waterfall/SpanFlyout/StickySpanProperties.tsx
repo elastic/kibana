@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// tslint:disable-next-line  no-var-requires
-import React from 'react';
-
 import { first } from 'lodash';
+import React from 'react';
+import {
+  SPAN_DURATION,
+  SPAN_NAME,
+  SPAN_TYPE
+} from 'x-pack/plugins/apm/common/constants';
 import { Span } from '../../../../../../../../typings/Span';
 import { asMillis, asPercent } from '../../../../../../../utils/formatters';
-// @ts-ignore
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
 function getSpanLabel(type: string) {
@@ -41,24 +43,23 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
   const spanName = span.span.name;
   const spanDuration = span.span.duration.us;
   const spanTypeLabel = getSpanLabel(getPrimaryType(span.span.type));
-
   const stickyProperties = [
     {
       label: 'Name',
-      fieldName: 'span.name',
+      fieldName: SPAN_NAME,
       val: spanName || 'N/A',
       truncated: true,
       width: '50%'
     },
     {
-      fieldName: 'span.type',
+      fieldName: SPAN_TYPE,
       label: 'Type',
       val: spanTypeLabel,
       truncated: true,
       widht: '50%'
     },
     {
-      fieldName: 'span.duration.us',
+      fieldName: SPAN_DURATION,
       label: 'Duration',
       val: asMillis(spanDuration),
       width: '50%'
