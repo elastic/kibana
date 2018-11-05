@@ -39,13 +39,13 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
           )}
         </BreadcrumbConsumer>
         <Switch>
+          {!libs.framework.hasValidLicense() && <Route render={() => <InvalidLicensePage />} />}
+          {!libs.framework.securityEnabled() && <Route render={() => <EnforceSecurityPage />} />}
           {!libs.framework.getCurrentUser() ||
             (!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
               !libs.framework.getCurrentUser().roles.includes('superuser') && (
                 <Route render={() => <NoAccessPage />} />
               ))}
-          {!libs.framework.hasValidLicense() && <Route render={() => <InvalidLicensePage />} />}
-          {!libs.framework.securityEnabled() && <Route render={() => <EnforceSecurityPage />} />}
           <Route
             path="/"
             exact={true}
