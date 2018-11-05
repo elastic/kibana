@@ -38,9 +38,4 @@ export function uiNavLinksMixin(kbnServer, server) {
   server.decorate('server', 'getUiNavLinks', () => (
     uiNavLinks.slice(0)
   ));
-
-  server.decorate('request', 'getUiNavLinks', async function getUiNavLinks() {
-    // TODO: re-impelment to allow links to be hidden on a per-request basis
-    return uiNavLinks.slice(0);
-  });
 }
