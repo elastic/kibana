@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import { AggConfig } from '../../vis/agg_config';
 import { buildExistsFilter } from '../../filter_manager/lib/exists';
 import { buildPhrasesFilter } from '../../filter_manager/lib/phrases';
 import { buildQueryFromFilters } from '../../courier';
@@ -110,9 +109,11 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   const indexPattern = aggWithOtherBucket.params.field.indexPattern;
 
   // create filters aggregation
-  const filterAgg = new AggConfig(aggConfigs[index].vis, {
+  const filterAgg = aggConfigs.createAggConfig({
     type: 'filters',
     id: 'other',
+  }, {
+    addToAggConfigs: false,
   });
 
   // nest all the child aggregations of aggWithOtherBucket
@@ -130,8 +131,8 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
     if (aggIndex < index) {
       _.each(agg.buckets, (bucket, bucketObjKey) => {
         const bucketKey = currentAgg.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey);
-        const filter = _.cloneDeep(bucket.filter) || currentAgg.createFilter(bucketKey);
-        const newFilters = [...filters, filter];
+        const filter = _.cloneDeep(bucket.filters) || currentAgg.createFilter(bucketKey);
+        const newFilters = _.flatten([...filters, filter]);
         walkBucketTree(newAggIndex, bucket, newAgg.id, newFilters, `${key}-${bucketKey.toString()}`);
       });
       return;

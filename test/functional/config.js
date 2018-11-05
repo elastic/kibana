@@ -53,6 +53,7 @@ import {
   ComboBoxProvider,
   EmbeddingProvider,
   RenderableProvider,
+  TableProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -111,6 +112,7 @@ export default async function ({ readConfigFile }) {
       comboBox: ComboBoxProvider,
       embedding: EmbeddingProvider,
       renderable: RenderableProvider,
+      table: TableProvider,
     },
     servers: commonConfig.get('servers'),
 
@@ -160,6 +162,10 @@ export default async function ({ readConfigFile }) {
       console: {
         pathname: '/app/kibana',
         hash: '/dev_tools/console',
+      },
+      account: {
+        pathname: '/app/kibana',
+        hash: '/account',
       },
       home: {
         pathname: '/app/kibana',

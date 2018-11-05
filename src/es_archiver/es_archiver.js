@@ -22,13 +22,15 @@ import {
   loadAction,
   unloadAction,
   rebuildAllAction,
+  emptyKibanaIndexAction,
 } from './actions';
 
 export class EsArchiver {
-  constructor({ client, dataDir, log }) {
+  constructor({ client, dataDir, log, kibanaUrl }) {
     this.client = client;
     this.dataDir = dataDir;
     this.log = log;
+    this.kibanaUrl = kibanaUrl;
   }
 
   /**
@@ -70,6 +72,7 @@ export class EsArchiver {
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,
+      kibanaUrl: this.kibanaUrl,
     });
   }
 
@@ -110,5 +113,18 @@ export class EsArchiver {
    */
   async loadIfNeeded(name) {
     return await this.load(name, { skipExisting: true });
+  }
+
+  /**
+   *  Delete any Kibana indices, and initialize the Kibana index as Kibana would do
+   *  on startup.
+   *
+   *  @return Promise
+   */
+  async emptyKibanaIndex() {
+    await emptyKibanaIndexAction({
+      client: this.client,
+      log: this.log,
+    });
   }
 }

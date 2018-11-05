@@ -19,19 +19,14 @@
 
 import _ from 'lodash';
 import { statSync, lstatSync, realpathSync } from 'fs';
-import { isWorker } from 'cluster';
 import { resolve } from 'path';
 
 import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
-import { Config } from '../../server/config/config';
-import { getConfigFromFiles } from '../../core/server/config';
+import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
-import { transformDeprecations } from '../../server/config/transform_deprecations';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
-
-const { startRepl } = canRequire('../repl') ? require('../repl') : { };
 
 function canRequire(path) {
   try {
@@ -60,6 +55,9 @@ function isSymlinkTo(link, dest) {
 const CLUSTER_MANAGER_PATH = resolve(__dirname, '../cluster/cluster_manager');
 const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
 
+const REPL_PATH = resolve(__dirname, '../repl');
+const CAN_REPL = canRequire(REPL_PATH);
+
 // xpack is installed in both dev and the distributable, it's optional if
 // install is a link to the source, not an actual install
 const XPACK_INSTALLED_DIR = resolve(__dirname, '../../../node_modules/x-pack');
@@ -79,12 +77,11 @@ const configPathCollector = pathCollector();
 const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-function readServerSettings(opts, extraCliOptions) {
-  const settings = getConfigFromFiles([].concat(opts.config || []));
-  const set = _.partial(_.set, settings);
-  const get = _.partial(_.get, settings);
-  const has = _.partial(_.has, settings);
-  const merge = _.partial(_.merge, settings);
+function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
+  const set = _.partial(_.set, rawConfig);
+  const get = _.partial(_.get, rawConfig);
+  const has = _.partial(_.has, rawConfig);
+  const merge = _.partial(_.merge, rawConfig);
 
   if (opts.dev) {
     set('env', 'development');
@@ -116,6 +113,11 @@ function readServerSettings(opts, extraCliOptions) {
   if (opts.verbose) set('logging.verbose', true);
   if (opts.logFile) set('logging.dest', opts.logFile);
 
+  if (opts.optimize) {
+    set('server.autoListen', false);
+    set('plugins.initialize', false);
+  }
+
   set('plugins.scanDirs', _.compact([].concat(
     get('plugins.scanDirs'),
     opts.pluginDir
@@ -133,7 +135,7 @@ function readServerSettings(opts, extraCliOptions) {
   merge(extraCliOptions);
   merge(readKeystore(get('path.data')));
 
-  return settings;
+  return rawConfig;
 }
 
 export default function (program) {
@@ -173,9 +175,11 @@ export default function (program) {
       pluginPathCollector,
       []
     )
-    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
+    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
+    .option('--optimize', 'Optimize and then stop the server');
 
-  if (!!startRepl) {
+
+  if (CAN_REPL) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
   }
 
@@ -205,81 +209,27 @@ export default function (program) {
         }
       }
 
-      const getCurrentSettings = () => readServerSettings(opts, this.getUnknownOptions());
-      const settings = getCurrentSettings();
-
-      if (CAN_CLUSTER && opts.dev && !isWorker) {
-        // stop processing the action and handoff to cluster manager
-        const ClusterManager = require(CLUSTER_MANAGER_PATH);
-        await ClusterManager.create(opts, settings);
-        return;
-      }
-
-      let kbnServer = {};
-      const KbnServer = require('../../server/kbn_server');
-      try {
-        kbnServer = new KbnServer(settings);
-        if (shouldStartRepl(opts)) {
-          startRepl(kbnServer);
-        }
-        await kbnServer.ready();
-      } catch (error) {
-        const { server } = kbnServer;
-
-        switch (error.code) {
-          case 'EADDRINUSE':
-            logFatal(`Port ${error.port} is already in use. Another instance of Kibana may be running!`, server);
-            break;
-
-          case 'InvalidConfig':
-            logFatal(error.message, server);
-            break;
-
-          default:
-            logFatal(error, server);
-            break;
-        }
-
-        kbnServer.close();
-        const exitCode = error.processExitCode == null ? 1 : error.processExitCode;
-        // eslint-disable-next-line no-process-exit
-        process.exit(exitCode);
-      }
-
-      process.on('SIGHUP', async function reloadConfig() {
-        const settings = transformDeprecations(getCurrentSettings());
-        const config = new Config(kbnServer.config.getSchema(), settings);
-
-        kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
-        await kbnServer.applyLoggingConfiguration(config);
-        kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
-
-        // If new platform config subscription is active, let's notify it with the updated config.
-        if (kbnServer.newPlatform) {
-          kbnServer.newPlatform.updateConfig(config.get());
-        }
+      const unknownOptions = this.getUnknownOptions();
+      await bootstrap({
+        configs: [].concat(opts.config || []),
+        cliArgs: {
+          dev: !!opts.dev,
+          envName: unknownOptions.env ? unknownOptions.env.name : undefined,
+          quiet: !!opts.quiet,
+          silent: !!opts.silent,
+          watch: !!opts.watch,
+          repl: !!opts.repl,
+          basePath: !!opts.basePath,
+          optimize: !!opts.optimize,
+        },
+        features: {
+          isClusterModeSupported: CAN_CLUSTER,
+          isOssModeSupported: XPACK_OPTIONAL,
+          isXPackInstalled: XPACK_INSTALLED,
+          isReplModeSupported: CAN_REPL,
+        },
+        applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
       });
-
-      return kbnServer;
     });
-}
 
-function shouldStartRepl(opts) {
-  if (opts.repl && !startRepl) {
-    throw new Error('Kibana REPL mode can only be run in development mode.');
-  }
-
-  // The kbnWorkerType check is necessary to prevent the repl
-  // from being started multiple times in different processes.
-  // We only want one REPL.
-  return opts.repl && process.env.kbnWorkerType === 'server';
-}
-
-function logFatal(message, server) {
-  if (server) {
-    server.log(['fatal'], message);
-  }
-
-  // It's possible for the Hapi logger to not be setup
-  console.error('FATAL', message);
 }

@@ -2,9 +2,9 @@
   <label
     for="{{watchSlackAction.makeId('to')}}"
     class="kuiFormLabel"
-  >
-    Recipient
-  </label>
+    i18n-id="xpack.watcher.watchActions.slack.recipientLabel"
+    i18n-default-message="Recipient"
+  ></label>
   <input
     type="text"
     id="{{watchSlackAction.makeId('to')}}"
@@ -19,17 +19,17 @@
     xpack-aria-describes="{{watchSlackAction.makeId('to')}}"
     class="kuiInputNote kuiInputNote--danger"
     ng-if="watchSlackAction.isValidationMessageVisible('to', 'required')"
-  >
-    Recipient is required.
-  </div>
+    i18n-id="xpack.watcher.watchActions.slack.recipientIsRequiredValidationMessage"
+    i18n-default-message="Recipient is required."
+  ></div>
 </div>
 <div class="kuiFormSection">
   <label
     for="{{watchSlackAction.makeId('text')}}"
     class="kuiFormLabel"
-  >
-    Message
-  </label>
+    i18n-id="xpack.watcher.watchActions.slack.messageLabel"
+    i18n-default-message="Message"
+  ></label>
   <textarea
     id="{{watchSlackAction.makeId('text')}}"
     name="text"
@@ -42,7 +42,7 @@
     xpack-aria-describes="{{watchSlackAction.makeId('text')}}"
     class="kuiInputNote kuiInputNote--danger"
     ng-if="watchSlackAction.isValidationMessageVisible('text', 'required')"
-  >
-    Message is required.
-  </div>
+    i18n-id="xpack.watcher.watchActions.slack.messageIsRequiredValidationMessage"
+    i18n-default-message="Message is required."
+  ></div>
 </div>

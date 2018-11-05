@@ -27,6 +27,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
 import { FieldWildcardProvider } from 'ui/field_wildcard';
+import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
@@ -135,6 +136,7 @@ function updateIndexedFieldsTable($scope, $state) {
                 $scope.kbnUrl.redirectToRoute(obj, route);
                 $scope.$apply();
               },
+              getFieldInfo: $scope.getFieldInfo,
             }}
           />
         </I18nProvider>,
@@ -184,11 +186,14 @@ uiModules.get('apps/management')
     $scope, $location, $route, config, indexPatterns, Private, AppState, docTitle, confirmModal) {
     const $state = $scope.state = new AppState();
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
+    const indexPatternListProvider = Private(IndexPatternListFactory)();
 
     $scope.fieldWildcardMatcher = fieldWildcardMatcher;
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
+    $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags($scope.indexPattern);
+    $scope.getFieldInfo = indexPatternListProvider.getFieldInfo;
     docTitle.change($scope.indexPattern.title);
 
     const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
@@ -196,7 +201,7 @@ uiModules.get('apps/management')
     });
 
     $scope.$watch('indexPattern.fields', function () {
-      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
+      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, indexPatternListProvider);
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
       updateIndexedFieldsTable($scope, $state);

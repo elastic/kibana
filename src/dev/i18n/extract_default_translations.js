@@ -18,28 +18,27 @@
  */
 
 import path from 'path';
-import { i18n } from '@kbn/i18n';
-import JSON5 from 'json5';
 import normalize from 'normalize-path';
 import chalk from 'chalk';
 
-import { extractHtmlMessages } from './extract_html_messages';
-import { extractCodeMessages } from './extract_code_messages';
-import { extractPugMessages } from './extract_pug_messages';
-import { extractHandlebarsMessages } from './extract_handlebars_messages';
-import { globAsync, readFileAsync, writeFileAsync } from './utils';
+import {
+  extractHtmlMessages,
+  extractCodeMessages,
+  extractPugMessages,
+  extractHandlebarsMessages,
+} from './extractors';
+import { globAsync, readFileAsync } from './utils';
 import { paths, exclude } from '../../../.i18nrc.json';
-import { createFailError } from '../run';
-
-const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
+import { createFailError, isFailError } from '../run';
 
 function addMessageToMap(targetMap, key, value) {
   const existingValue = targetMap.get(key);
+
   if (targetMap.has(key) && existingValue.message !== value.message) {
-    throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} \
-There is more than one default message for the same id "${key}":
+    throw createFailError(`There is more than one default message for the same id "${key}":
 "${existingValue.message}" and "${value.message}"`);
   }
+
   targetMap.set(key, value);
 }
 
@@ -47,7 +46,7 @@ function normalizePath(inputPath) {
   return normalize(path.relative('.', inputPath));
 }
 
-function filterPaths(inputPaths) {
+export function filterPaths(inputPaths) {
   const availablePaths = Object.values(paths);
   const pathsForExtraction = new Set();
 
@@ -79,9 +78,8 @@ export function validateMessageNamespace(id, filePath) {
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {
-    throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} \
-Expected "${id}" id to have "${expectedNamespace}" namespace. \
-See i18nrc.json for the list of supported namespaces.`);
+    throw createFailError(`Expected "${id}" id to have "${expectedNamespace}" namespace. \
+See .i18nrc.json for the list of supported namespaces.`);
   }
 }
 
@@ -133,72 +131,15 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
             addMessageToMap(targetMap, id, value);
           }
         } catch (error) {
-          throw createFailError(
-            `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(name)}\n${error}`
-          );
+          if (isFailError(error)) {
+            throw createFailError(
+              `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(name)}\n${error}`
+            );
+          }
+
+          throw error;
         }
       }
     })
-  );
-}
-
-function serializeToJson5(defaultMessages) {
-  // .slice(0, -1): remove closing curly brace from json to append messages
-  let jsonBuffer = Buffer.from(
-    JSON5.stringify({ formats: i18n.formats }, { quote: `'`, space: 2 }).slice(0, -1)
-  );
-
-  for (const [mapKey, mapValue] of defaultMessages) {
-    const formattedMessage = mapValue.message.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2');
-    const formattedContext = mapValue.context
-      ? mapValue.context.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
-      : '';
-
-    jsonBuffer = Buffer.concat([
-      jsonBuffer,
-      Buffer.from(`  '${mapKey}': '${formattedMessage}',`),
-      Buffer.from(formattedContext ? ` // ${formattedContext}\n` : '\n'),
-    ]);
-  }
-
-  // append previously removed closing curly brace
-  jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('}\n')]);
-
-  return jsonBuffer;
-}
-
-function serializeToJson(defaultMessages) {
-  const resultJsonObject = { formats: i18n.formats };
-
-  for (const [mapKey, mapValue] of defaultMessages) {
-    if (mapValue.context) {
-      resultJsonObject[mapKey] = { text: mapValue.message, comment: mapValue.context };
-    } else {
-      resultJsonObject[mapKey] = mapValue.message;
-    }
-  }
-
-  return JSON.stringify(resultJsonObject, undefined, 2);
-}
-
-export async function extractDefaultTranslations({ paths, output, outputFormat }) {
-  const defaultMessagesMap = new Map();
-
-  for (const inputPath of filterPaths(paths)) {
-    await extractMessagesFromPathToMap(inputPath, defaultMessagesMap);
-  }
-
-  // messages shouldn't be extracted to a file if output is not supplied
-  if (!output || !defaultMessagesMap.size) {
-    return;
-  }
-
-  const defaultMessages = [...defaultMessagesMap].sort(([key1], [key2]) =>
-    key1.localeCompare(key2)
-  );
-
-  await writeFileAsync(
-    path.resolve(output, 'en.json'),
-    outputFormat === 'json5' ? serializeToJson5(defaultMessages) : serializeToJson(defaultMessages)
   );
 }

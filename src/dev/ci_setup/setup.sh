@@ -30,13 +30,28 @@ fi
 ###
 ### download node
 ###
+UNAME=$(uname)
+OS="linux"
+if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
+  OS="win"
+fi
+echo " -- Running on OS: $OS"
+
 nodeVersion="$(cat $dir/.node-version)"
-nodeUrl="https://nodejs.org/download/release/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
 nodeDir="$cacheDir/node/$nodeVersion"
+
+if [[ "$OS" == "win" ]]; then
+  nodeBin="$HOME/node"
+  nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
+else
+  nodeBin="$nodeDir/bin"
+  nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
+fi
+
 echo " -- node: version=v${nodeVersion} dir=$nodeDir"
 
 echo " -- setting up node.js"
-if [ -x "$nodeDir/bin/node" ] && [ "$($nodeDir/bin/node --version)" == "v$nodeVersion" ]; then
+if [ -x "$nodeBin/node" ] && [ "$($nodeBin/node --version)" == "v$nodeVersion" ]; then
   echo " -- reusing node.js install"
 else
   if [ -d "$nodeDir" ]; then
@@ -46,62 +61,45 @@ else
 
   echo " -- downloading node.js from $nodeUrl"
   mkdir -p "$nodeDir"
-  curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
-fi
+  if [[ "$OS" == "win" ]]; then
+    nodePkg="$nodeDir/${nodeUrl##*/}"
+    curl --silent -o $nodePkg $nodeUrl
+    unzip -qo $nodePkg -d $nodeDir
+    mv "${nodePkg%.*}" "$nodeBin"
+  else
+    curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
+  fi
 
+fi
 
 ###
 ### "install" node into this shell
 ###
-export PATH="$nodeDir/bin:$PATH"
+export PATH="$nodeBin:$PATH"
 hash -r
-
 
 ###
 ### downloading yarn
 ###
 yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
-yarnUrl="https://github.com/yarnpkg/yarn/releases/download/v$yarnVersion/yarn-$yarnVersion.js"
-yarnDir="$cacheDir/yarn/$yarnVersion"
-if [ -z "$yarnVersion" ]; then
-  echo " ${RED}!! missing engines.yarn in package.json${RESET_C}";
-  exit 1
-elif [ -x "$yarnDir/bin/yarn" ] && [ "$($yarnDir/bin/yarn --version)" == "$yarnVersion" ]; then
-  echo " -- reusing yarn install"
-else
-  if [ -d "$yarnDir" ]; then
-    echo " -- clearing previous yarn install"
-    rm -rf "$yarnDir"
-  fi
-
-  echo " -- downloading yarn from $yarnUrl"
-  mkdir -p "$yarnDir/bin"
-  curl -L --silent "$yarnUrl" > "$yarnDir/bin/yarn"
-  chmod +x "$yarnDir/bin/yarn"
-fi
-
+npm install -g yarn@^${yarnVersion}
 
 ###
 ### "install" yarn into this shell
 ###
-export PATH="$yarnDir/bin:$PATH"
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
 hash -r
-
 
 ###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
-yarn config set cache-folder "$cacheDir/yarn"
 yarn kbn bootstrap
-
 
 ###
 ### verify no git modifications
 ###
-
 GIT_CHANGES="$(git ls-files --modified)"
 if [ "$GIT_CHANGES" ]; then
   echo -e "\n${RED}ERROR: 'yarn kbn bootstrap' caused changes to the following files:${C_RESET}\n"

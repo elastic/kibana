@@ -45,6 +45,7 @@ export function convertToGeoJson(tabifiedResponse) {
       features = table.rows.map(row => {
 
         const geohash = row[geohashColumn.id];
+        if (!geohash) return false;
         const geohashLocation = decodeGeoHash(geohash);
 
         let pointCoordinates;
@@ -94,7 +95,7 @@ export function convertToGeoJson(tabifiedResponse) {
         };
 
 
-      });
+      }).filter(row => row);
 
     }
 

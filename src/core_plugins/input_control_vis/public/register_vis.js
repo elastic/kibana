@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './vis.less';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -25,8 +24,8 @@ import { VisController } from './vis_controller';
 import { ControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
-import image from './images/icon-input-control.svg';
 import { Status } from 'ui/vis/update_status';
+import { i18n } from '@kbn/i18n';
 
 function InputControlVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -34,9 +33,13 @@ function InputControlVisProvider(Private) {
   // return the visType object, which kibana will use to display and configure new Vis object of this type.
   return VisFactory.createBaseVisualization({
     name: 'input_control_vis',
-    title: 'Controls',
-    image,
-    description: 'Create interactive controls for easy dashboard manipulation.',
+    title: i18n.translate('inputControl.register.controlsTitle', {
+      defaultMessage: 'Controls'
+    }),
+    icon: 'visControls',
+    description: i18n.translate('inputControl.register.controlsDescription', {
+      defaultMessage: 'Create interactive controls for easy dashboard manipulation.'
+    }),
     category: CATEGORY.OTHER,
     stage: 'lab',
     requiresUpdateStatus: [Status.PARAMS, Status.TIME],
@@ -55,12 +58,16 @@ function InputControlVisProvider(Private) {
       optionTabs: [
         {
           name: 'controls',
-          title: 'Controls',
+          title: i18n.translate('inputControl.register.tabs.controlsTitle', {
+            defaultMessage: 'Controls'
+          }),
           editor: ControlsTab
         },
         {
           name: 'options',
-          title: 'Options',
+          title: i18n.translate('inputControl.register.tabs.optionsTitle', {
+            defaultMessage: 'Options'
+          }),
           editor: OptionsTab
         }
       ]

@@ -91,17 +91,17 @@ export function processRecordScoreResults(scoreData) {
   return bucketScoreData;
 }
 
-// Uses data from the list of anomaly records to add anomalyScore properties
-// to the chartData entries for anomalous buckets.
+// Uses data from the list of anomaly records to add anomalyScore,
+// function, actual and typical properties, plus causes and multi-bucket
+// info if applicable, to the chartData entries for anomalous buckets.
 export function processDataForFocusAnomalies(
   chartData,
   anomalyRecords,
   timeFieldName) {
 
-  // Iterate through the anomaly records, adding anomalyScore, function,
-  // actual and typical properties, plus causes info if applicable,
-  // to the chartData entries for anomalous buckets.
-  _.each(anomalyRecords, (record) => {
+  // Iterate through the anomaly records adding the
+  // various properties required for display.
+  anomalyRecords.forEach((record) => {
 
     // Look for a chart point with the same time as the record.
     // If none found, find closest time in chartData set.
@@ -145,6 +145,10 @@ export function processDataForFocusAnomalies(
               chartPoint.typical = cause.typical;
             }
           }
+        }
+
+        if (_.has(record, 'multi_bucket_impact')) {
+          chartPoint.multiBucketImpact = record.multi_bucket_impact;
         }
       }
     }

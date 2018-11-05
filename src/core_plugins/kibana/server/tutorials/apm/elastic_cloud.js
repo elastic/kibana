@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
 
 import {
@@ -31,9 +32,13 @@ import {
 } from './apm_client_instructions';
 
 const createServerUrlInstruction = () => ({
-  title: 'APM Server endpoint',
-  textPre: `Retrieve the APM Server URL from the Deployments section on the Elastic Cloud dashboard.
-    You will also need the APM Server secret token, which was generated on deployment.`,
+  title: i18n.translate('kbn.server.tutorials.apm.serverUrlInstruction.title', {
+    defaultMessage: 'APM Server endpoint',
+  }),
+  textPre: i18n.translate('kbn.server.tutorials.apm.serverUrlInstruction.textPre', {
+    defaultMessage: 'Retrieve the APM Server URL from the Deployments section on the Elastic Cloud dashboard. \
+You will also need the APM Server secret token, which was generated on deployment.',
+  }),
 });
 
 export function createElasticCloudInstructions() {
@@ -42,7 +47,9 @@ export function createElasticCloudInstructions() {
   return {
     instructionSets: [
       {
-        title: 'APM Agents',
+        title: i18n.translate('kbn.server.tutorials.apm.elasticCloudInstructions.title', {
+          defaultMessage: 'APM Agents',
+        }),
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.NODE,

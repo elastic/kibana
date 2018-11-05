@@ -31,9 +31,9 @@ import {
   EuiLink
 } from '@elastic/eui';
 
-import { ELASTIC_DOCS } from '../../../../utils/documentation';
+import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
 
-import { KibanaLink } from '../../../../utils/url';
+import { UnconnectedKibanaLink } from '../../../../utils/url';
 import { createErrorGroupWatch } from './createErrorGroupWatch';
 import chrome from 'ui/chrome';
 
@@ -187,29 +187,30 @@ export default class WatcherFlyout extends Component {
         <p>
           The watch is now ready and will send error reports for{' '}
           {this.props.serviceName}.{' '}
-          <KibanaLink
+          <UnconnectedKibanaLink
+            location={this.props.location}
             pathname={'/app/kibana'}
             hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
           >
             View watch.
-          </KibanaLink>
+          </UnconnectedKibanaLink>
         </p>
       )
     });
   };
 
   render() {
+    if (!this.props.isOpen) {
+      return null;
+    }
+
     const userTimezoneSetting = getUserTimezone();
-
     const dailyTime = this.state.daily;
-
     const inputTime = `${dailyTime}Z`; // Add tz to make into UTC
     const inputFormat = 'HH:mmZ'; // Parse as 24 hour w. tz
-
     const dailyTimeFormatted = moment(inputTime, inputFormat)
       .tz(userTimezoneSetting)
       .format('HH:mm'); // Format as 24h
-
     const dailyTime12HourFormatted = moment(inputTime, inputFormat)
       .tz(userTimezoneSetting)
       .format('hh:mm A (z)'); // Format as 12h w. tz
@@ -226,10 +227,7 @@ export default class WatcherFlyout extends Component {
           This form will assist in creating a Watch that can notify you of error
           occurrences from this service. To learn more about Watcher, please
           read our{' '}
-          <EuiLink
-            target="_blank"
-            href={_.get(ELASTIC_DOCS, 'watcher-get-started.url')}
-          >
+          <EuiLink target="_blank" href={XPACK_DOCS.xpackWatcher}>
             documentation
           </EuiLink>
           .
@@ -344,10 +342,7 @@ export default class WatcherFlyout extends Component {
               helpText={
                 <span>
                   If you have not configured email, please see the{' '}
-                  <EuiLink
-                    target="_blank"
-                    href={_.get(ELASTIC_DOCS, 'x-pack-emails.url')}
-                  >
+                  <EuiLink target="_blank" href={XPACK_DOCS.xpackEmails}>
                     documentation
                   </EuiLink>
                   .
@@ -397,7 +392,7 @@ export default class WatcherFlyout extends Component {
       </EuiText>
     );
 
-    const flyout = (
+    return (
       <EuiFlyout onClose={this.props.onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
@@ -421,12 +416,11 @@ export default class WatcherFlyout extends Component {
         </EuiFlyoutFooter>
       </EuiFlyout>
     );
-
-    return <React.Fragment>{this.props.isOpen && flyout}</React.Fragment>;
   }
 }
 
 WatcherFlyout.propTypes = {
+  location: PropTypes.object.isRequired,
   isOpen: PropTypes.bool.isRequired,
   serviceName: PropTypes.string,
   onClose: PropTypes.func.isRequired

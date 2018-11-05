@@ -12,7 +12,7 @@
   <div class="text-warning " ng-if="workspace.nodes.length>0 && !grr.userHasConfirmedSaveWorkspaceData && graphSavePolicy=='configAndDataWithConsent'">
     <i class="fa fa-warning"></i> The data in this workspace will be cleared and only the configuration will be saved
   </div>
-  <div class="noUserSelect checkbox" ng-if="graphSavePolicy=='configAndDataWithConsent'">
+  <div class="gphNoUserSelect checkbox" ng-if="graphSavePolicy=='configAndDataWithConsent'">
     <label>
       <input type="checkbox" ng-model="grr.userHasConfirmedSaveWorkspaceData"> Save Graph Content
     </label>
@@ -27,7 +27,7 @@
     Save
   </button>
 
-  <div class="dialogFooterText" ng-if="workspace.nodes.length>0 && graphSavePolicy=='config'">
+  <div ng-if="workspace.nodes.length>0 && graphSavePolicy=='config'">
     <span class="text-info" >
       <i class="fa fa-info"></i> The data in this workspace will be cleared and only the configuration will be saved
     </span>

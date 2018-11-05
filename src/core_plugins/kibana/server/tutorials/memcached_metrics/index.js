@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function memcachedMetricsSpecProvider() {
+export function memcachedMetricsSpecProvider(server, context) {
   const moduleName = 'memcached';
   return {
     id: 'memcachedMetrics',
@@ -34,13 +34,13 @@ export function memcachedMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from the Memcached server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.memcachedMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `memcached` Metricbeat module fetches internal metrics from Memcached. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-memcached.html',
       },
     }),
+    euiIconType: 'logoMemcached',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.memcachedMetrics.artifacts.application.label', {
@@ -54,7 +54,7 @@ export function memcachedMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

@@ -130,6 +130,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     constructor(initialFields) {
       this._id = _.uniqueId('data_source');
 
+      this._searchStrategyId = undefined;
       this._fields = parseInitialFields(initialFields);
       this._parent = undefined;
 
@@ -163,6 +164,14 @@ export function SearchSourceProvider(Promise, Private, config) {
     /*****
      * PUBLIC API
      *****/
+
+    setPreferredSearchStrategyId(searchStrategyId) {
+      this._searchStrategyId = searchStrategyId;
+    }
+
+    getPreferredSearchStrategyId() {
+      return this._searchStrategyId;
+    }
 
     setFields(newFields) {
       this._fields = newFields;
@@ -583,7 +592,9 @@ export function SearchSourceProvider(Promise, Private, config) {
           if (flatData.body._source) {
             // exclude source fields for this index pattern specified by the user
             const filter = fieldWildcardFilter(flatData.body._source.excludes);
-            flatData.body.docvalue_fields = flatData.body.docvalue_fields.filter(filter);
+            flatData.body.docvalue_fields = flatData.body.docvalue_fields.filter(
+              docvalueField => filter(docvalueField.field)
+            );
           }
 
           // if we only want to search for certain fields

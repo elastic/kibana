@@ -2,13 +2,13 @@
 
 exports[`should only render permalink panel when there are no other panels 1`] = `
 <EuiContextMenu
+  data-test-subj="shareContextMenu"
   initialPanelId={1}
   panels={
     Array [
       Object {
-        "content": <ShareUrlContent
+        "content": <UrlPanelContent
           getUnhashableStates={[Function]}
-          objectId={undefined}
           objectType="dashboard"
         />,
         "id": 1,
@@ -21,23 +21,22 @@ exports[`should only render permalink panel when there are no other panels 1`] =
 
 exports[`should render context menu panel when there are more than one panel 1`] = `
 <EuiContextMenu
+  data-test-subj="shareContextMenu"
   initialPanelId={3}
   panels={
     Array [
       Object {
-        "content": <ShareUrlContent
+        "content": <UrlPanelContent
           getUnhashableStates={[Function]}
-          objectId={undefined}
           objectType="dashboard"
         />,
         "id": 1,
         "title": "Permalink",
       },
       Object {
-        "content": <ShareUrlContent
+        "content": <UrlPanelContent
           getUnhashableStates={[Function]}
           isEmbedded={true}
-          objectId={undefined}
           objectType="dashboard"
         />,
         "id": 2,
@@ -47,14 +46,18 @@ exports[`should render context menu panel when there are more than one panel 1`]
         "id": 3,
         "items": Array [
           Object {
+            "data-test-subj": "sharePanel-Embedcode",
             "icon": "console",
             "name": "Embed code",
             "panel": 2,
+            "sortOrder": 0,
           },
           Object {
+            "data-test-subj": "sharePanel-Permalinks",
             "icon": "link",
             "name": "Permalinks",
             "panel": 1,
+            "sortOrder": 0,
           },
         ],
         "title": "Share this dashboard",

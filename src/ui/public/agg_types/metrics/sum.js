@@ -28,6 +28,7 @@ export const sumMetricAgg = new MetricAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'number'
     }
   ],

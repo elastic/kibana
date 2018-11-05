@@ -32,7 +32,7 @@ interface LegacyLoggingConfig {
 }
 
 /**
- * Represents adapter between config provided by legacy platform and `RawConfig`
+ * Represents adapter between config provided by legacy platform and `Config`
  * supported by the current platform.
  */
 export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
@@ -59,6 +59,7 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
     // TODO: New platform uses just a subset of `server` config from the legacy platform,
     // new values will be exposed once we need them (eg. customResponseHeaders or xsrf).
     return {
+      autoListen: configValue.autoListen,
       basePath: configValue.basePath,
       cors: configValue.cors,
       host: configValue.host,

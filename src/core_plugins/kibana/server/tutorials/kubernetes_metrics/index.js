@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function kubernetesMetricsSpecProvider() {
+export function kubernetesMetricsSpecProvider(server, context) {
   const moduleName = 'kubernetes';
   return {
     id: 'kubernetesMetrics',
@@ -33,7 +33,6 @@ export function kubernetesMetricsSpecProvider() {
       defaultMessage: 'Fetch metrics from your Kubernetes installation.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.kubernetesMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `kubernetes` Metricbeat module fetches metrics from the Kubernetes APIs. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -57,7 +56,7 @@ export function kubernetesMetricsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/kubernetes_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

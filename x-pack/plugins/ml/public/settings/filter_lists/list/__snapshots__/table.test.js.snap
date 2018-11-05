@@ -172,7 +172,6 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
             <NewFilterButton />,
             <DeleteFilterListModal
               refreshFilterLists={[MockFunction]}
-              selectedFilterLists={undefined}
             />,
           ],
         }

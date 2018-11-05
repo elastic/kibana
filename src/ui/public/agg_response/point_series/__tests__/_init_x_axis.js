@@ -19,17 +19,12 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { PointSeriesInitXAxisProvider } from '../_init_x_axis';
+import { initXAxis } from '../_init_x_axis';
 
 describe('initXAxis', function () {
 
-  let initXAxis;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    initXAxis = Private(PointSeriesInitXAxisProvider);
-  }));
+  const field = {};
+  const indexPattern = {};
 
   const baseChart = {
     aspects: {
@@ -37,14 +32,16 @@ describe('initXAxis', function () {
         aggConfig: {
           fieldFormatter: _.constant({}),
           write: _.constant({ params: {} }),
+          aggConfigs: {},
+          getIndexPattern: () => {
+            return indexPattern;
+          },
           type: {}
         },
         title: 'label'
       }
     }
   };
-  const field = {};
-  const indexPattern = {};
 
   it('sets the xAxisFormatter if the agg is not ordered', function () {
     const chart = _.cloneDeep(baseChart);
@@ -60,9 +57,7 @@ describe('initXAxis', function () {
     chart.aspects.x.aggConfig.params = {
       field: field
     };
-    chart.aspects.x.aggConfig.vis = {
-      indexPattern: indexPattern
-    };
+    chart.aspects.x.aggConfig.aggConfigs.indexPattern = indexPattern;
 
     initXAxis(chart);
     expect(chart)
@@ -84,9 +79,7 @@ describe('initXAxis', function () {
     chart.aspects.x.aggConfig.params = {
       field: field
     };
-    chart.aspects.x.aggConfig.vis = {
-      indexPattern: indexPattern
-    };
+    chart.aspects.x.aggConfig.aggConfigs.indexPattern = indexPattern;
 
     initXAxis(chart);
     expect(chart)

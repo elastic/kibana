@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function golangMetricsSpecProvider() {
+export function golangMetricsSpecProvider(server, context) {
   const moduleName = 'golang';
   return {
     id: moduleName + 'Metrics',
@@ -34,7 +34,6 @@ export function golangMetricsSpecProvider() {
       defaultMessage: 'Fetch internal metrics from a Golang app.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.golangMetrics.longDescription', {
-      // eslint-disable-next-line no-multi-str
       defaultMessage: 'The `{moduleName}` Metricbeat module fetches internal metrics from a Golang app. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -42,6 +41,7 @@ export function golangMetricsSpecProvider() {
         learnMoreLink: `{config.docs.beats.metricbeat}/metricbeat-module-${moduleName}.html`,
       },
     }),
+    euiIconType: 'logoGolang',
     artifacts: {
       dashboards: [
         {
@@ -57,7 +57,7 @@ export function golangMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

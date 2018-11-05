@@ -33,6 +33,7 @@ import {
   createParseArchiveStreams,
   createCreateIndexStream,
   createIndexDocRecordsStream,
+  migrateKibanaIndex,
 } from '../lib';
 
 // pipe a series of streams into each other so that data and errors
@@ -45,7 +46,7 @@ const pipeline = (...streams) => streams
       .pipe(dest)
   ));
 
-export async function loadAction({ name, skipExisting, client, dataDir, log }) {
+export async function loadAction({ name, skipExisting, client, dataDir, log, kibanaUrl }) {
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
@@ -67,19 +68,28 @@ export async function loadAction({ name, skipExisting, client, dataDir, log }) {
 
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting, log }),
+    createCreateIndexStream({ client, stats, skipExisting, log, kibanaUrl }),
     createIndexDocRecordsStream(client, stats),
   ]);
 
-  const indicesToRefresh = [];
-  stats.forEachIndex((index, { docs }) => {
-    log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
-    indicesToRefresh.push(index);
-  });
+  const result = stats.toJSON();
+
+  const indicesToRefresh = Object
+    .entries(result)
+    .filter(([, stats]) => !stats.deleted)
+    .map(([index, { docs }]) => {
+      log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
+      return index;
+    });
 
   await client.indices.refresh({
     index: indicesToRefresh
   });
 
-  return stats.toJSON();
+  // If we affected the Kibana index, we need to ensure it's migrated...
+  if (Object.keys(result).some(k => k.startsWith('.kibana'))) {
+    await migrateKibanaIndex({ client, log });
+  }
+
+  return result;
 }

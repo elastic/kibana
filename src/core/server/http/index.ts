@@ -19,20 +19,26 @@
 
 import { Observable } from 'rxjs';
 
-import { Env } from '../config';
 import { LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import { HttpService } from './http_service';
+import { Router } from './router';
 
 export { Router, KibanaRequest } from './router';
 export { HttpService };
+export { HttpServerInfo } from './http_server';
+export { BasePathProxyServer } from './base_path_proxy_server';
 
 export { HttpConfig };
 
 export class HttpModule {
   public readonly service: HttpService;
 
-  constructor(readonly config$: Observable<HttpConfig>, logger: LoggerFactory, env: Env) {
-    this.service = new HttpService(this.config$, logger, env);
+  constructor(readonly config$: Observable<HttpConfig>, logger: LoggerFactory) {
+    this.service = new HttpService(this.config$, logger);
+
+    const router = new Router('/core');
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ version: '0.0.1' }));
+    this.service.registerRouter(router);
   }
 }

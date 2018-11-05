@@ -14,7 +14,6 @@
 import _ from 'lodash';
 import rison from 'rison-node';
 
-import 'plugins/kibana/visualize/styles/main.less';
 import 'plugins/ml/components/form_filter_input';
 
 import chrome from 'ui/chrome';
@@ -25,7 +24,7 @@ import { decorateQuery, luceneStringToDsl } from 'ui/courier';
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
-import { checkLicenseExpired } from 'plugins/ml/license/check_license';
+import { checkBasicLicense, isFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { createSearchItems } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
@@ -38,7 +37,7 @@ uiRoutes
   .when('/jobs/new_job/datavisualizer', {
     template,
     resolve: {
-      CheckLicense: checkLicenseExpired,
+      CheckLicense: checkBasicLicense,
       privileges: checkGetJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       savedSearch: loadCurrentSavedSearch,
@@ -93,6 +92,8 @@ module
     $scope.fieldFilterIcon = 0;
     $scope.fieldFilter = '';
     $scope.recognizerResults = { count: 0 };
+
+    $scope.showSidebar = isFullLicense();
 
     // Check for a saved query in the AppState or via a savedSearchId in the URL.
     $scope.searchQueryText = '';

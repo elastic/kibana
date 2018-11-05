@@ -7,4 +7,5 @@ source "$(dirname $0)/../../src/dev/ci_setup/java_setup.sh"
 
 node scripts/build --release --debug --oss;
 
+export TEST_ES_FROM=${TEST_ES_FROM:-source}
 xvfb-run "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:selenium --from=source;

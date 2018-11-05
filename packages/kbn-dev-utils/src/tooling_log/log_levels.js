@@ -19,12 +19,12 @@
 
 const LEVELS = ['silent', 'error', 'warning', 'info', 'debug', 'verbose'];
 
-export function pickLevelFromFlags(flags) {
+export function pickLevelFromFlags(flags, options = {}) {
   if (flags.verbose) return 'verbose';
   if (flags.debug) return 'debug';
   if (flags.quiet) return 'error';
   if (flags.silent) return 'silent';
-  return 'info';
+  return options.default || 'info';
 }
 
 export function parseLogLevel(name) {

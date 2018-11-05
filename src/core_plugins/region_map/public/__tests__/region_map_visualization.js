@@ -36,9 +36,9 @@ import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
 
-const manifestUrl = 'https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest';
-const tmsManifestUrl = `"https://tiles-maps-stage.elastic.co/v2/manifest`;
-const vectorManifestUrl = `"https://staging-dot-elastic-layer.appspot.com/v1/manifest`;
+const manifestUrl = 'https://catalogue-staging.maps.elastic.co/v2/manifest';
+const tmsManifestUrl = `https://tiles-maps-stage.elastic.co/v2/manifest`;
+const vectorManifestUrl = `https://vector-staging.maps.elastic.co/v2/manifest`;
 const manifest = {
   'services': [{
     'id': 'tiles_v2',
@@ -189,7 +189,7 @@ describe('RegionMapsVisualizationTests', function () {
         'attribution': '<p><a href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>&#10;',
         'name': 'World Countries',
         'format': 'geojson',
-        'url': 'https://staging-dot-elastic-layer.appspot.com/blob/5715999101812736?elastic_tile_service_tos=agree&my_app_version=7.0.0-alpha1',
+        'url': 'https://vector-staging.maps.elastic.co/blob/5715999101812736?elastic_tile_service_tos=agree&my_app_version=7.0.0-alpha1',
         'fields': [{ 'name': 'iso2', 'description': 'Two letter abbreviation' }, {
           'name': 'iso3',
           'description': 'Three letter abbreviation'

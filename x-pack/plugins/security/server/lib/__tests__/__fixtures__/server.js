@@ -37,7 +37,9 @@ export function serverFixture() {
         authenticate: stub(),
         deauthenticate: stub(),
         authorization: {
-          checkPrivilegesWithRequest: stub(),
+          mode: {
+            useRbacForRequest: stub(),
+          },
           actions: {
             login: 'stub-login-action',
           },

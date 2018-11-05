@@ -20,6 +20,7 @@
 import Mocha from 'mocha';
 
 import { loadTestFiles } from './load_test_files';
+import { filterSuitesByTags } from './filter_suites_by_tags';
 import { MochaReporterProvider } from './reporter';
 
 /**
@@ -46,6 +47,22 @@ export async function setupMocha(lifecycle, log, config, providers) {
     await lifecycle.trigger('beforeEachTest');
   });
 
-  loadTestFiles(mocha, log, lifecycle, providers, config.get('testFiles'), config.get('updateBaselines'));
+  loadTestFiles({
+    mocha,
+    log,
+    lifecycle,
+    providers,
+    paths: config.get('testFiles'),
+    excludePaths: config.get('excludeTestFiles'),
+    updateBaselines: config.get('updateBaselines'),
+  });
+
+  filterSuitesByTags({
+    log,
+    mocha,
+    include: config.get('suiteTags.include'),
+    exclude: config.get('suiteTags.exclude'),
+  });
+
   return mocha;
 }

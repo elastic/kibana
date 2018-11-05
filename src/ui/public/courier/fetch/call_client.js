@@ -24,7 +24,7 @@ import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { RequestStatus } from './req_status';
 import { SerializeFetchParamsProvider } from './request/serialize_fetch_params';
 
-export function CallClientProvider(Private, Promise, es) {
+export function CallClientProvider(Private, Promise, es, config) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
   const isRequest = Private(IsRequestProvider);
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
@@ -34,6 +34,8 @@ export function CallClientProvider(Private, Promise, es) {
   const DUPLICATE = RequestStatus.DUPLICATE;
 
   function callClient(searchRequests) {
+    const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
+
     // merging docs can change status to DUPLICATE, capture new statuses
     const searchRequestsAndStatuses = mergeDuplicateRequests(searchRequests);
 
@@ -136,7 +138,7 @@ export function CallClientProvider(Private, Promise, es) {
           searching,
           abort,
           failedSearchRequests,
-        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams });
+        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams, maxConcurrentShardRequests });
 
         // Collect searchRequests which have successfully been sent.
         searchRequests.forEach(searchRequest => {
@@ -150,6 +152,7 @@ export function CallClientProvider(Private, Promise, es) {
         abortableSearches.push({
           searching,
           abort,
+          requestsCount: searchRequests.length,
         });
       }
 
@@ -159,7 +162,12 @@ export function CallClientProvider(Private, Promise, es) {
           return;
         }
 
-        const segregatedResponses = await Promise.all(abortableSearches.map(({ searching }) => searching));
+        const segregatedResponses = await Promise.all(abortableSearches.map(async ({ searching, requestsCount }) => {
+          return searching.catch((e) => {
+            // Duplicate errors so that they correspond to the original requests.
+            return new Array(requestsCount).fill({ error: e });
+          });
+        }));
 
         // Assigning searchRequests to strategies means that the responses come back in a different
         // order than the original searchRequests. So we'll put them back in order so that we can
@@ -183,17 +191,18 @@ export function CallClientProvider(Private, Promise, es) {
       }
     });
 
-    // If there are any errors, notify the searchRequests of them.
-    defer.promise.catch((err) => {
+    // Return the promise which acts as our vehicle for providing search responses to the consumer.
+    // However, if there are any errors, notify the searchRequests of them *instead* of bubbling
+    // them up to the consumer.
+    return defer.promise.catch((err) => {
+      // By returning the return value of this catch() without rethrowing the error, we delegate
+      // error-handling to the searchRequest instead of the consumer.
       searchRequests.forEach((searchRequest, index) => {
         if (searchRequestsAndStatuses[index] !== ABORTED) {
           searchRequest.handleFailure(err);
         }
       });
     });
-
-    // Return the promise which acts as our vehicle for providing search responses to the consumer.
-    return defer.promise;
   }
 
   return callClient;
