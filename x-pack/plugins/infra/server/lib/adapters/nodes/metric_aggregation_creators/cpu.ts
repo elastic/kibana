@@ -13,6 +13,46 @@ const FIELDS = {
 };
 
 export const cpu: InfraNodeMetricFn = (nodeType: InfraNodeType) => {
+  if (nodeType === InfraNodeType.host) {
+    return {
+      cpu_user: {
+        avg: {
+          field: 'system.cpu.user.pct',
+        },
+      },
+      cpu_system: {
+        avg: {
+          field: 'system.cpu.system.pct',
+        },
+      },
+      cpu_cores: {
+        max: {
+          field: 'system.cpu.cores',
+        },
+      },
+      cpu: {
+        bucket_script: {
+          buckets_path: {
+            user: 'cpu_user',
+            system: 'cpu_system',
+            cores: 'cpu_cores',
+          },
+          script: {
+            source: '(params.user + params.system) / params.cores',
+            lang: 'painless',
+          },
+          gap_policy: 'skip',
+        },
+      },
+    };
+  }
+
   const field = FIELDS[nodeType];
-  return { cpu: { avg: { field } } };
+  return {
+    cpu: {
+      avg: {
+        field,
+      },
+    },
+  };
 };
