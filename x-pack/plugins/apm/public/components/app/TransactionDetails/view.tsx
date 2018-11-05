@@ -5,7 +5,6 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { isEmpty } from 'lodash';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
@@ -64,8 +63,8 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
 
       <TransactionDetailsRequest
         urlParams={urlParams}
-        render={({ data: transaction, status }) => {
-          if (isEmpty(transaction)) {
+        render={({ data: transaction }) => {
+          if (!transaction) {
             return (
               <EmptyMessage
                 heading="No transaction sample available."
