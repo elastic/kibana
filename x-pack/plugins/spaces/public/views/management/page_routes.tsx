@@ -7,8 +7,6 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 // @ts-ignore
 import template from 'plugins/spaces/views/management/template.html';
-// @ts-ignore
-import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
 import 'ui/autoload/styles';
 
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
@@ -16,6 +14,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 // @ts-ignore
 import routes from 'ui/routes';
+import { UserProfile } from '../../../../xpack_main/common/user_profile';
 import { SpacesManager } from '../../lib/spaces_manager';
 import { ManageSpacePage } from './edit_space';
 import { SpacesGridPage } from './spaces_grid';
@@ -28,12 +27,10 @@ routes.when('/management/spaces/list', {
     $scope: any,
     $http: any,
     chrome: any,
-    Private: any,
     spacesNavState: SpacesNavState,
-    spaceSelectorURL: string
+    spaceSelectorURL: string,
+    userProfile: UserProfile
   ) {
-    const userProfile = Private(UserProfileProvider);
-
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
 
@@ -66,12 +63,10 @@ routes.when('/management/spaces/create', {
     $scope: any,
     $http: any,
     chrome: any,
-    Private: any,
     spacesNavState: SpacesNavState,
-    spaceSelectorURL: string
+    spaceSelectorURL: string,
+    userProfile: UserProfile
   ) {
-    const userProfile = Private(UserProfileProvider);
-
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
 
@@ -111,10 +106,9 @@ routes.when('/management/spaces/edit/:spaceId', {
     chrome: any,
     Private: any,
     spacesNavState: SpacesNavState,
-    spaceSelectorURL: string
+    spaceSelectorURL: string,
+    userProfile: UserProfile
   ) {
-    const userProfile = Private(UserProfileProvider);
-
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
 
