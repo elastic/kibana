@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import sizeMe from 'react-sizeme';
 
 import { DashboardViewMode } from '../dashboard_view_mode';
@@ -72,19 +72,19 @@ afterAll(() => {
 });
 
 test('renders DashboardGrid', () => {
-  const component = shallow(<DashboardGrid {...getProps()} />);
+  const component = shallowWithIntl(<DashboardGrid.WrappedComponent {...getProps()} />);
   expect(component).toMatchSnapshot();
   const panelElements = component.find('Connect(DashboardPanel)');
   expect(panelElements.length).toBe(2);
 });
 
 test('renders DashboardGrid with no visualizations', () => {
-  const component = shallow(<DashboardGrid {...getProps({ panels: {} })} />);
+  const component = shallowWithIntl(<DashboardGrid.WrappedComponent {...getProps({ panels: {} })} />);
   expect(component).toMatchSnapshot();
 });
 
 test('adjusts z-index of focused panel to be higher than siblings', () => {
-  const component = shallow(<DashboardGrid {...getProps()} />);
+  const component = shallowWithIntl(<DashboardGrid.WrappedComponent {...getProps()} />);
   const panelElements = component.find('Connect(DashboardPanel)');
   panelElements.first().prop('onPanelFocused')('1');
   const [gridItem1, gridItem2] = component.update().findWhere(el => el.key() === '1' || el.key() === '2');

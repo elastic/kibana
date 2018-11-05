@@ -19,7 +19,7 @@
 
 import React from 'react';
 import _ from 'lodash';
-import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelError } from '../panel/panel_error';
@@ -62,7 +62,7 @@ beforeAll(() => {
 });
 
 test('DashboardPanel matches snapshot', () => {
-  const component = mount(<Provider store={store}><DashboardPanel {...getProps()} /></Provider>);
+  const component = mountWithIntl(<Provider store={store}><DashboardPanel.WrappedComponent {...getProps()} /></Provider>);
   expect(takeMountedSnapshot(component)).toMatchSnapshot();
 });
 
@@ -71,7 +71,7 @@ test('renders an error when error prop is passed', () => {
     error: 'Simulated error'
   });
 
-  const component = mount(<Provider store={store}><DashboardPanel {...props} /></Provider>);
+  const component = mountWithIntl(<Provider store={store}><DashboardPanel.WrappedComponent {...props} /></Provider>);
   const panelError = component.find(PanelError);
   expect(panelError.length).toBe(1);
 });
