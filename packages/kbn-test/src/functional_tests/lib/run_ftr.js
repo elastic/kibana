@@ -22,7 +22,7 @@ import { CliError } from './run_cli';
 
 export async function runFtr({
   configPath,
-  options: { log, bail, grep, updateBaselines, suiteTags },
+  options: { log, bail, grep, updateBaselines, suiteTags, assertNoneExcluded },
 }) {
   const ftr = createFunctionalTestRunner({
     log,
@@ -37,7 +37,7 @@ export async function runFtr({
     },
   });
 
-  const failureCount = await ftr.run();
+  const failureCount = assertNoneExcluded ? await ftr.assertNoneExcluded() : await ftr.run();
   if (failureCount > 0) {
     throw new CliError(
       `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`

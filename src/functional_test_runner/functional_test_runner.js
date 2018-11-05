@@ -20,10 +20,23 @@
 import {
   createLifecycle,
   readConfigFile,
-  createProviderCollection,
+  ProviderCollection,
+  readProviderSpec,
   setupMocha,
   runTests,
 } from './lib';
+
+// provider that returns a promise-like object which never "resolves" and is
+// used to disable all the services while still allowing us to load the test
+// files (and therefore define the tests) for assert-none-excluded
+const STUB_PROVIDER =  () => ({
+  then: () => {}
+});
+
+const replaceValues = (object, value) => Object.keys(object).reduce((acc, key) => ({
+  ...acc,
+  [key]: value
+}), {});
 
 export function createFunctionalTestRunner({ log, configFile, configOverrides }) {
   const lifecycle = createLifecycle();
@@ -36,8 +49,68 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
     log.verbose('ending %j lifecycle phase', name);
   });
 
+
   class FunctionalTestRunner {
     async run() {
+      return await this._run(async (config) => {
+        const providers = new ProviderCollection(log, [
+          // base level services that functional_test_runner exposes
+          ...readProviderSpec('Service', {
+            lifecycle: () => lifecycle,
+            log: () => log,
+            config: () => config,
+          }),
+
+          ...readProviderSpec('Service', config.get('services')),
+          ...readProviderSpec('PageObject', config.get('pageObjects'))
+        ]);
+
+        await providers.loadAll();
+
+        const mocha = await setupMocha(lifecycle, log, config, providers);
+        await lifecycle.trigger('beforeTests');
+        log.info('Starting tests');
+
+        return await runTests(lifecycle, log, mocha);
+      });
+    }
+
+    async assertNoneExcluded() {
+      return await this._run(async (config) => {
+        const providers = new ProviderCollection(log, [
+          // base level services that functional_test_runner exposes
+          ...readProviderSpec('Service', {
+            lifecycle: () => lifecycle,
+            log: () => log,
+            config: () => config,
+          }),
+
+          ...readProviderSpec('Service', replaceValues(config.get('services'), STUB_PROVIDER)),
+          ...readProviderSpec('PageObject', replaceValues(config.get('pageObjects'), STUB_PROVIDER))
+        ]);
+
+        const { excludedTests } = await setupMocha(lifecycle, log, config, providers);
+
+        if (excludedTests.length) {
+          log.error(`${excludedTests.length} tests excluded by tags:\n  -${excludedTests.map(t => t.fullTitle()).join('\n  -')}`);
+        } else {
+          log.info('All tests included by tags');
+        }
+
+        return excludedTests.length;
+      });
+    }
+
+    async close() {
+      if (this._closed) {
+        return;
+      }
+
+      this._closed = true;
+      await lifecycle.trigger('cleanup');
+    }
+
+    async _run(handler) {
       let runErrorOccurred = false;
 
       try {
@@ -49,14 +122,7 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
           return;
         }
 
-        const providers = createProviderCollection(lifecycle, log, config);
-        await providers.loadAll();
-
-        const mocha = await setupMocha(lifecycle, log, config, providers);
-        await lifecycle.trigger('beforeTests');
-        log.info('Starting tests');
-        return await runTests(lifecycle, log, mocha);
-
+        return await handler(config);
       } catch (runError) {
         runErrorOccurred = true;
         throw runError;
@@ -74,13 +140,6 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
           }
         }
       }
-    }
-
-    async close() {
-      if (this._closed) return;
-
-      this._closed = true;
-      await lifecycle.trigger('cleanup');
     }
   }
 

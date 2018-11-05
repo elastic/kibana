@@ -46,7 +46,7 @@ in another terminal session by running this command from this directory:
  */
 export async function runTests(options) {
   for (const configPath of options.configs) {
-    await runSingleConfig(resolve(process.cwd(), configPath), options);
+    await runSingleConfig(resolve(configPath), options);
   }
 }
 
@@ -60,7 +60,7 @@ export async function runTests(options) {
  */
 export async function startServers(options) {
   const { config: configOption, createLogger } = options;
-  const configPath = resolve(process.cwd(), configOption);
+  const configPath = resolve(configOption);
   const log = createLogger();
   const opts = {
     ...options,
@@ -106,10 +106,18 @@ async function silence(milliseconds, { log }) {
  */
 async function runSingleConfig(configPath, options) {
   const log = options.createLogger();
+  log.info('Running', configPath);
+  log.indent(2);
+
   const opts = {
     ...options,
     log,
   };
+
+  if (options.assertNoneExcluded) {
+    await runFtr({ configPath, options: opts });
+    return;
+  }
 
   await withProcRunner(log, async procs => {
     const config = await readConfigFile(log, configPath);

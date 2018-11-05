@@ -18,6 +18,7 @@ Options:
   --updateBaselines              Replace baseline screenshots with whatever is generated from the test. 
   --include-tag <tag>            Tags that suites must include to be run, can be included multiple times. 
   --exclude-tag <tag>            Tags that suites must NOT include to be run, can be included multiple times. 
+  --assert-none-excluded         Exit with 1/0 based on if any test is excluded with the current set of tags. 
   --verbose                      Log everything. 
   --debug                        Run in debug mode. 
   --quiet                        Only log errors. 
@@ -26,6 +27,7 @@ Options:
 
 exports[`process options for run tests CLI accepts boolean value for updateBaselines 1`] = `
 Object {
+  "assertNoneExcluded": false,
   "configs": Array [
     "foo",
   ],
@@ -41,6 +43,7 @@ Object {
 
 exports[`process options for run tests CLI accepts debug option 1`] = `
 Object {
+  "assertNoneExcluded": false,
   "configs": Array [
     "foo",
   ],
@@ -56,6 +59,7 @@ Object {
 
 exports[`process options for run tests CLI accepts empty config value if default passed 1`] = `
 Object {
+  "assertNoneExcluded": false,
   "config": "",
   "configs": Array [
     "foo",
@@ -74,6 +78,7 @@ Object {
   "_": Object {
     "server.foo": "bar",
   },
+  "assertNoneExcluded": false,
   "configs": Array [
     "foo",
   ],
@@ -90,6 +95,7 @@ Object {
 
 exports[`process options for run tests CLI accepts quiet option 1`] = `
 Object {
+  "assertNoneExcluded": false,
   "configs": Array [
     "foo",
   ],
@@ -105,6 +111,7 @@ Object {
 
 exports[`process options for run tests CLI accepts silent option 1`] = `
 Object {
+  "assertNoneExcluded": false,
   "configs": Array [
     "foo",
   ],
@@ -120,6 +127,7 @@ Object {
 
 exports[`process options for run tests CLI accepts source value for esFrom 1`] = `
 Object {
+  "assertNoneExcluded": false,
   "configs": Array [
     "foo",
   ],
@@ -135,6 +143,7 @@ Object {
 
 exports[`process options for run tests CLI accepts string value for kibana-install-dir 1`] = `
 Object {
+  "assertNoneExcluded": false,
   "configs": Array [
     "foo",
   ],
@@ -150,6 +159,7 @@ Object {
 
 exports[`process options for run tests CLI accepts value for grep 1`] = `
 Object {
+  "assertNoneExcluded": false,
   "configs": Array [
     "foo",
   ],
@@ -165,6 +175,7 @@ Object {
 
 exports[`process options for run tests CLI accepts verbose option 1`] = `
 Object {
+  "assertNoneExcluded": false,
   "configs": Array [
     "foo",
   ],

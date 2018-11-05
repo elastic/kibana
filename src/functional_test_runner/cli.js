@@ -48,6 +48,7 @@ cmd
   .option('--exclude [file]', 'Path to a test file that should not be loaded', collectExcludePaths(), [])
   .option('--include-tag [tag]', 'A tag to be included, pass multiple times for multiple tags', collectIncludeTags(), [])
   .option('--exclude-tag [tag]', 'A tag to be excluded, pass multiple times for multiple tags', collectExcludeTags(), [])
+  .option('--assert-none-excluded', 'Exit with 1/0 based on if any test is excluded with the current set of tags', false)
   .option('--verbose', 'Log everything', false)
   .option('--quiet', 'Only log errors', false)
   .option('--silent', 'Log nothing', false)
@@ -86,7 +87,9 @@ const functionalTestRunner = createFunctionalTestRunner({
 
 async function run() {
   try {
-    const failureCount = await functionalTestRunner.run();
+    const failureCount = cmd.assertNoneExcluded
+      ? await functionalTestRunner.assertNoneExcluded()
+      : await functionalTestRunner.run();
     process.exitCode = failureCount ? 1 : 0;
   } catch (err) {
     await teardown(err);
