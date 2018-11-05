@@ -17,20 +17,6 @@ interface ActionButtonProps {
   showPopover(): void;
 }
 
-const Action = (props: {
-  action: string;
-  danger?: boolean;
-  name: string;
-  actionHandler(action: string, payload?: any): void;
-}) => {
-  const { action, actionHandler, danger, name } = props;
-  return (
-    <EuiButton color={danger ? 'danger' : 'primary'} onClick={() => actionHandler(action)}>
-      {name}
-    </EuiButton>
-  );
-};
-
 export function ActionButton(props: ActionButtonProps) {
   const { actions, actionHandler, hidePopover, isPopoverVisible, showPopover } = props;
   if (actions.length === 0) {

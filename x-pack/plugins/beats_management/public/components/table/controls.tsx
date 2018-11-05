@@ -11,7 +11,7 @@ import { OptionControl } from '../table_controls';
 import { AssignmentOptions as AssignmentOptionsType, KueryBarProps } from './table';
 
 interface ControlBarProps {
-  itemType: 'string';
+  itemType: 'Beats' | 'Tags';
   assignmentOptions: AssignmentOptionsType;
   kueryBarProps?: KueryBarProps;
   selectionCount: number;
