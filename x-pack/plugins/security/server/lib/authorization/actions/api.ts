@@ -7,7 +7,7 @@
 export class ApiActions {
   public all = `api:*`;
 
-  public get(path: string, method: string) {
-    return `api:${path}/${method}`;
+  public get(path: string, operation: string) {
+    return `api:${path}/${operation}`;
   }
 }

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { flatten } from 'lodash';
 import { IGNORED_TYPES } from '../../../common/constants';
 
 interface PrivilegeMap {
@@ -12,212 +13,268 @@ interface PrivilegeMap {
   space: Record<string, string[]>;
 }
 
+interface ActionDefinition {
+  api: string[];
+  app: string[];
+  savedObject: {
+    all: string[];
+    read: string[];
+  };
+  space?: {
+    manage: boolean;
+  };
+  ui: string[];
+}
+
 export function buildPrivilegeMap(allSavedObjectTypes: string[], actions: any): PrivilegeMap {
   const validSavedObjectTypes = allSavedObjectTypes.filter(type => !IGNORED_TYPES.includes(type));
+
+  const buildActions = (actionDefinition: ActionDefinition) => {
+    return [
+      actions.login,
+      actions.version,
+      ...actionDefinition.api.map(api => actions.api.get(api)),
+      ...flatten(
+        actionDefinition.savedObject.all.map(types => actions.savedObject.allOperations(types))
+      ),
+      ...flatten(
+        actionDefinition.savedObject.read.map(types => actions.savedObject.readOperations(types))
+      ),
+      ...(actionDefinition.space && actionDefinition.space.manage ? actions.space.manage : []),
+      ...actionDefinition.ui.map(ui => actions.ui.get(ui)),
+    ];
+  };
 
   // the following list of privileges should only be added to, you can safely remove actions, but not privileges as
   // it's a backwards compatibility issue and we'll have to at least adjust registerPrivilegesWithCluster to support it
   return {
     features: {
       discover: {
-        read_write: [
-          actions.login,
-          ...actions.savedObject.readOperations(['config', 'index-pattern']),
-          ...actions.savedObject.allOperations('search'),
-          actions.ui.get('kibana'),
-          actions.ui.get('kibana:discover'),
-          actions.version,
-        ],
-        read: [
-          actions.login,
-          ...actions.savedObject.readOperations(['config', 'index-pattern', 'search']),
-          actions.ui.get('kibana'),
-          actions.ui.get('kibana:discover'),
-          actions.version,
-        ],
-        share: [actions.savedObject.get('search', 'share')],
+        all: buildActions({
+          api: [],
+          app: ['kibana'],
+          savedObject: {
+            all: ['search'],
+            read: ['config', 'index-pattern'],
+          },
+          ui: ['kibana:discover'],
+        }),
+        read: buildActions({
+          api: [],
+          app: ['kibana'],
+          savedObject: {
+            all: [],
+            read: ['config', 'index-pattern', 'search'],
+          },
+          ui: ['kibana:discover'],
+        }),
       },
       visualize: {
-        all: [
-          actions.login,
-          ...actions.savedObject.allOperations('visualization'),
-          ...actions.savedObject.readOperations(['config', 'index-pattern', 'search']),
-          actions.ui.get('kibana'),
-          actions.ui.get('kibana:visualize'),
-          actions.version,
-        ],
-        read: [
-          actions.login,
-          ...actions.savedObject.readOperations([
-            'config',
-            'index-pattern',
-            'search',
-            'visualization',
-          ]),
-          actions.ui.get('kibana'),
-          actions.ui.get('kibana:visualize'),
-          actions.version,
-        ],
+        all: buildActions({
+          api: [],
+          app: ['kibana'],
+          savedObject: {
+            all: ['visualization'],
+            read: ['config', 'index-pattern', 'search'],
+          },
+          ui: ['kibana_visualize'],
+        }),
+        read: buildActions({
+          api: [],
+          app: ['kibana'],
+          savedObject: {
+            all: [],
+            read: ['config', 'index-pattern', 'search', 'visualization'],
+          },
+          ui: ['kibana:visualize'],
+        }),
       },
       dashboard: {
-        all: [
-          actions.login,
-          ...actions.savedObject.allOperations(['dashboard']),
-          ...actions.savedObject.readOperations([
-            'config',
-            'index-pattern',
-            'search',
-            'visualization',
-            'timelion',
-            'canvas',
-          ]),
-          actions.ui.get(`kibana`),
-          actions.ui.get(`kibana:dashboard`),
-          actions.version,
-        ],
-        read: [
-          actions.login,
-          ...actions.savedObject.readOperations([
-            'config',
-            'index-pattern',
-            'search',
-            'visualization',
-            'timelion',
-            'canvas',
-            'dashboard',
-          ]),
-          actions.ui.get(`kibana`),
-          actions.ui.get(`kibana:dashboard`),
-          actions.version,
-        ],
+        all: buildActions({
+          api: [],
+          app: ['kibana'],
+          savedObject: {
+            all: ['dashboard'],
+            read: ['config', 'index-pattern', 'search', 'visualization', 'timelion', 'canvas'],
+          },
+          ui: ['kibana:dashboard'],
+        }),
+        read: buildActions({
+          api: [],
+          app: ['kibana'],
+          savedObject: {
+            all: [],
+            read: [
+              'config',
+              'index-pattern',
+              'search',
+              'visualization',
+              'timelion',
+              'canvas',
+              'dashboard',
+            ],
+          },
+          ui: ['kibana:dashboard'],
+        }),
       },
       timelion: {
-        all: [
-          actions.login,
-          ...actions.savedObject.readOperations(['config', 'index-pattern']),
-          ...actions.savedObject.allOperations(['timelion']),
-          actions.ui.get(`timelion`),
-          actions.version,
-        ],
-        read: [
-          actions.login,
-          ...actions.savedObject.readOperations(['config', 'index-pattern', 'timelion']),
-          actions.ui.get(`timelion`),
-          actions.version,
-        ],
+        all: buildActions({
+          api: [],
+          app: ['timelion'],
+          savedObject: {
+            all: ['timelion'],
+            read: ['config', 'index-pattern'],
+          },
+          ui: ['timelion'],
+        }),
+        read: buildActions({
+          api: [],
+          app: ['timelion'],
+          savedObject: {
+            all: [],
+            read: ['config', 'index-pattern', 'timelion'],
+          },
+          ui: ['timelion'],
+        }),
       },
       canvas: {
-        all: [
-          actions.login,
-          ...actions.savedObject.readOperations(['index-pattern']),
-          ...actions.savedObject.allOperations(['canvas']),
-          actions.ui.get(`canvas`),
-          actions.version,
-        ],
-        read: [
-          actions.login,
-          ...actions.savedObject.readOperations(['index-pattern', 'canvas']),
-          actions.ui.get(`canvas`),
-          actions.version,
-        ],
+        all: buildActions({
+          api: [],
+          app: ['canvas'],
+          savedObject: {
+            all: ['canvas'],
+            read: ['config', 'index-pattern'],
+          },
+          ui: ['canvas'],
+        }),
+        read: buildActions({
+          api: [],
+          app: ['canvas'],
+          savedObject: {
+            all: [],
+            read: ['config', 'index-pattern', 'canvas'],
+          },
+          ui: ['canvas'],
+        }),
       },
       apm: {
-        all: [actions.login, actions.ui.get(`apm`), actions.version],
+        all: buildActions({
+          api: [],
+          app: ['apm'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['apm'],
+        }),
       },
       ml: {
-        all: [actions.login, actions.ui.get(`ml`), actions.version],
+        all: buildActions({
+          api: [],
+          app: ['ml'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['ml'],
+        }),
       },
       graph: {
-        all: [
-          actions.login,
-          ...actions.savedObject.readOperations(['index-pattern']),
-          ...actions.savedObject.allOperations(['graph']),
-          actions.ui.get(`graph`),
-          actions.version,
-        ],
-        read: [
-          actions.login,
-          ...actions.savedObject.readOperations(['index-pattern', 'graph']),
-          actions.ui.get(`graph`),
-          actions.version,
-        ],
+        all: buildActions({
+          api: [],
+          app: ['graph'],
+          savedObject: {
+            all: [],
+            read: ['config', 'index-pattern'],
+          },
+          ui: ['graph'],
+        }),
+        read: buildActions({
+          api: [],
+          app: ['graph'],
+          savedObject: {
+            all: [],
+            read: ['config', 'index-pattern', 'graph'],
+          },
+          ui: [],
+        }),
       },
       devTools: {
-        all: [
-          actions.api.get('console/proxy/execute'),
-          actions.login,
-          actions.savedObject.readOperations('config'),
-          actions.ui.get(`kibana`),
-          actions.ui.get('kibana:dev_tools'),
-          actions.version,
-        ],
+        all: buildActions({
+          api: ['console/proxy/execute'],
+          app: ['kibana'],
+          savedObject: {
+            all: [],
+            read: ['config'],
+          },
+          ui: ['kibana:dev_tools'],
+        }),
       },
       monitoring: {
-        all: [
-          actions.login,
-          actions.savedObject.readOperations('config'),
-          actions.ui.get(`monitoring`),
-          actions.version,
-        ],
+        all: buildActions({
+          api: [],
+          app: ['monitoring'],
+          savedObject: {
+            all: [],
+            read: ['config'],
+          },
+          ui: ['monitoring'],
+        }),
       },
       // This is a subfeature of a feature within an application
       // it feels strange to put the feature at the same level as a full-featured application
       advancedSettings: {
-        all: [
-          actions.login,
-          ...actions.savedObject.allOperations(['config']),
-          actions.ui.get(`kibana:management:advancedSettings`),
-          actions.version,
-        ],
-        read: [
-          actions.login,
-          // not being able to write config makes some things hard:
-          // automatic assignment of default index pattern
-          ...actions.savedObject.readOperations(['config']),
-          actions.ui.get(`kibana:management:advancedSettings`),
-          actions.version,
-        ],
-      },
-      management: {
-        all: [
-          actions.login,
-          actions.ui.get(`kibana`),
-          actions.ui.get(`kibana:management`),
-          actions.version,
-        ],
+        all: buildActions({
+          api: [],
+          app: ['kibana'],
+          savedObject: {
+            all: ['config'],
+            read: [],
+          },
+          ui: ['kibana:management:advancedSettings'],
+        }),
+        read: buildActions({
+          api: [],
+          app: ['kibana'],
+          savedObject: {
+            all: [],
+            read: ['config'],
+          },
+          ui: ['kibana:management:advancedSettings'],
+        }),
       },
     },
     global: {
       all: [
-        actions.api.all,
         actions.login,
+        actions.version,
+        actions.api.all,
         actions.savedObject.all,
         actions.space.manage,
         actions.ui.all,
-        actions.version,
       ],
       read: [
-        actions.api.get('console/proxy/execute'),
         actions.login,
+        actions.version,
+        actions.api.get('console/proxy/execute'),
         ...actions.savedObject.readOperations(validSavedObjectTypes),
         actions.ui.all,
-        actions.version,
       ],
     },
     space: {
       all: [
-        actions.api.all,
         actions.login,
+        actions.version,
+        actions.api.all,
         ...actions.savedObject.allOperations(validSavedObjectTypes),
         actions.ui.all,
-        actions.version,
       ],
       read: [
-        actions.api.get('console/proxy/execute'),
         actions.login,
+        actions.version,
+        actions.api.get('console/proxy/execute'),
         ...actions.savedObject.readOperations(validSavedObjectTypes),
         actions.ui.get('*'),
-        actions.version,
       ],
     },
   };

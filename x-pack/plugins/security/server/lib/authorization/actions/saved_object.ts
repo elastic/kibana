@@ -20,16 +20,16 @@ export class SavedObjectActions {
 
   public all = `saved_object:*`;
 
-  public get(type: string, method: string): string {
+  public get(type: string, operation: string): string {
     if (!type || !isString(type)) {
       throw new Error('type is required and must be a string');
     }
 
-    if (!method || !isString(method)) {
+    if (!operation || !isString(operation)) {
       throw new Error('action is required and must be a string');
     }
 
-    return `saved_object:${type}/${method}`;
+    return `saved_object:${type}/${operation}`;
   }
 
   public allOperations(typeOrTypes: string | string[]): string[] {
