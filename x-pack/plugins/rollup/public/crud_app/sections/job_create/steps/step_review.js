@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiErrorBoundary,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -24,6 +25,7 @@ import {
   JOB_DETAILS_TAB_HISTOGRAM,
   JOB_DETAILS_TAB_METRICS,
   JOB_DETAILS_TAB_JSON,
+  tabToHumanizedMap,
 } from '../../components';
 
 const JOB_DETAILS_TABS = [
@@ -81,7 +83,7 @@ export class StepReviewUi extends Component {
           data-test-subj={`stepReviewTab${isSelected ? 'Selected' : ''}`}
           key={index}
         >
-          {tab}
+          {tabToHumanizedMap[tab]}
         </EuiTab>
       );
     });
@@ -119,11 +121,13 @@ export class StepReviewUi extends Component {
 
         {this.renderTabs()}
 
-        <JobDetails
-          job={job}
-          json={json}
-          tab={selectedTab}
-        />
+        <EuiErrorBoundary>
+          <JobDetails
+            job={job}
+            json={json}
+            tab={selectedTab}
+          />
+        </EuiErrorBoundary>
       </Fragment>
     );
   }
