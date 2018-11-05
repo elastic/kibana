@@ -421,10 +421,10 @@ function discoverController(
         defaultMessage: 'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
         values: {
           bucketsDescription: $scope.bucketInterval.scale > 1
-            ? i18n('kbn.discover.tooLargeBucketsText', {
+            ? i18n('kbn.discover.bucketIntervalTooltip.tooLargeBucketsText', {
               defaultMessage: 'buckets that are too large',
             })
-            : i18n('kbn.discover.tooManyBucketsText', {
+            : i18n('kbn.discover.bucketIntervalTooltip.tooManyBucketsText', {
               defaultMessage: 'too many buckets',
             }),
           bucketIntervalDescription: $scope.bucketInterval.description,
@@ -576,7 +576,7 @@ function discoverController(
         if (id) {
           toastNotifications.addSuccess({
             title: i18n('kbn.discover.notifications.savedSearchTitle', {
-              defaultMessage: 'Search \'{savedSearchTitle}\' was saved',
+              defaultMessage: `Search '{savedSearchTitle}' was saved`,
               values: {
                 savedSearchTitle: savedSearch.title,
               }
@@ -597,7 +597,7 @@ function discoverController(
     } catch(saveError) {
       toastNotifications.addDanger({
         title: i18n('kbn.discover.notifications.notSavedSearchTitle', {
-          defaultMessage: 'Search \'{savedSearchTitle}\' was not saved.',
+          defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
           values: {
             savedSearchTitle: savedSearch.title,
           }
@@ -938,7 +938,7 @@ function discoverController(
       const warningTitle = i18n('kbn.discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
         defaultMessage: '{stateVal} is not a configured index pattern ID',
         values: {
-          stateVal: '"' + stateVal + '"',
+          stateVal: `"${stateVal}"`,
         },
       });
 
