@@ -162,6 +162,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       return {
         securityEnabled: true,
         licenseValid: false,
+        licenseExpired: false,
         message: `Your ${licenseType} license does not support Beats central management features. Please upgrade your license.`,
       };
     }
@@ -170,7 +171,8 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     if (!isLicenseActive) {
       return {
         securityEnabled: true,
-        licenseValid: false,
+        licenseValid: true,
+        licenseExpired: true,
         message: `You cannot edit, create, or delete your Beats central management configurations because your ${licenseType} license has expired.`,
       };
     }
@@ -183,6 +185,8 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       return {
         securityEnabled: false,
         licenseValid: true,
+        licenseExpired: false,
+
         message,
       };
     }
@@ -191,6 +195,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     return {
       securityEnabled: true,
       licenseValid: true,
+      licenseExpired: false,
     };
   }
 }

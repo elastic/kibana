@@ -7,7 +7,7 @@ import * as React from 'react';
 import { NoDataLayout } from '../components/layouts/no_data';
 
 export const EnforceSecurityPage: React.SFC<any> = () => (
-  <NoDataLayout title="Security Disabled" actionSection={[]}>
+  <NoDataLayout title="Security disabled" actionSection={[]}>
     <p>
       Security is not currently enabled on your stack. Enableing security is required for the use of
       Beats Central Management

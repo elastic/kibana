@@ -7,10 +7,10 @@ import * as React from 'react';
 import { NoDataLayout } from '../components/layouts/no_data';
 
 export const InvalidLicensePage: React.SFC<any> = () => (
-  <NoDataLayout title="Invalid License" actionSection={[]}>
+  <NoDataLayout title="Expired license" actionSection={[]}>
     <p>
-      Your current license does not support Beats Central Management, or is expired. If you had
-      Beats enrolled previously, they will continue to function as before.
+      Your current license is expired. Beats that were enrolled before the license expired will
+      continue to function normaly.
     </p>
   </NoDataLayout>
 );

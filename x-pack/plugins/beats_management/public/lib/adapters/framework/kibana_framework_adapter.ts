@@ -65,6 +65,13 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     return this.xpackInfo.get('features.beats_management.licenseValid', false);
   }
 
+  public licenseExpired() {
+    if (!this.xpackInfo) {
+      return false;
+    }
+    return this.xpackInfo.get('features.beats_management.licenseExpired', false);
+  }
+
   public securityEnabled() {
     if (!this.xpackInfo) {
       return false;
@@ -85,21 +92,23 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     this.register(this.uiModule);
 
     this.hookAngular(() => {
-      const registerSection = () =>
-        this.management.register(pluginId, {
-          display: 'Beats', // TODO these need to be config options not hard coded in the adapter
-          icon: 'logoBeats',
-          order: 30,
-        });
-      const getSection = () => this.management.getSection(pluginId);
-      const section = this.management.hasItem(pluginId) ? getSection() : registerSection();
+      if (this.hasValidLicense()) {
+        const registerSection = () =>
+          this.management.register(pluginId, {
+            display: 'Beats', // TODO these need to be config options not hard coded in the adapter
+            icon: 'logoBeats',
+            order: 30,
+          });
+        const getSection = () => this.management.getSection(pluginId);
+        const section = this.management.hasItem(pluginId) ? getSection() : registerSection();
 
-      section.register(pluginId, {
-        visible: true,
-        display: displayName,
-        order: 30,
-        url: `#${basePath}`,
-      });
+        section.register(pluginId, {
+          visible: true,
+          display: displayName,
+          order: 30,
+          url: `#${basePath}`,
+        });
+      }
     });
   }
 
