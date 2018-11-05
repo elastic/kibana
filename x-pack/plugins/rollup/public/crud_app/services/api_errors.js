@@ -17,7 +17,7 @@ function createToast(error) {
   }
 }
 
-export function showApiWarning(error, location) {
+export function showApiWarning(error, title) {
   const toast = createToast(error);
 
   if (toast) {
@@ -26,10 +26,10 @@ export function showApiWarning(error, location) {
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
   // unexpected happened.
-  return fatalError(error, location);
+  return fatalError(error, title);
 }
 
-export function showApiError(error, location) {
+export function showApiError(error, title) {
   const toast = createToast(error);
 
   if (toast) {
@@ -38,5 +38,5 @@ export function showApiError(error, location) {
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
   // unexpected happened.
-  return fatalError(error, location);
+  return fatalError(error, title);
 }

@@ -137,7 +137,7 @@ export class JobListUi extends Component {
 
     const { intl } = this.props;
     const title = intl.formatMessage({
-      id: 'xpack.rollupJobs.jobList.errorTitle',
+      id: 'xpack.rollupJobs.jobList.loadingErrorTitle',
       defaultMessage: 'Error loading rollup jobs',
     });
     return (
@@ -149,11 +149,7 @@ export class JobListUi extends Component {
           color="danger"
           iconType="alert"
         >
-          <FormattedMessage
-            id="xpack.rollupJobs.jobList.errorText"
-            defaultMessage="{statusCode} {errorString}"
-            values={{ statusCode, errorString }}
-          />
+          {statusCode} {errorString}
         </EuiCallOut>
       </Fragment>
     );

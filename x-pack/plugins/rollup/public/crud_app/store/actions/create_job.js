@@ -47,8 +47,8 @@ export const createJob = (jobConfig) => async (dispatch) => {
             type: CREATE_JOB_FAILURE,
             payload: {
               error: {
-                message: i18n.translate('xpack.rollupJobs.api.errors.createJobAlreadyExistsError.text', {
-                  defaultMessage: 'A job with ID \'{jobConfigId}\' already exists.',
+                message: i18n.translate('xpack.rollupJobs.createAction.jobIdAlreadyExistsErrorMessage', {
+                  defaultMessage: `A job with ID '{jobConfigId}' already exists.`,
                   values: { jobConfigId: jobConfig.id },
                 }),
               },
@@ -60,7 +60,7 @@ export const createJob = (jobConfig) => async (dispatch) => {
           type: CREATE_JOB_FAILURE,
           payload: {
             error: {
-              message: i18n.translate('xpack.rollupJobs.api.errors.createJobDefaultError.text', {
+              message: i18n.translate('xpack.rollupJobs.createAction.failedDefaultErrorMessage', {
                 defaultMessage: 'Request failed with a {statusCode} error. {message}',
                 values: { statusCode, message: data.message },
               }),
@@ -73,7 +73,7 @@ export const createJob = (jobConfig) => async (dispatch) => {
 
     // This error isn't an HTTP error, so let the fatal error screen tell the user something
     // unexpected happened.
-    return fatalError(error, i18n.translate('xpack.rollupJobs.api.errors.createJobErrorLocation.text', {
+    return fatalError(error, i18n.translate('xpack.rollupJobs.createAction.fatalErrorTitle', {
       defaultMessage: 'Rollup Job Wizard create job',
     }));
   }

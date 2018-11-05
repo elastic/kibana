@@ -35,18 +35,18 @@ export const deleteJobs = (jobIds) => async (dispatch, getState) => {
       type: UPDATE_JOB_FAILURE,
     });
 
-    return showApiError(error, i18n.translate('xpack.rollupJobs.api.errors.deleteJobsErrorLocation.text', {
+    return showApiError(error, i18n.translate('xpack.rollupJobs.deleteAction.fatalErrorTitle', {
       defaultMessage: 'Rollup Job Wizard delete jobs',
     }));
   }
 
   if (jobIds.length === 1) {
-    toastNotifications.addSuccess(i18n.translate('xpack.rollupJobs.api.success.deleteJobsSuccessSingleToast.title', {
-      defaultMessage: 'Rollup job \'{jobId}\' was deleted',
+    toastNotifications.addSuccess(i18n.translate('xpack.rollupJobs.deleteAction.successSingleNotificationTitle', {
+      defaultMessage: `Rollup job '{jobId}' was deleted`,
       values: { jobId: jobIds[0] },
     }));
   } else {
-    toastNotifications.addSuccess(i18n.translate('xpack.rollupJobs.api.success.deleteJobsSuccessMultipleToast.title', {
+    toastNotifications.addSuccess(i18n.translate('xpack.rollupJobs.deleteAction.successMultipleNotificationTitle', {
       defaultMessage: '{count} rollup jobs were deleted',
       values: { count: jobIds.length },
     }));

@@ -267,7 +267,7 @@ export class JobCreateUi extends Component {
 
       // This error isn't an HTTP error, so let the fatal error screen tell the user something
       // unexpected happened.
-      fatalError(error, i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorLocation', {
+      fatalError(error, i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
         defaultMessage: 'Rollup Job Wizard index pattern validation',
       }));
     });
