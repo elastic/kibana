@@ -23,6 +23,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import {
+  PHASE_WARM,
   PHASE_ENABLED,
   WARM_PHASE_ON_ROLLOVER,
   PHASE_ROLLOVER_ALIAS,
@@ -135,6 +136,7 @@ export class WarmPhase extends PureComponent {
                 <EuiFlexGroup>
                   <EuiFlexItem style={{ maxWidth: 188 }}>
                     <ErrableFormRow
+                      id={`${PHASE_WARM}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
                       label="Move to warm phase after"
                       errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
                       isShowingErrors={isShowingErrors}
@@ -169,6 +171,7 @@ export class WarmPhase extends PureComponent {
               <EuiSpacer />
 
               <ErrableFormRow
+                id={`${PHASE_WARM}.${PHASE_NODE_ATTRS}`}
                 label="Choose where to allocate indices by node attribute"
                 errorKey={PHASE_NODE_ATTRS}
                 isShowingErrors={isShowingErrors}
@@ -196,6 +199,7 @@ export class WarmPhase extends PureComponent {
               <EuiFlexGroup>
                 <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
                   <ErrableFormRow
+                    id={`${PHASE_WARM}.${PHASE_REPLICA_COUNT}`}
                     label="Number of replicas"
                     errorKey={PHASE_REPLICA_COUNT}
                     isShowingErrors={isShowingErrors}
@@ -240,6 +244,7 @@ export class WarmPhase extends PureComponent {
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
                         <ErrableFormRow
+                          id={`${PHASE_WARM}.${PHASE_PRIMARY_SHARD_COUNT}`}
                           label="Number of primary shards"
                           errorKey={PHASE_PRIMARY_SHARD_COUNT}
                           isShowingErrors={isShowingErrors}
@@ -284,6 +289,7 @@ export class WarmPhase extends PureComponent {
 
               {phaseData[PHASE_FORCE_MERGE_ENABLED] ? (
                 <ErrableFormRow
+                  id={`${PHASE_WARM}.${PHASE_FORCE_MERGE_SEGMENTS}`}
                   label="Number of segments"
                   errorKey={PHASE_FORCE_MERGE_SEGMENTS}
                   isShowingErrors={isShowingErrors}

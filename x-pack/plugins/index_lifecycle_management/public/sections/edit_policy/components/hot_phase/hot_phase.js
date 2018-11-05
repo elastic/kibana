@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { LearnMoreLink } from '../../../../components/learn_more_link';
 import {
+  PHASE_HOT,
   PHASE_ROLLOVER_ALIAS,
   PHASE_ROLLOVER_MAX_AGE,
   PHASE_ROLLOVER_MAX_AGE_UNITS,
@@ -113,6 +114,7 @@ export class HotPhase extends PureComponent {
             <EuiFlexGroup>
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
+                  id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
                   label="Maximum index size"
                   errorKey={PHASE_ROLLOVER_MAX_SIZE_STORED}
                   isShowingErrors={isShowingErrors}
@@ -132,6 +134,7 @@ export class HotPhase extends PureComponent {
               </EuiFlexItem>
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
+                  id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS}`}
                   hasEmptyLabelSpace
                   errorKey={PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS}
                   isShowingErrors={isShowingErrors}
@@ -157,8 +160,9 @@ export class HotPhase extends PureComponent {
             <EuiFlexGroup>
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
+                  id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_AGE}`}
                   label="Maximum age"
-                  errorKey={PHASE_ROLLOVER_MAX_AGE}
+                  errorKey={`${PHASE_ROLLOVER_MAX_AGE}`}
                   isShowingErrors={isShowingErrors}
                   errors={errors}
                 >
@@ -173,6 +177,7 @@ export class HotPhase extends PureComponent {
               </EuiFlexItem>
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
+                  id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_AGE_UNITS}`}
                   hasEmptyLabelSpace
                   errorKey={PHASE_ROLLOVER_MAX_AGE_UNITS}
                   isShowingErrors={isShowingErrors}

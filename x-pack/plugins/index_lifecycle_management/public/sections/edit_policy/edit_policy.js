@@ -34,7 +34,7 @@ import {
   PHASE_WARM,
   STRUCTURE_POLICY_NAME,
 } from '../../store/constants';
-import { hasErrors } from '../../lib/find_errors';
+import { findFirstError } from '../../lib/find_errors';
 import { NodeAttrsDetails } from './components/node_attrs_details';
 import { ErrableFormRow } from './form_errors';
 
@@ -87,13 +87,17 @@ export class EditPolicy extends Component {
   submit = async () => {
     this.setState({ isShowingErrors: true });
     const {
-      errors,
       saveLifecyclePolicy,
       lifecycle,
       saveAsNewPolicy,
+      firstError
     } = this.props;
-    if (hasErrors(errors)) {
+    if (firstError) {
       toastNotifications.addDanger('Please the fix errors on the page');
+      const element = document.getElementById(`${firstError}-row`);
+      if (element) {
+        element.scrollIntoView();
+      }
     } else {
       const success = await saveLifecyclePolicy(lifecycle, saveAsNewPolicy);
       if (success) {
@@ -176,6 +180,7 @@ export class EditPolicy extends Component {
                 {saveAsNewPolicy || !policyName ? (
                   <Fragment>
                     <ErrableFormRow
+                      id={STRUCTURE_POLICY_NAME}
                       label="Policy name"
                       errorKey={STRUCTURE_POLICY_NAME}
                       isShowingErrors={isShowingErrors}
@@ -195,24 +200,24 @@ export class EditPolicy extends Component {
               <HotPhase
                 selectedPolicy={selectedPolicy}
                 errors={errors[PHASE_HOT]}
-                isShowingErrors={isShowingErrors && hasErrors(errors[PHASE_HOT])}
+                isShowingErrors={isShowingErrors && findFirstError(errors[PHASE_HOT], false)}
               />
               <EuiHorizontalRule className="ilmHrule" />
               <WarmPhase
                 errors={errors[PHASE_WARM]}
                 showNodeDetailsFlyout={this.showNodeDetailsFlyout}
-                isShowingErrors={isShowingErrors && hasErrors(errors[PHASE_WARM])}
+                isShowingErrors={isShowingErrors && findFirstError(errors[PHASE_WARM], false)}
               />
               <EuiHorizontalRule className="ilmHrule" />
               <ColdPhase
                 errors={errors[PHASE_COLD]}
                 showNodeDetailsFlyout={this.showNodeDetailsFlyout}
-                isShowingErrors={isShowingErrors && hasErrors(errors[PHASE_COLD])}
+                isShowingErrors={isShowingErrors && findFirstError(errors[PHASE_COLD], false)}
               />
               <EuiHorizontalRule className="ilmHrule" />
               <DeletePhase
                 errors={errors[PHASE_DELETE]}
-                isShowingErrors={isShowingErrors && hasErrors(errors[PHASE_DELETE])}
+                isShowingErrors={isShowingErrors && findFirstError(errors[PHASE_DELETE], false)}
               />
               <EuiHorizontalRule className="ilmHrule" />
               <EuiButtonEmpty onClick={this.backToPolicyList}>

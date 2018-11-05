@@ -23,18 +23,24 @@ import {
   saveLifecyclePolicy,
   fetchPolicies,
 } from '../../store/actions';
+import { findFirstError } from '../../lib/find_errors';
 
 export const EditPolicy = connect(
-  state => ({
-    errors: validateLifecycle(state),
-    selectedPolicy: getSelectedPolicy(state),
-    affectedIndexTemplates: getAffectedIndexTemplates(state),
-    saveAsNewPolicy: getSaveAsNewPolicy(state),
-    lifecycle: getLifecycle(state),
-    policies: getPolicies(state),
-    isPolicyListLoaded: isPolicyListLoaded(state),
-    isNewPolicy: getIsNewPolicy(state),
-  }),
+  state => {
+    const errors = validateLifecycle(state);
+    const firstError = findFirstError(errors);
+    return {
+      firstError,
+      errors,
+      selectedPolicy: getSelectedPolicy(state),
+      affectedIndexTemplates: getAffectedIndexTemplates(state),
+      saveAsNewPolicy: getSaveAsNewPolicy(state),
+      lifecycle: getLifecycle(state),
+      policies: getPolicies(state),
+      isPolicyListLoaded: isPolicyListLoaded(state),
+      isNewPolicy: getIsNewPolicy(state),
+    };
+  },
   {
     setSelectedPolicy,
     setSelectedPolicyName,

@@ -22,6 +22,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import {
+  PHASE_COLD,
   PHASE_ENABLED,
   PHASE_ROLLOVER_ALIAS,
   PHASE_ROLLOVER_MINIMUM_AGE,
@@ -118,6 +119,7 @@ export class ColdPhase extends PureComponent {
             <EuiFlexGroup>
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
+                  id={`${PHASE_COLD}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
                   label="Move to cold phase after"
                   errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
                   isShowingErrors={isShowingErrors}
@@ -151,6 +153,7 @@ export class ColdPhase extends PureComponent {
             <EuiSpacer />
 
             <ErrableFormRow
+              id={`${PHASE_COLD}.${PHASE_NODE_ATTRS}`}
               label="Choose where to allocate indices by node attribute"
               errorKey={PHASE_NODE_ATTRS}
               isShowingErrors={isShowingErrors}
@@ -177,6 +180,7 @@ export class ColdPhase extends PureComponent {
             <EuiFlexGroup>
               <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
                 <ErrableFormRow
+                  id={`${PHASE_COLD}.${PHASE_REPLICA_COUNT}`}
                   label="Number of replicas"
                   errorKey={PHASE_REPLICA_COUNT}
                   isShowingErrors={isShowingErrors}

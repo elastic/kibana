@@ -25,6 +25,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import {
+  PHASE_DELETE,
   PHASE_ENABLED,
   PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
@@ -104,6 +105,7 @@ export class DeletePhase extends PureComponent {
             <EuiFlexGroup>
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
+                  id={`${PHASE_DELETE}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
                   label="Delete indices after"
                   errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
                   isShowingErrors={isShowingErrors}

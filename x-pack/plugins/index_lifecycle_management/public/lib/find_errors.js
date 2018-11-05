@@ -4,19 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const hasErrors = (object, keysToIgnore = []) => {
-  let errors = false;
-  for (const [key, value] of Object.entries(object)) {
-    if (keysToIgnore.includes(key)) continue;
+export const findFirstError = (object, topLevel = true) => {
+  console.log("ERRORS", object);
+
+  let firstError;
+  const keys = topLevel ? [ 'policyName', 'hot', 'warm', 'cold', 'delete'] : Object.keys(object);
+  for (const key of keys) {
+    const value = object[key];
     if (Array.isArray(value) && value.length > 0) {
-      errors = true;
+      firstError = key;
+      console.log(`Found error ${firstError}`);
       break;
     } else if (value) {
-      errors = hasErrors(value, keysToIgnore);
-      if (errors) {
+      firstError = findFirstError(value, false);
+      if (firstError) {
+        firstError = `${key}.${firstError}`;
+        console.log(`Found error ${firstError}`);
         break;
       }
     }
   }
-  return errors;
+  console.log(`Returning ${firstError}`);
+  return firstError;
 };
