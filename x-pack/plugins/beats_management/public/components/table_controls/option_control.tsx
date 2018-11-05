@@ -72,7 +72,7 @@ export class OptionControl extends React.PureComponent<ComponentProps, Component
     if (schemaArray) {
       panel.items = schemaArray.map(def => {
         return {
-          // onClick: def.lazyLoad ? () => actionHandler(AssignmentActionType.Reload) : undefined,
+          onClick: def.lazyLoad ? () => actionHandler(AssignmentActionType.Reload) : undefined,
           panel: def.panel ? def.panel.id : undefined,
           name: def.action ? (
             <ActionControl
