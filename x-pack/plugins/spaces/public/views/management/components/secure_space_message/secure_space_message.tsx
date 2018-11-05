@@ -5,8 +5,8 @@
  */
 
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { UserProfile } from 'plugins/xpack_main/services/user_profile';
 import React, { Fragment } from 'react';
+import { UserProfile } from '../../../../../../xpack_main/common/user_profile';
 
 interface Props {
   userProfile: UserProfile;

@@ -7,6 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { KibanaPrivilege } from '../../../../../../../../security/common/model/kibana_privilege';
+import { UserProfile } from '../../../../../../../../xpack_main/common/user_profile';
 import { RoleValidator } from '../../../lib/validate_role';
 import { KibanaPrivileges } from './kibana_privileges';
 import { SimplePrivilegeForm } from './simple_privilege_form';
@@ -38,7 +39,7 @@ const buildProps = (customProps = {}) => {
         name: 'Marketing',
       },
     ],
-    userProfile: { hasCapability: () => true },
+    userProfile: new UserProfile(),
     editable: true,
     kibanaAppPrivileges: ['all' as KibanaPrivilege],
     onChange: jest.fn(),

@@ -19,7 +19,6 @@ import 'plugins/security/services/shield_indices';
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { SpacesManager } from '../../../../../spaces/public/lib';
-import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
 
@@ -86,14 +85,13 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope, $http, enableSpaceAwarePrivileges) {
+  controller($injector, $scope, $http, enableSpaceAwarePrivileges, userProfile) {
     const $route = $injector.get('$route');
     const Private = $injector.get('Private');
 
     const role = $route.current.locals.role;
 
     const xpackInfo = Private(XPackInfoProvider);
-    const userProfile = Private(UserProfileProvider);
     const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
     const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
     const rbacApplication = chrome.getInjected('rbacApplication');

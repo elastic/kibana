@@ -23,7 +23,7 @@ import {
 import { toastNotifications } from 'ui/notify';
 
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
-import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
+import { UserProfile } from '../../../../../xpack_main/common/user_profile';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';

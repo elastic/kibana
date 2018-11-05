@@ -5,14 +5,14 @@
  */
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { UserProfileProvider } from '../../../../../xpack_main/public/services/user_profile';
+import { UserProfile } from '../../../../../xpack_main/common/user_profile';
 import { SpaceAvatar } from '../../../components';
 import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
 import { SpacesGridPage } from './spaces_grid_page';
 
 const buildUserProfile = (canManageSpaces: boolean) => {
-  return UserProfileProvider({ manageSpaces: canManageSpaces });
+  return new UserProfile({ manageSpaces: canManageSpaces });
 };
 
 const spaces = [
