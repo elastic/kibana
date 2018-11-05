@@ -8,8 +8,10 @@ import { getSearchValue } from 'plugins/watcher/lib/get_search_value';
 import { get, isEqual, remove, map, merge } from 'lodash';
 import { Action } from '../action';
 import { WatchStatus } from '../watch_status';
+import { WatchErrors } from '../watch_errors';
 import { createActionId } from './lib/create_action_id';
 import { checkActionIdCollision } from './lib/check_action_id_collision';
+import { i18n } from '@kbn/i18n';
 
 export class BaseWatch {
   /**
@@ -30,6 +32,7 @@ export class BaseWatch {
     this.name = get(props, 'name', '');
     this.isSystemWatch = Boolean(get(props, 'isSystemWatch'));
     this.watchStatus = WatchStatus.fromUpstreamJson(get(props, 'watchStatus'));
+    this.watchErrors = WatchErrors.fromUpstreamJson(get(props, 'watchErrors'));
 
     const actions = get(props, 'actions', []);
     this.actions = actions.map(Action.fromUpstreamJson);
@@ -44,7 +47,12 @@ export class BaseWatch {
     const ActionType = ActionTypes[type];
 
     if (!Boolean(ActionType)) {
-      throw new Error(`Attempted to create unknown action type ${type}.`);
+      throw new Error(
+        i18n.translate('xpack.watcher.models.baseWatch.createUnknownActionTypeErrorMessage', {
+          defaultMessage: 'Attempted to create unknown action type {type}.',
+          values: { type }
+        })
+      );
     }
 
     const id = createActionId(this.actions, type);
@@ -70,9 +78,15 @@ export class BaseWatch {
     remove(this.actions, action);
   }
 
+  resetActions = () => {
+    this.actions = [];
+  };
+
   get displayName() {
     if (this.isNew) {
-      return 'New Watch';
+      return i18n.translate('xpack.watcher.models.baseWatch.displayName', {
+        defaultMessage: 'New Watch',
+      });
     } else if (this.name) {
       return this.name;
     } else {
@@ -122,9 +136,51 @@ export class BaseWatch {
     return isEqual(cleanWatch, cleanOtherWatch);
   }
 
-  static typeName = 'Watch';
+  /**
+   * Client validation of the Watch.
+   * Currently we are *only* validating the Watch "Actions"
+   */
+  validate() {
+
+    // Get the errors from each watch action
+    const actionsErrors = this.actions.reduce((actionsErrors, action) => {
+      if (action.validate) {
+        const { errors } = action.validate();
+        if (!errors) {
+          return actionsErrors;
+        }
+        return [...actionsErrors, ...errors];
+      }
+      return actionsErrors;
+    }, []);
+
+    if (!actionsErrors.length) {
+      return { warning: null };
+    }
+
+    // Concatenate their message
+    const warningMessage = actionsErrors.reduce((message, error) => (
+      !!message
+        ? `${message}, ${error.message}`
+        : error.message
+    ), '');
+
+    // We are not doing any *blocking* validation in the client,
+    // so we return the errors as a _warning_
+    return {
+      warning: {
+        message: warningMessage,
+      }
+    };
+  }
+
+  static typeName = i18n.translate('xpack.watcher.models.baseWatch.typeName', {
+    defaultMessage: 'Watch',
+  });
   static iconClass = '';
-  static selectMessage = 'Set up a new watch.';
+  static selectMessage = i18n.translate('xpack.watcher.models.baseWatch.selectMessageText', {
+    defaultMessage: 'Set up a new watch.',
+  });
   static isCreatable = true;
   static selectSortOrder = 0;
 }

@@ -78,6 +78,7 @@ class FieldText extends Component<
       className,
       disabled,
       helpText,
+      placeholder,
     } = this.props;
 
     const { allowError } = this.state;
@@ -94,6 +95,7 @@ class FieldText extends Component<
         <EuiFieldText
           id={id}
           name={name}
+          placeholder={placeholder}
           value={getValue() || ''}
           isInvalid={!disabled && error}
           onChange={this.handleChange}

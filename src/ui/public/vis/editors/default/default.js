@@ -31,10 +31,9 @@ import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
-import { updateEditorStateWithChanges } from './update_editor_state';
 
 
-const defaultEditor = function ($rootScope, $compile) {
+const defaultEditor = function ($rootScope, $compile, i18n) {
   return class DefaultEditor {
     static key = 'default';
 
@@ -45,7 +44,11 @@ const defaultEditor = function ($rootScope, $compile) {
 
       if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
         this.vis.type.editorConfig.optionTabs = [
-          { name: 'options', title: 'Options', editor: this.vis.type.editorConfig.optionsTemplate }
+          {
+            name: 'options',
+            title: i18n('common.ui.vis.editors.sidebar.tabs.optionsLabel', { defaultMessage: 'Options' }),
+            editor: this.vis.type.editorConfig.optionsTemplate,
+          }
         ];
       }
     }
@@ -115,18 +118,10 @@ const defaultEditor = function ($rootScope, $compile) {
             }
           };
 
-          let lockDirty = false;
           $scope.$watch(() => {
             return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
-            // when visualization updates its `vis.params` we need to update the editor, but we should
-            // not set the dirty flag (as this change came from vis itself and is already applied)
-            if (lockDirty) {
-              lockDirty = false;
-            } else {
-              $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
-            }
-
+            $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
             $scope.responseValueAggs = null;
             try {
               $scope.responseValueAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
@@ -143,8 +138,9 @@ const defaultEditor = function ($rootScope, $compile) {
           $scope.$watch(() => {
             return $scope.vis.getCurrentState(false);
           }, (newState) => {
-            if (updateEditorStateWithChanges(newState, $scope.oldState, $scope.state)) {
-              lockDirty = true;
+            if (!_.isEqual(newState, $scope.oldState)) {
+              $scope.state = $scope.vis.copyCurrentState(true);
+              $scope.oldState = newState;
             }
           }, true);
 

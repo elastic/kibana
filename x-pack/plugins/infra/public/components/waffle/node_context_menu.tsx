@@ -6,19 +6,14 @@
 
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import React from 'react';
-import { InfraNodeType } from '../../../common/graphql/types';
+
+import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
-import {
-  getContainerDetailUrl,
-  getContainerLogsUrl,
-  getHostDetailUrl,
-  getHostLogsUrl,
-  getPodDetailUrl,
-  getPodLogsUrl,
-} from '../../pages/link_to';
+import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 
 interface Props {
   options: InfraWaffleMapOptions;
+  timeRange: InfraTimerangeInput;
   node: InfraWaffleMapNode;
   nodeType: InfraNodeType;
   isPopoverOpen: boolean;
@@ -27,15 +22,30 @@ interface Props {
 
 export const NodeContextMenu: React.SFC<Props> = ({
   options,
+  timeRange,
   children,
   node,
   isPopoverOpen,
   closePopover,
   nodeType,
 }) => {
-  const nodeLogsUrl = getNodeLogsUrl(nodeType, node);
-  const nodeDetailUrl = getNodeDetailUrl(nodeType, node);
-  const nodeField = options.fields ? options.fields[nodeType] : null;
+  const nodeName = node.path.length > 0 ? node.path[node.path.length - 1].value : undefined;
+  const nodeLogsUrl = nodeName
+    ? getNodeLogsUrl({
+        nodeType,
+        nodeName,
+        time: timeRange.to,
+      })
+    : undefined;
+  const nodeDetailUrl = nodeName
+    ? getNodeDetailUrl({
+        nodeType,
+        nodeName,
+        from: timeRange.from,
+        to: timeRange.to,
+      })
+    : undefined;
+
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
@@ -57,14 +67,6 @@ export const NodeContextMenu: React.SFC<Props> = ({
               },
             ]
           : []),
-        ...(nodeField
-          ? [
-              {
-                name: `View APM Traces`,
-                href: `../app/apm#/?_g=()&kuery=${nodeField}~20~3A~20~22${node.name}~22`,
-              },
-            ]
-          : []),
       ],
     },
   ];
@@ -80,48 +82,4 @@ export const NodeContextMenu: React.SFC<Props> = ({
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
-};
-
-const getNodeLogsUrl = (
-  nodeType: 'host' | 'container' | 'pod',
-  { path }: InfraWaffleMapNode
-): string | undefined => {
-  if (path.length <= 0) {
-    return undefined;
-  }
-
-  const lastPathSegment = path[path.length - 1];
-
-  switch (nodeType) {
-    case 'host':
-      return getHostLogsUrl({ hostname: lastPathSegment.value });
-    case 'container':
-      return getContainerLogsUrl({ containerId: lastPathSegment.value });
-    case 'pod':
-      return getPodLogsUrl({ podId: lastPathSegment.value });
-    default:
-      return undefined;
-  }
-};
-
-const getNodeDetailUrl = (
-  nodeType: 'host' | 'container' | 'pod',
-  { path }: InfraWaffleMapNode
-): string | undefined => {
-  if (path.length <= 0) {
-    return undefined;
-  }
-
-  const lastPathSegment = path[path.length - 1];
-
-  switch (nodeType) {
-    case 'host':
-      return getHostDetailUrl({ name: lastPathSegment.value });
-    case 'container':
-      return getContainerDetailUrl({ name: lastPathSegment.value });
-    case 'pod':
-      return getPodDetailUrl({ name: lastPathSegment.value });
-    default:
-      return undefined;
-  }
 };
