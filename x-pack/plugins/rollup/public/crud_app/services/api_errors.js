@@ -6,7 +6,7 @@
 
 import { fatalError, toastNotifications } from 'ui/notify';
 
-function createToast(error, errorTitle) {
+function createToastConfig(error, errorTitle) {
   // Expect an error in the shape provided by Angular's $http service.
   if (error && error.data) {
     const { error: errorString, statusCode, message } = error.data;
@@ -18,10 +18,10 @@ function createToast(error, errorTitle) {
 }
 
 export function showApiWarning(error, errorTitle) {
-  const toast = createToast(error, errorTitle);
+  const toastConfig = createToastConfig(error, errorTitle);
 
-  if (toast) {
-    return toastNotifications.addWarning(toast);
+  if (toastConfig) {
+    return toastNotifications.addWarning(toastConfig);
   }
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
@@ -30,10 +30,10 @@ export function showApiWarning(error, errorTitle) {
 }
 
 export function showApiError(error, errorTitle) {
-  const toast = createToast(error, errorTitle);
+  const toastConfig = createToastConfig(error, errorTitle);
 
-  if (toast) {
-    return toastNotifications.addDanger(toast);
+  if (toastConfig) {
+    return toastNotifications.addDanger(toastConfig);
   }
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
