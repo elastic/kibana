@@ -18,7 +18,6 @@
  */
 
 import { resolve, dirname } from 'path';
-import { platform as getOsPlatform } from 'os';
 import { times } from 'lodash';
 
 const TOTAL_CI_SHARDS = 4;
@@ -29,13 +28,10 @@ module.exports = function (grunt) {
     if (grunt.option('browser')) {
       return grunt.option('browser');
     }
-
-    switch (getOsPlatform()) {
-      case 'win32':
-        return 'Chrome';
-      default:
-        return 'Chrome';
+    if (process.env.TEST_BROWSER_HEADLESS) {
+      return 'Chrome_Headless';
     }
+    return 'Chrome';
   }
 
   const config = {
@@ -60,6 +56,16 @@ module.exports = function (grunt) {
       logLevel: grunt.option('debug') || grunt.option('verbose') ? 'DEBUG' : 'INFO',
       autoWatch: false,
       browsers: [pickBrowser()],
+      customLaunchers: {
+        Chrome_Headless: {
+          base: 'Chrome',
+          flags: [
+            '--headless',
+            '--disable-gpu',
+            '--remote-debugging-port=9222',
+          ],
+        },
+      },
 
       // available reporters: https://npmjs.org/browse/keyword/karma-reporter
       reporters: process.env.CI ? ['dots', 'junit'] : ['progress'],

@@ -17,30 +17,9 @@
  * under the License.
  */
 
-import { createFunctionalTestRunner } from '../../../../../src/functional_test_runner';
-import { CliError } from './run_cli';
+import { i18n } from '@kbn/i18n';
 
-export async function runFtr({
-  configPath,
-  options: { log, bail, grep, updateBaselines, suiteTags },
-}) {
-  const ftr = createFunctionalTestRunner({
-    log,
-    configFile: configPath,
-    configOverrides: {
-      mochaOpts: {
-        bail: !!bail,
-        grep,
-      },
-      updateBaselines,
-      suiteTags,
-    },
-  });
-
-  const failureCount = await ftr.run();
-  if (failureCount > 0) {
-    throw new CliError(
-      `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`
-    );
-  }
-}
+export const aggGroupNameMaps = () => ({
+  metrics: i18n.translate('common.ui.vis.editors.aggGroups.metricsText', { defaultMessage: 'metrics' }),
+  buckets: i18n.translate('common.ui.vis.editors.aggGroups.bucketsText', { defaultMessage: 'buckets' })
+});
