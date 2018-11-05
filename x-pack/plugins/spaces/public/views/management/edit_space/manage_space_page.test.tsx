@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { UserProfileProvider } from '../../../../../xpack_main/public/services/user_profile';
 import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
 import { ManageSpacePage } from './manage_space_page';
@@ -19,10 +18,6 @@ const buildMockChrome = () => {
   return {
     addBasePath: (path: string) => path,
   };
-};
-
-const buildUserProfile = (canManageSpaces: boolean) => {
-  return UserProfileProvider({ manageSpaces: canManageSpaces });
 };
 
 describe('ManageSpacePage', () => {
@@ -40,12 +35,9 @@ describe('ManageSpacePage', () => {
       refreshSpacesList: jest.fn(),
     };
 
-    const userProfile = buildUserProfile(true);
-
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spacesManager={spacesManager}
-        userProfile={userProfile}
         spacesNavState={spacesNavState}
         intl={null as any}
       />
@@ -95,13 +87,10 @@ describe('ManageSpacePage', () => {
       refreshSpacesList: jest.fn(),
     };
 
-    const userProfile = buildUserProfile(true);
-
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'existing-space'}
         spacesManager={spacesManager}
-        userProfile={userProfile}
         spacesNavState={spacesNavState}
         intl={null as any}
       />

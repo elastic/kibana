@@ -25,9 +25,9 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
-import { UserProfile } from 'plugins/xpack_main/services/user_profile';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
+import { UserProfile } from '../../../../../xpack_main/common/user_profile';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';

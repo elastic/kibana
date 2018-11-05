@@ -7,7 +7,7 @@
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, CSSProperties } from 'react';
-import { UserProfile } from '../../../xpack_main/public/services/user_profile';
+import { UserProfile } from '../../../xpack_main/common/user_profile';
 import { MANAGE_SPACES_URL } from '../lib/constants';
 
 interface Props {
