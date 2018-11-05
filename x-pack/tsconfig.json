@@ -4,6 +4,7 @@
     "common/**/*",
     "server/**/*",
     "plugins/**/*",
+    "test_utils/enzyme_helpers.tsx"
   ],
   "exclude": [
     "test/**/*"
