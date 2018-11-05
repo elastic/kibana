@@ -10,6 +10,7 @@ import { KibanaConfigurationAdapter } from '../configuration/kibana_configuratio
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';
 import { Sources } from '../sources';
 import { ConfigurationSourcesAdapter } from '../sources/configuration_sources_adapter';
+import { ElasticsearchSuricataAdapter, Suricata } from '../suricata';
 import { AppBackendLibs, AppDomainLibs, Configuration } from '../types';
 
 export function compose(server: Server): AppBackendLibs {
@@ -18,7 +19,7 @@ export function compose(server: Server): AppBackendLibs {
   const sources = new Sources(new ConfigurationSourcesAdapter(configuration));
 
   const domainLibs: AppDomainLibs = {
-    hello: '',
+    suricata: new Suricata(new ElasticsearchSuricataAdapter(framework)),
   };
 
   const libs: AppBackendLibs = {

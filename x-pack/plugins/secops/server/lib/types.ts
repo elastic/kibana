@@ -7,9 +7,10 @@
 import { ConfigurationAdapter } from './configuration';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { SourceConfigurations, Sources } from './sources';
+import { Suricata } from './suricata';
 
 export interface AppDomainLibs {
-  hello: string;
+  suricata: Suricata;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {

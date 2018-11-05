@@ -14,6 +14,16 @@ export interface FrameworkAdapter {
   version: string;
   exposeStaticDir(urlPath: string, dir: string): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
+  callWithRequest<Hit = {}, Aggregation = undefined>(
+    req: FrameworkRequest,
+    method: 'search',
+    options?: object
+  ): Promise<DatabaseSearchResponse<Hit, Aggregation>>;
+  callWithRequest<Hit = {}, Aggregation = undefined>(
+    req: FrameworkRequest,
+    method: 'msearch',
+    options?: object
+  ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
 }
 
 export interface FrameworkRequest<InternalRequest extends WrappableRequest = WrappableRequest> {
@@ -28,4 +38,22 @@ export interface WrappableRequest<Payload = any, Params = any, Query = any> {
   payload: Payload;
   params: Params;
   query: Query;
+}
+
+export interface DatabaseResponse {
+  took: number;
+  timeout: boolean;
+}
+
+export interface DatabaseSearchResponse<Hit = {}, Aggregations = undefined>
+  extends DatabaseResponse {
+  aggregations?: Aggregations;
+  hits: {
+    total: number;
+    hits: Hit[];
+  };
+}
+
+export interface InfraDatabaseMultiResponse<Hit, Aggregation> extends DatabaseResponse {
+  responses: Array<DatabaseSearchResponse<Hit, Aggregation>>;
 }

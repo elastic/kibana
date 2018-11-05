@@ -38,6 +38,15 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     this.version = hapiServer.plugins.kibana.status.plugin.version;
   }
 
+  // tslint:disable-next-line:no-any
+  public async callWithRequest(req: FrameworkRequest<Request>, ...rest: any[]) {
+    const internalRequest = req[internalFrameworkRequest];
+    const { elasticsearch } = internalRequest.server.plugins;
+    const { callWithRequest } = elasticsearch.getCluster('data');
+    const fields = await callWithRequest(internalRequest, ...rest);
+    return fields;
+  }
+
   public exposeStaticDir(urlPath: string, dir: string): void {
     this.server.route({
       handler: {
