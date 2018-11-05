@@ -226,7 +226,7 @@ export function extractMessageValueFromNode(node, messageId) {
   );
 }
 
-export function extractContextValueFromNode(node, messageId) {
+export function extractDescriptionValueFromNode(node, messageId) {
   if (isStringLiteral(node)) {
     return node.value;
   }
@@ -236,7 +236,7 @@ export function extractContextValueFromNode(node, messageId) {
   }
 
   throw createFailError(
-    `context or description value should be a string or template literal ("${messageId}").`
+    `description value should be a string or template literal ("${messageId}").`
   );
 }
 

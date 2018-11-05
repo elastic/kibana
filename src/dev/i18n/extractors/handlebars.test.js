@@ -30,7 +30,7 @@ window.onload = function () {
       var err = document.createElement('h1');
       err.style['color'] = 'white';
       err.innerText = '{{i18n 'ui.id-1' \
-'{"defaultMessage": "Message text", "context": "Message context"}'}}';
+'{"defaultMessage": "Message text", "description": "Message description"}'}}';
 
       document.body.innerHTML = err.outerHTML;
     }
@@ -65,7 +65,7 @@ window.onload = function () {
   test('throws on empty id', () => {
     const source = Buffer.from(`\
 window.onload = function () {
-  err.innerText = '{{i18n '' '{"defaultMessage": "Message text", "context": "Message context"}'}}';
+  err.innerText = '{{i18n '' '{"defaultMessage": "Message text", "description": "Message description"}'}}';
 };
 `);
 
@@ -75,7 +75,7 @@ window.onload = function () {
   test('throws on missing defaultMessage property', () => {
     const source = Buffer.from(`\
 window.onload = function () {
-  err.innerText = '{{i18n 'message-id' '{"context": "Message context"}'}}';
+  err.innerText = '{{i18n 'message-id' '{"description": "Message description"}'}}';
 };
 `);
 

@@ -30,7 +30,7 @@ const MyComponentContent = ({ intl }) => (
     placeholder={intl.formatMessage({
       id: 'message-id-1',
       defaultMessage: 'Default message 1',
-      description: 'Message context 1'
+      description: 'Message description 1'
     })}
   />
 );
@@ -44,7 +44,7 @@ class Component extends PureComponent {
         <FormattedMessage
           id="message-id-2"
           defaultMessage="Default message 2"
-          description="Message context 2"
+          description="Message description 2"
         />
       </p>
     );
@@ -58,7 +58,7 @@ const messageId = 'message-id'
 intl.formatMessage({
   id: messageId,
   defaultMessage: 'Default message',
-  description: 'Message context'
+  description: 'Message description'
 });
 `,
   `
@@ -66,11 +66,11 @@ intl.formatMessage({
   intl.formatMessage({
     id: 'message-id',
     defaultMessage: message,
-    description: 'Message context'
+    description: 'Message description'
   });
 `,
   `
-const context = 'Message context'
+const description = 'Message description'
 intl.formatMessage({
   id: 'message-id',
   defaultMessage: 'Default message',

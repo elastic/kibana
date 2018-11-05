@@ -4,7 +4,7 @@ exports[`dev/i18n/extractors/react extractFormattedMessages extracts messages fr
 Array [
   "message-id-2",
   Object {
-    "context": "Message context 2",
+    "description": "Message description 2",
     "message": "Default message 2",
   },
 ]
@@ -14,13 +14,13 @@ exports[`dev/i18n/extractors/react extractIntlMessages extracts messages from "i
 Array [
   "message-id-1",
   Object {
-    "context": "Message context 1",
+    "description": "Message description 1",
     "message": "Default message 1",
   },
 ]
 `;
 
-exports[`dev/i18n/extractors/react extractIntlMessages throws if description value is not a string literal 1`] = `"context or description value should be a string or template literal (\\"message-id\\")."`;
+exports[`dev/i18n/extractors/react extractIntlMessages throws if description value is not a string literal 1`] = `"description value should be a string or template literal (\\"message-id\\")."`;
 
 exports[`dev/i18n/extractors/react extractIntlMessages throws if defaultMessage value is not a string literal 1`] = `"defaultMessage value should be a string or template literal (\\"message-id\\")."`;
 
