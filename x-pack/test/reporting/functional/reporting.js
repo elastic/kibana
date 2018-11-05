@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
+          await PageObjects.reporting.clearToastNotifications();
 
           const url = await PageObjects.reporting.getUrlOfTab(1);
           await PageObjects.reporting.closeTab(1);
@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
+          await PageObjects.reporting.clearToastNotifications();
 
           const url = await PageObjects.reporting.getUrlOfTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
@@ -167,8 +167,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
           await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
-
+          await PageObjects.reporting.clearToastNotifications();
           const url = await PageObjects.reporting.getUrlOfTab(1);
           await PageObjects.reporting.closeTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
@@ -230,8 +229,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
           await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
-
+          await PageObjects.reporting.clearToastNotifications();
           const url = await PageObjects.reporting.getUrlOfTab(1);
           await PageObjects.reporting.closeTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
@@ -310,7 +308,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
-          PageObjects.reporting.clearToastNotifications();
+          await PageObjects.reporting.clearToastNotifications();
 
           const url = await PageObjects.reporting.getUrlOfTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
