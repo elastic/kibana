@@ -6,7 +6,7 @@
 
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
 import React, { SFC } from 'react';
-import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
+import { UserProfile } from '../../../../../xpack_main/common/user_profile';
 import { ManageSpacesButton } from '../../../components';
 import { SPACES_FEATURE_DESCRIPTION } from '../../../lib/constants';
 

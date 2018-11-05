@@ -9,11 +9,11 @@ import template from 'plugins/spaces/views/management/template.html';
 import 'ui/autoload/styles';
 
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
-import { UserProfile } from 'plugins/xpack_main/services/user_profile';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 // @ts-ignore
 import routes from 'ui/routes';
+import { UserProfile } from '../../../../xpack_main/common/user_profile';
 import { SpacesManager } from '../../lib/spaces_manager';
 import { ManageSpacePage } from './edit_space';
 import { SpacesGridPage } from './spaces_grid';

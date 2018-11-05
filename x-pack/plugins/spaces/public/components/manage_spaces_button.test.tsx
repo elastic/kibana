@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { shallow } from 'enzyme';
-import { UserProfile } from 'plugins/xpack_main/services/user_profile';
 import React from 'react';
+import { UserProfile } from '../../../xpack_main/common/user_profile';
 import { ManageSpacesButton } from './manage_spaces_button';
 
 const buildUserProfile = (canManageSpaces: boolean) => {

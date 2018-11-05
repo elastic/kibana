@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { mount, shallow } from 'enzyme';
-import { UserProfile } from 'plugins/xpack_main/services/user_profile';
 import React from 'react';
+import { UserProfile } from '../../../../../xpack_main/common/user_profile';
 import { SpaceAvatar } from '../../../components';
 import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';

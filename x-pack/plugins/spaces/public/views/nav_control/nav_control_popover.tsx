@@ -6,7 +6,7 @@
 
 import { EuiAvatar, EuiPopover, PopoverAnchorPosition } from '@elastic/eui';
 import React, { Component, ComponentClass } from 'react';
-import { UserProfile } from '../../../../xpack_main/public/services/user_profile';
+import { UserProfile } from '../../../../xpack_main/common/user_profile';
 import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
