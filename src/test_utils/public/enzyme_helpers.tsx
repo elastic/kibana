@@ -18,7 +18,7 @@
  */
 
 import { I18nProvider, InjectedIntl, intlShape } from '@kbn/i18n/react';
-import { mount, ReactWrapper, render, shallow } from 'enzyme'; // eslint-disable-line import/no-extraneous-dependencies
+import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ReactElement } from 'react';
 import { IntlProvider } from 'react-intl';
 
