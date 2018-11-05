@@ -31,8 +31,8 @@ export const loadJobs = () => async (dispatch) => {
       payload: { error }
     });
 
-    return showApiError(error, i18n.translate('xpack.rollupJobs.loadAction.fatalErrorTitle', {
-      defaultMessage: 'Rollup Job Wizard load jobs',
+    return showApiError(error, i18n.translate('xpack.rollupJobs.loadAction.errorTitle', {
+      defaultMessage: 'Error loading rollup jobs',
     }));
   }
 

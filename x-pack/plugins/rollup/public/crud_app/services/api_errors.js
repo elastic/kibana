@@ -6,19 +6,19 @@
 
 import { fatalError, toastNotifications } from 'ui/notify';
 
-function createToast(error) {
+function createToast(error, errorTitle) {
   // Expect an error in the shape provided by Angular's $http service.
   if (error && error.data) {
     const { error: errorString, statusCode, message } = error.data;
     return {
-      title: `${statusCode}: ${errorString}`,
-      text: message,
+      title: errorTitle,
+      text: `${statusCode}: ${errorString}. ${message}`,
     };
   }
 }
 
-export function showApiWarning(error, title) {
-  const toast = createToast(error);
+export function showApiWarning(error, errorTitle) {
+  const toast = createToast(error, errorTitle);
 
   if (toast) {
     return toastNotifications.addWarning(toast);
@@ -26,11 +26,11 @@ export function showApiWarning(error, title) {
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
   // unexpected happened.
-  return fatalError(error, title);
+  return fatalError(error, errorTitle);
 }
 
-export function showApiError(error, title) {
-  const toast = createToast(error);
+export function showApiError(error, errorTitle) {
+  const toast = createToast(error, errorTitle);
 
   if (toast) {
     return toastNotifications.addDanger(toast);
@@ -38,5 +38,5 @@ export function showApiError(error, title) {
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
   // unexpected happened.
-  fatalError(error, title);
+  fatalError(error, errorTitle);
 }

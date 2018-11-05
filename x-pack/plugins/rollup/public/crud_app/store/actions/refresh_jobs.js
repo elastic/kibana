@@ -20,8 +20,8 @@ export const refreshJobs = () => async (dispatch) => {
   try {
     jobs = await sendLoadJobsRequest();
   } catch (error) {
-    return showApiWarning(error, i18n.translate('xpack.rollupJobs.refreshAction.fatalErrorTitle', {
-      defaultMessage: 'Rollup Job Wizard refresh jobs',
+    return showApiWarning(error, i18n.translate('xpack.rollupJobs.refreshAction.errorTitle', {
+      defaultMessage: 'Error refreshing rollup jobs',
     }));
   }
 

@@ -73,8 +73,8 @@ export const createJob = (jobConfig) => async (dispatch) => {
 
     // This error isn't an HTTP error, so let the fatal error screen tell the user something
     // unexpected happened.
-    return fatalError(error, i18n.translate('xpack.rollupJobs.createAction.fatalErrorTitle', {
-      defaultMessage: 'Rollup Job Wizard create job',
+    return fatalError(error, i18n.translate('xpack.rollupJobs.createAction.errorTitle', {
+      defaultMessage: 'Error creating rollup job',
     }));
   }
 

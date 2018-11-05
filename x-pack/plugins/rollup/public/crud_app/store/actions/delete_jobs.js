@@ -35,8 +35,8 @@ export const deleteJobs = (jobIds) => async (dispatch, getState) => {
       type: UPDATE_JOB_FAILURE,
     });
 
-    return showApiError(error, i18n.translate('xpack.rollupJobs.deleteAction.fatalErrorTitle', {
-      defaultMessage: 'Rollup Job Wizard delete jobs',
+    return showApiError(error, i18n.translate('xpack.rollupJobs.deleteAction.errorTitle', {
+      defaultMessage: 'Error deleting rollup jobs',
     }));
   }
 
