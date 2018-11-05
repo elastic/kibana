@@ -85,7 +85,7 @@ export default function GaugeVisType(Private, i18n) {
         gaugeTypes: ['Arc', 'Circle'],
         gaugeColorMode: ['None', 'Labels', 'Background'],
         scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.keys(vislibColorMaps),
+        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
       },
       optionsTemplate: gaugeTemplate,
       schemas: new Schemas([

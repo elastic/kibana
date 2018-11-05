@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "7.0.0-alpha1",
+  "version": "7.0.0",
   "branch": "master",
   "types": "./target/types/type_exports.d.ts",
   "build": {
@@ -288,6 +288,7 @@
     "eslint-plugin-babel": "^5.2.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jest": "^21.26.2",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-mocha": "^5.2.0",
     "eslint-plugin-no-unsanitized": "^3.0.2",
     "eslint-plugin-prefer-object-spread": "^1.2.1",
@@ -331,7 +332,7 @@
     "listr": "^0.14.1",
     "load-grunt-config": "0.19.2",
     "makelogs": "^4.3.0",
-    "mocha": "^5.2.0",
+    "mocha": "3.3.0",
     "mock-fs": "^4.4.2",
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
