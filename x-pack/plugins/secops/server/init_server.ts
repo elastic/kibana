@@ -8,6 +8,7 @@ import { addMockFunctionsToSchema, IResolvers, makeExecutableSchema } from 'grap
 
 import { createMocks, schemas } from './graphql';
 import { createSourcesResolvers } from './graphql/sources';
+import { createSuricataResolvers } from './graphql/suricata';
 import { createWhoAmIResolvers } from './graphql/who_am_i';
 import { AppBackendLibs } from './lib/types';
 import { Logger } from './utils/logger';
@@ -20,7 +21,11 @@ export interface Config {
 export const initServer = (libs: AppBackendLibs, config: Config) => {
   const { logger, mocking } = config;
   const schema = makeExecutableSchema({
-    resolvers: [createSourcesResolvers(libs) as IResolvers, createWhoAmIResolvers() as IResolvers],
+    resolvers: [
+      createSourcesResolvers(libs) as IResolvers,
+      createSuricataResolvers(libs) as IResolvers,
+      createWhoAmIResolvers() as IResolvers,
+    ],
     typeDefs: schemas,
   });
 
