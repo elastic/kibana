@@ -196,11 +196,16 @@ export const security = (kibana) => new kibana.Plugin({
     server.ext('onPostAuth', async function (req, h) {
       const path = req.path;
 
+      const { actions, checkPrivilegesWithRequest } = server.plugins.security.authorization;
+      const checkPrivileges = checkPrivilegesWithRequest(req);
+
       // Enforce app restrictions
       if (path.startsWith('/app/')) {
         const appId = path.split('/', 3)[2];
-        const userProfile = await req.getUserProfile();
-        if (!userProfile.canAccessFeature(appId)) {
+        const appAction = actions.app.get(appId);
+
+        const checkPrivilegesResponse = await checkPrivileges.globally(appAction);
+        if (!checkPrivilegesResponse.hasAllRequested) {
           return Boom.notFound();
         }
       }
@@ -213,13 +218,10 @@ export const security = (kibana) => new kibana.Plugin({
 
         if (actionTags.length > 0) {
           const feature = path.split('/', 3)[2];
-          const actions = actionTags.map(tag => `api:${feature}/${tag.split(':', 2)[1]}`);
+          const apiActions = actionTags.map(tag => actions.api.get(`${feature}/${tag.split(':', 2)[1]}`));
 
-          const { checkPrivilegesWithRequest } = server.plugins.security.authorization;
-          const checkPrivileges = checkPrivilegesWithRequest(req);
-          const canExecute = await checkPrivileges.globally(actions);
-
-          if (!canExecute.hasAllRequested) {
+          const checkPrivilegesResponse = await checkPrivileges.globally(apiActions);
+          if (!checkPrivilegesResponse.hasAllRequested) {
             return Boom.notFound();
           }
         }

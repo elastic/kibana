@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class ApiActions {
-  public all = `api:*`;
-
-  public get(operation: string) {
-    return `api:${operation}`;
+export class AppActions {
+  public get(appId: string) {
+    return `app:${appId}`;
   }
 }

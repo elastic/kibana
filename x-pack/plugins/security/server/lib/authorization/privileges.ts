@@ -34,6 +34,7 @@ export function buildPrivilegeMap(allSavedObjectTypes: string[], actions: any): 
       actions.login,
       actions.version,
       ...actionDefinition.api.map(api => actions.api.get(api)),
+      ...actionDefinition.app.map(appId => actions.app.get(appId)),
       ...flatten(
         actionDefinition.savedObject.all.map(types => actions.savedObject.allOperations(types))
       ),
@@ -201,7 +202,7 @@ export function buildPrivilegeMap(allSavedObjectTypes: string[], actions: any): 
       },
       devTools: {
         all: buildActions({
-          api: ['console/proxy/execute'],
+          api: ['console/execute'],
           app: ['kibana'],
           savedObject: {
             all: [],
@@ -256,7 +257,7 @@ export function buildPrivilegeMap(allSavedObjectTypes: string[], actions: any): 
       read: [
         actions.login,
         actions.version,
-        actions.api.get('console/proxy/execute'),
+        actions.api.get('console/execute'),
         ...actions.savedObject.readOperations(validSavedObjectTypes),
         actions.ui.all,
       ],
@@ -272,7 +273,7 @@ export function buildPrivilegeMap(allSavedObjectTypes: string[], actions: any): 
       read: [
         actions.login,
         actions.version,
-        actions.api.get('console/proxy/execute'),
+        actions.api.get('console/execute'),
         ...actions.savedObject.readOperations(validSavedObjectTypes),
         actions.ui.get('*'),
       ],

@@ -5,12 +5,15 @@
  */
 
 import { ApiActions } from './api';
+import { AppActions } from './app';
 import { SavedObjectActions } from './saved_object';
 import { SpaceActions } from './space';
 import { UiActions } from './ui';
 
 class Actions {
   public api = new ApiActions();
+
+  public app = new AppActions();
 
   public login = `login:`;
 
