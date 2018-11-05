@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiBadge, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-
-import { FacetText } from './facet_text';
 
 const Text = styled(EuiText)`
   display: inline;
@@ -30,7 +28,7 @@ const Flex = styled.div`
 export const Empty = pure(() => (
   <Flex data-test-subj="empty">
     <Text>Drop anything with a </Text>
-    <FacetText text="Facet" />
+    <EuiBadge color="primary">Facet</EuiBadge>
     <Text> count here</Text>
   </Flex>
 ));
