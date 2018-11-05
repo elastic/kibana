@@ -58,7 +58,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     this.rootComponent = component;
   };
 
-  public hadValidLicense() {
+  public hasValidLicense() {
     if (!this.xpackInfo) {
       return false;
     }
@@ -84,24 +84,22 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
     this.register(this.uiModule);
     this.hookAngular(() => {
-      if (this.hadValidLicense() && this.securityEnabled()) {
-        const registerSection = () =>
-          this.management.register(pluginId, {
-            display: 'Beats', // TODO these need to be config options not hard coded in the adapter
-            icon: 'logoBeats',
-            order: 30,
-          });
-        const getSection = () => this.management.getSection(pluginId);
-
-        const section = this.management.hasItem(pluginId) ? getSection() : registerSection();
-
-        section.register(pluginId, {
-          visible: true,
-          display: displayName,
+      const registerSection = () =>
+        this.management.register(pluginId, {
+          display: 'Beats', // TODO these need to be config options not hard coded in the adapter
+          icon: 'logoBeats',
           order: 30,
-          url: `#${basePath}`,
         });
-      }
+      const getSection = () => this.management.getSection(pluginId);
+
+      const section = this.management.hasItem(pluginId) ? getSection() : registerSection();
+
+      section.register(pluginId, {
+        visible: true,
+        display: displayName,
+        order: 30,
+        url: `#${basePath}`,
+      });
     });
   }
 

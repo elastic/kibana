@@ -55,6 +55,8 @@ export interface FrameworkAdapter {
     scope: string[];
     username: string;
   };
+  securityEnabled(): boolean;
+  hasValidLicense(): boolean;
   setUISettings(key: string, value: any): void;
   render(component: React.ReactElement<any>): void;
 }
