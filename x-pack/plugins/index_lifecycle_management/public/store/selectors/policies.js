@@ -182,6 +182,10 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
         Object.entries(allocate.require).forEach((entry) => {
           policy[PHASE_NODE_ATTRS] = entry.join(':');
         });
+        // checking for null or undefined here
+        if (allocate.number_of_replicas != null) {
+          policy[PHASE_REPLICA_COUNT] = allocate.number_of_replicas;
+        }
       }
     }
 
@@ -193,11 +197,6 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
 
     if (actions.shrink) {
       policy[PHASE_PRIMARY_SHARD_COUNT] = actions.shrink.number_of_shards;
-    }
-
-    if (actions.replicas) {
-      const replicas = actions.replicas;
-      policy[PHASE_REPLICA_COUNT] = replicas.number_of_replicas;
     }
   }
   return policy;
