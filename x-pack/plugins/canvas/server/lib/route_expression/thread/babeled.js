@@ -4,6 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// The babel-register below uses .babelrc by default.
-require('babel-register');
+require('babel-register')({
+  plugins: [
+    'transform-object-rest-spread',
+    'transform-async-to-generator',
+    'transform-class-properties',
+  ],
+  presets: [
+    'react',
+    [
+      'env',
+      {
+        targets: {
+          node: 'current',
+        },
+        // useBuiltIns: 'usage',
+      },
+    ],
+  ],
+  babelrc: false,
+});
 require('./worker');
