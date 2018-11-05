@@ -9,7 +9,7 @@ import { InfraNodeMetricFn, InfraNodeType } from '../adapter_types';
 const FIELDS = {
   [InfraNodeType.host]: 'system.cpu.user.pct',
   [InfraNodeType.pod]: 'kubernetes.pod.cpu.usage.node.pct',
-  [InfraNodeType.container]: 'docker.cpu.user.pct',
+  [InfraNodeType.container]: 'docker.cpu.total.pct',
 };
 
 export const cpu: InfraNodeMetricFn = (nodeType: InfraNodeType) => {
