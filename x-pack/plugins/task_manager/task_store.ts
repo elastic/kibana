@@ -68,6 +68,7 @@ export class TaskStore {
   private index: string;
   private maxAttempts: number;
   private supportedTypes: string[];
+  private wasInitialized = false;
 
   /**
    * Constructs a new TaskStore.
@@ -88,43 +89,47 @@ export class TaskStore {
    * Initializes the store, ensuring the task manager index is created and up to date.
    */
   public async init() {
-    const properties = {
-      type: { type: 'keyword' },
-      task: {
-        properties: {
-          taskType: { type: 'keyword' },
-          runAt: { type: 'date' },
-          interval: { type: 'text' },
-          attempts: { type: 'integer' },
-          status: { type: 'keyword' },
-          params: { type: 'text' },
-          state: { type: 'text' },
-          user: { type: 'keyword' },
-          scope: { type: 'keyword' },
+    if (!this.wasInitialized) {
+      const properties = {
+        type: { type: 'keyword' },
+        task: {
+          properties: {
+            taskType: { type: 'keyword' },
+            runAt: { type: 'date' },
+            interval: { type: 'text' },
+            attempts: { type: 'integer' },
+            status: { type: 'keyword' },
+            params: { type: 'text' },
+            state: { type: 'text' },
+            user: { type: 'keyword' },
+            scope: { type: 'keyword' },
+          },
         },
-      },
-    };
+      };
 
-    try {
-      return await this.callCluster('indices.putTemplate', {
-        name: this.index,
-        body: {
-          index_patterns: [this.index],
-          mappings: {
-            _doc: {
-              dynamic: 'strict',
-              properties,
+      try {
+        return await this.callCluster('indices.putTemplate', {
+          name: this.index,
+          body: {
+            index_patterns: [this.index],
+            mappings: {
+              _doc: {
+                dynamic: 'strict',
+                properties,
+              },
+            },
+            settings: {
+              number_of_shards: 1,
+              auto_expand_replicas: '0-1',
             },
           },
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-          },
-        },
-      });
-    } catch (err) {
-      throw err;
+        });
+      } catch (err) {
+        throw err;
+      }
+      this.wasInitialized = true;
     }
+    return;
   }
 
   /**
@@ -133,6 +138,7 @@ export class TaskStore {
    * @param task - The task being scheduled.
    */
   public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
+    await this.init();
     if (!this.supportedTypes.includes(taskInstance.taskType)) {
       throw new Error(`Unsupported task type "${taskInstance.taskType}".`);
     }
@@ -163,12 +169,13 @@ export class TaskStore {
    *
    * @param opts - The query options used to filter tasks
    */
-  public async fetch(opts: FetchOpts = {}): Promise<FetchResult> {
+  public async fetch(opts: FetchOpts = {}, verbose: undefined | boolean): Promise<FetchResult> {
     const sort = paginatableSort(opts.sort);
     return this.search({
       sort,
       search_after: opts.searchAfter,
       query: opts.query,
+      verbose,
     });
   }
 
@@ -271,7 +278,7 @@ export class TaskStore {
       ? { bool: { must: [queryOnlyTasks, originalQuery] } }
       : queryOnlyTasks;
 
-    const result = await this.callCluster('search', {
+    const searchObj = {
       type: DOC_TYPE,
       index: this.index,
       ignoreUnavailable: true,
@@ -279,7 +286,9 @@ export class TaskStore {
         ...opts,
         query,
       },
-    });
+    };
+
+    const result = await this.callCluster('search', searchObj);
 
     const rawDocs = result.hits.hits;
 
