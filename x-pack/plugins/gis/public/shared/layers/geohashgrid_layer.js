@@ -156,12 +156,13 @@ export class GeohashGridLayer extends ALayer {
     const requestToken = Symbol(`layer-source-refresh: this.getId()`);
     startLoading('source', requestToken, dataMeta);
     try {
+      const layerName = await this.getDisplayName();
       const data = await this._source.getGeoJsonPointsWithTotalCount({
         precision,
         extent: buffer,
         timeFilters,
         layerId: this.getId(),
-        layerName: this.getDisplayName(),
+        layerName,
       });
       stopLoading('source', requestToken, data);
     } catch(error) {
