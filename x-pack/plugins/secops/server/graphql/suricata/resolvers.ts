@@ -12,10 +12,6 @@ import { Context } from '../../lib/types';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-// interface QuerySuricataResponse extends SourceResolvers.GetSuricataEventsArgs {
-//   source: AppResolvedResult<QuerySourceResolver>;
-// }
-
 type QuerySuricataResolver = AppResolverOf<
   SourceResolvers.GetSuricataEventsResolver,
   AppResolvedResult<QuerySourceResolver>,
@@ -38,7 +34,7 @@ export const createSuricataResolvers = (
       const options: SuricataRequestOptions = {
         sourceConfiguration: source.configuration,
         timerange: args.timerange,
-        filterQuery: parseFilterQuery(args.filterQuery),
+        filterQuery: parseFilterQuery(args.filterQuery || ''),
       };
       const data = libs.suricata.getEvents(req, options);
       return data;

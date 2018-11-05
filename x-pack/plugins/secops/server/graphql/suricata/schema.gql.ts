@@ -22,15 +22,15 @@ export const suricataSchema = gql`
     flowId: String!
     proto: String!
     srcIp: String!
-    srcPort: String!
+    srcPort: Float!
     destIp: String!
-    destPort: String!
+    destPort: Float!
     geoRegionName: String!
     geoCountryIsoCode: String!
   }
 
   extend type Source {
-    "Get all event from suricata"
-    getSuricataEvents(timerange: TimerangeInput!, filterQuery: String): [SuricataEvents]
+    "Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
+    getSuricataEvents(timerange: TimerangeInput!, filterQuery: String): [SuricataEvents!]!
   }
 `;

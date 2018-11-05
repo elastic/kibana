@@ -28,6 +28,8 @@ export interface ESMatchQuery {
   match: {
     [name: string]: {
       query: string;
+      operator: string;
+      zero_terms_query: string;
     };
   };
 }

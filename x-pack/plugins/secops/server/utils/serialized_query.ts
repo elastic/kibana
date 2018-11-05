@@ -5,26 +5,24 @@
  */
 
 import { UserInputError } from 'apollo-server-errors';
+import { isEmpty, isPlainObject, isString } from 'lodash/fp';
 
 import { JsonObject } from '../../common/typed_json';
 
-export const parseFilterQuery = (
-  filterQuery: string | null | undefined
-): JsonObject | undefined => {
+export const parseFilterQuery = (filterQuery: string): JsonObject => {
   try {
-    if (filterQuery) {
+    if (filterQuery && isString(filterQuery) && !isEmpty(filterQuery)) {
       const parsedFilterQuery = JSON.parse(filterQuery);
       if (
         !parsedFilterQuery ||
-        ['string', 'number', 'boolean'].includes(typeof parsedFilterQuery) ||
+        !isPlainObject(parsedFilterQuery) ||
         Array.isArray(parsedFilterQuery)
       ) {
         throw new Error('expected value to be an object');
       }
       return parsedFilterQuery;
-    } else {
-      return undefined;
     }
+    return {};
   } catch (err) {
     throw new UserInputError(`Failed to parse query: ${err}`, {
       query: filterQuery,
