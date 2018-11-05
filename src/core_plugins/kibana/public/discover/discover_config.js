@@ -23,6 +23,9 @@ uiModules.get('kibana')
     return {
       $get() {
         return {
+          getHide() {
+            return false;
+          },
           getHideWriteControls() {
             return false;
           }

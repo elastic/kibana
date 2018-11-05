@@ -25,6 +25,13 @@ uiModules.get('kibana')
     if ($injector.has('discoverConfig')) {
       $provide.decorator('discoverConfig', function ($delegate, userProfile) {
         return {
+          getHide() {
+            if (!userProfile.canAccessFeature('kibana:discover')) {
+              return true;
+            }
+
+            return $delegate.getHideWriteControls();
+          },
           getHideWriteControls() {
             if (!userProfile.canWriteSavedObject('search')) {
               return true;

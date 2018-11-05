@@ -64,6 +64,7 @@ import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -74,7 +75,14 @@ const app = uiModules.get('apps/discover', [
 
 uiRoutes
   .defaults(/discover/, {
-    requireDefaultIndex: true
+    requireDefaultIndex: true,
+    resolve: {
+      redirect: function (discoverConfig, $window) {
+        if (discoverConfig.getHide()) {
+          $window.location.href = chrome.getBasePath();
+        }
+      }
+    },
   })
   .when('/discover/:id?', {
     template: indexTemplate,
