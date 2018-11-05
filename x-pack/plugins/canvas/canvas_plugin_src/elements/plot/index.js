@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import header from './header.png';
 
 export const plot = () => ({
   name: 'plot',
-  displayName: 'Coordinate plot',
-  help: 'Mixed line, bar or dot charts',
+  displayName: i18n.translate('xpack.canvas.elements.plotDisplayName', {
+    defaultMessage: 'Coordinate plot',
+  }),
+  help: i18n.translate('xpack.canvas.elements.plotHelpText', {
+    defaultMessage: 'Mixed line, bar or dot charts',
+  }),
   image: header,
   expression: `filters
 | demodata

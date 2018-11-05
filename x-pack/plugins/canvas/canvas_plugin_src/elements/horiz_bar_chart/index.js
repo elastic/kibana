@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import header from './header.png';
 
 export const horizontalBarChart = () => ({
   name: 'horizontalBarChart',
-  displayName: 'Horizontal bar chart',
-  help: 'A customizable horizontal bar chart',
+  displayName: i18n.translate('xpack.canvas.elements.horizontalBarChartDisplayName', {
+    defaultMessage: 'Horizontal bar chart',
+  }),
+  help: i18n.translate('xpack.canvas.elements.horizontalBarChartHelpText', {
+    defaultMessage: 'A customizable horizontal bar chart',
+  }),
   image: header,
   expression: `filters
 | demodata

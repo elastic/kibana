@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiDescriptionList,
@@ -21,7 +21,7 @@ import {
 
 import { JobStatus } from '../../job_status';
 
-export class TabSummaryUi extends Component {
+export class TabSummary extends Component {
   static propTypes = {
     job: PropTypes.object.isRequired,
     stats: PropTypes.object,
@@ -292,5 +292,3 @@ export class TabSummaryUi extends Component {
     );
   }
 }
-
-export const TabSummary = injectI18n(TabSummaryUi);

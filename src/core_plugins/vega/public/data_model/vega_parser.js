@@ -28,6 +28,7 @@ import { Utils } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { i18n }  from '@kbn/i18n';
 
 // Set default single color to match other Kibana visualizations
 const defaultColor = VISUALIZATION_COLORS[0];
@@ -77,7 +78,9 @@ export class VegaParser {
       this.spec = hjson.parse(this.spec, { legacyRoot: false });
     }
     if (!_.isPlainObject(this.spec)) {
-      throw new Error('Invalid Vega spec');
+      throw new Error(i18n.translate('vega.vegaParser.invalidVegaSpecErrorMessage', {
+        defaultMessage: 'Invalid Vega specification',
+      }));
     }
     this.isVegaLite = this._parseSchema();
     this.useHover = !this.isVegaLite;
@@ -128,7 +131,9 @@ export class VegaParser {
           this.spec.projections.length !== 1 ||
           this.spec.projections[0].name !== 'projection'
         ) {
-          throw new Error('Internal error: VL compiler should have generated a single projection object');
+          throw new Error(i18n.translate('vega.vegaParser.VLCompilerShouldHaveGeneratedSingleProtectionObjectErrorMessage', {
+            defaultMessage: 'Internal error: Vega-Lite compiler should have generated a single projection object',
+          }));
         }
         delete this.spec.projections;
       }
@@ -180,7 +185,14 @@ export class VegaParser {
         delete this.spec.width;
         delete this.spec.height;
       } else {
-        this._onWarning(`The 'width' and 'height' params are ignored with autosize=fit`);
+        this._onWarning(i18n.translate('vega.vegaParser.widthAndHeightParamsAreIngroredWithAutosizeFitWarningMessage', {
+          defaultMessage: 'The {widthParam} and {heightParam} params are ignored with {autosizeParam}',
+          values: {
+            autosizeParam: 'autosize=fit',
+            widthParam: '"width"',
+            heightParam: '"height"',
+          },
+        }));
       }
     }
   }
@@ -195,13 +207,18 @@ export class VegaParser {
       if (this._config.controlsLocation === undefined) {
         this.containerDir = 'column';
       } else {
-        throw new Error('Unrecognized controlsLocation value. Expecting one of ["' +
-          locToDirMap.keys().join('", "') + '"]');
+        throw new Error(i18n.translate('vega.vegaParser.unrecognizedControlsLocationValueErrorMessage', {
+          defaultMessage: 'Unrecognized {controlsLocationParam} value. Expecting one of [{locToDirMap}]',
+          values: { locToDirMap: `"${locToDirMap.keys().join('", "')}"`, controlsLocationParam: 'controlsLocation' }
+        }));
       }
     }
     const dir = this._config.controlsDirection;
     if (dir !== undefined && dir !== 'horizontal' && dir !== 'vertical') {
-      throw new Error('Unrecognized dir value. Expecting one of ["horizontal", "vertical"]');
+      throw new Error(i18n.translate('vega.vegaParser.unrecognizedDirValueErrorMessage', {
+        defaultMessage: 'Unrecognized {dirParam} value. Expecting one of [{expectedValues}]',
+        values: { expectedValues: '"horizontal", "vertical"', dirParam: 'dir' },
+      }));
     }
     this.controlsDir = dir === 'horizontal' ? 'row' : 'column';
   }
@@ -217,15 +234,27 @@ export class VegaParser {
       result = this.spec._hostConfig;
       delete this.spec._hostConfig;
       if (!_.isPlainObject(result)) {
-        throw new Error('If present, _hostConfig must be an object');
+        throw new Error(i18n.translate('vega.vegaParser.hostConfigValueTypeErrorMessage', {
+          defaultMessage: 'If present, {configName} must be an object',
+          values: { configName: '"_hostConfig"' },
+        }));
       }
-      this._onWarning('_hostConfig has been deprecated. Use config.kibana instead.');
+      this._onWarning(i18n.translate('vega.vegaParser.hostConfigIsDeprecatedWarningMessage', {
+        defaultMessage: '{deprecatedConfigName} has been deprecated. Use {newConfigName} instead.',
+        values: {
+          deprecatedConfigName: '"_hostConfig"',
+          newConfigName: 'config.kibana',
+        },
+      }));
     }
     if (_.isPlainObject(this.spec.config) && this.spec.config.kibana !== undefined) {
       result = this.spec.config.kibana;
       delete this.spec.config.kibana;
       if (!_.isPlainObject(result)) {
-        throw new Error('If present, config.kibana must be an object');
+        throw new Error(i18n.translate('vega.vegaParser.kibanaConfigValueTypeErrorMessage', {
+          defaultMessage: 'If present, {configName} must be an object',
+          values: { configName: 'config.kibana' },
+        }));
       }
     }
     return result || {};
@@ -241,13 +270,19 @@ export class VegaParser {
     if (result.position === undefined) {
       result.position = 'top';
     } else if (['top', 'right', 'bottom', 'left'].indexOf(result.position) === -1) {
-      throw new Error('Unexpected value for the result.position configuration');
+      throw new Error(i18n.translate('vega.vegaParser.unexpectedValueForPositionConfigurationErrorMessage', {
+        defaultMessage: 'Unexpected value for the {configurationName} configuration',
+        values: { configurationName: 'result.position' },
+      }));
     }
 
     if (result.padding === undefined) {
       result.padding = 16;
     } else if (typeof result.padding !== 'number') {
-      throw new Error('config.kibana.result.padding is expected to be a number');
+      throw new Error(i18n.translate('vega.vegaParser.paddingConfigValueTypeErrorMessage', {
+        defaultMessage: '{configName} is expected to be a number',
+        values: { configName: 'config.kibana.result.padding' },
+      }));
     }
 
     if (result.centerOnMark === undefined) {
@@ -256,7 +291,10 @@ export class VegaParser {
     } else if (typeof result.centerOnMark === 'boolean') {
       result.centerOnMark = result.centerOnMark ? Number.MAX_VALUE : -1;
     } else if (typeof result.centerOnMark !== 'number') {
-      throw new Error('config.kibana.result.centerOnMark is expected to be true, false, or a number');
+      throw new Error(i18n.translate('vega.vegaParser.centerOnMarkConfigValueTypeErrorMessage', {
+        defaultMessage: '{configName} is expected to be {trueValue}, {falseValue}, or a number',
+        values: { configName: 'config.kibana.result.centerOnMark', trueValue: 'true', falseValue: 'false' },
+      }));
     }
 
     return result;
@@ -280,7 +318,10 @@ export class VegaParser {
           res[name] = parsed;
           return;
         }
-        this._onWarning(`config.kibana.${name} is not valid`);
+        this._onWarning(i18n.translate('vega.vegaParser.someKibanaConfigurationIsNoValidWarningMessage', {
+          defaultMessage: '{configName} is not valid',
+          values: { configName: `config.kibana.${name}` },
+        }));
       }
       if (!isZoom) res[name] = 0;
     };
@@ -294,19 +335,31 @@ export class VegaParser {
     // `false` is a valid value
     res.mapStyle = this._config.mapStyle === undefined ? `default` : this._config.mapStyle;
     if (res.mapStyle !== `default` && res.mapStyle !== false) {
-      this._onWarning(`config.kibana.mapStyle may either be false or "default"`);
+      this._onWarning(i18n.translate('vega.vegaParser.mapStyleValueTypeWarningMessage', {
+        defaultMessage: '{mapStyleConfigName} may either be {mapStyleConfigFirstAllowedValue} or {mapStyleConfigSecondAllowedValue}',
+        values: {
+          mapStyleConfigName: 'config.kibana.mapStyle',
+          mapStyleConfigFirstAllowedValue: 'false',
+          mapStyleConfigSecondAllowedValue: '"default"',
+        },
+      }));
       res.mapStyle = `default`;
     }
 
     this._parseBool('zoomControl', res, true);
-    this._parseBool('scrollWheelZoom', res, true);
+    this._parseBool('scrollWheelZoom', res, false);
 
     const maxBounds = this._config.maxBounds;
     if (maxBounds !== undefined) {
       if (!Array.isArray(maxBounds) || maxBounds.length !== 4 ||
         !maxBounds.every(v => typeof v === 'number' && Number.isFinite(v))
       ) {
-        this._onWarning(`config.kibana.maxBounds must be an array with four numbers`);
+        this._onWarning(i18n.translate('vega.vegaParser.maxBoundsValueTypeWarningMessage', {
+          defaultMessage: '{maxBoundsConfigName} must be an array with four numbers',
+          values: {
+            maxBoundsConfigName: 'config.kibana.maxBounds',
+          },
+        }));
       } else {
         res.maxBounds = maxBounds;
       }
@@ -320,7 +373,12 @@ export class VegaParser {
     if (val === undefined) {
       dstObj[paramName] = dflt;
     } else if (typeof val !== 'boolean') {
-      this._onWarning(`config.kibana.${paramName} must be a boolean value`);
+      this._onWarning(i18n.translate('vega.vegaParser.someKibanaParamValueTypeWarningMessage', {
+        defaultMessage: '{configName} must be a boolean value',
+        values: {
+          configName: `config.kibana.${paramName}`
+        },
+      }));
       dstObj[paramName] = dflt;
     } else {
       dstObj[paramName] = val;
@@ -334,7 +392,10 @@ export class VegaParser {
    */
   _parseSchema() {
     if (!this.spec.$schema) {
-      this._onWarning(`The input spec does not specify a "$schema", defaulting to "${DEFAULT_SCHEMA}"`);
+      this._onWarning(i18n.translate('vega.vegaParser.inputSpecDoesNotSpecifySchemaWarningMessage', {
+        defaultMessage: 'The input spec does not specify a {schemaParam}, defaulting to {defaultSchema}',
+        values: { defaultSchema: `"${DEFAULT_SCHEMA}"`, schemaParam: '"$schema"' },
+      }));
       this.spec.$schema = DEFAULT_SCHEMA;
     }
 
@@ -343,10 +404,14 @@ export class VegaParser {
     const libVersion = isVegaLite ? vegaLite.version : vega.version;
 
     if (versionCompare(schema.version, libVersion) > 0) {
-      this._onWarning(
-        `The input spec uses ${schema.library} ${schema.version}, but ` +
-        `current version of ${schema.library} is ${libVersion}.`
-      );
+      this._onWarning(i18n.translate('vega.vegaParser.notValidLibraryVersionForInputSpecWarningMessage', {
+        defaultMessage: 'The input spec uses {schemaLibrary} {schemaVersion}, but current version of {schemaLibrary} is {libraryVersion}.',
+        values: {
+          schemaLibrary: schema.library,
+          schemaVersion: schema.version,
+          libraryVersion: libVersion,
+        },
+      }));
     }
 
     return isVegaLite;
@@ -371,7 +436,12 @@ export class VegaParser {
 
       const parser = this._urlParsers[type];
       if (parser === undefined) {
-        throw new Error(`url: {"%type%": "${type}"} is not supported`);
+        throw new Error(i18n.translate('vega.vegaParser.notSupportedUrlTypeErrorMessage', {
+          defaultMessage: '{urlObject} is not supported',
+          values: {
+            urlObject: 'url: {"%type%": "${type}"}',
+          },
+        }));
       }
 
       let pendingArr = pending[type];
@@ -405,7 +475,14 @@ export class VegaParser {
       if (key === 'data' && _.isPlainObject(obj.url)) {
         // Assume that any  "data": {"url": {...}}  is a request for data
         if (obj.values !== undefined || obj.source !== undefined) {
-          throw new Error('Data must not have more than one of "url", "values", and "source"');
+          throw new Error(i18n.translate('vega.vegaParser.dataExceedsSomeParamsUseTimesLimitErrorMessage', {
+            defaultMessage: 'Data must not have more than one of {urlParam}, {valuesParam}, and {sourceParam}',
+            values: {
+              urlParam: '"url"',
+              valuesParam: '"values"',
+              sourceParam: '"source"',
+            },
+          }));
         }
         onFind(obj);
       } else {

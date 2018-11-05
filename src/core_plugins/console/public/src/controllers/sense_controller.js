@@ -67,7 +67,8 @@ module.controller('SenseController', function SenseController(Private, $scope, $
       if (endpoint
         && endpoint.documentation
         && endpoint.documentation.indexOf('http') !== -1) {
-        $scope.documentation = endpoint.documentation.replace('master', DOC_LINK_VERSION);
+        $scope.documentation = endpoint.documentation.replace('/master/', `/${DOC_LINK_VERSION}/`);
+        $scope.documentation = $scope.documentation.replace('/current/', `/${DOC_LINK_VERSION}/`);
         $scope.$apply();
       } else {
         $scope.documentation = null;
