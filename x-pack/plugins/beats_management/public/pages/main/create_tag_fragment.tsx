@@ -102,7 +102,7 @@ export class CreateTagFragment extends React.PureComponent<TagPageProps, TagPage
     this.props.setUrlState({
       createdTag: newTag.id,
     });
-    this.props.goTo(`/overview/initial/review`);
+    this.props.goTo(`/overview/initial/finish`);
   };
 }
 export const CreateTagPageFragment = withUrlState<TagPageProps>(CreateTagFragment);

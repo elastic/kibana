@@ -65,7 +65,9 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               <h3>Tag details</h3>
             </EuiTitle>
             <EuiText color="subdued">
-              <p>Tags will apply the configurations below to all beats assigned this tag.</p>
+              <p>
+                A tag is a group of configuration blocks that you can apply to one or more Beats.
+              </p>
             </EuiText>
             <div>
               <TagBadge tag={{ color: tag.color || '#FF0', id: tag.id }} />
@@ -105,12 +107,13 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         >
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h3>Tag Configurations</h3>
+              <h3>Configuration blocks</h3>
             </EuiTitle>
             <EuiText color="subdued">
               <p>
-                Tags can have configurations for different types of Beats. For example, a tag can
-                have two Metricbeat configurations and one Filebeat input configuration.
+                A tag can have configuration blocks for different types of Beats. For example, a tag
+                can have two Metricbeat configuration blocks and one Filebeat input configuration
+                block.
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -140,7 +143,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                   this.setState({ showFlyout: true });
                 }}
               >
-                Add configuration
+                Add configuration block
               </EuiButton>
             </div>
           </EuiFlexItem>
