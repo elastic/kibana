@@ -34,6 +34,7 @@ describe('server/config completeMixin()', function () {
       settings = {},
       configValues = {},
       disabledPluginSpecs = [],
+      plugins = [],
     } = options;
 
     const server = {
@@ -48,24 +49,23 @@ describe('server/config completeMixin()', function () {
       settings,
       server,
       config,
-      disabledPluginSpecs
+      disabledPluginSpecs,
+      plugins
     };
 
-    const callCompleteMixin = () => {
-      completeMixin(kbnServer, server, config);
-    };
+    const callCompleteMixin = () => completeMixin(kbnServer, server, config);
 
     return { config, callCompleteMixin, server };
   };
 
   describe('server decoration', () => {
-    it('adds a config() function to the server', () => {
+    it('adds a config() function to the server', async () => {
       const { config, callCompleteMixin, server } = setup({
         settings: {},
         configValues: {}
       });
 
-      callCompleteMixin();
+      await callCompleteMixin();
       sinon.assert.calledOnce(server.decorate);
       sinon.assert.calledWith(server.decorate, 'server', 'config', sinon.match.func);
       expect(server.decorate.firstCall.args[2]()).toBe(config);
@@ -73,7 +73,7 @@ describe('server/config completeMixin()', function () {
   });
 
   describe('all settings used', () => {
-    it('should not throw', function () {
+    it('should not throw', async function () {
       const { callCompleteMixin } = setup({
         settings: {
           used: true
@@ -83,11 +83,11 @@ describe('server/config completeMixin()', function () {
         },
       });
 
-      callCompleteMixin();
+      await expect(callCompleteMixin()).resolves.toBe(undefined);
     });
 
     describe('more config values than settings', () => {
-      it('should not throw', function () {
+      it('should not throw', async function () {
         const { callCompleteMixin } = setup({
           settings: {
             used: true
@@ -98,13 +98,13 @@ describe('server/config completeMixin()', function () {
           }
         });
 
-        callCompleteMixin();
+        await expect(callCompleteMixin()).resolves.toBe(undefined);
       });
     });
   });
 
   describe('env setting specified', () => {
-    it('should not throw', () => {
+    it('should not throw', async () => {
       const { callCompleteMixin } = setup({
         settings: {
           env: 'development'
@@ -116,12 +116,12 @@ describe('server/config completeMixin()', function () {
         }
       });
 
-      callCompleteMixin();
+      await expect(callCompleteMixin()).resolves.toBe(undefined);
     });
   });
 
   describe('settings include non-default array settings', () => {
-    it('should not throw', () => {
+    it('should not throw', async () => {
       const { callCompleteMixin } = setup({
         settings: {
           foo: [
@@ -134,12 +134,13 @@ describe('server/config completeMixin()', function () {
         }
       });
 
-      callCompleteMixin();
+      await expect(callCompleteMixin()).resolves.toBe(undefined);
     });
   });
 
   describe('some settings unused', () => {
-    it('should throw an error', function () {
+    it('should throw an error', async function () {
+      expect.assertions(1);
       const { callCompleteMixin } = setup({
         settings: {
           unused: true
@@ -148,12 +149,15 @@ describe('server/config completeMixin()', function () {
           used: true
         }
       });
-
-      expect(callCompleteMixin).toThrowError('"unused" setting was not applied');
+      try {
+        await callCompleteMixin();
+      } catch(error) {
+        expect(error.message).toMatch('"unused" setting was not applied');
+      }
     });
 
     describe('error thrown', () => {
-      it('has correct code, processExitCode, and message', () => {
+      it('has correct code, processExitCode, and message', async () => {
         expect.assertions(3);
 
         const { callCompleteMixin } = setup({
@@ -171,7 +175,7 @@ describe('server/config completeMixin()', function () {
         });
 
         try {
-          callCompleteMixin();
+          await callCompleteMixin();
         } catch (error) {
           expect(error).toHaveProperty('code', 'InvalidConfig');
           expect(error).toHaveProperty('processExitCode', 64);
@@ -182,7 +186,7 @@ describe('server/config completeMixin()', function () {
   });
 
   describe('deprecation support', () => {
-    it('should transform settings when determining what is unused', function () {
+    it('should transform settings when determining what is unused', async function () {
       sandbox.spy(transformDeprecationsNS, 'transformDeprecations');
 
       const settings = {
@@ -196,12 +200,12 @@ describe('server/config completeMixin()', function () {
         }
       });
 
-      callCompleteMixin();
+      await callCompleteMixin();
       sinon.assert.calledOnce(transformDeprecations);
       sinon.assert.calledWithExactly(transformDeprecations, settings);
     });
 
-    it('should use transformed settings when considering what is used', function () {
+    it('should use transformed settings when considering what is used', async function () {
       sandbox.stub(transformDeprecationsNS, 'transformDeprecations').callsFake((settings) => {
         settings.bar = settings.foo;
         delete settings.foo;
@@ -217,13 +221,35 @@ describe('server/config completeMixin()', function () {
         }
       });
 
-      callCompleteMixin();
+      await callCompleteMixin();
       sinon.assert.calledOnce(transformDeprecations);
+    });
+
+    it('should transform deprecated plugin settings', async () => {
+      const { callCompleteMixin } = setup({
+        settings: {
+          foo1: 'bar'
+        },
+        configValues: {
+          foo2: 'bar'
+        },
+        plugins: [
+          {
+            spec: {
+              getDeprecationsProvider() {
+                return async ({ rename }) => [rename('foo1', 'foo2')];
+              }
+            }
+          }
+        ],
+      });
+
+      await expect(callCompleteMixin()).resolves.toBe(undefined);
     });
   });
 
   describe('disabled plugins', () => {
-    it('ignores config for plugins that are disabled', () => {
+    it('ignores config for plugins that are disabled', async () => {
       const { callCompleteMixin } = setup({
         settings: {
           foo: {
@@ -241,7 +267,7 @@ describe('server/config completeMixin()', function () {
         configValues: {}
       });
 
-      expect(callCompleteMixin).not.toThrowError();
+      await expect(callCompleteMixin()).resolves.toBe(undefined);
     });
   });
 });

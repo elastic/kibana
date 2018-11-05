@@ -20,6 +20,7 @@
 import React, { Fragment } from 'react';
 
 import {
+  EuiBetaBadge,
   EuiSpacer,
   EuiTitle,
   EuiFlexGroup,
@@ -37,9 +38,9 @@ export const Header = ({
   showSystemIndices,
   isIncludingSystemIndices,
   onChangeIncludingSystemIndices,
+  isBeta,
 }) => (
   <div>
-    <EuiSpacer size="m"/>
     <EuiTitle>
       <h1>
         <FormattedMessage
@@ -49,6 +50,12 @@ export const Header = ({
             indexPatternName
           }}
         />
+        { isBeta ? (
+          <Fragment>
+            {' '}
+            <EuiBetaBadge label="Beta" />
+          </Fragment>
+        ) : null }
       </h1>
     </EuiTitle>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">

@@ -15,6 +15,7 @@ import { FrameworkRequest } from './adapter_types';
 import {
   BackendFrameworkAdapter,
   FrameworkInternalUser,
+  FrameworkResponse,
   FrameworkRouteOptions,
   FrameworkWrappableRequest,
 } from './adapter_types';
@@ -75,22 +76,23 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     });
   }
 
-  public registerRoute<RouteRequest extends FrameworkWrappableRequest, RouteResponse>(
-    route: FrameworkRouteOptions<RouteRequest, RouteResponse>
-  ) {
+  public registerRoute<
+    RouteRequest extends FrameworkWrappableRequest,
+    RouteResponse extends FrameworkResponse
+  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
     const wrappedHandler = (licenseRequired: boolean, requiredRoles?: string[]) => async (
       request: any,
-      reply: any
+      h: any
     ) => {
       const xpackMainPlugin = this.server.plugins.xpack_main;
       const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN.ID).getLicenseCheckResults();
       if (licenseRequired && !licenseCheckResults.licenseValid) {
-        reply(Boom.forbidden(licenseCheckResults.message));
+        return Boom.forbidden(licenseCheckResults.message);
       }
       const wrappedRequest = wrapRequest(request);
       if (requiredRoles) {
         if (wrappedRequest.user.kind !== 'authenticated') {
-          return reply().code(403);
+          return h.response().code(403);
         }
         wrappedRequest.user = {
           ...wrappedRequest.user,
@@ -102,10 +104,10 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
           !wrappedRequest.user.roles.includes('superuser') &&
           difference(requiredRoles, wrappedRequest.user.roles).length !== 0
         ) {
-          return reply().code(403);
+          return h.response().code(403);
         }
       }
-      return route.handler(wrappedRequest, reply);
+      return route.handler(wrappedRequest, h);
     };
 
     this.server.route({

@@ -9,17 +9,20 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME
 } from 'x-pack/plugins/apm/common/constants';
-// @ts-ignore
 import { StickyProperties } from 'x-pack/plugins/apm/public/components/shared/StickyProperties';
 import { TransactionLink } from 'x-pack/plugins/apm/public/components/shared/TransactionLink';
 import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 
 interface Props {
-  transaction: Transaction;
+  transaction?: Transaction;
 }
 
 export function FlyoutTopLevelProperties({ transaction }: Props) {
+  if (!transaction) {
+    return null;
+  }
+
   const stickyProperties = [
     {
       label: 'Service',
