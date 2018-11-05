@@ -14,8 +14,9 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
 } from '@elastic/eui';
+
+import { JsonTooltip } from '../../../../../components/json_tooltip/json_tooltip';
 
 
 export class EnableModelPlotCheckbox extends Component {
@@ -27,16 +28,12 @@ export class EnableModelPlotCheckbox extends Component {
     };
   }
 
-  tooltipContent = `Select to enable model plot. Stores model information along with results.
-                  Can add considerable overhead to the performance of the system.`;
-
   warningTitle = 'Proceed with caution!';
 
   onChange = (e) => {
     this.setState({
       checked: e.target.checked,
     });
-
     this.props.onCheckboxChange(e.target.checked);
   };
 
@@ -73,10 +70,7 @@ export class EnableModelPlotCheckbox extends Component {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiIconTip
-              content={this.tooltipContent}
-              size={'s'}
-            />
+            <JsonTooltip id={'new_job_enable_model_plot'} position="top" />
           </EuiFlexItem>
         </EuiFlexGroup>
         { this.props.warningStatus && this.renderWarningCallout() }

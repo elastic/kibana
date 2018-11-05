@@ -79,7 +79,7 @@ module.directive('mlEnableModelPlotCheckbox', function () {
               $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
             } else {
               $scope.ui.cardinalityValidator.message = `Creating model plots is resource intensive and not recommended
-                where cardinality of the selected fields is greater than 100. Estimated cardinality
+                where the cardinality of the selected fields is greater than 100. Estimated cardinality
                 for this job is ${validationResult.highCardinality}.
                 If you enable model plot with this configuration we recommend you use a dedicated results index.`;
 
@@ -130,7 +130,7 @@ module.directive('mlEnableModelPlotCheckbox', function () {
           $scope.formConfig.enableModelPlot === false)
         );
         const validatorRunning = ($scope.ui.cardinalityValidator.status === STATUS.RUNNING);
-        const warningStatus = ($scope.ui.cardinalityValidator.status === STATUS.WARNING);
+        const warningStatus = ($scope.ui.cardinalityValidator.status === STATUS.WARNING && $scope.ui.formValid === true);
         const checkboxText = (validatorRunning) ? 'Validating cardinality...' : 'Enable model plot';
 
         const props = {
