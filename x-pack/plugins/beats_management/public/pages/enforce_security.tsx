@@ -9,8 +9,8 @@ import { NoDataLayout } from '../components/layouts/no_data';
 export const EnforceSecurityPage: React.SFC<any> = () => (
   <NoDataLayout title="Security disabled" actionSection={[]}>
     <p>
-      Security is not currently enabled on your stack. Enableing security is required for the use of
-      Beats Central Management
+      Security is currently disabled. You must enable security in Kibana and Elasticsearch to use
+      Beats central management.
     </p>
   </NoDataLayout>
 );
