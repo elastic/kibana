@@ -16,21 +16,21 @@ const cancellationToken = {
   on: jest.fn()
 };
 
-let mockServer;
 let config;
+let mockServer;
 beforeEach(() => {
   config = {
-    'xpack.security.cookieName': 'sid',
     'xpack.reporting.encryptionKey': 'testencryptionkey',
-    'xpack.reporting.kibanaServer.protocol': 'http',
-    'xpack.reporting.kibanaServer.hostname': 'localhost',
-    'xpack.reporting.kibanaServer.port': 5601,
-    'server.basePath': '/sbp'
+    'server.basePath': '/sbp',
+    'server.host': 'localhost',
+    'server.port': 5601
   };
-
   mockServer = {
     expose: () => { },
     config: memoize(() => ({ get: jest.fn() })),
+    info: {
+      protocol: 'http',
+    },
     plugins: {
       elasticsearch: {
         getCluster: memoize(() => {
@@ -38,8 +38,7 @@ beforeEach(() => {
             callWithRequest: jest.fn()
           };
         })
-      },
-      security: null,
+      }
     },
     savedObjects: {
       getScopedSavedObjectsClient: jest.fn(),
@@ -56,101 +55,202 @@ beforeEach(() => {
 
 afterEach(() => generatePdfObservableFactory.mockReset());
 
-const encrypt = async (headers) => {
+const encryptHeaders = async (headers) => {
   const crypto = cryptoFactory(mockServer);
   return await crypto.encrypt(headers);
 };
 
-describe(`sessionCookie`, () => {
-  test(`if serializedSession doesn't exist it doesn't pass sessionCookie to generatePdfObservable`, async () => {
-    mockServer.plugins.security = {};
-    const headers = {};
-    const encryptedHeaders = await encrypt(headers);
-
-    const generatePdfObservable = generatePdfObservableFactory();
-    generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
-
+describe('headers', () => {
+  test(`fails if it can't decrypt headers`, async () => {
     const executeJob = executeJobFactory(mockServer);
-    await executeJob({ objects: [], headers: encryptedHeaders, session: null }, cancellationToken);
-
-    expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, null, undefined, undefined);
+    await expect(executeJob({ objects: [], timeRange: {} }, cancellationToken)).rejects.toBeDefined();
   });
 
-  test(`if uses xpack.reporting.kibanaServer.hostname for domain of sessionCookie passed to generatePdfObservable`, async () => {
-    const sessionCookieOptions = {
-      httpOnly: true,
-      name: 'foo',
-      path: '/bar',
-      secure: false,
+  test(`passes in decrypted headers to generatePdf`, async () => {
+    const headers = {
+      foo: 'bar',
+      baz: 'quix',
     };
-    mockServer.plugins.security = {
-      getSessionCookieOptions() {
-        return sessionCookieOptions;
-      },
-    };
-    const headers = {};
-    const encryptedHeaders = await encrypt(headers);
-
-    const session = 'thisoldesession';
-    const encryptedSession = await encrypt(session);
 
     const generatePdfObservable = generatePdfObservableFactory();
     generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
+    const encryptedHeaders = await encryptHeaders(headers);
     const executeJob = executeJobFactory(mockServer);
-    await executeJob({ objects: [], headers: encryptedHeaders, session: encryptedSession }, cancellationToken);
+    await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
 
-    expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, {
-      domain: config['xpack.reporting.kibanaServer.hostname'],
-      httpOnly: sessionCookieOptions.httpOnly,
-      name: sessionCookieOptions.name,
-      path: sessionCookieOptions.path,
-      sameSite: 'Strict',
-      secure: sessionCookieOptions.secure,
-      value: session
-    }, undefined, undefined);
+    expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, expect.objectContaining({
+      headers: headers
+    }), undefined, undefined);
   });
 
-  test(`if uses server.host and reporting config isn't set for domain of sessionCookie passed to generatePdfObservable`, async () => {
-    config['xpack.reporting.kibanaServer.hostname'] = undefined;
-    config['server.host'] = 'something.com';
-    const sessionCookieOptions = {
-      httpOnly: true,
-      name: 'foo',
-      path: '/bar',
-      secure: false,
+  test(`omits blacklisted headers`, async () => {
+    const permittedHeaders = {
+      foo: 'bar',
+      baz: 'quix',
     };
-    mockServer.plugins.security = {
-      getSessionCookieOptions() {
-        return sessionCookieOptions;
-      },
-    };
-    const headers = {};
-    const encryptedHeaders = await encrypt(headers);
 
-    const session = 'thisoldesession';
-    const encryptedSession = await encrypt(session);
+    const blacklistedHeaders = {
+      'accept-encoding': '',
+      'content-length': '',
+      'content-type': '',
+      'host': '',
+      'transfer-encoding': '',
+    };
+
+    const encryptedHeaders = await encryptHeaders({
+      ...permittedHeaders,
+      ...blacklistedHeaders
+    });
 
     const generatePdfObservable = generatePdfObservableFactory();
     generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
     const executeJob = executeJobFactory(mockServer);
-    await executeJob({ objects: [], headers: encryptedHeaders, session: encryptedSession }, cancellationToken);
+    await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
 
-    expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, {
-      domain: config['server.host'],
-      httpOnly: sessionCookieOptions.httpOnly,
-      name: sessionCookieOptions.name,
-      path: sessionCookieOptions.path,
-      sameSite: 'Strict',
-      secure: sessionCookieOptions.secure,
-      value: session
-    }, undefined, undefined);
+    expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, expect.objectContaining({
+      headers: permittedHeaders
+    }), undefined, undefined);
+  });
+
+  describe('conditions', () => {
+    test(`uses hostname from reporting config if set`, async () => {
+      config['xpack.reporting.kibanaServer.hostname'] = 'custom-hostname';
+
+      const encryptedHeaders = await encryptHeaders({});
+
+      const generatePdfObservable = generatePdfObservableFactory();
+      generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+      const executeJob = executeJobFactory(mockServer);
+      await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
+
+      expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
+      expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, expect.objectContaining({
+        headers: expect.anything(),
+        conditions: expect.objectContaining({
+          hostname: config['xpack.reporting.kibanaServer.hostname']
+        })
+      }), undefined, undefined);
+    });
+
+    test(`uses hostname from server.config if reporting config not set`, async () => {
+      const encryptedHeaders = await encryptHeaders({});
+
+      const generatePdfObservable = generatePdfObservableFactory();
+      generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+      const executeJob = executeJobFactory(mockServer);
+      await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
+
+      expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
+      expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, expect.objectContaining({
+        headers: expect.anything(),
+        conditions: expect.objectContaining({
+          hostname: config['server.host']
+        })
+      }), undefined, undefined);
+    });
+
+    test(`uses port from reporting config if set`, async () => {
+      config['xpack.reporting.kibanaServer.port'] = 443;
+
+      const encryptedHeaders = await encryptHeaders({});
+
+      const generatePdfObservable = generatePdfObservableFactory();
+      generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+      const executeJob = executeJobFactory(mockServer);
+      await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
+
+      expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
+      expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, expect.objectContaining({
+        headers: expect.anything(),
+        conditions: expect.objectContaining({
+          port: config['xpack.reporting.kibanaServer.port']
+        })
+      }), undefined, undefined);
+    });
+
+    test(`uses port from server if reporting config not set`, async () => {
+      const encryptedHeaders = await encryptHeaders({});
+
+      const generatePdfObservable = generatePdfObservableFactory();
+      generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+      const executeJob = executeJobFactory(mockServer);
+      await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
+
+      expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
+      expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, expect.objectContaining({
+        headers: expect.anything(),
+        conditions: expect.objectContaining({
+          port: config['server.port']
+        })
+      }), undefined, undefined);
+    });
+
+    test(`uses basePath from server config`, async () => {
+      const encryptedHeaders = await encryptHeaders({});
+
+      const generatePdfObservable = generatePdfObservableFactory();
+      generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+      const executeJob = executeJobFactory(mockServer);
+      await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
+
+      expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
+      expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, expect.objectContaining({
+        headers: expect.anything(),
+        conditions: expect.objectContaining({
+          basePath: config['server.basePath']
+        })
+      }), undefined, undefined);
+    });
+
+    test(`uses protocol from reporting config if set`, async () => {
+      config['xpack.reporting.kibanaServer.protocol'] = 'https';
+
+      const encryptedHeaders = await encryptHeaders({});
+
+      const generatePdfObservable = generatePdfObservableFactory();
+      generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+      const executeJob = executeJobFactory(mockServer);
+      await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
+
+      expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
+      expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, expect.objectContaining({
+        headers: expect.anything(),
+        conditions: expect.objectContaining({
+          protocol: config['xpack.reporting.kibanaServer.protocol']
+        })
+      }), undefined, undefined);
+    });
+
+    test(`uses protocol from server.info`, async () => {
+      const encryptedHeaders = await encryptHeaders({});
+
+      const generatePdfObservable = generatePdfObservableFactory();
+      generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+
+      const executeJob = executeJobFactory(mockServer);
+      await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
+
+      expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
+      expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, expect.objectContaining({
+        headers: expect.anything(),
+        conditions: expect.objectContaining({
+          protocol: mockServer.info.protocol
+        })
+      }), undefined, undefined);
+    });
   });
 });
 
 test('uses basePath from job when creating saved object service', async () => {
-  const encryptedHeaders = await encrypt({});
+  const encryptedHeaders = await encryptHeaders({});
 
   const logo = 'custom-logo';
   mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
@@ -166,7 +266,7 @@ test('uses basePath from job when creating saved object service', async () => {
 });
 
 test(`uses basePath from server if job doesn't have a basePath when creating saved object service`, async () => {
-  const encryptedHeaders = await encrypt({});
+  const encryptedHeaders = await encryptHeaders({});
 
   const logo = 'custom-logo';
   mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
@@ -181,11 +281,7 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
 });
 
 test(`gets logo from uiSettings`, async () => {
-  const authorizationHeader = 'thisoldeheader';
-  const encryptedHeaders = await encrypt({
-    authorization: authorizationHeader,
-    thisotherheader: 'pleasedontshowup'
-  });
+  const encryptedHeaders = await encryptHeaders({});
 
   const logo = 'custom-logo';
   mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
@@ -196,40 +292,12 @@ test(`gets logo from uiSettings`, async () => {
   const executeJob = executeJobFactory(mockServer);
   await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
 
-  expect(mockServer.savedObjects.getScopedSavedObjectsClient).toBeCalledWith({
-    headers: {
-      authorization: authorizationHeader
-    },
-    getBasePath: expect.anything()
-  });
   expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
-  expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, null, undefined, logo);
-});
-
-test(`doesn't pass authorization header if it doesn't exist when getting logo from uiSettings`, async () => {
-  const encryptedHeaders = await encrypt({
-    thisotherheader: 'pleasedontshowup'
-  });
-
-  const logo = 'custom-logo';
-  mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
-
-  const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
-
-  const executeJob = executeJobFactory(mockServer);
-  await executeJob({ objects: [], headers: encryptedHeaders }, cancellationToken);
-
-  expect(mockServer.savedObjects.getScopedSavedObjectsClient).toBeCalledWith({
-    headers: {},
-    getBasePath: expect.anything()
-  });
-  expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
-  expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, null, undefined, logo);
+  expect(generatePdfObservable).toBeCalledWith(undefined, [], undefined, expect.anything(), undefined, logo);
 });
 
 test(`passes browserTimezone to generatePdf`, async () => {
-  const encryptedHeaders = await encrypt({});
+  const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
@@ -239,11 +307,11 @@ test(`passes browserTimezone to generatePdf`, async () => {
   await executeJob({ objects: [], browserTimezone, headers: encryptedHeaders }, cancellationToken);
 
   expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
-  expect(generatePdfObservable).toBeCalledWith(undefined, [], browserTimezone, null, undefined, undefined);
+  expect(generatePdfObservable).toBeCalledWith(undefined, [], browserTimezone, expect.anything(), undefined, undefined);
 });
 
 test(`adds forceNow to hash's query, if it exists`, async () => {
-  const encryptedHeaders = await encrypt({});
+  const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
@@ -253,11 +321,11 @@ test(`adds forceNow to hash's query, if it exists`, async () => {
 
   await executeJob({ objects: [{ relativeUrl: '/app/kibana#/something' }], forceNow, headers: encryptedHeaders }, cancellationToken);
 
-  expect(generatePdfObservable).toBeCalledWith(undefined, ['http://localhost:5601/sbp/app/kibana#/something?forceNow=2000-01-01T00%3A00%3A00.000Z'], undefined, null, undefined, undefined);
+  expect(generatePdfObservable).toBeCalledWith(undefined, ['http://localhost:5601/sbp/app/kibana#/something?forceNow=2000-01-01T00%3A00%3A00.000Z'], undefined, expect.anything(), undefined, undefined);
 });
 
 test(`appends forceNow to hash's query, if it exists`, async () => {
-  const encryptedHeaders = await encrypt({});
+  const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
@@ -271,11 +339,11 @@ test(`appends forceNow to hash's query, if it exists`, async () => {
     headers: encryptedHeaders
   }, cancellationToken);
 
-  expect(generatePdfObservable).toBeCalledWith(undefined, ['http://localhost:5601/sbp/app/kibana#/something?_g=something&forceNow=2000-01-01T00%3A00%3A00.000Z'], undefined, null, undefined, undefined);
+  expect(generatePdfObservable).toBeCalledWith(undefined, ['http://localhost:5601/sbp/app/kibana#/something?_g=something&forceNow=2000-01-01T00%3A00%3A00.000Z'], undefined, expect.anything(), undefined, undefined);
 });
 
 test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
-  const encryptedHeaders = await encrypt({});
+  const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
@@ -284,12 +352,12 @@ test(`doesn't append forceNow query to url, if it doesn't exists`, async () => {
 
   await executeJob({ objects: [{ relativeUrl: '/app/kibana#/something' }], headers: encryptedHeaders }, cancellationToken);
 
-  expect(generatePdfObservable).toBeCalledWith(undefined, ['http://localhost:5601/sbp/app/kibana#/something'], undefined, null, undefined, undefined);
+  expect(generatePdfObservable).toBeCalledWith(undefined, ['http://localhost:5601/sbp/app/kibana#/something'], undefined, expect.anything(), undefined, undefined);
 });
 
 test(`returns content_type of application/pdf`, async () => {
   const executeJob = executeJobFactory(mockServer);
-  const encryptedHeaders = await encrypt({});
+  const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
@@ -305,7 +373,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
 
   const executeJob = executeJobFactory(mockServer);
-  const encryptedHeaders = await encrypt({});
+  const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob({ objects: [], timeRange: {}, headers: encryptedHeaders }, cancellationToken);
 
   expect(content).toEqual(Buffer.from(testContent).toString('base64'));

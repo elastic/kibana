@@ -9,6 +9,25 @@ import { IndexPatternCreationConfig } from 'ui/management/index_pattern_creation
 
 import { RollupPrompt } from './components/rollup_prompt';
 import { setHttpClient, getRollupIndices } from '../services/api';
+import { i18n } from '@kbn/i18n';
+
+const rollupIndexPatternTypeName = i18n.translate('xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultTypeName',
+  { defaultMessage: 'rollup index pattern' });
+
+const rollupIndexPatternButtonText = i18n.translate('xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultButtonText',
+  { defaultMessage: 'Rollup index pattern' });
+
+const rollupIndexPatternButtonDescription = i18n.translate('xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultButtonDescription',
+  { defaultMessage: 'Perform limited aggregations against summarized data' });
+
+const rollupIndexPatternNoMatchError = i18n.translate('xpack.rollupJobs.editRollupIndexPattern.createIndex.noMatchError',
+  { defaultMessage: 'Rollup index pattern error: must match one rollup index' });
+
+const rollupIndexPatternTooManyMatchesError = i18n.translate('xpack.rollupJobs.editRollupIndexPattern.createIndex.tooManyMatchesError',
+  { defaultMessage: 'Rollup index pattern error: can only match one rollup index' });
+
+const rollupIndexPatternIndexLabel = i18n.translate('xpack.rollupJobs.editRollupIndexPattern.createIndex.indexLabel',
+  { defaultMessage: 'Rollup' });
 
 export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig {
   static key = 'rollup';
@@ -16,8 +35,9 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
   constructor(options) {
     super({
       type: 'rollup',
-      name: 'rollup index pattern',
+      name: rollupIndexPatternTypeName,
       showSystemIndices: false,
+      isBeta: true,
       ...options,
     });
 
@@ -37,9 +57,10 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
   async getIndexPatternCreationOption(urlHandler) {
     await this.settingUp;
     return this.rollupIndices && this.rollupIndices.length ? {
-      text: `Rollup index pattern`,
-      description: `Can perform limited aggregations against summarized data`,
+      text: rollupIndexPatternButtonText,
+      description: rollupIndexPatternButtonDescription,
       testSubj: `createRollupIndexPatternButton`,
+      isBeta: this.isBeta,
       onClick: () => {
         urlHandler('/management/kibana/index?type=rollup');
       },
@@ -53,7 +74,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
   getIndexTags(indexName) {
     return this.isRollupIndex(indexName) ? [{
       key: this.type,
-      name: 'Rollup',
+      name: rollupIndexPatternIndexLabel,
     }] : [];
   }
 
@@ -67,16 +88,22 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
     const rollupIndices = indices.filter(index => this.isRollupIndex(index.name));
 
     if(!rollupIndices.length) {
-      return ['Rollup index error: must match one rollup index'];
+      return [rollupIndexPatternNoMatchError];
     } else if(rollupIndices.length > 1) {
-      return ['Rollup index error: can only match one rollup index'];
+      return [rollupIndexPatternTooManyMatchesError];
     }
 
     const rollupIndexName = rollupIndices[0].name;
     const error = this.rollupIndicesCapabilities[rollupIndexName].error;
 
     if(error) {
-      return [`Rollup index error: ${error}`];
+      const errorMessage = i18n.translate('xpack.rollupJobs.editRollupIndexPattern.createIndex.uncaughtError', {
+        defaultMessage: 'Rollup index pattern error: {error}',
+        values: {
+          error
+        }
+      });
+      return [errorMessage];
     }
 
     this.rollupIndex = rollupIndexName;
