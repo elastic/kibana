@@ -53,10 +53,7 @@ function getPrivilegedActions(server: Record<string, any>, actions: Record<strin
   const { types } = server.savedObjects;
 
   const savedObjectsActions = _.flatten(
-    types.map((type: string) => [
-      actions.savedObject.get(type, 'read'),
-      actions.savedObject.get(type, 'create'),
-    ])
+    types.map((type: string) => actions.savedObject.allOperations(type))
   );
 
   return [...uiCapabilityActions, ...savedObjectsActions];
