@@ -6,7 +6,7 @@
 import { omit } from 'lodash';
 import { KBN_SCREENSHOT_HEADER_BLACKLIST } from '../../../common/constants';
 
-export const omitBlacklistedHeaders = ({ job, decryptedHeaders }) => {
+export const omitBlacklistedHeaders = ({ job, decryptedHeaders, server }) => {
   const filteredHeaders = omit(decryptedHeaders, KBN_SCREENSHOT_HEADER_BLACKLIST);
-  return { job, filteredHeaders };
+  return { job, filteredHeaders, server };
 };

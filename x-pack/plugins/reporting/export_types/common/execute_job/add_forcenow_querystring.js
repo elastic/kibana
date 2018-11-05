@@ -6,8 +6,8 @@
 import url from 'url';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 
-function  getSavedObjectAbsoluteUrl(job, relativeUrl) {
-  const getAbsoluteUrl = getAbsoluteUrlFactory(job.server);
+function  getSavedObjectAbsoluteUrl(job, relativeUrl, server) {
+  const getAbsoluteUrl = getAbsoluteUrlFactory(server);
 
   if (relativeUrl) {
     const { pathname: path, hash, search } = url.parse(relativeUrl);
@@ -17,13 +17,13 @@ function  getSavedObjectAbsoluteUrl(job, relativeUrl) {
   throw new Error(`Unable to generate report. Url is not defined.`);
 }
 
-export const  addForceNowQuerystring = async ({ job, conditionalHeaders, logo,  }) => {
+export const  addForceNowQuerystring = async ({ job, conditionalHeaders, logo, server  }) => {
 
   //if no URLS then its from PNG which should only have one so put it in the array and process as PDF does
   if (!job.urls) {
     if (!job.relativeUrl) {
       throw new Error(`Unable to generate report. Url is not defined.`);}
-    job.urls = [getSavedObjectAbsoluteUrl(job, job.relativeUrl)];
+    job.urls = [getSavedObjectAbsoluteUrl(job, job.relativeUrl, server)];
   }
 
   const urls = job.urls.map(jobUrl => {
@@ -48,6 +48,6 @@ export const  addForceNowQuerystring = async ({ job, conditionalHeaders, logo,  
     });
   });
 
-  return { job, conditionalHeaders, logo, urls };
+  return { job, conditionalHeaders, logo, urls, server };
 
 };

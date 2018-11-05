@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const  getConditionalHeaders = ({ job, filteredHeaders }) => {
-  const config = job.server.config();
+export const  getConditionalHeaders = ({ job, filteredHeaders, server }) => {
+  const config = server.config();
 
   const conditionalHeaders = {
     headers: filteredHeaders,
@@ -13,9 +13,9 @@ export const  getConditionalHeaders = ({ job, filteredHeaders }) => {
       hostname: config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
       port: config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
       basePath: config.get('server.basePath'),
-      protocol: config.get('xpack.reporting.kibanaServer.protocol') || job.server.info.protocol,
+      protocol: config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
     }
   };
 
-  return { job, conditionalHeaders };
+  return { job, conditionalHeaders, server };
 };

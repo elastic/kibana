@@ -18,8 +18,7 @@ function executeJobFn(server) {
   const compatibilityShim = compatibilityShimFactory(server);
 
   return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
-    jobToExecute.server = server;
-    const process$ = Rx.of(jobToExecute).pipe(
+    const process$ = Rx.of({ job: jobToExecute, server }).pipe(
       mergeMap(decryptJobHeaders),
       catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
       map(omitBlacklistedHeaders),

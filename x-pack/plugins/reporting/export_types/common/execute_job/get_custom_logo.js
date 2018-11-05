@@ -5,8 +5,8 @@
  */
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
 
-export const getCustomLogo = async ({ job, conditionalHeaders }) => {
-  const serverBasePath = job.server.config().get('server.basePath');
+export const getCustomLogo = async ({ job, conditionalHeaders, server }) => {
+  const serverBasePath = server.config().get('server.basePath');
 
   const fakeRequest = {
     headers: conditionalHeaders.headers,
@@ -16,14 +16,14 @@ export const getCustomLogo = async ({ job, conditionalHeaders }) => {
     getBasePath: () => job.basePath || serverBasePath
   };
 
-  const savedObjects = job.server.savedObjects;
+  const savedObjects = server.savedObjects;
 
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
-  const uiSettings = job.server.uiSettingsServiceFactory({
+  const uiSettings = server.uiSettingsServiceFactory({
     savedObjectsClient
   });
 
   const logo = await uiSettings.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
 
-  return { job, conditionalHeaders, logo };
+  return { job, conditionalHeaders, logo, server };
 };

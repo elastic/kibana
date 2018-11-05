@@ -5,8 +5,8 @@
  */
 import { cryptoFactory } from '../../../server/lib/crypto';
 
-export const decryptJobHeaders = async (job) => {
-  const crypto = cryptoFactory(job.server);
+export const decryptJobHeaders = async ({ job, server }) => {
+  const crypto = cryptoFactory(server);
   const decryptedHeaders = await crypto.decrypt(job.headers);
-  return { job, decryptedHeaders };
+  return { job, decryptedHeaders, server };
 };
