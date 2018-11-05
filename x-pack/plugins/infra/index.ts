@@ -22,7 +22,7 @@ export function infra(kibana: any) {
         description: 'Explore your infrastructure',
         icon: 'plugins/infra/images/infra_mono_white.svg',
         main: 'plugins/infra/app',
-        title: 'Intrastructure',
+        title: 'Infrastructure',
         listed: false,
         url: `/app/${APP_ID}#/home`,
       },
