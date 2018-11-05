@@ -19,6 +19,9 @@ const buildRequest = (telemetryOptedIn = null, path = '/app/kibana') => {
 
   return {
     path,
+    getUserProfile: async () => ({
+      toJSON: () => ({})
+    }),
     getSavedObjectsClient: () => {
       return {
         get,
@@ -47,6 +50,7 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      userProfileData: {}
     });
 
     sinon.assert.calledOnce(server.plugins.security.isAuthenticated);
@@ -66,6 +70,7 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      userProfileData: {}
     });
   });
 
@@ -82,6 +87,7 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      userProfileData: {}
     });
   });
 
@@ -98,6 +104,7 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      userProfileData: {}
     });
   });
 
@@ -114,6 +121,7 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      userProfileData: {}
     });
   });
 
@@ -130,6 +138,7 @@ describe('replaceInjectedVars uiExport', () => {
       xpackInitialInfo: {
         b: 1
       },
+      userProfileData: {}
     });
   });
 
@@ -165,6 +174,7 @@ describe('replaceInjectedVars uiExport', () => {
       a: 1,
       telemetryOptedIn: null,
       xpackInitialInfo: undefined,
+      userProfileData: {},
     });
   });
 
