@@ -10,9 +10,10 @@ import { SummaryStatus } from '../../summary_status';
 import { ApmStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
+import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export function StatusUI({ stats, intl }) {
+function StatusUI({ stats, intl }) {
   const {
     apms: {
       total
@@ -43,7 +44,11 @@ export function StatusUI({ stats, intl }) {
         id: 'xpack.monitoring.apm.instances.status.lastEventLabel',
         defaultMessage: 'Last Event',
       }),
-      value: formatTimestampToDuration(+moment(timeOfLastEvent), 'since') + ' ago',
+      value: intl.formatMessage({
+        id: 'xpack.monitoring.apm.instances.status.lastEventDescription',
+        defaultMessage: '{timeOfLastEvent} ago' }, {
+        timeOfLastEvent: formatTimestampToDuration(+moment(timeOfLastEvent), CALCULATE_DURATION_SINCE)
+      }),
       dataTestSubj: 'timeOfLastEvent',
     }
   ];
@@ -52,7 +57,7 @@ export function StatusUI({ stats, intl }) {
     <Fragment>
       <FormattedMessage
         id="xpack.monitoring.apm.instances.statusDescription"
-        defaultMessage="Status: {ApmStatusIcon}"
+        defaultMessage="Status: {apmStatusIcon}"
         values={{
           apmStatusIcon: (
             <ApmStatusIcon status={status} />

@@ -10,6 +10,7 @@ import { SummaryStatus } from '../../summary_status';
 import { ApmStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
+import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 function StatusUI({ stats, intl }) {
@@ -59,7 +60,11 @@ function StatusUI({ stats, intl }) {
         id: 'xpack.monitoring.apm.instance.status.lastEventLabel',
         defaultMessage: 'Last Event',
       }),
-      value: formatTimestampToDuration(+moment(timeOfLastEvent), 'since') + ' ago',
+      value: intl.formatMessage({
+        id: 'xpack.monitoring.apm.instance.status.lastEventDescription',
+        defaultMessage: '{timeOfLastEvent} ago' }, {
+        timeOfLastEvent: formatTimestampToDuration(+moment(timeOfLastEvent), CALCULATE_DURATION_SINCE)
+      }),
       dataTestSubj: 'timeOfLastEvent',
     }
   ];
@@ -68,7 +73,7 @@ function StatusUI({ stats, intl }) {
     <Fragment>
       <FormattedMessage
         id="xpack.monitoring.apm.instance.statusDescription"
-        defaultMessage="Status: {ApmStatusIcon}"
+        defaultMessage="Status: {apmStatusIcon}"
         values={{
           apmStatusIcon: (
             <ApmStatusIcon status={status} />

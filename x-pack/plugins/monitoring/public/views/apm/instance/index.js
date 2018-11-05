@@ -40,8 +40,11 @@ uiRoutes.when('/apm/instances/:uuid', {
       });
 
       super({
-        title: i18n('xpack.monitoring.apm.instanceRouteTitle', {
-          defaultMessage: 'APM - Instance'
+        title: i18n('xpack.monitoring.apm.instance.routeTitle', {
+          defaultMessage: '{apm} - Instance',
+          values: {
+            apm: 'APM'
+          }
         }),
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/${$route.current.params.uuid}`,
         defaultData: {},

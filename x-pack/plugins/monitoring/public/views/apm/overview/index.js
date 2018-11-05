@@ -13,6 +13,7 @@ import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmOverview } from '../../../components/apm/overview';
 import { timefilter } from 'ui/timefilter';
+import { I18nProvider } from '@kbn/i18n/react';
 
 uiRoutes.when('/apm', {
   template,
@@ -23,7 +24,7 @@ uiRoutes.when('/apm', {
     },
   },
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, {
@@ -31,9 +32,7 @@ uiRoutes.when('/apm', {
       });
 
       super({
-        title: i18n('xpack.monitoring.apm.overviewRouteTitle', {
-          defaultMessage: 'APM'
-        }),
+        title: 'APM',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm`,
         defaultData: {},
         reactNodeId: 'apmOverviewReact',
@@ -56,10 +55,12 @@ uiRoutes.when('/apm', {
 
     renderReact(data, onBrush) {
       const component = (
-        <ApmOverview
-          {...data}
-          onBrush={onBrush}
-        />
+        <I18nProvider>
+          <ApmOverview
+            {...data}
+            onBrush={onBrush}
+          />
+        </I18nProvider>
       );
       super.renderReact(component);
     }
