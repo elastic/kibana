@@ -349,6 +349,17 @@ module.exports = {
      * Canvas overrides
      */
     {
+      files: ['x-pack/plugins/canvas/*', 'x-pack/plugins/canvas/**/*'],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            packageDir: resolve(__dirname, 'x-pack'),
+          },
+        ],
+      },
+    },
+    {
       files: ['x-pack/plugins/canvas/**/*'],
       plugins: ['prettier'],
       rules: {
@@ -407,17 +418,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/*', 'x-pack/plugins/canvas/**/*'],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: './x-pack/',
-          },
-        ],
-      },
-    },
-    {
       files: [
         'x-pack/plugins/canvas/gulpfile.js',
         'x-pack/plugins/canvas/tasks/*.js',
@@ -431,7 +431,6 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
-            packageDir: './x-pack/',
           },
         ],
       },
@@ -440,12 +439,6 @@ module.exports = {
       files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*'],
       globals: { canvas: true, $: true },
       rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: './x-pack/',
-          },
-        ],
         'import/no-unresolved': [
           'error',
           {
