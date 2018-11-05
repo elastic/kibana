@@ -32,7 +32,7 @@ export class EnableModelPlotCheckbox extends Component {
 
   warningTitle = 'Proceed with caution!';
 
-  onChange = e => {
+  onChange = (e) => {
     this.setState({
       checked: e.target.checked,
     });

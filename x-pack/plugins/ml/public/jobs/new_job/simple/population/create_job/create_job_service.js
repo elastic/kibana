@@ -197,7 +197,9 @@ export function PopulationJobServiceProvider(Private) {
       job.data_description.time_field = formConfig.timeField;
 
       if (formConfig.enableModelPlot === true) {
-        job.model_plot_config = { 'enabled': true };
+        job.model_plot_config = {
+          enabled: true
+        };
       } else if (formConfig.enableModelPlot === false) {
         delete job.model_plot_config;
       }

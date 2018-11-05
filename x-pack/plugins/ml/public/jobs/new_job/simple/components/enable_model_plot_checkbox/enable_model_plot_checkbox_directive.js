@@ -8,7 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { EnableModelPlotCheckbox } from './enable_model_plot_checkbox_view.js';
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { ml } from '../../../../../services/ml_api_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -30,15 +30,16 @@ module.directive('mlEnableModelPlotCheckbox', function () {
         FINISHED: 2,
         WARNING: 3,
       };
-      const errorHandler = (error) => {
+
+      function errorHandler(error) {
         console.log('Cardinality could not be validated', error);
         $scope.ui.cardinalityValidator.status = STATUS.FAILED;
         $scope.ui.cardinalityValidator.message = 'Cardinality could not be validated';
-      };
+      }
 
       // Only model plot cardinality relevant
       // format:[{id:"cardinality_model_plot_high",modelPlotCardinality:11405}, {id:"cardinality_partition_field",fieldName:"clientip"}]
-      const checkCardinalitySuccess = (data) => {
+      function checkCardinalitySuccess(data) {
         const response = {
           success: true,
         };
@@ -60,9 +61,9 @@ module.directive('mlEnableModelPlotCheckbox', function () {
         }
 
         return response;
-      };
+      }
 
-      const validateCardinality = function () {
+      function validateCardinality() {
         $scope.ui.cardinalityValidator.status = STATUS.RUNNING;
         $scope.ui.cardinalityValidator.message = '';
 
@@ -77,23 +78,28 @@ module.directive('mlEnableModelPlotCheckbox', function () {
               $scope.formConfig.enableModelPlot = true;
               $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
             } else {
-              $scope.ui.cardinalityValidator.message = `The estimated cardinality of ${validationResult.highCardinality}
-                of fields relevant to creating model plots might result in resource intensive jobs.`;
+              $scope.ui.cardinalityValidator.message = `Creating model plots is resource intensive and not recommended
+                where cardinality of the selected fields is greater than 100. Estimated cardinality
+                for this job is ${validationResult.highCardinality}.
+                If you enable model plot with this configuration we recommend you use a dedicated results index.`;
+
               $scope.ui.cardinalityValidator.status = STATUS.WARNING;
+              // Go ahead and check the dedicated index box for them
+              $scope.formConfig.useDedicatedIndex = true;
               // show the advanced section so the warning message is visible since validation failed
               $scope.ui.showAdvanced = true;
             }
           })
           .catch(errorHandler);
-      };
+      }
 
       // Re-validate cardinality for updated fields/splitField
       // when enable model plot is checked and form valid
-      const revalidateCardinalityOnFieldChange = () => {
+      function revalidateCardinalityOnFieldChange() {
         if ($scope.formConfig.enableModelPlot === true && $scope.ui.formValid === true) {
           validateCardinality();
         }
-      };
+      }
 
       $scope.handleCheckboxChange = (isChecked) => {
         if (isChecked) {
