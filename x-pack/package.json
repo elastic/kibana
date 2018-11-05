@@ -199,6 +199,7 @@
     "moment": "^2.20.1",
     "moment-duration-format": "^1.3.0",
     "moment-timezone": "^0.5.14",
+    "ngreact": "^0.5.1",
     "nodemailer": "^4.6.4",
     "object-path-immutable": "^0.5.3",
     "oppsy": "^2.0.0",

@@ -11242,7 +11242,7 @@ next-tick@1:
   resolved "https://registry.yarnpkg.com/next-tick/-/next-tick-1.0.0.tgz#ca86d1fe8828169b0120208e3dc8424b9db8342c"
   integrity sha1-yobR/ogoFpsBICCOPchCS524NCw=
 
-ngreact@0.5.1:
+ngreact@0.5.1, ngreact@^0.5.1:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/ngreact/-/ngreact-0.5.1.tgz#2dcccc1541771796689d13e51bb8d5010af41c57"
   integrity sha512-u/jOWS0KF/twS09O+yuBgNNEEytEhrmSfLTewAuglDSfEYru6a4I8tUnU4fs9/WvlRWbvJTk7WEnwbGamM+Kvg==

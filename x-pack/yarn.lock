@@ -7650,6 +7650,11 @@ neo-async@^2.5.0:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.5.2.tgz#489105ce7bc54e709d736b195f82135048c50fcc"
   integrity sha512-vdqTKI9GBIYcAEbFAcpKPErKINfPF5zIuz3/niBfq8WUZjpT2tytLlFVrBgWdOtqI4uaA/Rb6No0hux39XXDuw==
 
+ngreact@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/ngreact/-/ngreact-0.5.1.tgz#2dcccc1541771796689d13e51bb8d5010af41c57"
+  integrity sha512-u/jOWS0KF/twS09O+yuBgNNEEytEhrmSfLTewAuglDSfEYru6a4I8tUnU4fs9/WvlRWbvJTk7WEnwbGamM+Kvg==
+
 nice-try@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.4.tgz#d93962f6c52f2c1558c0fbda6d512819f1efe1c4"
