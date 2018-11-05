@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HBMonitor } from '../../../../common/domain_types';
+type HBResolverResult<T> = Promise<T> | T;
 
-export interface HBMonitorsAdapter {
-  getAll(request: any): Promise<HBMonitor[]>;
-}
+export type HBResolver<Result, Parent, Args, Context> = (
+  parent: Parent,
+  args: Args,
+  context: Context
+) => HBResolverResult<Result>;

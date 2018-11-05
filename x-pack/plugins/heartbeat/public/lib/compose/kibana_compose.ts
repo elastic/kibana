@@ -12,7 +12,7 @@ import { HeartbeatFrontendLibs } from '../lib';
 
 export function compose(): HeartbeatFrontendLibs {
   const libs: HeartbeatFrontendLibs = {
-    framework: new HeartbeatKibanaFrameworkAdapter(uiModules.get('heartbeat'), uiRoutes),
+    framework: new HeartbeatKibanaFrameworkAdapter(uiRoutes),
   };
 
   return libs;

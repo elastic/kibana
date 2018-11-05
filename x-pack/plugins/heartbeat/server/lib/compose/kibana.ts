@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from 'hapi';
 import { KibanaDatabaseAdapter } from '../adapters/database/kibana_database_adapter';
 import { KibanaBackendFrameworkAdapter } from '../adapters/framework';
-import { ElasticsearchMonitorsAdapter } from '../adapters/monitors/elasticsearch_monitors_adapter';
-import { HBMonitorsDomain } from '../domains';
+import { ElasticsearchPingsAdapter } from '../adapters/pings/elasticsearch_pings_adapter';
+import { HBPingsDomain } from '../domains';
 import { HBDomainLibs, HBServerLibs } from '../lib';
 
-export function compose(hapiServer: any): HBServerLibs {
+export function compose(hapiServer: Server): HBServerLibs {
   const framework = new KibanaBackendFrameworkAdapter(hapiServer);
   const database = new KibanaDatabaseAdapter(hapiServer.plugins.elasticsearch);
 
-  const monitorsDomain = new HBMonitorsDomain(new ElasticsearchMonitorsAdapter(database), {});
+  const pingsDomain = new HBPingsDomain(new ElasticsearchPingsAdapter(database), {});
 
   const domainLibs: HBDomainLibs = {
-    monitors: monitorsDomain,
+    pings: pingsDomain,
   };
 
   const libs: HBServerLibs = {

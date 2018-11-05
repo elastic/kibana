@@ -4,12 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
+import { Ping } from 'x-pack/plugins/heartbeat/common/graphql/types';
 import { HBServerLibs } from '../../lib/lib';
 
 export const createGetAllRoute = (libs: HBServerLibs) => ({
   method: 'GET',
   path: '/api/heartbeat/monitors',
-  handler: async (request: any) => {
-    return await libs.monitors.getAll(request);
+  options: {
+    validate: {
+      query: Joi.object({
+        size: Joi.number(),
+        sort: Joi.string(),
+      }),
+    },
+  },
+  handler: async (request: any): Promise<Ping[]> => {
+    const { size, sort } = request.query;
+    return await libs.pings.getAll(request, sort, size);
   },
 });
