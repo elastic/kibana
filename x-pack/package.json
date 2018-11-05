@@ -5,7 +5,6 @@
   "private": true,
   "license": "Elastic-License",
   "scripts": {
-    "preinstall": "node ../preinstall_check",
     "kbn": "node ../scripts/kbn",
     "kbn:bootstrap": "gulp canvas:plugins:build",
     "start": "gulp dev",
