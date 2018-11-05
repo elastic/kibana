@@ -145,11 +145,13 @@
         >
       </div>
       <div class="form-group">
-        <label for="discoverFieldChooserHideMissingFields"
-          i18n-id="kbn.discover.fieldChooser.filter.hideMissingFieldsLabel"
-          i18n-default-message="{input} Hide missing fields"
-          i18n-values="{ input: '<input id=\'discoverFieldChooserHideMissingFields\' type=\'checkbox\' ng-model=\'filter.vals.missing\'></label>'}"
-        ></label>
+        <label for="discoverFieldChooserHideMissingFields">
+          <input id="discoverFieldChooserHideMissingFields" type="checkbox" ng-model="filter.vals.missing">
+          <span
+            i18n-id="kbn.discover.fieldChooser.filter.hideMissingFieldsLabel"
+            i18n-default-message="Hide missing fields"
+          ></span>
+        </label>
       </div>
       <button
         ng-click="filter.reset()"
