@@ -5,10 +5,12 @@
  */
 
 import {
+  EuiBadge,
   EuiBreadcrumbDefinition,
   EuiHeader,
   EuiHeaderBreadcrumbs,
   EuiHeaderSection,
+  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
@@ -33,6 +35,14 @@ export class Header extends React.PureComponent<HeaderProps> {
         <EuiHeaderSection>
           <EuiHeaderBreadcrumbs breadcrumbs={[...this.staticBreadcrumbs, ...breadcrumbs]} />
         </EuiHeaderSection>
+        <VerticallyCenteredHeaderSection side="right">
+          <EuiToolTip
+            content="This module is not GA. Please help us by reporting any bugs."
+            position="bottom"
+          >
+            <EuiBadge color="hollow">Beta</EuiBadge>
+          </EuiToolTip>
+        </VerticallyCenteredHeaderSection>
       </HeaderWrapper>
     );
   }
@@ -40,4 +50,10 @@ export class Header extends React.PureComponent<HeaderProps> {
 
 const HeaderWrapper = styled(EuiHeader)`
   height: 29px;
+`;
+
+const VerticallyCenteredHeaderSection = styled(EuiHeaderSection)`
+  padding-left: ${props => props.theme.eui.euiSizeS};
+  padding-right: ${props => props.theme.eui.euiSizeS};
+  align-items: center;
 `;
