@@ -163,8 +163,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('does not show the visualization edit icon', async () => {
-        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-        expect(editLinkExists).to.be(false);
+        await dashboardPanelActions.expectMissingEditPanelAction();
       });
 
       it('does not show the visualization delete icon', async () => {

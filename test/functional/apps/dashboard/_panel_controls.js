@@ -61,11 +61,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.saveDashboard(dashboardName);
 
         await dashboardPanelActions.openContextMenu();
-        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-        const removeExists = await dashboardPanelActions.removePanelActionExists();
-
-        expect(editLinkExists).to.equal(false);
-        expect(removeExists).to.equal(false);
+        await dashboardPanelActions.expectMissingEditPanelAction();
+        await dashboardPanelActions.expectMissingRemovePanelAction();
       });
 
       it('are shown in edit mode', async function () {
@@ -75,11 +72,8 @@ export default function ({ getService, getPageObjects }) {
         expect(isContextMenuIconVisible).to.equal(true);
         await dashboardPanelActions.openContextMenu();
 
-        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-        const removeExists = await dashboardPanelActions.removePanelActionExists();
-
-        expect(editLinkExists).to.equal(true);
-        expect(removeExists).to.equal(true);
+        await dashboardPanelActions.expectExistsEditPanelAction();
+        await dashboardPanelActions.expectExistsRemovePanelAction();
       });
 
       // Based off an actual bug encountered in a PR where a hard refresh in edit mode did not show the edit mode
@@ -91,11 +85,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await dashboardPanelActions.openContextMenu();
-        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-        expect(editLinkExists).to.equal(true);
-
-        const removeExists = await dashboardPanelActions.removePanelActionExists();
-        expect(removeExists).to.equal(true);
+        await dashboardPanelActions.expectExistsEditPanelAction();
+        await dashboardPanelActions.expectExistsRemovePanelAction();
 
         // Get rid of the timestamp in the url.
         await remote.get(currentUrl.toString(), false);
@@ -107,22 +98,15 @@ export default function ({ getService, getPageObjects }) {
           await dashboardPanelActions.toggleExpandPanel();
 
           await dashboardPanelActions.openContextMenu();
-          const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-          const removeExists = await dashboardPanelActions.removePanelActionExists();
-
-          expect(editLinkExists).to.equal(false);
-          expect(removeExists).to.equal(false);
+          await dashboardPanelActions.expectMissingEditPanelAction();
+          await dashboardPanelActions.expectMissingRemovePanelAction();
         });
 
         it('in edit mode hides remove icons ', async function () {
           await PageObjects.dashboard.switchToEditMode();
           await dashboardPanelActions.openContextMenu();
-          const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-          const removeExists = await dashboardPanelActions.removePanelActionExists();
-
-          expect(editLinkExists).to.equal(true);
-          expect(removeExists).to.equal(false);
-
+          await dashboardPanelActions.expectExistsEditPanelAction();
+          await dashboardPanelActions.expectMissingRemovePanelAction();
           await dashboardPanelActions.toggleExpandPanel();
         });
       });
@@ -182,8 +166,7 @@ export default function ({ getService, getPageObjects }) {
       it('shown in edit mode', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await dashboardPanelActions.openContextMenu();
-        const expandExists = await dashboardPanelActions.toggleExpandActionExists();
-        expect(expandExists).to.equal(true);
+        await dashboardPanelActions.expectExistsToggleExpandAction();
       });
     });
   });
