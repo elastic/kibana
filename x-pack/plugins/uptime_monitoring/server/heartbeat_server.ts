@@ -16,5 +16,5 @@ export const initHeartbeatServer = (libs: HBServerLibs) => {
     resolvers: resolvers.map(createResolversFn => createResolversFn(libs)),
     typeDefs,
   });
-  libs.framework.registerGraphQLEndpoint('/api/heartbeat/graphql', graphQLSchema);
+  libs.framework.registerGraphQLEndpoint('/api/uptime/graphql', graphQLSchema);
 };
