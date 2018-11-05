@@ -103,7 +103,7 @@ export class ActionStatus {
   static fromUpstreamJson(json) {
     if (!json.id) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.actionStatus.absenceOfIdPropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.actionStatus.idPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain an {id} property',
           values: {
             id: 'id'
@@ -113,7 +113,7 @@ export class ActionStatus {
     }
     if (!json.actionStatusJson) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.actionStatus.absenceOfActionStatusJsonPropertyBadRequestMessage', {
+        i18n.translate('xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage', {
           defaultMessage: 'json argument must contain an {actionStatusJson} property',
           values: {
             actionStatusJson: 'actionStatusJson'

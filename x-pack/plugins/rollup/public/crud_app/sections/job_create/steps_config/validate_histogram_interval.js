@@ -17,7 +17,7 @@ export function validateHistogramInterval(histogram, histogramInterval) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.histogramIntervalZero"
-        defaultMessage="Interval must be greater than zero"
+        defaultMessage="Interval must be greater than zero."
       />
     )];
   }
@@ -26,7 +26,7 @@ export function validateHistogramInterval(histogram, histogramInterval) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.histogramIntervalMissing"
-        defaultMessage="You must specify an interval to roll-up these histogram fields"
+        defaultMessage="An interval is required to roll up these histogram fields."
       />
     )];
   }
