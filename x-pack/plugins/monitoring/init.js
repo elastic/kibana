@@ -54,6 +54,13 @@ export const init = (monitoringPlugin, server) => {
     }
   });
 
+  xpackMainPlugin.registerFeature({
+    id: 'monitoring',
+    name: 'Monitoring',
+    type: 'app',
+    icon: 'monitoringApp'
+  });
+
   const bulkUploader = initBulkUploader(kbnServer, server);
   const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
   const { info: xpackMainInfo } = xpackMainPlugin;

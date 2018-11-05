@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { resolve } from 'path';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
@@ -23,6 +24,8 @@ import { createAuthorizationService, registerPrivilegesWithCluster } from './ser
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
+import { capabilityDecorator } from './server/lib/capability_decorator';
+import { registerUserProfileCapabilityDecorator } from '../xpack_main/server/lib/user_profile';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -124,6 +127,8 @@ export const security = (kibana) => new kibana.Plugin({
       }
     });
 
+    registerUserProfileCapabilityDecorator(Number.MIN_SAFE_INTEGER, capabilityDecorator);
+
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
 
     const { savedObjects } = server;
@@ -185,6 +190,42 @@ export const security = (kibana) => new kibana.Plugin({
           layout,
         }
       };
+    });
+
+
+    server.ext('onPostAuth', async function (req, h) {
+      const path = req.path;
+
+      // Enforce app restrictions
+      if (path.startsWith('/app/')) {
+        const appId = path.split('/', 3)[2];
+        const userProfile = await req.getUserProfile();
+        if (!userProfile.canAccessFeature(appId)) {
+          return Boom.notFound();
+        }
+      }
+
+      // Enforce API restrictions for associated applications
+      if (path.startsWith('/api/')) {
+        const { tags = [] } = req.route.settings;
+
+        const actionTags = tags.filter(tag => tag.startsWith('access:'));
+
+        if (actionTags.length > 0) {
+          const feature = path.split('/', 3)[2];
+          const actions = actionTags.map(tag => `api:${feature}/${tag.split(':', 2)[1]}`);
+
+          const { checkPrivilegesWithRequest } = server.plugins.security.authorization;
+          const checkPrivileges = checkPrivilegesWithRequest(req);
+          const canExecute = await checkPrivileges.globally(actions);
+
+          if (!canExecute.hasAllRequested) {
+            return Boom.notFound();
+          }
+        }
+      }
+
+      return h.continue;
     });
   }
 });

@@ -5,11 +5,11 @@
  */
 import { shallow } from 'enzyme';
 import React from 'react';
-import { UserProfileProvider } from '../../../xpack_main/public/services/user_profile';
+import { UserProfile } from '../../../xpack_main/common/user_profile';
 import { ManageSpacesButton } from './manage_spaces_button';
 
 const buildUserProfile = (canManageSpaces: boolean) => {
-  return UserProfileProvider({ manageSpaces: canManageSpaces });
+  return new UserProfile({ manageSpaces: canManageSpaces });
 };
 
 describe('ManageSpacesButton', () => {

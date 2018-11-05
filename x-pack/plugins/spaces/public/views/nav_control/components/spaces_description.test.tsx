@@ -6,17 +6,13 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+import { UserProfile } from '../../../../../xpack_main/common/user_profile';
 import { SpacesDescription } from './spaces_description';
 
 describe('SpacesDescription', () => {
   it('renders without crashing', () => {
     expect(
-      shallow(
-        <SpacesDescription
-          userProfile={{ hasCapability: () => true }}
-          onManageSpacesClick={jest.fn()}
-        />
-      )
+      shallow(<SpacesDescription userProfile={new UserProfile()} onManageSpacesClick={jest.fn()} />)
     ).toMatchSnapshot();
   });
 });

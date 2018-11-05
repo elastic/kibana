@@ -64,6 +64,7 @@ import 'leaflet';
 
 routes.enable();
 
+
 routes
   .otherwise({
     redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`

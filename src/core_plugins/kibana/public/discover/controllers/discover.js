@@ -156,7 +156,8 @@ function discoverController(
   courier,
   kbnUrl,
   localStorage,
-  breadcrumbState
+  breadcrumbState,
+  discoverConfig,
 ) {
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
@@ -190,85 +191,103 @@ function discoverController(
     dirty: !savedSearch.id
   };
 
-  $scope.topNavMenu = [{
-    key: 'new',
-    description: 'New Search',
-    run: function () { kbnUrl.change('/discover'); },
-    testId: 'discoverNewButton',
-  }, {
-    key: 'save',
-    description: 'Save Search',
-    testId: 'discoverSaveButton',
-    run: async () => {
-      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
-        const currentTitle = savedSearch.title;
-        savedSearch.title = newTitle;
-        savedSearch.copyOnSave = newCopyOnSave;
-        const saveOptions = {
-          confirmOverwrite: false,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        };
-        return saveDataSource(saveOptions).then(({ id, error }) => {
-          // If the save wasn't successful, put the original values back.
-          if (!id || error) {
-            savedSearch.title = currentTitle;
-          }
-          return { id, error };
-        });
-      };
+  const getTopNavLinks = () => {
+    const newSearch = {
+      key: 'new',
+      description: 'New Search',
+      run: function () { kbnUrl.change('/discover'); },
+      testId: 'discoverNewButton',
+    };
 
-      const saveModal = (
-        <SavedObjectSaveModal
-          onSave={onSave}
-          onClose={() => {}}
-          title={savedSearch.title}
-          showCopyOnSave={savedSearch.id ? true : false}
-          objectType="search"
-        />);
-      showSaveModal(saveModal);
+    const saveSearch = {
+      key: 'save',
+      description: 'Save Search',
+      testId: 'discoverSaveButton',
+      run: async () => {
+        const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+          const currentTitle = savedSearch.title;
+          savedSearch.title = newTitle;
+          savedSearch.copyOnSave = newCopyOnSave;
+          const saveOptions = {
+            confirmOverwrite: false,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          };
+          return saveDataSource(saveOptions).then(({ id, error }) => {
+            // If the save wasn't successful, put the original values back.
+            if (!id || error) {
+              savedSearch.title = currentTitle;
+            }
+            return { id, error };
+          });
+        };
+
+        const saveModal = (
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => { }}
+            title={savedSearch.title}
+            showCopyOnSave={savedSearch.id ? true : false}
+            objectType="search"
+          />);
+        showSaveModal(saveModal);
+      }
+    };
+    const openSearch = {
+      key: 'open',
+      description: 'Open Saved Search',
+      testId: 'discoverOpenButton',
+      run: () => {
+        showOpenSearchPanel({
+          makeUrl: (searchId) => {
+            return kbnUrl.eval('#/discover/{{id}}', { id: searchId });
+          }
+        });
+      }
+    };
+
+    const shareSearch = {
+      key: 'share',
+      description: 'Share Search',
+      testId: 'shareTopNavButton',
+      run: async (menuItem, navController, anchorElement) => {
+        const sharingData = await this.getSharingData();
+        showShareContextMenu({
+          anchorElement,
+          allowEmbed: false,
+          getUnhashableStates,
+          objectId: savedSearch.id,
+          objectType: 'search',
+          shareContextMenuExtensions,
+          sharingData: {
+            ...sharingData,
+            title: savedSearch.title,
+          },
+          isDirty: $appStatus.dirty,
+        });
+      }
+    };
+
+    const inspectSearch = {
+      key: 'inspect',
+      description: 'Open Inspector for search',
+      testId: 'openInspectorButton',
+      run() {
+        Inspector.open(inspectorAdapters, {
+          title: savedSearch.title
+        });
+      }
+    };
+
+    const hideSave = discoverConfig.getHideWriteControls();
+
+    if (hideSave) {
+      return [newSearch, openSearch, shareSearch, inspectSearch];
     }
-  }, {
-    key: 'open',
-    description: 'Open Saved Search',
-    testId: 'discoverOpenButton',
-    run: () => {
-      showOpenSearchPanel({
-        makeUrl: (searchId) => {
-          return kbnUrl.eval('#/discover/{{id}}', { id: searchId });
-        }
-      });
-    }
-  }, {
-    key: 'share',
-    description: 'Share Search',
-    testId: 'shareTopNavButton',
-    run: async (menuItem, navController, anchorElement) => {
-      const sharingData = await this.getSharingData();
-      showShareContextMenu({
-        anchorElement,
-        allowEmbed: false,
-        getUnhashableStates,
-        objectId: savedSearch.id,
-        objectType: 'search',
-        shareContextMenuExtensions,
-        sharingData: {
-          ...sharingData,
-          title: savedSearch.title,
-        },
-        isDirty: $appStatus.dirty,
-      });
-    }
-  }, {
-    key: 'inspect',
-    description: 'Open Inspector for search',
-    testId: 'openInspectorButton',
-    run() {
-      Inspector.open(inspectorAdapters, {
-        title: savedSearch.title
-      });
-    }
-  }];
+    return [newSearch, saveSearch, openSearch, shareSearch, inspectSearch];
+  };
+
+  $scope.topNavMenu = getTopNavLinks();
 
   // the actual courier.SearchSource
   $scope.searchSource = savedSearch.searchSource;

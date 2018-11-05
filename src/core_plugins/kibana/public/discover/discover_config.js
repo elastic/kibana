@@ -16,25 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { uiModules } from 'ui/modules';
 
-import './discover_config';
-import './saved_searches/saved_searches';
-import './directives';
-import 'ui/collapsible_sidebar';
-import './components/field_chooser/field_chooser';
-import './controllers/discover';
-import 'ui/doc_table/components/table_row';
-
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-
-FeatureCatalogueRegistryProvider.register(() => {
-  return {
-    id: 'discover',
-    title: 'Discover',
-    description: 'Interactively explore your data by querying and filtering raw documents.',
-    icon: 'discoverApp',
-    path: '/app/kibana#/discover',
-    showOnHomePage: true,
-    category: FeatureCatalogueCategory.DATA
-  };
-});
+uiModules.get('kibana')
+  .provider('discoverConfig', () => {
+    return {
+      $get() {
+        return {
+          getHideWriteControls() {
+            return false;
+          }
+        };
+      }
+    };
+  });
