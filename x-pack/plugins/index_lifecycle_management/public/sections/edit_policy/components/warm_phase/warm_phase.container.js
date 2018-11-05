@@ -12,8 +12,6 @@ import { WarmPhase as PresentationComponent } from './warm_phase';
 import {
   getNodeOptions,
   getPhase,
-  getSelectedReplicaCount,
-  getSelectedPrimaryShardCount
 } from '../../../../store/selectors';
 import { setPhaseData, fetchNodes } from '../../../../store/actions';
 import { PHASE_WARM, PHASE_HOT, PHASE_ROLLOVER_ENABLED } from '../../../../store/constants';
@@ -21,8 +19,6 @@ import { PHASE_WARM, PHASE_HOT, PHASE_ROLLOVER_ENABLED } from '../../../../store
 export const WarmPhase = connect(
   state => ({
     phaseData: getPhase(state, PHASE_WARM),
-    hotPhaseReplicaCount: Number(getSelectedReplicaCount(state)),
-    hotPhasePrimaryShardCount: Number(getSelectedPrimaryShardCount(state)),
     hotPhaseRolloverEnabled: getPhase(state, PHASE_HOT)[PHASE_ROLLOVER_ENABLED],
     nodeOptions: getNodeOptions(state)
   }),

@@ -59,10 +59,6 @@ export class WarmPhase extends PureComponent {
       [PHASE_ROLLOVER_MINIMUM_AGE]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
       [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: PropTypes.string.isRequired,
     }).isRequired,
-
-    hotPhaseReplicaCount: PropTypes.number.isRequired,
-    hotPhasePrimaryShardCount: PropTypes.number.isRequired,
-
     nodeOptions: PropTypes.array.isRequired,
   };
 
@@ -74,10 +70,7 @@ export class WarmPhase extends PureComponent {
     const {
       setPhaseData,
       showNodeDetailsFlyout,
-
       phaseData,
-      hotPhaseReplicaCount,
-      hotPhasePrimaryShardCount,
       nodeOptions,
       errors,
       isShowingErrors,
@@ -217,18 +210,6 @@ export class WarmPhase extends PureComponent {
                     />
                   </ErrableFormRow>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow hasEmptyLabelSpace>
-                    <EuiButtonEmpty
-                      flush="left"
-                      onClick={async () => {
-                        await setPhaseData(PHASE_REPLICA_COUNT, hotPhaseReplicaCount);
-                      }}
-                    >
-                      Set to same as hot phase
-                    </EuiButtonEmpty>
-                  </EuiFormRow>
-                </EuiFlexItem>
               </EuiFlexGroup>
 
 
@@ -272,21 +253,6 @@ export class WarmPhase extends PureComponent {
                             min={1}
                           />
                         </ErrableFormRow>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiFormRow hasEmptyLabelSpace>
-                          <EuiButtonEmpty
-                            flush="left"
-                            onClick={async () => {
-                              await setPhaseData(
-                                PHASE_PRIMARY_SHARD_COUNT,
-                                hotPhasePrimaryShardCount
-                              );
-                            }}
-                          >
-                              Set to same as hot phase
-                          </EuiButtonEmpty>
-                        </EuiFormRow>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiSpacer />
