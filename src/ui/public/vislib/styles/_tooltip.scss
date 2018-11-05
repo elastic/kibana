@@ -6,7 +6,7 @@
   line-height: 1.1;
   font-size: @font-size-base;
   font-weight: normal;
-  background: red !important;
+  background: @tooltip-bg !important;
   color: @tooltip-color !important;
   border-radius: 4px;
   position: fixed;

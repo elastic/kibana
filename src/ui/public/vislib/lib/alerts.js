@@ -49,12 +49,12 @@ export function VislibLibAlertsProvider() {
       const icon = alertDef.icon || type;
       const msg = alertDef.msg;
       // alert container
-      const $icon = $('<i>').addClass('vis-alerts-icon fa fa-' + icon);
-      const $text = $('<p>').addClass('vis-alerts-text').text(msg);
+      const $icon = $('<i>').addClass('visAlerts__icon fa fa-' + icon);
+      const $text = $('<p>').addClass('visAlerts__text').text(msg);
       const $closeIcon =  $('<i>').addClass('fa fa-close');
-      const $closeDiv = $('<div>').addClass('vis-alerts-close').append($closeIcon);
+      const $closeDiv = $('<div>').addClass('visAlerts__close').append($closeIcon);
 
-      const $alert = $('<div>').addClass('vis-alert vis-alert-' + type).append([$icon, $text, $closeDiv]);
+      const $alert = $('<div>').addClass('visAlert visAlert--' + type).append([$icon, $text, $closeDiv]);
       $closeDiv.on('click', () => {
         $alert.remove();
       });
@@ -67,9 +67,9 @@ export function VislibLibAlertsProvider() {
       const alerts = this.alerts;
       const vis = this.vis;
 
-      $(vis.el).find('.vis-alerts').append($('<div>').addClass('vis-alerts-tray'));
+      $(vis.el).find('.vis-alerts').append($('<div>').addClass('visAlerts__tray'));
       if (!alerts.size()) return;
-      $(vis.el).find('.vis-alerts-tray').append(alerts.value());
+      $(vis.el).find('.visAlerts__tray').append(alerts.value());
     }
 
     // shows new alert
@@ -81,7 +81,7 @@ export function VislibLibAlertsProvider() {
       };
       if (this.alertDefs.find(alertDef => alertDef.msg === alert.msg)) return;
       this.alertDefs.push(alert);
-      $(vis.el).find('.vis-alerts-tray').append(
+      $(vis.el).find('.visAlerts__tray').append(
         this._addAlert(alert)
       );
     }
