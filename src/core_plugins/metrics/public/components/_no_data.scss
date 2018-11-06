@@ -1,6 +1,8 @@
 // EUITODO: Convert to EuiCallout
 .tvbNoData {
   padding: $euiSize;
+  width: 100%;
+  height: 100%;
 
   // Calculate colors similar to EuiCallout
   $tempBackgroundColor: tintOrShade($euiColorPrimary, 90%, 70%);
