@@ -5,13 +5,16 @@
  */
 
 import {
+  EuiDatePicker,
+  EuiDatePickerRange,
   // @ts-ignore
   EuiHeaderLogo,
   EuiPanel,
   // @ts-ignore
   EuiSearchBar,
 } from '@elastic/eui';
-import { range as fpRange } from 'lodash/fp';
+import { first, last, noop, range as fpRange } from 'lodash/fp';
+import moment, { Moment } from 'moment';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -22,6 +25,7 @@ import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { Timeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
+import { getDateRange } from '../../components/timeline/body/mini_map/date_ranges';
 import { Sort } from '../../components/timeline/body/sort';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
 import {
@@ -68,12 +72,48 @@ const VisualizationPlaceholder = styled(EuiPanel)`
 
 const maxTimelineWidth = 1125;
 
+const dates: Date[] = getDateRange('day');
+const startDate: Moment = moment(first(dates));
+const endDate: Moment = moment(last(dates));
+
+const DatePicker: React.SFC = () => (
+  <EuiDatePickerRange
+    startDateControl={
+      <EuiDatePicker
+        selected={startDate}
+        onChange={noop}
+        isInvalid={false}
+        aria-label="Start date"
+        showTimeSelect
+      />
+    }
+    endDateControl={
+      <EuiDatePicker
+        selected={endDate}
+        onChange={noop}
+        isInvalid={false}
+        aria-label="End date"
+        showTimeSelect
+      />
+    }
+  />
+);
+
 export const HomePage = pure(() => (
   <PageContainer data-test-subj="pageContainer">
     <PageHeader data-test-subj="pageHeader">
       <Navigation data-test-subj="navigation" />
     </PageHeader>
     <PageContent data-test-subj="pageContent">
+      <div
+        data-test-subj="subHeader"
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <DatePicker />
+      </div>
       <SplitPane
         split="vertical"
         defaultSize="75%"
@@ -103,6 +143,7 @@ export const HomePage = pure(() => (
           <div
             data-test-subj="pane1Header"
             style={{
+              display: 'flex',
               margin: '5px',
               padding: '5px',
             }}

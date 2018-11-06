@@ -6,7 +6,6 @@
 import {
   EuiButton,
   EuiHealth,
-  EuiSpacer,
   // @ts-ignore
   EuiTab,
   // @ts-ignore
@@ -59,12 +58,28 @@ export class Navigation extends React.PureComponent<{}, NavigationState> {
       return res;
     }, ''),
   };
+
   public render() {
     return (
-      <div>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          width: '100%',
+        }}
+      >
         <EuiTabs>{this.renderTabs()}</EuiTabs>
-        <AddData />
-        <EuiSpacer />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            height: '0px',
+            justifyContent: 'flex-end',
+            width: '100%',
+          }}
+        >
+          <AddData />
+        </div>
       </div>
     );
   }
@@ -100,7 +115,6 @@ const AddData = pure(() => (
 ));
 
 const AddSources = styled.div`
-  float: right;
-  margin-top: -10px;
-  transform: translateY(-100%);
+  position: relative;
+  top: -48px;
 `;

@@ -30,7 +30,7 @@ export const FlexPage = styled(EuiPage)`
 `;
 
 export const PageHeader = styled.div`
-  flex: 0 0 auto;
+  display: flex;
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
 `;
 
