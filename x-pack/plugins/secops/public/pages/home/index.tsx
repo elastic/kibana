@@ -5,9 +5,13 @@
  */
 
 import * as React from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 
-import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { LinkToPage } from '../../components/link_to';
+import { PageContainer, PageContent } from '../../components/page';
+import { Navigation } from '../../components/page/navigation';
 import { Timeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
 import { Sort } from '../../components/timeline/body/sort';
@@ -19,6 +23,11 @@ import {
   OnRangeSelected,
 } from '../../components/timeline/events';
 import { WhoAmI } from '../../containers/who_am_i';
+
+import { NotFoundPage } from '../404';
+import { Hosts } from '../hosts';
+import { Network } from '../network';
+import { Overview } from '../overview';
 
 const onColumnSorted: OnColumnSorted = sorted => {
   alert(`column sorted: ${JSON.stringify(sorted)}`);
@@ -42,9 +51,18 @@ const sort: Sort = {
 };
 
 export const HomePage = pure(() => (
-  <EuiPage>
-    <EuiPageBody>
-      <EuiPageContent verticalPosition="center" horizontalPosition="center">
+  <PageContainer>
+    <Navigation />
+    <PageContent>
+      <Divide>
+        <Switch>
+          <Redirect from="/" exact={true} to="/overview" />
+          <Route path="/overview" component={Overview} />
+          <Route path="/hosts" component={Hosts} />
+          <Route path="/network" component={Network} />
+          <Route path="/link-to" component={LinkToPage} />
+          <Route component={NotFoundPage} />
+        </Switch>
         <Timeline
           columnHeaders={headers}
           dataProviders={mockDataProviders}
@@ -55,8 +73,25 @@ export const HomePage = pure(() => (
           sort={sort}
           width={900}
         />
-        <WhoAmI sourceId="default">{({ appName }) => <h1>Hello {appName}</h1>}</WhoAmI>
-      </EuiPageContent>
-    </EuiPageBody>
-  </EuiPage>
+      </Divide>
+    </PageContent>
+    <Footer>
+      <WhoAmI sourceId="default">{({ appName }) => <h1>Hello {appName}</h1>}</WhoAmI>
+    </Footer>
+  </PageContainer>
 ));
+
+const Footer = styled.div`
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  color: #666;
+  padding: 8px 8px;
+  text-align: center;
+`;
+
+const Divide = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
