@@ -18,10 +18,9 @@ const createCrumb = (url, label, testSubj) => {
 
 // generate Elasticsearch breadcrumbs
 function getElasticsearchBreadcrumbs(mainInstance) {
-  const esLabel = i18n.translate('xpack.monitoring.breadcrumbs.esLabel', { defaultMessage: 'Elasticsearch' });
   const breadcrumbs = [];
   if (mainInstance.instance) {
-    breadcrumbs.push(createCrumb('#/elasticsearch', esLabel));
+    breadcrumbs.push(createCrumb('#/elasticsearch', 'Elasticsearch'));
     if (mainInstance.name === 'indices') {
       breadcrumbs.push(createCrumb('#/elasticsearch/indices', i18n.translate(
         'xpack.monitoring.breadcrumbs.es.indicesLabel', { defaultMessage: 'Indices' }), 'breadcrumbEsIndices'));
@@ -41,23 +40,22 @@ function getElasticsearchBreadcrumbs(mainInstance) {
     breadcrumbs.push(createCrumb(null, mainInstance.instance));
   } else {
     // don't link to Overview when we're possibly on Overview or its sibling tabs
-    breadcrumbs.push(createCrumb(null, esLabel));
+    breadcrumbs.push(createCrumb(null, 'Elasticsearch'));
   }
   return breadcrumbs;
 }
 
 // generate Kibana breadcrumbs
 function getKibanaBreadcrumbs(mainInstance) {
-  const kibanaLabel = i18n.translate('xpack.monitoring.breadcrumbs.kibanaLabel', { defaultMessage: 'Kibana' });
   const breadcrumbs = [];
   if (mainInstance.instance) {
-    breadcrumbs.push(createCrumb('#/kibana', kibanaLabel));
+    breadcrumbs.push(createCrumb('#/kibana', 'Kibana'));
     breadcrumbs.push(createCrumb('#/kibana/instances', i18n.translate(
       'xpack.monitoring.breadcrumbs.kibana.instancesLabel', { defaultMessage: 'Instances' })
     ));
   } else {
     // don't link to Overview when we're possibly on Overview or its sibling tabs
-    breadcrumbs.push(createCrumb(null, kibanaLabel));
+    breadcrumbs.push(createCrumb(null, 'Kibana'));
   }
   return breadcrumbs;
 }
