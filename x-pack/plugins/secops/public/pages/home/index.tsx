@@ -29,7 +29,6 @@ import { Hosts } from '../hosts';
 import { Network } from '../network';
 import { Overview } from '../overview';
 
-
 const onColumnSorted: OnColumnSorted = sorted => {
   alert(`column sorted: ${JSON.stringify(sorted)}`);
 };
