@@ -1321,10 +1321,10 @@ core-util-is@~1.0.0:
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
   integrity sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
 
-cp-file@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/cp-file/-/cp-file-5.0.0.tgz#bc700fd30ca32d24d46c7fb02b992e435fc5a978"
-  integrity sha1-vHAP0wyjLSTUbH+wK5kuQ1/FqXg=
+cp-file@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/cp-file/-/cp-file-6.0.0.tgz#f38477ece100b403fcf780fd34d030486beb693e"
+  integrity sha512-OtHMgPugkgwHlbph25wlMKd358lZNhX1Y2viUpPoFmlBPlEiPIRhztYWha11grbGPnlM+urp5saVmwsChCIOEg==
   dependencies:
     graceful-fs "^4.1.2"
     make-dir "^1.0.0"
@@ -1332,14 +1332,14 @@ cp-file@^5.0.0:
     pify "^3.0.0"
     safe-buffer "^5.0.1"
 
-cpy@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/cpy/-/cpy-6.0.0.tgz#0b6888e037bb5a7b02a62249551316208a523253"
-  integrity sha512-7uBKHhKOFgjCVx6Vv2gx/LqdrM9F7l0vunzmyS3CdStn3U02H1ehhS1SCpZ1qJFZqPi40IMUWAPkN/nQ4RXAiA==
+cpy@^7.0.1:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/cpy/-/cpy-7.0.1.tgz#d817e4d81bd7f0f25ff812796c5f1392dc0fb485"
+  integrity sha512-Zo52tXKLJcgy/baacn6KaNoRAakkl2wb+R4u6qJ4wlD0uchncwRQcIk66PlGlkzuToCJO6A6PWX27Tdwc8LU2g==
   dependencies:
     arrify "^1.0.1"
-    cp-file "^5.0.0"
-    globby "^6.0.0"
+    cp-file "^6.0.0"
+    globby "^8.0.1"
     nested-error-stacks "^2.0.0"
 
 create-ecdh@^4.0.0:
@@ -1961,7 +1961,7 @@ globals@^9.18.0:
   resolved "https://registry.yarnpkg.com/globals/-/globals-9.18.0.tgz#aa3896b3e69b487f17e31ed2143d69a8e30c2d8a"
   integrity sha512-S0nG3CLEQiY/ILxqtztTWH/3iRRdyBLw6KMDxnKMchrtbj2OFmehVh0WUCfW3DUrIgx/qFrJPICrq4Z4sTR9UQ==
 
-globby@^6.0.0, globby@^6.1.0:
+globby@^6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/globby/-/globby-6.1.0.tgz#f5a6d70e8395e21c858fb0489d64df02424d506c"
   integrity sha1-9abXDoOV4hyFj7BInWTfAkJNUGw=
@@ -3401,6 +3401,11 @@ require-main-filename@^1.0.1:
   resolved "https://registry.yarnpkg.com/require-main-filename/-/require-main-filename-1.0.1.tgz#97f717b69d48784f5f526a6c5aa8ffdda055a4d1"
   integrity sha1-l/cXtp1IeE9fUmpsWqj/3aBVpNE=
 
+requires-regex@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/requires-regex/-/requires-regex-0.3.3.tgz#60309eaabbfd5ca8259e090b8b5a94b2144eb0dd"
+  integrity sha1-YDCeqrv9XKglngkLi1qUshROsN0=
+
 resolve-url@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/resolve-url/-/resolve-url-0.2.1.tgz#2c637fe77c893afd2a663fe21aa9080068e2052a"
@@ -3944,6 +3949,13 @@ unique-string@^1.0.0:
   integrity sha1-nhBXzKhRq7kzmPizOuGHuZyuwRo=
   dependencies:
     crypto-random-string "^1.0.0"
+
+unlazy-loader@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/unlazy-loader/-/unlazy-loader-0.1.3.tgz#2efdf05c489da311055586bf3cfca0c541dd8fa5"
+  integrity sha512-INqQZxgx399Y8Eo5gihKBmlHvvcacaYMXI9HMtb2c6JbZLJkgdf0s/gkxqJbo2pl+rtxzPtmf7tj7vHlRx+K/g==
+  dependencies:
+    requires-regex "^0.3.3"
 
 unset-value@^1.0.0:
   version "1.0.0"
