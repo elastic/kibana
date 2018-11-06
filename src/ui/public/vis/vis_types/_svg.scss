@@ -11,25 +11,25 @@ svg {
     stroke-width: 1px;
 
     line, path {
-      stroke: $euiColorLightShade;
+      stroke: $euiBorderColor;
       fill: none;
       shape-rendering: crispEdges;
     }
 
     .tick text {
-      font-size: fontSize($euiSizeS);
-      fill: $euiColorMediumShade;
+      @include fontSize($euiSizeS);
+      fill: lightOrDarkTheme($visValueColor, $visTextColorReversed);
     }
   }
 
   .chart-label,
   .label-text,
   .chart-text {
-    fill: $euiColorMediumShade;
+    fill: lightOrDarkTheme($visValueColor, $visTextColorReversed);
   }
 
   .label-line {
-    stroke: $euiColorMediumShade;
+    stroke: lightOrDarkTheme($visValueColor, $visTextColorReversed);
   }
 
   /* Brush Styling */
@@ -55,8 +55,9 @@ svg {
   }
 
   .slice {
-    stroke: white;
-    stroke-width: 2px;
+    stroke: $euiColorEmptyShade;
+    stroke-width: $euiSizeXS/2;
+
     &:hover {
       opacity: 0.8
     }
@@ -67,7 +68,7 @@ svg {
       opacity: 1;
 
       &:hover {
-        stroke-width: 10px;
+        stroke-width: $euiSizeS;
         stroke-opacity: 0.8;
       }
     }

@@ -1,0 +1,107 @@
+// NOTE: Some of the styles attempt to align with the TSVB legend
+
+.visLegend__toggle {
+  align-self: flex-start;
+  // Override .kuiCollapseButton
+  color: lightOrDarkTheme($visValueColor, $visValueColorReversed) !important;
+}
+
+.visLegend {
+  @include euiFontSizeXS;
+  display: flex;
+  flex-direction: row;
+  padding: $euiSizeXS 0;
+  overflow: auto;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+
+  // flex-direction re-aligns toggle button
+  .vislib-container--legend-left & {
+    flex-direction: row-reverse;
+  }
+
+  .vislib-container--legend-right & {
+    flex-direction: row;
+  }
+
+  .vislib-container--legend-top & {
+    flex-direction: column-reverse;
+    width: 100%;
+    padding-left: $euiSizeL;
+
+  }
+  .vislib-container--legend-bottom & {
+    flex-direction: column;
+    width: 100%;
+    padding-left: $euiSizeL;
+  }
+
+  .visLegend__list {
+    width: 150px;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    .vislib-container--legend-top &,
+    .vislib-container--legend-bottom & {
+      width: auto;
+      overflow-y: hidden;
+
+      .legend-value {
+        display: inline-block;
+      }
+    }
+
+    &.hidden {
+      visibility: hidden;
+    }
+  }
+}
+
+.legend-value {
+  cursor: pointer;
+  padding: $euiSizeXS;
+  display: flex;
+  max-width: 130px;
+
+  &.disabled {
+    opacity: 0.5;
+  }
+}
+
+.visLegend__valueTitle {
+  color: lightOrDarkTheme($visTextColor, $visTextColorReversed);
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.visLegend__valueTitle--truncate {
+  @include euiTextTruncate;
+}
+
+.visLegend__valueTitle--full {
+  word-break: break-all;
+}
+
+.visLegend__valueDetails {
+  border-bottom: 1px solid $euiColorLightShade;
+  padding-bottom: $euiSizeXS;
+}
+
+.visLegend__valueColorPicker {
+  width: $euiSizeM * 10;
+  margin: auto;
+
+  .visLegend__valueColorPickerDot {
+    margin: $euiSizeXS/2;
+
+    &:hover {
+      transform: scale(1.4);
+    }
+  }
+}
