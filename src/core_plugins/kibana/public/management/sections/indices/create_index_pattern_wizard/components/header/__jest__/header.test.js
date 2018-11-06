@@ -43,4 +43,18 @@ describe('Header', () => {
 
     expect(component).toMatchSnapshot();
   });
+
+  it('should render a different name, prompt, and beta tag if provided', () => {
+    const component = shallow(
+      <Header
+        isIncludingSystemIndices={false}
+        onChangeIncludingSystemIndices={() => {}}
+        prompt={<div>Test prompt</div>}
+        indexPatternName="test index pattern"
+        isBeta={true}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
 });

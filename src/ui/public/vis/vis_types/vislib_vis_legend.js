@@ -26,7 +26,7 @@ import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 
 
 uiModules.get('kibana')
-  .directive('vislibLegend', function (Private, getAppState, $timeout) {
+  .directive('vislibLegend', function (Private, getAppState, $timeout, i18n) {
     const Data = Private(VislibLibDataProvider);
     const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
@@ -137,7 +137,7 @@ uiModules.get('kibana')
         function refresh() {
           const vislibVis = $scope.vis.vislibVis;
           if (!vislibVis || !vislibVis.visConfig) {
-            $scope.labels = [{ label: 'loading ...' }];
+            $scope.labels = [{ label: i18n('common.ui.vis.visTypes.legend.loadingLabel', { defaultMessage: 'loading…' }) }];
             return;
           }  // make sure vislib is defined at this point
 

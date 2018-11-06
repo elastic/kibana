@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -16,7 +17,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-export const Navigation = ({
+const NavigationUi = ({
   isSaving,
   hasNextStep,
   hasPreviousStep,
@@ -33,7 +34,12 @@ export const Navigation = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiText>Saving</EuiText>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.rollupJobs.create.navigation.savingText"
+              defaultMessage="Saving"
+            />
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -47,7 +53,10 @@ export const Navigation = ({
           iconType="arrowLeft"
           onClick={goToPreviousStep}
         >
-          Back
+          <FormattedMessage
+            id="xpack.rollupJobs.create.backButton.label"
+            defaultMessage="Back"
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
     );
@@ -64,7 +73,10 @@ export const Navigation = ({
           isDisabled={!canGoToNextStep}
           fill
         >
-          Next
+          <FormattedMessage
+            id="xpack.rollupJobs.create.nextButton.label"
+            defaultMessage="Next"
+          />
         </EuiButton>
       </EuiFlexItem>
     );
@@ -77,7 +89,10 @@ export const Navigation = ({
           onClick={save}
           fill
         >
-          Save
+          <FormattedMessage
+            id="xpack.rollupJobs.create.saveButton.label"
+            defaultMessage="Save"
+          />
         </EuiButton>
       </EuiFlexItem>
     );
@@ -91,7 +106,7 @@ export const Navigation = ({
   );
 };
 
-Navigation.propTypes = {
+NavigationUi.propTypes = {
   hasNextStep: PropTypes.bool.isRequired,
   hasPreviousStep: PropTypes.bool.isRequired,
   isSaving: PropTypes.bool.isRequired,
@@ -100,3 +115,5 @@ Navigation.propTypes = {
   save: PropTypes.func.isRequired,
   canGoToNextStep: PropTypes.bool.isRequired,
 };
+
+export const Navigation = injectI18n(NavigationUi);

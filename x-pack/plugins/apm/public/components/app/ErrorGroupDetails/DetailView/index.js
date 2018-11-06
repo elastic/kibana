@@ -16,10 +16,9 @@ import {
 } from '../../../../style/variables';
 import { get, capitalize, isEmpty } from 'lodash';
 import { STATUS } from '../../../../constants';
-
 import { StickyProperties } from '../../../shared/StickyProperties';
 import { Tab, HeaderMedium } from '../../../shared/UIComponents';
-import DiscoverButton from '../../../shared/DiscoverButton';
+import { DiscoverButton } from '../../../shared/DiscoverButton';
 import {
   PropertiesTable,
   getPropertyTabNames
@@ -148,7 +147,7 @@ function DetailView({ errorGroup, urlParams, location }) {
       interval: 'auto',
       query: {
         language: 'lucene',
-        query: `${SERVICE_NAME}:"${serviceName}" AND ${ERROR_GROUP_ID}:${groupId}${
+        query: `${SERVICE_NAME}:"${serviceName}" AND ${ERROR_GROUP_ID}:"${groupId}"${
           urlParams.kuery ? ` AND ${urlParams.kuery}` : ``
         }`
       },

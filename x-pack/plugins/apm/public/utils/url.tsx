@@ -6,7 +6,7 @@
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import createHistory from 'history/createHashHistory';
-import _ from 'lodash';
+import { get, isEmpty, isPlainObject, mapValues } from 'lodash';
 import qs from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -44,7 +44,8 @@ export function ViewMLJob({
   };
 
   return (
-    <KibanaLink
+    <UnconnectedKibanaLink
+      location={location}
       pathname={pathname}
       hash={hash}
       query={query}
@@ -53,7 +54,7 @@ export function ViewMLJob({
   );
 }
 
-export function toQuery(search?: string) {
+export function toQuery(search?: string): StringMap<any> {
   return search ? qs.parse(search.slice(1)) : {};
 }
 
@@ -63,7 +64,7 @@ export function fromQuery(query: StringMap) {
 }
 
 export function encodeQuery(query: StringMap, exclude: string[] = []) {
-  return _.mapValues(query, (value: any, key: string) => {
+  return mapValues(query, (value: any, key: string) => {
     if (exclude.includes(key)) {
       return encodeURI(value);
     }
@@ -79,7 +80,7 @@ function stringifyWithoutEncoding(query: StringMap) {
 
 function decodeAsObject(value: string) {
   const decoded = rison.decode(value);
-  return _.isPlainObject(decoded) ? decoded : {};
+  return isPlainObject(decoded) ? decoded : {};
 }
 
 export function decodeKibanaSearchParams(search: string) {
@@ -124,15 +125,15 @@ export function RelativeLinkComponent({
   }
 
   // Shorthand for pathname
-  const pathname = path || _.get(props.to, 'pathname') || location.pathname;
+  const pathname = path || get(props.to, 'pathname') || location.pathname;
 
   // Add support for querystring as object
   const search =
-    query || _.get(props.to, 'query')
+    query || get(props.to, 'query')
       ? fromQuery({
           ...toQuery(location.search),
           ...query,
-          ..._.get(props.to, 'query')
+          ...get(props.to, 'query')
         })
       : location.search;
 
@@ -151,6 +152,17 @@ export function RelativeLinkComponent({
 // The two components have different APIs: `path` vs `pathname` and one uses EuiLink the other react-router's Link (which behaves differently)
 // Suggestion: Deprecate RelativeLink, and clean up KibanaLink
 
+// _g is always retrieved from the url - it can not be changed via query prop
+function getGArg(g: string) {
+  // use "g" if it's set in the url
+  if (g && !isEmpty(rison.decode(g))) {
+    return g;
+  }
+
+  // use default 24h (default set in: https://github.com/elastic/kibana/blob/e13e47fc4eb6112f2a5401408e9f765eae90f55d/x-pack/plugins/apm/public/utils/timepicker/index.js#L31-L35)
+  return '(time:(from:now-24h,mode:quick,to:now))';
+}
+
 export interface KibanaLinkArgs {
   location: {
     search?: string;
@@ -164,18 +176,25 @@ export interface KibanaLinkArgs {
   className?: string;
 }
 
-export function KibanaLinkComponent({
+/**
+ * NOTE: Use this component directly if you have to use a link that is
+ * going to be rendered outside of React, e.g. in the Kibana global toast loader.
+ *
+ * You must remember to pass in location in that case.
+ */
+
+export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   location,
   pathname,
   hash,
   query = {},
   ...props
-}: KibanaLinkArgs) {
+}) => {
   // Preserve current _g and _a
   const currentQuery = toQuery(location.search);
   const nextQuery = {
     ...query,
-    _g: query._g ? rison.encode(query._g) : currentQuery._g,
+    _g: getGArg(currentQuery._g),
     _a: query._a ? rison.encode(query._a) : ''
   };
 
@@ -186,14 +205,14 @@ export function KibanaLinkComponent({
   });
 
   return <EuiLink {...props} href={href} />;
-}
+};
 
 const withLocation = connect(
   ({ location }: { location: any }) => ({ location }),
   {}
 );
 export const RelativeLink = withLocation(RelativeLinkComponent);
-export const KibanaLink = withLocation(KibanaLinkComponent);
+export const KibanaLink = withLocation(UnconnectedKibanaLink);
 
 // This is downright horrible 😭 💔
 // Angular decodes encoded url tokens like "%2F" to "/" which causes the route to change.
