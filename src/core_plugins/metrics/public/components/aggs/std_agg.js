@@ -49,8 +49,9 @@ function StandardAgg(props) {
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormLabel>Aggregation</EuiFormLabel>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
           <AggSelect
+            id={htmlId('aggregation')}
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}

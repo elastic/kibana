@@ -130,7 +130,7 @@ class TableSeriesConfig extends Component {
 
         <EuiFlexGroup responsive={false} wrap={true}>
           <EuiFlexItem grow={true}>
-            <EuiFormRow label="Field">
+            <EuiFormRow id={htmlId('field')} label="Field">
               <FieldSelect
                 fields={this.props.fields}
                 indexPattern={this.props.panel.index_pattern}

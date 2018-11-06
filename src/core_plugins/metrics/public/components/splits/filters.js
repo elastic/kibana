@@ -22,16 +22,17 @@ import GroupBySelect from './group_by_select';
 import FilterItems from './filter_items';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 function SplitByFilters(props) {
   const { onChange, model } = props;
+  const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
   return(
     <div>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiFormRow label="Group by">
+          <EuiFormRow id={htmlId('group')} label="Group by">
             <GroupBySelect
               value={model.split_mode}
               onChange={handleSelectChange('split_mode')}

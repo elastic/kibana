@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import {
-  EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText, EuiLink,
+  htmlIdGenerator, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText, EuiLink,
 } from '@elastic/eui';
 import { durationOutputOptions, durationInputOptions } from './lib/durations';
 const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
@@ -91,6 +91,7 @@ class DataFormatPicker extends Component {
   }
 
   render() {
+    const htmlId = htmlIdGenerator();
     const value = this.props.value || '';
     let defaultValue = value;
     if (!_.includes(['bytes', 'number', 'percent'], value)) {
@@ -122,7 +123,7 @@ class DataFormatPicker extends Component {
       return (
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiFormRow label={this.props.label}>
+            <EuiFormRow id={htmlId('date')} label={this.props.label}>
               <EuiComboBox
                 isClearable={false}
                 options={options}
@@ -133,7 +134,7 @@ class DataFormatPicker extends Component {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label="From">
+            <EuiFormRow id={htmlId('from')} label="From">
               <EuiComboBox
                 isClearable={false}
                 options={durationInputOptions}
@@ -144,7 +145,7 @@ class DataFormatPicker extends Component {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label="To">
+            <EuiFormRow id={htmlId('to')} label="To">
               <EuiComboBox
                 isClearable={false}
                 options={durationOutputOptions}
@@ -155,7 +156,7 @@ class DataFormatPicker extends Component {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label="Decimal places">
+            <EuiFormRow id={htmlId('decimal')} label="Decimal places">
               <EuiFieldText
                 defaultValue={decimals}
                 inputRef={(el) => this.decimals = el}

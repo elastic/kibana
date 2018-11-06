@@ -24,9 +24,10 @@ import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import FieldSelect from '../aggs/field_select';
 import MetricSelect from '../aggs/metric_select';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSpacer } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSpacer } from '@elastic/eui';
 
 export const SplitByTerms = props => {
+  const htmlId = htmlIdGenerator();
   const handleTextChange = createTextHandler(props.onChange);
   const handleSelectChange = createSelectHandler(props.onChange);
   const { indexPattern } = props;
@@ -48,7 +49,7 @@ export const SplitByTerms = props => {
     <div>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiFormRow label="Group by">
+          <EuiFormRow id={htmlId('group')} label="Group by">
             <GroupBySelect
               value={model.split_mode}
               onChange={handleSelectChange('split_mode')}
@@ -56,7 +57,7 @@ export const SplitByTerms = props => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label="By">
+          <EuiFormRow id={htmlId('by')} label="By">
             <FieldSelect
               indexPattern={indexPattern}
               onChange={handleSelectChange('terms_field')}
@@ -71,7 +72,7 @@ export const SplitByTerms = props => {
 
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiFormRow label="Top">
+          <EuiFormRow id={htmlId('top')} label="Top">
             <EuiFieldNumber
               placeholder="Size"
               value={Number(model.terms_size)}
@@ -80,7 +81,7 @@ export const SplitByTerms = props => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label="Order by">
+          <EuiFormRow id={htmlId('order')} label="Order by">
             <MetricSelect
               metrics={metrics}
               clearable={false}
@@ -92,7 +93,7 @@ export const SplitByTerms = props => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label="Direction">
+          <EuiFormRow id={htmlId('direction')} label="Direction">
             <EuiComboBox
               isClearable={false}
               options={dirOptions}

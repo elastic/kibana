@@ -22,18 +22,19 @@ import createSelectHandler from '../lib/create_select_handler';
 import GroupBySelect from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
 
 export const SplitByFilter = props => {
   const { onChange } = props;
   const defaults = { filter: '' };
   const model = { ...defaults, ...props.model };
+  const htmlId = htmlIdGenerator();
   const handleTextChange = createTextHandler(onChange);
   const handleSelectChange = createSelectHandler(onChange);
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <EuiFormRow label="Group by">
+        <EuiFormRow id={htmlId('group')} label="Group by">
           <GroupBySelect
             value={model.split_mode}
             onChange={handleSelectChange('split_mode')}
@@ -41,7 +42,7 @@ export const SplitByFilter = props => {
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFormRow label="Query string">
+        <EuiFormRow id={htmlId('query')} label="Query string">
           <EuiFieldText
             value={model.filter}
             onChange={handleTextChange('filter')}
