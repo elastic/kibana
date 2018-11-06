@@ -13,15 +13,15 @@ export const PageContainer = styled.div`
   align-items: stretch;
   height: 100%;
   padding: 1rem;
-
   overflow: hidden;
   margin: 0px;
 `;
 
 export const PageContent = styled.div`
   flex: 1 1 auto;
+  height: 100%;
   position: relative;
-  overflow-y: auto;
+  overflow-y: hidden;
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
 `;
 

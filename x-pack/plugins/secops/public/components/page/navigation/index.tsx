@@ -5,6 +5,7 @@
  */
 import {
   EuiButton,
+  EuiHealth,
   EuiSpacer,
   // @ts-ignore
   EuiTab,
@@ -92,7 +93,9 @@ export class Navigation extends React.PureComponent<{}, NavigationState> {
 
 const AddData = pure(() => (
   <AddSources>
-    <EuiButton href="kibana#home/tutorial_directory/security">Add data</EuiButton>
+    <EuiButton href="kibana#home/tutorial_directory/security">
+      <EuiHealth color="success">Add data</EuiHealth>
+    </EuiButton>
   </AddSources>
 ));
 

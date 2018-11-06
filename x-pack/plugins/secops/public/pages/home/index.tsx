@@ -7,10 +7,11 @@
 import {
   // @ts-ignore
   EuiHeaderLogo,
-  EuiHealth,
-  EuiHorizontalRule,
   EuiPanel,
+  // @ts-ignore
+  EuiSearchBar,
 } from '@elastic/eui';
+import { range as fpRange } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -77,54 +78,97 @@ export const HomePage = pure(() => (
         split="vertical"
         defaultSize="75%"
         primary="second"
-        resizerStyle={{
-          background: '#000',
-          border: '5px solid',
-          opacity: 0.8,
-          zIndex: 1,
-          boxSizing: 'border-box',
-          backgroundClip: 'padding-box',
-          cursor: 'col-resize',
-        }}
         pane1Style={{
-          overflowY: 'scroll',
+          height: '100%',
         }}
         pane2Style={{
+          height: '100%',
           maxWidth: `${maxTimelineWidth}px`,
-          overflowY: 'scroll',
+        }}
+        resizerStyle={{
+          border: '5px solid #909AA1',
+          backgroundClip: 'padding-box',
+          cursor: 'col-resize',
+          margin: '5px',
+          zIndex: 1,
         }}
       >
         <div
+          data-test-subj="pane1"
           style={{
-            display: 'flex',
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            overflow: 'scroll',
+            height: '100%',
+            overflow: 'hidden',
           }}
         >
-          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(x => (
-            <VisualizationPlaceholder data-test-subj="visualizationPlaceholder" key={x}>
-              <WhoAmI sourceId="default">{({ appName }) => <h1>{appName}</h1>}</WhoAmI>
-            </VisualizationPlaceholder>
-          ))}
+          <div
+            data-test-subj="pane1Header"
+            style={{
+              margin: '5px',
+              padding: '5px',
+            }}
+          >
+            <EuiSearchBar />
+          </div>
+          <div
+            data-test-subj="pane1ScrollContainer"
+            style={{
+              height: '100%',
+              overflowY: 'scroll',
+            }}
+          >
+            <div
+              data-test-subj="pane1Content"
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                padding: '5px',
+                height: '100%',
+              }}
+            >
+              {fpRange(0, 10).map(p => (
+                <VisualizationPlaceholder
+                  data-test-subj="visualizationPlaceholder"
+                  key={`visualizationPlaceholder-${p}`}
+                >
+                  <WhoAmI sourceId="default">{({ appName }) => <div>{appName}</div>}</WhoAmI>
+                </VisualizationPlaceholder>
+              ))}
+            </div>
+          </div>
         </div>
-        <Timeline
-          columnHeaders={headers}
-          dataProviders={mockDataProviders}
-          onColumnSorted={onColumnSorted}
-          onDataProviderRemoved={onDataProviderRemoved}
-          onFilterChange={onFilterChange}
-          onRangeSelected={onRangeSelected}
-          sort={sort}
-          width={maxTimelineWidth}
-        />
+
+        <div
+          data-test-subj="pane2"
+          style={{
+            height: '100%',
+            overflow: 'hidden',
+          }}
+        >
+          <div data-test-subj="pane2Header" />
+          <div
+            data-test-subj="pane2ScrollContainer"
+            style={{
+              height: '100%',
+              overflowY: 'scroll',
+            }}
+          >
+            <div data-test-subj="pane2Content">
+              <Timeline
+                columnHeaders={headers}
+                dataProviders={mockDataProviders}
+                onColumnSorted={onColumnSorted}
+                onDataProviderRemoved={onDataProviderRemoved}
+                onFilterChange={onFilterChange}
+                onRangeSelected={onRangeSelected}
+                sort={sort}
+                width={maxTimelineWidth}
+              />
+            </div>
+          </div>
+        </div>
       </SplitPane>
     </PageContent>
-    <Footer>
-      <EuiHorizontalRule margin="xs" />
-      <WhoAmI sourceId="default">
-        {({ appName }) => <EuiHealth color="success">Live {appName} data</EuiHealth>}
-      </WhoAmI>
-    </Footer>
+    <Footer />
   </PageContainer>
 ));
