@@ -146,6 +146,7 @@ class MetricPanelConfig extends Component {
           <EuiTab
             isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
+            data-test-subj="metricEditorPanelOptionsBtn"
           >
             Panel options
           </EuiTab>

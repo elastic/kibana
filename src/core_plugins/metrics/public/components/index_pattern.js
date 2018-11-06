@@ -61,6 +61,7 @@ export const IndexPattern = props => {
             fullWidth
           >
             <EuiFieldText
+              data-test-subj="metricsIndexPatternInput"
               disabled={props.disabled}
               onChange={handleTextChange(indexPatternName, '*')}
               value={model[indexPatternName]}
@@ -75,6 +76,7 @@ export const IndexPattern = props => {
             fullWidth
           >
             <FieldSelect
+              data-test-subj="metricsIndexPatternFieldsSelect"
               restrict="date"
               value={model[timeFieldName]}
               disabled={props.disabled}

@@ -31,6 +31,7 @@ class Annotation extends Component {
   renderTooltip() {
     const [ timestamp, messageSource ] = this.props.series;
     const messages = messageSource.map((message, i) => {
+      console.log(message);
       return (
         <div
           key={`${message}-${i}`}
