@@ -40,9 +40,6 @@ import { SearchSourceProvider } from '../courier/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 import { timefilter } from 'ui/timefilter';
 
-import { Inspector } from '../inspector';
-import { RequestAdapter, DataAdapter } from '../inspector/adapters';
-
 const getTerms = (table, columnIndex, rowIndex) => {
   if (rowIndex === -1) {
     return [];
@@ -132,57 +129,8 @@ export function VisProvider(Private, indexPatterns, getAppState) {
             onBrushEvent(event, getAppState());
           }
         },
-        inspectorAdapters: this._getActiveInspectorAdapters(),
         getAppState,
       };
-    }
-
-    /**
-     * Open the inspector for this visualization.
-     * @return {InspectorSession} the handler for the session of this inspector.
-     */
-    openInspector() {
-      return Inspector.open(this.API.inspectorAdapters, {
-        title: this.title
-      });
-    }
-
-    hasInspector() {
-      return Inspector.isAvailable(this.API.inspectorAdapters);
-    }
-
-    /**
-     * Returns an object of all inspectors for this vis object.
-     * This must only be called after this.type has properly be initialized,
-     * since we need to read out data from the the vis type to check which
-     * inspectors are available.
-     */
-    _getActiveInspectorAdapters() {
-      const adapters = {};
-      const { inspectorAdapters: typeAdapters } = this.type;
-
-      // Add the requests inspector adapters if the vis type explicitly requested it via
-      // inspectorAdapters.requests: true in its definition or if it's using the courier
-      // request handler, since that will automatically log its requests.
-      if (typeAdapters && typeAdapters.requests || this.type.requestHandler === 'courier') {
-        adapters.requests = new RequestAdapter();
-      }
-
-      // Add the data inspector adapter if the vis type requested it or if the
-      // vis is using courier, since we know that courier supports logging
-      // its data.
-      if (typeAdapters && typeAdapters.data || this.type.requestHandler === 'courier') {
-        adapters.data = new DataAdapter();
-      }
-
-      // Add all inspectors, that are explicitly registered with this vis type
-      if (typeAdapters && typeAdapters.custom) {
-        Object.entries(typeAdapters.custom).forEach(([key, Adapter]) => {
-          adapters[key] = new Adapter();
-        });
-      }
-
-      return adapters;
     }
 
     setCurrentState(state) {

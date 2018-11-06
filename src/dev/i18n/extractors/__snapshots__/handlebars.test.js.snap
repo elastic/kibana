@@ -5,7 +5,7 @@ Array [
   Array [
     "ui.id-1",
     Object {
-      "context": "Message context",
+      "description": "Message description",
       "message": "Message text",
     },
   ],
