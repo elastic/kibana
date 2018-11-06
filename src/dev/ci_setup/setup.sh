@@ -19,7 +19,7 @@ export FORCE_COLOR=1
 ###
 ### Set up imagemagick's policy so tests can write to the FS
 ###
-export MAGICK_CONFIGURE_PATH=$dir/x-pack/test/reporting/functional/imagemagick
+export MAGICK_CONFIGURE_PATH="$dir/x-pack/test/reporting/functional/imagemagick"
 
 ###
 ### check that we seem to be in a kibana project
