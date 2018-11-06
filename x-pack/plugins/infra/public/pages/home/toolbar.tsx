@@ -5,6 +5,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import { AutocompleteField } from '../../components/autocomplete_field';
@@ -21,12 +23,28 @@ import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 
 const TITLES = {
-  [InfraNodeType.host]: 'Hosts',
-  [InfraNodeType.pod]: 'Kubernetes Pods',
-  [InfraNodeType.container]: 'Docker Containers',
+  [InfraNodeType.host]: i18n.translate('xpack.infra.homePageToolbar.homeToolbarHostsTitle', {
+    defaultMessage: 'Hosts',
+  }),
+  [InfraNodeType.pod]: i18n.translate(
+    'xpack.infra.homePageToolbar.homeToolbarKubernetesPodsTitle',
+    {
+      defaultMessage: 'Kubernetes Pods',
+    }
+  ),
+  [InfraNodeType.container]: i18n.translate(
+    'xpack.infra.homePageToolbar.homeToolbarDockerContainersTitle',
+    {
+      defaultMessage: 'Docker Containers',
+    }
+  ),
 };
 
-export const HomeToolbar: React.SFC = () => (
+interface Props {
+  intl: InjectedIntl;
+}
+
+const HomeToolbarUI: React.SFC<Props> = ({ intl }) => (
   <Toolbar>
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -38,7 +56,12 @@ export const HomeToolbar: React.SFC = () => (
           )}
         </WithWaffleOptions>
         <EuiText color="subdued">
-          <p>Showing the last 1 minute of data from the time period</p>
+          <p>
+            <FormattedMessage
+              id="xpack.infra.homePageToolbar.showingLastOneMinuteDataText"
+              defaultMessage="Showing the last 1 minute of data from the time period"
+            />
+          </p>
         </EuiText>
       </EuiFlexItem>
       <WithWaffleOptions>
@@ -71,7 +94,10 @@ export const HomeToolbar: React.SFC = () => (
                   loadSuggestions={loadSuggestions}
                   onChange={setFilterQueryDraftFromKueryExpression}
                   onSubmit={applyFilterQueryFromKueryExpression}
-                  placeholder="Search for infrastructure data... (e.g. host.name:host-1)"
+                  placeholder={intl.formatMessage({
+                    id: 'xpack.infra.homePageToolbar.searchFieldPlaceholder',
+                    defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+                  })}
                   suggestions={suggestions}
                   value={filterQueryDraft ? filterQueryDraft.expression : ''}
                 />
@@ -112,3 +138,5 @@ export const HomeToolbar: React.SFC = () => (
     </EuiFlexGroup>
   </Toolbar>
 );
+
+export const HomeToolbar = injectI18n(HomeToolbarUI);

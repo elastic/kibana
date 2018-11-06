@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import compose from 'lodash/fp/compose';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
@@ -29,7 +30,16 @@ export const RedirectToNodeLogs = ({
   <WithSource>
     {({ configuredFields }) => {
       if (!configuredFields) {
-        return <LoadingPage message={`Loading ${nodeType} logs`} />;
+        return (
+          <LoadingPage
+            message={i18n.translate('xpack.infra.redirectToNodeLogs.loadingNodeTypeLogsMessage', {
+              defaultMessage: 'Loading {nodeType} logs',
+              values: {
+                nodeType,
+              },
+            })}
+          />
+        );
       }
 
       const searchString = compose(

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { InfraMetric } from '../../../../common/graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import {
@@ -15,12 +16,16 @@ import {
 export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'nginxOverview',
-    label: 'Nginx',
+    label: i18n.translate('xpack.infra.homePageMetrics.nginxLabel', {
+      defaultMessage: 'Nginx',
+    }),
     requires: ['nginx'],
     sections: [
       {
         id: InfraMetric.nginxHits,
-        label: 'Hits',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerNginxHitsLabel', {
+          defaultMessage: 'Hits',
+        }),
         requires: ['nginx.access'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -36,7 +41,9 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.nginxRequestRate,
-        label: 'Request Rate',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerNginxRequestRateLabel', {
+          defaultMessage: 'Request Rate',
+        }),
         requires: ['nginx.statusstub'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -49,7 +56,9 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.nginxActiveConnections,
-        label: 'Active Connections',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerNginxActiveConnectionsLabel', {
+          defaultMessage: 'Active Connections',
+        }),
         requires: ['nginx.statusstub'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -64,7 +73,9 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.nginxRequestsPerConnection,
-        label: 'Requests per Connections',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerNginxConnectionRequestsLabel', {
+          defaultMessage: 'Requests per Connections',
+        }),
         requires: ['nginx.statusstub'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -73,7 +84,9 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
             reqPerConns: {
               color: theme.eui.euiColorVis1,
               type: InfraMetricLayoutVisualizationType.bar,
-              name: 'reqs per conn',
+              name: i18n.translate('xpack.infra.homePageMetrics.connectionRequestsAliasName', {
+                defaultMessage: 'reqs per conn',
+              }),
             },
           },
         },

@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { I18nProvider, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import { AutocompleteField } from '../../components/autocomplete_field';
@@ -20,7 +21,11 @@ import { WithLogPosition } from '../../containers/logs/with_log_position';
 import { WithLogTextview } from '../../containers/logs/with_log_textview';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 
-export const LogsToolbar: React.SFC = () => (
+interface Props {
+  intl: InjectedIntl;
+}
+
+const LogsToolbarUI: React.SFC<Props> = ({ intl }) => (
   <Toolbar>
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
       <EuiFlexItem>
@@ -40,7 +45,10 @@ export const LogsToolbar: React.SFC = () => (
                   loadSuggestions={loadSuggestions}
                   onChange={setFilterQueryDraftFromKueryExpression}
                   onSubmit={applyFilterQueryFromKueryExpression}
-                  placeholder="Search for log entries... (e.g. host.name:host-1)"
+                  placeholder={intl.formatMessage({
+                    id: 'xpack.infra.homePageLogsToolbar.searchFieldPlaceholder',
+                    defaultMessage: 'Search for log entries... (e.g. host.name:host-1)',
+                  })}
                   suggestions={suggestions}
                   value={filterQueryDraft ? filterQueryDraft.expression : ''}
                 />
@@ -53,22 +61,26 @@ export const LogsToolbar: React.SFC = () => (
         <LogCustomizationMenu>
           <WithLogMinimap>
             {({ availableIntervalSizes, intervalSize, setIntervalSize }) => (
-              <LogMinimapScaleControls
-                availableIntervalSizes={availableIntervalSizes}
-                setIntervalSize={setIntervalSize}
-                intervalSize={intervalSize}
-              />
+              <I18nProvider>
+                <LogMinimapScaleControls
+                  availableIntervalSizes={availableIntervalSizes}
+                  setIntervalSize={setIntervalSize}
+                  intervalSize={intervalSize}
+                />
+              </I18nProvider>
             )}
           </WithLogMinimap>
           <WithLogTextview>
             {({ availableTextScales, textScale, setTextScale, setTextWrap, wrap }) => (
               <>
-                <LogTextWrapControls wrap={wrap} setTextWrap={setTextWrap} />
-                <LogTextScaleControls
-                  availableTextScales={availableTextScales}
-                  textScale={textScale}
-                  setTextScale={setTextScale}
-                />
+                <I18nProvider>
+                  <LogTextWrapControls wrap={wrap} setTextWrap={setTextWrap} />
+                  <LogTextScaleControls
+                    availableTextScales={availableTextScales}
+                    textScale={textScale}
+                    setTextScale={setTextScale}
+                  />
+                </I18nProvider>
               </>
             )}
           </WithLogTextview>
@@ -96,3 +108,5 @@ export const LogsToolbar: React.SFC = () => (
     </EuiFlexGroup>
   </Toolbar>
 );
+
+export const LogsToolbar = injectI18n(LogsToolbarUI);

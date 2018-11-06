@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import { HomePageContent } from './page_content';
@@ -19,8 +20,13 @@ import { WithWaffleTimeUrlState } from '../../containers/waffle/with_waffle_time
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
 import { WithSource } from '../../containers/with_source';
 
-export class HomePage extends React.PureComponent {
+interface HomePageProps {
+  intl: InjectedIntl;
+}
+
+class HomePageUI extends React.PureComponent<HomePageProps, {}> {
   public render() {
+    const { intl } = this.props;
     return (
       <ColumnarPage>
         <WithSource>
@@ -38,9 +44,18 @@ export class HomePage extends React.PureComponent {
               <WithKibanaChrome>
                 {({ basePath }) => (
                   <EmptyPage
-                    title="Looks like you don't have any metrics indices."
-                    message="Let's add some!"
-                    actionLabel="Setup Instructions"
+                    title={intl.formatMessage({
+                      id: 'xpack.infra.homePage.youDontHaveMetricsIndicesTitle',
+                      defaultMessage: "Looks like you don't have any metrics indices.",
+                    })}
+                    message={intl.formatMessage({
+                      id: 'xpack.infra.homePage.youDontHaveMetricsIndicesMessage',
+                      defaultMessage: "Let's add some!",
+                    })}
+                    actionLabel={intl.formatMessage({
+                      id: 'xpack.infra.homePage.setupInstructionsActionLabel',
+                      defaultMessage: 'Setup Instructions',
+                    })}
                     actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
                     data-test-subj="noMetricsIndicesPrompt"
                   />
@@ -53,3 +68,5 @@ export class HomePage extends React.PureComponent {
     );
   }
 }
+
+export const HomePage = injectI18n(HomePageUI);

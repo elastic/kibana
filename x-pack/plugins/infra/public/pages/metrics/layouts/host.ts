@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { InfraMetric } from '../../../../common/graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import { nginxLayoutCreator } from './nginx';
@@ -16,37 +17,57 @@ import {
 export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'hostOverview',
-    label: 'Host',
+    label: i18n.translate('xpack.infra.homePageMetrics.hostLabel', {
+      defaultMessage: 'Host',
+    }),
     sections: [
       {
         id: InfraMetric.hostSystemOverview,
         linkToId: 'hostOverview',
-        label: 'Overview',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerHostOverviewLabel', {
+          defaultMessage: 'Overview',
+        }),
         requires: ['system.cpu', 'system.load', 'system.memory', 'system.network'],
         type: InfraMetricLayoutSectionType.gauges,
         visConfig: {
           seriesOverrides: {
             cpu: {
-              name: 'CPU Usage',
+              name: i18n.translate('xpack.infra.homePageMetrics.innerHostOverviewCPUUsageName', {
+                defaultMessage: 'CPU Usage',
+              }),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
             },
-            load: { name: 'Load (5m)', color: theme.eui.euiColorFullShade },
+            load: {
+              name: i18n.translate(
+                'xpack.infra.homePageMetrics.innerHostOverviewFiveMinuteLoadName',
+                {
+                  defaultMessage: 'Load (5m)',
+                }
+              ),
+              color: theme.eui.euiColorFullShade,
+            },
             memory: {
-              name: 'Memory Usage',
+              name: i18n.translate('xpack.infra.homePageMetrics.innerHostOverviewMemoryUsageName', {
+                defaultMessage: 'Memory Usage',
+              }),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
             },
             rx: {
-              name: 'Inbound (RX)',
+              name: i18n.translate('xpack.infra.homePageMetrics.innerHostOverviewInboundName', {
+                defaultMessage: 'Inbound (RX)',
+              }),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.bits,
               formatterTemplate: '{{value}}/s',
             },
             tx: {
-              name: 'Outbound (RX)',
+              name: i18n.translate('xpack.infra.homePageMetrics.innerHostOverviewOutboundName', {
+                defaultMessage: 'Outbound (RX)',
+              }),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.bits,
               formatterTemplate: '{{value}}/s',
@@ -56,7 +77,9 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.hostCpuUsage,
-        label: 'CPU Usage',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerHostCPUUsageLabel', {
+          defaultMessage: 'CPU Usage',
+        }),
         requires: ['system.cpu'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -77,20 +100,39 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.hostLoad,
-        label: 'Load',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerHostLoadLabel', {
+          defaultMessage: 'Load',
+        }),
         requires: ['system.load'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           seriesOverrides: {
-            load_1m: { color: theme.eui.euiColorVis0, name: '1m' },
-            load_5m: { color: theme.eui.euiColorVis1, name: '5m' },
-            load_15m: { color: theme.eui.euiColorVis3, name: '15m' },
+            load_1m: {
+              color: theme.eui.euiColorVis0,
+              name: i18n.translate('xpack.infra.homePageMetrics.innerHostLoadOneMinuteName', {
+                defaultMessage: '1m',
+              }),
+            },
+            load_5m: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate('xpack.infra.homePageMetrics.innerHostLoadFiveMinuteName', {
+                defaultMessage: '5m',
+              }),
+            },
+            load_15m: {
+              color: theme.eui.euiColorVis3,
+              name: i18n.translate('xpack.infra.homePageMetrics.innerHostLoadFifteenMinuteName', {
+                defaultMessage: '15m',
+              }),
+            },
           },
         },
       },
       {
         id: InfraMetric.hostMemoryUsage,
-        label: 'MemoryUsage',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerHostMemoryUsageLabel', {
+          defaultMessage: 'MemoryUsage',
+        }),
         requires: ['system.memory'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -106,7 +148,9 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.hostNetworkTraffic,
-        label: 'Network Traffic',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerHostNetworkTrafficLabel', {
+          defaultMessage: 'Network Traffic',
+        }),
         requires: ['system.network'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -114,8 +158,18 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
           formatterTemplate: '{{value}}/s',
           type: InfraMetricLayoutVisualizationType.area,
           seriesOverrides: {
-            rx: { color: theme.eui.euiColorVis1, name: 'in' },
-            tx: { color: theme.eui.euiColorVis2, name: 'out' },
+            rx: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate('xpack.infra.homePageMetrics.innerHostNetworkTrafficInRXName', {
+                defaultMessage: 'in',
+              }),
+            },
+            tx: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate('xpack.infra.homePageMetrics.innerHostNetworkTrafficOutTXName', {
+                defaultMessage: 'out',
+              }),
+            },
           },
         },
       },
@@ -123,37 +177,66 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
   },
   {
     id: 'k8sOverview',
-    label: 'Kubernetes',
+    label: i18n.translate('xpack.infra.homePageMetrics.kubernetesLabel', {
+      defaultMessage: 'Kubernetes',
+    }),
     sections: [
       {
         id: InfraMetric.hostK8sOverview,
         linkToId: 'k8sOverview',
-        label: 'Overview',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerKubernetesOverviewLabel', {
+          defaultMessage: 'Overview',
+        }),
         requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.gauges,
         visConfig: {
           seriesOverrides: {
             cpucap: {
-              name: 'CPU Capacity',
+              name: i18n.translate(
+                'xpack.infra.homePageMetrics.innerKubernetesOverviewCPUCapacityName',
+                {
+                  defaultMessage: 'CPU Capacity',
+                }
+              ),
               color: 'secondary',
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
             },
-            load: { name: 'Load (5m)', color: 'secondary' },
+            load: {
+              name: i18n.translate('xpack.infra.homePageMetrics.innerKubernetesOverviewLoadName', {
+                defaultMessage: 'Load (5m)',
+              }),
+              color: 'secondary',
+            },
             memorycap: {
-              name: 'Memory Capacity',
+              name: i18n.translate(
+                'xpack.infra.homePageMetrics.innerKubernetesOverviewMemoryCapacityName',
+                {
+                  defaultMessage: 'Memory Capacity',
+                }
+              ),
               color: 'secondary',
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
             },
             podcap: {
-              name: 'Pod Capacity',
+              name: i18n.translate(
+                'xpack.infra.homePageMetrics.innerKubernetesOverviewPodCapacityName',
+                {
+                  defaultMessage: 'Pod Capacity',
+                }
+              ),
               color: 'secondary',
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
             },
             diskcap: {
-              name: 'Disk Capacity',
+              name: i18n.translate(
+                'xpack.infra.homePageMetrics.innerKubernetesOverviewDiskCapacityName',
+                {
+                  defaultMessage: 'Disk Capacity',
+                }
+              ),
               color: 'secondary',
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
@@ -163,7 +246,9 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.hostK8sCpuCap,
-        label: 'Node CPU Capacity',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerKubernetesNodeCPUCapacityLabel', {
+          defaultMessage: 'Node CPU Capacity',
+        }),
         requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -176,7 +261,12 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.hostK8sMemoryCap,
-        label: 'Node Memory Capacity',
+        label: i18n.translate(
+          'xpack.infra.homePageMetrics.innerKubernetesNodeMemoryCapacityLabel',
+          {
+            defaultMessage: 'Node Memory Capacity',
+          }
+        ),
         requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -189,7 +279,9 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.hostK8sDiskCap,
-        label: 'Node Disk Capacity',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerKubernetesNodeDiskCapacityLabel', {
+          defaultMessage: 'Node Disk Capacity',
+        }),
         requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -202,7 +294,9 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.hostK8sPodCap,
-        label: 'Node Pod Capacity',
+        label: i18n.translate('xpack.infra.homePageMetrics.innerKubernetesNodePodCapacityLabel', {
+          defaultMessage: 'Node Pod Capacity',
+        }),
         requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {

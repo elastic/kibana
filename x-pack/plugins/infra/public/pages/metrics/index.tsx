@@ -17,6 +17,7 @@ import {
   EuiSideNav,
   EuiTitle,
 } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import styled, { withTheme } from 'styled-components';
 import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
 import { AutoSizer } from '../../components/auto_sizer';
@@ -52,19 +53,33 @@ interface Props {
       node: string;
     };
   };
+  intl: InjectedIntl;
 }
 
-class MetricDetailPage extends React.PureComponent<Props> {
+class MetricDetailPageUI extends React.PureComponent<Props> {
   public readonly state = {
     isSideNavOpenOnMobile: false,
   };
 
   public render() {
+    const { intl } = this.props;
     const nodeName = this.props.match.params.node;
     const nodeType = this.props.match.params.type as InfraNodeType;
     const layoutCreator = layoutCreators[nodeType];
     if (!layoutCreator) {
-      return <Error message={`"${nodeType}" is not a valid node type`} />;
+      return (
+        <Error
+          message={intl.formatMessage(
+            {
+              id: 'xpack.infra.homePageMetrics.metricDetailPageNodeTypeInvalidErrorMessage',
+              defaultMessage: '{nodeType} is not a valid node type',
+            },
+            {
+              nodeType: '"' + nodeType + '"',
+            }
+          )}
+        />
+      );
     }
     const layouts = layoutCreator(this.props.theme);
     const breadcrumbs = [{ text: nodeName }];
@@ -203,6 +218,8 @@ class MetricDetailPage extends React.PureComponent<Props> {
     });
   };
 }
+
+const MetricDetailPage = injectI18n(MetricDetailPageUI);
 
 export const MetricDetail = withTheme(MetricDetailPage);
 

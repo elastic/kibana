@@ -12,6 +12,7 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import styled from 'styled-components';
 import { Header } from '../components/header';
@@ -44,13 +45,23 @@ export const ErrorPageBody: React.SFC<{ message: string }> = ({ message }) => {
         <EuiPageHeader>
           <EuiPageHeaderSection>
             <EuiTitle size="m">
-              <h1>Oops!</h1>
+              <h1>
+                <FormattedMessage
+                  id="xpack.infra.homePageError.oopsErrorTitle"
+                  defaultMessage="Oops!"
+                />
+              </h1>
             </EuiTitle>
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageContent>
           <EuiCallOut color="danger" title={message} iconType={'alert'}>
-            <p>Please click the back button and try again.</p>
+            <p>
+              <FormattedMessage
+                id="xpack.infra.homePageError.clickBackButtonErrorTitle"
+                defaultMessage="Please click the back button and try again."
+              />
+            </p>
           </EuiCallOut>
         </EuiPageContent>
       </EuiPageBody>

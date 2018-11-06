@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import { LogsPageContent } from './page_content';
@@ -20,8 +21,13 @@ import { WithLogTextviewUrlState } from '../../containers/logs/with_log_textview
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
 import { WithSource } from '../../containers/with_source';
 
-export class LogsPage extends React.Component {
+interface Props {
+  intl: InjectedIntl;
+}
+
+class LogsPageUI extends React.Component<Props> {
   public render() {
+    const { intl } = this.props;
     return (
       <ColumnarPage>
         <WithSource>
@@ -32,7 +38,16 @@ export class LogsPage extends React.Component {
                 <WithLogPositionUrlState />
                 <WithLogMinimapUrlState />
                 <WithLogTextviewUrlState />
-                <Header breadcrumbs={[{ text: 'Logs' }]} />
+                <Header
+                  breadcrumbs={[
+                    {
+                      text: intl.formatMessage({
+                        id: 'xpack.infra.homePageLogsPage.logsTitle',
+                        defaultMessage: 'Logs',
+                      }),
+                    },
+                  ]}
+                />
                 <LogsToolbar />
                 <LogsPageContent />
               </>
@@ -40,9 +55,18 @@ export class LogsPage extends React.Component {
               <WithKibanaChrome>
                 {({ basePath }) => (
                   <EmptyPage
-                    title="Looks like you don't have any logging indices."
-                    message="Let's add some!"
-                    actionLabel="Setup Instructions"
+                    title={intl.formatMessage({
+                      id: 'xpack.infra.homePageLogsPage.youDontHaveLoggingIndicesTitle',
+                      defaultMessage: "Looks like you don't have any logging indices.",
+                    })}
+                    message={intl.formatMessage({
+                      id: 'xpack.infra.homePageLogsPage.addSomeLoggingIndicesDescription',
+                      defaultMessage: "Let's add some!",
+                    })}
+                    actionLabel={intl.formatMessage({
+                      id: 'xpack.infra.homePageLogsPage.setupInstructionsActionLabel',
+                      defaultMessage: 'Setup Instructions',
+                    })}
                     actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/logging`}
                   />
                 )}
@@ -54,3 +78,5 @@ export class LogsPage extends React.Component {
     );
   }
 }
+
+export const LogsPage = injectI18n(LogsPageUI);
