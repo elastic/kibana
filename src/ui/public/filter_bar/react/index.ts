@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './filter_bar'; // directive
-import './react/directive';
+import './directive';
 
-export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable_filter';
+export { FilterBar } from './filter_bar';

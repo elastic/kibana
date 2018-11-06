@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import './filter_bar'; // directive
-import './react/directive';
+import React, { Component } from 'react';
 
-export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable_filter';
+export class FilterBar extends Component {
+  public render() {
+    return <div>Hello world</div>;
+  }
+}

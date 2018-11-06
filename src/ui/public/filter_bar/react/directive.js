@@ -17,7 +17,16 @@
  * under the License.
  */
 
-import './filter_bar'; // directive
-import './react/directive';
+import 'ngreact';
+import { uiModules } from '../../modules';
+import { FilterBar } from './filter_bar';
 
-export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable_filter';
+const app = uiModules.get('app/kibana', ['react']);
+
+app.directive('reactFilterBar', (reactDirective) => {
+  return reactDirective(
+    FilterBar,
+    undefined,
+    {},
+  );
+});
