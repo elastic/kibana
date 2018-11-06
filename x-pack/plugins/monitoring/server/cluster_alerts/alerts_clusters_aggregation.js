@@ -110,7 +110,7 @@ export function alertsClustersAggregation(req, alertsIndex, clusters, checkLicen
                 defaultMessage: 'Cluster [{clusterName}] license type [{licenseType}] does not support Cluster Alerts',
                 values: {
                   clusterName: cluster.cluster_name,
-                  licenseType: license.type
+                  licenseType: `${license.type}`
                 }
               })
             }
