@@ -1,6 +1,6 @@
 // EUITODO: Use EuiTooltip or create a tooltip mixin
-.vis-tooltip,
-.vis-tooltip-sizing-clone {
+.visTooltip,
+.visTooltip__sizingClone {
   @include euiBottomShadow($color: $euiColorFullShade);
   @include euiFontSizeXS;
   visibility: hidden;
@@ -41,12 +41,11 @@
   }
 }
 
-.vis-tooltip-header {
+.visTooltip__header {
   margin: 0 0 $euiSizeS 0;
   padding: $euiSizeXS $euiSizeS;
   display: flex;
   align-items: center;
-  line-height: 1.5;
 
   &:last-child {
     margin-bottom: 0;
@@ -57,18 +56,16 @@
   }
 }
 
-.vis-tooltip-header-icon {
+.visTooltip__headerIcon {
   flex: 0 0 auto;
   padding-right: $euiSizeS;
 }
 
-.vis-tooltip-header-text {
-  flex: 1 1 200px;
+.visTooltip__headerText {
+  flex: 1 1 100%;
 }
 
-.vis-tooltip-sizing-clone {
-  visibility: hidden;
-  position: fixed;
+.visTooltip__sizingClone {
   top: -500px;
   left: -500px;
 }
