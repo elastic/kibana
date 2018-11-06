@@ -7,6 +7,7 @@
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import { ECS } from './ecs';
 
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
@@ -17,6 +18,7 @@ import { TimelineHeader } from './header/timeline_header';
 
 interface Props {
   columnHeaders: ColumnHeader[];
+  data: ECS[];
   dataProviders: DataProvider[];
   onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;
@@ -39,6 +41,7 @@ export const Timeline = pure<Props>(
   ({
     columnHeaders,
     dataProviders,
+    data,
     onColumnSorted,
     onDataProviderRemoved,
     onFilterChange,
@@ -55,6 +58,7 @@ export const Timeline = pure<Props>(
       <Body
         columnHeaders={columnHeaders}
         dataProviders={dataProviders}
+        data={data}
         onColumnSorted={onColumnSorted}
         onDataProviderRemoved={onDataProviderRemoved}
         onFilterChange={onFilterChange}
