@@ -6,8 +6,39 @@
 
 import React from 'react';
 
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiTitle,
+} from '@elastic/eui';
+
+import { UpgradeCheckupTabs } from './components/tabs';
+
 export class RootComponent extends React.Component {
   public render() {
-    return <div>Hello world!</div>;
+    return (
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageHeader>
+            <EuiPageHeaderSection>
+              <EuiTitle size="l">
+                <h1>Upgrade Checkup</h1>
+              </EuiTitle>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
+          <EuiPageContent>
+            <EuiPageContentBody>
+              <UpgradeCheckupTabs />
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    );
   }
 }

@@ -5,8 +5,8 @@
  */
 
 import { Server } from 'hapi';
-import { registerExampleRoutes } from './routes/example';
+import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 
 export function initServer(server: Server) {
-  registerExampleRoutes(server);
+  registerClusterCheckupRoutes(server);
 }
