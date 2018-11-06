@@ -81,7 +81,6 @@ This section summarizes the changes in each release.
 
 [[release-notes-6.4.3]]
 == {kib} 6.4.3
-coming[6.4.3]
 
 [float]
 [[breaking-6.4.3]]
