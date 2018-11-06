@@ -56,14 +56,10 @@ export class PluginDiscoveryError extends Error {
     public readonly path: string,
     public readonly cause: Error
   ) {
-    super(cause.message);
+    super(`${cause.message} (${type}, ${path})`);
 
     // Set the prototype explicitly, see:
     // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
     Object.setPrototypeOf(this, PluginDiscoveryError.prototype);
-  }
-
-  public toString() {
-    return `${super.toString()} (${this.type}, ${this.path})`;
   }
 }

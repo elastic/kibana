@@ -44,7 +44,7 @@ test('return error when manifest is empty', async () => {
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
-    message: 'Unexpected end of JSON input',
+    message: `Unexpected end of JSON input (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -56,7 +56,7 @@ test('return error when manifest content is null', async () => {
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
-    message: 'Plugin manifest must contain a JSON encoded object.',
+    message: `Plugin manifest must contain a JSON encoded object. (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -68,7 +68,7 @@ test('return error when manifest content is not a valid JSON', async () => {
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
-    message: 'Unexpected token o in JSON at position 1',
+    message: `Unexpected token o in JSON at position 1 (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -80,7 +80,7 @@ test('return error when plugin id is missing', async () => {
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
-    message: 'Plugin manifest must contain an "id" property.',
+    message: `Plugin manifest must contain an "id" property. (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -92,7 +92,7 @@ test('return error when plugin version is missing', async () => {
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
-    message: 'Plugin manifest for "some-id" must contain a "version" property.',
+    message: `Plugin manifest for "some-id" must contain a "version" property. (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -104,8 +104,7 @@ test('return error when plugin expected Kibana version is lower than actual vers
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
-    message:
-      'Plugin "some-id" is only compatible with Kibana version "6.4.2", but used Kibana version is "7.0.0-alpha1".',
+    message: `Plugin "some-id" is only compatible with Kibana version "6.4.2", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.IncompatibleVersion,
     path: pluginManifestPath,
   });
@@ -117,8 +116,7 @@ test('return error when plugin expected Kibana version is higher than actual ver
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
-    message:
-      'Plugin "some-id" is only compatible with Kibana version "7.0.1", but used Kibana version is "7.0.0-alpha1".',
+    message: `Plugin "some-id" is only compatible with Kibana version "7.0.1", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.IncompatibleVersion,
     path: pluginManifestPath,
   });

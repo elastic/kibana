@@ -38,6 +38,14 @@ export class PluginsService implements CoreService {
   public async start() {
     this.log.debug('starting plugins service');
 
+    // At this stage we report only errors that can occur when new platform plugin
+    // manifest is present, otherwise we can't be sure that the plugin is for the new
+    // platform and let legacy platform to handle it.
+    const errorTypesToReport = [
+      PluginDiscoveryErrorType.IncompatibleVersion,
+      PluginDiscoveryErrorType.InvalidManifest,
+    ];
+
     const { error$, plugin$ } = await this.configService
       .atPath('plugins', PluginsConfig)
       .pipe(
@@ -50,7 +58,7 @@ export class PluginsService implements CoreService {
 
     await error$
       .pipe(
-        filter(error => error.type === PluginDiscoveryErrorType.InvalidManifest),
+        filter(error => errorTypesToReport.includes(error.type)),
         tap(invalidManifestError => this.log.error(invalidManifestError))
       )
       .toPromise();
