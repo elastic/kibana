@@ -99,7 +99,7 @@ export const Body = pure<Props>(
       <EuiHorizontalRule margin="xs" />
       <ScrollableArea>
         {data.map(ecs => (
-          <Row key={ecs.event.id}>
+          <Row key={ecs._id}>
             <TimeGutter />
             <Transitionable>
               <Pin type="pin" size="l" />
