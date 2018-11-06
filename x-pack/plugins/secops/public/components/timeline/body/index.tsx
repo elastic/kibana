@@ -36,7 +36,7 @@ const BodyDiv = styled.div`
 /** Renders the timeline body */
 export const Body = pure<Props>(
   ({ columnHeaders, onColumnSorted, onFilterChange, onRangeSelected, sort, width }) => (
-    <BodyDiv data-test-subj="body" style={{ width: `${width - 10}px` }}>
+    <BodyDiv data-test-subj="body">
       <ColumnHeaders
         columnHeaders={columnHeaders}
         onColumnSorted={onColumnSorted}
