@@ -45,41 +45,59 @@ const navTabs: NavTab[] = [
   },
 ];
 
-export const Navigation = pure(() => (
-  <div>
-    <EuiTabs>{renderTabs()}</EuiTabs>
-    <AddData />
-    <EuiSpacer />
-  </div>
+interface NavigationState {
+  selectedTabId: string;
+}
+
+export class Navigation extends React.PureComponent<{}, NavigationState> {
+  public readonly state = {
+    selectedTabId: navTabs.reduce((res, tab) => {
+      if (window.location.hash.includes(tab.id)) {
+        res = tab.id;
+      }
+      return res;
+    }, ''),
+  };
+  public render() {
+    return (
+      <div>
+        <EuiTabs>{this.renderTabs()}</EuiTabs>
+        <AddData />
+        <EuiSpacer />
+      </div>
+    );
+  }
+
+  private handleTabClick = (href: string, id: string) => {
+    this.setState({
+      ...this.state,
+      selectedTabId: id,
+    });
+    window.location.assign(href);
+  };
+
+  private renderTabs = () =>
+    navTabs.map((tab: NavTab) => (
+      <EuiTab
+        data-href={tab.href}
+        onClick={() => this.handleTabClick(tab.href, tab.id)}
+        isSelected={this.state.selectedTabId === tab.id}
+        disabled={tab.disabled}
+        key={`navigation-${tab.id}`}
+      >
+        {tab.name}
+      </EuiTab>
+    ));
+}
+
+const AddData = pure(() => (
+  <AddSources>
+    <EuiButton href="kibana#home/tutorial_directory/security">Add data</EuiButton>
+  </AddSources>
 ));
-
-const renderTabs = () =>
-  navTabs.map((tab: NavTab) => (
-    <EuiTab
-      onClick={() => window.location.assign(tab.href)}
-      isSelected={window.location.hash.includes(tab.id)}
-      disabled={tab.disabled}
-      key={`navigation-${tab.id}`}
-    >
-      {tab.name}
-    </EuiTab>
-  ));
-
-const AddData: React.SFC = () => (
-  <div
-    style={{
-      margin: '0 5px',
-    }}
-  >
-    <AddSources>
-      <EuiButton href="kibana#home/tutorial_directory/security">Add data</EuiButton>
-    </AddSources>
-  </div>
-);
 
 const AddSources = styled.div`
   float: right;
   margin-top: -10px;
-  -webkit-transform: translateY(100%);
   transform: translateY(-100%);
 `;
