@@ -23,8 +23,8 @@ export function serializeToJson(defaultMessages) {
   const resultJsonObject = { formats: i18n.formats, messages: {} };
 
   for (const [mapKey, mapValue] of defaultMessages) {
-    if (mapValue.context) {
-      resultJsonObject.messages[mapKey] = { text: mapValue.message, comment: mapValue.context };
+    if (mapValue.description) {
+      resultJsonObject.messages[mapKey] = { text: mapValue.message, comment: mapValue.description };
     } else {
       resultJsonObject.messages[mapKey] = mapValue.message;
     }
