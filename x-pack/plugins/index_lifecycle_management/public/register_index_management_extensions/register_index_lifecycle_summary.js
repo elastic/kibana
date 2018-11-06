@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { addSummaryExtension } from '../../index_management/public/index_management_extensions';
-import { IndexLifecycleSummary } from './components/index_lifecycle_summary';
+import { addSummaryExtension } from '../../../index_management/public/index_management_extensions';
+import { IndexLifecycleSummary } from '../components/index_lifecycle_summary';
 addSummaryExtension((index) => {
   return <IndexLifecycleSummary index={index} />;
 });

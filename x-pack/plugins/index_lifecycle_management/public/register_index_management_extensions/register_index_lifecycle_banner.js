@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { addBannerExtension } from '../../index_management/public/index_management_extensions';
-import { IndexLifecycleBanner } from './components/index_lifecycle_banner';
+import { addBannerExtension } from '../../../index_management/public/index_management_extensions';
+import { IndexLifecycleBanner } from '../components/index_lifecycle_banner';
 addBannerExtension((indices) =>{
   if (!indices.length) {
     return null;

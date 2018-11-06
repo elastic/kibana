@@ -6,8 +6,8 @@
 
 import { every } from 'lodash';
 import { i18n }  from '@kbn/i18n';
-import { addActionExtension } from '../../index_management/public/index_management_extensions';
-import { retryLifecycleForIndex } from './api';
+import { addActionExtension } from '../../../index_management/public/index_management_extensions';
+import { retryLifecycleForIndex } from '../api';
 addActionExtension((indices) => {
   const allHaveErrors = every(indices, (index) => {
     return (index.ilm && index.ilm.failed_step);
