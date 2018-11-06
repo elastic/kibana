@@ -13,7 +13,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   rollup.rollupIndexCapabilities = ca({
     urls: [
       {
-        fmt: '<%=indexPattern%>/_xpack/rollup/data',
+        fmt: '/<%=indexPattern%>/_xpack/rollup/data',
         req: {
           indexPattern: {
             type: 'string'

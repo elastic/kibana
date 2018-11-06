@@ -119,6 +119,7 @@ class MetricPanelConfig extends Component {
             aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
+            data-test-subj="metricEditorPanelOptionsBtn"
           >Panel Options
           </button>
         </div>

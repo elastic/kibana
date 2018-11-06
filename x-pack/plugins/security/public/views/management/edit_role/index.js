@@ -9,7 +9,6 @@ import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { fatalError } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
-import 'plugins/security/views/management/edit_role/edit_role.less';
 import 'angular-ui-select';
 import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';

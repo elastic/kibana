@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import './collapsible_panel.less';
 
 interface Props {
   iconType: string | any;

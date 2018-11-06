@@ -9,17 +9,25 @@ import PropTypes from 'prop-types';
 import { EuiSuperSelect } from '@elastic/eui';
 import { fonts } from '../../../common/lib/fonts';
 
-export const FontPicker = ({ onSelect, value }) => (
-  <EuiSuperSelect
-    compressed
-    options={fonts.map(({ value, label }) => ({
-      value,
-      inputDisplay: <div style={{ fontFamily: value }}>{label}</div>,
-    }))}
-    valueOfSelected={value}
-    onChange={value => onSelect(value)}
-  />
-);
+export const FontPicker = ({ onSelect, value }) => {
+  if (value && !fonts.find(font => font.value === value)) {
+    const label = (value.indexOf(',') >= 0 ? value.split(',')[0] : value).replace(/['"]/g, '');
+    fonts.push({ value, label });
+    fonts.sort((a, b) => a.label.localeCompare(b.label));
+  }
+
+  return (
+    <EuiSuperSelect
+      compressed
+      options={fonts.map(({ value, label }) => ({
+        value,
+        inputDisplay: <div style={{ fontFamily: value }}>{label}</div>,
+      }))}
+      valueOfSelected={value}
+      onChange={value => onSelect(value)}
+    />
+  );
+};
 
 FontPicker.propTypes = {
   value: PropTypes.string,

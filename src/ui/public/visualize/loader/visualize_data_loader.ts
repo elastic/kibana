@@ -77,6 +77,9 @@ export class VisualizeDataLoader {
       const requestHandlerResponse = await this.requestHandler(this.vis, {
         partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
         ...params,
+        filters: params.filters
+          ? params.filters.filter(filter => !filter.meta.disabled)
+          : undefined,
       });
 
       // No need to call the response handler when there have been no data nor has been there changes
@@ -96,10 +99,14 @@ export class VisualizeDataLoader {
       return this.visData;
     } catch (error) {
       params.searchSource.cancelQueued();
+
       this.vis.requestError = error;
-      this.vis.showRequestError = error.type && error.type === 'UNSUPPORTED_QUERY';
+      this.vis.showRequestError =
+        error.type && ['NO_OP_SEARCH_STRATEGY', 'UNSUPPORTED_QUERY'].includes(error.type);
+
       // tslint:disable-next-line
       console.error(error);
+
       if (isTermSizeZeroError(error)) {
         return toastNotifications.addDanger(
           `Your visualization ('${this.vis.title}') has an error: it has a term ` +
@@ -107,6 +114,7 @@ export class VisualizeDataLoader {
             `the error.`
         );
       }
+
       toastNotifications.addDanger({
         title: 'Error in visualization',
         text: error.message,
