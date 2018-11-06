@@ -212,13 +212,13 @@ function VisEditor(
     description: 'Open Inspector for visualization',
     testId: 'openInspectorButton',
     disableButton() {
-      return !vis.hasInspector();
+      return !vis.hasInspector || !vis.hasInspector();
     },
     run() {
       vis.openInspector().bindToAngularScope($scope);
     },
     tooltip() {
-      if (!vis.hasInspector()) {
+      if (!vis.hasInspector || !vis.hasInspector()) {
         return 'This visualization doesn\'t support any inspectors.';
       }
     }
