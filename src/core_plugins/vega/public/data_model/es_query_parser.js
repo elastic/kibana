@@ -35,10 +35,10 @@ const TIMEFIELD = '%timefield%';
  */
 export class EsQueryParser {
 
-  constructor(timeCache, searchCache, dashboardContext, onWarning) {
+  constructor(timeCache, searchCache, filters, onWarning) {
     this._timeCache = timeCache;
     this._searchCache = searchCache;
-    this._dashboardContext = dashboardContext;
+    this._filters = filters;
     this._onWarning = onWarning;
   }
 
@@ -134,7 +134,7 @@ export class EsQueryParser {
 
       if (context) {
         // Use dashboard context
-        const newQuery = this._dashboardContext();
+        const newQuery = _.cloneDeep(this._filters);
         if (timefield) {
           newQuery.bool.must.push(body.query);
         }
@@ -174,7 +174,7 @@ export class EsQueryParser {
           const item = obj[pos];
           if (isQuery && (item === MUST_CLAUSE || item === MUST_NOT_CLAUSE)) {
             const ctxTag = item === MUST_CLAUSE ? 'must' : 'must_not';
-            const ctx = this._dashboardContext();
+            const ctx = _.cloneDeep(this._filters);
             if (ctx && ctx.bool && ctx.bool[ctxTag]) {
               if (Array.isArray(ctx.bool[ctxTag])) {
                 // replace one value with an array of values
