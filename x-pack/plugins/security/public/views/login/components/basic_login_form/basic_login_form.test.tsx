@@ -86,8 +86,6 @@ describe('BasicLoginForm', () => {
     await Promise.resolve();
     wrapper.update();
 
-    expect(wrapper.find(EuiCallOut).props().title).toEqual(
-      `Invalid username or password. Please try again.`
-    );
+    expect(wrapper.find(EuiCallOut).props().title).toEqual('Incorrect username or password.');
   });
 });
