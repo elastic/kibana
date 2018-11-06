@@ -136,9 +136,14 @@ export class WorkspaceHandler {
         return response;
       }
       case 'textDocument/edefinition': {
-        const result = response.result;
-        for (const def of result) {
-          this.convertLocation(def.location);
+        let result = response.result;
+        if (result) {
+          if (!Array.isArray(result)) {
+            response.result = result = [result];
+          }
+          for (const def of result) {
+            this.convertLocation(def.location);
+          }
         }
         return response;
       }
