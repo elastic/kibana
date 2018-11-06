@@ -100,6 +100,14 @@ export const ml = {
     });
   },
 
+  validateCardinality(obj) {
+    return http({
+      url: `${basePath}/validate/cardinality`,
+      method: 'POST',
+      data: obj
+    });
+  },
+
   getDatafeeds(obj) {
     const datafeedId = (obj && obj.datafeedId) ? `/${obj.datafeedId}` : '';
     return http({

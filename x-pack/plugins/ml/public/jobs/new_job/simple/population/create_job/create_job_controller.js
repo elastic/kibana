@@ -130,6 +130,7 @@ module
       formValid: false,
       bucketSpanValid: true,
       bucketSpanEstimator: { status: 0, message: '' },
+      cardinalityValidator: { status: 0, message: '' },
       aggTypeOptions: filterAggTypes(aggTypes.byType[METRIC_AGG_TYPE]),
       fields: [],
       overFields: [],
@@ -207,6 +208,7 @@ module
       description: '',
       jobGroups: [],
       useDedicatedIndex: false,
+      enableModelPlot: false,
       modelMemoryLimit: DEFAULT_MODEL_MEMORY_LIMIT
     };
 
@@ -539,6 +541,9 @@ module
           });
       }
     };
+
+    // expose this function so it can be used in the enable model plot checkbox directive
+    $scope.getJobFromConfig = mlPopulationJobService.getJobFromConfig;
 
     addJobValidationMethods($scope, mlPopulationJobService);
 
