@@ -11,6 +11,13 @@ uiModules.get('kibana')
     if ($injector.has('dashboardConfig')) {
       $provide.decorator('dashboardConfig', function ($delegate, userProfile) {
         return {
+          getHide() {
+            if (!userProfile.canAccessFeature('kibana:dashboard')) {
+              return true;
+            }
+
+            return $delegate.getHide();
+          },
           getHideWriteControls() {
             if (!userProfile.canWriteSavedObject('dashboard')) {
               return true;
@@ -30,7 +37,7 @@ uiModules.get('kibana')
               return true;
             }
 
-            return $delegate.getHideWriteControls();
+            return $delegate.getHide();
           },
           getHideWriteControls() {
             if (!userProfile.canWriteSavedObject('search')) {
