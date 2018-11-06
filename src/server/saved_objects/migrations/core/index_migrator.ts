@@ -78,13 +78,12 @@ export class IndexMigrator {
  * Determines what action the migration system needs to take (none, patch, migrate).
  */
 async function requiredAction(context: Context): Promise<MigrationAction> {
-  const { callCluster, alias, documentMigrator, dest, pollInterval } = context;
+  const { callCluster, alias, documentMigrator, dest } = context;
 
   const hasMigrations = await Index.migrationsUpToDate(
     callCluster,
     alias,
-    documentMigrator.migrationVersion,
-    pollInterval
+    documentMigrator.migrationVersion
   );
 
   if (!hasMigrations) {

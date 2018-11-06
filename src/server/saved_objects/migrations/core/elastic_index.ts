@@ -151,7 +151,6 @@ export async function migrationsUpToDate(
   callCluster: CallCluster,
   index: string,
   migrationVersion: MigrationVersion,
-  retryInterval: number = 1000,
   retryCount: number = 10
 ): Promise<boolean> {
   try {
@@ -192,9 +191,9 @@ export async function migrationsUpToDate(
       throw e;
     }
 
-    await new Promise(r => setTimeout(r, retryInterval));
+    await new Promise(r => setTimeout(r, 1000));
 
-    return migrationsUpToDate(callCluster, index, migrationVersion, retryInterval, retryCount - 1);
+    return await migrationsUpToDate(callCluster, index, migrationVersion, retryCount - 1);
   }
 }
 
