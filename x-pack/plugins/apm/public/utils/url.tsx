@@ -6,7 +6,7 @@
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import createHistory from 'history/createHashHistory';
-import { get, isEmpty, isPlainObject, mapValues } from 'lodash';
+import { get, isPlainObject, mapValues } from 'lodash';
 import qs from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -17,6 +17,7 @@ import url from 'url';
 import { StringMap } from '../../typings/common';
 
 // Kibana default set in: https://github.com/elastic/kibana/blob/e13e47fc4eb6112f2a5401408e9f765eae90f55d/x-pack/plugins/apm/public/utils/timepicker/index.js#L31-L35
+// TODO: store this in config or a shared constant?
 const DEFAULT_KIBANA_TIME_RANGE = '(time:(from:now-24h,mode:quick,to:now))';
 
 interface ViewMlJobArgs {
