@@ -19,6 +19,7 @@ import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/chec
 import { getClustersSummary } from './get_clusters_summary';
 import { CLUSTER_ALERTS_SEARCH_SIZE } from '../../../common/constants';
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -39,7 +40,12 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
   // TODO: this handling logic should be two different functions
   if (clusterUuid) { // if is defined, get specific cluster (no need for license checking)
     if (!clusters || clusters.length === 0) {
-      throw notFound(`Unable to find the cluster in the selected time range. UUID: ${clusterUuid}`);
+      throw notFound(i18n.translate('xpack.monitoring.cluster.clustersFromRequest.clusterUuidNotFoundErrorMessage', {
+        defaultMessage: 'Unable to find the cluster in the selected time range. UUID: {clusterUuid}',
+        values: {
+          clusterUuid
+        }
+      }));
     }
 
     const cluster = clusters[0];

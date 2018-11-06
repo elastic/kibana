@@ -5,6 +5,7 @@
  */
 
 import { includes } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Function to do the work of checking license for cluster alerts feature support
@@ -24,27 +25,47 @@ export function checkLicense(type, active, clusterSource, watcher = true) {
   // Disabled because there is no license
   if (!type) {
     return Object.assign(licenseInfo, {
-      message: `Cluster Alerts are not displayed because the [${clusterSource}] cluster's license could not be determined.`
+      message: i18n.translate('xpack.monitoring.clusterAlerts.checkLicense.licenseNotDeterminedDescription', {
+        defaultMessage: `Cluster Alerts are not displayed because the [{clusterSource}] cluster's license could not be determined.`,
+        values: {
+          clusterSource
+        }
+      })
     });
   }
 
   // Disabled because the license type is not valid (basic)
   if (!includes([ 'trial', 'standard', 'gold', 'platinum' ], type)) {
     return  Object.assign(licenseInfo, {
-      message: `Cluster Alerts are not displayed if Watcher is disabled or the [${clusterSource}] cluster's current license is basic.`
+      message: i18n.translate('xpack.monitoring.clusterAlerts.checkLicense.licenseIsBasicDescription', {
+        //eslint-disable-next-line max-len
+        defaultMessage: `Cluster Alerts are not displayed if Watcher is disabled or the [{clusterSource}] cluster's current license is basic.`,
+        values: {
+          clusterSource
+        }
+      })
     });
   }
 
   // Disabled because the license is inactive
   if (!active) {
     return Object.assign(licenseInfo, {
-      message: `Cluster Alerts are not displayed because the [${clusterSource}] cluster's current license [${type}] is not active.`
+      message: i18n.translate('xpack.monitoring.clusterAlerts.checkLicense.licenseNotActiveDescription', {
+        defaultMessage: `Cluster Alerts are not displayed because the [{clusterSource}] cluster's current license [{type}] is not active.`,
+        values: {
+          clusterSource,
+          type
+        }
+      })
     });
   }
 
   // Disabled because Watcher is not enabled (it may or may not be available)
   if (!watcher) {
-    return Object.assign(licenseInfo, { message: 'Cluster alerts is not enabled because Watcher is disabled.' });
+    return Object.assign(licenseInfo, {
+      message: i18n.translate('xpack.monitoring.clusterAlerts.checkLicense.watcherIsDisabledDescription', {
+        defaultMessage: 'Cluster alerts is not enabled because Watcher is disabled.' })
+    });
   }
 
   return Object.assign(licenseInfo, { clusterAlerts: { enabled: true } });

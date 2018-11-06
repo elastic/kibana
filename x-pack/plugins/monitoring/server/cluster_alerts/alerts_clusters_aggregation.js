@@ -6,6 +6,7 @@
 
 import { get, find } from 'lodash';
 import { verifyMonitoringLicense } from './verify_monitoring_license';
+import { i18n } from '@kbn/i18n';
 
 export function alertsClustersAggregation(req, alertsIndex, clusters, checkLicense) {
   const verification = verifyMonitoringLicense(req.server);
@@ -105,7 +106,14 @@ export function alertsClustersAggregation(req, alertsIndex, clusters, checkLicen
           alerts = {
             clusterMeta: {
               enabled: false,
-              message: `Cluster [${cluster.cluster_name}] license type [${license.type}] does not support Cluster Alerts` }
+              message: i18n.translate('xpack.monitoring.clusterAlerts.unsupportedClusterAlertsDescription', {
+                defaultMessage: 'Cluster [{clusterName}] license type [{licenseType}] does not support Cluster Alerts',
+                values: {
+                  clusterName: cluster.cluster_name,
+                  licenseType: license.type
+                }
+              })
+            }
           };
         }
 

@@ -6,6 +6,7 @@
 
 import { badRequest, notFound } from 'boom';
 import { getClustersStats } from './get_clusters_stats';
+import { i18n } from '@kbn/i18n';
 
 /**
  * This will fetch the cluster stats and cluster state as a single object for the cluster specified by the {@code req}.
@@ -17,14 +18,21 @@ import { getClustersStats } from './get_clusters_stats';
  */
 export function getClusterStats(req, esIndexPattern, clusterUuid) {
   if (!clusterUuid) {
-    throw badRequest('clusterUuid not specified');
+    throw badRequest(i18n.translate('xpack.monitoring.cluster.clusterStats.clusterUuidNotSpecifiedErrorMessage', {
+      defaultMessage: 'clusterUuid not specified'
+    }));
   }
 
   // passing clusterUuid so `get_clusters` will filter for single cluster
   return getClustersStats(req, esIndexPattern, clusterUuid)
     .then(clusters => {
       if (!clusters || clusters.length === 0) {
-        throw notFound(`Unable to find the cluster in the selected time range. UUID: ${clusterUuid}`);
+        throw notFound(i18n.translate('xpack.monitoring.cluster.clusterStats.clusterUuidNotFoundErrorMessage', {
+          defaultMessage: 'Unable to find the cluster in the selected time range. UUID: {clusterUuid}',
+          values: {
+            clusterUuid
+          }
+        }));
       }
 
       return clusters[0];

@@ -8,6 +8,9 @@
  * Note: currently only `node` and `master` are supported due to
  * https://github.com/elastic/x-pack-kibana/issues/608
  */
+
+import { i18n } from '@kbn/i18n';
+
 export const nodeTypeClass = {
   invalid: 'fa-exclamation-triangle',
   node: 'fa-server',
@@ -18,10 +21,16 @@ export const nodeTypeClass = {
 };
 
 export const nodeTypeLabel = {
-  invalid: 'Invalid Node',
-  node: 'Node',
-  master: 'Master Node',
-  master_only: 'Master Only Node',
-  data: 'Data Only Node',
-  client: 'Client Node'
+  invalid: i18n.translate('xpack.monitoring.es.nodes.nodeType.invalidNodeLabel', {
+    defaultMessage: 'Invalid Node' }),
+  node: i18n.translate('xpack.monitoring.es.nodes.nodeType.nodeLabel', {
+    defaultMessage: 'Node' }),
+  master: i18n.translate('xpack.monitoring.es.nodes.nodeType.masterNodeLabel', {
+    defaultMessage: 'Master Node' }),
+  master_only: i18n.translate('xpack.monitoring.es.nodes.nodeType.masterOnlyNodeLabel', {
+    defaultMessage: 'Master Only Node' }),
+  data: i18n.translate('xpack.monitoring.es.nodes.nodeType.dataOnlyNodeLabel', {
+    defaultMessage: 'Data Only Node' }),
+  client: i18n.translate('xpack.monitoring.es.nodes.nodeType.clientNodeLabel', {
+    defaultMessage: 'Client Node' })
 };

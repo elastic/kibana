@@ -10,6 +10,7 @@ import { ElasticsearchMetric } from '../../metrics';
 import { createQuery } from '../../create_query';
 import { calculateRate } from '../../calculate_rate';
 import { getUnassignedShards } from '../shards';
+import { i18n } from '@kbn/i18n';
 
 export function handleResponse(resp, min, max, shardStats) {
   // map the hits
@@ -44,7 +45,7 @@ export function handleResponse(resp, min, max, shardStats) {
     let status;
     let statusSort;
     let unassignedShards;
-    if (shardStatsForIndex && shardStatsForIndex.status) {
+    if (!shardStatsForIndex && shardStatsForIndex.status) {
       status = shardStatsForIndex.status;
       unassignedShards = getUnassignedShards(shardStatsForIndex);
 
@@ -57,7 +58,8 @@ export function handleResponse(resp, min, max, shardStats) {
         statusSort = 3;
       }
     } else {
-      status = 'Deleted / Closed';
+      status = i18n.translate('xpack.monitoring.es.indices.deletedClosedStatusLabel', {
+        defaultMessage: 'Deleted / Closed' });
       statusSort = 0;
     }
 

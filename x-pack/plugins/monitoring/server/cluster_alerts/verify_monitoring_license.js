@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Determine if an API for Cluster Alerts should respond based on the license and configuration of the monitoring cluster.
@@ -31,12 +32,14 @@ export function verifyMonitoringLicense(server) {
 
     return {
       enabled: false,
-      message: 'Status of Cluster Alerts feature could not be determined.'
+      message: i18n.translate('xpack.monitoring.clusterAlerts.verifyMonitoringLicenseNotDeterminedDescription', {
+        defaultMessage: 'Status of Cluster Alerts feature could not be determined.' })
     };
   }
 
   return {
     enabled: false,
-    message: 'Cluster Alerts feature is disabled.'
+    message: i18n.translate('xpack.monitoring.clusterAlerts.verifyMonitoringLicenseDisabledDescription', {
+      defaultMessage: 'Cluster Alerts feature is disabled.' })
   };
 }
