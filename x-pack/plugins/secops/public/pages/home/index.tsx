@@ -7,6 +7,8 @@
 import {
   // @ts-ignore
   EuiHeaderLogo,
+  EuiHealth,
+  EuiHorizontalRule,
   EuiPanel,
 } from '@elastic/eui';
 import * as React from 'react';
@@ -14,7 +16,8 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import SplitPane from 'react-split-pane';
-import { PageContainer, PageContent } from '../../components/page';
+import { PageContainer, PageContent, PageHeader } from '../../components/page';
+import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { Timeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
@@ -66,7 +69,9 @@ const maxTimelineWidth = 1125;
 
 export const HomePage = pure(() => (
   <PageContainer data-test-subj="pageContainer">
-    <Navigation data-test-subj="navigation" />
+    <PageHeader data-test-subj="pageHeader">
+      <Navigation data-test-subj="navigation" />
+    </PageHeader>
     <PageContent data-test-subj="pageContent">
       <SplitPane
         split="vertical"
@@ -81,8 +86,12 @@ export const HomePage = pure(() => (
           backgroundClip: 'padding-box',
           cursor: 'col-resize',
         }}
+        pane1Style={{
+          overflowY: 'scroll',
+        }}
         pane2Style={{
           maxWidth: `${maxTimelineWidth}px`,
+          overflowY: 'scroll',
         }}
       >
         <div
@@ -90,6 +99,7 @@ export const HomePage = pure(() => (
             display: 'flex',
             flexDirection: 'row',
             flexWrap: 'wrap',
+            overflow: 'scroll',
           }}
         >
           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(x => (
@@ -111,17 +121,10 @@ export const HomePage = pure(() => (
       </SplitPane>
     </PageContent>
     <Footer>
-      <WhoAmI sourceId="default">{({ appName }) => <h1>Hello {appName}</h1>}</WhoAmI>
+      <EuiHorizontalRule margin="xs" />
+      <WhoAmI sourceId="default">
+        {({ appName }) => <EuiHealth color="success">Live {appName} data</EuiHealth>}
+      </WhoAmI>
     </Footer>
   </PageContainer>
 ));
-
-const Footer = styled.div`
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  color: #666;
-  padding: 8px 8px;
-  text-align: center;
-`;
