@@ -47,7 +47,11 @@ export function ensureEsVersion(server, kibanaVersion) {
     ]
   })
     .then(function (info) {
-    // Aggregate incompatible ES nodes.
+      if (process.env.UNSAFE_RUN_AS_VERSION) {
+        kibanaVersion = process.env.UNSAFE_RUN_AS_VERSION;
+      }
+
+      // Aggregate incompatible ES nodes.
       const incompatibleNodes = [];
 
       // Aggregate ES nodes which should prompt a Kibana upgrade.
