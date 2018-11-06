@@ -33,14 +33,6 @@ import { logger } from '../../logging/__mocks__';
 import { PluginManifest } from './plugin_manifest_parser';
 import { discover } from './plugins_discovery';
 
-/**
- * Resolves absolute path and escapes backslashes (used on windows systems).
- * @param pathSegments Test path segments.
- */
-function resolveForSnapshot(...pathSegments: string[]) {
-  return resolve(...pathSegments).replace(/\\/g, '\\\\');
-}
-
 const TEST_PATHS = {
   scanDirs: {
     nonEmpty: resolve('scan', 'non-empty'),
@@ -112,65 +104,25 @@ test('properly scans folders and paths', async () => {
     logger.get()
   );
 
-  await expect(plugin$.pipe(toArray()).toPromise()).resolves.toMatchInlineSnapshot(`
-Array [
-  Object {
-    "manifest": Object {
-      "id": "plugin",
-      "kibanaVersion": "1.2.3",
-      "optionalPlugins": Array [],
-      "requiredPlugins": Array [],
-      "ui": false,
-      "version": "1",
-    },
-    "path": "${resolveForSnapshot(TEST_PATHS.scanDirs.nonEmpty, '1')}",
-  },
-  Object {
-    "manifest": Object {
-      "id": "plugin",
-      "kibanaVersion": "1.2.3",
-      "optionalPlugins": Array [],
-      "requiredPlugins": Array [],
-      "ui": false,
-      "version": "1",
-    },
-    "path": "${resolveForSnapshot(TEST_PATHS.scanDirs.nonEmpty, '3')}",
-  },
-  Object {
-    "manifest": Object {
-      "id": "plugin",
-      "kibanaVersion": "1.2.3",
-      "optionalPlugins": Array [],
-      "requiredPlugins": Array [],
-      "ui": false,
-      "version": "1",
-    },
-    "path": "${resolveForSnapshot(TEST_PATHS.scanDirs.nonEmpty2, '6')}",
-  },
-  Object {
-    "manifest": Object {
-      "id": "plugin",
-      "kibanaVersion": "1.2.3",
-      "optionalPlugins": Array [],
-      "requiredPlugins": Array [],
-      "ui": false,
-      "version": "1",
-    },
-    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",
-  },
-  Object {
-    "manifest": Object {
-      "id": "plugin",
-      "kibanaVersion": "1.2.3",
-      "optionalPlugins": Array [],
-      "requiredPlugins": Array [],
-      "ui": false,
-      "version": "1",
-    },
-    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir2)}",
-  },
-]
-`);
+  await expect(plugin$.pipe(toArray()).toPromise()).resolves.toEqual(
+    [
+      resolve(TEST_PATHS.scanDirs.nonEmpty, '1'),
+      resolve(TEST_PATHS.scanDirs.nonEmpty, '3'),
+      resolve(TEST_PATHS.scanDirs.nonEmpty2, '6'),
+      resolve(TEST_PATHS.paths.existentDir),
+      resolve(TEST_PATHS.paths.existentDir2),
+    ].map(path => ({
+      manifest: {
+        id: 'plugin',
+        version: '1',
+        kibanaVersion: '1.2.3',
+        optionalPlugins: [],
+        requiredPlugins: [],
+        ui: false,
+      },
+      path,
+    }))
+  );
 
   await expect(
     error$
@@ -179,35 +131,33 @@ Array [
         toArray()
       )
       .toPromise()
-  ).resolves.toMatchInlineSnapshot(`
-Array [
-  "Error: ENOENT (missing-manifest, ${resolveForSnapshot(
-    TEST_PATHS.scanDirs.nonEmpty,
-    '2-no-manifest',
-    'kibana.json'
-  )})",
-  "Error: Plugin manifest must contain an \\"id\\" property. (invalid-manifest, ${resolveForSnapshot(
-    TEST_PATHS.scanDirs.nonEmpty,
-    '4-incomplete-manifest',
-    'kibana.json'
-  )})",
-  "Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${resolveForSnapshot(
-    TEST_PATHS.scanDirs.nonEmpty2,
-    '5-invalid-manifest',
-    'kibana.json'
-  )})",
-  "Error: Plugin \\"plugin\\" is only compatible with Kibana version \\"1\\", but used Kibana version is \\"1.2.3\\". (incompatible-version, ${resolveForSnapshot(
-    TEST_PATHS.scanDirs.nonEmpty2,
-    '8-incompatible-manifest',
-    'kibana.json'
-  )})",
-  "Error: ENOENT (invalid-scan-dir, ${resolveForSnapshot(TEST_PATHS.scanDirs.nonExistent)})",
-  "Error: ${resolveForSnapshot(
-    TEST_PATHS.paths.nonDir
-  )} is not a directory. (invalid-plugin-dir, ${resolveForSnapshot(TEST_PATHS.paths.nonDir)})",
-  "Error: ENOENT (invalid-plugin-dir, ${resolveForSnapshot(TEST_PATHS.paths.nonExistent)})",
-]
-`);
+  ).resolves.toEqual([
+    `Error: ENOENT (missing-manifest, ${resolve(
+      TEST_PATHS.scanDirs.nonEmpty,
+      '2-no-manifest',
+      'kibana.json'
+    )})`,
+    `Error: Plugin manifest must contain an "id" property. (invalid-manifest, ${resolve(
+      TEST_PATHS.scanDirs.nonEmpty,
+      '4-incomplete-manifest',
+      'kibana.json'
+    )})`,
+    `Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${resolve(
+      TEST_PATHS.scanDirs.nonEmpty2,
+      '5-invalid-manifest',
+      'kibana.json'
+    )})`,
+    `Error: Plugin "plugin" is only compatible with Kibana version "1", but used Kibana version is "1.2.3". (incompatible-version, ${resolve(
+      TEST_PATHS.scanDirs.nonEmpty2,
+      '8-incompatible-manifest',
+      'kibana.json'
+    )})`,
+    `Error: ENOENT (invalid-scan-dir, ${resolve(TEST_PATHS.scanDirs.nonExistent)})`,
+    `Error: ${resolve(TEST_PATHS.paths.nonDir)} is not a directory. (invalid-plugin-dir, ${resolve(
+      TEST_PATHS.paths.nonDir
+    )})`,
+    `Error: ENOENT (invalid-plugin-dir, ${resolve(TEST_PATHS.paths.nonExistent)})`,
+  ]);
 });
 
 describe('parsing plugin manifest', () => {
@@ -242,14 +192,12 @@ describe('parsing plugin manifest', () => {
     });
 
     await expect(plugins$.toPromise()).resolves.toEqual([]);
-    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
-Array [
-  "Error: Unexpected end of JSON input (invalid-manifest, ${resolveForSnapshot(
-    TEST_PATHS.paths.existentDir,
-    'kibana.json'
-  )})",
-]
-`);
+    await expect(errors$.toPromise()).resolves.toEqual([
+      `Error: Unexpected end of JSON input (invalid-manifest, ${resolve(
+        TEST_PATHS.paths.existentDir,
+        'kibana.json'
+      )})`,
+    ]);
   });
 
   test('return error when manifest content is null', async () => {
@@ -258,14 +206,12 @@ Array [
     });
 
     await expect(plugins$.toPromise()).resolves.toEqual([]);
-    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
-Array [
-  "Error: Plugin manifest must contain a JSON encoded object. (invalid-manifest, ${resolveForSnapshot(
-    TEST_PATHS.paths.existentDir,
-    'kibana.json'
-  )})",
-]
-`);
+    await expect(errors$.toPromise()).resolves.toEqual([
+      `Error: Plugin manifest must contain a JSON encoded object. (invalid-manifest, ${resolve(
+        TEST_PATHS.paths.existentDir,
+        'kibana.json'
+      )})`,
+    ]);
   });
 
   test('return error when manifest content is not a valid JSON', async () => {
@@ -274,14 +220,12 @@ Array [
     });
 
     await expect(plugins$.toPromise()).resolves.toEqual([]);
-    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
-Array [
-  "Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${resolveForSnapshot(
-    TEST_PATHS.paths.existentDir,
-    'kibana.json'
-  )})",
-]
-`);
+    await expect(errors$.toPromise()).resolves.toEqual([
+      `Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${resolve(
+        TEST_PATHS.paths.existentDir,
+        'kibana.json'
+      )})`,
+    ]);
   });
 
   test('return error when plugin id is missing', async () => {
@@ -290,14 +234,12 @@ Array [
     });
 
     await expect(plugins$.toPromise()).resolves.toEqual([]);
-    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
-Array [
-  "Error: Plugin manifest must contain an \\"id\\" property. (invalid-manifest, ${resolveForSnapshot(
-    TEST_PATHS.paths.existentDir,
-    'kibana.json'
-  )})",
-]
-`);
+    await expect(errors$.toPromise()).resolves.toEqual([
+      `Error: Plugin manifest must contain an "id" property. (invalid-manifest, ${resolve(
+        TEST_PATHS.paths.existentDir,
+        'kibana.json'
+      )})`,
+    ]);
   });
 
   test('return error when plugin version is missing', async () => {
@@ -306,14 +248,12 @@ Array [
     });
 
     await expect(plugins$.toPromise()).resolves.toEqual([]);
-    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
-Array [
-  "Error: Plugin manifest for \\"some-id\\" must contain a \\"version\\" property. (invalid-manifest, ${resolveForSnapshot(
-    TEST_PATHS.paths.existentDir,
-    'kibana.json'
-  )})",
-]
-`);
+    await expect(errors$.toPromise()).resolves.toEqual([
+      `Error: Plugin manifest for "some-id" must contain a "version" property. (invalid-manifest, ${resolve(
+        TEST_PATHS.paths.existentDir,
+        'kibana.json'
+      )})`,
+    ]);
   });
 
   test('return error when plugin expected Kibana version is lower than actual version', async () => {
@@ -322,14 +262,12 @@ Array [
     });
 
     await expect(plugins$.toPromise()).resolves.toEqual([]);
-    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
-Array [
-  "Error: Plugin \\"some-id\\" is only compatible with Kibana version \\"6.4.2\\", but used Kibana version is \\"7.0.0-alpha1\\". (incompatible-version, ${resolveForSnapshot(
-    TEST_PATHS.paths.existentDir,
-    'kibana.json'
-  )})",
-]
-`);
+    await expect(errors$.toPromise()).resolves.toEqual([
+      `Error: Plugin "some-id" is only compatible with Kibana version "6.4.2", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${resolve(
+        TEST_PATHS.paths.existentDir,
+        'kibana.json'
+      )})`,
+    ]);
   });
 
   test('return error when plugin expected Kibana version is higher than actual version', async () => {
@@ -338,14 +276,12 @@ Array [
     });
 
     await expect(plugins$.toPromise()).resolves.toEqual([]);
-    await expect(errors$.toPromise()).resolves.toMatchInlineSnapshot(`
-Array [
-  "Error: Plugin \\"some-id\\" is only compatible with Kibana version \\"7.0.1\\", but used Kibana version is \\"7.0.0-alpha1\\". (incompatible-version, ${resolveForSnapshot(
-    TEST_PATHS.paths.existentDir,
-    'kibana.json'
-  )})",
-]
-`);
+    await expect(errors$.toPromise()).resolves.toEqual([
+      `Error: Plugin "some-id" is only compatible with Kibana version "7.0.1", but used Kibana version is "7.0.0-alpha1". (incompatible-version, ${resolve(
+        TEST_PATHS.paths.existentDir,
+        'kibana.json'
+      )})`,
+    ]);
   });
 
   test('set defaults for all missing optional fields', async () => {
@@ -353,21 +289,19 @@ Array [
       cb(null, Buffer.from(JSON.stringify({ id: 'some-id', version: '7.0.0' })));
     });
 
-    await expect(plugins$.toPromise()).resolves.toMatchInlineSnapshot(`
-Array [
-  Object {
-    "manifest": Object {
-      "id": "some-id",
-      "kibanaVersion": "7.0.0",
-      "optionalPlugins": Array [],
-      "requiredPlugins": Array [],
-      "ui": false,
-      "version": "7.0.0",
-    },
-    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",
-  },
-]
-`);
+    await expect(plugins$.toPromise()).resolves.toEqual([
+      {
+        manifest: {
+          id: 'some-id',
+          version: '7.0.0',
+          kibanaVersion: '7.0.0',
+          optionalPlugins: [],
+          requiredPlugins: [],
+          ui: false,
+        },
+        path: resolve(TEST_PATHS.paths.existentDir),
+      },
+    ]);
     await expect(errors$.toPromise()).resolves.toEqual([]);
   });
 
@@ -388,26 +322,19 @@ Array [
       );
     });
 
-    await expect(plugins$.toPromise()).resolves.toMatchInlineSnapshot(`
-Array [
-  Object {
-    "manifest": Object {
-      "id": "some-id",
-      "kibanaVersion": "7.0.0",
-      "optionalPlugins": Array [
-        "some-optional-plugin",
-      ],
-      "requiredPlugins": Array [
-        "some-required-plugin",
-        "some-required-plugin-2",
-      ],
-      "ui": true,
-      "version": "some-version",
-    },
-    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",
-  },
-]
-`);
+    await expect(plugins$.toPromise()).resolves.toEqual([
+      {
+        manifest: {
+          id: 'some-id',
+          version: 'some-version',
+          kibanaVersion: '7.0.0',
+          optionalPlugins: ['some-optional-plugin'],
+          requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
+          ui: true,
+        },
+        path: resolve(TEST_PATHS.paths.existentDir),
+      },
+    ]);
     await expect(errors$.toPromise()).resolves.toEqual([]);
   });
 
@@ -426,23 +353,19 @@ Array [
       );
     });
 
-    await expect(plugins$.toPromise()).resolves.toMatchInlineSnapshot(`
-Array [
-  Object {
-    "manifest": Object {
-      "id": "some-id",
-      "kibanaVersion": "7.0.0-alpha2",
-      "optionalPlugins": Array [],
-      "requiredPlugins": Array [
-        "some-required-plugin",
-      ],
-      "ui": false,
-      "version": "some-version",
-    },
-    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",
-  },
-]
-`);
+    await expect(plugins$.toPromise()).resolves.toEqual([
+      {
+        manifest: {
+          id: 'some-id',
+          version: 'some-version',
+          kibanaVersion: '7.0.0-alpha2',
+          optionalPlugins: [],
+          requiredPlugins: ['some-required-plugin'],
+          ui: false,
+        },
+        path: resolve(TEST_PATHS.paths.existentDir),
+      },
+    ]);
     await expect(errors$.toPromise()).resolves.toEqual([]);
   });
 
@@ -461,23 +384,19 @@ Array [
       );
     });
 
-    await expect(plugins$.toPromise()).resolves.toMatchInlineSnapshot(`
-Array [
-  Object {
-    "manifest": Object {
-      "id": "some-id",
-      "kibanaVersion": "kibana",
-      "optionalPlugins": Array [],
-      "requiredPlugins": Array [
-        "some-required-plugin",
-      ],
-      "ui": false,
-      "version": "some-version",
-    },
-    "path": "${resolveForSnapshot(TEST_PATHS.paths.existentDir)}",
-  },
-]
-`);
+    await expect(plugins$.toPromise()).resolves.toEqual([
+      {
+        manifest: {
+          id: 'some-id',
+          version: 'some-version',
+          kibanaVersion: 'kibana',
+          optionalPlugins: [],
+          requiredPlugins: ['some-required-plugin'],
+          ui: false,
+        },
+        path: resolve(TEST_PATHS.paths.existentDir),
+      },
+    ]);
     await expect(errors$.toPromise()).resolves.toEqual([]);
   });
 });
