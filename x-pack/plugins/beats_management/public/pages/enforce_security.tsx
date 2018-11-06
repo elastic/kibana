@@ -7,10 +7,7 @@ import * as React from 'react';
 import { NoDataLayout } from '../components/layouts/no_data';
 
 export const EnforceSecurityPage: React.SFC<any> = () => (
-  <NoDataLayout title="Security disabled" actionSection={[]}>
-    <p>
-      Security is currently disabled. You must enable security in Kibana and Elasticsearch to use
-      Beats central management.
-    </p>
+  <NoDataLayout title="Security is not enabled" actionSection={[]}>
+    <p>You must enable security in Kibana and Elasticsearch to use Beats central management.</p>
   </NoDataLayout>
 );
