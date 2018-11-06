@@ -17,6 +17,11 @@ C_RESET='\033[0m' # Reset color
 export FORCE_COLOR=1
 
 ###
+### Set up imagemagick's policy so tests can write to the FS
+###
+export $MAGICK_CONFIGURE_PATH=$dir/x-pack/test/reporting/functional/imagemagick
+
+###
 ### check that we seem to be in a kibana project
 ###
 if [ -f "$dir/package.json" ] && [ -f "$dir/.node-version" ]; then
