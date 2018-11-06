@@ -7,20 +7,64 @@
 import * as React from 'react';
 
 import {
-  // @ts-ignore
-  EuiAvatar,
   EuiButton,
-  EuiHeader,
+  EuiSpacer,
   // @ts-ignore
-  EuiHeaderLink,
+  EuiTab,
   // @ts-ignore
-  EuiHeaderLinks,
-  // @ts-ignore
-  EuiHeaderLogo,
-  EuiHeaderSection,
-  // @ts-ignore
-  EuiHeaderSectionItem,
+  EuiTabs,
 } from '@elastic/eui';
+import styled from 'styled-components';
+
+import { getHostsUrl, getNetworkUrl, getOverviewUrl } from '../../link_to';
+
+interface NavTab {
+  id: string;
+  name: string;
+  href: string;
+  disabled: boolean;
+}
+
+const navTabs: NavTab[] = [
+  {
+    id: 'overview',
+    name: 'Overview',
+    href: getOverviewUrl(),
+    disabled: false,
+  },
+  {
+    id: 'hosts',
+    name: 'Hosts',
+    href: getHostsUrl(),
+    disabled: false,
+  },
+  {
+    id: 'network',
+    name: 'Network',
+    href: getNetworkUrl(),
+    disabled: false,
+  },
+];
+
+export const Navigation: React.SFC = () => (
+  <div>
+    <EuiTabs>{renderTabs()}</EuiTabs>
+    <AddData />
+    <EuiSpacer />
+  </div>
+);
+
+const renderTabs = () =>
+  navTabs.map((tab: NavTab) => (
+    <EuiTab
+      onClick={() => window.location.assign(tab.href)}
+      isSelected={window.location.hash.includes(tab.id)}
+      disabled={tab.disabled}
+      key={`navigation-${tab.id}`}
+    >
+      {tab.name}
+    </EuiTab>
+  ));
 
 const AddData: React.SFC = () => (
   <div
@@ -28,55 +72,15 @@ const AddData: React.SFC = () => (
       margin: '0 5px',
     }}
   >
-    <EuiButton href="kibana#home/tutorial_directory/security">Add data</EuiButton>
+    <AddSources>
+      <EuiButton href="kibana#home/tutorial_directory/security">Add data</EuiButton>
+    </AddSources>
   </div>
 );
 
-const UserAvatar: React.SFC = () => (
-  <div
-    style={{
-      margin: '0 5px',
-    }}
-  >
-    <EuiAvatar size="l" name="Username" imageUrl="https://source.unsplash.com/64x64/?cat" />
-  </div>
-);
-
-export const Navigation: React.SFC = () => (
-  <EuiHeader>
-    <EuiHeaderSection>
-      <EuiHeaderSectionItem border="right">
-        <EuiHeaderLogo iconType="securityApp" href="#">
-          <span>Sec Ops</span>
-        </EuiHeaderLogo>
-      </EuiHeaderSectionItem>
-
-      <EuiHeaderLinks>
-        <EuiHeaderLink href="#">Overview</EuiHeaderLink>
-        <EuiHeaderLink href="#">Hosts</EuiHeaderLink>
-        <EuiHeaderLink href="#">Network</EuiHeaderLink>
-      </EuiHeaderLinks>
-
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          marginRight: '10px',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'space-between',
-          }}
-        >
-          <AddData />
-          <UserAvatar />
-        </div>
-      </div>
-    </EuiHeaderSection>
-  </EuiHeader>
-);
+const AddSources = styled.div`
+  float: right;
+  margin-top: -10px;
+  -webkit-transform: translateY(100%);
+  transform: translateY(-100%);
+`;
