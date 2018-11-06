@@ -17,21 +17,27 @@
  * under the License.
  */
 
+/**
+ * Components using the react-intl module require access to the intl context.
+ * This is not available when mounting single components in Enzyme.
+ * These helper functions aim to address that and wrap a valid,
+ * intl context around them.
+ */
+
 import { I18nProvider, InjectedIntl, intlShape } from '@kbn/i18n/react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
-import React, { ReactElement } from 'react';
-import { IntlProvider } from 'react-intl';
+import React, { ReactElement, ValidationMap } from 'react';
 
 // Use fake component to extract `intl` property to use in tests.
 const { intl } = (mount(
   <I18nProvider>
     <br />
   </I18nProvider>
-).find('IntlProvider') as ReactWrapper<{}, {}, IntlProvider>)
+).find('IntlProvider') as ReactWrapper<{}, {}, import('react-intl').IntlProvider>)
   .instance()
   .getChildContext();
 
-function getOptions(context = {}, childContextTypes = {}, props = {}) {
+function getOptions(context = {}, childContextTypes: ValidationMap<any> = {}, props = {}) {
   return {
     context: {
       ...context,
@@ -48,8 +54,8 @@ function getOptions(context = {}, childContextTypes = {}, props = {}) {
 /**
  * When using React-Intl `injectIntl` on components, props.intl is required.
  */
-function nodeWithIntlProp(node: ReactElement<any>): ReactElement<{ intl: InjectedIntl }> {
-  return React.cloneElement(node, { intl });
+function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { intl: InjectedIntl }> {
+  return React.cloneElement<any>(node, { intl });
 }
 
 /**
@@ -59,15 +65,15 @@ function nodeWithIntlProp(node: ReactElement<any>): ReactElement<{ intl: Injecte
  *  @param options properties to pass into shallow wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function shallowWithIntl(
-  node: ReactElement<any>,
+export function shallowWithIntl<T>(
+  node: ReactElement<T>,
   {
     context,
     childContextTypes,
     ...props
   }: {
     context?: any;
-    childContextTypes?: any;
+    childContextTypes?: ValidationMap<any>;
   } = {}
 ) {
   const options = getOptions(context, childContextTypes, props);
@@ -82,15 +88,15 @@ export function shallowWithIntl(
  *  @param options properties to pass into mount wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function mountWithIntl(
-  node: ReactElement<any>,
+export function mountWithIntl<T>(
+  node: ReactElement<T>,
   {
     context,
     childContextTypes,
     ...props
   }: {
     context?: any;
-    childContextTypes?: any;
+    childContextTypes?: ValidationMap<any>;
   } = {}
 ) {
   const options = getOptions(context, childContextTypes, props);
@@ -105,15 +111,15 @@ export function mountWithIntl(
  *  @param options properties to pass into render wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function renderWithIntl(
-  node: ReactElement<any>,
+export function renderWithIntl<T>(
+  node: ReactElement<T>,
   {
     context,
     childContextTypes,
     ...props
   }: {
     context?: any;
-    childContextTypes?: any;
+    childContextTypes?: ValidationMap<any>;
   } = {}
 ) {
   const options = getOptions(context, childContextTypes, props);
