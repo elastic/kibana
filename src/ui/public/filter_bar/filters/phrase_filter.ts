@@ -17,13 +17,36 @@
  * under the License.
  */
 
-import React, { SFC } from 'react';
-import { Filter } from 'ui/filter_bar/filters';
+import { Filter } from 'ui/filter_bar/filters/index';
 
-interface Props {
-  filter: Filter;
+export class PhraseFilter implements Filter {
+  public field: string;
+  public value: string | number;
+  public disabled: boolean;
+  public index: string;
+  public negate: boolean;
+
+  constructor({
+    field,
+    value,
+    index,
+    disabled = false,
+    negate = false,
+  }: {
+    field: string;
+    value: string | number;
+    index: string;
+    disabled?: boolean;
+    negate?: boolean;
+  }) {
+    this.field = field;
+    this.value = value;
+    this.disabled = disabled;
+    this.index = index;
+    this.negate = negate;
+  }
+
+  public getDisplayText = () => {
+    return `${this.field} : ${this.value}`;
+  };
 }
-
-export const FilterItem: SFC<Props> = props => {
-  return <div>{props.filter.getDisplayText()}</div>;
-};

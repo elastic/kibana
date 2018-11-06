@@ -18,10 +18,13 @@
  */
 
 import React, { Component } from 'react';
+import { PhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
 import { FilterItem } from 'ui/filter_bar/react/filter_item';
 
 export class FilterBar extends Component {
   public render() {
-    return <FilterItem />;
+    return (
+      <FilterItem filter={new PhraseFilter({ field: 'response', value: 200, index: 'foo' })} />
+    );
   }
 }

@@ -17,13 +17,9 @@
  * under the License.
  */
 
-import React, { SFC } from 'react';
-import { Filter } from 'ui/filter_bar/filters';
-
-interface Props {
-  filter: Filter;
+export interface Filter {
+  disabled: boolean;
+  negate: boolean;
+  index: string;
+  getDisplayText: () => string;
 }
-
-export const FilterItem: SFC<Props> = props => {
-  return <div>{props.filter.getDisplayText()}</div>;
-};
