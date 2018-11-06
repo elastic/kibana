@@ -132,7 +132,7 @@ uiModule.directive('monitoringMlListing', (kbnUrl, i18n) => {
       };
 
       const filterJobsPlaceholder = i18n('xpack.monitoring.elasticsearch.mlJobListing.filterJobsPlaceholder', {
-        defaultMessage: 'Filter Alerts…'
+        defaultMessage: 'Filter Jobs…'
       });
 
       scope.$watch('jobs', (jobs = []) => {
