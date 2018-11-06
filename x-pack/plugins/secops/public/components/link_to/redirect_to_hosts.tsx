@@ -8,9 +8,9 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 
 export const RedirectToHostsPage = () => {
-  return <Redirect to={`/hosts`} />;
+  return <Redirect to={'/hosts'} />;
 };
 
 export const getHostsUrl = () => {
-  return `#/link-to/hosts`;
+  return '#/link-to/hosts';
 };
