@@ -19,8 +19,7 @@
 
 import { EventEmitter } from 'events';
 import { debounce } from 'lodash';
-import { Inspector } from '../../inspector';
-
+import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { IPrivate } from '../../private';
 import { RenderCompleteHelper } from '../../render_complete';
@@ -29,6 +28,9 @@ import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
 import { visualizationLoader } from './visualization_loader';
 import { VisualizeDataLoader } from './visualize_data_loader';
+
+import { Inspector } from '../../inspector';
+import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
 import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './types';
 
@@ -67,6 +69,7 @@ export class EmbeddedVisualizeHandler {
   private readonly appState?: AppState;
   private uiState: PersistedState;
   private dataLoader: VisualizeDataLoader;
+  private inspectorAdapters: Adapters = {};
 
   constructor(
     private readonly element: HTMLElement,
@@ -110,6 +113,9 @@ export class EmbeddedVisualizeHandler {
 
     this.dataLoader = new VisualizeDataLoader(vis, Private);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
+    this.inspectorAdapters = this.getActiveInspectorAdapters();
+    this.vis.openInspector = this.openInspector;
+    this.vis.hasInspector = this.hasInspector;
 
     this.render();
   }
@@ -184,9 +190,15 @@ export class EmbeddedVisualizeHandler {
    * handler to the inspector to close and interact with it.
    * @return An inspector session to interact with the opened inspector.
    */
-  public openInspector(): ReturnType<typeof Inspector.open> {
-    return this.vis.openInspector();
-  }
+  public openInspector = () => {
+    return Inspector.open(this.inspectorAdapters, {
+      title: this.vis.title,
+    });
+  };
+
+  public hasInspector = () => {
+    return Inspector.isAvailable(this.inspectorAdapters);
+  };
 
   /**
    * Returns a promise, that will resolve (without a value) once the first rendering of
@@ -231,6 +243,40 @@ export class EmbeddedVisualizeHandler {
   };
 
   /**
+   * Returns an object of all inspectors for this vis object.
+   * This must only be called after this.type has properly be initialized,
+   * since we need to read out data from the the vis type to check which
+   * inspectors are available.
+   */
+  private getActiveInspectorAdapters = (): Adapters => {
+    const adapters: Adapters = {};
+    const { inspectorAdapters: typeAdapters } = this.vis.type;
+
+    // Add the requests inspector adapters if the vis type explicitly requested it via
+    // inspectorAdapters.requests: true in its definition or if it's using the courier
+    // request handler, since that will automatically log its requests.
+    if ((typeAdapters && typeAdapters.requests) || this.vis.type.requestHandler === 'courier') {
+      adapters.requests = new RequestAdapter();
+    }
+
+    // Add the data inspector adapter if the vis type requested it or if the
+    // vis is using courier, since we know that courier supports logging
+    // its data.
+    if ((typeAdapters && typeAdapters.data) || this.vis.type.requestHandler === 'courier') {
+      adapters.data = new DataAdapter();
+    }
+
+    // Add all inspectors, that are explicitly registered with this vis type
+    if (typeAdapters && typeAdapters.custom) {
+      Object.entries(typeAdapters.custom).forEach(([key, Adapter]) => {
+        adapters[key] = new (Adapter as any)();
+      });
+    }
+
+    return adapters;
+  };
+
+  /**
    * Fetches new data and renders the chart. This will happen debounced for a couple
    * of milliseconds, to bundle fast successive calls into one fetch and render,
    * e.g. while resizing the window, this will be triggered constantly on the resize
@@ -265,6 +311,7 @@ export class EmbeddedVisualizeHandler {
   private fetch = (forceFetch: boolean = false) => {
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
+    this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
 
     return this.dataLoader.fetch(this.dataLoaderParams);
   };

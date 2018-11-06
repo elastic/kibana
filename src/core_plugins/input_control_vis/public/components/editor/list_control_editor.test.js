@@ -20,7 +20,7 @@
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
 
@@ -286,4 +286,53 @@ test('handleNumberOptionChange - size', async () => {
       }
       return false;
     }, 'unexpected input event'));
+});
+
+test('field name change', async () => {
+  const component = shallowWithIntl(
+    <ListControlEditor
+      getIndexPattern={getIndexPatternMock}
+      controlIndex={0}
+      controlParams={controlParams}
+      handleFieldNameChange={handleFieldNameChange}
+      handleIndexPatternChange={handleIndexPatternChange}
+      handleCheckboxOptionChange={handleCheckboxOptionChange}
+      handleNumberOptionChange={handleNumberOptionChange}
+      handleParentChange={() => {}}
+      parentCandidates={[]}
+    />
+  );
+
+  const update = async () => {
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+  };
+
+  // ensure that after async loading is complete the DynamicOptionsSwitch is not disabled
+  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')).toHaveLength(0);
+  await update();
+  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')).toHaveLength(1);
+
+  component.setProps({
+    controlParams: {
+      ...controlParams,
+      fieldName: 'numberField',
+    },
+  });
+
+  // ensure that after async loading is complete the DynamicOptionsSwitch is disabled, because this is not a "string" field
+  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')).toHaveLength(0);
+  await update();
+  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')).toHaveLength(1);
+
+  component.setProps({
+    controlParams
+  });
+
+  // ensure that after async loading is complete the DynamicOptionsSwitch is not disabled again, because we switched to original "string" field
+  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')).toHaveLength(0);
+  await update();
+  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')).toHaveLength(1);
 });
