@@ -86,7 +86,6 @@ const Footer = styled.div`
   left: 0;
   bottom: 0;
   width: 100%;
-  border-top: 1px solid #d9d9d9;
   color: #666;
   padding: 8px 8px;
   text-align: center;
