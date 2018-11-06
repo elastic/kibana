@@ -58,8 +58,10 @@ exports[`dev/i18n/serializers/json5 should serialize default messages to JSON5 1
       },
     },
   },
-  'plugin1.message.id-1': 'Message text 1',
-  'plugin2.message.id-2': 'Message text 2', // Message context
+  messages: {
+    'plugin1.message.id-1': 'Message text 1',
+    'plugin2.message.id-2': 'Message text 2', // Message description
+  },
 }
 "
 `;

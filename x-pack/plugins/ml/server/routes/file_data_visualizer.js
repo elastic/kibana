@@ -24,13 +24,12 @@ export function fileDataVisualizerRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/file_data_visualizer/analyze_file',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const data = request.payload;
 
       return analyzeFiles(callWithRequest, data, request.query)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(wrapError);
     },
     config: {
       ...commonRouteConfig,
@@ -41,14 +40,13 @@ export function fileDataVisualizerRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/file_data_visualizer/import',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.query;
       const { index, data, settings, mappings, ingestPipeline } = request.payload;
 
       return importData(callWithRequest, id, index, settings, mappings, ingestPipeline, data)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(wrapError);
     },
     config: {
       ...commonRouteConfig,

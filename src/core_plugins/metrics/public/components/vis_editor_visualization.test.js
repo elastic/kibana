@@ -29,7 +29,10 @@ describe('getVisualizeLoader', () => {
   beforeEach(() => {
     updateStub = jest.fn();
     const handlerMock = {
-      update: updateStub
+      update: updateStub,
+      data$: {
+        subscribe: () => {}
+      }
     };
     const loaderMock = {
       embedVisualizationWithSavedObject: () => {

@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 
-export function TileMapTooltipFormatterProvider($compile, $rootScope) {
+export function TileMapTooltipFormatterProvider($compile, $rootScope, i18n) {
 
   const $tooltipScope = $rootScope.$new();
   const $el = $('<div>').html(require('./_tooltip.html'));
@@ -37,11 +37,11 @@ export function TileMapTooltipFormatterProvider($compile, $rootScope) {
         value: metricAgg.fieldFormatter()(feature.properties.value)
       },
       {
-        label: 'Latitude',
+        label: i18n('tileMap.tooltipFormatter.latitudeLabel', { defaultMessage: 'Latitude' }),
         value: feature.geometry.coordinates[1]
       },
       {
-        label: 'Longitude',
+        label: i18n('tileMap.tooltipFormatter.longitudeLabel', { defaultMessage: 'Longitude' }),
         value: feature.geometry.coordinates[0]
       }
     ];

@@ -20,14 +20,20 @@
 import {
   isCallExpression,
   isIdentifier,
-  isObjectProperty,
   isMemberExpression,
   isNode,
+  isObjectExpression,
+  isObjectProperty,
+  isStringLiteral,
+  isTemplateLiteral,
 } from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
 import chalk from 'chalk';
+import parser from 'intl-messageformat-parser';
+
+import { createFailError } from '../run';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
@@ -35,6 +41,10 @@ const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
 export const globAsync = promisify(glob);
+
+export function difference(left = [], right = []) {
+  return left.filter(value => !right.includes(value));
+}
 
 export function isPropertyWithKey(property, identifierName) {
   return isObjectProperty(property) && isIdentifier(property.key, { name: identifierName });
@@ -113,4 +123,129 @@ export function createParserErrorMessage(content, error) {
   const context = contentLines.slice(firstLine, lastLine + 1).join('\n');
 
   return `${error.message}:\n${context}`;
+}
+
+/**
+ * Checks whether values from "values" and "defaultMessage" correspond to each other.
+ *
+ * @param {string[]} valuesKeys array of "values" property keys
+ * @param {string} defaultMessage "defaultMessage" value
+ * @param {string} messageId message id for fail errors
+ * @throws if "values" and "defaultMessage" don't correspond to each other
+ */
+export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
+  // skip validation if defaultMessage doesn't use ICU and values prop has no keys
+  if (!valuesKeys.length && !defaultMessage.includes('{')) {
+    return;
+  }
+
+  let defaultMessageAst;
+
+  try {
+    defaultMessageAst = parser.parse(defaultMessage);
+  } catch (error) {
+    if (error.name === 'SyntaxError') {
+      const errorWithContext = createParserErrorMessage(defaultMessage, {
+        loc: {
+          line: error.location.start.line,
+          column: error.location.start.column - 1,
+        },
+        message: error.message,
+      });
+
+      throw createFailError(
+        `Couldn't parse default message ("${messageId}"):\n${errorWithContext}`
+      );
+    }
+
+    throw error;
+  }
+
+  const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
+
+  // skip validation if intl-messageformat-parser didn't return an AST with nonempty elements array
+  if (!defaultMessageAst || !defaultMessageAst.elements || !defaultMessageAst.elements.length) {
+    return;
+  }
+
+  const defaultMessageValueReferences = defaultMessageAst.elements.reduce((keys, element) => {
+    if (element.type === ARGUMENT_ELEMENT_TYPE) {
+      keys.push(element.id);
+    }
+    return keys;
+  }, []);
+
+  const missingValuesKeys = difference(defaultMessageValueReferences, valuesKeys);
+  if (missingValuesKeys.length) {
+    throw createFailError(
+      `some properties are missing in "values" object ("${messageId}"):\n[${missingValuesKeys}].`
+    );
+  }
+
+  const unusedValuesKeys = difference(valuesKeys, defaultMessageValueReferences);
+  if (unusedValuesKeys.length) {
+    throw createFailError(
+      `"values" object contains unused properties ("${messageId}"):\n[${unusedValuesKeys}].`
+    );
+  }
+}
+
+export function extractMessageIdFromNode(node) {
+  if (!isStringLiteral(node)) {
+    throw createFailError(`Message id should be a string literal.`);
+  }
+
+  return node.value;
+}
+
+function parseTemplateLiteral(node, messageId) {
+  // TemplateLiteral consists of quasis (strings) and expressions.
+  // If we have at least one expression in template literal, then quasis length
+  // will be greater than 1
+  if (node.quasis.length > 1) {
+    throw createFailError(`expressions are not allowed in template literals ("${messageId}").`);
+  }
+
+  // Babel reads 'cooked' and 'raw' versions of a string.
+  // 'cooked' acts like a normal StringLiteral value and interprets backslashes
+  // 'raw' is primarily designed for TaggedTemplateLiteral and escapes backslashes
+  return node.quasis[0].value.cooked;
+}
+
+export function extractMessageValueFromNode(node, messageId) {
+  if (isStringLiteral(node)) {
+    return node.value;
+  }
+
+  if (isTemplateLiteral(node)) {
+    return parseTemplateLiteral(node, messageId);
+  }
+
+  throw createFailError(
+    `defaultMessage value should be a string or template literal ("${messageId}").`
+  );
+}
+
+export function extractDescriptionValueFromNode(node, messageId) {
+  if (isStringLiteral(node)) {
+    return node.value;
+  }
+
+  if (isTemplateLiteral(node)) {
+    return parseTemplateLiteral(node, messageId);
+  }
+
+  throw createFailError(
+    `description value should be a string or template literal ("${messageId}").`
+  );
+}
+
+export function extractValuesKeysFromNode(node, messageId) {
+  if (!isObjectExpression(node)) {
+    throw createFailError(`"values" value should be an object expression ("${messageId}").`);
+  }
+
+  return node.properties.map(
+    property => (isStringLiteral(property.key) ? property.key.value : property.key.name)
+  );
 }

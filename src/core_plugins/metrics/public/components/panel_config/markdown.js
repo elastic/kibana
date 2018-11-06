@@ -197,7 +197,6 @@ MarkdownPanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData: PropTypes.object,
   dateFormat: PropTypes.string
 };
 
