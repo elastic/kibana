@@ -18,6 +18,13 @@ $visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
   min-height: 1px !important;
 }
 
+.leaflet-clickable {
+  &:hover {
+    stroke-width: $euiSizeS;
+    stroke-opacity: 0.8
+  }
+}
+
 /**
  * 1. Since Leaflet is an external library, we also have to provide EUI variables
  *    to non-override colors for darkmode.

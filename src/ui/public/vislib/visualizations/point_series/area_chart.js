@@ -100,7 +100,7 @@ export function VislibVisualizationsAreaChartProvider(Private) {
         .attr('data-label', data.label)
         .style('fill', () => color(data.label))
         .style('stroke', () => color(data.label))
-        .classed('overlap_area', function () {
+        .classed('visAreaChart__overlapArea', function () {
           return isOverlapping;
         })
         .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
