@@ -51,7 +51,11 @@ $visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 }
 
 /* over-rides leaflet popup styles to look like kibana tooltip */
-.leaflet-popup-content-wrapper {
+.leaflet-popup-content-wrapper,
+.leaflet-resp-popup-south-west .leaflet-popup-content-wrapper,
+.leaflet-resp-popup-south-east .leaflet-popup-content-wrapper,
+.leaflet-resp-popup-north-east .leaflet-popup-content-wrapper,
+.leaflet-resp-popup-north-west .leaflet-popup-content-wrapper {
   margin: 0;
   padding: 0;
   background: $temp-euiTooltipBackground;
