@@ -5,6 +5,7 @@
  */
 
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import * as React from 'react';
 
 import { getLabelOfTextScale, isTextScale, TextScale } from '../../../common/log_text_scale';
@@ -13,9 +14,10 @@ interface LogTextScaleControlsProps {
   availableTextScales: TextScale[];
   textScale: TextScale;
   setTextScale: (scale: TextScale) => any;
+  intl: InjectedIntl;
 }
 
-export class LogTextScaleControls extends React.PureComponent<LogTextScaleControlsProps> {
+class LogTextScaleControlsUI extends React.PureComponent<LogTextScaleControlsProps> {
   public setTextScale = (textScale: string) => {
     if (isTextScale(textScale)) {
       this.props.setTextScale(textScale);
@@ -23,10 +25,15 @@ export class LogTextScaleControls extends React.PureComponent<LogTextScaleContro
   };
 
   public render() {
-    const { availableTextScales, textScale } = this.props;
+    const { availableTextScales, textScale, intl } = this.props;
 
     return (
-      <EuiFormRow label="Text Size">
+      <EuiFormRow
+        label={intl.formatMessage({
+          id: 'xpack.infra.logTextScaleControls.textSizeFormRowLabel',
+          defaultMessage: 'Text Size',
+        })}
+      >
         <EuiRadioGroup
           options={availableTextScales.map((availableTextScale: TextScale) => ({
             id: availableTextScale.toString(),
@@ -39,3 +46,5 @@ export class LogTextScaleControls extends React.PureComponent<LogTextScaleContro
     );
   }
 }
+
+export const LogTextScaleControls = injectI18n(LogTextScaleControlsUI);

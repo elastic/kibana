@@ -5,6 +5,7 @@
  */
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
 interface LogTextStreamEmptyViewProps {
@@ -17,12 +18,29 @@ export class LogTextStreamEmptyView extends React.PureComponent<LogTextStreamEmp
 
     return (
       <EuiEmptyPrompt
-        title={<h2>There are no log messages to display.</h2>}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.infra.logTextStreamEmptyView.noLogMessageToDisplayTitle"
+              defaultMessage="There are no log messages to display."
+            />
+          </h2>
+        }
         titleSize="m"
-        body={<p>Try adjusting your filter.</p>}
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.infra.logTextStreamEmptyView.adjustingFilterTryDescription"
+              defaultMessage="Try adjusting your filter."
+            />
+          </p>
+        }
         actions={
           <EuiButton iconType="refresh" color="primary" fill onClick={reload}>
-            Check for new data
+            <FormattedMessage
+              id="xpack.infra.logTextStreamEmptyView.checkForNewDataButtonLabel"
+              defaultMessage="Check for new data"
+            />
           </EuiButton>
         }
       />

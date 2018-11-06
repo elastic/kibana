@@ -10,6 +10,7 @@ import {
   EuiHeaderBreadcrumbs,
   EuiHeaderSection,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -21,7 +22,9 @@ export class Header extends React.PureComponent<HeaderProps> {
   private staticBreadcrumbs = [
     {
       href: '#/',
-      text: 'InfraOps',
+      text: i18n.translate('xpack.infra.header.infraOpsTitle', {
+        defaultMessage: 'InfraOps',
+      }),
     },
   ];
 

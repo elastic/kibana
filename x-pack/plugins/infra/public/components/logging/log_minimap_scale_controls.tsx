@@ -5,6 +5,7 @@
  */
 
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import * as React from 'react';
 
 interface IntervalSizeDescriptor {
@@ -16,9 +17,10 @@ interface LogMinimapScaleControlsProps {
   availableIntervalSizes: IntervalSizeDescriptor[];
   intervalSize: number;
   setIntervalSize: (intervalSize: number) => any;
+  intl: InjectedIntl;
 }
 
-export class LogMinimapScaleControls extends React.PureComponent<LogMinimapScaleControlsProps> {
+class LogMinimapScaleControlsUI extends React.PureComponent<LogMinimapScaleControlsProps> {
   public handleScaleChange = (intervalSizeDescriptorKey: string) => {
     const { availableIntervalSizes, setIntervalSize } = this.props;
     const [sizeDescriptor] = availableIntervalSizes.filter(
@@ -31,11 +33,16 @@ export class LogMinimapScaleControls extends React.PureComponent<LogMinimapScale
   };
 
   public render() {
-    const { availableIntervalSizes, intervalSize } = this.props;
+    const { availableIntervalSizes, intervalSize, intl } = this.props;
     const [currentSizeDescriptor] = availableIntervalSizes.filter(intervalSizeEquals(intervalSize));
 
     return (
-      <EuiFormRow label="Minimap Scale">
+      <EuiFormRow
+        label={intl.formatMessage({
+          id: 'xpack.infra.logMinimapScaleControls.minimapScaleFormRowLabel',
+          defaultMessage: 'Minimap Scale',
+        })}
+      >
         <EuiRadioGroup
           options={availableIntervalSizes.map(sizeDescriptor => ({
             id: getIntervalSizeDescriptorKey(sizeDescriptor),
@@ -57,3 +64,5 @@ const intervalKeyEquals = (key: string) => (sizeDescriptor: IntervalSizeDescript
 
 const intervalSizeEquals = (size: number) => (sizeDescriptor: IntervalSizeDescriptor) =>
   sizeDescriptor.intervalSize === size;
+
+export const LogMinimapScaleControls = injectI18n(LogMinimapScaleControlsUI);

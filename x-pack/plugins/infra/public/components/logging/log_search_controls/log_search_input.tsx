@@ -5,6 +5,7 @@
  */
 
 import { EuiFieldSearch } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import * as React from 'react';
 import styled from 'styled-components';
@@ -14,13 +15,14 @@ interface LogSearchInputProps {
   isLoading: boolean;
   onSearch: (query: string) => void;
   onClear: () => void;
+  intl: InjectedIntl;
 }
 
 interface LogSearchInputState {
   query: string;
 }
 
-export class LogSearchInput extends React.PureComponent<LogSearchInputProps, LogSearchInputState> {
+class LogSearchInputUI extends React.PureComponent<LogSearchInputProps, LogSearchInputState> {
   public readonly state = {
     query: '',
   };
@@ -44,7 +46,7 @@ export class LogSearchInput extends React.PureComponent<LogSearchInputProps, Log
   };
 
   public render() {
-    const { className, isLoading } = this.props;
+    const { className, isLoading, intl } = this.props;
     const { query } = this.state;
 
     const classes = classNames('loggingSearchInput', className);
@@ -52,12 +54,18 @@ export class LogSearchInput extends React.PureComponent<LogSearchInputProps, Log
     return (
       <form onSubmit={this.handleSubmit}>
         <PlainSearchField
-          aria-label="search"
+          aria-label={intl.formatMessage({
+            id: 'xpack.infra.logSearchInput.searchInLogsAriaLabel',
+            defaultMessage: 'search',
+          })}
           className={classes}
           fullWidth
           isLoading={isLoading}
           onChange={this.handleChangeQuery}
-          placeholder="Search"
+          placeholder={intl.formatMessage({
+            id: 'xpack.infra.logSearchInput.searchInLogsPlaceholder',
+            defaultMessage: 'Search',
+          })}
           value={query}
         />
       </form>
@@ -73,3 +81,5 @@ const PlainSearchField = styled(EuiFieldSearch)`
     box-shadow: inset 0 -2px 0 0 ${props => props.theme.eui.euiColorPrimary};
   }
 `;
+
+export const LogSearchInput = injectI18n(LogSearchInputUI);

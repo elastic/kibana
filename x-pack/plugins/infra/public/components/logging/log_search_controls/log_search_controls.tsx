@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import * as React from 'react';
 
@@ -44,11 +45,13 @@ export class LogSearchControls extends React.PureComponent<LogSearchControlsProp
         className={classes}
       >
         <EuiFlexItem>
-          <LogSearchInput
-            isLoading={isLoadingSearchResults}
-            onClear={clearSearch}
-            onSearch={search}
-          />
+          <I18nProvider>
+            <LogSearchInput
+              isLoading={isLoadingSearchResults}
+              onClear={clearSearch}
+              onSearch={search}
+            />
+          </I18nProvider>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LogSearchButtons

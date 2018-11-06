@@ -5,25 +5,41 @@
  */
 
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import * as React from 'react';
 
 interface LogTextWrapControlsProps {
   wrap: boolean;
   setTextWrap: (scale: boolean) => any;
+  intl: InjectedIntl;
 }
 
-export class LogTextWrapControls extends React.PureComponent<LogTextWrapControlsProps> {
+class LogTextWrapControlsUI extends React.PureComponent<LogTextWrapControlsProps> {
   public toggleWrap = () => {
     this.props.setTextWrap(!this.props.wrap);
   };
 
   public render() {
-    const { wrap } = this.props;
+    const { wrap, intl } = this.props;
 
     return (
-      <EuiFormRow label="Line Wrapping">
-        <EuiSwitch label="Wrap long lines" checked={wrap} onChange={this.toggleWrap} />
+      <EuiFormRow
+        label={intl.formatMessage({
+          id: 'xpack.infra.logTextWrapControls.lineWrappingFormRowLabel',
+          defaultMessage: 'Line Wrapping',
+        })}
+      >
+        <EuiSwitch
+          label={intl.formatMessage({
+            id: 'xpack.infra.logTextWrapControls.wrapLongLinesFormRowLabel',
+            defaultMessage: 'Wrap long lines',
+          })}
+          checked={wrap}
+          onChange={this.toggleWrap}
+        />
       </EuiFormRow>
     );
   }
 }
+
+export const LogTextWrapControls = injectI18n(LogTextWrapControlsUI);
