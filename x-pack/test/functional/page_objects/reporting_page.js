@@ -128,6 +128,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async clearToastNotifications() {
       const toasts = await testSubjects.findAll('toastCloseButton');
+      log.debug(`clearToastNotifications: ${toasts.length}`);
       await Promise.all(toasts.map(t => t.click()));
     }
 
