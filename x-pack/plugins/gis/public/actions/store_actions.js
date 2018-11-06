@@ -229,15 +229,6 @@ export function updateLayerLabel(id, newLabel) {
   };
 }
 
-// export function updateLayerShowAtAllZoomLevels(id, showAtAllZoomLevels) {
-//   return {
-//     type: UPDATE_LAYER_PROP,
-//     id,
-//     propName: 'showAtAllZoomLevels',
-//     newValue: showAtAllZoomLevels,
-//   };
-// }
-
 export function updateLayerMinZoom(id, minZoom) {
   return {
     type: UPDATE_LAYER_PROP,

@@ -114,9 +114,7 @@ export class GeohashGridLayer extends ALayer {
 
     mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     this._style.setMBPaintProperties(mbMap, heatmapLayerId, scaledPropertyName);
-    if (!this._descriptor.showAtAllZoomLevels) {
-      mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    }
+    mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
 
@@ -165,7 +163,7 @@ export class GeohashGridLayer extends ALayer {
         layerName,
       });
       stopLoading('source', requestToken, data);
-    } catch(error) {
+    } catch (error) {
       onLoadError('source', requestToken, error.message);
     }
   }

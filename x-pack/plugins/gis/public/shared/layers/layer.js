@@ -44,10 +44,6 @@ export class ALayer {
   }
 
   static _renderZoomSliders(minZoom, maxZoom, onMinZoomChange, onMaxZoomChange) {
-    // if (this.state.showAtAllZoomLevels) {
-    //   return;
-    // }
-
     return (
       <Fragment>
         <EuiFlexGroup>
@@ -114,7 +110,6 @@ export class ALayer {
     layerDescriptor.dataRequests = [];
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
-    layerDescriptor.showAtAllZoomLevels = _.get(options, 'showAtAllZoomLevels', false);
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.source = options.source;
@@ -158,9 +153,6 @@ export class ALayer {
   }
 
   showAtZoomLevel(zoom) {
-    if (this._descriptor.showAtAllZoomLevels) {
-      return true;
-    }
 
     if (zoom >= this._descriptor.minZoom && zoom <= this._descriptor.maxZoom) {
       return true;
@@ -179,7 +171,6 @@ export class ALayer {
 
   getZoomConfig() {
     return {
-      showAtAllZoomLevels: this._descriptor.showAtAllZoomLevels,
       minZoom: this._descriptor.minZoom,
       maxZoom: this._descriptor.maxZoom,
     };
