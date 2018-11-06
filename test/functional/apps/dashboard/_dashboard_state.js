@@ -170,10 +170,8 @@ export default function ({ getService, getPageObjects }) {
         // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
         // soft refresh.
         await remote.get(newUrl.toString(), false);
-        await retry.try(async () => {
-          const newQuery = await queryBar.getQueryString();
-          expect(newQuery).to.equal('hi');
-        });
+        const newQuery = await queryBar.getQueryString();
+        expect(newQuery).to.equal('hi');
       });
 
       it('for panel size parameters', async function () {

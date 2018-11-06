@@ -23,7 +23,7 @@ declare module '@elastic/eui' {
   export const EuiOutsideClickDetector: SFC<any>;
 }
 
-import { debounce } from 'lodash';
+import { debounce, isEqual } from 'lodash';
 import React, { Component, SFC } from 'react';
 import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
 import { kfetch } from 'ui/kfetch';
@@ -84,16 +84,13 @@ interface State {
   index: number | null;
   suggestions: AutocompleteSuggestion[];
   suggestionLimit: number;
-  stateChanged: boolean;
+  currentProps?: Props;
 }
 
 export class QueryBar extends Component<Props, State> {
   public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
-    if (prevState.stateChanged === true) {
-      return {
-        ...prevState,
-        stateChanged: false,
-      };
+    if (isEqual(prevState.currentProps, nextProps)) {
+      return null;
     }
 
     if (nextProps.query.query !== prevState.query.query) {
@@ -102,6 +99,7 @@ export class QueryBar extends Component<Props, State> {
           query: toUser(nextProps.query.query),
           language: nextProps.query.language,
         },
+        currentProps: nextProps,
       };
     } else if (nextProps.query.language !== prevState.query.language) {
       return {
@@ -109,6 +107,7 @@ export class QueryBar extends Component<Props, State> {
           query: '',
           language: nextProps.query.language,
         },
+        currentProps: nextProps,
       };
     }
 
@@ -137,7 +136,6 @@ export class QueryBar extends Component<Props, State> {
     index: null,
     suggestions: [],
     suggestionLimit: 50,
-    stateChanged: false,
   };
 
   public updateSuggestions = debounce(async () => {
@@ -151,37 +149,6 @@ export class QueryBar extends Component<Props, State> {
 
   private componentIsUnmounting = false;
   private persistedLog: PersistedLog | null = null;
-
-  /*
-    This is a really nasty hack required because React "fixed" getDerivedStateFromProps in version 16.4 [1].
-    We were relying on the fact that getDerivedStateFromProps was only called on prop change. The
-    reasons for this are outlined in the other comment above about avoiding triggering angular
-    digest cycles. I intentionally chose not to implement React's "Preferred Solution"[2] because it
-    would once again involve triggering angular digest cycles on every keypress. We can remove this hack
-    once this component is no longer used in Angular.
-
-    [1]: https://reactjs.org/blog/2018/05/23/react-v-16-4.html#bugfix-for-getderivedstatefromprops
-    [2]: https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#recommendation-fully-controlled-component
-  */
-  public setState = <K extends keyof State>(
-    updater:
-      | ((prevState: Readonly<State>, props: Props) => Pick<State, K> | State)
-      | (Pick<State, K> | State),
-    callback?: () => void
-  ) => {
-    if (typeof updater === 'function') {
-      return super.setState(
-        // TypeScript doesn't handle spread operators on generics well https://github.com/Microsoft/TypeScript/issues/13557
-        // @ts-ignore
-        (state, props) => ({ ...updater(state, props), stateChanged: true }),
-        callback
-      );
-    }
-    if (typeof updater === 'object') {
-      // @ts-ignore
-      return super.setState({ ...updater, stateChanged: true }, callback);
-    }
-  };
 
   public isDirty = () => {
     return this.state.query.query !== this.props.query.query;
