@@ -9,7 +9,7 @@ import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 
 import { Header } from './components/layouts/header';
 import { BreadcrumbConsumer, RouteWithBreadcrumb } from './components/route_with_breadcrumb';
-import { FrontendLibs } from './lib/lib';
+import { FrontendLibs } from './lib/types';
 import { BeatDetailsPage } from './pages/beat';
 import { MainPages } from './pages/main';
 import { NoAccessPage } from './pages/no_access';

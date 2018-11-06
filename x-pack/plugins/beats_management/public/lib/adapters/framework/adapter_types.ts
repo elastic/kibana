@@ -18,3 +18,13 @@ export const RuntimeFrameworkInfo = t.type({
   }),
 });
 export interface FrameworkInfo extends t.TypeOf<typeof RuntimeFrameworkInfo> {}
+
+export interface FrameworkUser {
+  email: string | null;
+  enabled: boolean;
+  full_name: string | null;
+  metadata: { _reserved: true };
+  roles: string[];
+  scope: string[];
+  username: string;
+}

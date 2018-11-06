@@ -21,7 +21,7 @@ import { PrimaryLayout } from '../../components/layouts/primary';
 import { WalkthroughLayout } from '../../components/layouts/walkthrough';
 import { RouteWithBreadcrumb } from '../../components/route_with_breadcrumb';
 import { URLStateProps, withUrlState } from '../../containers/with_url_state';
-import { FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/types';
 import { ActivityPage } from './activity';
 import { BeatsPage } from './beats';
 import { CreateTagPageFragment } from './create_tag_fragment';

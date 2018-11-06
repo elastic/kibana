@@ -12,7 +12,7 @@ import { AssignmentActionType, Table, TagsTableType } from '../../components/tab
 import { tagListAssignmentOptions } from '../../components/table/assignment_schema';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { URLStateProps } from '../../containers/with_url_state';
-import { FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/types';
 
 interface TagsPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;

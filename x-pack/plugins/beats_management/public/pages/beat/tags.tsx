@@ -8,7 +8,7 @@ import { EuiGlobalToastList } from '@elastic/eui';
 import React from 'react';
 import { CMPopulatedBeat } from '../../../common/domain_types';
 import { BeatDetailTagsTable, Table } from '../../components/table';
-import { FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/types';
 
 interface BeatTagsPageProps {
   beatId: string;

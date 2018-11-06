@@ -4,6 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FrameworkUser } from './adapters/framework/adapter_types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { FrameworkInfo } from './adapters/framework/adapter_types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -64,15 +71,7 @@ export interface FrameworkAdapter {
     visable?: boolean;
     order?: number;
   }): void;
-  getCurrentUser(): {
-    email: string | null;
-    enabled: boolean;
-    full_name: string | null;
-    metadata: { _reserved: true };
-    roles: string[];
-    scope: string[];
-    username: string;
-  };
+  getCurrentUser(): FrameworkUser;
   setUISettings(key: string, value: any): void;
 }
 

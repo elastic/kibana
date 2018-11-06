@@ -10,7 +10,7 @@ import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { AppURLState } from '../../app';
 import { URLStateProps, withUrlState } from '../../containers/with_url_state';
-import { FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/types';
 interface PageProps extends URLStateProps<AppURLState>, RouteComponentProps<any> {
   loadBeats: any;
   libs: FrontendLibs;

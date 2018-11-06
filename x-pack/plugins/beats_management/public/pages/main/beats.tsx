@@ -27,7 +27,7 @@ import { beatsListAssignmentOptions } from '../../components/table/assignment_sc
 import { AssignmentActionType } from '../../components/table/table';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { URLStateProps } from '../../containers/with_url_state';
-import { FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/types';
 import { EnrollBeatPage } from './enroll_fragment';
 
 interface BeatsPageProps extends URLStateProps<AppURLState> {

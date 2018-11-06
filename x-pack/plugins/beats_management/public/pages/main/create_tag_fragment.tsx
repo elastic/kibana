@@ -13,7 +13,7 @@ import { BeatTag } from '../../../common/domain_types';
 import { AppURLState } from '../../app';
 import { TagEdit } from '../../components/tag';
 import { URLStateProps, withUrlState } from '../../containers/with_url_state';
-import { FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/types';
 
 interface TagPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;

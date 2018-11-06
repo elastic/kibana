@@ -21,7 +21,7 @@ import { RouteComponentProps } from 'react-router';
 import { CMBeat } from '../../../common/domain_types';
 import { AppURLState } from '../../app';
 import { URLStateProps, withUrlState } from '../../containers/with_url_state';
-import { FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/types';
 
 interface BeatsProps extends URLStateProps<AppURLState>, RouteComponentProps<any> {
   match: any;

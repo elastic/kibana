@@ -7,21 +7,21 @@
 import { IScope } from 'angular';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { FrameworkInfo } from './adapter_types';
+import { FrameworkInfo, FrameworkUser } from './adapter_types';
 
 import {
   BufferedKibanaServiceCall,
   FrameworkAdapter,
   KibanaAdapterServiceRefs,
   KibanaUIConfig,
-} from '../../lib';
+} from '../../types';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public info: FrameworkInfo | null = null;
 
   private adapterService: KibanaAdapterServiceProvider;
   private rootComponent: React.ReactElement<any> | null = null;
-  private shieldUser: any;
+  private shieldUser: FrameworkUser | null = null;
   private hasInit: boolean = false;
   constructor(
     private readonly PLUGIN_ID: string,
@@ -40,11 +40,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   };
 
   public getCurrentUser() {
-    try {
-      return this.shieldUser;
-    } catch (e) {
-      return null;
-    }
+    return this.shieldUser!;
   }
 
   public async renderUIAtPath(path: string, component: React.ReactElement<any>) {
@@ -125,18 +121,23 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         const Private = $injector.get('Private');
         const xpackInfo = Private(this.XPackInfoProvider);
 
-        this.info = {
-          basePath: this.chrome.getBasePath(),
-          license: {
-            type: xpackInfo.getLicense().type,
-            expired: !xpackInfo.getLicense().isActive,
-            expiry_date_in_millis: xpackInfo.getLicense().expiryDateInMillis,
-          },
-          security: {
-            enabled: xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false),
-            available: xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false),
-          },
-        };
+        try {
+          this.info = {
+            basePath: this.chrome.getBasePath(),
+            license: {
+              type: xpackInfo.getLicense().type,
+              expired: !xpackInfo.getLicense().isActive,
+              expiry_date_in_millis: xpackInfo.getLicense().expiryDateInMillis,
+            },
+            security: {
+              enabled: xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false),
+              available: xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false),
+            },
+          };
+        } catch (e) {
+          throw new Error(`Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`);
+        }
+
         this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
 
         resolve();

@@ -10,7 +10,7 @@ import { ThemeProvider } from 'styled-components';
 import { BASE_PATH, REQUIRED_LICENSES } from '../common/constants';
 import { BreadcrumbProvider } from './components/route_with_breadcrumb';
 import { compose } from './lib/compose/kibana';
-import { FrontendLibs } from './lib/lib';
+import { FrontendLibs } from './lib/types';
 import { PageRouter } from './router';
 
 async function startApp(libs: FrontendLibs) {

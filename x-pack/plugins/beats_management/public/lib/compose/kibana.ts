@@ -28,8 +28,8 @@ import { RestTagsAdapter } from '../adapters/tags/rest_tags_adapter';
 import { RestTokensAdapter } from '../adapters/tokens/rest_tokens_adapter';
 import { BeatsLib } from '../beats';
 import { ElasticsearchLib } from '../elasticsearch';
-import { FrontendDomainLibs, FrontendLibs } from '../lib';
 import { TagsLib } from '../tags';
+import { FrontendDomainLibs, FrontendLibs } from '../types';
 
 export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());

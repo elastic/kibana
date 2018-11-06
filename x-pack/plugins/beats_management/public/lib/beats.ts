@@ -12,7 +12,7 @@ import {
   CMAssignmentReturn,
   CMBeatsAdapter,
 } from './adapters/beats/adapter_types';
-import { FrontendDomainLibs } from './lib';
+import { FrontendDomainLibs } from './types';
 
 export class BeatsLib {
   constructor(
