@@ -206,7 +206,7 @@ export class Waffle extends React.Component<Props, {}> {
 }
 
 const WaffleMapOuterContiner = styled.div`
-  flex: 1 0 0;
+  flex: 1 0 0%;
   display: flex;
   justify-content: center;
   flex-direction: column;
