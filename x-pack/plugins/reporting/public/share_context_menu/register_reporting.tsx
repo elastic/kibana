@@ -85,6 +85,7 @@ function reportingProvider(Private: any, dashboardConfig: any, i18n: I18nService
             ? true
             : false,
           ['data-test-subj']: 'pdfReportMenuItem',
+          sortOrder: 10,
         },
         panel: {
           title: panelTitle,
@@ -112,6 +113,7 @@ function reportingProvider(Private: any, dashboardConfig: any, i18n: I18nService
           toolTipContent: xpackInfo.get('features.reporting.png.message'),
           disabled: !xpackInfo.get('features.reporting.png.enableLinks', false) ? true : false,
           ['data-test-subj']: 'pngReportMenuItem',
+          sortOrder: 10,
         },
         panel: {
           title: panelTitle,
