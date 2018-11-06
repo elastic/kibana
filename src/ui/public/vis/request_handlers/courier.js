@@ -26,6 +26,7 @@ import { tabifyAggResponse } from '../../agg_response/tabify/tabify';
 
 import { FormattedData } from '../../inspector/adapters';
 import { getTime } from '../../timefilter/get_time';
+import { i18n } from '@kbn/i18n';
 
 const CourierRequestHandlerProvider = function () {
 
@@ -124,9 +125,12 @@ const CourierRequestHandlerProvider = function () {
       if (shouldQuery) {
         const lastAggConfig = aggs;
         vis.API.inspectorAdapters.requests.reset();
-        const request = vis.API.inspectorAdapters.requests.start('Data', {
-          description: `This request queries Elasticsearch to fetch the data for the visualization.`,
-        });
+        const request = vis.API.inspectorAdapters.requests.start(
+          i18n.translate('common.ui.vis.courier.inspector.dataRequest.title', { defaultMessage: 'Data' }),
+          {
+            description: i18n.translate('common.ui.vis.courier.inspector.dataRequest.description',
+              { defaultMessage: 'This request queries Elasticsearch to fetch the data for the visualization.' }),
+          });
         request.stats(getRequestInspectorStats(requestSearchSource));
 
         const response = await requestSearchSource.fetch();
