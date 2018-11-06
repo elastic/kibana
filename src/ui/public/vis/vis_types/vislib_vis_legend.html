@@ -6,6 +6,7 @@
     aria-label="{{::'common.ui.vis.visTypes.legend.toggleLegendButtonAriaLabel' | i18n: { defaultMessage: 'Toggle legend' } }}"
     aria-expanded="{{!!open}}"
     aria-controls="{{::legendId}}"
+    data-test-subj="vislibToggleLegend"
   >
     <span class="kuiIcon {{getToggleLegendClasses()}}"></span>
   </button>
@@ -50,6 +51,7 @@
               class="kuiButton kuiButton--basic kuiButton--small"
               ng-click="filter(legendData, false)"
               aria-label="{{::'common.ui.vis.visTypes.legend.filterForValueButtonAriaLabel' | i18n: { defaultMessage: 'Filter for value {legendDataLabel}', values: { legendDataLabel: legendData.label } } }}"
+              data-test-subj="legend-{{legendData.label}}-filterIn"
             >
               <span class="kuiIcon fa-search-plus"></span>
             </button>
@@ -58,6 +60,7 @@
               class="kuiButton kuiButton--basic kuiButton--small"
               ng-click="filter(legendData, true)"
               aria-label="{{::'common.ui.vis.visTypes.legend.filterOutValueButtonAriaLabel' | i18n: { defaultMessage: 'Filter out value {legendDataLabel}', values: { legendDataLabel: legendData.label } } }}"
+              data-test-subj="legend-{{legendData.label}}-filterOut"
             >
               <span class="kuiIcon fa-search-minus"></span>
             </button>
