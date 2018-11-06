@@ -14,6 +14,7 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { flatten, intersection, sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -31,6 +32,7 @@ import { FrontendLibs } from '../../lib/lib';
 import { EnrollBeatPage } from './enroll_fragment';
 
 interface BeatsPageProps extends URLStateProps<AppURLState> {
+  intl: InjectedIntl;
   libs: FrontendLibs;
   location: any;
   beats: CMPopulatedBeat[];
@@ -47,7 +49,7 @@ interface ActionAreaProps extends URLStateProps<AppURLState>, RouteComponentProp
   libs: FrontendLibs;
 }
 
-export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
+class BeatsPageUi extends React.PureComponent<BeatsPageProps, BeatsPageState> {
   public static ActionArea = (props: ActionAreaProps) => (
     <React.Fragment>
       <EuiButtonEmpty
@@ -60,7 +62,10 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
           );
         }}
       >
-        Learn how to install beats
+        <FormattedMessage
+          id="xpack.beatsManagement.beats.installBeatsLearningButtonLabel"
+          defaultMessage="Learn how to install beats"
+        />
       </EuiButtonEmpty>
       <EuiButton
         size="s"
@@ -69,7 +74,10 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
           props.goTo(`/overview/beats/enroll`);
         }}
       >
-        Enroll Beats
+        <FormattedMessage
+          id="xpack.beatsManagement.beats.enrollBeatsButtonLabel"
+          defaultMessage="Enroll Beats"
+        />
       </EuiButton>
 
       {props.location.pathname === '/overview/beats/enroll' && (
@@ -81,7 +89,12 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
             style={{ width: '640px' }}
           >
             <EuiModalHeader>
-              <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
+              <EuiModalHeaderTitle>
+                <FormattedMessage
+                  id="xpack.beatsManagement.beats.enrollNewBeatsTitle"
+                  defaultMessage="Enroll a new Beat"
+                />
+              </EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>
               <EnrollBeatPage {...props} />
@@ -217,13 +230,38 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
   };
 
   private notifyBeatDisenrolled = async (beats: CMPopulatedBeat[]) => {
+    const { intl } = this.props;
     let title;
     let text;
     if (beats.length === 1) {
-      title = `"${beats[0].name || beats[0].id}" disenrolled`;
-      text = `Beat with ID "${beats[0].id}" was disenrolled.`;
+      title = intl.formatMessage(
+        {
+          id: 'xpack.beatsManagement.beats.beatDisenrolledNotificationTitle',
+          defaultMessage: '{firstBeatNameOrId} disenrolled',
+        },
+        {
+          firstBeatNameOrId: `"${beats[0].name || beats[0].id}"`,
+        }
+      );
+      text = intl.formatMessage(
+        {
+          id: 'xpack.beatsManagement.beats.beatDisenrolledNotificationDescription',
+          defaultMessage: 'Beat with ID {firstBeatId} was disenrolled.',
+        },
+        {
+          firstBeatId: `"${beats[0].id}"`,
+        }
+      );
     } else {
-      title = `${beats.length} beats disenrolled`;
+      title = intl.formatMessage(
+        {
+          id: 'xpack.beatsManagement.beats.disenrolledBeatsNotificationTitle',
+          defaultMessage: '{beatsLength} beats disenrolled',
+        },
+        {
+          beatsLength: beats.length,
+        }
+      );
     }
 
     this.setState({
@@ -241,18 +279,59 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     assignments: BeatsTagAssignment[],
     tag: string
   ) => {
-    const actionName = action === 'remove' ? 'Removed' : 'Added';
-    const preposition = action === 'remove' ? 'from' : 'to';
-    const beatMessage =
-      assignments.length && assignments.length === 1
-        ? `beat "${this.getNameForBeatId(assignments[0].beatId)}"`
-        : `${assignments.length} beats`;
+    const { intl } = this.props;
+    const notificationMessage =
+      action === 'remove'
+        ? intl.formatMessage(
+            {
+              id: 'xpack.beatsManagement.beats.removedNotificationDescription',
+              defaultMessage:
+                'Removed tag {tag} from {assignmentsLength, plural, one {beat {beatName}} other {# beats}}.',
+            },
+            {
+              tag: `"${tag}"`,
+              assignmentsLength: assignments.length,
+              beatName: `"${this.getNameForBeatId(assignments[0].beatId)}"`,
+            }
+          )
+        : intl.formatMessage(
+            {
+              id: 'xpack.beatsManagement.beats.addedNotificationDescription',
+              defaultMessage:
+                'Added tag {tag} to {assignmentsLength, plural, one {beat {beatName}} other {# beats}}.',
+            },
+            {
+              tag: `"${tag}"`,
+              assignmentsLength: assignments.length,
+              beatName: `"${this.getNameForBeatId(assignments[0].beatId)}"`,
+            }
+          );
+    const notificationTitle =
+      action === 'remove'
+        ? intl.formatMessage(
+            {
+              id: 'xpack.beatsManagement.beats.removedNotificationTitle',
+              defaultMessage: '{assignmentsLength, plural, one {Tag} other {Tags}} removed',
+            },
+            {
+              assignmentsLength: assignments.length,
+            }
+          )
+        : intl.formatMessage(
+            {
+              id: 'xpack.beatsManagement.beats.addedNotificationTitle',
+              defaultMessage: '{assignmentsLength, plural, one {Tag} other {Tags}} added',
+            },
+            {
+              assignmentsLength: assignments.length,
+            }
+          );
     this.setState({
       notifications: this.state.notifications.concat({
         color: 'success',
         id: `tag-${moment.now()}`,
-        text: <p>{`${actionName} tag "${tag}" ${preposition} ${beatMessage}.`}</p>,
-        title: `Tag ${actionName}`,
+        text: <p>{notificationMessage}</p>,
+        title: notificationTitle,
       }),
     });
   };
@@ -311,3 +390,5 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
       // reduce to result
       .reduce((acc, cur) => acc || cur, false);
 }
+
+export const BeatsPage = injectI18n(BeatsPageUi);

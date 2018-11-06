@@ -9,6 +9,7 @@ import 'brace/theme/github';
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { sample } from 'lodash';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
@@ -21,6 +22,7 @@ import { FrontendLibs } from '../../lib/lib';
 interface TagPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
   match: any;
+  intl: InjectedIntl;
 }
 
 interface TagPageState {
@@ -56,9 +58,26 @@ export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageS
     }
   }
   public render() {
+    const { intl } = this.props;
+
     return (
       <PrimaryLayout
-        title={this.mode === 'create' ? 'Create Tag' : `Update Tag: ${this.state.tag.id}`}
+        title={
+          this.mode === 'create'
+            ? intl.formatMessage({
+                id: 'xpack.beatsManagement.tag.createTagTitle',
+                defaultMessage: 'Create Tag',
+              })
+            : intl.formatMessage(
+                {
+                  id: 'xpack.beatsManagement.tag.updateTagTitle',
+                  defaultMessage: 'Update Tag: {tagId}',
+                },
+                {
+                  tagId: this.state.tag.id,
+                }
+              )
+        }
       >
         <div>
           <TagEdit
@@ -89,12 +108,18 @@ export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageS
                 }
                 onClick={this.saveTag}
               >
-                Save
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.saveButtonLabel"
+                  defaultMessage="Save"
+                />
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={() => this.props.goTo('/overview/tags')}>
-                Cancel
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -139,4 +164,6 @@ export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageS
       .map(({ type }) => UNIQUENESS_ENFORCING_TYPES.some(uniqueType => uniqueType === type))
       .reduce((acc, cur) => (cur ? acc + 1 : acc), 0);
 }
-export const TagPage = withUrlState<TagPageProps>(TagPageComponent);
+export const TagPageUi = withUrlState<TagPageProps>(TagPageComponent);
+
+export const TagPage = injectI18n(TagPageUi);

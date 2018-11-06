@@ -15,6 +15,7 @@ import {
   EuiSelect,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { RouteComponentProps } from 'react-router';
@@ -26,6 +27,7 @@ import { FrontendLibs } from '../../lib/lib';
 interface BeatsProps extends URLStateProps<AppURLState>, RouteComponentProps<any> {
   match: any;
   libs: FrontendLibs;
+  intl: InjectedIntl;
 }
 export class EnrollBeat extends React.Component<BeatsProps, any> {
   private pinging = false;
@@ -83,7 +85,7 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
     if (this.props.urlState.enrollmentToken && !this.state.enrolledBeat) {
       this.waitForToken(this.props.urlState.enrollmentToken);
     }
-    const { goTo } = this.props;
+    const { goTo, intl } = this.props;
 
     const actions = [];
 
@@ -91,18 +93,27 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
       case '/overview/initial/beats':
         actions.push({
           goTo: '/overview/initial/tag',
-          name: 'Continue',
+          name: intl.formatMessage({
+            id: 'xpack.beatsManagement.enrollBeat.continueButtonLabel',
+            defaultMessage: 'Continue',
+          }),
         });
         break;
       case '/overview/beats/enroll':
         actions.push({
           goTo: '/overview/beats/enroll',
-          name: 'Enroll another Beat',
+          name: intl.formatMessage({
+            id: 'xpack.beatsManagement.enrollBeat.enrollAnotherBeatButtonLabel',
+            defaultMessage: 'Enroll another Beat',
+          }),
           newToken: true,
         });
         actions.push({
           goTo: '/overview/beats',
-          name: 'Done',
+          name: intl.formatMessage({
+            id: 'xpack.beatsManagement.enrollBeat.doneButtonLabel',
+            defaultMessage: 'Done',
+          }),
           clearToken: true,
         });
         break;
@@ -117,15 +128,36 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
-                      <h3>Beat type:</h3>
+                      <h3>
+                        <FormattedMessage
+                          id="xpack.beatsManagement.enrollBeat.beatTypeTitle"
+                          defaultMessage="Beat type:"
+                        />
+                      </h3>
                     </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSelect
                   value={this.state.beatType}
                   options={[
-                    { value: 'filebeat', text: 'Filebeat' },
-                    { value: 'metricbeat', text: 'Metricbeat' },
+                    {
+                      value: 'filebeat',
+                      text: (
+                        <FormattedMessage
+                          id="xpack.beatsManagement.enrollBeat.beatTypeFilebeatOptionText"
+                          defaultMessage="Filebeat"
+                        />
+                      ),
+                    },
+                    {
+                      value: 'metricbeat',
+                      text: (
+                        <FormattedMessage
+                          id="xpack.beatsManagement.enrollBeat.beatTypeMetricbeatOptionText"
+                          defaultMessage="Metricbeat"
+                        />
+                      ),
+                    },
                   ]}
                   onChange={(e: any) => this.setState({ beatType: e.target.value })}
                   fullWidth={true}
@@ -140,7 +172,12 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
-                      <h3>Platform:</h3>
+                      <h3>
+                        <FormattedMessage
+                          id="xpack.beatsManagement.enrollBeat.platformTitle"
+                          defaultMessage="Platform:"
+                        />
+                      </h3>
                     </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -176,8 +213,13 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="xs">
                         <h3>
-                          On the host where your {capitalize(this.state.beatType)} is installed,
-                          run:
+                          <FormattedMessage
+                            id="xpack.beatsManagement.enrollBeat.yourBeatTypeHostTitle"
+                            defaultMessage="On the host where your {beatType} is installed, run:"
+                            values={{
+                              beatType: capitalize(this.state.beatType),
+                            }}
+                          />
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -187,7 +229,14 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                       className="euiFieldText euiFieldText--fullWidth"
                       style={{ textAlign: 'left' }}
                     >
-                      $ {this.state.command} enroll {window.location.protocol}
+                      <FormattedMessage
+                        id="xpack.beatsManagement.enrollBeat.stateCommandEnrollLocationProtocolTitle"
+                        defaultMessage="$ {stateCommand} enroll {locationProtocol}"
+                        values={{
+                          stateCommand: this.state.command,
+                          locationProtocol: window.location.protocol,
+                        }}
+                      />
                       {`//`}
                       {window.location.host}
                       {this.props.libs.framework.baseURLPath
@@ -203,7 +252,15 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                       <EuiFlexGroup gutterSize="s" alignItems="center">
                         <EuiFlexItem grow={false}>
                           <EuiTitle size="xs">
-                            <h3>Waiting for {capitalize(this.state.beatType)} to enroll...</h3>
+                            <h3>
+                              <FormattedMessage
+                                id="xpack.beatsManagement.enrollBeat.waitingBeatTypeToEnrollTitle"
+                                defaultMessage="Waiting for {beatType} to enroll…"
+                                values={{
+                                  beatType: capitalize(this.state.beatType),
+                                }}
+                              />
+                            </h3>
                           </EuiTitle>
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -218,7 +275,10 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
         )}
         {this.state.enrolledBeat && (
           <EuiModalBody>
-            The Beat is now enrolled in central management:
+            <FormattedMessage
+              id="xpack.beatsManagement.enrollBeat.beatEnrolledTitle"
+              defaultMessage="The Beat is now enrolled in central management:"
+            />
             <br />
             <br />
             <br />
@@ -227,17 +287,32 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
               columns={[
                 {
                   field: 'type',
-                  name: 'Beat Type',
+                  name: (
+                    <FormattedMessage
+                      id="xpack.beatsManagement.enrollBeat.beatTypeColumnName"
+                      defaultMessage="Beat Type"
+                    />
+                  ),
                   sortable: false,
                 },
                 {
                   field: 'version',
-                  name: 'Version',
+                  name: (
+                    <FormattedMessage
+                      id="xpack.beatsManagement.enrollBeat.versionColumnName"
+                      defaultMessage="Version"
+                    />
+                  ),
                   sortable: false,
                 },
                 {
                   field: 'host_name',
-                  name: 'Hostname',
+                  name: (
+                    <FormattedMessage
+                      id="xpack.beatsManagement.enrollBeat.hostnameColumnName"
+                      defaultMessage="Hostname"
+                    />
+                  ),
                   sortable: false,
                 },
               ]}
@@ -276,4 +351,6 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
   }
 }
 
-export const EnrollBeatPage = withUrlState<BeatsProps>(EnrollBeat);
+export const EnrollBeatPageUi = withUrlState<BeatsProps>(EnrollBeat);
+
+export const EnrollBeatPage = injectI18n(EnrollBeatPageUi);

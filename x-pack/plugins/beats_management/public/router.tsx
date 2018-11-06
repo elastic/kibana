@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 
@@ -25,11 +26,15 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
               breadcrumbs={[
                 {
                   href: '#/management',
-                  text: 'Management',
+                  text: i18n.translate('xpack.beatsManagement.router.managementTitle', {
+                    defaultMessage: 'Management',
+                  }),
                 },
                 {
                   href: '#/management/beats_management',
-                  text: 'Beats',
+                  text: i18n.translate('xpack.beatsManagement.router.beatsTitle', {
+                    defaultMessage: 'Beats',
+                  }),
                 },
                 ...breadcrumbs,
               ]}
@@ -49,11 +54,16 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
           <Route path="/overview" render={(props: any) => <MainPages {...props} libs={libs} />} />
           <RouteWithBreadcrumb
             title={params => {
-              return `Beats: ${params.beatId}`;
+              return i18n.translate('xpack.beatsManagement.router.beatTitle', {
+                defaultMessage: 'Beat: {beatId}',
+                values: { beatId: params.beatId },
+              });
             }}
             parentBreadcrumbs={[
               {
-                text: 'Beats List',
+                text: i18n.translate('xpack.beatsManagement.router.beatsListTitle', {
+                  defaultMessage: 'Beats List',
+                }),
                 href: '#/management/beats_management/overview/beats',
               },
             ]}
@@ -63,13 +73,20 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
           <RouteWithBreadcrumb
             title={params => {
               if (params.action === 'create') {
-                return 'Create Tag';
+                return i18n.translate('xpack.beatsManagement.router.createTagTitle', {
+                  defaultMessage: 'Create Tag',
+                });
               }
-              return `Tag: ${params.tagid}`;
+              return i18n.translate('xpack.beatsManagement.router.tagTitle', {
+                defaultMessage: 'Tag: {tagId}',
+                values: { tagId: params.tagid },
+              });
             }}
             parentBreadcrumbs={[
               {
-                text: 'Tags List',
+                text: i18n.translate('xpack.beatsManagement.router.tagsListTitle', {
+                  defaultMessage: 'Tags List',
+                }),
                 href: '#/management/beats_management/overview/tags',
               },
             ]}

@@ -27,18 +27,20 @@ import {
   EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { ConfigurationBlock } from '../../../../common/domain_types';
 import { supportedConfigs } from '../../../config_schemas';
 import { ConfigForm } from './config_form';
 
 interface ComponentProps {
+  intl: InjectedIntl;
   configBlock?: ConfigurationBlock;
   onClose(): any;
   onSave?(config: ConfigurationBlock): any;
 }
 
-export class ConfigView extends React.Component<ComponentProps, any> {
+class ConfigViewUi extends React.Component<ComponentProps, any> {
   private form = React.createRef<any>();
   private editMode: boolean;
   constructor(props: any) {
@@ -62,21 +64,42 @@ export class ConfigView extends React.Component<ComponentProps, any> {
     }));
   };
   public render() {
+    const { intl } = this.props;
     return (
       <EuiFlyout onClose={this.props.onClose}>
         <EuiFlyoutHeader>
           <EuiTitle size="m">
             <h2>
-              {this.editMode
-                ? this.props.onSave
-                  ? 'Edit configuration'
-                  : 'View configuration'
-                : 'Add configuration'}
+              {this.editMode ? (
+                this.props.onSave ? (
+                  <FormattedMessage
+                    id="xpack.beatsManagement.tagConfig.editConfigurationTitle"
+                    defaultMessage="Edit configuration"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.beatsManagement.tagConfig.viewConfigurationTitle"
+                    defaultMessage="View configuration"
+                  />
+                )
+              ) : (
+                <FormattedMessage
+                  id="xpack.beatsManagement.tagConfig.addConfigurationTitle"
+                  defaultMessage="Add configuration"
+                />
+              )}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiFormRow label="Type">
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.beatsManagement.tagConfig.typeLabel"
+                defaultMessage="Type"
+              />
+            }
+          >
             <EuiSelect
               options={supportedConfigs}
               value={this.state.configBlock.type}
@@ -84,20 +107,34 @@ export class ConfigView extends React.Component<ComponentProps, any> {
               onChange={this.onValueChange('type')}
             />
           </EuiFormRow>
-          <EuiFormRow label="Description">
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.beatsManagement.tagConfig.descriptionLabel"
+                defaultMessage="Description"
+              />
+            }
+          >
             <EuiFieldText
               value={this.state.configBlock.description}
               disabled={!this.props.onSave}
               onChange={this.onValueChange('description')}
-              placeholder="Description (optional)"
+              placeholder={intl.formatMessage({
+                id: 'xpack.beatsManagement.tagConfig.descriptionPlaceholder',
+                defaultMessage: 'Description (optional)',
+              })}
             />
           </EuiFormRow>
           <h3>
-            {
-              (supportedConfigs.find(config => this.state.configBlock.type === config.value) as any)
-                .text
-            }
-            &nbsp;configuration
+            <FormattedMessage
+              id="xpack.beatsManagement.tagConfig.configurationTypeText"
+              defaultMessage="{configType} configuration"
+              values={{
+                configType: (supportedConfigs.find(
+                  config => this.state.configBlock.type === config.value
+                ) as any).text,
+              }}
+            />
           </h3>
           <EuiHorizontalRule />
 
@@ -132,7 +169,10 @@ export class ConfigView extends React.Component<ComponentProps, any> {
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={this.props.onClose}>
-                Close
+                <FormattedMessage
+                  id="xpack.beatsManagement.tagConfig.closeButtonLabel"
+                  defaultMessage="Close"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
             {this.props.onSave && (
@@ -141,12 +181,15 @@ export class ConfigView extends React.Component<ComponentProps, any> {
                   disabled={!this.state.valid}
                   fill
                   onClick={() => {
-                    if (this.form.current) {
-                      this.form.current.submit();
+                    if (this.form.current && this.form.current.getWrappedInstance()) {
+                      this.form.current.getWrappedInstance().submit();
                     }
                   }}
                 >
-                  Save
+                  <FormattedMessage
+                    id="xpack.beatsManagement.tagConfig.saveButtonLabel"
+                    defaultMessage="Save"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             )}
@@ -156,3 +199,5 @@ export class ConfigView extends React.Component<ComponentProps, any> {
     );
   }
 }
+
+export const ConfigView = injectI18n(ConfigViewUi);

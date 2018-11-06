@@ -4,30 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { YamlConfigSchema } from './lib/lib';
 
 const filebeatInputConfig: YamlConfigSchema[] = [
   {
     id: 'paths',
     ui: {
-      label: 'Paths',
+      label: i18n.translate('xpack.beatsManagement.filebeatInputConfig.pathsLabel', {
+        defaultMessage: 'Paths',
+      }),
       type: 'multi-input',
-      helpText: 'Put each of the paths on a seperate line',
+      helpText: i18n.translate('xpack.beatsManagement.filebeatInputConfig.pathsDescription', {
+        defaultMessage: 'Put each of the paths on a separate line',
+      }),
       placeholder: `first/path/to/file.json                   second/path/to/otherfile.json`,
     },
     validations: 'isPaths',
-    error: 'One file path per line',
+    error: i18n.translate('xpack.beatsManagement.filebeatInputConfig.pathsErrorMessage', {
+      defaultMessage: 'One file path per line',
+    }),
     required: true,
   },
   {
     id: 'other',
     ui: {
-      label: 'Other Config',
+      label: i18n.translate('xpack.beatsManagement.filebeatInputConfig.otherConfigLabel', {
+        defaultMessage: 'Other Config',
+      }),
       type: 'code',
-      helpText: 'Use YAML format to specify other settings for the Filebeat Input',
+      helpText: i18n.translate('xpack.beatsManagement.filebeatInputConfig.otherConfigDescription', {
+        defaultMessage: 'Use YAML format to specify other settings for the Filebeat Input',
+      }),
     },
     validations: 'isYaml',
-    error: 'Use valid YAML format',
+    error: i18n.translate('xpack.beatsManagement.filebeatInputConfig.otherConfigErrorMessage', {
+      defaultMessage: 'Use valid YAML format',
+    }),
   },
 ];
 
@@ -35,7 +48,9 @@ const filebeatModuleConfig: YamlConfigSchema[] = [
   {
     id: 'module',
     ui: {
-      label: 'Module',
+      label: i18n.translate('xpack.beatsManagement.filebeatModuleConfig.moduleLabel', {
+        defaultMessage: 'Module',
+      }),
       type: 'select',
     },
     options: [
@@ -108,18 +123,26 @@ const filebeatModuleConfig: YamlConfigSchema[] = [
         text: 'traefik',
       },
     ],
-    error: 'Please select a module',
+    error: i18n.translate('xpack.beatsManagement.filebeatModuleConfig.moduleErrorMessage', {
+      defaultMessage: 'Please select a module',
+    }),
     required: true,
   },
   {
     id: 'other',
     ui: {
-      label: 'Other Config',
+      label: i18n.translate('xpack.beatsManagement.filebeatModuleConfig.otherConfigLabel', {
+        defaultMessage: 'Other Config',
+      }),
       type: 'code',
-      helpText: 'Use YAML format to specify other settings for the Filebeat Module',
+      helpText: i18n.translate('xpack.beatsManagement.filebeatModuleConfig.moduleDescription', {
+        defaultMessage: 'Use YAML format to specify other settings for the Filebeat Module',
+      }),
     },
     validations: 'isYaml',
-    error: 'Use valid YAML format',
+    error: i18n.translate('xpack.beatsManagement.filebeatModuleConfig.otherConfigErrorMessage', {
+      defaultMessage: 'Use valid YAML format',
+    }),
   },
 ];
 
@@ -127,7 +150,9 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
   {
     id: 'module',
     ui: {
-      label: 'Module',
+      label: i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.moduleLabel', {
+        defaultMessage: 'Module',
+      }),
       type: 'select',
     },
     options: [
@@ -272,41 +297,62 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
         text: 'zookeeper',
       },
     ],
-    error: 'Please select a module',
+    error: i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.moduleErrorMessage', {
+      defaultMessage: 'Please select a module',
+    }),
     required: true,
   },
   {
     id: 'hosts',
     ui: {
-      label: 'Hosts',
+      label: i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.hostsLabel', {
+        defaultMessage: 'Hosts',
+      }),
       type: 'multi-input',
-      helpText: 'Put each of the paths on a seperate line',
+      helpText: i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.hostsDescription', {
+        defaultMessage: 'Put each of the paths on a seperate line',
+      }),
       placeholder: `somehost.local                                                             otherhost.local`,
     },
     validations: 'isHosts',
-    error: 'One file host per line',
+    error: i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.hostsErrorMessage', {
+      defaultMessage: 'One file host per line',
+    }),
     required: false,
   },
   {
     id: 'period',
     ui: {
-      label: 'Period',
+      label: i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.periodLabel', {
+        defaultMessage: 'Period',
+      }),
       type: 'input',
     },
     defaultValue: '10s',
     validations: 'isPeriod',
-    error: 'Invalid Period, must be formatted as `10s` for 10 seconds',
+    error: i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.periodErrorMessage', {
+      defaultMessage: 'Invalid Period, must be formatted as `10s` for 10 seconds',
+    }),
     required: true,
   },
   {
     id: 'other',
     ui: {
-      label: 'Other Config',
+      label: i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.otherConfigLabel', {
+        defaultMessage: 'Other Config',
+      }),
       type: 'code',
-      helpText: 'Use YAML format to specify other settings for the Metricbeat Module',
+      helpText: i18n.translate(
+        'xpack.beatsManagement.metricbeatModuleConfig.otherConfigDescription',
+        {
+          defaultMessage: 'Use YAML format to specify other settings for the Metricbeat Module',
+        }
+      ),
     },
     validations: 'isYaml',
-    error: 'Use valid YAML format',
+    error: i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.otherConfigErrorMessage', {
+      defaultMessage: 'Use valid YAML format',
+    }),
   },
 ];
 
@@ -314,7 +360,9 @@ const outputConfig: YamlConfigSchema[] = [
   {
     id: 'output',
     ui: {
-      label: 'Output Type',
+      label: i18n.translate('xpack.beatsManagement.outputConfig.outputTypeLabel', {
+        defaultMessage: 'Output Type',
+      }),
       type: 'select',
     },
     options: [
@@ -335,42 +383,80 @@ const outputConfig: YamlConfigSchema[] = [
         text: 'Console',
       },
     ],
-    error: 'Please select an output type',
+    error: i18n.translate('xpack.beatsManagement.outputConfig.outputTypeErrorMessage', {
+      defaultMessage: 'Please select an output type',
+    }),
     required: true,
   },
   {
     id: '{{output}}.hosts',
     ui: {
-      label: 'Hosts',
+      label: i18n.translate('xpack.beatsManagement.outputConfig.hostsLabel', {
+        defaultMessage: 'Hosts',
+      }),
       type: 'multi-input',
     },
     validations: 'isHosts',
-    error: 'One file host per line',
+    error: i18n.translate('xpack.beatsManagement.outputConfig.hostsErrorMessage', {
+      defaultMessage: 'One file host per line',
+    }),
     parseValidResult: v => v.split('\n'),
   },
   {
     id: '{{output}}.username',
     ui: {
-      label: 'Username',
+      label: i18n.translate('xpack.beatsManagement.outputConfig.usernameLabel', {
+        defaultMessage: 'Username',
+      }),
       type: 'input',
     },
     validations: 'isString',
-    error: 'Unprocessable username',
+    error: i18n.translate('xpack.beatsManagement.outputConfig.usernameErrorMessage', {
+      defaultMessage: 'Unprocessable username',
+    }),
   },
   {
     id: '{{output}}.password',
     ui: {
-      label: 'Password',
+      label: i18n.translate('xpack.beatsManagement.outputConfig.passwordLabel', {
+        defaultMessage: 'Password',
+      }),
       type: 'password',
     },
     validations: 'isString',
-    error: 'Unprocessable password',
+    error: i18n.translate('xpack.beatsManagement.outputConfig.passwordErrorMessage', {
+      defaultMessage: 'Unprocessable password',
+    }),
   },
 ];
 
 export const supportedConfigs = [
-  { text: 'Filebeat Input', value: 'filebeat.inputs', config: filebeatInputConfig },
-  { text: 'Filebeat Module', value: 'filebeat.modules', config: filebeatModuleConfig },
-  { text: 'Metricbeat Module', value: 'metricbeat.modules', config: metricbeatModuleConfig },
-  { text: 'Output', value: 'output', config: outputConfig },
+  {
+    text: i18n.translate('xpack.beatsManagement.tagConfig.filebeatInputLabel', {
+      defaultMessage: 'Filebeat Input',
+    }),
+    value: 'filebeat.inputs',
+    config: filebeatInputConfig,
+  },
+  {
+    text: i18n.translate('xpack.beatsManagement.tagConfig.filebeatModuleLabel', {
+      defaultMessage: 'Filebeat Module',
+    }),
+    value: 'filebeat.modules',
+    config: filebeatModuleConfig,
+  },
+  {
+    text: i18n.translate('xpack.beatsManagement.tagConfig.metricbeatModuleLabel', {
+      defaultMessage: 'Metricbeat Module',
+    }),
+    value: 'metricbeat.modules',
+    config: metricbeatModuleConfig,
+  },
+  {
+    text: i18n.translate('xpack.beatsManagement.tagConfig.outputLabel', {
+      defaultMessage: 'Output',
+    }),
+    value: 'output',
+    config: outputConfig,
+  },
 ];

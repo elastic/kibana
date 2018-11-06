@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
 import { isEqual } from 'lodash';
@@ -37,6 +38,7 @@ interface TagEditProps {
   onDetachBeat: (beatIds: string[]) => void;
   onTagChange: (field: keyof BeatTag, value: string) => any;
   attachedBeats: CMBeat[] | null;
+  intl: InjectedIntl;
 }
 
 interface TagEditState {
@@ -45,7 +47,7 @@ interface TagEditState {
   selectedConfigIndex?: number;
 }
 
-export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
+class TagEditUI extends React.PureComponent<TagEditProps, TagEditState> {
   constructor(props: TagEditProps) {
     super(props);
 
@@ -56,16 +58,26 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
   }
 
   public render() {
-    const { tag, attachedBeats } = this.props;
+    const { tag, attachedBeats, intl } = this.props;
     return (
       <div>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h3>Tag details</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.tagDetailsTitle"
+                  defaultMessage="Tag details"
+                />
+              </h3>
             </EuiTitle>
             <EuiText color="subdued">
-              <p>Tags will apply the configurations below to all beats assigned this tag.</p>
+              <p>
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.tagDetailsDescription"
+                  defaultMessage="Tags will apply the configurations below to all beats assigned this tag."
+                />
+              </p>
             </EuiText>
             <div>
               <TagBadge tag={{ color: tag.color || '#FF0', id: tag.id }} />
@@ -74,7 +86,12 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
           <EuiFlexItem>
             <EuiForm>
               <EuiFormRow
-                label="Tag Name"
+                label={
+                  <FormattedMessage
+                    id="xpack.beatsManagement.tag.tagNameLabel"
+                    defaultMessage="Tag Name"
+                  />
+                }
                 isInvalid={!!this.getNameError(tag.id)}
                 error={this.getNameError(tag.id) || undefined}
               >
@@ -84,11 +101,19 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                   onChange={this.updateTag('id')}
                   disabled={this.props.mode === 'edit'}
                   value={tag.id}
-                  placeholder="Tag name (required)"
+                  placeholder={intl.formatMessage({
+                    id: 'xpack.beatsManagement.tag.tagNamePlaceholder',
+                    defaultMessage: 'Tag name (required)',
+                  })}
                 />
               </EuiFormRow>
               {this.props.mode === 'create' && (
-                <EuiFormRow label="Tag Color">
+                <EuiFormRow
+                  label={intl.formatMessage({
+                    id: 'xpack.beatsManagement.tag.tagColorLabel',
+                    defaultMessage: 'Tag Color',
+                  })}
+                >
                   <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
                 </EuiFormRow>
               )}
@@ -105,12 +130,20 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         >
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h3>Tag Configurations</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.tagConfigurationsTitle"
+                  defaultMessage="Tag Configurations"
+                />
+              </h3>
             </EuiTitle>
             <EuiText color="subdued">
               <p>
-                Tags can have configurations for different types of Beats. For example, a tag can
-                have two Metricbeat configurations and one Filebeat input configuration.
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.tagConfigurationsDescription"
+                  defaultMessage="Tags can have configurations for different types of Beats. For example, a tag can
+                    have two Metricbeat configurations and one Filebeat input configuration."
+                />
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -140,7 +173,10 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                   this.setState({ showFlyout: true });
                 }}
               >
-                Add configuration
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.addConfigurationButtonLabel"
+                  defaultMessage="Add configuration"
+                />
               </EuiButton>
             </div>
           </EuiFlexItem>
@@ -151,7 +187,12 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             <EuiHorizontalRule />
 
             <EuiTitle size="xs">
-              <h3>Beats assigned this tag</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.beatsAssignedToTagTitle"
+                  defaultMessage="Beats assigned this tag"
+                />
+              </h3>
             </EuiTitle>
             <Table
               assignmentOptions={{
@@ -195,8 +236,12 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
   }
 
   private getNameError = (name: string) => {
+    const { intl } = this.props;
     if (name && name !== '' && name.search(/^[a-zA-Z0-9-]+$/) === -1) {
-      return 'Tag name must consist of letters, numbers, and dashes only';
+      return intl.formatMessage({
+        id: 'xpack.beatsManagement.tag.tagName.validationErrorMessage',
+        defaultMessage: 'Tag name must consist of letters, numbers, and dashes only',
+      });
     } else {
       return false;
     }
@@ -216,3 +261,5 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
       ? this.props.onTagChange(key, value)
       : (e: any) => this.props.onTagChange(key, e.target ? e.target.value : e);
 }
+
+export const TagEdit = injectI18n(TagEditUI);

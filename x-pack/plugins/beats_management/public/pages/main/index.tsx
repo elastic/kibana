@@ -11,6 +11,7 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { CMPopulatedBeat } from '../../../common/domain_types';
@@ -32,6 +33,7 @@ import { ReviewWalkthroughPage } from './walkthrough_review';
 interface MainPagesProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
   location: any;
+  intl: InjectedIntl;
 }
 
 interface MainPagesState {
@@ -68,6 +70,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
   }
 
   public render() {
+    const { intl } = this.props;
     if (
       this.state.loadedBeatsAtLeastOnce &&
       this.state.unfilteredBeats.length === 0 &&
@@ -78,7 +81,12 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
     const tabs = [
       {
         id: '/overview/beats',
-        name: 'Enrolled Beats',
+        name: (
+          <FormattedMessage
+            id="xpack.beatsManagement.beats.enrolledBeatsTabTitle"
+            defaultMessage="Enrolled Beats"
+          />
+        ),
         disabled: false,
       },
       // {
@@ -88,7 +96,12 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
       // },
       {
         id: '/overview/tags',
-        name: 'Configuration tags',
+        name: (
+          <FormattedMessage
+            id="xpack.beatsManagement.beats.configurationTagsTabTitle"
+            defaultMessage="Configuration tags"
+          />
+        ),
         disabled: false,
       },
     ];
@@ -96,19 +109,34 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
     const walkthroughSteps = [
       {
         id: '/overview/initial/beats',
-        name: 'Enroll Beat',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.enrollBeat.enrollBeatStepLabel',
+          defaultMessage: 'Enroll Beat',
+        }),
+        // name: (
+        //   <FormattedMessage
+        //     id="xpack.beatsManagement.initialMainPages.enrollBeatName"
+        //     defaultMessage="Enroll Beat"
+        //   />
+        // ),
         disabled: false,
         page: EnrollBeatPage,
       },
       {
         id: '/overview/initial/tag',
-        name: 'Create tag',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.enrollBeat.createTagStepLabel',
+          defaultMessage: 'Create tag',
+        }),
         disabled: false,
         page: CreateTagPageFragment,
       },
       {
         id: '/overview/initial/review',
-        name: 'Review',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.enrollBeat.reviewStepLabel',
+          defaultMessage: 'Review',
+        }),
         disabled: false,
         page: ReviewWalkthroughPage,
       },
@@ -117,16 +145,27 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
     if (this.props.location.pathname === '/overview/initial/help') {
       return (
         <NoDataLayout
-          title="Beats central management"
+          title={intl.formatMessage({
+            id: 'xpack.beatsManagement.enrollBeat.beatsCentralManagementTitle',
+            defaultMessage: 'Beats central management',
+          })}
           actionSection={
             <ConnectedLink path="/overview/initial/beats">
               <EuiButton color="primary" fill>
-                Enroll Beat
+                <FormattedMessage
+                  id="xpack.beatsManagement.enrollBeat.enrollBeatButtonLabel"
+                  defaultMessage="Enroll Beat"
+                />
               </EuiButton>
             </ConnectedLink>
           }
         >
-          <p>Manage your configurations in a central location.</p>
+          <p>
+            <FormattedMessage
+              id="xpack.beatsManagement.enrollBeat.beatsCentralManagementDescription"
+              defaultMessage="Manage your configurations in a central location."
+            />
+          </p>
         </NoDataLayout>
       );
     }
@@ -134,7 +173,10 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
     if (this.props.location.pathname.includes('/overview/initial')) {
       return (
         <WalkthroughLayout
-          title="Get started with Beats central management"
+          title={intl.formatMessage({
+            id: 'xpack.beatsManagement.enrollBeat.getStartedBeatsCentralManagementTitle',
+            defaultMessage: 'Get started with Beats central management',
+          })}
           walkthroughSteps={walkthroughSteps}
           goTo={this.props.goTo}
           activePath={this.props.location.pathname}
@@ -171,7 +213,10 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
 
     return (
       <PrimaryLayout
-        title="Beats"
+        title={intl.formatMessage({
+          id: 'xpack.beatsManagement.beatsRouteTitle',
+          defaultMessage: 'Beats',
+        })}
         actionSection={
           <Switch>
             <Route
@@ -192,7 +237,10 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
         <EuiTabs>{renderedTabs}</EuiTabs>
 
         <RouteWithBreadcrumb
-          title="Beats List"
+          title={intl.formatMessage({
+            id: 'xpack.beatsManagement.beatsListRouteTitle',
+            defaultMessage: 'Beats List',
+          })}
           path="/overview/beats/:action?/:enrollmentToken?"
           render={(props: any) => (
             <BeatsPage
@@ -205,7 +253,10 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
           )}
         />
         <RouteWithBreadcrumb
-          title="Activity Overview"
+          title={intl.formatMessage({
+            id: 'xpack.beatsManagement.activityOverviewRouteTitle',
+            defaultMessage: 'Activity Overview',
+          })}
           path="/overview/activity"
           exact={true}
           render={(props: any) => (
@@ -213,7 +264,10 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
           )}
         />
         <RouteWithBreadcrumb
-          title="Tags List"
+          title={intl.formatMessage({
+            id: 'xpack.beatsManagement.tagsListRouteTitle',
+            defaultMessage: 'Tags List',
+          })}
           path="/overview/tags"
           exact={true}
           render={(props: any) => <TagsPage {...this.props} libs={this.props.libs} {...props} />}
@@ -251,4 +305,6 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
   };
 }
 
-export const MainPages = withUrlState<MainPagesProps>(MainPagesComponent);
+const MainPagesUI = withUrlState<MainPagesProps>(MainPagesComponent);
+
+export const MainPages = injectI18n(MainPagesUI);

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 interface SelectionCountProps {
@@ -12,6 +13,12 @@ interface SelectionCountProps {
 
 export const SelectionCount = (props: SelectionCountProps) => (
   <div>
-    {props.selectionCount} {`item${props.selectionCount === 1 ? '' : 's'}`} selected
+    <FormattedMessage
+      id="xpack.beatsManagement.tableControls.selectionItemsCountText"
+      defaultMessage="{selectionCount, plural, one {# item} other {# items}} selected"
+      values={{
+        selectionCount: props.selectionCount,
+      }}
+    />
   </div>
 );

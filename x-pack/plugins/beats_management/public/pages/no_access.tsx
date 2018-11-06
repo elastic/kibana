@@ -3,14 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import * as React from 'react';
 import { NoDataLayout } from '../components/layouts/no_data';
 
-export const NoAccessPage: React.SFC<any> = () => (
-  <NoDataLayout title="Access Denied" actionSection={[]}>
+export const NoAccessPage = injectI18n(({ intl }) => (
+  <NoDataLayout
+    title={intl.formatMessage({
+      id: 'xpack.beatsManagement.noAccess.accessDeniedTitle',
+      defaultMessage: 'Access Denied',
+    })}
+    actionSection={[]}
+  >
     <p>
-      You are not authorized to access Beats central management. To use Beats central management,
-      you need the privileges granted by the `beats_admin` role.
+      <FormattedMessage
+        id="xpack.beatsManagement.noAccess.accessDeniedDescription"
+        defaultMessage="You are not authorized to access Beats central management. To use Beats central management,
+          you need the privileges granted by the {beatsAdminRole} role."
+        values={{ beatsAdminRole: `\`beats_admin\`` }}
+      />
     </p>
   </NoDataLayout>
-);
+));

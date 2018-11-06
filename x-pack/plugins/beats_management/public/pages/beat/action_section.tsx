@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { first, sortByOrder } from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -20,14 +21,20 @@ export const BeatDetailsActionSection = ({ beat }: BeatDetailsActionSectionProps
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            Type:&nbsp;
-            <strong>{beat.type}</strong>.
+            <FormattedMessage
+              id="xpack.beatsManagement.beat.actionSectionTypeLabel"
+              defaultMessage="Type: {beatType}."
+              values={{ beatType: <strong>{beat.type}</strong> }}
+            />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            Version:&nbsp;
-            <strong>{beat.version}</strong>.
+            <FormattedMessage
+              id="xpack.beatsManagement.beat.actionSectionVersionLabel"
+              defaultMessage="Version: {beatVersion}."
+              values={{ beatVersion: <strong>{beat.version}</strong> }}
+            />
           </EuiText>
         </EuiFlexItem>
         {/* TODO: We need a populated field before we can run this code
@@ -40,19 +47,30 @@ export const BeatDetailsActionSection = ({ beat }: BeatDetailsActionSectionProps
           beat.full_tags.length > 0 && (
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                Last Config Update:{' '}
-                <strong>
-                  {moment(
-                    first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
-                  ).fromNow()}
-                </strong>
-                .
+                <FormattedMessage
+                  id="xpack.beatsManagement.beat.lastConfigUpdateMessage"
+                  defaultMessage="Last Config Update: {lastUpdateTime}"
+                  values={{
+                    lastUpdateTime: (
+                      <strong>
+                        {moment(
+                          first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
+                        ).fromNow()}
+                      </strong>
+                    ),
+                  }}
+                />
               </EuiText>
             </EuiFlexItem>
           )}
       </EuiFlexGroup>
     ) : (
-      <div>Beat not found</div>
+      <div>
+        <FormattedMessage
+          id="xpack.beatsManagement.beat.beatNotFoundMessage"
+          defaultMessage="Beat not found"
+        />
+      </div>
     )}
   </div>
 );

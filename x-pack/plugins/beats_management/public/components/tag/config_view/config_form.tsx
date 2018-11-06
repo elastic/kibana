@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import Formsy, { addValidationRule, FieldValue, FormData } from 'formsy-react';
 import yaml from 'js-yaml';
 import { get } from 'lodash';
@@ -71,6 +72,7 @@ addValidationRule('isYaml', (values: FormData, value: FieldValue) => {
 });
 
 interface ComponentProps {
+  intl: InjectedIntl;
   values: ConfigurationBlock;
   schema: YamlConfigSchema[];
   id: string;
@@ -78,7 +80,7 @@ interface ComponentProps {
   canSubmit(canIt: boolean): any;
 }
 
-export class ConfigForm extends React.Component<ComponentProps, any> {
+class ConfigFormUi extends React.Component<ComponentProps, any> {
   private form = React.createRef<HTMLButtonElement>();
   constructor(props: ComponentProps) {
     super(props);
@@ -113,6 +115,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
     this.props.onSubmit(model);
   };
   public render() {
+    const { intl } = this.props;
     return (
       <div>
         <br />
@@ -197,9 +200,15 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     )}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
-                    options={[{ value: '', text: 'Please Select An Option' }].concat(
-                      schema.options || []
-                    )}
+                    options={[
+                      {
+                        value: '',
+                        text: intl.formatMessage({
+                          id: 'xpack.beatsManagement.tagConfig.selectOptionLabel',
+                          defaultMessage: 'Please Select An Option',
+                        }),
+                      },
+                    ].concat(schema.options || [])}
                     validations={schema.validations}
                     validationError={schema.error}
                     required={schema.required}
@@ -241,3 +250,4 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
     );
   }
 }
+export const ConfigForm = injectI18n(ConfigFormUi, { withRef: true });

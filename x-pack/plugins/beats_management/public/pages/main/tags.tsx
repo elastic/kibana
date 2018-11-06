@@ -5,6 +5,7 @@
  */
 
 import { EuiButton } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { BeatTag } from '../../../common/domain_types';
 import { AppURLState } from '../../app';
@@ -16,6 +17,7 @@ import { FrontendLibs } from '../../lib/lib';
 
 interface TagsPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
+  intl: InjectedIntl;
 }
 
 interface TagsPageState {
@@ -23,7 +25,7 @@ interface TagsPageState {
   tableRef: any;
 }
 
-export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> {
+class TagsPageUi extends React.PureComponent<TagsPageProps, TagsPageState> {
   public static ActionArea = ({ goTo }: TagsPageProps) => (
     <EuiButton
       size="s"
@@ -32,7 +34,10 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
         goTo('/tag/create');
       }}
     >
-      Add Tag
+      <FormattedMessage
+        id="xpack.beatsManagement.tags.addTagButtonLabel"
+        defaultMessage="Add Tag"
+      />
     </EuiButton>
   );
 
@@ -78,13 +83,18 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
   }
 
   private handleTagsAction = async (action: AssignmentActionType, payload: any) => {
+    const { intl } = this.props;
     switch (action) {
       case AssignmentActionType.Delete:
         const tags = this.getSelectedTags().map((tag: BeatTag) => tag.id);
         const success = await this.props.libs.tags.delete(tags);
         if (!success) {
           alert(
-            'Some of these tags might be assigned to beats. Please ensure tags being removed are not activly assigned'
+            intl.formatMessage({
+              id: 'xpack.beatsManagement.tags.someTagsMightBeAssignedToBeatsTitle',
+              defaultMessage:
+                'Some of these tags might be assigned to beats. Please ensure tags being removed are not activly assigned',
+            })
           );
         } else {
           this.loadTags();
@@ -109,3 +119,5 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
     });
   }
 }
+
+export const TagsPage = injectI18n(TagsPageUi);

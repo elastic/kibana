@@ -8,6 +8,7 @@ import { IModule, IScope } from 'angular';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+import { i18n } from '@kbn/i18n';
 import {
   BufferedKibanaServiceCall,
   FrameworkAdapter,
@@ -87,7 +88,9 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       if (this.hadValidLicense() && this.securityEnabled()) {
         const registerSection = () =>
           this.management.register(pluginId, {
-            display: 'Beats', // TODO these need to be config options not hard coded in the adapter
+            display: i18n.translate('xpack.beatsManagement.beatsDislayName', {
+              defaultMessage: 'Beats',
+            }), // TODO these need to be config options not hard coded in the adapter
             icon: 'logoBeats',
             order: 30,
           });
