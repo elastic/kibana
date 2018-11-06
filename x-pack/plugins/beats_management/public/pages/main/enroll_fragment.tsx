@@ -190,8 +190,8 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                       $ {this.state.command} enroll {window.location.protocol}
                       {`//`}
                       {window.location.host}
-                      {this.props.libs.framework.baseURLPath
-                        ? this.props.libs.framework.baseURLPath
+                      {this.props.libs.framework.info
+                        ? this.props.libs.framework.info.basePath
                         : ''}{' '}
                       {this.props.urlState.enrollmentToken}
                     </div>

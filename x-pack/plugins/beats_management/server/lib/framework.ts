@@ -15,7 +15,7 @@ import {
   FrameworkWrappableRequest,
 } from './adapters/framework/adapter_types';
 
-export class FrameworkLib {
+export class BackendFrameworkLib {
   public exposeStaticDir = this.adapter.exposeStaticDir;
   public internalUser = this.adapter.internalUser;
   constructor(private readonly adapter: BackendFrameworkAdapter) {

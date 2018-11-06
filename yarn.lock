@@ -6839,6 +6839,11 @@ formsy-react@^1.1.5:
     form-data-to-object "^0.2.0"
     prop-types "^15.5.10"
 
+fp-ts@^1.0.0:
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.10.0.tgz#f249f07a167f4c13a96baf01794f7e0753de4225"
+  integrity sha512-ZOdfxiFgjipHEQKMam06/+BVneM/UKQDhoXAH2I6VvwqY4p0awswQcDgopvfE/jPeR7Aigv1aIv8U5awSXSw8A==
+
 fragment-cache@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/fragment-cache/-/fragment-cache-0.2.1.tgz#4290fad27f13e89be7f33799c6bc5a0abfff0d19"
@@ -8419,6 +8424,13 @@ invert-kv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
   integrity sha1-EEqOSqym09jNFXqO+L+rLXo//bY=
+
+io-ts@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.4.0.tgz#fc9f78d72f49c9e73d9fe62cc7ee740c91e48e37"
+  integrity sha512-VHlesowGOIcMz6u0jNwfaSE1Ga1dDnawRElY3EYdZe36rdRbZPkKnorDf94JKbxu6/n+3pyuMEwpLWwcWHHllQ==
+  dependencies:
+    fp-ts "^1.0.0"
 
 ip-regex@^1.0.1:
   version "1.0.3"

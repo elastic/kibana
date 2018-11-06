@@ -17,6 +17,7 @@ import { uiModules } from 'ui/modules';
 // @ts-ignore: path dynamic for kibana
 import routes from 'ui/routes';
 
+import { PLUGIN } from 'x-pack/plugins/beats_management/common/constants';
 import { INDEX_NAMES } from '../../../common/constants/index_names';
 import { supportedConfigs } from '../../config_schemas';
 import { RestBeatsAdapter } from '../adapters/beats/rest_beats_adapter';
@@ -45,10 +46,9 @@ export function compose(): FrontendLibs {
     tokens,
     beats,
   };
-  const pluginUIModule = uiModules.get('app/beats_management');
 
   const framework = new KibanaFrameworkAdapter(
-    pluginUIModule,
+    PLUGIN.ID,
     management,
     routes,
     chrome,

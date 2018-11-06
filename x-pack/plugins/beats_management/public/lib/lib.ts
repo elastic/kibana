@@ -4,6 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FrameworkInfo } from './adapters/framework/adapter_types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { IModule, IScope } from 'angular';
 import { AxiosRequestConfig } from 'axios';
 import React from 'react';
@@ -41,11 +48,22 @@ export interface YamlConfigSchema {
 
 export interface FrameworkAdapter {
   // Instance vars
-  appState?: object;
-  kbnVersion?: string;
-  baseURLPath: string;
-  registerManagementSection(pluginId: string, displayName: string, basePath: string): void;
+  info?: FrameworkInfo | null;
   // Methods
+  renderUIAtPath(path: string, component: React.ReactElement<any>): Promise<void>;
+  registerManagementSection(settings: {
+    id?: string;
+    name: string;
+    iconName: string;
+    order?: number;
+  }): void;
+  registerManagementUI(settings: {
+    id?: string;
+    name: string;
+    basePath: string;
+    visable?: boolean;
+    order?: number;
+  }): void;
   getCurrentUser(): {
     email: string | null;
     enabled: boolean;
@@ -56,7 +74,6 @@ export interface FrameworkAdapter {
     username: string;
   };
   setUISettings(key: string, value: any): void;
-  render(component: React.ReactElement<any>): void;
 }
 
 export interface FramworkAdapterConstructable {

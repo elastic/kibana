@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IModule, IScope } from 'angular';
+import { IScope } from 'angular';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { FrameworkInfo } from './adapter_types';
 
 import {
   BufferedKibanaServiceCall,
@@ -16,36 +17,20 @@ import {
 } from '../../lib';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
-  public appState: object;
+  public info: FrameworkInfo | null = null;
 
-  private management: any;
   private adapterService: KibanaAdapterServiceProvider;
   private rootComponent: React.ReactElement<any> | null = null;
-  private uiModule: IModule;
-  private routes: any;
-  private XPackInfoProvider: any;
-  private xpackInfo: null | any;
-  private chrome: any;
   private shieldUser: any;
-
+  private hasInit: boolean = false;
   constructor(
-    uiModule: IModule,
-    management: any,
-    routes: any,
-    chrome: any,
-    XPackInfoProvider: any
+    private readonly PLUGIN_ID: string,
+    private readonly management: any,
+    private readonly routes: any,
+    private readonly chrome: any,
+    private readonly XPackInfoProvider: any
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
-    this.management = management;
-    this.uiModule = uiModule;
-    this.routes = routes;
-    this.chrome = chrome;
-    this.XPackInfoProvider = XPackInfoProvider;
-    this.appState = {};
-  }
-
-  public get baseURLPath(): string {
-    return this.chrome.getBasePath();
   }
 
   public setUISettings = (key: string, value: any) => {
@@ -53,25 +38,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       config.set(key, value);
     });
   };
-
-  public render = (component: React.ReactElement<any>) => {
-    this.rootComponent = component;
-  };
-
-  public hadValidLicense() {
-    if (!this.xpackInfo) {
-      return false;
-    }
-    return this.xpackInfo.get('features.beats_management.licenseValid', false);
-  }
-
-  public securityEnabled() {
-    if (!this.xpackInfo) {
-      return false;
-    }
-
-    return this.xpackInfo.get('features.beats_management.securityEnabled', false);
-  }
 
   public getCurrentUser() {
     try {
@@ -81,27 +47,54 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     }
   }
 
-  public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
-    this.register(this.uiModule);
-    this.hookAngular(() => {
-      if (this.hadValidLicense() && this.securityEnabled()) {
-        const registerSection = () =>
-          this.management.register(pluginId, {
-            display: 'Beats', // TODO these need to be config options not hard coded in the adapter
-            icon: 'logoBeats',
-            order: 30,
-          });
-        const getSection = () => this.management.getSection(pluginId);
+  public async renderUIAtPath(path: string, component: React.ReactElement<any>) {
+    this.rootComponent = component;
+    this.registerPath(path);
+    await this.hookAngular();
+    this.hasInit = true;
+  }
 
-        const section = this.management.hasItem(pluginId) ? getSection() : registerSection();
+  public registerManagementSection(settings: {
+    id?: string;
+    name: string;
+    iconName: string;
+    order?: number;
+  }) {
+    this.runFrameworkReadyCheck();
+    const sectionId = settings.id || this.PLUGIN_ID;
 
-        section.register(pluginId, {
-          visible: true,
-          display: displayName,
-          order: 30,
-          url: `#${basePath}`,
-        });
-      }
+    if (!this.management.hasItem(sectionId)) {
+      this.management.register(sectionId, {
+        display: settings.name,
+        icon: settings.iconName,
+        order: settings.order || 30,
+      });
+    }
+  }
+
+  public registerManagementUI(settings: {
+    id?: string;
+    name: string;
+    basePath: string;
+    visable?: boolean;
+    order?: number;
+  }) {
+    this.runFrameworkReadyCheck();
+    const sectionId = settings.id || this.PLUGIN_ID;
+
+    if (!this.management.hasItem(sectionId)) {
+      throw new Error(
+        `registerManagementUI was called with a sectionId of ${sectionId}, and that is is not yet regestered as a section`
+      );
+    }
+
+    const section = this.management.getSection(sectionId);
+
+    section.register(sectionId, {
+      visible: settings.visable || true,
+      display: settings.name,
+      order: settings.order || 30,
+      url: `#${settings.basePath}`,
     });
   }
 
@@ -126,29 +119,47 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     });
   }
 
-  private hookAngular(done: () => any) {
-    this.chrome.dangerouslyGetActiveInjector().then(async ($injector: any) => {
-      const Private = $injector.get('Private');
-      const xpackInfo = Private(this.XPackInfoProvider);
+  private async hookAngular() {
+    return new Promise(resolve => {
+      this.chrome.dangerouslyGetActiveInjector().then(async ($injector: any) => {
+        const Private = $injector.get('Private');
+        const xpackInfo = Private(this.XPackInfoProvider);
 
-      this.xpackInfo = xpackInfo;
-      this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+        this.info = {
+          basePath: this.chrome.getBasePath(),
+          license: {
+            type: xpackInfo.getLicense().type,
+            expired: !xpackInfo.getLicense().isActive,
+            expiry_date_in_millis: xpackInfo.getLicense().expiryDateInMillis,
+          },
+          security: {
+            enabled: xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false),
+            available: xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false),
+          },
+        };
+        this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
 
-      done();
+        resolve();
+      });
     });
   }
 
-  private register = (adapterModule: IModule) => {
+  private registerPath = (path: string) => {
     const adapter = this;
-    this.routes.when(`/management/beats_management/:view?/:id?/:other?/:other2?`, {
-      template:
-        '<beats-cm><div id="beatsReactRoot" style="flex-grow: 1; height: 100vh; background: #f5f5f5"></div></beats-cm>',
-      controllerAs: 'beatsManagement',
+    this.routes.when(`${path}/:view?/:id?/:other?/:other2?/:other3?/:other4?/:other5?`, {
+      template: `<${this.PLUGIN_ID.replace('_', '-')}><div id="${this.PLUGIN_ID.replace(
+        '_',
+        ''
+      )}ReactRoot" style="flex-grow: 1; height: 100vh; background: #f5f5f5"></div></${this.PLUGIN_ID.replace(
+        '_',
+        '-'
+      )}>`,
+      controllerAs: this.PLUGIN_ID.replace('_', ''),
       // tslint:disable-next-line: max-classes-per-file
-      controller: class BeatsManagementController {
+      controller: class KibanaFrameworkAdapterController {
         constructor($scope: any, $route: any) {
           $scope.$$postDigest(() => {
-            const elem = document.getElementById('beatsReactRoot');
+            const elem = document.getElementById(adapter.PLUGIN_ID.replace('_', '') + 'ReactRoot');
             ReactDOM.render(adapter.rootComponent as React.ReactElement<any>, elem);
             adapter.manageAngularLifecycle($scope, $route, elem);
           });
@@ -159,6 +170,11 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       },
     });
   };
+  private runFrameworkReadyCheck() {
+    if (!this.hasInit) {
+      throw new Error('framework must have renderUIAtPath called before anything else');
+    }
+  }
 }
 
 // tslint:disable-next-line: max-classes-per-file

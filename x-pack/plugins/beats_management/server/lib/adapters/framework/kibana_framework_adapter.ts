@@ -118,7 +118,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     }
   }
 
-  private xpackInfoWasUpdatedHandler(xpackInfo: any) {
+  private xpackInfoWasUpdatedHandler = (xpackInfo: any) => {
     let xpackInfoUnpacked: FrameworkInfo;
 
     // If, for some reason, we cannot get the license information
@@ -160,5 +160,9 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     }
 
     this.info = xpackInfoUnpacked;
-  }
+
+    return {
+      security: xpackInfoUnpacked.security,
+    };
+  };
 }

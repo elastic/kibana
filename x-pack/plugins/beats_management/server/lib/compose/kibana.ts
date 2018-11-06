@@ -10,7 +10,7 @@ import { ElasticsearchTagsAdapter } from '../adapters/tags/elasticsearch_tags_ad
 import { ElasticsearchTokensAdapter } from '../adapters/tokens/elasticsearch_tokens_adapter';
 
 import { KibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
-import { FrameworkLib } from './../framework';
+import { BackendFrameworkLib } from './../framework';
 
 import { CMBeatsDomain } from '../beats';
 import { CMTagsDomain } from '../tags';
@@ -21,7 +21,7 @@ import { CMServerLibs } from '../types';
 
 export function compose(server: any): CMServerLibs {
   const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch);
-  const framework = new FrameworkLib(new KibanaBackendFrameworkAdapter(PLUGIN.ID, server));
+  const framework = new BackendFrameworkLib(new KibanaBackendFrameworkAdapter(PLUGIN.ID, server));
 
   const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(database));
   const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(database), {

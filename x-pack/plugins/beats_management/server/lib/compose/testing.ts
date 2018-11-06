@@ -14,11 +14,11 @@ import { CMBeatsDomain } from '../beats';
 import { CMTagsDomain } from '../tags';
 import { CMTokensDomain } from '../tokens';
 
-import { FrameworkLib } from '../framework';
+import { BackendFrameworkLib } from '../framework';
 import { CMServerLibs } from '../types';
 
 export function compose(server: any): CMServerLibs {
-  const framework = new FrameworkLib(new HapiBackendFrameworkAdapter(undefined, server));
+  const framework = new BackendFrameworkLib(new HapiBackendFrameworkAdapter(undefined, server));
 
   const tags = new CMTagsDomain(new MemoryTagsAdapter(server.tagsDB || []));
   const tokens = new CMTokensDomain(new MemoryTokensAdapter(server.tokensDB || []), {

@@ -8,14 +8,14 @@ import { DatabaseAdapter } from './adapters/database/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 
 import { CMBeatsDomain } from './beats';
-import { FrameworkLib } from './framework';
+import { BackendFrameworkLib } from './framework';
 import { CMTagsDomain } from './tags';
 import { CMTokensDomain } from './tokens';
 
 export type UserOrToken = FrameworkUser | string;
 
 export interface CMServerLibs {
-  framework: FrameworkLib;
+  framework: BackendFrameworkLib;
   database?: DatabaseAdapter;
   beats: CMBeatsDomain;
   tags: CMTagsDomain;
