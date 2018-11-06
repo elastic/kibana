@@ -7,24 +7,27 @@ import { timingSafeEqual } from 'crypto';
 import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
 import moment from 'moment';
 import uuid from 'uuid';
-import { BackendFrameworkAdapter } from './adapters/framework/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
+import { CMServerLibs } from './types';
 
 const RANDOM_TOKEN_1 = 'b48c4bda384a40cb91c6eb9b8849e77f';
 const RANDOM_TOKEN_2 = '80a3819e3cd64f4399f1d4886be7a08b';
 
 export class CMTokensDomain {
   private adapter: CMTokensAdapter;
-  private framework: BackendFrameworkAdapter;
+  private framework: CMServerLibs['framework'];
 
-  constructor(adapter: CMTokensAdapter, libs: { framework: BackendFrameworkAdapter }) {
+  constructor(adapter: CMTokensAdapter, libs: { framework: CMServerLibs['framework'] }) {
     this.adapter = adapter;
     this.framework = libs.framework;
   }
 
   public async getEnrollmentToken(enrollmentToken: string) {
-    const fullToken = await this.adapter.getEnrollmentToken(enrollmentToken);
+    const fullToken = await this.adapter.getEnrollmentToken(
+      this.framework.internalUser,
+      enrollmentToken
+    );
 
     if (!fullToken) {
       return {
@@ -48,7 +51,7 @@ export class CMTokensDomain {
   }
 
   public async deleteEnrollmentToken(enrollmentToken: string) {
-    return await this.adapter.deleteEnrollmentToken(enrollmentToken);
+    return await this.adapter.deleteEnrollmentToken(this.framework.internalUser, enrollmentToken);
   }
 
   public verifyToken(recivedToken: string, token2: string, decode = true) {
@@ -56,7 +59,7 @@ export class CMTokensDomain {
     let expired = false;
 
     if (decode) {
-      const enrollmentTokenSecret = this.framework.getSetting('xpack.beats.encryptionKey');
+      const enrollmentTokenSecret = this.framework.getSetting('encryptionKey');
 
       try {
         verifyToken(recivedToken, enrollmentTokenSecret);
@@ -96,7 +99,7 @@ export class CMTokensDomain {
   }
 
   public generateAccessToken() {
-    const enrollmentTokenSecret = this.framework.getSetting('xpack.beats.encryptionKey');
+    const enrollmentTokenSecret = this.framework.getSetting('encryptionKey');
 
     const tokenData = {
       created: moment().toJSON(),
@@ -111,9 +114,7 @@ export class CMTokensDomain {
     numTokens: number = 1
   ): Promise<string[]> {
     const tokens = [];
-    const enrollmentTokensTtlInSeconds = this.framework.getSetting(
-      'xpack.beats.enrollmentTokensTtlInSeconds'
-    );
+    const enrollmentTokensTtlInSeconds = this.framework.getSetting('enrollmentTokensTtlInSeconds');
 
     const enrollmentTokenExpiration = moment()
       .add(enrollmentTokensTtlInSeconds, 'seconds')

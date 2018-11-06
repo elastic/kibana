@@ -19,10 +19,8 @@ describe('assign_tags_to_beats', () => {
   beforeEach(async () => await testHarnes.loadData());
 
   it('should add a single tag to a single beat', async () => {
-    const {
-      result,
-      statusCode,
-    } = await (serverLibs.framework as HapiBackendFrameworkAdapter).injectRequstForTesting({
+    const { result, statusCode } = await ((serverLibs.framework as any)
+      .adapter as HapiBackendFrameworkAdapter).injectRequstForTesting({
       method: 'POST',
       url: '/api/beats/agents_tags/assignments',
       headers: {
@@ -39,10 +37,8 @@ describe('assign_tags_to_beats', () => {
   });
 
   it('should not re-add an existing tag to a beat', async () => {
-    const {
-      result,
-      statusCode,
-    } = await (serverLibs.framework as HapiBackendFrameworkAdapter).injectRequstForTesting({
+    const { result, statusCode } = await ((serverLibs.framework as any)
+      .adapter as HapiBackendFrameworkAdapter).injectRequstForTesting({
       method: 'POST',
       url: '/api/beats/agents_tags/assignments',
       headers: {
@@ -70,10 +66,8 @@ describe('assign_tags_to_beats', () => {
   });
 
   it('should add a single tag to a multiple beats', async () => {
-    const {
-      result,
-      statusCode,
-    } = await (serverLibs.framework as HapiBackendFrameworkAdapter).injectRequstForTesting({
+    const { result, statusCode } = await ((serverLibs.framework as any)
+      .adapter as HapiBackendFrameworkAdapter).injectRequstForTesting({
       method: 'POST',
       url: '/api/beats/agents_tags/assignments',
       headers: {
@@ -114,10 +108,8 @@ describe('assign_tags_to_beats', () => {
   });
 
   it('should add multiple tags to a single beat', async () => {
-    const {
-      result,
-      statusCode,
-    } = await (serverLibs.framework as HapiBackendFrameworkAdapter).injectRequstForTesting({
+    const { result, statusCode } = await ((serverLibs.framework as any)
+      .adapter as HapiBackendFrameworkAdapter).injectRequstForTesting({
       method: 'POST',
       url: '/api/beats/agents_tags/assignments',
       headers: {

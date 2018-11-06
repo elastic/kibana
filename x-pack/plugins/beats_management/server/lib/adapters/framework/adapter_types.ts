@@ -8,6 +8,9 @@ import * as t from 'io-ts';
 
 export const internalAuthData = Symbol('internalAuthData');
 export type LicenseType = 'oss' | 'trial' | 'standard' | 'basic' | 'gold' | 'platinum';
+export const internalUser: FrameworkInternalUser = {
+  kind: 'internal',
+};
 export interface BackendFrameworkAdapter {
   internalUser: FrameworkInternalUser;
   info: null | FrameworkInfo;

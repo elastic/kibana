@@ -11,20 +11,18 @@ import {
   FrameworkInfo,
   FrameworkRequest,
   internalAuthData,
+  internalUser,
   RuntimeFrameworkInfo,
 } from './adapter_types';
 import {
   BackendFrameworkAdapter,
-  FrameworkInternalUser,
   FrameworkResponse,
   FrameworkRouteOptions,
   FrameworkWrappableRequest,
 } from './adapter_types';
 
 export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
-  public readonly internalUser: FrameworkInternalUser = {
-    kind: 'internal',
-  };
+  public readonly internalUser = internalUser;
   public info: null | FrameworkInfo = null;
 
   private server: any;

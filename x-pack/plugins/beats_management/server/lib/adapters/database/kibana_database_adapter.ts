@@ -42,7 +42,6 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     const callES = this.getCallType(user);
     const result = await callES('get', params);
     return result;
-    // todo
   }
 
   public async mget<T>(
@@ -52,7 +51,6 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     const callES = this.getCallType(user);
     const result = await callES('mget', params);
     return result;
-    // todo
   }
 
   public async bulk(user: FrameworkUser, params: DatabaseBulkIndexDocumentsParams): Promise<any> {

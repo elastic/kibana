@@ -7,12 +7,12 @@
 import {
   BackendFrameworkAdapter,
   FrameworkInfo,
-  FrameworkInternalUser,
   FrameworkRequest,
   FrameworkResponse,
   FrameworkRouteOptions,
   FrameworkWrappableRequest,
   internalAuthData,
+  internalUser,
   LicenseType,
 } from './adapter_types';
 
@@ -22,10 +22,8 @@ interface TestSettings {
 }
 
 export class HapiBackendFrameworkAdapter implements BackendFrameworkAdapter {
-  public readonly internalUser: FrameworkInternalUser = {
-    kind: 'internal',
-  };
   public info: null | FrameworkInfo = null;
+  public readonly internalUser = internalUser;
 
   private settings: TestSettings;
   private server: any;
