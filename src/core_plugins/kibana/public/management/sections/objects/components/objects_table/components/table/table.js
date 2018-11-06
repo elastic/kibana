@@ -61,6 +61,26 @@ class TableUI extends PureComponent {
     onShowRelationships: PropTypes.func.isRequired,
   };
 
+  state = {
+    isSearchTextValid: true,
+  }
+
+  onChange = ({ query, error }) => {
+    if (error) {
+      this.setState({
+        isSearchTextValid: false,
+        parseErrorMessage: error.message,
+      });
+      return;
+    }
+
+    this.setState({
+      isSearchTextValid: true,
+      parseErrorMessage: null,
+    });
+    this.props.onQueryChange({ query });
+  }
+
   render() {
     const {
       pageIndex,
@@ -74,7 +94,6 @@ class TableUI extends PureComponent {
       onDelete,
       onExport,
       selectedSavedObjects,
-      onQueryChange,
       onTableChange,
       goInApp,
       getEditUrl,
@@ -182,11 +201,21 @@ class TableUI extends PureComponent {
       },
     ];
 
+    let queryParseError;
+    if (!this.state.isSearchTextValid) {
+      queryParseError = (
+        <div className="euiFormErrorText euiFormRow__text">
+          {`Unable to parse query. ${this.state.parseErrorMessage}`}
+        </div>
+      );
+    }
+
     return (
       <Fragment>
         <EuiSearchBar
+          box={{ ['data-test-subj']: 'savedObjectSearchBar' }}
           filters={filters}
-          onChange={onQueryChange}
+          onChange={this.onChange}
           toolsRight={[
             <EuiButton
               key="deleteSO"
@@ -213,6 +242,7 @@ class TableUI extends PureComponent {
             </EuiButton>,
           ]}
         />
+        {queryParseError}
         <EuiSpacer size="s" />
         <div data-test-subj="savedObjectsTable">
           <EuiBasicTable

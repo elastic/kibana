@@ -55,4 +55,27 @@ describe('Search', () => {
     component.find('input').simulate('keyup', { target: { value: 'new filter' } });
     expect(onQueryChange).toHaveBeenCalledTimes(1);
   });
+
+  it('should handle query parse error', async () => {
+    const onQueryChangeMock = jest.fn();
+    const component = mountWithIntl(
+      <Search.WrappedComponent
+        query={query}
+        categories={categories}
+        onQueryChange={onQueryChangeMock}
+      />
+    );
+
+    // Send invalid query
+    component.find('input').simulate('keyup', { target: { value: '?' } });
+    expect(onQueryChangeMock).toHaveBeenCalledTimes(0);
+    expect(component.state().isSearchTextValid).toBe(false);
+
+    onQueryChangeMock.mockReset();
+
+    // Send valid query to ensure component can recover from invalid query
+    component.find('input').simulate('keyup', { target: { value: 'dateFormat' } });
+    expect(onQueryChangeMock).toHaveBeenCalledTimes(1);
+    expect(component.state().isSearchTextValid).toBe(true);
+  });
 });

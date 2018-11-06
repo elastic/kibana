@@ -18,7 +18,9 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { keyCodes } from '@elastic/eui/lib/services';
 
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
@@ -39,37 +41,62 @@ jest.mock('ui/chrome', () => ({
 
 import { Table } from '../table';
 
+const defaultProps = {
+  selectedSavedObjects: [1],
+  selectionConfig: {
+    onSelectionChange: () => {},
+  },
+  filterOptions: [{ value: 2 }],
+  onDelete: () => {},
+  onExport: () => {},
+  getEditUrl: () => {},
+  goInApp: () => {},
+  pageIndex: 1,
+  pageSize: 2,
+  items: [3],
+  itemId: 'id',
+  totalItemCount: 3,
+  onQueryChange: () => {},
+  onTableChange: () => {},
+  isSearching: false,
+  onShowRelationships: () => {},
+};
+
 describe('Table', () => {
   it('should render normally', () => {
-    const props = {
-      selectedSavedObjects: [1],
-      selectionConfig: {
-        onSelectionChange: () => {},
-      },
-      filterOptions: [{ value: 2 }],
-      onDelete: () => {},
-      onExport: () => {},
-      getEditUrl: () => {},
-      goInApp: () => {},
-
-      pageIndex: 1,
-      pageSize: 2,
-      items: [3],
-      itemId: 'id',
-      totalItemCount: 3,
-      onQueryChange: () => {},
-      onTableChange: () => {},
-      isSearching: false,
-
-      onShowRelationships: () => {},
-    };
-
     const component = shallowWithIntl(
       <Table.WrappedComponent
-        {...props}
+        {...defaultProps}
       />
     );
 
     expect(component).toMatchSnapshot();
+  });
+
+  it('should handle query parse error', () => {
+    const onQueryChangeMock = jest.fn();
+    const customizedProps = {
+      ...defaultProps,
+      onQueryChange: onQueryChangeMock
+    };
+
+    const component = mountWithIntl(
+      <Table.WrappedComponent
+        {...customizedProps}
+      />
+    );
+    const searchBar = findTestSubject(component, 'savedObjectSearchBar');
+
+    // Send invalid query
+    searchBar.simulate('keyup', { keyCode: keyCodes.ENTER, target: { value: '?' } });
+    expect(onQueryChangeMock).toHaveBeenCalledTimes(0);
+    expect(component.state().isSearchTextValid).toBe(false);
+
+    onQueryChangeMock.mockReset();
+
+    // Send valid query to ensure component can recover from invalid query
+    searchBar.simulate('keyup', { keyCode: keyCodes.ENTER, target: { value: 'I am valid' } });
+    expect(onQueryChangeMock).toHaveBeenCalledTimes(1);
+    expect(component.state().isSearchTextValid).toBe(true);
   });
 });
