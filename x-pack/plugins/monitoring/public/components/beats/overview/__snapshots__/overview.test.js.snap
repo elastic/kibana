@@ -176,7 +176,7 @@ exports[`Overview that overview page renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -196,7 +196,7 @@ exports[`Overview that overview page renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -216,7 +216,7 @@ exports[`Overview that overview page renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -236,7 +236,7 @@ exports[`Overview that overview page renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -299,7 +299,7 @@ up, but you don't seem to have any activity within the last day."
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -319,7 +319,7 @@ up, but you don't seem to have any activity within the last day."
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -339,7 +339,7 @@ up, but you don't seem to have any activity within the last day."
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -359,7 +359,7 @@ up, but you don't seem to have any activity within the last day."
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
