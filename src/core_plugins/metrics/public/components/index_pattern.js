@@ -54,6 +54,7 @@ export const IndexPattern = props => {
         disabled={props.disabled}
         onChange={handleTextChange(indexPatternName, '*')}
         value={model[indexPatternName]}
+        data-test-subj="metricsIndexPatternInput"
       />
       <label className="vis_editor__label" htmlFor={htmlId('timeField')}>
         Time Field
@@ -67,6 +68,7 @@ export const IndexPattern = props => {
           onChange={handleSelectChange(timeFieldName)}
           indexPattern={model[indexPatternName]}
           fields={fields}
+          data-test-subj="metricsIndexPatternFieldsSelect"
         />
       </div>
       <label className="vis_editor__label" htmlFor={htmlId('interval')}>
