@@ -203,9 +203,13 @@ class TableUI extends PureComponent {
 
     let queryParseError;
     if (!this.state.isSearchTextValid) {
+      const parseErrorMsg = intl.formatMessage({
+        id: 'kbn.management.objects.objectsTable.table.searchBarUnableToParseQuery',
+        defaultMessage: 'Unable to parse query',
+      });
       queryParseError = (
         <div className="euiFormErrorText euiFormRow__text">
-          {`Unable to parse query. ${this.state.parseErrorMessage}`}
+          {`${parseErrorMsg}. ${this.state.parseErrorMessage}`}
         </div>
       );
     }
