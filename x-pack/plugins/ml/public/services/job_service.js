@@ -27,7 +27,7 @@ class JobService {
     this.jobs = [];
 
     // Provide ready access to widely used basic job properties.
-    // Note these get populated on a call to either loadJobs or getBasicJobInfo.
+    // Note these get populated on a call to loadJobs.
     this.basicJobs = {};
     this.jobDescriptions = {};
     this.detectorsByJob = {};
