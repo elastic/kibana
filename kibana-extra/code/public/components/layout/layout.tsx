@@ -107,7 +107,8 @@ const DirectoryView = withRouter(props => {
 const Commits = props => {
   const commitList = props.commits.map(commit => (
     <div key={commit.id} className="commitItem">
-      {commit.id} {commit.message} {moment(commit.updated).fromNow()}
+      <Link to={`/commit/${props.repoId}/${commit.id}`}>{commit.id}</Link> {commit.message}{' '}
+      {moment(commit.updated).fromNow()}
     </div>
   ));
   return (
@@ -216,7 +217,8 @@ export class LayoutPage extends React.Component<Props, State> {
     );
 
   public renderContent = () => {
-    const { path, pathType } = this.props.match.params;
+    const { path, pathType, resource, org, repo } = this.props.match.params;
+    const repoId = `${resource}/${org}/${repo}`;
     if (pathType === PathTypes.tree) {
       return (
         <EuiFlexGroup direction="column" style={noMarginStyle}>
@@ -224,7 +226,7 @@ export class LayoutPage extends React.Component<Props, State> {
             <DirectoryView node={this.findNode(path ? path.split('/') : [], this.props.tree)} />
           </EuiFlexItem>
           <EuiFlexItem className="contentItem">
-            <Commits commits={this.props.commits} />
+            <Commits commits={this.props.commits} repoId={repoId} />
           </EuiFlexItem>
         </EuiFlexGroup>
       );

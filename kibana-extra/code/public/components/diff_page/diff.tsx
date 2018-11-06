@@ -105,7 +105,7 @@ export class DiffPage extends React.Component<Props> {
       return null;
     }
     const diffs = commit.files.map((file, index) => (
-      <div>
+      <div key={index}>
         <div>
           {file.additions + file.deletions}{' '}
           <Modification additions={file.additions} deletions={file.deletions} />{' '}
