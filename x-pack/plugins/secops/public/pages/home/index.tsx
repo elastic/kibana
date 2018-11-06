@@ -14,6 +14,8 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import SplitPane from 'react-split-pane';
+import { PageContainer, PageContent } from '../../components/page';
+import { Navigation } from '../../components/page/navigation';
 import { Timeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
 import { Sort } from '../../components/timeline/body/sort';
@@ -63,47 +65,63 @@ const VisualizationPlaceholder = styled(EuiPanel)`
 const maxTimelineWidth = 1125;
 
 export const HomePage = pure(() => (
-  <div>
-    <SplitPane
-      split="vertical"
-      defaultSize="75%"
-      primary="second"
-      resizerStyle={{
-        background: '#000',
-        border: '5px solid',
-        opacity: 0.8,
-        zIndex: 1,
-        boxSizing: 'border-box',
-        backgroundClip: 'padding-box',
-        cursor: 'col-resize',
-      }}
-      pane2Style={{
-        maxWidth: `${maxTimelineWidth}px`,
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          flexWrap: 'wrap',
+  <PageContainer data-test-subj="pageContainer">
+    <Navigation data-test-subj="navigation" />
+    <PageContent data-test-subj="pageContent">
+      <SplitPane
+        split="vertical"
+        defaultSize="75%"
+        primary="second"
+        resizerStyle={{
+          background: '#000',
+          border: '5px solid',
+          opacity: 0.8,
+          zIndex: 1,
+          boxSizing: 'border-box',
+          backgroundClip: 'padding-box',
+          cursor: 'col-resize',
+        }}
+        pane2Style={{
+          maxWidth: `${maxTimelineWidth}px`,
         }}
       >
-        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(x => (
-          <VisualizationPlaceholder data-test-subj="visualizationPlaceholder" key={x}>
-            <WhoAmI sourceId="default">{({ appName }) => <h1>{appName}</h1>}</WhoAmI>
-          </VisualizationPlaceholder>
-        ))}
-      </div>
-      <Timeline
-        columnHeaders={headers}
-        dataProviders={mockDataProviders}
-        onColumnSorted={onColumnSorted}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onFilterChange={onFilterChange}
-        onRangeSelected={onRangeSelected}
-        sort={sort}
-        width={maxTimelineWidth}
-      />
-    </SplitPane>
-  </div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+          }}
+        >
+          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(x => (
+            <VisualizationPlaceholder data-test-subj="visualizationPlaceholder" key={x}>
+              <WhoAmI sourceId="default">{({ appName }) => <h1>{appName}</h1>}</WhoAmI>
+            </VisualizationPlaceholder>
+          ))}
+        </div>
+        <Timeline
+          columnHeaders={headers}
+          dataProviders={mockDataProviders}
+          onColumnSorted={onColumnSorted}
+          onDataProviderRemoved={onDataProviderRemoved}
+          onFilterChange={onFilterChange}
+          onRangeSelected={onRangeSelected}
+          sort={sort}
+          width={maxTimelineWidth}
+        />
+      </SplitPane>
+    </PageContent>
+    <Footer>
+      <WhoAmI sourceId="default">{({ appName }) => <h1>Hello {appName}</h1>}</WhoAmI>
+    </Footer>
+  </PageContainer>
 ));
+
+const Footer = styled.div`
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  color: #666;
+  padding: 8px 8px;
+  text-align: center;
+`;

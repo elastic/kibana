@@ -7,11 +7,12 @@
 import { EuiPage } from '@elastic/eui';
 import styled from 'styled-components';
 
-export const ColumnarPage = styled.div`
+export const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
   flex: 1 0 0;
+  padding: 1rem;
 `;
 
 export const PageContent = styled.div`
