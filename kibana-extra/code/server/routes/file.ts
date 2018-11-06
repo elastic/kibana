@@ -6,10 +6,15 @@
 
 import Boom from 'boom';
 import fileType from 'file-type';
-import hapi from 'hapi';
+import hapi, { RequestQuery } from 'hapi';
 import { Reference } from 'nodegit';
 import { ReferenceInfo } from '../../model/commit';
-import { commitInfo, GitOperations, referenceInfo } from '../git_operations';
+import {
+  commitInfo,
+  DEFAULT_TREE_CHILDREN_LIMIT,
+  GitOperations,
+  referenceInfo,
+} from '../git_operations';
 import { ServerOptions } from '../server_options';
 import { extractLines } from '../utils/buffer';
 import { detectLanguage } from '../utils/detect_language';
@@ -18,12 +23,17 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
   server.route({
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
     method: 'GET',
-    async handler(req) {
+    async handler(req: hapi.Request) {
       const fileResolver = new GitOperations(options.repoPath);
       const { uri, path, ref } = req.params;
-      const depth = req.query.depth || Number.MAX_SAFE_INTEGER;
+      const queries = req.query as RequestQuery;
+      const limit = queries.limit
+        ? parseInt(queries.limit as string, 10)
+        : DEFAULT_TREE_CHILDREN_LIMIT;
+      const skip = queries.skip ? parseInt(queries.skip as string, 10) : 0;
+      const withParents = 'parents' in queries;
       try {
-        return await fileResolver.fileTree(uri, path, ref, depth);
+        return await fileResolver.fileTree(uri, path, ref, skip, limit, withParents);
       } catch (e) {
         if (e.isBoom) {
           return e;

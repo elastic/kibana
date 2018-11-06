@@ -15,6 +15,7 @@ import { detectLanguage } from './utils/detect_language';
 
 const HEAD = 'HEAD';
 const REFS_HEADS = 'refs/heads/';
+export const DEFAULT_TREE_CHILDREN_LIMIT = 50;
 
 /**
  * do a nodegit operation and check the results. If it throws a not found error or returns null,
@@ -131,23 +132,17 @@ export class GitOperations {
     uri: RepositoryUri,
     path: string,
     revision: string = HEAD,
-    depth: number = Number.MAX_SAFE_INTEGER
+    skip: number = 0,
+    limit: number = DEFAULT_TREE_CHILDREN_LIMIT,
+    resolveParents: boolean = false
   ): Promise<FileTree> {
     const repo = await this.openRepo(uri);
     const commit = await this.getCommit(repo, revision);
     const tree = await commit.getTree();
-
-    if (path) {
-      const entry = await checkExists(
-        () => Promise.resolve(tree.getEntry(path)),
-        `path ${path} does not exists.`
-      );
-      if (entry.isDirectory()) {
-        return await this.walkTree(entry2Tree(entry), await entry.getTree(), depth);
-      } else {
-        return entry2Tree(entry);
-      }
-    } else {
+    if (path === '/') {
+      path = '';
+    }
+    const getRoot = async () => {
       return await this.walkTree(
         {
           name: '',
@@ -155,8 +150,28 @@ export class GitOperations {
           type: FileTreeItemType.Directory,
         },
         tree,
-        depth
+        [],
+        skip,
+        limit
       );
+    };
+    if (path) {
+      if (resolveParents) {
+        return this.walkTree(await getRoot(), tree, path.split('/'), skip, limit);
+      } else {
+        const entry = await checkExists(
+          () => Promise.resolve(tree.getEntry(path)),
+          `path ${path} does not exists.`
+        );
+        if (entry.isDirectory()) {
+          const tree1 = await entry.getTree();
+          return this.walkTree(entry2Tree(entry), tree1, [], skip, limit);
+        } else {
+          return entry2Tree(entry);
+        }
+      }
+    } else {
+      return getRoot();
     }
   }
 
@@ -254,19 +269,42 @@ export class GitOperations {
     const entry = await commit.getEntry(path);
     return (await entry.getBlob()).content().toString('utf8');
   }
-
-  private async walkTree(file: FileTree, tree: Tree, depth: number): Promise<FileTree> {
-    if (depth > 0) {
-      file.children = [];
-      for (const entry of tree.entries()) {
-        const subDir = entry2Tree(entry);
-        if (entry.isDirectory()) {
-          await this.walkTree(subDir, await entry.getTree(), depth - 1);
+  private async walkTree(
+    fileTree: FileTree,
+    tree: Tree,
+    paths: string[],
+    skip: number,
+    limit: number
+  ): Promise<FileTree> {
+    const [path, ...rest] = paths;
+    if (!fileTree.children) {
+      fileTree.children = [];
+      for (const e of tree.entries().slice(skip, limit)) {
+        if (e.path() !== path) {
+          fileTree.children.push(entry2Tree(e));
         }
-        file.children.push(subDir);
       }
     }
-    return file;
+    fileTree.totalChildren = tree.entryCount();
+    if (path) {
+      const entry = await checkExists(
+        () => Promise.resolve(tree.getEntry(path)),
+        `path ${fileTree.path}/${path} does not exists.`
+      );
+      let child = entry2Tree(entry);
+      if (entry.isDirectory()) {
+        child = await this.walkTree(child, await entry.getTree(), rest, skip, limit);
+      }
+      const idx = fileTree.children.findIndex(c => c.name === entry.name());
+      if (idx >= 0) {
+        // replace the entry in children if found
+        fileTree.children[idx] = child;
+      } else {
+        fileTree.children.push(child);
+      }
+    }
+
+    return fileTree;
   }
 
   private async findCommit(repo: Repository, revision: string): Promise<Commit> {
