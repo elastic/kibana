@@ -1,6 +1,6 @@
-<table>
+<table class="visTooltip__table">
   <thead>
-    <tr class="tooltip-label">
+    <tr class="eui-textLeft tooltip-label">
       <th scope="col">field</th>
       <th scope="col">value</th>
       <th scope="col">{{metricCol.label}}</th>
@@ -8,9 +8,9 @@
   </thead>
   <tbody>
     <tr class="tooltip-value" ng-repeat="row in rows track by $index">
-      <td><span ng-bind-html="row.spacer"></span>{{row.field}}</td>
-      <td class="row-bucket">{{row.bucket}}</td>
-      <td>{{row.metric}}</td>
+      <td class="eui-textBreakWord"><span ng-bind-html="row.spacer"></span>{{row.field}}</td>
+      <td class="eui-textBreakAll">{{row.bucket}}</td>
+      <td class="eui-textNoWrap">{{row.metric}}</td>
     </tr>
   </tbody>
 </table>

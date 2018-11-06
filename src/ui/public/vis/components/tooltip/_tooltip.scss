@@ -1,0 +1,74 @@
+// EUITODO: Use EuiTooltip or create a tooltip mixin
+.vis-tooltip,
+.vis-tooltip-sizing-clone {
+  @include euiBottomShadow($color: $euiColorFullShade);
+  @include euiFontSizeXS;
+  visibility: hidden;
+  pointer-events: none;
+  position: fixed;
+  z-index: $euiZLevel9;
+  background-color: tintOrShade($euiColorFullShade, 25%, 90%);
+  color: $euiColorGhost;
+  border-radius: $euiBorderRadius;
+  word-wrap: break-word;
+  max-width: 320px;
+
+  // display: flex;
+  // align-items: center;
+  // padding: 0 $euiSizeS;
+
+  > :last-child {
+    margin-bottom: $euiSizeS;
+  }
+
+  > * {
+    margin: $euiSizeS $euiSizeS 0;
+  }
+
+  table {
+    .tooltip-label {
+      font-weight: $euiFontWeightMedium;
+      color: shade($euiColorGhost, 20%);
+    }
+
+    td,th {
+      padding: $euiSizeXS;
+
+      &.row-bucket {
+        word-break: break-all;
+      }
+    }
+  }
+}
+
+.vis-tooltip-header {
+  margin: 0 0 $euiSizeS 0;
+  padding: $euiSizeXS $euiSizeS;
+  display: flex;
+  align-items: center;
+  line-height: 1.5;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  + * {
+    margin-top: $euiSizeS;
+  }
+}
+
+.vis-tooltip-header-icon {
+  flex: 0 0 auto;
+  padding-right: $euiSizeS;
+}
+
+.vis-tooltip-header-text {
+  flex: 1 1 200px;
+}
+
+.vis-tooltip-sizing-clone {
+  visibility: hidden;
+  position: fixed;
+  top: -500px;
+  left: -500px;
+}
