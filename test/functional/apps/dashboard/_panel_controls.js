@@ -95,8 +95,8 @@ export default function ({ getService, getPageObjects }) {
       describe('on an expanded panel', function () {
         it('are hidden in view mode', async function () {
           await PageObjects.dashboard.saveDashboard(dashboardName);
-          await dashboardPanelActions.toggleExpandPanel();
-
+          await dashboardPanelActions.openContextMenu();
+          await dashboardPanelActions.clickExpandPanelToggle();
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.expectMissingEditPanelAction();
           await dashboardPanelActions.expectMissingRemovePanelAction();
@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }) {
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.expectExistsEditPanelAction();
           await dashboardPanelActions.expectMissingRemovePanelAction();
-          await dashboardPanelActions.toggleExpandPanel();
+          await dashboardPanelActions.clickExpandPanelToggle();
         });
       });
 
@@ -144,6 +144,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('opens a saved search when edit link is clicked', async () => {
+          await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.clickEdit();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const queryName = await PageObjects.discover.getCurrentQueryName();

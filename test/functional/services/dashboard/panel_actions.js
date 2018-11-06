@@ -26,7 +26,6 @@ const OPEN_INSPECTOR_TEST_SUBJ = 'dashboardPanelAction-openInspector';
 
 export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
   const log = getService('log');
-  const retry = getService('retry');
   const remote = getService('remote');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
@@ -63,23 +62,12 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
 
     async clickEdit() {
       log.debug('clickEdit');
-      await this.openContextMenu();
-
-      // Edit link may sometimes be disabled if the embeddable isn't rendered yet.
-      await retry.try(async () => {
-        await testSubjects.click(EDIT_PANEL_DATA_TEST_SUBJ);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.common.waitForTopNavToBeVisible();
-        const current = await remote.getCurrentUrl();
-        if (current.indexOf('dashboard') >= 0) {
-          throw new Error('Still on dashboard');
-        }
-      });
+      await testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.waitForTopNavToBeVisible();
     }
 
-    async toggleExpandPanel() {
-      log.debug('toggleExpandPanel');
-      await this.openContextMenu();
+    async clickExpandPanelToggle() {
       await testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
