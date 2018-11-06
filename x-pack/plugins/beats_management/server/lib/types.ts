@@ -7,21 +7,18 @@
 import { DatabaseAdapter } from './adapters/database/adapter_types';
 import { BackendFrameworkAdapter, FrameworkUser } from './adapters/framework/adapter_types';
 
-import { CMBeatsDomain } from './domains/beats';
-import { CMTagsDomain } from './domains/tags';
-import { CMTokensDomain } from './domains/tokens';
+import { CMBeatsDomain } from './beats';
+import { CMTagsDomain } from './tags';
+import { CMTokensDomain } from './tokens';
 
 export type UserOrToken = FrameworkUser | string;
 
-export interface CMDomainLibs {
+export interface CMServerLibs {
+  framework: BackendFrameworkAdapter;
+  database?: DatabaseAdapter;
   beats: CMBeatsDomain;
   tags: CMTagsDomain;
   tokens: CMTokensDomain;
-}
-
-export interface CMServerLibs extends CMDomainLibs {
-  framework: BackendFrameworkAdapter;
-  database?: DatabaseAdapter;
 }
 
 export enum BeatEnrollmentStatus {

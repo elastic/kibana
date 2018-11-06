@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import Boom from 'boom';
-import { difference } from 'lodash';
+import { get } from 'lodash';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
-import { PLUGIN } from '../../../../common/constants/plugin';
-import { wrapRequest } from '../../../utils/wrap_request';
-import { FrameworkRequest } from './adapter_types';
+import {
+  FrameworkInfo,
+  FrameworkRequest,
+  internalAuthData,
+  RuntimeFrameworkInfo,
+} from './adapter_types';
 import {
   BackendFrameworkAdapter,
   FrameworkInternalUser,
@@ -24,61 +25,43 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public readonly internalUser: FrameworkInternalUser = {
     kind: 'internal',
   };
-  public version: string;
-  public license: 'oss' | 'trial' | 'standard' | 'basic' | 'gold' | 'platinum' = 'oss';
-  public securityEnabled: boolean = false;
-  public licenseActive: boolean = false;
+  public info: null | FrameworkInfo = null;
 
   private server: any;
-  private cryptoHash: string | null;
 
   constructor(private readonly PLUGIN_ID: string, hapiServer: any) {
     this.server = hapiServer;
-    if (hapiServer.plugins.kibana) {
-      this.version = hapiServer.plugins.kibana.status.plugin.version;
-    } else {
-      this.version = 'unknown';
-    }
-    this.cryptoHash = null;
-    this.validateConfig();
 
     const xpackMainPlugin = hapiServer.plugins.xpack_main;
     const thisPlugin = hapiServer.plugins.beats_management;
 
     mirrorPluginStatus(xpackMainPlugin, thisPlugin);
     xpackMainPlugin.status.once('green', () => {
+      this.xpackInfoWasUpdatedHandler(xpackMainPlugin.info);
       // Register a function that is called whenever the xpack info changes,
       // to re-compute the license check results for this plugin
       xpackMainPlugin.info
-        .feature(PLUGIN_ID)
-        .registerLicenseCheckResultsGenerator(this.checkLicense);
+        .feature(this.PLUGIN_ID)
+        .registerLicenseCheckResultsGenerator(this.xpackInfoWasUpdatedHandler);
     });
   }
 
   public on(event: 'xpack.status.green', cb: () => void) {
-    const xpackMainPlugin = this.server.plugins.xpack_main;
-
     switch (event) {
       case 'xpack.status.green':
-        xpackMainPlugin.status.once('green', cb);
+        this.server.plugins.xpack_main.status.once('green', cb);
     }
   }
 
-  // TODO make base path a constructor level param
   public getSetting(settingPath: string) {
-    // TODO type check server properly
-    if (settingPath === 'xpack.beats.encryptionKey') {
-      // @ts-ignore
-      return this.server.config().get(settingPath) || this.cryptoHash;
-    }
-    // @ts-ignore
-    return this.server.config().get(settingPath) || this.cryptoHash;
+    return this.server.config().get(settingPath);
+  }
+
+  public log(text: string) {
+    this.server.log(text);
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
-    if (!this.securityEnabled) {
-      return;
-    }
     this.server.route({
       handler: {
         directory: {
@@ -94,47 +77,42 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     RouteRequest extends FrameworkWrappableRequest,
     RouteResponse extends FrameworkResponse
   >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
-    const wrappedHandler = (licenseRequired: boolean, requiredRoles?: string[]) => async (
-      request: any,
-      h: any
-    ) => {
-      const xpackMainPlugin = this.server.plugins.xpack_main;
-      const licenseCheckResults = xpackMainPlugin.info
-        .feature(this.PLUGIN_ID)
-        .getLicenseCheckResults();
-      if (licenseRequired && !licenseCheckResults.licenseValid) {
-        return Boom.forbidden(licenseCheckResults.message);
-      }
-      const wrappedRequest = wrapRequest(request);
-      if (requiredRoles) {
-        if (wrappedRequest.user.kind !== 'authenticated') {
-          return h.response().code(403);
-        }
-        wrappedRequest.user = {
-          ...wrappedRequest.user,
-          ...(await this.getUser(request)),
-        };
-
-        if (
-          wrappedRequest.user.kind === 'authenticated' &&
-          !wrappedRequest.user.roles.includes('superuser') &&
-          difference(requiredRoles, wrappedRequest.user.roles).length !== 0
-        ) {
-          return h.response().code(403);
-        }
-      }
-      return route.handler(wrappedRequest, h);
-    };
-
     this.server.route({
-      handler: wrappedHandler(route.licenseRequired || false, route.requiredRoles),
+      handler: async (request: any, h: any) => {
+        return await route.handler(await this.wrapRequest(request), h);
+      },
       method: route.method,
       path: route.path,
       config: route.config,
     });
   }
 
-  public async getUser(request: FrameworkRequest) {
+  private async wrapRequest<InternalRequest extends FrameworkWrappableRequest>(
+    req: InternalRequest
+  ): Promise<FrameworkRequest<InternalRequest>> {
+    const { params, payload, query, headers, info } = req;
+
+    const isAuthenticated = headers.authorization != null;
+
+    return {
+      user: isAuthenticated
+        ? {
+            kind: 'authenticated',
+            [internalAuthData]: headers,
+            ...(await this.getUser(req)),
+          }
+        : {
+            kind: 'unauthenticated',
+          },
+      headers,
+      info,
+      params,
+      payload,
+      query,
+    };
+  }
+
+  private async getUser(request: FrameworkWrappableRequest) {
     try {
       return await this.server.plugins.security.getUser(request);
     } catch (e) {
@@ -142,74 +120,47 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     }
   }
 
-  // TODO make key a param
-  private validateConfig() {
-    // @ts-ignore
-    const config = this.server.config();
-    const encryptionKey = config.get('xpack.beats.encryptionKey');
+  private xpackInfoWasUpdatedHandler(xpackInfo: any) {
+    let xpackInfoUnpacked: FrameworkInfo;
 
-    if (!encryptionKey) {
-      this.server.log(
-        'Using a default encryption key for xpack.beats.encryptionKey. It is recommended that you set xpack.beats.encryptionKey in kibana.yml with a unique token'
-      );
-      this.cryptoHash = 'xpack_beats_default_encryptionKey';
-    }
-  }
-
-  // TODO this should NOT be in an adapter, break up and move validation to a lib
-  private checkLicense(xPackInfo: any) {
     // If, for some reason, we cannot get the license information
-    // from Elasticsearch, assume worst case and disable the Logstash pipeline UI
-    if (!xPackInfo || !xPackInfo.isAvailable()) {
+    // from Elasticsearch, assume worst case and disable
+    if (!xpackInfo || !xpackInfo.isAvailable()) {
+      this.info = null;
       return;
     }
 
-    this.license = xPackInfo.license.getType();
-    this.licenseActive = xPackInfo.license.isActive();
-    this.securityEnabled = xPackInfo.feature('security').isEnabled();
-    const VALID_LICENSE_MODES = ['trial', 'standard', 'gold', 'platinum'];
-
-    const isLicenseValid = VALID_LICENSE_MODES.includes(this.license);
-    const isLicenseActive = xPackInfo.license.isActive();
-
-    // License is not valid
-    if (!isLicenseValid) {
-      return {
-        securityEnabled: true,
-        licenseValid: false,
-        message: `Your ${
-          this.license
-        } license does not support Beats central management features. Please upgrade your license.`,
+    try {
+      xpackInfoUnpacked = {
+        kibana: {
+          version: get(this.server, 'plugins.kibana.status.plugin.version', 'unknown'),
+        },
+        license: {
+          type: xpackInfo.license.getType(),
+          expired: !xpackInfo.license.isActive(),
+          expiry_date_in_millis: xpackInfo.license.getExpiryDateInMillis(),
+        },
+        security: {
+          enabled: !!xpackInfo.feature('security') && xpackInfo.feature('security').isEnabled(),
+          available: !!xpackInfo.feature('security'),
+        },
+        watcher: {
+          enabled: !!xpackInfo.feature('watcher') && xpackInfo.feature('watcher').isEnabled(),
+          available: !!xpackInfo.feature('watcher'),
+        },
       };
+    } catch (e) {
+      this.server.log(`Error accessing required xPackInfo in ${this.PLUGIN_ID} Kibana adapter`);
+      throw e;
     }
 
-    // License is valid but not active, we go into a read-only mode.
-    if (!isLicenseActive) {
-      return {
-        securityEnabled: true,
-        licenseValid: false,
-        message: `You cannot edit, create, or delete your Beats central management configurations because your ${
-          this.license
-        } license has expired.`,
-      };
+    const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);
+    if (assertData.isLeft()) {
+      throw new Error(
+        `Error parsing xpack info in ${this.PLUGIN_ID},   ${JSON.stringify(assertData)}`
+      );
     }
 
-    // Security is not enabled in ES
-    if (!this.securityEnabled) {
-      const message =
-        'Security must be enabled in order to use Beats central management features.' +
-        ' Please set xpack.security.enabled: true in your elasticsearch.yml.';
-      return {
-        securityEnabled: false,
-        licenseValid: true,
-        message,
-      };
-    }
-
-    // License is valid and active
-    return {
-      securityEnabled: true,
-      licenseValid: true,
-    };
+    this.info = xpackInfoUnpacked;
   }
 }

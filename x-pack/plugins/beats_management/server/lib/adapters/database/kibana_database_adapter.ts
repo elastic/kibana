@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { internalAuthData } from '../../../utils/wrap_request';
-import { FrameworkUser } from '../framework/adapter_types';
+import { FrameworkUser, internalAuthData } from '../framework/adapter_types';
 import {
   DatabaseAdapter,
   DatabaseBulkIndexDocumentsParams,

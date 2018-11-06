@@ -14,18 +14,18 @@ import { FrameworkUser } from './adapters/framework/adapter_types';
 
 import { CMAssignmentReturn } from './adapters/beats/adapter_types';
 import { BeatsRemovalReturn } from './adapters/beats/adapter_types';
-import { BeatEnrollmentStatus, CMDomainLibs, CMServerLibs, UserOrToken } from './types';
+import { BeatEnrollmentStatus, CMServerLibs, UserOrToken } from './types';
 
 export class CMBeatsDomain {
-  private tags: CMDomainLibs['tags'];
-  private tokens: CMDomainLibs['tokens'];
+  private tags: CMServerLibs['tags'];
+  private tokens: CMServerLibs['tokens'];
   private framework: CMServerLibs['framework'];
 
   constructor(
     private readonly adapter: CMBeatsAdapter,
     libs: {
-      tags: CMDomainLibs['tags'];
-      tokens: CMDomainLibs['tokens'];
+      tags: CMServerLibs['tags'];
+      tokens: CMServerLibs['tokens'];
       framework: CMServerLibs['framework'];
     }
   ) {

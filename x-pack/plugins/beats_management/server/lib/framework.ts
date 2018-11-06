@@ -4,93 +4,97 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { intersection, uniq, values } from 'lodash';
-import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants';
-import { ConfigurationBlock } from '../../common/domain_types';
-import { FrameworkUser } from './adapters/framework/adapter_types';
-
-import { entries } from '../utils/polyfills';
-import { CMTagsAdapter } from './adapters/tags/adapter_types';
+import Boom from 'boom';
+import { difference } from 'lodash';
+import { FrameworkRouteHandler } from './adapters/framework/adapter_types';
+import { FrameworkRequest } from './adapters/framework/adapter_types';
+import {
+  BackendFrameworkAdapter,
+  FrameworkResponse,
+  FrameworkRouteOptions,
+  FrameworkWrappableRequest,
+} from './adapters/framework/adapter_types';
 
 export class FrameworkLib {
-  constructor(private readonly adapter: CMTagsAdapter) {}
-
-  public async getAll(user: FrameworkUser, ESQuery?: any) {
-    return await this.adapter.getAll(user, ESQuery);
+  public exposeStaticDir = this.adapter.exposeStaticDir;
+  public internalUser = this.adapter.internalUser;
+  constructor(private readonly adapter: BackendFrameworkAdapter) {
+    this.validateConfig();
   }
 
-  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
-    return await this.adapter.getTagsWithIds(user, tagIds);
+  public registerRoute<
+    RouteRequest extends FrameworkWrappableRequest,
+    RouteResponse extends FrameworkResponse
+  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
+    this.adapter.registerRoute({
+      ...route,
+      handler: this.wrapRouteWithSecurity(
+        route.handler,
+        route.licenseRequired || [],
+        route.requiredRoles
+      ),
+    });
   }
 
-  public async delete(user: FrameworkUser, tagIds: string[]) {
-    return await this.adapter.delete(user, tagIds);
+  public getSetting(setting: 'encryptionKey' | 'enrollmentTokensTtlInSeconds') {
+    return this.adapter.getSetting(`xpack.beats.${setting}`);
   }
 
-  public async saveTag(
-    user: FrameworkUser,
-    tagId: string,
-    config: { color: string; configuration_blocks: ConfigurationBlock[] }
-  ) {
-    const { isValid, message } = await this.validateConfigurationBlocks(
-      config.configuration_blocks
-    );
-    if (!isValid) {
-      return { isValid, result: message };
-    }
-
-    const tag = {
-      ...config,
-      id: tagId,
-      last_updated: new Date(),
-    };
+  /**
+   * Expired `null` happens when we have no xpack info
+   */
+  get license() {
     return {
-      isValid: true,
-      result: await this.adapter.upsertTag(user, tag),
+      type: this.adapter.info ? this.adapter.info.license.type : 'unknown',
+      expired: this.adapter.info ? this.adapter.info.license.expired : null,
     };
   }
 
-  private validateConfigurationBlocks(configurationBlocks: any) {
-    const types = uniq(configurationBlocks.map((block: any) => block.type));
+  get securityIsEnabled() {
+    return this.adapter.info ? this.adapter.info.security.enabled : false;
+  }
 
-    // If none of the types in the given configuration blocks are uniqueness-enforcing,
-    // we don't need to perform any further validation checks.
-    const uniquenessEnforcingTypes = intersection(types, UNIQUENESS_ENFORCING_TYPES);
-    if (uniquenessEnforcingTypes.length === 0) {
-      return { isValid: true };
+  private validateConfig() {
+    const encryptionKey = this.adapter.getSetting('xpack.beats.encryptionKey');
+
+    if (!encryptionKey) {
+      this.adapter.log(
+        'Using a default encryption key for xpack.beats.encryptionKey. It is recommended that you set xpack.beats.encryptionKey in kibana.yml with a unique token'
+      );
     }
+  }
 
-    // Count the number of uniqueness-enforcing types in the given configuration blocks
-    const typeCountMap = configurationBlocks.reduce((map: any, block: any) => {
-      const { type } = block;
-      if (!uniquenessEnforcingTypes.includes(type)) {
-        return map;
+  private wrapRouteWithSecurity(
+    handler: FrameworkRouteHandler<any, any>,
+    requiredLicense: string[],
+    requiredRoles?: string[]
+  ) {
+    return async (request: FrameworkRequest, h: any) => {
+      if (
+        requiredLicense.length > 0 &&
+        (this.license.expired || !requiredLicense.includes(this.license.type))
+      ) {
+        return Boom.forbidden(
+          `Your ${
+            this.license
+          } license does not support this API or is expired. Please upgrade your license.`
+        );
       }
 
-      const count = map[type] || 0;
-      return {
-        ...map,
-        [type]: count + 1,
-      };
-    }, {});
+      if (requiredRoles) {
+        if (request.user.kind !== 'authenticated') {
+          return h.response().code(403);
+        }
 
-    // If there is no more than one of any uniqueness-enforcing types in the given
-    // configuration blocks, we don't need to perform any further validation checks.
-    if (values(typeCountMap).filter(count => count > 1).length === 0) {
-      return { isValid: true };
-    }
-
-    const message = entries(typeCountMap)
-      .filter(([, count]) => count > 1)
-      .map(
-        ([type, count]) =>
-          `Expected only one configuration block of type '${type}' but found ${count}`
-      )
-      .join(' ');
-
-    return {
-      isValid: false,
-      message,
+        if (
+          request.user.kind === 'authenticated' &&
+          !request.user.roles.includes('superuser') &&
+          difference(requiredRoles, request.user.roles).length !== 0
+        ) {
+          return h.response().code(403);
+        }
+      }
+      return await handler(request, h);
     };
   }
 }

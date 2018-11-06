@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Lifecycle, ResponseToolkit } from 'hapi';
-import { internalAuthData } from '../../../utils/wrap_request';
+import * as t from 'io-ts';
 
+export const internalAuthData = Symbol('internalAuthData');
+export type LicenseType = 'oss' | 'trial' | 'standard' | 'basic' | 'gold' | 'platinum';
 export interface BackendFrameworkAdapter {
   internalUser: FrameworkInternalUser;
-  version: string;
-  license: 'oss' | 'trial' | 'standard' | 'basic' | 'gold' | 'platinum';
-  securityEnabled: boolean;
-  licenseActive: boolean;
+  info: null | FrameworkInfo;
+  log(text: string): void;
   on(event: 'xpack.status.green', cb: () => void): void;
-  getSetting(
-    settingPath: 'xpack.beats.encryptionKey' | 'xpack.beats.enrollmentTokensTtlInSeconds'
-  ): any;
+  getSetting(settingPath: string): any;
   exposeStaticDir(urlPath: string, dir: string): void;
   registerRoute<
     RouteRequest extends FrameworkWrappableRequest,
@@ -24,6 +22,26 @@ export interface BackendFrameworkAdapter {
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;
 }
+
+export const RuntimeFrameworkInfo = t.type({
+  kibana: t.type({
+    version: t.string,
+  }),
+  license: t.type({
+    type: t.union(['oss', 'trial', 'standard', 'basic', 'gold', 'platinum'].map(s => t.literal(s))),
+    expired: t.boolean,
+    expiry_date_in_millis: t.number,
+  }),
+  security: t.type({
+    enabled: t.boolean,
+    available: t.boolean,
+  }),
+  watcher: t.type({
+    enabled: t.boolean,
+    available: t.boolean,
+  }),
+});
+export interface FrameworkInfo extends t.TypeOf<typeof RuntimeFrameworkInfo> {}
 
 export interface FrameworkAuthenticatedUser<AuthDataType = any> {
   kind: 'authenticated';
@@ -62,13 +80,13 @@ export interface FrameworkRequest<
 }
 
 export interface FrameworkRouteOptions<
-  RouteRequest extends FrameworkWrappableRequest,
-  RouteResponse extends FrameworkResponse
+  RouteRequest extends FrameworkWrappableRequest = any,
+  RouteResponse extends FrameworkResponse = any
 > {
   path: string;
   method: string | string[];
   vhost?: string;
-  licenseRequired?: boolean;
+  licenseRequired?: string[];
   requiredRoles?: string[];
   handler: FrameworkRouteHandler<RouteRequest, RouteResponse>;
   config?: {};

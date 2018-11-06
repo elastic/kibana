@@ -7,6 +7,7 @@
 
 // @ts-ignore
 import { createEsTestCluster } from '@kbn/test';
+import { PLUGIN } from 'x-pack/plugins/beats_management/common/constants';
 import { config as beatsPluginConfig, configPrefix } from '../../../../..';
 // @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
@@ -29,6 +30,6 @@ contractTests('Kibana  Framework Adapter', {
     await kbnServer.shutdown();
   },
   adapterSetup: () => {
-    return new KibanaBackendFrameworkAdapter(legacyServer.server);
+    return new KibanaBackendFrameworkAdapter(PLUGIN.ID, legacyServer.server);
   },
 });

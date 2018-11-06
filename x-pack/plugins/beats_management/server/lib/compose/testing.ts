@@ -10,11 +10,11 @@ import { MemoryTokensAdapter } from '../adapters/tokens/memory_tokens_adapter';
 
 import { HapiBackendFrameworkAdapter } from '../adapters/framework/hapi_framework_adapter';
 
-import { CMBeatsDomain } from '../domains/beats';
-import { CMTagsDomain } from '../domains/tags';
-import { CMTokensDomain } from '../domains/tokens';
+import { CMBeatsDomain } from '../beats';
+import { CMTagsDomain } from '../tags';
+import { CMTokensDomain } from '../tokens';
 
-import { CMDomainLibs, CMServerLibs } from '../lib';
+import { CMServerLibs } from '../types';
 
 export function compose(server: any): CMServerLibs {
   const framework = new HapiBackendFrameworkAdapter(undefined, server);
@@ -29,15 +29,11 @@ export function compose(server: any): CMServerLibs {
     framework,
   });
 
-  const domainLibs: CMDomainLibs = {
+  const libs: CMServerLibs = {
+    framework,
     beats,
     tags,
     tokens,
-  };
-
-  const libs: CMServerLibs = {
-    framework,
-    ...domainLibs,
   };
 
   return libs;

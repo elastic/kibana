@@ -5,7 +5,7 @@
  */
 
 import { CMBeat } from '../../../common/domain_types';
-import { CMServerLibs } from '../../lib/lib';
+import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
 export const createGetBeatRoute = (libs: CMServerLibs) => ({

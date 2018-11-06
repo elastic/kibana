@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CMServerLibs } from '../../lib/lib';
+import { CMServerLibs } from '../../lib/types';
 import { HapiBackendFrameworkAdapter } from './../../lib/adapters/framework/hapi_framework_adapter';
 import { testHarnes } from './test_harnes';
 

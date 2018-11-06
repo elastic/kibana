@@ -45,19 +45,16 @@ export const contractTests = (testName: string, config: ContractConfig) => {
       expect(enrollmentTokensTtlInSeconds).toEqual(600);
     });
     it('Should return current Kibana version', () => {
-      expect(frameworkAdapter.version).not.toEqual(undefined);
+      expect(frameworkAdapter.info!.kibana.version).not.toEqual(undefined);
     });
     it('Should return current license', () => {
-      expect(frameworkAdapter.license).toEqual('trial');
+      expect(frameworkAdapter.info!.license.type).toEqual('trial');
     });
     it('Should return current license status', () => {
-      expect(frameworkAdapter.licenseActive).toEqual(true);
+      expect(frameworkAdapter.info!.license.expired).toEqual(false);
     });
     it('Should return security status', () => {
-      expect(frameworkAdapter.securityEnabled).toEqual(true);
-    });
-    it('Should return security status', () => {
-      expect(frameworkAdapter.securityEnabled).toEqual(true);
+      expect(frameworkAdapter.info!.security.enabled).toEqual(true);
     });
   });
 };

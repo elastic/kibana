@@ -5,15 +5,18 @@
  */
 
 import * as Joi from 'joi';
+import { REQUIRED_LICENSES } from 'x-pack/plugins/beats_management/common/constants';
 import { CMBeat } from '../../../common/domain_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
-import { CMServerLibs } from '../../lib/lib';
+import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
 export const createListAgentsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/agents/{listByAndValue*}',
   requiredRoles: ['beats_admin'],
+  licenseRequired: REQUIRED_LICENSES,
+
   validate: {
     headers: Joi.object({
       'kbn-beats-enrollment-token': Joi.string().required(),
@@ -24,7 +27,6 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
       ESQuery: Joi.string(),
     }),
   },
-  licenseRequired: true,
   handler: async (request: FrameworkRequest) => {
     const listByAndValueParts = request.params.listByAndValue
       ? request.params.listByAndValue.split('/')

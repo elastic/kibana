@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { REQUIRED_LICENSES } from 'x-pack/plugins/beats_management/common/constants';
 import { BeatTag } from '../../../common/domain_types';
-import { CMServerLibs } from '../../lib/lib';
+import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
+import { FrameworkRouteOptions } from './../../lib/adapters/framework/adapter_types';
 
-export const createGetTagsWithIdsRoute = (libs: CMServerLibs) => ({
+export const createGetTagsWithIdsRoute = (libs: CMServerLibs): FrameworkRouteOptions => ({
   method: 'GET',
   path: '/api/beats/tags/{tagIds}',
   requiredRoles: ['beats_admin'],
-  licenseRequired: true,
+  licenseRequired: REQUIRED_LICENSES,
   handler: async (request: any) => {
     const tagIdString: string = request.params.tagIds;
     const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);

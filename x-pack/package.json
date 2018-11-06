@@ -177,6 +177,7 @@
     "humps": "2.0.1",
     "icalendar": "0.7.1",
     "inline-style": "^2.0.0",
+    "io-ts": "^1.4.0",
     "isomorphic-fetch": "2.2.1",
     "joi": "^13.5.2",
     "jquery": "^3.3.1",

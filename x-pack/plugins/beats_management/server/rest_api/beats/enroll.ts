@@ -5,16 +5,16 @@
  */
 import Joi from 'joi';
 import { omit } from 'lodash';
+import { REQUIRED_LICENSES } from 'x-pack/plugins/beats_management/common/constants';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
-import { CMServerLibs } from '../../lib/lib';
-import { BeatEnrollmentStatus } from '../../lib/lib';
+import { BeatEnrollmentStatus, CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
 // TODO: write to Kibana audit log file
 export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/agent/{beatId}',
-  licenseRequired: true,
+  licenseRequired: REQUIRED_LICENSES,
   config: {
     auth: false,
     validate: {
