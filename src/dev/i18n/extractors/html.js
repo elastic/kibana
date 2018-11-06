@@ -19,7 +19,7 @@
 
 import cheerio from 'cheerio';
 import { parse } from '@babel/parser';
-import { isDirectiveLiteral, isObjectExpression } from '@babel/types';
+import { isObjectExpression, isStringLiteral } from '@babel/types';
 
 import {
   isPropertyWithKey,
@@ -42,7 +42,23 @@ import { createFailError } from '../../run';
  */
 const ANGULAR_EXPRESSION_REGEX = /{{([^{}]|({([^']|('([^']|(\\'))*'))*?}))*}}+/g;
 
+const LINEBREAK_REGEX = /\n/g;
 const I18N_FILTER_MARKER = '| i18n: ';
+
+function parseExpression(expression) {
+  let ast;
+
+  try {
+    ast = parse(`+${expression}`.replace(LINEBREAK_REGEX, ' '));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      const errorWithContext = createParserErrorMessage(` ${expression}`, error);
+      throw createFailError(`Couldn't parse angular i18n expression:\n${errorWithContext}`);
+    }
+  }
+
+  return ast;
+}
 
 /**
  * Extract default message from an angular filter expression argument
@@ -51,22 +67,7 @@ const I18N_FILTER_MARKER = '| i18n: ';
  * @returns {{ message?: string, context?: string, valuesKeys: string[]] }}
  */
 function parseFilterObjectExpression(expression, messageId) {
-  let ast;
-
-  try {
-    // parse an object expression instead of block statement
-    ast = parse(`+${expression}`);
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      const errorWithContext = createParserErrorMessage(` ${expression}`, error);
-      throw createFailError(
-        `Couldn't parse angular expression with i18n filter:\n${errorWithContext}`
-      );
-    }
-
-    throw error;
-  }
-
+  const ast = parseExpression(expression);
   const objectExpressionNode = [...traverseNodes(ast.program.body)].find(node =>
     isObjectExpression(node)
   );
@@ -97,30 +98,14 @@ function parseFilterObjectExpression(expression, messageId) {
 }
 
 function parseIdExpression(expression) {
-  let ast;
-
-  try {
-    ast = parse(expression);
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      const errorWithContext = createParserErrorMessage(expression, error);
-      throw createFailError(
-        `Couldn't parse angular expression with i18n filter:\n${errorWithContext}`
-      );
-    }
-
-    throw error;
-  }
-
-  const stringNode = [...traverseNodes(ast.program.directives)].find(node =>
-    isDirectiveLiteral(node)
-  );
+  const ast = parseExpression(expression);
+  const stringNode = [...traverseNodes(ast.program.body)].find(node => isStringLiteral(node));
 
   if (!stringNode) {
     throw createFailError(`Message id should be a string literal, but got: \n${expression}`);
   }
 
-  return formatJSString(stringNode.value);
+  return stringNode ? formatJSString(stringNode.value) : null;
 }
 
 function trimCurlyBraces(string) {
@@ -257,8 +242,10 @@ function* getDirectiveMessages(htmlContent) {
     }
 
     if (element.values) {
-      const nodes = parse(`+${element.values}`).program.body;
-      const valuesObjectNode = [...traverseNodes(nodes)].find(node => isObjectExpression(node));
+      const ast = parseExpression(element.values);
+      const valuesObjectNode = [...traverseNodes(ast.program.body)].find(node =>
+        isObjectExpression(node)
+      );
       const valuesKeys = extractValuesKeysFromNode(valuesObjectNode);
 
       checkValuesProperty(valuesKeys, message, messageId);

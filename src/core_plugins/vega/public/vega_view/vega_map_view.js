@@ -21,6 +21,7 @@ import { KibanaMap } from 'ui/vis/map/kibana_map';
 import * as vega from 'vega-lib';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
+import { i18n }  from '@kbn/i18n';
 
 export class VegaMapView extends VegaBaseView {
 
@@ -37,7 +38,10 @@ export class VegaMapView extends VegaBaseView {
       const mapStyle = mapConfig.mapStyle === 'default' ? 'road_map' : mapConfig.mapStyle;
       baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
       if (!baseMapOpts) {
-        this.onWarn(`mapStyle ${JSON.stringify(mapStyle)} was not found`);
+        this.onWarn(i18n.translate('vega.mapView.mapStyleNotFoundWarningMessage', {
+          defaultMessage: '{mapStyleParam} was not found',
+          values: { mapStyleParam: `"mapStyle": ${JSON.stringify(mapStyle)}` },
+        }));
       } else {
         limitMinZ = baseMapOpts.minZoom;
         limitMaxZ = baseMapOpts.maxZoom;
@@ -48,10 +52,16 @@ export class VegaMapView extends VegaBaseView {
       if (value === undefined) {
         value = dflt;
       } else if (value < min) {
-        this.onWarn(`Resetting ${name} to ${min}`);
+        this.onWarn(i18n.translate('vega.mapView.resettingPropertyToMinValueWarningMessage', {
+          defaultMessage: 'Resetting {name} to {min}',
+          values: { name: `"${name}"`, min },
+        }));
         value = min;
       } else if (value > max) {
-        this.onWarn(`Resetting ${name} to ${max}`);
+        this.onWarn(i18n.translate('vega.mapView.resettingPropertyToMaxValueWarningMessage', {
+          defaultMessage: 'Resetting {name} to {max}',
+          values: { name: `"${name}"`, max },
+        }));
         value = max;
       }
       return value;
@@ -60,7 +70,13 @@ export class VegaMapView extends VegaBaseView {
     let minZoom = validate('minZoom', mapConfig.minZoom, limitMinZ, limitMinZ, limitMaxZ);
     let maxZoom = validate('maxZoom', mapConfig.maxZoom, limitMaxZ, limitMinZ, limitMaxZ);
     if (minZoom > maxZoom) {
-      this.onWarn('minZoom and maxZoom have been swapped');
+      this.onWarn(i18n.translate('vega.mapView.minZoomAndMaxZoomHaveBeenSwappedWarningMessage', {
+        defaultMessage: '{minZoomPropertyName} and {maxZoomPropertyName} have been swapped',
+        values: {
+          minZoomPropertyName: '"minZoom"',
+          maxZoomPropertyName: '"maxZoom"',
+        },
+      }));
       [minZoom, maxZoom] = [maxZoom, minZoom];
     }
     const zoom = validate('zoom', mapConfig.zoom, 2, minZoom, maxZoom);
