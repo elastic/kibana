@@ -16,6 +16,9 @@ import chrome from 'ui/chrome';
 import url from 'url';
 import { StringMap } from '../../typings/common';
 
+// Kibana default set in: https://github.com/elastic/kibana/blob/e13e47fc4eb6112f2a5401408e9f765eae90f55d/x-pack/plugins/apm/public/utils/timepicker/index.js#L31-L35
+const DEFAULT_KIBANA_TIME_RANGE = '(time:(from:now-24h,mode:quick,to:now))';
+
 interface ViewMlJobArgs {
   serviceName: string;
   transactionType: string;
@@ -152,17 +155,6 @@ export function RelativeLinkComponent({
 // The two components have different APIs: `path` vs `pathname` and one uses EuiLink the other react-router's Link (which behaves differently)
 // Suggestion: Deprecate RelativeLink, and clean up KibanaLink
 
-// _g is always retrieved from the url - it can not be changed via query prop
-function getGArg(g: string) {
-  // use "g" if it's set in the url
-  if (g && !isEmpty(rison.decode(g))) {
-    return g;
-  }
-
-  // use default 24h (default set in: https://github.com/elastic/kibana/blob/e13e47fc4eb6112f2a5401408e9f765eae90f55d/x-pack/plugins/apm/public/utils/timepicker/index.js#L31-L35)
-  return '(time:(from:now-24h,mode:quick,to:now))';
-}
-
 export interface KibanaLinkArgs {
   location: {
     search?: string;
@@ -194,7 +186,8 @@ export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   const currentQuery = toQuery(location.search);
   const nextQuery = {
     ...query,
-    _g: getGArg(currentQuery._g),
+    // use "_g" if it's set in the url, otherwise use default
+    _g: currentQuery._g || DEFAULT_KIBANA_TIME_RANGE,
     _a: query._a ? rison.encode(query._a) : ''
   };
 
