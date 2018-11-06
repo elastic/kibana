@@ -7,31 +7,9 @@
 import { get } from 'lodash';
 import { Span } from '../typings/Span';
 import { Transaction } from '../typings/Transaction';
-import {
-  PROCESSOR_EVENT,
-  PROCESSOR_NAME,
-  REQUEST_METHOD,
-  REQUEST_URL_FULL,
-  SERVICE_AGENT_NAME,
-  SERVICE_LANGUAGE_NAME,
-  SERVICE_NAME,
-  SPAN_DURATION,
-  SPAN_HEX_ID,
-  SPAN_ID,
-  SPAN_NAME,
-  SPAN_SQL,
-  SPAN_START,
-  SPAN_TYPE,
-  TRANSACTION_DURATION,
-  TRANSACTION_ID,
-  TRANSACTION_NAME,
-  TRANSACTION_RESULT,
-  TRANSACTION_SAMPLED,
-  TRANSACTION_TYPE,
-  USER_ID
-} from './constants';
+import * as constants from './constants';
 
-describe('Transaction v1', () => {
+describe('Transaction v1:', () => {
   const transaction: Transaction = {
     version: 'v1',
     '@timestamp': new Date().toString(),
@@ -87,64 +65,7 @@ describe('Transaction v1', () => {
     }
   };
 
-  // service
-  it('SERVICE_NAME', () => {
-    expect(get(transaction, SERVICE_NAME)).toBe('service name');
-  });
-
-  it('SERVICE_AGENT_NAME', () => {
-    expect(get(transaction, SERVICE_AGENT_NAME)).toBe('agent name');
-  });
-
-  it('SERVICE_LANGUAGE_NAME', () => {
-    expect(get(transaction, SERVICE_LANGUAGE_NAME)).toBe('nodejs');
-  });
-
-  it('REQUEST_URL_FULL', () => {
-    expect(get(transaction, REQUEST_URL_FULL)).toBe('http://www.elastic.co');
-  });
-
-  it('REQUEST_METHOD', () => {
-    expect(get(transaction, REQUEST_METHOD)).toBe('GET');
-  });
-
-  it('USER_ID', () => {
-    expect(get(transaction, USER_ID)).toBe('1337');
-  });
-
-  // processor
-  it('PROCESSOR_NAME', () => {
-    expect(get(transaction, PROCESSOR_NAME)).toBe('transaction');
-  });
-
-  it('PROCESSOR_EVENT', () => {
-    expect(get(transaction, PROCESSOR_EVENT)).toBe('transaction');
-  });
-
-  // transaction
-  it('TRANSACTION_DURATION', () => {
-    expect(get(transaction, TRANSACTION_DURATION)).toBe(1337);
-  });
-
-  it('TRANSACTION_TYPE', () => {
-    expect(get(transaction, TRANSACTION_TYPE)).toBe('transaction type');
-  });
-
-  it('TRANSACTION_RESULT', () => {
-    expect(get(transaction, TRANSACTION_RESULT)).toBe('transaction result');
-  });
-
-  it('TRANSACTION_NAME', () => {
-    expect(get(transaction, TRANSACTION_NAME)).toBe('transaction name');
-  });
-
-  it('TRANSACTION_ID', () => {
-    expect(get(transaction, TRANSACTION_ID)).toBe('transaction id');
-  });
-
-  it('TRANSACTION_SAMPLED', () => {
-    expect(get(transaction, TRANSACTION_SAMPLED)).toBe(true);
-  });
+  matchSnapshot(transaction);
 });
 
 describe('Transaction v2', () => {
@@ -175,6 +96,9 @@ describe('Transaction v2', () => {
       user: { id: '1337' },
       request: { url: { full: 'http://www.elastic.co' }, method: 'GET' }
     },
+    parent: {
+      id: 'parentId'
+    },
     transaction: {
       duration: { us: 1337 },
       id: 'transaction id',
@@ -185,64 +109,7 @@ describe('Transaction v2', () => {
     }
   };
 
-  // service
-  it('SERVICE_NAME', () => {
-    expect(get(transaction, SERVICE_NAME)).toBe('service name');
-  });
-
-  it('SERVICE_AGENT_NAME', () => {
-    expect(get(transaction, SERVICE_AGENT_NAME)).toBe('agent name');
-  });
-
-  it('SERVICE_LANGUAGE_NAME', () => {
-    expect(get(transaction, SERVICE_LANGUAGE_NAME)).toBe('nodejs');
-  });
-
-  it('REQUEST_URL_FULL', () => {
-    expect(get(transaction, REQUEST_URL_FULL)).toBe('http://www.elastic.co');
-  });
-
-  it('REQUEST_METHOD', () => {
-    expect(get(transaction, REQUEST_METHOD)).toBe('GET');
-  });
-
-  it('USER_ID', () => {
-    expect(get(transaction, USER_ID)).toBe('1337');
-  });
-
-  // processor
-  it('PROCESSOR_NAME', () => {
-    expect(get(transaction, PROCESSOR_NAME)).toBe('transaction');
-  });
-
-  it('PROCESSOR_EVENT', () => {
-    expect(get(transaction, PROCESSOR_EVENT)).toBe('transaction');
-  });
-
-  // transaction
-  it('TRANSACTION_DURATION', () => {
-    expect(get(transaction, TRANSACTION_DURATION)).toBe(1337);
-  });
-
-  it('TRANSACTION_TYPE', () => {
-    expect(get(transaction, TRANSACTION_TYPE)).toBe('transaction type');
-  });
-
-  it('TRANSACTION_RESULT', () => {
-    expect(get(transaction, TRANSACTION_RESULT)).toBe('transaction result');
-  });
-
-  it('TRANSACTION_NAME', () => {
-    expect(get(transaction, TRANSACTION_NAME)).toBe('transaction name');
-  });
-
-  it('TRANSACTION_ID', () => {
-    expect(get(transaction, TRANSACTION_ID)).toBe('transaction id');
-  });
-
-  it('TRANSACTION_SAMPLED', () => {
-    expect(get(transaction, TRANSACTION_SAMPLED)).toBe(true);
-  });
+  matchSnapshot(transaction);
 });
 
 describe('Span v1', () => {
@@ -293,56 +160,7 @@ describe('Span v1', () => {
     }
   };
 
-  // service
-  it('SERVICE_NAME', () => {
-    expect(get(span, SERVICE_NAME)).toBe('service name');
-  });
-
-  it('SERVICE_AGENT_NAME', () => {
-    expect(get(span, SERVICE_AGENT_NAME)).toBe('agent name');
-  });
-
-  it('SERVICE_LANGUAGE_NAME', () => {
-    expect(get(span, SERVICE_LANGUAGE_NAME)).toBe('nodejs');
-  });
-
-  // processor
-  it('PROCESSOR_NAME', () => {
-    expect(get(span, PROCESSOR_NAME)).toBe('transaction');
-  });
-
-  it('PROCESSOR_EVENT', () => {
-    expect(get(span, PROCESSOR_EVENT)).toBe('span');
-  });
-
-  // span
-  it('SPAN_START', () => {
-    expect(get(span, SPAN_START)).toBe(1337);
-  });
-
-  it('SPAN_DURATION', () => {
-    expect(get(span, SPAN_DURATION)).toBe(1337);
-  });
-
-  it('SPAN_TYPE', () => {
-    expect(get(span, SPAN_TYPE)).toBe('span type');
-  });
-
-  it('SPAN_NAME', () => {
-    expect(get(span, SPAN_NAME)).toBe('span name');
-  });
-
-  it('SPAN_ID', () => {
-    expect(get(span, SPAN_ID)).toBe(1337);
-  });
-
-  it('SPAN_SQL', () => {
-    expect(get(span, SPAN_SQL)).toBe('db statement');
-  });
-
-  it('SPAN_HEX_ID', () => {
-    expect(get(span, SPAN_HEX_ID)).toBe(undefined);
-  });
+  matchSnapshot(span);
 });
 
 describe('Span v2', () => {
@@ -383,6 +201,9 @@ describe('Span v2', () => {
         }
       }
     },
+    parent: {
+      id: 'parentId'
+    },
     span: {
       duration: {
         us: 1337
@@ -397,54 +218,14 @@ describe('Span v2', () => {
     }
   };
 
-  // service
-  it('SERVICE_NAME', () => {
-    expect(get(span, SERVICE_NAME)).toBe('service name');
-  });
-
-  it('SERVICE_AGENT_NAME', () => {
-    expect(get(span, SERVICE_AGENT_NAME)).toBe('agent name');
-  });
-
-  it('SERVICE_LANGUAGE_NAME', () => {
-    expect(get(span, SERVICE_LANGUAGE_NAME)).toBe('nodejs');
-  });
-
-  // processor
-  it('PROCESSOR_NAME', () => {
-    expect(get(span, PROCESSOR_NAME)).toBe('transaction');
-  });
-
-  it('PROCESSOR_EVENT', () => {
-    expect(get(span, PROCESSOR_EVENT)).toBe('span');
-  });
-
-  // span
-  it('SPAN_START', () => {
-    expect(get(span, SPAN_START)).toBe(undefined);
-  });
-
-  it('SPAN_DURATION', () => {
-    expect(get(span, SPAN_DURATION)).toBe(1337);
-  });
-
-  it('SPAN_TYPE', () => {
-    expect(get(span, SPAN_TYPE)).toBe('span type');
-  });
-
-  it('SPAN_NAME', () => {
-    expect(get(span, SPAN_NAME)).toBe('span name');
-  });
-
-  it('SPAN_ID', () => {
-    expect(get(span, SPAN_ID)).toBe(1337);
-  });
-
-  it('SPAN_SQL', () => {
-    expect(get(span, SPAN_SQL)).toBe('db statement');
-  });
-
-  it('SPAN_HEX_ID', () => {
-    expect(get(span, SPAN_HEX_ID)).toBe('hex id');
-  });
+  matchSnapshot(span);
 });
+
+function matchSnapshot(obj: Span | Transaction) {
+  Object.entries(constants).forEach(([key, longKey]) => {
+    const value = get(obj, longKey);
+    it(key, () => {
+      expect(value).toMatchSnapshot();
+    });
+  });
+}
