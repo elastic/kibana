@@ -39,7 +39,7 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
           )}
         </BreadcrumbConsumer>
         <Switch>
-          {!libs.framework.hasValidLicense() && <Route render={() => <InvalidLicensePage />} />}
+          {libs.framework.licenseExpired() && <Route render={() => <InvalidLicensePage />} />}
           {!libs.framework.securityEnabled() && <Route render={() => <EnforceSecurityPage />} />}
           {!libs.framework.getCurrentUser() ||
             (!libs.framework.getCurrentUser().roles.includes('beats_admin') &&

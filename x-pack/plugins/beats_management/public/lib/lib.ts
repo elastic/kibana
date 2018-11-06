@@ -55,6 +55,7 @@ export interface FrameworkAdapter {
     scope: string[];
     username: string;
   };
+  licenseExpired(): boolean;
   securityEnabled(): boolean;
   hasValidLicense(): boolean;
   setUISettings(key: string, value: any): void;
