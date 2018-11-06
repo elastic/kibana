@@ -19,12 +19,11 @@
 
 import { readFile } from 'fs';
 import { resolve } from 'path';
-import { bindNodeCallback, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { promisify } from 'util';
 import { PackageInfo } from '../../config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 
-const fsReadFile$ = bindNodeCallback(readFile);
+const fsReadFileAsync = promisify(readFile);
 
 /**
  * Describes the set of required and optional properties plugin can define in its
@@ -89,66 +88,69 @@ const SEM_VER_REGEX = /\d+\.\d+\.\d+/;
  * @param pluginPath Path to the plugin directory where manifest should be loaded from.
  * @param packageInfo Kibana package info.
  */
-export function parseManifest$(pluginPath: string, packageInfo: PackageInfo) {
+export async function parseManifest(pluginPath: string, packageInfo: PackageInfo) {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
-  return fsReadFile$(manifestPath).pipe(
-    catchError(err => throwError(PluginDiscoveryError.missingManifest(manifestPath, err))),
-    map(manifestContent => {
-      let manifest: Partial<PluginManifest>;
-      try {
-        manifest = JSON.parse(manifestContent.toString());
-      } catch (err) {
-        throw PluginDiscoveryError.invalidManifest(manifestPath, err);
-      }
 
-      if (!manifest || typeof manifest !== 'object') {
-        throw PluginDiscoveryError.invalidManifest(
-          manifestPath,
-          new Error('Plugin manifest must contain a JSON encoded object.')
-        );
-      }
+  let manifestContent;
+  try {
+    manifestContent = await fsReadFileAsync(manifestPath);
+  } catch (err) {
+    throw PluginDiscoveryError.missingManifest(manifestPath, err);
+  }
 
-      if (!manifest.id || typeof manifest.id !== 'string') {
-        throw PluginDiscoveryError.invalidManifest(
-          manifestPath,
-          new Error('Plugin manifest must contain an "id" property.')
-        );
-      }
+  let manifest: Partial<PluginManifest>;
+  try {
+    manifest = JSON.parse(manifestContent.toString());
+  } catch (err) {
+    throw PluginDiscoveryError.invalidManifest(manifestPath, err);
+  }
 
-      if (!manifest.version || typeof manifest.version !== 'string') {
-        throw PluginDiscoveryError.invalidManifest(
-          manifestPath,
-          new Error(`Plugin manifest for "${manifest.id}" must contain a "version" property.`)
-        );
-      }
+  if (!manifest || typeof manifest !== 'object') {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error('Plugin manifest must contain a JSON encoded object.')
+    );
+  }
 
-      const expectedKibanaVersion =
-        typeof manifest.kibanaVersion === 'string' && manifest.kibanaVersion
-          ? manifest.kibanaVersion
-          : manifest.version;
-      if (!isVersionCompatible(expectedKibanaVersion, packageInfo.version)) {
-        throw PluginDiscoveryError.incompatibleVersion(
-          manifestPath,
-          new Error(
-            `Plugin "${
-              manifest.id
-            }" is only compatible with Kibana version "${expectedKibanaVersion}", but used Kibana version is "${
-              packageInfo.version
-            }".`
-          )
-        );
-      }
+  if (!manifest.id || typeof manifest.id !== 'string') {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error('Plugin manifest must contain an "id" property.')
+    );
+  }
 
-      return {
-        id: manifest.id,
-        version: manifest.version,
-        kibanaVersion: expectedKibanaVersion,
-        requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
-        optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
-        ui: typeof manifest.ui === 'boolean' ? manifest.ui : false,
-      };
-    })
-  );
+  if (!manifest.version || typeof manifest.version !== 'string') {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(`Plugin manifest for "${manifest.id}" must contain a "version" property.`)
+    );
+  }
+
+  const expectedKibanaVersion =
+    typeof manifest.kibanaVersion === 'string' && manifest.kibanaVersion
+      ? manifest.kibanaVersion
+      : manifest.version;
+  if (!isVersionCompatible(expectedKibanaVersion, packageInfo.version)) {
+    throw PluginDiscoveryError.incompatibleVersion(
+      manifestPath,
+      new Error(
+        `Plugin "${
+          manifest.id
+        }" is only compatible with Kibana version "${expectedKibanaVersion}", but used Kibana version is "${
+          packageInfo.version
+        }".`
+      )
+    );
+  }
+
+  return {
+    id: manifest.id,
+    version: manifest.version,
+    kibanaVersion: expectedKibanaVersion,
+    requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
+    optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
+    ui: typeof manifest.ui === 'boolean' ? manifest.ui : false,
+  };
 }
 
 /**

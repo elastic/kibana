@@ -25,7 +25,7 @@ import { PackageInfo } from '../../config';
 import { Logger } from '../../logging';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
-import { parseManifest$, PluginManifest } from './plugin_manifest_parser';
+import { parseManifest, PluginManifest } from './plugin_manifest_parser';
 
 const fsReadDir$ = bindNodeCallback(readdir);
 const fsStat$ = bindNodeCallback(stat);
@@ -138,7 +138,7 @@ function createPlugin$(
   packageInfo: PackageInfo,
   log: Logger
 ): Observable<DiscoveryResult> {
-  return parseManifest$(path, packageInfo).pipe(
+  return from(parseManifest(path, packageInfo)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       return { plugin: { path, manifest } };
