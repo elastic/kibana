@@ -7,17 +7,16 @@
 import { EsClient } from '@code/esqueue';
 
 import { RepositoryUtils } from '../../common/repository_utils';
-import {
-  REPOSITORY_GIT_STATUS_INDEX_TYPE,
-  REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
-} from '../../mappings';
 import { CloneWorkerProgress, Repository, WorkerProgress } from '../../model';
 import {
+  RepositoryGitStatusReservedField,
   RepositoryIndexName,
-  RepositoryReserviedField,
+  RepositoryLspIndexStatusReservedField,
+  RepositoryReservedField,
+  RepositoryStatusIndexName,
+  RepositoryStatusTypeName,
   RepositoryTypeName,
 } from '../indexer/schema';
-import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { IndexWorker } from '../queue';
 import { ServerOptions } from '../server_options';
@@ -27,7 +26,6 @@ export class IndexScheduler extends AbstractScheduler {
   constructor(
     private readonly indexWorker: IndexWorker,
     private readonly serverOptions: ServerOptions,
-    private readonly objectsClient: SavedObjectsClient,
     protected readonly client: EsClient,
     protected readonly log: Log
   ) {
@@ -47,11 +45,13 @@ export class IndexScheduler extends AbstractScheduler {
         return;
       }
 
-      const cloneStatusRes = await this.objectsClient.get(
-        REPOSITORY_GIT_STATUS_INDEX_TYPE,
-        repo.uri
-      );
-      const cloneStatus: CloneWorkerProgress = cloneStatusRes.attributes;
+      const cloneStatusRes = await this.client.get({
+        index: RepositoryStatusIndexName(repo.uri),
+        type: RepositoryStatusTypeName,
+        id: `${repo.uri}-git-status`,
+      });
+      const cloneStatus: CloneWorkerProgress =
+        cloneStatusRes._source[RepositoryGitStatusReservedField];
       if (
         !RepositoryUtils.hasFullyCloned(cloneStatus.cloneProgress) ||
         cloneStatus.progress !== 100
@@ -60,8 +60,12 @@ export class IndexScheduler extends AbstractScheduler {
         return;
       }
 
-      const res = await this.objectsClient.get(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, repo.uri);
-      const repoIndexStatus: WorkerProgress = res.attributes;
+      const res = await this.client.get({
+        index: RepositoryStatusIndexName(repo.uri),
+        type: RepositoryStatusTypeName,
+        id: `${repo.uri}-lsp-index-status`,
+      });
+      const repoIndexStatus: WorkerProgress = res._source[RepositoryLspIndexStatusReservedField];
 
       // Schedule index job only when the indexed revision is different from the current repository
       // revision.
@@ -87,7 +91,7 @@ export class IndexScheduler extends AbstractScheduler {
           id: repo.uri,
           body: JSON.stringify({
             doc: {
-              [RepositoryReserviedField]: {
+              [RepositoryReservedField]: {
                 nextIndexTimestamp: nextRepoIndexTimestamp,
               },
             },

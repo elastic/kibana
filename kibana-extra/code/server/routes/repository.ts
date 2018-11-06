@@ -9,13 +9,15 @@ import Boom from 'boom';
 import hapi from 'hapi';
 import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
-import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneWorkerProgress, Repository } from '../../model';
 import { RepositoryIndexInitializerFactory } from '../indexer';
 import {
+  RepositoryGitStatusReservedField,
   RepositoryIndexName,
   RepositoryIndexNamePrefix,
   RepositoryReservedField,
+  RepositoryStatusIndexName,
+  RepositoryStatusTypeName,
   RepositoryTypeName,
 } from '../indexer/schema';
 import { Log } from '../log';
@@ -150,11 +152,15 @@ export function repositoryRoute(
     async handler(req) {
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
-      const objectClient = req.getSavedObjectsClient();
+      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
 
       try {
-        const response = await objectClient.get(REPOSITORY_GIT_STATUS_INDEX_TYPE, repoUri);
-        const status: CloneWorkerProgress = response.attributes;
+        const response = await callWithRequest(req, 'get', {
+          index: RepositoryStatusIndexName(repoUri),
+          type: RepositoryStatusTypeName,
+          id: `${repoUri}-git-status`,
+        });
+        const status: CloneWorkerProgress = response._source[RepositoryGitStatusReservedField];
         return status;
       } catch (error) {
         const msg = `Get repository clone status ${repoUri} error: ${error}`;
@@ -208,11 +214,15 @@ export function repositoryRoute(
     async handler(req) {
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
-      const objectClient = req.getSavedObjectsClient();
+      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
 
       try {
-        const response = await objectClient.get(REPOSITORY_GIT_STATUS_INDEX_TYPE, repoUri);
-        const cloneStatus: CloneWorkerProgress = response.attributes;
+        const response = await callWithRequest(req, 'get', {
+          index: RepositoryStatusIndexName(repoUri),
+          type: RepositoryStatusTypeName,
+          id: `${repoUri}-git-status`,
+        });
+        const cloneStatus: CloneWorkerProgress = response._source[RepositoryGitStatusReservedField];
 
         const payload = {
           uri: repoUri,

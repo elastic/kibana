@@ -11,15 +11,20 @@ import path from 'path';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserver';
 
+import { EsClient } from '@code/esqueue';
 import { Full } from '@code/lsp-extension';
 import { DetailSymbolInformation } from '@code/lsp-extension';
 
 import rimraf from 'rimraf';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
-import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneWorkerProgress, LspRequest } from '../../model';
 import { getDefaultBranch, GitOperations } from '../git_operations';
+import {
+  RepositoryGitStatusReservedField,
+  RepositoryStatusIndexName,
+  RepositoryStatusTypeName,
+} from '../indexer/schema';
 import { Logger } from '../log';
 import { LoggerFactory } from '../utils/log_factory';
 
@@ -33,7 +38,7 @@ export class WorkspaceHandler {
   constructor(
     readonly repoPath: string,
     private readonly workspacePath: string,
-    private readonly objectsClient: any,
+    private readonly client: EsClient,
     loggerFactory: LoggerFactory
   ) {
     this.git = new GitOperations(repoPath);
@@ -47,8 +52,13 @@ export class WorkspaceHandler {
    */
   public async openWorkspace(repositoryUri: string, revision: string) {
     try {
-      const res = await this.objectsClient.get(REPOSITORY_GIT_STATUS_INDEX_TYPE, repositoryUri);
-      const gitStatus: CloneWorkerProgress = res.attributes;
+      const res = await this.client.get({
+        index: RepositoryStatusIndexName(repositoryUri),
+        type: RepositoryStatusTypeName,
+        id: `${repositoryUri}-git-status`,
+      });
+      const gitStatus: CloneWorkerProgress = res._source[RepositoryGitStatusReservedField];
+
       if (!RepositoryUtils.hasFullyCloned(gitStatus.cloneProgress) && gitStatus.progress !== 100) {
         throw Boom.internal(`repository has not been fully cloned yet.`);
       }

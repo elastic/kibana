@@ -8,7 +8,6 @@ import { Esqueue } from '@code/esqueue';
 import moment from 'moment';
 import { resolve } from 'path';
 
-import { mappings } from './mappings';
 import { LspIndexerFactory, RepositoryIndexInitializerFactory } from './server/indexer';
 import { Server } from './server/kibana_types';
 import { Log } from './server/log';
@@ -52,8 +51,6 @@ export default (kibana: any) =>
       },
       styleSheetPaths: resolve(__dirname, 'public/styles.scss'),
       hacks: ['plugins/code/hack'],
-
-      mappings,
     },
 
     config(Joi: any) {
@@ -95,16 +92,11 @@ export default (kibana: any) =>
       const documentSearchClient = new DocumentSearchClient(dataCluster.getClient(), log);
       const symbolSearchClient = new SymbolSearchClient(dataCluster.getClient(), log);
 
-      const repository = server.savedObjects.getSavedObjectsRepository(
-        adminCluster.callWithInternalUser
-      );
-      const objectsClient = new server.savedObjects.SavedObjectsClient(repository);
-
       // Initialize indexing factories.
       const lspService = new LspService(
         '127.0.0.1',
         serverOptions,
-        objectsClient,
+        adminCluster.getClient(),
         new ServerLoggerFactory(server)
       );
       const lspIndexerFactory = new LspIndexerFactory(
@@ -131,7 +123,7 @@ export default (kibana: any) =>
       const indexWorker = new IndexWorker(
         queue,
         log,
-        objectsClient,
+        adminCluster.getClient(),
         [lspIndexerFactory],
         cancellationService,
         socketService
@@ -139,7 +131,6 @@ export default (kibana: any) =>
       const cloneWorker = new CloneWorker(
         queue,
         log,
-        objectsClient,
         adminCluster.getClient(),
         indexWorker,
         socketService
@@ -147,31 +138,23 @@ export default (kibana: any) =>
       const deleteWorker = new DeleteWorker(
         queue,
         log,
-        objectsClient,
         adminCluster.getClient(),
         cancellationService,
         lspService,
         socketService
       ).bind();
-      const updateWorker = new UpdateWorker(
-        queue,
-        log,
-        objectsClient,
-        adminCluster.getClient()
-      ).bind();
+      const updateWorker = new UpdateWorker(queue, log, adminCluster.getClient()).bind();
 
       // Initialize schedulers.
       const updateScheduler = new UpdateScheduler(
         updateWorker,
         serverOptions,
-        objectsClient,
         adminCluster.getClient(),
         log
       );
       const indexScheduler = new IndexScheduler(
         indexWorker,
         serverOptions,
-        objectsClient,
         adminCluster.getClient(),
         log
       );
@@ -193,7 +176,7 @@ export default (kibana: any) =>
       documentSearchRoute(server, documentSearchClient);
       symbolSearchRoute(server, symbolSearchClient);
       fileRoute(server, serverOptions);
-      workspaceRoute(server, serverOptions, objectsClient);
+      workspaceRoute(server, serverOptions, adminCluster.getClient());
       monacoRoute(server);
       symbolByQnameRoute(server, symbolSearchClient);
       socketRoute(server, socketService, log);

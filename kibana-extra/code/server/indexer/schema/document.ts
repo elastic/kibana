@@ -38,7 +38,7 @@ export const DocumentSchema = {
     index: false,
     norms: false,
   },
-  // Repository is resided in this document index.
+  // Repository object resides in this document index.
   // There is always a single Repository object in this index.
   repository: {
     properties: {
@@ -57,6 +57,85 @@ export const DocumentSchema = {
       },
       defaultBranch: {
         type: 'keyword',
+      },
+      revision: {
+        type: 'keyword',
+      },
+    },
+  },
+  // A single Repository Git Status object resides in this document index.
+  repository_git_status: {
+    properties: {
+      uri: {
+        type: 'text',
+      },
+      progress: {
+        type: 'integer',
+      },
+      timestamp: {
+        type: 'date',
+      },
+      revision: {
+        type: 'keyword',
+      },
+      cloneProgress: {
+        properties: {
+          isCloned: {
+            type: 'boolean',
+          },
+          receivedObjects: {
+            type: 'integer',
+          },
+          indexedObjects: {
+            type: 'integer',
+          },
+          totalObjects: {
+            type: 'integer',
+          },
+          localObjects: {
+            type: 'integer',
+          },
+          totalDeltas: {
+            type: 'integer',
+          },
+          indexedDeltas: {
+            type: 'integer',
+          },
+          receivedBytes: {
+            type: 'integer',
+          },
+        },
+      },
+    },
+  },
+  // A single Repository Delete Status object resides in this document index.
+  repository_delete_status: {
+    properties: {
+      uri: {
+        type: 'text',
+      },
+      progress: {
+        type: 'integer',
+      },
+      timestamp: {
+        type: 'date',
+      },
+      revision: {
+        type: 'keyword',
+      },
+    },
+  },
+  // A single Repository LSP Index Status object resides in this document index.
+  repository_lsp_index_status: {
+    properties: {
+      uri: {
+        type: 'text',
+      },
+      progress: {
+        type: 'integer',
+      },
+      timestamp: {
+        type: 'date',
       },
       revision: {
         type: 'keyword',

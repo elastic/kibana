@@ -8,12 +8,13 @@
 import fs from 'fs';
 import Git from 'nodegit';
 import rimraf from 'rimraf';
+import sinon from 'sinon';
+import path from 'path';
+
 import { LspService } from "./lsp_service";
 import { ServerOptions } from "../server_options";
 import { ConsoleLoggerFactory } from "../utils/console_logger_factory";
-import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from "../../mappings";
-import sinon from 'sinon';
-import path from 'path';
+import { RepositoryStatusTypeName, RepositoryGitStatusReservedField } from '../indexer/schema';
 
 jest.setTimeout(30000);
 
@@ -60,19 +61,22 @@ const config = {
 
 const serverOptions = new ServerOptions(options, config);
 
-function mockObjectsClient() {
+function mockEsClient(): any {
   const api = {
-    get: function (indexName: string, key: string) {
-      if (indexName === REPOSITORY_GIT_STATUS_INDEX_TYPE) {
+    get: function (params: any) {
+      const { type } = params;
+      if (type === RepositoryStatusTypeName) {
         return {
-          attributes: {
-            cloneProgress: {
-              isCloned: true
+          _source: {
+            [RepositoryGitStatusReservedField]: {
+              cloneProgress: {
+                isCloned: true
+              }
             }
           }
         }
       }
-    }
+    },
   };
   return api;
 }
@@ -110,10 +114,10 @@ function comparePath(pathA: string, pathB: string) {
 
 test('process a hover request', async () => {
 
-  let objectsClient = mockObjectsClient();
+  let esClient = mockEsClient();
   const revision = 'master';
 
-  const lspservice = new LspService('127.0.0.1', serverOptions, objectsClient, new ConsoleLoggerFactory());
+  const lspservice = new LspService('127.0.0.1', serverOptions, esClient, new ConsoleLoggerFactory());
   try {
     const params = {
       textDocument: {
@@ -158,9 +162,9 @@ test('process a hover request', async () => {
 });
 
 test("unload a workspace", async() => {
-  let objectsClient = mockObjectsClient();
+  let esClient = mockEsClient();
   const revision = 'master';
-  const lspservice = new LspService('127.0.0.1', serverOptions, objectsClient, new ConsoleLoggerFactory());
+  const lspservice = new LspService('127.0.0.1', serverOptions, esClient, new ConsoleLoggerFactory());
   try {
     const params = {
       textDocument: {

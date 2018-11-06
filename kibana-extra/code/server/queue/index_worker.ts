@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Esqueue } from '@code/esqueue';
+import { EsClient, Esqueue } from '@code/esqueue';
 import moment = require('moment');
 
-import {
-  REPOSITORY_INDEX_STATUS_INDEX_TYPE,
-  REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE,
-} from '../../mappings';
 import { IndexStats, IndexWorkerResult, RepositoryUri, WorkerProgress } from '../../model';
 import { IndexerFactory, IndexProgress } from '../indexer';
-import { SavedObjectsClient } from '../kibana_types';
+import {
+  RepositoryIndexName,
+  RepositoryLspIndexStatusReservedField,
+  RepositoryStatusIndexName,
+  RepositoryStatusTypeName,
+  RepositoryTypeName,
+} from '../indexer/schema';
 import { Log } from '../log';
 import { SocketService } from '../socket_service';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
@@ -27,7 +29,7 @@ export class IndexWorker extends AbstractWorker {
   constructor(
     protected readonly queue: Esqueue,
     protected readonly log: Log,
-    protected readonly objectsClient: SavedObjectsClient,
+    protected readonly client: EsClient,
     protected readonly indexerFactories: IndexerFactory[],
     private readonly cancellationService: CancellationSerivce,
     private readonly socketService: SocketService
@@ -79,34 +81,31 @@ export class IndexWorker extends AbstractWorker {
       timestamp: new Date(),
       revision,
     };
-    try {
-      await this.objectsClient.create(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, progress, {
-        id: uri,
-      });
-    } catch (error) {
-      // If the object already exists then update the status
-      return await this.objectsClient.update(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, uri, progress);
-    }
-    try {
-      await this.objectsClient.create(REPOSITORY_INDEX_STATUS_INDEX_TYPE, progress, {
-        id: uri,
-      });
-    } catch (error) {
-      // If the object already exists then update the status
-      return await this.objectsClient.update(REPOSITORY_INDEX_STATUS_INDEX_TYPE, uri, progress);
-    }
+    return await this.client.index({
+      index: RepositoryIndexName(uri),
+      type: RepositoryTypeName,
+      id: `${uri}-lsp-index-status`,
+      body: {
+        [RepositoryLspIndexStatusReservedField]: progress,
+      },
+    });
   }
 
   public async onJobCompleted(job: Job, res: WorkerProgress) {
     const { uri } = job.payload;
-    await this.objectsClient.update(REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE, uri, {
-      progress: 100,
-      timestamp: new Date(),
-    });
 
-    await this.objectsClient.update(REPOSITORY_INDEX_STATUS_INDEX_TYPE, uri, {
-      progress: 100,
-      timestamp: new Date(),
+    await this.client.update({
+      index: RepositoryIndexName(uri),
+      type: RepositoryTypeName,
+      id: `${uri}-lsp-index-status`,
+      body: JSON.stringify({
+        doc: {
+          [RepositoryLspIndexStatusReservedField]: {
+            progress: 100,
+            timestamp: new Date(),
+          },
+        },
+      }),
     });
 
     return await super.onJobCompleted(job, res);
@@ -124,13 +123,6 @@ export class IndexWorker extends AbstractWorker {
     total: number
   ) {
     return async (progress: IndexProgress) => {
-      let statusIndex = '';
-      if (progress.type === 'lsp') {
-        statusIndex = REPOSITORY_LSP_INDEX_STATUS_INDEX_TYPE;
-      } else if (progress.type === 'repository') {
-        statusIndex = REPOSITORY_INDEX_STATUS_INDEX_TYPE;
-      }
-
       const p: WorkerProgress = {
         uri: repoUri,
         progress: progress.percentage,
@@ -141,14 +133,15 @@ export class IndexWorker extends AbstractWorker {
       const globalProgress = (index * 100 + progress.percentage) / total;
 
       this.socketService.boardcastIndexProgress(repoUri, globalProgress);
-      try {
-        return await this.objectsClient.create(statusIndex, p, {
-          id: repoUri,
-        });
-      } catch (error) {
-        // If the object already exists then update the status
-        return await this.objectsClient.update(statusIndex, repoUri, p);
-      }
+
+      return await this.client.index({
+        index: RepositoryStatusIndexName(repoUri),
+        type: RepositoryStatusTypeName,
+        id: `${repoUri}-lsp-index-status`,
+        body: {
+          [RepositoryLspIndexStatusReservedField]: p,
+        },
+      });
     };
   }
 }

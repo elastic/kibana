@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EsClient } from '@code/esqueue';
 import Boom from 'boom';
 import hapi from 'hapi';
-import { SavedObjectsClient } from '../kibana_types';
+
 import { Log } from '../log';
 import { WorkspaceCommand } from '../lsp/workspace_command';
 import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
+import { ServerLoggerFactory } from '../utils/server_logger_factory';
 
 export function workspaceRoute(
   server: hapi.Server,
   serverOptions: ServerOptions,
-  objectsClient: SavedObjectsClient
+  client: EsClient
 ) {
   server.route({
     path: '/api/code/workspace',
@@ -38,8 +40,8 @@ export function workspaceRoute(
         const workspaceHandler = new WorkspaceHandler(
           serverOptions.repoPath,
           serverOptions.workspacePath,
-          objectsClient,
-          log
+          client,
+          new ServerLoggerFactory(server)
         );
         try {
           const { workspaceRepo, workspaceRevision } = await workspaceHandler.openWorkspace(

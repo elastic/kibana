@@ -6,14 +6,15 @@
 
 import { EsClient } from '@code/esqueue';
 
-import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneWorkerProgress, Repository } from '../../model';
 import {
+  RepositoryGitStatusReservedField,
   RepositoryIndexName,
-  RepositoryReserviedField,
+  RepositoryReservedField,
+  RepositoryStatusIndexName,
+  RepositoryStatusTypeName,
   RepositoryTypeName,
 } from '../indexer/schema';
-import { SavedObjectsClient } from '../kibana_types';
 import { Log } from '../log';
 import { UpdateWorker } from '../queue';
 import { ServerOptions } from '../server_options';
@@ -23,7 +24,6 @@ export class UpdateScheduler extends AbstractScheduler {
   constructor(
     private readonly updateWorker: UpdateWorker,
     private readonly serverOptions: ServerOptions,
-    private readonly objectsClient: SavedObjectsClient,
     protected readonly client: EsClient,
     protected readonly log: Log
   ) {
@@ -46,8 +46,12 @@ export class UpdateScheduler extends AbstractScheduler {
         return;
       }
 
-      const res = await this.objectsClient.get(REPOSITORY_GIT_STATUS_INDEX_TYPE, repo.uri);
-      const cloneStatus: CloneWorkerProgress = res.attributes;
+      const res = await this.client.get({
+        index: RepositoryStatusIndexName(repo.uri),
+        type: RepositoryStatusTypeName,
+        id: `${repo.uri}-git-status`,
+      });
+      const cloneStatus: CloneWorkerProgress = res._source[RepositoryGitStatusReservedField];
       // Schedule update job only when the repo has been fully cloned already
       if (
         cloneStatus.cloneProgress &&
@@ -67,7 +71,7 @@ export class UpdateScheduler extends AbstractScheduler {
           id: repo.uri,
           body: JSON.stringify({
             doc: {
-              [RepositoryReserviedField]: {
+              [RepositoryReservedField]: {
                 nextUpdateTimestamp: nextRepoUpdateTimestamp,
               },
             },

@@ -3,7 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { EsClient } from '@code/esqueue';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { LanguageServerController } from './controller';
@@ -15,13 +18,13 @@ export class LspService {
   constructor(
     targetHost: string,
     serverOptions: ServerOptions,
-    objectsClient: any,
+    client: EsClient,
     loggerFactory: LoggerFactory
   ) {
     this.workspaceHandler = new WorkspaceHandler(
       serverOptions.repoPath,
       serverOptions.workspacePath,
-      objectsClient,
+      client,
       loggerFactory
     );
     this.controller = new LanguageServerController(serverOptions, targetHost, loggerFactory);

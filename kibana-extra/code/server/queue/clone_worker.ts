@@ -5,12 +5,14 @@
  */
 
 import { EsClient, Esqueue } from '@code/esqueue';
-import moment from 'moment';
 
 import { RepositoryUtils } from '../../common/repository_utils';
-import { REPOSITORY_GIT_STATUS_INDEX_TYPE } from '../../mappings';
 import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../model';
-import { SavedObjectsClient } from '../kibana_types';
+import {
+  RepositoryGitStatusReservedField,
+  RepositoryStatusIndexName,
+  RepositoryStatusTypeName,
+} from '../indexer/schema';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
 import { SocketService } from '../socket_service';
@@ -24,12 +26,11 @@ export class CloneWorker extends AbstractGitWorker {
   constructor(
     protected readonly queue: Esqueue,
     protected readonly log: Log,
-    protected readonly objectsClient: SavedObjectsClient,
     protected readonly client: EsClient,
     private readonly indexWorker: IndexWorker,
     private readonly socketService?: SocketService
   ) {
-    super(queue, log, objectsClient, client);
+    super(queue, log, client);
   }
 
   public async executeJob(job: Job) {
@@ -72,8 +73,13 @@ export class CloneWorker extends AbstractGitWorker {
       progress: 0,
       timestamp: new Date(),
     };
-    return await this.objectsClient.create(REPOSITORY_GIT_STATUS_INDEX_TYPE, progress, {
-      id: repo.uri,
+    return await this.client.index({
+      index: RepositoryStatusIndexName(repo.uri),
+      type: RepositoryStatusTypeName,
+      id: `${repo.uri}-git-status`,
+      body: {
+        [RepositoryGitStatusReservedField]: progress,
+      },
     });
   }
 }
