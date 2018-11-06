@@ -3,9 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import * as React from 'react';
-
 import {
   EuiButton,
   EuiSpacer,
@@ -14,6 +11,8 @@ import {
   // @ts-ignore
   EuiTabs,
 } from '@elastic/eui';
+import * as React from 'react';
+import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl } from '../../link_to';
@@ -46,13 +45,13 @@ const navTabs: NavTab[] = [
   },
 ];
 
-export const Navigation: React.SFC = () => (
+export const Navigation = pure(() => (
   <div>
     <EuiTabs>{renderTabs()}</EuiTabs>
     <AddData />
     <EuiSpacer />
   </div>
-);
+));
 
 const renderTabs = () =>
   navTabs.map((tab: NavTab) => (

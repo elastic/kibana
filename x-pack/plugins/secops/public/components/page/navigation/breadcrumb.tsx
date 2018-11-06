@@ -11,32 +11,27 @@ import {
   EuiHeaderSection,
 } from '@elastic/eui';
 import React from 'react';
+import { pure } from 'recompose';
 import styled from 'styled-components';
 
 interface HeaderBreadcrumbsProps {
   breadcrumbs?: EuiBreadcrumbDefinition[];
 }
 
-export class HeaderBreadcrumbs extends React.PureComponent<HeaderBreadcrumbsProps> {
-  private staticBreadcrumbs = [
-    {
-      href: '#/',
-      text: 'secops',
-    },
-  ];
+const staticBreadcrumbs = [
+  {
+    href: '#/',
+    text: 'secops',
+  },
+];
 
-  public render() {
-    const { breadcrumbs = [] } = this.props;
-
-    return (
-      <HeaderWrapper>
-        <EuiHeaderSection>
-          <EuiHeaderBreadcrumbs breadcrumbs={[...this.staticBreadcrumbs, ...breadcrumbs]} />
-        </EuiHeaderSection>
-      </HeaderWrapper>
-    );
-  }
-}
+export const HeaderBreadcrumbs = pure<HeaderBreadcrumbsProps>(({ breadcrumbs = [] }) => (
+  <HeaderWrapper>
+    <EuiHeaderSection>
+      <EuiHeaderBreadcrumbs breadcrumbs={[...staticBreadcrumbs, ...breadcrumbs]} />
+    </EuiHeaderSection>
+  </HeaderWrapper>
+));
 
 const HeaderWrapper = styled(EuiHeader)`
   height: 29px;

@@ -8,9 +8,9 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 
 export const RedirectToNetworkPage = () => {
-  return <Redirect to={`/network`} />;
+  return <Redirect to={'/network'} />;
 };
 
 export const getNetworkUrl = () => {
-  return `#/link-to/network`;
+  return '#/link-to/network';
 };
