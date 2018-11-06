@@ -106,6 +106,14 @@ Monitoring::
 * Ensures the provided node id is used in a query {pull}23715[#23715]
 * Preserves the state of cross cluster search {pull}24331[#24331]
 
+Security::
+* Fixes an issue with reporting that could potentially send authentication 
+credentials to third parties (CVE-2018-17245).  See 
+https://www.elastic.co/blog/elastic-support-alert-kibana-reporting-vulnerability[this blog post].  {pull}24177[#24177]
+* Fixes an issue with the console API that might allow arbitrary files to be 
+included from the system (CVE-2018-17246). See 
+https://www.elastic.co/community/security[Security issues]. {pull}24398[#24398]
+
 Visualization::
 * Fixes the editor so that updating `aggconfigs` in a visualization 
 and then calling `vis.updateState()` works correctly {pull}22869[#22869]
