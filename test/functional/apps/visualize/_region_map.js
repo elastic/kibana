@@ -82,11 +82,6 @@ export default function ({ getService, getPageObjects }) {
         expect(actualData).to.eql(expectedData);
       });
 
-      it('base layer settings should be selectable', async function () {
-        await PageObjects.visualize.clickOptions();
-        await PageObjects.visualize.selectFieldById('road_map', 'tmsLayers');
-      });
-
       it('should contain a dropdown with the default road_map base layer as an option',
         async () => {
           const roadMapExists = await find.existsByCssSelector('[label="road_map"]');
