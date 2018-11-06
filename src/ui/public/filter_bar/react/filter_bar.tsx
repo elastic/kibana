@@ -18,9 +18,10 @@
  */
 
 import React, { Component } from 'react';
+import { FilterItem } from 'ui/filter_bar/react/filter_item';
 
 export class FilterBar extends Component {
   public render() {
-    return <div>Hello world</div>;
+    return <FilterItem />;
   }
 }
