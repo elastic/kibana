@@ -8,18 +8,12 @@ import { EsClient, Esqueue } from '@code/esqueue';
 import moment from 'moment';
 
 import { RepositoryUri } from '../../model';
-import { WorkerProgress } from '../../model/repository';
-import {
-  DocumentIndexName,
-  ReferenceIndexName,
-  RepositoryDeleteStatusReservedField,
-  RepositoryStatusIndexName,
-  RepositoryStatusTypeName,
-  SymbolIndexName,
-} from '../indexer/schema';
+import { WorkerProgress, WorkerResult } from '../../model/repository';
+import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from '../indexer/schema';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryService } from '../repository_service';
+import { RepositoryObjectClient } from '../search';
 import { SocketService } from '../socket_service';
 import { AbstractWorker } from './abstract_worker';
 import { CancellationSerivce } from './cancellation_service';
@@ -27,6 +21,7 @@ import { Job } from './job';
 
 export class DeleteWorker extends AbstractWorker {
   public id: string = 'delete';
+  private objectClient: RepositoryObjectClient;
 
   constructor(
     protected readonly queue: Esqueue,
@@ -37,6 +32,7 @@ export class DeleteWorker extends AbstractWorker {
     private readonly socketService: SocketService
   ) {
     super(queue, log);
+    this.objectClient = new RepositoryObjectClient(this.client);
   }
 
   public async executeJob(job: Job) {
@@ -76,7 +72,10 @@ export class DeleteWorker extends AbstractWorker {
         deleteWorkspacePromise,
       ]);
 
-      // 5. Delete the document index where the repository document and all status reside,
+      // 5. Notify repo delete end through websocket.
+      this.socketService.boardcastDeleteProgress(uri, 100);
+
+      // 6. Delete the document index where the repository document and all status reside,
       // so that you won't be able to import the same repositories until they are
       // fully removed.
       await this.deletePromiseWrapper(
@@ -84,9 +83,6 @@ export class DeleteWorker extends AbstractWorker {
         'document ES index',
         uri
       );
-
-      // 6. Notify repo delete end through websocket.
-      this.socketService.boardcastDeleteProgress(uri, 100);
 
       return {
         uri,
@@ -110,14 +106,12 @@ export class DeleteWorker extends AbstractWorker {
       progress: 0,
       timestamp: new Date(),
     };
-    return await this.client.index({
-      index: RepositoryStatusIndexName(repoUri),
-      type: RepositoryStatusTypeName,
-      id: `${repoUri}-delete-status`,
-      body: {
-        [RepositoryDeleteStatusReservedField]: progress,
-      },
-    });
+    return await this.objectClient.setRepositoryDeleteStatus(repoUri, progress);
+  }
+
+  public async onJobCompleted(_: Job, res: WorkerResult) {
+    this.log.info(`Delete job ${this.id} completed with result ${JSON.stringify(res)}`);
+    // Don't update the delete progress anymore.
   }
 
   public async updateProgress(uri: string, progress: number) {
@@ -126,16 +120,7 @@ export class DeleteWorker extends AbstractWorker {
       progress,
       timestamp: new Date(),
     };
-    return await this.client.update({
-      index: RepositoryStatusIndexName(uri),
-      type: RepositoryStatusTypeName,
-      id: `${uri}-delete-status`,
-      body: JSON.stringify({
-        doc: {
-          [RepositoryDeleteStatusReservedField]: progress,
-        },
-      }),
-    });
+    return await this.objectClient.updateRepositoryDeleteStatus(uri, p);
   }
 
   protected getTimeoutMs(_: any) {

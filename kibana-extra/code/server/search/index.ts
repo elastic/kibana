@@ -7,3 +7,4 @@
 export * from './document_search_client';
 export * from './repository_search_client';
 export * from './symbol_search_client';
+export * from './repository_object_client';

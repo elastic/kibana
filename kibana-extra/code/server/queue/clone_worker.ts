@@ -8,13 +8,9 @@ import { EsClient, Esqueue } from '@code/esqueue';
 
 import { RepositoryUtils } from '../../common/repository_utils';
 import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../model';
-import {
-  RepositoryGitStatusReservedField,
-  RepositoryStatusIndexName,
-  RepositoryStatusTypeName,
-} from '../indexer/schema';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
+import { RepositoryObjectClient } from '../search';
 import { SocketService } from '../socket_service';
 import { AbstractGitWorker } from './abstract_git_worker';
 import { IndexWorker } from './index_worker';
@@ -73,13 +69,6 @@ export class CloneWorker extends AbstractGitWorker {
       progress: 0,
       timestamp: new Date(),
     };
-    return await this.client.index({
-      index: RepositoryStatusIndexName(repo.uri),
-      type: RepositoryStatusTypeName,
-      id: `${repo.uri}-git-status`,
-      body: {
-        [RepositoryGitStatusReservedField]: progress,
-      },
-    });
+    return await this.objectClient.setRepositoryGitStatus(repo.uri, progress);
   }
 }

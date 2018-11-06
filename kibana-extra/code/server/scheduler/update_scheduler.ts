@@ -6,21 +6,21 @@
 
 import { EsClient } from '@code/esqueue';
 
-import { CloneWorkerProgress, Repository } from '../../model';
+import { Repository } from '../../model';
 import {
-  RepositoryGitStatusReservedField,
   RepositoryIndexName,
   RepositoryReservedField,
-  RepositoryStatusIndexName,
-  RepositoryStatusTypeName,
   RepositoryTypeName,
 } from '../indexer/schema';
 import { Log } from '../log';
 import { UpdateWorker } from '../queue';
+import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 import { AbstractScheduler } from './abstract_scheduler';
 
 export class UpdateScheduler extends AbstractScheduler {
+  private objectClient: RepositoryObjectClient;
+
   constructor(
     private readonly updateWorker: UpdateWorker,
     private readonly serverOptions: ServerOptions,
@@ -28,6 +28,7 @@ export class UpdateScheduler extends AbstractScheduler {
     protected readonly log: Log
   ) {
     super(client, serverOptions.updateFrequencyMs);
+    this.objectClient = new RepositoryObjectClient(this.client);
   }
 
   protected getRepoSchedulingFrequencyMs() {
@@ -46,12 +47,7 @@ export class UpdateScheduler extends AbstractScheduler {
         return;
       }
 
-      const res = await this.client.get({
-        index: RepositoryStatusIndexName(repo.uri),
-        type: RepositoryStatusTypeName,
-        id: `${repo.uri}-git-status`,
-      });
-      const cloneStatus: CloneWorkerProgress = res._source[RepositoryGitStatusReservedField];
+      const cloneStatus = await this.objectClient.getRepositoryGitStatus(repo.uri);
       // Schedule update job only when the repo has been fully cloned already
       if (
         cloneStatus.cloneProgress &&

@@ -28,6 +28,9 @@ import {
   ReferenceIndexName,
   ReferenceSchema,
   ReferenceTypeName,
+  RepositoryDeleteStatusReservedField,
+  RepositoryGitStatusReservedField,
+  RepositoryLspIndexStatusReservedField,
   RepositoryReservedField,
   SymbolAnalysisSettings,
   SymbolIndexName,
@@ -170,10 +173,33 @@ export class LspIndexer extends AbstractIndexer {
         body: {
           query: {
             bool: {
-              must_not: [
+              should: [
                 {
-                  exists: {
-                    field: RepositoryReservedField,
+                  must_not: {
+                    exists: {
+                      field: RepositoryReservedField,
+                    },
+                  },
+                },
+                {
+                  must_not: {
+                    exists: {
+                      field: RepositoryGitStatusReservedField,
+                    },
+                  },
+                },
+                {
+                  must_not: {
+                    exists: {
+                      field: RepositoryLspIndexStatusReservedField,
+                    },
+                  },
+                },
+                {
+                  must_not: {
+                    exists: {
+                      field: RepositoryDeleteStatusReservedField,
+                    },
                   },
                 },
               ],

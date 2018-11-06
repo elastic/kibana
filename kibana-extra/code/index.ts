@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Esqueue } from '@code/esqueue';
+import { EsClient, Esqueue } from '@code/esqueue';
 import moment from 'moment';
 import { resolve } from 'path';
 
@@ -50,7 +50,6 @@ export default (kibana: any) =>
         main: 'plugins/code/app',
       },
       styleSheetPaths: resolve(__dirname, 'public/styles.scss'),
-      hacks: ['plugins/code/hack'],
     },
 
     config(Joi: any) {
@@ -92,72 +91,50 @@ export default (kibana: any) =>
       const documentSearchClient = new DocumentSearchClient(dataCluster.getClient(), log);
       const symbolSearchClient = new SymbolSearchClient(dataCluster.getClient(), log);
 
+      const esClient: EsClient = adminCluster.getClient();
+
       // Initialize indexing factories.
       const lspService = new LspService(
         '127.0.0.1',
         serverOptions,
-        adminCluster.getClient(),
+        esClient,
         new ServerLoggerFactory(server)
       );
-      const lspIndexerFactory = new LspIndexerFactory(
-        lspService,
-        serverOptions,
-        adminCluster.getClient(),
-        log
-      );
+      const lspIndexerFactory = new LspIndexerFactory(lspService, serverOptions, esClient, log);
 
-      const repoIndexInitializerFactory = new RepositoryIndexInitializerFactory(
-        adminCluster.getClient(),
-        log
-      );
+      const repoIndexInitializerFactory = new RepositoryIndexInitializerFactory(esClient, log);
 
       // Initialize queue worker cancellation service.
       const cancellationService = new CancellationSerivce();
 
       // Initialize queue.
       const queue = new Esqueue(queueIndex, {
-        client: adminCluster.getClient(),
+        client: esClient,
         timeout: queueTimeout,
         doctype: 'esqueue',
       });
       const indexWorker = new IndexWorker(
         queue,
         log,
-        adminCluster.getClient(),
+        esClient,
         [lspIndexerFactory],
         cancellationService,
         socketService
       ).bind();
-      const cloneWorker = new CloneWorker(
-        queue,
-        log,
-        adminCluster.getClient(),
-        indexWorker,
-        socketService
-      ).bind();
+      const cloneWorker = new CloneWorker(queue, log, esClient, indexWorker, socketService).bind();
       const deleteWorker = new DeleteWorker(
         queue,
         log,
-        adminCluster.getClient(),
+        esClient,
         cancellationService,
         lspService,
         socketService
       ).bind();
-      const updateWorker = new UpdateWorker(queue, log, adminCluster.getClient()).bind();
+      const updateWorker = new UpdateWorker(queue, log, esClient).bind();
 
       // Initialize schedulers.
-      const updateScheduler = new UpdateScheduler(
-        updateWorker,
-        serverOptions,
-        adminCluster.getClient(),
-        log
-      );
-      const indexScheduler = new IndexScheduler(
-        indexWorker,
-        serverOptions,
-        adminCluster.getClient(),
-        log
-      );
+      const updateScheduler = new UpdateScheduler(updateWorker, serverOptions, esClient, log);
+      const indexScheduler = new IndexScheduler(indexWorker, serverOptions, esClient, log);
       if (!serverOptions.disableScheduler) {
         updateScheduler.start();
         indexScheduler.start();
@@ -176,7 +153,7 @@ export default (kibana: any) =>
       documentSearchRoute(server, documentSearchClient);
       symbolSearchRoute(server, symbolSearchClient);
       fileRoute(server, serverOptions);
-      workspaceRoute(server, serverOptions, adminCluster.getClient());
+      workspaceRoute(server, serverOptions, esClient);
       monacoRoute(server);
       symbolByQnameRoute(server, symbolSearchClient);
       socketRoute(server, socketService, log);

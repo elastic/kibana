@@ -18,14 +18,10 @@ import { DetailSymbolInformation } from '@code/lsp-extension';
 import rimraf from 'rimraf';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { parseLspUrl } from '../../common/uri_util';
-import { CloneWorkerProgress, LspRequest } from '../../model';
+import { LspRequest } from '../../model';
 import { getDefaultBranch, GitOperations } from '../git_operations';
-import {
-  RepositoryGitStatusReservedField,
-  RepositoryStatusIndexName,
-  RepositoryStatusTypeName,
-} from '../indexer/schema';
 import { Logger } from '../log';
+import { RepositoryObjectClient } from '../search';
 import { LoggerFactory } from '../utils/log_factory';
 
 export const MAX_RESULT_COUNT = 20;
@@ -34,6 +30,7 @@ export class WorkspaceHandler {
   private git: GitOperations;
   private revisionMap: { [uri: string]: string } = {};
   private log: Logger;
+  private objectClient: RepositoryObjectClient;
 
   constructor(
     readonly repoPath: string,
@@ -43,6 +40,7 @@ export class WorkspaceHandler {
   ) {
     this.git = new GitOperations(repoPath);
     this.log = loggerFactory.getLogger(['LSP', 'workspace']);
+    this.objectClient = new RepositoryObjectClient(this.client);
   }
 
   /**
@@ -52,12 +50,7 @@ export class WorkspaceHandler {
    */
   public async openWorkspace(repositoryUri: string, revision: string) {
     try {
-      const res = await this.client.get({
-        index: RepositoryStatusIndexName(repositoryUri),
-        type: RepositoryStatusTypeName,
-        id: `${repositoryUri}-git-status`,
-      });
-      const gitStatus: CloneWorkerProgress = res._source[RepositoryGitStatusReservedField];
+      const gitStatus = await this.objectClient.getRepositoryGitStatus(repositoryUri);
 
       if (!RepositoryUtils.hasFullyCloned(gitStatus.cloneProgress) && gitStatus.progress !== 100) {
         throw Boom.internal(`repository has not been fully cloned yet.`);

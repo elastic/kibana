@@ -9,19 +9,16 @@ import Boom from 'boom';
 import hapi from 'hapi';
 import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
-import { CloneWorkerProgress, Repository } from '../../model';
+import { Repository } from '../../model';
 import { RepositoryIndexInitializerFactory } from '../indexer';
 import {
-  RepositoryGitStatusReservedField,
-  RepositoryIndexName,
   RepositoryIndexNamePrefix,
   RepositoryReservedField,
-  RepositoryStatusIndexName,
-  RepositoryStatusTypeName,
   RepositoryTypeName,
 } from '../indexer/schema';
 import { Log } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
+import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 
 export function repositoryRoute(
@@ -46,15 +43,13 @@ export function repositoryRoute(
       }
 
       const repo = RepositoryUtils.buildRepository(repoUrl);
-      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+      const objectClient = new RepositoryObjectClient(
+        req.server.plugins.elasticsearch.getCluster('data').getClient()
+      );
 
       try {
         // Check if the repository already exists
-        await callWithRequest(req, 'get', {
-          index: RepositoryIndexName(repo.uri),
-          type: RepositoryTypeName,
-          id: repo.uri,
-        });
+        await objectClient.getRepository(repo.uri);
         const msg = `Repository ${repoUrl} already exists. Skip clone.`;
         log.info(msg);
         return h.response(msg).code(304); // Not Modified
@@ -65,16 +60,9 @@ export function repositoryRoute(
           await repoIndexInitializerFactory.create(repo.uri, '').init();
 
           // Persist to elasticsearch
-          await callWithRequest(req, 'create', {
-            index: RepositoryIndexName(repo.uri),
-            type: RepositoryTypeName,
-            id: repo.uri,
-            body: JSON.stringify({
-              [RepositoryReservedField]: repo,
-            }),
-          });
+          await objectClient.setRepository(repo.uri, repo);
 
-          // // Kick off clone job
+          // Kick off clone job
           const payload = {
             url: repoUrl,
             dataPath: options.repoPath,
@@ -97,15 +85,13 @@ export function repositoryRoute(
     async handler(req) {
       const repoUri: string = req.params.uri as string;
       const log = new Log(req.server);
-      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+      const objectClient = new RepositoryObjectClient(
+        req.server.plugins.elasticsearch.getCluster('data').getClient()
+      );
       try {
         // Delete the repository from ES.
         // If object does not exist in ES, an error will be thrown.
-        await callWithRequest(req, 'delete', {
-          index: RepositoryIndexName(repoUri),
-          type: RepositoryTypeName,
-          id: repoUri,
-        });
+        await objectClient.deleteRepository(repoUri);
 
         const payload = {
           uri: repoUri,
@@ -129,15 +115,11 @@ export function repositoryRoute(
     async handler(req) {
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
-      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
       try {
-        const response = await callWithRequest(req, 'get', {
-          index: RepositoryIndexName(repoUri),
-          type: RepositoryTypeName,
-          id: repoUri,
-        });
-        const repo: Repository = response._source[RepositoryReservedField];
-        return repo;
+        const objectClient = new RepositoryObjectClient(
+          req.server.plugins.elasticsearch.getCluster('data').getClient()
+        );
+        return await objectClient.getRepository(repoUri);
       } catch (error) {
         const msg = `Get repository ${repoUri} error: ${error}`;
         log.error(msg);
@@ -152,16 +134,11 @@ export function repositoryRoute(
     async handler(req) {
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
-      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-
       try {
-        const response = await callWithRequest(req, 'get', {
-          index: RepositoryStatusIndexName(repoUri),
-          type: RepositoryStatusTypeName,
-          id: `${repoUri}-git-status`,
-        });
-        const status: CloneWorkerProgress = response._source[RepositoryGitStatusReservedField];
-        return status;
+        const objectClient = new RepositoryObjectClient(
+          req.server.plugins.elasticsearch.getCluster('data').getClient()
+        );
+        return await objectClient.getRepositoryGitStatus(repoUri);
       } catch (error) {
         const msg = `Get repository clone status ${repoUri} error: ${error}`;
         log.error(msg);
@@ -214,15 +191,11 @@ export function repositoryRoute(
     async handler(req) {
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
-      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-
       try {
-        const response = await callWithRequest(req, 'get', {
-          index: RepositoryStatusIndexName(repoUri),
-          type: RepositoryStatusTypeName,
-          id: `${repoUri}-git-status`,
-        });
-        const cloneStatus: CloneWorkerProgress = response._source[RepositoryGitStatusReservedField];
+        const objectClient = new RepositoryObjectClient(
+          req.server.plugins.elasticsearch.getCluster('data').getClient()
+        );
+        const cloneStatus = await objectClient.getRepositoryGitStatus(repoUri);
 
         const payload = {
           uri: repoUri,

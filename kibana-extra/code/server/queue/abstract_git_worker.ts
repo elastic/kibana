@@ -9,20 +9,14 @@ import { EsClient, Esqueue } from '@code/esqueue';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../model';
 import { getDefaultBranch, getHeadRevision } from '../git_operations';
-import {
-  RepositoryGitStatusReservedField,
-  RepositoryIndexName,
-  RepositoryReservedField,
-  RepositoryStatusIndexName,
-  RepositoryStatusTypeName,
-  RepositoryTypeName,
-} from '../indexer/schema';
 import { Log } from '../log';
+import { RepositoryObjectClient } from '../search';
 import { AbstractWorker } from './abstract_worker';
 import { Job } from './job';
 
 export abstract class AbstractGitWorker extends AbstractWorker {
   public id: string = 'abstract-git';
+  protected objectClient: RepositoryObjectClient;
 
   constructor(
     protected readonly queue: Esqueue,
@@ -30,6 +24,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     protected readonly client: EsClient
   ) {
     super(queue, log);
+    this.objectClient = new RepositoryObjectClient(client);
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
@@ -41,37 +36,19 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     const defaultBranch = await getDefaultBranch(localPath);
 
     // Update the repository data.
-    this.client.update({
-      index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
-      id: repoUri,
-      body: JSON.stringify({
-        doc: {
-          [RepositoryReservedField]: {
-            defaultBranch,
-            revision,
-          },
-        },
-      }),
+    await this.objectClient.updateRepository(repoUri, {
+      defaultBranch,
+      revision,
     });
 
     // Update the git operation status.
     try {
-      return await this.client.update({
-        index: RepositoryStatusIndexName(repoUri),
-        type: RepositoryStatusTypeName,
-        id: `${repoUri}-git-status`,
-        body: JSON.stringify({
-          doc: {
-            [RepositoryGitStatusReservedField]: {
-              revision,
-              progress: 100,
-              cloneProgress: {
-                isCloned: true,
-              },
-            },
-          },
-        }),
+      return await this.objectClient.updateRepositoryGitStatus(repoUri, {
+        revision,
+        progress: 100,
+        cloneProgress: {
+          isCloned: true,
+        },
       });
     } catch (error) {
       this.log.debug(`Update revision of repo clone progress error: ${error}`);
@@ -88,16 +65,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
       cloneProgress,
     };
     try {
-      return await this.client.update({
-        index: RepositoryStatusIndexName(p.uri),
-        type: RepositoryStatusTypeName,
-        id: `${p.uri}-git-status`,
-        body: JSON.stringify({
-          doc: {
-            [RepositoryGitStatusReservedField]: p,
-          },
-        }),
-      });
+      return await this.objectClient.updateRepositoryGitStatus(p.uri, p);
     } catch (error) {
       this.log.debug(`Update git clone progress error: ${error}`);
     }

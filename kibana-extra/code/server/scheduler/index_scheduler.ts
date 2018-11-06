@@ -7,22 +7,16 @@
 import { EsClient } from '@code/esqueue';
 
 import { RepositoryUtils } from '../../common/repository_utils';
-import { CloneWorkerProgress, Repository, WorkerProgress } from '../../model';
-import {
-  RepositoryGitStatusReservedField,
-  RepositoryIndexName,
-  RepositoryLspIndexStatusReservedField,
-  RepositoryReservedField,
-  RepositoryStatusIndexName,
-  RepositoryStatusTypeName,
-  RepositoryTypeName,
-} from '../indexer/schema';
+import { Repository } from '../../model';
 import { Log } from '../log';
 import { IndexWorker } from '../queue';
+import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 import { AbstractScheduler } from './abstract_scheduler';
 
 export class IndexScheduler extends AbstractScheduler {
+  private objectClient: RepositoryObjectClient;
+
   constructor(
     private readonly indexWorker: IndexWorker,
     private readonly serverOptions: ServerOptions,
@@ -30,6 +24,7 @@ export class IndexScheduler extends AbstractScheduler {
     protected readonly log: Log
   ) {
     super(client, serverOptions.indexFrequencyMs);
+    this.objectClient = new RepositoryObjectClient(this.client);
   }
 
   protected getRepoSchedulingFrequencyMs() {
@@ -44,14 +39,7 @@ export class IndexScheduler extends AbstractScheduler {
         this.log.debug(`Repo ${repo.uri} is too soon to execute the next index job.`);
         return;
       }
-
-      const cloneStatusRes = await this.client.get({
-        index: RepositoryStatusIndexName(repo.uri),
-        type: RepositoryStatusTypeName,
-        id: `${repo.uri}-git-status`,
-      });
-      const cloneStatus: CloneWorkerProgress =
-        cloneStatusRes._source[RepositoryGitStatusReservedField];
+      const cloneStatus = await this.objectClient.getRepositoryGitStatus(repo.uri);
       if (
         !RepositoryUtils.hasFullyCloned(cloneStatus.cloneProgress) ||
         cloneStatus.progress !== 100
@@ -60,12 +48,7 @@ export class IndexScheduler extends AbstractScheduler {
         return;
       }
 
-      const res = await this.client.get({
-        index: RepositoryStatusIndexName(repo.uri),
-        type: RepositoryStatusTypeName,
-        id: `${repo.uri}-lsp-index-status`,
-      });
-      const repoIndexStatus: WorkerProgress = res._source[RepositoryLspIndexStatusReservedField];
+      const repoIndexStatus = await this.objectClient.getRepositoryLspIndexStatus(repo.uri);
 
       // Schedule index job only when the indexed revision is different from the current repository
       // revision.
@@ -85,17 +68,8 @@ export class IndexScheduler extends AbstractScheduler {
 
         // Update the next repo index timestamp.
         const nextRepoIndexTimestamp = this.repoNextSchedulingTime();
-        this.client.update({
-          index: RepositoryIndexName(repo.uri),
-          type: RepositoryTypeName,
-          id: repo.uri,
-          body: JSON.stringify({
-            doc: {
-              [RepositoryReservedField]: {
-                nextIndexTimestamp: nextRepoIndexTimestamp,
-              },
-            },
-          }),
+        await this.objectClient.updateRepository(repo.uri, {
+          nextIndexTimestamp: nextRepoIndexTimestamp,
         });
 
         await this.indexWorker.enqueueJob(payload, {});

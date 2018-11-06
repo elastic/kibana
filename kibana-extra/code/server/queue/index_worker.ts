@@ -9,14 +9,8 @@ import moment = require('moment');
 
 import { IndexStats, IndexWorkerResult, RepositoryUri, WorkerProgress } from '../../model';
 import { IndexerFactory, IndexProgress } from '../indexer';
-import {
-  RepositoryIndexName,
-  RepositoryLspIndexStatusReservedField,
-  RepositoryStatusIndexName,
-  RepositoryStatusTypeName,
-  RepositoryTypeName,
-} from '../indexer/schema';
 import { Log } from '../log';
+import { RepositoryObjectClient } from '../search';
 import { SocketService } from '../socket_service';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
 import { AbstractWorker } from './abstract_worker';
@@ -25,6 +19,7 @@ import { Job } from './job';
 
 export class IndexWorker extends AbstractWorker {
   public id: string = 'index';
+  private objectClient: RepositoryObjectClient;
 
   constructor(
     protected readonly queue: Esqueue,
@@ -35,6 +30,8 @@ export class IndexWorker extends AbstractWorker {
     private readonly socketService: SocketService
   ) {
     super(queue, log);
+
+    this.objectClient = new RepositoryObjectClient(this.client);
   }
 
   public async executeJob(job: Job) {
@@ -81,33 +78,15 @@ export class IndexWorker extends AbstractWorker {
       timestamp: new Date(),
       revision,
     };
-    return await this.client.index({
-      index: RepositoryIndexName(uri),
-      type: RepositoryTypeName,
-      id: `${uri}-lsp-index-status`,
-      body: {
-        [RepositoryLspIndexStatusReservedField]: progress,
-      },
-    });
+    return await this.objectClient.setRepositoryLspIndexStatus(uri, progress);
   }
 
   public async onJobCompleted(job: Job, res: WorkerProgress) {
     const { uri } = job.payload;
-
-    await this.client.update({
-      index: RepositoryIndexName(uri),
-      type: RepositoryTypeName,
-      id: `${uri}-lsp-index-status`,
-      body: JSON.stringify({
-        doc: {
-          [RepositoryLspIndexStatusReservedField]: {
-            progress: 100,
-            timestamp: new Date(),
-          },
-        },
-      }),
+    await this.objectClient.updateRepositoryLspIndexStatus(uri, {
+      progress: 100,
+      timestamp: new Date(),
     });
-
     return await super.onJobCompleted(job, res);
   }
 
@@ -134,14 +113,7 @@ export class IndexWorker extends AbstractWorker {
 
       this.socketService.boardcastIndexProgress(repoUri, globalProgress);
 
-      return await this.client.index({
-        index: RepositoryStatusIndexName(repoUri),
-        type: RepositoryStatusTypeName,
-        id: `${repoUri}-lsp-index-status`,
-        body: {
-          [RepositoryLspIndexStatusReservedField]: p,
-        },
-      });
+      return await this.objectClient.setRepositoryLspIndexStatus(repoUri, p);
     };
   }
 }

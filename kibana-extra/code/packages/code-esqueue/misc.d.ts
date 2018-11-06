@@ -22,6 +22,7 @@ export interface EsClient {
   get(params: AnyObject): Promise<any>;
   update(params: AnyObject): Promise<any>;
   search(params: AnyObject): Promise<any>;
+  delete(params: AnyObject): Promise<any>;
   deleteByQuery(params: AnyObject): Promise<any>;
 }
 
