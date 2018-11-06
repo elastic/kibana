@@ -9,6 +9,7 @@ import {
   EuiDatePickerRange,
   // @ts-ignore
   EuiHeaderLogo,
+  EuiHorizontalRule,
   EuiPanel,
   // @ts-ignore
   EuiSearchBar,
@@ -109,11 +110,23 @@ export const HomePage = pure(() => (
         data-test-subj="subHeader"
         style={{
           display: 'flex',
-          justifyContent: 'flex-end',
+          flexDirection: 'column',
+          width: '100%',
         }}
       >
-        <DatePicker />
+        <div
+          data-test-subj="datePickerContainer"
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            margin: '5px 0 5px 0',
+          }}
+        >
+          <DatePicker />
+        </div>
+        <EuiHorizontalRule margin="none" />
       </div>
+
       <SplitPane
         split="vertical"
         defaultSize="75%"
