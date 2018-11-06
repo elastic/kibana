@@ -28,6 +28,11 @@ interface ContextMenuActionOptions {
   onClick?: (actionAPI: PanelActionAPI) => void;
 
   /**
+   * An optional href to use as navigation when the action is clicked on.
+   */
+  getHref?: (actionAPI: PanelActionAPI) => string | undefined;
+
+  /**
    * An optional child context menu to display when the action is clicked.
    */
   childContextMenuPanel?: ContextMenuPanel;
@@ -95,6 +100,16 @@ export class ContextMenuAction {
   public readonly parentPanelId: string;
 
   /**
+   * @param {PanelActionAPI} panelActionAPI
+   */
+  public readonly onClick?: (panelActionAPI: PanelActionAPI) => void;
+
+  /**
+   * @param {PanelActionAPI} panelActionAPI
+   */
+  public readonly getHref?: (panelActionAPI: PanelActionAPI) => string | undefined;
+
+  /**
    *
    * @param {string} config.id
    * @param {string} config.displayName
@@ -103,6 +118,7 @@ export class ContextMenuAction {
    * @param {ContextMenuPanel} options.childContextMenuPanel - optional child panel to open when clicked.
    * @param {function} options.isDisabled - optionally set a custom disabled function
    * @param {function} options.isVisible - optionally set a custom isVisible function
+   * @param {string} options.href
    * @param {Element} options.icon
    */
   public constructor(config: ContextMenuActionsConfig, options: ContextMenuActionOptions = {}) {
@@ -124,13 +140,10 @@ export class ContextMenuAction {
     if (options.isVisible) {
       this.isVisible = options.isVisible;
     }
-  }
 
-  /**
-   * @param {PanelActionAPI} panelActionAPI
-   */
-  public onClick(panelActionAPI: PanelActionAPI): void {
-    return;
+    if (options.getHref) {
+      this.getHref = options.getHref;
+    }
   }
 
   /**

@@ -140,12 +140,22 @@ function convertPanelActionToContextMenuItem({
   containerState: ContainerState;
   embeddable?: Embeddable;
 }): EuiContextMenuPanelItemDescriptor {
-  return {
+  const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
     name: action.displayName,
     icon: action.icon,
     panel: _.get(action, 'childContextMenuPanel.id'),
-    onClick: () => action.onClick({ embeddable, containerState }),
     disabled: action.isDisabled({ embeddable, containerState }),
     'data-test-subj': `dashboardPanelAction-${action.id}`,
+    onClick: () => {
+      if (action.onClick) {
+        action.onClick({ embeddable, containerState });
+      }
+    },
   };
+
+  if (action.getHref) {
+    menuPanelItem.href = action.getHref({ embeddable, containerState });
+  }
+
+  return menuPanelItem;
 }
