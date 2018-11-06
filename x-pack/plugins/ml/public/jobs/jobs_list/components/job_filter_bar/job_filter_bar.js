@@ -53,11 +53,9 @@ export class JobFilterBar extends Component {
     if (error) {
       this.setState({ error });
     } else {
-      let clauses;
+      let clauses = [];
       if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
         clauses = query.ast.clauses;
-      } else {
-        clauses = [];
       }
       this.setFilters(clauses);
       this.setState({ error: null });
