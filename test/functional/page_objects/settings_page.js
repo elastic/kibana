@@ -18,6 +18,8 @@
  */
 
 import { map as mapAsync } from 'bluebird';
+import expect from 'expect.js';
+
 export function SettingsPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
@@ -273,7 +275,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await this.navigateTo();
         await this.clickKibanaIndices();
         await this.clickOptionalAddNewButton();
-        await this.setIndexPatternField(indexPatternName);
+        await retry.try(async () => {
+          await this.setIndexPatternField(indexPatternName);
+        });
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
         await PageObjects.common.sleep(2000);
@@ -323,6 +327,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       const field = await this.getIndexPatternField();
       await field.clearValue();
       await field.type(indexPatternName);
+      const currentName = await field.getAttribute('value');
+      log.debug(`setIndexPatternField set to ${currentName}`);
+      expect(currentName).to.eql(`${indexPatternName}*`);
     }
 
     async getCreateIndexPatternGoToStep2Button() {

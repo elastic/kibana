@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
-
 import { Header } from './components/layouts/header';
 import { BreadcrumbConsumer, RouteWithBreadcrumb } from './components/route_with_breadcrumb';
 import { FrontendLibs } from './lib/lib';
