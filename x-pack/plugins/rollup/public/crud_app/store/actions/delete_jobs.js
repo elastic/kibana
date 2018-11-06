@@ -42,7 +42,7 @@ export const deleteJobs = (jobIds) => async (dispatch, getState) => {
 
   if (jobIds.length === 1) {
     toastNotifications.addSuccess(i18n.translate('xpack.rollupJobs.deleteAction.successSingleNotificationTitle', {
-      defaultMessage: `Rollup job '{jobId}' was deleted`,
+      defaultMessage: 'Rollup job {jobId} was deleted',
       values: { jobId: jobIds[0] },
     }));
   } else {
