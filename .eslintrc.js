@@ -349,17 +349,6 @@ module.exports = {
      * Canvas overrides
      */
     {
-      files: ['x-pack/plugins/canvas/*', 'x-pack/plugins/canvas/**/*'],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: resolve(__dirname, 'x-pack'),
-          },
-        ],
-      },
-    },
-    {
       files: ['x-pack/plugins/canvas/**/*'],
       plugins: ['prettier'],
       rules: {
