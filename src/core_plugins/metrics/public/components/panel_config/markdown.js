@@ -204,7 +204,7 @@ class MarkdownPanelConfig extends Component {
     }
     return (
       <div>
-        <EuiTabs>
+        <EuiTabs size="s">
           <EuiTab
             isSelected={selectedTab === 'markdown'}
             onClick={() => this.switchTab('markdown')}

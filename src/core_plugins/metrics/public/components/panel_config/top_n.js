@@ -174,7 +174,7 @@ class TopNPanelConfig extends Component {
     }
     return (
       <div>
-        <EuiTabs>
+        <EuiTabs size="s">
           <EuiTab
             isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
