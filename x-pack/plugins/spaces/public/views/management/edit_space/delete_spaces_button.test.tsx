@@ -40,6 +40,7 @@ describe('DeleteSpacesButton', () => {
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
         onDelete={jest.fn()}
+        intl={null as any}
       />
     );
     expect(wrapper).toMatchSnapshot();

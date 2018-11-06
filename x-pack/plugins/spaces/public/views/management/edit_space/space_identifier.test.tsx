@@ -19,6 +19,8 @@ test('renders without crashing', () => {
     onChange: jest.fn(),
     validator: new SpaceValidator(),
   };
-  const wrapper = shallowWithIntl(<SpaceIdentifier.WrappedComponent {...props} />);
+  const wrapper = shallowWithIntl(
+    <SpaceIdentifier.WrappedComponent {...props} intl={null as any} />
+  );
   expect(wrapper).toMatchSnapshot();
 });

@@ -16,21 +16,21 @@ const space = {
 
 test('renders without crashing', () => {
   const wrapper = shallowWithIntl(
-    <CustomizeSpaceAvatar.WrappedComponent space={space} onChange={jest.fn()} />
+    <CustomizeSpaceAvatar.WrappedComponent space={space} onChange={jest.fn()} intl={null as any} />
   );
   expect(wrapper).toMatchSnapshot();
 });
 
 test('renders a "customize" link by default', () => {
   const wrapper = mountWithIntl(
-    <CustomizeSpaceAvatar.WrappedComponent space={space} onChange={jest.fn()} />
+    <CustomizeSpaceAvatar.WrappedComponent space={space} onChange={jest.fn()} intl={null as any} />
   );
   expect(wrapper.find(EuiLink)).toHaveLength(1);
 });
 
 test('shows customization fields when the "customize" link is clicked', () => {
   const wrapper = mountWithIntl(
-    <CustomizeSpaceAvatar.WrappedComponent space={space} onChange={jest.fn()} />
+    <CustomizeSpaceAvatar.WrappedComponent space={space} onChange={jest.fn()} intl={null as any} />
   );
   wrapper.find(EuiLink).simulate('click');
 
@@ -50,7 +50,11 @@ test('invokes onChange callback when avatar is customized', () => {
   const changeHandler = jest.fn();
 
   const wrapper = mountWithIntl(
-    <CustomizeSpaceAvatar.WrappedComponent space={customizedSpace} onChange={changeHandler} />
+    <CustomizeSpaceAvatar.WrappedComponent
+      space={customizedSpace}
+      onChange={changeHandler}
+      intl={null as any}
+    />
   );
   wrapper.find(EuiLink).simulate('click');
 

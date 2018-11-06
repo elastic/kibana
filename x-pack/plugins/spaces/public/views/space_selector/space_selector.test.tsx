@@ -32,7 +32,11 @@ function getSpacesManager(spaces: Space[] = []) {
 test('it renders without crashing', () => {
   const spacesManager = getSpacesManager();
   const component = shallowWithIntl(
-    <SpaceSelector.WrappedComponent spaces={[]} spacesManager={spacesManager as any} />
+    <SpaceSelector.WrappedComponent
+      spaces={[]}
+      spacesManager={spacesManager as any}
+      intl={null as any}
+    />
   );
   expect(component).toMatchSnapshot();
 });
@@ -49,7 +53,11 @@ test('it uses the spaces on props, when provided', () => {
   ];
 
   const component = renderWithIntl(
-    <SpaceSelector.WrappedComponent spaces={spaces} spacesManager={spacesManager as any} />
+    <SpaceSelector.WrappedComponent
+      spaces={spaces}
+      spacesManager={spacesManager as any}
+      intl={null as any}
+    />
   );
 
   return Promise.resolve().then(() => {
@@ -69,7 +77,9 @@ test('it queries for spaces when not provided on props', () => {
 
   const spacesManager = getSpacesManager(spaces);
 
-  shallowWithIntl(<SpaceSelector.WrappedComponent spacesManager={spacesManager as any} />);
+  shallowWithIntl(
+    <SpaceSelector.WrappedComponent spacesManager={spacesManager as any} intl={null as any} />
+  );
 
   return Promise.resolve().then(() => {
     expect(spacesManager.getSpaces).toHaveBeenCalledTimes(1);

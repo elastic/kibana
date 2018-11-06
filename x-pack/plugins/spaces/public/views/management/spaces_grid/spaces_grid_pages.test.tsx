@@ -59,6 +59,7 @@ describe('SpacesGridPage', () => {
           spacesManager={spacesManager}
           spacesNavState={spacesNavState}
           userProfile={buildUserProfile(true)}
+          intl={null as any}
         />
       )
     ).toMatchSnapshot();
@@ -70,6 +71,7 @@ describe('SpacesGridPage', () => {
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
         userProfile={buildUserProfile(true)}
+        intl={null as any}
       />
     );
 

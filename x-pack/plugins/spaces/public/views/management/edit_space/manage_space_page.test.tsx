@@ -47,6 +47,7 @@ describe('ManageSpacePage', () => {
         spacesManager={spacesManager}
         userProfile={userProfile}
         spacesNavState={spacesNavState}
+        intl={null as any}
       />
     );
     const nameInput = wrapper.find('input[name="name"]');
@@ -102,6 +103,7 @@ describe('ManageSpacePage', () => {
         spacesManager={spacesManager}
         userProfile={userProfile}
         spacesNavState={spacesNavState}
+        intl={null as any}
       />
     );
 

@@ -45,6 +45,7 @@ describe('ConfirmDeleteModal', () => {
           spacesNavState={spacesNavState}
           onCancel={onCancel}
           onConfirm={onConfirm}
+          intl={null as any}
         />
       )
     ).toMatchSnapshot();
@@ -78,6 +79,7 @@ describe('ConfirmDeleteModal', () => {
         spacesNavState={spacesNavState}
         onCancel={onCancel}
         onConfirm={onConfirm}
+        intl={null as any}
       />
     );
 
