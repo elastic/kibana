@@ -357,13 +357,13 @@ when missing translations
 - `init(messages: Map<string, string>)` - initializes the engine
 
 The translation `service` provides only one method:
-- `i18n(id: string, [{values: object, defaultMessage: string, context: string }])`–
+- `i18n(id: string, [{values: object, defaultMessage: string, description: string }])`–
 translate message by id
 
 The translation `filter` is used for attributes translation and has
 the following syntax:
 ```
-{{'translationId' | i18n[:{ values: object, defaultMessage: string, context: string }]}}
+{{'translationId' | i18n[:{ values: object, defaultMessage: string, description: string }]}}
 ```
 
 Where:
