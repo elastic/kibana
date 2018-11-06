@@ -9,6 +9,7 @@ import { cryptoFactory } from '../../../../server/lib/crypto';
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
@@ -106,7 +107,10 @@ function executeJobFn(server) {
   return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
     const process$ = Rx.of(jobToExecute).pipe(
       mergeMap(decryptJobHeaders),
-      catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
+      catchError(() => Rx.throwError(
+        i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptReportJobDataErrorMessage', {
+          defaultMessage: 'Failed to decrypt report job data. Please re-generate this report.'
+        }))),
       map(omitBlacklistedHeaders),
       map(getConditionalHeaders),
       mergeMap(getCustomLogo),

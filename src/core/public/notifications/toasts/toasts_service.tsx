@@ -24,6 +24,8 @@ import { Toast } from '@elastic/eui';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsStartContract } from './toasts_start_contract';
 
+import { I18nProvider } from '@kbn/i18n/react';
+
 interface Params {
   targetDomElement: HTMLElement;
 }
@@ -35,10 +37,12 @@ export class ToastsService {
     const toasts = new ToastsStartContract();
 
     render(
-      <GlobalToastList
-        dismissToast={(toast: Toast) => toasts.remove(toast)}
-        toasts$={toasts.get$()}
-      />,
+      <I18nProvider>
+        <GlobalToastList
+          dismissToast={(toast: Toast) => toasts.remove(toast)}
+          toasts$={toasts.get$()}
+        />
+      </I18nProvider>,
       this.params.targetDomElement
     );
 
