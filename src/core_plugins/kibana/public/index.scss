@@ -17,6 +17,9 @@
 
 // Visualize styles
 @import './visualize/index';
+// Has to come after visualize because of some
+// bad cascading in the Editor layout
+@import 'ui/public/vis/index';
 
 // Management styles
 @import './management/index';
